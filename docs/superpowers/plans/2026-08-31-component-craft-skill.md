@@ -308,6 +308,7 @@ EOF
 
 **Files:**
 - Create: `tools/harness/shoot.mjs`
+- Modify: `docs/superpowers/plans/2026-08-31-component-craft-skill.md` (use a `file:` URL for the capture)
 
 **Interfaces:**
 - Consumes: the page written by Task 1 at `tools/harness/out/<family>.html`.
@@ -322,7 +323,7 @@ import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const run = promisify(execFile);
 
@@ -338,6 +339,9 @@ export async function shoot({ family, scheme, width, outDir }) {
   }
 
   const out = join(outDir, `${family}-${scheme}-${width}.png`);
+  const capture = pathToFileURL(page);
+  capture.searchParams.set('scheme', scheme);
+  capture.searchParams.set('width', width);
 
   await run('google-chrome', [
     '--headless',
@@ -347,7 +351,7 @@ export async function shoot({ family, scheme, width, outDir }) {
     '--force-device-scale-factor=2',
     `--window-size=${Number(width) + 80},900`,
     `--screenshot=${out}`,
-    `${page}?scheme=${scheme}&width=${width}`,
+    capture.href,
   ]);
 
   return out;
@@ -367,12 +371,12 @@ node tools/harness/shoot.mjs breadcrumb light 420
 node tools/harness/shoot.mjs breadcrumb dark 240
 ```
 
-Open both PNGs. Expected: the Breadcrumb, legible, on a white ground and on a near-black one. A blank image means the query filter hid everything — check that the `id` pattern in `build.mjs` and the filter in the page script agree.
+Open both PNGs. Expected: the Breadcrumb, legible, on a white ground and on a near-black one. A blank image means the query filter hid everything — check that the `id` pattern in `build.mjs` and the filter in the page script agree. An `ERR_FILE_NOT_FOUND` image means Chrome received a path with a query instead of a `file:` URL; its PNG can be larger than 2 KB, so size alone does not prove the capture is readable.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add tools/harness/shoot.mjs
+git add docs/superpowers/plans/2026-08-31-component-craft-skill.md tools/harness/shoot.mjs
 git commit -F - <<'EOF'
 feat(harness): capture one combination at a time
 

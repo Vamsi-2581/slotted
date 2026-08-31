@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test",
+    "test": "node --test test/validate-theme.test.mjs test/resolve.test.mjs",
     "typecheck": "node --check src/validate-theme.mjs && node --check scripts/build.mjs",
     "verify": "pnpm test && pnpm typecheck && pnpm build"
   }

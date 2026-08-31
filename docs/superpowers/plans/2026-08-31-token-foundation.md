@@ -18,7 +18,7 @@
 - Space, type and radius are expressed in `rem`. Control geometry stays in `px`, as today.
 - `contract.schemaVersion` goes from `1` to `2` in Task 1 and is not touched again.
 - No component stylesheet is edited by this plan. Consuming the scales is the craft skill's work, family by family.
-- Commit messages follow the repository style: imperative subject under 72 characters, a body explaining *why*, ending with:
+- Commit messages follow the repository style: imperative subject under 72 characters, a body explaining _why_, ending with:
   `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`
 
 ---
@@ -28,6 +28,7 @@
 Adds space, radius, type and weight, redefines the two existing tokens whose values those scales now hold, and builds the test that makes "no pixel changed" checkable rather than asserted.
 
 **Files:**
+
 - Create: `packages/tokens/test/resolve.test.mjs`
 - Create: `packages/tokens/src/resolve.mjs`
 - Modify: `packages/tokens/src/contract.json`
@@ -35,7 +36,8 @@ Adds space, radius, type and weight, redefines the two existing tokens whose val
 - Modify: `packages/tokens/package.json` (add the new test to the `test` script)
 
 **Interfaces:**
-- Produces: `resolveTokens(values: Record<string,string>) => Record<string,string>` from `packages/tokens/src/resolve.mjs`. Expands `var(--name)` and `var(--name, fallback)` references *within the same map*, repeatedly, until no reference remains. Throws `Error` on a reference cycle and on a reference to a name absent from the map with no fallback. Tasks 2 and 4 reuse it.
+
+- Produces: `resolveTokens(values: Record<string,string>) => Record<string,string>` from `packages/tokens/src/resolve.mjs`. Expands `var(--name)` and `var(--name, fallback)` references _within the same map_, repeatedly, until no reference remains. Throws `Error` on a reference cycle and on a reference to a name absent from the map with no fallback. Tasks 2 and 4 reuse it.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -81,6 +83,20 @@ test('expands a reference to another token in the same map', () => {
     '--a': '4px',
     '--b': '4px',
   });
+});
+
+test('expands repeated references to the same token', () => {
+  assert.equal(resolveTokens({ '--a': 'var(--b) var(--b)', '--b': '1px' })['--a'], '1px 1px');
+});
+
+test('expands more than one hundred sibling references', () => {
+  const count = 101;
+  const references = Array(count).fill('var(--b)').join(' ');
+
+  assert.equal(
+    resolveTokens({ '--a': references, '--b': 'x' })['--a'],
+    Array(count).fill('x').join(' '),
+  );
 });
 
 test('expands a chain of references', () => {
@@ -141,32 +157,32 @@ export function resolveTokens(values) {
   const resolved = { ...values };
 
   for (const name of Object.keys(resolved)) {
-    const seen = new Set([name]);
-    let guard = 0;
-
-    while (REFERENCE.test(resolved[name])) {
-      if ((guard += 1) > 100) throw new Error(`Reference cycle reached from ${name}`);
-
-      resolved[name] = resolved[name].replace(REFERENCE, (whole, reference, fallback) => {
-        if (reference in values) {
-          if (seen.has(reference)) throw new Error(`Reference cycle at ${reference}`);
-          seen.add(reference);
-          return values[reference];
-        }
-        if (fallback !== undefined) return fallback.trim();
-        throw new Error(`${name} references ${reference}, which the map does not hold`);
-      });
-    }
+    resolved[name] = resolveValue(values, values[name], name, new Set([name]));
   }
 
   return resolved;
+}
+
+function resolveValue(values, value, name, path) {
+  while (REFERENCE.test(value)) {
+    value = value.replace(REFERENCE, (whole, reference, fallback) => {
+      if (reference in values) {
+        if (path.has(reference)) throw new Error(`Reference cycle at ${reference}`);
+        return resolveValue(values, values[reference], name, new Set([...path, reference]));
+      }
+      if (fallback !== undefined) return fallback.trim();
+      throw new Error(`${name} references ${reference}, which the map does not hold`);
+    });
+  }
+
+  return value;
 }
 ```
 
 - [ ] **Step 4: Run the resolver tests**
 
 Run: `node --test packages/tokens/test/resolve.test.mjs`
-Expected: the six unit tests PASS; the last test PASSES too, because no token references a scale yet.
+Expected: the eight unit tests PASS; the last test PASSES too, because no token references a scale yet.
 
 - [ ] **Step 5: Add the scales to the contract**
 
@@ -273,6 +289,7 @@ EOF
 ### Task 2: Motion, and reduced motion resolved once
 
 **Files:**
+
 - Modify: `packages/tokens/src/contract.json`
 - Modify: `packages/tokens/src/validate-theme.mjs`
 - Modify: `packages/themes/default/src/theme.json`
@@ -281,6 +298,7 @@ EOF
 - Modify: `packages/tokens/test/validate-theme.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `resolveTokens` from Task 1.
 - Produces: `contract.reducedMotion: string[]` — token names redefined under `@media (prefers-reduced-motion: reduce)`. `theme.reducedMotion` holds their values. `renderThemeCss` emits one extra block for them, last.
 
@@ -302,7 +320,8 @@ test('collapses the duration tokens under one reduced-motion query', () => {
 test('emits the reduced-motion block after the block it overrides', () => {
   const css = renderThemeCss(contract, theme);
   assert.ok(
-    css.indexOf('@media (prefers-reduced-motion: reduce)') > css.indexOf('--slotted-duration-short'),
+    css.indexOf('@media (prefers-reduced-motion: reduce)') >
+      css.indexOf('--slotted-duration-short'),
     'A media query adds no specificity, so source order is what makes the override win',
   );
 });
@@ -319,8 +338,20 @@ Append to `packages/tokens/test/validate-theme.test.mjs`:
 
 ```js
 test('reports a reduced-motion token the theme does not hold', () => {
-  const contract = { base: [], scheme: [], density: [], reducedMotion: ['--slotted-duration-short'], requiredSchemes: [], requiredDensities: [] };
-  const errors = validateTheme(contract, { base: {}, schemes: {}, densities: {}, reducedMotion: {} });
+  const contract = {
+    base: [],
+    scheme: [],
+    density: [],
+    reducedMotion: ['--slotted-duration-short'],
+    requiredSchemes: [],
+    requiredDensities: [],
+  };
+  const errors = validateTheme(contract, {
+    base: {},
+    schemes: {},
+    densities: {},
+    reducedMotion: {},
+  });
   assert.deepEqual(errors, ['reducedMotion is missing --slotted-duration-short']);
 });
 ```
@@ -390,7 +421,7 @@ Add a new top-level key after `base`:
 In `packages/tokens/src/validate-theme.mjs`, inside `validateTheme`, after the `base` check:
 
 ```js
-  checkTokenMap(errors, 'reducedMotion', contract.reducedMotion ?? [], theme.reducedMotion);
+checkTokenMap(errors, 'reducedMotion', contract.reducedMotion ?? [], theme.reducedMotion);
 ```
 
 - [ ] **Step 6: Emit the block**
@@ -398,21 +429,21 @@ In `packages/tokens/src/validate-theme.mjs`, inside `validateTheme`, after the `
 In `packages/themes/default/scripts/build-theme.mjs`, inside `renderThemeCss`, after the density loop and before the `return`:
 
 ```js
-  /**
-   * One query collapses every duration token, so a family honours the
-   * preference by reaching for a token rather than by writing its own rule.
-   * It is emitted last because a media query adds no specificity: source
-   * order is what makes it win.
-   *
-   * An animation that loops forever needs more than a short duration — it
-   * needs to stop — so those families keep their own rule.
-   */
-  blocks.push(
-    `  @media (prefers-reduced-motion: reduce) {\n` +
-      `    [data-slotted-theme="${theme.name}"] {\n` +
-      `${contract.reducedMotion.map((name) => `      ${name}: ${theme.reducedMotion[name]};`).join('\n')}\n` +
-      `    }\n  }`,
-  );
+/**
+ * One query collapses every duration token, so a family honours the
+ * preference by reaching for a token rather than by writing its own rule.
+ * It is emitted last because a media query adds no specificity: source
+ * order is what makes it win.
+ *
+ * An animation that loops forever needs more than a short duration — it
+ * needs to stop — so those families keep their own rule.
+ */
+blocks.push(
+  `  @media (prefers-reduced-motion: reduce) {\n` +
+    `    [data-slotted-theme="${theme.name}"] {\n` +
+    `${contract.reducedMotion.map((name) => `      ${name}: ${theme.reducedMotion[name]};`).join('\n')}\n` +
+    `    }\n  }`,
+);
 ```
 
 - [ ] **Step 7: Verify**
@@ -456,10 +487,12 @@ EOF
 ### Task 3: Shadow and stacking
 
 **Files:**
+
 - Modify: `packages/tokens/src/contract.json`
 - Modify: `packages/themes/default/src/theme.json`
 
 **Interfaces:**
+
 - Consumes: nothing from earlier tasks.
 - Produces: `--slotted-shadow-{xs,sm,md,lg}` in every scheme; `--slotted-z-index-{sticky,overlay,popover,toast}` in `base`.
 
@@ -539,11 +572,13 @@ EOF
 Turns the Button-scoped density layer into a control-scoped one, which is the change that makes a Button and an Input the same height.
 
 **Files:**
+
 - Modify: `packages/tokens/src/contract.json`
 - Modify: `packages/themes/default/src/theme.json`
 - Modify: `packages/tokens/test/resolve.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `resolveTokens` from Task 1.
 - Produces: `--slotted-control-{height,padding-inline,font-size,icon-size,gap}-{sm,md,lg}` in the density layer. Every `--slotted-button-{height,padding-inline,font-size,icon-size}-{sm,md,lg}` becomes `var()` of its control counterpart.
 
@@ -728,12 +763,14 @@ EOF
 ### Task 5: The intrinsic glyphs
 
 **Files:**
+
 - Modify: `packages/tokens/src/contract.json`
 - Modify: `packages/themes/default/src/theme.json`
 - Create: `packages/themes/default/test/glyphs.test.mjs`
 - Modify: `packages/themes/default/package.json` (add the test to the `test` script)
 
 **Interfaces:**
+
 - Produces: `--slotted-icon-{check,minus,dot,x,chevron-right,chevron-down}` in `base`, each a `url("data:image/svg+xml,…")` usable as a `mask-image`.
 
 - [ ] **Step 1: Write the failing test**
@@ -861,12 +898,14 @@ EOF
 ### Task 6: Resolve the inherited naming collision
 
 **Files:**
+
 - Modify: `packages/tokens/src/contract.json`
 - Modify: `packages/themes/default/src/theme.json`
 - Modify: `packages/styles/src/button/button.css`
 - Modify: `packages/styles/src/button/button.tokens.json`
 
 **Interfaces:**
+
 - Consumes: `--slotted-control-icon-size-{sm,md,lg}` from Task 4.
 - Produces: `--slotted-button-icon-size` removed from `base`; the stylesheet reads the density-scoped names instead.
 
@@ -926,10 +965,12 @@ EOF
 ### Task 7: Document the foundation for the skill to cite
 
 **Files:**
+
 - Create: `docs/token-foundation.md`
 - Modify: `docs/BUILD-LOG.md`
 
 **Interfaces:**
+
 - Produces: the document `references/foundation.md` in Plan 3 links to, so the law lives in the repository rather than inside a skill.
 
 - [ ] **Step 1: Write the reference**

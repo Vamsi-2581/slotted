@@ -1,8 +1,10 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-export const SCHEMES = ['light', 'dark'];
+export const SCHEMES = ['light', 'dark', 'high-contrast'];
 export const WIDTHS = [240, 420, 720];
+export const DENSITIES = ['comfortable', 'compact', 'dense'];
+export const DIRECTIONS = ['ltr', 'rtl'];
 
 const SCENE = /<section data-scene="([^"]+)">([\s\S]*?)<\/section>/g;
 
@@ -11,6 +13,11 @@ const SCENE = /<section data-scene="([^"]+)">([\s\S]*?)<\/section>/g;
  * React and Angular, so plain markup carrying the theme and the family's CSS
  * previews both — and it renders in milliseconds, where a Storybook build
  * takes tens of seconds. Refinement needs many iterations, not two.
+ *
+ * Scheme and width multiply the cells, because a reader compares them side by
+ * side. Density and direction are applied to the whole page instead: they are
+ * axes a capture is taken *in*, and multiplying every cell by six would make
+ * the review view unreadable to reach the same coverage.
  */
 export function renderHarness({ family, fragment, familyCss, themeCss }) {
   const scenes = [...fragment.matchAll(SCENE)].map(([, name, markup]) => ({ name, markup }));
@@ -36,7 +43,7 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
   );
 
   return `<!doctype html>
-<html lang="en" data-slotted-theme="default" data-slotted-density="comfortable">
+<html lang="en" dir="ltr" data-slotted-theme="default" data-slotted-density="comfortable">
 <meta charset="utf-8">
 <title>${family} harness</title>
 <style>${themeCss}</style>
@@ -46,8 +53,16 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
   .cell { margin: 0; padding: 12px }
   .cell[data-scheme="dark"] { background: #0b0b0d; color: #fafafa }
   .cell[data-scheme="light"] { background: #ffffff; color: #0f172a }
+  .cell[data-scheme="high-contrast"] { background: #ffffff; color: #000000 }
   figcaption { font: 11px ui-monospace, monospace; opacity: 0.55; padding-block-end: 8px }
-  .stage { border: 1px dashed rgb(128 128 128 / 0.35); padding: 12px; resize: horizontal; overflow: auto }
+  .stage {
+    border: 1px dashed rgb(128 128 128 / 0.35);
+    padding: 12px;
+    resize: horizontal;
+    overflow: auto;
+    background: var(--slotted-surface);
+    color: var(--slotted-text);
+  }
   main { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1px; background: #d8dade }
   body[data-only] .cell { display: none }
   body[data-only] .cell.shown { display: block }
@@ -55,10 +70,16 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
 <main>${cells.join('')}</main>
 <script>
   /* The shooter asks for one combination so each capture is legible on its own.
-     Opened without a query, the page shows everything, which is the review view. */
+     Opened without a query, the page shows everything, which is the review view.
+     Density and direction are page-wide: they change how a cell renders, not
+     which cells exist. */
   const q = new URLSearchParams(location.search);
   const scheme = q.get('scheme');
   const width = q.get('width');
+  const density = q.get('density');
+  const direction = q.get('dir');
+  if (density) document.documentElement.dataset.slottedDensity = density;
+  if (direction) document.documentElement.dir = direction;
   if (scheme || width) {
     document.body.dataset.only = '';
     for (const cell of document.querySelectorAll('.cell')) {

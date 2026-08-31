@@ -130,7 +130,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node package-boundary.verify.mjs",
+    "build": "vite build && tsc -p tsconfig.build.json && node layer-order.build.mjs && node package-boundary.verify.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
     "verify": "pnpm test && pnpm typecheck && pnpm build"
@@ -143,6 +143,7 @@
     "@slotted/core": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/styles": "workspace:*",
+    "@slotted/tokens": "workspace:*",
     "@storybook/react-vite": "10.5.10",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

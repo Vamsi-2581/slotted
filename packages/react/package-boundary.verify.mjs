@@ -2,6 +2,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 
+import { LAYER_ORDER_STATEMENT } from '@slotted/tokens/layer-order';
+
 const packageDirectory = fileURLToPath(new URL('.', import.meta.url));
 const distDirectory = join(packageDirectory, 'dist');
 const forbiddenPattern = /storybook-workbench|@storybook|fontsource|@testing-library/i;
@@ -31,6 +33,11 @@ const normalizedStyles = bundledStyles.replace(/\s+/g, '');
 const missingSelectors = requiredSelectors.filter(
   (selector) => !normalizedStyles.includes(selector.replace(/\s+/g, '')),
 );
+
+if (!bundledStyles.startsWith(LAYER_ORDER_STATEMENT)) {
+  console.error('The bundled stylesheet does not open with the published layer order.');
+  process.exitCode = 1;
+}
 
 if (missingSelectors.length > 0) {
   console.error('The bundled stylesheet lost required rules:');

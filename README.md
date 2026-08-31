@@ -20,6 +20,19 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
+## Styling
+
+Every rule the library ships lives inside the `slotted` cascade layer. An
+application that keeps its own CSS in layers declares the order once, before
+importing anything:
+
+```css
+@layer slotted, app;
+```
+
+Read [docs/styling.md](docs/styling.md) for the published sublayer order and
+the override rules.
+
 ## Repository Checks
 
 - `pnpm check` runs the normal fast gate.

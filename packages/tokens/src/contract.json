@@ -66,7 +66,13 @@
     "--slotted-z-index-sticky",
     "--slotted-z-index-overlay",
     "--slotted-z-index-popover",
-    "--slotted-z-index-toast"
+    "--slotted-z-index-toast",
+    "--slotted-icon-check",
+    "--slotted-icon-minus",
+    "--slotted-icon-dot",
+    "--slotted-icon-x",
+    "--slotted-icon-chevron-right",
+    "--slotted-icon-chevron-down"
   ],
   "reducedMotion": [
     "--slotted-duration-instant",

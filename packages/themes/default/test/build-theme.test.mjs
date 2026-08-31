@@ -94,7 +94,10 @@ test('defines the exact reduced-motion duration tokens and non-zero collapsed va
 
 test('locks the exact shadow and stacking scales', () => {
   assert.deepEqual(contract.scheme.slice(-4), SHADOW_TOKENS);
-  assert.deepEqual(contract.base.slice(-4), Z_INDEX_TOKENS);
+  assert.deepEqual(
+    contract.base.filter((token) => token.startsWith('--slotted-z-index-')),
+    Z_INDEX_TOKENS,
+  );
   assert.deepEqual(pick(theme.schemes.light, SHADOW_TOKENS), SHADOW_VALUES.light);
   assert.deepEqual(pick(theme.schemes.dark, SHADOW_TOKENS), SHADOW_VALUES.dark);
   assert.deepEqual(pick(theme.base, Z_INDEX_TOKENS), Z_INDEX_VALUES);

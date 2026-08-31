@@ -569,6 +569,16 @@ asserts the four shadow names and exact light and dark values, plus the four
 z-index names and exact base values. If a new shadow or z-index value is
 missing or `undefined`, the test must fail with an assertion diff.
 
+```js
+assert.deepEqual(
+  contract.base.filter((token) => token.startsWith('--slotted-z-index-')),
+  Z_INDEX_TOKENS,
+);
+```
+
+Filter the z-index family before asserting its exact names and order; later
+base-token families must not invalidate the stacking-scale regression.
+
 Mutation check: temporarily change or remove one shadow and one z-index entry,
 run `pnpm --filter @slotted/theme-default exec node --test test/build-theme.test.mjs`,
 and record the expected RED assertion before restoring both mutations.
@@ -885,24 +895,44 @@ const GLYPHS = [
   '--slotted-icon-chevron-down',
 ];
 
-test('every glyph is a data URI a mask can use', () => {
+function payloadFor(name) {
+  const value = theme.base[name];
+  assert.ok(value !== undefined, `${name} is missing`);
+
+  const match = /^url\("data:image\/svg\+xml,([^"]*)"\)$/.exec(value);
+  assert.ok(match, `${name} is not a complete SVG data URI`);
+  return match[1];
+}
+
+test('every glyph has a fully encoded, complete SVG payload a mask can use', () => {
   for (const name of GLYPHS) {
-    const value = theme.base[name];
-    assert.ok(value !== undefined, `${name} is missing`);
-    assert.match(value, /^url\("data:image\/svg\+xml,/, `${name} is not a data URI`);
-    assert.ok(value.endsWith('")'), `${name} is not closed`);
+    const payload = payloadFor(name);
+    assert.doesNotMatch(payload, /[<>#]/, `${name} leaves SVG syntax unencoded`);
+
+    const svg = decodeURIComponent(payload);
+    assert.match(svg, /^<svg\b[^>]*>[\s\S]*<\/svg>$/, `${name} is not a complete SVG document`);
   }
 });
 
-test('no glyph carries a colour, because the mask takes it from currentColor', () => {
+test('every glyph uses black or none only for its mask alpha geometry', () => {
   for (const name of GLYPHS) {
-    assert.doesNotMatch(theme.base[name], /%23|rgb|hsl/, `${name} paints a colour of its own`);
+    const svg = decodeURIComponent(payloadFor(name));
+    const attributes = [...svg.matchAll(/\b(fill|stroke)=['"]([^'"]+)['"]/g)];
+    assert.ok(attributes.length > 0, `${name} has no fill or stroke alpha geometry`);
+
+    for (const [, attribute, value] of attributes) {
+      assert.ok(
+        value === 'black' || value === 'none',
+        `${name} uses ${value} for ${attribute}, not black or none mask alpha geometry`,
+      );
+    }
   }
 });
 
 test('every glyph declares the same viewBox, so one size rule fits all', () => {
   for (const name of GLYPHS) {
-    assert.ok(theme.base[name].includes("viewBox='0 0 24 24'"), `${name} has a foreign viewBox`);
+    const svg = decodeURIComponent(payloadFor(name));
+    assert.ok(svg.includes("viewBox='0 0 24 24'"), `${name} has a foreign viewBox`);
   }
 });
 ```
@@ -923,7 +953,7 @@ Append to `contract.base`:
 
 - [ ] **Step 4: Add the geometry to the theme**
 
-Append to `theme.json` `base`. The paths are Lucide's; `stroke='black'` is arbitrary because a mask reads only the alpha channel, and the colour comes from the element's `background-color`:
+Append to `theme.json` `base`. The paths are Lucide's; `black` and `none` define alpha geometry only because a mask reads alpha while the element's `background-color` supplies the visible colour. The test requires every `fill` and `stroke` attribute to use only one of those two values, with a fully encoded payload that decodes to one complete SVG document:
 
 ```json
 "--slotted-icon-check": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E\")",

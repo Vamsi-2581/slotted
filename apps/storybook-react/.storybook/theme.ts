@@ -1,4 +1,4 @@
-import { GLOBALS_UPDATED } from 'storybook/internal/core-events';
+import { GLOBALS_UPDATED, SET_GLOBALS } from 'storybook/internal/core-events';
 import { create, type ThemeVars } from 'storybook/theming';
 
 export type SlottedScheme = 'light' | 'dark';
@@ -96,19 +96,33 @@ export const applyRootScheme = (root: SchemeRoot, scheme: unknown) => {
   return normalizedScheme;
 };
 
+const SCHEME_EVENTS = [SET_GLOBALS, GLOBALS_UPDATED];
+
+export const readSchemeFromSearch = (search: string): SlottedScheme => {
+  const serializedGlobals = new URLSearchParams(search).get('globals') ?? '';
+  const entry = serializedGlobals.split(';').find((part) => part.startsWith('scheme:'));
+
+  return normalizeScheme(entry?.slice('scheme:'.length));
+};
+
 export const subscribeToScheme = (
   channel: SchemeChannel,
   initialScheme: unknown,
   applyScheme: (scheme: SlottedScheme) => void,
 ) => {
-  const handleGlobalsUpdated = ({ globals }: SchemePayload) => {
+  const handleGlobals = ({ globals }: SchemePayload) => {
     applyScheme(normalizeScheme(globals['scheme']));
   };
 
   applyScheme(normalizeScheme(initialScheme));
-  channel.on(GLOBALS_UPDATED, handleGlobalsUpdated);
+
+  for (const event of SCHEME_EVENTS) {
+    channel.on(event, handleGlobals);
+  }
 
   return () => {
-    channel.off(GLOBALS_UPDATED, handleGlobalsUpdated);
+    for (const event of SCHEME_EVENTS) {
+      channel.off(event, handleGlobals);
+    }
   };
 };

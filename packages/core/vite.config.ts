@@ -10,6 +10,7 @@ export default defineConfig({
         files: resolve(import.meta.dirname, 'src/files/index.ts'),
         focus: resolve(import.meta.dirname, 'src/focus/index.ts'),
         measure: resolve(import.meta.dirname, 'src/measure/index.ts'),
+        state: resolve(import.meta.dirname, 'src/state/index.ts'),
       },
       formats: ['es'],
     },

@@ -24,6 +24,10 @@
     "./measure": {
       "types": "./dist/types/measure/index.d.ts",
       "import": "./dist/measure.js"
+    },
+    "./state": {
+      "types": "./dist/types/state/index.d.ts",
+      "import": "./dist/state.js"
     }
   },
   "scripts": {

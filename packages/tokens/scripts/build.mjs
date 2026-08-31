@@ -1,5 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
+import { LAYER_ORDER_STATEMENT } from '../src/layer-order.mjs';
+
 const contractUrl = new URL('../src/contract.json', import.meta.url);
 const distUrl = new URL('../dist/', import.meta.url);
 const contract = JSON.parse(await readFile(contractUrl, 'utf8'));
@@ -11,7 +13,4 @@ if (new Set(allNames).size !== allNames.length) {
 
 await mkdir(distUrl, { recursive: true });
 await writeFile(new URL('contract.json', distUrl), `${JSON.stringify(contract, null, 2)}\n`);
-await writeFile(
-  new URL('styles.css', distUrl),
-  '@layer slotted.tokens, slotted.theme, slotted.components, slotted.overrides;\n',
-);
+await writeFile(new URL('styles.css', distUrl), LAYER_ORDER_STATEMENT);

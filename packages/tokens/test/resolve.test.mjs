@@ -82,3 +82,57 @@ test('every token that predates the scales still resolves to its old value', () 
     assert.equal(resolved[name], expected, `${name} changed value`);
   }
 });
+
+const DENSITY_UNCHANGED = {
+  comfortable: {
+    '--slotted-button-height-sm': '30px',
+    '--slotted-button-height-md': '34px',
+    '--slotted-button-height-lg': '38px',
+    '--slotted-button-padding-inline-sm': '10px',
+    '--slotted-button-padding-inline-md': '13px',
+    '--slotted-button-padding-inline-lg': '16px',
+    '--slotted-button-font-size-sm': '12px',
+    '--slotted-button-font-size-md': '13px',
+    '--slotted-button-font-size-lg': '14px',
+    '--slotted-button-icon-size-sm': '14px',
+    '--slotted-button-icon-size-md': '16px',
+    '--slotted-button-icon-size-lg': '18px',
+  },
+  compact: {
+    '--slotted-button-height-sm': '26px',
+    '--slotted-button-height-md': '28px',
+    '--slotted-button-height-lg': '32px',
+    '--slotted-button-padding-inline-sm': '8px',
+    '--slotted-button-padding-inline-md': '10px',
+    '--slotted-button-padding-inline-lg': '12px',
+    '--slotted-button-font-size-sm': '12px',
+    '--slotted-button-font-size-md': '12px',
+    '--slotted-button-font-size-lg': '13px',
+    '--slotted-button-icon-size-sm': '13px',
+    '--slotted-button-icon-size-md': '14px',
+    '--slotted-button-icon-size-lg': '16px',
+  },
+};
+
+test('every button geometry token still resolves to its old value', () => {
+  for (const [density, expected] of Object.entries(DENSITY_UNCHANGED)) {
+    const resolved = resolveTokens(theme.densities[density]);
+    for (const [name, value] of Object.entries(expected)) {
+      assert.equal(resolved[name], value, `${name} changed in ${density}`);
+    }
+  }
+});
+
+test('button geometry tokens alias control geometry, so a theme retunes controls once', () => {
+  for (const [density, buttonGeometry] of Object.entries(DENSITY_UNCHANGED)) {
+    for (const buttonToken of Object.keys(buttonGeometry)) {
+      const controlToken = buttonToken.replace('--slotted-button-', '--slotted-control-');
+
+      assert.equal(
+        theme.densities[density][buttonToken],
+        `var(${controlToken})`,
+        `${density} ${buttonToken} must alias ${controlToken}`,
+      );
+    }
+  }
+});

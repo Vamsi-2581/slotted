@@ -713,13 +713,17 @@ test('every button geometry token still resolves to its old value', () => {
   }
 });
 
-test('a button geometry token is an alias, so a theme retunes controls once', () => {
-  for (const density of Object.keys(theme.densities)) {
-    assert.match(
-      theme.densities[density]['--slotted-button-height-md'],
-      /^var\(--slotted-control-height-md\)$/,
-      `${density} still hard-codes the button height`,
-    );
+test('button geometry tokens alias control geometry, so a theme retunes controls once', () => {
+  for (const [density, buttonGeometry] of Object.entries(DENSITY_UNCHANGED)) {
+    for (const buttonToken of Object.keys(buttonGeometry)) {
+      const controlToken = buttonToken.replace('--slotted-button-', '--slotted-control-');
+
+      assert.equal(
+        theme.densities[density][buttonToken],
+        `var(${controlToken})`,
+        `${density} ${buttonToken} must alias ${controlToken}`,
+      );
+    }
   }
 });
 ```
@@ -727,7 +731,9 @@ test('a button geometry token is an alias, so a theme retunes controls once', ()
 - [ ] **Step 2: Run it and watch it fail**
 
 Run: `node --test packages/tokens/test/resolve.test.mjs`
-Expected: the alias test FAILS — the value is `34px`, not a `var()`.
+Expected: the alias test FAILS — each Button geometry token is still a literal rather
+than the exact `var(--slotted-control-...)` alias. The first failure is
+`comfortable --slotted-button-height-sm` with `30px`.
 
 - [ ] **Step 3: Add the control geometry to the contract**
 

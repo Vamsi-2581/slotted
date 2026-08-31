@@ -28,6 +28,22 @@ export function renderThemeCss(contract, theme) {
     );
   }
 
+  /**
+   * One query collapses every duration token, so a family honours the
+   * preference by reaching for a token rather than by writing its own rule.
+   * It is emitted last because a media query adds no specificity: source
+   * order is what makes it win.
+   *
+   * An animation that loops forever needs more than a short duration — it
+   * needs to stop — so those families keep their own rule.
+   */
+  blocks.push(
+    `  @media (prefers-reduced-motion: reduce) {\n` +
+      `    [data-slotted-theme="${theme.name}"] {\n` +
+      `${contract.reducedMotion.map((name) => `      ${name}: ${theme.reducedMotion[name]};`).join('\n')}\n` +
+      `    }\n  }`,
+  );
+
   return `@layer slotted.theme {\n${blocks.join('\n\n')}\n}\n`;
 }
 

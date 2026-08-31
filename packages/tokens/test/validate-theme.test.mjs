@@ -39,3 +39,42 @@ test('reports unknown tokens', () => {
   invalid.base['--unknown'] = 'value';
   assert.deepEqual(validateTheme(contract, invalid), ['base contains unknown token --unknown']);
 });
+
+test('reports a reduced-motion token the theme does not hold', () => {
+  const contract = {
+    base: [],
+    scheme: [],
+    density: [],
+    reducedMotion: ['--slotted-duration-short'],
+    requiredSchemes: [],
+    requiredDensities: [],
+  };
+  const errors = validateTheme(contract, {
+    base: {},
+    schemes: {},
+    densities: {},
+    reducedMotion: {},
+  });
+  assert.deepEqual(errors, ['reducedMotion is missing --slotted-duration-short']);
+});
+
+test('reports a reduced-motion token outside the contract', () => {
+  const contract = {
+    base: [],
+    scheme: [],
+    density: [],
+    reducedMotion: ['--slotted-duration-short'],
+    requiredSchemes: [],
+    requiredDensities: [],
+  };
+  const errors = validateTheme(contract, {
+    base: {},
+    schemes: {},
+    densities: {},
+    reducedMotion: {
+      '--slotted-duration-short': '1ms',
+      '--slotted-duration-long': '1ms',
+    },
+  });
+  assert.deepEqual(errors, ['reducedMotion contains unknown token --slotted-duration-long']);
+});

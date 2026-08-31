@@ -14,6 +14,7 @@ function checkTokenMap(errors, label, expectedNames, values) {
 export function validateTheme(contract, theme) {
   const errors = [];
   checkTokenMap(errors, 'base', contract.base, theme.base);
+  checkTokenMap(errors, 'reducedMotion', contract.reducedMotion ?? [], theme.reducedMotion);
 
   for (const scheme of contract.requiredSchemes) {
     checkTokenMap(errors, `scheme ${scheme}`, contract.scheme, theme.schemes?.[scheme]);

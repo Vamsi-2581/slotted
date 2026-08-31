@@ -304,17 +304,56 @@ EOF
 
 - [ ] **Step 1: Write the failing tests**
 
+The existing theme-builder test file does not load the contract or theme. Before
+appending the tests below, add JSON fixtures for both files (using `readFile`)
+so the tests exercise the actual default theme and fail for the intended missing
+`reducedMotion` feature rather than with an undefined test variable.
+
+Its existing isolated `renderThemeCss` fixture must also add an empty
+`reducedMotion: []` contract section and `reducedMotion: {}` theme section. The
+new renderer intentionally reads this required interface unconditionally.
+
 Append to `packages/themes/default/test/build-theme.test.mjs`:
 
 ```js
-test('collapses the duration tokens under one reduced-motion query', () => {
-  const css = renderThemeCss(contract, theme);
-  const block = css.split('@media (prefers-reduced-motion: reduce)')[1];
+const REDUCED_MOTION_TOKENS = [
+  '--slotted-duration-instant',
+  '--slotted-duration-short',
+  '--slotted-duration-medium',
+  '--slotted-duration-long',
+];
+const REDUCED_MOTION_VALUES = {
+  '--slotted-duration-instant': '1ms',
+  '--slotted-duration-short': '1ms',
+  '--slotted-duration-medium': '1ms',
+  '--slotted-duration-long': '1ms',
+};
 
-  assert.ok(block !== undefined, 'The theme emits no reduced-motion block');
-  for (const name of contract.reducedMotion) {
-    assert.ok(block.includes(`${name}:`), `${name} is not collapsed`);
-  }
+function expectedReducedMotionBlock(themeName) {
+  const declarations = REDUCED_MOTION_TOKENS.map((name) => `      ${name}: 1ms;`).join('\n');
+  return (
+    `  @media (prefers-reduced-motion: reduce) {\n` +
+    `    [data-slotted-theme="${themeName}"] {\n` +
+    `${declarations}\n` +
+    `    }\n` +
+    `  }`
+  );
+}
+
+test('defines the exact reduced-motion duration tokens and non-zero collapsed values', () => {
+  assert.deepEqual(contract.reducedMotion, REDUCED_MOTION_TOKENS);
+  assert.deepEqual(theme.reducedMotion, REDUCED_MOTION_VALUES);
+});
+
+test('collapses every duration under the default theme selector', () => {
+  const css = renderThemeCss(contract, theme);
+  const queryStart = css.indexOf('@media (prefers-reduced-motion: reduce)');
+
+  assert.notEqual(queryStart, -1, 'The theme emits no reduced-motion block');
+  assert.equal(
+    css.slice(queryStart - 2, queryStart - 2 + expectedReducedMotionBlock(theme.name).length),
+    expectedReducedMotionBlock(theme.name),
+  );
 });
 
 test('emits the reduced-motion block after the block it overrides', () => {
@@ -326,11 +365,16 @@ test('emits the reduced-motion block after the block it overrides', () => {
   );
 });
 
-test('collapses to a duration that still fires transitionend', () => {
-  for (const value of Object.values(theme.reducedMotion)) {
-    assert.notEqual(value, '0s', 'A zero duration fires no transitionend, which breaks callers');
-    assert.notEqual(value, '0ms', 'A zero duration fires no transitionend, which breaks callers');
-  }
+test('emits the reduced-motion block as the final theme content', () => {
+  const css = renderThemeCss(contract, theme);
+  const queryStart = css.indexOf('@media (prefers-reduced-motion: reduce)');
+
+  assert.notEqual(queryStart, -1, 'The theme emits no reduced-motion block');
+  assert.equal(
+    css.slice(queryStart),
+    `${expectedReducedMotionBlock(theme.name).slice(2)}\n}\n`,
+    'No later theme block may override reduced motion',
+  );
 });
 ```
 
@@ -353,6 +397,27 @@ test('reports a reduced-motion token the theme does not hold', () => {
     reducedMotion: {},
   });
   assert.deepEqual(errors, ['reducedMotion is missing --slotted-duration-short']);
+});
+
+test('reports a reduced-motion token outside the contract', () => {
+  const contract = {
+    base: [],
+    scheme: [],
+    density: [],
+    reducedMotion: ['--slotted-duration-short'],
+    requiredSchemes: [],
+    requiredDensities: [],
+  };
+  const errors = validateTheme(contract, {
+    base: {},
+    schemes: {},
+    densities: {},
+    reducedMotion: {
+      '--slotted-duration-short': '1ms',
+      '--slotted-duration-long': '1ms',
+    },
+  });
+  assert.deepEqual(errors, ['reducedMotion contains unknown token --slotted-duration-long']);
 });
 ```
 

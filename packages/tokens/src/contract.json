@@ -54,7 +54,21 @@
     "--slotted-button-loading-indicator-duration",
     "--slotted-button-group-gap",
     "--slotted-button-group-adjacent-offset",
-    "--slotted-button-group-inner-radius"
+    "--slotted-button-group-inner-radius",
+    "--slotted-duration-instant",
+    "--slotted-duration-short",
+    "--slotted-duration-medium",
+    "--slotted-duration-long",
+    "--slotted-easing-standard",
+    "--slotted-easing-enter",
+    "--slotted-easing-exit",
+    "--slotted-easing-emphasized"
+  ],
+  "reducedMotion": [
+    "--slotted-duration-instant",
+    "--slotted-duration-short",
+    "--slotted-duration-medium",
+    "--slotted-duration-long"
   ],
   "scheme": [
     "--slotted-focus-ring-color",

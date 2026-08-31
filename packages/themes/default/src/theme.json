@@ -38,8 +38,8 @@
     "--slotted-control-border-width": "1px",
     "--slotted-control-radius": "var(--slotted-radius-sm)",
     "--slotted-control-shadow": "none",
-    "--slotted-control-transition-duration": "120ms",
-    "--slotted-control-transition-easing": "cubic-bezier(0.2, 0, 0, 1)",
+    "--slotted-control-transition-duration": "var(--slotted-duration-short)",
+    "--slotted-control-transition-easing": "var(--slotted-easing-standard)",
     "--slotted-focus-ring-width": "2px",
     "--slotted-focus-ring-offset": "2px",
     "--slotted-button-gap": "0.5rem",
@@ -54,7 +54,21 @@
     "--slotted-button-loading-indicator-duration": "700ms",
     "--slotted-button-group-gap": "0px",
     "--slotted-button-group-adjacent-offset": "calc(-1 * var(--slotted-control-border-width))",
-    "--slotted-button-group-inner-radius": "0px"
+    "--slotted-button-group-inner-radius": "0px",
+    "--slotted-duration-instant": "1ms",
+    "--slotted-duration-short": "120ms",
+    "--slotted-duration-medium": "200ms",
+    "--slotted-duration-long": "320ms",
+    "--slotted-easing-standard": "cubic-bezier(0.2, 0, 0, 1)",
+    "--slotted-easing-enter": "cubic-bezier(0.05, 0.7, 0.1, 1)",
+    "--slotted-easing-exit": "cubic-bezier(0.3, 0, 0.8, 0.15)",
+    "--slotted-easing-emphasized": "cubic-bezier(0.3, 0, 0, 1.3)"
+  },
+  "reducedMotion": {
+    "--slotted-duration-instant": "1ms",
+    "--slotted-duration-short": "1ms",
+    "--slotted-duration-medium": "1ms",
+    "--slotted-duration-long": "1ms"
   },
   "schemes": {
     "light": {

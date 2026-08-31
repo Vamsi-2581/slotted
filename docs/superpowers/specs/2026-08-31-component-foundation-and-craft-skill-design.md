@@ -187,31 +187,23 @@ both directions. Adding required tokens breaks any third-party theme. The
 package is `private: true` at version `0.0.0` with no consumer, so the cost is
 zero now and a major version after 1.0.
 
-## Part 2 — Enforcement
+## Part 2 — The Family Checker
 
-Five tests in `@slotted/styles`, each encoding one requirement:
+Five rules, each one a defect the library actually shipped, in
+`tools/harness/check.mjs`:
 
-| Test | Rule |
+| Rule | What it refuses |
 | --- | --- |
-| `scales` | A family token's fallback must be another token, never a literal. Exempt: `0`, `none`, `auto`, `100%`, `transparent`, `currentColor`, `inherit` |
-| `motion` | Durations and easings only through tokens |
-| `glyphs` | A pseudo-element's `content` accepts `''` or a mask token. Literal glyph strings are refused by name |
-| `looping-motion` | Every `infinite` animation carries a reduced-motion rule |
-| `container` | A stylesheet using `@container` declares its own `container-type` and `container-name` |
+| Scales | A family token falling back to a literal. Exempt: `0`, `none`, `auto`, `100%`, `transparent`, `currentColor`, `inherit` |
+| Glyphs | A character used as an icon — the `'/'` and the `'*'` this library shipped |
+| Motion | A duration or easing written by hand |
+| Looping motion | An `infinite` animation with no reduced-motion rule |
+| Container | A `@container` query from a stylesheet declaring no container of its own |
 
-### The unrefined list
-
-The moment the foundation lands, the thirty published families stop complying.
-`packages/styles/src/unrefined.json` is created holding all of them, and the
-five tests apply only to families outside it.
-
-Three properties matter:
-
-- It only shrinks. The skill's refine mode removes the family as its last step,
-  after human approval.
-- A new component never enters it. It is born compliant or it is not born.
-- An empty list is the mechanical definition of a refined library, and
-  `pnpm check:full` stays green at every commit along the way.
+It runs against one family, invoked by the skill at step 7 and again before the
+human gate. It is deliberately not part of `pnpm check`: a permanent gate would
+need a dispensation list naming all thirty unrefined families, and that list is
+machinery for a problem the human gate already answers.
 
 ## Part 3 — The Skill
 
@@ -299,18 +291,25 @@ human something specific to disagree with at step 12.
 The rubric is versioned so the criterion survives between sessions and the
 skill can assess itself before asking. The human's evaluation is free-form,
 against the harness page in a real browser, where hover, focus, keyboard and
-resizing behave. Nothing is committed and no family leaves `unrefined.json`
-until that approval.
+resizing behave. Nothing is committed until that approval.
 
 ## Sequencing
 
-Three implementation plans, strictly ordered:
+Two implementation plans, strictly ordered:
 
 1. The foundation: contract, theme, the redefinition of existing tokens as
    scale steps, and the generalisation of the density layer.
-2. Enforcement: the five tests and `unrefined.json` seeded with every published
-   family.
-3. The skill and the harness, proven by refining one family end to end.
+2. The skill and its tools, proven by refining one family end to end.
+
+An earlier version of this design placed enforcement between them: five tests
+wired into the repository gate, and an `unrefined.json` holding every published
+family so the gate could stay green while thirty of them were non-compliant.
+That was dropped after the foundation landed, and the reason is worth keeping.
+A permanent gate needs the dispensation list, the list is machinery, and the
+machinery answers a question the skill's human gate already answers better. The
+five rules survive as `tools/harness/check.mjs`, which the skill runs against
+the one family in hand — where there is nothing to dispense, because that family
+is compliant by the time the skill finishes.
 
 The family proving the skill should be Breadcrumb: it is small, and it carries
 the character-glyph defect, so a successful run is visible rather than

@@ -76,6 +76,18 @@ test('refuses a cycle rather than looping', () => {
   assert.throws(() => resolveTokens({ '--a': 'var(--b)', '--b': 'var(--a)' }), /cycle/i);
 });
 
+test('resolves frozen authored maps without mutating them', () => {
+  const base = Object.freeze({ ...theme.base });
+  const density = Object.freeze({ ...theme.densities.comfortable });
+  const baseSnapshot = structuredClone(base);
+  const densitySnapshot = structuredClone(density);
+
+  assert.equal(resolveTokens(base)['--slotted-control-font-weight'], '600');
+  assert.equal(resolveTokens(density)['--slotted-button-height-md'], '34px');
+  assert.deepEqual(base, baseSnapshot);
+  assert.deepEqual(density, densitySnapshot);
+});
+
 test('every token that predates the scales still resolves to its old value', () => {
   const resolved = resolveTokens(theme.base);
   for (const [name, expected] of Object.entries(UNCHANGED)) {

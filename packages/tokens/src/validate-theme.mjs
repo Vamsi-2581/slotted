@@ -1,6 +1,10 @@
+function asMap(values) {
+  return values !== null && typeof values === 'object' && !Array.isArray(values) ? values : {};
+}
+
 function checkTokenMap(errors, label, expectedNames, values) {
   const expected = new Set(expectedNames);
-  const actual = values ?? {};
+  const actual = asMap(values);
 
   for (const name of expectedNames) {
     if (!(name in actual)) errors.push(`${label} is missing ${name}`);
@@ -11,18 +15,36 @@ function checkTokenMap(errors, label, expectedNames, values) {
   }
 }
 
+function checkVariantMaps(errors, label, requiredNames, expectedTokens, values) {
+  const required = new Set(requiredNames);
+  const actual = asMap(values);
+
+  for (const name of requiredNames) {
+    if (!(name in actual)) {
+      errors.push(`${label} is missing required variant ${name}`);
+      continue;
+    }
+    checkTokenMap(errors, `${label} ${name}`, expectedTokens, actual[name]);
+  }
+
+  for (const name of Object.keys(actual)) {
+    if (!required.has(name)) errors.push(`${label} contains unknown variant ${name}`);
+  }
+}
+
 export function validateTheme(contract, theme) {
   const errors = [];
   checkTokenMap(errors, 'base', contract.base, theme.base);
   checkTokenMap(errors, 'reducedMotion', contract.reducedMotion ?? [], theme.reducedMotion);
 
-  for (const scheme of contract.requiredSchemes) {
-    checkTokenMap(errors, `scheme ${scheme}`, contract.scheme, theme.schemes?.[scheme]);
-  }
-
-  for (const density of contract.requiredDensities) {
-    checkTokenMap(errors, `density ${density}`, contract.density, theme.densities?.[density]);
-  }
+  checkVariantMaps(errors, 'scheme', contract.requiredSchemes, contract.scheme, theme.schemes);
+  checkVariantMaps(
+    errors,
+    'density',
+    contract.requiredDensities,
+    contract.density,
+    theme.densities,
+  );
 
   return errors;
 }

@@ -1194,6 +1194,72 @@ EOF
 
 ---
 
+### Task 8: Enforce exact theme variants and frozen resolver inputs
+
+This task was added after final independent review found the plan's exact contract/theme lockstep claim was incomplete for variant-map names: `validateTheme` compared tokens inside required maps but never compared the scheme and density map names themselves.
+
+**Files:**
+
+- Modify: `packages/tokens/src/validate-theme.mjs`
+- Modify: `packages/tokens/test/validate-theme.test.mjs`
+- Modify: `packages/tokens/test/resolve.test.mjs`
+- Modify: `docs/superpowers/plans/2026-08-31-token-foundation.md`
+
+**Interfaces:**
+
+- `validateTheme(contract, theme)` requires scheme and density variant names to correspond exactly to `contract.requiredSchemes` and `contract.requiredDensities`. Missing names return `scheme is missing required variant <name>` or `density is missing required variant <name>`; extras return `scheme contains unknown variant <name>` or `density contains unknown variant <name>`. Every base, reduced-motion, variant-container, and required variant token map accepts only a non-null, non-array object; absent, null, primitive, and array values normalize to an empty map while preserving the existing scope-specific missing errors and their order.
+- `resolveTokens(values)` reads frozen authored maps without mutating them.
+
+- [ ] **Step 1: Test-first RED**
+
+In `packages/tokens/test/validate-theme.test.mjs`, clone the valid theme. Add `schemes.typo` and assert exactly `scheme contains unknown variant typo`; add `densities.typo` and assert exactly `density contains unknown variant typo`. Delete `schemes.dark` and assert exactly `scheme is missing required variant dark`; delete `densities.compact` and assert exactly `density is missing required variant compact`. Table-drive absent, undefined, null, string, number, and array scheme/density containers separately, keeping the other container valid; each scheme case must return `scheme is missing required variant light` then `scheme is missing required variant dark`, and each density case must return `density is missing required variant comfortable` then `density is missing required variant compact`, with no thrown `TypeError`. Reuse the malformed-value table for base, reduced-motion, `schemes.light`, and `densities.comfortable`: assert only `base is missing --base`, `reducedMotion is missing --slotted-duration-short`, `scheme light is missing --scheme`, or `density comfortable is missing --density`, respectively. Preserve missing-required-variant errors for actually deleted required maps.
+
+In `packages/tokens/test/resolve.test.mjs`, freeze shallow clones of `theme.base` and one real density map, snapshot both, resolve them, assert representative resolved values, and assert both frozen maps still deep-equal their snapshots.
+
+Run: `node --test packages/tokens/test/validate-theme.test.mjs`
+
+Expected RED: unknown variants currently return `[]`, missing whole maps currently produce token-missing errors rather than missing-required-variant errors, primitive containers throw from the `in` operator, and arrays add an unknown index error after the missing errors.
+
+Mutation-proof the resolver test by temporarily changing `resolveTokens` to operate on `values` rather than its clone. Run `node --test packages/tokens/test/resolve.test.mjs` and observe the frozen-map test throw on assignment. Restore the resolver; do not commit a `resolve.mjs` change.
+
+- [ ] **Step 2: Minimal implementation**
+
+In `packages/tokens/src/validate-theme.mjs`, add one shared helper that normalizes any null, primitive, or array value to `{}`; only a non-null, non-array object is a map. Use it in both `checkTokenMap` and `checkVariantMaps`, so base, reduced-motion, outer variants, and nested required maps aggregate scoped missing errors rather than throwing or treating array indexes as unknown names. Iterate required variants in contract order: emit the exact missing-required-variant error when absent, otherwise call existing `checkTokenMap` with its existing scoped label, preserving token-level semantics. Then iterate actual map keys in object-key order and emit the exact unknown-variant error for every key outside the required set. `assertValidTheme` then prevents `renderThemeCss` from emitting unknown maps; no builder change is required.
+
+- [ ] **Step 3: GREEN and full gate**
+
+Run:
+
+```bash
+node --test packages/tokens/test/validate-theme.test.mjs packages/tokens/test/resolve.test.mjs
+pnpm --filter @slotted/tokens verify
+pnpm --filter @slotted/theme-default verify
+prettier --write packages/tokens/src/validate-theme.mjs packages/tokens/test/validate-theme.test.mjs packages/tokens/test/resolve.test.mjs docs/superpowers/plans/2026-08-31-token-foundation.md
+pnpm check
+pnpm check:full
+```
+
+Expected GREEN: all commands exit 0. Re-run the extra-variant and primitive-container reproductions; confirm extras return the new unknown-variant errors and malformed base, reduced-motion, and nested maps return their existing ordered scoped missing errors without throwing.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add packages/tokens/src/validate-theme.mjs packages/tokens/test/validate-theme.test.mjs packages/tokens/test/resolve.test.mjs docs/superpowers/plans/2026-08-31-token-foundation.md
+git commit -m "fix(tokens): reject unknown theme variants" -m "The validator compared every token inside the required scheme and density maps but never compared the map names themselves. A misspelled or stale variant therefore passed validation and the theme builder emitted it as a selector outside the contract.
+
+Scheme and density names now correspond in both directions: required variants must exist, unknown variants are rejected, and token checking inside each valid map keeps its existing scoped errors.
+
+The resolver harness also proves it can read frozen authored maps without mutating them, so value-preservation checks do not depend on writable inputs.
+
+This task was added after the final independent review found the written plan's exact contract/theme lockstep claim was incomplete for variant map names.
+
+Quality review then found primitive and array containers could throw or leak unknown index errors instead of aggregating validation errors, so the validator, tests, and plan now normalize them before checking variants.
+
+Repeat final review found the same gap in base, reduced-motion, and nested required maps, so one shared normalizer now keeps every token-map boundary on the aggregation path.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
+```
+
 ## What this plan does not do
 
 No component stylesheet consumes a scale when this plan finishes, except Button's one-line correction in Task 6. That is deliberate: consuming the scales is a visual change to a shipped component, and every such change goes through the craft skill's human gate.

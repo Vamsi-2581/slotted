@@ -1122,32 +1122,65 @@ EOF
 **Files:**
 
 - Create: `docs/token-foundation.md`
+- Create: `scripts/verify-token-foundation.test.mjs`
 - Modify: `docs/BUILD-LOG.md`
+- Modify: `package.json`
 
 **Interfaces:**
 
 - Produces: the document `references/foundation.md` in Plan 3 links to, so the law lives in the repository rather than inside a skill.
 
-- [ ] **Step 1: Write the reference**
+- [ ] **Step 1: Write the focused foundation test and observe RED**
+
+Create `scripts/verify-token-foundation.test.mjs`. It reads the final contract,
+default theme, foundation reference, and Build Log. Data-drive every foundation
+group from the contract and theme, then assert exact token/name/value parity in
+the appropriate documentation context: base space, radius, type, motion,
+stacking, and glyph values; light and dark shadow values; comfortable and
+compact control geometry with legacy Button aliases; and reduced-motion values.
+It must verify required contract names and preserve scheme and density context,
+so swapped values cannot pass. Its parity is bidirectional: each table has the
+source-derived cardinality exactly, with no stale or duplicate token rows, and
+variant tables assert their `Token`/scheme/density headers. It also holds the
+migration scope and precise reduced-motion law: newly created or refined
+families are bound, existing unrefined families may still contain literals and
+ad-hoc motion, only the four motion-scale duration tokens collapse, existing
+family-specific durations are not automatic, and infinite animations stop or
+disable rather than shorten.
+
+Run `node --test scripts/verify-token-foundation.test.mjs`. On a fresh base,
+the initial RED is the missing/ENOENT `docs/token-foundation.md`; the later
+review hardening proves the absent migration scope and precise reduced-motion
+wording after the reference exists. The data-parity assertions then pass.
+
+- [ ] **Step 2: Write the reference and make the test GREEN**
 
 Create `docs/token-foundation.md` holding one table per scale — the token names, their values, and one sentence on what each answers — plus these four rules stated explicitly:
 
 1. A component token's fallback is another token, never a literal. Exempt: `0`, `none`, `auto`, `100%`, `transparent`, `currentColor`, `inherit`.
-2. Durations and easings come only from the motion scale. A family that reaches for a duration token honours `prefers-reduced-motion` automatically; an animation that loops still needs its own rule.
+2. For newly created or refined families, durations and easings come only from the motion scale. A motion-scale duration token honors `prefers-reduced-motion`; only the four motion-scale duration tokens collapse, and infinite animations stop or disable rather than shorten. Existing unrefined families may still have literal or family-specific motion until migrated.
 3. An icon the component owns is a mask from a glyph token. A character is never an icon.
 4. A container breakpoint cannot be a token, because `@container (min-width: var(--x))` is invalid CSS. A family that reflows declares `container-type: inline-size` and its own `container-name`, and writes its breakpoints literally.
 
-- [ ] **Step 2: Record the entry**
+- [ ] **Step 3: Record the entry**
 
-Append an entry to `docs/BUILD-LOG.md` before the "Where the queue stands" section, naming: the scales added, the value-preservation property and the test that holds it, the reduced-motion collapse, the glyph masks, and the fact that no component stylesheet consumes any of it yet.
+Append an entry to `docs/BUILD-LOG.md` before the "Where the queue stands" section, naming: the scales added, the value-preservation property and the test that holds it, the scoped reduced-motion collapse, the glyph masks, and the fact that no component stylesheet consumes any of it yet.
 
-- [ ] **Step 3: Verify and commit**
+- [ ] **Step 4: Register, verify, and commit**
 
-Run: `pnpm check:full`
-Expected: exit 0.
+Add `scripts/verify-token-foundation.test.mjs` beside
+`scripts/verify-docs-snippets.test.mjs` in `package.json`'s `test:docs` command
+without removing the existing test. Run the focused test, `pnpm check`, and
+`pnpm check:full`.
+
+Format exactly the changed files and stage exactly:
+`docs/token-foundation.md`, `docs/BUILD-LOG.md`,
+`scripts/verify-token-foundation.test.mjs`, `package.json`, and this plan.
 
 ```bash
-git add docs/token-foundation.md docs/BUILD-LOG.md
+git add docs/token-foundation.md docs/BUILD-LOG.md \
+  scripts/verify-token-foundation.test.mjs package.json \
+  docs/superpowers/plans/2026-08-31-token-foundation.md
 git commit -F - <<'EOF'
 docs: write down the token foundation the skill will enforce
 

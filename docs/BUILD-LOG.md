@@ -717,6 +717,25 @@ decisions with `Input`.
   is worth more than a rarely-used native attribute, but a consumer who wants
   the native one cannot reach it in React.
 
+## Token foundation — 2026-08-31
+
+- Decisions: added the space, radius, type size, line-height, font-weight,
+  motion, shadow, stacking, control-geometry, and intrinsic-glyph scales to
+  the token contract and default theme in lockstep.
+- Decisions: `packages/tokens/test/resolve.test.mjs` resolves token references
+  and holds the pre-scale values of existing tokens, so scale aliases are
+  value-preserving rather than merely claimed to be.
+- Decisions: only the four motion-scale duration tokens collapse to `1ms` under
+  `prefers-reduced-motion`; existing
+  family-specific durations are not automatically covered until their family is
+  refined. Intrinsic glyph data URIs are mask sources rather than character
+  icons.
+- Boundaries: no component stylesheet consumes these scales yet, except Task
+  6's Button token-name correction. Family-by-family scale consumption is
+  later visual work.
+- Defects found: none.
+- Deviations: none.
+
 ## Where the queue stands — 2026-08-31
 
 **T1 and T2 are complete.** Button, Field and Tabs were already shipped. T1

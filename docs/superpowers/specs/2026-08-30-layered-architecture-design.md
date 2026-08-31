@@ -104,7 +104,7 @@ core/glyphs       path data for the glyphs the library itself renders
 
 `core/id` is the mechanism that satisfies PRD §22: ids are derived deterministically so server and client markup match. It carries a caveat: React 19 ships `useId`, which is already hydration-safe, and PRD §6.4 prefers a framework primitive to a custom abstraction. A shared id utility is therefore likely to be Angular-only, and the React package should keep using `useId` unless a concrete case shows otherwise.
 
-None of these modules is created up front. No component in the catalog generates an identifier or manages focus today, so every one of these functions would ship without a caller, and the questions that shape their signatures — whether `trapFocus` needs an initial-focus option, whether a roving tabindex needs orientation, looping and disabled-item skipping — are answered by the first real consumer, differently for a dialog, a menu and a toolbar. The layer is registered and enforced in `scripts/verify-layers.mjs`; each module arrives with the component that calls it.
+None of these modules is created up front. No component in the catalog generates an identifier or manages focus today, so every one of these functions would ship without a caller, and the questions that shape their signatures — whether `trapFocus` needs an initial-focus option, whether a roving tabindex needs orientation, looping and disabled-item skipping — are answered by the first real consumer, differently for a dialog, a menu and a toolbar. The layer is registered and enforced in `scripts/verify-package-layers.mjs`; each module arrives with the component that calls it.
 
 ### Overlay
 

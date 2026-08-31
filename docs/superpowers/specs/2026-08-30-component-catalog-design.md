@@ -8,7 +8,7 @@ It decides scope and order. It does not decide anatomy, states, keyboard model, 
 
 ## Tiers Are Not Package Layers
 
-`L0`–`L4` in `2026-08-30-layered-architecture-design.md` are package layers, enforced by `scripts/verify-layers.mjs`. Every component here lives in `L3`, the framework packages.
+`L0`–`L4` in `2026-08-30-layered-architecture-design.md` are package layers, enforced by `scripts/verify-package-layers.mjs`. Every component here lives in `L3`, the framework packages.
 
 `T1`–`T7` are build tiers, derived from one rule:
 

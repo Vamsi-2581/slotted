@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { LAYERS, layerViolations } from './verify-layers.mjs';
+import { LAYERS, layerViolations } from './verify-package-layers.mjs';
 
 const dependency = (name, kind = 'dependencies') => ({ name, kind });
 

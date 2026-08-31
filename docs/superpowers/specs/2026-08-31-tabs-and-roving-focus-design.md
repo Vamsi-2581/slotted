@@ -36,7 +36,7 @@ Signatures stay malleable until a second caller — `Toolbar`, `Menu`, `Listbox`
 
 ## Package
 
-`@slotted/core` is created at layer rank 20, already reserved and enforced in `scripts/verify-layers.mjs`. It imports nothing from this repository and no framework. Every export is a pure function or an imperative function that takes an element and returns a disposer, so it is testable in jsdom without React or Angular.
+`@slotted/core` is created at layer rank 20, already reserved and enforced in `scripts/verify-package-layers.mjs`. It imports nothing from this repository and no framework. Every export is a pure function or an imperative function that takes an element and returns a disposer, so it is testable in jsdom without React or Angular.
 
 ```
 packages/core/src/focus/roving-tabindex.ts

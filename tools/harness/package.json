@@ -1,0 +1,10 @@
+{
+  "name": "@slotted/harness",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test build.test.mjs",
+    "verify": "pnpm test"
+  }
+}

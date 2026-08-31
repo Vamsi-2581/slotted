@@ -30,6 +30,9 @@
 - Create: `tools/harness/build.test.mjs`
 - Create: `packages/styles/src/breadcrumb/breadcrumb.harness.html`
 - Create: `tools/harness/package.json`
+- Modify: `.gitignore` (ignore the generated `tools/harness/out/` page)
+- Modify: `pnpm-lock.yaml` (register the new workspace importer)
+- Modify: `pnpm-workspace.yaml`
 
 **Interfaces:**
 - Produces: `renderHarness({ family, fragment, familyCss, themeCss }) => string` from `tools/harness/build.mjs`. Returns a complete HTML document. Throws when the fragment declares no scene. A CLI entry writes `tools/harness/out/<family>.html`.
@@ -275,8 +278,9 @@ Add `tools/*` to the `packages` list in `pnpm-workspace.yaml`, which currently h
 `apps/*`, `packages/*` and `packages/themes/*` and does not cover `tools/`. Then:
 
 ```bash
-git add tools/harness/build.mjs tools/harness/build.test.mjs tools/harness/package.json \
-        packages/styles/src/breadcrumb/breadcrumb.harness.html pnpm-workspace.yaml
+git add .gitignore docs/superpowers/plans/2026-08-31-component-craft-skill.md \
+        tools/harness/build.mjs tools/harness/build.test.mjs tools/harness/package.json \
+        packages/styles/src/breadcrumb/breadcrumb.harness.html pnpm-lock.yaml pnpm-workspace.yaml
 git commit -F - <<'EOF'
 feat(harness): render a family into a page that can be looked at
 

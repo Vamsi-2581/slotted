@@ -354,6 +354,8 @@ importers:
 
   packages/tokens: {}
 
+  tools/harness: {}
+
 packages:
 
   '@adobe/css-tools@4.5.0':

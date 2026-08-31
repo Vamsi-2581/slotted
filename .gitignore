@@ -10,4 +10,5 @@ coverage/
 dist/
 apps/storybook-angular/documentation.json
 node_modules/
+tools/harness/out/
 *.log

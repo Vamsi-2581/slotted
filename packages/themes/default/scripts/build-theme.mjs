@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
+import { LAYER_ORDER_STATEMENT } from '@slotted/tokens/layer-order';
 import { assertValidTheme } from '@slotted/tokens/validate-theme';
 
 function declarations(names, values) {
@@ -44,7 +45,12 @@ export function renderThemeCss(contract, theme) {
       `    }\n  }`,
   );
 
-  return `@layer slotted.theme {\n${blocks.join('\n\n')}\n}\n`;
+  /**
+   * The order statement opens every distributed stylesheet. A layer takes its
+   * position from the first mention of its name, so an entry point that omits
+   * it leaves the order to whatever the application loaded first.
+   */
+  return `${LAYER_ORDER_STATEMENT}\n@layer slotted.theme {\n${blocks.join('\n\n')}\n}\n`;
 }
 
 async function build() {

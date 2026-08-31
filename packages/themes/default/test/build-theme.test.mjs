@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
+import { LAYER_ORDER_STATEMENT } from '@slotted/tokens/layer-order';
+
 import { renderThemeCss } from '../scripts/build-theme.mjs';
 
 const contract = JSON.parse(
@@ -133,4 +135,13 @@ test('emits the reduced-motion block as the final theme content', () => {
     `${expectedReducedMotionBlock(theme.name).slice(2)}\n}\n`,
     'No later theme block may override reduced motion',
   );
+});
+
+test('opens the stylesheet with the published layer order', () => {
+  assert.ok(renderThemeCss(contract, theme).startsWith(LAYER_ORDER_STATEMENT));
+});
+
+test('opens the built stylesheet with the published layer order', async () => {
+  const css = await readFile(new URL('../dist/styles.css', import.meta.url), 'utf8');
+  assert.ok(css.startsWith(LAYER_ORDER_STATEMENT));
 });

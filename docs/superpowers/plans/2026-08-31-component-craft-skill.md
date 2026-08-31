@@ -398,6 +398,7 @@ EOF
 - Create: `tools/harness/check.mjs`
 - Create: `tools/harness/check.test.mjs`
 - Modify: `tools/harness/package.json` (add the test file to the `test` script)
+- Modify: `docs/superpowers/plans/2026-08-31-component-craft-skill.md` (align the checker implementation with its tests)
 
 **Interfaces:**
 - Produces: `checkFamily({ family, css }) => string[]` from `tools/harness/check.mjs`, returning one message per violation and an empty array when clean. A CLI prints them and exits `1` when any is found.
@@ -515,11 +516,19 @@ export function checkFamily({ family, css }) {
   const errors = [];
   const source = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
-  for (const [, token, fallback] of source.matchAll(FALLBACK)) {
+  for (const match of source.matchAll(FALLBACK)) {
+    const [, token, fallback] = match;
     const value = fallback.trim();
     if (value.startsWith('var(') || KEYWORDS.has(value)) continue;
+    const declarationStart = Math.max(
+      source.lastIndexOf(';', match.index),
+      source.lastIndexOf('{', match.index),
+      source.lastIndexOf('}', match.index),
+    );
+    const declaration = source.slice(declarationStart + 1, match.index);
+    const property = /content\s*:\s*$/.test(declaration) ? 'content: ' : '';
     errors.push(
-      `${family}: ${token} falls back to the literal ${value}. Reach for a scale step instead.`,
+      `${family}: ${property}${token} falls back to the literal ${value}. Reach for a scale step instead.`,
     );
   }
 
@@ -533,6 +542,7 @@ export function checkFamily({ family, css }) {
 
   for (const declaration of source.matchAll(/(transition|animation)(?:-[a-z-]+)?:\s*([^;}]+)/g)) {
     const value = declaration[2];
+    if (declaration[1] === 'animation' && /\binfinite\b/.test(value)) continue;
     const outsideVar = value.replace(/var\([^()]*(?:\([^()]*\)[^()]*)*\)/g, '');
     if (DURATION.test(outsideVar) || EASING.test(outsideVar)) {
       errors.push(
@@ -581,7 +591,8 @@ Expected: `EXIT=1`, listing the `/` separator and the literal fallbacks. That ou
 - [ ] **Step 6: Commit**
 
 ```bash
-git add tools/harness/check.mjs tools/harness/check.test.mjs tools/harness/package.json
+git add docs/superpowers/plans/2026-08-31-component-craft-skill.md \
+        tools/harness/check.mjs tools/harness/check.test.mjs tools/harness/package.json
 git commit -F - <<'EOF'
 feat(harness): report what a family gets mechanically wrong
 

@@ -1,12 +1,12 @@
 # Component craft rubric
 
-Assess every dimension in writing before the human gate. A checker pass is evidence for mechanical rules, not a substitute for looking at the component or reading its APIs.
+Assess every dimension in writing before the human gate. This rubric directs attention; it is not an exhaustive rule set. Do not turn it into regex enforcement or assume every valid decision can be enumerated ahead of time. Use behavioural evidence, rendered output, source reading, and component context.
 
 ## 1. Icons
 
 **Meaning:** Every component-owned icon is real geometry from a glyph token, never a character or emoji. The component supplies intrinsic icons instead of asking the consumer to supply its own semantics.
 
-**Verify:** Run `node tools/harness/check.mjs <family>`, inspect each icon in light and dark captures, and inspect the family's `forced-colors` rule. Confirm directional artwork behaves deliberately in right-to-left documents.
+**Verify:** Inspect each icon in light and dark captures, read how its geometry is produced, and inspect the family's `forced-colors` rule. Confirm directional artwork behaves deliberately in right-to-left documents.
 
 **Fails when:** `content` draws `/`, `*`, or another character; an expected glyph is absent; a mask disappears in forced colors; direction-sensitive geometry points the wrong way.
 
@@ -14,7 +14,7 @@ Assess every dimension in writing before the human gate. A checker pass is evide
 
 **Meaning:** State changes that benefit from continuity use duration and easing tokens. Reduced motion is inherited from the theme, while infinite animation stops explicitly.
 
-**Verify:** Run the checker, exercise every animated state in a real browser, and emulate `prefers-reduced-motion: reduce` for looping motion.
+**Verify:** Exercise every animated state in a real browser, read the timing choices in context, and emulate `prefers-reduced-motion: reduce` for looping motion.
 
 **Fails when:** A useful transition snaps without reason; a duration or easing is handwritten; an animation loops under reduced motion; decorative motion blocks interaction.
 
@@ -38,7 +38,7 @@ Assess every dimension in writing before the human gate. A checker pass is evide
 
 **Meaning:** Every visual decision that a theme may retune is a correctly scoped, honestly named token. Family tokens reach foundation tokens instead of encoding a second scale.
 
-**Verify:** Run the checker, read `docs/token-foundation.md`, inspect `packages/styles/src/<family>/<family>.tokens.json`, and trace each fallback to the appropriate foundation layer.
+**Verify:** Read `docs/token-foundation.md`, inspect `packages/styles/src/<family>/<family>.tokens.json`, and trace each fallback to the appropriate foundation layer. Record any intentional literal or departure with its reason instead of assuming a source pattern is always defective.
 
 **Fails when:** A family token falls back to a literal outside the documented exemptions; a token name hides its actual purpose; density, scheme, or base concerns live in the wrong layer; the stylesheet invents a parallel scale.
 

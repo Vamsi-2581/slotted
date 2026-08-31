@@ -35,10 +35,10 @@ green gate on every commit — and the components came out visually poor. The
 process was not skipped; it never rendered anything, and a checklist does not
 detect ugly.
 
-You are building the three tools and the skill that fix that: a harness that
-turns a family's stylesheet into a browser page, a shooter that captures it, a
-checker that reports the mechanical defects, and the skill that sequences them
-around a step where the component is actually looked at.
+You are building the two evidence tools and the skill that fix that: a harness
+that turns a family's stylesheet into a browser page, a shooter that captures
+it, and the skill that sequences behavioural tests, source reading and those
+visual artefacts around a step where the component is actually looked at.
 
 ## 3. Scope
 
@@ -53,15 +53,16 @@ committed by an agent working alone.
 
 ## 4. Rules
 
-**The plan is the instruction; the steps are in order.** Tasks 1 and 3 are TDD
-cycles written out: write the failing test, run it and confirm it fails for the
-stated reason, implement, run it and confirm it passes, commit. Do not skip the
-"watch it fail" step — it is what proves the test tests something.
+**The plan is the instruction; the steps are in order.** Task 1 is a TDD cycle
+written out: write the failing test, run it and confirm it fails for the stated
+reason, implement, run it and confirm it passes, commit. Do not skip the "watch
+it fail" step — it is what proves the test tests something. Task 3 is an
+automation boundary and deliberately creates no artifact or commit.
 
 **Never weaken a test to make code pass.**
 
-**One commit per task**, using the message the plan gives verbatim, trailer
-included.
+**One commit per artifact-bearing task**, using the message the plan gives
+verbatim, trailer included.
 
 **`git add` names files, never directories.** Directory-wide staging has twice
 swept unintended files into commits here.

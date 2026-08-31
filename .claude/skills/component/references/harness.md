@@ -4,12 +4,6 @@ The harness renders the one authored family stylesheet against framework-free ma
 
 ## Commands
 
-Run the family checker:
-
-```bash
-node tools/harness/check.mjs <family>
-```
-
 Build `tools/harness/out/<family>.html`:
 
 ```bash

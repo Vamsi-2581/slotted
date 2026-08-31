@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test build.test.mjs check.test.mjs",
+    "test": "node --test build.test.mjs",
     "verify": "pnpm test"
   }
 }

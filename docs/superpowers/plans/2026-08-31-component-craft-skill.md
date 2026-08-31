@@ -4,7 +4,7 @@
 
 **Goal:** A manually invoked skill that builds or refines one component family against the token foundation, renders it, looks at it, and hands it to a human before anything is committed.
 
-**Architecture:** Three small tools and one skill. A harness builder turns a family's stylesheet plus a markup fragment into a single browser page showing every scene across both schemes and three container widths. A shooter captures one combination at a time as a PNG the agent can read. A checker reads a family's CSS and reports the mechanical violations. The skill sequences them, and its last two steps are a written self-assessment and a human gate.
+**Architecture:** Two small tools and one skill. A harness builder turns a family's stylesheet plus a markup fragment into a single browser page showing every scene across both schemes and three container widths. A shooter captures one combination at a time as a PNG the agent can read. The skill sequences behavioural tests, source reading and the visual loop, and its last two steps are a written self-assessment and a human gate.
 
 **Tech Stack:** Node 24, `node --test`, headless Google Chrome (already at `/usr/bin/google-chrome`). No new dependencies.
 
@@ -12,8 +12,8 @@
 
 ## Global Constraints
 
-- The token foundation is already built. `docs/token-foundation.md` is the law; read it before Task 3.
-- The checker runs **against one family at a time**, invoked by the skill. It is deliberately not wired into `pnpm check`, and there is no allowlist: it only ever runs against the family being worked on, which is compliant by the time the skill finishes.
+- The token foundation is already built. `docs/token-foundation.md` is the law; read it before Task 4.
+- Do not encode open-ended CSS or design policy in a checker. Automation is blocking only when it has a closed, machine-readable source of truth. The rubric, rendered evidence and human gate own contextual judgement.
 - No component stylesheet other than `breadcrumb.css` is touched by this plan.
 - Ten files under `apps/storybook-*/.storybook/` are modified and uncommitted and belong to unrelated work. Never stage, commit, revert or stash them.
 - `git add` names files, never directories. Never trust an exit status through a pipe.
@@ -392,225 +392,21 @@ EOF
 
 ---
 
-### Task 3: The family checker
+### Task 3: The automation boundary
 
-**Files:**
-- Create: `tools/harness/check.mjs`
-- Create: `tools/harness/check.test.mjs`
-- Modify: `tools/harness/package.json` (add the test file to the `test` script)
-- Modify: `docs/superpowers/plans/2026-08-31-component-craft-skill.md` (align the checker implementation with its tests)
+This task deliberately creates no checker and no commit. It constrains Tasks 4 and 5.
 
-**Interfaces:**
-- Produces: `checkFamily({ family, css }) => string[]` from `tools/harness/check.mjs`, returning one message per violation and an empty array when clean. A CLI prints them and exits `1` when any is found.
+A blocking script is appropriate only when it checks a closed, machine-readable source of truth such as a schema, contract shape, syntax, command exit status, produced file, or observable behaviour. Component craft is not closed: CSS values, platform keywords, fallbacks, accessibility treatments and future techniques depend on context.
 
-- [ ] **Step 1: Write the failing test**
+Do not create `tools/harness/check.mjs`, an exemption list, or an equivalent source-pattern gate. Adding more exceptions does not make a heuristic complete; it makes valid component work depend on maintaining a second policy.
 
-Create `tools/harness/check.test.mjs`:
+- [ ] **Step 1: Keep the harness package factual**
 
-```js
-import assert from 'node:assert/strict';
-import test from 'node:test';
+`tools/harness/package.json` runs only the builder's behavioural test. The harness and shooter produce pages and images; they do not decide whether a design choice is universally correct.
 
-import { checkFamily } from './check.mjs';
+- [ ] **Step 2: Carry the boundary into the skill**
 
-const check = (css) => checkFamily({ family: 'demo', css });
-
-test('accepts a stylesheet that reaches only for tokens', () => {
-  assert.deepEqual(
-    check(`.slotted-demo { gap: var(--slotted-demo-gap, var(--slotted-space-4)) }`),
-    [],
-  );
-});
-
-test('refuses a literal fallback', () => {
-  const errors = check(`.slotted-demo { gap: var(--slotted-demo-gap, 0.625rem) }`);
-  assert.equal(errors.length, 1);
-  assert.match(errors[0], /--slotted-demo-gap.*0\.625rem/);
-});
-
-test('allows the keywords a scale cannot express', () => {
-  for (const value of ['0', 'none', 'auto', '100%', 'transparent', 'currentColor', 'inherit']) {
-    assert.deepEqual(check(`.slotted-demo { x: var(--slotted-demo-x, ${value}) }`), []);
-  }
-});
-
-test('refuses a character used as an icon', () => {
-  const errors = check(`.slotted-demo::before { content: var(--slotted-demo-separator, '/') }`);
-  assert.equal(errors.length, 1);
-  assert.match(errors[0], /content/);
-});
-
-test('accepts an empty content, which is what a mask needs', () => {
-  assert.deepEqual(check(`.slotted-demo::before { content: '' }`), []);
-});
-
-test('refuses a duration or easing written by hand', () => {
-  assert.equal(check(`.slotted-demo { transition: color 120ms ease }`).length, 1);
-  assert.deepEqual(
-    check(
-      `.slotted-demo { transition: color var(--slotted-duration-short) var(--slotted-easing-standard) }`,
-    ),
-    [],
-  );
-});
-
-test('refuses a looping animation with no reduced-motion rule', () => {
-  const spinning = `.slotted-demo { animation: spin 1s linear infinite }`;
-  assert.equal(check(spinning).length, 1);
-  assert.deepEqual(
-    check(`${spinning} @media (prefers-reduced-motion: reduce) { .slotted-demo { animation: none } }`),
-    [],
-  );
-});
-
-test('refuses a container query from a stylesheet that declares no container', () => {
-  const errors = check(`@container (min-width: 20rem) { .slotted-demo { gap: 0 } }`);
-  assert.equal(errors.length, 1);
-  assert.match(errors[0], /container-type/);
-});
-
-test('accepts a container query when the family declares its own container', () => {
-  assert.deepEqual(
-    check(
-      `.slotted-demo { container-type: inline-size; container-name: slotted-demo }
-       @container slotted-demo (min-width: 20rem) { .slotted-demo { gap: 0 } }`,
-    ),
-    [],
-  );
-});
-```
-
-- [ ] **Step 2: Run it and watch it fail**
-
-Run: `node --test tools/harness/check.test.mjs`
-Expected: FAIL — `Cannot find module './check.mjs'`.
-
-- [ ] **Step 3: Write the checker**
-
-Create `tools/harness/check.mjs`:
-
-```js
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-
-/** Values no scale can express, so a literal is the honest answer. */
-const KEYWORDS = new Set([
-  '0',
-  'none',
-  'auto',
-  '100%',
-  'transparent',
-  'currentColor',
-  'inherit',
-  'unset',
-  'initial',
-  '1',
-]);
-
-const FALLBACK = /var\(\s*(--slotted-[a-z0-9-]+)\s*,\s*([^;]*?)\)(?=[;\s}])/g;
-const CONTENT = /content:\s*([^;}]+)/g;
-const DURATION = /(?<![\w-])\d+(?:\.\d+)?m?s(?![\w-])/;
-const EASING = /(?<![\w-])(?:ease(?:-in|-out|-in-out)?|linear|cubic-bezier|steps)\s*\(?/;
-
-export function checkFamily({ family, css }) {
-  const errors = [];
-  const source = css.replace(/\/\*[\s\S]*?\*\//g, '');
-
-  for (const match of source.matchAll(FALLBACK)) {
-    const [, token, fallback] = match;
-    const value = fallback.trim();
-    if (value.startsWith('var(') || KEYWORDS.has(value)) continue;
-    const declarationStart = Math.max(
-      source.lastIndexOf(';', match.index),
-      source.lastIndexOf('{', match.index),
-      source.lastIndexOf('}', match.index),
-    );
-    const declaration = source.slice(declarationStart + 1, match.index);
-    const property = /content\s*:\s*$/.test(declaration) ? 'content: ' : '';
-    errors.push(
-      `${family}: ${property}${token} falls back to the literal ${value}. Reach for a scale step instead.`,
-    );
-  }
-
-  for (const [, raw] of source.matchAll(CONTENT)) {
-    const value = raw.trim();
-    if (value === "''" || value === '""' || value.startsWith('var(')) continue;
-    errors.push(
-      `${family}: content is ${value}. A character is never an icon — use a glyph token as a mask.`,
-    );
-  }
-
-  for (const declaration of source.matchAll(/(transition|animation)(?:-[a-z-]+)?:\s*([^;}]+)/g)) {
-    const value = declaration[2];
-    if (declaration[1] === 'animation' && /\binfinite\b/.test(value)) continue;
-    const outsideVar = value.replace(/var\([^()]*(?:\([^()]*\)[^()]*)*\)/g, '');
-    if (DURATION.test(outsideVar) || EASING.test(outsideVar)) {
-      errors.push(
-        `${family}: ${declaration[1]} writes its own timing in "${value.trim()}". Use the motion scale.`,
-      );
-    }
-  }
-
-  if (/animation[^;}]*\binfinite\b/.test(source) && !source.includes('prefers-reduced-motion')) {
-    errors.push(
-      `${family}: an animation loops forever with no reduced-motion rule. Collapsing a duration is not enough — it has to stop.`,
-    );
-  }
-
-  if (source.includes('@container') && !source.includes('container-type')) {
-    errors.push(`${family}: uses @container without declaring container-type on its own root.`);
-  }
-
-  return errors;
-}
-
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const family = process.argv[2];
-  if (!family) throw new Error('usage: node tools/harness/check.mjs <family>');
-  const css = await readFile(
-    new URL(`../../packages/styles/src/${family}/${family}.css`, import.meta.url),
-    'utf8',
-  );
-  const errors = checkFamily({ family, css });
-  for (const error of errors) console.error(`- ${error}`);
-  console.log(errors.length === 0 ? `${family}: clean` : `${family}: ${errors.length} to fix`);
-  process.exitCode = errors.length === 0 ? 0 : 1;
-}
-```
-
-- [ ] **Step 4: Run the tests**
-
-Run: `node --test tools/harness/check.test.mjs`
-Expected: PASS, nine tests.
-
-- [ ] **Step 5: Point it at the real Breadcrumb**
-
-Run: `node tools/harness/check.mjs breadcrumb; echo "EXIT=$?"`
-Expected: `EXIT=1`, listing the `/` separator and the literal fallbacks. That output is Task 5's worklist.
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add docs/superpowers/plans/2026-08-31-component-craft-skill.md \
-        tools/harness/check.mjs tools/harness/check.test.mjs tools/harness/package.json
-git commit -F - <<'EOF'
-feat(harness): report what a family gets mechanically wrong
-
-Five rules, each one a defect the library actually shipped: a literal
-fallback where a scale step belongs, a character used as an icon, timing
-written by hand, a looping animation with no reduced-motion rule, and a
-container query from a stylesheet that declares no container.
-
-It runs against one family, invoked by the skill, and is deliberately
-not wired into the repository gate. A permanent gate would need a
-dispensation list holding all thirty unrefined families, and the list
-would be machinery for a problem the skill's human gate already answers.
-
-Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
-EOF
-```
-
----
+The skill reads the token foundation and rubric, runs contract and behavioural tests, inspects source in context, renders the family, and records its reasoning for the human gate. No step requires a CSS-policy script to report zero findings.
 
 ### Task 4: The skill
 
@@ -622,7 +418,7 @@ EOF
 - Create: `.claude/skills/component/references/patterns.md`
 
 **Interfaces:**
-- Consumes: `tools/harness/build.mjs`, `shoot.mjs`, `check.mjs` from Tasks 1–3; `docs/token-foundation.md` from the foundation plan.
+- Consumes: `tools/harness/build.mjs` and `shoot.mjs` from Tasks 1–2; `docs/token-foundation.md` from the foundation plan.
 - Produces: the skill invoked as `/component <family> [ideas…]`.
 
 - [ ] **Step 1: Write `SKILL.md`**
@@ -641,10 +437,10 @@ The body holds, in this order:
 1. **The law, loaded first.** Read `docs/token-foundation.md`, `references/rubric.md`, and — when the family is a form control — `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`. Before reading any component code.
 2. **Mode.** `specs/components/<family>/` exists → refine. Otherwise → create.
 3. **Weigh the request.** If the invocation carried features, behaviours or ideas, judge each against `PROJECT-PRD.md`: composition over configuration, platform first, no internal DOM promises, YAGNI. Write **adopt / adapt / decline** with one sentence of reason for each, and **present it before writing any code**. An idea is not adopted because it was asked for, and not declined because it is unfamiliar.
-4. **Source the pattern.** Look the WAI-ARIA Authoring Practices pattern up. Do not recall it. In refine mode, also run `node tools/harness/check.mjs <family>` and read the family's CSS against the rubric, and write the defect list.
+4. **Source the pattern.** Look the WAI-ARIA Authoring Practices pattern up. Do not recall it. In refine mode, read the family's CSS against the rubric and write the defects, open questions and context-dependent decisions. The rubric guides inspection; it is not a closed rule set.
 5. **Design.** Only where an architectural question arises. Then it is a document in `docs/superpowers/specs/`.
 6. **Contract and its test**, test first.
-7. **Stylesheet against the foundation.** `node tools/harness/check.mjs <family>` exits 0 before moving on.
+7. **Stylesheet against the foundation.** Read each visual decision against the foundation in context, document intentional departures and their cost, and do not create a regex-based CSS policy gate.
 8. **The visual loop.** `node tools/harness/build.mjs <family>`, then `shoot.mjs` for at least `light 420`, `dark 420` and `light 240`. **Read every image.** Judge alignment, rhythm, optical balance, and whether the narrow width holds. Correct and repeat. Do not leave this step because the code is finished; leave it because the picture is right.
 9. **Both frameworks**, following `references/frameworks.md`.
 10. **Reference pages** for both Storybooks.
@@ -659,18 +455,18 @@ State plainly, near the top: **step 8 is the reason this skill exists.** The lib
 
 Eight dimensions. For each: what it means, how it is verified, and what fails it.
 
-1. **Icons** — real geometry, never a character or emoji, and present wherever the component needs one. Verified by `check.mjs` and by the eye on the capture.
+1. **Icons** — real geometry, never a character or emoji, and present wherever the component needs one. Verified by source reading, platform modes and the eye on the capture.
 2. **Motion** — every state change that benefits from one has a transition, taken from the motion scale, and nothing loops without a reduced-motion rule. Fails when a control snaps between states with no reason.
 3. **Responsiveness** — the component answers its own width, not the viewport's. Verified at 240, 420 and 720. Fails when content overflows or wraps badly at 240.
 4. **Refinement** — alignment, spacing rhythm, type sizes, optical balance. Verified by the eye. Fails on a half-pixel misalignment, a gap that does not match a scale step, or text that sits off the optical centre.
-5. **Tokens** — every visual decision is themeable, correctly scoped and honestly named. Verified by `check.mjs` and by reading the names.
+5. **Tokens** — every visual decision is themeable, correctly scoped and honestly named. Verified by reading names and fallbacks against the foundation in context.
 6. **Patterns** — the APG pattern, item by item; the platform before ARIA; composition over configuration.
 7. **Accessibility** — name, role, state, keyboard, visible focus, `forced-colors`, reduced motion.
 8. **Native API** — modern idioms in both frameworks, and no capability the consumer loses by using the component.
 
 - [ ] **Step 3: Write `references/harness.md`**
 
-The three commands, the fragment format (`<section data-scene="NAME">`), the rule that every `data-part` in the contract appears in the fragment and every declared state is exercised, and the note that the fragment is a third place the DOM is written — after React and Angular — so it drifts and must be re-read whenever either component's markup changes.
+The build and capture commands, the fragment format (`<section data-scene="NAME">`), the rule that every `data-part` in the contract appears in the fragment and every declared state is exercised, and the note that the fragment is a third place the DOM is written — after React and Angular — so it drifts and must be re-read whenever either component's markup changes.
 
 - [ ] **Step 4: Write `references/frameworks.md`**
 
@@ -737,7 +533,6 @@ This task is executed **by invoking the skill**, not by writing the CSS in this 
 
 The refinement is not done until all of these hold:
 
-- `node tools/harness/check.mjs breadcrumb` exits 0.
 - The separator is a mask from `--slotted-icon-chevron-right`, not the character `/`, and it flips or is replaced for a right-to-left document.
 - Every literal in the stylesheet is a scale step: the `0.8125rem`, the two `0.375rem`, the `1.45`, the `4px` and the `600` all resolve through tokens.
 - The link's colour change is a transition from the motion scale, not a snap.
@@ -755,7 +550,7 @@ Commits follow the skill's own step 14: one per step of substance, in the reposi
 
 - [ ] **Step 5: Record the entry**
 
-Append to `docs/BUILD-LOG.md`: what the skill changed, what the checker caught that the eye did not, what the eye caught that the checker did not, and how many visual iterations it took. That last number is the honest measure of whether step 8 is doing work.
+Append to `docs/BUILD-LOG.md`: what the skill changed, what behavioural tests caught, what the rendered review caught, which decisions required context, and how many visual iterations it took. That last number is the honest measure of whether step 8 is doing work.
 
 ---
 

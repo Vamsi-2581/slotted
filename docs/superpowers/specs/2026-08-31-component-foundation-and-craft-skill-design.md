@@ -187,23 +187,13 @@ both directions. Adding required tokens breaks any third-party theme. The
 package is `private: true` at version `0.0.0` with no consumer, so the cost is
 zero now and a major version after 1.0.
 
-## Part 2 — The Family Checker
+## Part 2 — The Automation Boundary
 
-Five rules, each one a defect the library actually shipped, in
-`tools/harness/check.mjs`:
+Automation is appropriate only where the repository has a closed, machine-readable source of truth: schema correspondence, syntax, contract shape, command exit status, file production, and observable behaviour. Those checks can prove what they claim without guessing at design intent.
 
-| Rule | What it refuses |
-| --- | --- |
-| Scales | A family token falling back to a literal. Exempt: `0`, `none`, `auto`, `100%`, `transparent`, `currentColor`, `inherit` |
-| Glyphs | A character used as an icon — the `'/'` and the `'*'` this library shipped |
-| Motion | A duration or easing written by hand |
-| Looping motion | An `infinite` animation with no reduced-motion rule |
-| Container | A `@container` query from a stylesheet declaring no container of its own |
+CSS craft is open-ended. A script cannot enumerate every legitimate fallback, platform keyword, accessibility treatment, token exception, or future technique. Encoding those choices as regular expressions creates a second, incomplete policy that produces false positives and has to be changed before valid component work can proceed.
 
-It runs against one family, invoked by the skill at step 7 and again before the
-human gate. It is deliberately not part of `pnpm check`: a permanent gate would
-need a dispensation list naming all thirty unrefined families, and that list is
-machinery for a problem the human gate already answers.
+There is therefore no family policy checker. The skill reads the token foundation and rubric, renders the family, runs behavioural and contract tests, and records context-dependent decisions for the human gate. The harness builder and shooter produce evidence; they do not decide whether a design choice is universally correct.
 
 ## Part 3 — The Skill
 
@@ -234,11 +224,11 @@ invoked, never by inference.
 | 3 | Source the pattern | The APG looked up, not recalled. In refine mode, also: list the current defects against the rubric |
 | 4 | Design | A document only where an architectural question arises |
 | 5 | Contract and its test | Test first |
-| 6 | Stylesheet against the foundation | No literals |
+| 6 | Stylesheet against the foundation | Decisions read in context; departures written down |
 | 7 | Visual loop | Render, capture, **look**, correct, repeat |
 | 8 | Both frameworks | Each framework's modern idioms |
 | 9 | Reference pages | — |
-| 10 | Automatic gates | `pnpm check` and the five new tests |
+| 10 | Automatic gates | `pnpm check`; no heuristic CSS policy gate |
 | 11 | Self-assessment against the rubric | Written, across all eight dimensions, with anything below the bar fixed |
 | 12 | Human gate | The harness path and a short report. Free-form evaluation. Iterate |
 | 13 | Commit and leave the list | Only after approval |
@@ -273,18 +263,19 @@ Eight dimensions, each with its meaning, its verification, and what fails it:
 
 | # | Dimension | Verification |
 | --- | --- | --- |
-| 1 | Icons | `glyphs` test, and the eye on the capture |
-| 2 | Motion | `motion` test, and captures across the transition |
+| 1 | Icons | Source reading, platform modes, and the eye on the capture |
+| 2 | Motion | Behavioural tests, source reading, and captures across the transition |
 | 3 | Responsiveness | Captures at three container widths |
 | 4 | Refinement | The eye: alignment, rhythm, optical balance |
-| 5 | Tokens | `scales` test, and reading the names |
+| 5 | Tokens | Reading names and fallbacks against the foundation in context |
 | 6 | Patterns | The APG checked item by item |
 | 7 | Accessibility | Name, role, state, keyboard, focus, `forced-colors` |
 | 8 | Native API | Read against `references/frameworks.md` |
 
-Half is mechanical and runs unattended. Dimensions 4, 6, 7 and 8 require
-judgement, which is why step 11 writes the self-assessment down: it gives the
-human something specific to disagree with at step 12.
+Closed contracts and observable behaviour can run unattended. Every rubric
+dimension still requires judgement because no source-pattern checker can know
+all valid component contexts. Step 11 writes the self-assessment down so the
+human has something specific to disagree with at step 12.
 
 ### The human gate
 
@@ -301,15 +292,13 @@ Two implementation plans, strictly ordered:
    scale steps, and the generalisation of the density layer.
 2. The skill and its tools, proven by refining one family end to end.
 
-An earlier version of this design placed enforcement between them: five tests
-wired into the repository gate, and an `unrefined.json` holding every published
-family so the gate could stay green while thirty of them were non-compliant.
-That was dropped after the foundation landed, and the reason is worth keeping.
-A permanent gate needs the dispensation list, the list is machinery, and the
-machinery answers a question the skill's human gate already answers better. The
-five rules survive as `tools/harness/check.mjs`, which the skill runs against
-the one family in hand — where there is nothing to dispense, because that family
-is compliant by the time the skill finishes.
+An earlier version of this design placed CSS-policy enforcement between them:
+five tests wired into the repository gate, followed by a family-scoped regular
+expression checker. Both were dropped. Narrowing enforcement to one family
+reduces blast radius but does not solve the underlying problem: open-ended craft
+rules still produce false positives and become a prerequisite for valid
+refactoring. Only checks backed by a closed source of truth belong in the
+automatic gate; the rubric and human gate own contextual judgement.
 
 The family proving the skill should be Breadcrumb: it is small, and it carries
 the character-glyph defect, so a successful run is visible rather than

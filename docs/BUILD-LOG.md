@@ -829,3 +829,57 @@ Do not start T4 until T3 is complete. `Dialog` must be the first overlay.
   directly. And a control inside a disabled `<fieldset>` keeps its own
   `disabled` property `false` — it matches `:disabled` instead, which is what
   every control stylesheet keys on.
+
+## Layered token foundation, state model, ratchet — 2026-08-31
+
+- Decisions: the token contract is one list carrying two independent facts per
+  token — the layer, which says what may reference it, and the axis, which says
+  which CSS block emits it. Grouping by axis alone made the layer invisible, so
+  a component token sat beside a primitive and nothing objected. Validation now
+  refuses a reference that reaches a deeper layer, and refuses a token that is
+  not a scale root and restates a literal without recording why. Fourteen
+  literals carry their reason in the contract.
+- Decisions: `--slotted-surface`, `-raised`, `-sunken`, `-inverse`,
+  `--slotted-text-inverse`, `--slotted-border-strong` and `--slotted-scrim`
+  close the gap that made every family invent its own neutral background. Card,
+  Popover, Dialog and Table would each have decided it separately.
+- Decisions: `high-contrast` is a scheme the application selects and is held to
+  7:1 for text; the operating system's own mode is served by the
+  `forced-colors` block the theme emits, which maps all 64 scheme tokens to
+  system colours. A scheme token without a mapping fails contract validation, so
+  the mapping cannot fall behind the palette.
+- Decisions: the coarse-pointer block raises control height per density to
+  `max(<value>, var(--slotted-target-comfortable))` rather than switching the
+  application to a larger density. A dense table keeps its type and spacing on
+  touch while its controls stay hittable.
+- Decisions: schema 5 adds `data-ui` and `stateModel`. A family had no public
+  selector — classes are explicitly not contract — and no shared answer for
+  controlled versus uncontrolled, so Splitter and Switch had each invented one.
+  `packages/core/src/state/` holds the one implementation both bindings will
+  use, including the change request with an enumerated reason, an opaque source
+  event, and cancellation before commit.
+- Decisions: `specs/legacy-families.json` is the ratchet. The 29 families built
+  before the foundation stay on schema 4 and are exempt from the motion,
+  precedence and identity laws; a family leaves the list when it is rebuilt, and
+  `specs/rebuild-ledger.test.mjs` refuses to let the list grow. Without it,
+  either the new law would be unenforceable or 29 families slated for rebuild
+  would have to be edited first.
+- Defects found: the light scheme's `--slotted-text-muted` measured 4.47:1
+  against the new sunken surface, and `--slotted-border-strong` measured 2.56:1
+  in light and 2.40:1 in dark against the surface it separates. Both were
+  darkened. The contrast test that found them did not exist before this change;
+  the old one checked solid tones only.
+- Defects found: `renderThemeCss` and `validateTheme` both took a contract
+  argument and then read token names from the module singleton, so a theme built
+  against a different contract would have emitted this one's tokens. Both now
+  derive every list from the argument.
+- Deviations: only the four motion-scale duration tokens collapse under reduced
+  motion. The three new loop durations do not, because an endless animation has
+  to stop rather than hurry.
+- Follow-on: the harness captures six combinations per family, and the review
+  page multiplies scenes by three schemes and three widths. Density and
+  direction are page-wide query parameters instead, or the review view would
+  carry 54 cells per scene.
+- Follow-on: `docs/rebuild-order.md` holds the order the 29 families are
+  rebuilt in. Wave 1 starts at `typography` and `icon`, because the type scale
+  and the glyph system are what every later family reads.

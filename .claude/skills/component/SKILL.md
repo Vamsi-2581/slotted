@@ -13,9 +13,9 @@ Step 8 is the reason this skill exists. The library already had a rigorous check
 
 Follow these steps in order. Replace `<family>` with the invoked family name. When the invocation names a tightly related pair, apply every step and every gate to both.
 
-1. **Load the law before component code.** Read `docs/token-foundation.md` and `references/rubric.md`. For a form control, also read `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`. Do not inspect the family implementation first.
+1. **Load the law before component code.** Read `docs/token-foundation.md`, `docs/state-and-events.md`, and `references/rubric.md`. Read the section of `docs/component-features.md` that covers this family, and its sections 2 and 18. For a form control, also read `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`. Do not inspect the family implementation first.
 
-2. **Detect the mode.** If `specs/components/<family>/` exists, refine the family. Otherwise, create it.
+2. **Detect the mode.** If `specs/components/<family>/` exists, refine the family. Otherwise, create it. A family listed in `specs/legacy-families.json` is being rebuilt, not refined: it moves to the current contract schema and leaves that list in the same commit.
 
 3. **Weigh the request.** If the invocation includes features, behaviours, or ideas, read `PROJECT-PRD.md` and judge each item against composition over configuration, platform first, no internal DOM promises, and YAGNI. Write `adopt`, `adapt`, or `decline` plus one sentence of reason for every item, and present the weighing before writing code. Do not adopt an idea merely because it was requested or decline it merely because it is unfamiliar.
 
@@ -23,7 +23,7 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
 5. **Design only when architecture is in question.** When responsibility, anatomy, state ownership, composition, or cross-framework behaviour needs a decision, write a design in `docs/superpowers/specs/` and obtain approval before implementation. Do not create a design document for a mechanical refinement.
 
-6. **Change the contract and its test first.** Create or update `specs/components/<family>/contract.json` and its contract test. Run the focused test, watch it fail for the intended missing behaviour, implement the smallest contract change, and run it again:
+6. **Change the contract and its test first.** Create or update `specs/components/<family>/contract.json` and its contract test. The contract declares `ui`, the parts, the states from the shared vocabulary, and a `stateModel` for every mutable capability. Run the focused test, watch it fail for the intended missing behaviour, implement the smallest contract change, and run it again:
 
    ```bash
    node --test specs/components/<family>/*.test.mjs
@@ -37,12 +37,15 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
    ```bash
    node tools/harness/build.mjs <family>
-   node tools/harness/shoot.mjs <family> light 420
-   node tools/harness/shoot.mjs <family> dark 420
-   node tools/harness/shoot.mjs <family> light 240
+   node tools/harness/shoot.mjs <family> --scheme light --width 420
+   node tools/harness/shoot.mjs <family> --scheme dark --width 420
+   node tools/harness/shoot.mjs <family> --scheme high-contrast --width 420
+   node tools/harness/shoot.mjs <family> --scheme light --width 240
+   node tools/harness/shoot.mjs <family> --scheme light --density dense
+   node tools/harness/shoot.mjs <family> --scheme light --dir rtl
    ```
 
-   Read every image. Judge alignment, spacing rhythm, type, optical balance, scheme contrast, and whether the narrow container holds. Correct the component and repeat all affected captures. Code completion is not the exit condition; a right picture is.
+   Read every image. Judge alignment, spacing rhythm, type, optical balance, scheme contrast, whether density changes size without changing meaning, whether the mirrored layout is the same component, and whether the narrow container holds. Correct the component and repeat all affected captures. Code completion is not the exit condition; a right picture is.
 
 9. **Implement both frameworks.** Follow `references/frameworks.md`. Keep the conceptual contract shared, React idiomatic to React, and Angular idiomatic to Angular. Preserve native props, events, and explicit consumer values.
 
@@ -56,7 +59,7 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
     Do not pipe a verification command into `head`, `tail`, or `grep`; preserve its exit status.
 
-12. **Write the self-assessment.** Assess all eight dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, and Native API. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
+12. **Write the self-assessment.** Assess all eight dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, and Native API. Then state, against `docs/component-features.md` section 18, the family's anatomy, its controlled and uncontrolled contract with reasons, its state matrix, its density and direction behaviour, and its loading, empty, error and extreme-content cases. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
 
 13. **Stop at the human gate.** Hand over the absolute harness path, the step 3 weighing, the eight-dimension self-assessment, and every remaining uncertainty. Ask the person to open the harness in a real browser and exercise hover, focus, keyboard, and resizing. Wait. Incorporate the response and repeat the necessary checks. Nothing is committed before approval.
 

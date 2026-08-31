@@ -4,30 +4,111 @@ import { fileURLToPath } from 'node:url';
 import { LAYER_ORDER_STATEMENT } from '@slotted/tokens/layer-order';
 import { assertValidTheme } from '@slotted/tokens/validate-theme';
 
-function declarations(names, values) {
-  return names.map((name) => `    ${name}: ${values[name]};`).join('\n');
+/**
+ * Every list this renderer emits is derived from the contract it is handed, so
+ * a theme built against a different contract emits that contract's tokens.
+ */
+function tokenNames(contract, axis) {
+  return contract.tokens.filter((token) => token.axis === axis).map((token) => token.name);
+}
+
+function reducedMotionNames(contract) {
+  return contract.tokens.filter((token) => token.reducedMotion).map((token) => token.name);
+}
+
+function forcedColorMap(contract) {
+  return Object.fromEntries(
+    contract.tokens
+      .filter((token) => token.forcedColor !== undefined)
+      .map((token) => [token.name, token.forcedColor]),
+  );
+}
+
+function declarations(names, values, indent = '    ') {
+  return names.map((name) => `${indent}${name}: ${values[name]};`).join('\n');
+}
+
+function schemeSelectors(theme, scheme) {
+  return [
+    `  [data-slotted-theme="${theme.name}"][data-slotted-scheme="${scheme}"]`,
+    `  [data-slotted-theme="${theme.name}"] [data-slotted-scheme="${scheme}"]`,
+  ];
+}
+
+function densitySelectors(theme, density) {
+  return [
+    `  [data-slotted-theme="${theme.name}"][data-slotted-density="${density}"]`,
+    `  [data-slotted-theme="${theme.name}"] [data-slotted-density="${density}"]`,
+  ];
 }
 
 export function renderThemeCss(contract, theme) {
   const blocks = [
-    `  [data-slotted-theme="${theme.name}"] {\n${declarations(contract.base, theme.base)}\n  }`,
+    `  [data-slotted-theme="${theme.name}"] {\n${declarations(tokenNames(contract, 'base'), theme.base)}\n  }`,
   ];
 
   for (const [scheme, values] of Object.entries(theme.schemes)) {
     blocks.push(
-      `  [data-slotted-theme="${theme.name}"][data-slotted-scheme="${scheme}"],\n` +
-        `  [data-slotted-theme="${theme.name}"] [data-slotted-scheme="${scheme}"] {\n` +
-        `${declarations(contract.scheme, values)}\n  }`,
+      `${schemeSelectors(theme, scheme).join(',\n')} {\n` +
+        `${declarations(tokenNames(contract, 'scheme'), values)}\n  }`,
     );
   }
 
   for (const [density, values] of Object.entries(theme.densities)) {
     blocks.push(
-      `  [data-slotted-theme="${theme.name}"][data-slotted-density="${density}"],\n` +
-        `  [data-slotted-theme="${theme.name}"] [data-slotted-density="${density}"] {\n` +
-        `${declarations(contract.density, values)}\n  }`,
+      `${densitySelectors(theme, density).join(',\n')} {\n` +
+        `${declarations(tokenNames(contract, 'density'), values)}\n  }`,
     );
   }
+
+  /**
+   * A coarse pointer cannot hit what a mouse can. Every control grows to the
+   * comfortable target on touch, at the density the application chose, so a
+   * dense table stays dense in its type and spacing while its controls stay
+   * operable. `max()` keeps a theme whose control is already larger untouched.
+   */
+  const targets = tokenNames(contract, 'density').filter((name) =>
+    /^--slotted-control-height-(sm|md|lg)$/.test(name),
+  );
+  blocks.push(
+    `  @media (pointer: coarse) {\n` +
+      Object.entries(theme.densities)
+        .map(
+          ([density, values]) =>
+            `${densitySelectors(theme, density)
+              .map((selector) => `  ${selector}`)
+              .join(',\n')} {\n` +
+            targets
+              .map(
+                (name) => `      ${name}: max(${values[name]}, var(--slotted-target-comfortable));`,
+              )
+              .join('\n') +
+            `\n    }`,
+        )
+        .join('\n\n') +
+      `\n  }`,
+  );
+
+  /**
+   * Under forced colours the operating system replaces the palette. A family
+   * that reads a semantic token therefore keeps working, because the token is
+   * remapped here rather than in each stylesheet. The selector list repeats
+   * the scheme selectors so the mapping carries their specificity; a media
+   * query adds none of its own.
+   */
+  const forced = forcedColorMap(contract);
+  const forcedSelectors = [
+    `  [data-slotted-theme="${theme.name}"]`,
+    ...Object.keys(theme.schemes).flatMap((scheme) => schemeSelectors(theme, scheme)),
+  ];
+  blocks.push(
+    `  @media (forced-colors: active) {\n` +
+      `${forcedSelectors.map((selector) => `  ${selector}`).join(',\n')} {\n` +
+      `${tokenNames(contract, 'scheme')
+        .map((name) => `      ${name}: ${forced[name]};`)
+        .join('\n')}\n` +
+      `    }\n  }`,
+  );
 
   /**
    * One query collapses every duration token, so a family honours the
@@ -41,7 +122,7 @@ export function renderThemeCss(contract, theme) {
   blocks.push(
     `  @media (prefers-reduced-motion: reduce) {\n` +
       `    [data-slotted-theme="${theme.name}"] {\n` +
-      `${contract.reducedMotion.map((name) => `      ${name}: ${theme.reducedMotion[name]};`).join('\n')}\n` +
+      `${declarations(reducedMotionNames(contract), theme.reducedMotion, '      ')}\n` +
       `    }\n  }`,
   );
 

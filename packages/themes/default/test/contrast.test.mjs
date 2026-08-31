@@ -83,3 +83,67 @@ test('button radii decrease gently as control size increases', () => {
     ['7px', '6px', '5px'],
   );
 });
+
+/**
+ * A scheme named for contrast has to earn the name. `high-contrast` is held to
+ * the AAA ratio for body text rather than the AA ratio the other schemes meet,
+ * and its borders are held to the non-text ratio, because a border is what
+ * separates two surfaces that no longer differ in fill.
+ */
+const TEXT_RATIO = { light: 4.5, dark: 4.5, 'high-contrast': 7 };
+const NON_TEXT_RATIO = 3;
+
+const surfaces = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
+
+for (const [scheme, values] of Object.entries(theme.schemes)) {
+  const required = TEXT_RATIO[scheme];
+
+  test(`${scheme} text reads on every surface`, () => {
+    for (const surface of surfaces) {
+      for (const text of ['--slotted-text', '--slotted-text-muted']) {
+        assert.ok(
+          contrast(values[surface], values[text]) >= required,
+          `${scheme} ${text} on ${surface} is below ${required}:1`,
+        );
+      }
+    }
+  });
+
+  test(`${scheme} inverts a surface without losing its text`, () => {
+    assert.ok(
+      contrast(values['--slotted-surface-inverse'], values['--slotted-text-inverse']) >= required,
+      `${scheme} inverse text is below ${required}:1`,
+    );
+  });
+
+  test(`${scheme} separates surfaces with a visible border`, () => {
+    assert.ok(
+      contrast(values['--slotted-surface'], values['--slotted-border-strong']) >= NON_TEXT_RATIO,
+      `${scheme} strong border is below ${NON_TEXT_RATIO}:1`,
+    );
+    assert.ok(
+      contrast(values['--slotted-surface'], values['--slotted-focus-ring-color']) >= NON_TEXT_RATIO,
+      `${scheme} focus ring is below ${NON_TEXT_RATIO}:1`,
+    );
+  });
+
+  test(`${scheme} solid variants meet the ratio the scheme promises`, () => {
+    for (const variant of variants) {
+      const foreground = values[`--slotted-tone-${variant}-on-solid`];
+      for (const state of solidStates) {
+        assert.ok(
+          contrast(values[`--slotted-tone-${variant}-${state}`], foreground) >= required,
+          `${scheme}.${variant}.${state} is below ${required}:1`,
+        );
+      }
+    }
+  });
+
+  test(`${scheme} keeps disabled text legible`, () => {
+    assert.ok(
+      contrast(values['--slotted-disabled-background'], values['--slotted-disabled-foreground']) >=
+        NON_TEXT_RATIO,
+      `${scheme} disabled text is below ${NON_TEXT_RATIO}:1`,
+    );
+  });
+}

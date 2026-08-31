@@ -60,6 +60,10 @@ function pick(values, names) {
   return Object.fromEntries(names.map((name) => [name, values[name]]));
 }
 
+function names(axis) {
+  return contract.tokens.filter((token) => token.axis === axis).map((token) => token.name);
+}
+
 function expectedReducedMotionBlock(themeName) {
   const declarations = REDUCED_MOTION_TOKENS.map((name) => `      ${name}: 1ms;`).join('\n');
   return (
@@ -73,7 +77,22 @@ function expectedReducedMotionBlock(themeName) {
 
 test('renders independent theme, scheme, and density scopes', () => {
   const css = renderThemeCss(
-    { base: ['--base'], scheme: ['--scheme'], density: ['--density'], reducedMotion: [] },
+    {
+      layers: ['primitive', 'semantic', 'component'],
+      axes: ['base', 'scheme', 'density'],
+      tokens: [
+        { name: '--base', layer: 'primitive', axis: 'base', type: 'length', root: true },
+        {
+          name: '--scheme',
+          layer: 'semantic',
+          axis: 'scheme',
+          type: 'color',
+          root: true,
+          forcedColor: 'Canvas',
+        },
+        { name: '--density', layer: 'semantic', axis: 'density', type: 'length', root: true },
+      ],
+    },
     {
       name: 'test',
       base: { '--base': '1px' },
@@ -90,14 +109,20 @@ test('renders independent theme, scheme, and density scopes', () => {
 });
 
 test('defines the exact reduced-motion duration tokens and non-zero collapsed values', () => {
-  assert.deepEqual(contract.reducedMotion, REDUCED_MOTION_TOKENS);
+  assert.deepEqual(
+    contract.tokens.filter((token) => token.reducedMotion).map((token) => token.name),
+    REDUCED_MOTION_TOKENS,
+  );
   assert.deepEqual(theme.reducedMotion, REDUCED_MOTION_VALUES);
 });
 
 test('locks the exact shadow and stacking scales', () => {
-  assert.deepEqual(contract.scheme.slice(-4), SHADOW_TOKENS);
   assert.deepEqual(
-    contract.base.filter((token) => token.startsWith('--slotted-z-index-')),
+    names('scheme').filter((token) => token.startsWith('--slotted-shadow-')),
+    SHADOW_TOKENS,
+  );
+  assert.deepEqual(
+    names('base').filter((token) => token.startsWith('--slotted-z-index-')),
     Z_INDEX_TOKENS,
   );
   assert.deepEqual(pick(theme.schemes.light, SHADOW_TOKENS), SHADOW_VALUES.light);
@@ -123,6 +148,42 @@ test('emits the reduced-motion block after the block it overrides', () => {
       css.indexOf('--slotted-duration-short'),
     'A media query adds no specificity, so source order is what makes the override win',
   );
+});
+
+test('grows every control to the comfortable target under a coarse pointer', () => {
+  const css = renderThemeCss(contract, theme);
+  const query = css.slice(css.indexOf('@media (pointer: coarse)'));
+
+  for (const density of contract.requiredDensities) {
+    assert.match(query, new RegExp(`data-slotted-density="${density}"`));
+  }
+  assert.match(
+    query,
+    /--slotted-control-height-md: max\([^)]+, var\(--slotted-target-comfortable\)\)/,
+  );
+  assert.ok(
+    css.indexOf('@media (pointer: coarse)') > css.lastIndexOf('--slotted-control-height-md: 2'),
+    'The coarse-pointer block must follow the density block it overrides',
+  );
+});
+
+test('maps every scheme token to a system colour under forced colours', () => {
+  const css = renderThemeCss(contract, theme);
+  const query = css.slice(
+    css.indexOf('@media (forced-colors: active)'),
+    css.indexOf('@media (prefers-reduced-motion: reduce)'),
+  );
+
+  for (const name of names('scheme')) {
+    assert.match(query, new RegExp(`${name}: [A-Za-z]+;`), `${name} is unmapped`);
+  }
+  for (const scheme of contract.requiredSchemes) {
+    assert.match(
+      query,
+      new RegExp(`\\[data-slotted-scheme="${scheme}"\\]`),
+      `forced colours must carry the specificity of the ${scheme} block`,
+    );
+  }
 });
 
 test('emits the reduced-motion block as the final theme content', () => {

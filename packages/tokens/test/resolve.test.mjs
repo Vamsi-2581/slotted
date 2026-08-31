@@ -83,6 +83,14 @@ test('every token that predates the scales still resolves to its old value', () 
   }
 });
 
+test('does not keep the ambiguous unsized button icon-size token in base', () => {
+  assert.equal(
+    theme.base['--slotted-button-icon-size'],
+    undefined,
+    'base must not define --slotted-button-icon-size: density-scoped icon sizes are unambiguous',
+  );
+});
+
 const DENSITY_UNCHANGED = {
   comfortable: {
     '--slotted-button-height-sm': '30px',

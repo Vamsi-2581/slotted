@@ -85,6 +85,14 @@ test('implements every contract state in framework-owned CSS', () => {
   assert.ok(css.includes('--slotted-control-radius'), 'Missing control radius token');
 });
 
+test('uses a direct size-scoped icon-size fallback for every button size', () => {
+  for (const size of contract.axes.size) {
+    assertNormalizedRuleDeclarations(`.slotted-button[data-size='${size}']`, [
+      `--_button-icon-size: var(--slotted-button-icon-size-${size}, 1em);`,
+    ]);
+  }
+});
+
 test('maps secondary to a theme palette and keeps fill borders intentional', () => {
   assertNormalizedRuleDeclarations(".slotted-button[data-variant='secondary']", [
     '--_solid: var(--slotted-tone-secondary-solid);',

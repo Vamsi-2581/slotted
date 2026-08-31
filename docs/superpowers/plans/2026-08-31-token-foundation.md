@@ -1025,47 +1025,80 @@ EOF
 - Modify: `packages/themes/default/src/theme.json`
 - Modify: `packages/styles/src/button/button.css`
 - Modify: `packages/styles/src/button/button.tokens.json`
+- Modify: `packages/tokens/test/resolve.test.mjs`
+- Modify: `packages/styles/src/button/button.styles.test.mjs`
+- Modify: `docs/superpowers/plans/2026-08-31-token-foundation.md`
+- Modify: `docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-design.md`
 
 **Interfaces:**
 
 - Consumes: `--slotted-control-icon-size-{sm,md,lg}` from Task 4.
-- Produces: `--slotted-button-icon-size` removed from `base`; the stylesheet reads the density-scoped names instead.
+- Produces: `--slotted-button-icon-size` removed from `base`; the stylesheet reads the density-scoped names with a direct `1em` fallback instead.
 
 - [ ] **Step 1: Find every use**
 
-Run: `grep -rn "slotted-button-icon-size" packages/ --include="*.css" --include="*.json" --include="*.ts" --include="*.tsx" | grep -v node_modules | grep -v dist`
+Run: `rg -n --fixed-strings -- '--slotted-button-icon-size' packages/tokens/src/contract.json packages/themes/default/src/theme.json packages/styles/src/button/button.css packages/styles/src/button/button.tokens.json packages/tokens/test/resolve.test.mjs packages/styles/src/button/button.styles.test.mjs`
 
-Expected: `--slotted-button-icon-size` (the `1em` one) appears in `button.css` and in `button.tokens.json`. Note each line before editing.
+Expected: the unsized base token appears in contract, theme, `button.css`, and `button.tokens.json`; the three CSS size rules use nested fallbacks. Density-scoped `sm`, `md`, and `lg` names are legitimate and remain.
 
-- [ ] **Step 2: Point the stylesheet at the size-scoped token**
+- [ ] **Step 2: Write focused failing tests**
 
-In `packages/styles/src/button/button.css`, replace each `var(--slotted-button-icon-size, 1em)` with the size-scoped form already used elsewhere in that file — `var(--slotted-button-icon-size-md, 1em)` inside the `md` rule, and the matching `sm` and `lg` names inside theirs. Where the declaration is not inside a size rule, use `1em` directly: an icon beside text should follow the text.
+In `packages/tokens/test/resolve.test.mjs`, assert that `theme.base['--slotted-button-icon-size']` is absent, with a naming-collision message. In `packages/styles/src/button/button.styles.test.mjs`, derive every size from `contract.axes.size` and assert its matching size rule has this exact declaration:
 
-- [ ] **Step 3: Remove the ambiguous token**
+```
+--_button-icon-size: var(--slotted-button-icon-size-{size}, 1em);
+```
+
+- [ ] **Step 3: Run the tests and watch them fail**
+
+Run: `node --test packages/tokens/test/resolve.test.mjs packages/styles/src/button/button.styles.test.mjs`
+
+Expected: FAIL because `theme.base['--slotted-button-icon-size']` equals `1em`, and the `sm` size rule lacks the exact declaration `--_button-icon-size: var(--slotted-button-icon-size-sm, 1em);` because it contains the nested unsized fallback.
+
+- [ ] **Step 4: Point each size rule at its size-scoped token**
+
+In `packages/styles/src/button/button.css`, replace the current nested declaration in each matching size rule with a direct fallback: `var(--slotted-button-icon-size-sm, 1em)` in `sm`, and likewise for `md` and `lg`. Do not introduce nested duplicate fallbacks. No declaration outside a size rule changes.
+
+- [ ] **Step 5: Remove the ambiguous token**
 
 Delete `"--slotted-button-icon-size"` from `contract.base` and from `theme.base`. The twelve size-scoped names stay.
 
-- [ ] **Step 4: Regenerate the token list**
+- [ ] **Step 6: Regenerate the token list**
 
 ```bash
 node -e "
 const { readFileSync, writeFileSync } = require('node:fs');
-const css = readFileSync('packages/styles/src/button/button.css', 'utf8');
+const css = [
+  readFileSync('packages/styles/src/button/button.css', 'utf8'),
+  readFileSync('packages/styles/src/button/button-group.css', 'utf8'),
+].join('\n');
 const tokens = [...new Set([...css.matchAll(/var\(\s*(--slotted-[a-z0-9-]+)/g)].map((m) => m[1]))].sort();
 writeFileSync('packages/styles/src/button/button.tokens.json', JSON.stringify(tokens, null, 2) + '\n');
 "
 ```
 
-- [ ] **Step 5: Verify nothing moved**
+- [ ] **Step 7: Correct the design-spec history**
+
+Update `docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-design.md` to describe the naming collision in past tense, its removal, and the direct density-scoped fallback in every Button size rule.
+
+- [ ] **Step 8: Verify the focused tests and full repository**
+
+Run: `node --test packages/tokens/test/resolve.test.mjs packages/styles/src/button/button.styles.test.mjs`
+
+Expected: PASS.
 
 Run: `pnpm check:full`
-Expected: exit 0. If a Button visual test fails, the substitution in Step 2 put a density-scoped value where `1em` belonged; revisit that line.
+Expected: exit 0. If a Button visual test fails, the substitution in Step 4 put a density-scoped value where `1em` belonged; revisit that line.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add packages/tokens/src/contract.json packages/themes/default/src/theme.json \
-        packages/styles/src/button/button.css packages/styles/src/button/button.tokens.json
+        packages/styles/src/button/button.css packages/styles/src/button/button.tokens.json \
+        packages/tokens/test/resolve.test.mjs \
+        packages/styles/src/button/button.styles.test.mjs \
+        docs/superpowers/plans/2026-08-31-token-foundation.md \
+        docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-design.md
 git commit -F - <<'EOF'
 fix(tokens): remove the icon-size name that meant two things
 

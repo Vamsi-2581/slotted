@@ -211,7 +211,7 @@
 
   .slotted-button[data-size='sm'] {
     --_button-height: var(--slotted-button-height-sm, 1.875rem);
-    --_button-icon-size: var(--slotted-button-icon-size-sm, var(--slotted-button-icon-size, 1em));
+    --_button-icon-size: var(--slotted-button-icon-size-sm, 1em);
 
     border-radius: var(--slotted-button-radius-sm, var(--slotted-control-radius, 4px));
     font-size: var(--slotted-button-font-size-sm, 0.75rem);
@@ -221,7 +221,7 @@
 
   .slotted-button[data-size='md'] {
     --_button-height: var(--slotted-button-height-md, 2.125rem);
-    --_button-icon-size: var(--slotted-button-icon-size-md, var(--slotted-button-icon-size, 1em));
+    --_button-icon-size: var(--slotted-button-icon-size-md, 1em);
 
     border-radius: var(--slotted-button-radius-md, var(--slotted-control-radius, 4px));
     font-size: var(--slotted-button-font-size-md, 0.8125rem);
@@ -231,7 +231,7 @@
 
   .slotted-button[data-size='lg'] {
     --_button-height: var(--slotted-button-height-lg, 2.375rem);
-    --_button-icon-size: var(--slotted-button-icon-size-lg, var(--slotted-button-icon-size, 1em));
+    --_button-icon-size: var(--slotted-button-icon-size-lg, 1em);
 
     border-radius: var(--slotted-button-radius-lg, var(--slotted-control-radius, 4px));
     font-size: var(--slotted-button-font-size-lg, 0.875rem);

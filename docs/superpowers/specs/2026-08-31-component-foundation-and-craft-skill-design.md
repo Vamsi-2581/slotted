@@ -173,10 +173,12 @@ component and belongs to its own decision, not to this one.
 
 ### One inherited naming defect
 
-`--slotted-button-icon-size` in `base` holds `1em`, and
-`--slotted-button-icon-size-{sm,md,lg}` in `density` holds pixel values. The
-same prefix means two different things. It is resolved as part of the
-generalisation, while the package is still unpublished.
+`--slotted-button-icon-size` previously held `1em` in `base`, while
+`--slotted-button-icon-size-{sm,md,lg}` in `density` holds pixel values. Task
+6 removes the ambiguous base token; each matching Button size rule now uses
+its density-scoped token with a direct `1em` fallback. The package is still
+unpublished, so removing rather than renaming the ambiguous token costs no
+consumer.
 
 ### The breaking change, stated plainly
 

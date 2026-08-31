@@ -43,7 +43,6 @@
     "--slotted-focus-ring-width": "2px",
     "--slotted-focus-ring-offset": "2px",
     "--slotted-button-gap": "0.5rem",
-    "--slotted-button-icon-size": "1em",
     "--slotted-button-radius-sm": "7px",
     "--slotted-button-radius-md": "6px",
     "--slotted-button-radius-lg": "5px",

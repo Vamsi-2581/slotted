@@ -62,7 +62,11 @@
     "--slotted-easing-standard",
     "--slotted-easing-enter",
     "--slotted-easing-exit",
-    "--slotted-easing-emphasized"
+    "--slotted-easing-emphasized",
+    "--slotted-z-index-sticky",
+    "--slotted-z-index-overlay",
+    "--slotted-z-index-popover",
+    "--slotted-z-index-toast"
   ],
   "reducedMotion": [
     "--slotted-duration-instant",
@@ -124,7 +128,11 @@
     "--slotted-tone-danger-border",
     "--slotted-tone-danger-text",
     "--slotted-tone-danger-subtle-hover",
-    "--slotted-tone-danger-subtle-active"
+    "--slotted-tone-danger-subtle-active",
+    "--slotted-shadow-xs",
+    "--slotted-shadow-sm",
+    "--slotted-shadow-md",
+    "--slotted-shadow-lg"
   ],
   "density": [
     "--slotted-button-height-sm",

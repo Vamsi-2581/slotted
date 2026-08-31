@@ -555,13 +555,25 @@ EOF
 
 - Modify: `packages/tokens/src/contract.json`
 - Modify: `packages/themes/default/src/theme.json`
+- Modify: `packages/themes/default/test/build-theme.test.mjs`
 
 **Interfaces:**
 
 - Consumes: nothing from earlier tasks.
 - Produces: `--slotted-shadow-{xs,sm,md,lg}` in every scheme; `--slotted-z-index-{sticky,overlay,popover,toast}` in `base`.
 
-- [ ] **Step 1: Add to the contract**
+- [ ] **Step 1: Lock the exact scale values in a focused test**
+
+Before editing the configuration, add a focused `build-theme` test that
+asserts the four shadow names and exact light and dark values, plus the four
+z-index names and exact base values. If a new shadow or z-index value is
+missing or `undefined`, the test must fail with an assertion diff.
+
+Mutation check: temporarily change or remove one shadow and one z-index entry,
+run `pnpm --filter @slotted/theme-default exec node --test test/build-theme.test.mjs`,
+and record the expected RED assertion before restoring both mutations.
+
+- [ ] **Step 2: Add to the contract**
 
 Append to `contract.scheme`:
 
@@ -576,7 +588,16 @@ Append to `contract.base`:
 "--slotted-z-index-popover", "--slotted-z-index-toast"
 ```
 
-- [ ] **Step 2: Add the values to both schemes and to base**
+- [ ] **Step 3: RED — run the validator after the contract edit**
+
+Run: `pnpm --filter @slotted/theme-default verify`
+
+Expected: FAIL with `base is missing --slotted-z-index-sticky` as the first
+relevant error, followed by the remaining missing z-index and shadow entries
+(not formatting or syntax errors). Record the failure before editing the
+theme.
+
+- [ ] **Step 4: Add the values to both schemes and to base**
 
 In `theme.json` `schemes.light`, append:
 
@@ -605,12 +626,12 @@ In `base`, append:
 "--slotted-z-index-toast": "1200",
 ```
 
-- [ ] **Step 3: Verify**
+- [ ] **Step 5: Verify**
 
-Run: `pnpm --filter @slotted/theme-default verify && pnpm --filter @slotted/tokens verify`
+Run: `pnpm --filter @slotted/theme-default exec node --test test/build-theme.test.mjs && pnpm --filter @slotted/theme-default verify && pnpm --filter @slotted/tokens verify`
 Expected: PASS. A missing entry in either scheme fails with `scheme dark is missing --slotted-shadow-xs`.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add packages/tokens/src/contract.json packages/themes/default/src/theme.json

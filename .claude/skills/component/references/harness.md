@@ -21,8 +21,15 @@ node tools/harness/shoot.mjs <family> \
   --density <comfortable|compact|dense> \
   --dir <ltr|rtl> \
   --scene <name> \
+  --focus <css selector> \
   --out <directory>
 ```
+
+`--focus` puts focus on the first element the selector matches inside the
+captured cell, after a Tab press that makes Chrome treat the interaction as a
+keyboard one, so `:focus-visible` and `:focus-within` are photographed rather
+than described. The selector reaches the file name as a slug, so two focus
+targets in one combination produce two images.
 
 The capture is the whole page, not the window: the shooter drives Chrome through the DevTools protocol and clips to the document's own height. A family with many scenes therefore produces one tall image, so `--scene` narrows it to a single scene when a detail needs to fill the view.
 
@@ -46,7 +53,7 @@ The fragment is a third place where the DOM is written, after React and Angular.
 
 ## Visual loop
 
-At minimum capture light at 420, dark at 420, light at 240, high contrast at 420, dense at 420, and RTL at 420. Also inspect 720 pixels whenever width affects composition. Read every capture at full size and compare it to the prior iteration.
+At minimum capture light at 420, dark at 420, light at 240, high contrast at 420, dense at 420, and RTL at 420. Capture `--focus` for every state a family paints only while focus is on it. Also inspect 720 pixels whenever width affects composition. Read every capture at full size and compare it to the prior iteration.
 
 Check alignment, spacing rhythm, optical balance, type, contrast, focus treatment, glyph geometry, long content, the narrow-width decision, whether density changes size without changing meaning, and whether the mirrored layout is the same component rather than a rearranged one. Correct the source, rebuild, and recapture every affected combination. Stop only when the picture and live interactions meet `rubric.md`.
 

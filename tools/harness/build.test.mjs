@@ -66,6 +66,7 @@ test('defaults every axis and names each one in the file it writes', () => {
   assert.deepEqual(options, {
     family: 'demo',
     outDir: options.outDir,
+    focus: undefined,
     scene: undefined,
     scheme: 'light',
     width: '420',
@@ -73,6 +74,18 @@ test('defaults every axis and names each one in the file it writes', () => {
     dir: 'ltr',
   });
   assert.equal(captureName(options), 'demo-light-comfortable-ltr-420.png');
+});
+
+test('captures a focused element, because a focus ring is judged from an image', () => {
+  const options = parseArguments(['demo', '--focus', '[data-focusable] a']);
+  assert.equal(options.focus, '[data-focusable] a');
+  assert.equal(captureName(options), 'demo-focus-data-focusable-a-light-comfortable-ltr-420.png');
+});
+
+test('keeps two focus targets in the same combination in two files', () => {
+  const first = parseArguments(['demo', '--focus', 'a']);
+  const second = parseArguments(['demo', '--focus', 'button']);
+  assert.notEqual(captureName(first), captureName(second));
 });
 
 test('reads every axis by name', () => {

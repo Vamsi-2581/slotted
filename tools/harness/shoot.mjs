@@ -140,8 +140,65 @@ export function captureUrl({ family, scheme, width, density, dir, scene }) {
   return url;
 }
 
-export function captureName({ family, scheme, width, density, dir, scene }) {
-  return `${[family, scene, scheme, density, dir, width].filter(Boolean).join('-')}.png`;
+/**
+ * A selector is not a file name, so it travels as a slug. Two focus targets in
+ * one combination therefore land in two files instead of one overwriting the
+ * other, which is the failure a reader cannot see in the image.
+ */
+export function focusSlug(selector) {
+  if (!selector) return undefined;
+  const slug = selector
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40)
+    .replace(/-+$/, '');
+  return `focus-${slug}`;
+}
+
+export function captureName({ family, scheme, width, density, dir, scene, focus }) {
+  const parts = [family, scene, focusSlug(focus), scheme, density, dir, width];
+  return `${parts.filter(Boolean).join('-')}.png`;
+}
+
+/**
+ * A focus ring, and a rule that reveals content only while focus is inside it,
+ * exist in no capture the shooter could take before this: the page is loaded
+ * and photographed with focus on the document. The Tab press is dispatched
+ * first so Chrome counts the last interaction as a keyboard one and
+ * `:focus-visible` matches; the script call then puts focus on the element the
+ * reader asked for rather than on whatever Tab happened to reach.
+ *
+ * The selector is resolved inside the shown cell first, because the page holds
+ * one cell per scheme and width and only one of them is the capture.
+ */
+async function focusElement(devtools, selector) {
+  for (const type of ['rawKeyDown', 'keyUp']) {
+    await devtools.send('Input.dispatchKeyEvent', {
+      type,
+      key: 'Tab',
+      code: 'Tab',
+      windowsVirtualKeyCode: 9,
+      nativeVirtualKeyCode: 9,
+    });
+  }
+
+  const expression = `(() => {
+    const selector = ${JSON.stringify(selector)};
+    const element =
+      document.querySelector('.cell.shown ' + selector) ?? document.querySelector(selector);
+    if (!element) throw new Error('no element matches ' + selector);
+    element.focus();
+    return element.tagName;
+  })()`;
+
+  const { exceptionDetails } = await devtools.send('Runtime.evaluate', {
+    expression,
+    returnByValue: true,
+  });
+  if (exceptionDetails) {
+    throw new Error(`--focus ${selector}: ${exceptionDetails.exception?.description ?? 'failed'}`);
+  }
 }
 
 export async function shoot(options) {
@@ -161,6 +218,8 @@ export async function shoot(options) {
     const loaded = devtools.once('Page.loadEventFired');
     await devtools.send('Page.navigate', { url: captureUrl(options).href });
     await loaded;
+
+    if (options.focus) await focusElement(devtools, options.focus);
 
     const { cssContentSize } = await devtools.send('Page.getLayoutMetrics');
     const { data } = await devtools.send('Page.captureScreenshot', {
@@ -193,11 +252,16 @@ export function parseArguments(argv) {
   const [family, ...rest] = argv;
   if (!family || family.startsWith('--')) {
     throw new Error(
-      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--scene name] [--out dir]',
+      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--scene name] [--focus selector] [--out dir]',
     );
   }
 
-  const options = { family, outDir: process.env['TMPDIR'] ?? '/tmp', scene: undefined };
+  const options = {
+    family,
+    outDir: process.env['TMPDIR'] ?? '/tmp',
+    focus: undefined,
+    scene: undefined,
+  };
   for (const [axis, { fallback }] of Object.entries(AXES)) options[axis] = fallback;
 
   for (let index = 0; index < rest.length; index += 2) {
@@ -211,6 +275,10 @@ export function parseArguments(argv) {
     }
     if (flag === 'scene') {
       options.scene = value;
+      continue;
+    }
+    if (flag === 'focus') {
+      options.focus = value;
       continue;
     }
 

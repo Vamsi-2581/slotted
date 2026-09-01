@@ -11,6 +11,17 @@ foundation of tokens, state and identity is law. The families listed in
 `specs/legacy-families.json` were built before it, stay on schema 4, and **must
 not be touched** until their own turn in `docs/rebuild-order.md`.
 
+## Scope of the invocation
+
+`docs/rebuild-order.md` states the wave, the mode — build, rebuild or
+consolidate — and the scope of each family. Read the entry for the invoked
+family there first.
+
+If that family has no scope written yet, derive it from its section in
+`docs/component-features.md`, write it into `docs/rebuild-order.md` as part of
+the work, and proceed. An invocation is never blocked for want of a scope
+paragraph.
+
 ## Read first
 
 - `docs/token-foundation.md` — layers, scales, schemes, densities, target size
@@ -27,19 +38,30 @@ Work in this worktree, `/home/dreco/dev/slotted`, on the branch already checked
 out. **Do not create a branch, do not create a worktree, do not check anything
 out.** Storybook runs here and a human watches it live.
 
-The `node` on `PATH` is 22 and the repository requires 24:
+The `node` on `PATH` is older than the one `.node-version` requires, and shell
+state does not survive between tool calls, so **prefix every `node` and `pnpm`
+command** with the resolution below rather than exporting it once:
 
 ```bash
-export PATH=~/.nvm/versions/node/v24.18.0/bin:$PATH
-node -v   # v24.x
+export PATH="$(ls -d ~/.nvm/versions/node/v$(cat .node-version)*/bin | tail -1):$PATH"
+node -v   # must match .node-version
 ```
+
+If that path does not exist, `nvm install` against `.node-version` is the fix;
+never run the repository's scripts on the older runtime.
 
 ## Storybook
 
-Already running; do not stop or restart it without saying why.
+Usually already running, started by the reviewer. Do not stop or restart it
+without saying why.
 
 - React: <http://localhost:6006>
 - Angular: <http://localhost:6007>
+
+If a port answers nothing, say so at the gate rather than assuming the pages
+were seen. Starting it is the reviewer's call; the commands are
+`pnpm --filter @slotted/storybook-react dev` and
+`pnpm --filter @slotted/storybook-angular dev`.
 
 The toolbar exposes `scheme` (`light`, `dark`, `high-contrast`), `density`
 (`comfortable`, `compact`, `dense`) and `direction` (`ltr`, `rtl`). The reviewer

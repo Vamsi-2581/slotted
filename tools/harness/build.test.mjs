@@ -38,6 +38,15 @@ test('renders every scene in every scheme at every width', () => {
   }
 });
 
+test('gives a filtered page one column, so the widest stage is not clipped', () => {
+  const html = render();
+  assert.match(html, /body\[data-only\] main \{ grid-template-columns: 1fr \}/);
+  assert.ok(
+    html.indexOf('body[data-only] main') > html.indexOf('main { display: grid'),
+    'the single-column rule has to come after the review grid to win',
+  );
+});
+
 test('gives each cell the scheme attribute the theme selects on', () => {
   assert.match(render(), /data-slotted-scheme="dark"/);
 });
@@ -57,6 +66,20 @@ test('applies density and direction to the page rather than to each cell', () =>
   assert.match(html, /documentElement\.dir = direction/);
 });
 
+/**
+ * A capture is evidence only while it says which axes it was taken on. The
+ * caption is baked at build time and cannot know them, so two captures of the
+ * same scene at two densities carried the same label and the reader had no way
+ * to tell them apart inside the image.
+ */
+test('names the density and the direction in every caption it captions', () => {
+  const html = render();
+  assert.match(html, /<span data-axes><\/span>/);
+  assert.match(html, /querySelectorAll\('\[data-axes\]'\)/);
+  assert.match(html, /documentElement\.dataset\.slottedDensity/);
+  assert.match(html, /documentElement\.dir/);
+});
+
 test('paints each stage on the theme surface it is judged against', () => {
   assert.match(render(), /background: var\(--slotted-surface\)/);
 });
@@ -66,7 +89,9 @@ test('defaults every axis and names each one in the file it writes', () => {
   assert.deepEqual(options, {
     family: 'demo',
     outDir: options.outDir,
+    active: undefined,
     focus: undefined,
+    hover: undefined,
     scene: undefined,
     scheme: 'light',
     width: '420',
@@ -80,6 +105,30 @@ test('captures a focused element, because a focus ring is judged from an image',
   const options = parseArguments(['demo', '--focus', '[data-focusable] a']);
   assert.equal(options.focus, '[data-focusable] a');
   assert.equal(captureName(options), 'demo-focus-data-focusable-a-light-comfortable-ltr-420.png');
+});
+
+/**
+ * Hover and press exist in no capture the shooter could take before this: a
+ * headless page has no pointer, so a family could paint a hover fill nobody
+ * ever looked at. The pseudo-class is forced through the protocol instead of
+ * simulated with a mouse, because a moved pointer also scrolls, hovers whatever
+ * it passes over, and cannot reach `:active` at all without holding a button
+ * down for the length of the capture.
+ */
+test('captures hover and press, which a headless page has no pointer to produce', () => {
+  const hovered = parseArguments(['demo', '--hover', "[data-ui='card']"]);
+  assert.equal(hovered.hover, "[data-ui='card']");
+  assert.equal(captureName(hovered), 'demo-hover-data-ui-card-light-comfortable-ltr-420.png');
+
+  const pressed = parseArguments(['demo', '--active', "[data-ui='card']"]);
+  assert.equal(pressed.active, "[data-ui='card']");
+  assert.equal(captureName(pressed), 'demo-active-data-ui-card-light-comfortable-ltr-420.png');
+});
+
+test('keeps a hovered capture and a pressed capture of one element apart', () => {
+  const hovered = parseArguments(['demo', '--hover', 'a']);
+  const pressed = parseArguments(['demo', '--active', 'a']);
+  assert.notEqual(captureName(hovered), captureName(pressed));
 });
 
 test('keeps two focus targets in the same combination in two files', () => {

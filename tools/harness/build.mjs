@@ -30,7 +30,7 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
       WIDTHS.map(
         (width) => `
       <figure class="cell" data-scheme="${scheme}">
-        <figcaption>${name} · ${scheme} · ${width}px</figcaption>
+        <figcaption>${name} · ${scheme} · ${width}px<span data-axes></span></figcaption>
         <div
           class="stage"
           id="${name}-${scheme}-${width}"
@@ -64,6 +64,12 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
     color: var(--slotted-text);
   }
   main { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1px; background: #d8dade }
+  /* A filtered page is one capture, so it is one column. The review view packs
+     cells side by side to compare them, and the same packing at the widest step
+     put two 720-pixel stages in two 400-pixel tracks: the stage overflowed its
+     track and the shooter clipped every line of text at the viewport edge. A
+     capture the reader cannot read is worse than no capture. */
+  body[data-only] main { grid-template-columns: 1fr }
   body[data-only] .cell { display: none }
   body[data-only] .cell.shown { display: block }
 </style>
@@ -81,6 +87,13 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
   const scene = q.get('scene');
   if (density) document.documentElement.dataset.slottedDensity = density;
   if (direction) document.documentElement.dir = direction;
+  /* Baked at build time, the caption could not know the two axes the page
+     applies to itself, so a dense RTL capture and a comfortable LTR one carried
+     the same label. The reader compares images, not file names. */
+  for (const axes of document.querySelectorAll('[data-axes]')) {
+    axes.textContent =
+      ' · ' + document.documentElement.dataset.slottedDensity + ' · ' + document.documentElement.dir;
+  }
   if (scheme || width || scene) {
     document.body.dataset.only = '';
     for (const cell of document.querySelectorAll('.cell')) {

@@ -13,7 +13,7 @@ Step 8 is the reason this skill exists. The library already had a rigorous check
 
 Follow these steps in order. Replace `<family>` with the invoked family name. When the invocation names a tightly related pair, apply every step and every gate to both.
 
-1. **Load the law before component code.** Read `docs/token-foundation.md`, `docs/state-and-events.md`, and `references/rubric.md`. Read the section of `docs/component-features.md` that covers this family, and its sections 2 and 18. For a form control, also read `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`. Do not inspect the family implementation first.
+1. **Load the law before component code.** Read `docs/rebuild-briefing.md` first — it holds the environment, the constraints and the decisions already taken. Then `docs/token-foundation.md`, `docs/state-and-events.md`, and `references/rubric.md`. Read the section of `docs/component-features.md` that covers this family, and its sections 2 and 18. For a form control, also read `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`. Do not inspect the family implementation first.
 
 2. **Detect the mode.** If `specs/components/<family>/` exists, refine the family. Otherwise, create it. A family listed in `specs/legacy-families.json` is being rebuilt, not refined: it moves to the current contract schema and leaves that list in the same commit.
 
@@ -61,6 +61,6 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
 12. **Write the self-assessment.** Assess all eight dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, and Native API. Then state, against `docs/component-features.md` section 18, the family's anatomy, its controlled and uncontrolled contract with reasons, its state matrix, its density and direction behaviour, and its loading, empty, error and extreme-content cases. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
 
-13. **Stop at the human gate.** Hand over the absolute harness path, the step 3 weighing, the eight-dimension self-assessment, and every remaining uncertainty. Ask the person to open the harness in a real browser and exercise hover, focus, keyboard, and resizing. Wait. Incorporate the response and repeat the necessary checks. Nothing is committed before approval.
+13. **Stop at the human gate.** Decide every open question first, as `docs/rebuild-briefing.md` requires: the gate carries decisions already taken, not questions for the reviewer. Hand over the absolute harness path, the reference-page URLs, the step 3 weighing, the eight-dimension self-assessment, and the decisions taken. Ask the person to open the harness in a real browser and exercise hover, focus, keyboard, and resizing. Wait. Incorporate the response and repeat the necessary checks. Nothing is committed before approval.
 
 14. **Commit after approval.** Make one commit per step of substance, name every staged file explicitly, and include only this family's work. Do not stage a directory. Record the completed family in `docs/BUILD-LOG.md` when the active plan requires it.

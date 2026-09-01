@@ -110,6 +110,41 @@ decisões, e é onde a inconsistência atual se origina.
 `typography` e `icon` primeiro, nesta ordem; os cinco restantes são
 independentes entre si.
 
+`typography` entrega **Text** e **Heading**. **Prose** — o recipe editorial da
+seção 10 — fica adiado: o ritmo que ele precisa fixar é definido sobre `list` e
+`list-item` (onda 4), `link` (onda 2), `table` (onda 6) e `code-block` (onda 8).
+Escrito antes disso, seria uma segunda escala privada para elementos que a
+reconstrução ainda não alcançou. Volta como invocação própria no fim da onda 4,
+quando lista e link já existirem; tabela e código entram como refino posterior.
+
+### Escopo por família — onda 1
+
+O que cada invocação entrega. A pesagem do passo 3 continua sendo do
+implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
+
+- **`typography`** — entregue. Text e Heading.
+- **`icon`** — registry tree-shakeable, `size`, stroke/fill, `tone`, e espelho em
+  RTL só para ícones direcionais. Decorativo sai da árvore de acessibilidade;
+  significativo exige rótulo ou texto adjacente. Não aceita SVG remoto nem HTML
+  não sanitizado. Decidir onde vive o registry — pacote próprio, entrada de
+  `@slotted/core`, ou tokens de glifo como hoje — e a relação com
+  `--slotted-icon-*`, que já serve máscaras intrínsecas de componente.
+- **`visually-hidden`** — reconstrução. Conteúdo oculto visualmente permanece
+  acessível sem alterar layout; a variante revelável no foco continua sendo uma
+  regra só, não uma regra mais o seu desfazer.
+- **`divider`** — reconstrução. `hr` como elemento, `decorative` removendo da
+  árvore, orientação vertical com comprimento mínimo. A variante rotulada
+  ("OU" no meio) e o separador dentro de `ul` (Menu, onda 5) precisam de decisão
+  agora, não depois.
+- **`stack inline grid`** — `gap`, `align`, `justify`, `wrap`,
+  `columns`/`minItemWidth`, tudo limitado por tokens. Sem virar DSL de CSS.
+  Herda a decisão de medida: o contêiner é quem limita comprimento de linha.
+- **`container`** — largura máxima, inset e centragem por token; é o dono da
+  medida confortável de texto.
+- **`card`** — por último na onda, porque escolhe tamanho de texto e superfície
+  já decididos. Superfície vem de `--slotted-surface-raised`; nenhuma família
+  volta a inventar fundo neutro.
+
 ## Onda 2 — Ação, status e metadados
 
 | Invocação             | Modo       | Guia |

@@ -19,6 +19,27 @@ const AXES = {
 const CHROME_MARGIN = 80;
 
 /**
+ * The emulation already renders at twice the device scale, so a clip that asks
+ * for scale 2 again photographs the page at four times. Chrome fills the region
+ * it never rendered by repeating the top of the document, and the reader sees a
+ * ghost of the first scene below the last one — in an image the visual loop is
+ * required to read as evidence.
+ *
+ * `cssContentSize` never falls below the viewport, so a short page was clipped
+ * to 900 pixels of which most was background. The height comes from the body
+ * instead, and falls back to the layout metric when the measurement fails.
+ */
+export function captureClip({ width, contentHeight }) {
+  return {
+    x: 0,
+    y: 0,
+    width: Number(width) + CHROME_MARGIN,
+    height: Math.max(Math.ceil(contentHeight), 1),
+    scale: 1,
+  };
+}
+
+/**
  * One capture per combination rather than one of the whole page: a reader —
  * human or model — judges alignment and rhythm from an image that fills its
  * view, not from a thumbnail of forty cells.
@@ -201,6 +222,16 @@ async function focusElement(devtools, selector) {
   }
 }
 
+async function contentHeight(devtools, cssContentSize) {
+  const { result } = await devtools.send('Runtime.evaluate', {
+    expression: 'document.body.getBoundingClientRect().height',
+    returnByValue: true,
+  });
+  return typeof result?.value === 'number' && result.value > 0
+    ? result.value
+    : cssContentSize.height;
+}
+
 export async function shoot(options) {
   const { width, outDir } = options;
   const out = join(outDir, captureName(options));
@@ -225,13 +256,7 @@ export async function shoot(options) {
     const { data } = await devtools.send('Page.captureScreenshot', {
       format: 'png',
       captureBeyondViewport: true,
-      clip: {
-        x: 0,
-        y: 0,
-        width: Number(width) + CHROME_MARGIN,
-        height: Math.max(cssContentSize.height, 1),
-        scale: 2,
-      },
+      clip: captureClip({ width, contentHeight: await contentHeight(devtools, cssContentSize) }),
     });
 
     await writeFile(out, Buffer.from(data, 'base64'));

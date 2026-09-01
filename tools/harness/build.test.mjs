@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { DENSITIES, DIRECTIONS, SCHEMES, WIDTHS, renderHarness } from './build.mjs';
-import { captureName, parseArguments } from './shoot.mjs';
+import { captureClip, captureName, parseArguments } from './shoot.mjs';
 
 const fragment = `
 <section data-scene="default"><b class="x">one</b></section>
@@ -137,4 +137,16 @@ test('refuses a fragment that declares no scene', () => {
 
 test('keeps the scene markup verbatim, so the harness shows the real DOM', () => {
   assert.ok(render().includes('<b class="x">one</b>'));
+});
+
+test('photographs the page once, at the scale the emulation already set', () => {
+  const clip = captureClip({ width: '420', contentHeight: 553 });
+  assert.equal(clip.scale, 1, 'a second scale factor repeats the top of the page below the fold');
+  assert.equal(clip.width, 500);
+  assert.equal(clip.height, 553);
+});
+
+test('clips to the content, not to the viewport floor a short page never reaches', () => {
+  assert.equal(captureClip({ width: '420', contentHeight: 553.4 }).height, 554);
+  assert.equal(captureClip({ width: '420', contentHeight: 0 }).height, 1);
 });

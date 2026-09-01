@@ -216,6 +216,20 @@
       "root": true
     },
     {
+      "name": "--slotted-font-size-2xl",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-font-size-3xl",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
       "name": "--slotted-line-height-xs",
       "layer": "primitive",
       "axis": "base",
@@ -245,6 +259,20 @@
     },
     {
       "name": "--slotted-line-height-xl",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "number",
+      "root": true
+    },
+    {
+      "name": "--slotted-line-height-2xl",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "number",
+      "root": true
+    },
+    {
+      "name": "--slotted-line-height-3xl",
       "layer": "primitive",
       "axis": "base",
       "type": "number",

@@ -120,6 +120,10 @@
       "types": "./dist/types/toolbar/index.d.ts",
       "import": "./dist/toolbar.js"
     },
+    "./typography": {
+      "types": "./dist/types/typography/index.d.ts",
+      "import": "./dist/typography.js"
+    },
     "./virtual-list": {
       "types": "./dist/types/virtual-list/index.d.ts",
       "import": "./dist/virtual-list.js"

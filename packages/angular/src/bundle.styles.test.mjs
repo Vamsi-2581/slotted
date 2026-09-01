@@ -3,6 +3,9 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const packageRoot = new URL('..', import.meta.url);
+const ledger = JSON.parse(
+  readFileSync(new URL('../../../specs/legacy-families.json', import.meta.url), 'utf8'),
+).families;
 
 /**
  * Every directory holding an ng-package.json is a published entry point, so
@@ -16,8 +19,25 @@ function entryPoints() {
     .filter((entry) => existsSync(new URL(`${entry.name}/ng-package.json`, packageRoot)))
     .map((entry) => ({
       name: entry.name,
+      legacy: ledger.includes(entry.name),
       bundle: new URL(`dist/fesm2022/slotted-angular-${entry.name}.mjs`, packageRoot),
     }));
+}
+
+/**
+ * A rebuilt family is selected in public by `data-ui`; a family still on the
+ * ledger is selected by its class until it is rebuilt. Either way the bundle
+ * has to carry the selector the stylesheet was authored with, because the
+ * component that lost its styles still renders and still passes every other
+ * test.
+ */
+function identity({ legacy, name }) {
+  return legacy
+    ? { pattern: new RegExp(`\\.slotted-${name}\\b`), described: `.slotted-${name}` }
+    : {
+        pattern: new RegExp(`\\[data-ui=['"]?${name}['"]?\\]`),
+        described: `[data-ui="${name}"]`,
+      };
 }
 
 test('finds every published entry point', () => {
@@ -25,21 +45,33 @@ test('finds every published entry point', () => {
   assert.ok(found.length >= 4, `Expected several entry points, found ${found.join(', ')}`);
 });
 
-test('ships class-selector styles with encapsulation disabled', () => {
+test('ships the family styles with encapsulation disabled', () => {
   for (const { bundle, name } of entryPoints()) {
     const source = readFileSync(bundle, 'utf8');
     assert.match(source, /encapsulation: i0\.ViewEncapsulation\.None/, name);
     assert.doesNotMatch(source, /styles: \["@layer slotted\.components\{:host/, name);
-    assert.match(source, /styles: \["@layer slotted\.components\{\.slotted-/, name);
+    assert.match(source, /styles: \["@layer slotted\.components\{/, name);
   }
 });
 
 test('carries the family stylesheet into its own bundle', () => {
-  for (const { bundle, name } of entryPoints()) {
+  for (const point of entryPoints()) {
+    const source = readFileSync(point.bundle, 'utf8');
+    const { described, pattern } = identity(point);
+    assert.ok(pattern.test(source), `${point.name} bundle carries no ${described} rule`);
+  }
+});
+
+test('writes the identifier a rebuilt family is selected by', () => {
+  const rebuilt = entryPoints().filter(({ legacy }) => !legacy);
+  if (rebuilt.length === 0) return;
+
+  for (const { bundle, name } of rebuilt) {
     const source = readFileSync(bundle, 'utf8');
-    assert.ok(
-      source.includes(`.slotted-${name}`),
-      `${name} bundle carries no .slotted-${name} rule`,
+    assert.match(
+      source,
+      new RegExp(`"data-ui": "${name}"`),
+      `${name} renders no element carrying its own identifier`,
     );
   }
 });

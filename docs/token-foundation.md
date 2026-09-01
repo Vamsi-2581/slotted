@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 56     |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 60     |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 91     |
 | `component` | One family adjusting a semantic value for itself.              | 26     |
 
@@ -74,25 +74,29 @@ This scale answers how rounded a component or part should be.
 
 This scale answers what text size a component needs.
 
-| Token                    | Default value |
-| ------------------------ | ------------- |
-| `--slotted-font-size-xs` | `0.75rem`     |
-| `--slotted-font-size-sm` | `0.8125rem`   |
-| `--slotted-font-size-md` | `0.875rem`    |
-| `--slotted-font-size-lg` | `1rem`        |
-| `--slotted-font-size-xl` | `1.125rem`    |
+| Token                     | Default value |
+| ------------------------- | ------------- |
+| `--slotted-font-size-xs`  | `0.75rem`     |
+| `--slotted-font-size-sm`  | `0.8125rem`   |
+| `--slotted-font-size-md`  | `0.875rem`    |
+| `--slotted-font-size-lg`  | `1rem`        |
+| `--slotted-font-size-xl`  | `1.125rem`    |
+| `--slotted-font-size-2xl` | `1.25rem`     |
+| `--slotted-font-size-3xl` | `1.5rem`      |
 
 ## Line height
 
 This scale answers how much vertical rhythm a text size needs.
 
-| Token                      | Default value |
-| -------------------------- | ------------- |
-| `--slotted-line-height-xs` | `1.4`         |
-| `--slotted-line-height-sm` | `1.45`        |
-| `--slotted-line-height-md` | `1.5`         |
-| `--slotted-line-height-lg` | `1.5`         |
-| `--slotted-line-height-xl` | `1.45`        |
+| Token                       | Default value |
+| --------------------------- | ------------- |
+| `--slotted-line-height-xs`  | `1.4`         |
+| `--slotted-line-height-sm`  | `1.45`        |
+| `--slotted-line-height-md`  | `1.5`         |
+| `--slotted-line-height-lg`  | `1.5`         |
+| `--slotted-line-height-xl`  | `1.45`        |
+| `--slotted-line-height-2xl` | `1.4`         |
+| `--slotted-line-height-3xl` | `1.3`         |
 
 ## Font weight
 

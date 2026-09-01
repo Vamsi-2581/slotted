@@ -25,5 +25,6 @@ export * from './tabs';
 export * from './tag';
 export * from './textarea';
 export * from './toolbar';
+export * from './typography';
 export * from './virtual-list';
 export * from './visually-hidden';

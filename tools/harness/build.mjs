@@ -78,15 +78,17 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
   const width = q.get('width');
   const density = q.get('density');
   const direction = q.get('dir');
+  const scene = q.get('scene');
   if (density) document.documentElement.dataset.slottedDensity = density;
   if (direction) document.documentElement.dir = direction;
-  if (scheme || width) {
+  if (scheme || width || scene) {
     document.body.dataset.only = '';
     for (const cell of document.querySelectorAll('.cell')) {
       const id = cell.querySelector('.stage').id;
       const okScheme = !scheme || id.includes('-' + scheme + '-');
       const okWidth = !width || id.endsWith('-' + width);
-      if (okScheme && okWidth) cell.classList.add('shown');
+      const okScene = !scene || id.startsWith(scene + '-');
+      if (okScheme && okWidth && okScene) cell.classList.add('shown');
     }
   }
 </script>

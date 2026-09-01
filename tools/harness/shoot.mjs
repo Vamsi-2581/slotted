@@ -1,12 +1,12 @@
-import { execFile } from 'node:child_process';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { promisify } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { DENSITIES, DIRECTIONS, SCHEMES, WIDTHS } from './build.mjs';
-
-const run = promisify(execFile);
 
 const AXES = {
   scheme: { values: SCHEMES, fallback: 'light' },
@@ -15,37 +15,171 @@ const AXES = {
   dir: { values: DIRECTIONS, fallback: 'ltr' },
 };
 
+/** Room for the cell's own padding and caption around the stage. */
+const CHROME_MARGIN = 80;
+
 /**
  * One capture per combination rather than one of the whole page: a reader —
  * human or model — judges alignment and rhythm from an image that fills its
  * view, not from a thumbnail of forty cells.
  *
- * The file name states every axis, so two captures of the same family cannot
- * be confused and a correction can be compared against the picture it replaces.
+ * The capture is driven through the DevTools protocol rather than through
+ * `--screenshot`, which photographs the window and nothing below it. A family
+ * with seven scenes ran past the window, so the last scenes were absent from
+ * the image the visual loop is required to read, and absent silently.
  */
-export async function shoot({ family, scheme, width, density, dir, outDir }) {
+class Devtools {
+  #socket;
+  #next = 0;
+  #pending = new Map();
+  #listeners = new Map();
+
+  constructor(socket) {
+    this.#socket = socket;
+    socket.addEventListener('message', ({ data }) => {
+      const message = JSON.parse(String(data));
+      if (message.id !== undefined) {
+        this.#pending.get(message.id)?.(message);
+        this.#pending.delete(message.id);
+        return;
+      }
+      this.#listeners.get(message.method)?.forEach((resolve) => resolve(message.params));
+      this.#listeners.delete(message.method);
+    });
+  }
+
+  static async connect(url) {
+    const socket = new WebSocket(url);
+    await new Promise((resolve, reject) => {
+      socket.addEventListener('open', resolve, { once: true });
+      socket.addEventListener('error', () => reject(new Error(`cannot reach ${url}`)), {
+        once: true,
+      });
+    });
+    return new Devtools(socket);
+  }
+
+  send(method, params = {}) {
+    const id = (this.#next += 1);
+    return new Promise((resolve, reject) => {
+      this.#pending.set(id, (message) =>
+        message.error
+          ? reject(new Error(`${method}: ${message.error.message}`))
+          : resolve(message.result),
+      );
+      this.#socket.send(JSON.stringify({ id, method, params }));
+    });
+  }
+
+  once(method) {
+    return new Promise((resolve) => {
+      this.#listeners.set(method, [...(this.#listeners.get(method) ?? []), resolve]);
+    });
+  }
+
+  close() {
+    this.#socket.close();
+  }
+}
+
+async function launch() {
+  const profile = await mkdtemp(join(tmpdir(), 'slotted-harness-'));
+  const chrome = spawn(process.env['CHROME_BIN'] ?? 'google-chrome', [
+    '--headless=new',
+    '--disable-gpu',
+    '--no-sandbox',
+    '--hide-scrollbars',
+    '--remote-debugging-port=0',
+    `--user-data-dir=${profile}`,
+    'about:blank',
+  ]);
+
+  const port = await new Promise((resolve, reject) => {
+    let output = '';
+    const timer = setTimeout(
+      () => reject(new Error(`Chrome never opened a port:\n${output}`)),
+      20000,
+    );
+    chrome.stderr.on('data', (chunk) => {
+      output += chunk;
+      const match = /ws:\/\/127\.0\.0\.1:(\d+)\//.exec(output);
+      if (!match) return;
+      clearTimeout(timer);
+      resolve(Number(match[1]));
+    });
+    chrome.on('exit', (code) => reject(new Error(`Chrome exited with ${code}:\n${output}`)));
+  });
+
+  const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+  const page = targets.find((target) => target.type === 'page');
+  if (!page) throw new Error('Chrome opened no page target');
+
+  return {
+    devtools: await Devtools.connect(page.webSocketDebuggerUrl),
+    async close() {
+      chrome.kill();
+      await once(chrome, 'exit');
+      await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
+    },
+  };
+}
+
+export function captureUrl({ family, scheme, width, density, dir, scene }) {
   const page = fileURLToPath(new URL(`out/${family}.html`, import.meta.url));
   if (!existsSync(page)) {
     throw new Error(`${page} does not exist — run: node tools/harness/build.mjs ${family}`);
   }
 
-  const out = join(outDir, `${family}-${scheme}-${density}-${dir}-${width}.png`);
-  const capture = pathToFileURL(page);
-  capture.searchParams.set('scheme', scheme);
-  capture.searchParams.set('width', width);
-  capture.searchParams.set('density', density);
-  capture.searchParams.set('dir', dir);
+  const url = pathToFileURL(page);
+  url.searchParams.set('scheme', scheme);
+  url.searchParams.set('width', width);
+  url.searchParams.set('density', density);
+  url.searchParams.set('dir', dir);
+  if (scene) url.searchParams.set('scene', scene);
 
-  await run('google-chrome', [
-    '--headless',
-    '--disable-gpu',
-    '--no-sandbox',
-    '--hide-scrollbars',
-    '--force-device-scale-factor=2',
-    `--window-size=${Number(width) + 80},900`,
-    `--screenshot=${out}`,
-    capture.href,
-  ]);
+  return url;
+}
+
+export function captureName({ family, scheme, width, density, dir, scene }) {
+  return `${[family, scene, scheme, density, dir, width].filter(Boolean).join('-')}.png`;
+}
+
+export async function shoot(options) {
+  const { width, outDir } = options;
+  const out = join(outDir, captureName(options));
+  const { devtools, close } = await launch();
+
+  try {
+    await devtools.send('Page.enable');
+    await devtools.send('Emulation.setDeviceMetricsOverride', {
+      width: Number(width) + CHROME_MARGIN,
+      height: 900,
+      deviceScaleFactor: 2,
+      mobile: false,
+    });
+
+    const loaded = devtools.once('Page.loadEventFired');
+    await devtools.send('Page.navigate', { url: captureUrl(options).href });
+    await loaded;
+
+    const { cssContentSize } = await devtools.send('Page.getLayoutMetrics');
+    const { data } = await devtools.send('Page.captureScreenshot', {
+      format: 'png',
+      captureBeyondViewport: true,
+      clip: {
+        x: 0,
+        y: 0,
+        width: Number(width) + CHROME_MARGIN,
+        height: Math.max(cssContentSize.height, 1),
+        scale: 2,
+      },
+    });
+
+    await writeFile(out, Buffer.from(data, 'base64'));
+    devtools.close();
+  } finally {
+    await close();
+  }
 
   return out;
 }
@@ -59,11 +193,11 @@ export function parseArguments(argv) {
   const [family, ...rest] = argv;
   if (!family || family.startsWith('--')) {
     throw new Error(
-      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--out dir]',
+      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--scene name] [--out dir]',
     );
   }
 
-  const options = { family, outDir: process.env.TMPDIR ?? '/tmp' };
+  const options = { family, outDir: process.env['TMPDIR'] ?? '/tmp', scene: undefined };
   for (const [axis, { fallback }] of Object.entries(AXES)) options[axis] = fallback;
 
   for (let index = 0; index < rest.length; index += 2) {
@@ -73,6 +207,10 @@ export function parseArguments(argv) {
 
     if (flag === 'out') {
       options.outDir = value;
+      continue;
+    }
+    if (flag === 'scene') {
+      options.scene = value;
       continue;
     }
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { DENSITIES, DIRECTIONS, SCHEMES, WIDTHS, renderHarness } from './build.mjs';
-import { parseArguments } from './shoot.mjs';
+import { captureName, parseArguments } from './shoot.mjs';
 
 const fragment = `
 <section data-scene="default"><b class="x">one</b></section>
@@ -66,11 +66,13 @@ test('defaults every axis and names each one in the file it writes', () => {
   assert.deepEqual(options, {
     family: 'demo',
     outDir: options.outDir,
+    scene: undefined,
     scheme: 'light',
     width: '420',
     density: 'comfortable',
     dir: 'ltr',
   });
+  assert.equal(captureName(options), 'demo-light-comfortable-ltr-420.png');
 });
 
 test('reads every axis by name', () => {
@@ -92,6 +94,14 @@ test('reads every axis by name', () => {
   assert.equal(options.dir, 'rtl');
   assert.equal(options.width, '240');
   assert.equal(options.outDir, '/somewhere');
+});
+
+test('narrows a capture to one scene and says so in the file name', () => {
+  const options = parseArguments(['demo', '--scene', 'emphasis']);
+  assert.equal(options.scene, 'emphasis');
+  assert.equal(captureName(options), 'demo-emphasis-light-comfortable-ltr-420.png');
+  assert.match(render(), /q\.get\('scene'\)/);
+  assert.match(render(), /id\.startsWith\(scene \+ '-'\)/);
 });
 
 test('refuses an axis value the harness cannot render', () => {

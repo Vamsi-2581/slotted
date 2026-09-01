@@ -20,8 +20,11 @@ node tools/harness/shoot.mjs <family> \
   --width <420|240|720> \
   --density <comfortable|compact|dense> \
   --dir <ltr|rtl> \
+  --scene <name> \
   --out <directory>
 ```
+
+The capture is the whole page, not the window: the shooter drives Chrome through the DevTools protocol and clips to the document's own height. A family with many scenes therefore produces one tall image, so `--scene` narrows it to a single scene when a detail needs to fill the view.
 
 The shooter prints the PNG's absolute path, and the name states every axis. Its default output directory is `$TMPDIR` or `/tmp`. Always read the image; file existence and size do not distinguish the component from a browser error page.
 

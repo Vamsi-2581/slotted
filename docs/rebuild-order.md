@@ -171,6 +171,54 @@ implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
   `--slotted-button-loading-indicator-*` do contrato.
 - `badge` e `tag` compartilham tokens e permanecem famílias distintas.
 
+### Escopo por família — onda 2
+
+- **`button icon-button`** — par, porque IconButton é o mesmo comportamento com
+  nome acessível obrigatório. `type`, `variant`, `tone`, `size`, `fullWidth`,
+  `disabled`, `loading`, ícones start/end, evento de press unificado para
+  ponteiro e teclado. `loading` preserva largura e nome acessível. Área visual e
+  alvo interativo podem divergir; o alvo obedece `--slotted-target-min`. Abre a
+  onda porque fixa altura, padding e densidade de todo controle.
+- **`button-group`** — espaçamento, orientação e overflow de ações
+  relacionadas, sem alterar a semântica de cada botão. Ação destrutiva não
+  encosta em ação frequente sem separação. O overflow para menu depende de
+  `menu` (onda 5) e volta como refino.
+- **`link`** — destino, navegação interna e externa, download, ícone de externo,
+  `disabled` excepcional. Reconhecível sem depender só de cor; nova janela é
+  comunicada. Não emula botão.
+- **`badge`** — contagem, status ou metadado curto não editável. Variantes
+  solid, soft e outline, `tone`, `size`, `dot`, `maxCount`. Contagem que muda
+  declara política de anúncio. Não é botão.
+- **`tag`** — entidade, filtro ou valor compacto; estático, selecionável,
+  removível ou navegável, nunca dois comportamentos implícitos ao mesmo tempo.
+  Eventos de press e de remove separados; remover devolve o foco ao item lógico
+  seguinte.
+- **`avatar avatar-group`** — par. Ordem de fallback imagem → iniciais → ícone,
+  sem ícone quebrado quando a imagem falha; `tone` determinístico a partir do
+  nome. O grupo controla sobreposição, limite e resumo "+N" sem tornar os
+  membros anônimos.
+- **`kbd`** — combinação localizada por plataforma, com nome acessível. Não
+  registra atalho nenhum. Lê `--slotted-font-family-mono`.
+- **`skeleton`** — geometria aproximada do conteúdo, com recipes de texto,
+  avatar, bloco e composição. Fora da árvore de acessibilidade; a região anuncia
+  o carregamento uma vez. Sob reduced motion a animação para, não encurta.
+- **`progress-indicator`** — consolidação. Uma família com recipes linear,
+  circular e spinner, absorvendo `spinner`, `progress-bar` e `loading-bar`.
+  Determinado (`value`, min, max) ou indeterminado, `label`, `valueText`,
+  `size`, e atraso antes de aparecer. Remove três entradas de
+  `specs/components/` e os tokens `--slotted-button-loading-indicator-*`, que o
+  anel do Button passa a ler daqui.
+- **`status-indicator`** — ponto, ícone ou rótulo curto de estado operacional,
+  sempre com texto acessível e alternativa não cromática. Pulso só para mudança
+  viva, respeitando reduced motion.
+- **`alert`** — uma família com recipes por alcance: alerta contextual, callout
+  editorial e banner de página. `tone`, título, descrição, ícone, ações,
+  `dismissible`. Os cinco tons comunicam por texto e ícone além de cor. Alerta
+  presente na montagem não é live region; atualização assíncrona pode ser.
+- **`inline-message`** — mensagem ligada a um campo, seção ou ação, com ID
+  estável e política de anúncio. Sem layout shift severo, e nunca tooltip para
+  erro obrigatório. É a peça que `field` (onda 3) consome para mensagem e erro.
+
 ## Onda 3 — Formulário
 
 Sequencial. Cada item reusa a decisão de anatomia do anterior.

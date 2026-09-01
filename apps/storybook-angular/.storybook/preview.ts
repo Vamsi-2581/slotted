@@ -13,7 +13,7 @@ import {
 import '@slotted/storybook-workbench/styles.css';
 
 import { SlottedDocsContainer } from './docs-container';
-import { applyRootScheme, getPreviewStyle, normalizeScheme } from './theme';
+import { applyRootDirection, applyRootScheme, getPreviewStyle, normalizeScheme } from './theme';
 
 const preview: Preview = {
   initialGlobals: INITIAL_GLOBALS,
@@ -21,18 +21,20 @@ const preview: Preview = {
   decorators: [
     componentWrapperDecorator(
       (story) =>
-        `<div class="slotted-workbench-preview" [class.slotted-workbench-preview--embedded]="slottedEmbedded" [attr.data-slotted-theme]="slottedTheme" [attr.data-slotted-scheme]="slottedScheme" [attr.data-slotted-density]="slottedDensity" [style.background]="slottedBackground" [style.color]="slottedColor" [style.color-scheme]="slottedColorScheme">${story}</div>`,
+        `<div class="slotted-workbench-preview" [class.slotted-workbench-preview--embedded]="slottedEmbedded" [attr.data-slotted-theme]="slottedTheme" [attr.data-slotted-scheme]="slottedScheme" [attr.data-slotted-density]="slottedDensity" [attr.dir]="slottedDirection" [style.background]="slottedBackground" [style.color]="slottedColor" [style.color-scheme]="slottedColorScheme">${story}</div>`,
       (context) => {
         const values = resolveWorkbenchGlobals(context?.globals);
         const scheme = normalizeScheme(values.scheme);
         const previewStyle = getPreviewStyle(scheme);
         applyRootScheme(document.documentElement, scheme);
+        applyRootDirection(document.documentElement, values.direction);
 
         return {
           slottedBackground: previewStyle.background,
           slottedColor: previewStyle.color,
           slottedColorScheme: previewStyle.colorScheme,
           slottedDensity: values.density,
+          slottedDirection: values.direction,
           slottedEmbedded: context?.viewMode === 'docs',
           slottedScheme: scheme,
           slottedTheme: values.theme,

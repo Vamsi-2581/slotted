@@ -13,7 +13,7 @@ import {
 } from '@slotted/storybook-workbench';
 
 import { SlottedDocsContainer } from './docs-container';
-import { applyRootScheme, getPreviewStyle, normalizeScheme } from './theme';
+import { applyRootDirection, applyRootScheme, getPreviewStyle, normalizeScheme } from './theme';
 
 const preview: Preview = {
   initialGlobals: INITIAL_GLOBALS,
@@ -23,6 +23,7 @@ const preview: Preview = {
       const values = resolveWorkbenchGlobals(context?.globals);
       const scheme = normalizeScheme(values.scheme);
       applyRootScheme(document.documentElement, scheme);
+      applyRootDirection(document.documentElement, values.direction);
       const className = [
         'slotted-workbench-preview',
         context?.viewMode === 'docs' ? 'slotted-workbench-preview--embedded' : undefined,
@@ -36,6 +37,7 @@ const preview: Preview = {
           data-slotted-theme={values.theme}
           data-slotted-scheme={scheme}
           data-slotted-density={values.density}
+          dir={values.direction}
           style={{
             ...getPreviewStyle(scheme),
             boxSizing: 'border-box',

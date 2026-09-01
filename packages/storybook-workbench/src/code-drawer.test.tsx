@@ -122,4 +122,18 @@ describe('CodeDrawer', () => {
 
     expect(document.querySelector('[aria-live="polite"]')).toHaveTextContent('Copied');
   });
+
+  it('names every language it can hold, including the one that is neither binding', () => {
+    for (const [language, label] of [
+      ['angular', 'Angular'],
+      ['css', 'CSS'],
+      ['tsx', 'React'],
+    ] as const) {
+      const { unmount } = render(
+        <CodeDrawer snippet={{ ...snippet, id: language, label: language, language }} />,
+      );
+      expect(screen.getByText(label)).toBeInTheDocument();
+      unmount();
+    }
+  });
 });

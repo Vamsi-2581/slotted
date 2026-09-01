@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
-import type { WorkbenchSnippet } from './snippets';
+import type { SnippetLanguage, WorkbenchSnippet } from './snippets';
+
+const LANGUAGE_LABELS: Record<SnippetLanguage, string> = {
+  angular: 'Angular',
+  css: 'CSS',
+  tsx: 'React',
+};
 
 export function CodeDrawer({ snippet }: { snippet: WorkbenchSnippet }) {
   const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
@@ -62,7 +68,7 @@ export function CodeDrawer({ snippet }: { snippet: WorkbenchSnippet }) {
     <details className="slotted-code-drawer">
       <summary>{snippet.label}</summary>
       <div className="slotted-code-drawer__toolbar">
-        <span>{snippet.language === 'angular' ? 'Angular' : 'React'}</span>
+        <span>{LANGUAGE_LABELS[snippet.language]}</span>
         <button aria-label={`Copy ${snippet.label}`} onClick={copy} type="button">
           {status === 'copied' ? 'Copied' : 'Copy code'}
         </button>

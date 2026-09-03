@@ -156,6 +156,10 @@ export function createScrollAffordance(
     refresh,
     state: () => current,
     page: (direction) => {
+      /* A document with no layout engine — a test environment — implements
+         neither of the two scrolling methods, and a family that assumed them
+         would crash in every consumer's unit test. */
+      if (typeof container.scrollBy !== 'function') return;
       const vertical = orientation() === 'vertical';
       const distance =
         (vertical ? container.clientHeight : container.clientWidth) * PAGE_FRACTION * direction;
@@ -173,6 +177,7 @@ export function createScrollAffordance(
       });
     },
     reveal: (item) => {
+      if (typeof item.scrollIntoView !== 'function') return;
       item.scrollIntoView({
         behavior: behaviorFor(container),
         block: 'nearest',

@@ -125,6 +125,25 @@ describe('createRovingTabindex', () => {
     handle.destroy();
   });
 
+  /**
+   * A control inside a disabled `fieldset` carries no attribute of its own and
+   * still cannot be focused. It is how a whole bar is taken out of action with
+   * one word.
+   */
+  it('skips a control an ancestor disabled', () => {
+    document.body.innerHTML =
+      '<fieldset disabled><div id="group"><button>1</button><button>2</button></div></fieldset>';
+    const container = document.getElementById('group') as HTMLElement;
+    const items = [...container.querySelectorAll('button')];
+    const onMove = vi.fn();
+    const handle = createRovingTabindex(container, { itemSelector: 'button', onMove });
+
+    press(items[0]!, 'ArrowRight');
+
+    expect(onMove).not.toHaveBeenCalled();
+    handle.destroy();
+  });
+
   it('never places the tab stop on a disabled item', () => {
     const { container, items } = mount('<button disabled>1</button><button>2</button>');
     const handle = createRovingTabindex(container, { itemSelector: 'button' });
@@ -218,6 +237,23 @@ describe('createRovingTabindex', () => {
     const handle = createRovingTabindex(container, { itemSelector: 'button' });
 
     expect(() => handle.setActive(0)).not.toThrow();
+    handle.destroy();
+  });
+
+  /**
+   * A control the reader clicked, or a script focused, holds focus while the
+   * tab stop still sits on the item it was written on. Moving relative to the
+   * stop rather than to the origin made the first arrow after a click do
+   * nothing at all.
+   */
+  it('moves from where focus is, not from where the tab stop was written', () => {
+    const { container, items } = mount(three);
+    const handle = createRovingTabindex(container, { itemSelector: 'button' });
+
+    items[2]!.focus();
+    press(items[2]!, 'ArrowLeft');
+
+    expect(document.activeElement).toBe(items[1]);
     handle.destroy();
   });
 

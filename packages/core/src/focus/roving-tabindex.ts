@@ -63,8 +63,16 @@ const VERTICAL_KEYS = { next: 'ArrowDown', previous: 'ArrowUp' } as const;
 /** One frozen array, so the default `ownedKeys` allocates nothing per key. */
 const EMPTY: readonly string[] = Object.freeze([]);
 
+/**
+ * `:disabled` rather than the attribute alone, because a control inside a
+ * disabled `fieldset` carries no attribute of its own and still cannot be
+ * focused. That is how a whole bar or a whole set of controls is taken out of
+ * action with one word, and a ring that wrote its tab stop on one of them would
+ * hand the reader a stop the platform refuses to honour.
+ */
 function isDisabled(item: HTMLElement, includeAriaDisabled: boolean) {
   if (item.hasAttribute('disabled')) return true;
+  if (typeof item.matches === 'function' && item.matches(':disabled')) return true;
   return !includeAriaDisabled && item.getAttribute('aria-disabled') === 'true';
 }
 
@@ -142,8 +150,17 @@ export function createRovingTabindex(
     return -1;
   }
 
-  function moveTo(index: number) {
-    if (index === -1 || index === activeIndex) return;
+  /**
+   * `from` is where the key was pressed, which is not always where the tab stop
+   * is: a control the reader clicked, or a script focused, holds focus while
+   * `activeIndex` still points at the item the stop was written on. Comparing
+   * the destination with the tab stop rather than with the origin is what made
+   * the first arrow after a click do nothing at all — measured in a toolbar
+   * whose text field owns the inline arrows, where the one key that could take
+   * focus out of the field was the one key that was ignored.
+   */
+  function moveTo(index: number, from: number) {
+    if (index === -1 || index === from) return;
     activeIndex = index;
     applyTabindex();
     const item = items[index]!;
@@ -178,11 +195,11 @@ export function createRovingTabindex(
     if (item !== undefined && ownedKeys(item).includes(event.key)) return;
 
     if (event.key === keys.next || (crossAxis && event.key === cross.next)) {
-      moveTo(step(origin, 1));
+      moveTo(step(origin, 1), origin);
     } else if (event.key === keys.previous || (crossAxis && event.key === cross.previous)) {
-      moveTo(step(origin, -1));
-    } else if (event.key === 'Home') moveTo(edge(1));
-    else if (event.key === 'End') moveTo(edge(-1));
+      moveTo(step(origin, -1), origin);
+    } else if (event.key === 'Home') moveTo(edge(1), origin);
+    else if (event.key === 'End') moveTo(edge(-1), origin);
     else return;
 
     event.preventDefault();

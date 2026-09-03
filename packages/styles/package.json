@@ -7,6 +7,8 @@
     "**/*.css"
   ],
   "exports": {
+    "./accordion/accordion.css": "./src/accordion/accordion.css",
+    "./accordion/tokens.json": "./src/accordion/accordion.tokens.json",
     "./alert/alert.css": "./src/alert/alert.css",
     "./alert/tokens.json": "./src/alert/alert.tokens.json",
     "./avatar-group/avatar-group.css": "./src/avatar-group/avatar-group.css",
@@ -27,6 +29,8 @@
     "./checkbox-group/tokens.json": "./src/checkbox-group/checkbox-group.tokens.json",
     "./checkbox/checkbox.css": "./src/checkbox/checkbox.css",
     "./checkbox/tokens.json": "./src/checkbox/checkbox.tokens.json",
+    "./collapsible/collapsible.css": "./src/collapsible/collapsible.css",
+    "./collapsible/tokens.json": "./src/collapsible/collapsible.tokens.json",
     "./container/container.css": "./src/container/container.css",
     "./container/tokens.json": "./src/container/container.tokens.json",
     "./currency-field/currency-field.css": "./src/currency-field/currency-field.css",
@@ -87,8 +91,8 @@
     "./visually-hidden/visually-hidden.css": "./src/visually-hidden/visually-hidden.css"
   },
   "scripts": {
-    "test": "node --test src/fallbacks.test.mjs src/identity.test.mjs src/logical.test.mjs src/motion.test.mjs src/states.test.mjs src/tokens.test.mjs src/alert/alert.styles.test.mjs src/avatar/avatar.styles.test.mjs src/avatar-group/avatar-group.styles.test.mjs src/badge/badge.styles.test.mjs src/button/button.styles.test.mjs src/button-group/button-group.styles.test.mjs src/card/card.styles.test.mjs src/checkbox/checkbox.styles.test.mjs src/checkbox-group/checkbox-group.styles.test.mjs src/container/container.styles.test.mjs src/currency-field/currency-field.styles.test.mjs src/divider/divider.styles.test.mjs src/field/field.styles.test.mjs src/field-group/field-group.styles.test.mjs src/grid/grid.styles.test.mjs src/icon/icon.styles.test.mjs src/inline/inline.styles.test.mjs src/inline-message/inline-message.styles.test.mjs src/kbd/kbd.styles.test.mjs src/link/link.styles.test.mjs src/number-field/number-field.styles.test.mjs src/radio-group/radio-group.styles.test.mjs src/skeleton/skeleton.styles.test.mjs src/stack/stack.styles.test.mjs src/status-indicator/status-indicator.styles.test.mjs src/switch/switch.styles.test.mjs src/tag/tag.styles.test.mjs src/text-field/text-field.styles.test.mjs src/textarea/textarea.styles.test.mjs src/typography/typography.styles.test.mjs src/visually-hidden/visually-hidden.styles.test.mjs src/tabs/tabs.styles.test.mjs src/toolbar/toolbar.styles.test.mjs",
-    "typecheck": "node --check src/fallbacks.test.mjs && node --check src/identity.test.mjs && node --check src/logical.test.mjs && node --check src/motion.test.mjs && node --check src/states.test.mjs && node --check src/tokens.test.mjs && node --check src/alert/alert.styles.test.mjs && node --check src/avatar/avatar.styles.test.mjs && node --check src/avatar-group/avatar-group.styles.test.mjs && node --check src/badge/badge.styles.test.mjs && node --check src/button/button.styles.test.mjs && node --check src/button-group/button-group.styles.test.mjs && node --check src/card/card.styles.test.mjs && node --check src/checkbox/checkbox.styles.test.mjs && node --check src/checkbox-group/checkbox-group.styles.test.mjs && node --check src/container/container.styles.test.mjs && node --check src/currency-field/currency-field.styles.test.mjs && node --check src/divider/divider.styles.test.mjs && node --check src/field/field.styles.test.mjs && node --check src/field-group/field-group.styles.test.mjs && node --check src/grid/grid.styles.test.mjs && node --check src/icon/icon.styles.test.mjs && node --check src/inline/inline.styles.test.mjs && node --check src/inline-message/inline-message.styles.test.mjs && node --check src/kbd/kbd.styles.test.mjs && node --check src/link/link.styles.test.mjs && node --check src/number-field/number-field.styles.test.mjs && node --check src/radio-group/radio-group.styles.test.mjs && node --check src/skeleton/skeleton.styles.test.mjs && node --check src/stack/stack.styles.test.mjs && node --check src/status-indicator/status-indicator.styles.test.mjs && node --check src/switch/switch.styles.test.mjs && node --check src/tag/tag.styles.test.mjs && node --check src/text-field/text-field.styles.test.mjs && node --check src/textarea/textarea.styles.test.mjs && node --check src/typography/typography.styles.test.mjs && node --check src/visually-hidden/visually-hidden.styles.test.mjs && node --check src/tabs/tabs.styles.test.mjs && node --check src/toolbar/toolbar.styles.test.mjs",
+    "test": "node --test \"src/**/*.test.mjs\"",
+    "typecheck": "find src -name '*.test.mjs' -print0 | xargs -0 -n1 node --check",
     "verify": "pnpm test && pnpm typecheck"
   },
   "devDependencies": {

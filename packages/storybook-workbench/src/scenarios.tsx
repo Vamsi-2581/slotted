@@ -2,21 +2,27 @@ export function scenario(id: string) {
   return { slotted: { scenarioId: id } } as const;
 }
 
+/** The scenario a story declares through `scenario()`, or nothing. */
+function scenarioIdOf(value: unknown) {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const parameters = Reflect.get(value, 'parameters');
+  const slotted =
+    typeof parameters === 'object' && parameters !== null
+      ? Reflect.get(parameters, 'slotted')
+      : undefined;
+  const id =
+    typeof slotted === 'object' && slotted !== null
+      ? Reflect.get(slotted, 'scenarioId')
+      : undefined;
+  return typeof id === 'string' ? id : undefined;
+}
+
 export function storyScenarioIds(storyModule: Record<string, unknown>) {
   return Object.entries(storyModule)
     .filter(([name]) => name !== 'default')
     .flatMap(([, value]) => {
-      if (typeof value !== 'object' || value === null) return [];
-      const parameters = Reflect.get(value, 'parameters');
-      const slotted =
-        typeof parameters === 'object' && parameters !== null
-          ? Reflect.get(parameters, 'slotted')
-          : undefined;
-      const id =
-        typeof slotted === 'object' && slotted !== null
-          ? Reflect.get(slotted, 'scenarioId')
-          : undefined;
-      return typeof id === 'string' ? [id] : [];
+      const id = scenarioIdOf(value);
+      return id === undefined ? [] : [id];
     });
 }
 
@@ -105,7 +111,16 @@ const capabilityApi = {
    * families still document their own.
    */
   selection: [],
-  removable: ['removeLabel'],
+  /**
+   * Nothing, for the reason `selection` and `placement` ask for nothing: the
+   * table cannot see what a family calls the control that takes an item away.
+   * A chip is removed and names its label `removeLabel`; a tab is dismissed —
+   * the APG's own word for closing one — and names it `dismissLabel`. Naming
+   * one of the two here made the table the authority on a prop it cannot know,
+   * and the family with the other word had to document a prop it does not have.
+   * Every declared default is still required row by row below.
+   */
+  removable: [],
   virtualization: ['itemCount', 'itemSize', 'overscan'],
   files: ['accept', 'files', 'maxSize', 'multiple'],
   checked: ['checked'],
@@ -181,13 +196,29 @@ export function apiMetadataErrors(
  * demonstrations without importing Storybook, and the story objects live in
  * the stories module; this is the one place the two meet, and it refuses a
  * scene with no story rather than rendering a page with a hole in it.
+ *
+ * `stories` is either the stories module itself or a table keyed by scene id.
+ * A key wins where one exists, and a story that declares the scene through
+ * `scenario()` answers where none does — so a table that has fallen a scene
+ * behind still binds, and a page is not blown up by a name nobody kept in step.
+ * That is not a convenience: the table was hand-written, `scenarioCoverageErrors`
+ * already proved the story existed, and the only thing left to get wrong was
+ * the copy. A whole reference page failed to render over one missing line, and
+ * every test passed.
  */
 export function bindScenes<Story>(
   scenes: readonly { id: string; title: string; note: string; snippet: unknown }[],
   stories: Record<string, Story>,
 ) {
+  const declared = new Map<string, Story>();
+  for (const [name, story] of Object.entries(stories)) {
+    if (name === 'default') continue;
+    const id = scenarioIdOf(story);
+    if (id !== undefined && !declared.has(id)) declared.set(id, story);
+  }
+
   return scenes.map((scene) => {
-    const story = stories[scene.id];
+    const story = stories[scene.id] ?? declared.get(scene.id);
     if (story === undefined) throw new Error(`Scene "${scene.id}" is bound to no story`);
     return { ...scene, of: story };
   });

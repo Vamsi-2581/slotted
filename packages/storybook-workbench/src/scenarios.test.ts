@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { apiMetadataErrors, scenario, scenarioCoverageErrors, storyScenarioIds } from './scenarios';
+import {
+  apiMetadataErrors,
+  bindScenes,
+  scenario,
+  scenarioCoverageErrors,
+  storyScenarioIds,
+} from './scenarios';
 
 describe('workbench scenario metadata', () => {
   it('collects story scenario IDs and reports missing or unknown IDs', () => {
@@ -89,6 +95,19 @@ describe('workbench scenario metadata', () => {
   });
 
   /**
+   * A chip is removed and names its label `removeLabel`; a tab is dismissed —
+   * the APG's own word — and names it `dismissLabel`. The table cannot know
+   * which, so it asks for neither and holds the declared default instead.
+   */
+  it('asks a family whose items go away for no name it cannot know', () => {
+    expect(
+      apiMetadataErrors({ capabilities: ['removable'], defaults: { dismissible: false } }, [
+        { name: 'dismissible', defaultValue: 'false' },
+      ]),
+    ).toEqual([]);
+  });
+
+  /**
    * A control that holds text has one value and one initial value, and the
    * words for them are fixed by `docs/state-and-events.md` rather than chosen
    * by the family — so unlike `selection`, this is a name the table can know.
@@ -164,5 +183,35 @@ describe('a state model the contract declares', () => {
     expect(apiMetadataErrors({ capabilities: ['current'], defaults: {} }, [])).toEqual([
       'missing API current',
     ]);
+  });
+});
+
+/**
+ * The table binding a docs scene to its story was hand-written, and a scene
+ * added without a line in it took a whole reference page down with
+ * `Scene "formatOn" is bound to no story` — after every test passed, because
+ * nothing but rendering the page ever called the binder.
+ */
+describe('bindScenes', () => {
+  const scene = (id: string) => ({ id, title: id, note: id, snippet: null });
+
+  it('binds a scene through the table it was given', () => {
+    const Sizes = { parameters: scenario('sizes') };
+    expect(bindScenes([scene('sizes')], { sizes: Sizes })[0]?.of).toBe(Sizes);
+  });
+
+  it('binds a scene the table forgot, through the scenario the story declares', () => {
+    const FormatOn = { parameters: scenario('formatOn') };
+    expect(bindScenes([scene('formatOn')], { FormatOn })[0]?.of).toBe(FormatOn);
+  });
+
+  it('lets the table win where it answers, so a deliberate pairing stands', () => {
+    const Chosen = { parameters: scenario('sizes') };
+    const Declared = { parameters: scenario('sizes') };
+    expect(bindScenes([scene('sizes')], { sizes: Chosen, Declared })[0]?.of).toBe(Chosen);
+  });
+
+  it('still refuses a scene nothing renders', () => {
+    expect(() => bindScenes([scene('missing')], {})).toThrow(/bound to no story/);
   });
 });

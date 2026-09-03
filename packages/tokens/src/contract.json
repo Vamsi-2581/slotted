@@ -423,6 +423,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-copy",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-eye",
       "layer": "primitive",
       "axis": "base",

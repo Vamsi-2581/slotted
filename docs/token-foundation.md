@@ -183,16 +183,17 @@ This scale answers which intrinsic mask geometry a component-owned icon uses.
 Each value is the exact authored data URI; the black paint becomes the mask's
 alpha when it is used with `mask-image`.
 
-| Token                           | Default value                                                                                                                                                                                                                                                |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--slotted-icon-check`          | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")`                             |
-| `--slotted-icon-minus`          | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E")`                                                            |
-| `--slotted-icon-plus`           | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E")`                                    |
-| `--slotted-icon-dot`            | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Ccircle cx='12' cy='12' r='6'/%3E%3C/svg%3E")`                                                                                                       |
-| `--slotted-icon-x`              | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E")`                                                |
-| `--slotted-icon-chevron-right`  | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E")`                               |
-| `--slotted-icon-chevron-down`   | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`                                |
-| `--slotted-icon-chevrons-right` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 18 6-6-6-6'/%3E%3Cpath d='m13 18 6-6-6-6'/%3E%3C/svg%3E")` |
+| Token                           | Default value                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--slotted-icon-check`          | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")`                                                                                              |
+| `--slotted-icon-minus`          | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E")`                                                                                                                             |
+| `--slotted-icon-plus`           | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E")`                                                                                                     |
+| `--slotted-icon-dot`            | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Ccircle cx='12' cy='12' r='6'/%3E%3C/svg%3E")`                                                                                                                                                                        |
+| `--slotted-icon-x`              | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E")`                                                                                                                 |
+| `--slotted-icon-copy`           | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E")` |
+| `--slotted-icon-chevron-right`  | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E")`                                                                                                |
+| `--slotted-icon-chevron-down`   | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`                                                                                                 |
+| `--slotted-icon-chevrons-right` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 18 6-6-6-6'/%3E%3Cpath d='m13 18 6-6-6-6'/%3E%3C/svg%3E")`                                                                  |
 
 | `--slotted-icon-eye` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.6 12C4.6 8.2 8 6.2 12 6.2s7.4 2 9.4 5.8c-2 3.8-5.4 5.8-9.4 5.8S4.6 15.8 2.6 12Z'/%3E%3Ccircle cx='12' cy='12' r='2.8'/%3E%3C/svg%3E")` |
 | `--slotted-icon-eye-off` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.6 12C4.6 8.2 8 6.2 12 6.2s7.4 2 9.4 5.8c-2 3.8-5.4 5.8-9.4 5.8S4.6 15.8 2.6 12Z'/%3E%3Ccircle cx='12' cy='12' r='2.8'/%3E%3Cpath d='M4.4 19.6 19.6 4.4'/%3E%3C/svg%3E")` |
@@ -224,6 +225,12 @@ the library that means "all the way to the end" rather than "one step"; like
 every chevron it is mirrored by the family that draws it, so the same token
 serves both ends of the row.
 
+`--slotted-icon-copy` is two sheets, one behind the other, rather than a pair of
+brackets or a page: the mark has to be read at sixteen pixels beside a value, and
+the overlap is what says _duplicate_ at that size. It was added for
+`description-list`, whose long values are reachable by copying rather than by
+truncation, and `code-block` in wave 7 needs the same mark.
+
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph
 rather than annotating text. It is the last step of Avatar's fallback order,
@@ -231,9 +238,10 @@ reached when there is no picture and no name to take initials from.
 
 The six glyphs from `--slotted-icon-circle` onward are the status set, and they
 are the only ones that carry their own container. The bare marks above them —
-`check`, `minus`, `plus`, `x`, `eye`, `eye-off` — are drawn inside a box some
-control already provides: a checkbox, a tag's remove button, a text field's
-reveal button, a number field's stepper. `minus` and `plus` are one pair drawn
+`check`, `minus`, `plus`, `x`, `copy`, `eye`, `eye-off` — are drawn inside a box
+some control already provides: a checkbox, a tag's remove button, a description
+list's copy button, a text field's reveal button, a number field's stepper.
+`minus` and `plus` are one pair drawn
 on one grid — the same bar, with a second crossing it — so a split stepper's two
 halves read as one control and not as two marks of different weights. `plus` was
 added for `number-field`; the scale had held the half of the pair that a

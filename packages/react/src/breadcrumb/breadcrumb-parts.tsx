@@ -44,10 +44,18 @@ export function collapsedRange(count: number, before: number, after: number) {
 export function BreadcrumbList({ children, ref, render, ...nativeProps }: BreadcrumbListProps) {
   const trail = useBreadcrumb();
   const items = Children.toArray(children).filter((child) => isValidElement(child));
-  const collapsed =
-    trail.expanded || trail.maxItems <= 0 || items.length <= trail.maxItems
+  /**
+   * The range is computed whether or not the trail is expanded, because two
+   * different things read it. The collapse reads it only while folded; the
+   * focus target reads it afterwards, and it has to still be there — the id
+   * used to disappear with the ellipsis, which left focus on a removed button
+   * and therefore on the body.
+   */
+  const range =
+    trail.maxItems <= 0 || items.length <= trail.maxItems
       ? undefined
       : collapsedRange(items.length, trail.itemsBeforeCollapse, trail.itemsAfterCollapse);
+  const collapsed = trail.expanded ? undefined : range;
 
   const laidOut: ReactNode[] = [];
   for (const [index, child] of items.entries()) {
@@ -67,7 +75,7 @@ export function BreadcrumbList({ children, ref, render, ...nativeProps }: Breadc
         value={{
           hidden,
           last: index === items.length - 1,
-          revealedId: index === (collapsed?.start ?? -1) ? trail.firstRevealedId : undefined,
+          revealedId: index === (range?.start ?? -1) ? trail.firstRevealedId : undefined,
         }}
       >
         {child}

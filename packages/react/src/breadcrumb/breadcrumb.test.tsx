@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { useState } from 'react';
+import { useState, type Ref } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/breadcrumb/contract.json';
@@ -134,7 +134,7 @@ describe('Breadcrumb', () => {
 
       expect(ellipsis()).toBeNull();
       expect(crumbs().some((crumb) => crumb.hasAttribute('hidden'))).toBe(false);
-      expect(document.activeElement).toHaveTextContent('Northwind');
+      expect(document.activeElement).toBe(screen.getByText('Northwind'));
     });
 
     it('carries the reason a press and a key differ by', () => {
@@ -190,7 +190,12 @@ describe('Breadcrumb', () => {
   describe('composition', () => {
     it('substitutes the rendered element of every part', () => {
       render(
-        <Breadcrumb maxItems={0} render={(props) => <div {...props} role="navigation" />}>
+        <Breadcrumb
+          maxItems={0}
+          render={({ ref, ...props }) => (
+            <div {...props} ref={ref as Ref<HTMLDivElement>} role="navigation" />
+          )}
+        >
           <BreadcrumbList render={(props) => <ul {...props} />}>
             <BreadcrumbItem>
               <BreadcrumbLink render={(props) => <a {...props} data-router="" />} href="#a">

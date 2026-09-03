@@ -17,6 +17,13 @@ export type TabsSize = 'sm' | 'md' | 'lg';
  */
 export type TabsVariant = 'line' | 'contained';
 
+/**
+ * Whether the list draws the line its tabs stand on. `none` is for a list that
+ * sits on a line the page already drew — a card header's edge, a table's own
+ * rule — where two hairlines a pixel apart read as one smudge.
+ */
+export type TabsTrack = 'line' | 'none';
+
 /** Whether each tab is as wide as its label or takes an equal share of the line. */
 export type TabsFit = 'auto' | 'equal';
 
@@ -59,6 +66,7 @@ export interface TabsDismissRequest {
 export interface TabsDefaults {
   activation: TabsActivation;
   fit: TabsFit;
+  track: TabsTrack;
   loop: boolean;
   mount: TabsMount;
   orientation: TabsOrientation;
@@ -104,6 +112,7 @@ export interface TabsRootProps extends HTMLAttributes<HTMLElement> {
   'data-overflowing'?: '' | undefined;
   'data-part': string;
   'data-size': TabsSize;
+  'data-track': TabsTrack;
   'data-ui': string;
   'data-variant': TabsVariant;
 }
@@ -157,6 +166,11 @@ export interface TabsProps extends Omit<ComponentPropsWithRef<'div'>, 'defaultVa
   render?: ((props: TabsRootProps) => ReactNode) | undefined;
   /** Defaults to the provider, then to `md`. */
   size?: TabsSize | undefined;
+  /**
+   * Defaults to the provider, then to `line`. `none` draws no line at all, for a
+   * list standing on one the page already drew.
+   */
+  track?: TabsTrack | undefined;
   /** Present means controlled, for the life of the component. */
   value?: string | undefined;
   /** Defaults to the provider, then to `line`. */

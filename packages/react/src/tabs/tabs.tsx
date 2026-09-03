@@ -100,6 +100,7 @@ export function Tabs({
   render,
   size,
   style,
+  track,
   value,
   variant,
   ...nativeProps
@@ -120,6 +121,7 @@ export function Tabs({
   const resolvedMount = mount ?? defaults.mount;
   const resolvedOrientation = orientation ?? defaults.orientation;
   const resolvedSize = size ?? defaults.size;
+  const resolvedTrack = track ?? defaults.track;
   const resolvedVariant = variant ?? defaults.variant;
   const resolvedDisabled = disabled === true;
 
@@ -336,6 +338,7 @@ export function Tabs({
     ...(overflow.overflowing ? { 'data-overflowing': '' } : {}),
     'data-part': 'root',
     'data-size': resolvedSize,
+    'data-track': resolvedTrack,
     'data-ui': 'tabs',
     'data-variant': resolvedVariant,
     style,

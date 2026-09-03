@@ -147,12 +147,13 @@ test('scrolls a list that does not fit, and keeps its paging controls out of the
   assert.equal(contract.overflow.engine, '@slotted/core/overflow');
 });
 
-test('resolves its six axes in one stated order', () => {
+test('resolves its seven axes in one stated order', () => {
   assert.deepEqual(Object.keys(contract.axes), [
     'activation',
     'orientation',
     'size',
     'variant',
+    'track',
     'fit',
     'mount',
   ]);
@@ -165,12 +166,25 @@ test('resolves its six axes in one stated order', () => {
   }
 });
 
+/**
+ * The line under a tab list is one the page may have drawn already, and the
+ * family cannot see it. Cloudscape ships a whole `container` variant for the
+ * same case; this is one axis with two values.
+ */
+test('can stand on a line the page already drew', () => {
+  assert.deepEqual(contract.axes.track, ['line', 'none']);
+  assert.equal(member.defaults.track, 'line');
+  assert.equal(contract.trackless.value, 'none');
+  assert.match(contract.trackless.reason, /smudge/);
+});
+
 test('hands every tab what the family decides once', () => {
   assert.deepEqual(contract.provides.tabsDefaults, [
     'activation',
     'orientation',
     'size',
     'variant',
+    'track',
     'fit',
     'mount',
     'loop',

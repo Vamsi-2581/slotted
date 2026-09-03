@@ -14,6 +14,7 @@ export type {
   TabsMount,
   TabsOrientation,
   TabsSize,
+  TabsTrack,
   TabsVariant,
 } from './tabs-defaults';
 export { SlTab, SlTabActions, SlTabList, SlTabPanel } from './tabs-parts';

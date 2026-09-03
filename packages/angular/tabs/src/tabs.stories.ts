@@ -167,7 +167,7 @@ export const Variant: Story = {
   parameters: scenario('variant'),
   render: () => ({
     template: grid(
-      2,
+      3,
       scene(
         'Line',
         'A row of labels over a hairline. The marker covers the track exactly, so the two lines read as one that thickens where the selection is.',
@@ -177,6 +177,11 @@ export const Variant: Story = {
           'Contained',
           'A sunken track that hugs its tabs, with a surface under the selected one. The marker stays, which is what the high-contrast scheme is left with.',
           `<div slTabs defaultValue="resumo" variant="contained">${ORDER}</div>`,
+        ) +
+        scene(
+          'track="none", for a line that is already there',
+          "The labels and the marker stay and the hairline goes, so a list sitting on a card header's edge or a table's own rule draws one line instead of two a pixel apart.",
+          `<div slTabs defaultValue="resumo" track="none">${ORDER}</div>`,
         ),
     ),
   }),

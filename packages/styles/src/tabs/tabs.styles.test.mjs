@@ -177,13 +177,73 @@ test('holds hover and press back for a disabled control and for the selected tab
  * twenty-four WCAG 2.2 SC 2.5.8 asks for. The box around it is the target.
  */
 test('gives the two glyph controls the target their glyphs are too small to be', () => {
-  for (const name of ['dismiss', 'scroll']) {
-    assert.match(
-      rule(part(name)),
-      /inline-size:max\(var\(--slotted-target-min,24px\),var\(--_height\)\)/,
-      `${name} is smaller than the minimum target`,
-    );
-  }
+  /* The paging control is as tall as the row it pages; the closing control is
+     the mark with a step of air around it, never below the minimum target. */
+  assert.match(
+    rule(part('scroll')),
+    /inline-size:max\(var\(--slotted-target-min,24px\),var\(--_height\)\)/,
+  );
+  assert.match(
+    rule(ui),
+    /--_dismiss-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,
+  );
+  const dismiss = rule(part('dismiss'));
+  assert.match(dismiss, /inline-size:var\(--_dismiss-size\)/);
+  assert.match(dismiss, /block-size:var\(--_dismiss-size\)/);
+});
+
+/**
+ * The box overhangs the mark on every side, so a box set flush against the
+ * label leaves a hole where the overhang is. Both margins take the overhang
+ * back, which puts the mark one inner gap from the last letter and the tab's
+ * own inset from the end of the item.
+ */
+test('aligns the closing control by its mark rather than by its box', () => {
+  const dismiss = rule(part('dismiss'));
+  assert.match(dismiss, /align-self:center/);
+  assert.match(
+    dismiss,
+    /margin-inline-end:calc\(var\(--_padding-inline\) - var\(--_dismiss-overhang\)\)/,
+  );
+  assert.match(
+    dismiss,
+    /margin-inline-start:max\(0px,calc\(var\(--_inner-gap\) - var\(--_dismiss-overhang\)\)\)/,
+  );
+  assert.match(
+    rule(`${ui} [data-part='item']:has([data-part='dismiss']) [data-part='tab']`),
+    /padding-inline-end:0/,
+  );
+});
+
+/**
+ * The closing control keeps the library's outward ring: it is shorter than the
+ * item and centred in it, so nothing about the ring reaches the edge the
+ * scroller clips at, and an inset ring on a twenty-four pixel box would be
+ * drawn through the mark.
+ */
+test('rings the closing control from outside and the tab from inside', () => {
+  assert.match(
+    rule(`${part('dismiss')}:focus-visible`),
+    /outline-offset:var\(--slotted-focus-ring-offset,2px\)/,
+  );
+  assert.match(
+    rule(`${part('tab')}:focus-visible`),
+    /outline-offset:calc\(-1 \* \(var\(--slotted-focus-ring-offset,2px\) \+ var\(--_marker-size\)\)\)/,
+  );
+});
+
+/**
+ * A list standing on a line the page already drew: two hairlines a pixel apart
+ * read as one smudge, and no surveyed implementation offers a way out —
+ * Cloudscape ships a whole `container` variant for the same case.
+ */
+test('can stand on a line the page already drew', () => {
+  assert.ok(normalized.includes(`${ui}[data-variant='line'][data-track='line'] [data-part='list']{`));
+  assert.match(
+    rule(`${ui}[data-track='none'] [data-part='item']::after`),
+    /inset-block-end:0/,
+  );
+  assert.match(fragment, /data-track="none"/);
 });
 
 test('draws both glyphs as masks from the scale, never as characters', () => {

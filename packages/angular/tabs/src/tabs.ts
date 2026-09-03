@@ -27,6 +27,7 @@ import type {
   TabsMount,
   TabsOrientation,
   TabsSize,
+  TabsTrack,
   TabsVariant,
 } from './tabs-defaults';
 
@@ -38,6 +39,7 @@ export type {
   TabsMount,
   TabsOrientation,
   TabsSize,
+  TabsTrack,
   TabsVariant,
 } from './tabs-defaults';
 
@@ -126,6 +128,7 @@ export function escapeTabValue(value: string): string {
     'data-part': 'root',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
+    '[attr.data-track]': 'resolvedTrack()',
     '[attr.data-orientation]': 'resolvedOrientation()',
     '[attr.data-fit]': 'resolvedFit()',
     '[attr.data-activation-direction]': 'direction()',
@@ -142,6 +145,8 @@ export class SlTabs implements OnInit {
   readonly orientation = input<TabsOrientation | undefined>(undefined);
   readonly size = input<TabsSize | undefined>(undefined);
   readonly variant = input<TabsVariant | undefined>(undefined);
+  /** `none` draws no line at all, for a list standing on one the page drew. */
+  readonly track = input<TabsTrack | undefined>(undefined);
   readonly fit = input<TabsFit | undefined>(undefined);
   readonly mount = input<TabsMount | undefined>(undefined);
   readonly loop = input<boolean | undefined, boolean | string | undefined>(undefined, {
@@ -178,6 +183,7 @@ export class SlTabs implements OnInit {
   readonly resolvedOrientation = computed(() => this.orientation() ?? this.defaults.orientation);
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
+  readonly resolvedTrack = computed(() => this.track() ?? this.defaults.track);
   readonly resolvedFit = computed(() => this.fit() ?? this.defaults.fit);
   readonly resolvedMount = computed(() => this.mount() ?? this.defaults.mount);
   readonly resolvedLoop = computed(() => this.loop() ?? this.defaults.loop);

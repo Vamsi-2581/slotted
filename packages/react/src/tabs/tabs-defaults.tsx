@@ -9,6 +9,7 @@ const FALLBACK: TabsDefaults = {
   mount: 'active',
   orientation: 'horizontal',
   size: 'md',
+  track: 'line',
   variant: 'line',
 };
 
@@ -36,6 +37,7 @@ export function TabsDefaultsProvider({ children, ...defaults }: TabsDefaultsProv
         mount: defaults.mount ?? inherited.mount,
         orientation: defaults.orientation ?? inherited.orientation,
         size: defaults.size ?? inherited.size,
+        track: defaults.track ?? inherited.track,
         variant: defaults.variant ?? inherited.variant,
       }}
     >

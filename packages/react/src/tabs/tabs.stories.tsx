@@ -139,7 +139,7 @@ export const Orientation: Story = {
 export const Variant: Story = {
   parameters: scenario('variant'),
   render: () => (
-    <Grid columns={2}>
+    <Grid columns={3}>
       <Scene
         label="Line"
         note="A row of labels over a hairline. The marker covers the track exactly, so the two lines read as one that thickens where the selection is."
@@ -151,6 +151,12 @@ export const Variant: Story = {
         note="A sunken track that hugs its tabs, with a surface under the selected one. The marker stays, which is what the high-contrast scheme is left with once every fill flattens."
       >
         <Order variant="contained" />
+      </Scene>
+      <Scene
+        label='track="none", for a line that is already there'
+        note="The labels and the marker stay and the hairline goes, so a list sitting on a card header's edge or a table's own rule draws one line instead of two a pixel apart. The marker moves onto the item's own edge, which is where that line is."
+      >
+        <Order track="none" />
       </Scene>
     </Grid>
   ),

@@ -146,13 +146,16 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'variant',
     title: 'The two ways a list is drawn',
-    note: 'Line is a row of labels over a hairline; contained is a sunken track holding a surface per tab. Both keep the accent marker, which is what survives the high-contrast scheme after every surface flattens.',
+    note: 'Line is a row of labels over a hairline; contained is a sunken track holding a surface per tab; and track="none" keeps the labels and drops the hairline, for a list standing on a line the page already drew. All three keep the accent marker, which is what survives the high-contrast scheme after every surface flattens.',
     snippet: defineSnippet({
       id: 'tabs-react-variant',
       language: 'tsx',
-      label: 'Line, and contained',
+      label: 'Line, contained, and no line at all',
       source: `<Tabs defaultValue="a" variant="line" />;
-<Tabs defaultValue="a" variant="contained" />;`,
+<Tabs defaultValue="a" variant="contained" />;
+
+// Standing on a line the page already drew — a card header, a table's rule.
+<Tabs defaultValue="a" track="none" />;`,
     }),
   },
   {
@@ -394,6 +397,13 @@ export const REACT_TABS_DOCS = {
         'line',
         'Tabs, TabsDefaultsProvider',
         'How the list is drawn. Both variants paint the accent marker, which is what says which view is open once the high-contrast scheme flattens every surface',
+      ],
+      [
+        'track',
+        "'line' | 'none'",
+        'line',
+        'Tabs, TabsDefaultsProvider',
+        'Whether the list draws the line its tabs stand on. none is for a list that sits on a line the page already drew — a card header’s edge, a table’s own rule — where two hairlines a pixel apart read as one smudge. The marker then sits on the item’s own edge, so it lands on the line that is there',
       ],
       [
         'fit',

@@ -24,5 +24,6 @@ export type {
   TabsRootProps,
   TabsSelectionReason,
   TabsSize,
+  TabsTrack,
   TabsVariant,
 } from './tabs.types';

@@ -148,13 +148,16 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'variant',
     title: 'The two ways a list is drawn',
-    note: 'Line is a row of labels over a hairline; contained is a sunken track holding a surface per tab. Both keep the accent marker, which is what survives the high-contrast scheme after every surface flattens.',
+    note: 'Line is a row of labels over a hairline; contained is a sunken track holding a surface per tab; and track="none" keeps the labels and drops the hairline, for a list standing on a line the page already drew. All three keep the accent marker, which is what survives the high-contrast scheme after every surface flattens.',
     snippet: defineSnippet({
       id: 'tabs-angular-variant',
       language: 'angular',
-      label: 'Line, and contained',
+      label: 'Line, contained, and no line at all',
       source: `<div slTabs defaultValue="a" variant="line"></div>
-<div slTabs defaultValue="a" variant="contained"></div>`,
+<div slTabs defaultValue="a" variant="contained"></div>
+
+<!-- Standing on a line the page already drew — a card header, a table's rule. -->
+<div slTabs defaultValue="a" track="none"></div>`,
     }),
   },
   {
@@ -388,6 +391,13 @@ export const ANGULAR_TABS_DOCS = {
         'line',
         'slTabs, provideTabsDefaults',
         'How the list is drawn. Both variants paint the accent marker, which is what says which view is open once the high-contrast scheme flattens every surface',
+      ],
+      [
+        'track',
+        "'line' | 'none'",
+        'line',
+        'slTabs, provideTabsDefaults',
+        'Whether the list draws the line its tabs stand on. none is for a list that sits on a line the page already drew — a card header’s edge, a table’s own rule — where two hairlines a pixel apart read as one smudge. The marker then sits on the item’s own edge, so it lands on the line that is there',
       ],
       [
         'fit',

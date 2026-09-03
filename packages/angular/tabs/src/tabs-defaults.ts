@@ -16,6 +16,13 @@ export type TabsSize = 'sm' | 'md' | 'lg';
  */
 export type TabsVariant = 'line' | 'contained';
 
+/**
+ * Whether the list draws the line its tabs stand on. `none` is for a list that
+ * sits on a line the page already drew — a card header's edge, a table's own
+ * rule — where two hairlines a pixel apart read as one smudge.
+ */
+export type TabsTrack = 'line' | 'none';
+
 /** Whether each tab is as wide as its label or takes an equal share of the line. */
 export type TabsFit = 'auto' | 'equal';
 
@@ -31,6 +38,7 @@ export type TabsActivationDirection = 'forward' | 'backward' | 'none';
 export interface TabsDefaults {
   activation: TabsActivation;
   fit: TabsFit;
+  track: TabsTrack;
   loop: boolean;
   mount: TabsMount;
   orientation: TabsOrientation;
@@ -45,6 +53,7 @@ const FALLBACK: TabsDefaults = {
   mount: 'active',
   orientation: 'horizontal',
   size: 'md',
+  track: 'line',
   variant: 'line',
 };
 

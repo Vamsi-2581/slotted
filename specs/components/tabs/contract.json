@@ -118,6 +118,7 @@
     "orientation": ["horizontal", "vertical"],
     "size": ["sm", "md", "lg"],
     "variant": ["line", "contained"],
+    "track": ["line", "none"],
     "fit": ["auto", "equal"],
     "mount": ["active", "lazy", "eager"]
   },
@@ -126,11 +127,21 @@
     "orientation": ["prop", "defaults", "horizontal"],
     "size": ["prop", "defaults", "md"],
     "variant": ["prop", "defaults", "line"],
+    "track": ["prop", "defaults", "line"],
     "fit": ["prop", "defaults", "auto"],
     "mount": ["prop", "defaults", "active"]
   },
   "provides": {
-    "tabsDefaults": ["activation", "orientation", "size", "variant", "fit", "mount", "loop"],
+    "tabsDefaults": [
+      "activation",
+      "orientation",
+      "size",
+      "variant",
+      "track",
+      "fit",
+      "mount",
+      "loop"
+    ],
     "toTabs": ["activation", "disabled", "orientation", "size", "value"]
   },
   "overflow": {
@@ -166,6 +177,7 @@
         "orientation": "horizontal",
         "size": "md",
         "variant": "line",
+        "track": "line",
         "fit": "auto",
         "mount": "active",
         "loop": true,
@@ -201,5 +213,10 @@
       "composition",
       "keyboard"
     ]
+  },
+  "trackless": {
+    "axis": "track",
+    "value": "none",
+    "reason": "A set of tabs sitting on a card header's edge, a table's own rule or a panel that already draws its top border has a line the family cannot see. Two hairlines a pixel apart read as one smudge, and the only answer the field offers is Cloudscape's whole `container` variant — a second family's worth of paint to remove one line. With no track the marker sits on the item's own edge, so it lands on the line the page already drew."
   }
 }

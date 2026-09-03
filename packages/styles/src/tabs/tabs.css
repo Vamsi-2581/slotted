@@ -33,6 +33,19 @@
      */
     --_list-gap: var(--slotted-space-1, 0.125rem);
     --_track-size: var(--slotted-border-width-thin, 1px);
+    /**
+     * The box around the X, and how far that box overhangs the glyph inside it.
+     * The box is a target and the glyph is the mark: at the dense step the mark
+     * is twelve pixels, under the twenty-four WCAG 2.2 SC 2.5.8 asks for, so the
+     * box is the larger of the minimum target and the mark with a step of air
+     * around it. It was the control's whole height before, which put a
+     * thirty-four pixel square beside a sixteen pixel mark.
+     */
+    --_dismiss-size: max(
+      var(--slotted-target-min, 24px),
+      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+    );
+    --_dismiss-overhang: calc((var(--_dismiss-size) - var(--_icon-size)) / 2);
     --_marker-size: var(--slotted-border-width-thick, 2px);
     /**
      * Which way the selection travelled, resolved into a transform origin. The
@@ -116,9 +129,33 @@
     scrollbar-width: none;
   }
 
-  [data-ui='tabs'][data-variant='line'] [data-part='list'] {
+  [data-ui='tabs'][data-variant='line'][data-track='line'] [data-part='list'] {
     border-block-end: var(--_track-size) solid
       var(--slotted-tabs-track-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  /**
+   * ── A list that stands on somebody else's line ────────────────────────
+   *
+   * `track="none"` draws no line at all, for the case the family cannot see: a
+   * set of tabs sitting on the edge of a card header, a table's own rule or a
+   * panel that already draws its top border. Two hairlines a pixel apart read
+   * as one thick smudge rather than as two decisions, and no surveyed
+   * implementation offers a way out — Cloudscape ships a whole `container`
+   * variant for the same case, which is a second family's worth of paint to
+   * remove one line.
+   *
+   * The marker then sits on the item's own edge rather than a track's width
+   * below it, so it lands on the line the page already drew. Where that line is
+   * is the page's business: the family stops at its own box.
+   */
+  [data-ui='tabs'][data-track='none'] [data-part='item']::after {
+    inset-block-end: 0;
+  }
+
+  [data-ui='tabs'][data-track='none'][data-orientation='vertical'] [data-part='item']::after {
+    inset-block-end: auto;
+    inset-inline-end: 0;
   }
 
   /**
@@ -139,7 +176,8 @@
     overflow-y: auto;
   }
 
-  [data-ui='tabs'][data-orientation='vertical'][data-variant='line'] [data-part='list'] {
+  [data-ui='tabs'][data-orientation='vertical'][data-variant='line'][data-track='line']
+    [data-part='list'] {
     border-block-end: 0;
     border-inline-end: var(--_track-size) solid
       var(--slotted-tabs-track-color, var(--slotted-border-subtle, ButtonBorder));
@@ -223,6 +261,15 @@
   }
 
   /**
+   * A tab that hands the closing control the end of its row gives up its own
+   * inset there: the control carries it instead, measured from the mark rather
+   * than from the box.
+   */
+  [data-ui='tabs'] [data-part='item']:has([data-part='dismiss']) [data-part='tab'] {
+    padding-inline-end: 0;
+  }
+
+  /**
    * The words. A box of their own, as in `tag`, and for the same three
    * reasons: `text-overflow` needs something to clip, an icon beside the label
    * needs something to be aligned against, and a label in another script needs
@@ -265,10 +312,20 @@
    * focus became one blue shape that said neither of the two things — the
    * capture is what showed it.
    */
-  [data-ui='tabs'] [data-part='tab']:focus-visible,
-  [data-ui='tabs'] [data-part='dismiss']:focus-visible {
+  [data-ui='tabs'] [data-part='tab']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * (var(--slotted-focus-ring-offset, 2px) + var(--_marker-size)));
+  }
+
+  /**
+   * The closing control keeps the library's outward ring. It is shorter than
+   * the item and centred in it, so the ring has room inside the list's own box
+   * and nothing about it reaches the edge the scroller clips at — and an inset
+   * ring on a twenty-four pixel box would be drawn through the mark.
+   */
+  [data-ui='tabs'] [data-part='dismiss']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   [data-ui='tabs'] [data-part='item'][data-selected] [data-part='tab'] {
@@ -418,23 +475,30 @@
    * keyboard path is `Delete`, which the APG names and which the tab announces
    * through `aria-keyshortcuts`.
    *
-   * Its target is the control height in both axes: at the dense step the glyph
-   * is twelve pixels, under the twenty-four WCAG 2.2 SC 2.5.8 asks for, and
-   * the box around it is what makes the difference.
+   * It is aligned by its mark rather than by its box. The box overhangs the X
+   * on every side, so a box set flush against the label leaves a hole where the
+   * overhang is; both margins take the overhang back, which puts the mark one
+   * inner gap from the last letter and the tab's own inset from the end of the
+   * item. The first capture showed the other arrangement: a square the height of
+   * the control, hard against the words, with the whole tab's padding on the
+   * far side of it.
    */
   [data-ui='tabs'] [data-part='dismiss'] {
     align-items: center;
+    align-self: center;
     appearance: none;
     background-color: transparent;
+    block-size: var(--_dismiss-size);
     border: 0;
     border-radius: var(--slotted-control-radius, 4px);
     color: var(--slotted-tabs-dismiss-color, var(--slotted-text-muted, GrayText));
     cursor: pointer;
     display: inline-flex;
     flex: none;
-    inline-size: max(var(--slotted-target-min, 24px), var(--_height));
+    inline-size: var(--_dismiss-size);
     justify-content: center;
-    margin-inline-start: calc(-1 * var(--_padding-inline));
+    margin-inline-end: calc(var(--_padding-inline) - var(--_dismiss-overhang));
+    margin-inline-start: max(0px, calc(var(--_inner-gap) - var(--_dismiss-overhang)));
     padding: 0;
     transition:
       background-color var(--slotted-control-transition-duration)
@@ -649,7 +713,7 @@
    * adds is the track: a disabled family should not read as a live one with
    * grey labels.
    */
-  [data-ui='tabs'][data-disabled][data-variant='line'] [data-part='list'] {
+  [data-ui='tabs'][data-disabled][data-variant='line'][data-track='line'] [data-part='list'] {
     border-color: var(--slotted-disabled-border, GrayText);
   }
 

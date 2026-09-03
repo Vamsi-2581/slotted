@@ -8,252 +8,488 @@ const contract = JSON.parse(
     'utf8',
   ),
 );
-const css = [
-  readFileSync(new URL('./button.css', import.meta.url), 'utf8'),
-  readFileSync(new URL('./button-group.css', import.meta.url), 'utf8'),
-].join('\n');
-const normalizedCss = css.replace(/\s+/g, '');
+const css = readFileSync(new URL('./button.css', import.meta.url), 'utf8');
+const fragment = readFileSync(new URL('./button.harness.html', import.meta.url), 'utf8');
+const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
+const normalized = declarations.replace(/\s+/g, ' ').replace(/\s*([{};,:])\s*/g, '$1');
+const ui = `[data-ui='${contract.ui}']`;
+/**
+ * The same sheet with every space taken out. A selector's shape survives a
+ * formatter reflowing it across three lines; an assertion written against one
+ * particular line break does not.
+ */
+const dense = normalized.replace(/\s+/g, '');
 
-function assertRuleDeclarations(selector, declarations) {
-  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = css.match(new RegExp(`${escapedSelector}[^{}]*\\{([\\s\\S]*?)\\}`));
-
-  assert.ok(match, `Missing selector: ${selector}`);
-  for (const declaration of declarations) {
-    const whitespaceTolerantDeclaration = declaration
-      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      .replaceAll(' ', '\\s*');
-    assert.match(
-      match[1],
-      new RegExp(whitespaceTolerantDeclaration),
-      `Missing declaration for ${selector}: ${declaration}`,
-    );
-  }
+/** The declarations of the first rule whose selector starts with `selector`. */
+function rule(selector) {
+  return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
 }
 
-function assertNormalizedRuleDeclarations(selector, declarations) {
-  const normalizedSelector = selector.replace(/\s+/g, '');
-  const start = normalizedCss.indexOf(`${normalizedSelector}{`);
-  assert.notEqual(start, -1, `Missing selector: ${selector}`);
-  const end = normalizedCss.indexOf('}', start);
-  const rule = normalizedCss.slice(start, end + 1);
-
-  for (const declaration of declarations) {
-    assert.ok(
-      rule.includes(declaration.replace(/\s+/g, '')),
-      `Missing declaration for ${selector}: ${declaration}`,
+/**
+ * Every selector in the sheet, one entry per comma-separated selector, with
+ * the whitespace a formatter puts inside `:not()` taken back out. A guard
+ * printed as `:not( [data-loading] )` guards exactly as much as one printed on
+ * a single line, and an assertion that cannot see it reads as satisfied.
+ */
+function selectors() {
+  return [...declarations.matchAll(/(^|\})([^{}]+)\{/g)]
+    .map(([, , selector]) => selector.trim())
+    .filter((selector) => selector.length > 0 && !selector.startsWith('@'))
+    .flatMap((selector) => selector.split(','))
+    .map((selector) =>
+      selector.replace(/\s+/g, ' ').replace(/\(\s+|\s+\)/g, (match) => match.trim()),
     );
-  }
 }
 
-test('implements every contract state in framework-owned CSS', () => {
-  const requiredStates = new Set(
-    Object.values(contract.members).flatMap((member) => member.states),
-  );
-  const selectors = {
-    default: '.slotted-button {',
-    hover:
-      ".slotted-button[data-fill='solid']:hover:not(:disabled):not([aria-disabled='true']):not([data-pressed])",
-    active:
-      ".slotted-button[data-fill='solid']:active:not(:disabled):not([aria-disabled='true']):not([data-pressed])",
-    'focus-visible': '.slotted-button:focus-visible',
-    disabled: `[${contract.stateAttributes.disabled}]`,
-    loading: `[${contract.stateAttributes.loading}]`,
-    pressed: `[${contract.stateAttributes.pressed}]`,
-  };
-
-  assert.deepEqual(new Set(Object.keys(selectors)), requiredStates);
-  for (const selector of Object.values(selectors)) {
-    assert.ok(
-      normalizedCss.includes(selector.replace(/\s+/g, '')),
-      `Missing state selector: ${selector}`,
-    );
-  }
-
-  for (const variant of contract.axes.variant) {
-    assert.ok(css.includes(`[data-variant='${variant}']`), `Missing variant: ${variant}`);
-  }
-  for (const fill of contract.axes.fill) {
-    assert.ok(css.includes(`[data-fill='${fill}']`), `Missing fill: ${fill}`);
-  }
-  for (const size of contract.axes.size) {
-    assert.ok(css.includes(`[data-size='${size}']`), `Missing size: ${size}`);
-    assertNormalizedRuleDeclarations(`.slotted-button[data-size='${size}']`, [
-      `border-radius: var(--slotted-button-radius-${size}, var(--slotted-control-radius, 4px));`,
-    ]);
-  }
-  assert.ok(css.includes('--slotted-control-radius'), 'Missing control radius token');
+test('lives in the component layer', () => {
+  assert.match(css, /@layer slotted\.components/);
 });
 
-test('uses a direct size-scoped icon-size fallback for every button size', () => {
-  for (const size of contract.axes.size) {
-    assertNormalizedRuleDeclarations(`.slotted-button[data-size='${size}']`, [
-      `--_button-icon-size: var(--slotted-button-icon-size-${size}, 1em);`,
-    ]);
-  }
+test('is selected by the identifier the contract declares', () => {
+  assert.ok(normalized.includes(`${ui}{`), 'the family has no base rule keyed on data-ui');
 });
 
-test('maps secondary to a theme palette and keeps fill borders intentional', () => {
-  assertNormalizedRuleDeclarations(".slotted-button[data-variant='secondary']", [
-    '--_solid: var(--slotted-tone-secondary-solid);',
-    '--_on-solid: var(--slotted-tone-secondary-on-solid);',
-    '--_text: var(--slotted-tone-secondary-text);',
-  ]);
-  assertNormalizedRuleDeclarations(".slotted-button[data-fill='solid']", [
-    'border-color: transparent;',
-  ]);
-  assertNormalizedRuleDeclarations(
-    ".slotted-button[data-fill='solid']:hover:not(:disabled):not([aria-disabled='true']):not([data-pressed])",
-    ['border-color: transparent;'],
+/**
+ * The whole point of the rebuild. Button aliased the density scale into
+ * `--slotted-button-*` and therefore never saw the larger control the theme
+ * emits under `@media (pointer: coarse)`.
+ */
+test('reads control geometry directly rather than through a family alias', () => {
+  assert.doesNotMatch(
+    declarations,
+    /--slotted-button-/,
+    'the family declares a token of its own again',
   );
-  assertNormalizedRuleDeclarations(
-    ".slotted-button[data-fill='solid']:active:not(:disabled):not([aria-disabled='true']):not([data-pressed])",
-    ['border-color: transparent;'],
-  );
-  assertNormalizedRuleDeclarations(
-    ".slotted-button[data-fill='outline']:hover:not(:disabled):not([aria-disabled='true']):not([data-pressed])",
-    ['background: var(--_subtle-hover);', 'border-color: var(--_border);'],
-  );
-  assertNormalizedRuleDeclarations(
-    ".slotted-button[data-fill='outline']:active:not(:disabled):not([aria-disabled='true']):not([data-pressed])",
-    ['background: var(--_subtle-active);', 'border-color: var(--_border);'],
-  );
-});
-
-test('styles button group seams and focus layering with logical properties', () => {
-  assertRuleDeclarations('.slotted-button-group', [
-    'align-items: stretch;',
-    'display: inline-flex;',
-    'gap: var(--slotted-button-group-gap, 0px);',
-    'isolation: isolate;',
-    'vertical-align: middle;',
-  ]);
-  assertRuleDeclarations(".slotted-button-group[data-orientation='vertical']", [
-    'flex-direction: column;',
-  ]);
-  assertRuleDeclarations(
-    ".slotted-button-group[data-orientation='horizontal'] > .slotted-button:not(:first-child)",
-    [
-      'border-start-start-radius: var(--slotted-button-group-inner-radius, 0px);',
-      'border-end-start-radius: var(--slotted-button-group-inner-radius, 0px);',
-      'margin-inline-start: var(--slotted-button-group-adjacent-offset, -1px);',
-    ],
-  );
-  assertRuleDeclarations(
-    ".slotted-button-group[data-orientation='horizontal'] > .slotted-button:not(:last-child)",
-    [
-      'border-start-end-radius: var(--slotted-button-group-inner-radius, 0px);',
-      'border-end-end-radius: var(--slotted-button-group-inner-radius, 0px);',
-    ],
-  );
-  assertRuleDeclarations(
-    ".slotted-button-group[data-orientation='vertical'] > .slotted-button:not(:first-child)",
-    [
-      'border-start-start-radius: var(--slotted-button-group-inner-radius, 0px);',
-      'border-start-end-radius: var(--slotted-button-group-inner-radius, 0px);',
-      'margin-block-start: var(--slotted-button-group-adjacent-offset, -1px);',
-    ],
-  );
-  assertRuleDeclarations(
-    ".slotted-button-group[data-orientation='vertical'] > .slotted-button:not(:last-child)",
-    [
-      'border-end-start-radius: var(--slotted-button-group-inner-radius, 0px);',
-      'border-end-end-radius: var(--slotted-button-group-inner-radius, 0px);',
-    ],
-  );
-  assertRuleDeclarations('.slotted-button-group > .slotted-button:hover:not([data-pressed])', [
-    'z-index: 1;',
-  ]);
-  assertRuleDeclarations('.slotted-button-group > .slotted-button:focus-visible', ['z-index: 2;']);
-});
-
-test('sizes consumer supplied SVG icons without imposing an icon visual language', () => {
-  assertRuleDeclarations(".slotted-button [data-part='icon'] svg", [
-    'block-size: 100%;',
-    'display: block;',
-    'inline-size: 100%;',
-  ]);
-
-  const iconSlotRule = css.match(
-    /\.slotted-button \[data-part='icon'\],[\s\S]*?\.slotted-button \[data-part='trailing'\]\s*\{([\s\S]*?)\}/,
-  );
-  assert.ok(iconSlotRule, 'Missing icon slot rule');
-  assert.match(iconSlotRule[1], /font-size:\s*var\(--_button-icon-size\);/);
-  assert.match(iconSlotRule[1], /line-height:\s*1;/);
-  assert.doesNotMatch(iconSlotRule[1], /(?:fill|stroke):/);
-});
-
-test('keeps pressed toggle surfaces outside generic interactive selectors', () => {
-  const headers = [...css.matchAll(/\.slotted-button[^{}]*:(?:hover|active)[^{]*\{/g)].map(
-    ([header]) => header,
-  );
-
-  assert.ok(
-    headers.length >= 6,
-    `Expected at least 6 interactive selectors, found ${headers.length}`,
-  );
-
-  for (const pattern of [
-    /data-fill='solid'[^{}]*:hover/,
-    /data-fill='solid'[^{}]*:active/,
-    /data-fill='outline'[^{}]*:hover/,
-    /data-fill='outline'[^{}]*:active/,
-    /data-fill='ghost'[^{}]*:hover/,
-    /data-fill='ghost'[^{}]*:active/,
-  ]) {
-    assert.ok(
-      headers.some((header) => pattern.test(header)),
-      `Missing interactive selector matching ${pattern}`,
-    );
-  }
-
-  for (const header of headers) {
-    assert.match(header.replace(/\s+/g, ''), /:not\(\[data-pressed\]\)/);
-  }
-});
-
-test('keeps a disabled toggle distinguishable when pressed', () => {
-  assertNormalizedRuleDeclarations('.slotted-button[data-disabled][data-pressed]', [
-    'border-color: var(--slotted-disabled-foreground, GrayText);',
-  ]);
-});
-
-test('sizes every icon shape a consumer can supply', async () => {
-  const { JSDOM } = await import('jsdom');
-
-  // Selectors are read from the stylesheet, not restated here, so the test
-  // fails when the stylesheet stops covering a shape.
-  const sizingSelectors = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-    .filter(([, , body]) => /inline-size:\s*100%/.test(body) && /block-size:\s*100%/.test(body))
-    .flatMap(([, selector]) => selector.split(','))
-    .map((selector) => selector.trim())
-    .filter((selector) => selector.includes('[data-part'));
-
-  assert.ok(sizingSelectors.length > 0, 'No icon sizing rule found in the stylesheet');
-
-  const shapes = {
-    'bare svg': '<svg data-probe></svg>',
-    'component rendering an svg': '<svg data-probe class="lucide"></svg>',
-    'wrapper with a nested svg': '<ng-icon><svg data-probe></svg></ng-icon>',
-    'element sized in em': '<i data-probe class="icon-font"></i>',
-  };
-
-  for (const slot of ['icon', 'leading', 'trailing']) {
-    for (const [shape, markup] of Object.entries(shapes)) {
-      const dom = new JSDOM(
-        `<button class="slotted-button"><span data-part="${slot}">${markup}</span></button>`,
-      );
-      const probe = dom.window.document.querySelector('[data-probe]');
-
-      assert.ok(
-        sizingSelectors.some((selector) => probe.matches(selector)),
-        `${shape} in the ${slot} slot is not covered by an icon sizing rule`,
+  for (const size of ['sm', 'md', 'lg']) {
+    for (const scale of ['height', 'padding-inline', 'font-size', 'icon-size', 'gap']) {
+      assert.match(
+        css,
+        new RegExp(`--slotted-control-${scale}-${size}`),
+        `no size step reads --slotted-control-${scale}-${size}`,
       );
     }
   }
 });
 
-test('does not force sizing on content inside the label slot', () => {
-  assert.doesNotMatch(css, /\.slotted-button \[data-part\] > svg/);
-  assert.doesNotMatch(css, /\[data-part='label'\][^{]*>\s*\*/);
+test('gives each of the three steps its own geometry and nothing else', () => {
+  for (const size of ['sm', 'lg']) {
+    const step = rule(`${ui}[data-size='${size}']`);
+    assert.ok(step.includes(`--_height:var(--slotted-control-height-${size}`), size);
+    assert.ok(step.includes(`--_font-size:var(--slotted-control-font-size-${size}`), size);
+    assert.ok(step.includes(`--_gap:var(--slotted-control-gap-${size}`), size);
+    assert.doesNotMatch(step, /background|color:/, `${size} decides a colour as well as a size`);
+  }
+});
+
+test('paints each tone the contract declares from that tone alone', () => {
+  for (const tone of contract.axes.tone) {
+    const painted = tone === 'accent' ? rule(ui) : rule(`${ui}[data-tone='${tone}']`);
+    assert.ok(painted.length > 0, `${tone} has no rule`);
+    for (const role of ['solid', 'on-solid', 'text']) {
+      assert.ok(
+        painted.includes(`var(--slotted-tone-${tone}-${role})`),
+        `${tone} does not read its own ${role}`,
+      );
+    }
+  }
+});
+
+test('gives every variant the contract declares a rule of its own', () => {
+  for (const variant of contract.axes.variant) {
+    assert.ok(
+      rule(`${ui}[data-variant='${variant}']`).includes('background:'),
+      `${variant} paints no surface`,
+    );
+  }
+});
+
+/**
+ * The paint axis lost `soft` at the visual review. The tone `surface` role it
+ * read belongs to the families a tinted rectangle is, and this one stops
+ * reading it rather than leaving a private property nothing consumes.
+ */
+test('no longer paints a tinted fill, or reads the role that drew it', () => {
+  assert.ok(!contract.axes.variant.includes('soft'));
+  assert.doesNotMatch(declarations, /data-variant='soft'/);
+  assert.doesNotMatch(declarations, /--_surface/);
+  assert.doesNotMatch(declarations, /-surface\)/, 'a tone surface is still read somewhere');
+});
+
+/**
+ * In the `high-contrast` scheme every tone surface is the page's own white, so
+ * a filled control with no border is a rectangle of nothing. Every variant but
+ * `ghost` draws an edge for that reason, and the disabled state keeps one.
+ */
+test('keeps an edge on every variant that is not bare', () => {
+  assert.ok(rule(`${ui}[data-variant='solid']`).includes('border-color:var(--_edge'));
+  assert.ok(rule(`${ui}[data-variant='ghost']`).includes('border-color:transparent'));
+  assert.ok(
+    rule(
+      `${ui}[data-variant='solid']:disabled,${ui}[data-variant='solid'][data-disabled]`,
+    ).includes('border-color:var(--slotted-disabled-border'),
+  );
+});
+
+/**
+ * A saturated border on all five tones turned a row of actions into a row of
+ * status chips. The edge of an outline button is neutral and its label carries
+ * the tone; `--slotted-border-strong` is held to 3:1 against the surface.
+ */
+/**
+ * A fill is its own edge. Anything else — the tone's `border` role, a neutral
+ * from the foundation — reads as a line laid over the control rather than as
+ * the edge of it. The one exception is the neutral tone, whose fill is 1.23:1
+ * against the surface in light and the page's own white in `high-contrast`: a
+ * control with no edge at all cannot be found, so it takes the next step of
+ * its own ramp and nothing stronger.
+ */
+test('lets a fill be its own edge, except the one that is the page', () => {
+  assert.ok(rule(ui).includes('--_edge:var(--_solid)'));
+  assert.ok(rule(`${ui}[data-tone='secondary']`).includes('--_edge:var(--_solid-hover)'));
+
+  for (const tone of ['accent', 'success', 'warning', 'danger']) {
+    assert.ok(!rule(`${ui}[data-tone='${tone}']`).includes('--_edge:'), `${tone} borrows an edge`);
+  }
+  assert.doesNotMatch(declarations, /--_edge:var\(--slotted-border-strong/);
+  assert.doesNotMatch(declarations, /--_border/, 'a tone border role is still read somewhere');
+});
+
+/**
+ * The shadow belongs to the frame, not to the family. `ghost` draws neither a
+ * fill nor an edge, so a shadow under it is a rectangle nobody drew — a
+ * toolbar of ghost actions read as a row of invisible cards for as long as the
+ * base rule carried it. Disabled loses it for the reason `text-field` states:
+ * nothing a person cannot reach is lifted off the page.
+ */
+test('lifts only the variants that draw a frame', () => {
+  const shadow = 'box-shadow:var(--slotted-control-shadow';
+
+  assert.ok(!rule(ui).includes(shadow), 'the base rule lifts every member again');
+  assert.ok(rule(`${ui}[data-variant='solid']`).includes(shadow));
+  assert.ok(rule(`${ui}[data-variant='outline']`).includes(shadow));
+  assert.ok(
+    !rule(`${ui}[data-variant='ghost']`).includes('box-shadow'),
+    'a bare control casts a shadow',
+  );
+  /* A ghost toggle that is on has taken a fill and an edge, so it is framed. */
+  assert.ok(rule(`${ui}[data-pressed]:not(:disabled):not([data-disabled])`).includes(shadow));
+  assert.ok(rule(`${ui}:disabled,${ui}[data-disabled]`).includes('box-shadow:none'));
+});
+
+test('draws an outline button with a neutral edge and a tone label', () => {
+  const outline = rule(`${ui}[data-variant='outline']`);
+  assert.ok(outline.includes('border-color:var(--slotted-border-strong'));
+  assert.ok(outline.includes('color:var(--_text'));
+  assert.ok(!outline.includes('border-color:var(--_border'));
+});
+
+/**
+ * A pressed toggle is the tone's fill, and one edge like every other control.
+ * The first rebuild grew the border to carry the extra weight, which moved
+ * every control in the row; the second drew a ring inside the border instead,
+ * which cost no space and read as a control with two edges. The state is a
+ * colour, and `aria-pressed` is what announces it.
+ *
+ * The guard is on the pressed selector rather than on the sheet. It was
+ * written as a ban on `::after` anywhere, which is a proxy that stopped
+ * holding the moment the family had a second thing to draw: the waiting band
+ * is a pseudo-element too, and it is not an edge and not on this state.
+ */
+test('says pressed with a fill, and with one edge like every other control', () => {
+  const pressed = rule(`${ui}[data-pressed]:not(:disabled):not([data-disabled])`);
+  assert.ok(pressed.includes('background:var(--_solid'));
+  assert.ok(pressed.includes('border-color:var(--_edge'));
+  assert.ok(pressed.includes('color:var(--_on-solid'));
+
+  const drawn = selectors().filter(
+    (selector) => selector.includes('[data-pressed]') && /::(after|before)/.test(selector),
+  );
+  assert.deepEqual(drawn, [], 'the family draws a second edge again');
+});
+
+/**
+ * The whole reason this family was rebuilt a second time. A state may change
+ * a colour and nothing else: a border width, a padding, a margin or a size
+ * written under a state selector moves every control in the row when the
+ * state turns on.
+ */
+test('changes no geometry when a state changes', () => {
+  const stateful =
+    /(:hover|:active(?![-\w])|:focus-visible|:disabled|\[data-(disabled|loading|pressed)\])/;
+  const offenders = [];
+
+  for (const match of declarations.matchAll(/(^|\})([^{}]+)\{([^{}]*)\}/g)) {
+    const [, , selector, body] = match;
+    if (!stateful.test(selector) || selector.includes('::after')) continue;
+    for (const property of ['border-width', 'padding', 'margin', 'inline-size', 'block-size']) {
+      if (new RegExp(`(^|;)\\s*${property}\\s*:`).test(body)) {
+        offenders.push(`${selector.trim()} sets ${property}`);
+      }
+    }
+  }
+
+  assert.deepEqual(offenders, [], `a state moves the layout:\n  ${offenders.join('\n  ')}`);
+});
+
+test('holds hover and active back for every stronger state', () => {
+  const weak = selectors().filter((selector) => /:hover|:active(?![-\w])/.test(selector));
+  assert.ok(weak.length > 0, 'the family paints no interactive state at all');
+  for (const selector of weak) {
+    assert.ok(
+      selector.includes(':not(:disabled)') && selector.includes(':not([data-disabled])'),
+      `"${selector}" answers a pointer on a disabled control`,
+    );
+  }
+  /**
+   * Every one of these selectors mentions `[data-pressed]`, because the ones
+   * that are not about a toggle hold themselves back for it. What separates
+   * them is whether the compound targets it.
+   */
+  const momentary = weak.filter((candidate) => !/\[data-pressed\]:(hover|active)/.test(candidate));
+  assert.equal(momentary.length + 2, weak.length, 'the toggle answers the pointer twice, no more');
+  for (const selector of momentary) {
+    assert.ok(
+      selector.includes(':not([data-loading])'),
+      `"${selector}" answers a pointer on a control that is still working`,
+    );
+  }
+});
+
+test('shows focus only when the keyboard asked for it, and without moving anything', () => {
+  const focus = rule(`${ui}:focus-visible`);
+  assert.ok(focus.includes('outline:'), 'focus is not drawn as an outline');
+  assert.ok(focus.includes('outline-offset:var(--slotted-focus-ring-offset'));
+  assert.doesNotMatch(focus, /border-width|padding|margin|inset/, 'focus changes the layout');
+});
+
+/**
+ * `opacity: 0` rather than `visibility: hidden` or an unmounted label:
+ * the first keeps the label in the flow, so the control cannot change size,
+ * and in the accessibility tree, so the accessible name survives the wait and
+ * combines with the indicator's own.
+ *
+ * It applies only to the control that has nowhere else to put the ring. A
+ * control with a start or end visual gives the ring that box and keeps its
+ * label readable, which is the difference between a button that is waiting
+ * and a coloured rectangle with nothing in it.
+ */
+test('waits without losing the size or the name of the control', () => {
+  const faded = dense.match(
+    /\[data-loading\]:has\(>\[data-part='indicator'\]\)>:not\(\[data-part='indicator'\]\)\{([^}]*)\}/,
+  );
+  assert.ok(faded, 'the label of a control with no visual slot is not hidden');
+  assert.ok(faded[1].includes('opacity:0'));
+  assert.doesNotMatch(css, /visibility:hidden/);
+  assert.doesNotMatch(css, /display:none/);
+  assert.ok(rule(`${ui}[data-loading]`).includes('cursor:progress'));
+});
+
+test('sizes the ring to the glyph it stands in for, wherever it is drawn', () => {
+  const indicator = rule(`${ui} [data-part='indicator']`);
+  assert.ok(indicator.includes('inline-size:var(--_icon-size)'), 'the ring is not the icon size');
+  assert.ok(indicator.includes('block-size:var(--_icon-size)'));
+  assert.ok(indicator.includes('flex:none'), 'the ring can be squeezed inside its slot');
+  assert.ok(indicator.includes('border-inline-end-color:transparent'));
+
+  const centred = dense.split(`${ui}>[data-part='indicator']{`)[1]?.split('}')[0] ?? '';
+  assert.ok(centred.includes('position:absolute'), 'the ring without a slot is in the flow');
+  assert.ok(centred.includes('inset:0'));
+  assert.ok(centred.includes('margin:auto'));
+});
+
+test('stops the ring under reduced motion rather than slowing it', () => {
+  const query = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
+  assert.match(query, /animation:\s*none/);
+  assert.doesNotMatch(css, /(?<![\w-])\d+(?:\.\d+)?m?s(?![\w-])/, 'a duration is written by hand');
+});
+
+/**
+ * The band replaces the ring on a control that has words in it, and what that
+ * buys is the words: the ring had to be drawn over the label of a control with
+ * no visual slot, so the reader lost the name of the action they pressed.
+ */
+test('waits behind the label rather than over it', () => {
+  const sweep = dense.split(`${ui}:not([data-shape])[data-loading]::after{`)[1]?.split('}')[0];
+  assert.ok(sweep, 'no band is drawn');
+  assert.ok(sweep.includes('position:absolute'), 'the band is in the flow');
+  assert.ok(sweep.includes('inset:0'));
+  assert.ok(sweep.includes('pointer-events:none'), 'the band takes the press from the label');
+  assert.ok(sweep.includes('border-radius:inherit'), 'the band ignores the shape of the control');
+  assert.match(
+    sweep,
+    /background-image:linear-gradient\([^)]*currentcolor/i,
+    'the band has a tone',
+  );
+
+  const restored = dense
+    .split(
+      `${ui}:not([data-shape])[data-loading]:has(>[data-part='indicator'])>:not([data-part='indicator']){`,
+    )[1]
+    ?.split('}')[0];
+  assert.ok(restored?.includes('opacity:1'), 'the label stays hidden behind the band');
+
+  const stepped = dense
+    .split(`${ui}:not([data-shape])[data-loading][data-part='indicator']{`)[1]
+    ?.split('}')[0];
+  assert.ok(stepped?.includes('opacity:0'), 'the ring is drawn under the band');
+  assert.ok(stepped.includes('position:absolute'), 'the ring keeps the width of the glyph');
+});
+
+/**
+ * The band has no still form: one frozen halfway across a control is a
+ * rendering fault, not a state. Both conditions are written as what the band
+ * needs rather than as an undo, so the ring is what the family does by default
+ * and an engine that drops either one is left with a state rather than with
+ * nothing.
+ */
+test('draws the band only where it can move and be seen', () => {
+  /**
+   * Read off the sheet rather than through `selectors()`: the band lives
+   * inside two nested at-rules, and that helper splits on braces.
+   */
+  const sweeps = [...dense.matchAll(/([^{}]*::after)\{/g)].map(([, selector]) =>
+    selector.slice(selector.lastIndexOf('}') + 1),
+  );
+  assert.ok(sweeps.length > 0, 'no band is drawn');
+  for (const selector of sweeps) {
+    assert.ok(selector.includes(':not([data-shape])'), `${selector} sweeps an icon-only control`);
+  }
+
+  const guarded = declarations
+    .slice(
+      declarations.indexOf('@media (prefers-reduced-motion: no-preference)'),
+      declarations.indexOf(`${ui} [data-part='start'],`),
+    )
+    .replace(/\s+/g, '');
+  assert.ok(guarded.includes('@medianot(forced-colors:active)'), 'the band outlives the gradient');
+  for (const selector of [
+    ...sweeps,
+    `${ui}:not([data-shape])[data-loading] [data-part='indicator']`,
+  ]) {
+    assert.ok(guarded.includes(selector.replace(/\s+/g, '')), `${selector} is drawn unguarded`);
+  }
+});
+
+/**
+ * A flex container centres the line box, and a line box is not symmetric
+ * around the letters in it: the word sat up to 1.2 pixels above the centre of
+ * the glyph beside it. Trimming to the cap and the baseline centres the ink
+ * instead. The padding is what the trim costs a label that wraps — the
+ * half-leading that keeps a second line off the border.
+ */
+test('centres the ink of the label rather than the box the ink sits in', () => {
+  const guarded = css.slice(css.indexOf('@supports (text-box: trim-both cap alphabetic)'));
+  assert.ok(guarded.length > 0, 'the trim is applied unguarded, or not at all');
+  assert.match(guarded, /text-box:\s*trim-both cap alphabetic/);
+  assert.match(
+    guarded,
+    /padding-block:\s*calc\(\(var\(--slotted-line-height-sm/,
+    'the trim takes the leading a wrapped label needs and does not give it back',
+  );
+});
+
+/**
+ * A glyph reaches closer to the edge of the box than a letter does, so the
+ * side holding one is inset less. Measuring one padding against two different
+ * shapes is what makes an icon look pushed towards the middle.
+ */
+test('insets the side that holds a glyph less than the side that holds a word', () => {
+  assert.ok(dense.includes('--_padding-inline-visual:max('));
+  for (const [part, side] of [
+    ['start', 'padding-inline-start'],
+    ['end', 'padding-inline-end'],
+  ]) {
+    assert.ok(
+      dense.includes(
+        `${ui}:not([data-shape]):has(>[data-part='${part}']){${side}:var(--_padding-inline-visual)`,
+      ),
+      `the ${part} side is not compensated`,
+    );
+  }
+});
+
+test('lets the label wrap instead of pushing the control past its container', () => {
+  const label = rule(`${ui} [data-part='label']`);
+  assert.ok(label.includes('overflow-wrap:anywhere'));
+  assert.ok(label.includes('line-height:var(--slotted-line-height-sm'));
+  assert.doesNotMatch(css, /white-space:nowrap/);
+  assert.ok(rule(ui).includes('min-block-size:var(--_height)'), 'the control cannot grow');
+  assert.ok(rule(ui).includes('max-inline-size:100%'), 'the control can outgrow its container');
+});
+
+/**
+ * A control is exactly the height the density states. Block padding is added
+ * to the label's line box, so at `dense` four pixels of it took the small and
+ * the medium step to the same 27.4 pixels: the density stopped meaning the
+ * height the theme states, and two steps of the scale collapsed into one.
+ */
+test('is the height its density states, at every step of the scale', () => {
+  assert.ok(rule(ui).includes('padding-block:0'), 'block padding inflates the control');
+
+  const lineHeight = 1.45;
+  const geometry = {
+    comfortable: { sm: [30, 12], md: [34, 12], lg: [38, 14] },
+    compact: { sm: [26, 12], md: [28, 12], lg: [32, 13] },
+    dense: { sm: [24, 12], md: [26, 12], lg: [30, 12] },
+  };
+
+  for (const [density, steps] of Object.entries(geometry)) {
+    for (const [step, [height, fontSize]] of Object.entries(steps)) {
+      const lineBox = fontSize * lineHeight + 2;
+      assert.ok(
+        lineBox <= height,
+        `${density}/${step}: a single line is ${lineBox}px inside a ${height}px control`,
+      );
+    }
+  }
+});
+
+/**
+ * WCAG 2.2 SC 2.5.8 in both axes. Theme validation guarantees the block axis
+ * through the control height; the inline axis of a square control is the
+ * family's own, so the family states the floor.
+ */
+test('keeps an icon-only target above the minimum in both axes', () => {
+  const square = rule(`${ui}[data-shape]`);
+  assert.ok(square.includes('aspect-ratio:1'));
+  assert.ok(square.includes('inline-size:var(--_height)'));
+  assert.ok(square.includes('min-inline-size:var(--slotted-target-min'));
+  assert.ok(square.includes('min-block-size:max(var(--_height),var(--slotted-target-min'));
+  assert.ok(
+    rule(`${ui}[data-shape='circle']`).includes('border-radius:var(--slotted-radius-full'),
+    'a circular icon button is not round',
+  );
+});
+
+/**
+ * The theme remaps every token it owns. This block is only for what the family
+ * paints itself — the transparent borders of `ghost` and of a control at rest.
+ */
+test('restores the edge forced colours would leave the family without', () => {
+  const query = css.slice(css.indexOf('@media (forced-colors: active)'));
+  assert.match(query, /border-color:\s*ButtonBorder/);
+  assert.match(query, /border-color:\s*Highlight/);
+  assert.match(query, /border-color:\s*GrayText/);
+});
+
+test('exercises every declared part in the harness fragment', () => {
+  const parts = new Set(Object.values(contract.members).flatMap((member) => member.parts));
+  for (const part of parts) {
+    assert.ok(fragment.includes(`data-part="${part}"`), `no scene renders the ${part} part`);
+  }
+  assert.match(fragment, new RegExp(`data-ui="${contract.ui}"`));
+});
+
+test('exercises every declared axis and attribute state in the harness fragment', () => {
+  for (const [axis, values] of Object.entries(contract.axes)) {
+    for (const value of values) {
+      assert.ok(
+        fragment.includes(`data-${axis}="${value}"`),
+        `no scene renders ${axis}="${value}"`,
+      );
+    }
+  }
+  for (const attribute of Object.values(contract.stateAttributes)) {
+    assert.ok(fragment.includes(attribute), `no scene renders ${attribute}`);
+  }
 });

@@ -4137,6 +4137,42 @@ were.
   reads is even at every density, so an even shape leaves an even remainder and
   both halves are whole pixels. Confirmed by freezing the morph to a circle and
   photographing all three steps side by side.
+- **The wave's amplitude was constant, and M3's is a function of the value.**
+  `DeterminateDrawable.java` states the rule as
+  `FULL_AMPLITUDE_PROGRESS_MIN = 0.1` and `FULL_AMPLITUDE_PROGRESS_MAX = 0.9`:
+  full amplitude only between a tenth and nine tenths, flat outside — at both
+  ends, not only at the finish. The family shipped a bar that stayed wavy
+  through completion, which reports movement in a task that has stopped.
+- The amplitude is animatable only because the two effects separate across two
+  mask layers. A mask cannot interpolate the amplitude of artwork baked into a
+  data URI: scaling the layer vertically thins the stroke by exactly as much as
+  it flattens the crest, so the line would fade rather than straighten. Instead
+  the wave's own layer shrinks from three thicknesses to one — its excursion
+  falls from a full thickness to a third of one, and its stroke with it — while
+  a plain band grows from nothing to a full thickness beside it. The layers are
+  unioned, so at the end the shrunken wave sits entirely inside the straight
+  band and the bar is a bar. The crests retract as the line fills out.
+- The ramp rides the value's own transition rather than M3's separate
+  500-millisecond animator, because `--slotted-progress-indicator-percent` is a
+  registered property and everything derived from it recomputes each frame: a
+  bar that jumps from 84 to 100 flattens over exactly the time its fill takes to
+  get there. The cost is M3's asymmetry — `motionEasingStandard` turning the
+  wave on and `motionEasingEmphasizedAccelerate` turning it off — which this
+  does not reproduce. An indeterminate wave is wavy throughout, which is M3's
+  own `hasWavyEffect(isDeterminate)` distinction.
+- The travel stays `linear`, and that is M3's answer rather than an omission:
+  `PHASE_ANIMATION_DURATION_MS = 1000` with a null interpolator.
+- Photographed at five values — 5, 12, 50, 88 and 100 — in `light`, `dark` and
+  `rtl`, and the thickness is constant across all five while the crests retract.
+  The scene is declared as `waveRamp` and appears on both reference pages.
+- **Three things still differ from M3, and the design document tables them
+  rather than claiming parity.** M3 stretches the wavelength so a whole number
+  of cycles fits the track (`adjustedWavelength = trackLength / cycleCount`),
+  which CSS cannot compute from an element's own width; M3 drives the
+  determinate value with a `SpringAnimation` where the motion scale holds four
+  cubic-beziers and no spring; and M3 ramps the amplitude of the wavy _circular_
+  indicator too, which needs `d` interpolation rather than the two-layer mask
+  trick and is the named follow-on.
 - Deviations: none. The one thing the family does not answer inside itself is
   the `secondary` tone's `solid` role, which it routes around rather than fixes;
   the ramp belongs to the theme, and `button` has that recorded already.

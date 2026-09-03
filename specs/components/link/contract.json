@@ -1,23 +1,41 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "link",
+  "ui": "link",
   "axes": {
-    "underline": ["always", "hover", "none"]
+    "underline": ["always", "hover", "none"],
+    "variant": ["accent", "neutral", "inverse"]
+  },
+  "stateAttributes": {
+    "disabled": "data-disabled"
   },
   "members": {
     "link": {
       "nativeElement": "a",
       "defaults": {
         "underline": "always",
+        "variant": "accent",
+        "visited": false,
         "external": false,
-        "externalHint": "(opens in a new tab)"
+        "externalHint": "(opens in a new tab)",
+        "disabled": false
       },
-      "capabilities": ["underline", "external"],
-      "states": ["default", "hover", "active", "focus-visible"],
-      "parts": ["root", "external-hint"]
+      "capabilities": ["appearance", "underline", "external", "disabled"],
+      "states": ["default", "hover", "active", "focus-visible", "disabled"],
+      "parts": ["root", "external-icon", "external-hint"]
     }
   },
   "scenarios": {
-    "link": ["playground", "underline", "external", "composition"]
+    "link": [
+      "playground",
+      "underline",
+      "variants",
+      "external",
+      "states",
+      "current",
+      "content",
+      "composition",
+      "accessibility"
+    ]
   }
 }

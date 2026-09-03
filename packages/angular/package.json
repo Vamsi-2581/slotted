@@ -6,13 +6,14 @@
   "sideEffects": false,
   "scripts": {
     "build": "ng build slotted-angular",
-    "test": "ng test slotted-angular --watch=false && pnpm build && node --test src/bundle.styles.test.mjs src/bundle.boundaries.test.mjs",
+    "test": "ng test slotted-angular --watch=false && pnpm build && node --test src/bundle.styles.test.mjs src/bundle.boundaries.test.mjs src/entry-points.source.test.mjs",
     "typecheck": "ng build slotted-angular --configuration development",
     "verify": "pnpm test && pnpm build"
   },
   "peerDependencies": {
     "@angular/common": ">=22.1.0 <23",
     "@angular/core": ">=22.1.0 <23",
+    "@angular/forms": ">=22.1.0 <23",
     "@slotted/core": "workspace:*"
   },
   "devDependencies": {

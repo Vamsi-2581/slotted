@@ -1,0 +1,102 @@
+import type { ComponentPropsWithRef, ReactNode } from 'react';
+
+/** Which of the five semantic colours the message speaks in. */
+export type InlineMessageTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+
+/**
+ * The type step the message sits at. `sm` is the message of a field; `md` is
+ * the message of a section. Both read the control scales, which the theme
+ * restates per density.
+ */
+export type InlineMessageSize = 'sm' | 'md';
+
+/**
+ * Which mark the message draws. `glyph` is the tone's own silhouette — the
+ * circled information, check, triangle and circled exclamation. `dot` is a
+ * neutral bullet in the tone's ink, the same shape for every tone including
+ * the help tone that draws no silhouette at all, so a column of messages under
+ * one field starts on one left edge.
+ */
+export type InlineMessageMark = 'glyph' | 'dot';
+
+/**
+ * Whether the message announces itself, and how loudly. `off` is the default,
+ * because the WAI-ARIA APG records that a message already present when the page
+ * finishes loading is not announced whatever role it carries.
+ */
+export type InlineMessageLive = 'off' | 'polite' | 'assertive';
+
+/**
+ * The word a reader hears before the message. `null` is a tone that is not a
+ * severity — help and information announce themselves by their sentence.
+ */
+export type InlineMessagePrefixes = Record<InlineMessageTone, string | null>;
+
+/** What an application sets once for every message under it. */
+export interface InlineMessageDefaults {
+  live: InlineMessageLive;
+  mark: InlineMessageMark;
+  prefixes: InlineMessagePrefixes;
+  size: InlineMessageSize;
+  tone: InlineMessageTone;
+}
+
+export interface InlineMessageDefaultsProviderProps extends Partial<
+  Omit<InlineMessageDefaults, 'prefixes'>
+> {
+  children?: ReactNode | undefined;
+  /** Merged over the inherited table, so one word can be replaced alone. */
+  prefixes?: Partial<InlineMessagePrefixes> | undefined;
+}
+
+export interface InlineMessageRootProps extends ComponentPropsWithRef<'p'> {
+  'data-live': InlineMessageLive;
+  'data-mark': InlineMessageMark;
+  'data-part': string;
+  'data-size': InlineMessageSize;
+  'data-tone': InlineMessageTone;
+  'data-ui': string;
+}
+
+export interface InlineMessageProps extends Omit<
+  ComponentPropsWithRef<'p'>,
+  'children' | 'prefix'
+> {
+  children?: ReactNode | undefined;
+  /** Defaults to the provider, then to `secondary` — help text. */
+  tone?: InlineMessageTone | undefined;
+  /** Defaults to the provider, then to `sm`. */
+  size?: InlineMessageSize | undefined;
+  /** Defaults to the provider, then to `off`. */
+  live?: InlineMessageLive | undefined;
+  /**
+   * Which mark is drawn. Defaults to the provider, then to `glyph`. `field` and
+   * `field-group` ask for `dot` instead, because a form reads a column of
+   * sentences rather than identifying a severity by its outline.
+   */
+  mark?: InlineMessageMark | undefined;
+  /**
+   * The word read before the message. Unstated is the tone's own — `Error:`,
+   * `Warning:`, `Success:` — and the empty string removes it, for a message
+   * whose sentence already names the severity.
+   */
+  prefix?: string | undefined;
+  /** Draws no mark at all, for a message that carries its own artwork. */
+  hideIcon?: boolean | undefined;
+  /** Replaces the tone's mark, keeping its box, its size and its place. */
+  icon?: ReactNode | undefined;
+  /** The message is waiting for something: the mark becomes a turning ring. */
+  loading?: boolean | undefined;
+  /**
+   * Unstated rather than `false`, so a `field` can answer it once this family
+   * is inside one. Stated, it wins.
+   */
+  disabled?: boolean | undefined;
+  /**
+   * Holds one line box open whether or not there is a message, so the form
+   * below does not move when the error arrives.
+   */
+  reserve?: boolean | undefined;
+  /** Renders the message into another element — a `div`, a `ul` of failures. */
+  render?: ((props: InlineMessageRootProps) => ReactNode) | undefined;
+}

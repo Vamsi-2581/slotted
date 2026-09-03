@@ -86,18 +86,18 @@ export const Hierarchy: Story = {
 <div class="slotted-demo-measure">
   <div class="slotted-demo-stack">
     <h1 slHeading>Billing</h1>
-    <p slText size="sm" tone="muted">No section around it, so this is the first rank.</p>
+    <span slText size="sm" tone="muted">No section around it, so this is the first rank.</span>
     <section slHeadingLevel class="slotted-demo-stack">
       <h2 slHeading>Invoices</h2>
-      <p slText size="sm" tone="muted">
+      <span slText size="sm" tone="muted">
         One section deeper. The section states the rank it expects, and the heading matches it.
-      </p>
+      </span>
       <section slHeadingLevel class="slotted-demo-stack">
         <h3 slHeading>History</h3>
-        <p slText size="sm" tone="muted">
+        <span slText size="sm" tone="muted">
           Two deep. A tag deeper than the section allows is reported in development rather than
           corrected.
-        </p>
+        </span>
       </section>
     </section>
   </div>

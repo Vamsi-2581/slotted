@@ -1,10 +1,10 @@
 import { Directive } from '@angular/core';
 
+/** A title and the line that supports it. Both of them are Typography. */
 @Directive({
   selector: '[slCardHeader]',
   standalone: true,
-  host: {
-    'data-part': 'header',
-  },
+  exportAs: 'slCardHeader',
+  host: { 'data-part': 'header' },
 })
 export class SlCardHeader {}

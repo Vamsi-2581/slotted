@@ -1,0 +1,391 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+
+import contract from '../../../../specs/components/alert/contract.json';
+import {
+  Alert,
+  AlertActions,
+  AlertContent,
+  AlertDefaultsProvider,
+  AlertDescription,
+  AlertTitle,
+} from './index';
+
+const parts = (element: HTMLElement) =>
+  [...element.children].map((child) => child.getAttribute('data-part'));
+
+describe('Alert', () => {
+  it('is selected in public by the family identifier and its parts', () => {
+    render(
+      <Alert data-testid="alert" dismissible>
+        <AlertContent>
+          <AlertTitle>Sua assinatura expira</AlertTitle>
+          <AlertDescription>Renove para manter o acesso.</AlertDescription>
+        </AlertContent>
+        <AlertActions>
+          <button type="button">Renovar</button>
+        </AlertActions>
+      </Alert>,
+    );
+
+    const alert = screen.getByTestId('alert');
+    expect(alert.tagName).toBe('SECTION');
+    expect(alert).toHaveAttribute('data-ui', 'alert');
+    expect(alert).toHaveAttribute('data-part', 'root');
+    expect(parts(alert)).toEqual(['icon', 'content', 'actions', 'dismiss']);
+  });
+
+  it('writes every axis a consumer may style on, and the contract’s defaults', () => {
+    render(
+      <Alert data-testid="alert">
+        <AlertContent>Pronto.</AlertContent>
+      </Alert>,
+    );
+
+    const alert = screen.getByTestId('alert');
+    const { defaults } = contract.members.alert;
+    expect(alert).toHaveAttribute('data-tone', defaults.tone);
+    expect(alert).toHaveAttribute('data-variant', defaults.variant);
+    expect(alert).toHaveAttribute('data-reach', defaults.reach);
+    expect(alert).toHaveAttribute('data-live', defaults.live);
+    expect(alert).toHaveAttribute('data-open', '');
+  });
+
+  /**
+   * The decision the family exists to get right. MDN states that the `alert`
+   * role "should only be used for text content, not interactive elements such
+   * as links or buttons", so the region is the text and the controls are its
+   * siblings — not the other way round, which is what four of the ten surveyed
+   * implementations ship.
+   */
+  it('announces with the text alone, and never with the controls inside it', () => {
+    render(
+      <Alert data-testid="alert" dismissible live="assertive">
+        <AlertContent data-testid="content">
+          <AlertTitle>Não foi possível salvar</AlertTitle>
+        </AlertContent>
+        <AlertActions>
+          <button type="button">Tentar de novo</button>
+        </AlertActions>
+      </Alert>,
+    );
+
+    const region = screen.getByTestId('content');
+    expect(region).toHaveAttribute('role', 'alert');
+    expect(region).not.toHaveAttribute('aria-live');
+    expect(region.querySelector('button')).toBeNull();
+    expect(screen.getByTestId('alert')).not.toHaveAttribute('role');
+  });
+
+  it('maps each live value to the role that already implies it', () => {
+    for (const [live, role] of Object.entries(contract.liveRoles)) {
+      const { unmount } = render(
+        <Alert live={live as 'off' | 'polite' | 'assertive'}>
+          <AlertContent data-testid="content">Mensagem</AlertContent>
+        </Alert>,
+      );
+
+      const region = screen.getByTestId('content');
+      if (role === null) expect(region).not.toHaveAttribute('role');
+      else expect(region).toHaveAttribute('role', role);
+      unmount();
+    }
+  });
+
+  /**
+   * A `section` with an `aria-labelledby` pointing at nothing has no accessible
+   * name and is not a landmark, so the attribute is written only when a title
+   * is actually there to name it.
+   */
+  it('names the box with its own title, and only when it has one', () => {
+    const { rerender } = render(
+      <Alert data-testid="alert">
+        <AlertContent>
+          <AlertTitle data-testid="title">Sobre os fusos</AlertTitle>
+        </AlertContent>
+      </Alert>,
+    );
+
+    const alert = screen.getByTestId('alert');
+    expect(alert).toHaveAttribute('aria-labelledby', screen.getByTestId('title').id);
+    expect(screen.getByRole('region', { name: 'Sobre os fusos' })).toBe(alert);
+
+    rerender(
+      <Alert data-testid="alert">
+        <AlertContent>Sem título.</AlertContent>
+      </Alert>,
+    );
+    expect(screen.getByTestId('alert')).not.toHaveAttribute('aria-labelledby');
+  });
+
+  it('renders the mark the tone maps to, and nothing when it is refused', () => {
+    const { rerender } = render(
+      <Alert data-testid="alert" tone="danger">
+        <AlertContent>Falhou.</AlertContent>
+      </Alert>,
+    );
+
+    const icon = screen.getByTestId('alert').querySelector('[data-part="icon"]');
+    expect(icon).not.toBeNull();
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+
+    rerender(
+      <Alert data-testid="alert" hideIcon tone="danger">
+        <AlertContent>Falhou.</AlertContent>
+      </Alert>,
+    );
+    expect(screen.getByTestId('alert').querySelector('[data-part="icon"]')).toBeNull();
+  });
+
+  it('puts the page’s own mark in the box the tone’s would have had', () => {
+    render(
+      <Alert data-testid="alert" icon={<svg data-testid="glyph" />}>
+        <AlertContent>Pronto.</AlertContent>
+      </Alert>,
+    );
+
+    expect(screen.getByTestId('glyph').parentElement).toHaveAttribute('data-part', 'icon');
+  });
+
+  describe('dismissal', () => {
+    it('renders no control until the alert says it can be dismissed', () => {
+      render(
+        <Alert>
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      expect(screen.queryByRole('button')).toBeNull();
+    });
+
+    /**
+     * The capability none of the ten surveyed implementations ships. All five
+     * that dismiss are controlled only: `onDismiss` fires and the consumer
+     * removes the element, so a banner nobody has written state for cannot be
+     * dismissed at all.
+     */
+    it('closes itself when nobody owns the value, and stays in the document', () => {
+      render(
+        <Alert data-testid="alert" dismissible>
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+      const alert = screen.getByTestId('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert).toHaveAttribute('hidden');
+      expect(alert).not.toHaveAttribute('data-open');
+    });
+
+    it('only asks when the consumer owns the value', () => {
+      const onOpenChange = vi.fn();
+      render(
+        <Alert data-testid="alert" dismissible onOpenChange={onOpenChange} open>
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+      expect(onOpenChange.mock.calls[0]?.[0]).toBe(false);
+      expect(screen.getByTestId('alert')).not.toHaveAttribute('hidden');
+    });
+
+    it('carries the reason and the event, and can be refused', () => {
+      const onOpenChange = vi.fn((_open: boolean, request: { cancel(): void }) => {
+        request.cancel();
+      });
+      render(
+        <Alert data-testid="alert" dismissible onOpenChange={onOpenChange}>
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+      const request = onOpenChange.mock.calls[0]?.[1] as unknown as {
+        reason: string;
+        source: unknown;
+      };
+      expect(request.reason).toBe('dismiss');
+      expect(request.source).toBeDefined();
+      expect(screen.getByTestId('alert')).not.toHaveAttribute('hidden');
+    });
+
+    it('takes the word a provider gave every dismiss control', () => {
+      render(
+        <AlertDefaultsProvider dismissLabel="Dispensar">
+          <Alert dismissible>
+            <AlertContent>Pronto.</AlertContent>
+          </Alert>
+        </AlertDefaultsProvider>,
+      );
+
+      expect(screen.getByRole('button', { name: 'Dispensar' })).toBeInTheDocument();
+    });
+  });
+
+  /**
+   * The gap none of the ten fills: the reader tabs to the dismiss control,
+   * activates it, the control is destroyed, and focus falls to the document
+   * body — so the next Tab starts again at the top of the page.
+   */
+  describe('focus', () => {
+    /**
+     * `relatedTarget` is stated rather than produced: jsdom's focus manager
+     * reports none, and the family reads it because a real browser does supply
+     * it on `focusin`. What is under test is the rule — where the keyboard goes
+     * when the message closes with focus inside it — and the live behaviour is
+     * exercised in the browser at the gate.
+     */
+    it('returns the keyboard to where it came from when the message closes', () => {
+      render(
+        <>
+          <button data-testid="before" type="button">
+            Antes
+          </button>
+          <Alert dismissible>
+            <AlertContent>Pronto.</AlertContent>
+          </Alert>
+        </>,
+      );
+
+      const before = screen.getByTestId('before');
+      const dismiss = screen.getByRole('button', { name: 'Dismiss' });
+      fireEvent.focusIn(dismiss, { relatedTarget: before });
+      fireEvent.click(dismiss);
+
+      expect(before).toHaveFocus();
+    });
+
+    it('moves nothing when the application says it manages focus itself', () => {
+      render(
+        <>
+          <button data-testid="before" type="button">
+            Antes
+          </button>
+          <Alert dismissible restoreFocus={false}>
+            <AlertContent>Pronto.</AlertContent>
+          </Alert>
+        </>,
+      );
+
+      const before = screen.getByTestId('before');
+      const dismiss = screen.getByRole('button', { name: 'Dismiss' });
+      fireEvent.focusIn(dismiss, { relatedTarget: before });
+      fireEvent.click(dismiss);
+
+      expect(before).not.toHaveFocus();
+    });
+
+    it('moves nothing when the keyboard was never inside the message', () => {
+      render(
+        <>
+          <button data-testid="before" type="button">
+            Antes
+          </button>
+          <Alert dismissible>
+            <AlertContent>Pronto.</AlertContent>
+          </Alert>
+        </>,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+      expect(screen.getByTestId('before')).not.toHaveFocus();
+    });
+
+    it('is a programmatic destination and never a tab stop', () => {
+      render(
+        <Alert data-testid="alert">
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      expect(screen.getByTestId('alert')).toHaveAttribute('tabindex', '-1');
+    });
+  });
+
+  describe('composition', () => {
+    it('lets an explicit prop beat the provider, and the provider beat the default', () => {
+      render(
+        <AlertDefaultsProvider reach="page" tone="warning">
+          <Alert data-testid="inherited">
+            <AlertContent>Um</AlertContent>
+          </Alert>
+          <Alert data-testid="stated" tone="danger">
+            <AlertContent>Dois</AlertContent>
+          </Alert>
+        </AlertDefaultsProvider>,
+      );
+
+      expect(screen.getByTestId('inherited')).toHaveAttribute('data-tone', 'warning');
+      expect(screen.getByTestId('inherited')).toHaveAttribute('data-reach', 'page');
+      expect(screen.getByTestId('stated')).toHaveAttribute('data-tone', 'danger');
+      expect(screen.getByTestId('stated')).toHaveAttribute('data-reach', 'page');
+    });
+
+    it('renders each part into the element the page means', () => {
+      render(
+        <Alert data-testid="alert" render={(props) => <aside {...props} />}>
+          <AlertContent>
+            <AlertTitle data-testid="title" render={(props) => <h3 {...props} />}>
+              Manutenção
+            </AlertTitle>
+          </AlertContent>
+        </Alert>,
+      );
+
+      expect(screen.getByTestId('alert').tagName).toBe('ASIDE');
+      expect(screen.getByTestId('title').tagName).toBe('H3');
+    });
+
+    it('runs the consumer’s own handler beside the family’s', () => {
+      const onClick = vi.fn();
+      render(
+        <Alert data-testid="alert" dismissible onClick={onClick}>
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('alert')).toHaveAttribute('hidden');
+    });
+
+    it('passes native attributes through to the element that owns them', () => {
+      render(
+        <Alert aria-describedby="hint" data-testid="alert" id="save-error" lang="pt-BR">
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>,
+      );
+
+      const alert = screen.getByTestId('alert');
+      expect(alert).toHaveAttribute('id', 'save-error');
+      expect(alert).toHaveAttribute('lang', 'pt-BR');
+      expect(alert).toHaveAttribute('aria-describedby', 'hint');
+    });
+
+    it('reaches the element through a ref rather than through a handle', () => {
+      function Probe() {
+        const [element, setElement] = useState<HTMLElement | null>(null);
+        return (
+          <>
+            <Alert ref={setElement}>
+              <AlertContent>Pronto.</AlertContent>
+            </Alert>
+            <span data-testid="tag">{element?.tagName ?? ''}</span>
+          </>
+        );
+      }
+      render(<Probe />);
+
+      expect(screen.getByTestId('tag')).toHaveTextContent('SECTION');
+    });
+  });
+});

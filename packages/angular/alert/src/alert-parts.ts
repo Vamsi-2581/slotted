@@ -1,0 +1,114 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  Directive,
+  inject,
+  ViewEncapsulation,
+} from '@angular/core';
+
+import { SlAlert } from './alert';
+import type { AlertLive } from './alert-defaults';
+
+/**
+ * The two roles that announce, and the value that does not. Both roles imply
+ * `aria-live` and `aria-atomic`, so the whole message is read rather than the
+ * word that changed, and nothing here writes either attribute by hand.
+ */
+const LIVE_ROLE: Record<AlertLive, string | null> = {
+  off: null,
+  polite: 'status',
+  assertive: 'alert',
+};
+
+/**
+ * The message itself, and the only part that announces.
+ *
+ * It is written explicitly rather than wrapped around the alert's projected
+ * content, because a box that guessed which of its children were text would be
+ * guessing about the one thing a reader hears. Fluent's `MessageBarBody` is the
+ * only surveyed implementation with the same shape, and it is the only one
+ * whose region excludes its own controls.
+ */
+@Directive({
+  selector: '[slAlertContent]',
+  standalone: true,
+  exportAs: 'slAlertContent',
+  host: {
+    'data-part': 'content',
+    '[attr.role]': 'role()',
+  },
+})
+export class SlAlertContent {
+  private readonly alert = inject(SlAlert);
+
+  protected readonly role = computed(() => LIVE_ROLE[this.alert.resolvedLive()]);
+}
+
+/**
+ * The message's name, and the box's.
+ *
+ * The element is the consumer's: a heading puts the alert in the document
+ * outline, which is right for a page banner and wrong for the alert beside a
+ * field group, and only the page knows which. Writing `<h3 slAlertTitle>` is
+ * how a page that wants one says so, and Angular needs no `render` prop to
+ * allow it.
+ */
+@Component({
+  selector: '[slAlertTitle]',
+  standalone: true,
+  exportAs: 'slAlertTitle',
+  template: '<ng-content />',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: {
+    'data-part': 'title',
+    '[attr.id]': 'alert.titleId',
+  },
+})
+export class SlAlertTitle {
+  protected readonly alert = inject(SlAlert);
+
+  constructor() {
+    this.alert.registerTitle(true);
+  }
+
+  ngOnDestroy() {
+    this.alert.registerTitle(false);
+  }
+}
+
+/** The message. Written on the consumer's own `p`, which is what prose is. */
+@Directive({
+  selector: '[slAlertDescription]',
+  standalone: true,
+  exportAs: 'slAlertDescription',
+  host: { 'data-part': 'description' },
+})
+export class SlAlertDescription {}
+
+/**
+ * The controls that act on the message, outside the region that announces: a
+ * reader hearing the message is not read the labels of two buttons in the
+ * middle of it. What goes in is the consumer's own buttons, because `button`
+ * already owns what a button is.
+ */
+@Directive({
+  selector: '[slAlertActions]',
+  standalone: true,
+  exportAs: 'slAlertActions',
+  host: { 'data-part': 'actions' },
+})
+export class SlAlertActions {}
+
+/**
+ * A mark the page supplies instead of the tone's own. It is projected into the
+ * box the family draws, so it keeps the size, the colour and the place on the
+ * message's first line that the tone's own mark would have had.
+ */
+@Directive({
+  selector: '[slAlertIcon]',
+  standalone: true,
+  exportAs: 'slAlertIcon',
+})
+export class SlAlertIcon {}

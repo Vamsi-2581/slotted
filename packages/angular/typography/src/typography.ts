@@ -10,8 +10,6 @@ export type TypographyNumeric = 'normal' | 'tabular';
 /** The six the platform has. A seventh would be a heading no browser knows. */
 export type HeadingLevelValue = 1 | 2 | 3 | 4 | 5 | 6;
 
-export const TYPOGRAPHY_STYLE_URL = '../../../styles/src/typography/typography.css';
-
 /**
  * `inherit` is the absence of a colour rather than a colour of its own, so it
  * removes the attribute and lets the surface decide.

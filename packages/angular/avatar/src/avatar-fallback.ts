@@ -1,14 +1,17 @@
 import { Directive } from '@angular/core';
 
 /**
- * Always in the template. The stylesheet takes it out of the document once the
- * picture arrives, so the decision lives in one place and matches React.
+ * Content that stands in for the picture, in place of the initials and the
+ * glyph: a company mark, a product logo, an `sl-icon`.
+ *
+ * It is a marker rather than a bare `<ng-content>` because Angular cannot ask
+ * whether anything was projected, and an avatar that wrote its initials
+ * *and* the consumer's logo into the same disc would be drawing two fallbacks.
+ * React answers the same question by looking at `children`.
  */
 @Directive({
-  selector: 'span[slAvatarFallback]',
+  selector: '[slAvatarFallback]',
   standalone: true,
-  host: {
-    'data-part': 'fallback',
-  },
+  exportAs: 'slAvatarFallback',
 })
 export class SlAvatarFallback {}

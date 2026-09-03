@@ -1,278 +1,153 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
+import contract from '../../../../specs/components/button/contract.json';
+import { SlButtonEnd, SlButtonStart } from './button-appearance';
 import { SlToggleButton } from './toggle-button';
 
-@Component({
-  imports: [SlToggleButton],
-  template: `
-    <button
-      slToggleButton
-      [(pressed)]="pressed"
-      [aria-disabled]="ariaDisabled()"
-      [disabled]="disabled()"
-      [fullWidth]="fullWidth()"
-      [size]="size()"
-      [fill]="fill()"
-      [type]="type()"
-      [variant]="variant()"
-    >
-      <span slButtonLeading>L</span>Toggle<span slButtonTrailing>T</span>
-    </button>
-  `,
-})
-class BoundHost {
-  pressed = false;
-  readonly ariaDisabled = signal<boolean | string | null>(null);
-  readonly disabled = signal(false);
-  readonly fullWidth = signal(false);
-  readonly size = signal<'sm' | 'md' | 'lg'>('md');
-  readonly fill = signal<'solid' | 'outline' | 'ghost'>('outline');
-  readonly type = signal<'button' | 'submit' | 'reset'>('button');
-  readonly variant = signal<'accent' | 'secondary' | 'success' | 'warning' | 'danger'>('secondary');
-}
+const defaults = contract.members.toggleButton.defaults;
 
 @Component({
-  imports: [SlToggleButton],
-  template: `
-    <button
-      slToggleButton
-      [pressed]="pressed()"
-      [aria-disabled]="ariaDisabled()"
-      [disabled]="disabled()"
-      (click)="onClick($event)"
-      (pressedChange)="onPressedChange($event)"
-    >
-      Controlled
-    </button>
-  `,
+  imports: [SlButtonEnd, SlButtonStart, SlToggleButton],
+  template: `<button
+    slToggleButton
+    [disabled]="disabled()"
+    [pressed]="pressed()"
+    [defaultPressed]="defaultPressed()"
+    (click)="onClick($event)"
+    (pressedChange)="onPressedChange($event)"
+  >
+    @if (withIcons()) {
+      <span slButtonStart>S</span>
+    }
+    Pin
+    @if (withIcons()) {
+      <span slButtonEnd>E</span>
+    }
+  </button>`,
 })
-class ControlledHost {
-  readonly pressed = signal(false);
-  readonly ariaDisabled = signal<boolean | string | null>(null);
+class TestHost {
   readonly disabled = signal(false);
-  readonly clickSpy = vi.fn();
-  readonly pressedChangeSpy = vi.fn();
-  readonly order: string[] = [];
-  preventClick = false;
-  destroyed = false;
-
-  onClick(event: Event) {
-    this.order.push('click');
-    if (this.preventClick) event.preventDefault();
-    this.clickSpy();
-  }
-
-  onPressedChange(pressed: boolean) {
-    this.order.push(`${this.destroyed ? 'change-after-destroy' : 'change'}:${pressed}`);
-    this.pressedChangeSpy(pressed);
-  }
+  readonly pressed = signal<boolean | undefined>(undefined);
+  readonly defaultPressed = signal(false);
+  readonly withIcons = signal(false);
+  readonly onPressedChange = vi.fn<(request: ChangeRequest<boolean>) => void>();
+  readonly onClick = vi.fn<(event: Event) => void>();
 }
 
-function click(button: HTMLButtonElement) {
-  return button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+function mount() {
+  const fixture = TestBed.createComponent(TestHost);
+  fixture.detectChanges();
+  const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  return { button, fixture, host: fixture.componentInstance };
 }
 
 describe('SlToggleButton', () => {
-  it('keeps the pressed value visible while disabled', () => {
-    const fixture = TestBed.createComponent(BoundHost);
-    fixture.componentInstance.pressed = true;
-    fixture.componentInstance.disabled.set(true);
-    fixture.detectChanges();
+  it('is a native button announced as a toggle', () => {
+    const { button } = mount();
 
-    const button = fixture.nativeElement.querySelector('button');
-    expect(button.getAttribute('data-pressed')).toBe('');
-    expect(button.getAttribute('data-disabled')).toBe('');
-    expect(button.hasAttribute('data-state')).toBe(false);
+    expect(button.localName).toBe(contract.members.toggleButton.nativeElement);
+    expect(button.getAttribute('data-ui')).toBe(contract.ui);
+    expect(button.getAttribute('aria-pressed')).toBe(String(defaults.defaultPressed));
+    expect(button.getAttribute('data-tone')).toBe(defaults.tone);
+    expect(button.getAttribute('data-variant')).toBe(defaults.variant);
   });
 
-  it('renders defaults, native type, component identity, and labeled projection', async () => {
-    const fixture = TestBed.createComponent(BoundHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    expect(button.type).toBe('button');
-    expect(button.dataset['slottedComponent']).toBe('toggle-button');
-    expect(button.dataset['variant']).toBe('secondary');
-    expect(button.dataset['fill']).toBe('outline');
-    expect(button.dataset['size']).toBe('md');
-    expect(button.getAttribute('aria-pressed')).toBe('false');
-    expect(button.querySelector('[data-part="leading"]')?.textContent).toContain('L');
-    expect(button.querySelector('[data-part="label"]')?.textContent).toContain('Toggle');
-    expect(button.querySelector('[data-part="trailing"]')?.textContent).toContain('T');
-  });
-
-  it('reflects fullWidth as a data attribute', async () => {
-    const fixture = TestBed.createComponent(BoundHost);
-    fixture.componentInstance.fullWidth.set(true);
-    await fixture.whenStable();
-
-    expect(
-      (fixture.nativeElement.querySelector('button') as HTMLButtonElement).getAttribute(
-        'data-full-width',
-      ),
-    ).toBe('');
-  });
-
-  it('uses the banana binding to update the consumer pressed value', async () => {
-    const fixture = TestBed.createComponent(BoundHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    click(button);
-    await fixture.whenStable();
-
-    expect(fixture.componentInstance.pressed).toBe(true);
-    expect(button.getAttribute('aria-pressed')).toBe('true');
-    expect(button.dataset['pressed']).toBe('');
-  });
-
-  it('requests the next pressed value without writing the controlled input', async () => {
-    const fixture = TestBed.createComponent(ControlledHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    click(button);
-
-    expect(fixture.componentInstance.pressedChangeSpy).toHaveBeenCalledWith(true);
-    expect(fixture.componentInstance.order).toEqual(['click', 'change:true']);
-    expect(fixture.componentInstance.pressed()).toBe(false);
-    expect(button.getAttribute('aria-pressed')).toBe('false');
-    expect(button.dataset['pressed']).toBeUndefined();
-  });
-
-  it('requests false from a true controlled input while the DOM remains true until the host updates', async () => {
-    const fixture = TestBed.createComponent(ControlledHost);
-    fixture.componentInstance.pressed.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    click(button);
-
-    expect(fixture.componentInstance.pressedChangeSpy).toHaveBeenCalledWith(false);
-    expect(button.getAttribute('aria-pressed')).toBe('true');
-    expect(button.dataset['pressed']).toBe('');
-  });
-
-  it('lets a consumer cancel a click before pressedChange and preserves output ordering', async () => {
-    const fixture = TestBed.createComponent(ControlledHost);
-    fixture.componentInstance.preventClick = true;
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    click(button);
-
-    expect(fixture.componentInstance.clickSpy).toHaveBeenCalledOnce();
-    expect(fixture.componentInstance.pressedChangeSpy).not.toHaveBeenCalled();
-    expect(fixture.componentInstance.order).toEqual(['click']);
-  });
-
-  it('actively blocks cancelable activation while explicitly disabled and gives disabled state priority over pressed', async () => {
-    const fixture = TestBed.createComponent(ControlledHost);
-    fixture.componentInstance.pressed.set(true);
-    fixture.componentInstance.disabled.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    const laterCapture = vi.fn();
-    button.addEventListener('click', laterCapture, true);
-    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+  it('owns its state when the consumer passes only an initial value', () => {
+    const { button, fixture } = mount();
 
     button.click();
-    button.dispatchEvent(event);
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+    expect(button.getAttribute('data-pressed')).toBe('');
+  });
 
+  it('never moves state the consumer owns', () => {
+    const { button, fixture, host } = mount();
+    host.pressed.set(false);
+    fixture.detectChanges();
+
+    button.click();
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+    expect(host.onPressedChange).toHaveBeenCalledOnce();
+  });
+
+  it('moves when the consumer hands the new value back', () => {
+    const { button, fixture, host } = mount();
+    host.pressed.set(false);
+    host.onPressedChange.mockImplementation((request) => host.pressed.set(request.value));
+    fixture.detectChanges();
+
+    button.click();
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('carries the value, the value it replaces, the reason and the event', () => {
+    const { button, fixture, host } = mount();
+    host.defaultPressed.set(true);
+    fixture.detectChanges();
+
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    const request = host.onPressedChange.mock.calls[0]?.[0];
+    expect(request?.value).toBe(false);
+    expect(request?.previous).toBe(true);
+    expect(request?.reason).toBe('pointer');
+    expect(request?.source).toBeDefined();
+  });
+
+  it('says keyboard when the click carried no pointer', () => {
+    const { button, host } = mount();
+
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+    expect(host.onPressedChange.mock.calls[0]?.[0].reason).toBe('keyboard');
+  });
+
+  it('commits nothing when the request is cancelled', () => {
+    const { button, fixture, host } = mount();
+    host.onPressedChange.mockImplementation((request) => request.cancel());
+    fixture.detectChanges();
+
+    button.click();
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('treats a refused activation as no activation', () => {
+    const { button, fixture, host } = mount();
+    host.onClick.mockImplementation((event) => event.preventDefault());
+    fixture.detectChanges();
+
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(host.onPressedChange).not.toHaveBeenCalled();
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('leaves the disabled state to the platform and keeps saying whether it is on', () => {
+    const { button, fixture, host } = mount();
+    host.defaultPressed.set(true);
+    host.disabled.set(true);
+    fixture.detectChanges();
+
+    button.click();
+    fixture.detectChanges();
     expect(button.disabled).toBe(true);
-    expect(button.dataset['disabled']).toBe('');
-    expect(event.defaultPrevented).toBe(true);
-    expect(laterCapture).not.toHaveBeenCalled();
-    expect(fixture.componentInstance.clickSpy).not.toHaveBeenCalled();
-    expect(fixture.componentInstance.pressedChangeSpy).not.toHaveBeenCalled();
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+    expect(button.getAttribute('data-disabled')).toBe('');
+    expect(host.onPressedChange).not.toHaveBeenCalled();
   });
 
-  it.each([true, 'true'] as const)(
-    'blocks raw aria-disabled %s before later capture and consumer handlers',
-    async (ariaDisabled) => {
-      const fixture = TestBed.createComponent(ControlledHost);
-      fixture.componentInstance.ariaDisabled.set(ariaDisabled);
-      await fixture.whenStable();
-      const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-      const laterCapture = vi.fn();
-      button.addEventListener('click', laterCapture, true);
-      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+  it('renders the content parts the contract names', () => {
+    const { button, fixture, host } = mount();
+    host.withIcons.set(true);
+    fixture.detectChanges();
 
-      button.dispatchEvent(event);
-
-      expect(event.defaultPrevented).toBe(true);
-      expect(button.getAttribute('aria-disabled')).toBe(String(ariaDisabled));
-      expect(button.disabled).toBe(false);
-      expect(button.getAttribute('aria-disabled')).toBe(String(ariaDisabled));
-      expect(button.dataset['disabled']).toBeUndefined();
-      expect(laterCapture).not.toHaveBeenCalled();
-      expect(fixture.componentInstance.clickSpy).not.toHaveBeenCalled();
-      expect(fixture.componentInstance.pressedChangeSpy).not.toHaveBeenCalled();
-    },
-  );
-
-  it.each([false, 'false'] as const)(
-    'keeps raw aria-disabled %s interactive without forcing disabled state',
-    async (ariaDisabled) => {
-      const fixture = TestBed.createComponent(ControlledHost);
-      fixture.componentInstance.ariaDisabled.set(ariaDisabled);
-      await fixture.whenStable();
-      const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-      click(button);
-
-      expect(button.disabled).toBe(false);
-      expect(button.dataset['disabled']).toBeUndefined();
-      expect(fixture.componentInstance.clickSpy).toHaveBeenCalledOnce();
-      expect(fixture.componentInstance.pressedChangeSpy).toHaveBeenCalledWith(true);
-    },
-  );
-
-  it('emits synchronously for rapid controlled clicks without changing the input', async () => {
-    const fixture = TestBed.createComponent(ControlledHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    click(button);
-    click(button);
-
-    expect(fixture.componentInstance.pressedChangeSpy).toHaveBeenCalledTimes(2);
-    expect(fixture.componentInstance.pressedChangeSpy).toHaveBeenNthCalledWith(1, true);
-    expect(fixture.componentInstance.pressedChangeSpy).toHaveBeenNthCalledWith(2, true);
-    expect(fixture.componentInstance.pressed()).toBe(false);
-  });
-
-  it('does not defer an output until after destruction', async () => {
-    const fixture = TestBed.createComponent(ControlledHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    click(button);
-    fixture.destroy();
-    fixture.componentInstance.destroyed = true;
-    await Promise.resolve();
-
-    expect(fixture.componentInstance.pressedChangeSpy).toHaveBeenCalledOnce();
-    expect(fixture.componentInstance.order).toEqual(['click', 'change:true']);
-  });
-
-  it('removes its capture listener on destroy without disturbing a focused native button', async () => {
-    const fixture = TestBed.createComponent(ControlledHost);
-    fixture.componentInstance.ariaDisabled.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    button.focus();
-    fixture.destroy();
-    const observer = vi.fn((event: Event) => event.preventDefault());
-    button.addEventListener('click', observer, true);
-    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-
-    button.dispatchEvent(event);
-
-    expect(document.activeElement).toBe(button);
-    expect(observer).toHaveBeenCalledOnce();
-    expect(event.defaultPrevented).toBe(true);
+    expect(
+      [...button.querySelectorAll('[data-part]')].map((part) => part.getAttribute('data-part')),
+    ).toEqual(['start', 'label', 'end']);
   });
 });

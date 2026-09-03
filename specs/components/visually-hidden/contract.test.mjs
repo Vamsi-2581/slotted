@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { assertContractShape } from '../../contract.schema.mjs';
+import { assertContractShape, MUTABLE_CAPABILITIES } from '../../contract.schema.mjs';
 
 const contract = JSON.parse(await readFile(new URL('./contract.json', import.meta.url), 'utf8'));
 
@@ -14,6 +14,10 @@ test('declares one member, because the family is one primitive', () => {
   assert.equal(contract.family, 'visually-hidden');
   assert.deepEqual(Object.keys(contract.members), ['visuallyHidden']);
   assert.ok(!('axes' in contract), 'the family has no appearance axes');
+});
+
+test('names itself in the DOM, so a consumer has one selector to rely on', () => {
+  assert.equal(contract.ui, 'visually-hidden');
 });
 
 test('renders a span, the element that adds no semantics of its own', () => {
@@ -31,7 +35,25 @@ test('exposes focusable content as its only capability', () => {
   assert.deepEqual(contract.members.visuallyHidden.defaults, { focusable: false });
 });
 
+/**
+ * `focusable` is a decision the consumer makes once, not a value that moves:
+ * the browser owns focus, and the component neither reads it nor asks for it
+ * to change. A state model here would name a request no one can send.
+ */
+test('declares no state model, because nothing the family holds is mutable', () => {
+  const mutable = contract.members.visuallyHidden.capabilities.filter((capability) =>
+    MUTABLE_CAPABILITIES.includes(capability),
+  );
+  assert.deepEqual(mutable, []);
+  assert.ok(!('stateModel' in contract));
+});
+
 test('names one scenario page for the family', () => {
   assert.deepEqual(Object.keys(contract.scenarios), ['visuallyHidden']);
-  assert.deepEqual(contract.scenarios.visuallyHidden, ['playground', 'focusable', 'accessibility']);
+  assert.deepEqual(contract.scenarios.visuallyHidden, [
+    'playground',
+    'focusable',
+    'layout',
+    'accessibility',
+  ]);
 });

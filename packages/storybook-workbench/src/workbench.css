@@ -13,7 +13,17 @@
   --slotted-workbench-accent: #4656c9;
   --slotted-workbench-code: #11151d;
   --slotted-workbench-scene-gap: clamp(20px, 2.6vw, 34px);
-  font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif;
+
+  /**
+   * Mirrors `fonts.ts`, which explains why `ui-monospace` is absent from the
+   * code stack. `workbench.styles.test.mjs` holds the two copies equal.
+   */
+  --slotted-workbench-font-sans: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif;
+  --slotted-workbench-font-code:
+    'JetBrains Mono Variable', 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
+    monospace;
+
+  font-family: var(--slotted-workbench-font-sans);
 }
 
 [data-slotted-scheme='dark'] {
@@ -38,13 +48,19 @@
   background: var(--slotted-workbench-canvas);
   color: var(--slotted-workbench-text);
   min-block-size: 100vh;
-  padding: clamp(20px, 3.25vw, 44px);
+  padding: 24px;
 }
 
+/**
+ * A story inside a reference page still needs a margin. Zero was the correction
+ * for a story that filled the viewport, and it overshot: the demonstration then
+ * started on the canvas border, and every scene header and every stage edge sat
+ * against it.
+ */
 .slotted-workbench-preview--embedded {
   background: transparent;
   min-block-size: 0;
-  padding: 0;
+  padding: 16px;
 }
 
 .slotted-workbench-preview ::selection {
@@ -117,6 +133,45 @@
   color: var(--slotted-workbench-muted);
   font-size: 13.5px;
   line-height: 1.62;
+}
+
+/**
+ * The page's prose styling stops at the demonstration.
+ *
+ * `.slotted-reference-page p` is the reference page's own paragraph: muted,
+ * 13.5 pixels, and right for the sentence under a heading. It was also reaching
+ * every paragraph a family renders inside a canvas — `alert`'s description is a
+ * `p`, and on its own reference page it was drawn in the workbench's muted grey
+ * at the workbench's own type size. On a `solid` alert that is grey on a
+ * saturated ground: the one place a reader looks to judge the family was
+ * showing a contrast the family does not ship.
+ *
+ * A layer cannot fix this from the component's side. `@layer slotted.components`
+ * loses to every unlayered rule by construction, which is what lets an
+ * application retune the library — so the page that hosts the demonstration is
+ * the only place that can stand out of its way.
+ *
+ * `inherit` was the first answer to that, and it answered the wrong question:
+ * it does not restore the family's own declaration, it takes the workbench's.
+ * `inline-message` is a `p`, so a field error was drawn at the page's 16 pixels
+ * in the page's ink instead of at 12 pixels in the danger ink — the one place a
+ * reader opens to judge an error message showed neither its size nor its
+ * colour, and its mark was the only part of it still painted in red.
+ * `revert-layer` rolls each property back to `slotted.components` instead, so
+ * the family paints what it declares and inherits what it leaves open.
+ *
+ * The reset is addressed to library elements — a `[data-ui]` root, and anything
+ * inside one — so a demonstration's own prose in the same stage keeps the
+ * page's voice. Two attribute selectors is one more than
+ * `.slotted-reference-page p` carries, which is the rule this has to outrank.
+ */
+.slotted-workbench-preview :is([data-ui], [data-ui] *),
+.slotted-reference-page :is([data-ui], [data-ui] *) {
+  color: revert-layer;
+  font-family: revert-layer;
+  font-size: revert-layer;
+  font-weight: revert-layer;
+  line-height: revert-layer;
 }
 
 .slotted-reference-page ul {
@@ -195,7 +250,19 @@
 .slotted-demo-grid {
   display: grid;
   gap: var(--slotted-workbench-scene-gap);
+  grid-auto-rows: auto;
   grid-template-columns: repeat(var(--slotted-demo-columns, 2), minmax(0, 1fr));
+}
+
+/**
+ * A scene that has to be read at the full width of the page asks for one
+ * column. Only `3` was answered before this, so a story that asked for `1`
+ * silently received the default two and was reviewed at half the width it
+ * requested — which is how a layout family's reflow demonstration collapsed to
+ * the same picture in every column count.
+ */
+.slotted-demo-grid[data-columns='1'] {
+  --slotted-demo-columns: 1;
 }
 
 .slotted-demo-grid[data-columns='3'] {
@@ -203,10 +270,28 @@
 }
 
 .slotted-demo-scene {
+  display: grid;
   min-inline-size: 0;
 }
 
-.slotted-demo-scene[data-span='full'] {
+/**
+ * Two scenes side by side start their stages on the same line, whatever their
+ * captions say. Without the subgrid a three-line note pushed one stage lower
+ * than the one beside it, and the reader compared two components that were not
+ * on the same baseline — which is the one thing a comparison must not do.
+ *
+ * The alignment is asked for only where a grid can answer it. `subgrid` means
+ * nothing to an element that is not a grid item, and a section holding a single
+ * scene lays its body out as a block: there the declaration stopped the stage
+ * from growing past its own `min-block-size`, and a matrix five rows tall was
+ * drawn out of an 88-pixel box and over the two scenes beneath it.
+ */
+.slotted-demo-grid > .slotted-demo-scene {
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+}
+
+.slotted-demo-grid > .slotted-demo-scene[data-span='full'] {
   grid-column: 1 / -1;
 }
 
@@ -231,20 +316,200 @@
   margin-block-start: 3px;
 }
 
+/**
+ * The stage is a layout primitive, not a box with padding. Two demonstrations
+ * placed side by side used to touch unless the story remembered to wrap them
+ * in a row or a stack, and the ones that forgot were reviewed as if the
+ * component had no margin of its own. The gap is the stage's, so forgetting is
+ * no longer possible; `data-layout` chooses the direction, and a story that
+ * needs a different distance sets `--slotted-demo-gap` rather than writing an
+ * inline style.
+ */
 .slotted-demo-stage {
   align-items: center;
   background: var(--slotted-workbench-panel-subtle);
   border: 1px solid var(--slotted-workbench-border);
   border-radius: 8px;
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--slotted-demo-gap, 12px);
   inline-size: 100%;
   min-block-size: 88px;
   min-inline-size: 0;
   padding: clamp(16px, 2vw, 22px);
 }
 
+/**
+ * Everything placed on a stage shrinks to it. A story that wraps a wide thing
+ * — a matrix that declares a 760-pixel minimum, a table, a long row — in a
+ * plain `div` hands the stage a flex item whose `min-width` is `auto`, and the
+ * item then refuses to shrink and reaches out over whatever sits beside it.
+ * The stage answers for its own children rather than trusting each story to
+ * remember.
+ */
+.slotted-demo-stage > * {
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
 .slotted-demo-stage[data-align='start'] {
   align-items: flex-start;
+}
+
+/** A column of examples: every child on its own line, none of them stretched. */
+.slotted-demo-stage[data-layout='stack'] {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+/**
+ * A column whose children fill it, for a family whose members are blocks.
+ *
+ * `stack` is a column of things that keep their own width, which is right for a
+ * chip or a key and wrong for a message: `alert` declares
+ * `container-type: inline-size`, so its intrinsic width is zero by design, and
+ * on a stage that shrink-wraps its children every alert collapsed to one
+ * character wide and broke its text one letter per line. The collapse then
+ * travelled outwards — a painted surface holding one shrank with it — which is
+ * why this is a layout of its own rather than an override each story writes.
+ */
+.slotted-demo-stage[data-layout='block'] {
+  align-items: stretch;
+  flex-direction: column;
+  /**
+   * A column of blocks never wraps, and saying so is what keeps the stage's
+   * height honest. The stage is a grid item, so the grid hands it a definite
+   * block size; a wrapping column flex container with a definite main size and
+   * a stretched item resolves that circularity by growing — measured at 1292
+   * pixels for a demonstration whose content is 156 — and the whole scene grew
+   * with it. Nothing here wraps, so nothing here needs to.
+   */
+  flex-wrap: nowrap;
+}
+
+/** Running text, where the component is read inside a sentence. */
+.slotted-demo-stage[data-layout='prose'] {
+  align-items: stretch;
+  display: block;
+  font-family: var(--slotted-font-family-sans);
+  font-size: var(--slotted-font-size-md);
+  line-height: var(--slotted-line-height-md);
+}
+
+.slotted-demo-stage[data-layout='prose'] > * + * {
+  margin-block-start: var(--slotted-demo-gap, 12px);
+}
+
+.slotted-demo-stage[data-layout='prose'] p {
+  margin: 0;
+  max-inline-size: 62ch;
+}
+
+/**
+ * A surface to demonstrate on, so a story never reaches for an inline style to
+ * paint one. Every value is a foundation token, which is also what makes the
+ * demonstration answer the scheme switch in the toolbar.
+ */
+/**
+ * A painted ground examples stand on — and, like the stage, it owns the
+ * distance between them. Without the gap four shortcuts placed on an inverse
+ * surface touched each other: a surface was a plain block, and JSX siblings
+ * written on separate lines produce no whitespace text node to fall back on.
+ * The rule the stage states is that nothing placed on a ground can touch
+ * anything else; a surface is a ground.
+ */
+.slotted-demo-surface {
+  align-items: center;
+  border-radius: var(--slotted-radius-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--slotted-demo-gap, 12px);
+  padding: var(--slotted-space-5);
+}
+
+.slotted-demo-surface[data-surface='inverse'] {
+  background: var(--slotted-surface-inverse);
+  color: var(--slotted-text-inverse);
+}
+
+.slotted-demo-surface[data-surface='raised'] {
+  background: var(--slotted-surface-raised);
+  border: 1px solid var(--slotted-border-subtle);
+  color: var(--slotted-text);
+}
+
+.slotted-demo-surface[data-surface='sunken'] {
+  background: var(--slotted-surface-sunken);
+  color: var(--slotted-text);
+}
+
+/**
+ * A region that states its own colour scheme rather than inverting one surface.
+ *
+ * The two are not the same ground, and `alert` is where the difference stopped
+ * being academic. `--slotted-surface-inverse` flips one token and leaves every
+ * tone role calibrated against the page it came from, so a variant that borrows
+ * its ground borrows a foreground the theme never measured against that ground
+ * — the words go quiet. A region carrying `data-slotted-scheme` restates every
+ * token instead, which is what an application actually writes for a dark
+ * sidebar, and it is the ground a family has to be demonstrated on to show that
+ * its quiet variant survives one.
+ */
+.slotted-demo-surface[data-surface='scheme'] {
+  background: var(--slotted-surface);
+  border: 1px solid var(--slotted-border-subtle);
+  color: var(--slotted-text);
+}
+
+/**
+ * The painted ground as a column. A surface is a row by default, which is right
+ * for the chips and controls it was written for and wrong for a family whose
+ * members are blocks: two alerts side by side in a flex row are two alerts at
+ * half the width they would ever have in a page.
+ */
+.slotted-demo-surface[data-flow='stack'] {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+/** A table-shaped context, for a family whose real home is a dense row. */
+.slotted-demo-rows {
+  border: 1px solid var(--slotted-border-subtle);
+  border-radius: var(--slotted-radius-md);
+  color: var(--slotted-text);
+  display: grid;
+  font-family: var(--slotted-font-family-sans);
+  font-size: var(--slotted-font-size-sm);
+  grid-template-columns: 1fr auto;
+  inline-size: 100%;
+  line-height: var(--slotted-line-height-sm);
+}
+
+.slotted-demo-rows > * {
+  align-items: center;
+  display: flex;
+  padding: var(--slotted-space-4) var(--slotted-space-5);
+}
+
+.slotted-demo-rows > *:nth-child(2n) {
+  color: var(--slotted-text-muted);
+  justify-content: flex-end;
+}
+
+.slotted-demo-rows > *:not(:nth-last-child(-n + 2)) {
+  border-block-end: 1px solid var(--slotted-border-subtle);
+}
+
+/**
+ * A row whose item is unavailable, marked on the label and reaching the value
+ * beside it. A family that lives at the end of a menu row can only be shown
+ * honestly next to a label that dims with it — `kbd`'s bare variant takes the
+ * colour of the text around it, and a row that dimmed the shortcut alone
+ * demonstrated the opposite of what the family does.
+ */
+.slotted-demo-rows > [data-disabled],
+.slotted-demo-rows > [data-disabled] + * {
+  color: var(--slotted-disabled-foreground);
 }
 
 .slotted-demo-row {
@@ -263,8 +528,283 @@
   min-inline-size: 0;
 }
 
+/**
+ * A column of examples that is a real list. A set of choices is a list, and a
+ * family whose root can be substituted for a `li` needs somewhere valid to put
+ * it — but a `ul` brings a marker and an inset with it, and a stray bullet in a
+ * demonstration is the kind of defect a reader finds and a test does not.
+ */
+.slotted-demo-list {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  list-style: none;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
 .slotted-demo-measure {
   inline-size: min(100%, 360px);
+}
+
+/**
+ * A box that stands in for the viewport, so a family that pins itself to an
+ * edge can be demonstrated inside a page rather than over it.
+ *
+ * `contain: paint` is the whole mechanism: it makes this element the
+ * containing block for a fixed-position descendant, which is otherwise the
+ * viewport itself. Without it a page-level progress bar renders once across
+ * the top of the reference page, over the navigation, and every scene that
+ * declares one draws in the same place.
+ *
+ * It is a preview of the composition rather than the composition: in an
+ * application the containing block *is* the viewport, and the caption of any
+ * scene using this has to say so.
+ */
+.slotted-demo-viewport {
+  background: var(--slotted-surface);
+  block-size: 4rem;
+  border: 1px dashed var(--slotted-border-subtle);
+  border-radius: 6px;
+  contain: paint;
+  inline-size: 100%;
+  position: relative;
+}
+
+/**
+ * One demonstration: caption, canvas, source. The three belong together and
+ * are spaced as one unit, so a page of eight demonstrations reads as eight
+ * things rather than twenty-four.
+ */
+.slotted-reference-scenes {
+  display: grid;
+  gap: calc(var(--slotted-workbench-scene-gap) * 1.4);
+}
+
+.slotted-reference-scene__header {
+  margin-block-end: 10px;
+}
+
+.slotted-reference-scene__header h3 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.slotted-reference-scene__header p {
+  color: var(--slotted-workbench-muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin: 4px 0 0;
+  max-inline-size: 68ch;
+}
+
+.slotted-reference-scene .slotted-code-drawer {
+  margin-block-start: 10px;
+}
+
+.slotted-reference-import {
+  display: grid;
+}
+
+/**
+ * An import statement is one long line and a table cell can hold a token
+ * longer than its column. Both used to run past the right edge of the page,
+ * where a scroll container clipped them without saying so — the reader saw a
+ * sentence that stopped mid-word.
+ *
+ * The highlighter ships its own block; what it does not ship is a guarantee
+ * that the line wraps rather than disappearing under the edge.
+ *
+ * The `code` inside needs the rule as much as the `pre` does, and the first
+ * version of this fix gave it only to the `pre`. The docs theme sets
+ * `white-space: pre` on the inner element, which beats inheritance, so a
+ * hundred-character import grew the block to 771 pixels inside a 710-pixel
+ * column and the last words of it were clipped by an ancestor. One family's
+ * page showed the defect; every page with a long import had it.
+ */
+.slotted-reference-import pre,
+.slotted-reference-import pre code {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/**
+ * The highlighted block sits inside the drawer, so the drawer's own corner and
+ * ground stay the ones the reader sees. Its padding is the drawer's decision:
+ * code that starts on the border of its box is code nobody can read the first
+ * character of.
+ */
+/**
+ * The palette the local highlighter paints with. One colour per kind, chosen
+ * against the code ground rather than inherited from a theme that only exists
+ * inside a rendered docs page.
+ */
+.slotted-code-drawer__source [data-token='comment'],
+.slotted-reference-import [data-token='comment'] {
+  color: #71717a;
+}
+
+.slotted-code-drawer__source [data-token='string'],
+.slotted-reference-import [data-token='string'] {
+  color: #a3e635;
+}
+
+.slotted-code-drawer__source [data-token='keyword'],
+.slotted-reference-import [data-token='keyword'] {
+  color: #c084fc;
+}
+
+.slotted-code-drawer__source [data-token='tag'],
+.slotted-reference-import [data-token='tag'] {
+  color: #60a5fa;
+}
+
+.slotted-code-drawer__source [data-token='attr'],
+.slotted-reference-import [data-token='attr'] {
+  color: #fbbf24;
+}
+
+.slotted-code-drawer__source [data-token='property'],
+.slotted-reference-import [data-token='property'] {
+  color: #67e8f9;
+}
+
+.slotted-code-drawer__source [data-token='number'],
+.slotted-reference-import [data-token='number'] {
+  color: #fda4af;
+}
+
+.slotted-code-drawer__source,
+.slotted-reference-import pre {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font: 12.5px/1.65 var(--slotted-workbench-font-code) !important;
+  margin: 0 !important;
+  padding: 16px 18px 20px !important;
+  tab-size: 2;
+}
+
+.slotted-code-drawer__source {
+  overflow: auto;
+}
+
+/**
+ * The block declares the monospaced family; nothing inside it inherited that.
+ * The user-agent sheet gives `<code>` its own `font-family: monospace`, and the
+ * docs theme gives every highlighted token span its own `fontBase` — the sans
+ * stack. Both beat inheritance, so the snippet a reader copies was set in a
+ * proportional face: `import` and `<Button` never lined up under each other,
+ * which is the one thing a code block is for.
+ */
+.slotted-code-drawer__source code,
+.slotted-code-drawer__source code *,
+.slotted-reference-import pre code,
+.slotted-reference-import pre code * {
+  font: inherit;
+}
+
+.slotted-code-drawer__source > *,
+.slotted-reference-import > * {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+/**
+ * The highlighter offers its own copy button, positioned over the corner of a
+ * block it assumes is its own. Inside these two it lands half outside the
+ * rounded corner; the drawer already carries a copy button that works.
+ */
+.slotted-code-drawer__source button,
+.slotted-reference-import button {
+  display: none !important;
+}
+
+.slotted-reference-import {
+  background: var(--slotted-workbench-code);
+  border-radius: 8px;
+  color: #fafafa;
+  overflow: clip;
+}
+
+/**
+ * A long token breaks; a column heading does not. Allowing both to break
+ * anywhere collapsed every column to its narrowest word — "ELE MEN T" over
+ * three lines — and left the sentence in the last column no room at all.
+ */
+.slotted-api-table th,
+.slotted-token-table th {
+  white-space: nowrap;
+}
+
+.slotted-api-table td code,
+.slotted-token-table td code {
+  overflow-wrap: anywhere;
+}
+
+/**
+ * The first column holds a part name or a prop name, and breaking one of those
+ * in the middle — `data-part="ro` on one line, `ot"` on the next — is worse
+ * than the column being a little wider than its neighbours.
+ */
+.slotted-api-table td:first-child,
+.slotted-token-table td:first-child {
+  min-inline-size: 17ch;
+}
+
+/**
+ * The same argument one column over, and the reason it was missed is that no
+ * family had a long type until one did: `Ref<HTMLSpanElement | HTMLDivElement>`
+ * met a column with no floor and `overflow-wrap: anywhere`, and came out as a
+ * vertical ribbon one character wide and four hundred pixels tall. The table
+ * already scrolls; a column that is too narrow to read does not.
+ */
+.slotted-api-table td:nth-child(2) {
+  min-inline-size: 20ch;
+}
+
+.slotted-api-table td:last-child,
+.slotted-token-table td:last-child {
+  min-inline-size: 26ch;
+}
+
+/**
+ * Three corrections, all found on one rendered page rather than in this file.
+ *
+ * The padding carries `!important` for the reason the code block above it
+ * does: the docs theme resets a `dl` and wins on specificity, so the labels
+ * sat flush against the container's own edge with no inset at all.
+ *
+ * `minmax(0, 1fr)` rather than `1fr`, because a `fr` track keeps a min-content
+ * floor: a value naming three selectors made the row wider than the block and
+ * pushed the label out of line with it.
+ *
+ * `baseline`, so a label sits on the same line as the value it names instead
+ * of on the bottom of a taller row.
+ */
+.slotted-reference-import__facts {
+  align-items: baseline;
+  border-block-start: 1px solid #27272a;
+  display: grid;
+  font-size: 12px;
+  gap: 4px 14px;
+  grid-template-columns: auto minmax(0, 1fr);
+  margin: 0;
+  padding: 12px 18px 14px !important;
+}
+
+.slotted-reference-import__facts dt {
+  color: #a1a1aa;
+}
+
+.slotted-reference-import__facts dd {
+  margin: 0;
 }
 
 .slotted-split-action {
@@ -402,18 +942,27 @@
 
 .slotted-api-table code,
 .slotted-token-table code {
-  font:
-    11.5px/1.5 'JetBrains Mono Variable',
-    ui-monospace,
-    monospace;
+  font: 11.5px/1.5 var(--slotted-workbench-font-code);
 }
 
+/**
+ * The drawer is a quiet row until it is opened. Nine demonstrations each
+ * followed by a black slab made the page read as code with pictures between it,
+ * so the closed state takes the page's own ground and only the source is dark.
+ */
 .slotted-code-drawer {
-  background: var(--slotted-workbench-code);
+  background: var(--slotted-workbench-panel);
+  border: 1px solid var(--slotted-workbench-border);
   border-radius: 8px;
-  color: #fafafa;
+  color: var(--slotted-workbench-text);
   inline-size: 100%;
   overflow: clip;
+}
+
+.slotted-code-drawer[open] {
+  background: var(--slotted-workbench-code);
+  border-color: var(--slotted-workbench-code);
+  color: #fafafa;
 }
 
 .slotted-code-drawer + .slotted-code-drawer {
@@ -425,7 +974,11 @@
   font-size: 12px;
   font-weight: 660;
   list-style-position: inside;
-  padding: 12px 14px;
+  padding: 11px 14px;
+}
+
+.slotted-code-drawer:not([open]) summary:hover {
+  background: var(--slotted-workbench-panel-subtle);
 }
 
 .slotted-code-drawer summary:hover,
@@ -464,10 +1017,7 @@
 }
 
 .slotted-code-drawer pre {
-  font:
-    12.5px/1.65 'JetBrains Mono Variable',
-    ui-monospace,
-    monospace;
+  font: 12.5px/1.65 var(--slotted-workbench-font-code);
   margin: 0;
   overflow: auto;
   padding: 16px 18px 20px;

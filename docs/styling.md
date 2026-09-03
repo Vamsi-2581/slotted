@@ -68,7 +68,7 @@ so a single class defeats any library selector:
 
 ```css
 @layer app {
-  .checkout .slotted-button {
+  .checkout [data-ui='button'] {
     border-radius: 0;
   }
 }

@@ -1,207 +1,145 @@
-import { createRef } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/button/contract.json';
 import { ButtonLink } from './button-link';
 
+const defaults = contract.members.buttonLink.defaults;
+
 describe('ButtonLink', () => {
-  it('renders a native anchor and forwards anchor props and ref', () => {
-    const ref = createRef<HTMLAnchorElement>();
-    render(
-      <ButtonLink ref={ref} href="/settings" target="_blank">
-        Settings
-      </ButtonLink>,
-    );
+  it('is an anchor wearing the action surface', () => {
+    render(<ButtonLink href="/settings">Settings</ButtonLink>);
     const link = screen.getByRole('link', { name: 'Settings' });
+
     expect(link.localName).toBe(contract.members.buttonLink.nativeElement);
+    expect(link).toHaveAttribute('data-ui', contract.ui);
+    expect(link).toHaveAttribute('data-part', 'root');
     expect(link).toHaveAttribute('href', '/settings');
+    expect(link).toHaveAttribute('data-tone', defaults.tone);
+    expect(link).toHaveAttribute('data-variant', defaults.variant);
+  });
+
+  it('forwards native anchor attributes and events', () => {
+    const onClick = vi.fn();
+    render(
+      <ButtonLink download href="/report.pdf" onClick={onClick} rel="noreferrer" target="_blank">
+        Report
+      </ButtonLink>,
+    );
+    const link = screen.getByRole('link', { name: 'Report' });
+
+    fireEvent.click(link);
+    expect(onClick).toHaveBeenCalledOnce();
     expect(link).toHaveAttribute('target', '_blank');
-    expect(ref.current).toBe(link);
+    expect(link).toHaveAttribute('rel', 'noreferrer');
+    expect(link).toHaveAttribute('download');
   });
 
-  it('suppresses disabled navigation before consumer handlers', () => {
-    const onClick = vi.fn();
-    const onKeyDown = vi.fn();
+  /**
+   * The destination is what makes an anchor navigate, and a middle click or a
+   * modified click never reaches a `click` handler. Blocking the handler alone
+   * would leave a disabled link that still opens in a new tab.
+   */
+  it('has no destination at all when it is disabled', () => {
     render(
-      <ButtonLink disabled href="/settings" onClick={onClick} onKeyDown={onKeyDown}>
+      <ButtonLink disabled href="/settings">
         Settings
       </ButtonLink>,
     );
-    const link = screen.getByText('Settings').closest('a');
+    const link = screen.getByRole('link', { name: 'Settings' });
+
+    expect(link).not.toHaveAttribute('href');
     expect(link).toHaveAttribute('aria-disabled', 'true');
-    expect(link).toHaveAttribute('tabindex', '-1');
-    fireEvent.click(link!);
-    fireEvent.keyDown(link!, { key: 'Enter' });
-    expect(onClick).not.toHaveBeenCalled();
-    expect(onKeyDown).not.toHaveBeenCalled();
+    expect(link).toHaveAttribute('data-disabled', '');
   });
 
-  it('honors an explicit disabled tab index', () => {
+  it('stays reachable by keyboard while it is disabled', () => {
     render(
-      <ButtonLink disabled href="/settings" tabIndex={0}>
-        Settings
-      </ButtonLink>,
-    );
-    expect(screen.getByText('Settings').closest('a')).toHaveAttribute('tabindex', '0');
-  });
-
-  it('passes complete root props to a router-owned link', () => {
-    const ref = createRef<HTMLAnchorElement>();
-    render(
-      <ButtonLink
-        ref={ref}
-        render={(rootProps) => <a href="/router" {...rootProps} data-router-link="true" />}
-      >
-        Router settings
-      </ButtonLink>,
-    );
-    const link = screen.getByRole('link', { name: 'Router settings' });
-    expect(link).toHaveAttribute('data-router-link', 'true');
-    expect(link).toHaveAttribute('data-variant', 'accent');
-    expect(link).toHaveAttribute('data-fill', 'solid');
-    expect(link).toHaveAttribute('href', '/router');
-    expect(ref.current).toBe(link);
-  });
-
-  it('blocks disabled activation in capture before consumer capture and bubble handlers', () => {
-    const onClick = vi.fn();
-    const onClickCapture = vi.fn();
-    const onAuxClick = vi.fn();
-    const onAuxClickCapture = vi.fn();
-    const onKeyDown = vi.fn();
-    const onKeyDownCapture = vi.fn();
-    render(
-      <ButtonLink
-        disabled
-        href="#settings"
-        onAuxClick={onAuxClick}
-        onAuxClickCapture={onAuxClickCapture}
-        onClick={onClick}
-        onClickCapture={onClickCapture}
-        onKeyDown={onKeyDown}
-        onKeyDownCapture={onKeyDownCapture}
-      >
+      <ButtonLink disabled href="/settings">
         Settings
       </ButtonLink>,
     );
     const link = screen.getByRole('link', { name: 'Settings' });
 
-    expect(fireEvent.click(link)).toBe(false);
-    expect(fireEvent(link, new MouseEvent('auxclick', { bubbles: true, cancelable: true }))).toBe(
-      false,
-    );
-    expect(fireEvent.keyDown(link, { key: 'Enter' })).toBe(false);
-    expect(fireEvent.keyDown(link, { key: ' ' })).toBe(false);
-    expect(onClickCapture).not.toHaveBeenCalled();
-    expect(onClick).not.toHaveBeenCalled();
-    expect(onAuxClickCapture).not.toHaveBeenCalled();
-    expect(onAuxClick).not.toHaveBeenCalled();
-    expect(onKeyDownCapture).not.toHaveBeenCalled();
-    expect(onKeyDown).not.toHaveBeenCalled();
+    expect(link).toHaveAttribute('tabindex', '0');
+    link.focus();
+    expect(link).toHaveFocus();
   });
 
-  it('composes non-activation keyboard and enabled handlers', () => {
+  it('refuses every activation while it is disabled', () => {
     const onClick = vi.fn();
-    const onClickCapture = vi.fn();
     const onAuxClick = vi.fn();
-    const onAuxClickCapture = vi.fn();
     const onKeyDown = vi.fn();
-    const onKeyDownCapture = vi.fn();
-    const { rerender } = render(
+    render(
       <ButtonLink
         disabled
-        href="#settings"
+        href="/settings"
         onAuxClick={onAuxClick}
-        onAuxClickCapture={onAuxClickCapture}
         onClick={onClick}
-        onClickCapture={onClickCapture}
         onKeyDown={onKeyDown}
-        onKeyDownCapture={onKeyDownCapture}
       >
         Settings
       </ButtonLink>,
     );
     const link = screen.getByRole('link', { name: 'Settings' });
-
-    expect(fireEvent.keyDown(link, { key: 'ArrowDown' })).toBe(true);
-    expect(onKeyDownCapture).toHaveBeenCalledOnce();
-    expect(onKeyDown).toHaveBeenCalledOnce();
-
-    rerender(
-      <ButtonLink
-        href="#settings"
-        onAuxClick={onAuxClick}
-        onAuxClickCapture={onAuxClickCapture}
-        onClick={onClick}
-        onClickCapture={onClickCapture}
-        onKeyDown={onKeyDown}
-        onKeyDownCapture={onKeyDownCapture}
-      >
-        Settings
-      </ButtonLink>,
-    );
 
     fireEvent.click(link);
     fireEvent(link, new MouseEvent('auxclick', { bubbles: true, cancelable: true }));
     fireEvent.keyDown(link, { key: 'Enter' });
-    expect(onClickCapture).toHaveBeenCalledOnce();
-    expect(onClick).toHaveBeenCalledOnce();
-    expect(onAuxClickCapture).toHaveBeenCalledOnce();
-    expect(onAuxClick).toHaveBeenCalledOnce();
-    expect(onKeyDownCapture).toHaveBeenCalledTimes(2);
-    expect(onKeyDown).toHaveBeenCalledTimes(2);
+    expect(onClick).not.toHaveBeenCalled();
+    expect(onAuxClick).not.toHaveBeenCalled();
+    expect(onKeyDown).not.toHaveBeenCalled();
   });
 
-  it.each([true, 'true'] as const)(
-    'blocks aria-disabled=%s activation without changing visual or focus state',
-    (ariaDisabled) => {
-      const onClick = vi.fn();
-      const onClickCapture = vi.fn();
-      render(
-        <ButtonLink
-          aria-disabled={ariaDisabled}
-          href="#settings"
-          onClick={onClick}
-          onClickCapture={onClickCapture}
-        >
-          Settings
-        </ButtonLink>,
-      );
-      const link = screen.getByRole('link', { name: 'Settings' });
-      expect(link).toHaveAttribute('aria-disabled', 'true');
-      expect(link).not.toHaveAttribute('data-disabled');
-      expect(link).not.toHaveAttribute('tabindex');
-      expect(fireEvent.click(link)).toBe(false);
-      expect(onClickCapture).not.toHaveBeenCalled();
-      expect(onClick).not.toHaveBeenCalled();
-    },
-  );
-
-  it('preserves an explicit tab index with raw aria-disabled', () => {
+  /** Space does not activate a link, so the family does not make it. */
+  it('leaves keys that are not the platform’s activation alone', () => {
+    const onKeyDown = vi.fn();
     render(
-      <ButtonLink aria-disabled="true" href="#settings" tabIndex={0}>
+      <ButtonLink disabled href="/settings" onKeyDown={onKeyDown}>
+        Settings
+      </ButtonLink>,
+    );
+
+    fireEvent.keyDown(screen.getByRole('link'), { key: ' ' });
+    expect(onKeyDown).toHaveBeenCalledOnce();
+  });
+
+  it('hands every root prop to a router’s own link', () => {
+    const rendered = vi.fn();
+    render(
+      <ButtonLink
+        render={(props) => {
+          rendered(props);
+          return <a {...props} data-router-link="true" href="/settings" />;
+        }}
+        variant="outline"
+      >
         Settings
       </ButtonLink>,
     );
     const link = screen.getByRole('link', { name: 'Settings' });
-    expect(link).toHaveAttribute('tabindex', '0');
-    expect(link).not.toHaveAttribute('data-disabled');
+
+    expect(link).toHaveAttribute('data-router-link', 'true');
+    expect(link).toHaveAttribute('data-ui', contract.ui);
+    expect(link).toHaveAttribute('data-variant', 'outline');
+    expect(rendered.mock.calls[0]?.[0]['data-part']).toBe('root');
   });
 
-  it.each([false, 'false', undefined] as const)(
-    'keeps aria-disabled=%s interactive',
-    (ariaDisabled) => {
-      const onClick = vi.fn();
-      render(
-        <ButtonLink aria-disabled={ariaDisabled} href="#settings" onClick={onClick}>
-          Settings
-        </ButtonLink>,
-      );
-      const link = screen.getByRole('link', { name: 'Settings' });
-      fireEvent.click(link);
-      expect(onClick).toHaveBeenCalledOnce();
-      expect(link).not.toHaveAttribute('data-disabled');
-    },
-  );
+  it('renders the content parts the contract names', () => {
+    render(
+      <ButtonLink end="E" href="/settings" start="S">
+        Settings
+      </ButtonLink>,
+    );
+    const parts = [...screen.getByRole('link').querySelectorAll('[data-part]')].map((part) =>
+      part.getAttribute('data-part'),
+    );
+
+    expect(parts).toEqual(['start', 'label', 'end']);
+  });
+
+  it('never waits: navigation is the platform’s, not the family’s', () => {
+    expect(contract.members.buttonLink.capabilities).not.toContain('loading');
+    expect(contract.members.buttonLink.capabilities).not.toContain('pressed');
+  });
 });

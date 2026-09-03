@@ -75,7 +75,7 @@ export const Scale: Story = {
         <div className="slotted-demo-stage">
           <div className="slotted-demo-stack">
             {SIZES.map((size) => (
-              <Text align="start" key={size} size={size}>
+              <Text key={size} size={size}>
                 {size} — the quick brown fox jumps over the lazy dog
               </Text>
             ))}
@@ -101,11 +101,11 @@ export const Tone: Story = {
         <div className="slotted-demo-stage">
           <div className="slotted-demo-stack">
             {TONES.map((tone) => (
-              <Text align="start" key={tone} tone={tone}>
+              <Text key={tone} tone={tone}>
                 {tone}
               </Text>
             ))}
-            <Text align="start" size="xs" tone="muted" transform="uppercase" weight="semibold">
+            <Text size="xs" tone="muted" transform="uppercase" weight="semibold">
               Section label
             </Text>
             <Text align="end" numeric="tabular">
@@ -126,17 +126,15 @@ export const Truncation: Story = {
   render: () => (
     <div className="slotted-demo-measure">
       <div className="slotted-demo-stack">
-        <Text align="start" truncate>
+        <Text truncate>
           A single line that runs past the edge of its container and is cut with an ellipsis rather
           than wrapped.
         </Text>
-        <Text align="start" truncate={3}>
-          {NOTE}
-        </Text>
-        <Text align="start" size="sm" tone="muted">
+        <Text truncate={3}>{NOTE}</Text>
+        <Text size="sm" tone="muted">
           f4c2b9a7e1d05836af9c74b21e0d8a5639bc17e408fa26d3915cb7420ed83fa1
         </Text>
-        <Text align="start" size="sm" tone="muted">
+        <Text size="sm" tone="muted">
           Select the clipped lines and copy them: the whole string is still there. A token longer
           than its container breaks instead of widening the layout.
         </Text>
@@ -150,14 +148,14 @@ export const Accessibility: Story = {
   render: () => (
     <div className="slotted-demo-measure">
       <div className="slotted-demo-stack">
-        <Text align="start" render={(props) => <p {...props} />} wrap="pretty">
+        <Text render={(props) => <p {...props} />} wrap="pretty">
           A span claims nothing. Render the element the content is — a paragraph here — so the
           document says what it means.
         </Text>
-        <Text align="start" dir="rtl" lang="ar">
+        <Text dir="rtl" lang="ar">
           تصدر الفواتير في أول يوم عمل من كل شهر، وتسدد من وسيلة الدفع المسجلة.
         </Text>
-        <Text align="start" size="sm" tone="muted">
+        <Text size="sm" tone="muted">
           Alignment is logical, so a right-to-left document is the same component mirrored. The
           tracking that capitals need is undone for scripts whose letters join.
         </Text>

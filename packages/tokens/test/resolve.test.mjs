@@ -13,6 +13,14 @@ const theme = JSON.parse(
  * A scale step is only allowed to replace a literal if it holds the same
  * value, so this table is what makes "the foundation changed no pixel"
  * a fact rather than a claim. Entries are added, never edited.
+ *
+ * A row leaves with the token itself, or with a change to the rendered value
+ * that was taken deliberately and written into the **Current boundary** section
+ * of `docs/token-foundation.md`. Button's four base tokens left the first way
+ * when the family was rebuilt: it reads `--slotted-control-gap-*` for its gap
+ * and `--slotted-control-radius` for its corners, so there is no longer a value
+ * for this table to pin. `--slotted-control-shadow` left the second way: a
+ * framed control gained a shadow, so `none` is no longer what it resolves to.
  */
 const UNCHANGED = {
   '--slotted-control-font-family': 'ui-sans-serif, system-ui, sans-serif',
@@ -21,15 +29,10 @@ const UNCHANGED = {
   '--slotted-control-letter-spacing': '0',
   '--slotted-control-border-width': '1px',
   '--slotted-control-radius': '4px',
-  '--slotted-control-shadow': 'none',
   '--slotted-control-transition-duration': '120ms',
   '--slotted-control-transition-easing': 'cubic-bezier(0.2, 0, 0, 1)',
   '--slotted-focus-ring-width': '2px',
   '--slotted-focus-ring-offset': '2px',
-  '--slotted-button-gap': '0.5rem',
-  '--slotted-button-radius-sm': '7px',
-  '--slotted-button-radius-md': '6px',
-  '--slotted-button-radius-lg': '5px',
 };
 
 test('expands a reference to another token in the same map', () => {
@@ -83,7 +86,7 @@ test('resolves frozen authored maps without mutating them', () => {
   const densitySnapshot = structuredClone(density);
 
   assert.equal(resolveTokens(base)['--slotted-control-font-weight'], '600');
-  assert.equal(resolveTokens(density)['--slotted-button-height-md'], '34px');
+  assert.equal(resolveTokens(density)['--slotted-control-height-md'], '34px');
   assert.deepEqual(base, baseSnapshot);
   assert.deepEqual(density, densitySnapshot);
 });
@@ -95,64 +98,49 @@ test('every token that predates the scales still resolves to its old value', () 
   }
 });
 
-test('does not keep the ambiguous unsized button icon-size token in base', () => {
-  assert.equal(
-    theme.base['--slotted-button-icon-size'],
-    undefined,
-    'base must not define --slotted-button-icon-size: density-scoped icon sizes are unambiguous',
-  );
-});
-
 const DENSITY_UNCHANGED = {
   comfortable: {
-    '--slotted-button-height-sm': '30px',
-    '--slotted-button-height-md': '34px',
-    '--slotted-button-height-lg': '38px',
-    '--slotted-button-padding-inline-sm': '10px',
-    '--slotted-button-padding-inline-md': '13px',
-    '--slotted-button-padding-inline-lg': '16px',
-    '--slotted-button-font-size-sm': '12px',
-    '--slotted-button-font-size-md': '13px',
-    '--slotted-button-font-size-lg': '14px',
-    '--slotted-button-icon-size-sm': '14px',
-    '--slotted-button-icon-size-md': '16px',
-    '--slotted-button-icon-size-lg': '18px',
+    '--slotted-control-height-sm': '30px',
+    '--slotted-control-height-md': '34px',
+    '--slotted-control-height-lg': '38px',
+    '--slotted-control-padding-inline-sm': '10px',
+    '--slotted-control-padding-inline-md': '13px',
+    '--slotted-control-padding-inline-lg': '16px',
+    '--slotted-control-font-size-sm': '12px',
+    '--slotted-control-font-size-md': '13px',
+    '--slotted-control-font-size-lg': '14px',
+    '--slotted-control-icon-size-sm': '14px',
+    '--slotted-control-icon-size-md': '16px',
+    '--slotted-control-icon-size-lg': '18px',
   },
   compact: {
-    '--slotted-button-height-sm': '26px',
-    '--slotted-button-height-md': '28px',
-    '--slotted-button-height-lg': '32px',
-    '--slotted-button-padding-inline-sm': '8px',
-    '--slotted-button-padding-inline-md': '10px',
-    '--slotted-button-padding-inline-lg': '12px',
-    '--slotted-button-font-size-sm': '12px',
-    '--slotted-button-font-size-md': '12px',
-    '--slotted-button-font-size-lg': '13px',
-    '--slotted-button-icon-size-sm': '13px',
-    '--slotted-button-icon-size-md': '14px',
-    '--slotted-button-icon-size-lg': '16px',
+    '--slotted-control-height-sm': '26px',
+    '--slotted-control-height-md': '28px',
+    '--slotted-control-height-lg': '32px',
+    '--slotted-control-padding-inline-sm': '8px',
+    '--slotted-control-padding-inline-md': '10px',
+    '--slotted-control-padding-inline-lg': '12px',
+    '--slotted-control-font-size-sm': '12px',
+    '--slotted-control-font-size-md': '12px',
+    '--slotted-control-font-size-lg': '13px',
+    '--slotted-control-icon-size-sm': '13px',
+    '--slotted-control-icon-size-md': '14px',
+    '--slotted-control-icon-size-lg': '16px',
   },
 };
 
-test('every button geometry token still resolves to its old value', () => {
+/**
+ * These are the pixels every control in the library is built from, and they are
+ * the numbers Button rendered before the foundation existed. They were pinned
+ * through Button's density aliases until the family was rebuilt; the aliases
+ * are gone and the pinning moved onto the tokens that survived them, so the
+ * same values are still held by the same count of assertions.
+ */
+test('every control geometry token still resolves to its old value', () => {
   for (const [density, expected] of Object.entries(DENSITY_UNCHANGED)) {
     const resolved = resolveTokens(theme.densities[density]);
     for (const [name, value] of Object.entries(expected)) {
       assert.equal(resolved[name], value, `${name} changed in ${density}`);
-    }
-  }
-});
-
-test('button geometry tokens alias control geometry, so a theme retunes controls once', () => {
-  for (const [density, buttonGeometry] of Object.entries(DENSITY_UNCHANGED)) {
-    for (const buttonToken of Object.keys(buttonGeometry)) {
-      const controlToken = buttonToken.replace('--slotted-button-', '--slotted-control-');
-
-      assert.equal(
-        theme.densities[density][buttonToken],
-        `var(${controlToken})`,
-        `${density} ${buttonToken} must alias ${controlToken}`,
-      );
     }
   }
 });

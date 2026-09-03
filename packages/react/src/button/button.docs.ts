@@ -11,89 +11,155 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
     appliesTo,
     description,
   }));
+
 export const REACT_BUTTON_TOKENS = buttonTokens.map((name) => ({
   name,
-  purpose: 'Theme-owned Button family decision',
+  purpose: 'Foundation token the Button family reads',
 }));
+
+const TONE = 'accent | secondary | success | warning | danger';
+const VARIANT = 'solid | outline | ghost';
+const SIZE = 'sm | md | lg';
+
+const appearance = (member: string, tone: string, variant: string): ApiTuple[] => [
+  ['tone', TONE, tone, member, 'Which of the five semantic colours the control speaks in'],
+  ['variant', VARIANT, variant, member, 'How the tone is painted'],
+  ['size', SIZE, 'md', member, 'Step of the control scale'],
+];
+
+/** Being unavailable and being unreachable are two decisions, not one. */
+const unavailable = (member: string): ApiTuple[] => [
+  [
+    'disabled',
+    'boolean',
+    'false',
+    member,
+    'Refuses the action and says the control is unavailable',
+  ],
+  [
+    'focusableWhenDisabled',
+    'boolean',
+    'false',
+    member,
+    'Keeps an unavailable control in the tab sequence, announcing aria-disabled instead',
+  ],
+];
+
+const waiting = (member: string): ApiTuple[] => [
+  ['loading', 'boolean', 'false', member, 'Waits: refuses activation and shows an indicator'],
+  [
+    'loadingDelay',
+    'number',
+    '0',
+    member,
+    'Milliseconds before the indicator appears; the refusal is immediate',
+  ],
+  ['loadingLabel', 'string', 'Loading', member, 'What the indicator announces itself as'],
+];
+
+const substitutable = (member: string): ApiTuple[] => [
+  [
+    'render',
+    '(rootProps) => ReactElement',
+    '—',
+    member,
+    'Hands the root props to something else to render',
+  ],
+];
 
 export const REACT_BUTTON_DOCS = {
   button: {
     api: apiRows([
-      [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'accent',
-        'Button',
-        'Semantic intent',
-      ],
-      ['fill', 'solid | outline | ghost', 'solid', 'Button', 'Surface treatment'],
-      ['size', 'sm | md | lg', 'md', 'Button', 'Control scale'],
-      ['leading', 'ReactNode', '—', 'Button', 'Logical leading content'],
-      ['trailing', 'ReactNode', '—', 'Button', 'Logical trailing content'],
-      ['fullWidth', 'boolean', 'false', 'Button', 'Fill the inline container'],
-      ['disabled', 'boolean', 'false', 'Button', 'Native disabled state'],
-      ['loading', 'boolean', 'false', 'Button', 'Controlled busy state'],
-      ['loadingText', 'ReactNode', '—', 'Button', 'Explicit busy label'],
-      ['loadingIndicator', 'ReactNode', 'spinner', 'Button', 'Replacement indicator'],
-      ['type', 'button | submit | reset', 'button', 'Button', 'Native button type'],
+      ...appearance('Button', 'accent', 'solid'),
+      ['start', 'ReactNode', '—', 'Button', 'Content before the label, mirrored in right-to-left'],
+      ['end', 'ReactNode', '—', 'Button', 'Content after the label, mirrored in right-to-left'],
+      ['fullWidth', 'boolean', 'false', 'Button', 'Fills the inline size of its container'],
+      ...unavailable('Button'),
+      ...waiting('Button'),
+      ...substitutable('Button'),
+      ['type', 'button | submit | reset', 'button', 'Button', 'The native button type'],
     ]),
     accessibility: [
-      'Visible label supplies the accessible name.',
-      'Loading preserves focus, sets aria-busy and aria-disabled, and blocks activation.',
-      'Use submit only for an intentional form submission.',
+      'The visible label supplies the accessible name, and it is a native button, so Space, Enter, focus and the disabled state are the platform’s.',
+      'While loading, the indicator is a named progress bar in the accessibility tree and the control announces aria-disabled while keeping focus — the shape React Aria’s pending button and Primer’s loading button both take. aria-busy is not used: it is not reliably announced on a button, and two mechanisms for one fact is one too many.',
+      'A control with a start or end icon gives the indicator that box and keeps its label. One with neither renders the label at zero opacity: it stays in the accessibility tree, so the name survives the wait and combines with the indicator’s own, and it stays in the flow, so the control never changes size.',
+      'loading refuses activation in the capture phase, before any handler the consumer attached, so a submit button cannot submit twice.',
+      'focusableWhenDisabled keeps an unavailable control reachable. Use it when the control carries a tooltip or an explanation a keyboard user would otherwise never reach, such as one inside a toolbar.',
+      'A start or end icon is decorative content the consumer supplies; give it aria-hidden so it does not repeat the label.',
+      'type defaults to button. Use submit only for an intentional form submission.',
     ],
     snippets: [
       defineSnippet({
         id: 'react-button-basic',
-        label: 'Basic action',
+        label: 'An action',
         language: 'tsx',
         source:
-          'import { Save } from \'lucide-react\';\n\n<Button variant="accent" leading={<Save aria-hidden="true" />}>\n  Save changes\n</Button>;',
+          'import { Save } from \'lucide-react\';\n\n<Button start={<Save aria-hidden="true" />}>Save changes</Button>;',
       }),
       defineSnippet({
         id: 'react-button-loading',
-        label: 'Controlled loading',
+        label: 'Waiting for the action to finish',
         language: 'tsx',
-        source: '<Button loading={saving} loadingText="Saving">\n  Save\n</Button>;',
+        source:
+          '<Button\n  loading={saving}\n  loadingDelay={300}\n  loadingLabel="Saving"\n  onClick={save}\n  start={<Save aria-hidden="true" />}\n>\n  Save changes\n</Button>;',
+      }),
+      defineSnippet({
+        id: 'react-button-defaults',
+        label: 'Every action in the application, decided once',
+        language: 'tsx',
+        source: '<ButtonDefaultsProvider size="sm">\n  <Toolbar />\n</ButtonDefaultsProvider>;',
+      }),
+      defineSnippet({
+        id: 'react-button-emphasis',
+        label: 'One primary action per region',
+        language: 'tsx',
+        source:
+          '<Inline gap={4}>\n  <Button>Publish</Button>\n  <Button tone="secondary" variant="outline">\n    Save draft\n  </Button>\n  <Button tone="secondary" variant="ghost">\n    Discard\n  </Button>\n</Inline>;',
       }),
     ],
   },
   buttonLink: {
     api: apiRows([
-      ['href', 'string', 'required in native mode', 'ButtonLink', 'Native navigation destination'],
-      ['render', '(rootProps) => ReactElement', '—', 'ButtonLink', 'Router-owned link adapter'],
-      ['disabled', 'boolean', 'false', 'ButtonLink', 'Suppress navigation and sequential focus'],
+      ['href', 'string', 'required in native mode', 'ButtonLink', 'The navigation destination'],
       [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'accent',
+        'render',
+        '(rootProps) => ReactElement',
+        '—',
         'ButtonLink',
-        'Semantic intent',
+        'Hands the root props to a router’s own link component',
       ],
-      ['fill', 'solid | outline | ghost', 'solid', 'ButtonLink', 'Surface treatment'],
-      ['size', 'sm | md | lg', 'md', 'ButtonLink', 'Control scale'],
-      ['leading', 'ReactNode', '—', 'ButtonLink', 'Logical leading content'],
-      ['trailing', 'ReactNode', '—', 'ButtonLink', 'Logical trailing content'],
-      ['fullWidth', 'boolean', 'false', 'ButtonLink', 'Fill the inline container'],
+      ...appearance('ButtonLink', 'accent', 'solid'),
+      ['start', 'ReactNode', '—', 'ButtonLink', 'Content before the label'],
+      ['end', 'ReactNode', '—', 'ButtonLink', 'Content after the label'],
+      ['fullWidth', 'boolean', 'false', 'ButtonLink', 'Fills the inline size of its container'],
+      [
+        'disabled',
+        'boolean',
+        'false',
+        'ButtonLink',
+        'Removes the destination and refuses activation',
+      ],
     ]),
     accessibility: [
-      'Use ButtonLink only for navigation.',
-      'Disabled navigation sets aria-disabled, suppresses activation, and defaults to tabIndex -1.',
-      'The render adapter must preserve every supplied root prop and accessible name.',
+      'It is an anchor, so it is announced as a link and activates on Enter. Space does not activate it, because Space does not activate a link.',
+      'Use it only for navigation. An action without a destination is a Button.',
+      'A disabled ButtonLink renders no href at all: an anchor that keeps its destination and only blocks click still navigates on a middle click and on a modified click.',
+      'It stays in the tab sequence when disabled, with role="link" and aria-disabled, because a control a keyboard user cannot reach is one they cannot discover is unavailable.',
+      'The render adapter receives every root prop, including the accessible name and the data attributes, and must pass all of them on.',
     ],
     snippets: [
       defineSnippet({
         id: 'react-button-link-native',
-        label: 'Native navigation',
+        label: 'Navigating',
         language: 'tsx',
-        source: '<ButtonLink href="/settings">Settings</ButtonLink>;',
+        source: '<ButtonLink href="/settings">Open settings</ButtonLink>;',
       }),
       defineSnippet({
         id: 'react-button-link-router',
-        label: 'Router-owned navigation',
+        label: 'Navigation the router owns',
         language: 'tsx',
         source:
-          '<ButtonLink render={(props) => <RouterLink to="/settings" {...props} />}>Settings</ButtonLink>;',
+          '<ButtonLink variant="outline" render={(props) => <RouterLink to="/settings" {...props} />}>\n  Open settings\n</ButtonLink>;',
       }),
     ],
   },
@@ -104,107 +170,113 @@ export const REACT_BUTTON_DOCS = {
         'string',
         'required',
         'IconButton',
-        'Explicit accessible name',
+        'The accessible name, which no content can supply',
+      ],
+      ...appearance('IconButton', 'secondary', 'ghost'),
+      ['shape', 'square | circle', 'square', 'IconButton', 'How the square control is cornered'],
+      ...unavailable('IconButton'),
+      ...waiting('IconButton'),
+      ...substitutable('IconButton'),
+      [
+        'pressed',
+        'boolean',
+        '—',
+        'IconButton',
+        'The consumer’s value; passing it controls the state',
       ],
       [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'secondary',
+        'defaultPressed',
+        'boolean',
+        '—',
         'IconButton',
-        'Semantic intent',
+        'The value an uncontrolled toggle starts from',
       ],
-      ['fill', 'solid | outline | ghost', 'ghost', 'IconButton', 'Surface treatment'],
-      ['size', 'sm | md | lg', 'md', 'IconButton', 'Square control scale'],
-      ['fullWidth', 'boolean', 'false', 'IconButton', 'Fill the inline container'],
-      ['disabled', 'boolean', 'false', 'IconButton', 'Native disabled state'],
-      ['loading', 'boolean', 'false', 'IconButton', 'Controlled busy state'],
-      ['loadingIndicator', 'ReactNode', 'spinner', 'IconButton', 'Replacement indicator'],
-      ['type', 'button | submit | reset', 'button', 'IconButton', 'Native button type'],
+      [
+        'onPressedChange',
+        '(pressed, request) => void',
+        '—',
+        'IconButton',
+        'The request: value, previous, reason, event and cancel()',
+      ],
+      ['type', 'button | submit | reset', 'button', 'IconButton', 'The native button type'],
     ]),
     accessibility: [
-      'An explicit aria-label or aria-labelledby is mandatory.',
-      'The visible icon is decorative relative to that accessible name.',
-      'Loading preserves the explicit accessible name and focus.',
+      'The accessible name is mandatory at the type level: one of aria-label or aria-labelledby must be present, and the development build throws when neither is.',
+      'aria-pressed appears only once pressed or defaultPressed is passed. A plain icon button that announced itself as a toggle would be announcing a state it does not have.',
+      'The name must not change with the pressed state. The APG is explicit that a toggle keeps its label and lets the state be announced beside it.',
+      'The square control is the control height in both axes and never falls below the WCAG 2.2 minimum of 24 by 24 CSS pixels, at any density.',
+      'Add a tooltip when the icon alone does not say what the action does. The name is not a substitute for a visible one.',
     ],
     snippets: [
       defineSnippet({
-        id: 'react-icon-button',
-        label: 'Named icon action',
+        id: 'react-icon-button-basic',
+        label: 'A named icon-only action',
         language: 'tsx',
         source:
-          'import { X } from \'lucide-react\';\n\n<IconButton aria-label="Close" fill="ghost">\n  <X aria-hidden="true" />\n</IconButton>;',
+          'import { Trash2 } from \'lucide-react\';\n\n<IconButton aria-label="Delete invoice" tone="danger">\n  <Trash2 aria-hidden="true" />\n</IconButton>;',
+      }),
+      defineSnippet({
+        id: 'react-icon-button-toggle',
+        label: 'An icon toggle in a toolbar',
+        language: 'tsx',
+        source:
+          'import { Bold } from \'lucide-react\';\n\n<IconButton\n  aria-label="Bold"\n  pressed={bold}\n  onPressedChange={(bold) => setBold(bold)}\n  tone="secondary"\n>\n  <Bold aria-hidden="true" />\n</IconButton>;',
       }),
     ],
   },
   toggleButton: {
     api: apiRows([
-      ['pressed', 'boolean', 'false', 'ToggleButton', 'Controlled pressed state'],
+      ...appearance('ToggleButton', 'secondary', 'outline'),
+      ['start', 'ReactNode', '—', 'ToggleButton', 'Content before the label'],
+      ['end', 'ReactNode', '—', 'ToggleButton', 'Content after the label'],
+      ['fullWidth', 'boolean', 'false', 'ToggleButton', 'Fills the inline size of its container'],
+      ...unavailable('ToggleButton'),
+      ...waiting('ToggleButton'),
+      ...substitutable('ToggleButton'),
       [
-        'onPressedChange',
-        '(next: boolean) => void',
+        'pressed',
+        'boolean',
         '—',
         'ToggleButton',
-        'Requests the next state',
+        'The consumer’s value; passing it controls the state',
       ],
       [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'secondary',
+        'defaultPressed',
+        'boolean',
+        'false',
         'ToggleButton',
-        'Semantic intent',
+        'The value an uncontrolled toggle starts from, read once',
       ],
-      ['fill', 'solid | outline | ghost', 'outline', 'ToggleButton', 'Surface treatment'],
-      ['size', 'sm | md | lg', 'md', 'ToggleButton', 'Control scale'],
-      ['leading', 'ReactNode', '—', 'ToggleButton', 'Logical leading content'],
-      ['trailing', 'ReactNode', '—', 'ToggleButton', 'Logical trailing content'],
-      ['fullWidth', 'boolean', 'false', 'ToggleButton', 'Fill the inline container'],
-      ['disabled', 'boolean', 'false', 'ToggleButton', 'Native disabled state'],
-      ['type', 'button | submit | reset', 'button', 'ToggleButton', 'Native button type'],
+      [
+        'onPressedChange',
+        '(pressed, request) => void',
+        '—',
+        'ToggleButton',
+        'The request: value, previous, reason, event and cancel()',
+      ],
+      ['type', 'button | submit | reset', 'button', 'ToggleButton', 'The native button type'],
     ]),
     accessibility: [
-      'aria-pressed always reflects the controlled pressed prop.',
-      'The label describes the toggled feature rather than its next action.',
-      'Disabled toggles do not request state changes.',
+      'It is a native button carrying aria-pressed, so it is announced as a toggle and activates on Space and Enter.',
+      'The label must not change with the state: "Mute" stays "Mute" and the state is announced beside it. A label that changes needs a Button, not a toggle.',
+      'The request carries why it happened. A native button fires the same click for a pointer, Space and Enter, and the reason separates them by whether the click reported a real pointer.',
+      'Calling preventDefault in onClick refuses the activation, and a refused activation moves nothing.',
+      'It is not a Checkbox. Use Checkbox for a value a form submits.',
+      'A toggle that persists reaches a server before the state is true. While it waits it holds the state it still has, so nobody is shown a value that has not been agreed to.',
     ],
     snippets: [
       defineSnippet({
-        id: 'react-toggle-button',
-        label: 'Controlled toggle',
+        id: 'react-toggle-button-uncontrolled',
+        label: 'A toggle that owns its own state',
         language: 'tsx',
-        source:
-          '<ToggleButton pressed={pinned} onPressedChange={setPinned}>\n  Pin\n</ToggleButton>;',
+        source: '<ToggleButton defaultPressed>Pin</ToggleButton>;',
       }),
-    ],
-  },
-  buttonGroup: {
-    api: apiRows([
-      [
-        'orientation',
-        'horizontal | vertical',
-        'horizontal',
-        'ButtonGroup',
-        'Logical group direction',
-      ],
-      [
-        'aria-label | aria-labelledby',
-        'string',
-        'contextual',
-        'ButtonGroup',
-        'Names the related action set',
-      ],
-    ]),
-    accessibility: [
-      'Name the group when surrounding context does not already identify it.',
-      'Children retain their own button or link semantics and tab order.',
-      'A split-action example does not imply menu keyboard behavior.',
-    ],
-    snippets: [
       defineSnippet({
-        id: 'react-button-group',
-        label: 'Grouped actions',
+        id: 'react-toggle-button-controlled',
+        label: 'A toggle the consumer owns, with the reason',
         language: 'tsx',
         source:
-          'import { ChevronDown } from \'lucide-react\';\n\n<ButtonGroup aria-label="Editing actions">\n  <Button>Save</Button>\n  <IconButton aria-label="More save options">\n    <ChevronDown aria-hidden="true" />\n  </IconButton>\n</ButtonGroup>;',
+          "<ToggleButton\n  pressed={pinned}\n  onPressedChange={(pinned, request) => {\n    if (request.reason === 'keyboard') announce(pinned);\n    setPinned(pinned);\n  }}\n>\n  Pin\n</ToggleButton>;",
       }),
     ],
   },

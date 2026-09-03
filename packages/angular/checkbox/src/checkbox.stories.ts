@@ -1,0 +1,424 @@
+import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SlCheckboxGroup } from '@slotted/angular/checkbox-group';
+import { SlField, SlFieldLabel } from '@slotted/angular/field';
+import { SlFieldGroup, SlFieldGroupLegend } from '@slotted/angular/field-group';
+import { SlGrid } from '@slotted/angular/grid';
+import type { Meta, StoryObj } from '@storybook/angular-vite';
+import { moduleMetadata } from '@storybook/angular-vite';
+
+import { SlCheckbox } from './checkbox';
+import type { CheckboxLabelPlacement, CheckboxSize } from './checkbox-defaults';
+import { SlCheckboxDescription } from './checkbox-parts';
+import { ANGULAR_CHECKBOX_DOCS, ANGULAR_CHECKBOX_TOKENS } from './checkbox.docs';
+
+interface CheckboxStoryArgs {
+  disabled: boolean;
+  indeterminate: boolean;
+  labelPlacement: CheckboxLabelPlacement;
+  readOnly: boolean;
+  size: CheckboxSize;
+}
+
+const referenceScenes: ReferencePageConfig['scenes'] = () =>
+  bindScenes(ANGULAR_CHECKBOX_DOCS.checkbox.scenes, {
+    playground: Playground,
+    sizes: Sizes,
+    tile: Tile,
+    states: States,
+    indeterminate: Indeterminate,
+    placement: Placement,
+    description: Description,
+    field: InsideAField,
+    content: Content,
+    composition: Composition,
+    keyboard: Keyboard,
+  }) as never;
+
+const DIRECTIVES = [
+  ReactiveFormsModule,
+  SlCheckbox,
+  SlCheckboxDescription,
+  SlCheckboxGroup,
+  SlField,
+  SlFieldGroup,
+  SlFieldGroupLegend,
+  SlFieldLabel,
+  SlGrid,
+];
+
+const meta: Meta<CheckboxStoryArgs> = {
+  title: 'Components/Checkbox',
+  component: SlCheckbox,
+  decorators: [moduleMetadata({ imports: DIRECTIVES })],
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      page: createReferencePage({
+        title: 'Checkbox',
+        description:
+          'One choice, ticked or not, around a native input that keeps the value, the name and the platform’s whole keyboard — with the mark drawn as a mask beside it rather than as a character inside it.',
+        framework: 'Angular',
+        ...ANGULAR_CHECKBOX_DOCS.checkbox,
+        tokens: ANGULAR_CHECKBOX_TOKENS,
+        scenes: referenceScenes,
+      }),
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<CheckboxStoryArgs>;
+
+/**
+ * One demonstration: what it is called, what to look at, and the stage that
+ * owns the distance between the examples on it. Every story below composes this
+ * rather than laying itself out, so no two examples can end up against each
+ * other and no story reaches for an inline style.
+ */
+const scene = (
+  label: string,
+  note: string,
+  body: string,
+  layout: 'block' | 'row' | 'stack' | 'prose' = 'stack',
+) => `
+  <section class="slotted-demo-scene">
+    <header class="slotted-demo-scene__header">
+      <span class="slotted-demo-scene__label">${label}</span>
+      <span class="slotted-demo-scene__note">${note}</span>
+    </header>
+    <div class="slotted-demo-stage" data-layout="${layout}">${body}</div>
+  </section>`;
+
+const grid = (columns: 1 | 2 | 3, scenes: string) =>
+  `<div class="slotted-demo-grid" data-columns="${String(columns)}">${scenes}</div>`;
+
+/** A narrow column, for showing what a control does below 320 pixels. */
+const measure = (body: string) => `<div class="slotted-demo-measure">${body}</div>`;
+
+export const Playground: Story = {
+  args: {
+    disabled: false,
+    indeterminate: false,
+    labelPlacement: 'end',
+    readOnly: false,
+    size: 'md',
+  },
+  parameters: { ...scenario('playground'), controls: { disable: false } },
+  render: (args) => ({
+    props: args,
+    template: `
+      <div class="slotted-demo-stage" data-layout="block">
+        <div
+          slCheckbox
+          defaultChecked
+          [size]="size"
+          [labelPlacement]="labelPlacement"
+          [indeterminate]="indeterminate"
+          [disabled]="disabled"
+          [readOnly]="readOnly"
+        >
+          Enviar recibo
+          <p slCheckboxDescription>Enviaremos o recibo por e-mail.</p>
+        </div>
+      </div>`,
+  }),
+};
+
+export const Sizes: Story = {
+  parameters: scenario('sizes'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'The three steps on their own',
+        'The square, the type and the gap all come from the control scales, so switching the toolbar to dense shrinks each step whole rather than in parts.',
+        `<div slCheckbox size="sm" defaultChecked>Compacto</div>
+         <div slCheckbox size="md" defaultChecked>Padrão</div>
+         <div slCheckbox size="lg" defaultChecked>Confortável</div>`,
+      ) +
+        scene(
+          'Inside a group, the group decides',
+          'A small group holding a medium box is a group and a control disagreeing about one row, so the box reads the group’s step before the application token’s.',
+          `<div slCheckboxGroup size="sm" [defaultValue]="['a']">
+             <div slCheckbox value="a">Compacto porque o grupo é</div>
+             <div slCheckbox value="b">E este também</div>
+           </div>
+           <div slCheckboxGroup size="lg" [defaultValue]="['a']">
+             <div slCheckbox value="a">Confortável porque o grupo é</div>
+           </div>`,
+        ),
+    ),
+  }),
+};
+
+export const Tile: Story = {
+  parameters: scenario('tile'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'The whole frame is the target',
+        'Click the description, the empty space, the edge — the label’s hit area covers the surface, so a tile is one target rather than a box with text beside it.',
+        `<div slGrid [gap]="4" minItemWidth="sm">
+           <div slCheckbox variant="tile" defaultChecked>
+             Backup diário
+             <p slCheckboxDescription>Uma cópia por dia, guardada por trinta dias.</p>
+           </div>
+           <div slCheckbox variant="tile">
+             Registro de auditoria
+             <p slCheckboxDescription>Quem mudou o quê, e quando, exportável em CSV.</p>
+           </div>
+           <div slCheckbox variant="tile" disabled>
+             Região secundária
+             <p slCheckboxDescription>Disponível a partir do plano Escala.</p>
+           </div>
+         </div>`,
+        'block',
+      ) +
+        scene(
+          'Chosen is an edge before it is a tint',
+          'Switch the toolbar to high contrast: the tint flattens to white and the two-pixel accent edge is what still says which tile was chosen. Hovering a chosen tile deepens that edge rather than its ground, because the tint is already the last step the tone has.',
+          `<div slGrid [columns]="1" [gap]="4">
+             <div slCheckbox variant="tile" defaultChecked>Escolhido</div>
+             <div slCheckbox variant="tile">Não escolhido</div>
+             <div slCheckbox variant="tile" defaultChecked invalid>Escolhido e inválido</div>
+             <div slCheckbox variant="tile" defaultChecked readOnly>
+               Escolhido e somente leitura
+             </div>
+           </div>`,
+          'block',
+        ),
+    ),
+  }),
+};
+
+export const States: Story = {
+  parameters: scenario('states'),
+  render: () => ({
+    template: grid(
+      3,
+      scene(
+        'What a reader may still change',
+        'Hover the first two and press one: the ground answers the pointer and goes one step further under it, and the ring on focus sits clear of the border rather than on it.',
+        `<div slCheckbox>Padrão</div>
+         <div slCheckbox defaultChecked>Marcado</div>
+         <div slCheckbox indeterminate>Parcialmente marcado</div>`,
+      ) +
+        scene(
+          'What a reader may not',
+          'Read-only keeps full-strength ink, its ring and its tab stop, because the value is real and still submitted. Disabled loses all three, and stays legible rather than merely faded.',
+          `<div slCheckbox defaultChecked readOnly>Somente leitura</div>
+           <div slCheckbox disabled>Desativado</div>
+           <div slCheckbox defaultChecked disabled>Desativado e marcado</div>`,
+        ) +
+        scene(
+          'Invalid says it twice',
+          'The border reddens and thickens together, because the high-contrast scheme paints every border the same black and colour alone would leave the two states identical there.',
+          `<div slCheckbox invalid>Escolha ao menos uma</div>
+           <div slCheckbox invalid defaultChecked>Inválido e marcado</div>`,
+        ),
+    ),
+  }),
+};
+
+export const Indeterminate: Story = {
+  parameters: scenario('indeterminate'),
+  render: () => ({
+    props: { days: ['mon', 'tue', 'wed', 'thu', 'fri'], chosen: ['mon', 'tue'] },
+    template: grid(
+      2,
+      scene(
+        'A state the consumer owns',
+        'The dash is drawn from the same mask property as the check, pointed at another glyph, and the form still submits a boolean rather than a third value.',
+        `<div slCheckbox indeterminate>Parcialmente marcado</div>
+         <div slCheckbox indeterminate>
+           Com descrição
+           <p slCheckboxDescription>Nada muda no que é enviado.</p>
+         </div>`,
+      ) +
+        scene(
+          'A state the group derives',
+          'Tick the first box and the whole set follows; untick any one of them and the first goes back to the dash, because it reads the set rather than keeping a state of its own.',
+          `<div slCheckboxGroup [allValues]="days" [defaultValue]="chosen">
+             <div slCheckbox parent>Todos os dias úteis</div>
+             <div slCheckbox value="mon">Segunda</div>
+             <div slCheckbox value="tue">Terça</div>
+             <div slCheckbox value="wed">Quarta</div>
+             <div slCheckbox value="thu">Quinta</div>
+             <div slCheckbox value="fri">Sexta</div>
+           </div>`,
+        ),
+    ),
+  }),
+};
+
+export const Placement: Story = {
+  parameters: scenario('placement'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'The box before the label',
+        'The default, and the arrangement a form uses: the box starts the row, the label owns the gap after it, and the description aligns under the text.',
+        `<div slCheckbox defaultChecked>
+           Receber avisos
+           <p slCheckboxDescription>A descrição acompanha o rótulo.</p>
+         </div>
+         <div slCheckbox>Receber resumo semanal</div>`,
+      ) +
+        scene(
+          'The box after the label',
+          'The controls line up with each other at the end of the row rather than each one hugging its own label, which is what a settings list needs and what a column of different-length labels would otherwise lose.',
+          `<div slCheckbox labelPlacement="start" defaultChecked>Notificações por e-mail</div>
+           <div slCheckbox labelPlacement="start">Notificações por SMS</div>
+           <div slCheckbox labelPlacement="start">Notificações no aplicativo</div>`,
+        ),
+    ),
+  }),
+};
+
+export const Description: Story = {
+  parameters: scenario('description'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'Described, and not named',
+        'A screen reader announces the label as the name and the paragraph as the description, and clicking the paragraph toggles nothing — which is why it is projected outside the label element.',
+        `<div slCheckbox>
+           Receber avisos por e-mail
+           <p slCheckboxDescription>
+             Um resumo por dia, e nunca mais de um. Pode ser desligado a qualquer momento.
+           </p>
+         </div>`,
+      ) +
+        scene(
+          'At the smallest step, in a narrow column',
+          'The description drops one step below the label’s type and keeps its alignment under the text, so a set of options in a 320-pixel drawer still reads as a list rather than as a paragraph.',
+          measure(
+            `<div slCheckboxGroup size="sm">
+               <div slCheckbox value="a">
+                 Guardar por 90 dias
+                 <p slCheckboxDescription>Depois disso a nota é arquivada.</p>
+               </div>
+               <div slCheckbox value="b">
+                 Aplicar a todo o grupo
+                 <p slCheckboxDescription>Vale para todas as filiais.</p>
+               </div>
+             </div>`,
+          ),
+        ),
+    ),
+  }),
+};
+
+export const InsideAField: Story = {
+  parameters: scenario('field'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'A set of boxes under one legend',
+        'The fieldset and its legend are what group and name the set, so the group inside it withdraws its own role rather than announcing the same set twice.',
+        `<fieldset slFieldGroup required>
+           <legend slFieldGroupLegend>Notificações</legend>
+           <div slCheckboxGroup name="alerts" [defaultValue]="['approved']">
+             <div slCheckbox value="approved">Pedido aprovado</div>
+             <div slCheckbox value="refused">Pedido recusado</div>
+             <div slCheckbox value="shipped">Pedido enviado</div>
+           </div>
+         </fieldset>`,
+      ) +
+        scene(
+          'A disabled group, from the platform',
+          'Only the fieldset carries disabled. Every box inside it is disabled by the browser with nothing passed down, and each label dims from its own control’s state.',
+          `<fieldset slFieldGroup disabled>
+             <legend slFieldGroupLegend>Enquanto a conta está suspensa</legend>
+             <div slCheckboxGroup [defaultValue]="['approved']">
+               <div slCheckbox value="approved">Pedido aprovado</div>
+               <div slCheckbox value="refused">Pedido recusado</div>
+             </div>
+           </fieldset>`,
+        ),
+    ),
+  }),
+};
+
+export const Content: Story = {
+  parameters: scenario('content'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'A label that wraps',
+        'The box stays on the first line box of the label rather than centring itself against the whole block, which is where align-items would put it as soon as the text reaches a second line.',
+        `<div slCheckbox defaultChecked>
+           Concordo em receber comunicações sobre alterações contratuais, prazos de entrega e
+           mudanças na política de devolução desta e das demais lojas do grupo.
+           <p slCheckboxDescription>
+             A caixa continua na primeira linha do rótulo, e não no meio do bloco de texto.
+           </p>
+         </div>`,
+      ) +
+        scene(
+          'Content the family did not choose',
+          'An unbroken token breaks instead of taking the page’s horizontal scrollbar with it, and a right-to-left label mirrors the whole row — the same component, not a rearranged one.',
+          measure(
+            `<div slCheckbox>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0</div>
+             <div slCheckbox defaultChecked dir="rtl">
+               أوافق على تلقي رسائل حول التغييرات في العقد ومواعيد التسليم.
+             </div>`,
+          ),
+        ),
+    ),
+  }),
+};
+
+export const Composition: Story = {
+  parameters: scenario('composition'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'The element behind the instance',
+        'exportAs reaches the component and inputElement reaches the input, so focus() and click() are the platform’s own and no imperative handle is invented for them.',
+        `<div slCheckbox #box="slCheckbox">Uma caixa que o botão alcança</div>
+         <button type="button" slButton variant="outline" size="sm" (click)="box.inputElement.focus()">
+           Focar a caixa
+         </button>`,
+      ) +
+        scene(
+          'The root is the consumer’s own element',
+          'Angular pays one element for the root where React pays none: the host is the wrapper, so a set of choices can be a real list with each box written as a list item.',
+          `<ul class="slotted-demo-list">
+             <li slCheckbox defaultChecked>Um item de lista que também é uma caixa</li>
+             <li slCheckbox>E outro abaixo dele</li>
+           </ul>`,
+        ),
+    ),
+  }),
+};
+
+export const Keyboard: Story = {
+  parameters: scenario('keyboard'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'The platform’s whole table',
+        'Tab reaches the box, Space toggles it, and Enter submits the form rather than the control. No key listener exists in this family, which is why the behaviour is already translated and already mirrored.',
+        `<div slCheckbox>Tab até aqui, depois espaço</div>
+         <div slCheckbox defaultChecked>E de novo</div>`,
+      ) +
+        scene(
+          'A box the browser disabled is skipped',
+          'The browser skips it because it is natively disabled, so the tab order needs no bookkeeping from the family and stays right when the set changes at runtime.',
+          `<div slCheckbox>Disponível</div>
+           <div slCheckbox disabled>Indisponível</div>
+           <div slCheckbox>Disponível de novo</div>`,
+        ),
+    ),
+  }),
+};

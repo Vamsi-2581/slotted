@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 5,
+  "family": "checkbox",
+  "ui": "checkbox",
+  "controlPart": "control",
+  "rootRole": null,
+  "indicator": {
+    "part": "indicator",
+    "drawnOn": "sibling",
+    "checked": "--slotted-icon-check",
+    "indeterminate": "--slotted-icon-minus"
+  },
+  "labelAssociation": "for",
+  "generatesControlId": true,
+  "stateSource": "field",
+  "mirrorsState": true,
+  "requiredAttribute": "aria-required",
+  "disabledAttribute": "disabled",
+  "readOnlyAttribute": "aria-readonly",
+  "wiring": {
+    "id": "never",
+    "aria-describedby": "merged",
+    "aria-invalid": "invalid",
+    "aria-required": "required",
+    "disabled": "disabled",
+    "readonly": "aria-readonly"
+  },
+  "keyboard": [
+    {
+      "key": "Space",
+      "effect": "toggles the checkbox",
+      "focus": "stays on the control",
+      "source": "platform"
+    }
+  ],
+  "escapeBound": false,
+  "axes": {
+    "size": ["sm", "md", "lg"],
+    "variant": ["plain", "tile"],
+    "labelPlacement": ["end", "start"]
+  },
+  "resolution": {
+    "size": ["prop", "group", "field", "defaults", "md"],
+    "variant": ["prop", "group", "defaults", "plain"],
+    "labelPlacement": ["prop", "group", "defaults", "end"]
+  },
+  "provides": {
+    "checkboxDefaults": ["size", "variant", "labelPlacement"]
+  },
+  "stateAttributes": {
+    "checked": "data-checked",
+    "indeterminate": "data-indeterminate",
+    "disabled": "data-disabled",
+    "invalid": "data-invalid",
+    "readonly": "data-readonly"
+  },
+  "stateModel": {
+    "checked": {
+      "controlled": "checked",
+      "uncontrolled": "defaultChecked",
+      "request": "onCheckedChange",
+      "reasons": ["pointer", "keyboard"]
+    }
+  },
+  "literals": {
+    "--slotted-checkbox-mark-inset": "The mark is drawn at seven eighths of the box because the glyph scale's artwork is authored inside a 24-unit grid with two units of margin, so a mark that filled the box would touch its border. It is arithmetic over the box token rather than a step on a scale, and no scale in docs/token-foundation.md holds the inset of a mask inside its own box."
+  },
+  "members": {
+    "checkbox": {
+      "nativeElement": "input",
+      "defaults": {
+        "size": "md",
+        "variant": "plain",
+        "labelPlacement": "end",
+        "indeterminate": false,
+        "parent": false
+      },
+      "capabilities": [
+        "checked",
+        "size",
+        "appearance",
+        "placement",
+        "disabled",
+        "invalid",
+        "required",
+        "readOnly",
+        "wiring"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "active",
+        "focus-visible",
+        "disabled",
+        "readonly",
+        "invalid",
+        "checked",
+        "indeterminate"
+      ],
+      "parts": ["root", "label", "control", "indicator", "description"]
+    }
+  },
+  "scenarios": {
+    "checkbox": [
+      "playground",
+      "sizes",
+      "tile",
+      "states",
+      "indeterminate",
+      "placement",
+      "description",
+      "field",
+      "content",
+      "composition",
+      "keyboard"
+    ]
+  }
+}

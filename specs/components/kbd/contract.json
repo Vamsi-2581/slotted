@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 5,
+  "family": "kbd",
+  "ui": "kbd",
+  "axes": {
+    "size": ["sm", "md", "lg", "inherit"],
+    "variant": ["raised", "outline", "soft", "plain"],
+    "platform": ["auto", "mac", "windows", "linux", "other"]
+  },
+  "stateAttributes": {
+    "disabled": "data-disabled"
+  },
+  "members": {
+    "kbd": {
+      "nativeElement": "kbd",
+      "defaults": {
+        "size": "md",
+        "variant": "raised",
+        "platform": "auto",
+        "disabled": false,
+        "separator": "+",
+        "thenLabel": "then"
+      },
+      "capabilities": ["appearance", "size", "disabled"],
+      "states": ["default", "disabled"],
+      "parts": ["root", "legend", "name", "shortcut", "separator"]
+    }
+  },
+  "scenarios": {
+    "kbd": [
+      "playground",
+      "variants",
+      "sizes",
+      "shortcut",
+      "platform",
+      "sequence",
+      "context",
+      "states",
+      "content",
+      "composition",
+      "accessibility"
+    ]
+  }
+}

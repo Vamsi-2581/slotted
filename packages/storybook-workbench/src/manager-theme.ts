@@ -1,5 +1,7 @@
 import { create } from 'storybook/theming/create';
 
+import { WORKBENCH_FONT_CODE, WORKBENCH_FONT_SANS } from './fonts';
+
 export const managerTheme = create({
   base: 'dark',
   brandTitle: 'Slotted Workbench',
@@ -22,6 +24,6 @@ export const managerTheme = create({
   inputBorder: '#3f3f46',
   inputTextColor: '#fafafa',
   inputBorderRadius: 5,
-  fontBase: '"Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif',
-  fontCode: '"JetBrains Mono Variable", ui-monospace, monospace',
+  fontBase: WORKBENCH_FONT_SANS,
+  fontCode: WORKBENCH_FONT_CODE,
 });

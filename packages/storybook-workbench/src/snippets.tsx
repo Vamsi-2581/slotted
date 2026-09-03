@@ -4,8 +4,14 @@
  * an icon set needs — with a stylesheet rule that belongs to neither binding,
  * and a drawer that can only say React or Angular leaves that answer
  * undocumented in both reference pages.
+ *
+ * `ts` is the same gap on the other side. An application sets a family's
+ * defaults once, and in Angular that is a provider in a bootstrap file rather
+ * than a template: labelling it `angular` would put template syntax
+ * highlighting on TypeScript, and labelling it `tsx` would name the wrong
+ * framework on an Angular page.
  */
-export type SnippetLanguage = 'angular' | 'css' | 'tsx';
+export type SnippetLanguage = 'angular' | 'css' | 'ts' | 'tsx';
 
 export interface WorkbenchSnippet {
   id: string;

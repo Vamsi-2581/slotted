@@ -6,62 +6,149 @@ const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/tag/contract.json', import.meta.url), 'utf8'),
 );
 const css = readFileSync(new URL('./tag.css', import.meta.url), 'utf8');
+const fragment = readFileSync(new URL('./tag.harness.html', import.meta.url), 'utf8');
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
-const normalized = declarations.replace(/\s+/g, '');
+/**
+ * Whitespace is collapsed rather than removed: a descendant selector and a
+ * multi-word value both lose their meaning when every space goes. Parentheses
+ * are collapsed too, because the formatter breaks a long value across lines
+ * and leaves `var( --token`, which no assertion here spells.
+ */
+const normalized = declarations
+  .replace(/\s+/g, ' ')
+  .replace(/\s*([{};,:])\s*/g, '$1')
+  .replace(/\(\s+/g, '(')
+  .replace(/\s+\)/g, ')');
+
+const ui = `[data-ui='${contract.ui}']`;
+const root = `${ui}[data-part='root']`;
+
+/** The declarations of the first rule whose selector starts with `selector`. */
+function rule(selector) {
+  return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
+}
 
 test('lives in the component layer', () => {
   assert.match(css, /@layer slotted\.components/);
 });
 
+test('is selected by the identifier the contract declares', () => {
+  assert.ok(normalized.includes(`${root}{`), 'the family has no base rule keyed on data-ui');
+  assert.ok(!/\.slotted-/.test(css), 'a class name is not contract');
+});
+
 test('answers every value of every axis the contract names', () => {
   for (const [axis, values] of Object.entries(contract.axes)) {
     for (const value of values) {
-      assert.ok(
-        normalized.includes(`.slotted-tag[data-${axis}='${value}']`),
-        `Missing ${axis} ${value}`,
-      );
+      /* `pill`, `soft` and `horizontal` are the base rule rather than an
+         override, so the sheet answers them by not needing a selector. */
+      if (['pill', 'soft', 'md', 'horizontal'].includes(value)) continue;
+      assert.ok(normalized.includes(`[data-${axis}='${value}']`), `Missing ${axis} ${value}`);
     }
   }
 });
 
-test('routes every variant through the same four local properties', () => {
-  for (const variant of contract.axes.variant) {
-    const rule = normalized.split(`.slotted-tag[data-variant='${variant}']{`)[1]?.split('}')[0];
-    assert.ok(rule, `Missing variant ${variant}`);
-    for (const local of ['--_solid:', '--_on-solid:', '--_border:', '--_surface:', '--_text:']) {
-      assert.ok(rule.includes(local), `Variant ${variant} does not set ${local}`);
+test('routes every tone through the same local properties', () => {
+  for (const tone of contract.axes.tone) {
+    if (tone === 'secondary') continue;
+    const declared = rule(`${root}[data-tone='${tone}']`);
+    for (const local of [
+      '--_solid:',
+      '--_solid-hover:',
+      '--_solid-active:',
+      '--_on-solid:',
+      '--_surface:',
+      '--_subtle-hover:',
+      '--_subtle-active:',
+      '--_border:',
+      '--_text:',
+    ]) {
+      assert.ok(declared.includes(local), `Tone ${tone} does not set ${local}`);
     }
   }
 });
 
-test('draws the remove glyph in CSS, so neither framework ships a cross', () => {
+/**
+ * A `button` cannot contain a `button` and an `a` cannot contain either, so
+ * the chip that both acts and removes puts its two controls side by side. The
+ * sheet has to agree: the root paints, the body holds the inset, and the
+ * remove control is the body's sibling rather than its child.
+ */
+test('paints the chip on the root and the inset on the body', () => {
+  assert.match(rule(root), /border-radius:var\(--_radius\)/);
+  assert.match(rule(`${ui} [data-part='body']`), /padding-inline:/);
   assert.ok(
-    normalized.includes("[data-part='remove']::before") &&
-      normalized.includes("[data-part='remove']::after"),
-    'Missing the drawn cross',
-  );
-  assert.ok(
-    /\[data-part='remove'\]::before,\.slotted-tag\[data-part='remove'\]::after\{[^}]*inset:0;margin:auto/.test(
-      normalized,
-    ),
-    'A percentage translation is not symmetric in a right-to-left document',
+    !normalized.includes("[data-part='body'] [data-part='remove']"),
+    'the remove control is a sibling of the body, never a descendant of it',
   );
 });
 
-test('reacts to every state the remove control declares', () => {
-  for (const state of contract.members.tagRemove.states) {
+/**
+ * `docs/token-foundation.md` names this family's remove control as the case a
+ * theme cannot correct on the family's behalf. The control is as tall as the
+ * chip and as wide as it is tall, so flooring the chip at the WCAG minimum is
+ * what makes it hittable at every size and every density.
+ */
+test('floors the chip at the target minimum, and makes the remove control square', () => {
+  assert.match(rule(root), /--_block-size:max\(var\(--slotted-target-min,24px\)/);
+  assert.match(rule(`${ui} [data-part='remove']`), /inline-size:var\(--_block-size\)/);
+});
+
+test('draws the remove glyph and the selection mark from glyph tokens', () => {
+  assert.match(rule(`${ui} [data-part='remove']::before`), /mask-image:var\(--slotted-icon-x\)/);
+  assert.match(rule(`${ui} [data-part='indicator']`), /mask-image:var\(--slotted-icon-check\)/);
+  assert.ok(!/content:'[^']+'/.test(normalized), 'a character is never an icon');
+});
+
+/**
+ * The one motion the family has, and the reason it has it: the words move to
+ * make room for the mark, and an eye that cannot follow that reads the row as
+ * having jumped.
+ */
+test('animates the selection mark arriving, from the motion scale', () => {
+  const declared = rule(`${ui} [data-part='indicator']`);
+  assert.match(declared, /transition:/);
+  assert.match(declared, /inline-size var\(--slotted-duration-short\)/);
+  assert.ok(!/\d+m?s/.test(declared.replace(/var\([^)]*\)/g, '')), 'a literal duration');
+});
+
+test('reacts to every state the contract declares, on the control that holds it', () => {
+  for (const state of contract.members.tagToggle.states) {
     if (state === 'default') continue;
-    const selector = state === 'disabled' ? ':disabled' : `:${state}`;
-    assert.ok(
-      normalized.includes(`[data-part='remove']${selector}`),
-      `Missing remove state ${state}`,
-    );
+    const selector = { disabled: '[data-disabled]', selected: '[data-selected]' }[state];
+    assert.ok(normalized.includes(selector ?? `:${state}`), `Missing state ${state}`);
   }
+});
+
+/**
+ * Three variants, two mechanisms. `solid` and `outline` step along the tone's
+ * own ramp; `soft` cannot, because the tinted ramp ends at `surface`, so its
+ * step is a state layer over whatever ground the chip already has.
+ */
+test('gives a tinted chip a hover step the tone ramp does not carry', () => {
+  assert.match(normalized, /--_state-hover:color-mix\(in oklab,currentColor/);
+  assert.ok(
+    normalized.includes("[data-variant='soft']:not([data-disabled]):not([data-selected])"),
+    'the tinted step is not held back for the stronger states',
+  );
 });
 
 test('keeps a border under forced colours, where the tone is discarded', () => {
   assert.ok(
-    /@media\(forced-colors:active\)\{\.slotted-tag\{border-color:currentColor/.test(normalized),
-    'A solid and an outline tag are otherwise indistinguishable',
+    normalized.includes(`@media (forced-colors:active){${root}{border-color:currentColor`),
+    'a solid and an outline tag are otherwise indistinguishable',
   );
+});
+
+test('renders every declared part in the harness fragment', () => {
+  const parts = new Set(Object.values(contract.members).flatMap((member) => member.parts));
+  for (const part of parts) {
+    assert.ok(fragment.includes(`data-part="${part}"`), `the fragment renders no ${part}`);
+  }
+});
+
+test('exercises every declared state in the harness fragment', () => {
+  for (const [state, attribute] of Object.entries(contract.stateAttributes)) {
+    assert.ok(fragment.includes(attribute), `the fragment never shows ${state}`);
+  }
 });

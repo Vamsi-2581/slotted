@@ -1,9 +1,35 @@
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { CSSProperties } from 'react';
 
 import { Divider } from './divider';
 import { REACT_DIVIDER_DOCS, REACT_DIVIDER_TOKENS } from './divider.docs';
+
+/**
+ * A menu is not a family yet, so the surface it needs is written here. The
+ * inline padding is the control padding the inset reads, which is what lines
+ * the rule up with the text of the items at every density.
+ */
+const MENU: CSSProperties = {
+  background: 'var(--slotted-surface-raised)',
+  border: 'var(--slotted-border-width-thin) solid var(--slotted-border-subtle)',
+  borderRadius: 'var(--slotted-radius-md)',
+  display: 'grid',
+  gap: 'var(--slotted-space-1)',
+  inlineSize: '100%',
+  listStyle: 'none',
+  margin: 0,
+  paddingBlock: 'var(--slotted-space-2)',
+  paddingInline: 0,
+};
+
+const MENU_ITEM: CSSProperties = {
+  paddingBlock: 'var(--slotted-space-2)',
+  paddingInline: 'var(--slotted-control-padding-inline-md)',
+};
+
+const MENU_LABELLED: CSSProperties = { paddingBlock: 'var(--slotted-space-2)' };
 
 const referenceStories: ReferencePageConfig['stories'] = () => ({
   essential: Playground as never,
@@ -32,7 +58,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
-  args: { decorative: false, orientation: 'horizontal' },
+  args: { align: 'center', decorative: false, inset: false, orientation: 'horizontal' },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => (
     <div className="slotted-demo-measure">
@@ -55,7 +81,7 @@ export const Orientations: Story = {
           <span className="slotted-demo-scene__note">Fills the inline size of its container.</span>
         </header>
         <div className="slotted-demo-stage">
-          <div className="slotted-demo-stack">
+          <div className="slotted-demo-stack" style={{ inlineSize: '100%' }}>
             <span>Billing</span>
             <Divider />
             <span>Members</span>
@@ -65,7 +91,9 @@ export const Orientations: Story = {
       <section className="slotted-demo-scene">
         <header className="slotted-demo-scene__header">
           <span className="slotted-demo-scene__label">Vertical</span>
-          <span className="slotted-demo-scene__note">Stretches to the height of a flex row.</span>
+          <span className="slotted-demo-scene__note">
+            Takes the height of the row, and one line of text when the row gives it none.
+          </span>
         </header>
         <div className="slotted-demo-stage">
           <div className="slotted-demo-row">
@@ -77,6 +105,41 @@ export const Orientations: Story = {
           </div>
         </div>
       </section>
+      <section className="slotted-demo-scene">
+        <header className="slotted-demo-scene__header">
+          <span className="slotted-demo-scene__label">Inset</span>
+          <span className="slotted-demo-scene__note">
+            Stops short of both ends, so it lines up with the text of a list rather than the edge of
+            its container.
+          </span>
+        </header>
+        <div className="slotted-demo-stage">
+          <div className="slotted-demo-stack" style={{ inlineSize: '100%' }}>
+            <span>Export as CSV</span>
+            <Divider inset />
+            <span>Export as PDF</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  ),
+};
+
+export const Label: Story = {
+  parameters: scenario('label'),
+  render: () => (
+    <div className="slotted-demo-measure">
+      <div className="slotted-demo-stack">
+        <p>Continue with a single sign-on provider.</p>
+        <Divider label="Or" />
+        <p>Sign in with an email address and a password.</p>
+        <Divider align="start" label="Archived workspaces" />
+        <p>
+          A label at one end keeps one half of the rule. The label is the rule&apos;s accessible
+          name, so a screen reader announces the division and the words that qualify it once.
+        </p>
+        <Divider align="end" label="Updated 12 minutes ago" />
+      </div>
     </div>
   ),
 };
@@ -93,7 +156,7 @@ export const Decorative: Story = {
           </span>
         </header>
         <div className="slotted-demo-stage">
-          <div className="slotted-demo-stack">
+          <div className="slotted-demo-stack" style={{ inlineSize: '100%' }}>
             <p>Terms of service</p>
             <Divider />
             <p>Privacy notice</p>
@@ -108,7 +171,7 @@ export const Decorative: Story = {
           </span>
         </header>
         <div className="slotted-demo-stage">
-          <div className="slotted-demo-stack">
+          <div className="slotted-demo-stack" style={{ inlineSize: '100%' }}>
             <h3>Members</h3>
             <Divider decorative />
             <p>Four people have access to this workspace.</p>
@@ -129,11 +192,31 @@ export const Composition: Story = {
           <Divider decorative orientation="vertical" />
           <span>Workspace settings</span>
         </div>
-        <Divider />
         <p>
-          A vertical rule inside a row of text and a horizontal rule between blocks read the same
-          thickness token, so one theme decision governs both.
+          An hr cannot stand inside a list, so the rule between two groups of menu items renders
+          into the li the list needs. The element changes; what it means does not.
         </p>
+        <ul role="menu" style={MENU}>
+          <li role="menuitem" style={MENU_ITEM}>
+            Rename
+          </li>
+          <li role="menuitem" style={MENU_ITEM}>
+            Duplicate
+          </li>
+          <Divider inset render={(props) => <li {...props} />} />
+          <li role="menuitem" style={MENU_ITEM}>
+            Export
+          </li>
+          <Divider
+            align="start"
+            inset
+            label="Danger zone"
+            render={(props) => <li {...props} style={MENU_LABELLED} />}
+          />
+          <li role="menuitem" style={MENU_ITEM}>
+            Delete
+          </li>
+        </ul>
       </div>
     </div>
   ),

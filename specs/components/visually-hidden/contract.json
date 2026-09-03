@@ -1,6 +1,7 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "visually-hidden",
+  "ui": "visually-hidden",
   "members": {
     "visuallyHidden": {
       "nativeElement": "span",
@@ -13,6 +14,6 @@
     }
   },
   "scenarios": {
-    "visuallyHidden": ["playground", "focusable", "accessibility"]
+    "visuallyHidden": ["playground", "focusable", "layout", "accessibility"]
   }
 }

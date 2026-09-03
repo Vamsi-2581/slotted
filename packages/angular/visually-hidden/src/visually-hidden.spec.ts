@@ -7,7 +7,12 @@ import { SlVisuallyHidden } from './visually-hidden';
 @Component({
   imports: [SlVisuallyHidden],
   template: `
-    <span slVisuallyHidden [focusable]="focusable()" class="app-announcement" id="announcement"
+    <span
+      slVisuallyHidden
+      [focusable]="focusable()"
+      class="app-announcement"
+      id="announcement"
+      aria-live="polite"
       >Saved</span
     >
     <a slVisuallyHidden focusable href="#main">Skip to content</a>
@@ -36,22 +41,24 @@ describe('SlVisuallyHidden', () => {
     expect(span().hasAttribute('aria-hidden')).toBe(false);
   });
 
-  it('carries the class the stylesheet hides', () => {
+  it('names itself with the identifier the stylesheet hides', () => {
     const { span } = mount();
 
-    expect(span().classList.contains('slotted-visually-hidden')).toBe(true);
+    expect(span().getAttribute('data-ui')).toBe('visually-hidden');
+    expect(span().getAttribute('data-part')).toBe('root');
   });
 
-  it('keeps the class the consumer passed alongside its own', () => {
+  it('keeps the class the consumer passed and adds none of its own', () => {
     const { span } = mount();
 
-    expect(span().classList.contains('app-announcement')).toBe(true);
+    expect([...span().classList]).toEqual(['app-announcement']);
   });
 
   it('leaves the attributes the consumer set untouched', () => {
     const { span } = mount();
 
     expect(span().getAttribute('id')).toBe('announcement');
+    expect(span().getAttribute('aria-live')).toBe('polite');
   });
 
   it('omits the marker when the content stays hidden under focus', () => {
@@ -72,7 +79,7 @@ describe('SlVisuallyHidden', () => {
   it('applies to any element, so a skip link stays an anchor', () => {
     const { link } = mount();
 
-    expect(link().classList.contains('slotted-visually-hidden')).toBe(true);
+    expect(link().getAttribute('data-ui')).toBe('visually-hidden');
     expect(link().getAttribute('data-focusable')).toBe('');
     expect(link().getAttribute('href')).toBe('#main');
   });

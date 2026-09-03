@@ -1,2 +1,2 @@
 export { SlDivider } from './divider';
-export type { DividerOrientation } from './divider';
+export type { DividerAlign, DividerOrientation } from './divider';

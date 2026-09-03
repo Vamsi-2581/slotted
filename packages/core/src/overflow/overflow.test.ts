@@ -100,9 +100,7 @@ describe('createScrollAffordance', () => {
 
     handle.page(1);
 
-    expect(container.scrollBy).toHaveBeenCalledWith(
-      expect.objectContaining({ left: 240 }),
-    );
+    expect(container.scrollBy).toHaveBeenCalledWith(expect.objectContaining({ left: 240 }));
     handle.destroy();
   });
 

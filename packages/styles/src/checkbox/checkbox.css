@@ -1,0 +1,724 @@
+@layer slotted.components {
+  /**
+   * ── One choice, and the box its mark is drawn in ───────────────────────
+   *
+   * The element carrying `data-ui` is a `div` with no role. The `input` inside
+   * it is the control: it holds the value, the name, the identifier and every
+   * native attribute, and it draws the box — the border, the ground and the
+   * focus ring — with `appearance: none`.
+   *
+   * The mark is a sibling of the control and not a pseudo-element of it,
+   * because Firefox renders neither `::before` nor `::after` on an `input`. It
+   * cannot be the control's own `background-image` either: a glyph token is
+   * authored black so it can be masked, and a baked-in colour answers one
+   * scheme out of three. A mask set on the control itself would clip the
+   * border and the ground away with the mark.
+   *
+   * Painting reads `:checked` and `:indeterminate` rather than the mirrored
+   * attributes, so the picture cannot disagree with the element: an
+   * uncontrolled control that the browser has already toggled is drawn toggled
+   * whether or not anything re-rendered. `data-checked` and
+   * `data-indeterminate` are still written, because they are what a consumer
+   * styles against.
+   */
+  [data-ui='checkbox'][data-part='root'] {
+    /**
+     * The box is the control glyph scale's square, which the theme restates
+     * per density: 16px at `md`, and the same square Radix, Carbon and Primer
+     * all draw. No component scale is invented for it, because inventing one
+     * would restate a scale that exists.
+     */
+    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-md, 16px));
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_gap: var(--slotted-control-gap-md, 8px);
+    --_line-height: var(--slotted-checkbox-line-height, var(--slotted-line-height-md, 1.5));
+    /**
+     * The mark inside its box. The glyph scale's artwork is drawn inside a
+     * 24-unit grid with two to three units of margin already in it, so a mark
+     * that filled the box would still not touch the border — but the box has a
+     * border of its own, and seven eighths is the inset at which the check
+     * clears it at every step and every density.
+     */
+    --_mark-inset: var(--slotted-checkbox-mark-inset, 0.875);
+    /**
+     * The height a one-line label is missing before it is a WCAG 2.2 target,
+     * split above and below its text. It is padding rather than a minimum
+     * alone: a minimum sinks the whole difference below the text, and the
+     * description under it then sat further from the label it belongs to than
+     * from the next choice. Proximity said the wrong thing, and it said it by
+     * four and a half pixels at `md` and six at `dense`.
+     */
+    --_label-slack: max(
+      0px,
+      (var(--slotted-target-min, 24px) - var(--_font-size) * var(--_line-height)) / 2
+    );
+    /**
+     * The distance from the top of the label's box to the top of the square, so
+     * the box sits on the first line of a label that wraps to three rather than
+     * in the middle of the block. Stated rather than centred: `align-items:
+     * center` on a wrapped label is what puts a checkbox beside the second line,
+     * and `align-content: center` stops answering the moment the label wraps.
+     * The slack is inside it because the label's own text starts one slack down.
+     */
+    --_lift: calc(
+      var(--_label-slack) + (var(--_font-size) * var(--_line-height) - var(--_size)) / 2
+    );
+    /**
+     * The distance from the label's text to the description under it, stated
+     * once so both variants land on it. `field` puts `--slotted-space-3`
+     * between its own rows and a description belongs to the label above it at
+     * the same step; the label's slack already supplies part of that distance
+     * in the plain variant and none of it in a tile, so the padding is what is
+     * left over rather than a second number.
+     */
+    --_description-gap: max(0px, var(--slotted-space-3, 0.375rem) - var(--_label-slack));
+
+    color: var(--slotted-checkbox-color, var(--slotted-text, CanvasText));
+    display: grid;
+    font-family: var(--slotted-control-font-family, system-ui, sans-serif);
+    font-size: var(--_font-size);
+    grid-template-columns: auto minmax(0, 1fr);
+    line-height: var(--_line-height);
+  }
+
+  /* ── Size ─────────────────────────────────────────────────────────────
+   *
+   * Three steps against the control scales, the only ones the theme restates
+   * per density, so a `sm` checkbox in a `dense` table is one decision and not
+   * six.
+   */
+
+  [data-ui='checkbox'][data-part='root'][data-size='sm'] {
+    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-sm, 14px));
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+    --_gap: var(--slotted-control-gap-sm, 6px);
+    --_tile-inset: var(
+      --slotted-checkbox-tile-inset,
+      var(--slotted-control-padding-inline-sm, 10px)
+    );
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-size='md'] {
+    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-md, 16px));
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_gap: var(--slotted-control-gap-md, 8px);
+    --_tile-inset: var(
+      --slotted-checkbox-tile-inset,
+      var(--slotted-control-padding-inline-md, 13px)
+    );
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-size='lg'] {
+    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-lg, 18px));
+    --_font-size: var(--slotted-control-font-size-lg, 14px);
+    --_gap: var(--slotted-control-gap-lg, 8px);
+    --_tile-inset: var(
+      --slotted-checkbox-tile-inset,
+      var(--slotted-control-padding-inline-lg, 16px)
+    );
+  }
+
+  /* ── The box ──────────────────────────────────────────────────────────── */
+
+  [data-ui='checkbox'] [data-part='control'] {
+    appearance: none;
+    background-color: var(--slotted-checkbox-background, var(--slotted-surface, Canvas));
+    /**
+     * The control step of the border scale rather than the strong one: the edge
+     * of a control and a separator between two surfaces hold the same 3:1 ratio
+     * and are not the same weight.
+     */
+    border: var(--slotted-control-border-width, 1px) solid
+      var(--slotted-checkbox-border-color, var(--slotted-control-border-color, ButtonBorder));
+    border-radius: var(--slotted-checkbox-radius, var(--slotted-control-radius, 4px));
+    block-size: var(--_size);
+    box-sizing: border-box;
+    cursor: pointer;
+    grid-area: 1 / 1;
+    inline-size: var(--_size);
+    margin: 0;
+    margin-block-start: var(--_lift);
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      border-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing);
+  }
+
+  /* ── The mark ─────────────────────────────────────────────────────────
+   *
+   * One element for two glyphs. The check and the dash are the same mask
+   * property pointed at a different token, so the swap between checked and
+   * mixed is one declaration and the two states cannot drift apart.
+   */
+
+  [data-ui='checkbox'] [data-part='indicator'] {
+    --_glyph: var(--slotted-checkbox-mark-image, var(--slotted-icon-check));
+
+    background-color: var(--slotted-checkbox-mark-color, var(--slotted-tone-accent-on-solid));
+    /**
+     * The same square as the box, so the two grid items are concentric without
+     * a second offset to keep in step. The inset is applied to the mask rather
+     * than to the element, which is what keeps the mark centred at every step.
+     */
+    block-size: var(--_size);
+    grid-area: 1 / 1;
+    inline-size: var(--_size);
+    margin-block-start: var(--_lift);
+    mask-image: var(--_glyph);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: calc(var(--_size) * var(--_mark-inset)) calc(var(--_size) * var(--_mark-inset));
+    opacity: 0;
+    /** Nothing here answers the pointer; the control underneath does. */
+    pointer-events: none;
+    /**
+     * The mark grows into a box that was empty, which is a change the eye has
+     * to follow. It is the shortest step on the motion scale, so the state is
+     * legible before the transition ends rather than because of it.
+     */
+    scale: 0.6;
+    transition:
+      opacity var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
+      scale var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
+  [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /**
+   * Mixed is the dash, and it outranks the check: a control that is both
+   * indeterminate and checked is drawing the state its children are actually
+   * in, which is the one the reader has to see.
+   */
+  [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+    --_glyph: var(--slotted-checkbox-mixed-image, var(--slotted-icon-minus));
+  }
+
+  /* ── The label, and the target ────────────────────────────────────────
+   *
+   * The label is the control's own element and it names it through `for`, so a
+   * description below it can be read without toggling anything. It carries the
+   * whole target: at `dense`/`sm` the square is 12px, under WCAG 2.2's 24, and
+   * the correction is the family's to make rather than the theme's.
+   */
+
+  [data-ui='checkbox'] [data-part='label'] {
+    cursor: pointer;
+    grid-column: 2;
+    grid-row: 1;
+    /** The minimum never binds, because the padding already reaches it at one
+        line and the label is taller than it at two. It states the requirement
+        the padding meets, so a theme that retunes the target moves both. */
+    min-block-size: var(--slotted-target-min, 24px);
+    padding-block: var(--_label-slack);
+    padding-inline-start: var(--_gap);
+    /** A label that is one unbroken token — an id, a hash, a URL — breaks. */
+    overflow-wrap: anywhere;
+  }
+
+  /**
+   * Aligned under the label rather than under the box, and never inside the
+   * label: inside, it would join the accessible name, and a paragraph of help
+   * text that toggles a value when it is clicked is a paragraph nobody reads.
+   */
+  [data-ui='checkbox'] [data-part='description'] {
+    color: var(--slotted-checkbox-description-color, var(--slotted-text-muted, GrayText));
+    font-size: var(--slotted-checkbox-description-font-size, var(--slotted-font-size-xs, 0.75rem));
+    grid-column: 2;
+    grid-row: 2;
+    line-height: var(--slotted-line-height-xs, 1.4);
+    margin: 0;
+    overflow-wrap: anywhere;
+    padding-block-start: var(--_description-gap);
+    padding-inline-start: var(--_gap);
+  }
+
+  /* ── Placement ────────────────────────────────────────────────────────
+   *
+   * The box on the other side of its label. Two columns swap and the padding
+   * that owns the gap swaps with them, so the distance between box and text is
+   * the same number in both arrangements and in both writing directions.
+   */
+
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] {
+    /**
+     * `1fr` and not `max-content`, which was tried first and looked better in
+     * one row than in five: `max-content` sizes each item's first column from
+     * its own label, so a column of choices ends with the boxes at five
+     * different distances from the edge. A control that does not line up with
+     * the control above it is a worse picture than a control at the end of its
+     * row — and the end of the row is where a label-first arrangement puts a
+     * control everywhere it is used, from a settings list to a table cell.
+     */
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='control'],
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='indicator'] {
+    grid-area: 1 / 2;
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label'],
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='description'] {
+    grid-column: 1;
+    padding-inline-end: var(--_gap);
+    padding-inline-start: 0;
+  }
+
+  /* ── States ───────────────────────────────────────────────────────────
+   *
+   * In the order `STATE_PRECEDENCE` declares, each weaker one held back for
+   * every stronger one it can meet: a disabled control answers no hover, and a
+   * read-only one answers no press.
+   */
+
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:hover:not(:disabled) {
+    background-color: var(
+      --slotted-checkbox-hover-background,
+      var(--slotted-tone-accent-subtle-hover)
+    );
+    border-color: var(--slotted-checkbox-hover-border-color, var(--slotted-tone-accent-border));
+  }
+
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:active:not(:disabled) {
+    background-color: var(
+      --slotted-checkbox-active-background,
+      var(--slotted-tone-accent-subtle-active)
+    );
+  }
+
+  [data-ui='checkbox'] [data-part='control']:checked,
+  [data-ui='checkbox'] [data-part='control']:indeterminate {
+    background-color: var(--slotted-checkbox-checked-background, var(--slotted-tone-accent-solid));
+    border-color: var(--slotted-checkbox-checked-border-color, var(--slotted-tone-accent-solid));
+  }
+
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:checked:hover:not(:disabled),
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:indeterminate:hover:not(:disabled) {
+    background-color: var(
+      --slotted-checkbox-checked-hover-background,
+      var(--slotted-tone-accent-solid-hover)
+    );
+    border-color: var(
+      --slotted-checkbox-checked-hover-background,
+      var(--slotted-tone-accent-solid-hover)
+    );
+  }
+
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:checked:active:not(:disabled),
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:indeterminate:active:not(:disabled) {
+    background-color: var(
+      --slotted-checkbox-checked-active-background,
+      var(--slotted-tone-accent-solid-active)
+    );
+    border-color: var(
+      --slotted-checkbox-checked-active-background,
+      var(--slotted-tone-accent-solid-active)
+    );
+  }
+
+  [data-ui='checkbox'] [data-part='control']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /**
+   * The ring is retargeted rather than repainted: every rule that draws focus
+   * reads one name, so pointing it at the invalid colour moves the outline
+   * without a second focus rule existing anywhere.
+   */
+  [data-ui='checkbox'][data-part='root'][data-invalid] {
+    --slotted-focus-ring-color: var(
+      --slotted-checkbox-invalid-focus-ring-color,
+      var(--slotted-focus-ring-color-invalid, Highlight)
+    );
+  }
+
+  /**
+   * The border thickens as well as changing colour. In the `high-contrast`
+   * scheme the theme paints `--slotted-tone-danger-border` the same black as
+   * every other border, so colour alone would make an invalid control identical
+   * to a valid one — and `docs/component-features.md` §2.5 refuses a state that
+   * only colour carries. The box keeps its size, because the border box is what
+   * is measured.
+   */
+  [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control'] {
+    border-width: var(--slotted-border-width-thick, 2px);
+    border-color: var(--slotted-checkbox-invalid-border-color, var(--slotted-tone-danger-border));
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:checked,
+  [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:indeterminate {
+    background-color: var(
+      --slotted-checkbox-invalid-checked-background,
+      var(--slotted-tone-danger-solid)
+    );
+    border-color: var(
+      --slotted-checkbox-invalid-checked-background,
+      var(--slotted-tone-danger-solid)
+    );
+  }
+
+  /**
+   * Read-only keeps the ink, the ring and the tab stop: the value is real and
+   * is submitted, and `docs/component-features.md` §2.5 refuses to let it look
+   * disabled. Only the ground and the pointer say the value is not the
+   * reader's to move.
+   */
+  [data-ui='checkbox'][data-part='root'][data-readonly] [data-part='control'],
+  [data-ui='checkbox'][data-part='root'][data-readonly] [data-part='label'] {
+    cursor: default;
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-readonly]
+    [data-part='control']:not(:checked):not(:indeterminate) {
+    background-color: var(
+      --slotted-checkbox-readonly-background,
+      /**
+       * The ground `textarea` already gives a read-only value, and not the
+       * sunken surface: at the `light` scheme the sunken step is #f6f8fb
+       * against a white surface, a difference a reader cannot see, so the state
+       * existed in the accessibility tree and nowhere on screen.
+       */
+        var(--slotted-tone-secondary-subtle-hover)
+    );
+  }
+
+  /**
+   * `:disabled` beside `[data-disabled]`, because a disabled `fieldset`
+   * disables every control inside it and tells none of them.
+   */
+  [data-ui='checkbox'][data-part='root'][data-disabled] [data-part='control'],
+  [data-ui='checkbox'] [data-part='control']:disabled {
+    background-color: var(
+      --slotted-checkbox-disabled-background,
+      var(--slotted-disabled-background)
+    );
+    border-color: var(--slotted-checkbox-disabled-border-color, var(--slotted-disabled-border));
+    cursor: not-allowed;
+  }
+
+  [data-ui='checkbox'] [data-part='control']:disabled + [data-part='indicator'] {
+    background-color: var(
+      --slotted-checkbox-disabled-mark-color,
+      var(--slotted-disabled-foreground)
+    );
+  }
+
+  /**
+   * The element's own state reaches the text beside it through the general
+   * sibling combinator, and not only through the mirrored attribute: a disabled
+   * `fieldset` disables every control inside it and tells none of them, so a
+   * checkbox in a disabled group would otherwise keep a full-contrast label on
+   * a control nobody can reach.
+   */
+  [data-ui='checkbox'][data-part='root'][data-disabled] [data-part='label'],
+  [data-ui='checkbox'][data-part='root'][data-disabled] [data-part='description'],
+  [data-ui='checkbox'] [data-part='control']:disabled ~ [data-part='label'],
+  [data-ui='checkbox'] [data-part='control']:disabled ~ [data-part='description'] {
+    color: var(--slotted-checkbox-disabled-color, var(--slotted-disabled-foreground));
+    cursor: not-allowed;
+  }
+
+  /* ── The tile ─────────────────────────────────────────────────────────
+   *
+   * A choice drawn as a framed surface, and the whole of that surface as its
+   * target. Three of the implementations surveyed put this inside the checkbox
+   * family — Mantine's `Checkbox.Card`, Chakra's `CheckboxCard`, React Aria's
+   * `CheckboxButton` — and the reason it is not `card`'s `data-part="selection"`
+   * is that `card` is a content container: it holds media, three regions and an
+   * elevation calibrated for content, and it knows nothing of a `size` arriving
+   * from a field, of `invalid`, of `readonly` or of `required`. `selection`
+   * stays what it is, a choice living inside real card content; this is a
+   * choice that is the whole of what the surface holds.
+   *
+   * The name is `tile` rather than `card`, which is what Mantine and Chakra
+   * call it, because `card` already names a family here. Carbon and Cloudscape
+   * both call the framed choice a tile.
+   *
+   * The tile does not arrange itself. `grid` already ships `columns`,
+   * `minItemWidth` and a stretching alignment, so a row of equal-width tiles of
+   * equal height is a `grid` around the items and nothing this family adds.
+   */
+
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'] {
+    /* Current. The gated rules below move these three and nothing else, so a
+       state change is one declaration rather than a repainted rule. */
+    /* The tile is the target, at every size and density, so the label stops
+       carrying a minimum it no longer needs — and the slack that minimum
+       required goes with it. A one-line tile is then its inset plus its line
+       rather than its inset plus twenty-four pixels, and the description sits
+       at the same distance from its label that `field` puts between its rows. */
+    --_label-slack: 0px;
+    --_tile-surface: var(--slotted-checkbox-tile-background, var(--slotted-surface, Canvas));
+    --_tile-edge: var(
+      --slotted-checkbox-tile-border-color,
+      var(--slotted-control-border-color, ButtonBorder)
+    );
+    --_tile-edge-width: var(--slotted-control-border-width, 1px);
+
+    background-color: var(--_tile-surface);
+    border-radius: var(--slotted-checkbox-tile-radius, var(--slotted-radius-md, 6px));
+    /* The shadow a framed control carries at rest. A tile is a framed control,
+       so it reads the control step rather than a surface elevation: the two say
+       different things and the token foundation separates them for that. */
+    box-shadow: var(--slotted-control-shadow, none);
+    cursor: pointer;
+    padding: var(--_tile-inset);
+    /* The containing block for the edge and for the stretched target. */
+    position: relative;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  /**
+   * The edge is drawn over the border box and never in flow, so a hairline
+   * becoming a two-pixel chosen edge moves no line of text inside the tile. A
+   * real border would have to reserve its resting width, and reserving it is
+   * what makes the change shift every row by a pixel. It is a border rather
+   * than a shadow so that it survives forced colours, where a shadow is removed
+   * outright and a width is not. `card` draws its own edge the same way and for
+   * the same two reasons.
+   */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']::before {
+    border: var(--_tile-edge-width) solid var(--_tile-edge);
+    border-radius: inherit;
+    content: '';
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: border-color var(--slotted-control-transition-duration)
+      var(--slotted-control-transition-easing);
+  }
+
+  /**
+   * The target is the tile. The label already owns the target in the plain
+   * variant; here its hit area stretches over the whole surface, which is the
+   * mechanism `card` uses for a card that resolves to one destination. The
+   * element stays a `<label for>`, so the name, the toggle and `Space` are the
+   * platform's and nothing is reimplemented.
+   *
+   * Anything a consumer raises above the surface — a link inside the
+   * description, a button in the corner — sets `position: relative` on itself,
+   * for the same reason a card's footer does.
+   */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'] [data-part='label']::after {
+    content: '';
+    inset: 0;
+    position: absolute;
+  }
+
+  /* The tile carries the target the label used to. */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'] [data-part='label'] {
+    min-block-size: 0;
+  }
+
+  /* ── The tile's states ────────────────────────────────────────────────
+   *
+   * Read on the root rather than on the control, because the stretched
+   * target means the pointer is over the label and not over the box for all but
+   * sixteen pixels of the surface. Each rule holds itself back for every
+   * stronger state it can meet, in the order `STATE_PRECEDENCE` declares —
+   * including `checked`, which outranks both: without that guard, hovering a
+   * chosen tile repainted it in the fainter tint an unchosen one shows, so the
+   * pointer made a tile look less chosen than it was.
+   */
+
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):not(
+      [data-disabled]
+    ):has([data-part='control']:not(:disabled)):not(
+      :has([data-part='control']:is(:checked, :indeterminate))
+    ):hover {
+    --_tile-surface: var(
+      --slotted-checkbox-tile-hover-background,
+      var(--slotted-tone-accent-subtle-hover)
+    );
+    --_tile-edge: var(
+      --slotted-checkbox-tile-hover-border-color,
+      var(--slotted-tone-accent-border)
+    );
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):not(
+      [data-disabled]
+    ):has([data-part='control']:not(:disabled)):not(
+      :has([data-part='control']:is(:checked, :indeterminate))
+    ):active {
+    --_tile-surface: var(
+      --slotted-checkbox-tile-active-background,
+      var(--slotted-tone-accent-subtle-active)
+    );
+  }
+
+  /**
+   * Chosen says it with the edge, at the solid step and at twice the width. The
+   * ground moves one tint with it, because at tile area an edge alone is a
+   * difference a reader has to look for across a row of five, and the tint
+   * alone is a difference the `high-contrast` scheme flattens to nothing.
+   */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):has(
+      [data-part='control']:is(:checked, :indeterminate)
+    ) {
+    --_tile-edge: var(
+      --slotted-checkbox-tile-checked-border-color,
+      var(--slotted-tone-accent-solid)
+    );
+    --_tile-edge-width: var(--slotted-border-width-thick, 2px);
+  }
+
+  /**
+   * The chosen tint is the weaker half of what "chosen" says, so it holds
+   * itself back for read-only, which outranks it. The edge above does not: the
+   * value is real and stays visible, and a read-only set then reads as a set of
+   * secondary grounds with one accent edge on the choice that was made.
+   */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):has(
+      [data-part='control']:is(:checked, :indeterminate)
+    ) {
+    --_tile-surface: var(
+      --slotted-checkbox-tile-checked-background,
+      var(--slotted-tone-accent-surface)
+    );
+  }
+
+  /**
+   * A chosen tile still answers the pointer, and it is the edge that moves
+   * rather than the ground: the chosen tint is already the deepest step the
+   * accent tone has below its solid, so a ground that moved would either not
+   * move at all in `light` — where `accent-subtle-active` and `accent-surface`
+   * are the same value — or land on the tint an unchosen tile shows when it is
+   * merely hovered. Carbon moves the ground because its selected fill is not at
+   * the end of its own scale; here it is.
+   */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):not(
+      [data-disabled]
+    ):has([data-part='control']:is(:checked, :indeterminate):not(:disabled)):hover {
+    --_tile-edge: var(
+      --slotted-checkbox-tile-checked-hover-border-color,
+      var(--slotted-tone-accent-solid-hover)
+    );
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid] {
+    --_tile-edge: var(
+      --slotted-checkbox-tile-invalid-border-color,
+      var(--slotted-tone-danger-border)
+    );
+    --_tile-edge-width: var(--slotted-border-width-thick, 2px);
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid]:has(
+      [data-part='control']:is(:checked, :indeterminate)
+    ) {
+    --_tile-surface: var(
+      --slotted-checkbox-tile-invalid-checked-background,
+      var(--slotted-tone-danger-surface)
+    );
+    --_tile-edge: var(
+      --slotted-checkbox-tile-invalid-checked-border-color,
+      var(--slotted-tone-danger-solid)
+    );
+  }
+
+  /* Read-only keeps the ink and the tab stop; only the ground and the pointer
+     say the value is not the reader's to move. */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-readonly] {
+    --_tile-surface: var(
+      --slotted-checkbox-tile-readonly-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    /**
+     * The frame holds back for read-only, edge and all. It was the ground
+     * alone, and in the `dark` scheme that ground is `#18181b` against a chosen
+     * tile's `#181b22`: seven units of blue, which is a state that exists in
+     * the accessibility tree and nowhere on screen. The box inside is still
+     * painted chosen — it is the mark that says what was chosen — and the frame
+     * says the value is not the reader's to move, in every scheme, because the
+     * neutral edge and the accent edge are different colours in all three.
+     */
+    --_tile-edge: var(--slotted-checkbox-tile-readonly-border-color, var(--slotted-border-strong));
+
+    cursor: default;
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-disabled],
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']:has([data-part='control']:disabled) {
+    --_tile-surface: var(
+      --slotted-checkbox-tile-disabled-background,
+      var(--slotted-disabled-background)
+    );
+    --_tile-edge: var(
+      --slotted-checkbox-tile-disabled-border-color,
+      var(--slotted-disabled-border)
+    );
+
+    /* A tile that cannot be used does not sit above the page. */
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /**
+   * The ring goes around the tile and the box loses its own. Drawing both left
+   * a ring around a sixteen-pixel box inside a ring around the whole surface,
+   * which reads as two controls. The tile is what the pointer and the keyboard
+   * are addressing, so the tile is what the ring is about.
+   */
+  [data-ui='checkbox'][data-part='root'][data-variant='tile']:has(
+      [data-part='control']:focus-visible
+    ) {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  [data-ui='checkbox'][data-part='root'][data-variant='tile'] [data-part='control']:focus-visible {
+    outline: none;
+  }
+
+  /* ── Forced colors ────────────────────────────────────────────────────
+   *
+   * The one place this family paints something the theme cannot reach. Forced
+   * colors overrides `background-color` on both boxes, so the mark and the
+   * ground it stands on would be forced to the same colour and the check would
+   * disappear into the box it is drawn in. The pair is restated here in system
+   * colours, which is what the briefing allows a family to do exactly when the
+   * theme cannot.
+   */
+  @media (forced-colors: active) {
+    [data-ui='checkbox'] [data-part='control'] {
+      background-color: Field;
+      border-color: FieldText;
+    }
+
+    [data-ui='checkbox'] [data-part='control']:checked,
+    [data-ui='checkbox'] [data-part='control']:indeterminate {
+      background-color: Highlight;
+      border-color: Highlight;
+    }
+
+    [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
+    [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+      background-color: HighlightText;
+    }
+
+    [data-ui='checkbox'] [data-part='control']:disabled {
+      background-color: Field;
+      border-color: GrayText;
+    }
+
+    [data-ui='checkbox'] [data-part='control']:disabled + [data-part='indicator'] {
+      background-color: GrayText;
+    }
+  }
+}

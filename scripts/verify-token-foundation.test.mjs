@@ -14,8 +14,17 @@ const buildLog = readFileSync(join(ROOT, 'docs/BUILD-LOG.md'), 'utf8');
 const SCHEMES = ['light', 'dark', 'high-contrast'];
 const DENSITIES = ['comfortable', 'compact', 'dense'];
 
+/**
+ * `\Z` is not a JavaScript regular expression: it matches the letter Z. The
+ * section therefore used to end at the first capital Z in the document, which
+ * nothing noticed until a glyph's path data ended in one — the `Z` that closes
+ * an SVG subpath — and the row holding it was read half a cell short. The end
+ * of the input is written the way JavaScript spells it.
+ */
 function section(name) {
-  const match = foundation.match(new RegExp(`^## ${name}\\n([\\s\\S]*?)(?=^## |\\Z)`, 'm'));
+  const match = foundation.match(
+    new RegExp(`^## ${name}\\n([\\s\\S]*?)(?=^## |$(?![\\s\\S]))`, 'm'),
+  );
   assert.ok(match, `Missing ${name} section`);
   return match[1];
 }
@@ -70,8 +79,16 @@ function assertBaseTable(title, prefix) {
   );
 }
 
+/**
+ * The predicate reads the token, not its name. Splitting the scheme tables by
+ * name prefix held only while every shadow was called `--slotted-shadow-*`,
+ * and it broke the moment a control named its own: `--slotted-control-shadow`
+ * is a shadow that does not carry the prefix, and the split sent it to the
+ * colour table. The contract already declares what each token is, so the
+ * declared type is what the tables are partitioned by.
+ */
 function assertSchemeTable(title, predicate) {
-  const entries = names((token) => token.axis === 'scheme' && predicate(token.name));
+  const entries = names((token) => token.axis === 'scheme' && predicate(token));
   assert.ok(entries.length > 0, `${title} documents no token`);
   assertExactTable(
     title,
@@ -136,10 +153,10 @@ test('documents the control typography every family shares', () => {
 });
 
 test('documents each scheme colour in all three schemes', () => {
-  assertSchemeTable('Shadow', (name) => name.startsWith('--slotted-shadow-'));
+  assertSchemeTable('Shadow', (token) => token.type === 'shadow');
   assertSchemeTable(
     'Semantic colour',
-    (name) => !name.startsWith('--slotted-shadow-') && !name.startsWith('--slotted-tone-'),
+    (token) => token.type !== 'shadow' && !token.name.startsWith('--slotted-tone-'),
   );
 });
 
@@ -158,25 +175,70 @@ test('documents the control geometry of every density', () => {
   const geometry = names(
     (token) => token.axis === 'density' && token.name.startsWith('--slotted-control-'),
   );
-  const aliases = names(
-    (token) => token.axis === 'density' && token.name.startsWith('--slotted-button-'),
-  );
 
   assertExactTable(
     'Control geometry',
-    ['Token', 'Comfortable', 'Compact', 'Dense', 'Legacy Button alias'],
-    geometry.map((name) => {
-      const [, geometryName, size] = name.match(/^--slotted-control-(.+)-(sm|md|lg)$/) ?? [];
-      const alias = aliases.find(
-        (candidate) => candidate === `--slotted-button-${geometryName}-${size}`,
-      );
-      return [
+    ['Token', 'Comfortable', 'Compact', 'Dense'],
+    geometry.map((name) => [
+      `\`${name}\``,
+      ...DENSITIES.map((density) => `\`${theme.densities[density][name]}\``),
+    ]),
+  );
+});
+
+/**
+ * Control geometry is the one scale a family was ever tempted to alias, and
+ * Button did until it was rebuilt. An alias looks harmless and is not: the
+ * theme raises the control tokens under `@media (pointer: coarse)`, and a
+ * family reading the alias never sees the larger touch target.
+ *
+ * The rule is about the value and not about the name, which the first
+ * independent density scale made plain: `--slotted-avatar-size-*` states its
+ * own lengths and aliases nothing, while a token named for a control that
+ * merely forwarded `var(--slotted-control-height-md)` is the defect this test
+ * exists to catch. What is refused is a density token whose value reaches the
+ * control scale.
+ */
+test('leaves the density scale with no aliases in front of it', () => {
+  const aliases = names(
+    (token) =>
+      token.axis === 'density' &&
+      !token.name.startsWith('--slotted-control-') &&
+      DENSITIES.some((density) =>
+        /var\(\s*--slotted-control-/.test(String(theme.densities[density]?.[token.name] ?? '')),
+      ),
+  );
+  assert.deepEqual(aliases, [], 'a density token in front of the control scale is an alias');
+});
+
+/**
+ * A density scale outside control geometry is documented the way control
+ * geometry is, so a family cannot add one and leave it unwritten. Avatar is the
+ * only family that has needed one; the table is what makes the next one a
+ * decision rather than a habit.
+ */
+test('documents every density scale that is not control geometry', () => {
+  const scales = new Map();
+  for (const name of names(
+    (token) => token.axis === 'density' && !token.name.startsWith('--slotted-control-'),
+  )) {
+    /* `--slotted-avatar-size-xs` is documented under "Avatar size": the family
+       it belongs to, then what it measures. */
+    const [family, concept] = name.replace('--slotted-', '').split('-');
+    const title = `${(family ?? '').replace(/^./, (first) => first.toUpperCase())} ${concept}`;
+    scales.set(title, [...(scales.get(title) ?? []), name]);
+  }
+
+  for (const [title, scale] of scales) {
+    assertExactTable(
+      title,
+      ['Token', 'Comfortable', 'Compact', 'Dense'],
+      scale.map((name) => [
         `\`${name}\``,
         ...DENSITIES.map((density) => `\`${theme.densities[density][name]}\``),
-        alias ? `\`${alias}\`` : '—',
-      ];
-    }),
-  );
+      ]),
+    );
+  }
 });
 
 test('states the rules the contract enforces rather than leaving them to habit', () => {

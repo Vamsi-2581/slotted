@@ -11,8 +11,24 @@ const ROOT = new URL('..', import.meta.url).pathname;
  * default every instance takes, a weight the artwork's own grid decides — and
  * that rule is equally correct on both pages. The rule below is about a page
  * showing the *wrong framework's* code, which a stylesheet cannot be.
+ *
+ * `ts` is the same case on the other side. An application sets a family's
+ * defaults once, and in Angular that lives in a bootstrap file rather than in a
+ * template: it is TypeScript, which is the language both bindings are written
+ * in, and it is not the other framework's code. The rule still refuses a `tsx`
+ * snippet on an Angular page and an `angular` one on a React page, which is the
+ * confusion it exists to catch.
  */
-const NEUTRAL_LANGUAGES = new Set(['css']);
+const NEUTRAL_LANGUAGES = new Set(['css', 'ts']);
+
+/**
+ * A snippet that is the *same snippet* on both pages, rather than merely
+ * written in a language neither framework owns. Only a stylesheet rule is: the
+ * Angular `ts` snippet that provides a family's defaults is Angular's own, and
+ * a React page's `ts` snippet of the same idea would be a different one, so
+ * both ids have to name their framework or the two would collide.
+ */
+const SHARED_LANGUAGES = new Set(['css']);
 
 /**
  * Each framework's reference pages are written by copying the other's and
@@ -127,7 +143,7 @@ test('gives every snippet an id naming the framework it belongs to', () => {
          * other page's copy would then be the wrong name rather than a
          * collision.
          */
-        if (NEUTRAL_LANGUAGES.has(found)) {
+        if (SHARED_LANGUAGES.has(found)) {
           if (id.includes('react') || id.includes('angular')) {
             violations.push(`${path.slice(ROOT.length)}: ${found} snippet ${id} names a framework`);
           }

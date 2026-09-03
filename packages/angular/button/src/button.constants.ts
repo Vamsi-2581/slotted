@@ -1,18 +1,36 @@
-export const BUTTON_VARIANTS = ['accent', 'secondary', 'success', 'warning', 'danger'] as const;
-export const BUTTON_FILLS = ['solid', 'outline', 'ghost'] as const;
+/**
+ * The five colours are tones in `docs/token-foundation.md`, so the axis that
+ * selects one is `tone`. `variant` names what it actually selects: how the
+ * chosen tone is painted.
+ */
+export const BUTTON_TONES = ['accent', 'secondary', 'success', 'warning', 'danger'] as const;
+export const BUTTON_VARIANTS = ['solid', 'outline', 'ghost'] as const;
 export const BUTTON_SIZES = ['sm', 'md', 'lg'] as const;
-export const BUTTON_GROUP_ORIENTATIONS = ['horizontal', 'vertical'] as const;
+export const BUTTON_SHAPES = ['square', 'circle'] as const;
 
-export const BUTTON_DEFAULTS = { variant: 'accent', fill: 'solid', size: 'md' } as const;
-export const ICON_BUTTON_DEFAULTS = { variant: 'secondary', fill: 'ghost', size: 'md' } as const;
+export const BUTTON_DEFAULTS = { tone: 'accent', variant: 'solid', size: 'md' } as const;
+export const BUTTON_LINK_DEFAULTS = BUTTON_DEFAULTS;
+export const ICON_BUTTON_DEFAULTS = {
+  tone: 'secondary',
+  variant: 'ghost',
+  size: 'md',
+  shape: 'square',
+} as const;
 export const TOGGLE_BUTTON_DEFAULTS = {
-  variant: 'secondary',
-  fill: 'outline',
+  tone: 'secondary',
+  variant: 'outline',
   size: 'md',
 } as const;
 
+export type ButtonTone = (typeof BUTTON_TONES)[number];
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number];
-export type ButtonFill = (typeof BUTTON_FILLS)[number];
 export type ButtonSize = (typeof BUTTON_SIZES)[number];
-export type ButtonGroupOrientation = (typeof BUTTON_GROUP_ORIENTATIONS)[number];
+export type ButtonShape = (typeof BUTTON_SHAPES)[number];
 export type ButtonType = 'button' | 'submit' | 'reset';
+
+/**
+ * What the ring announces itself as when the consumer says nothing. It is a
+ * progress bar, so it needs a name; an application replaces it per instance or
+ * translates it once at the call site.
+ */
+export const BUTTON_LOADING_LABEL = 'Loading';

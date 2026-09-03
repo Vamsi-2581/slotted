@@ -9,6 +9,34 @@ const referenceStories: ReferencePageConfig['stories'] = () => ({
   essential: Playground as never,
 });
 
+/**
+ * The icon belongs to the consumer, and the Icon family has not been built
+ * yet, so these pages draw geometry rather than a character. A character is
+ * never an icon, and a reference page that used one would be teaching the
+ * wrong thing beside the right one.
+ */
+function Glyph({ path }: { path: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={path} />
+    </svg>
+  );
+}
+
+const CROSS = 'M18 6 6 18M6 6l12 12';
+const CHECK = 'M20 6 9 17l-5-5';
+
 const meta = {
   title: 'Components/VisuallyHidden',
   component: VisuallyHidden,
@@ -17,7 +45,7 @@ const meta = {
     docs: {
       page: createReferencePage({
         title: 'VisuallyHidden',
-        description: 'Content a screen reader reads and the eye never sees.',
+        description: 'Content a screen reader reads, the eye never sees, and layout never feels.',
         framework: 'React',
         ...REACT_VISUALLY_HIDDEN_DOCS.visuallyHidden,
         tokens: REACT_VISUALLY_HIDDEN_TOKENS,
@@ -31,18 +59,20 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
-  args: { children: 'Delete invoice', focusable: false },
+  args: { children: 'Remove invoice', focusable: false },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => (
     <div className="slotted-demo-measure">
       <div className="slotted-demo-stack">
         <button type="button">
-          <span aria-hidden="true">🗑</span>
+          <Glyph path={CROSS} />
           <VisuallyHidden {...args} />
         </button>
         <p>
           The button shows a glyph and nothing else. Its accessible name is the hidden text, so a
-          screen reader announces the action the glyph stands for.
+          screen reader announces the action the glyph stands for. Turn <code>focusable</code> on
+          and press Tab to see the difference: the name becomes visible while the button holds
+          focus.
         </p>
       </div>
     </div>
@@ -59,10 +89,53 @@ export const Focusable: Story = {
         </VisuallyHidden>
         <p>
           Press Tab with focus inside this frame. The skip link above is hidden until it holds
-          focus, then it lays itself out like any other link.
+          focus, then it stops being hidden and renders as the anchor it is — the component paints
+          nothing on it, so its appearance is the one the consumer gives the link.
         </p>
-        <p id="visually-hidden-main">The link's destination.</p>
+        <p id="visually-hidden-main">The link’s destination.</p>
       </div>
+    </div>
+  ),
+};
+
+/**
+ * The promise that separates this primitive from `aria-label`: the content is
+ * read and it costs no space. Both rows carry the same two buttons, and the
+ * second one carries hidden text inside the first button and between the two.
+ */
+export const Layout: Story = {
+  parameters: scenario('layout'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="2">
+      <section className="slotted-demo-scene">
+        <header className="slotted-demo-scene__header">
+          <span className="slotted-demo-scene__label">Without hidden content</span>
+          <span className="slotted-demo-scene__note">Two buttons in a row with a gap.</span>
+        </header>
+        <div className="slotted-demo-stage" data-align="start">
+          <div className="slotted-demo-row">
+            <button type="button">A</button>
+            <button type="button">B</button>
+          </div>
+        </div>
+      </section>
+      <section className="slotted-demo-scene">
+        <header className="slotted-demo-scene__header">
+          <span className="slotted-demo-scene__label">With hidden content</span>
+          <span className="slotted-demo-scene__note">
+            The same row, with a name inside the first button and a hidden span between the two.
+          </span>
+        </header>
+        <div className="slotted-demo-stage" data-align="start">
+          <div className="slotted-demo-row">
+            <button type="button">
+              A<VisuallyHidden>pprove</VisuallyHidden>
+            </button>
+            <VisuallyHidden>Not a third gap</VisuallyHidden>
+            <button type="button">B</button>
+          </div>
+        </div>
+      </section>
     </div>
   ),
 };
@@ -84,7 +157,7 @@ export const Accessibility: Story = {
               <tr>
                 <th scope="col">Invoice</th>
                 <th scope="col">
-                  <span aria-hidden="true">✓</span>
+                  <Glyph path={CHECK} />
                   <VisuallyHidden>Paid</VisuallyHidden>
                 </th>
               </tr>

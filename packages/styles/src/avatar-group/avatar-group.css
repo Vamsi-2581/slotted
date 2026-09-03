@@ -1,0 +1,175 @@
+@layer slotted.components {
+  /**
+   * ── The group ──────────────────────────────────────────────────────────
+   *
+   * A list of faces, overlapped or apart, ending in a summary of the ones it
+   * does not show. It is a family rather than a part of `avatar` for the reason
+   * `button-group` is one: it owns a different element, a different set of
+   * decisions, and a member it does not have to be.
+   *
+   * It is a real `<ul>`, so a screen reader announces a list of N without the
+   * family inventing a role. The label is the consumer's `aria-label`, which is
+   * the decision `button-group` already took for the same question: a second
+   * way to name one thing is a second thing to get wrong.
+   */
+  [data-ui='avatar-group'][data-part='root'] {
+    /**
+     * How much of a member the next one covers, as a fraction of its own box.
+     * A proportion rather than a step of the space scale, because what has to
+     * stay constant is the amount of face that remains visible: at 0.22 the
+     * leading four fifths of every avatar is showing, at every size and at
+     * every density.
+     *
+     * The value is what two initials can afford to lose. Measured on the
+     * harness at `md`, a pair of letters spans the middle 55 per cent of the
+     * box, so a quarter covered clips the second one and a fifth does not. MUI
+     * lands in the same place from the other direction, with a fixed eight
+     * pixels on a forty-pixel avatar.
+     */
+    --_overlap: var(--slotted-avatar-group-overlap, 0.28);
+
+    /**
+     * The size is restated here as well as reaching every member through the
+     * defaults each binding provides. The member needs it to scale its own type
+     * and glyph; the group needs it as a number, to work out an overlap that no
+     * child can compute for its parent.
+     */
+    --_size: var(--slotted-avatar-size, var(--slotted-avatar-size-md, 36px));
+
+    align-items: center;
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /**
+   * An actions row built from a permission filter renders an empty group often,
+   * and an empty box still eats a gap in the row that holds it, so the row
+   * beside it drifts for a reason nobody can see in the markup. The same
+   * decision `button-group` took.
+   */
+  [data-ui='avatar-group'][data-part='root']:empty {
+    display: none;
+  }
+
+  [data-ui='avatar-group'] [data-part='item'],
+  [data-ui='avatar-group'] [data-part='overflow'] {
+    display: flex;
+    /* Not a stacking context: `z-index` stays `auto` so a member raised on
+       hover rises above its neighbours rather than only inside its own item. */
+    position: relative;
+  }
+
+  [data-ui='avatar-group'][data-part='root'][data-layout='stack']
+    [data-ui='avatar'][data-part='root'] {
+    transition:
+      transform var(--slotted-duration-short) var(--slotted-easing-standard),
+      box-shadow var(--slotted-duration-short) var(--slotted-easing-standard);
+  }
+
+  /* ── Size ─────────────────────────────────────────────────────────────── */
+
+  [data-ui='avatar-group'][data-part='root'][data-size='xs'] {
+    --slotted-avatar-size: var(--slotted-avatar-size-xs, 24px);
+  }
+
+  [data-ui='avatar-group'][data-part='root'][data-size='sm'] {
+    --slotted-avatar-size: var(--slotted-avatar-size-sm, 28px);
+  }
+
+  [data-ui='avatar-group'][data-part='root'][data-size='md'] {
+    --slotted-avatar-size: var(--slotted-avatar-size-md, 36px);
+  }
+
+  [data-ui='avatar-group'][data-part='root'][data-size='lg'] {
+    --slotted-avatar-size: var(--slotted-avatar-size-lg, 48px);
+  }
+
+  [data-ui='avatar-group'][data-part='root'][data-size='xl'] {
+    --slotted-avatar-size: var(--slotted-avatar-size-xl, 64px);
+  }
+
+  /* ── Layout ───────────────────────────────────────────────────────────── */
+
+  /**
+   * The overlapped run. A negative logical inset, so a right-to-left document
+   * gets the same component mirrored rather than a second stylesheet — which is
+   * what Ant, MUI, Chakra and Primer all need, because all four write `margin-left`.
+   *
+   * Members are not wrapped: a stack that broke across two lines would leave
+   * the last face of the first line overlapping nothing.
+   */
+  [data-ui='avatar-group'][data-part='root'][data-layout='stack'] {
+    flex-wrap: nowrap;
+  }
+
+  /**
+   * The avatar owns its own one-pixel edge. The group only controls the overlap,
+   * so the stack has one curve per face instead of a second thick ring layered
+   * over every member.
+   */
+  [data-ui='avatar-group'][data-part='root'][data-layout='stack'] > * + * {
+    margin-inline-start: calc(var(--_size) * var(--_overlap) * -1);
+  }
+
+  /**
+   * The separated run. It wraps, because a row of eight faces at 420 pixels has
+   * to go somewhere, and a group laid out apart has no stacking order to lose
+   * by breaking.
+   */
+  [data-ui='avatar-group'][data-part='root'][data-layout='spread'] {
+    flex-wrap: wrap;
+    /**
+     * A step of the space scale rather than a proportion of the avatar, because
+     * separation between two components is a layout rhythm and the space scale
+     * is where this library keeps those — the decision `button-group` recorded
+     * for the gap between two buttons. Cost: a row of extra-large avatars is
+     * proportionally tighter than a row of small ones.
+     */
+    gap: var(--slotted-space-4, 0.5rem);
+  }
+
+  /* ── The member under the pointer, or under the caret ─────────────────── */
+
+  /**
+   * In a stack every member covers the trailing edge of the one before it, so a
+   * focus ring drawn on any but the last would be half-hidden under its
+   * neighbour. Raising the member is the whole feedback, and it is instant: a
+   * change of stacking order that took two hundred milliseconds would leave the
+   * avatar behind its neighbour for most of the time the pointer is on it.
+   *
+   * A weak state held back for the stronger one: a disabled member does not
+   * rise, which is the rule `packages/styles/src/states.test.mjs` keeps.
+   */
+  [data-ui='avatar-group'][data-layout='stack']
+    [data-ui='avatar'][data-part='root']:not([data-disabled]):hover {
+    z-index: 1;
+    transform: translateY(calc(var(--slotted-space-1, 0.125rem) * -1));
+  }
+
+  [data-ui='avatar-group'][data-layout='stack'] [data-ui='avatar'][data-part='root']:focus-visible {
+    z-index: 1;
+    transform: translateY(calc(var(--slotted-space-1, 0.125rem) * -1));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='avatar-group'][data-layout='stack'] [data-ui='avatar'][data-part='root'] {
+      transition: none;
+    }
+  }
+
+  /* ── The summary ──────────────────────────────────────────────────────── */
+
+  /**
+   * `+12` is three figures where a pair of initials is two, so the avatar in
+   * the overflow reads its type a step smaller. Tabular figures keep the box
+   * from jittering as the count crosses a power of ten, which is the same rule
+   * `badge` applies to its own count.
+   */
+  [data-ui='avatar-group'] [data-part='overflow'] [data-ui='avatar'][data-part='root'] {
+    --slotted-avatar-initials-size: calc(var(--_size) * 0.32);
+
+    font-variant-numeric: tabular-nums;
+  }
+}

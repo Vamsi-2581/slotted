@@ -54,7 +54,7 @@ export const Playground: Story = {
     props: args,
     template: `
 <div class="slotted-demo-measure">
-  <p slText [size]="size" [weight]="weight">{{ content }}</p>
+  <span slText [size]="size" [weight]="weight">{{ content }}</span>
 </div>`,
   }),
 };
@@ -76,7 +76,7 @@ export const Scale: Story = {
       <div class="slotted-demo-stack">
         ${SIZES.map(
           (size) =>
-            `<p slText size="${size}">${size} — the quick brown fox jumps over the lazy dog</p>`,
+            `<span slText size="${size}">${size} — the quick brown fox jumps over the lazy dog</span>`,
         ).join('\n        ')}
       </div>
     </div>
@@ -100,10 +100,12 @@ export const Tone: Story = {
     </header>
     <div class="slotted-demo-stage">
       <div class="slotted-demo-stack">
-        ${TONES.map((tone) => `<p slText tone="${tone}">${tone}</p>`).join('\n        ')}
-        <p slText size="xs" tone="muted" transform="uppercase" weight="semibold">Section label</p>
-        <p slText align="end" numeric="tabular">1,204.50</p>
-        <p slText align="end" numeric="tabular">88,111.09</p>
+        ${TONES.map((tone) => `<span slText tone="${tone}">${tone}</span>`).join('\n        ')}
+        <span slText size="xs" tone="muted" transform="uppercase" weight="semibold">
+          Section label
+        </span>
+        <span slText align="end" numeric="tabular">1,204.50</span>
+        <span slText align="end" numeric="tabular">88,111.09</span>
       </div>
     </div>
   </section>
@@ -117,22 +119,22 @@ export const Truncation: Story = {
     template: `
 <div class="slotted-demo-measure">
   <div class="slotted-demo-stack">
-    <p slText [truncate]="true">
+    <span slText [truncate]="true">
       A single line that runs past the edge of its container and is cut with an ellipsis rather than
       wrapped.
-    </p>
-    <p slText [truncate]="3">
+    </span>
+    <span slText [truncate]="3">
       Three lines are kept and the rest is clipped. The whole string stays in the document, so a
       screen reader still reads it, a page search still finds it, and a selection still copies it.
       Only the picture is shorter.
-    </p>
-    <p slText size="sm" tone="muted">
+    </span>
+    <span slText size="sm" tone="muted">
       f4c2b9a7e1d05836af9c74b21e0d8a5639bc17e408fa26d3915cb7420ed83fa1
-    </p>
-    <p slText size="sm" tone="muted">
+    </span>
+    <span slText size="sm" tone="muted">
       Select the clipped lines and copy them: the whole string is still there. A token longer than
       its container breaks instead of widening the layout.
-    </p>
+    </span>
   </div>
 </div>`,
   }),
@@ -147,13 +149,13 @@ export const Accessibility: Story = {
     <p slText wrap="pretty">
       The directive sits on the element the consumer wrote, so the document says what it means.
     </p>
-    <p slText lang="ar" dir="rtl">
+    <span slText lang="ar" dir="rtl">
       تصدر الفواتير في أول يوم عمل من كل شهر، وتسدد من وسيلة الدفع المسجلة.
-    </p>
-    <p slText size="sm" tone="muted">
+    </span>
+    <span slText size="sm" tone="muted">
       Alignment is logical, so a right-to-left document is the same component mirrored. The tracking
       that capitals need is undone for scripts whose letters join.
-    </p>
+    </span>
   </div>
 </div>`,
   }),

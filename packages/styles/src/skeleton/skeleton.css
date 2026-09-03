@@ -1,0 +1,422 @@
+/**
+ * The phase every placeholder on the page reads, registered so it can be
+ * animated at all: an unregistered custom property has no type and interpolates
+ * by discrete jumps.
+ *
+ * `inherits: true` is the whole mechanism. One animation on a region drives the
+ * number, every placeholder inside it reads the same value, and a box that
+ * mounts halfway through a load inherits the phase the others are already at.
+ * React Spectrum reaches the same result with the Web Animations API and
+ * `animation.startTime = 0`; HeroUI asks the consumer to put a class on the
+ * parent and to switch every child's animation off by hand. This costs one
+ * declaration and no script, and a hundred rows animate one property rather
+ * than a hundred timelines.
+ */
+@property --slotted-skeleton-phase {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@layer slotted.components {
+  /* ── The box, and the row inside a paragraph ────────────────────────────
+   *
+   * One fill, one rim, one highlight, shared by the standalone placeholder and
+   * by every line of a text placeholder. They are the same object drawn at two
+   * scales, so they resolve their paint in one place.
+   *
+   * `--slotted-disabled-background` is the fill because it already means the
+   * one thing a placeholder means: a surface that is not available yet. It
+   * carries a cost, and the rim is what pays it — in the `high-contrast`
+   * scheme that token is the page's own white, so a fill alone would be an
+   * invisible box. `--slotted-border-subtle` is the fill's own colour in
+   * light, a faint step in dark, and black in high contrast: a rim that
+   * appears exactly where the fill stops working and adds no noise where it
+   * does.
+   */
+  /**
+   * `[data-loading]` on the paint rather than on the geometry, and the
+   * difference is not cosmetic: `user-select` and `color` inherit, so a
+   * placeholder that kept them after the content arrived handed the consumer
+   * unselectable, invisible text. The first capture of this family showed a
+   * loaded row as an empty line beside its avatar for exactly that reason.
+   * Geometry is left unguarded because a loaded placeholder is
+   * `display: contents` and has no box for it to describe.
+   */
+  [data-ui='skeleton'][data-part='root'][data-loading],
+  [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line'] {
+    /**
+     * The unavailable surface, pushed a little toward the text colour. The
+     * token alone is not enough and the first dark capture is why: in the dark
+     * scheme `--slotted-disabled-background` is `#18181b` over a `#131316`
+     * ground, one step apart, and a page of placeholders read as an empty
+     * page. Mixing toward `--slotted-text` moves away from the ground in every
+     * scheme, because the text colour is the far end of each scheme's own
+     * range — darker in light, lighter in dark, black in high contrast.
+     *
+     * Eight per cent, measured rather than chosen. In oklab lightness the
+     * unmixed token sits 0.071 from the light surface, 0.022 from the dark one
+     * and 0.000 from the high-contrast one; at this ratio the three are 0.129,
+     * 0.086 and 0.081, which is the closest the one number gets to treating
+     * the three schemes alike without making the light placeholder shout. For
+     * scale, MUI's light skeleton sits about 0.07 from its ground.
+     */
+    --_fill: var(
+      --slotted-skeleton-fill,
+      color-mix(
+        in oklab,
+        var(--slotted-disabled-background, ButtonFace) 92%,
+        var(--slotted-text, CanvasText)
+      )
+    );
+    --_edge: var(--slotted-skeleton-border-color, var(--slotted-border-subtle, ButtonBorder));
+    /**
+     * A shimmer needs a second colour, and in August this family declined to
+     * have one on the grounds that the theme did not own it. It does: the band
+     * is the fill carried further along the same axis the fill was derived on,
+     * so it separates from the fill in every scheme without a token of its own.
+     * The band is darker than the fill in light and lighter in dark, which is
+     * Ant Design's answer to the same problem — its gradient runs from
+     * `rgba(0,0,0,.06)` to `rgba(0,0,0,.15)` — and it is the only direction
+     * that is a direction at all in three schemes rather than two.
+     */
+    --_highlight: var(
+      --slotted-skeleton-highlight-color,
+      color-mix(in oklab, var(--_fill) 86%, var(--slotted-text, CanvasText))
+    );
+    /**
+     * The dimmed end of the pulse: the fill carried toward the deepest surface
+     * the scheme holds, so it is a step away from the fill in every scheme
+     * without a token of its own. `surface-sunken` rather than `surface`
+     * because the two are the same white in light and a full step apart in
+     * dark, which is where the pulse was too quiet to see.
+     *
+     * A colour rather than an opacity, and that is a correction rather than a
+     * preference. The pulse used to fade the whole box, which flickered in the
+     * dark scheme: the rim faded with the fill, so once every cycle the shape
+     * came within a hair of the ground and then came back. Painting the
+     * background alone leaves the rim at full strength, and the box never
+     * leaves the page.
+     */
+    --_trough: var(
+      --slotted-skeleton-trough-color,
+      color-mix(in oklab, var(--_fill) 60%, var(--slotted-surface-sunken, Canvas))
+    );
+    /**
+     * The loop, eased. Zero at both ends of the cycle and one in the middle,
+     * so the seam where the phase wraps from one back to zero carries the same
+     * value on both sides and there is nothing to see there.
+     */
+    --_p: calc(0.5 - 0.5 * cos(var(--slotted-skeleton-phase) * 1turn));
+    /**
+     * The sweep runs with the text. `background-position` has no logical form,
+     * so the direction lives in which end of the phase the band starts from
+     * rather than in a sign multiplied onto a percentage — a negative position
+     * moves the image the wrong way rather than the mirrored way.
+     */
+    --_sweep-phase: calc(1 - var(--slotted-skeleton-phase));
+
+    background-color: var(--_fill);
+    border: var(--slotted-skeleton-border-width, var(--slotted-border-width-thin, 1px)) solid
+      var(--_edge);
+    /* The rim is inside the reserved geometry, or the placeholder is two
+       pixels taller than the content it stands for. */
+    box-sizing: border-box;
+    /* A placeholder is furniture, not text: nothing in it should be
+       selectable, and a drag across a loading list should not highlight it. */
+    user-select: none;
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-loading]:dir(rtl),
+  [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line']:dir(rtl) {
+    --_sweep-phase: var(--slotted-skeleton-phase);
+  }
+
+  /* ── Shapes ─────────────────────────────────────────────────────────────
+   *
+   * Four relationships to the surrounding layout rather than four points on
+   * one scale: a line of type, a block of content, and the two boxes an avatar
+   * can be.
+   */
+
+  [data-ui='skeleton'][data-part='root'] {
+    display: inline-block;
+    /* Never a negative or zero box, whatever the consumer's value resolves
+       to. A placeholder that cannot be seen cannot be corrected. */
+    min-block-size: var(--slotted-skeleton-border-width, var(--slotted-border-width-thin, 1px));
+  }
+
+  /**
+   * A bar the height of the type it is placed in, sitting on that type's
+   * optical centre rather than on its baseline — the correction `link` derives
+   * for the marker it draws beside a word, for the same reason: an inline box
+   * is aligned by its bottom edge, and centring it on the cap line is what
+   * puts it where the reader expects the word to be.
+   *
+   * There is no size axis here on purpose. `1em` is the size of whatever type
+   * surrounds it, at whatever density, including a scale this library does not
+   * own — an axis would have been a coarser second copy of the type scale that
+   * a consumer could set to the wrong value.
+   */
+  [data-ui='skeleton'][data-part='root'][data-shape='text'] {
+    --_line: var(--slotted-skeleton-line-size, 1cap);
+
+    block-size: var(--slotted-skeleton-block-size, var(--_line));
+    border-radius: var(--slotted-radius-full, 9999px);
+    inline-size: var(--slotted-skeleton-inline-size, 100%);
+    /**
+     * Zero for the default bar, and that is the point rather than an accident:
+     * a box one cap tall, aligned on the baseline, occupies exactly the band a
+     * capital letter occupies. The expression stays because a consumer who
+     * overrides the height still wants it centred on the same band.
+     */
+    vertical-align: calc(0.5cap - 0.5 * var(--_line));
+  }
+
+  /**
+   * The block of content: an image, a chart, a map, a card. Its height is the
+   * consumer's or its content's, and with neither it is one line tall — a
+   * placeholder that resolved to nothing would be a hole in the page that no
+   * capture and no reader could point at.
+   */
+  [data-ui='skeleton'][data-part='root'][data-shape='block'] {
+    block-size: var(--slotted-skeleton-block-size, auto);
+    border-radius: var(--slotted-skeleton-radius, var(--slotted-radius-md, 6px));
+    display: block;
+    inline-size: var(--slotted-skeleton-inline-size, 100%);
+    min-block-size: var(--slotted-skeleton-min-block-size, 1lh);
+  }
+
+  /**
+   * The two shapes an avatar can be, taking Avatar's own two words and Avatar's
+   * own scale. `--slotted-skeleton-size` is the unstepped escape hatch `icon`
+   * established and `avatar` reuses, and it is the family's own rather than
+   * `--slotted-avatar-size`: setting it on a container must not resize the real
+   * avatars standing beside the placeholders.
+   */
+  [data-ui='skeleton'][data-part='root'][data-shape='circle'],
+  [data-ui='skeleton'][data-part='root'][data-shape='square'] {
+    --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-md, 36px));
+
+    block-size: var(--slotted-skeleton-block-size, var(--_size));
+    inline-size: var(--slotted-skeleton-inline-size, var(--_size));
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-shape='circle'] {
+    border-radius: var(--slotted-radius-full, 9999px);
+  }
+
+  /**
+   * A sixth of the box, which is the proportion `avatar` derives rather than a
+   * step of the radius scale: six pixels is a gentle round on a 64-pixel square
+   * and a quarter-circle on a 20-pixel one.
+   */
+  [data-ui='skeleton'][data-part='root'][data-shape='square'] {
+    border-radius: var(--slotted-skeleton-radius, calc(var(--_size) / 6));
+  }
+
+  /* ── The size steps, which mean something only for the two round shapes ── */
+
+  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='xs'],
+  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='xs'] {
+    --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-xs, 24px));
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='sm'],
+  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='sm'] {
+    --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-sm, 28px));
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='md'],
+  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='md'] {
+    --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-md, 36px));
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='lg'],
+  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='lg'] {
+    --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-lg, 48px));
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='xl'],
+  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='xl'] {
+    --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-xl, 64px));
+  }
+
+  /* ── The placeholder that covers real content ───────────────────────────
+   *
+   * The only form in which the reserved geometry cannot disagree with what
+   * replaces it, because it is that content's own geometry. MUI infers the box
+   * from `children` and Spectrum clones the child with a skeleton class; both
+   * arrive here, and neither hides the text a bare text node carries.
+   *
+   * `:not(:empty)` is what tells the two apart, so no attribute has to be
+   * invented for a fact the DOM already states. Every stated size stays
+   * available: a consumer covering a paragraph that has not been measured
+   * still sets one.
+   */
+  [data-ui='skeleton'][data-part='root'][data-loading]:not(:empty) {
+    block-size: var(--slotted-skeleton-block-size, auto);
+    /* An element child is hidden by `visibility`; a bare text node is not an
+       element and can only be hidden by taking the colour away. */
+    color: transparent;
+    inline-size: var(--slotted-skeleton-inline-size, auto);
+  }
+
+  [data-ui='skeleton'][data-part='root'][data-loading]:not(:empty) > * {
+    visibility: hidden;
+  }
+
+  /* ── The paragraph ──────────────────────────────────────────────────────
+   *
+   * Rows of exactly one line box, so `n` rows occupy exactly the `n` lines of
+   * the paragraph they stand in and nothing moves when the words arrive. Every
+   * surveyed implementation types a pixel height here instead and is therefore
+   * wrong at every density but one.
+   *
+   * The bar inside the row is one cap rather than one em, which is the second
+   * half of the same idea and was found by measuring rather than by reading:
+   * at `1em` the bar filled sixteen pixels of a twenty-pixel line box, and a
+   * paragraph of them read as a barcode because real prose fills a little over
+   * half its leading. A capital's height is where the ink actually is.
+   */
+  [data-ui='skeleton'][data-part='text'] {
+    align-items: center;
+    display: grid;
+    grid-auto-rows: var(--slotted-skeleton-row-size, 1lh);
+    inline-size: var(--slotted-skeleton-inline-size, 100%);
+  }
+
+  [data-ui='skeleton'] [data-part='line'] {
+    block-size: var(--slotted-skeleton-line-size, 1cap);
+    border-radius: var(--slotted-radius-full, 9999px);
+    inline-size: 100%;
+  }
+
+  /**
+   * The short last line is what makes a stack of bars read as prose rather
+   * than as a barcode. `:not(:only-child)` is the case Chakra guards in
+   * TypeScript and Carbon does not guard at all: one line shortened by itself
+   * stands for a sentence that was never there.
+   */
+  [data-ui='skeleton'] [data-part='line']:last-child:not(:only-child) {
+    inline-size: var(--slotted-skeleton-last-line-size, 62%);
+  }
+
+  /* ── Loaded ─────────────────────────────────────────────────────────────
+   *
+   * The element stays and stops taking part in layout, so the content it was
+   * covering lands exactly where it would have landed with no placeholder at
+   * all — and an empty placeholder, having nothing to lay out, renders
+   * nothing. One declaration answers both, and neither answer remounts the
+   * consumer's content on the way through.
+   */
+  [data-ui='skeleton'][data-part='root']:not([data-loading]),
+  [data-ui='skeleton'][data-part='text']:not([data-loading]) {
+    display: contents;
+  }
+
+  /* ── The region ─────────────────────────────────────────────────────────
+   *
+   * A region stands for a block of content, so it takes the inline size of
+   * whatever holds it. Without this it is a flex item with no definite size,
+   * and a flex item that shrinks to its content while the placeholders inside
+   * it are a percentage of that content resolves to nothing: measured at two
+   * pixels inside a 599-pixel column, every placeholder in it two pixels wide.
+   * The token is the way out for a region that really is inline.
+   */
+  [data-ui='skeleton'][data-part='region'] {
+    inline-size: var(--slotted-skeleton-inline-size, 100%);
+    min-inline-size: 0;
+  }
+
+  /* ── Motion ─────────────────────────────────────────────────────────────
+   *
+   * A region drives the phase for everything inside it; a placeholder standing
+   * on its own drives its own. The second rule is what stops the two from
+   * running at once, and it is why a region of twelve boxes pulses as one
+   * surface rather than as twelve independent blinks.
+   */
+  [data-ui='skeleton'][data-part='region'][data-loading],
+  [data-ui='skeleton'][data-part='root'][data-loading],
+  [data-ui='skeleton'][data-part='text'][data-loading] {
+    animation: slotted-skeleton-phase var(--slotted-duration-loop-slow) linear infinite;
+  }
+
+  [data-ui='skeleton'][data-part='region'] [data-ui='skeleton'] {
+    animation: none;
+  }
+
+  [data-ui='skeleton'][data-animation='none'] {
+    animation: none;
+  }
+
+  /**
+   * The quiet one: the fill travels to the trough and back, and nothing else
+   * on the box moves. It paints `background-color` rather than `opacity`, for
+   * the reason recorded on `--_trough`.
+   */
+  [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading],
+  [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line'] {
+    background-color: color-mix(in oklab, var(--_trough) calc(var(--_p) * 100%), var(--_fill));
+  }
+
+  /**
+   * A band crossing the box, and the geometry is the whole of it. A
+   * `background-position` percentage places the image inside the box minus the
+   * image, so a background three times the box's width gives a positioning
+   * range two boxes wide: a phase running the full `0%`–`100%` carries a band
+   * a third of that width in at one edge, across, and out at the other, with a
+   * rest between passes. That rest is what makes it read as something crossing
+   * the placeholder rather than as a gradient painted on it.
+   *
+   * The first version multiplied a percentage by three and by a direction
+   * sign, which put the band outside the box for most of every cycle: the
+   * sweep was in the stylesheet and almost never on the screen. The gradient
+   * angle stays physical because a gradient has no logical one; the direction
+   * it travels is carried by `--_sweep-phase`.
+   */
+  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading],
+  [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line'] {
+    background-image: linear-gradient(
+      90deg,
+      transparent 38%,
+      var(--_highlight) 50%,
+      transparent 62%
+    );
+    background-position: calc(var(--_sweep-phase) * 100%) 0;
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+  }
+
+  @keyframes slotted-skeleton-phase {
+    to {
+      --slotted-skeleton-phase: 1;
+    }
+  }
+
+  /**
+   * The loop stops rather than hurries. A spinner reports through its motion
+   * and has nothing left to say once it is still; a placeholder reports
+   * through its shape, which does not move — so stillness costs this family
+   * nothing, and `docs/token-foundation.md` requires it of every infinite
+   * animation regardless.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='skeleton'] {
+      animation: none;
+    }
+  }
+
+  /**
+   * The theme remaps the fill to `Canvas` and the rim to `ButtonBorder`, so
+   * the box survives on its own. What does not survive is the gradient: a
+   * `background-image` is not replaced by the system palette, so a shimmer
+   * would go on painting a mixed colour over a forced one.
+   */
+  @media (forced-colors: active) {
+    [data-ui='skeleton'][data-part='root'][data-loading],
+    [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line'] {
+      background-image: none;
+    }
+  }
+}

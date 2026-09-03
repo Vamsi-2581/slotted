@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 5,
+  "family": "number-field",
+  "ui": "number-field",
+  "controlPart": "input",
+  "controlRole": "spinbutton",
+  "rootRole": null,
+  "inputType": "text",
+  "hiddenValueInput": true,
+  "valueType": "number | null",
+  "core": "@slotted/core/number",
+  "stateSource": "field",
+  "mirrorsState": true,
+  "requiredAttribute": "aria-required",
+  "disabledAttribute": "disabled",
+  "wiring": {
+    "id": "always",
+    "aria-describedby": "merged",
+    "aria-invalid": "invalid",
+    "aria-required": "required",
+    "disabled": "disabled",
+    "readonly": "readOnly"
+  },
+  "ariaValue": ["aria-valuenow", "aria-valuemin", "aria-valuemax", "aria-valuetext"],
+  "keyboard": [
+    {
+      "key": "ArrowUp",
+      "effect": "step",
+      "by": "step"
+    },
+    {
+      "key": "ArrowDown",
+      "effect": "step",
+      "by": "step"
+    },
+    {
+      "key": "Shift+ArrowUp",
+      "effect": "step",
+      "by": "largeStep"
+    },
+    {
+      "key": "Shift+ArrowDown",
+      "effect": "step",
+      "by": "largeStep"
+    },
+    {
+      "key": "Alt+ArrowUp",
+      "effect": "step",
+      "by": "smallStep"
+    },
+    {
+      "key": "Alt+ArrowDown",
+      "effect": "step",
+      "by": "smallStep"
+    },
+    {
+      "key": "PageUp",
+      "effect": "step",
+      "by": "largeStep"
+    },
+    {
+      "key": "PageDown",
+      "effect": "step",
+      "by": "largeStep"
+    },
+    {
+      "key": "Home",
+      "effect": "min"
+    },
+    {
+      "key": "End",
+      "effect": "max"
+    },
+    {
+      "key": "Enter",
+      "effect": "commit"
+    }
+  ],
+  "escapeBound": false,
+  "enterSubmits": true,
+  "stepperTabIndex": -1,
+  "stepperNames": ["incrementLabel", "decrementLabel"],
+  "stepperDisabledAtBound": true,
+  "parseOn": "input",
+  "commitOn": ["blur", "enter", "step", "wheel"],
+  "range": {
+    "min": "min",
+    "max": "max",
+    "step": "step",
+    "largeStep": "largeStep",
+    "smallStep": "smallStep",
+    "stepFrom": "stepFrom"
+  },
+  "stepDefaults": {
+    "largeStep": "step * 10",
+    "smallStep": "step / 10",
+    "stepFrom": "min, or 0"
+  },
+  "format": {
+    "options": "Intl.NumberFormatOptions",
+    "locale": "BCP 47",
+    "parserFrom": "formatToParts"
+  },
+  "inputMode": {
+    "negative": "text",
+    "fractional": "decimal",
+    "integer": "numeric"
+  },
+  "axes": {
+    "size": ["sm", "md", "lg"],
+    "variant": ["outline", "subtle", "plain"],
+    "stepper": ["stacked", "split", "none"],
+    "clamp": ["blur", "strict", "none"],
+    "formatOn": ["change", "commit"]
+  },
+  "resolution": {
+    "size": ["prop", "field", "defaults", "md"],
+    "variant": ["prop", "defaults", "outline"],
+    "stepper": ["prop", "defaults", "stacked"],
+    "clamp": ["prop", "defaults", "blur"],
+    "formatOn": ["prop", "defaults", "change"],
+    "locale": ["prop", "defaults", "runtime"]
+  },
+  "provides": {
+    "numberFieldDefaults": [
+      "size",
+      "variant",
+      "stepper",
+      "locale",
+      "formatOn",
+      "clamp",
+      "incrementLabel",
+      "decrementLabel"
+    ]
+  },
+  "imperative": ["increment", "decrement"],
+  "stateAttributes": {
+    "disabled": "data-disabled",
+    "invalid": "data-invalid",
+    "readonly": "data-readonly"
+  },
+  "stateModel": {
+    "value": {
+      "controlled": "value",
+      "uncontrolled": "defaultValue",
+      "request": "onValueChange",
+      "reasons": ["keyboard", "pointer", "blur", "programmatic"]
+    }
+  },
+  "literals": {
+    "--slotted-number-field-stepper-size": "The stepper column is square and sized from the control's own glyph scale plus its gap, which is arithmetic over tokens rather than a literal; the floor under it is --slotted-target-min, which the theme owns."
+  },
+  "members": {
+    "numberField": {
+      "nativeElement": "input",
+      "defaults": {
+        "size": "md",
+        "variant": "outline",
+        "stepper": "stacked",
+        "step": 1,
+        "clamp": "blur",
+        "formatOn": "change",
+        "snapToStep": false,
+        "wheel": false
+      },
+      "capabilities": [
+        "value",
+        "appearance",
+        "size",
+        "content",
+        "disabled",
+        "invalid",
+        "required",
+        "readOnly",
+        "wiring"
+      ],
+      "states": ["default", "hover", "active", "focus-visible", "disabled", "invalid", "readonly"],
+      "parts": ["root", "input", "start", "end", "stepper", "decrement", "increment"]
+    }
+  },
+  "scenarios": {
+    "numberField": [
+      "playground",
+      "sizes",
+      "variants",
+      "stepper",
+      "range",
+      "format",
+      "formatOn",
+      "locale",
+      "adornments",
+      "states",
+      "content",
+      "composition",
+      "keyboard"
+    ]
+  }
+}

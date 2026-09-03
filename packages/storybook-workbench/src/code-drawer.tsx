@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { highlight } from './highlight';
+
 import type { SnippetLanguage, WorkbenchSnippet } from './snippets';
 
 const LANGUAGE_LABELS: Record<SnippetLanguage, string> = {
   angular: 'Angular',
   css: 'CSS',
+  ts: 'TypeScript',
   tsx: 'React',
 };
 
@@ -76,8 +79,14 @@ export function CodeDrawer({ snippet }: { snippet: WorkbenchSnippet }) {
           {message}
         </span>
       </div>
-      <pre data-language={snippet.language}>
-        <code>{snippet.source}</code>
+      <pre className="slotted-code-drawer__source" data-language={snippet.language}>
+        <code>
+          {highlight(snippet.source, snippet.language).map((token, index) => (
+            <span data-token={token.kind} key={`${token.kind}-${index}`}>
+              {token.text}
+            </span>
+          ))}
+        </code>
       </pre>
     </details>
   );

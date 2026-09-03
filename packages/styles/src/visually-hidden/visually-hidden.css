@@ -2,14 +2,29 @@
   /**
    * Removed from sight while left in the accessibility tree. `display: none`
    * and `visibility: hidden` would remove it from both, which is the opposite
-   * of what this primitive exists to do.
+   * of what this primitive exists to do. The rule set is the one WCAG 2.2
+   * technique C7 publishes — a one-pixel box, clipped, out of flow, on a single
+   * line — without its `clip: rect()` companion, which every engine the library
+   * supports superseded with `clip-path`.
    *
-   * The declarations apply only while nothing inside is focused, so the
-   * focusable variant restores the element by ceasing to match rather than by
-   * a second rule undoing each declaration.
+   * One selector, not two: the element is hidden unless it is the focusable
+   * variant and focus is inside it. A second rule undoing each declaration
+   * would leave the family holding an opinion about how a revealed skip link
+   * looks, and it has none — the revealed element is the consumer's anchor,
+   * rendered as the consumer wrote it.
+   *
+   * `border` and `padding` are zeroed because the element is whichever one the
+   * consumer brought: an anchor or a button arrives with a frame of its own,
+   * and the box has to stay one pixel regardless.
+   *
+   * The negative margin is measured, not inherited. Inside a scrolling
+   * container that is also the element's containing block — `position:
+   * relative` plus `overflow: auto`, the ordinary shape of a scroll panel —
+   * the one-pixel box sits past the last line and adds one pixel of
+   * block-direction scrollable overflow. The margin pulls it back inside the
+   * content box, and the overflow measures zero.
    */
-  .slotted-visually-hidden:not([data-focusable]),
-  .slotted-visually-hidden[data-focusable]:not(:focus-within) {
+  [data-ui='visually-hidden']:not([data-focusable]:focus-within) {
     block-size: 1px;
     border: 0;
     clip-path: inset(50%);

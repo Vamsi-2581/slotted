@@ -37,12 +37,40 @@ function currentFamilies() {
     }));
 }
 
-/** Every selector list in the sheet, one entry per comma-separated selector. */
+/**
+ * A selector list is separated by top-level commas only. Splitting on every
+ * comma tore `:is(:checked, :indeterminate)` in half and handed this test the
+ * fragment `:indeterminate)) ):hover`, which carries no guard because it is not
+ * a selector — so a correctly guarded rule was reported as an unguarded one.
+ * `:is()`, `:not()`, `:where()` and `:has()` all take lists, and all four are
+ * how a rule states the precedence this test exists to check.
+ */
+export function splitSelectorList(list) {
+  const parts = [];
+  let depth = 0;
+  let current = '';
+
+  for (const character of list) {
+    if (character === '(') depth += 1;
+    if (character === ')') depth -= 1;
+    if (character === ',' && depth === 0) {
+      parts.push(current);
+      current = '';
+      continue;
+    }
+    current += character;
+  }
+  parts.push(current);
+
+  return parts;
+}
+
+/** Every selector list in the sheet, one entry per selector. */
 function selectors(css) {
   return [...css.matchAll(/(^|\})([^{}]+)\{/g)]
     .map(([, , selector]) => selector.trim())
     .filter((selector) => selector.length > 0 && !selector.startsWith('@'))
-    .flatMap((selector) => selector.split(','))
+    .flatMap(splitSelectorList)
     .map((selector) => selector.trim());
 }
 
@@ -63,4 +91,10 @@ test('holds a weaker state back for the stronger ones it can meet', () => {
 test('reads the precedence from the shared vocabulary rather than restating it', () => {
   assert.ok(STATE_PRECEDENCE.indexOf('disabled') < STATE_PRECEDENCE.indexOf('hover'));
   assert.ok(STATE_PRECEDENCE.indexOf('loading') < STATE_PRECEDENCE.indexOf('active'));
+});
+
+test('splits a selector list at its own commas and not inside a functional one', () => {
+  assert.deepEqual(splitSelectorList('a:is(b, c):hover, d'), ['a:is(b, c):hover', ' d']);
+  assert.deepEqual(splitSelectorList('a:has(b:is(c, d)):active'), ['a:has(b:is(c, d)):active']);
+  assert.deepEqual(splitSelectorList('a, b'), ['a', ' b']);
 });

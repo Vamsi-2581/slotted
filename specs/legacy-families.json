@@ -1,34 +1,4 @@
 {
   "note": "Families still on schema 4, awaiting the rebuild ordered in docs/rebuild-order.md. The list only shrinks: a family leaves it when it is rebuilt against the current schema, and nothing may be added.",
-  "families": [
-    "alert",
-    "avatar",
-    "badge",
-    "breadcrumb",
-    "button",
-    "card",
-    "collapsible",
-    "description-list",
-    "divider",
-    "field",
-    "fieldset",
-    "file-upload",
-    "input",
-    "kbd",
-    "link",
-    "loading-bar",
-    "pagination",
-    "progress-bar",
-    "skeleton",
-    "spinner",
-    "splitter",
-    "stepper",
-    "switch",
-    "tabs",
-    "tag",
-    "textarea",
-    "toolbar",
-    "virtual-list",
-    "visually-hidden"
-  ]
+  "families": []
 }

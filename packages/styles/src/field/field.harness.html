@@ -1,0 +1,483 @@
+<section data-scene="default">
+  <div
+    data-ui="field"
+    data-part="root"
+    data-size="md"
+    data-label-placement="top"
+    data-required-mark="mark"
+  >
+    <label data-part="label" for="default-control">E-mail</label>
+    <input
+      data-part="control"
+      id="default-control"
+      type="email"
+      aria-describedby="default-description"
+      value="cobranca@sirius.com.br"
+    />
+    <p
+      data-ui="inline-message"
+      data-mark="dot"
+      data-part="root"
+      data-tone="secondary"
+      data-size="sm"
+      data-live="off"
+      id="default-description"
+    >
+      <span aria-hidden="true" data-part="icon"></span>
+      <span data-part="text">Usaremos este endereço para a cobrança.</span>
+    </p>
+  </div>
+</section>
+
+<section data-scene="necessity">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-required
+    >
+      <label data-part="label" for="necessity-mark"
+        >CNPJ<span aria-hidden="true" data-part="mark">*</span></label
+      >
+      <input
+        data-part="control"
+        id="necessity-mark"
+        aria-required="true"
+        value="12.345.678/0001-90"
+      />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="text"
+      data-required
+    >
+      <label data-part="label" for="necessity-required"
+        >CNPJ<span data-part="mark">(required)</span></label
+      >
+      <input
+        data-part="control"
+        id="necessity-required"
+        aria-required="true"
+        value="12.345.678/0001-90"
+      />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="text"
+    >
+      <label data-part="label" for="necessity-optional"
+        >Inscrição estadual<span data-part="mark">(optional)</span></label
+      >
+      <input data-part="control" id="necessity-optional" />
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="none"
+      data-required
+    >
+      <label data-part="label" for="necessity-none">Razão social</label>
+      <input data-part="control" id="necessity-none" aria-required="true" value="Sirius Group" />
+    </div>
+  </div>
+</section>
+
+<section data-scene="placement">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="side"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="placement-side">Razão social</label>
+      <input
+        data-part="control"
+        id="placement-side"
+        value="Sirius Group Tecnologia"
+        aria-describedby="placement-side-description"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        id="placement-side-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Como consta no cartão CNPJ.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="side"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="placement-wrap">Endereço de correspondência da matriz</label>
+      <textarea data-part="control" id="placement-wrap" rows="3">Avenida Paulista, 1000</textarea>
+    </div>
+  </div>
+</section>
+
+<section data-scene="sizes">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="sm"
+      data-label-placement="top"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="size-sm">Apelido</label>
+      <input data-part="control" id="size-sm" value="sm" aria-describedby="size-sm-description" />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        id="size-sm-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Aparece nos relatórios.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="size-md">Apelido</label>
+      <input data-part="control" id="size-md" value="md" aria-describedby="size-md-description" />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        id="size-md-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Aparece nos relatórios.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="lg"
+      data-label-placement="top"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="size-lg">Apelido</label>
+      <input data-part="control" id="size-lg" value="lg" aria-describedby="size-lg-description" />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="md"
+        data-live="off"
+        id="size-lg-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Aparece nos relatórios.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section data-scene="states">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-required
+      data-invalid
+    >
+      <label data-part="label" for="state-invalid"
+        >CNPJ<span aria-hidden="true" data-part="mark">*</span></label
+      >
+      <input
+        data-part="control"
+        id="state-invalid"
+        aria-invalid="true"
+        aria-required="true"
+        aria-describedby="state-invalid-description state-invalid-error"
+        value="12.345.678"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        id="state-invalid-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Somente números, com filial e dígito.</span>
+      </p>
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        id="state-invalid-error"
+      >
+        <span data-part="prefix">Error:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Faltam seis dígitos.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-readonly
+    >
+      <label data-part="label" for="state-readonly">Identificador da conta</label>
+      <input
+        data-part="control"
+        id="state-readonly"
+        readonly
+        value="acc_9f2b7c41"
+        aria-describedby="state-readonly-description"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        id="state-readonly-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Gerado na criação da conta e copiável.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-required
+      data-disabled
+    >
+      <label data-part="label" for="state-disabled"
+        >Centro de custo<span aria-hidden="true" data-part="mark">*</span></label
+      >
+      <input
+        data-part="control"
+        id="state-disabled"
+        disabled
+        aria-required="true"
+        aria-describedby="state-disabled-description"
+        value="Escolha uma unidade primeiro"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        data-disabled
+        id="state-disabled-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Disponível depois que a unidade for escolhida.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-invalid
+    >
+      <label data-part="label" for="state-reserve">Telefone</label>
+      <input
+        data-part="control"
+        id="state-reserve"
+        aria-describedby="state-reserve-error"
+        value="(11) 90000-0000"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        data-reserve
+        id="state-reserve-error"
+      >
+        <span data-part="prefix">Error:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text"></span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section data-scene="counter">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="counter-under">Descrição pública</label>
+      <span data-part="counter">64/140</span>
+      <textarea data-part="control" id="counter-under" rows="2">
+Integramos folha, ponto e benefícios em um só lugar.</textarea>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-invalid
+    >
+      <label data-part="label" for="counter-over">Descrição pública</label>
+      <span data-part="counter" data-invalid>148/140</span>
+      <textarea
+        data-part="control"
+        id="counter-over"
+        rows="3"
+        aria-invalid="true"
+        aria-describedby="counter-over-error"
+      >
+Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento contábil da competência em um só lugar.</textarea>
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        id="counter-over-error"
+      >
+        <span data-part="prefix">Error:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Corte oito caracteres.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="side"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="counter-side">Assunto</label>
+      <span data-part="counter">12/60</span>
+      <input data-part="control" id="counter-side" value="Fatura março" />
+    </div>
+  </div>
+</section>
+
+<section data-scene="content">
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="side"
+      data-required-mark="text"
+      data-required
+    >
+      <label data-part="label" for="content-long"
+        >Kraftfahrzeug-Haftpflichtversicherungsnummer<span data-part="mark">(required)</span></label
+      >
+      <input
+        data-part="control"
+        id="content-long"
+        aria-required="true"
+        aria-describedby="content-long-description"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="secondary"
+        data-size="sm"
+        data-live="off"
+        id="content-long-description"
+      >
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text"
+          >sha256:9f2b7c41a8d3e05f6c1b4a97e2d80f3c5b6a1d4e7f0938271a6b5c4d3e2f1a09</span
+        >
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-invalid
+    >
+      <label data-part="label" for="content-rtl" lang="ar" dir="rtl">رقم التعريف الضريبي</label>
+      <span data-part="counter">3/14</span>
+      <input
+        data-part="control"
+        id="content-rtl"
+        lang="ar"
+        dir="rtl"
+        aria-invalid="true"
+        aria-describedby="content-rtl-error"
+        value="٣٠٠"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="dot"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        id="content-rtl-error"
+        lang="ar"
+        dir="rtl"
+      >
+        <span data-part="prefix">خطأ:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">الرقم غير مكتمل.</span>
+      </p>
+    </div>
+  </div>
+</section>

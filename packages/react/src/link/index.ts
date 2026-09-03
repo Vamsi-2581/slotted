@@ -1,2 +1,10 @@
 export { Link } from './link';
-export type { LinkProps, LinkRootProps, LinkUnderline } from './link.types';
+export { LinkDefaultsProvider, useLinkDefaults } from './link-defaults';
+export type {
+  LinkDefaults,
+  LinkDefaultsProviderProps,
+  LinkProps,
+  LinkRootProps,
+  LinkUnderline,
+  LinkVariant,
+} from './link.types';

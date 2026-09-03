@@ -1,0 +1,575 @@
+<!--
+  The markup is the third place this family's DOM is written, after React and
+  Angular, and it can drift from both. Every part the contract declares appears
+  in the first scene, every value of every painted axis appears below it, and
+  the two structural facts the family is built on are visible rather than
+  described: the live role is on `content` and nowhere else, and the actions
+  and the dismiss control are that region's siblings.
+
+  The buttons are real `button` markup rather than boxes, because how a message
+  and its actions sit together is one of the things these captures are for.
+-->
+<section data-scene="anatomy">
+  <div style="display: grid; gap: var(--slotted-space-6)">
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="warning"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="anatomy-title"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="anatomy-title">Sua assinatura expira em três dias</div>
+        <p data-part="description">
+          Renove agora para manter o acesso da equipe aos projetos publicados.
+        </p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="warning"
+          data-variant="solid"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Renovar</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="warning"
+          data-variant="ghost"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Ver planos</span>
+        </button>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+
+    <!-- The same box with no title: the mark lands on the description's line. -->
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="accent"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <p data-part="description">O relatório terminou de ser gerado e já pode ser baixado.</p>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+  </div>
+</section>
+
+<section data-scene="tones">
+  <!--
+    Five tones and five marks. Read in greyscale, the circle, the triangle and
+    the crossed circle are what tells them apart; read in `high-contrast`, they
+    are the only thing that does.
+  -->
+  <div style="display: grid; gap: var(--slotted-space-4)">
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="accent"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="tone-accent"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="tone-accent">Informação</div>
+        <p data-part="description">Um aviso que não pede nada de ninguém.</p>
+      </div>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="tone-secondary"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="tone-secondary">Nota</div>
+        <p data-part="description">Uma observação sobre o que está nesta seção.</p>
+      </div>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="success"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="tone-success"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="tone-success">Publicado</div>
+        <p data-part="description">A versão 4.2 está no ar desde as 14h07.</p>
+      </div>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="warning"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="tone-warning"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="tone-warning">Quase sem espaço</div>
+        <p data-part="description">Restam 480 MB dos 20 GB do plano atual.</p>
+      </div>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="danger"
+      data-variant="soft"
+      data-reach="section"
+      data-live="assertive"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="tone-danger"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content" role="alert">
+        <div data-part="title" id="tone-danger">Não foi possível salvar</div>
+        <p data-part="description">A conexão caiu antes do envio. Nada foi perdido.</p>
+      </div>
+    </section>
+  </div>
+</section>
+
+<section data-scene="variants">
+  <!--
+    The three paintings on the page's own surface, then the same three on a
+    surface the family did not choose: `soft` and `solid` bring a ground with
+    them, `outline` takes the one underneath.
+  -->
+  <div style="display: grid; gap: var(--slotted-space-4)">
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="danger"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <p data-part="description">soft — a superfície do tom, com a borda do tom.</p>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="danger"
+      data-variant="outline"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <p data-part="description">outline — sem fundo próprio, só a borda.</p>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="danger"
+      data-variant="solid"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <p data-part="description">solid — o preenchimento do tom e a tinta que o tema mede.</p>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+
+    <!--
+      An inverted surface, and the boundary it exposes. `soft` and `solid`
+      repaint their own ground and are unharmed; `outline` borrows the ground
+      under it and keeps a foreground the theme measured against the page's own
+      surfaces, so the words go quiet. The answer is not a fourth variant — it
+      is the block below, where the region carries its own scheme.
+    -->
+    <div
+      style="
+        background: var(--slotted-surface-inverse);
+        color: var(--slotted-text-inverse);
+        display: grid;
+        gap: var(--slotted-space-4);
+        padding: var(--slotted-space-5);
+      "
+    >
+      <section
+        data-ui="alert"
+        data-part="root"
+        data-tone="success"
+        data-variant="soft"
+        data-reach="section"
+        data-live="off"
+        data-open=""
+        tabindex="-1"
+      >
+        <span data-part="icon" aria-hidden="true"></span>
+        <div data-part="content">
+          <p data-part="description">soft, sobre uma superfície invertida.</p>
+        </div>
+      </section>
+      <section
+        data-ui="alert"
+        data-part="root"
+        data-tone="success"
+        data-variant="outline"
+        data-reach="section"
+        data-live="off"
+        data-open=""
+        tabindex="-1"
+      >
+        <span data-part="icon" aria-hidden="true"></span>
+        <div data-part="content">
+          <p data-part="description">outline, sobre a mesma superfície.</p>
+        </div>
+      </section>
+    </div>
+
+    <!--
+      The same three, in a region that states its own scheme instead of
+      inverting one surface. Every tone role is restated by the scheme, so
+      `outline` reads again — a dark ground is a scheme, not a surface, and
+      that is the composition an application writes for a dark sidebar.
+    -->
+    <div
+      data-slotted-scheme="dark"
+      style="
+        background: var(--slotted-surface);
+        color: var(--slotted-text);
+        display: grid;
+        gap: var(--slotted-space-4);
+        padding: var(--slotted-space-5);
+      "
+    >
+      <section
+        data-ui="alert"
+        data-part="root"
+        data-tone="success"
+        data-variant="soft"
+        data-reach="section"
+        data-live="off"
+        data-open=""
+        tabindex="-1"
+      >
+        <span data-part="icon" aria-hidden="true"></span>
+        <div data-part="content">
+          <p data-part="description">soft, numa região com esquema próprio.</p>
+        </div>
+      </section>
+      <section
+        data-ui="alert"
+        data-part="root"
+        data-tone="success"
+        data-variant="outline"
+        data-reach="section"
+        data-live="off"
+        data-open=""
+        tabindex="-1"
+      >
+        <span data-part="icon" aria-hidden="true"></span>
+        <div data-part="content">
+          <p data-part="description">outline, na mesma região.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<section data-scene="reach">
+  <!--
+    The guide's three recipes. `page` loses its corners and its inline edges
+    because it runs to both edges of what holds it, and past forty rems of
+    container it puts its action back on the message's own line.
+  -->
+  <div style="display: grid; gap: var(--slotted-space-6)">
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="danger"
+      data-variant="soft"
+      data-reach="inline"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <p data-part="description">Informe um CNPJ válido para continuar.</p>
+      </div>
+    </section>
+
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="accent"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="reach-section"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="reach-section">Sobre os fusos horários</div>
+        <p data-part="description">
+          Os horários abaixo são exibidos no fuso da sua conta, não no do servidor.
+        </p>
+      </div>
+    </section>
+
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="warning"
+      data-variant="soft"
+      data-reach="page"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="reach-page"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="reach-page">Manutenção programada para domingo</div>
+        <p data-part="description">O serviço ficará indisponível das 02h às 04h (UTC−3).</p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="warning"
+          data-variant="outline"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Detalhes</span>
+        </button>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+  </div>
+</section>
+
+<section data-scene="dismiss">
+  <!--
+    The control this family's states belong to. Its box is taller than the line
+    it sits beside, so it is pulled up by half the difference to put the glyph
+    on the title's own line — which is what these captures are for.
+  -->
+  <div style="display: grid; gap: var(--slotted-space-4)">
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="accent"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="dismiss-soft"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="dismiss-soft">Modo de leitura ativado</div>
+        <p data-part="description">Nada nesta página pode ser editado até que você saia dele.</p>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="accent"
+      data-variant="solid"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="dismiss-solid"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="dismiss-solid">Modo de leitura ativado</div>
+        <p data-part="description">Nada nesta página pode ser editado até que você saia dele.</p>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="outline"
+      data-reach="inline"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <p data-part="description">O menor alcance, com a mesma área de toque.</p>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+  </div>
+</section>
+
+<section data-scene="content">
+  <!--
+    Content the family did not choose: a paragraph too long for a narrow
+    column, a string no language can break, a message with no mark at all, and
+    a title standing on its own.
+  -->
+  <div style="display: grid; gap: var(--slotted-space-4)">
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="warning"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="content-long"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="content-long">
+          Die Zahlungsbestätigung konnte nicht zugestellt werden
+        </div>
+        <p data-part="description">
+          A tentativa de entrega falhou porque o endereço de cobrança registrado não corresponde ao
+          endereço informado pela instituição financeira. Corrija o endereço e reenvie o documento
+          para que a assinatura permaneça ativa.
+        </p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="warning"
+          data-variant="solid"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Corrigir endereço</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="warning"
+          data-variant="ghost"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Reenviar</span>
+        </button>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="danger"
+      data-variant="soft"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="content-token"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content">
+        <div data-part="title" id="content-token">O deploy falhou</div>
+        <p data-part="description">
+          sha256:9f2c4ab1de77c0d5e8b3a6f41c9d0e72b58a4437cc61de09f2a3b7d1e40c5a86
+        </p>
+      </div>
+    </section>
+
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="outline"
+      data-reach="section"
+      data-live="off"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="content-bare"
+    >
+      <div data-part="content">
+        <div data-part="title" id="content-bare">Sem marca nenhuma</div>
+        <p data-part="description">
+          Um callout editorial que traz a sua própria ilustração no corpo do texto.
+        </p>
+      </div>
+    </section>
+
+    <section
+      data-ui="alert"
+      data-part="root"
+      data-tone="success"
+      data-variant="soft"
+      data-reach="section"
+      data-live="polite"
+      data-open=""
+      tabindex="-1"
+      aria-labelledby="content-title-only"
+    >
+      <span data-part="icon" aria-hidden="true"></span>
+      <div data-part="content" role="status">
+        <div data-part="title" id="content-title-only">Tudo salvo</div>
+      </div>
+      <button data-part="dismiss" type="button" aria-label="Dispensar"></button>
+    </section>
+  </div>
+</section>

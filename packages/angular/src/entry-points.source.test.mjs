@@ -1,0 +1,61 @@
+import assert from 'node:assert/strict';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import test from 'node:test';
+
+const packageRoot = new URL('..', import.meta.url).pathname;
+
+/**
+ * A component's `styleUrl` has to be written as a string literal in the
+ * decorator. ng-packagr folds a constant and inlines the sheet anyway, so the
+ * published bundle looks correct; Storybook's compiler does not, and leaves
+ * the decorator holding an identifier it never resolves. The component then
+ * renders with no styles at all, in a build that reported no error — headings
+ * keep the user agent's margins and every type size collapses to one.
+ *
+ * The defect is invisible to every test that reads `dist`, which is why this
+ * one reads the source.
+ */
+function componentSources() {
+  return readdirSync(packageRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !['dist', 'node_modules', 'src'].includes(entry.name))
+    .filter((entry) => existsSync(join(packageRoot, entry.name, 'ng-package.json')))
+    .flatMap((entry) => {
+      const source = join(packageRoot, entry.name, 'src');
+      return readdirSync(source)
+        .filter(
+          (file) => file.endsWith('.ts') && !file.includes('.spec.') && !file.includes('.stories.'),
+        )
+        .map((file) => ({
+          path: `${entry.name}/src/${file}`,
+          code: readFileSync(join(source, file), 'utf8'),
+        }));
+    });
+}
+
+test('finds the source of every published entry point', () => {
+  assert.ok(componentSources().length >= 10);
+});
+
+test('names every stylesheet with a literal a compiler can resolve', () => {
+  const violations = [];
+
+  for (const { code, path } of componentSources()) {
+    for (const [, value] of code.matchAll(/styleUrl\s*:\s*([^,\n]+)/g)) {
+      if (!/^'[^']+'$/.test(value.trim())) violations.push(`${path}: styleUrl: ${value.trim()}`);
+    }
+    for (const [, list] of code.matchAll(/styleUrls\s*:\s*\[([\s\S]*?)\]/g)) {
+      for (const entry of list.split(',')) {
+        if (entry.trim().length === 0) continue;
+        if (!/^'[^']+'$/.test(entry.trim()))
+          violations.push(`${path}: styleUrls entry ${entry.trim()}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    `A stylesheet named by an identifier is dropped by the Storybook compiler:\n  ${violations.join('\n  ')}`,
+  );
+});

@@ -1,25 +1,45 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "badge",
+  "ui": "badge",
   "axes": {
-    "variant": ["accent", "secondary", "success", "warning", "danger"],
-    "fill": ["solid", "outline", "subtle"],
-    "size": ["sm", "md"]
+    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "variant": ["solid", "soft", "outline"],
+    "size": ["sm", "md", "lg"],
+    "shape": ["pill", "square", "dot"],
+    "live": ["off", "polite", "assertive"],
+    "placement": ["top-end", "top-start", "bottom-end", "bottom-start"],
+    "overlap": ["rectangle", "circle"]
   },
   "members": {
     "badge": {
       "nativeElement": "span",
       "defaults": {
-        "variant": "secondary",
-        "fill": "solid",
-        "size": "md"
+        "tone": "secondary",
+        "variant": "soft",
+        "size": "md",
+        "shape": "pill",
+        "live": "off",
+        "placement": "top-end",
+        "overlap": "rectangle",
+        "max": 99,
+        "showZero": false
       },
-      "capabilities": ["appearance"],
-      "states": ["default"],
-      "parts": ["root"]
+      "capabilities": ["appearance", "size", "shape", "content", "live", "placement"],
+      "states": ["default", "focus-visible"],
+      "parts": ["root", "start", "label", "end", "anchor"]
     }
   },
   "scenarios": {
-    "badge": ["playground", "appearance", "sizes", "composition"]
+    "badge": [
+      "playground",
+      "appearance",
+      "sizes",
+      "shapes",
+      "count",
+      "anchored",
+      "composition",
+      "accessibility"
+    ]
   }
 }

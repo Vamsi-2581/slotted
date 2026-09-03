@@ -1,6 +1,8 @@
 import { GLOBALS_UPDATED, SET_GLOBALS } from 'storybook/internal/core-events';
 import { create, type ThemeVars } from 'storybook/theming';
 
+import { WORKBENCH_FONT_CODE, WORKBENCH_FONT_SANS } from '@slotted/storybook-workbench/fonts';
+
 export type SlottedScheme = 'light' | 'dark' | 'high-contrast';
 
 export type SlottedDirection = 'ltr' | 'rtl';
@@ -30,8 +32,8 @@ const lightTheme = create({
   appPreviewBg: '#eef1f5',
   appBorderColor: '#cbd5e1',
   appBorderRadius: 8,
-  fontBase: 'ui-sans-serif, system-ui, sans-serif',
-  fontCode: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+  fontBase: WORKBENCH_FONT_SANS,
+  fontCode: WORKBENCH_FONT_CODE,
   textColor: '#0f172a',
   textInverseColor: '#ffffff',
   textMutedColor: '#475569',
@@ -60,8 +62,8 @@ const darkTheme = create({
   appPreviewBg: '#09090b',
   appBorderColor: '#27272a',
   appBorderRadius: 8,
-  fontBase: 'ui-sans-serif, system-ui, sans-serif',
-  fontCode: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+  fontBase: WORKBENCH_FONT_SANS,
+  fontCode: WORKBENCH_FONT_CODE,
   textColor: '#fafafa',
   textInverseColor: '#18181b',
   textMutedColor: '#a1a1aa',

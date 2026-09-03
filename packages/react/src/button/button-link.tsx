@@ -1,19 +1,29 @@
 import type { SyntheticEvent } from 'react';
 
-import { ButtonContentLayer } from './button-content';
-import { BUTTON_DEFAULTS } from './button.constants';
-import { appearanceData, blockActivation, buttonClassName } from './button-root';
+import { ButtonContent } from './button-content';
+import { BUTTON_LINK_DEFAULTS } from './button.constants';
+import { blockActivation, rootData, useAppearance } from './button-root';
 import type { ButtonLinkProps, ButtonLinkRootProps } from './button.types';
 
+/**
+ * Navigation wearing the action surface. It is the button surface applied to
+ * an anchor, never a button emulating a link: the element is an `a`, the
+ * activation is the platform's, and Space does not activate it because Space
+ * does not activate a link.
+ *
+ * A disabled ButtonLink renders no `href` at all. An anchor that keeps its
+ * destination and only blocks `click` still navigates on a middle click and on
+ * a modified click; taking the destination away is what actually disables it.
+ * It stays in the tab sequence with `role="link"` and `aria-disabled`, because
+ * a control a keyboard user cannot reach is one they cannot discover is
+ * unavailable.
+ */
 export function ButtonLink({
-  'aria-disabled': ariaDisabled,
   children,
-  className,
   disabled = false,
-  fill = BUTTON_DEFAULTS.fill,
+  end,
   fullWidth = false,
   href,
-  leading,
   onAuxClick,
   onAuxClickCapture,
   onClick,
@@ -21,63 +31,56 @@ export function ButtonLink({
   onKeyDown,
   onKeyDownCapture,
   render,
-  size = BUTTON_DEFAULTS.size,
-  tabIndex,
-  trailing,
-  variant = BUTTON_DEFAULTS.variant,
+  size,
+  start,
+  tone,
+  variant,
   ...anchorProps
 }: ButtonLinkProps) {
-  const interactionBlocked = disabled || ariaDisabled === true || ariaDisabled === 'true';
-  const blockInteraction = (event: SyntheticEvent) => {
-    if (!interactionBlocked) return false;
+  const appearance = useAppearance({ size, tone, variant }, BUTTON_LINK_DEFAULTS);
+
+  const block = (event: SyntheticEvent) => {
+    if (!disabled) return false;
     blockActivation(event);
     return true;
   };
-  const isActivationKey = (key: string) => key === 'Enter' || key === ' ';
 
   const rootProps: ButtonLinkRootProps = {
     ...anchorProps,
-    ...appearanceData({
-      component: 'button-link',
-      disabled,
-      fill,
-      fullWidth,
-      size,
-      variant,
-    }),
-    'aria-disabled': interactionBlocked || ariaDisabled || undefined,
+    ...rootData({ disabled, fullWidth, ...appearance }),
+    'aria-disabled': disabled || undefined,
     children: (
-      <ButtonContentLayer leading={leading} loading={false} trailing={trailing}>
+      <ButtonContent end={end} start={start}>
         {children}
-      </ButtonContentLayer>
+      </ButtonContent>
     ),
-    className: buttonClassName(className),
-    ...(render === undefined ? { href } : {}),
+    role: disabled ? 'link' : undefined,
+    tabIndex: disabled ? (anchorProps.tabIndex ?? 0) : anchorProps.tabIndex,
+    ...(render === undefined && !disabled ? { href } : {}),
     onAuxClick: (event) => {
-      if (blockInteraction(event)) return;
+      if (block(event)) return;
       onAuxClick?.(event);
     },
     onAuxClickCapture: (event) => {
-      if (blockInteraction(event)) return;
+      if (block(event)) return;
       onAuxClickCapture?.(event);
     },
     onClick: (event) => {
-      if (blockInteraction(event)) return;
+      if (block(event)) return;
       onClick?.(event);
     },
     onClickCapture: (event) => {
-      if (blockInteraction(event)) return;
+      if (block(event)) return;
       onClickCapture?.(event);
     },
     onKeyDown: (event) => {
-      if (isActivationKey(event.key) && blockInteraction(event)) return;
+      if (event.key === 'Enter' && block(event)) return;
       onKeyDown?.(event);
     },
     onKeyDownCapture: (event) => {
-      if (isActivationKey(event.key) && blockInteraction(event)) return;
+      if (event.key === 'Enter' && block(event)) return;
       onKeyDownCapture?.(event);
     },
-    tabIndex: disabled ? (tabIndex ?? -1) : tabIndex,
   };
 
   return render === undefined ? <a {...rootProps} /> : render(rootProps);

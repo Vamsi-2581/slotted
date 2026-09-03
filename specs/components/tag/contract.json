@@ -1,37 +1,107 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "tag",
+  "ui": "tag",
   "axes": {
-    "variant": ["accent", "secondary", "success", "warning", "danger"],
-    "fill": ["solid", "outline", "subtle"],
-    "size": ["sm", "md"]
+    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "variant": ["solid", "soft", "outline"],
+    "size": ["sm", "md", "lg"],
+    "shape": ["pill", "square"],
+    "orientation": ["horizontal", "vertical"]
   },
   "stateAttributes": {
-    "disabled": "data-disabled"
+    "disabled": "data-disabled",
+    "selected": "data-selected"
+  },
+  "stateModel": {
+    "selection": {
+      "controlled": "selected",
+      "uncontrolled": "defaultSelected",
+      "request": "onSelectedChange",
+      "reasons": ["pointer", "keyboard"]
+    }
   },
   "members": {
     "tag": {
       "nativeElement": "span",
       "defaults": {
-        "variant": "secondary",
-        "fill": "solid",
-        "size": "md"
+        "tone": "secondary",
+        "variant": "soft",
+        "size": "md",
+        "shape": "pill",
+        "orientation": "horizontal",
+        "disabled": false,
+        "removeLabel": "Remove"
       },
-      "capabilities": ["appearance"],
-      "states": ["default"],
-      "parts": ["root"]
-    },
-    "tagRemove": {
-      "nativeElement": "button",
-      "defaults": {
-        "disabled": false
-      },
-      "capabilities": ["wiring", "disabled"],
+      "capabilities": [
+        "appearance",
+        "size",
+        "shape",
+        "content",
+        "disabled",
+        "removable",
+        "orientation"
+      ],
       "states": ["default", "hover", "active", "focus-visible", "disabled"],
-      "parts": ["remove"]
+      "parts": ["root", "body", "start", "label", "end", "remove", "group"]
+    },
+    "tagButton": {
+      "nativeElement": "span",
+      "defaults": {
+        "tone": "secondary",
+        "variant": "soft",
+        "size": "md",
+        "shape": "pill",
+        "disabled": false,
+        "removeLabel": "Remove"
+      },
+      "capabilities": ["appearance", "size", "shape", "content", "disabled", "removable"],
+      "states": ["default", "hover", "active", "focus-visible", "disabled"],
+      "parts": ["root", "body", "start", "label", "end", "remove"]
+    },
+    "tagLink": {
+      "nativeElement": "span",
+      "defaults": {
+        "tone": "secondary",
+        "variant": "soft",
+        "size": "md",
+        "shape": "pill",
+        "disabled": false,
+        "removeLabel": "Remove"
+      },
+      "capabilities": ["appearance", "size", "shape", "content", "disabled", "removable"],
+      "states": ["default", "hover", "active", "focus-visible", "disabled"],
+      "parts": ["root", "body", "start", "label", "end", "remove"]
+    },
+    "tagToggle": {
+      "nativeElement": "span",
+      "defaults": {
+        "tone": "secondary",
+        "variant": "soft",
+        "size": "md",
+        "shape": "pill",
+        "disabled": false,
+        "selected": false,
+        "removeLabel": "Remove"
+      },
+      "capabilities": [
+        "appearance",
+        "size",
+        "shape",
+        "content",
+        "disabled",
+        "removable",
+        "selection"
+      ],
+      "states": ["default", "hover", "active", "focus-visible", "selected", "disabled"],
+      "parts": ["root", "body", "indicator", "start", "label", "end", "remove"]
     }
   },
   "scenarios": {
-    "tag": ["playground", "appearance", "removable", "composition"]
+    "overview": ["members", "appearance", "sizes", "group", "composition", "accessibility"],
+    "tag": ["playground", "removal", "content"],
+    "tagButton": ["playground", "states"],
+    "tagLink": ["playground", "states"],
+    "tagToggle": ["playground", "selection"]
   }
 }

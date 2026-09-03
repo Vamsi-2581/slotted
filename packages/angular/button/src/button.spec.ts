@@ -3,194 +3,296 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/button/contract.json';
-import { BUTTON_FILLS, BUTTON_SIZES, BUTTON_VARIANTS } from './button.constants';
 import { SlButton } from './button';
+import { SlButtonEnd, SlButtonStart } from './button-appearance';
+import { provideButtonDefaults } from './button-defaults';
+import { BUTTON_SIZES, BUTTON_TONES, BUTTON_VARIANTS } from './button.constants';
+import type { ButtonSize, ButtonTone, ButtonType, ButtonVariant } from './button.constants';
+
+const defaults = contract.members.button.defaults;
 
 @Component({
-  imports: [SlButton],
-  template: `
-    <button
-      slButton
-      [aria-busy]="ariaBusy()"
-      [aria-disabled]="ariaDisabled()"
-      [fill]="fill()"
-      [variant]="variant()"
-      [size]="size()"
-      [type]="type()"
-      [disabled]="disabled()"
-      [fullWidth]="fullWidth()"
-      [loading]="loading()"
-      [loadingText]="loadingText()"
-      (click)="onClick()"
-    >
-      <span slButtonLeading>L</span>
-      Save
-      <span slButtonTrailing>T</span>
-      @if (customLoadingIndicator()) {
-        <span slButtonLoadingIndicator>Custom indicator</span>
-      }
-    </button>
-  `,
+  imports: [SlButton, SlButtonEnd, SlButtonStart],
+  template: `<button
+    slButton
+    [tone]="tone()"
+    [variant]="variant()"
+    [size]="size()"
+    [type]="type()"
+    [disabled]="disabled()"
+    [focusableWhenDisabled]="focusableWhenDisabled()"
+    [fullWidth]="fullWidth()"
+    [loading]="loading()"
+    [loadingDelay]="loadingDelay()"
+    [loadingLabel]="loadingLabel()"
+    (click)="onClick()"
+  >
+    @if (withIcons()) {
+      <span slButtonStart>S</span>
+    }
+    Save
+    @if (withIcons()) {
+      <span slButtonEnd>E</span>
+    }
+  </button>`,
 })
 class TestHost {
-  readonly fill = signal<'solid' | 'outline' | 'ghost'>('solid');
-  readonly variant = signal<'accent' | 'secondary' | 'success' | 'warning' | 'danger'>('accent');
-  readonly size = signal<'sm' | 'md' | 'lg'>('md');
-  readonly type = signal<'button' | 'submit' | 'reset'>('button');
+  readonly tone = signal<ButtonTone>('accent');
+  readonly variant = signal<ButtonVariant>('solid');
+  readonly size = signal<ButtonSize>('md');
+  readonly type = signal<ButtonType>('button');
   readonly disabled = signal(false);
+  readonly focusableWhenDisabled = signal(false);
   readonly fullWidth = signal(false);
   readonly loading = signal(false);
-  readonly loadingText = signal<string | undefined>(undefined);
-  readonly ariaBusy = signal<boolean | string | null>(null);
-  readonly ariaDisabled = signal<boolean | string | null>(null);
-  readonly customLoadingIndicator = signal(false);
-  readonly clickSpy = vi.fn();
-  onClick() {
-    this.clickSpy();
-  }
+  readonly loadingDelay = signal(0);
+  readonly loadingLabel = signal('Loading');
+  readonly withIcons = signal(false);
+  readonly onClick = vi.fn();
+}
+
+/** A host that states no axis, so the injected defaults are what is read. */
+@Component({
+  imports: [SlButton],
+  template: `<button slButton>Inherits</button>
+    <button slButton tone="danger">States its own</button>`,
+})
+class DefaultsHost {}
+
+function mount() {
+  const fixture = TestBed.createComponent(TestHost);
+  fixture.detectChanges();
+  const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  return { button, fixture, host: fixture.componentInstance };
 }
 
 describe('SlButton', () => {
-  it('renders native safe defaults and logical parts', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  it('is the platform’s own button, carrying the family identity', () => {
+    const { button } = mount();
+
     expect(button.localName).toBe(contract.members.button.nativeElement);
-    expect(button.dataset['slottedComponent']).toBe('button');
-    expect(button.type).toBe(contract.members.button.defaults.type);
-    expect(button.dataset['variant']).toBe(contract.members.button.defaults.variant);
-    expect(button.dataset['fill']).toBe(contract.members.button.defaults.fill);
-    expect(button.dataset['size']).toBe(contract.members.button.defaults.size);
-    const parts = [...button.querySelectorAll('[data-part]')].map((part) =>
-      part.getAttribute('data-part'),
-    );
-    expect(parts).toEqual(contract.members.button.parts.slice(0, 3));
+    expect(button.getAttribute('data-ui')).toBe(contract.ui);
+    expect(button.getAttribute('data-part')).toBe('root');
+    expect(button.getAttribute('type')).toBe(defaults.type);
+    expect(button.getAttribute('data-tone')).toBe(defaults.tone);
+    expect(button.getAttribute('data-variant')).toBe(defaults.variant);
+    expect(button.getAttribute('data-size')).toBe(defaults.size);
   });
 
-  it('updates inputs and preserves native events', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.fill.set('outline');
-    fixture.componentInstance.type.set('submit');
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    button.click();
-    expect(button.dataset['fill']).toBe('outline');
-    expect(button.type).toBe('submit');
-    expect(fixture.componentInstance.clickSpy).toHaveBeenCalledOnce();
+  it('never announces itself as a toggle', () => {
+    const { button } = mount();
+    expect(button.hasAttribute('aria-pressed')).toBe(false);
   });
 
-  it('preserves native disabled behavior', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.disabled.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  it('writes every axis the contract declares', () => {
+    const { button, fixture, host } = mount();
+
+    for (const tone of BUTTON_TONES) {
+      host.tone.set(tone);
+      fixture.detectChanges();
+      expect(button.getAttribute('data-tone')).toBe(tone);
+    }
+    for (const variant of BUTTON_VARIANTS) {
+      host.variant.set(variant);
+      fixture.detectChanges();
+      expect(button.getAttribute('data-variant')).toBe(variant);
+    }
+    for (const size of BUTTON_SIZES) {
+      host.size.set(size);
+      fixture.detectChanges();
+      expect(button.getAttribute('data-size')).toBe(size);
+    }
+  });
+
+  it('marks each part on the element the consumer wrote, and never an empty one', () => {
+    const { button, fixture, host } = mount();
+    expect(
+      [...button.querySelectorAll('[data-part]')].map((part) => part.getAttribute('data-part')),
+    ).toEqual(['label']);
+
+    host.withIcons.set(true);
+    fixture.detectChanges();
+    expect(
+      [...button.querySelectorAll('[data-part]')].map((part) => part.getAttribute('data-part')),
+    ).toEqual(['start', 'label', 'end']);
+  });
+
+  it('leaves the disabled state to the platform', () => {
+    const { button, fixture, host } = mount();
+    host.disabled.set(true);
+    fixture.detectChanges();
+
     button.click();
     expect(button.disabled).toBe(true);
-    expect(button.dataset['disabled']).toBe('');
-    expect(fixture.componentInstance.clickSpy).not.toHaveBeenCalled();
+    expect(button.getAttribute('data-disabled')).toBe('');
+    expect(host.onClick).not.toHaveBeenCalled();
   });
 
-  it('matches the shared contract axes', () => {
-    expect(BUTTON_VARIANTS).toEqual(contract.axes.variant);
-    expect(BUTTON_FILLS).toEqual(contract.axes.fill);
-    expect(BUTTON_SIZES).toEqual(contract.axes.size);
-  });
+  /** The name has to survive the wait, so the label stays rendered. */
+  it('keeps its label and says it is unavailable while it waits', () => {
+    const { button, fixture, host } = mount();
+    host.loading.set(true);
+    fixture.detectChanges();
 
-  it('blocks activation while loading without using native disabled', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.loading.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    button.focus();
-    button.click();
-    expect(button.disabled).toBe(false);
-    expect(button.getAttribute('aria-busy')).toBe('true');
     expect(button.getAttribute('aria-disabled')).toBe('true');
-    expect(button.dataset['loading']).toBe('');
+    expect(button.getAttribute('data-loading')).toBe('');
+    expect(button.querySelector('[data-part="label"]')?.textContent?.trim()).toBe('Save');
+  });
+
+  /**
+   * A waiting control keeps its place in the tab sequence. Focus has to survive
+   * an action the person just started, or the keyboard lands somewhere else
+   * mid-task — which is why the refusal is `aria-disabled` and a blocked
+   * activation rather than the attribute that removes the control.
+   */
+  it('stays focusable while it waits', () => {
+    const { button, fixture, host } = mount();
+    host.loading.set(true);
+    fixture.detectChanges();
+
+    expect(button.disabled).toBe(false);
+    button.focus();
     expect(document.activeElement).toBe(button);
-    expect(fixture.componentInstance.clickSpy).not.toHaveBeenCalled();
   });
 
-  it('renders explicit loading text and a replaceable indicator slot', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.loading.set(true);
-    fixture.componentInstance.loadingText.set('Saving');
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    expect(button.textContent).toContain('Saving');
-    expect(button.querySelector('[data-part="loading-indicator"]')).not.toBeNull();
+  it('refuses activation while it waits, before any handler the template attached', () => {
+    const { button, fixture, host } = mount();
+    host.loading.set(true);
+    fixture.detectChanges();
+
+    button.click();
+    expect(host.onClick).not.toHaveBeenCalled();
   });
 
-  it('exposes full-width layout as a data fact', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.fullWidth.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  /**
+   * The wait is announced by a named progress bar rather than by `aria-busy`,
+   * which is not reliably announced on a button. The label stays at zero
+   * opacity, so the two names combine.
+   */
+  it('announces the wait as a named progress bar', () => {
+    const { button, fixture, host } = mount();
+    expect(button.querySelector('[data-part="indicator"]')).toBeNull();
+
+    host.loadingLabel.set('Saving');
+    host.loading.set(true);
+    fixture.detectChanges();
+    const indicator = button.querySelector('[data-part="indicator"]');
+
+    expect(indicator).not.toBeNull();
+    expect(indicator?.getAttribute('role')).toBe('progressbar');
+    expect(indicator?.getAttribute('aria-label')).toBe('Saving');
+    expect(indicator?.hasAttribute('aria-valuenow')).toBe(false);
+  });
+
+  /**
+   * The ring takes the first visual slot the control has, because that box was
+   * already the size of it: the glyph fades under it and the label stays
+   * readable. Only a control with no slot draws a ring of its own.
+   */
+  it('gives the ring the projected icon’s own box when the control has one', () => {
+    const { button, fixture, host } = mount();
+    host.withIcons.set(true);
+    host.loading.set(true);
+    fixture.detectChanges();
+
+    const start = button.querySelector('[data-part="start"]');
+    expect(start?.querySelector('[data-part="indicator"]')).not.toBeNull();
+    expect(start?.textContent).toContain('S');
+    expect(button.querySelector(':scope > [data-part="indicator"]')).toBeNull();
+  });
+
+  it('centres a ring of its own when the control has no visual slot', () => {
+    const { button, fixture, host } = mount();
+    host.loading.set(true);
+    fixture.detectChanges();
+
+    expect(button.querySelector(':scope > [data-part="indicator"]')).not.toBeNull();
+  });
+
+  /**
+   * The action is refused from the first millisecond; only the picture waits.
+   * A spinner shown for ninety of them is a flash rather than a status.
+   */
+  it('delays the ring without letting the action through', () => {
+    vi.useFakeTimers();
+    try {
+      const { button, fixture, host } = mount();
+      host.loadingDelay.set(300);
+      host.loading.set(true);
+      fixture.detectChanges();
+
+      expect(button.querySelector('[data-part="indicator"]')).toBeNull();
+      button.click();
+      expect(host.onClick).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(300);
+      fixture.detectChanges();
+      expect(button.querySelector('[data-part="indicator"]')).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  /**
+   * Being unavailable and being unreachable are two decisions. A disabled
+   * control in a toolbar that leaves the tab sequence takes its tooltip and
+   * its explanation with it.
+   */
+  it('can be unavailable and still reachable by keyboard', () => {
+    const { button, fixture, host } = mount();
+    host.disabled.set(true);
+    host.focusableWhenDisabled.set(true);
+    fixture.detectChanges();
+
+    expect(button.disabled).toBe(false);
+    expect(button.getAttribute('aria-disabled')).toBe('true');
+    expect(button.getAttribute('data-disabled')).toBe('');
+    button.focus();
+    expect(document.activeElement).toBe(button);
+
+    button.click();
+    expect(host.onClick).not.toHaveBeenCalled();
+  });
+
+  it('keeps the native type the consumer asked for', () => {
+    const { button, fixture, host } = mount();
+    host.type.set('submit');
+    fixture.detectChanges();
+
+    expect(button.getAttribute('type')).toBe('submit');
+  });
+
+  it('fills its container only when asked', () => {
+    const { button, fixture, host } = mount();
+    expect(button.hasAttribute('data-full-width')).toBe(false);
+
+    host.fullWidth.set(true);
+    fixture.detectChanges();
     expect(button.getAttribute('data-full-width')).toBe('');
   });
 
-  it('keeps its projected label as the accessible name for blank loading text', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.loading.set(true);
-    fixture.componentInstance.loadingText.set('   ');
-    await fixture.whenStable();
-    const content = fixture.nativeElement.querySelector(
-      '.slotted-button__content',
-    ) as HTMLSpanElement;
-    expect(content.getAttribute('aria-hidden')).toBeNull();
-    expect(content.textContent).toContain('Save');
-  });
+  /**
+   * An application decides once, and an axis it leaves unset keeps each member
+   * the default it was designed with. A button that states an axis itself
+   * always wins: an explicit input is never overridden by the token.
+   */
+  it('takes an application’s defaults, and yields to an explicit value', () => {
+    TestBed.configureTestingModule({
+      providers: [provideButtonDefaults({ size: 'sm', tone: 'success' })],
+    });
 
-  it('replaces projected content only for meaningful loading text', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.loading.set(true);
-    fixture.componentInstance.loadingText.set('Saving');
-    await fixture.whenStable();
-    const content = fixture.nativeElement.querySelector(
-      '.slotted-button__content',
-    ) as HTMLSpanElement;
-    const loading = fixture.nativeElement.querySelector(
-      '.slotted-button__loading',
-    ) as HTMLSpanElement;
-    expect(content.getAttribute('aria-hidden')).toBe('true');
-    expect(loading.textContent).toContain('Saving');
-  });
+    const fixture = TestBed.createComponent(DefaultsHost);
+    fixture.detectChanges();
+    const [inherited, explicit] = [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('button'),
+    ];
 
-  it.each([true, 'true'] as const)(
-    'blocks activation for raw aria-disabled value %s without native disabled state',
-    async (ariaDisabled) => {
-      const fixture = TestBed.createComponent(TestHost);
-      fixture.componentInstance.ariaDisabled.set(ariaDisabled);
-      await fixture.whenStable();
-      const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-      button.click();
-      expect(button.disabled).toBe(false);
-      expect(button.dataset['disabled']).toBeUndefined();
-      expect(fixture.componentInstance.clickSpy).not.toHaveBeenCalled();
-    },
-  );
+    expect(inherited?.getAttribute('data-size')).toBe('sm');
+    expect(inherited?.getAttribute('data-tone')).toBe('success');
+    /** An axis the application left unset keeps the member's own default. */
+    expect(inherited?.getAttribute('data-variant')).toBe(defaults.variant);
 
-  it.each([false, 'false'] as const)(
-    'keeps raw aria-disabled value %s active',
-    async (ariaDisabled) => {
-      const fixture = TestBed.createComponent(TestHost);
-      fixture.componentInstance.ariaDisabled.set(ariaDisabled);
-      await fixture.whenStable();
-      const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-      button.click();
-      expect(button.disabled).toBe(false);
-      expect(fixture.componentInstance.clickSpy).toHaveBeenCalledOnce();
-    },
-  );
-
-  it('projects a custom loading indicator into the loading indicator part', async () => {
-    const fixture = TestBed.createComponent(TestHost);
-    fixture.componentInstance.loading.set(true);
-    fixture.componentInstance.customLoadingIndicator.set(true);
-    await fixture.whenStable();
-    const indicator = fixture.nativeElement.querySelector(
-      '[data-part="loading-indicator"]',
-    ) as HTMLSpanElement;
-    expect(indicator.textContent).toContain('Custom indicator');
+    expect(explicit?.getAttribute('data-tone')).toBe('danger');
+    expect(explicit?.getAttribute('data-size')).toBe('sm');
   });
 });

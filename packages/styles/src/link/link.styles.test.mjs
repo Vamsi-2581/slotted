@@ -17,25 +17,87 @@ test('answers every underline value the contract names', () => {
   for (const underline of contract.axes.underline) {
     const styled =
       underline === 'always'
-        ? normalized.includes('.slotted-link{')
-        : normalized.includes(`.slotted-link[data-underline='${underline}']`);
+        ? normalized.includes("[data-ui='link']{")
+        : normalized.includes(`[data-ui='link'][data-underline='${underline}']`);
     assert.ok(styled, `Missing underline ${underline}`);
   }
 });
 
-test('reacts to every pseudo-state the contract declares', () => {
-  for (const state of contract.members.link.states) {
-    if (state === 'default') continue;
-    assert.ok(normalized.includes(`.slotted-link:${state}`), `Missing state ${state}`);
+test('answers every variant the contract names', () => {
+  for (const variant of contract.axes.variant) {
+    const styled =
+      variant === 'accent'
+        ? normalized.includes("[data-ui='link']{")
+        : normalized.includes(`[data-ui='link'][data-variant='${variant}']`);
+    assert.ok(styled, `Missing variant ${variant}`);
   }
 });
 
-test('restores the underline under forced colours', () => {
+test('reacts to every state the contract declares', () => {
+  for (const state of contract.members.link.states) {
+    if (state === 'default') continue;
+    const selector =
+      state === 'disabled'
+        ? "[data-ui='link'][data-disabled]"
+        : `[data-ui='link']:not([data-disabled]):${state}`;
+    const focus = `[data-ui='link']:${state}`;
+    assert.ok(
+      normalized.includes(selector.replace(/\s+/g, '')) || normalized.includes(focus),
+      `Missing state ${state}`,
+    );
+  }
+});
+
+/**
+ * The link that is the page the reader is already on is painted from
+ * `aria-current`, and no mirrored `data-current` exists to paint instead. A
+ * router writes that attribute and nothing else, so a family that waited for
+ * its own mirror would paint nothing for the consumer who never adopted one.
+ */
+test('paints the current link from the platform attribute', () => {
+  assert.ok(normalized.includes("[data-ui='link'][aria-current]:not([aria-current='false'])"));
+  assert.ok(!normalized.includes('data-current'));
+});
+
+/**
+ * Every colour a state moves to is mixed toward a token the theme holds to a
+ * contrast ratio, never toward a fill role. A fill that darkens in the light
+ * scheme lightens nothing in the dark one, which is how the shipped family
+ * came to make a link harder to read under the pointer than at rest.
+ */
+test('never paints text with a fill role', () => {
+  assert.ok(!/tone-[a-z]+-solid/.test(declarations), 'A solid fill is not a text colour');
+  assert.match(declarations, /--_hover:[\s\S]*?color-mix\(in oklab, var\(--_rest\) 65%/);
+});
+
+test('draws the external marker as a mask from the glyph scale', () => {
+  assert.ok(normalized.includes('mask-image:var(--slotted-icon-external)'));
+  assert.ok(normalized.includes('background-color:currentColor'));
+});
+
+test('mirrors the marker in a right-to-left document', () => {
+  assert.ok(normalized.includes("[data-part='external-icon']:dir(rtl){scale:-11;}"));
+});
+
+test('restores the underline under forced colours, and repaints the mask', () => {
   assert.ok(normalized.includes('@media(forced-colors:active)'), 'Missing the query');
   assert.ok(
-    /@media\(forced-colors:active\)\{\.slotted-link\{text-decoration-line:underline/.test(
+    /@media\(forced-colors:active\)\{\[data-ui='link'\]\{text-decoration-line:underline/.test(
       normalized,
     ),
     'A link with no underline is unrecognizable once the palette flattens colour',
   );
+  assert.ok(
+    normalized.includes("[data-part='external-icon']{background-color:LinkText"),
+    'A mask painted with currentColor disappears when the system replaces the palette',
+  );
+});
+
+/**
+ * `:visited` accepts colour and hides its computed value from script, so this
+ * assertion on the source is the only evidence the rule exists. It is named at
+ * the gate for the same reason.
+ */
+test('paints a visited link only where the application asked for it', () => {
+  assert.ok(normalized.includes("[data-ui='link'][data-visited]:visited{color:var(--_visited)"));
 });

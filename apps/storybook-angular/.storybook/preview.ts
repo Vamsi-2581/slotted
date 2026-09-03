@@ -15,7 +15,16 @@ import '@slotted/storybook-workbench/styles.css';
 import { SlottedDocsContainer } from './docs-container';
 import { applyRootDirection, applyRootScheme, getPreviewStyle, normalizeScheme } from './theme';
 
+/**
+ * `autodocs` is what turns `parameters.docs.page` into a page. Without the tag
+ * Storybook indexes the stories and no docs entry at all, so every reference
+ * page this repository builds — the API tables, the anatomy, the captions and
+ * the code beside each demonstration — was written, tested and never rendered.
+ * Enabling it here rather than per family is what keeps the next family from
+ * inheriting the same silence.
+ */
 const preview: Preview = {
+  tags: ['autodocs'],
   initialGlobals: INITIAL_GLOBALS,
   globalTypes: GLOBAL_TYPES,
   decorators: [

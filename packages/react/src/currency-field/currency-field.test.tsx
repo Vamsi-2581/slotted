@@ -1,0 +1,687 @@
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { createRef, useState } from 'react';
+import { describe, expect, it, vi } from 'vitest';
+
+import contract from '../../../../specs/components/currency-field/contract.json';
+import { Field, FieldError, FieldLabel } from '../field';
+import { CurrencyField } from './currency-field';
+import { CurrencyFieldDefaultsProvider } from './currency-field-defaults';
+import type { CurrencyFieldHandle } from './currency-field.types';
+
+const control = () => screen.getByRole('spinbutton') as HTMLInputElement;
+const frameOf = (element: HTMLElement) => element.parentElement as HTMLElement;
+const stepper = (part: 'increment' | 'decrement') =>
+  frameOf(control()).querySelector(`[data-part="${part}"]`) as HTMLButtonElement;
+
+/**
+ * `Intl` separates a symbol from its amount with a non-breaking space, and the
+ * normalisation runs over the value the control holds rather than over the
+ * expectation: a test that wrote the invisible character itself would compare
+ * two strings a reader cannot tell apart.
+ */
+const plain = (text: string) => text.replace(/\u00a0/g, ' ');
+
+/** One keystroke, as the browser delivers it: the whole new text. */
+function type(value: string) {
+  fireEvent.change(control(), { target: { value } });
+}
+
+/** What a reader typing digit by digit produces, under cents-first entry. */
+function typeDigits(digits: string) {
+  for (const digit of digits) type(control().value + digit);
+}
+
+/**
+ * A raw `dispatchEvent` leaves React's state update unflushed, so the event
+ * goes through `fireEvent`, which wraps the dispatch in `act`.
+ */
+function beforeInput(data: string, inputType = 'insertText') {
+  const event = new InputEvent('beforeinput', { bubbles: true, cancelable: true, data, inputType });
+  fireEvent(control(), event);
+  return event;
+}
+
+describe('CurrencyField', () => {
+  it('is selected in public by the family identifier and its parts', () => {
+    render(
+      <CurrencyField
+        className="page-amount"
+        currency="BRL"
+        defaultValue={1480}
+        end="por mês"
+        locale="pt-BR"
+        start="R$"
+        stepper="stacked"
+      />,
+    );
+
+    const root = frameOf(control());
+    expect(root.tagName).toBe('DIV');
+    expect(root).toHaveAttribute('data-ui', 'currency-field');
+    expect(root).toHaveAttribute('data-part', 'root');
+    expect(root).toHaveClass('page-amount');
+    expect(control()).toHaveAttribute('data-part', 'input');
+    expect(root.querySelector('[data-part="start"]')).toHaveTextContent('R$');
+    expect(root.querySelector('[data-part="end"]')).toHaveTextContent('por mês');
+    expect(root.querySelector('[data-part="stepper"]')).not.toBeNull();
+  });
+
+  it('writes every axis a consumer may style on, and the contract’s defaults', () => {
+    render(<CurrencyField currency="BRL" defaultValue={1} locale="pt-BR" />);
+    const root = frameOf(control());
+    const { defaults } = contract.members.currencyField;
+
+    expect(root).toHaveAttribute('data-size', defaults.size);
+    expect(root).toHaveAttribute('data-variant', defaults.variant);
+    expect(root).toHaveAttribute('data-stepper', defaults.stepper);
+    expect(root).toHaveAttribute('data-align', defaults.align);
+    expect(root).toHaveAttribute('data-entry', defaults.entry);
+  });
+
+  /**
+   * `type="number"` empties itself whenever the text is not a valid
+   * floating-point number, so no grouping separator and no currency symbol
+   * survives it. The role is the APG's, applied to a text input.
+   */
+  it('holds the amount in a text input carrying the spinbutton role', () => {
+    render(<CurrencyField currency="BRL" defaultValue={1480} locale="pt-BR" max={5000} min={0} />);
+
+    expect(control()).toHaveAttribute('type', 'text');
+    expect(control()).toHaveAttribute('role', contract.controlRole);
+    expect(control()).toHaveAttribute('aria-valuenow', '1480');
+    expect(control()).toHaveAttribute('aria-valuemin', '0');
+    expect(control()).toHaveAttribute('aria-valuemax', '5000');
+    expect(plain(control().getAttribute('aria-valuetext') ?? '')).toBe('R$ 1.480,00');
+  });
+
+  it('writes the symbol the currency names and the separators the locale writes', () => {
+    render(<CurrencyField currency="USD" defaultValue={1480} locale="pt-BR" />);
+
+    expect(plain(control().value)).toBe('US$ 1.480,00');
+  });
+
+  /**
+   * A currency field cannot decide how many digits a cent has, and one that
+   * guessed two would write `¥12,34`.
+   */
+  it('refuses to render without a currency, in the place it was written', () => {
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    expect(() => render(<CurrencyField defaultValue={1} />)).toThrow(/currency/i);
+
+    quiet.mockRestore();
+  });
+
+  /**
+   * The arrangement `Intl` has no option for: the symbol beside the amount
+   * rather than inside it, with the currency still deciding the shift.
+   */
+  it('writes no currency at all under the display that has none', () => {
+    render(<CurrencyField currency="BRL" currencyDisplay="none" locale="pt-BR" start="R$" />);
+
+    typeDigits('1234');
+    expect(control().value).toBe('12,34');
+    expect(frameOf(control()).querySelector('[data-part="start"]')).toHaveTextContent('R$');
+  });
+
+  it('takes the currency from an application that set one once', () => {
+    render(
+      <CurrencyFieldDefaultsProvider currency="JPY" locale="ja-JP">
+        <CurrencyField defaultValue={1480} />
+      </CurrencyFieldDefaultsProvider>,
+    );
+
+    expect(control().value).toBe('￥1,480');
+  });
+});
+
+describe('cents-first entry', () => {
+  it('shifts each digit left by the currency minor units', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    type('1');
+    expect(plain(control().value)).toBe('R$ 0,01');
+    type(`${control().value}2`);
+    expect(plain(control().value)).toBe('R$ 0,12');
+    typeDigits('34');
+    expect(plain(control().value)).toBe('R$ 12,34');
+  });
+
+  it('shifts by nothing in a currency with no cent', () => {
+    render(<CurrencyField currency="JPY" locale="ja-JP" />);
+
+    typeDigits('1480');
+    expect(control().value).toBe('￥1,480');
+  });
+
+  it('shifts by three in a currency with three', () => {
+    render(<CurrencyField currency="KWD" locale="pt-BR" />);
+
+    typeDigits('1234');
+    expect(plain(control().value)).toBe('KWD 1,234');
+  });
+
+  /** Backspace shifts the digits right; the last one leaves nothing, not nought. */
+  it('empties to nothing rather than to nought', () => {
+    const onValueChange = vi.fn();
+    render(<CurrencyField currency="BRL" locale="pt-BR" onValueChange={onValueChange} />);
+
+    typeDigits('12');
+    type('R$ 0,1');
+    expect(plain(control().value)).toBe('R$ 0,01');
+
+    type('');
+    expect(control().value).toBe('');
+    expect(onValueChange).toHaveBeenLastCalledWith(null, expect.objectContaining({ value: null }));
+  });
+
+  it('keeps a nought a reader actually typed', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    type('0');
+    expect(plain(control().value)).toBe('R$ 0,00');
+  });
+
+  /**
+   * The one case where the cash-register rule would lose the reader's data: an
+   * amount copied from a bank statement is not a run of digits.
+   */
+  it('parses a paste instead of accumulating its digits', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    fireEvent.input(control(), {
+      target: { value: 'R$\u00a01.480,00' },
+      inputType: 'insertFromPaste',
+    });
+
+    expect(plain(control().value)).toBe('R$ 1.480,00');
+    expect(control()).toHaveAttribute('aria-valuenow', '1480');
+  });
+
+  it('reads an accounting negative back as a negative when it is pasted', () => {
+    render(<CurrencyField currency="USD" locale="en-US" min={-1000000} />);
+
+    fireEvent.input(control(), {
+      target: { value: '($1,234.56)' },
+      inputType: 'insertFromPaste',
+    });
+
+    expect(control()).toHaveAttribute('aria-valuenow', '-1234.56');
+  });
+
+  /** The digits are the value, so nothing else may be typed into them. */
+  it('refuses a separator, a letter and every other character', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+    control().focus();
+
+    expect(beforeInput(',').defaultPrevented).toBe(true);
+    expect(beforeInput('.').defaultPrevented).toBe(true);
+    expect(beforeInput('a').defaultPrevented).toBe(true);
+    expect(beforeInput('7').defaultPrevented).toBe(false);
+  });
+
+  it('lets a paste through the filter that refuses a keystroke', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    expect(beforeInput('R$ 1.480,00', 'insertFromPaste').defaultPrevented).toBe(false);
+  });
+
+  /** Fifteen digits is where a double stops holding a cent. */
+  it('stops at the digit a double could not hold', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    typeDigits('123456789012345');
+    expect(control()).toHaveAttribute('aria-valuenow', '1234567890123.45');
+
+    expect(beforeInput('6').defaultPrevented).toBe(true);
+  });
+
+  it('sets the sign with a key rather than with a digit', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    typeDigits('1234');
+    beforeInput('-');
+    expect(control()).toHaveAttribute('aria-valuenow', '-12.34');
+
+    beforeInput('+');
+    expect(control()).toHaveAttribute('aria-valuenow', '12.34');
+  });
+
+  it('remembers a sign typed into an empty amount', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    beforeInput('-');
+    typeDigits('5');
+    expect(control()).toHaveAttribute('aria-valuenow', '-0.05');
+  });
+
+  /** `min={0}` is what says a debit is impossible, and it says it once. */
+  it('refuses a sign the range does not admit', () => {
+    render(<CurrencyField currency="BRL" defaultValue={12.34} locale="pt-BR" min={0} />);
+
+    beforeInput('-');
+    expect(control()).toHaveAttribute('aria-valuenow', '12.34');
+  });
+
+  it('asks the numeric keypad for, and never the full keyboard', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" min={-100} />);
+
+    expect(control()).toHaveAttribute('inputmode', 'numeric');
+  });
+});
+
+describe('natural entry', () => {
+  /**
+   * `number-field`'s model, and `number-field`'s axis with it: an amount is
+   * scannable while it is being typed, and the padding to the currency's own
+   * minor units still belongs to the commit.
+   */
+  it('gives the text the locale’s shape on the keystroke that changed it', () => {
+    render(<CurrencyField currency="BRL" entry="natural" locale="pt-BR" />);
+
+    type('1234,5');
+    expect(plain(control().value)).toBe('R$ 1.234,5');
+    expect(control()).toHaveAttribute('aria-valuenow', '1234.5');
+
+    fireEvent.blur(control());
+    expect(plain(control().value)).toBe('R$ 1.234,50');
+  });
+
+  it('leaves the text alone until a commit when asked to', () => {
+    render(<CurrencyField currency="BRL" entry="natural" formatOn="commit" locale="pt-BR" />);
+
+    type('1234,5');
+    expect(control().value).toBe('1234,5');
+    expect(control()).toHaveAttribute('aria-valuenow', '1234.5');
+
+    fireEvent.blur(control());
+    expect(plain(control().value)).toBe('R$ 1.234,50');
+  });
+
+  it('derives its keypad from what the format admits', () => {
+    render(<CurrencyField currency="BRL" entry="natural" locale="pt-BR" min={0} />);
+
+    expect(control()).toHaveAttribute('inputmode', 'decimal');
+  });
+
+  it('takes the full keyboard when a debit is possible', () => {
+    render(<CurrencyField currency="BRL" entry="natural" locale="pt-BR" />);
+
+    expect(control()).toHaveAttribute('inputmode', 'text');
+  });
+});
+
+describe('the request an amount carries', () => {
+  it('carries the reason, the currency and the exact integer of minor units', () => {
+    const onValueChange = vi.fn();
+    render(<CurrencyField currency="BRL" locale="pt-BR" onValueChange={onValueChange} />);
+
+    typeDigits('1234');
+
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      12.34,
+      expect.objectContaining({ currency: 'BRL', minorUnits: 1234, reason: 'keyboard' }),
+    );
+  });
+
+  it('reports the integer a payment API is charged in, without a float in between', () => {
+    const onValueChange = vi.fn();
+    render(
+      <CurrencyField currency="USD" entry="natural" locale="en-US" onValueChange={onValueChange} />,
+    );
+
+    type('1.005');
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      1.005,
+      expect.objectContaining({ minorUnits: 101 }),
+    );
+  });
+
+  it('can be refused before anything commits', () => {
+    render(
+      <CurrencyField
+        currency="BRL"
+        locale="pt-BR"
+        onValueChange={(_value, request) => request.cancel()}
+      />,
+    );
+
+    typeDigits('1234');
+    expect(control().value).toBe('');
+  });
+
+  it('never asks for the value it already holds', () => {
+    const onValueChange = vi.fn();
+    render(
+      <CurrencyField
+        currency="BRL"
+        defaultValue={12.34}
+        locale="pt-BR"
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.blur(control());
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
+describe('the two modes', () => {
+  it('holds its own amount when nobody owns it', () => {
+    render(<CurrencyField currency="BRL" defaultValue={12.34} locale="pt-BR" />);
+
+    typeDigits('5');
+    expect(plain(control().value)).toBe('R$ 123,45');
+  });
+
+  it('waits for the consumer in controlled mode', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" value={12.34} />);
+
+    typeDigits('5');
+    expect(plain(control().value)).toBe('R$ 12,34');
+  });
+
+  it('shows the amount the consumer moves it to', () => {
+    function Controlled() {
+      const [amount, setAmount] = useState<number | null>(null);
+      return (
+        <CurrencyField currency="BRL" locale="pt-BR" onValueChange={setAmount} value={amount} />
+      );
+    }
+
+    render(<Controlled />);
+    typeDigits('1234');
+    expect(plain(control().value)).toBe('R$ 12,34');
+  });
+});
+
+describe('the range', () => {
+  it('returns an amount to the range at the commit', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" max={100} />);
+
+    typeDigits('999999');
+    fireEvent.blur(control());
+    expect(plain(control().value)).toBe('R$ 100,00');
+  });
+
+  it('refuses the keystroke that would leave the range under strict clamping', () => {
+    render(<CurrencyField clamp="strict" currency="BRL" locale="pt-BR" max={1} />);
+
+    typeDigits('99');
+    expect(plain(control().value)).toBe('R$ 0,99');
+    expect(beforeInput('9').defaultPrevented).toBe(true);
+  });
+
+  it('keeps an amount outside the range when nothing clamps it', () => {
+    render(<CurrencyField clamp="none" currency="BRL" locale="pt-BR" max={100} />);
+
+    typeDigits('999999');
+    fireEvent.blur(control());
+    expect(control()).toHaveAttribute('aria-valuenow', '9999.99');
+  });
+});
+
+describe('the keyboard', () => {
+  it('steps by the amounts the contract declares', () => {
+    render(<CurrencyField currency="BRL" defaultValue={100} locale="pt-BR" step={1} />);
+
+    fireEvent.keyDown(control(), { key: 'ArrowUp' });
+    expect(control()).toHaveAttribute('aria-valuenow', '101');
+
+    fireEvent.keyDown(control(), { key: 'ArrowDown' });
+    expect(control()).toHaveAttribute('aria-valuenow', '100');
+
+    fireEvent.keyDown(control(), { key: 'ArrowUp', shiftKey: true });
+    expect(control()).toHaveAttribute('aria-valuenow', '110');
+
+    fireEvent.keyDown(control(), { key: 'ArrowDown', altKey: true });
+    expect(control()).toHaveAttribute('aria-valuenow', '109.9');
+
+    fireEvent.keyDown(control(), { key: 'PageUp' });
+    expect(control()).toHaveAttribute('aria-valuenow', '119.9');
+  });
+
+  it('goes to the bounds the pattern names, and only when they exist', () => {
+    render(<CurrencyField currency="BRL" defaultValue={100} locale="pt-BR" max={500} min={10} />);
+
+    fireEvent.keyDown(control(), { key: 'Home' });
+    expect(control()).toHaveAttribute('aria-valuenow', '10');
+
+    fireEvent.keyDown(control(), { key: 'End' });
+    expect(control()).toHaveAttribute('aria-valuenow', '500');
+  });
+
+  it('commits on Enter without intercepting the submit', () => {
+    const onSubmit = vi.fn((event: { preventDefault(): void }) => event.preventDefault());
+    render(
+      <form onSubmit={onSubmit}>
+        <CurrencyField currency="BRL" entry="natural" locale="pt-BR" />
+      </form>,
+    );
+
+    type('1234');
+    fireEvent.keyDown(control(), { key: 'Enter' });
+    expect(plain(control().value)).toBe('R$ 1.234,00');
+  });
+
+  it('binds nothing to Escape', () => {
+    render(<CurrencyField currency="BRL" defaultValue={12} locale="pt-BR" />);
+
+    fireEvent.keyDown(control(), { key: 'Escape' });
+    expect(control()).toHaveAttribute('aria-valuenow', '12');
+  });
+});
+
+describe('the two steppers', () => {
+  it('are withdrawn until a product asks for them', () => {
+    render(<CurrencyField currency="BRL" defaultValue={12} locale="pt-BR" />);
+
+    expect(frameOf(control()).querySelector('[data-part="increment"]')).toBeNull();
+  });
+
+  it('step the amount and keep focus on the value', () => {
+    render(<CurrencyField currency="BRL" defaultValue={100} locale="pt-BR" stepper="stacked" />);
+
+    fireEvent.pointerDown(stepper('increment'), { button: 0 });
+    expect(control()).toHaveAttribute('aria-valuenow', '101');
+    fireEvent.pointerUp(stepper('increment'));
+
+    expect(document.activeElement).toBe(control());
+  });
+
+  it('stay out of the tab order with names and a control to point at', () => {
+    render(
+      <CurrencyField
+        currency="BRL"
+        decrementLabel="Menos"
+        defaultValue={100}
+        id="total"
+        incrementLabel="Mais"
+        locale="pt-BR"
+        stepper="stacked"
+      />,
+    );
+
+    expect(stepper('increment')).toHaveAttribute('tabindex', '-1');
+    expect(stepper('increment')).toHaveAccessibleName('Mais');
+    expect(stepper('decrement')).toHaveAccessibleName('Menos');
+    expect(stepper('increment')).toHaveAttribute('aria-controls', 'total');
+  });
+
+  it('are disabled at the bound they would cross', () => {
+    render(
+      <CurrencyField
+        currency="BRL"
+        defaultValue={100}
+        locale="pt-BR"
+        max={100}
+        min={0}
+        stepper="stacked"
+      />,
+    );
+
+    expect(stepper('increment')).toBeDisabled();
+    expect(stepper('decrement')).not.toBeDisabled();
+  });
+});
+
+describe('the field around it', () => {
+  it('takes its identity, its description and its states from the field', () => {
+    render(
+      <Field invalid>
+        <FieldLabel>Total</FieldLabel>
+        <CurrencyField currency="BRL" defaultValue={12} locale="pt-BR" />
+        <FieldError>Informe um valor maior.</FieldError>
+      </Field>,
+    );
+
+    expect(control()).toHaveAccessibleName('Total');
+    expect(control()).toHaveAccessibleDescription(/Informe um valor maior\./);
+    expect(control()).toHaveAttribute('aria-invalid', 'true');
+    expect(frameOf(control())).toHaveAttribute('data-invalid', '');
+  });
+
+  it('lets a stated value win over the field', () => {
+    render(
+      <Field disabled>
+        <FieldLabel>Total</FieldLabel>
+        <CurrencyField currency="BRL" defaultValue={12} disabled={false} locale="pt-BR" />
+      </Field>,
+    );
+
+    expect(control()).not.toBeDisabled();
+  });
+});
+
+describe('forms', () => {
+  it('submits the raw number rather than the formatted amount', () => {
+    render(
+      <form data-testid="form">
+        <CurrencyField currency="BRL" defaultValue={1480.5} locale="pt-BR" name="total" />
+      </form>,
+    );
+
+    const hidden = screen
+      .getByTestId('form')
+      .querySelector('input[type="hidden"]') as HTMLInputElement;
+    expect(hidden.value).toBe('1480.5');
+    expect(hidden.name).toBe('total');
+  });
+
+  it('goes back to where it started when the form resets', () => {
+    render(
+      <form data-testid="form">
+        <CurrencyField currency="BRL" defaultValue={12} locale="pt-BR" name="total" />
+      </form>,
+    );
+
+    typeDigits('5');
+    fireEvent.reset(screen.getByTestId('form'));
+    expect(plain(control().value)).toBe('R$ 12,00');
+  });
+});
+
+describe('the escape hatches', () => {
+  it('hands the native element to a ref and the two actions to a handle', () => {
+    const ref = createRef<HTMLInputElement>();
+    const handle = createRef<CurrencyFieldHandle>();
+    render(
+      <CurrencyField
+        currency="BRL"
+        defaultValue={100}
+        handle={handle}
+        locale="pt-BR"
+        ref={ref}
+        step={5}
+      />,
+    );
+
+    expect(ref.current).toBe(control());
+    act(() => handle.current?.increment());
+    expect(control()).toHaveAttribute('aria-valuenow', '105');
+  });
+
+  it('renders the frame into another element', () => {
+    render(
+      <CurrencyField
+        currency="BRL"
+        defaultValue={12}
+        locale="pt-BR"
+        render={(props) => <label {...props} />}
+      />,
+    );
+
+    expect(frameOf(control()).tagName).toBe('LABEL');
+  });
+
+  it('runs the consumer’s own handler as well as its own', () => {
+    const onChange = vi.fn();
+    const onKeyDown = vi.fn();
+    render(
+      <CurrencyField currency="BRL" locale="pt-BR" onChange={onChange} onKeyDown={onKeyDown} />,
+    );
+
+    typeDigits('1');
+    fireEvent.keyDown(control(), { key: 'ArrowUp' });
+
+    expect(onChange).toHaveBeenCalled();
+    expect(onKeyDown).toHaveBeenCalled();
+    expect(control()).toHaveAttribute('aria-valuenow', '1.01');
+  });
+
+  it('lets a consumer stop the family from acting on a key', () => {
+    render(
+      <CurrencyField
+        currency="BRL"
+        defaultValue={12}
+        locale="pt-BR"
+        onKeyDown={(event) => event.preventDefault()}
+      />,
+    );
+
+    fireEvent.keyDown(control(), { key: 'ArrowUp' });
+    expect(control()).toHaveAttribute('aria-valuenow', '12');
+  });
+
+  it('keeps a native attribute the consumer wrote', () => {
+    render(
+      <CurrencyField
+        autoComplete="transaction-amount"
+        currency="BRL"
+        defaultValue={12}
+        locale="pt-BR"
+        placeholder="R$ 0,00"
+      />,
+    );
+
+    expect(control()).toHaveAttribute('autocomplete', 'transaction-amount');
+    expect(control()).toHaveAttribute('placeholder', 'R$ 0,00');
+  });
+});
+
+describe('an application that decides once', () => {
+  it('sets every axis from the provider, and a control still wins', () => {
+    render(
+      <CurrencyFieldDefaultsProvider
+        align="start"
+        currency="USD"
+        entry="natural"
+        locale="en-US"
+        size="sm"
+        stepper="split"
+        variant="subtle"
+      >
+        <CurrencyField defaultValue={12} />
+        <CurrencyField align="end" defaultValue={12} />
+      </CurrencyFieldDefaultsProvider>,
+    );
+
+    const [first, second] = screen.getAllByRole('spinbutton').map((input) => frameOf(input));
+    expect(first).toHaveAttribute('data-align', 'start');
+    expect(first).toHaveAttribute('data-entry', 'natural');
+    expect(first).toHaveAttribute('data-size', 'sm');
+    expect(first).toHaveAttribute('data-stepper', 'split');
+    expect(first).toHaveAttribute('data-variant', 'subtle');
+    expect(second).toHaveAttribute('data-align', 'end');
+  });
+});

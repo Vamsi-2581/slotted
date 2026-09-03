@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 5,
+  "family": "icon",
+  "ui": "icon",
+  "axes": {
+    "size": ["text", "sm", "md", "lg"],
+    "tone": ["inherit", "default", "muted", "accent", "success", "warning", "danger", "inverse"]
+  },
+  "members": {
+    "icon": {
+      "nativeElement": "span",
+      "defaults": {
+        "size": "md",
+        "tone": "inherit",
+        "directional": false
+      },
+      "capabilities": ["size"],
+      "states": ["default"],
+      "parts": ["root"]
+    }
+  },
+  "scenarios": {
+    "icon": ["playground", "sizes", "baseline", "tone", "in-context", "direction", "accessibility"]
+  }
+}

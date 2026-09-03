@@ -12,6 +12,7 @@ import type { SnippetLanguage, WorkbenchSnippet } from './snippets';
 const PARSERS: Record<SnippetLanguage, string> = {
   angular: 'angular',
   css: 'css',
+  ts: 'babel-ts',
   tsx: 'babel-ts',
 };
 
@@ -41,3 +42,6 @@ export async function snippetFormatErrors(snippets: readonly WorkbenchSnippet[])
   }
   return errors;
 }
+
+export { referencePageErrors } from './reference-audit';
+export type { ReferenceContractMember, ReferenceDocs, ReferenceSceneMeta } from './reference-audit';

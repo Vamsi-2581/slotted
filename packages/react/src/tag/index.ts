@@ -1,10 +1,27 @@
 export { Tag } from './tag';
-export { TagRemove } from './tag-remove';
+export { TagButton } from './tag-button';
+export { TAG_REMOVE_LABEL, TagDefaultsProvider, useTagDefaults } from './tag-defaults';
+export { TagGroup } from './tag-group';
+export { TagLink } from './tag-link';
+export { TagToggle } from './tag-toggle';
 export type {
-  TagFill,
+  TagButtonBodyProps,
+  TagButtonProps,
+  TagDefaults,
+  TagDefaultsProviderProps,
+  TagElementProps,
+  TagGroupProps,
+  TagGroupRootProps,
+  TagLinkBodyProps,
+  TagLinkProps,
+  TagOrientation,
   TagProps,
-  TagRemoveProps,
+  TagRemoveReason,
+  TagRemoveRequest,
   TagRootProps,
+  TagShape,
   TagSize,
+  TagToggleProps,
+  TagTone,
   TagVariant,
 } from './tag.types';

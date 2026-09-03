@@ -1,71 +1,119 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "button",
+  "ui": "button",
   "axes": {
-    "variant": ["accent", "secondary", "success", "warning", "danger"],
-    "fill": ["solid", "outline", "ghost"],
-    "size": ["sm", "md", "lg"]
+    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "variant": ["solid", "outline", "ghost"],
+    "size": ["sm", "md", "lg"],
+    "shape": ["square", "circle"]
   },
-  "orientations": ["horizontal", "vertical"],
   "stateAttributes": {
     "disabled": "data-disabled",
     "loading": "data-loading",
     "pressed": "data-pressed"
   },
+  "stateModel": {
+    "pressed": {
+      "controlled": "pressed",
+      "uncontrolled": "defaultPressed",
+      "request": "onPressedChange",
+      "reasons": ["pointer", "keyboard"]
+    }
+  },
   "members": {
     "button": {
       "nativeElement": "button",
-      "defaults": { "variant": "accent", "fill": "solid", "size": "md", "type": "button" },
+      "defaults": {
+        "tone": "accent",
+        "variant": "solid",
+        "size": "md",
+        "type": "button",
+        "fullWidth": false,
+        "disabled": false,
+        "focusableWhenDisabled": false,
+        "loading": false,
+        "loadingDelay": 0,
+        "loadingLabel": "Loading"
+      },
       "capabilities": ["appearance", "content", "fullWidth", "disabled", "loading"],
       "states": ["default", "hover", "active", "focus-visible", "disabled", "loading"],
-      "parts": ["leading", "label", "trailing", "loading-indicator"]
+      "parts": ["root", "start", "label", "end", "indicator"]
     },
     "buttonLink": {
       "nativeElement": "a",
-      "defaults": { "variant": "accent", "fill": "solid", "size": "md" },
+      "defaults": {
+        "tone": "accent",
+        "variant": "solid",
+        "size": "md",
+        "fullWidth": false,
+        "disabled": false
+      },
       "capabilities": ["appearance", "content", "fullWidth", "disabled"],
       "states": ["default", "hover", "active", "focus-visible", "disabled"],
-      "parts": ["leading", "label", "trailing"]
+      "parts": ["root", "start", "label", "end"]
     },
     "iconButton": {
       "nativeElement": "button",
       "defaults": {
-        "variant": "secondary",
-        "fill": "ghost",
+        "tone": "secondary",
+        "variant": "ghost",
         "size": "md",
-        "type": "button"
+        "shape": "square",
+        "type": "button",
+        "disabled": false,
+        "focusableWhenDisabled": false,
+        "loading": false,
+        "loadingDelay": 0,
+        "loadingLabel": "Loading"
       },
-      "capabilities": ["appearance", "fullWidth", "disabled", "loading"],
-      "states": ["default", "hover", "active", "focus-visible", "disabled", "loading"],
-      "parts": ["icon", "loading-indicator"]
+      "capabilities": ["appearance", "shape", "disabled", "loading", "pressed"],
+      "states": ["default", "hover", "active", "focus-visible", "disabled", "loading", "pressed"],
+      "parts": ["root", "icon", "indicator"]
     },
     "toggleButton": {
       "nativeElement": "button",
       "defaults": {
-        "variant": "secondary",
-        "fill": "outline",
+        "tone": "secondary",
+        "variant": "outline",
         "size": "md",
         "type": "button",
-        "pressed": false
+        "fullWidth": false,
+        "disabled": false,
+        "focusableWhenDisabled": false,
+        "loading": false,
+        "loadingDelay": 0,
+        "loadingLabel": "Loading",
+        "defaultPressed": false
       },
-      "capabilities": ["appearance", "content", "fullWidth", "disabled", "pressed"],
-      "states": ["default", "hover", "active", "focus-visible", "disabled", "pressed"],
-      "parts": ["leading", "label", "trailing"]
-    },
-    "buttonGroup": {
-      "nativeElement": "div",
-      "defaults": { "orientation": "horizontal" },
-      "capabilities": ["orientation"],
-      "states": [],
-      "parts": ["group"]
+      "capabilities": ["appearance", "content", "fullWidth", "disabled", "loading", "pressed"],
+      "states": ["default", "hover", "active", "focus-visible", "disabled", "loading", "pressed"],
+      "parts": ["root", "start", "label", "end", "indicator"]
     }
   },
   "scenarios": {
-    "overview": ["matrix", "themes", "densities"],
-    "button": ["playground", "states", "content", "fullWidth", "loading", "accessibility"],
+    "overview": ["matrix", "tones", "densities"],
+    "button": [
+      "playground",
+      "variants",
+      "content",
+      "states",
+      "loading",
+      "fullWidth",
+      "composition",
+      "defaults",
+      "accessibility"
+    ],
     "buttonLink": ["playground", "states", "routerIntegration", "accessibility"],
-    "iconButton": ["playground", "sizes", "states", "loading", "accessibility"],
-    "toggleButton": ["playground", "pressed", "states", "accessibility"],
-    "buttonGroup": ["playground", "orientations", "splitAction", "accessibility"]
+    "iconButton": [
+      "playground",
+      "shapes",
+      "sizes",
+      "states",
+      "loading",
+      "pressed",
+      "accessibility"
+    ],
+    "toggleButton": ["playground", "pressed", "states", "loading", "accessibility"]
   }
 }

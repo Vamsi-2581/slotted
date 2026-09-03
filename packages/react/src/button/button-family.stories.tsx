@@ -1,23 +1,25 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import { scenario, WorkbenchMatrix } from '@slotted/storybook-workbench';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   ArrowRight,
   Bold,
   ChevronDown,
   ExternalLink,
   Italic,
+  MoreHorizontal,
   Plus,
-  Redo2,
+  RefreshCw,
   Save,
+  Star,
   Trash2,
   Underline,
-  Undo2,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { Button } from './button';
-import { ButtonGroup } from './button-group';
 import { ButtonLink } from './button-link';
+import { BUTTON_SIZES, BUTTON_TONES, BUTTON_VARIANTS } from './button.constants';
+import type { ButtonTone, ButtonVariant } from './button.types';
 import { IconButton } from './icon-button';
 import { ToggleButton } from './toggle-button';
 
@@ -27,19 +29,14 @@ const demoIcons = {
   'chevron-down': ChevronDown,
   'external-link': ExternalLink,
   italic: Italic,
+  more: MoreHorizontal,
   plus: Plus,
-  redo: Redo2,
+  refresh: RefreshCw,
   save: Save,
+  star: Star,
   trash: Trash2,
   underline: Underline,
-  undo: Undo2,
 } as const;
-const variants = ['accent', 'secondary', 'success', 'warning', 'danger'] as const;
-const fills = ['solid', 'outline', 'ghost'] as const;
-const sizes = ['sm', 'md', 'lg'] as const;
-
-type Variant = (typeof variants)[number];
-type Fill = (typeof fills)[number];
 
 function titleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -98,7 +95,7 @@ function LabSection({
   );
 }
 
-function MatrixScene({
+function ToneMatrix({
   label,
   matrix,
   note,
@@ -107,16 +104,16 @@ function MatrixScene({
   label: string;
   matrix: string;
   note: string;
-  renderCell: (variant: Variant, fill: Fill) => ReactNode;
+  renderCell: (tone: ButtonTone, variant: ButtonVariant) => ReactNode;
 }) {
   return (
     <DemoScene label={label} note={note}>
       <div data-slotted-matrix={matrix}>
         <WorkbenchMatrix
-          columns={variants.map(titleCase)}
-          rows={fills.map((fill) => ({
-            label: titleCase(fill),
-            cells: variants.map((variant) => renderCell(variant, fill)),
+          columns={BUTTON_TONES.map(titleCase)}
+          rows={BUTTON_VARIANTS.map((variant) => ({
+            label: titleCase(variant),
+            cells: BUTTON_TONES.map((tone) => renderCell(tone, variant)),
           }))}
         />
       </div>
@@ -137,16 +134,16 @@ export const Matrix: Story = {
   render: () => (
     <main className="slotted-component-lab">
       <LabSection
-        description="Five semantic variants across three fills. ButtonLink, IconButton and ToggleButton read from the same axes, so this matrix is shown once."
+        description="Four members, one surface. Button acts, ButtonLink navigates, IconButton acts without room for a label, and ToggleButton stays on. They share the tone, variant and size axes, so the appearance is decided once."
         title="Appearance system"
       >
-        <MatrixScene
-          label="Appearance matrix"
+        <ToneMatrix
+          label="Tone by variant"
           matrix="button"
-          note="Rendered with Button. The same tokens drive every component below."
-          renderCell={(variant, fill) => (
-            <Button fill={fill} key={variant} variant={variant}>
-              {titleCase(variant)}
+          note="Five semantic colours across four ways of painting them."
+          renderCell={(tone, variant) => (
+            <Button size="sm" tone={tone} variant={variant}>
+              {titleCase(tone)}
             </Button>
           )}
         />
@@ -154,259 +151,256 @@ export const Matrix: Story = {
 
       <LabSection
         columns="2"
-        description="The native action primitive: scale, interaction state, and consumer content."
+        description="A momentary action. It waits without changing size, and it wraps rather than pushing past a narrow container."
         title="Button"
       >
-        <DemoScene label="Sizes" note="Three explicit control heights.">
+        <DemoScene label="Emphasis" note="One primary action per region.">
           <div className="slotted-demo-row">
-            {sizes.map((size) => (
-              <Button key={size} size={size}>
-                {size === 'sm' ? 'Small' : size === 'md' ? 'Medium' : 'Large'}
+            <Button start={<DemoIcon name="save" />}>Publish</Button>
+            <Button tone="secondary" variant="outline">
+              Save draft
+            </Button>
+            <Button tone="secondary" variant="ghost">
+              Discard
+            </Button>
+          </div>
+        </DemoScene>
+        <DemoScene label="Waiting" note="The label stays, so the width and the name do too.">
+          <div className="slotted-demo-row">
+            <Button start={<DemoIcon name="save" />}>Save changes</Button>
+            <Button loading>Save changes</Button>
+          </div>
+        </DemoScene>
+        <DemoScene label="Sizes" note="Three steps of the control scale, at every density.">
+          <div className="slotted-demo-row">
+            {BUTTON_SIZES.map((size) => (
+              <Button end={<DemoIcon name="chevron-down" />} key={size} size={size}>
+                {size}
               </Button>
             ))}
           </div>
         </DemoScene>
-        <DemoScene label="States" note="Default, unavailable, and in progress.">
-          <div className="slotted-demo-row">
-            <Button>Default</Button>
-            <Button disabled>Disabled</Button>
-            <Button loading loadingText="Saving">
-              Save
-            </Button>
-          </div>
-        </DemoScene>
-        <DemoScene label="Content" note="Replaceable icon slots and full-width layout.">
-          <div className="slotted-demo-stack slotted-demo-measure">
-            <Button leading={<DemoIcon name="save" />} trailing={<DemoIcon name="chevron-down" />}>
-              Save draft
-            </Button>
-            <Button fullWidth leading={<DemoIcon name="plus" />}>
-              Create document
-            </Button>
-          </div>
-        </DemoScene>
-        <DemoScene label="Hierarchy" note="Primary and secondary actions remain unmistakable.">
-          <div className="slotted-demo-row">
-            <Button>Primary action</Button>
-            <Button fill="outline" variant="secondary">
-              Secondary action
-            </Button>
+        <DemoScene label="Extreme content" note="A long label wraps; a long token breaks.">
+          <div className="slotted-demo-measure">
+            <div className="slotted-demo-stack">
+              <Button fullWidth>Export every invoice issued this quarter</Button>
+              <Button size="sm" tone="secondary" variant="outline">
+                reconciliation_2026_Q3_final.xlsx
+              </Button>
+            </div>
           </div>
         </DemoScene>
       </LabSection>
 
       <LabSection
-        columns="3"
-        description="Navigation that reads as an action. What differs from Button is the element it renders, not the appearance."
+        columns="2"
+        description="An anchor wearing the action surface. It is announced as a link, activates on Enter alone, and loses its destination entirely when disabled."
         title="ButtonLink"
       >
-        <DemoScene
-          label="Anchor semantics"
-          note="Renders a real anchor. Middle-click, copy link, and browser navigation all work."
-        >
+        <DemoScene label="Navigation" note="Internal, external, and a router’s own link.">
           <div className="slotted-demo-row">
-            <ButtonLink href="/docs/button" trailing={<DemoIcon name="arrow-right" />}>
-              Read the guide
+            <ButtonLink end={<DemoIcon name="arrow-right" />} href="/settings">
+              Open settings
             </ButtonLink>
             <ButtonLink
-              fill="ghost"
-              href="https://developer.mozilla.org/docs/Web/HTML/Element/a"
+              end={<DemoIcon name="external-link" />}
+              href="https://example.com"
               rel="noreferrer"
               target="_blank"
-              trailing={<DemoIcon name="external-link" />}
-              variant="secondary"
+              variant="outline"
             >
-              MDN reference
+              Status page
+            </ButtonLink>
+            <ButtonLink
+              render={(props) => <a {...props} data-router-link="true" href="/billing" />}
+              variant="ghost"
+            >
+              Billing
             </ButtonLink>
           </div>
         </DemoScene>
-        <DemoScene
-          label="Unavailable"
-          note="disabled keeps the anchor in the DOM, sets aria-disabled, and removes it from the tab order."
-        >
+        <DemoScene label="Unavailable" note="No href at all, and still reachable by keyboard.">
           <div className="slotted-demo-row">
-            <ButtonLink disabled fill="outline" href="/billing/upgrade" variant="secondary">
-              Upgrade plan
-            </ButtonLink>
-          </div>
-        </DemoScene>
-        <DemoScene
-          label="Beside an action"
-          note="Submission stays a button; navigation stays a link at a quieter fill."
-        >
-          <div className="slotted-demo-row">
-            <Button leading={<DemoIcon name="save" />}>Save changes</Button>
-            <ButtonLink fill="ghost" href="/documents" variant="secondary">
-              Back to documents
+            <ButtonLink disabled href="/settings">
+              Open settings
             </ButtonLink>
           </div>
         </DemoScene>
       </LabSection>
 
       <LabSection
-        columns="3"
-        description="Icon-only actions. The footprint is square and the accessible name is mandatory."
+        columns="2"
+        description="The same control with no room for a label, so the accessible name is an explicit attribute. Its box is square from the control height, which keeps the target at or above 24 by 24 at every density."
         title="IconButton"
       >
-        <DemoScene
-          label="Square footprint"
-          note="Inline size tracks the control height at every size — no label padding."
-        >
+        <DemoScene label="Shape and size" note="Square or circular, at all three steps.">
           <div className="slotted-demo-row">
-            {sizes.map((size) => (
+            {BUTTON_SIZES.map((size) => (
               <IconButton
-                aria-label={`Add item (${size})`}
-                fill="outline"
+                aria-label={`Add, ${size}`}
                 key={size}
                 size={size}
-                variant="secondary"
+                tone="accent"
+                variant="solid"
+              >
+                <DemoIcon name="plus" />
+              </IconButton>
+            ))}
+            {BUTTON_SIZES.map((size) => (
+              <IconButton
+                aria-label={`Add, circle, ${size}`}
+                key={`${size}-circle`}
+                shape="circle"
+                size={size}
+                tone="accent"
+                variant="solid"
               >
                 <DemoIcon name="plus" />
               </IconButton>
             ))}
           </div>
         </DemoScene>
-        <DemoScene label="Fills" note="The same three fills, carried without a text label.">
+        <DemoScene label="A toolbar" note="Icon toggles keep their name while their state moves.">
           <div className="slotted-demo-row">
-            {fills.map((fill) => (
-              <IconButton aria-label={`Save ${fill}`} fill={fill} key={fill} variant="accent">
-                <DemoIcon name="save" />
-              </IconButton>
-            ))}
+            <IconButton aria-label="Bold" defaultPressed size="sm">
+              <DemoIcon name="bold" />
+            </IconButton>
+            <IconButton aria-label="Italic" defaultPressed={false} size="sm">
+              <DemoIcon name="italic" />
+            </IconButton>
+            <IconButton aria-label="Underline" defaultPressed={false} size="sm">
+              <DemoIcon name="underline" />
+            </IconButton>
+            <IconButton aria-label="More formatting" size="sm">
+              <DemoIcon name="more" />
+            </IconButton>
+            <IconButton aria-label="Delete" size="sm" tone="danger">
+              <DemoIcon name="trash" />
+            </IconButton>
           </div>
         </DemoScene>
-        <DemoScene
-          label="Accessible name"
-          note="aria-label is required; development builds throw when it is missing."
-        >
+        <DemoScene label="Waiting" note="The icon fades and the ring takes its place, in its size.">
           <div className="slotted-demo-row">
-            <IconButton aria-label="Undo">
-              <DemoIcon name="undo" />
+            <IconButton aria-label="Refresh" variant="outline">
+              <DemoIcon name="refresh" />
             </IconButton>
-            <IconButton aria-label="Redo">
-              <DemoIcon name="redo" />
+            <IconButton aria-label="Refresh" loading variant="outline">
+              <DemoIcon name="refresh" />
             </IconButton>
-            <IconButton aria-label="Delete" variant="danger">
-              <DemoIcon name="trash" />
+          </div>
+        </DemoScene>
+        <DemoScene label="Unavailable" note="A disabled toggle still says whether it is on.">
+          <div className="slotted-demo-row">
+            <IconButton aria-label="Favourite" defaultPressed shape="circle" tone="warning">
+              <DemoIcon name="star" />
+            </IconButton>
+            <IconButton
+              aria-label="Favourite, unavailable"
+              defaultPressed
+              disabled
+              shape="circle"
+              tone="warning"
+            >
+              <DemoIcon name="star" />
             </IconButton>
           </div>
         </DemoScene>
       </LabSection>
 
       <LabSection
-        description="A persistent on/off action. Its contract is the pressed state, so every appearance is shown as an Off and On pair."
+        columns="2"
+        description="A two-state action. The label never changes with the state, and the request that moves it carries whether a pointer or the keyboard asked."
         title="ToggleButton"
       >
-        <MatrixScene
-          label="State matrix"
-          matrix="toggle-state"
-          note="Off and On stay distinguishable in all fifteen appearances."
-          renderCell={(variant, fill) => (
-            <div className="slotted-demo-row" key={variant}>
-              <ToggleButton fill={fill} pressed={false} variant={variant}>
-                Off
-              </ToggleButton>
-              <ToggleButton fill={fill} pressed variant={variant}>
-                On
-              </ToggleButton>
-            </div>
-          )}
-        />
+        <DemoScene
+          label="On and off"
+          note="The fill and a heavier edge, so neither scheme flattens it."
+        >
+          <div className="slotted-demo-row">
+            <ToggleButton start={<DemoIcon name="star" />}>Favourite</ToggleButton>
+            <ToggleButton defaultPressed start={<DemoIcon name="star" />}>
+              Favourite
+            </ToggleButton>
+          </div>
+        </DemoScene>
+        <DemoScene label="Unavailable" note="Disabled wins over pressed, and pressed still shows.">
+          <div className="slotted-demo-row">
+            <ToggleButton disabled>Favourite</ToggleButton>
+            <ToggleButton defaultPressed disabled>
+              Favourite
+            </ToggleButton>
+          </div>
+        </DemoScene>
       </LabSection>
 
       <LabSection
-        columns="3"
-        description="Grouped actions share one seam system across all four components."
+        description="Members side by side, in the composition an application actually writes."
         title="Composition"
       >
-        <DemoScene
-          label="Formatting toolbar"
-          note="Independent toggles keep their pressed state inside a group."
-        >
-          <ButtonGroup aria-label="Text formatting">
-            <ToggleButton leading={<DemoIcon name="bold" />} pressed>
-              Bold
-            </ToggleButton>
-            <ToggleButton leading={<DemoIcon name="italic" />}>Italic</ToggleButton>
-            <ToggleButton leading={<DemoIcon name="underline" />}>Underline</ToggleButton>
-          </ButtonGroup>
-        </DemoScene>
-        <DemoScene label="Editing history" note="A compact icon-only toolbar with one seam system.">
-          <ButtonGroup aria-label="Editing history">
-            <IconButton aria-label="Undo" fill="outline" variant="secondary">
-              <DemoIcon name="undo" />
+        <DemoScene label="A page header" note="One primary action, one secondary, one destructive.">
+          <div className="slotted-demo-row">
+            <Button start={<DemoIcon name="save" />}>Publish</Button>
+            <ButtonLink href="/preview" variant="outline">
+              Preview
+            </ButtonLink>
+            <IconButton aria-label="More actions" variant="outline">
+              <DemoIcon name="more" />
             </IconButton>
-            <IconButton aria-label="Redo" fill="outline" variant="secondary">
-              <DemoIcon name="redo" />
-            </IconButton>
-            <IconButton aria-label="Delete" fill="outline" variant="secondary">
-              <DemoIcon name="trash" />
-            </IconButton>
-          </ButtonGroup>
-        </DemoScene>
-        <DemoScene label="Split action" note="One primary action and its related options.">
-          <ButtonGroup aria-label="Publish actions" className="slotted-split-action">
-            <Button fill="solid" leading={<DemoIcon name="save" />} size="md" variant="accent">
-              Publish
+            <Button tone="danger" variant="ghost">
+              Delete
             </Button>
-            <IconButton aria-label="More publish options" fill="solid" size="md" variant="accent">
-              <DemoIcon name="chevron-down" />
-            </IconButton>
-          </ButtonGroup>
+          </div>
         </DemoScene>
       </LabSection>
     </main>
   ),
 };
 
-export const Themes: Story = {
-  parameters: scenario('themes'),
+/** Every tone in every variant, at one size, for comparing the palette itself. */
+export const Tones: Story = {
+  parameters: scenario('tones'),
   render: () => (
-    <div className="slotted-demo-grid">
-      {(['light', 'dark'] as const).map((scheme) => (
-        <section className="slotted-demo-scene" key={scheme}>
-          <header className="slotted-demo-scene__header">
-            <span className="slotted-demo-scene__label">
-              {scheme.charAt(0).toUpperCase() + scheme.slice(1)} scheme
-            </span>
-            <span className="slotted-demo-scene__note">The same semantic contract.</span>
-          </header>
-          <div className="slotted-demo-stage" data-slotted-scheme={scheme}>
-            <div className="slotted-demo-row">
-              <Button leading={<DemoIcon name="save" />}>Save draft</Button>
-              <Button variant="secondary">Explore</Button>
-              <IconButton aria-label="Add item" fill="outline" variant="secondary">
-                <DemoIcon name="plus" />
-              </IconButton>
-            </div>
-          </div>
-        </section>
+    <div className="slotted-demo-stage">
+      {BUTTON_TONES.map((tone) => (
+        <div className="slotted-demo-row" key={tone}>
+          {BUTTON_VARIANTS.map((variant) => (
+            <Button key={variant} tone={tone} variant={variant}>
+              {titleCase(tone)}
+            </Button>
+          ))}
+          <IconButton aria-label={`Add, ${tone}`} tone={tone} variant="solid">
+            <DemoIcon name="plus" />
+          </IconButton>
+        </div>
       ))}
     </div>
   ),
 };
 
+/**
+ * Density changes the size of a control and nothing about its meaning. The
+ * toolbar switches it from the Storybook toolbar; this scene is what shows the
+ * three steps against each other at whichever one is selected.
+ */
 export const Densities: Story = {
   parameters: scenario('densities'),
   render: () => (
-    <div className="slotted-demo-grid">
-      {(['comfortable', 'compact'] as const).map((density) => (
-        <section className="slotted-demo-scene" data-slotted-density={density} key={density}>
-          <header className="slotted-demo-scene__header">
-            <span className="slotted-demo-scene__label">
-              {density.charAt(0).toUpperCase() + density.slice(1)}
-            </span>
-            <span className="slotted-demo-scene__note">Spacing changes, semantics do not.</span>
-          </header>
-          <div className="slotted-demo-stage">
-            <div className="slotted-demo-row">
-              <Button leading={<DemoIcon name="save" />}>Save</Button>
-              <Button fill="outline" variant="secondary">
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </section>
+    <div className="slotted-demo-stage">
+      {BUTTON_SIZES.map((size) => (
+        <div className="slotted-demo-row" key={size}>
+          <Button size={size} start={<DemoIcon name="save" />}>
+            Save changes
+          </Button>
+          <Button size={size} variant="outline">
+            Cancel
+          </Button>
+          <IconButton aria-label={`More, ${size}`} size={size} variant="outline">
+            <DemoIcon name="more" />
+          </IconButton>
+          <ToggleButton defaultPressed size={size}>
+            Pinned
+          </ToggleButton>
+        </div>
       ))}
     </div>
   ),

@@ -19,10 +19,19 @@ describe('VisuallyHidden', () => {
     expect(screen.getByText('Loading').tagName).toBe('SPAN');
   });
 
-  it('carries the class the stylesheet hides', () => {
+  it('names itself with the identifier the stylesheet hides', () => {
     render(<VisuallyHidden>Loading</VisuallyHidden>);
 
-    expect(screen.getByText('Loading')).toHaveClass('slotted-visually-hidden');
+    const element = screen.getByText('Loading');
+    expect(element).toHaveAttribute('data-ui', 'visually-hidden');
+    expect(element).toHaveAttribute('data-part', 'root');
+  });
+
+  /** A class name is not contract, so the family must not need one of its own. */
+  it('adds no class of its own', () => {
+    render(<VisuallyHidden>Loading</VisuallyHidden>);
+
+    expect(screen.getByText('Loading')).not.toHaveAttribute('class');
   });
 
   it('marks the focusable variant so focus can reveal it', () => {
@@ -37,18 +46,23 @@ describe('VisuallyHidden', () => {
     expect(screen.getByText('Loading')).not.toHaveAttribute('data-focusable');
   });
 
-  it('keeps the class the consumer passed alongside its own', () => {
+  it('carries the class the consumer passed', () => {
     render(<VisuallyHidden className="app-skip-link">Skip to content</VisuallyHidden>);
 
-    const element = screen.getByText('Skip to content');
-    expect(element).toHaveClass('slotted-visually-hidden');
-    expect(element).toHaveClass('app-skip-link');
+    expect(screen.getByText('Skip to content')).toHaveClass('app-skip-link');
   });
 
   it('forwards the attributes the consumer set', () => {
-    render(<VisuallyHidden id="announcement">Saved</VisuallyHidden>);
+    render(
+      <VisuallyHidden id="announcement" aria-live="polite" lang="en">
+        Saved
+      </VisuallyHidden>,
+    );
 
-    expect(screen.getByText('Saved')).toHaveAttribute('id', 'announcement');
+    const element = screen.getByText('Saved');
+    expect(element).toHaveAttribute('id', 'announcement');
+    expect(element).toHaveAttribute('aria-live', 'polite');
+    expect(element).toHaveAttribute('lang', 'en');
   });
 
   it('hands the wiring to another element through render', () => {
@@ -59,7 +73,7 @@ describe('VisuallyHidden', () => {
     );
 
     const link = screen.getByRole('link', { name: 'Skip to content' });
-    expect(link).toHaveClass('slotted-visually-hidden');
+    expect(link).toHaveAttribute('data-ui', 'visually-hidden');
     expect(link).toHaveAttribute('data-focusable', '');
   });
 });

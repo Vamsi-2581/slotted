@@ -1,0 +1,661 @@
+@layer slotted.components {
+  /**
+   * ── The message ────────────────────────────────────────────────────────
+   *
+   * A block of text about the page, a section, or the thing beside it, with a
+   * mark saying how serious it is and — sometimes — a control that puts it
+   * away and a row of controls that act on it.
+   *
+   * The box is a `section`, not a live region. MDN's `alert` role reference
+   * says the role "should only be used for text content, not interactive
+   * elements such as links or buttons", and every alert worth shipping has a
+   * dismiss control. Four of the ten surveyed implementations write a live
+   * role on the box anyway and put buttons inside it; two write no live region
+   * at all and announce nothing. Here the region is `content`, which holds the
+   * title and the description and nothing else, and the actions and the
+   * dismiss control are its siblings outside it.
+   *
+   * The family owns its own container, because two of its layout decisions
+   * answer the width of the box rather than the width of the window: a run of
+   * actions stacks and stretches when the box is narrow, and a page banner
+   * puts its actions back on the message's own line when the box is wide.
+   */
+  [data-ui='alert'][data-part='root'] {
+    /**
+     * The tone's five roles, defaulted to `accent` so an alert with no stated
+     * tone is an informational one. Each tone below restates the same five;
+     * every one of them is a role the theme's contrast test measures, so the
+     * family never invents a colour and never mixes a ground the theme holds
+     * with a foreground it does not.
+     */
+    --_solid: var(--slotted-tone-accent-solid);
+    --_on-solid: var(--slotted-tone-accent-on-solid);
+    --_surface: var(--slotted-tone-accent-surface);
+    --_border: var(--slotted-tone-accent-border);
+    --_text: var(--slotted-tone-accent-text);
+    --_glyph: var(--slotted-icon-circle-info);
+
+    /**
+     * How the dismiss control answers a pointer, and it is one mechanism for
+     * all three variants rather than three.
+     *
+     * `tag` measured why the tone's own ramp cannot do it: in the light scheme
+     * `--slotted-tone-accent-subtle-hover` is #eff6ff against a #dbeafe ground
+     * and `subtle-active` is that ground exactly, so a control on a tinted
+     * alert either lightened on hover or did nothing at all on press. On a
+     * `solid` alert the same roles are calibrated against the page rather than
+     * against the tone's fill, and on `outline` the ground is not the family's
+     * to know.
+     *
+     * A state layer answers all three: the control's own text colour, at a low
+     * strength, over whatever ground it already has. `currentcolor` is legible
+     * on that ground by construction — it is the colour the words are read in —
+     * so a wash of it is always perceptible and never depends on a pair the
+     * theme does not measure. The cost is that a theme retunes it by strength
+     * rather than by colour, which is what the two component tokens are for.
+     */
+    --_state-hover: color-mix(
+      in oklab,
+      currentcolor var(--slotted-alert-state-layer-hover, 8%),
+      transparent
+    );
+    --_state-active: color-mix(
+      in oklab,
+      currentcolor var(--slotted-alert-state-layer-active, 14%),
+      transparent
+    );
+
+    /**
+     * Type and glyph come from the control scales, the only ones the theme
+     * restates per density, so an alert inside a dense table shrinks with the
+     * rows around it. The box's inset comes from the space scale, which does
+     * not vary by density — the cost `card` accepted for the same reason, and
+     * recorded in `docs/superpowers/specs/2026-09-02-alert-family-design.md`:
+     * at `dense` the box keeps its inset while the type inside it shrinks.
+     *
+     * `--_font-size` is the *title's* size and the root's own, and the
+     * description steps down from it. That is what lets the mark be one line
+     * box tall and land on the message's first line at every reach without a
+     * number saying how.
+     */
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_description-font-size: var(--slotted-control-font-size-md, 13px);
+    --_glyph-size: var(--slotted-control-icon-size-md, 16px);
+    --_line-height: var(--slotted-line-height-md, 1.5);
+
+    /**
+     * Each measure is named once, and a reach moves only the value it falls
+     * back to. An application that retunes `--slotted-alert-padding-block`
+     * therefore retunes all three reaches, rather than discovering that the
+     * name it set is the one the default reach happens to read.
+     */
+    --_inset-block: var(--slotted-alert-padding-block, var(--slotted-space-5, 0.75rem));
+    --_inset-inline: var(--slotted-alert-padding-inline, var(--slotted-space-6, 1rem));
+    /**
+     * The distance from the mark to the words it belongs to. One step below the
+     * box's own inset on purpose: read at 420 pixels with the inset and the gap
+     * equal, the mark sat as far from its own sentence as it did from the edge
+     * of the box, and belonged to neither.
+     */
+    --_column-gap: var(--slotted-alert-column-gap, var(--slotted-space-4, 0.5rem));
+    --_row-gap: var(--slotted-alert-row-gap, var(--slotted-space-5, 0.75rem));
+    --_text-gap: var(--slotted-alert-text-gap, var(--slotted-space-2, 0.25rem));
+    --_radius: var(--slotted-alert-radius, var(--slotted-radius-md, 6px));
+    --_border-width: var(--slotted-alert-border-width, var(--slotted-border-width-thin, 1px));
+
+    /**
+     * The dismiss control is a control, so it takes the smallest control
+     * height rather than a number of its own. That is what carries it past
+     * WCAG 2.2 2.5.8's twenty-four pixels at every density — the tightest step
+     * is exactly twenty-four — and what makes it grow under
+     * `@media (pointer: coarse)`, which the theme applies to control heights
+     * and to nothing else.
+     */
+    --_dismiss-size: var(--slotted-alert-dismiss-size, var(--slotted-control-height-sm, 30px));
+
+    /**
+     * Two composition changes that answer the box rather than the window.
+     * A container name rather than the anonymous form, because an alert inside
+     * a card inside a page would otherwise resolve against whichever ancestor
+     * happened to be a container first.
+     */
+    container-name: slotted-alert;
+    container-type: inline-size;
+    /**
+     * `container-type: inline-size` applies `contain: inline-size`, which makes
+     * the box's intrinsic width zero: it is the whole point of the containment,
+     * and it is why the width has to be stated rather than left to `auto`.
+     *
+     * Found in the rendered reference page rather than in a test. In normal
+     * flow the box filled its parent and nothing was wrong; placed in a column
+     * that shrink-wraps its children — a flex column aligned to `start`, which
+     * is what the workbench's own stage is — every alert collapsed to the width
+     * of one character and the message broke one letter per line. A consumer
+     * writing `<Stack>` around three alerts would have found the same thing.
+     */
+    inline-size: 100%;
+
+    background-color: transparent;
+    border: var(--_border-width) solid transparent;
+    border-radius: var(--_radius);
+    box-sizing: border-box;
+    color: var(--_text);
+    /**
+     * The distance between the mark and the words belongs to the mark, not to
+     * the grid. A grid `column-gap` is drawn between two tracks whether or not
+     * either holds anything, so an alert with no mark was indented by a gap in
+     * front of an empty column — the words started one gap further in than the
+     * inset, which is visible the moment two alerts sit one above the other.
+     */
+    column-gap: 0;
+    display: grid;
+    font-family: var(--slotted-alert-font-family, var(--slotted-control-font-family, sans-serif));
+    font-size: var(--_font-size);
+    /**
+     * Three columns: the mark, the words, and the control that puts the
+     * message away. The row of actions goes under the words rather than beside
+     * them, so a second row exists only when there are actions to put in it —
+     * a fixed two-row template leaves a row gap under every alert that has
+     * none, which is the defect a `grid-template-areas` version of this had.
+     */
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    line-height: var(--_line-height);
+    padding-block: var(--_inset-block);
+    padding-inline: var(--_inset-inline);
+    row-gap: var(--_row-gap);
+    /**
+     * The exit, and the only transition the box itself carries. Something the
+     * reader was reading is going away, which is a change the eye has to
+     * follow; `display` is carried with it so the box holds its place until
+     * the fade is over rather than snapping out from under the content below.
+     *
+     * There is no entry transition. The family does not own the moment it is
+     * inserted, and `@starting-style` fires on first paint — so every alert
+     * already on a settings page would fade in at once, which is motion
+     * carrying no information. Arrival belongs to `toast`.
+     */
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      translate var(--slotted-duration-short) var(--slotted-easing-exit),
+      display var(--slotted-duration-short) var(--slotted-easing-exit);
+    transition-behavior: allow-discrete;
+  }
+
+  /**
+   * A closed alert keeps its element: a live region has to be in the document
+   * before its text changes, so an alert that unmounted could not announce the
+   * second time the message arrived. `display: none` is restated because the
+   * root's own `display: grid` would otherwise win over the user agent's rule
+   * for `[hidden]`.
+   */
+  [data-ui='alert'][data-part='root'][hidden] {
+    display: none;
+    opacity: 0;
+    translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
+  }
+
+  /* ── Tone: the colour, and the mark that says the same thing ───────────
+   *
+   * Five tones and five marks, and the map is
+   * `specs/components/alert/contract.json` rather than a decision taken here:
+   * the stylesheet, both bindings and the contract test read one table. It is
+   * the map `status-indicator` declares, so a status light and an alert about
+   * the same thing draw the same silhouette.
+   *
+   * The mark is what satisfies WCAG 2.2 1.4.1. Under forced colours every tone
+   * ground becomes one system colour and the five boxes are identical; the
+   * circle, the triangle and the crossed circle are what is left.
+   */
+
+  [data-ui='alert'][data-part='root'][data-tone='accent'] {
+    --_solid: var(--slotted-tone-accent-solid);
+    --_on-solid: var(--slotted-tone-accent-on-solid);
+    --_surface: var(--slotted-tone-accent-surface);
+    --_border: var(--slotted-tone-accent-border);
+    --_text: var(--slotted-tone-accent-text);
+    --_glyph: var(--slotted-icon-circle-info);
+  }
+
+  [data-ui='alert'][data-part='root'][data-tone='secondary'] {
+    --_solid: var(--slotted-tone-secondary-solid);
+    --_on-solid: var(--slotted-tone-secondary-on-solid);
+    --_surface: var(--slotted-tone-secondary-surface);
+    --_border: var(--slotted-tone-secondary-border);
+    --_text: var(--slotted-tone-secondary-text);
+    --_glyph: var(--slotted-icon-circle);
+  }
+
+  [data-ui='alert'][data-part='root'][data-tone='success'] {
+    --_solid: var(--slotted-tone-success-solid);
+    --_on-solid: var(--slotted-tone-success-on-solid);
+    --_surface: var(--slotted-tone-success-surface);
+    --_border: var(--slotted-tone-success-border);
+    --_text: var(--slotted-tone-success-text);
+    --_glyph: var(--slotted-icon-circle-check);
+  }
+
+  [data-ui='alert'][data-part='root'][data-tone='warning'] {
+    --_solid: var(--slotted-tone-warning-solid);
+    --_on-solid: var(--slotted-tone-warning-on-solid);
+    --_surface: var(--slotted-tone-warning-surface);
+    --_border: var(--slotted-tone-warning-border);
+    --_text: var(--slotted-tone-warning-text);
+    --_glyph: var(--slotted-icon-triangle-alert);
+  }
+
+  [data-ui='alert'][data-part='root'][data-tone='danger'] {
+    --_solid: var(--slotted-tone-danger-solid);
+    --_on-solid: var(--slotted-tone-danger-on-solid);
+    --_surface: var(--slotted-tone-danger-surface);
+    --_border: var(--slotted-tone-danger-border);
+    --_text: var(--slotted-tone-danger-text);
+    --_glyph: var(--slotted-icon-circle-alert);
+  }
+
+  /* ── Variant: the three ways one tone is painted ───────────────────────
+   *
+   * The words take the tone's own `text` role in all three, because that is
+   * the one pair `packages/themes/default/test/contrast.test.mjs` measures
+   * against these grounds: the tone's text on the tone's surface, and the
+   * tone's text on each of the three neutral surfaces. Painting a tinted
+   * ground with `--slotted-text` would be an unheld ratio, and the theme's own
+   * comment records that the first family to depend on one is the family that
+   * discovers the shortfall in a screenshot.
+   */
+
+  /**
+   * The default, and the shape seven of the ten surveyed implementations draw.
+   * It carries the tone's border as well as its surface: in `high-contrast`
+   * the tone surfaces are the page's own white, so a soft alert with no edge
+   * is a run of coloured text with no box around it — the finding `kbd`
+   * recorded about its own soft variant.
+   */
+  [data-ui='alert'][data-part='root'][data-variant='soft'] {
+    background-color: var(--_surface);
+    border-color: var(--_border);
+  }
+
+  /**
+   * The quiet painting, for the three grounds the theme measures a tone's text
+   * against: the page's surface, a raised one, a sunken one. It carries no
+   * ground of its own, which is what lets it sit inside a card without drawing
+   * a second rectangle around the message.
+   *
+   * It is not the variant for an unknown ground, and the harness fragment shows
+   * why: read on `--slotted-surface-inverse`, the tone's text is a colour the
+   * theme never measured against that ground and the words go quiet. A dark
+   * region is a scheme rather than a surface — an application states
+   * `data-slotted-scheme` on it, every tone role is restated, and `outline`
+   * reads again. `soft` and `solid` survive the inverted surface only because
+   * they repaint the ground before they write on it.
+   */
+  [data-ui='alert'][data-part='root'][data-variant='outline'] {
+    background-color: transparent;
+    border-color: var(--_border);
+  }
+
+  /**
+   * The message that must not be missed. `on-solid` is the foreground the
+   * theme's contrast test holds against `solid`, `solid-hover` and
+   * `solid-active` in every scheme, so the whole box — words, mark and dismiss
+   * control — takes it.
+   */
+  [data-ui='alert'][data-part='root'][data-variant='solid'] {
+    background-color: var(--_solid);
+    border-color: var(--_solid);
+    color: var(--_on-solid);
+  }
+
+  /* ── Reach: the same message at three scopes ───────────────────────────
+   *
+   * The guide's three recipes as one axis. It is not a size: a size would say
+   * the same message can be drawn large or small, and this says which scope
+   * the message applies to, with the geometry following from that.
+   */
+
+  /** Beside the thing it is about — a field group, a table row, a card. */
+  [data-ui='alert'][data-part='root'][data-reach='inline'] {
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+    --_description-font-size: var(--slotted-control-font-size-sm, 12px);
+    --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
+    --_inset-block: var(--slotted-alert-padding-block, var(--slotted-space-4, 0.5rem));
+    --_inset-inline: var(--slotted-alert-padding-inline, var(--slotted-space-5, 0.75rem));
+    --_column-gap: var(--slotted-alert-column-gap, var(--slotted-space-3, 0.375rem));
+    --_row-gap: var(--slotted-alert-row-gap, var(--slotted-space-4, 0.5rem));
+    --_radius: var(--slotted-alert-radius, var(--slotted-radius-sm, 4px));
+  }
+
+  /**
+   * Across a page or an application shell. It runs to both edges of whatever
+   * holds it, so it draws no corner and no inline edge — there is nothing
+   * there for an edge to separate — and keeps the one edge that does separate
+   * it from the page below.
+   *
+   * The title steps up while the description stays where it was, which is the
+   * one place in the family where the two type sizes differ.
+   */
+  [data-ui='alert'][data-part='root'][data-reach='page'] {
+    --_font-size: var(--slotted-control-font-size-lg, 14px);
+    --_glyph-size: var(--slotted-control-icon-size-lg, 18px);
+    /**
+     * A banner is much wider than it is tall, so its two insets are not equal:
+     * the inline one is a step wider than a section's because it has a page's
+     * width to sit inside, and the block one is a step deeper because twelve
+     * pixels over a title this size read as a strip rather than as a band.
+     */
+    --_inset-block: var(--slotted-alert-padding-block, var(--slotted-space-6, 1rem));
+    --_inset-inline: var(--slotted-alert-padding-inline, var(--slotted-space-7, 1.25rem));
+    --_radius: var(--slotted-alert-radius, 0);
+
+    border-block-start-width: 0;
+    border-inline-width: 0;
+  }
+
+  /** A solid page banner has no edge to lose, so it keeps all four. */
+  [data-ui='alert'][data-part='root'][data-reach='page'][data-variant='solid'] {
+    border-block-start-width: var(--_border-width);
+    border-inline-width: var(--_border-width);
+  }
+
+  /* ── The mark ─────────────────────────────────────────────────────────
+   *
+   * One line box tall, with the glyph centred inside it by the mask rather
+   * than by a second element. `1lh` resolves against the root's own line box,
+   * and the root's font size is the title's, so the mark sits on the message's
+   * first line at every reach, every density and every type size without a
+   * number saying how. It is the rule `status-indicator` uses for its own dot,
+   * with the centring moved into `mask-position` so the part stays one span.
+   *
+   * `--slotted-alert-icon` is the escape hatch: an application with its own
+   * icon set writes one declaration and keeps the tone, the size, the
+   * alignment and the part name.
+   */
+  [data-ui='alert'] > [data-part='icon'] {
+    background-color: currentcolor;
+    block-size: 1lh;
+    grid-column: 1;
+    grid-row: 1;
+    inline-size: var(--_glyph-size);
+    margin-inline-end: var(--_column-gap);
+    mask-image: var(--slotted-alert-icon, var(--_glyph));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: var(--_glyph-size) var(--_glyph-size);
+  }
+
+  /**
+   * A mark the page supplied instead of the tone's own. The box keeps its size
+   * and its place on the first line; the mask goes, because a mask over an
+   * element that now has content of its own would cut that content into the
+   * shape of a circle.
+   */
+  [data-ui='alert'] > [data-part='icon']:not(:empty) {
+    align-items: center;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    mask-image: none;
+  }
+
+  /* ── The words, which are the live region ─────────────────────────────
+   *
+   * `min-inline-size: 0` is what lets the column shrink below its content
+   * inside the grid, and it is the half of the pair that `minmax(0, 1fr)` on
+   * the track cannot supply on its own.
+   */
+  [data-ui='alert'] > [data-part='content'] {
+    display: grid;
+    grid-column: 2;
+    grid-row: 1;
+    min-inline-size: 0;
+    row-gap: var(--_text-gap);
+  }
+
+  [data-ui='alert'] [data-part='title'] {
+    font-weight: var(--slotted-alert-title-font-weight, var(--slotted-font-weight-semibold, 600));
+    margin: 0;
+  }
+
+  /**
+   * `break-word` breaks the one string a message is likeliest to carry that no
+   * language can break — a deployment id, a container digest, a host name
+   * without a hyphen. Nothing is removed: the whole string stays in the DOM, in
+   * the accessibility tree, and findable by a page search.
+   *
+   * `anywhere` would break the same string and also lower the paragraph's
+   * min-content size to one character, which is a second answer to a question
+   * `minmax(0, 1fr)` on the text column has already answered — and one that
+   * invites an ordinary word to break in a column narrow enough. `break-word`
+   * breaks only what would otherwise overflow.
+   */
+  [data-ui='alert'] [data-part='description'] {
+    font-size: var(--_description-font-size);
+    margin: 0;
+    min-inline-size: 0;
+    overflow-wrap: break-word;
+  }
+
+  /* ── The actions ──────────────────────────────────────────────────────
+   *
+   * Under the words rather than beside them, which is where Primer, Polaris,
+   * Carbon and MUI all put them, and the only place they can wrap without
+   * taking the message's own column with them. They are outside `content`, so
+   * they are outside the live region: a reader hearing the message is not read
+   * the labels of two buttons in the middle of it.
+   */
+  [data-ui='alert'] > [data-part='actions'] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slotted-alert-actions-gap, var(--slotted-space-3, 0.375rem));
+    grid-column: 2;
+    grid-row: 2;
+    min-inline-size: 0;
+  }
+
+  /* ── The dismiss control ──────────────────────────────────────────────
+   *
+   * A real button with a real name, sized from the smallest control height so
+   * it clears the WCAG 2.2 2.5.8 minimum at every density.
+   *
+   * The negative margins are optical rather than decorative. The button's box
+   * is taller than the line it sits beside, so aligning the two boxes puts the
+   * glyph below the title's centre; pulling the box up by half the difference
+   * puts the glyph on the title's own line. The same distance is taken off the
+   * inline end, so the glyph — rather than the invisible hit area around it —
+   * sits at the inset the rest of the box uses.
+   *
+   * The block end takes it too, which is the half that was missing. A grid row
+   * is as tall as its tallest item, so a control pulled up by half its overhang
+   * and left to hang by the other half made the row taller than the line it sat
+   * on — and a message of one line with no description ended up with more room
+   * under it than over it. With both margins the control's margin box is
+   * exactly one line, and the inset above the message equals the inset below.
+   */
+  [data-ui='alert'] > [data-part='dismiss'] {
+    align-items: center;
+    align-self: start;
+    appearance: none;
+    background-color: transparent;
+    block-size: var(--_dismiss-size);
+    border: 0;
+    border-radius: var(--slotted-alert-dismiss-radius, var(--slotted-control-radius, 4px));
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    /* The user agent gives every button a font of its own, and `1lh` below is
+       measured against whatever that font resolves to. Inheriting is what puts
+       the control's optical correction on the same line box as the title. */
+    font: inherit;
+    grid-column: 3;
+    grid-row: 1;
+    inline-size: var(--_dismiss-size);
+    justify-content: center;
+    margin-block-end: calc((1lh - var(--_dismiss-size)) / 2);
+    margin-block-start: calc((1lh - var(--_dismiss-size)) / 2);
+    margin-inline-end: calc((1lh - var(--_dismiss-size)) / 2);
+    margin-inline-start: var(--_column-gap);
+    padding: 0;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  [data-ui='alert'] > [data-part='dismiss']::before {
+    background-color: currentcolor;
+    block-size: var(--_glyph-size);
+    content: '';
+    inline-size: var(--_glyph-size);
+    mask-image: var(--slotted-alert-dismiss-icon, var(--slotted-icon-x));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  /**
+   * `:enabled` is the guard `packages/styles/src/states.test.mjs` requires, and
+   * the reason it exists: a control the browser has already refused must not
+   * answer a pointer.
+   */
+  [data-ui='alert'] > [data-part='dismiss']:enabled:hover {
+    background-color: var(--_state-hover);
+  }
+
+  [data-ui='alert'] > [data-part='dismiss']:enabled:active {
+    background-color: var(--_state-active);
+  }
+
+  [data-ui='alert'] > [data-part='dismiss']:disabled {
+    color: var(--slotted-disabled-foreground);
+    cursor: default;
+  }
+
+  /* ── Focus ────────────────────────────────────────────────────────────
+   *
+   * The ring on the dismiss control is inset, because the control sits at the
+   * corner of the box and a ring outside it would be drawn over the border or
+   * clipped by it. The ring on the box itself is outside, and it exists
+   * because the root carries `tabindex="-1"`: the family never moves focus
+   * there on its own — the APG is explicit that an alert must not affect
+   * keyboard focus — but a page that deliberately sends focus to a message
+   * must not send it somewhere invisible.
+   */
+  [data-ui='alert'] > [data-part='dismiss']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
+  }
+
+  /**
+   * Measured rather than assumed: `--slotted-focus-ring-color` reads 1.30 : 1
+   * against `--slotted-tone-accent-solid` in the light scheme, 1.03 against
+   * `success` and 1.07 against `danger`. The ring the theme calibrated against
+   * the page's surface disappears on the tone's own fill, so a solid alert
+   * draws it in the one colour the contrast test holds against that fill — the
+   * ink its own words are written in.
+   */
+  [data-ui='alert'][data-variant='solid'] > [data-part='dismiss']:focus-visible {
+    outline-color: var(--_on-solid);
+  }
+
+  [data-ui='alert'][data-part='root']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /* ── Composition that answers the box, not the window ──────────────────
+   *
+   * Two container queries, and both change what the box is made of rather than
+   * how large it is. The breakpoints are literal because CSS forbids a custom
+   * property inside a container condition, which is the rule
+   * `docs/token-foundation.md` records for every reflowing family.
+   */
+
+  /**
+   * A narrow box. Two buttons wrapping into two ragged lines is worse than two
+   * buttons stacked, and at this width a control that fills the column is the
+   * one a thumb can hit. This is the composition change the 240-pixel capture
+   * exists to check.
+   */
+  @container slotted-alert (max-width: 22rem) {
+    [data-ui='alert'] > [data-part='actions'] {
+      /**
+       * Stacked, and each control still its own width. Stretching them is what
+       * the mobile banners in the field do, and it takes a decision that is not
+       * the family's: how wide a control is belongs to the control, and
+       * `button` already ships `fullWidth` for a consumer who wants it.
+       */
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  /**
+   * A wide page banner. A system message is usually one line with one action,
+   * and stacking that action under it wastes the whole width the banner took;
+   * past this point the action rejoins the message's own line and the dismiss
+   * control moves out to a column of its own. Only `page` reflows: an alert
+   * beside a field group is narrow because the thing it is about is narrow,
+   * however wide the window is.
+   */
+  @container slotted-alert (min-width: 40rem) {
+    [data-ui='alert'][data-reach='page'] > [data-part='actions'] {
+      align-self: center;
+      grid-column: 3;
+      grid-row: 1;
+      margin-inline-start: var(--_column-gap);
+    }
+
+    /**
+     * Centred with the action beside it rather than pulled onto the title's
+     * line. On its own the control belongs at the message's first line; next to
+     * a control that is centred on the whole box, two marks at two heights read
+     * as an alignment mistake.
+     */
+    [data-ui='alert'][data-reach='page'] > [data-part='dismiss'] {
+      align-self: center;
+      grid-column: 4;
+      margin-block-start: 0;
+    }
+  }
+
+  /* ── Forced colours ───────────────────────────────────────────────────
+   *
+   * The operating system replaces every author colour, so all five tones
+   * become one box and all three variants become one painting. What is left to
+   * decide is whether the box still has an edge and whether the mark is still
+   * there, and the theme cannot answer either: `solid` draws its border in its
+   * own fill, and a transparent border is not a colour the system remaps.
+   *
+   * The mark keeps its silhouette, which is the whole reason a glyph is drawn
+   * per tone — a triangle and a crossed circle are still different from each
+   * other when neither of them is coloured.
+   */
+  @media (forced-colors: active) {
+    [data-ui='alert'][data-part='root'] {
+      border-color: CanvasText;
+    }
+
+    [data-ui='alert'] > [data-part='icon'] {
+      background-color: CanvasText;
+    }
+
+    /**
+     * The control's glyph is painted in `currentcolor`, so giving the control a
+     * system colour repaints the mark with it. Writing the colour on the
+     * pseudo-element instead would put a system colour inside a decorative rule,
+     * which `packages/styles/src/fallbacks.test.mjs` refuses — and rightly:
+     * decoration with no theme behind it should disappear rather than shout.
+     */
+    [data-ui='alert'] > [data-part='dismiss'] {
+      color: CanvasText;
+    }
+
+    [data-ui='alert'] > [data-part='dismiss']:enabled:hover,
+    [data-ui='alert'] > [data-part='dismiss']:enabled:active {
+      background-color: Highlight;
+      color: HighlightText;
+    }
+  }
+}

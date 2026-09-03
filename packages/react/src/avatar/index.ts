@@ -1,10 +1,15 @@
 export { Avatar } from './avatar';
-export { AvatarFallback } from './avatar-fallback';
-export { AvatarImage } from './avatar-image';
+export { AvatarDefaultsProvider, useAvatarDefaults } from './avatar-defaults';
 export type {
-  AvatarFallbackProps,
+  AvatarDefaults,
+  AvatarDefaultsProviderProps,
   AvatarImageProps,
   AvatarProps,
+  AvatarResolvedTone,
   AvatarRootProps,
+  AvatarShape,
   AvatarSize,
+  AvatarStatus,
+  AvatarTone,
+  AvatarVariant,
 } from './avatar.types';

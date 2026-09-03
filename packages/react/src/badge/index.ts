@@ -1,2 +1,18 @@
 export { Badge } from './badge';
-export type { BadgeFill, BadgeProps, BadgeRootProps, BadgeSize, BadgeVariant } from './badge.types';
+export { BadgeAnchor } from './badge-anchor';
+export { BadgeDefaultsProvider, useBadgeDefaults } from './badge-defaults';
+export type {
+  BadgeAnchorProps,
+  BadgeAnchorRootProps,
+  BadgeDefaults,
+  BadgeDefaultsProviderProps,
+  BadgeLive,
+  BadgeOverlap,
+  BadgePlacement,
+  BadgeProps,
+  BadgeRootProps,
+  BadgeShape,
+  BadgeSize,
+  BadgeTone,
+  BadgeVariant,
+} from './badge.types';

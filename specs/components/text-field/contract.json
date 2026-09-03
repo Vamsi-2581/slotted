@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 5,
+  "family": "text-field",
+  "ui": "text-field",
+  "controlPart": "input",
+  "rootRole": null,
+  "stateSource": "field",
+  "mirrorsState": true,
+  "requiredAttribute": "aria-required",
+  "disabledAttribute": "disabled",
+  "wiring": {
+    "id": "always",
+    "aria-describedby": "merged",
+    "aria-invalid": "invalid",
+    "aria-required": "required",
+    "disabled": "disabled",
+    "readonly": "readOnly"
+  },
+  "types": ["text", "search", "email", "url", "tel", "password"],
+  "counter": {
+    "unit": "utf-16",
+    "placedBy": "field",
+    "limitFrom": "maxLength"
+  },
+  "keyboard": [],
+  "escapeBound": false,
+  "axes": {
+    "size": ["sm", "md", "lg"],
+    "variant": ["outline", "subtle", "plain"]
+  },
+  "resolution": {
+    "size": ["prop", "field", "defaults", "md"],
+    "variant": ["prop", "defaults", "outline"]
+  },
+  "provides": {
+    "textFieldDefaults": ["size", "variant", "mono", "clearLabel", "revealLabel"]
+  },
+  "stateAttributes": {
+    "disabled": "data-disabled",
+    "invalid": "data-invalid",
+    "readonly": "data-readonly"
+  },
+  "stateModel": {
+    "value": {
+      "controlled": "value",
+      "uncontrolled": "defaultValue",
+      "request": "onValueChange",
+      "reasons": ["keyboard", "clear"]
+    },
+    "revealed": {
+      "controlled": "revealed",
+      "uncontrolled": "defaultRevealed",
+      "request": "onRevealedChange",
+      "reasons": ["pointer", "keyboard"]
+    }
+  },
+  "literals": {
+    "--slotted-text-field-action-size": "The two buttons inside the frame are square and sized from the control's own glyph scale plus its gap, which is arithmetic over tokens rather than a literal; the floor under it is --slotted-target-min, which the theme owns."
+  },
+  "members": {
+    "textField": {
+      "nativeElement": "input",
+      "defaults": {
+        "size": "md",
+        "variant": "outline",
+        "mono": false,
+        "clearable": false,
+        "revealable": false,
+        "showCount": false
+      },
+      "capabilities": [
+        "value",
+        "revealed",
+        "appearance",
+        "size",
+        "content",
+        "disabled",
+        "invalid",
+        "required",
+        "readOnly",
+        "wiring"
+      ],
+      "states": ["default", "hover", "focus-visible", "disabled", "invalid", "readonly"],
+      "parts": ["root", "input", "start", "end", "clear", "reveal"]
+    }
+  },
+  "scenarios": {
+    "textField": [
+      "playground",
+      "sizes",
+      "variants",
+      "adornments",
+      "actions",
+      "states",
+      "count",
+      "types",
+      "content",
+      "composition",
+      "keyboard"
+    ]
+  }
+}

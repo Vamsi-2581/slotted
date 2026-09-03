@@ -31,9 +31,14 @@ export const STATE_ATTRIBUTES = {
   dragging: 'data-dragging',
   checked: 'data-checked',
   /**
-   * A step of a flow the reader has finished. It is not `checked` and not
-   * `selected`: both of those are the reader's own choice, and completion is
-   * the flow's fact about a step the reader has walked past.
+   * Something that has finished: a step of a flow the reader has walked past,
+   * and equally a quantity that has reached the top of its range. It is not
+   * `checked` and not `selected` — both of those are the reader's own choice,
+   * while completion is a fact about the thing itself.
+   *
+   * The second reading is here because CSS cannot compare a value to a
+   * maximum, so a bar that must read differently at a hundred per cent has no
+   * selector to write without it.
    */
   complete: 'data-complete',
   open: 'data-open',
@@ -99,6 +104,16 @@ export const KNOWN_CAPABILITIES = [
   'arrangement',
   'size',
   'shape',
+  /**
+   * A quantity the consumer states and the family draws: a progress, a level,
+   * a share of a whole. It is deliberately not mutable, and the distinction is
+   * the one `value` exists for — a control whose value the reader moves holds
+   * `value` and a state model, where a measured quantity is read-only by the
+   * definition of the role that reports it. `progress-bar` put the word in
+   * this vocabulary and schema 5 filed it under the mutable list, where it
+   * would have obliged `progress-indicator` to declare a request nothing can
+   * emit and a reason no vocabulary holds.
+   */
   'measurement',
   'live',
   'current',
@@ -161,7 +176,6 @@ export const MUTABLE_CAPABILITIES = [
   'pressed',
   'selection',
   'activation',
-  'measurement',
   'files',
   'current',
   'value',

@@ -11,216 +11,243 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
     appliesTo,
     description,
   }));
+
 export const ANGULAR_BUTTON_TOKENS = buttonTokens.map((name) => ({
   name,
-  purpose: 'Theme-owned Button family decision',
+  purpose: 'Foundation token the Button family reads',
 }));
+
+const TONE = 'accent | secondary | success | warning | danger';
+const VARIANT = 'solid | outline | ghost';
+const SIZE = 'sm | md | lg';
+
+const appearance = (member: string, tone: string, variant: string): ApiTuple[] => [
+  ['tone', TONE, tone, member, 'Which of the five semantic colours the control speaks in'],
+  ['variant', VARIANT, variant, member, 'How the tone is painted'],
+  ['size', SIZE, 'md', member, 'Step of the control scale'],
+];
+
+/** Being unavailable and being unreachable are two decisions, not one. */
+const unavailable = (member: string): ApiTuple[] => [
+  [
+    'disabled',
+    'boolean',
+    'false',
+    member,
+    'Refuses the action and says the control is unavailable',
+  ],
+  [
+    'focusableWhenDisabled',
+    'boolean',
+    'false',
+    member,
+    'Keeps an unavailable control in the tab sequence, announcing aria-disabled instead',
+  ],
+];
+
+const waiting = (member: string): ApiTuple[] => [
+  ['loading', 'boolean', 'false', member, 'Waits: refuses activation and shows an indicator'],
+  [
+    'loadingDelay',
+    'number',
+    '0',
+    member,
+    'Milliseconds before the indicator appears; the refusal is immediate',
+  ],
+  ['loadingLabel', 'string', 'Loading', member, 'What the indicator announces itself as'],
+];
+
+const CONTENT = (member: string): ApiTuple[] => [
+  ['start', '[slButtonStart]', '—', member, 'Content projected before the label'],
+  ['end', '[slButtonEnd]', '—', member, 'Content projected after the label'],
+];
 
 export const ANGULAR_BUTTON_DOCS = {
   button: {
     api: apiRows([
-      [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'accent',
-        'Button',
-        'Semantic intent via [variant]',
-      ],
-      ['fill', 'solid | outline | ghost', 'solid', 'Button', 'Surface treatment via [fill]'],
-      ['size', 'sm | md | lg', 'md', 'Button', 'Control scale via [size]'],
-      ['fullWidth', 'boolean', 'false', 'Button', 'Fill the inline container with [fullWidth]'],
-      ['disabled', 'boolean', 'false', 'Button', 'Native disabled state'],
-      ['loading', 'boolean', 'false', 'Button', 'Controlled busy state'],
-      ['loadingText', 'string', '—', 'Button', 'Explicit busy label via [loadingText]'],
-      ['type', 'button | submit | reset', 'button', 'Button', 'Native button type'],
-      ['leading', '[slButtonLeading]', '—', 'Button', 'Logical leading projected content'],
-      ['trailing', '[slButtonTrailing]', '—', 'Button', 'Logical trailing projected content'],
-      [
-        '[slButtonLoadingIndicator]',
-        'projected content',
-        'spinner',
-        'Button',
-        'Replacement loading indicator',
-      ],
+      ...appearance('SlButton', 'accent', 'solid'),
+      ...CONTENT('SlButton'),
+      ['fullWidth', 'boolean', 'false', 'SlButton', 'Fills the inline size of its container'],
+      ...unavailable('SlButton'),
+      ...waiting('SlButton'),
+      ['type', 'button | submit | reset', 'button', 'SlButton', 'The native button type'],
     ]),
     accessibility: [
-      'Visible label supplies the accessible name.',
-      'Loading preserves focus, sets aria-busy and aria-disabled, and blocks activation.',
-      'Use type="submit" only for an intentional form submission.',
+      'It is a directive on the consumer’s own button element, so Space, Enter, focus, form submission and the disabled state are the platform’s.',
+      'While loading, the indicator is a named progress bar in the accessibility tree and the control announces aria-disabled while keeping focus — the shape React Aria’s pending button and Primer’s loading button both take. aria-busy is not used: it is not reliably announced on a button, and two mechanisms for one fact is one too many.',
+      'A control with a projected start or end icon gives the indicator that box and keeps its label. One with neither renders the label at zero opacity: it stays in the accessibility tree, so the name survives the wait, and it stays in the flow, so the control never changes size.',
+      'loading refuses activation on a capture-phase listener, before any handler the template attached, so a submit button cannot submit twice.',
+      'focusableWhenDisabled keeps an unavailable control reachable. Use it when the control carries a tooltip or an explanation a keyboard user would otherwise never reach, such as one inside a toolbar.',
+      'There is no render input, and none is needed: the component is a directive on the element the template wrote, so substituting the element is done by writing a different one.',
+      'Project a start or end icon with aria-hidden so it does not repeat the label.',
     ],
     snippets: [
       defineSnippet({
         id: 'angular-button-basic',
-        label: 'Basic action',
+        label: 'An action',
         language: 'angular',
         source:
-          '<button slButton variant="accent">\n  <ng-icon slButtonLeading name="lucideSave" aria-hidden="true" />\n  Save changes\n</button>',
+          '<button slButton (click)="save()">\n  <span slButtonStart><ng-icon aria-hidden="true" name="lucideSave" /></span>\n  Save changes\n</button>',
       }),
       defineSnippet({
         id: 'angular-button-loading',
-        label: 'Controlled loading',
+        label: 'Waiting for the action to finish',
         language: 'angular',
-        source: '<button slButton [loading]="saving" loadingText="Saving">Save</button>',
+        source:
+          '<button slButton [loading]="saving()" [loadingDelay]="300" loadingLabel="Saving" (click)="save()">\n  <span slButtonStart><ng-icon aria-hidden="true" name="lucideSave" /></span>\n  Save changes\n</button>',
+      }),
+      defineSnippet({
+        id: 'angular-button-defaults',
+        label: 'Every action in the application, decided once',
+        language: 'ts',
+        source:
+          "bootstrapApplication(App, {\n  providers: [provideButtonDefaults({ size: 'sm' })],\n});",
       }),
     ],
   },
   buttonLink: {
     api: apiRows([
+      ['href', 'string', '—', 'SlButtonLink', 'The navigation destination'],
+      ...appearance('SlButtonLink', 'accent', 'solid'),
+      ...CONTENT('SlButtonLink'),
+      ['fullWidth', 'boolean', 'false', 'SlButtonLink', 'Fills the inline size of its container'],
       [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'accent',
-        'ButtonLink',
-        'Semantic intent via [variant]',
+        'disabled',
+        'boolean',
+        'false',
+        'SlButtonLink',
+        'Removes the destination and refuses activation',
       ],
-      ['fill', 'solid | outline | ghost', 'solid', 'ButtonLink', 'Surface treatment via [fill]'],
-      ['size', 'sm | md | lg', 'md', 'ButtonLink', 'Control scale via [size]'],
-      ['fullWidth', 'boolean', 'false', 'ButtonLink', 'Fill the inline container with [fullWidth]'],
-      ['disabled', 'boolean', 'false', 'ButtonLink', 'Suppress navigation and sequential focus'],
-      ['tabIndex', 'number', 'automatic', 'ButtonLink', 'Native tabindex; disabled defaults to -1'],
-      [
-        'href/routerLink',
-        'string',
-        '—',
-        'ButtonLink',
-        'Native href or Angular RouterLink destination; RouterLink is Angular-owned',
-      ],
-      ['leading', '[slButtonLeading]', '—', 'ButtonLink', 'Logical leading projected content'],
-      ['trailing', '[slButtonTrailing]', '—', 'ButtonLink', 'Logical trailing projected content'],
     ]),
     accessibility: [
-      'Use ButtonLink only for navigation.',
-      'Disabled navigation sets aria-disabled, suppresses activation, and defaults to tabIndex -1.',
-      'RouterLink retains Angular Router semantics.',
+      'It is a directive on an anchor, so it is announced as a link and activates on Enter. Space does not activate it, because Space does not activate a link.',
+      'routerLink works on the same element and writes the href itself; leave [href] unset then.',
+      'A disabled link renders no href at all: an anchor that keeps its destination and only blocks click still navigates on a middle click and on a modified click.',
+      'It stays in the tab sequence when disabled, with role="link" and aria-disabled, because a control a keyboard user cannot reach is one they cannot discover is unavailable.',
     ],
     snippets: [
       defineSnippet({
-        id: 'angular-button-link-router',
-        label: 'Router navigation',
+        id: 'angular-button-link-native',
+        label: 'Navigating',
         language: 'angular',
-        source: '<a slButtonLink routerLink="/settings">Settings</a>',
+        source: '<a slButtonLink href="/settings">Open settings</a>',
+      }),
+      defineSnippet({
+        id: 'angular-button-link-router',
+        label: 'Navigation the router owns',
+        language: 'angular',
+        source: '<a slButtonLink variant="outline" routerLink="/settings">Open settings</a>',
       }),
     ],
   },
   iconButton: {
     api: apiRows([
       [
-        'aria-label/aria-labelledby',
+        'aria-label | aria-labelledby',
         'string',
         'required',
-        'IconButton',
-        'Explicit accessible name',
+        'SlIconButton',
+        'The accessible name, which no content can supply',
+      ],
+      ...appearance('SlIconButton', 'secondary', 'ghost'),
+      ['shape', 'square | circle', 'square', 'SlIconButton', 'How the square control is cornered'],
+      ...unavailable('SlIconButton'),
+      ...waiting('SlIconButton'),
+      [
+        'pressed',
+        'boolean',
+        '—',
+        'SlIconButton',
+        'The consumer’s value; passing it controls the state',
       ],
       [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'secondary',
-        'IconButton',
-        'Semantic intent via [variant]',
+        'defaultPressed',
+        'boolean',
+        '—',
+        'SlIconButton',
+        'The value an uncontrolled toggle starts from',
       ],
-      ['fill', 'solid | outline | ghost', 'ghost', 'IconButton', 'Surface treatment via [fill]'],
-      ['size', 'sm | md | lg', 'md', 'IconButton', 'Square control scale via [size]'],
-      ['fullWidth', 'boolean', 'false', 'IconButton', 'Fill the inline container with [fullWidth]'],
-      ['disabled', 'boolean', 'false', 'IconButton', 'Native disabled state'],
-      ['loading', 'boolean', 'false', 'IconButton', 'Controlled busy state'],
-      ['type', 'button | submit | reset', 'button', 'IconButton', 'Native button type'],
       [
-        '[slButtonLoadingIndicator]',
-        'projected content',
-        'spinner',
-        'IconButton',
-        'Replacement loading indicator',
+        'pressedChange',
+        'ChangeRequest<boolean>',
+        '—',
+        'SlIconButton',
+        'The request: value, previous, reason, event and cancel()',
       ],
+      ['type', 'button | submit | reset', 'button', 'SlIconButton', 'The native button type'],
     ]),
     accessibility: [
-      'An explicit aria-label or aria-labelledby is mandatory.',
-      'The visible icon is decorative relative to that accessible name.',
-      'Loading preserves the explicit accessible name and focus.',
+      'The accessible name is required: the development build throws when neither aria-label nor aria-labelledby is present, because a template cannot make an attribute mandatory.',
+      'aria-pressed appears only once [pressed] or [defaultPressed] is bound. A plain icon button that announced itself as a toggle would be announcing a state it does not have.',
+      'The name must not change with the pressed state. The APG is explicit that a toggle keeps its label and lets the state be announced beside it.',
+      'The square control is the control height in both axes and never falls below the WCAG 2.2 minimum of 24 by 24 CSS pixels, at any density.',
     ],
     snippets: [
       defineSnippet({
-        id: 'angular-icon-button',
-        label: 'Named icon action',
+        id: 'angular-icon-button-basic',
+        label: 'A named icon-only action',
         language: 'angular',
         source:
-          '<button slIconButton aria-label="Close">\n  <ng-icon name="lucideX" aria-hidden="true" />\n</button>',
+          '<button slIconButton tone="danger" aria-label="Delete invoice" (click)="remove()">\n  <ng-icon aria-hidden="true" name="lucideTrash2" />\n</button>',
+      }),
+      defineSnippet({
+        id: 'angular-icon-button-toggle',
+        label: 'An icon toggle in a toolbar',
+        language: 'angular',
+        source:
+          '<button slIconButton aria-label="Bold" [pressed]="bold()" (pressedChange)="bold.set($event.value)">\n  <ng-icon aria-hidden="true" name="lucideBold" />\n</button>',
       }),
     ],
   },
   toggleButton: {
     api: apiRows([
-      ['pressed', 'boolean', 'false', 'ToggleButton', 'Controlled pressed state via [(pressed)]'],
-      ['pressedChange', 'boolean event', '—', 'ToggleButton', 'Requests the next controlled state'],
+      ...appearance('SlToggleButton', 'secondary', 'outline'),
+      ...CONTENT('SlToggleButton'),
+      ['fullWidth', 'boolean', 'false', 'SlToggleButton', 'Fills the inline size of its container'],
+      ...unavailable('SlToggleButton'),
+      ...waiting('SlToggleButton'),
       [
-        'variant',
-        'accent | secondary | success | warning | danger',
-        'secondary',
-        'ToggleButton',
-        'Semantic intent via [variant]',
+        'pressed',
+        'boolean',
+        '—',
+        'SlToggleButton',
+        'The consumer’s value; passing it controls the state',
       ],
       [
-        'fill',
-        'solid | outline | ghost',
-        'outline',
-        'ToggleButton',
-        'Surface treatment via [fill]',
-      ],
-      ['size', 'sm | md | lg', 'md', 'ToggleButton', 'Control scale via [size]'],
-      [
-        'fullWidth',
+        'defaultPressed',
         'boolean',
         'false',
-        'ToggleButton',
-        'Fill the inline container with [fullWidth]',
+        'SlToggleButton',
+        'The value an uncontrolled toggle starts from, read once',
       ],
-      ['disabled', 'boolean', 'false', 'ToggleButton', 'Native disabled state'],
-      ['type', 'button | submit | reset', 'button', 'ToggleButton', 'Native button type'],
-      ['leading', '[slButtonLeading]', '—', 'ToggleButton', 'Logical leading projected content'],
-      ['trailing', '[slButtonTrailing]', '—', 'ToggleButton', 'Logical trailing projected content'],
+      [
+        'pressedChange',
+        'ChangeRequest<boolean>',
+        '—',
+        'SlToggleButton',
+        'The request: value, previous, reason, event and cancel()',
+      ],
+      ['type', 'button | submit | reset', 'button', 'SlToggleButton', 'The native button type'],
     ]),
     accessibility: [
-      'aria-pressed always reflects the controlled pressed input.',
-      'The label describes the toggled feature rather than its next action.',
-      'Disabled toggles do not request state changes.',
+      'It is a native button carrying aria-pressed, so it is announced as a toggle and activates on Space and Enter.',
+      'The label must not change with the state: "Mute" stays "Mute" and the state is announced beside it.',
+      'There is no [(pressed)]: a two-way binding has one slot and cannot carry the reason or the cancellation, and a second output for the same transition would be the same failure stated twice.',
+      'Calling preventDefault on the click refuses the activation, and a refused activation moves nothing.',
     ],
     snippets: [
       defineSnippet({
-        id: 'angular-toggle-button',
-        label: 'Controlled toggle',
+        id: 'angular-toggle-button-uncontrolled',
+        label: 'A toggle that owns its own state',
         language: 'angular',
-        source: '<button slToggleButton [(pressed)]="pinned">Pin</button>',
+        source: '<button slToggleButton defaultPressed>Pin</button>',
       }),
-    ],
-  },
-  buttonGroup: {
-    api: apiRows([
-      [
-        'orientation',
-        'horizontal | vertical',
-        'horizontal',
-        'ButtonGroup',
-        'Logical group direction via [orientation]',
-      ],
-      [
-        'aria-label/aria-labelledby',
-        'string',
-        'contextual',
-        'ButtonGroup',
-        'Names the related action set',
-      ],
-    ]),
-    accessibility: [
-      'Name the group when surrounding context does not already identify it.',
-      'Children retain their own button or link semantics and tab order.',
-      'A split-action example does not imply menu keyboard behavior.',
-    ],
-    snippets: [
       defineSnippet({
-        id: 'angular-button-group',
-        label: 'Grouped actions',
+        id: 'angular-toggle-button-controlled',
+        label: 'A toggle the consumer owns, with the reason',
         language: 'angular',
         source:
-          '<div slButtonGroup aria-label="Editing actions">\n  <button slButton>Save</button>\n  <button slIconButton aria-label="More save options">\n    <ng-icon name="lucideChevronDown" aria-hidden="true" />\n  </button>\n</div>',
+          '<button slToggleButton [pressed]="pinned()" (pressedChange)="onPinnedChange($event)">Pin</button>',
       }),
     ],
   },

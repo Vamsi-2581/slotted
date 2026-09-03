@@ -1,19 +1,16 @@
-import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { createElement, Fragment } from 'react';
-
-import contract from '../../../../specs/components/button/contract.json';
 import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
 import { snippetFormatErrors } from '@slotted/storybook-workbench/testing';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { createElement, Fragment } from 'react';
+import { describe, expect, it } from 'vitest';
 
+import contract from '../../../../specs/components/button/contract.json';
+import * as buttonLinkStories from './button-link.stories';
 import { REACT_BUTTON_DOCS } from './button.docs';
 import * as overviewStories from './button-family.stories';
 import * as buttonStories from './button.stories';
-import * as buttonLinkStories from './button-link.stories';
 import * as iconButtonStories from './icon-button.stories';
 import * as toggleButtonStories from './toggle-button.stories';
-import * as buttonGroupStories from './button-group.stories';
-import { ToggleButtonStoryAdapter } from './toggle-button.stories';
 
 const storyModules = {
   overview: overviewStories,
@@ -21,7 +18,6 @@ const storyModules = {
   buttonLink: buttonLinkStories,
   iconButton: iconButtonStories,
   toggleButton: toggleButtonStories,
-  buttonGroup: buttonGroupStories,
 };
 
 describe('Button family stories', () => {
@@ -32,20 +28,32 @@ describe('Button family stories', () => {
   });
 
   it('documents each public component API', () => {
-    for (const page of Object.keys(contract.members) as Array<keyof typeof contract.members>) {
-      expect(apiMetadataErrors(contract.members[page], REACT_BUTTON_DOCS[page].api)).toEqual([]);
+    for (const member of Object.keys(contract.members) as Array<keyof typeof contract.members>) {
+      expect(apiMetadataErrors(contract.members[member], REACT_BUTTON_DOCS[member].api)).toEqual(
+        [],
+      );
     }
   });
 
+  /**
+   * The axes are what a consumer picks from, so the reference page has to
+   * spell every value rather than say "one of the tones".
+   */
   it('spells every appearance axis in the reference API', () => {
-    const variantType = 'accent | secondary | success | warning | danger';
-    const fillType = 'solid | outline | ghost';
-    for (const page of ['button', 'buttonLink', 'iconButton', 'toggleButton'] as const) {
-      expect(REACT_BUTTON_DOCS[page].api.find((row) => row.name === 'variant')?.type).toBe(
-        variantType,
-      );
-      expect(REACT_BUTTON_DOCS[page].api.find((row) => row.name === 'fill')?.type).toBe(fillType);
+    const spelled = {
+      tone: contract.axes.tone.join(' | '),
+      variant: contract.axes.variant.join(' | '),
+      size: contract.axes.size.join(' | '),
+    };
+
+    for (const member of Object.keys(contract.members) as Array<keyof typeof contract.members>) {
+      for (const [axis, type] of Object.entries(spelled)) {
+        expect(REACT_BUTTON_DOCS[member].api.find((row) => row.name === axis)?.type).toBe(type);
+      }
     }
+    expect(REACT_BUTTON_DOCS.iconButton.api.find((row) => row.name === 'shape')?.type).toBe(
+      contract.axes.shape.join(' | '),
+    );
   });
 
   it('keeps curated snippets formatted', async () => {
@@ -53,75 +61,36 @@ describe('Button family stories', () => {
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
 
-  it('makes the controlled ToggleButton story adapter interactive', () => {
-    render(createElement(ToggleButtonStoryAdapter, undefined, 'Pin'));
-
+  it('makes the controlled ToggleButton adapter interactive', () => {
+    render(createElement(toggleButtonStories.ToggleButtonStoryAdapter, undefined, 'Pin'));
     const button = screen.getByRole('button', { name: 'Pin' });
+
     expect(button).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(button);
     expect(button).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('renders descriptions referenced by accessibility stories', () => {
-    const buttonLink = buttonLinkStories.Accessibility.render?.({} as never, {} as never);
-    const toggleButton = toggleButtonStories.Accessibility.render?.({} as never, {} as never);
-    render(createElement(Fragment, undefined, buttonLink, toggleButton));
+  it('renders the descriptions its accessibility stories point at', () => {
+    const stories = [
+      buttonStories.Accessibility,
+      buttonLinkStories.Accessibility,
+      iconButtonStories.Accessibility,
+      toggleButtonStories.Accessibility,
+    ].map((story) => story.render?.({} as never, {} as never));
+    render(createElement(Fragment, undefined, ...stories));
 
-    for (const id of ['settings-help', 'pin-help']) {
+    for (const id of ['save-help', 'delete-help', 'settings-help', 'refresh-name', 'pin-help']) {
       expect(document.getElementById(id)).not.toBeNull();
     }
   });
 
-  it('renders the overview as a structured lab with real icons and no empty icon controls', () => {
+  it('gives the overview one section per member, plus the axes and a composition', () => {
     const overview = overviewStories.Matrix.render?.({} as never, {} as never);
     const { container } = render(createElement(Fragment, undefined, overview));
-
-    expect(container.querySelectorAll('.slotted-component-lab__section')).toHaveLength(6);
-    expect(container.querySelectorAll('.slotted-demo-scene')).toHaveLength(15);
-
-    const appearanceMatrix = container.querySelector('[data-slotted-matrix="button"]');
-    expect(appearanceMatrix).not.toBeNull();
-    expect(appearanceMatrix?.querySelectorAll('[data-slotted-component="button"]')).toHaveLength(
-      15,
-    );
-    for (const variant of ['accent', 'secondary', 'success', 'warning', 'danger']) {
-      expect(appearanceMatrix?.querySelectorAll(`[data-variant="${variant}"]`)).toHaveLength(3);
-    }
-    for (const fill of ['solid', 'outline', 'ghost']) {
-      expect(appearanceMatrix?.querySelectorAll(`[data-fill="${fill}"]`)).toHaveLength(5);
-    }
-
-    expect(container.querySelectorAll('[data-slotted-matrix]')).toHaveLength(2);
-
-    const toggleStateMatrix = container.querySelector('[data-slotted-matrix="toggle-state"]');
-    expect(
-      toggleStateMatrix?.querySelectorAll('[data-slotted-component="toggle-button"]'),
-    ).toHaveLength(30);
-    expect(toggleStateMatrix?.querySelectorAll('[aria-pressed="true"]')).toHaveLength(15);
-    expect(toggleStateMatrix?.querySelectorAll('[aria-pressed="false"]')).toHaveLength(15);
-    for (const variant of ['accent', 'secondary', 'success', 'warning', 'danger']) {
-      expect(toggleStateMatrix?.querySelectorAll(`[data-variant="${variant}"]`)).toHaveLength(6);
-    }
-    for (const fill of ['solid', 'outline', 'ghost']) {
-      expect(toggleStateMatrix?.querySelectorAll(`[data-fill="${fill}"]`)).toHaveLength(10);
-    }
-    expect(container.querySelector('.slotted-matrix button[data-tone]')).toBeNull();
-
-    const iconButtons = container.querySelectorAll('[data-slotted-component="icon-button"]');
-    expect(iconButtons.length).toBeGreaterThan(0);
-    for (const iconButton of iconButtons) {
-      expect(iconButton.querySelector('svg.lucide[aria-hidden="true"]')).not.toBeNull();
-      expect(iconButton).toHaveAttribute('data-part-root', 'icon');
-    }
-  });
-
-  it('demonstrates each family member with something Button alone does not show', () => {
-    const overview = overviewStories.Matrix.render?.({} as never, {} as never);
-    const { container } = render(createElement(Fragment, undefined, overview));
-
     const headings = [...container.querySelectorAll('.slotted-component-lab__intro h2')].map(
       (heading) => heading.textContent,
     );
+
     expect(headings).toEqual([
       'Appearance system',
       'Button',
@@ -130,53 +99,79 @@ describe('Button family stories', () => {
       'ToggleButton',
       'Composition',
     ]);
+  });
 
-    const links = container.querySelectorAll('a[data-slotted-component="button-link"]');
+  it('shows every tone against every variant, once, in the overview matrix', () => {
+    const overview = overviewStories.Matrix.render?.({} as never, {} as never);
+    const { container } = render(createElement(Fragment, undefined, overview));
+    const matrix = container.querySelector('[data-slotted-matrix="button"]');
+
+    expect(matrix).not.toBeNull();
+    expect(matrix?.querySelectorAll('[data-ui="button"]')).toHaveLength(
+      contract.axes.tone.length * contract.axes.variant.length,
+    );
+    for (const tone of contract.axes.tone) {
+      expect(matrix?.querySelectorAll(`[data-tone="${tone}"]`)).toHaveLength(
+        contract.axes.variant.length,
+      );
+    }
+    for (const variant of contract.axes.variant) {
+      expect(matrix?.querySelectorAll(`[data-variant="${variant}"]`)).toHaveLength(
+        contract.axes.tone.length,
+      );
+    }
+    expect(container.querySelectorAll('[data-slotted-matrix]')).toHaveLength(1);
+  });
+
+  it('demonstrates each member with something Button alone does not show', () => {
+    const overview = overviewStories.Matrix.render?.({} as never, {} as never);
+    const { container } = render(createElement(Fragment, undefined, overview));
+
+    const links = container.querySelectorAll('a[data-ui="button"]');
     expect(links.length).toBeGreaterThan(0);
-    for (const link of links) {
-      expect(link.getAttribute('href')).toBeTruthy();
-    }
-    expect(
-      container.querySelector('a[data-slotted-component="button-link"][aria-disabled="true"]'),
-    ).not.toBeNull();
+    expect(container.querySelector('a[data-ui="button"][aria-disabled="true"]')).not.toBeNull();
+    expect(container.querySelector('a[data-router-link="true"]')).not.toBeNull();
 
-    const sizedIconButtons = [
-      ...container.querySelectorAll('[data-slotted-component="icon-button"]'),
-    ].map((iconButton) => iconButton.getAttribute('data-size'));
-    for (const size of ['sm', 'md', 'lg']) {
-      expect(sizedIconButtons).toContain(size);
+    const iconButtons = [...container.querySelectorAll('[data-ui="button"][data-shape]')];
+    expect(iconButtons.length).toBeGreaterThan(0);
+    for (const iconButton of iconButtons) {
+      expect(iconButton.querySelector('[data-part="icon"] svg')).not.toBeNull();
+      expect(iconButton.getAttribute('aria-label')?.trim()).toBeTruthy();
+    }
+    expect(iconButtons.map((button) => button.getAttribute('data-shape'))).toContain('circle');
+    expect(container.querySelector('[data-ui="button"][data-loading]')).not.toBeNull();
+    expect(container.querySelector('[data-ui="button"][data-pressed]')).not.toBeNull();
+  });
+
+  it('keeps every icon inside an icon-only control decorative', () => {
+    const overview = overviewStories.Matrix.render?.({} as never, {} as never);
+    const { container } = render(createElement(Fragment, undefined, overview));
+
+    for (const icon of container.querySelectorAll('[data-part="icon"] svg')) {
+      expect(icon).toHaveAttribute('aria-hidden', 'true');
     }
   });
 
-  it('exposes every IconButton appearance axis in its playground', () => {
-    const meta = iconButtonStories.default;
+  it('shows the densities scene at all three steps of the control scale', () => {
+    const densities = overviewStories.Densities.render?.({} as never, {} as never);
+    const { container } = render(createElement(Fragment, undefined, densities));
 
-    expect(meta.args).toMatchObject({
-      disabled: false,
-      fill: 'ghost',
-      loading: false,
-      size: 'md',
-      variant: 'secondary',
-    });
-    expect(meta.argTypes?.variant).toMatchObject({
-      options: ['accent', 'secondary', 'success', 'warning', 'danger'],
-    });
-    expect(meta.argTypes?.fill).toMatchObject({ options: ['solid', 'outline', 'ghost'] });
+    for (const size of contract.axes.size) {
+      expect(container.querySelectorAll(`[data-size="${size}"]`).length).toBeGreaterThan(0);
+    }
   });
 
-  it('renders split actions as one coherent control with matching segments', () => {
-    const splitAction = buttonGroupStories.SplitAction.render?.({} as never, {} as never);
-    const { container } = render(createElement(Fragment, undefined, splitAction));
-    const group = screen.getByRole('group', { name: 'Publish actions' });
-    const buttons = within(group).getAllByRole('button');
+  it('exercises the toolbar in the overview as a real group of controls', () => {
+    const overview = overviewStories.Matrix.render?.({} as never, {} as never);
+    render(createElement(Fragment, undefined, overview));
+    const toolbar = screen.getByRole('button', { name: 'Bold' }).parentElement;
 
-    expect(group).toHaveClass('slotted-split-action');
-    expect(buttons).toHaveLength(2);
-    for (const button of buttons) {
-      expect(button).toHaveAttribute('data-size', 'md');
-      expect(button).toHaveAttribute('data-variant', 'accent');
-      expect(button).toHaveAttribute('data-fill', 'solid');
-    }
-    expect(container.querySelector('svg.lucide-chevron-down')).not.toBeNull();
+    expect(toolbar).not.toBeNull();
+    expect(within(toolbar as HTMLElement).getAllByRole('button')).toHaveLength(5);
+    expect(screen.getByRole('button', { name: 'Bold' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Italic' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'More formatting' })).not.toHaveAttribute(
+      'aria-pressed',
+    );
   });
 });

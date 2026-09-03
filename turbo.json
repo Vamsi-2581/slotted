@@ -1,6 +1,15 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "dependsOn": ["@slotted/tokens#build", "@slotted/theme-default#build"],
+      "cache": false,
+      "persistent": true
+    },
     "verify": {
       "dependsOn": ["^verify"],
       "outputs": ["dist/**", "coverage/**"]

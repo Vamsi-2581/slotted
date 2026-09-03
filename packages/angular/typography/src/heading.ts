@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 
 import { SlHeadingLevel } from './heading-level';
-import { toneAttribute, truncatedLines, TYPOGRAPHY_STYLE_URL } from './typography';
+import { toneAttribute, truncatedLines } from './typography';
 import type {
   HeadingLevelValue,
   TypographyAlign,
@@ -47,7 +47,7 @@ const SIZE_OF_LEVEL: Record<HeadingLevelValue, TypographySize> = {
   standalone: true,
   exportAs: 'slHeading',
   template: '<ng-content></ng-content>',
-  styleUrl: TYPOGRAPHY_STYLE_URL,
+  styleUrl: '../../../styles/src/typography/typography.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {

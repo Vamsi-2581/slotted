@@ -166,7 +166,7 @@ export function captureUrl({ family, scheme, width, density, dir, scene }) {
  * one combination therefore land in two files instead of one overwriting the
  * other, which is the failure a reader cannot see in the image.
  */
-export function focusSlug(selector) {
+export function focusSlug(selector, prefix = 'focus') {
   if (!selector) return undefined;
   const slug = selector
     .toLowerCase()
@@ -174,11 +174,48 @@ export function focusSlug(selector) {
     .replace(/^-+|-+$/g, '')
     .slice(0, 40)
     .replace(/-+$/, '');
-  return `focus-${slug}`;
+  return `${prefix}-${slug}`;
 }
 
-export function captureName({ family, scheme, width, density, dir, scene, focus }) {
-  const parts = [family, scene, focusSlug(focus), scheme, density, dir, width];
+export function captureName({
+  family,
+  scheme,
+  width,
+  density,
+  dir,
+  scene,
+  focus,
+  hover,
+  active,
+  zoom,
+  at,
+  motion,
+}) {
+  /* Every forced state named, not the first one: a capture of a hovered card
+     with focus inside it is neither of the two, and overwriting one with the
+     other is the failure a reader cannot see in the image. */
+  const states = [focusSlug(hover, 'hover'), focusSlug(active, 'active'), focusSlug(focus)].filter(
+    Boolean,
+  );
+  /* A zoom of 100% is the axis's own default, so it stays out of the name and
+     every capture taken before the axis existed keeps the name it had. */
+  const magnified = zoom === undefined || zoom === '100' ? undefined : `zoom${zoom}`;
+  /* Left out when no moment was asked for, so every capture taken before the
+     axis existed keeps the name it had. */
+  const moment = at === undefined ? undefined : `at${at}ms`;
+  const preference = motion === undefined ? undefined : `motion-${motion}`;
+  const parts = [
+    family,
+    scene,
+    ...states,
+    scheme,
+    density,
+    dir,
+    width,
+    magnified,
+    preference,
+    moment,
+  ];
   return `${parts.filter(Boolean).join('-')}.png`;
 }
 
@@ -222,6 +259,37 @@ async function focusElement(devtools, selector) {
   }
 }
 
+/**
+ * Hover and press are forced through the protocol rather than simulated with a
+ * pointer. A moved pointer also scrolls the page, hovers whatever it passes
+ * over on the way, and cannot hold `:active` for the length of a capture
+ * without a button held down; forcing the pseudo-class states exactly the one
+ * thing the reader asked to look at.
+ *
+ * The selector is resolved inside the shown cell first, for the same reason
+ * `--focus` is: the page holds one cell per scheme and width, and only one of
+ * them is the capture.
+ */
+async function forcePseudoState(devtools, selector, pseudoClasses) {
+  await devtools.send('DOM.enable');
+  await devtools.send('CSS.enable');
+  const { root } = await devtools.send('DOM.getDocument', { depth: -1 });
+
+  let nodeId = 0;
+  for (const candidate of [`.cell.shown ${selector}`, selector]) {
+    ({ nodeId } = await devtools.send('DOM.querySelector', {
+      nodeId: root.nodeId,
+      selector: candidate,
+    }));
+    if (nodeId) break;
+  }
+  if (!nodeId) {
+    throw new Error(`--${pseudoClasses[0]} ${selector}: no element matches ${selector}`);
+  }
+
+  await devtools.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: pseudoClasses });
+}
+
 async function contentHeight(devtools, cssContentSize) {
   const { result } = await devtools.send('Runtime.evaluate', {
     expression: 'document.body.getBoundingClientRect().height',
@@ -246,11 +314,83 @@ export async function shoot(options) {
       mobile: false,
     });
 
+    /**
+     * The reader's motion preference, stated rather than inherited.
+     *
+     * Headless Chrome answers `prefers-reduced-motion: reduce` by default, so
+     * every capture this harness has ever taken was taken by a reader who had
+     * asked for stillness. A family whose motion is guarded by that query —
+     * which the token foundation requires of every infinite animation — was
+     * therefore photographed with the motion switched off, and
+     * `status-indicator`'s pulse was missing from five captures before anyone
+     * asked why. The axis makes both answers reachable and neither of them a
+     * default of the browser's.
+     */
     const loaded = devtools.once('Page.loadEventFired');
     await devtools.send('Page.navigate', { url: captureUrl(options).href });
     await loaded;
 
+    if (options.motion !== undefined) {
+      await devtools.send('Emulation.setEmulatedMedia', {
+        media: '',
+        features: [{ name: 'prefers-reduced-motion', value: options.motion }],
+      });
+    }
+
+    /**
+     * The reader's own zoom, applied the way the browser applies it. A control
+     * whose edges are drawn by two coincident borders looks correct at 100% and
+     * comes apart at 110%: the browser snaps each border box to device pixels on
+     * its own, so one boundary lands on a single column and the next lands
+     * across two. That defect reached a human review because no capture could
+     * show it — the axis exists so the visual loop can.
+     */
+    if (options.zoom !== '100') {
+      await devtools.send('Runtime.evaluate', {
+        expression: `document.documentElement.style.zoom = ${Number(options.zoom) / 100}`,
+      });
+    }
+
+    if (options.hover) await forcePseudoState(devtools, options.hover, ['hover']);
+    /* Press is hover plus the button: a card that paints `:active` without ever
+       having been hovered is a state no pointer can reach. */
+    if (options.active) await forcePseudoState(devtools, options.active, ['hover', 'active']);
     if (options.focus) await focusElement(devtools, options.focus);
+
+    /**
+     * The moment in an animation the picture is taken at.
+     *
+     * A page is photographed the instant it loads, so every animation on it is
+     * at the start of its first cycle — and the start of a cycle is exactly
+     * where a pulse, a sweep or an expanding ring looks like nothing at all.
+     * `status-indicator`'s pulse was invisible in three captures for that
+     * reason and not because it was missing, which is a defect no reader of
+     * the image could have told apart from an unimplemented state.
+     *
+     * Every animation on the page is moved to the same point and paused, so
+     * the capture is deterministic: the same millisecond produces the same
+     * picture every time, which is what makes two captures of one animation
+     * comparable. It runs after the forced states, because a rule that only
+     * animates on hover has no animation to move until the hover is forced.
+     *
+     * An animation that is *already* paused is left where it is, and that is
+     * the whole distinction this flag has to make. A paused keyframe scrubbed
+     * by a negative delay is not motion: it is a value expressed as an
+     * animation, which is how a stylesheet interpolates something CSS has no
+     * other way to interpolate — `progress-indicator` ramps a wavy ring's
+     * amplitude by morphing `d` that way. Seeking it moves the value rather
+     * than the clock, and the capture then shows every ring at full amplitude,
+     * including the ones the page had drawn as circles.
+     */
+    if (options.at !== undefined) {
+      await devtools.send('Runtime.evaluate', {
+        expression: `for (const animation of document.getAnimations()) {
+          if (animation.playState === 'paused') continue;
+          animation.currentTime = ${Number(options.at)};
+          animation.pause();
+        }`,
+      });
+    }
 
     const { cssContentSize } = await devtools.send('Page.getLayoutMetrics');
     const { data } = await devtools.send('Page.captureScreenshot', {
@@ -277,15 +417,20 @@ export function parseArguments(argv) {
   const [family, ...rest] = argv;
   if (!family || family.startsWith('--')) {
     throw new Error(
-      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--scene name] [--focus selector] [--out dir]',
+      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--scene name] [--focus selector] [--hover selector] [--active selector] [--zoom percent] [--motion reduce|no-preference] [--at milliseconds] [--out dir]',
     );
   }
 
   const options = {
     family,
     outDir: process.env['TMPDIR'] ?? '/tmp',
+    active: undefined,
+    at: undefined,
     focus: undefined,
+    hover: undefined,
+    motion: undefined,
     scene: undefined,
+    zoom: '100',
   };
   for (const [axis, { fallback }] of Object.entries(AXES)) options[axis] = fallback;
 
@@ -302,8 +447,29 @@ export function parseArguments(argv) {
       options.scene = value;
       continue;
     }
-    if (flag === 'focus') {
-      options.focus = value;
+    if (flag === 'focus' || flag === 'hover' || flag === 'active') {
+      options[flag] = value;
+      continue;
+    }
+    if (flag === 'motion') {
+      if (value !== 'reduce' && value !== 'no-preference') {
+        throw new Error(`motion must be one of reduce, no-preference, received ${value}`);
+      }
+      options.motion = value;
+      continue;
+    }
+    if (flag === 'at') {
+      if (!/^\d{1,6}$/.test(value)) {
+        throw new Error(`at is a whole number of milliseconds, received ${value}`);
+      }
+      options.at = value;
+      continue;
+    }
+    if (flag === 'zoom') {
+      if (!/^[1-9][0-9]{1,2}$/.test(value)) {
+        throw new Error(`zoom is a percentage between 10 and 999, received ${value}`);
+      }
+      options.zoom = value;
       continue;
     }
 

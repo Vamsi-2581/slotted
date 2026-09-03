@@ -31,6 +31,8 @@ paragraph.
   this family, plus section 2 (global contract) and section 18 (definition of
   done)
 - `.claude/skills/component/references/rubric.md`
+- `.claude/skills/component/references/stories.md` — what the two reference
+  pages have to prove, and the primitives every demonstration is laid out with
 
 ## Environment
 
@@ -60,22 +62,44 @@ without saying why.
 
 If a port answers nothing, say so at the gate rather than assuming the pages
 were seen. Starting it is the reviewer's call; the commands are
-`pnpm --filter @slotted/storybook-react dev` and
-`pnpm --filter @slotted/storybook-angular dev`.
+`pnpm dev:react` and `pnpm dev:angular`, or
+`pnpm dev` for both. Each builds the two generated stylesheets first and
+nothing else.
 
 The toolbar exposes `scheme` (`light`, `dark`, `high-contrast`), `density`
 (`comfortable`, `compact`, `dense`) and `direction` (`ltr`, `rtl`). The reviewer
 uses those controls, so the reference pages have to hold up under all of them.
 
-- A new React story file is picked up by the glob without a restart.
+A family's reference page is a docs entry, and it renders on its own at
+`iframe.html?viewMode=docs&id=components-<family>--reference`. That URL is what
+a screenshot can be taken of, and reading the rendered page — not the story
+file — is what `.claude/skills/component/references/stories.md` requires before
+the gate.
+
+- A new React story file is picked up by the glob without a restart, but a new
+  **family** is not: its `*.docs.ts` imports `@slotted/styles/<family>/tokens.json`,
+  and a subpath export added to `packages/styles/package.json` is invisible to a
+  Vite dev server that was already running. The story is indexed, the module
+  answers 404, and the page never mounts. **Both Storybooks need a restart when
+  a family lands.** Say so at the gate rather than restarting unannounced.
 - **A new Angular entry point needs the Angular Storybook restarted**, because
   `apps/storybook-angular/.storybook/main.ts` reads the directories of
   `packages/angular/` once, at startup. Say so at the gate rather than
   restarting unannounced.
-- A token or theme change needs `pnpm --filter @slotted/theme-default build`
-  before Storybook and the harness see the new value.
-- A new `@slotted/core` entry point needs `pnpm --filter @slotted/core build`
-  before any framework package can import it.
+- A token or theme change needs `pnpm build:tokens` before Storybook and the
+  harness see the new value.
+- A change under `packages/core/src` needs no build: both Storybooks and the
+  React test run resolve `@slotted/core/*` to source through
+  `scripts/source-aliases.mjs`. `pnpm build:core` is for publishing, and for
+  reading `dist` itself.
+- `pnpm build` covers every generated artefact in dependency order and is
+  cached: a second run with nothing changed is under a second. Run it rather
+  than deciding which applies.
+- Nothing else needs a build. Both Storybooks read `packages/styles`,
+  `packages/react/src`, `packages/angular/*/src` and `packages/core/src` from
+  source. A stylesheet
+  edit is on the page on save — and if it is not, a `dist` bundle has been
+  imported into a preview again, which `CONTRIBUTING.md` explains and forbids.
 
 ## Leave no uncertainty open
 
@@ -129,8 +153,10 @@ that found it. It is not reported and left in place: the next family inherits it
 Inherit these rather than reopening them:
 
 - **Measure belongs to the container, not to Text.** No text family caps its own
-  line length; `container` and `stack` own comfortable measure when they are
-  built. Decided while Typography was built.
+  line length, and neither does a layout primitive. `container` owns comfortable
+  measure when it is built, and it owns it alone: two families offering a
+  maximum measure would be two answers to one question. Decided while Typography
+  was built, narrowed to one family while Stack, Inline and Grid were.
 - **Truncation never removes content from the DOM.** A truncated string stays
   readable to assistive technology and reachable in full when the content
   matters.
@@ -168,7 +194,8 @@ pnpm check:full
 Stop before committing and hand over:
 
 - the absolute path of the harness page and of the captures read;
-- the URLs of the reference pages in both Storybooks;
+- the URLs of the reference pages in both Storybooks, and the widths and
+  schemes they were read at;
 - the weighing from step 3 — adopt, adapt or decline, one sentence each;
 - the self-assessment across the eight rubric dimensions plus section 18 of the
   guide;

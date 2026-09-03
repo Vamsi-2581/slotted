@@ -1,211 +1,158 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it, vi } from 'vitest';
 
+import contract from '../../../../specs/components/button/contract.json';
+import type { ButtonShape } from './button.constants';
 import { SlIconButton } from './icon-button';
 
+const defaults = contract.members.iconButton.defaults;
+
 @Component({
   imports: [SlIconButton],
-  template: `
-    <button
-      slIconButton
-      aria-label="Close"
-      [aria-busy]="ariaBusy()"
-      [aria-disabled]="ariaDisabled()"
-      [fill]="fill()"
-      [variant]="variant()"
-      [size]="size()"
-      [type]="type()"
-      [disabled]="disabled()"
-      [fullWidth]="fullWidth()"
-      [loading]="loading()"
-      (click)="clickSpy()"
-    >
-      <span aria-hidden="true">×</span>
-      @if (customLoadingIndicator()) {
-        <span slButtonLoadingIndicator>Custom indicator</span>
-      }
-    </button>
-  `,
+  template: `<button
+    slIconButton
+    [attr.aria-label]="label()"
+    [shape]="shape()"
+    [disabled]="disabled()"
+    [loading]="loading()"
+    [pressed]="pressed()"
+    [defaultPressed]="defaultPressed()"
+    (pressedChange)="onPressedChange($event)"
+  >
+    <svg></svg>
+  </button>`,
 })
-class NamedHost {
-  readonly ariaBusy = signal<boolean | string | null>(null);
-  readonly ariaDisabled = signal<boolean | string | null>(null);
-  readonly fill = signal<'solid' | 'outline' | 'ghost'>('ghost');
-  readonly variant = signal<'accent' | 'secondary' | 'success' | 'warning' | 'danger'>('secondary');
-  readonly size = signal<'sm' | 'md' | 'lg'>('md');
-  readonly type = signal<'button' | 'submit' | 'reset'>('button');
+class TestHost {
+  readonly label = signal<string | null>('Add member');
+  readonly shape = signal<ButtonShape>('square');
   readonly disabled = signal(false);
-  readonly fullWidth = signal(false);
   readonly loading = signal(false);
-  readonly customLoadingIndicator = signal(false);
-  readonly clickSpy = vi.fn();
+  readonly pressed = signal<boolean | undefined>(undefined);
+  readonly defaultPressed = signal<boolean | undefined>(undefined);
+  readonly onPressedChange = vi.fn<(request: ChangeRequest<boolean>) => void>();
 }
 
-@Component({
-  imports: [SlIconButton],
-  template: '<button slIconButton><span aria-hidden="true">×</span></button>',
-})
-class UnnamedHost {}
-
-@Component({
-  imports: [SlIconButton],
-  template: '<button slIconButton aria-label=""><span aria-hidden="true">×</span></button>',
-})
-class EmptyNamedHost {}
-
-@Component({
-  imports: [SlIconButton],
-  template:
-    '<span id="label">Close</span><button slIconButton aria-labelledby="label"><span aria-hidden="true">×</span></button>',
-})
-class LabelledByHost {}
-
-@Component({
-  imports: [SlIconButton],
-  template: '<button slIconButton aria-label=" "><span aria-hidden="true">×</span></button>',
-})
-class WhitespaceNamedHost {}
+function mount() {
+  const fixture = TestBed.createComponent(TestHost);
+  fixture.detectChanges();
+  const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  return { button, fixture, host: fixture.componentInstance };
+}
 
 describe('SlIconButton', () => {
-  it('renders a native icon button with safe defaults and an explicit accessible name', async () => {
-    const fixture = TestBed.createComponent(NamedHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  it('is a square button with the family identity and an icon part', () => {
+    const { button } = mount();
 
-    expect(button.localName).toBe('button');
-    expect(button.type).toBe('button');
-    expect(button.dataset['slottedComponent']).toBe('icon-button');
-    expect(button.dataset['partRoot']).toBe('icon');
-    expect(button.dataset['variant']).toBe('secondary');
-    expect(button.dataset['fill']).toBe('ghost');
-    expect(button.dataset['size']).toBe('md');
-    expect(button.getAttribute('aria-label')).toBe('Close');
-    expect(button.querySelector('[data-part="icon"]')).not.toBeNull();
+    expect(button.localName).toBe(contract.members.iconButton.nativeElement);
+    expect(button.getAttribute('data-ui')).toBe(contract.ui);
+    expect(button.getAttribute('data-part')).toBe('root');
+    expect(button.getAttribute('data-shape')).toBe(defaults.shape);
+    expect(button.getAttribute('data-tone')).toBe(defaults.tone);
+    expect(button.getAttribute('data-variant')).toBe(defaults.variant);
+    expect(button.querySelector('[data-part="icon"] svg')).not.toBeNull();
   });
 
-  it('updates native attributes and appearance inputs', async () => {
-    const fixture = TestBed.createComponent(NamedHost);
-    fixture.componentInstance.type.set('submit');
-    fixture.componentInstance.fill.set('outline');
-    fixture.componentInstance.fullWidth.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  it('refuses to render without an accessible name in development', () => {
+    const fixture = TestBed.createComponent(TestHost);
+    fixture.componentInstance.label.set(null);
 
-    expect(button.type).toBe('submit');
-    expect(button.dataset['fill']).toBe('outline');
-    expect(button.getAttribute('data-full-width')).toBe('');
+    expect(() => fixture.detectChanges()).toThrow(/aria-label/);
   });
 
-  it('rejects a missing accessible name during stabilization', async () => {
-    const fixture = TestBed.createComponent(UnnamedHost);
+  /**
+   * A plain icon button that announced `aria-pressed` would be announcing a
+   * state it does not have, so the attribute waits for either half of the
+   * state model.
+   */
+  it('is not a toggle until the consumer says it is', () => {
+    const { button } = mount();
 
-    await expect(fixture.whenStable()).rejects.toThrow(
-      'IconButton requires aria-label or aria-labelledby',
-    );
+    expect(button.hasAttribute('aria-pressed')).toBe(false);
+    expect(button.hasAttribute('data-pressed')).toBe(false);
   });
 
-  it('rejects an empty accessible name during stabilization', async () => {
-    const fixture = TestBed.createComponent(EmptyNamedHost);
+  it('owns its state when only the initial value is given', () => {
+    const { button, fixture, host } = mount();
+    host.defaultPressed.set(false);
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('false');
 
-    await expect(fixture.whenStable()).rejects.toThrow(
-      'IconButton requires aria-label or aria-labelledby',
-    );
-  });
-
-  it('rejects a whitespace-only accessible name during stabilization', async () => {
-    const fixture = TestBed.createComponent(WhitespaceNamedHost);
-
-    await expect(fixture.whenStable()).rejects.toThrow(
-      'IconButton requires aria-label or aria-labelledby',
-    );
-  });
-
-  it('accepts a meaningful aria-labelledby accessible name', async () => {
-    const fixture = TestBed.createComponent(LabelledByHost);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-    expect(button.getAttribute('aria-labelledby')).toBe('label');
-    expect((fixture.nativeElement.querySelector('#label') as HTMLElement).textContent).toBe(
-      'Close',
-    );
-  });
-
-  it('keeps a loading icon button enabled, focusable, named, and inert before later listeners', async () => {
-    const fixture = TestBed.createComponent(NamedHost);
-    fixture.componentInstance.loading.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-    const laterCapture = vi.fn();
-    button.addEventListener('click', laterCapture, { capture: true });
-
-    button.focus();
     button.click();
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+    expect(button.getAttribute('data-pressed')).toBe('');
+  });
 
-    expect(button.disabled).toBe(false);
-    expect(document.activeElement).toBe(button);
-    expect(button.getAttribute('aria-label')).toBe('Close');
-    expect(button.getAttribute('aria-busy')).toBe('true');
+  it('never moves state the consumer owns', () => {
+    const { button, fixture, host } = mount();
+    host.pressed.set(false);
+    fixture.detectChanges();
+
+    button.click();
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+    expect(host.onPressedChange).toHaveBeenCalledOnce();
+    expect(host.onPressedChange.mock.calls[0]?.[0].value).toBe(true);
+  });
+
+  it('carries the reason, the value it replaces and the originating event', () => {
+    const { button, fixture, host } = mount();
+    host.defaultPressed.set(true);
+    fixture.detectChanges();
+
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    const request = host.onPressedChange.mock.calls[0]?.[0];
+    expect(request?.value).toBe(false);
+    expect(request?.previous).toBe(true);
+    expect(request?.reason).toBe('pointer');
+    expect(request?.source).toBeDefined();
+  });
+
+  it('tells a keyboard activation from a pointer one', () => {
+    const { button, fixture, host } = mount();
+    host.defaultPressed.set(false);
+    fixture.detectChanges();
+
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+    expect(host.onPressedChange.mock.calls[0]?.[0].reason).toBe('keyboard');
+  });
+
+  it('commits nothing when the request is cancelled', () => {
+    const { button, fixture, host } = mount();
+    host.defaultPressed.set(false);
+    host.onPressedChange.mockImplementation((request) => request.cancel());
+    fixture.detectChanges();
+
+    button.click();
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('waits without losing its name, and refuses activation while it does', () => {
+    const { button, fixture, host } = mount();
+    host.loading.set(true);
+    host.defaultPressed.set(false);
+    fixture.detectChanges();
+
+    button.click();
+    fixture.detectChanges();
     expect(button.getAttribute('aria-disabled')).toBe('true');
-    expect(button.dataset['loading']).toBe('');
-    expect(laterCapture).not.toHaveBeenCalled();
-    expect(fixture.componentInstance.clickSpy).not.toHaveBeenCalled();
+    expect(button.getAttribute('data-loading')).toBe('');
+    expect(button.disabled).toBe(false);
+    const indicator = button.querySelector('[data-part="indicator"]');
+    expect(indicator?.getAttribute('role')).toBe('progressbar');
+    expect(button.querySelector('[data-part="icon"]')).toContain(indicator);
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+    expect(host.onPressedChange).not.toHaveBeenCalled();
   });
 
-  it('gives explicit native disabled state priority over loading', async () => {
-    const fixture = TestBed.createComponent(NamedHost);
-    fixture.componentInstance.disabled.set(true);
-    fixture.componentInstance.loading.set(true);
-    await fixture.whenStable();
-    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+  it('takes the shape the consumer asked for', () => {
+    const { button, fixture, host } = mount();
+    host.shape.set('circle');
+    fixture.detectChanges();
 
-    expect(button.disabled).toBe(true);
-    expect(button.dataset['disabled']).toBe('');
-  });
-
-  it.each([true, 'true'] as const)(
-    'blocks raw aria-disabled value %s without applying disabled state',
-    async (ariaDisabled) => {
-      const fixture = TestBed.createComponent(NamedHost);
-      fixture.componentInstance.ariaDisabled.set(ariaDisabled);
-      await fixture.whenStable();
-      const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-      button.click();
-
-      expect(button.disabled).toBe(false);
-      expect(button.dataset['disabled']).toBeUndefined();
-      expect(fixture.componentInstance.clickSpy).not.toHaveBeenCalled();
-    },
-  );
-
-  it.each([false, 'false'] as const)(
-    'keeps raw aria-disabled value %s active',
-    async (ariaDisabled) => {
-      const fixture = TestBed.createComponent(NamedHost);
-      fixture.componentInstance.ariaDisabled.set(ariaDisabled);
-      await fixture.whenStable();
-      const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
-
-      button.click();
-
-      expect(button.disabled).toBe(false);
-      expect(fixture.componentInstance.clickSpy).toHaveBeenCalledOnce();
-    },
-  );
-
-  it('projects a custom loading indicator while keeping it hidden from the accessible name', async () => {
-    const fixture = TestBed.createComponent(NamedHost);
-    fixture.componentInstance.loading.set(true);
-    fixture.componentInstance.customLoadingIndicator.set(true);
-    await fixture.whenStable();
-    const indicator = fixture.nativeElement.querySelector(
-      '[data-part="loading-indicator"]',
-    ) as HTMLSpanElement;
-
-    expect(indicator.getAttribute('aria-hidden')).toBe('true');
-    expect(indicator.textContent).toContain('Custom indicator');
-    expect(indicator.querySelector('.slotted-button__spinner')).not.toBeNull();
+    expect(button.getAttribute('data-shape')).toBe('circle');
   });
 });

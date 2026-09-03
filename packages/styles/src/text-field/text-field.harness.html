@@ -1,0 +1,211 @@
+<!--
+  The glyphs in the adornments are authored for this page and are not library
+  assets: the reference pages use Lucide, and a framework-free page cannot
+  import it. Two shapes on the same 24-unit grid are enough to judge the box.
+
+  The clear and reveal buttons carry no visible text, and their masks come from
+  the theme's own glyph scale, so nothing here draws a character as an icon.
+-->
+
+<section data-scene="default">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="email" value="cobranca@sirius.com.br" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" placeholder="voce@empresa.com.br" />
+    </div>
+  </div>
+</section>
+
+<section data-scene="sizes">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
+      <input data-part="input" value="Compacto" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" value="Padrão" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="lg" data-variant="outline">
+      <input data-part="input" value="Confortável" />
+    </div>
+  </div>
+</section>
+
+<section data-scene="variants">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" value="outline" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="subtle">
+      <input data-part="input" value="subtle" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="plain">
+      <input data-part="input" value="plain" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="plain" data-mono>
+      <input data-part="input" value="sk_live_9f2c41ab" />
+    </div>
+  </div>
+</section>
+
+<section data-scene="adornments">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="m16 16 4.5 4.5" stroke-linecap="round" />
+        </svg>
+      </span>
+      <input data-part="input" type="search" placeholder="Buscar pedidos" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start" aria-hidden="true">R$</span>
+      <input data-part="input" inputmode="decimal" value="1.480,00" />
+      <span data-part="end" aria-hidden="true">BRL</span>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
+      <span data-part="start" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="m16 16 4.5 4.5" stroke-linecap="round" />
+        </svg>
+      </span>
+      <input data-part="input" value="Passo compacto" />
+      <span data-part="end" aria-hidden="true">%</span>
+    </div>
+  </div>
+</section>
+
+<section data-scene="actions">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="search" value="nota fiscal 2026" />
+      <button data-part="clear" type="button" aria-label="Limpar"></button>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="password" value="senha-secreta" />
+      <button
+        data-part="reveal"
+        type="button"
+        aria-pressed="false"
+        aria-label="Mostrar senha"
+      ></button>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="text" value="senha-secreta" />
+      <button
+        data-part="reveal"
+        type="button"
+        aria-pressed="true"
+        aria-label="Mostrar senha"
+      ></button>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start" aria-hidden="true">@</span>
+      <input data-part="input" value="ada.lovelace" />
+      <button data-part="clear" type="button" aria-label="Limpar"></button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="states">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" value="Padrão" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-invalid>
+      <input data-part="input" value="12.345.678/0001" aria-invalid="true" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-readonly>
+      <input data-part="input" value="Somente leitura" readonly />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-disabled>
+      <input data-part="input" value="Desativado" disabled />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-disabled>
+      <span data-part="start" aria-hidden="true">R$</span>
+      <input data-part="input" value="1.480,00" disabled />
+      <span data-part="end" aria-hidden="true">BRL</span>
+    </div>
+    <fieldset disabled style="border: 0; margin: 0; padding: 0">
+      <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+        <input data-part="input" value="Dentro de um fieldset desativado" />
+      </div>
+    </fieldset>
+  </div>
+</section>
+
+<section data-scene="count">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="count-control">Assunto</label>
+      <span data-part="counter">28/60</span>
+      <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+        <input
+          data-part="input"
+          id="count-control"
+          maxlength="60"
+          value="Reembolso da nota 2026-0442"
+        />
+      </div>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+    >
+      <label data-part="label" for="count-over">Apelido público</label>
+      <span data-part="counter" data-invalid>21/16</span>
+      <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-invalid>
+        <input data-part="input" id="count-over" value="Ada Lovelace Byron" aria-invalid="true" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="types">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="email" autocomplete="email" value="ada@sirius.com.br" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="tel" inputmode="tel" value="+55 11 98765-4321" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" type="url" inputmode="url" value="https://sirius.com.br" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-mono>
+      <input data-part="input" value="ghp_9Xk2LmQ4pR7tV0wZ" />
+    </div>
+  </div>
+</section>
+
+<section data-scene="content">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" value="Kraftfahrzeug-Haftpflichtversicherungsnummer-2026-0442-XZ" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <input data-part="input" placeholder="Digite o número da nota fiscal, com série e subsérie" />
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+      <span data-part="start" aria-hidden="true">R$</span>
+      <input data-part="input" value="1.480.320.559,00" />
+      <button data-part="clear" type="button" aria-label="Limpar"></button>
+    </div>
+    <div data-ui="text-field" data-part="root" data-size="sm" data-variant="subtle">
+      <input data-part="input" value="مرحبا بالعالم" />
+      <button data-part="clear" type="button" aria-label="Limpar"></button>
+    </div>
+  </div>
+</section>

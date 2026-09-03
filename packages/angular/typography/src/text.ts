@@ -6,7 +6,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
-import { toneAttribute, truncatedLines, TYPOGRAPHY_STYLE_URL } from './typography';
+import { toneAttribute, truncatedLines } from './typography';
 import type {
   TypographyAlign,
   TypographyNumeric,
@@ -31,7 +31,7 @@ import type {
   standalone: true,
   exportAs: 'slText',
   template: '<ng-content></ng-content>',
-  styleUrl: TYPOGRAPHY_STYLE_URL,
+  styleUrl: '../../../styles/src/typography/typography.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {

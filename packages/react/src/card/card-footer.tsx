@@ -1,5 +1,11 @@
-import type { CardRegionProps } from './card.types';
+import type { CardRegionProps, CardRegionRootProps } from './card.types';
 
-export function CardFooter(props: CardRegionProps) {
-  return <div {...props} data-part="footer" />;
+/**
+ * Actions and metadata. The footer sits above the hit area a card action
+ * stretches, so a secondary action inside it stays operable.
+ */
+export function CardFooter({ render, ...nativeProps }: CardRegionProps) {
+  const rootProps: CardRegionRootProps = { ...nativeProps, 'data-part': 'footer' };
+
+  return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

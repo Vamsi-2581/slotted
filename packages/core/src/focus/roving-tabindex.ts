@@ -171,11 +171,7 @@ export function createRovingTabindex(
   function handleKeydown(event: KeyboardEvent) {
     readItems();
     const vertical = orientation() === 'vertical';
-    const keys = vertical
-      ? VERTICAL_KEYS
-      : direction() === 'rtl'
-        ? MIRRORED_KEYS
-        : HORIZONTAL_KEYS;
+    const keys = vertical ? VERTICAL_KEYS : direction() === 'rtl' ? MIRRORED_KEYS : HORIZONTAL_KEYS;
     /**
      * The pair across the flow. It navigates only when the caller asked for
      * it, and it is never mirrored: `dir` turns the inline axis and leaves the

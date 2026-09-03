@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 5,
+  "family": "status-indicator",
+  "ui": "status-indicator",
+  "axes": {
+    "status": ["neutral", "info", "success", "warning", "danger", "unknown"],
+    "mark": ["dot", "icon"],
+    "size": ["sm", "md", "lg"],
+    "live": ["off", "polite", "assertive"]
+  },
+  "statusTones": {
+    "neutral": "secondary",
+    "info": "accent",
+    "success": "success",
+    "warning": "warning",
+    "danger": "danger",
+    "unknown": "secondary"
+  },
+  "statusGlyphs": {
+    "neutral": "--slotted-icon-circle",
+    "info": "--slotted-icon-circle-info",
+    "success": "--slotted-icon-circle-check",
+    "warning": "--slotted-icon-triangle-alert",
+    "danger": "--slotted-icon-circle-alert",
+    "unknown": "--slotted-icon-circle-question"
+  },
+  "defaultLabels": {
+    "neutral": "Neutral",
+    "info": "Information",
+    "success": "Success",
+    "warning": "Warning",
+    "danger": "Error",
+    "unknown": "Unknown"
+  },
+  "members": {
+    "statusIndicator": {
+      "nativeElement": "span",
+      "defaults": {
+        "status": "neutral",
+        "mark": "dot",
+        "size": "md",
+        "live": "off",
+        "pulse": false
+      },
+      "capabilities": ["appearance", "size", "status", "live"],
+      "states": ["default", "focus-visible"],
+      "parts": ["root", "mark", "label", "announcement"]
+    }
+  },
+  "scenarios": {
+    "statusIndicator": [
+      "playground",
+      "statuses",
+      "marks",
+      "sizes",
+      "pulse",
+      "announcements",
+      "context",
+      "content",
+      "composition",
+      "accessibility"
+    ]
+  }
+}

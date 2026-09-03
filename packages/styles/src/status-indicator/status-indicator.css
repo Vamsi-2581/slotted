@@ -1,0 +1,385 @@
+@layer slotted.components {
+  /**
+   * ── The indicator ──────────────────────────────────────────────────────
+   *
+   * A mark and the word it stands for: the operational state of something the
+   * application observes and this family only reports. It is never a command,
+   * so it answers no hover and gives no press feedback, and it holds no state
+   * of its own — a component that moved its own status would be describing a
+   * system it cannot see.
+   *
+   * `align-items: flex-start` rather than `center`, and that is the decision
+   * the whole box is built around. A status is often a sentence — “Waiting for
+   * approval from the security team” — and this family lets it wrap where
+   * `badge` clips its own label to one line. A centred mark beside four lines
+   * of text floats in the middle of a paragraph; the mark is given a box one
+   * line tall instead, so it sits on the first line however far the words run.
+   *
+   * The words take the page's own colour. The tone is on the mark, which is
+   * what keeps a column of statuses in a table as readable as the column
+   * beside it — the answer Spectrum, Chakra and Ant Design all reached, and
+   * the opposite of the coloured pill Primer and Atlassian draw.
+   */
+  [data-ui='status-indicator'][data-part='root'] {
+    /**
+     * Type and glyph come from the control scales, the only ones the theme
+     * restates per density, so a status shrinks with the row it sits in. The
+     * gap comes from the space scale: a density step inside a distance this
+     * small would be sub-pixel, and density already moves the type.
+     */
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_glyph-size: var(--slotted-control-icon-size-md, 16px);
+    --_gap: var(--slotted-space-3, 0.375rem);
+    --_line-height: var(--slotted-line-height-md, 1.5);
+
+    /**
+     * The disc is one cap tall: the height of the letters it stands beside
+     * rather than of the em box that contains them. `badge` sizes its own dot
+     * on the whole font size, and it is right to — a badge's dot is a chip
+     * standing alone, with nothing beside it to be measured against. Read at
+     * 420 pixels, the same 13 pixels beside a word is a bullet rather than a
+     * status light: it outweighs the letters it belongs to. One cap is 9.4
+     * pixels at `md`, which leaves 7.4 of tone inside the rim — above the six
+     * at which `badge` recorded a dot reading as dark rather than as its own
+     * colour — and it answers density and type size without a number.
+     */
+    --_dot-size: 1cap;
+    --_mark-size: var(--_dot-size);
+    --_rim-width: var(
+      --slotted-status-indicator-mark-border-width,
+      var(--slotted-border-width-thin, 1px)
+    );
+    /**
+     * The rim is the tone's own text role, which is the darkest step the tone
+     * has and the one the theme's contrast test holds to the 4.5:1 reading
+     * ratio against the surface. A mark whose whole meaning is a graphic is
+     * bound by WCAG 2.2 1.4.11's 3:1 rather than decorated by it, so a rim
+     * measured for text clears the requirement with room over.
+     *
+     * `badge` rims its dot with `--slotted-border-strong` instead, and it is
+     * right to: a badge's dot sits on the corner of a photograph or a button,
+     * where the ground is not the page's own surface and only a neutral edge
+     * can be measured against it. This one sits in a line of text on the
+     * surface the theme calibrated the tone against — and read at 250%, the
+     * neutral rim was a grey ring that took the saturation out of the four
+     * tones whose fill already cleared 3:1 on its own.
+     */
+    --_rim: var(--slotted-status-indicator-mark-border-color, var(--_text));
+
+    /**
+     * What the ring is drawn against. The pulse cannot hang off the mark
+     * itself: an icon mark carries a `mask-image`, a mask clips the element's
+     * pseudo-elements with it, and a ring behind a triangle was cut into the
+     * shape of that triangle and then disappeared. Photographed at 300% before
+     * it was moved here.
+     */
+    --_pulse-inset: calc((1lh - var(--_mark-size)) / 2);
+
+    align-items: flex-start;
+    display: inline-flex;
+    font-family: var(
+      --slotted-status-indicator-font-family,
+      var(--slotted-control-font-family, sans-serif)
+    );
+    font-size: var(--_font-size);
+    line-height: var(--_line-height);
+    max-inline-size: 100%;
+    /**
+     * The indicator never widens the box that holds it. Its own minimum is the
+     * longest word of a label it did not choose, and a grid or flex parent
+     * sizes its track from that minimum — so a container digest with nothing
+     * to break on pushed a 220-pixel column out to 420 and painted past its
+     * own edge. Zero here hands the decision back to the container, and the
+     * label breaks the token at whatever width it is given.
+     */
+    min-inline-size: 0;
+    position: relative;
+    /**
+     * `render` can make the root an `<a>`, and the rule a browser writes on
+     * every anchor would put a line under a status. The mark is the
+     * affordance; the underline belongs to `link`, on a link.
+     */
+    text-decoration: none;
+    /* Written inside a sentence, the indicator sits on the text's centre. */
+    vertical-align: middle;
+  }
+
+  /* ── Status: the tone each state speaks in, and the glyph it draws ─────
+   *
+   * Six values, and the map is `specs/components/status-indicator/contract.json`
+   * rather than a decision taken here: the stylesheet, both bindings and the
+   * contract test all read the same table.
+   *
+   * `neutral` and `unknown` share `secondary` on purpose, so the difference
+   * between “nothing is happening” and “nobody knows” is never carried by
+   * colour. The filled disc and the dashed ring say it in `high-contrast` and
+   * in greyscale as well as in `light`.
+   */
+
+  [data-ui='status-indicator'][data-part='root'][data-status='neutral'] {
+    /**
+     * The one neutral the theme calibrates against the surface rather than
+     * against a control, and the only fill that makes this dot read as filled.
+     *
+     * `--slotted-tone-secondary-solid` is the surface's own colour in all
+     * three schemes, and its `solid-hover` step — which `badge` reaches for on
+     * a chip the size of a word — is one shade off it. Read at 420 pixels on a
+     * nine-pixel disc, that was a rim around nothing: `neutral` and `unknown`
+     * both read as hollow, and hollow is the word this family reserved for
+     * “nobody knows”. `--slotted-border-strong` is held to 3:1 against the
+     * surface it separates, which is exactly what a filled neutral mark needs
+     * and the reason `badge` rims its own dot with it.
+     */
+    --_solid: var(--slotted-border-strong);
+    --_text: var(--slotted-tone-secondary-text);
+    --_glyph: var(--slotted-icon-circle);
+  }
+
+  [data-ui='status-indicator'][data-part='root'][data-status='info'] {
+    --_solid: var(--slotted-tone-accent-solid);
+    --_text: var(--slotted-tone-accent-text);
+    --_glyph: var(--slotted-icon-circle-info);
+  }
+
+  [data-ui='status-indicator'][data-part='root'][data-status='success'] {
+    --_solid: var(--slotted-tone-success-solid);
+    --_text: var(--slotted-tone-success-text);
+    --_glyph: var(--slotted-icon-circle-check);
+  }
+
+  [data-ui='status-indicator'][data-part='root'][data-status='warning'] {
+    --_solid: var(--slotted-tone-warning-solid);
+    --_text: var(--slotted-tone-warning-text);
+    --_glyph: var(--slotted-icon-triangle-alert);
+  }
+
+  [data-ui='status-indicator'][data-part='root'][data-status='danger'] {
+    --_solid: var(--slotted-tone-danger-solid);
+    --_text: var(--slotted-tone-danger-text);
+    --_glyph: var(--slotted-icon-circle-alert);
+  }
+
+  [data-ui='status-indicator'][data-part='root'][data-status='unknown'] {
+    --_solid: transparent;
+    --_text: var(--slotted-tone-secondary-text);
+    --_glyph: var(--slotted-icon-circle-question);
+  }
+
+  /**
+   * Which of the two marks the box is sized for, decided on the root rather
+   * than on the mark. Both the mark and the ring that leaves it read the
+   * measurement, and the ring is a pseudo-element of the root: declaring it on
+   * the mark left the ring the size of a dot around a sixteen-pixel glyph, and
+   * one and three quarter pixels above where it belonged.
+   */
+  [data-ui='status-indicator'][data-part='root'][data-mark='icon'] {
+    --_mark-size: var(--_glyph-size);
+  }
+
+  /* ── Size ─────────────────────────────────────────────────────────────── */
+
+  [data-ui='status-indicator'][data-part='root'][data-size='sm'] {
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+    --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
+    --_gap: var(--slotted-space-2, 0.25rem);
+  }
+
+  [data-ui='status-indicator'][data-part='root'][data-size='lg'] {
+    --_font-size: var(--slotted-control-font-size-lg, 14px);
+    --_glyph-size: var(--slotted-control-icon-size-lg, 18px);
+    --_gap: var(--slotted-space-4, 0.5rem);
+  }
+
+  /* ── The mark ─────────────────────────────────────────────────────────
+   *
+   * One box, painted two ways. `1lh` is what puts it on the first line: the
+   * unit resolves against the indicator's own line box, so the mark stays
+   * centred on the words at every type size and every density without a
+   * number saying how. It is the rule `skeleton` uses to sit an inline bar on
+   * a line of type, applied to a box rather than to a baseline.
+   */
+  [data-ui='status-indicator'] [data-part='mark'] {
+    block-size: var(--_mark-size);
+    box-sizing: border-box;
+    flex: none;
+    inline-size: var(--_mark-size);
+    margin-block-start: var(--_pulse-inset);
+  }
+
+  [data-ui='status-indicator'][data-mark='dot'] [data-part='mark'] {
+    background-color: var(--_solid, ButtonFace);
+    border: var(--_rim-width) solid var(--_rim, CanvasText);
+    border-radius: var(--slotted-radius-full, 9999px);
+  }
+
+  /**
+   * The ring nobody filled in. A dashed edge is the second half of the answer
+   * to `neutral` and `unknown` sharing a tone, and it is the only mark in the
+   * family that says something by what it is missing.
+   */
+  [data-ui='status-indicator'][data-mark='dot'][data-status='unknown'] [data-part='mark'] {
+    border-style: dashed;
+  }
+
+  /**
+   * The glyph, in the tone's own text role and on no ground of its own.
+   *
+   * Fluent and Carbon both knock the symbol out of a filled disc. Read at
+   * `sm`, that is 1.75 device pixels of stroke inside a fourteen-pixel circle,
+   * and it depends on a contrast the theme does not promise between a tone's
+   * fill and its on-solid ink at that size. The tone `text` roles are the ones
+   * the theme's contrast test holds to the 4.5:1 reading ratio — more than the
+   * 3:1 a meaningful graphic needs — so the glyph is drawn in one of those and
+   * the disc is left to the mark that is a disc.
+   *
+   * `--slotted-status-indicator-mark-image` is the escape hatch: an
+   * application with a status of its own writes one declaration and keeps the
+   * tone, the size, the alignment and the name.
+   */
+  [data-ui='status-indicator'][data-mark='icon'] [data-part='mark'] {
+    background-color: var(--_text, CanvasText);
+    mask-image: var(--slotted-status-indicator-mark-image, var(--_glyph));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  /* ── The words ────────────────────────────────────────────────────────
+   *
+   * `min-inline-size: 0` is what lets the label shrink below its content
+   * inside the flex root, and `overflow-wrap` is what breaks the one string a
+   * status is likeliest to hold that no language can break — a deployment id,
+   * a container digest, a hostname without a hyphen. Nothing is ever removed:
+   * the whole string stays in the DOM, in the accessibility tree and findable
+   * by a page search.
+   *
+   * `break-word` rather than `anywhere`, and the difference is the one this
+   * family was caught by. Both break the token; only `anywhere` also reports a
+   * min-content size of one character, so a grid column sized to its content
+   * collapses to that character. Read on the reference page, “Build 4821
+   * failed” came out as fourteen lines of one letter each in a table whose
+   * first column was auto-sized. `break-word` keeps the longest word as the
+   * minimum and breaks only what still does not fit.
+   */
+  [data-ui='status-indicator'] [data-part='label'] {
+    margin-inline-start: var(--_gap);
+    min-inline-size: 0;
+    overflow-wrap: break-word;
+  }
+
+  /**
+   * The gap taken back when the label holds nothing a reader can see. A mark
+   * with no visible words still carries its own word, clipped by
+   * `visually-hidden`, and that word is out of flow — so the label box is
+   * empty, and a gap in front of an empty box puts a bare dot off the centre
+   * of the cell it was meant to sit in.
+   */
+  [data-ui='status-indicator'] [data-part='label']:has(> [data-part='announcement']) {
+    margin-inline-start: 0;
+  }
+
+  /* ── Focus ────────────────────────────────────────────────────────────
+   *
+   * The family is not focusable on its own. The ring is painted anyway,
+   * because `render` and Angular's host element both let a consumer make the
+   * root an `<a>` or a `<button>`, and a ring that appears only where a family
+   * expects focus is a ring that goes missing.
+   */
+  [data-ui='status-indicator'][data-part='root']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /* ── The pulse ────────────────────────────────────────────────────────
+   *
+   * A ring leaving the mark and fading, for a change happening now. It is an
+   * enhancement rather than the state: the tone, the glyph and the word have
+   * already said what the status is, so the ring can be withdrawn wherever it
+   * would be wrong without anything going unsaid.
+   *
+   * The three implementations that ship this animation all get the same thing
+   * wrong. Mantine and Shoelace each write a literal duration and `infinite`
+   * beside it, and Ant Design keeps its own in a theme number; none of the
+   * three sits inside a query that answers a reader who asked the operating
+   * system for stillness. This one takes the loop scale's slowest step, which
+   * is the only step the theme does not shorten under reduced motion —
+   * shortening an endless animation is not an answer to it.
+   */
+  @keyframes slotted-status-indicator-pulse {
+    from {
+      opacity: 0.5;
+      scale: 1;
+    }
+
+    to {
+      opacity: 0;
+      scale: 2.2;
+    }
+  }
+
+  /**
+   * The ring is the tone's text role rather than its fill, and that is one
+   * decision covering three cases. It is defined for all six statuses, where
+   * the fill is not — `unknown` has none, so a ring painted from it would be a
+   * pulse nobody can see. It is the role the theme's contrast test holds to
+   * the reading ratio, so the ring clears its ground in every scheme. And on
+   * an icon mark it is the colour the glyph is already drawn in, so the ring
+   * leaves the mark rather than appearing beside it in a second colour.
+   */
+  [data-ui='status-indicator'][data-pulse]::after {
+    animation: slotted-status-indicator-pulse var(--slotted-duration-loop-slow)
+      var(--slotted-easing-standard) infinite;
+    block-size: var(--_mark-size);
+    border: var(--_rim-width) solid var(--_text);
+    border-radius: var(--slotted-radius-full, 9999px);
+    box-sizing: border-box;
+    content: '';
+    inline-size: var(--_mark-size);
+    inset-block-start: var(--_pulse-inset);
+    inset-inline-start: 0;
+    position: absolute;
+  }
+
+  /**
+   * Stopped, not slowed, and removed rather than frozen. A ring halted halfway
+   * through an expansion is a rendering fault rather than a state — the
+   * finding `button` recorded about its own loading band — so the pseudo goes
+   * and the status is left to the parts that were always carrying it.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='status-indicator'][data-pulse]::after {
+      animation: none;
+      content: none;
+    }
+  }
+
+  /**
+   * ── Forced colours ─────────────────────────────────────────────────────
+   *
+   * The operating system replaces every author colour here, so the tone is
+   * gone whatever the family writes: the six statuses become one mark. What is
+   * left to decide is whether that mark is visible, and a masked glyph over a
+   * forced `Canvas` background is not — the defect `link` found on its own
+   * external mark and answered the same way.
+   *
+   * The glyph keeps its silhouette, which is the whole reason the icon mark
+   * exists: a triangle and a circled cross are still different from each other
+   * when neither of them is red. The pulse is withdrawn, because its ring is
+   * painted from a tone the system replaces with a face colour, and a ring in
+   * `ButtonFace` on `Canvas` is an animation of nothing.
+   */
+  @media (forced-colors: active) {
+    [data-ui='status-indicator'] [data-part='mark'] {
+      background-color: CanvasText;
+      border-color: CanvasText;
+    }
+
+    [data-ui='status-indicator'][data-mark='dot'][data-status='unknown'] [data-part='mark'] {
+      background-color: Canvas;
+    }
+
+    [data-ui='status-indicator'][data-pulse]::after {
+      content: none;
+    }
+  }
+}

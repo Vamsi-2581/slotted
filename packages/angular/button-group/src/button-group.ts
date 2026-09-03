@@ -1,0 +1,152 @@
+import {
+  booleanAttribute,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  HostAttributeToken,
+  inject,
+  input,
+  ViewEncapsulation,
+} from '@angular/core';
+import { BUTTON_DEFAULTS_TOKEN } from '@slotted/angular/button';
+import type {
+  ButtonDefaults,
+  ButtonSize,
+  ButtonTone,
+  ButtonVariant,
+} from '@slotted/angular/button';
+
+import {
+  injectButtonGroupDefaults,
+  type ButtonGroupAlign,
+  type ButtonGroupCollapse,
+  type ButtonGroupGap,
+  type ButtonGroupJustify,
+  type ButtonGroupOrientation,
+} from './button-group-defaults';
+
+/**
+ * The three axes the group hands down to the buttons inside it, through the
+ * button family's own defaults token rather than through a second channel of
+ * this family's invention. That is what keeps an explicit input on a button
+ * winning over the group, because it is the rule `button` already implements.
+ *
+ * The value is read through getters so that a button's `computed` tracks the
+ * group's signals: a plain snapshot would fix the paint at the moment the
+ * first button was created and never move again.
+ */
+function provideGroupPaint() {
+  return {
+    provide: BUTTON_DEFAULTS_TOKEN,
+    useFactory: (): ButtonDefaults => {
+      const group = inject(SlButtonGroup);
+      const inherited = inject(BUTTON_DEFAULTS_TOKEN, { skipSelf: true });
+
+      return {
+        get size() {
+          return group.size() ?? inherited.size;
+        },
+        get tone() {
+          return group.tone() ?? inherited.tone;
+        },
+        get variant() {
+          return group.variant() ?? inherited.variant;
+        },
+      };
+    },
+  };
+}
+
+/**
+ * A set of related actions laid out as one unit. The group arranges what the
+ * consumer wrote and changes the semantics of nothing inside it: every button
+ * keeps its own role, its own state and its own place in the tab sequence.
+ *
+ * It is `role="group"` and not `role="toolbar"`, and the difference is a
+ * keyboard model rather than a name. A toolbar is one tab stop with arrow-key
+ * navigation between its controls, which is the `toolbar` family. A consumer
+ * who wrote `role` on the element keeps it, read before the host binding is
+ * written, so the role and the model are never confused by accident.
+ *
+ * There is no `label` input. The element already accepts `aria-label` and
+ * `aria-labelledby`, and a second way to name one thing is a second thing to
+ * get wrong.
+ */
+@Component({
+  selector: '[slButtonGroup]',
+  standalone: true,
+  exportAs: 'slButtonGroup',
+  template: '<ng-content></ng-content>',
+  styleUrl: '../../../styles/src/button-group/button-group.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  providers: [provideGroupPaint()],
+  host: {
+    'data-ui': 'button-group',
+    'data-part': 'root',
+    '[attr.role]': 'role',
+    '[attr.data-orientation]': 'orientation() ?? null',
+    '[attr.data-gap]': 'gap() ?? null',
+    '[attr.data-align]': 'align() ?? null',
+    '[attr.data-justify]': 'justify() ?? null',
+    '[attr.data-collapse]': 'collapse() ?? null',
+    '[attr.data-attached]': 'attached() ? "" : null',
+    '[attr.data-full-width]': 'fullWidth() ? "" : null',
+  },
+})
+export class SlButtonGroup {
+  private readonly provided = injectButtonGroupDefaults();
+
+  /** Positions the buttons across the flow. */
+  readonly align = input<ButtonGroupAlign>();
+  /** Positions the buttons along the flow, which makes the group hold the line. */
+  readonly justify = input<ButtonGroupJustify>();
+  readonly orientation = input<ButtonGroupOrientation>();
+  /** The group holds the line and its buttons share it in equal segments. */
+  readonly fullWidth = input(false, { transform: booleanAttribute });
+
+  /**
+   * Joins the buttons into one shape: shared edges, outer corners only.
+   *
+   * Absence has to survive the transform, because `false` is a value: an unset
+   * input mapped to `false` would overrule an application that provided
+   * `attached` for every group under it.
+   */
+  protected readonly attachedInput = input<boolean | undefined, boolean | string | undefined>(
+    undefined,
+    {
+      alias: 'attached',
+      transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
+    },
+  );
+  /** Separation between buttons, as a step on the space scale. */
+  protected readonly gapInput = input<ButtonGroupGap | undefined>(undefined, { alias: 'gap' });
+  /** What happens when the container is narrower than the row. */
+  protected readonly collapseInput = input<ButtonGroupCollapse | undefined>(undefined, {
+    alias: 'collapse',
+  });
+
+  readonly size = input<ButtonSize | undefined>(undefined);
+  readonly tone = input<ButtonTone | undefined>(undefined);
+  readonly variant = input<ButtonVariant | undefined>(undefined);
+
+  readonly attached = computed(() => this.attachedInput() ?? this.provided.attached ?? false);
+  readonly gap = computed(() => this.gapInput() ?? this.provided.gap);
+  readonly collapse = computed(() => this.collapseInput() ?? this.provided.collapse);
+
+  /**
+   * A static attribute the consumer wrote survives the host binding, which is
+   * how `role="toolbar"` stays possible on an element this family would
+   * otherwise call a group.
+   *
+   * `role=""` is the way out: ARIA reads an empty role as "use the element's
+   * implicit one", so a `nav` or a `section` carrying this directive keeps the
+   * semantics it was chosen for instead of being flattened to a group.
+   */
+  private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
+  protected readonly role = this.writtenRole === '' ? null : (this.writtenRole ?? 'group');
+
+  /** What the rule between two runs turns with, and whether it may state an axis. */
+  readonly flow = computed(() => this.orientation() ?? 'horizontal');
+  readonly collapses = computed(() => this.collapse() === 'stack');
+}

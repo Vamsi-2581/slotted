@@ -1,0 +1,52 @@
+/**
+ * The six operational states. The vocabulary is closed, and that is a decision
+ * rather than an omission: a seventh value would carry no tone, no glyph and
+ * no fallback word, which are the three things this family exists to supply.
+ */
+export type StatusIndicatorStatus =
+  'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'unknown';
+
+/** The compact mark, and the one that says the status without colour. */
+export type StatusIndicatorMark = 'dot' | 'icon';
+export type StatusIndicatorSize = 'sm' | 'md' | 'lg';
+export type StatusIndicatorLive = 'off' | 'polite' | 'assertive';
+
+/** What a reader hears when the page showed no words. Replaceable per status. */
+export type StatusIndicatorLabels = Partial<Record<StatusIndicatorStatus, string>>;
+
+export const STATUS_INDICATOR_DEFAULT_STATUS: StatusIndicatorStatus = 'neutral';
+export const STATUS_INDICATOR_DEFAULT_MARK: StatusIndicatorMark = 'dot';
+export const STATUS_INDICATOR_DEFAULT_SIZE: StatusIndicatorSize = 'md';
+export const STATUS_INDICATOR_DEFAULT_LIVE: StatusIndicatorLive = 'off';
+
+/**
+ * The word a reader hears when the consumer projected no content.
+ *
+ * It is a table rather than a sentence built at the call site, because it is
+ * the one thing every surveyed implementation of this family gets wrong.
+ * React Spectrum's page says an `aria-label` “must be provided” and ships a
+ * nameless dot when nobody does; Fluent builds one from its own
+ * `DEFAULT_STRINGS`, which is English and cannot be replaced. Here the table
+ * is the fallback and the whole of it is replaceable in one decision, through
+ * `provideStatusIndicatorDefaults`.
+ */
+export const STATUS_INDICATOR_LABELS: Required<StatusIndicatorLabels> = {
+  neutral: 'Neutral',
+  info: 'Information',
+  success: 'Success',
+  warning: 'Warning',
+  danger: 'Error',
+  unknown: 'Unknown',
+};
+
+/**
+ * What `live` writes on the host. The names are the platform's: `status` is a
+ * polite live region with an implicit `aria-atomic`, so the mark and its word
+ * are announced as one thing; `alert` interrupts, which the APG's Alert
+ * pattern reserves for a message that needs immediate attention.
+ */
+export const STATUS_INDICATOR_ROLE: Record<StatusIndicatorLive, string | null> = {
+  off: null,
+  polite: 'status',
+  assertive: 'alert',
+};

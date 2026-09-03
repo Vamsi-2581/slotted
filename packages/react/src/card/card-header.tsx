@@ -1,5 +1,8 @@
-import type { CardRegionProps } from './card.types';
+import type { CardRegionProps, CardRegionRootProps } from './card.types';
 
-export function CardHeader(props: CardRegionProps) {
-  return <div {...props} data-part="header" />;
+/** A title and the line that supports it. Both of them are Typography. */
+export function CardHeader({ render, ...nativeProps }: CardRegionProps) {
+  const rootProps: CardRegionRootProps = { ...nativeProps, 'data-part': 'header' };
+
+  return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

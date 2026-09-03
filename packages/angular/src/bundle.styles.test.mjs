@@ -45,12 +45,20 @@ test('finds every published entry point', () => {
   assert.ok(found.length >= 4, `Expected several entry points, found ${found.join(', ')}`);
 });
 
+/**
+ * The rule is that the bundle carries the family's layered stylesheet and that
+ * the compiler scoped none of it — not that the layer is the first byte of the
+ * file. `@property` cannot take effect inside `@layer`, so a family that
+ * registers one has to write it before the layer, and `skeleton` does: the
+ * assertion anchored to the start of the string called that a violation and
+ * reported a family whose stylesheet was entirely correct.
+ */
 test('ships the family styles with encapsulation disabled', () => {
   for (const { bundle, name } of entryPoints()) {
     const source = readFileSync(bundle, 'utf8');
     assert.match(source, /encapsulation: i0\.ViewEncapsulation\.None/, name);
-    assert.doesNotMatch(source, /styles: \["@layer slotted\.components\{:host/, name);
-    assert.match(source, /styles: \["@layer slotted\.components\{/, name);
+    assert.doesNotMatch(source, /@layer slotted\.components\{:host/, name);
+    assert.match(source, /styles: \["[^\]]*?@layer slotted\.components\{/, name);
   }
 });
 

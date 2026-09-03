@@ -1,20 +1,27 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "family": "divider",
-  "orientations": ["horizontal", "vertical"],
+  "ui": "divider",
+  "labelledElement": "div",
+  "axes": {
+    "orientation": ["horizontal", "vertical"],
+    "align": ["start", "center", "end"]
+  },
   "members": {
     "divider": {
       "nativeElement": "hr",
       "defaults": {
         "orientation": "horizontal",
-        "decorative": false
+        "decorative": false,
+        "inset": false,
+        "align": "center"
       },
       "capabilities": ["orientation", "decorative"],
       "states": ["default"],
-      "parts": ["root"]
+      "parts": ["root", "label"]
     }
   },
   "scenarios": {
-    "divider": ["playground", "orientations", "decorative", "composition"]
+    "divider": ["playground", "orientations", "label", "decorative", "composition"]
   }
 }

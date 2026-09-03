@@ -6,7 +6,62 @@ export const WIDTHS = [240, 420, 720];
 export const DENSITIES = ['comfortable', 'compact', 'dense'];
 export const DIRECTIONS = ['ltr', 'rtl'];
 
-const SCENE = /<section data-scene="([^"]+)">([\s\S]*?)<\/section>/g;
+const SCENE_OPEN = /<section\s+data-scene="([^"]+)"\s*>/g;
+const SECTION_TAG = /<section\b|<\/section\s*>/g;
+const IDENTIFIER = /data-ui=['"]([a-z0-9-]+)['"]/g;
+
+/**
+ * The scenes a fragment declares, read by counting `section` tags rather than
+ * by stopping at the first closing one.
+ *
+ * A single non-greedy pattern was enough while no family's own root was a
+ * `section`. `alert`'s is — a message with a name is a `region` landmark, which
+ * is the answer Primer's Banner reaches and the reason the family does not
+ * write a live role on its box — so the first alert in a scene closed the scene
+ * around it, and every alert after it disappeared from the page. Nothing in the
+ * capture said so: the picture was a correct rendering of one alert.
+ */
+export function parseScenes(fragment) {
+  const scenes = [];
+  SCENE_OPEN.lastIndex = 0;
+
+  for (let open = SCENE_OPEN.exec(fragment); open !== null; open = SCENE_OPEN.exec(fragment)) {
+    const start = open.index + open[0].length;
+    SECTION_TAG.lastIndex = start;
+
+    let depth = 1;
+    let end = -1;
+    for (let tag = SECTION_TAG.exec(fragment); tag !== null; tag = SECTION_TAG.exec(fragment)) {
+      depth += tag[0].startsWith('</') ? -1 : 1;
+      if (depth === 0) {
+        end = tag.index;
+        break;
+      }
+    }
+
+    if (end === -1) throw new Error(`the scene "${open[1]}" is never closed`);
+    scenes.push({ name: open[1], markup: fragment.slice(start, end) });
+    SCENE_OPEN.lastIndex = end;
+  }
+
+  return scenes;
+}
+
+/**
+ * The other families a fragment renders, read from the fragment itself.
+ *
+ * A family whose subject is how it composes with another cannot be looked at
+ * alone: `button-group` joins buttons into one shape, repaints one seam of a
+ * solid one and raises the focused one over its neighbour, and with only its
+ * own stylesheet on the page every capture shows unstyled markup. Nothing new
+ * has to be declared for the page to carry them, because the fragment already
+ * names them in the same `data-ui` that is the public identifier.
+ */
+export function composedFamilies(fragment, family) {
+  return [...new Set([...fragment.matchAll(IDENTIFIER)].map(([, name]) => name))]
+    .filter((name) => name !== family)
+    .sort();
+}
 
 /**
  * The page is framework-free on purpose. One authored stylesheet serves both
@@ -19,8 +74,28 @@ const SCENE = /<section data-scene="([^"]+)">([\s\S]*?)<\/section>/g;
  * axes a capture is taken *in*, and multiplying every cell by six would make
  * the review view unreadable to reach the same coverage.
  */
-export function renderHarness({ family, fragment, familyCss, themeCss }) {
-  const scenes = [...fragment.matchAll(SCENE)].map(([, name, markup]) => ({ name, markup }));
+/**
+ * A radio group is scoped to its form owner, and a fragment with no `form` of
+ * its own owns the document. The builder emits every scene nine times, so nine
+ * copies of one scene were nine copies of one radio group: the last `checked`
+ * in the page won and the eight cells above it photographed an empty set. The
+ * `name` is therefore made per cell.
+ *
+ * It is the one identifier rewritten. `id` and `for` stay verbatim, because a
+ * duplicated `id` costs a screenshot nothing — the shooter scopes `--focus` and
+ * the pointer to the cell it is capturing — and rewriting them would edit the
+ * DOM the harness exists to show. Wrapping each stage in a `form` was the other
+ * way to scope the group and is not open: two fragments already declare a
+ * `form`, and a nested one is dropped by the parser.
+ */
+export function scopeControlNames(markup, suffix) {
+  return markup.replace(/<input\b[^>]*>/g, (tag) =>
+    tag.replace(/\bname="([^"]*)"/g, (_, value) => `name="${value}--${suffix}"`),
+  );
+}
+
+export function renderHarness({ family, fragment, familyCss, composedCss = '', themeCss }) {
+  const scenes = parseScenes(fragment);
   if (scenes.length === 0) {
     throw new Error(`${family}: the harness fragment declares no scene`);
   }
@@ -34,9 +109,10 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
         <div
           class="stage"
           id="${name}-${scheme}-${width}"
+          data-scene="${name}"
           data-slotted-scheme="${scheme}"
           style="inline-size: ${width}px"
-        >${markup}</div>
+        >${scopeControlNames(markup, `${scheme}-${width}`)}</div>
       </figure>`,
       ),
     ),
@@ -47,6 +123,7 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
 <meta charset="utf-8">
 <title>${family} harness</title>
 <style>${themeCss}</style>
+<style>${composedCss}</style>
 <style>${familyCss}</style>
 <style>
   body { margin: 0; font: 12px ui-sans-serif, system-ui, sans-serif; background: #f4f5f7 }
@@ -100,7 +177,7 @@ export function renderHarness({ family, fragment, familyCss, themeCss }) {
       const id = cell.querySelector('.stage').id;
       const okScheme = !scheme || id.includes('-' + scheme + '-');
       const okWidth = !width || id.endsWith('-' + width);
-      const okScene = !scene || id.startsWith(scene + '-');
+      const okScene = !scene || cell.querySelector('.stage').dataset.scene === scene;
       if (okScheme && okWidth && okScene) cell.classList.add('shown');
     }
   }
@@ -116,10 +193,18 @@ async function main() {
   const root = new URL('../../', import.meta.url);
   const read = (path) => readFile(new URL(path, root), 'utf8');
 
+  const fragment = await read(`packages/styles/src/${family}/${family}.harness.html`);
+  const composed = await Promise.all(
+    composedFamilies(fragment, family).map((name) =>
+      read(`packages/styles/src/${name}/${name}.css`).catch(() => ''),
+    ),
+  );
+
   const html = renderHarness({
     family,
-    fragment: await read(`packages/styles/src/${family}/${family}.harness.html`),
+    fragment,
     familyCss: await read(`packages/styles/src/${family}/${family}.css`),
+    composedCss: composed.join('\n'),
     themeCss: await read('packages/themes/default/dist/styles.css'),
   });
 

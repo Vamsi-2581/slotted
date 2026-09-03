@@ -10,6 +10,12 @@
     "pnpm": "11.24.0"
   },
   "scripts": {
+    "build": "turbo run build",
+    "build:tokens": "turbo run build --filter @slotted/tokens --filter @slotted/theme-default",
+    "build:core": "turbo run build --filter @slotted/core",
+    "dev": "turbo run dev",
+    "dev:react": "turbo run dev --filter @slotted/storybook-react",
+    "dev:angular": "turbo run dev --filter @slotted/storybook-angular",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",
@@ -28,6 +34,7 @@
     "@angular/compiler": "22.1.4",
     "@angular/compiler-cli": "22.1.4",
     "@angular/core": "22.1.4",
+    "@angular/forms": "22.1.4",
     "@angular/platform-browser": "22.1.4",
     "@eslint/js": "10.0.1",
     "eslint": "10.9.1",

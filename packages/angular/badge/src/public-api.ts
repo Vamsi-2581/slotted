@@ -1,2 +1,14 @@
 export { SlBadge } from './badge';
-export type { BadgeFill, BadgeSize, BadgeVariant } from './badge';
+export { SlBadgeAnchor } from './badge-anchor';
+export { SlBadgeEnd, SlBadgeStart } from './badge-content';
+export { BADGE_DEFAULTS, injectBadgeDefaults, provideBadgeDefaults } from './badge-defaults';
+export type {
+  BadgeDefaults,
+  BadgeLive,
+  BadgeOverlap,
+  BadgePlacement,
+  BadgeShape,
+  BadgeSize,
+  BadgeTone,
+  BadgeVariant,
+} from './badge-defaults';

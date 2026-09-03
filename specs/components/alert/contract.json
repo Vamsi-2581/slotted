@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 5,
+  "family": "alert",
+  "ui": "alert",
+  "axes": {
+    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "variant": ["soft", "outline", "solid"],
+    "reach": ["inline", "section", "page"],
+    "live": ["off", "polite", "assertive"]
+  },
+  "toneGlyphs": {
+    "accent": "--slotted-icon-circle-info",
+    "secondary": "--slotted-icon-circle",
+    "success": "--slotted-icon-circle-check",
+    "warning": "--slotted-icon-triangle-alert",
+    "danger": "--slotted-icon-circle-alert"
+  },
+  "liveRoles": {
+    "off": null,
+    "polite": "status",
+    "assertive": "alert"
+  },
+  "stateAttributes": {
+    "open": "data-open"
+  },
+  "stateModel": {
+    "open": {
+      "controlled": "open",
+      "uncontrolled": "defaultOpen",
+      "request": "onOpenChange",
+      "reasons": ["dismiss", "programmatic"]
+    }
+  },
+  "members": {
+    "alert": {
+      "nativeElement": "section",
+      "defaults": {
+        "tone": "accent",
+        "variant": "soft",
+        "reach": "section",
+        "live": "off",
+        "hideIcon": false,
+        "dismissible": false,
+        "dismissLabel": "Dismiss",
+        "defaultOpen": true,
+        "restoreFocus": true
+      },
+      "capabilities": ["appearance", "live", "open"],
+      "states": ["default", "hover", "active", "focus-visible", "open"],
+      "parts": ["root", "icon", "content", "title", "description", "actions", "dismiss"]
+    }
+  },
+  "scenarios": {
+    "alert": [
+      "playground",
+      "tones",
+      "variants",
+      "reach",
+      "dismissal",
+      "actions",
+      "live",
+      "content",
+      "composition",
+      "accessibility"
+    ]
+  }
+}

@@ -31,7 +31,7 @@
   "keyboard": [
     {
       "key": "Tab",
-      "effect": "moves to each trigger the flow has not disabled",
+      "effect": "moves to each trigger, including one a linear flow has not opened",
       "focus": "the next control",
       "source": "platform"
     },
@@ -49,37 +49,37 @@
     },
     {
       "key": "ArrowRight",
-      "effect": "horizontal only: focuses the next trigger in the reading direction, wrapping and stepping over a disabled one",
+      "effect": "horizontal only: focuses the next trigger in the reading direction, wrapping. It reaches every header, including one a linear flow has not opened, because Tab does",
       "focus": "that trigger",
       "source": "family"
     },
     {
       "key": "ArrowLeft",
-      "effect": "horizontal only: focuses the previous trigger in the reading direction, wrapping and stepping over a disabled one",
+      "effect": "horizontal only: focuses the previous trigger in the reading direction, wrapping. It reaches every header, including one a linear flow has not opened, because Tab does",
       "focus": "that trigger",
       "source": "family"
     },
     {
       "key": "ArrowDown",
-      "effect": "vertical only: focuses the next trigger, wrapping and stepping over a disabled one",
+      "effect": "vertical only: focuses the next trigger, wrapping. It reaches every header, because Tab does",
       "focus": "that trigger",
       "source": "family"
     },
     {
       "key": "ArrowUp",
-      "effect": "vertical only: focuses the previous trigger, wrapping and stepping over a disabled one",
+      "effect": "vertical only: focuses the previous trigger, wrapping. It reaches every header, because Tab does",
       "focus": "that trigger",
       "source": "family"
     },
     {
       "key": "Home",
-      "effect": "focuses the first trigger the flow has not disabled",
+      "effect": "focuses the first trigger",
       "focus": "that trigger",
       "source": "family"
     },
     {
       "key": "End",
-      "effect": "focuses the last trigger the flow has not disabled",
+      "effect": "focuses the last trigger",
       "focus": "that trigger",
       "source": "family"
     }

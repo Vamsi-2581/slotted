@@ -1,0 +1,682 @@
+@layer slotted.components {
+  /**
+   * One view out of several, and the panels under it.
+   *
+   * The family is a four-column, two-row grid, and every part is placed in a
+   * cell rather than positioned over one. That is what lets the two paging
+   * controls stand beside the list instead of floating above it: an overlay
+   * would need a gradient the width of the control, mirrored for a
+   * right-to-left document, and it would cover the hairline it sits on. Two
+   * `auto` tracks collapse to nothing while the controls are absent, so the
+   * layout costs nothing until the list stops fitting.
+   *
+   *   ┌──────────┬───────────────────┬────────┬─────────┐
+   *   │ scroll ◀ │ list              │ ▶      │ actions │
+   *   ├──────────┴───────────────────┴────────┴─────────┤
+   *   │ panel                                            │
+   *   └──────────────────────────────────────────────────┘
+   */
+  [data-ui='tabs'] {
+    /**
+     * The control scales, read once at the root, so `size` and the three
+     * densities are one decision each rather than one per rule.
+     */
+    --_height: var(--slotted-control-height-md, 34px);
+    --_font-size: var(--slotted-control-font-size-md, 0.875rem);
+    --_padding-inline: var(--slotted-control-padding-inline-md, 0.75rem);
+    --_inner-gap: var(--slotted-control-gap-md, 0.375rem);
+    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    /**
+     * The distance between two tabs. A step below the control gap: two tabs are
+     * one row of one control, and the gap that separates two buttons reads as
+     * two components when what it separates is two labels on a shared line.
+     */
+    --_list-gap: var(--slotted-space-1, 0.125rem);
+    --_track-size: var(--slotted-border-width-thin, 1px);
+    --_marker-size: var(--slotted-border-width-thick, 2px);
+    /**
+     * Which way the selection travelled, resolved into a transform origin. The
+     * marker of the tab being left collapses toward the direction of travel
+     * and the marker of the tab being entered grows from the side the reader
+     * came from, so the pair reads as one bar moving. Nothing is measured:
+     * every surveyed indicator reads the active tab's box, which is why Base UI
+     * ships `renderBeforeHydration` and Ark UI a `setIndicatorRect`.
+     */
+    --_marker-origin: 50%;
+    --_marker-origin-selected: 50%;
+
+    column-gap: var(--slotted-tabs-actions-gap, var(--slotted-space-4, 0.5rem));
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto;
+    min-inline-size: 0;
+    row-gap: var(--slotted-tabs-gap, var(--slotted-space-6, 1rem));
+  }
+
+  [data-ui='tabs'][data-size='sm'] {
+    --_height: var(--slotted-control-height-sm, 30px);
+    --_font-size: var(--slotted-control-font-size-sm, 0.8125rem);
+    --_padding-inline: var(--slotted-control-padding-inline-sm, 0.625rem);
+    --_inner-gap: var(--slotted-control-gap-sm, 0.25rem);
+    --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+  }
+
+  [data-ui='tabs'][data-size='lg'] {
+    --_height: var(--slotted-control-height-lg, 40px);
+    --_font-size: var(--slotted-control-font-size-lg, 1rem);
+    --_padding-inline: var(--slotted-control-padding-inline-lg, 1rem);
+    --_inner-gap: var(--slotted-control-gap-lg, 0.5rem);
+    --_icon-size: var(--slotted-control-icon-size-lg, 20px);
+  }
+
+  /**
+   * A quarter turn, and one column instead of four: the list takes the first
+   * column, the panels the second, and the actions sit under the list. The
+   * paging controls are not drawn at all — a vertical list stacks and the page
+   * scrolls, which is the answer Carbon gives for the same case.
+   */
+  [data-ui='tabs'][data-orientation='vertical'] {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  /* ── The list ─────────────────────────────────────────────────────────── */
+
+  /**
+   * The scroll container and the one tab stop. The hairline is its own border,
+   * which is on the border box and therefore does not scroll with the tabs —
+   * a track drawn on the content would slide away with the first tab.
+   */
+  [data-ui='tabs'] [data-part='list'] {
+    align-items: stretch;
+    display: flex;
+    gap: var(--slotted-tabs-list-gap, var(--_list-gap));
+    grid-column: 2;
+    grid-row: 1;
+    min-inline-size: 0;
+    /**
+     * A row of tabs that runs past its container is a row whose last tab
+     * nobody can reach, and Carbon states the rule for the whole field:
+     * horizontal tabs "should not wrap to multiple lines or stack on top of
+     * each other; instead, they should scroll horizontally".
+     */
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    /**
+     * The platform's scrollbar is the affordance until the family draws its
+     * own. It is hidden only once `data-overflowing` says the paging controls
+     * are there to replace it, which is also the only case where the family
+     * knows a script is running.
+     */
+    scrollbar-width: thin;
+  }
+
+  [data-ui='tabs'][data-overflowing] [data-part='list'] {
+    scrollbar-width: none;
+  }
+
+  [data-ui='tabs'][data-variant='line'] [data-part='list'] {
+    border-block-end: var(--_track-size) solid
+      var(--slotted-tabs-track-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  /**
+   * A column of labels reads down its own start edge. Centring them is what the
+   * horizontal rule wants — a row of equal shares has a middle — and in a
+   * column it produces a ragged left edge nobody can scan.
+   */
+  [data-ui='tabs'][data-orientation='vertical'] [data-part='tab'] {
+    justify-content: start;
+    text-align: start;
+  }
+
+  [data-ui='tabs'][data-orientation='vertical'] [data-part='list'] {
+    flex-direction: column;
+    grid-column: 1;
+    grid-row: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  [data-ui='tabs'][data-orientation='vertical'][data-variant='line'] [data-part='list'] {
+    border-block-end: 0;
+    border-inline-end: var(--_track-size) solid
+      var(--slotted-tabs-track-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  /**
+   * Equal shares of the line, which is Angular Material's `stretchTabs` and
+   * Carbon's grid-aware alignment. A grid rather than `flex: 1`: equal columns
+   * are what stop a four-character tab and a twenty-character one from
+   * dividing the row by the length of a translated string. A row of equal
+   * shares cannot also scroll — there is nothing left to scroll to — so the
+   * label is what gives way, and it is the only place a horizontal label ever
+   * truncates.
+   */
+  [data-ui='tabs'][data-fit='equal'] [data-part='list'] {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    justify-self: stretch;
+    overflow: visible;
+  }
+
+  /** Equal shares are shares of the line, so each item takes the one it is given. */
+  [data-ui='tabs'][data-fit='equal'] [data-part='item'] {
+    min-inline-size: 0;
+  }
+
+  [data-ui='tabs'][data-fit='equal'] [data-part='label'] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── One tab, and the box that holds it ───────────────────────────────── */
+
+  /**
+   * The item is presentational, and it exists for two reasons a `button`
+   * cannot answer: a `button` may not contain a `button`, so a dismissible tab
+   * needs a box for its second control, and the marker has to span the pair
+   * rather than only the label.
+   */
+  [data-ui='tabs'] [data-part='item'] {
+    align-items: stretch;
+    display: grid;
+    grid-auto-flow: column;
+    /**
+     * A tab is as wide as its label. A flex item shrinks below its content
+     * unless it is told otherwise, and the first capture showed what that
+     * costs: three file names in a narrow list wrapped and printed over each
+     * other. The list scrolls instead, which is what `overflow-x` is there for.
+     */
+    flex: none;
+    position: relative;
+  }
+
+  [data-ui='tabs'] [data-part='tab'] {
+    align-items: center;
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--slotted-control-radius, 4px);
+    color: var(--slotted-tabs-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    display: inline-flex;
+    font-family: var(--slotted-control-font-family, ui-sans-serif, system-ui, sans-serif);
+    font-size: var(--_font-size);
+    font-weight: var(--slotted-control-font-weight, 600);
+    gap: var(--_inner-gap);
+    justify-content: center;
+    letter-spacing: var(--slotted-control-letter-spacing, 0);
+    line-height: var(--slotted-control-line-height, 1);
+    min-block-size: var(--_height);
+    min-inline-size: 0;
+    padding-block: 0;
+    padding-inline: var(--_padding-inline);
+    text-decoration: none;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  /**
+   * The words. A box of their own, as in `tag`, and for the same three
+   * reasons: `text-overflow` needs something to clip, an icon beside the label
+   * needs something to be aligned against, and a label in another script needs
+   * to read its own way inside a page that reads the other.
+   */
+  [data-ui='tabs'] [data-part='label'] {
+    min-inline-size: 0;
+    unicode-bidi: plaintext;
+  }
+
+  /**
+   * A tab that is not selected raises its ink on hover and goes one step
+   * further on press. A selected one does neither: it is already at full
+   * strength, and a hover that changes nothing is what tells the reader they
+   * are on the tab they are looking at.
+   */
+  [data-ui='tabs'] [data-part='tab']:not(:disabled):not([aria-selected='true']):hover {
+    background-color: var(
+      --slotted-tabs-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    color: var(--slotted-tabs-hover-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='tabs'] [data-part='tab']:not(:disabled):active {
+    background-color: var(
+      --slotted-tabs-active-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+  }
+
+  /**
+   * The ring is drawn inside the control, and it is the family's one departure
+   * from the library's outward ring: the list is a scroll container, which
+   * clips to its padding box, so a ring outside the first or last tab is a ring
+   * with a side missing.
+   *
+   * It is inset by the marker's own width on top of the usual offset. At the
+   * usual offset the ring's outer edge met the marker, and a selected tab under
+   * focus became one blue shape that said neither of the two things — the
+   * capture is what showed it.
+   */
+  [data-ui='tabs'] [data-part='tab']:focus-visible,
+  [data-ui='tabs'] [data-part='dismiss']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * (var(--slotted-focus-ring-offset, 2px) + var(--_marker-size)));
+  }
+
+  [data-ui='tabs'] [data-part='item'][data-selected] [data-part='tab'] {
+    color: var(--slotted-tabs-selected-color, var(--slotted-tone-accent-text));
+  }
+
+  [data-ui='tabs'] [data-part='tab']:disabled {
+    color: var(--slotted-disabled-foreground, GrayText);
+    cursor: not-allowed;
+  }
+
+  /* ── The marker ───────────────────────────────────────────────────────── */
+
+  /**
+   * Drawn on the item, on the edge the list runs along, and present on every
+   * item rather than only on the selected one: a mark that appears has nothing
+   * to transition from. It is scaled to nothing across the axis it marks, and
+   * the transform origin is what the direction of travel decides.
+   *
+   * It is pulled over the track by exactly the track's own width, so the two
+   * lines are one line rather than a hairline with a thicker line beside it.
+   */
+  [data-ui='tabs'] [data-part='item']::after {
+    background-color: var(--slotted-tabs-marker-color, var(--slotted-tone-accent-solid));
+    border-start-end-radius: var(--slotted-radius-xs, 2px);
+    border-start-start-radius: var(--slotted-radius-xs, 2px);
+    block-size: var(--_marker-size);
+    content: '';
+    inset-block-end: calc(-1 * var(--_track-size));
+    inset-inline: 0;
+    opacity: 0;
+    position: absolute;
+    transform: scale(0, 1);
+    transform-origin: var(--_marker-origin) 50%;
+    transition:
+      opacity var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
+      transform var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  [data-ui='tabs'] [data-part='item'][data-selected]::after {
+    opacity: 1;
+    transform: scale(1, 1);
+    transform-origin: var(--_marker-origin-selected) 50%;
+  }
+
+  /**
+   * Forward is toward the end of the list. The tab being left collapses toward
+   * the end and the tab being entered grows from the start, which is one bar
+   * travelling. `transform-origin` takes no logical keyword, so the two
+   * percentages swap under `:dir(rtl)` — the one place in this stylesheet
+   * where a rule is mirrored by hand.
+   */
+  [data-ui='tabs'][data-activation-direction='forward'] {
+    --_marker-origin: 100%;
+    --_marker-origin-selected: 0%;
+  }
+
+  [data-ui='tabs'][data-activation-direction='backward'] {
+    --_marker-origin: 0%;
+    --_marker-origin-selected: 100%;
+  }
+
+  [data-ui='tabs'][data-activation-direction='forward']:dir(rtl) {
+    --_marker-origin: 0%;
+    --_marker-origin-selected: 100%;
+  }
+
+  [data-ui='tabs'][data-activation-direction='backward']:dir(rtl) {
+    --_marker-origin: 100%;
+    --_marker-origin-selected: 0%;
+  }
+
+  /** A quarter turn: the bar stands on the list's own edge and grows in block. */
+  [data-ui='tabs'][data-orientation='vertical'] [data-part='item']::after {
+    block-size: auto;
+    border-start-end-radius: var(--slotted-radius-xs, 2px);
+    border-start-start-radius: 0;
+    border-end-end-radius: var(--slotted-radius-xs, 2px);
+    inline-size: var(--_marker-size);
+    inset-block: 0;
+    inset-inline: auto calc(-1 * var(--_track-size));
+    transform: scale(1, 0);
+    transform-origin: 50% var(--_marker-origin);
+  }
+
+  [data-ui='tabs'][data-orientation='vertical'] [data-part='item'][data-selected]::after {
+    transform: scale(1, 1);
+    transform-origin: 50% var(--_marker-origin-selected);
+  }
+
+  /* ── Contained ────────────────────────────────────────────────────────── */
+
+  /**
+   * Carbon's contained tabs and Fluent's filled appearance: the list is a
+   * sunken track and each tab a surface inside it. The marker stays, and it is
+   * the reason this variant survives the `high-contrast` scheme — the theme
+   * paints every surface `Canvas` there, so a selection said with a fill alone
+   * would be a selection nobody in that scheme can see.
+   */
+  /**
+   * The track hugs its tabs rather than the line. A sunken bar running the full
+   * width with three pills at one end is a box with a hole in it, which is what
+   * the first capture showed; the `line` variant keeps the full width, because
+   * there the track is the edge of the panel below it.
+   */
+  [data-ui='tabs'][data-variant='contained'] [data-part='list'] {
+    background-color: var(--slotted-tabs-contained-background, var(--slotted-surface-sunken));
+    border-radius: var(--slotted-radius-md, 6px);
+    justify-self: start;
+    max-inline-size: 100%;
+    padding: var(--slotted-space-1, 0.125rem);
+  }
+
+  [data-ui='tabs'][data-variant='contained'] [data-part='item'] {
+    border-radius: var(--slotted-radius-sm, 4px);
+    transition: background-color var(--slotted-control-transition-duration)
+      var(--slotted-control-transition-easing);
+  }
+
+  [data-ui='tabs'][data-variant='contained'] [data-part='item'][data-selected] {
+    background-color: var(--slotted-tabs-contained-selected-background, var(--slotted-surface));
+    box-shadow: var(--slotted-shadow-xs);
+  }
+
+  /**
+   * Inset from the corners by the radius, so the bar underlines the label
+   * instead of tracing the edge of the surface it sits on. Sitting on the
+   * edge, it read as a second border of a different colour, and the capture
+   * showed a pill with one blue side.
+   */
+  [data-ui='tabs'][data-variant='contained'] [data-part='item']::after {
+    inset-block-end: var(--slotted-space-1, 0.125rem);
+    inset-inline: var(--slotted-radius-sm, 4px);
+  }
+
+  [data-ui='tabs'][data-variant='contained'][data-orientation='vertical']
+    [data-part='item']::after {
+    inset-block: var(--slotted-radius-sm, 4px);
+    inset-inline: auto var(--slotted-space-1, 0.125rem);
+  }
+
+  /* ── The dismiss control ──────────────────────────────────────────────── */
+
+  /**
+   * Out of the arrow ring, so the pattern's own model is untouched, and inside
+   * the accessibility tree, so it is not a control only a mouse can reach. The
+   * keyboard path is `Delete`, which the APG names and which the tab announces
+   * through `aria-keyshortcuts`.
+   *
+   * Its target is the control height in both axes: at the dense step the glyph
+   * is twelve pixels, under the twenty-four WCAG 2.2 SC 2.5.8 asks for, and
+   * the box around it is what makes the difference.
+   */
+  [data-ui='tabs'] [data-part='dismiss'] {
+    align-items: center;
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--slotted-control-radius, 4px);
+    color: var(--slotted-tabs-dismiss-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    inline-size: max(var(--slotted-target-min, 24px), var(--_height));
+    justify-content: center;
+    margin-inline-start: calc(-1 * var(--_padding-inline));
+    padding: 0;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  [data-ui='tabs'] [data-part='dismiss']::before {
+    background-color: currentColor;
+    block-size: var(--_icon-size);
+    content: '';
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-icon-x);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  [data-ui='tabs'] [data-part='dismiss']:not(:disabled):hover {
+    background-color: var(
+      --slotted-tabs-dismiss-hover-background,
+      var(--slotted-tone-danger-surface)
+    );
+    color: var(--slotted-tabs-dismiss-hover-color, var(--slotted-tone-danger-text));
+  }
+
+  [data-ui='tabs'] [data-part='dismiss']:not(:disabled):active {
+    background-color: var(
+      --slotted-tabs-dismiss-active-background,
+      var(--slotted-tone-danger-border)
+    );
+    color: var(--slotted-tabs-dismiss-active-color, var(--slotted-text-inverse));
+  }
+
+  [data-ui='tabs'] [data-part='dismiss']:disabled {
+    color: var(--slotted-disabled-foreground, GrayText);
+    cursor: not-allowed;
+  }
+
+  /* ── The paging controls ──────────────────────────────────────────────── */
+
+  /**
+   * One per end, in a track of its own. Standing beside the list rather than
+   * over it costs two `auto` columns that collapse while the controls are
+   * absent, and it buys back the gradient, its mirrored twin, and the hole a
+   * gradient leaves in the hairline it covers.
+   *
+   * They are out of the tab sequence and out of the accessibility tree: every
+   * tab is already reachable through the roving stop, the arrows scroll the
+   * list as they move, and Cloudscape's own guidance warns against extra
+   * stops before a tab list.
+   */
+  [data-ui='tabs'] [data-part='scroll'] {
+    align-items: center;
+    align-self: center;
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--slotted-control-radius, 4px);
+    color: var(--slotted-tabs-scroll-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    display: inline-flex;
+    inline-size: max(var(--slotted-target-min, 24px), var(--_height));
+    justify-content: center;
+    min-block-size: var(--_height);
+    padding: 0;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  [data-ui='tabs'] [data-part='scroll'][data-direction='start'] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  [data-ui='tabs'] [data-part='scroll'][data-direction='end'] {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  [data-ui='tabs'] [data-part='scroll']::before {
+    background-color: currentColor;
+    block-size: var(--_icon-size);
+    content: '';
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-icon-chevron-right);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  /**
+   * The glyph points along the reading direction, so the control toward the
+   * start is the one that turns — and in a right-to-left document it is the
+   * other one. `scale` rather than a second glyph: a chevron is symmetrical
+   * about the axis it is flipped on.
+   */
+  [data-ui='tabs'] [data-part='scroll'][data-direction='start']::before {
+    transform: scaleX(-1);
+  }
+
+  [data-ui='tabs']:dir(rtl) [data-part='scroll'][data-direction='start']::before {
+    transform: none;
+  }
+
+  [data-ui='tabs']:dir(rtl) [data-part='scroll'][data-direction='end']::before {
+    transform: scaleX(-1);
+  }
+
+  [data-ui='tabs'] [data-part='scroll']:not(:disabled):hover {
+    background-color: var(
+      --slotted-tabs-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    color: var(--slotted-tabs-hover-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='tabs'] [data-part='scroll']:not(:disabled):active {
+    background-color: var(
+      --slotted-tabs-active-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+  }
+
+  /**
+   * At an end there is nowhere to go, and the control says so rather than
+   * disappearing: a control that comes and goes moves the list under the
+   * pointer that is using it.
+   */
+  [data-ui='tabs'] [data-part='scroll']:disabled {
+    color: var(--slotted-disabled-foreground, GrayText);
+    cursor: default;
+  }
+
+  [data-ui='tabs'][data-orientation='vertical'] [data-part='scroll'] {
+    display: none;
+  }
+
+  /* ── Actions, and the panels ──────────────────────────────────────────── */
+
+  [data-ui='tabs'] [data-part='actions'] {
+    align-items: center;
+    align-self: center;
+    display: flex;
+    grid-column: 4;
+    grid-row: 1;
+    min-inline-size: 0;
+  }
+
+  [data-ui='tabs'][data-orientation='vertical'] [data-part='actions'] {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  [data-ui='tabs'] [data-part='panel'] {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-inline-size: 0;
+  }
+
+  [data-ui='tabs'][data-orientation='vertical'] [data-part='panel'] {
+    grid-column: 2;
+    grid-row: 1 / -1;
+  }
+
+  /**
+   * `[hidden]` carries `display: none` from the user-agent sheet at a
+   * specificity any rule here would beat, so the attribute is restated rather
+   * than relied on. It is the attribute and not a class because a screen
+   * reader, find-in-page and `:target` all already understand it.
+   */
+  [data-ui='tabs'] [data-part='panel'][hidden] {
+    display: none;
+  }
+
+  /**
+   * The panel is in the page's tab sequence, which is where `Tab` from the list
+   * goes. Its ring is the library's outward one: the panel holds the consumer's
+   * own content and has no padding of its own, so an inset ring is drawn
+   * through the first line of it.
+   */
+  [data-ui='tabs'] [data-part='panel']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /**
+   * A panel arriving fades in. It is the one transition the family draws on the
+   * content rather than on a control, and it exists because the panel is the
+   * thing that changed: without it, a tab press repaints half the page with no
+   * indication that the two states are related. Angular Material slides the
+   * panel instead, which needs a clipping viewport that traps horizontal
+   * scrolling and fights the list's own scroll.
+   */
+  [data-ui='tabs'] [data-part='panel']:not([hidden]) {
+    animation: slotted-tabs-panel-in var(--slotted-duration-short) var(--slotted-easing-enter);
+  }
+
+  @keyframes slotted-tabs-panel-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* ── The family out of action ─────────────────────────────────────────── */
+
+  /**
+   * Every tab carries the native attribute, so the paint follows the element's
+   * own `:disabled` and the browser skips it with the arrows. What the root
+   * adds is the track: a disabled family should not read as a live one with
+   * grey labels.
+   */
+  [data-ui='tabs'][data-disabled][data-variant='line'] [data-part='list'] {
+    border-color: var(--slotted-disabled-border, GrayText);
+  }
+
+  [data-ui='tabs'][data-disabled][data-variant='contained'] [data-part='list'] {
+    background-color: var(--slotted-disabled-background, Canvas);
+  }
+
+  /**
+   * No last resort behind the token, unlike every rule that paints an element:
+   * decoration in an unthemed page should disappear rather than shout, and a
+   * marker painted `GrayText` with no theme would be the loudest thing on it.
+   */
+  [data-ui='tabs'][data-disabled] [data-part='item'][data-selected]::after {
+    background-color: var(--slotted-disabled-border);
+  }
+
+  /* ── Forced colours ──────────────────────────────────────────────────── */
+
+  /**
+   * The theme maps every scheme token to a system colour, so the only rules
+   * here are the ones about paint the theme cannot reach: a mask has no colour
+   * of its own to map, and a selected tab in the contained variant has a fill
+   * that flattens to `Canvas` along with the track it stands in.
+   */
+  @media (forced-colors: active) {
+    [data-ui='tabs'][data-variant='contained'] [data-part='item'][data-selected] {
+      border: var(--slotted-border-width-thin, 1px) solid Highlight;
+    }
+  }
+}

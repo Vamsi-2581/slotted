@@ -586,6 +586,34 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
 | `result-state`          | consolidar | 9    |
 | `toolbar`               | refazer    | 5    |
 
+### Escopo por família — onda 4
+
+- **`breadcrumbs`** — trilha de ancestrais acima da página atual. Landmark `nav`
+  nomeado e `ol` do platform; página atual como texto com `aria-current="page"`,
+  não como link. Separador é geometria desenhada em CSS, espelhada por
+  `:dir(rtl)`; a família não possui ícone algum. Colapso acima de `maxItems`
+  atrás de um botão que expande no lugar — sem overlay, portanto sem depender de
+  `menu` da onda 5 — com contagem no nome acessível e foco no primeiro item
+  revelado. Truncamento por falta de espaço, nunca por medida inventada.
+
+- **`pagination`** — treze partes, doze opcionais: a fileira numerada entre dois
+  gatilhos e a barra de paginador de tabela são a mesma família em dois arranjos.
+  Página e tamanho de página são valores controláveis; total desconhecido não é
+  inventado. Aritmética em `@slotted/core/pagination`, compartilhada pelos dois
+  bindings. `itemHref` decide entre `button` e `a`. Compactação por container
+  query abaixo de 22rem troca a fileira pelo resumo. Seletor de tamanho de página
+  é `select` nativo até `select` existir na onda 6.
+
+- **`stepper`** — indicador e navegação de etapas, mais o painel da etapa atual.
+  Recusa `role="tablist"` (guia, seção 7) e usa `ol`/`li` com
+  `aria-current="step"` mais um status oculto por cabeçalho. Estados pending,
+  current, complete, error e disabled, cada um por forma além de cor. `linear`
+  deriva alcance de conclusão; recusar uma navegação é cancelar a solicitação de
+  mudança. Três modos de navegação — `button`, `link` e `none`, sendo o último um
+  indicador de progresso somente leitura. Avanço é diretiva ou handler no botão
+  do consumidor, nunca um botão da família. Reflow por container query abaixo de
+  30rem transforma linha em coluna.
+
 - `result-state` cobre empty e error na mesma família visual com semânticas
   distintas (guia 17).
 - `toolbar` fecha a onda sem o overflow para menu; o overflow depende de `menu`

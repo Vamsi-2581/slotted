@@ -4302,3 +4302,89 @@ there would put one family's roving focus inside another's.
 - A concurrent session in this worktree is mid-way through `breadcrumb`:
   `specs/reference-pages.test.mjs` fails on that family alone, and no file this
   family owns is involved.
+
+## Breadcrumb, Pagination and Stepper — 2026-09-03
+
+- Decisions: `complete` joins the shared state vocabulary as `data-complete`,
+  between `current` and `active` in the precedence. The vocabulary held fifteen
+  attributes and none meant "this step is done"; `checked` and `selected` are
+  both the reader's own choice, while completion is a fact about the thing
+  itself. `docs/component-features.md` section 7 already spelled the missing
+  word. The comment covers a second reading — a quantity at the top of its range
+  — so a parallel `progress-indicator` finds its reason written rather than
+  adding a second entry.
+- Decisions: `--slotted-icon-chevrons-right` joins the glyph scale. The scale
+  held one chevron, which says "one step"; a paginator's first and last triggers
+  say "all the way to the end", and every surveyed implementation draws that as
+  two. It is one mark rather than two masks composited by each family, because
+  the distance between the strokes is part of the artwork.
+- Decisions: the ellipsis in both breadcrumb and pagination is the character
+  U+2026 rendered as text. Rule 3 of the token foundation forbids drawing an
+  _icon_ from a character — a mark standing in for a concept — and U+2026 stands
+  in for nothing: it is the typographic mark for omitted content, which is
+  exactly what the control holds. The cost of the alternative was concrete: a
+  painted mark is replaced by the page's own background under `forced-colors`,
+  and text never is.
+- Decisions: breadcrumb collapses by expanding in place rather than into an
+  overlay. shadcn and MUI both reach for a layer; a layer needs `menu`, which is
+  wave 5. The cost is that hidden crumbs carry `hidden` and leave the
+  accessibility tree, and it is paid by the ellipsis, whose accessible name says
+  how many it hides and which carries `aria-expanded`.
+- Decisions: `maxItems` folds the same shape at every depth. It first refused to
+  hide a single crumb, on the reasoning that replacing one crumb with one button
+  saves nothing — wrong when the crumb is a forty-character compound, and it made
+  the number mean different things at different depths.
+- Decisions: pagination renders a native `select` for its page size rather than
+  waiting for `select` in wave 6. A paginator that cannot resize its page for a
+  whole wave is not one a table can use, and section 2.8 of the guide asks for
+  the native control first. The part is replaceable when `select` lands.
+- Decisions: changing the page size keeps the reader's first item visible, which
+  is the answer Angular Material takes. Clamping leaves someone on page seven at
+  the end of the collection; resetting to page one throws away where they were.
+  The page that follows is a second request carrying `programmatic`.
+- Decisions: stepper refuses `role="tablist"`, which Angular Material gives a
+  horizontal stepper. Section 7 of the guide forbids it in the Tabs entry itself.
+  The cost — no "tab 2 of 5" announcement — is answered by a visually hidden
+  status inside every header, and written in the contract.
+- Decisions: a consumer refuses a step move by cancelling the change request the
+  library already defines. Zag ships `isStepValid` and `onStepInvalid` for the
+  same job; `request.cancel()` says the same thing at the same moment with the
+  reason already attached.
+- Decisions: the stepper's arrow keys reach every header, exactly where Tab
+  reaches. They are added on top of the tab sequence rather than replacing it
+  with a roving tab stop, because the roving model belongs to the role this
+  family declined, and a step a linear flow has not opened is still one a reader
+  is allowed to find.
+- Decisions: advancing a step is a handler on the consumer's own button —
+  `useStepper()` in React, `slStepperNext` in Angular, the shape `matStepperNext`
+  already taught. A family that shipped its own advance button would ship a
+  second button nobody could theme with the first.
+- Defects found: `packages/storybook-workbench/src/scenarios.tsx` guessed a prop
+  name from a capability, which holds only while a family has one mutable value
+  called what the table expects. Pagination holds a page and a page size and
+  neither is `value`. `apiMetadataErrors` now takes the contract's `stateModel`
+  and checks the names the family actually ships; the table stays the fallback.
+- Defects found by looking, which no test could have caught: hidden crumbs that
+  still rendered, because `display: flex` on the item beat the user agent's own
+  `[hidden] { display: none }`; an ellipsis sitting on the baseline instead of
+  the optical centre; a disabled pagination trigger painted the same grey as its
+  rest state; a cursor paginator that hid its only sentence at 240 pixels; a
+  stepper connector drawn as a stub against the next marker; and a finished step
+  drawing its number and its check on top of each other.
+- Defects found by the specs: after the trail expanded, focus was given to an
+  element whose id had disappeared with the ellipsis, so it fell to the body.
+  The range that decides the collapse is now computed whether or not the trail is
+  expanded, because the collapse and the focus target read it at different
+  moments.
+- Deviations: in the `high-contrast` scheme the untravelled connector is black
+  and the travelled one is the accent, so the pending track reads heavier than
+  the finished one. The theme maps `--slotted-border-subtle` to black there, and
+  a family second-guessing its own theme's palette is what the foundation exists
+  to prevent. The four statuses stay separated by fill and glyph rather than by
+  colour. Raised at the gate.
+- Follow-on: `select` in wave 6 replaces the paginator's native page-size
+  control; the part is already substitutable. `menu` in wave 5 gives a consumer
+  the overlay collapse breadcrumb declined, composed around the ellipsis.
+  `progress-indicator` owns the bar the stepper exposes only as a percentage.
+  `toolbar`'s overflow and `table`'s row actions are the next two callers for
+  `--slotted-icon-chevrons-right` and for the ellipsis-as-text decision.

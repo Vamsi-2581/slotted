@@ -13,21 +13,61 @@
       "types": "./dist/types/collection/index.d.ts",
       "import": "./dist/collection.js"
     },
+    "./count": {
+      "types": "./dist/types/count/index.d.ts",
+      "import": "./dist/count.js"
+    },
+    "./currency": {
+      "types": "./dist/types/currency/index.d.ts",
+      "import": "./dist/currency.js"
+    },
     "./files": {
       "types": "./dist/types/files/index.d.ts",
       "import": "./dist/files.js"
+    },
+    "./form": {
+      "types": "./dist/types/form/index.d.ts",
+      "import": "./dist/form.js"
     },
     "./focus": {
       "types": "./dist/types/focus/index.d.ts",
       "import": "./dist/focus.js"
     },
+    "./identity": {
+      "types": "./dist/types/identity/index.d.ts",
+      "import": "./dist/identity.js"
+    },
+    "./keys": {
+      "types": "./dist/types/keys/index.d.ts",
+      "import": "./dist/keys.js"
+    },
+    "./loading": {
+      "types": "./dist/types/loading/index.d.ts",
+      "import": "./dist/loading.js"
+    },
     "./measure": {
       "types": "./dist/types/measure/index.d.ts",
       "import": "./dist/measure.js"
     },
+    "./number": {
+      "types": "./dist/types/number/index.d.ts",
+      "import": "./dist/number.js"
+    },
+    "./pagination": {
+      "types": "./dist/types/pagination/index.d.ts",
+      "import": "./dist/pagination.js"
+    },
+    "./slider": {
+      "types": "./dist/types/slider/index.d.ts",
+      "import": "./dist/slider.js"
+    },
     "./state": {
       "types": "./dist/types/state/index.d.ts",
       "import": "./dist/state.js"
+    },
+    "./steps": {
+      "types": "./dist/types/steps/index.d.ts",
+      "import": "./dist/steps.js"
     }
   },
   "scripts": {

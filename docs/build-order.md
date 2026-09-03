@@ -643,6 +643,55 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   que não são dele, e `<fieldset disabled>` é a resposta da plataforma. Sem eixo
   de arranjo: gap, alinhamento e barra unida continuam de `button-group`.
 
+- **`description-list`** — pares termo–descrição de um painel de detalhes, lido
+  e não editado. `div` de raiz — o contêiner da container query — em volta de um
+  `dl` de `div`/`dt`/`dd`, forma que o HTML Standard §4.4.9 permite e que faz de
+  cada par uma célula de grade. Nenhum `role` é escrito: HTML-AAM já mapeia
+  `list`, `term` e `definition`, e a MDN registra que escrever `term`/`definition`
+  à mão muda o que o VoiceOver anuncia. Onze partes — `root`, `list`, `item`,
+  `term`, `hint`, `description`, `value`, `placeholder`, `copy`, `toggle` e
+  `action`. Eixos `layout` (`row`/`stack`), `columns` (`1`/`2`/`3`) e `variant`
+  (`plain`/`ruled`/`framed`, o vocabulário de `collapsible`). Os termos
+  compartilham uma trilha dimensionada pelo mais largo deles, por `subgrid`: é o
+  que um `dl` de grupos independentes não faz sozinho, e o que a PatternFly
+  resolve com largura fixa e o Ant com uma `table` de verdade. A trilha de ação
+  existe só onde há ação, porque um gap separa duas trilhas tenha a segunda
+  largura ou não. Recomposição por container query: três colunas viram duas
+  abaixo de 48rem, duas viram uma abaixo de 34rem, a linha vira pilha abaixo de
+  26rem — e oito rem antes disso quando os termos carregam `hint`. Valor longo
+  tem duas saídas e nenhuma tira texto do DOM: `clamp` com `revealed`
+  controlado/não controlado, e cópia por `navigator.clipboard.writeText`
+  anunciada pelo `live-announcer`. Valor ausente é decisão, não omissão: régua
+  desenhada mais o motivo em texto por `visually-hidden`. Ação da linha é um
+  segundo `dd`, nomeada pelo próprio termo com `aria-describedby`. Título e ações
+  do conjunto ficam com `card`; ajuda em camada, com `popover` da onda 5;
+  carregamento, com `skeleton`. Inventário em
+  `docs/superpowers/specs/2026-09-03-description-list-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-03-description-list-design.md`.
+
+- **`list list-item`** — duas famílias, a relação que `accordion` e
+  `collapsible` já têm: nenhuma regra da folha do conjunto alcança
+  `[data-ui='list-item']`, e o conjunto entrega `variant`, `size`, `marker` e
+  `inset` a cada linha pelo binding. `list` tem um membro e cinco partes —
+  `root`, `section`, `section-label`, `section-list` e `empty` — com eixos
+  `variant` (`plain`/`ruled`/`framed`/`separated`, o vocabulário de
+  `accordion`), `size` e `marker` (`none`/`bullet`/`number`), mais `ordered`,
+  `inset`, `loading` e o nome acessível. `list-item` tem um membro e oito partes
+  — `root`, `content`, `start`, `body`, `label`, `description`, `end` e
+  `actions` — com eixos `tone` (as cinco do tema), `size` e `align`
+  (`center`/`start`), mais `inset`, `truncate`, `selected`, `current`,
+  `disabled`, `loading`, `position` e `setSize`.
+  `content` é `div`, `button` ou `a`, e `actions` é irmão dele e nunca filho:
+  conteúdo interativo não aninha dentro de `a` nem de `button`. `aria-disabled`
+  não vai na `li` — a ARIA 1.2 a depreca em `listitem` — e a família escreve
+  `role="list"` sempre, porque desenha o próprio marcador e o `::marker` nativo
+  não existe em uma linha que também carrega controles. Seleção com foco
+  rotativo, virtualização e reordenação por arraste ficam com `listbox`, com o
+  motor de coleção e com drag-and-drop, todos da onda 6.
+  Inventário em
+  `docs/superpowers/specs/2026-09-03-list-and-list-item-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-03-list-and-list-item-design.md`.
+
 ## Onda 5 — Infraestrutura de overlay e overlays
 
 Infraestrutura primeiro, em `packages/core`, com teste próprio e sem UI:

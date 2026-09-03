@@ -1,0 +1,163 @@
+<!--
+  The DOM both bindings render, written a third time. Every `data-part` the
+  contract declares appears here, and every scene is a trail an application
+  would actually put on a page rather than a row of specimens.
+-->
+<section data-scene="trail">
+  <nav aria-label="Breadcrumb" data-part="root" data-ui="breadcrumb">
+    <ol data-part="list">
+      <li data-part="item">
+        <a data-part="link" href="#workspace">Workspace</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#billing">Billing</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#invoices">Invoices</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <span aria-current="page" data-part="page">INV-2026-08-0041</span>
+      </li>
+    </ol>
+  </nav>
+</section>
+
+<!--
+  Seven levels collapsed to four visible items. The hidden crumbs stay in the
+  DOM behind `hidden`, and the button that reveals them says how many there are
+  in the name a reader hears rather than in the mark the eye sees.
+-->
+<section data-scene="collapsed">
+  <nav aria-label="Breadcrumb" data-part="root" data-ui="breadcrumb">
+    <ol data-part="list">
+      <li data-part="item">
+        <a data-part="link" href="#workspace">Workspace</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <button
+          aria-expanded="false"
+          aria-label="Show 3 hidden levels"
+          data-part="ellipsis"
+          type="button"
+        >
+          …
+        </button>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item" hidden>
+        <a data-part="link" href="#organisation">Northwind Trading</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item" hidden>
+        <a data-part="link" href="#accounts">Accounts</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item" hidden>
+        <a data-part="link" href="#billing">Billing</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#invoices">Invoices</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <span aria-current="page" data-part="page">INV-2026-08-0041</span>
+      </li>
+    </ol>
+  </nav>
+</section>
+
+<!-- The same trail after the ellipsis was pressed. Nothing is hidden and the
+     button is gone, which is why focus has somewhere else to be. -->
+<section data-scene="expanded">
+  <nav aria-label="Breadcrumb" data-expanded="" data-part="root" data-ui="breadcrumb">
+    <ol data-part="list">
+      <li data-part="item">
+        <a data-part="link" href="#workspace">Workspace</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#organisation">Northwind Trading</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#accounts">Accounts</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#billing">Billing</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#invoices">Invoices</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <span aria-current="page" data-part="page">INV-2026-08-0041</span>
+      </li>
+    </ol>
+  </nav>
+</section>
+
+<!--
+  A separator the consumer replaced. The element is the same part; what changes
+  is that it holds content, so the painted rule stops being drawn and the mark
+  inside it is shown instead.
+-->
+<section data-scene="separator">
+  <nav aria-label="Breadcrumb" data-part="root" data-ui="breadcrumb">
+    <ol data-part="list">
+      <li data-part="item">
+        <a data-part="link" href="#workspace">Workspace</a>
+        <span aria-hidden="true" data-part="separator">›</span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#billing">Billing</a>
+        <span aria-hidden="true" data-part="separator">›</span>
+      </li>
+      <li data-part="item">
+        <span aria-current="page" data-part="page">Invoices</span>
+      </li>
+    </ol>
+  </nav>
+</section>
+
+<!--
+  Content the trail did not choose: a German compound, a pasted identifier with
+  no break opportunity in it, and a trail whose only crumb is the page itself.
+  The first two truncate at the measure and keep their string; the third draws
+  no separator, because there is nothing to separate.
+-->
+<section data-scene="content">
+  <nav aria-label="Breadcrumb" data-part="root" data-ui="breadcrumb">
+    <ol data-part="list">
+      <li data-part="item">
+        <a data-part="link" href="#a">Zahlungsabwicklungseinstellungen</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <a data-part="link" href="#b">INV-2026-08-0041-RECONCILIATION-REPORT</a>
+        <span aria-hidden="true" data-part="separator"></span>
+      </li>
+      <li data-part="item">
+        <span aria-current="page" data-part="page">تسوية</span>
+      </li>
+    </ol>
+  </nav>
+</section>
+
+<!-- A trail whose only crumb is the page itself. No separator is drawn,
+     because there is nothing to separate, and the landmark keeps its name. -->
+<section data-scene="single">
+  <nav aria-label="Breadcrumb" data-part="root" data-ui="breadcrumb">
+    <ol data-part="list">
+      <li data-part="item">
+        <span aria-current="page" data-part="page">Dashboard</span>
+      </li>
+    </ol>
+  </nav>
+</section>

@@ -1,0 +1,289 @@
+@layer slotted.components {
+  /**
+   * The trail of ancestors above the current page. It is a line of text, not a
+   * row of controls: no fill, no frame, no height of its own. What it borrows
+   * from the control scale is the gap and the type size, so a trail sitting
+   * above a toolbar reads at the same weight as the toolbar's own labels.
+   *
+   * Two colours carry the whole family. `--_rest` is the muted step every
+   * ancestor is painted in, and `--_strong` is the page's own text colour,
+   * which is where hover goes and where the current page sits already. Mixing
+   * toward a colour the theme holds to a contrast ratio in every scheme is the
+   * rule `link` arrived at after painting hover with a fill role; a trail is
+   * text for the same reason a link is.
+   */
+  [data-ui='breadcrumb'] {
+    --_rest: var(--slotted-breadcrumb-color, var(--slotted-text-muted, GrayText));
+    --_strong: var(--slotted-breadcrumb-color-current, var(--slotted-text, CanvasText));
+    --_hover: var(
+      --slotted-breadcrumb-color-hover,
+      color-mix(in oklab, var(--_rest) 30%, var(--_strong))
+    );
+    --_separator: var(
+      --slotted-breadcrumb-separator-color,
+      color-mix(in oklab, var(--_rest) 72%, transparent)
+    );
+    --_gap: var(--slotted-breadcrumb-gap, var(--slotted-control-gap-md, 8px));
+    --_ellipsis-hover: color-mix(in oklab, currentColor 10%, transparent);
+    --_ellipsis-active: color-mix(in oklab, currentColor 18%, transparent);
+
+    color: var(--_rest);
+    display: block;
+    font-family: var(--slotted-breadcrumb-font-family, var(--slotted-font-family-sans, inherit));
+    font-size: var(--slotted-breadcrumb-font-size, var(--slotted-control-font-size-md, 13px));
+    line-height: var(--slotted-breadcrumb-line-height, var(--slotted-line-height-sm, 1.45));
+  }
+
+  /**
+   * The list wraps rather than scrolling. A trail that scrolls hides its own
+   * first crumb, which is the one a reader looks for; a trail that wraps keeps
+   * every ancestor visible and costs one line. `row-gap` is smaller than the
+   * inline gap because two wrapped lines of one type size need less air between
+   * them than two words do beside each other.
+   */
+  [data-ui='breadcrumb'] [data-part='list'] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    column-gap: var(--_gap);
+    row-gap: var(--slotted-breadcrumb-row-gap, var(--slotted-space-2, 0.25rem));
+  }
+
+  [data-ui='breadcrumb'] [data-part='item'] {
+    align-items: center;
+    column-gap: var(--_gap);
+    display: flex;
+    /**
+     * The item shrinks and its label truncates; the separator beside it does
+     * not, so a trail under pressure loses characters from the longest crumb
+     * rather than losing the marks that make it a trail.
+     */
+    min-inline-size: 0;
+    /**
+     * And it never exceeds the trail. Without this a pasted identifier with no
+     * break opportunity in it widens the list past the column it sits in,
+     * because a wrapping row wraps between items and not inside one.
+     */
+    max-inline-size: 100%;
+  }
+
+  /**
+   * A crumb the collapse is hiding. The rule exists because `display: flex` on
+   * the item above beats the user agent's own `[hidden] { display: none }` —
+   * author styles win over the user agent sheet — so without it every hidden
+   * crumb rendered and the collapse did nothing at all. The capture is what
+   * said so; both bindings write the attribute and neither could have known.
+   */
+  [data-ui='breadcrumb'] [data-part='item'][hidden] {
+    display: none;
+  }
+
+  /* ── The crumbs ─────────────────────────────────────────────────────────
+   *
+   * An ancestor is a muted label that reaches the page's text colour under the
+   * pointer, and the current page is that colour already. Neither is
+   * underlined at rest: a trail is a row of eight rules stacked above a
+   * heading, and the underline arrives with the pointer and with focus, where
+   * it distinguishes the one crumb being addressed from the seven beside it.
+   */
+
+  [data-ui='breadcrumb'] :is([data-part='link'], [data-part='page']) {
+    border-radius: var(--slotted-breadcrumb-radius, var(--slotted-control-radius, 4px));
+    display: block;
+    /**
+     * A crumb truncates because the trail ran out of room, not because it
+     * passed a number this stylesheet invented: the row wraps first, and only
+     * a crumb wider than the whole trail loses characters. An application that
+     * wants every crumb capped sets the measure itself. Whatever is cut, the
+     * string stays in the DOM and in the accessible name, which is the
+     * repository's rule for every truncation.
+     */
+    max-inline-size: var(--slotted-breadcrumb-item-measure, 100%);
+    /* A flex item refuses to shrink below its content until it is told to. */
+    min-inline-size: 0;
+    overflow: hidden;
+    text-decoration-color: transparent;
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--slotted-breadcrumb-underline-thickness, from-font);
+    text-overflow: ellipsis;
+    text-underline-offset: var(--slotted-breadcrumb-underline-offset, 0.2em);
+    transition:
+      color var(--slotted-duration-short) var(--slotted-easing-standard),
+      text-decoration-color var(--slotted-duration-short) var(--slotted-easing-standard);
+    white-space: nowrap;
+  }
+
+  [data-ui='breadcrumb'] [data-part='link'] {
+    color: inherit;
+  }
+
+  /**
+   * The page the reader is on. It takes the strongest text colour and gains
+   * weight, so the end of the trail is legible without reading it — and the
+   * weight is on the one crumb that never moves, so nothing beside it shifts
+   * when the pointer arrives.
+   */
+  [data-ui='breadcrumb'] [data-part='page'] {
+    color: var(--_strong);
+    font-weight: var(--slotted-breadcrumb-page-weight, var(--slotted-font-weight-medium, 500));
+  }
+
+  [data-ui='breadcrumb'] [data-part='link']:not([data-disabled]):hover {
+    color: var(--_hover);
+    text-decoration-color: currentColor;
+  }
+
+  [data-ui='breadcrumb'] [data-part='link']:not([data-disabled]):active {
+    color: var(--_strong);
+  }
+
+  /**
+   * The ring hugs a crumb at one pixel and the ellipsis at two. A crumb is
+   * text with no border for the ring to clear — the distance `link` arrived at
+   * for the same reason — and at two pixels its ring reached into the
+   * separator beside it. The ellipsis is a real button box, and a ring drawn
+   * against its own edge would read as a thicker edge rather than as focus.
+   */
+  [data-ui='breadcrumb'] [data-part='link']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-breadcrumb-focus-ring-offset, 1px);
+    text-decoration-color: currentColor;
+  }
+
+  [data-ui='breadcrumb'] [data-part='ellipsis']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-breadcrumb-ellipsis-focus-ring-offset, 2px);
+  }
+
+  /* ── The separator ──────────────────────────────────────────────────────
+   *
+   * Geometry, not a character and not a glyph mask. The APG example draws it
+   * as a border skewed with `transform` so it never reaches the accessibility
+   * tree, and `docs/token-foundation.md` forbids drawing an icon from a
+   * character — a rotated rule is neither.
+   *
+   * It is an element rather than a pseudo-element because a consumer may put
+   * their own mark inside it, and a pseudo-element holds no content the
+   * consumer wrote. The rule is drawn on the element itself, so a separator
+   * with children shows the children and the empty one shows the rule.
+   */
+
+  [data-ui='breadcrumb'] [data-part='separator'] {
+    align-items: center;
+    color: var(--_separator);
+    display: flex;
+    flex: none;
+    justify-content: center;
+  }
+
+  [data-ui='breadcrumb'] [data-part='separator']:empty {
+    background-color: currentColor;
+    block-size: var(--slotted-breadcrumb-separator-length, 0.9em);
+    border-radius: var(--slotted-radius-full, 9999px);
+    inline-size: var(
+      --slotted-breadcrumb-separator-thickness,
+      var(--slotted-border-width-thin, 1px)
+    );
+    rotate: var(--slotted-breadcrumb-separator-skew, 20deg);
+  }
+
+  /**
+   * A slash leans the other way in a right-to-left document, the same way the
+   * trail itself runs the other way. `:dir()` rather than an ancestor `[dir]`,
+   * so a trail inside a left-to-right island leans the way that island reads.
+   */
+  [data-ui='breadcrumb'] [data-part='separator']:empty:dir(rtl) {
+    rotate: calc(-1 * var(--slotted-breadcrumb-separator-skew, 20deg));
+  }
+
+  /* ── The ellipsis ───────────────────────────────────────────────────────
+   *
+   * What the collapse hides, and the control that reveals it. It is a button
+   * with a real hit area rather than three characters' worth of one: the
+   * button fills the minimum target in both axes, and the ellipsis inside it
+   * is the character U+2026 rendered as text.
+   *
+   * That is deliberate, and it is the one place in the library where a
+   * character is the right answer. Rule 3 of `docs/token-foundation.md`
+   * forbids drawing an *icon* from a character — a mark standing in for a
+   * concept, like an arrow or a check. U+2026 stands in for nothing: it is the
+   * typographic mark for omitted content, and omitted content is exactly what
+   * this control holds. Text also survives `forced-colors`, where every
+   * painted decoration is replaced by the page's own background, and it scales
+   * with the type where a fixed mask would not.
+   *
+   * The button's accessible name says how many crumbs it hides, so what a
+   * reader hears is a count rather than three dots.
+   */
+
+  [data-ui='breadcrumb'] [data-part='ellipsis'] {
+    align-items: center;
+    appearance: none;
+    background: none;
+    block-size: var(--slotted-breadcrumb-ellipsis-size, var(--slotted-target-min, 24px));
+    border: 0;
+    border-radius: var(--slotted-breadcrumb-radius, var(--slotted-control-radius, 4px));
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    inline-size: var(--slotted-breadcrumb-ellipsis-size, var(--slotted-target-min, 24px));
+    justify-content: center;
+    /**
+     * The mark is set larger than the trail's own type, because it sits alone
+     * inside a target box and three dots at label size read as a gap rather
+     * than as a control.
+     */
+    font-size: var(--slotted-breadcrumb-ellipsis-font-size, 1.15em);
+    letter-spacing: var(--slotted-breadcrumb-ellipsis-tracking, 0.05em);
+    /**
+     * The ink of an ellipsis sits on the baseline, and a centred line box puts
+     * the baseline below the middle of the box. Half a cap height is the
+     * distance between the baseline and the optical centre of Latin text,
+     * which is the same correction the `icon` family derives for an inline
+     * box — here applied to the text rather than to a glyph.
+     */
+    line-height: 1;
+    padding: 0;
+    transition:
+      background-color var(--slotted-duration-short) var(--slotted-easing-standard),
+      color var(--slotted-duration-short) var(--slotted-easing-standard);
+    translate: 0 calc(-1 * var(--slotted-breadcrumb-ellipsis-lift, 0.5cap));
+  }
+
+  [data-ui='breadcrumb'] [data-part='ellipsis']:not([data-disabled]):hover {
+    background-color: var(--slotted-breadcrumb-ellipsis-background-hover, var(--_ellipsis-hover));
+    color: var(--_hover);
+  }
+
+  [data-ui='breadcrumb'] [data-part='ellipsis']:not([data-disabled]):active {
+    background-color: var(--slotted-breadcrumb-ellipsis-background-active, var(--_ellipsis-active));
+    color: var(--_strong);
+  }
+
+  /* ── Forced colours ─────────────────────────────────────────────────────
+   *
+   * The theme remaps every token it owns, so this block covers only what the
+   * family paints itself, which is one thing: the separator is a painted rule,
+   * and a painted surface is replaced by the page's own background when the
+   * system takes the palette over. It is restated against a system colour so
+   * the trail keeps its marks.
+   *
+   * Nothing else needs a rule here. The ellipsis is text, and text is never
+   * removed; its hover fill is, which leaves a button whose own frame the
+   * system draws.
+   */
+
+  @media (forced-colors: active) {
+    [data-ui='breadcrumb'] [data-part='separator']:empty {
+      background-color: GrayText;
+    }
+
+    [data-ui='breadcrumb'] [data-part='ellipsis'] {
+      border: var(--slotted-border-width-thin, 1px) solid ButtonBorder;
+    }
+  }
+}

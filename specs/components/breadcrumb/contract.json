@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 5,
+  "family": "breadcrumb",
+  "ui": "breadcrumb",
+  "rootRole": "navigation",
+  "currentValue": "page",
+  "currentSource": "aria-current",
+  "separator": "geometry",
+  "collapse": {
+    "control": "ellipsis",
+    "reveals": "in place",
+    "hides": "the hidden attribute",
+    "focusAfterExpand": "the first revealed link"
+  },
+  "keyboard": [
+    {
+      "key": "Tab",
+      "effect": "moves to each link in the trail, and to the ellipsis when the trail is collapsed",
+      "focus": "the next control",
+      "source": "platform"
+    },
+    {
+      "key": "Enter",
+      "effect": "follows the focused link",
+      "focus": "the destination",
+      "source": "platform"
+    },
+    {
+      "key": "Enter",
+      "effect": "expands a collapsed trail when the ellipsis has focus",
+      "focus": "the first revealed link, because the ellipsis stops existing",
+      "source": "family"
+    },
+    {
+      "key": "Space",
+      "effect": "expands a collapsed trail when the ellipsis has focus",
+      "focus": "the first revealed link, because the ellipsis stops existing",
+      "source": "platform"
+    }
+  ],
+  "declined": {
+    "skeleton": {
+      "deferTo": "skeleton",
+      "reason": "A trail whose labels are still loading is a trail of skeletons, and skeleton already ships the shape. Two families drawing a loading placeholder would be two answers to one question."
+    },
+    "size": {
+      "deferTo": "the density axis",
+      "reason": "Carbon is the only surveyed implementation with a size step, and the three densities already restate the control scale. A second scale would contradict them at two of the three."
+    },
+    "menu": {
+      "deferTo": "menu",
+      "reason": "shadcn and MUI both put the collapsed crumbs in an overlay. This family expands them in place instead, which needs no layer, no positioner and no dismissal policy; a consumer who wants the overlay composes menu around the ellipsis in wave 5."
+    }
+  },
+  "provides": {
+    "breadcrumbDefaults": ["label", "maxItems", "itemsBeforeCollapse", "itemsAfterCollapse"]
+  },
+  "stateAttributes": {
+    "expanded": "data-expanded"
+  },
+  "stateModel": {
+    "open": {
+      "controlled": "expanded",
+      "uncontrolled": "defaultExpanded",
+      "request": "onExpandedChange",
+      "reasons": ["pointer", "keyboard"]
+    }
+  },
+  "literals": {
+    "--slotted-breadcrumb-separator-skew": "The angle a one-pixel rule is rotated through to read as a slash. It is a shape rather than a step on a scale, and docs/token-foundation.md holds no scale of angles."
+  },
+  "members": {
+    "breadcrumb": {
+      "nativeElement": "nav",
+      "defaults": {
+        "label": "Breadcrumb",
+        "maxItems": 8,
+        "itemsBeforeCollapse": 1,
+        "itemsAfterCollapse": 2,
+        "defaultExpanded": false
+      },
+      "capabilities": ["open", "wiring"],
+      "states": ["default", "hover", "active", "focus-visible", "expanded"],
+      "parts": ["root", "list", "item", "link", "page", "separator", "ellipsis"]
+    }
+  },
+  "scenarios": {
+    "breadcrumb": [
+      "playground",
+      "collapse",
+      "separator",
+      "current",
+      "context",
+      "content",
+      "composition",
+      "keyboard"
+    ]
+  }
+}

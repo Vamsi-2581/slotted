@@ -151,6 +151,17 @@ test('names an owner for everything it declines', () => {
   }
 });
 
+/**
+ * `count` is the one input with no default. Absent, the total is unknown: the
+ * row of numbers is not drawn and the family invents nothing. Declaring a
+ * default of nought said the opposite — that an unstated collection is empty —
+ * and the reference page repeated it before the contract was corrected.
+ */
+test('gives the total no default, because absent means unknown', () => {
+  assert.ok(!('count' in pagination.defaults));
+  assert.ok(pagination.capabilities.includes('current'));
+});
+
 test('announces a page change politely, and lets an application turn it off', () => {
   assert.ok(pagination.capabilities.includes('live'));
   assert.equal(pagination.defaults.live, 'polite');

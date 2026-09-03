@@ -85,8 +85,14 @@ is not, and the two look identical from outside.
 
 Two states that can be true at once resolve in the order `STATE_PRECEDENCE`
 declares, strongest first: `disabled`, `loading`, `readonly`, `invalid`,
-`checked`, `selected`, `pressed`, `current`, `active`, `hover`,
+`checked`, `selected`, `pressed`, `current`, `complete`, `active`, `hover`,
 `focus-visible`, `default`.
+
+`complete` sits under `current` because where the reader is now outranks what
+they have already done, and under `invalid` because a completed step that
+failed is a step that failed. It was added when Stepper found the vocabulary
+had no word for a step a flow has finished; `checked` and `selected` are both
+the reader's own choice and neither describes it.
 
 A weaker state holds itself back for every stronger one. A disabled control
 does not answer hover; a loading control does not answer press. The library

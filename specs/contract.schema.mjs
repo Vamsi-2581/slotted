@@ -30,6 +30,12 @@ export const STATE_ATTRIBUTES = {
   readonly: 'data-readonly',
   dragging: 'data-dragging',
   checked: 'data-checked',
+  /**
+   * A step of a flow the reader has finished. It is not `checked` and not
+   * `selected`: both of those are the reader's own choice, and completion is
+   * the flow's fact about a step the reader has walked past.
+   */
+  complete: 'data-complete',
   open: 'data-open',
   expanded: 'data-expanded',
   'drop-target': 'data-drop-target',
@@ -53,11 +59,24 @@ export const STATE_PRECEDENCE = [
   'selected',
   'pressed',
   'current',
+  'complete',
   'active',
   'hover',
   'focus-visible',
   'default',
 ];
+
+/**
+ * The five semantic colours the library speaks in. They belong to the theme —
+ * every one of them carries the same nine roles — so no family owns the list.
+ *
+ * It is stated here because it was not stated anywhere: `alert` and `tag` each
+ * asserted their tones by reading `badge`'s contract, which held only while all
+ * three families were on the same schema. Rebuilding one of the three renamed
+ * the axis under the other two, and two tests failed for a family neither of
+ * them is about.
+ */
+export const TONES = ['accent', 'secondary', 'success', 'warning', 'danger'];
 
 /** Why a change was requested. A boolean cannot say, so every request does. */
 export const CHANGE_REASONS = [
@@ -76,6 +95,8 @@ export const CHANGE_REASONS = [
 
 export const KNOWN_CAPABILITIES = [
   'appearance',
+  /** Arranging children: separation, alignment along the flow and across it. */
+  'arrangement',
   'size',
   'shape',
   'measurement',
@@ -100,9 +121,37 @@ export const KNOWN_CAPABILITIES = [
   'external',
   'activation',
   'selection',
+  /**
+   * Asking to be taken out of the collection that holds it. It is deliberately
+   * not mutable: the family emits a request carrying a reason, and the
+   * consumer's own collection decides. A component that removed itself would
+   * render nothing while the consumer's array still held the item, which is
+   * the desync `docs/state-and-events.md` exists to prevent.
+   */
+  'removable',
   'virtualization',
   'files',
   'checked',
+  /**
+   * The text a control holds. It is the most common mutable value a component
+   * library ships and the vocabulary had no word for it, which is how the
+   * deleted `input` family came to declare five capabilities, none of them
+   * mutable, and no state model for the one thing the control does.
+   */
+  'value',
+  /** A hidden value shown in the clear, which is a password field's own bit. */
+  'revealed',
+  /**
+   * The errors a form holds, keyed by the name of the control each one is
+   * about. It is mutable and a consumer can own it: a server sends the map
+   * back, and the family also builds one from `checkValidity()`.
+   *
+   * `invalid` is the state one control is in; this is the set of reasons a
+   * whole form is in it. Calling it `value` would have named it for something
+   * it is not, and `form` was the family that found the vocabulary had no word
+   * for what it holds.
+   */
+  'validity',
 ];
 
 /** Capabilities that hold state a consumer can own, and therefore need a model. */
@@ -115,6 +164,9 @@ export const MUTABLE_CAPABILITIES = [
   'measurement',
   'files',
   'current',
+  'value',
+  'revealed',
+  'validity',
 ];
 
 export function strongestState(states) {

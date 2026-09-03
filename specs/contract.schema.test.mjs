@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   CHANGE_REASONS,
   LEGACY_FAMILIES,
+  LEGACY_SCHEMA_VERSION,
   STATE_ATTRIBUTES,
   STATE_PRECEDENCE,
   assertContractShape,
@@ -72,6 +73,17 @@ test('carries the disclosure states an overlay introduces', () => {
   assert.equal(STATE_ATTRIBUTES.expanded, 'data-expanded');
 });
 
+/**
+ * A step that is done is neither checked nor selected: a checkbox is checked by
+ * the reader and a row is selected by the reader, while a step is completed by
+ * the flow. The vocabulary held no word for it, and
+ * `docs/component-features.md` section 7 already spells the one it was missing
+ * — "estados pending/current/complete/error/disabled".
+ */
+test('carries the completion state a stepped flow introduces', () => {
+  assert.equal(STATE_ATTRIBUTES.complete, 'data-complete');
+});
+
 /* ------------------------------------------------------------- identity - */
 
 test('rejects a family that does not name its public identifier', () => {
@@ -136,6 +148,34 @@ test('rejects a state model for a capability the family does not hold', () => {
   assert.throws(() => assertContractShape(contract), /checked/);
 });
 
+/**
+ * The text a control holds is the most common mutable value in a component
+ * library and the vocabulary could not name it, which is why the deleted
+ * `input` family declared five capabilities and none of them mutable: the
+ * schema had no word for the one thing the control does.
+ */
+test('requires a state model from a family that holds a text value', () => {
+  const contract = structuredClone(valid);
+  contract.members.example.capabilities.push('value');
+  assert.throws(() => assertContractShape(contract), /value holds state/);
+
+  contract.stateModel = {
+    value: {
+      controlled: 'value',
+      uncontrolled: 'defaultValue',
+      request: 'onValueChange',
+      reasons: ['keyboard', 'clear'],
+    },
+  };
+  assert.doesNotThrow(() => assertContractShape(contract));
+});
+
+test('requires a state model from a family that reveals a hidden value', () => {
+  const contract = structuredClone(valid);
+  contract.members.example.capabilities.push('revealed');
+  assert.throws(() => assertContractShape(contract), /revealed holds state/);
+});
+
 test('names every reason a request can carry', () => {
   assert.deepEqual(CHANGE_REASONS.includes('programmatic'), true);
   assert.equal(new Set(CHANGE_REASONS).size, CHANGE_REASONS.length);
@@ -155,10 +195,59 @@ test('orders every state the vocabulary can paint', () => {
   assert.equal(STATE_PRECEDENCE.at(-1), 'default');
 });
 
+/**
+ * Where the reader is beats what they have already done, and an error beats
+ * both. A step that is current and complete reads as current; a step that is
+ * complete and in error reads as in error, because `invalid` already sits
+ * above the pair.
+ */
+test('places completion under the step the reader is on and under an error', () => {
+  assert.ok(STATE_PRECEDENCE.indexOf('current') < STATE_PRECEDENCE.indexOf('complete'));
+  assert.ok(STATE_PRECEDENCE.indexOf('invalid') < STATE_PRECEDENCE.indexOf('complete'));
+  assert.ok(STATE_PRECEDENCE.indexOf('complete') < STATE_PRECEDENCE.indexOf('hover'));
+  assert.equal(strongestState(['complete', 'current']), 'current');
+  assert.equal(strongestState(['complete', 'hover']), 'complete');
+});
+
 /* --------------------------------------------------------------- legacy - */
 
+/**
+ * The ledger runs down to nothing, and it has: twenty-one families were removed
+ * rather than rebuilt, and every family left in the repository satisfies the
+ * current schema. So this states the rule from whichever side is real — while a
+ * family is listed it is held to the schema it was built against, and once the
+ * list is empty no contract may claim that schema at all.
+ */
 test('holds a listed family to the schema it was built against', () => {
   const family = LEGACY_FAMILIES.at(0);
+
+  if (family === undefined) {
+    const contract = { ...structuredClone(valid), schemaVersion: LEGACY_SCHEMA_VERSION };
+    assert.throws(() => assertContractShape(contract), /must satisfy schema/);
+    return;
+  }
+
   const contract = { ...structuredClone(valid), family, ui: family };
   assert.throws(() => assertContractShape(contract), /legacy/);
+});
+
+/**
+ * `form` holds one mutable value and the vocabulary had no word for it. The
+ * capability is mutable, so a contract that declares it and no model is
+ * refused exactly like every other mutable one.
+ */
+test('requires a model for the error map a form holds', () => {
+  const contract = structuredClone(valid);
+  contract.members.example.capabilities.push('validity');
+  assert.throws(() => assertContractShape(contract), /validity holds state and declares no model/);
+
+  contract.stateModel = {
+    validity: {
+      controlled: 'errors',
+      uncontrolled: 'defaultErrors',
+      request: 'onErrorsChange',
+      reasons: ['submit', 'keyboard', 'clear', 'programmatic'],
+    },
+  };
+  assert.doesNotThrow(() => assertContractShape(contract));
 });

@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
  * public identifier a consumer selects the family by, and the state model —
  * controlled, uncontrolled, and the reason a change carries. A family still on
  * schema 4 is listed in `legacy-families.json` and is awaiting the rebuild
- * ordered in `docs/rebuild-order.md`; that list only shrinks.
+ * ordered in `docs/build-order.md`; that list only shrinks.
  */
 export const SCHEMA_VERSION = 5;
 export const LEGACY_SCHEMA_VERSION = 4;
@@ -43,6 +43,18 @@ export const STATE_ATTRIBUTES = {
   complete: 'data-complete',
   open: 'data-open',
   expanded: 'data-expanded',
+  /**
+   * A value the component was holding back and is now showing whole. The
+   * capability existed from `text-field`, whose reveal is a swap of the input's
+   * own `type` and needs no selector; `description-list` clamps a long value in
+   * CSS, so the stylesheet has to be able to select the state that releases the
+   * clamp.
+   *
+   * It is not `open` and not `expanded`: both of those are a section of content
+   * appearing beside or below a control, while this is one value being shown at
+   * its full length in the place it already occupied.
+   */
+  revealed: 'data-revealed',
   'drop-target': 'data-drop-target',
 };
 
@@ -144,6 +156,18 @@ export const KNOWN_CAPABILITIES = [
    * the desync `docs/state-and-events.md` exists to prevent.
    */
   'removable',
+  /**
+   * Putting a value the component displays onto the clipboard. It is
+   * deliberately not mutable: the clipboard belongs to the platform and the
+   * family holds none of it, so there is no controlled value and nothing to
+   * cancel — the component writes, then reports what happened with a reason.
+   *
+   * `description-list` found the vocabulary had no word for it. Section 10 of
+   * `docs/component-features.md` asks that a long value be reachable by copying
+   * rather than truncated, and `code-block` in wave 7 asks for the same control
+   * over a different kind of value.
+   */
+  'copyable',
   'virtualization',
   'files',
   'checked',

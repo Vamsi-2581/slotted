@@ -3,8 +3,10 @@ import test from 'node:test';
 
 import {
   CHANGE_REASONS,
+  KNOWN_CAPABILITIES,
   LEGACY_FAMILIES,
   LEGACY_SCHEMA_VERSION,
+  MUTABLE_CAPABILITIES,
   STATE_ATTRIBUTES,
   STATE_PRECEDENCE,
   assertContractShape,
@@ -82,6 +84,26 @@ test('carries the disclosure states an overlay introduces', () => {
  */
 test('carries the completion state a stepped flow introduces', () => {
   assert.equal(STATE_ATTRIBUTES.complete, 'data-complete');
+});
+
+/**
+ * `text-field` reveals a value by swapping the input's `type`, so it never
+ * needed a selector. A value clamped in CSS does: the rule that releases the
+ * clamp has to name the state that released it.
+ */
+test('carries the revealed state a clamped value introduces', () => {
+  assert.equal(STATE_ATTRIBUTES.revealed, 'data-revealed');
+});
+
+/**
+ * Copying is an action the platform completes, not a value a consumer owns:
+ * there is no controlled form of a clipboard and nothing to cancel. Filing it
+ * under the mutable list would oblige every family that copies to declare a
+ * state model for state it does not hold.
+ */
+test('holds copying as a capability and not as state', () => {
+  assert.ok(KNOWN_CAPABILITIES.includes('copyable'));
+  assert.ok(!MUTABLE_CAPABILITIES.includes('copyable'));
 });
 
 /* ------------------------------------------------------------- identity - */

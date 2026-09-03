@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 5,
+  "family": "toolbar",
+  "ui": "toolbar",
+  "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/",
+  "roles": {
+    "root": "toolbar",
+    "group": "group",
+    "separator": "separator"
+  },
+  "wiring": {
+    "aria-label": "the consumer's own, and the toolbar writes none of its own",
+    "aria-orientation": "written on the root only when vertical, and on a separator always, perpendicular to the bar",
+    "aria-disabled": "an item that says it stays in the ring; a native disabled attribute is skipped"
+  },
+  "items": {
+    "found": "focusable-descendants",
+    "selector": "a[href], button, input, select, textarea, [role='button'], [role='link'], [role='checkbox'], [role='radio'], [role='switch'], [role='menuitem'], [role='slider'], [role='spinbutton'], [role='combobox']",
+    "wrapperPerItem": false,
+    "keyOwners": {
+      "attribute": "data-toolbar-keys",
+      "values": ["inline", "block", "all", "none"],
+      "inferred": "a text entry, a select, a slider, a spin button or a contenteditable keeps the keys of the flow axis"
+    }
+  },
+  "keyboard": [
+    {
+      "key": "Tab",
+      "effect": "moves focus into the bar, which holds one tab stop however many controls it has",
+      "focus": "the control that last had focus, or the first that is not disabled",
+      "source": "roving tabindex"
+    },
+    {
+      "key": "ArrowRight",
+      "effect": "moves to the next control in a horizontal bar, wrapping at the end and from row to row when the bar wrapped",
+      "focus": "the control moved to",
+      "source": "@slotted/core/focus"
+    },
+    {
+      "key": "ArrowLeft",
+      "effect": "moves to the previous control in a horizontal bar, wrapping at the start",
+      "focus": "the control moved to",
+      "source": "@slotted/core/focus"
+    },
+    {
+      "key": "ArrowDown",
+      "effect": "moves to the next control, duplicating ArrowRight in a horizontal bar as the pattern permits",
+      "focus": "the control moved to",
+      "source": "@slotted/core/focus"
+    },
+    {
+      "key": "ArrowUp",
+      "effect": "moves to the previous control, duplicating ArrowLeft in a horizontal bar as the pattern permits",
+      "focus": "the control moved to",
+      "source": "@slotted/core/focus"
+    },
+    {
+      "key": "Home",
+      "effect": "moves to the first control",
+      "focus": "the first control that is not natively disabled",
+      "source": "@slotted/core/focus"
+    },
+    {
+      "key": "End",
+      "effect": "moves to the last control",
+      "focus": "the last control that is not natively disabled",
+      "source": "@slotted/core/focus"
+    }
+  ],
+  "escapeBound": false,
+  "crossAxisNavigates": true,
+  "declined": {
+    "overflowMenu": {
+      "deferTo": "menu",
+      "reason": "Primer, Kendo and Fluent all move what does not fit into a menu, and no menu exists until wave 5. docs/rebuild-order.md names the refinement; overflow=wrap keeps every control visible until then."
+    },
+    "checkedValues": {
+      "deferTo": "toggle-group",
+      "reason": "Fluent's toolbar holds the checked state of the controls inside it. `button` already ships `pressed`, and an exclusive set of segments is toggle-group in wave 8; a family holding another family's state is the desync docs/state-and-events.md exists to prevent."
+    },
+    "arrangement": {
+      "deferTo": "button-group",
+      "reason": "gap, alignment, stacking and a joined bar belong to button-group, which is what a run of joined actions inside a toolbar is. The bar's own gap comes from its size step, and the spacer part is what pushes a run to the end."
+    },
+    "itemWrappers": {
+      "reason": "Radix and Base UI wrap each item in a component of their own. Items are found by being focusable instead, so this library's own button, link, checkbox and text-field drop in unwrapped; an element that cannot hold focus is not an item, which is stated in the anatomy."
+    },
+    "pagingControls": {
+      "deferTo": "menu",
+      "reason": "a scrolling toolbar reveals its controls with the arrow keys, which reach every item; no surveyed toolbar draws paging buttons, and the menu is the answer the field agrees on."
+    },
+    "disabled": {
+      "deferTo": "the platform",
+      "reason": "Base UI alone ships a disabled toolbar. A container cannot disable controls it does not own, and a bar that refuses interaction while its controls still look operable is the defect packages/styles/src/states.test.mjs exists to prevent. The platform already answers it in two lines: <fieldset disabled> around the bar disables every control inside it natively, which also takes them out of the ring, because a natively disabled control cannot be focused."
+    }
+  },
+  "axes": {
+    "orientation": ["horizontal", "vertical"],
+    "size": ["sm", "md", "lg"],
+    "variant": ["plain", "outline"],
+    "overflow": ["wrap", "scroll"]
+  },
+  "resolution": {
+    "orientation": ["prop", "defaults", "horizontal"],
+    "size": ["prop", "defaults", "md"],
+    "variant": ["prop", "defaults", "plain"],
+    "overflow": ["prop", "defaults", "wrap"]
+  },
+  "provides": {
+    "toolbarDefaults": ["orientation", "size", "variant", "overflow", "loop"]
+  },
+  "roleGuidance": {
+    "minimumControls": 3,
+    "enforced": false,
+    "reason": "the APG uses the role for three or more controls. A role that disappears when a permission filter removes a button is a semantic changing behind the author, so the guidance is documented and the consumer decides."
+  },
+  "members": {
+    "toolbar": {
+      "nativeElement": "div",
+      "defaults": {
+        "orientation": "horizontal",
+        "size": "md",
+        "variant": "plain",
+        "overflow": "wrap",
+        "loop": true
+      },
+      "capabilities": ["orientation", "size", "appearance"],
+      "states": ["default"],
+      "parts": ["root", "group", "separator", "spacer"]
+    }
+  },
+  "scenarios": {
+    "toolbar": [
+      "playground",
+      "orientation",
+      "variant",
+      "sizes",
+      "groups",
+      "keyboard",
+      "keyOwners",
+      "disabled",
+      "overflow",
+      "composition"
+    ]
+  }
+}

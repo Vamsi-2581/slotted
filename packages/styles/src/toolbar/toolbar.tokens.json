@@ -1,0 +1,23 @@
+[
+  "--slotted-border-strong",
+  "--slotted-border-subtle",
+  "--slotted-border-width-thin",
+  "--slotted-control-gap-lg",
+  "--slotted-control-gap-md",
+  "--slotted-control-gap-sm",
+  "--slotted-control-height-lg",
+  "--slotted-control-height-md",
+  "--slotted-control-height-sm",
+  "--slotted-focus-ring-offset",
+  "--slotted-focus-ring-width",
+  "--slotted-radius-md",
+  "--slotted-space-1",
+  "--slotted-space-2",
+  "--slotted-space-3",
+  "--slotted-surface-raised",
+  "--slotted-toolbar-background",
+  "--slotted-toolbar-border-color",
+  "--slotted-toolbar-gap",
+  "--slotted-toolbar-inset",
+  "--slotted-toolbar-separator-color"
+]

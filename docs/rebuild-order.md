@@ -123,91 +123,341 @@ O que cada invocação entrega. A pesagem do passo 3 continua sendo do
 implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
 
 - **`typography`** — entregue. Text e Heading.
-- **`icon`** — registry tree-shakeable, `size`, stroke/fill, `tone`, e espelho em
-  RTL só para ícones direcionais. Decorativo sai da árvore de acessibilidade;
-  significativo exige rótulo ou texto adjacente. Não aceita SVG remoto nem HTML
-  não sanitizado. Decidir onde vive o registry — pacote próprio, entrada de
-  `@slotted/core`, ou tokens de glifo como hoje — e a relação com
-  `--slotted-icon-*`, que já serve máscaras intrínsecas de componente.
+- **`icon`** — entregue. A família é a caixa em que um glifo é desenhado, não o
+  glifo: o registry não existe em nenhuma das três formas, e a arte continua do
+  consumidor. `size` lê a escala de ícone de controle em `sm`/`md`/`lg` e segue o
+  tipo em `text`; `tone` reusa os oito valores de Typography; `directional`
+  espelha por `:dir(rtl)` só o que aponta para algum lado. Nome presente decide
+  `role="img"`, ausência decide `aria-hidden`, e não há chave `decorative`.
+  Stroke/fill recusado: a família não é dona da geometria. As seis máscaras
+  `--slotted-icon-*` permanecem como estão, e a fronteira entre elas e a família
+  está em `docs/superpowers/specs/2026-09-01-icon-family-design.md`.
 - **`visually-hidden`** — reconstrução. Conteúdo oculto visualmente permanece
   acessível sem alterar layout; a variante revelável no foco continua sendo uma
   regra só, não uma regra mais o seu desfazer.
-- **`divider`** — reconstrução. `hr` como elemento, `decorative` removendo da
+- **`divider`** — entregue. `hr` como elemento, `decorative` removendo da
   árvore, orientação vertical com comprimento mínimo. A variante rotulada
   ("OU" no meio) e o separador dentro de `ul` (Menu, onda 5) precisam de decisão
   agora, não depois.
-- **`stack inline grid`** — `gap`, `align`, `justify`, `wrap`,
-  `columns`/`minItemWidth`, tudo limitado por tokens. Sem virar DSL de CSS.
-  Herda a decisão de medida: o contêiner é quem limita comprimento de linha.
-- **`container`** — largura máxima, inset e centragem por token; é o dono da
-  medida confortável de texto.
-- **`card`** — por último na onda, porque escolhe tamanho de texto e superfície
-  já decididos. Superfície vem de `--slotted-surface-raised`; nenhuma família
-  volta a inventar fundo neutro.
+- **`stack inline grid`** — entregue. Três famílias, uma invocação: `gap` como
+  passo da escala de espaço, `align` atravessando o fluxo e `justify` correndo
+  ao longo dele, `wrap` só em Inline, `columns`/`minItemWidth` só em Grid. Sem
+  DSL de CSS, sem eixo que reordene filhos e sem breakpoint. A medida ficou com
+  `container` sozinho.
+- **`container`** — entregue. Um membro e duas partes: `root` e `breakout`.
+  Três eixos: `size` (`measure`/`content`/`wide`/`full`), `inset` (passo da
+  escala de espaço, padrão `6`) e `align` (`center`/`start`/`end`). É o dono da
+  medida confortável, e a medida é contada em caracteres — `65ch` — porque um
+  máximo em pixels fica _mais longo_ em caracteres quando o leitor amplia o
+  texto. Os passos são nomeados pelo que limitam, e não `sm`/`md`/`lg`: o
+  máximo de um container é escolhido pelo que está dentro dele, e uma letra
+  esconde a escolha. O padrão é `content`, contra as quatro implementações
+  pesquisadas que escolhem o passo limitado mais largo, porque a falha estreita
+  é a visível.
+
+  A raiz é sempre um grid de três trilhas — sarjeta inicial, coluna limitada,
+  sarjeta final — e não uma caixa com máximo, porque `breakout` precisa de
+  trilha para atravessar. O inset é piso das sarjetas e nunca padding da caixa,
+  que insetaria também o breakout. Sem breakpoint e sem `container-type`: a
+  família responde à própria largura por `min()` e `minmax()`, continuamente.
+  `gap` continua do Stack, padding vertical de página fica com `page` (onda 4),
+  e o breakout responde ao container e não à viewport, então continua correto
+  aninhado, dentro de uma região com scroll e num container que não preenche a
+  página. Padrões da aplicação em uma decisão só: `ContainerDefaultsProvider`
+  no React e `provideContainerDefaults` no Angular. A decisão completa está em
+  `docs/superpowers/specs/2026-09-01-container-family-design.md`.
+
+- **`card`** — entregue. Um membro e sete partes: `root`, `media`, `header`,
+  `actions`, `body`, `footer` e `link`. Superfície vem de
+  `--slotted-surface-raised`. Eixos: `orientation`, `fill`
+  (`outline`/`elevated`/`subtle`) e `size` (`sm`/`md`/`lg`) — o eixo de
+  aparência reverte a decisão "sem eixos" do Card antigo, porque quatro das seis
+  implementações pesquisadas o entregam e uma página usa mais de um ao mesmo
+  tempo. `fill` e não `variant`: `variant` é a palavra desta biblioteca para
+  tom, que um card não carrega. O canto do header (`actions`) é a segunda coluna
+  do grid e fica preso à primeira linha. Linha divisória entre regiões é
+  composição com `Divider`, não um eixo. O card inteiro clicável é o alcance
+  esticado de um `<a href>` marcado `data-part="link"`, e nunca um comando.
+  `selected` e `disabled` espelham o controle interno e não são capacidades.
+  Padrões da aplicação em uma decisão só: `CardDefaultsProvider` no React e
+  `provideCardDefaults` no Angular.
+
+  Segunda passagem, sobre estados e aparência. Oitava parte: `selection`, a
+  coluna que um card de escolha reserva para o seu controle — a vaga, não o
+  glifo, porque `checkbox radio-group` da onda 3 é dono de onde o check e o dot
+  são desenhados. Estado `active` acrescentado. A borda passou para um
+  `::before` sobre a caixa de borda, então a aresta de 2px do selecionado não
+  move conteúdo. `selected` é pintado por `--slotted-surface-inverse` e por
+  nenhum preenchimento: o acento já é a cor do anel de foco, e um tom de
+  superfície calibrado em badge inunda na área de um card. Cada `fill` responde
+  hover e press na propriedade de que é feito, e os três preenchem no press.
+  `elevated` descansa em `--slotted-shadow-md`. O intervalo entre regiões caiu
+  um passo abaixo do inset do card, que antes igualava.
 
 ## Onda 2 — Ação, status e metadados
 
-| Invocação             | Modo       | Guia |
-| --------------------- | ---------- | ---- |
-| `button icon-button`  | refazer    | 5    |
-| `button-group`        | novo       | 5    |
-| `link`                | refazer    | 5    |
-| `badge`               | refazer    | 10   |
-| `tag`                 | refazer    | 10   |
-| `avatar avatar-group` | refazer    | 10   |
-| `kbd`                 | refazer    | 5    |
-| `skeleton`            | refazer    | 9    |
-| `progress-indicator`  | consolidar | 9    |
-| `status-indicator`    | novo       | 9    |
-| `alert`               | refazer    | 9    |
-| `inline-message`      | novo       | 9    |
+| Invocação             | Modo           | Guia |
+| --------------------- | -------------- | ---- |
+| `button icon-button`  | refazer        | 5    |
+| `button-group`        | novo           | 5    |
+| `link`                | refazer        | 5    |
+| `badge`               | refazer        | 10   |
+| `tag`                 | refazer        | 10   |
+| `avatar avatar-group` | refazer + novo | 10   |
+| `kbd`                 | refazer        | 5    |
+| `skeleton`            | refazer        | 9    |
+| `progress-indicator`  | consolidar     | 9    |
+| `status-indicator`    | novo           | 9    |
+| `alert`               | refazer        | 9    |
+| `inline-message`      | novo           | 9    |
 
 - `button icon-button` abre a onda: fixa altura de controle, padding, densidade
   e estado `loading` que todos os controles seguem. `button-group` depois dele.
 - `progress-indicator` absorve `spinner`, `progress-bar` e `loading-bar` como
   recipes de uma família só (guia 17), e resolve a duplicação já registrada em
   `docs/BUILD-LOG.md` entre o anel do Button e `spinner.css`. Remove três
-  entradas de `specs/components/` e os tokens
-  `--slotted-button-loading-indicator-*` do contrato.
+  entradas de `specs/components/`. Os tokens
+  `--slotted-button-loading-indicator-*` já saíram do contrato na reconstrução
+  de `button`: o anel lê `--slotted-duration-loop-fast`,
+  `--slotted-border-width-thick` e o tamanho de ícone do próprio passo, e passa
+  a ler `progress-indicator` quando a família existir.
 - `badge` e `tag` compartilham tokens e permanecem famílias distintas.
 
 ### Escopo por família — onda 2
 
-- **`button icon-button`** — par, porque IconButton é o mesmo comportamento com
-  nome acessível obrigatório. `type`, `variant`, `tone`, `size`, `fullWidth`,
-  `disabled`, `loading`, ícones start/end, evento de press unificado para
-  ponteiro e teclado. `loading` preserva largura e nome acessível. Área visual e
-  alvo interativo podem divergir; o alvo obedece `--slotted-target-min`. Abre a
-  onda porque fixa altura, padding e densidade de todo controle.
+- **`button icon-button`** — entregue, e refeito uma segunda vez depois do gate
+  humano. Uma família, quatro membros: Button, ButtonLink, IconButton e
+  ToggleButton, todos com `data-ui="button"`. IconButton é membro e não família,
+  porque é a mesma superfície, a mesma máquina de estado e a mesma escala de
+  geometria — o que muda é o conteúdo e a forma que segue dele, e `shape` é o
+  eixo que a nomeia. `tone` passa a nomear as cinco cores e `variant` passa a
+  nomear a pintura; `fill` desaparece. `pressed` fica com ToggleButton e
+  IconButton, com modelo controlado/não controlado completo, e nunca com Button,
+  que é ação momentânea. A família deixou de declarar token de componente: lê
+  `--slotted-control-*` diretamente, e a camada de componente do contrato ficou
+  vazia. `buttonGroup` saiu daqui e volta na invocação seguinte.
+
+  A segunda passagem: `soft` sai do eixo de pintura, que fica em `solid`,
+  `outline` e `ghost`; a borda de `outline` passa a ser neutra e o tom fica no
+  rótulo; a borda de `solid` passa a ser o próprio preenchimento, exceto nos
+  dois tons cujo preenchimento não se distingue da superfície (`secondary` em
+  todos os esquemas, `warning` em dois), que desenham a borda do próprio tom.
+  Nenhum estado altera geometria: o peso extra de `pressed` é um anel em
+  `::after`, e o `padding-block` saiu porque inflava o controle acima da altura
+  que a densidade declara. Quatro capacidades entram: `render` (só no React —
+  no Angular cada membro é diretiva no elemento do consumidor),
+  `ButtonDefaultsProvider`/`provideButtonDefaults`, `focusableWhenDisabled`, e
+  um `loading` refeito — o anel ocupa a caixa do primeiro ícone e o rótulo
+  permanece legível, a espera é anunciada por um `progressbar` nomeado em vez de
+  `aria-busy`, `loadingDelay` separa a recusa da imagem, e `toggleButton` também
+  espera.
+
 - **`button-group`** — espaçamento, orientação e overflow de ações
   relacionadas, sem alterar a semântica de cada botão. Ação destrutiva não
   encosta em ação frequente sem separação. O overflow para menu depende de
-  `menu` (onda 5) e volta como refino.
-- **`link`** — destino, navegação interna e externa, download, ícone de externo,
-  `disabled` excepcional. Reconhecível sem depender só de cor; nova janela é
-  comunicada. Não emula botão.
-- **`badge`** — contagem, status ou metadado curto não editável. Variantes
-  solid, soft e outline, `tone`, `size`, `dot`, `maxCount`. Contagem que muda
-  declara política de anúncio. Não é botão.
-- **`tag`** — entidade, filtro ou valor compacto; estático, selecionável,
-  removível ou navegável, nunca dois comportamentos implícitos ao mesmo tempo.
-  Eventos de press e de remove separados; remover devolve o foco ao item lógico
-  seguinte.
-- **`avatar avatar-group`** — par. Ordem de fallback imagem → iniciais → ícone,
-  sem ícone quebrado quando a imagem falha; `tone` determinístico a partir do
-  nome. O grupo controla sobreposição, limite e resumo "+N" sem tornar os
-  membros anônimos.
+  `menu` (onda 5) e volta como refino. A entrada antiga foi removida junto com
+  a reconstrução de `button`: o seu stylesheet vivia no diretório da família e
+  não sobreviveria às leis que passaram a valer ali. O modo continua `novo`.
+- **`link`** — entregue. Um membro e três partes: `root`, `external-icon` e
+  `external-hint`. Dois eixos: `underline` (`always`/`hover`/`none`, padrão
+  `always`) e `variant` (`accent`/`neutral`/`inverse`). `neutral` é o link com a
+  cor do texto ao redor, que sete implementações entregam sob três nomes
+  diferentes; `inverse` é o link sobre superfície sólida. Sem eixo de tamanho —
+  `typography` é dona da escala de tipo — e sem eixo de tom: tom marca a
+  consequência de uma ação, e navegação não tem nenhuma.
+
+  `external` é açúcar para outro contexto de navegação, e os três avisos que uma
+  nova aba deve — `rel` seguro, marcador visível, texto anunciado — seguem o
+  `target` resolvido, então quem escreve `target="_blank"` à mão recebe o mesmo
+  aviso. O marcador é máscara de `--slotted-icon-external`, glifo novo na escala,
+  precedido por juntador de palavras (U+2060) para nunca quebrar sozinho na
+  linha. `disabled` repete a semântica de ButtonLink: sem `href`, com
+  `role="link"`, `aria-disabled` e lugar na sequência de tabulação. O link
+  corrente é pintado por `aria-current`, o atributo que `routerLinkActive` já
+  escreve — sem `data-current` espelhado e sem prop inventada. `visited` é
+  opcional e mistura a cor do link em direção ao texto discreto.
+
+  O hover deixou de ler o degrau de preenchimento: `--slotted-tone-accent-solid-hover`
+  no esquema escuro é azul escuro sobre fundo escuro, e passar o mouse piorava a
+  leitura. Agora a cor caminha por `color-mix` em direção a `--slotted-text`, e o
+  sublinhado vai de 55% a `currentColor` — o único sinal que sobra para
+  `inverse`. Padrões da aplicação em uma decisão só: `LinkDefaultsProvider` no
+  React e `provideLinkDefaults` no Angular.
+
+- **`badge`** — entregue. Contagem, status ou metadado curto não editável. Um
+  membro e três partes: `root`, `icon` e `anchor`. O campo publica duas coisas
+  sob o mesmo nome — a ficha de metadado no fluxo (Spectrum, Primer, Atlassian,
+  Radix, shadcn) e a contagem ancorada no canto de outro elemento (Ant, MUI,
+  Angular Material, HeroUI) — e as duas são uma família só, porque são a mesma
+  caixa com o mesmo tom, a mesma aresta e a mesma escala de tipo. `anchor` é a
+  única parte da biblioteca que contém a raiz da própria família em vez de ficar
+  dentro dela, e por isso carrega `data-ui`.
+
+  Eixos: `tone` (as cinco cores), `variant` (`solid`/`soft`/`outline`), `size`
+  (`sm`/`md`/`lg`), `shape` (`pill`/`square`/`dot`), `live`
+  (`off`/`polite`/`assertive`), e `placement`/`overlap` no `anchor`. O contrato
+  antigo tinha `variant` nomeando cor e `fill` nomeando pintura; os dois trocam
+  de lugar para acompanhar `button`, e `subtle` vira `soft`. O padrão de
+  `variant` passa de `solid` a `soft`: uma página de pílulas cinza sólidas se lê
+  como uma página de controles.
+
+  Preenchido não tem aro: a aresta de `solid` é o próprio preenchimento, então a
+  ficha é uma forma só. `soft` e `outline` desenham a borda do tom — `soft`
+  precisa dela porque no esquema `high-contrast` toda superfície de tom vira o
+  branco da própria página, e lá ela converge com `outline`. `secondary` é a
+  única exceção às duas regras, porque é o único tom cujo preenchimento é a cor
+  da própria página: passa a preencher com o passo `solid-hover` e mantém a
+  borda do tom.
+
+  Cinco partes: `root`, `start`, `label`, `end` e `anchor` — a anatomia que
+  `button` já usa. O texto tem caixa própria porque `text-box` precisa de um
+  contêiner de bloco, e o texto de um contêiner flex vive num item anônimo que
+  nenhum seletor alcança. Sem isso, uma palavra sem descendente ficava 2,19px
+  acima do centro numa caixa de 24px; com `text-box: trim-both cap alphabetic`
+  a folga é 7,59px acima e 7,59px abaixo em todo tamanho. Sob `@supports`.
+
+  Uma linha só: string longa é recortada com reticências, não reflui. Uma
+  insígnia que virasse parágrafo deixou de ser insígnia — o comprimento é erro
+  do conteúdo, e `tag` responde essa pergunta por si. O recorte é visual:
+  `text-overflow` não encurta nada, então a string inteira permanece no DOM, na
+  árvore de acessibilidade e encontrável por busca na página. O rótulo carrega
+  `padding-block` com margem negativa equivalente, porque uma caixa aparada no
+  cap e na linha de base deixa descendentes de fora e `overflow: hidden` os
+  decapitava.
+
+  `count`, `max` e `showZero` são uma decisão só, tomada em
+  `@slotted/core/count` — novo entry point — para que os dois bindings não
+  divirjam; o número é formatado por `Intl.NumberFormat` no `locale` da
+  aplicação, o que nenhuma das onze implementações pesquisadas faz. Contagem
+  zero não deixa uma pílula vazia: remove a insígnia inteira.
+
+  `dot` é o disco com a largura do tipo ao lado do qual está, aro em
+  `--slotted-border-strong` — o único token de borda que o tema segura em 3:1 —
+  porque é a única insígnia cujo significado inteiro é um gráfico. As palavras
+  que uma cor não diz são composição com `visually-hidden`, não uma parte nova.
+
+  A família não anima. O único candidato — a contagem que aparece no canto de um
+  botão — dispara também na primeira pintura, porque `@starting-style` não
+  distingue montagem de mudança; volta com `presence` (guia, seção 3).
+
+  Padrões da aplicação em uma decisão só: `BadgeDefaultsProvider` no React e
+  `provideBadgeDefaults` no Angular, ambos carregando `locale`.
+
+- **`tag`** — entregue. Entidade, filtro ou valor compacto. A regra do guia —
+  nunca dois comportamentos implícitos ao mesmo tempo — virou estrutura: quatro
+  membros (`tag`, `tagButton`, `tagLink`, `tagToggle`), e o que a ficha _é_ é o
+  elemento que carrega o corpo. Nenhuma prop acrescenta um segundo
+  comportamento.
+
+  Uma anatomia só, para todos os casos: `root` (span) › `body`
+  (span | button | a) + `remove` (button), com `indicator`, `start`, `label` e
+  `end` dentro do corpo. **A raiz nunca é o elemento interativo**, porque um
+  `button` não contém um `button` e um `a` não contém nenhum dos dois — uma
+  ficha que age e remove precisa dos dois controles lado a lado. Primer resolve
+  isso com um desvio (`hasMultipleActionTargets`), Fluent com dois componentes
+  irmãos, React Aria e Angular Material com um grid; decidir uma vez elimina o
+  desvio. O custo é um elemento a mais numa ficha estática.
+
+  Eixos: `tone` (as cinco cores), `variant` (`solid`/`soft`/`outline`), `size`
+  (`sm`/`md`/`lg`), `shape` (`pill`/`square`) e `orientation` no grupo. `soft`
+  é o padrão pela razão que `badge` registrou. A altura é a caixa de linha da
+  própria ficha, com piso em `--slotted-target-min`: o controle de remoção é um
+  quadrado da altura da ficha, e é isso que o faz alcançar o mínimo da WCAG 2.2
+  2.5.8 em todo tamanho e toda densidade — o caso que `docs/token-foundation.md`
+  nomeia como impossível de o tema corrigir pela família.
+
+  `group` é parte, não membro — a segunda da biblioteca a conter a raiz da
+  própria família, depois de `anchor` em `badge`. Implementa o padrão APG
+  Toolbar: um tab stop, setas entre todos os controles em ordem de DOM,
+  `Home`/`End` nas pontas, e o foco restaurado para o controle que tomou o
+  lugar do removido — depois para o último, depois para o próprio grupo, que é
+  por isso que ele carrega `tabindex="-1"`. Escrever `role="list"` desliga o
+  teclado e dá `role="listitem"` a cada ficha.
+
+  A remoção é pedido, nunca valor: a ficha não é dona da própria existência.
+  `reason` separa o X (`remove`) de `Backspace`/`Delete` (`keyboard`), e o
+  pedido pode ser recusado — a recusa é o que impede o grupo de mover o foco.
+  O nome do controle de remoção é composto por `aria-labelledby` sobre a
+  palavra escondida e o rótulo da própria ficha, então anuncia "Remove Design"
+  sem o consumidor repetir o valor.
+
+  Padrões da aplicação em uma decisão só: `TagDefaultsProvider` no React e
+  `provideTagDefaults` no Angular, ambos carregando `removeLabel`.
+
+- **`avatar avatar-group`** — entregue. Par: `avatar` refeito e `avatar-group`
+  criado como família própria, pela razão de `button-group` — outro elemento,
+  outro conjunto de decisões, e um membro que ela não precisa ser.
+
+  A família anterior era a caixa com um atributo só: uma capacidade (`size`,
+  três passos), nenhum nome, nenhuma inicial, nenhuma cor, nenhuma forma,
+  nenhum grupo, e um booleano `data-loaded` onde cabem quatro estados. Agora são
+  seis capacidades: `appearance`, `size`, `shape`, `status`, `disabled` e
+  `decorative`.
+
+  Ordem de fallback imagem → iniciais → glifo. A imagem fica fora de vista até
+  reportar que chegou, então uma requisição que falha nunca pinta o ícone
+  quebrado do navegador. O glifo é `--slotted-icon-person`, acrescentado à
+  escala em lockstep com contrato, tema e `docs/token-foundation.md`.
+
+  O nome mora na raiz como `aria-label` com `role="img"` e a imagem leva `alt`
+  vazio, então o avatar anuncia a mesma coisa nos quatro estados. As quatorze
+  implementações pesquisadas nomeiam a imagem, o que faz o mesmo avatar ser
+  "Ada Lovelace" depois que a foto carrega e "AL" antes.
+
+  `tone="auto"` é o padrão e deriva do nome por FNV-1a em
+  `@slotted/core/identity` — novo entry point, com `initialsFrom`, `toneFrom` e
+  `formatNameList`. As iniciais são segmentadas por grafema e maiusculizadas
+  pelo locale, o que nenhuma das quatro implementações que derivam iniciais faz.
+  A paleta são os cinco tons da biblioteca: colisão é certa em um grupo de seis,
+  então a cor é auxílio de leitura e o nome é o identificador.
+
+  **A camada de componente deixou de ser vazia.**
+  `--slotted-avatar-size-{xs,sm,md,lg,xl}` são raízes de escala que variam por
+  densidade. Uma família só responde à densidade lendo um token que o tema
+  reafirma por densidade, e as três escalas que fazem isso nomeiam um controle;
+  `--slotted-control-height-lg` é 38px e a página de perfil precisa de 64.
+
+  O grupo é um `<ul>` de `<li>`. `max` conta os discos desenhados, resumo
+  incluído. O resumo é um avatar de verdade, e o seu nome acessível são os nomes
+  dos membros ocultos unidos por `Intl.ListFormat` no locale — Atlassian entrega
+  a string inglesa "N more people" e as outras deixam "+3" como o anúncio
+  inteiro. O grupo provê `size`, `shape` e `variant` aos membros pelo mecanismo
+  de defaults do próprio `avatar`, e nunca `tone`.
+
+  Quebra de contrato registrada em `docs/BUILD-LOG.md` e no design em
+  `docs/superpowers/specs/2026-09-02-avatar-family-design.md`.
+
 - **`kbd`** — combinação localizada por plataforma, com nome acessível. Não
   registra atalho nenhum. Lê `--slotted-font-family-mono`.
 - **`skeleton`** — geometria aproximada do conteúdo, com recipes de texto,
   avatar, bloco e composição. Fora da árvore de acessibilidade; a região anuncia
   o carregamento uma vez. Sob reduced motion a animação para, não encurta.
-- **`progress-indicator`** — consolidação. Uma família com recipes linear,
-  circular e spinner, absorvendo `spinner`, `progress-bar` e `loading-bar`.
-  Determinado (`value`, min, max) ou indeterminado, `label`, `valueText`,
-  `size`, e atraso antes de aparecer. Remove três entradas de
-  `specs/components/` e os tokens `--slotted-button-loading-indicator-*`, que o
-  anel do Button passa a ler daqui.
+- **`progress-indicator`** — entregue. Uma família, um membro, três
+  componentes: `ProgressBar` (linear), `ProgressCircle` (circular, e o spinner
+  quando não tem valor) e `Loader` — o loading indicator do M3 Expressive, uma
+  forma que se transforma enquanto gira, que nenhuma das três famílias
+  absorvidas tinha. `data-shape` é `linear`, `circular` ou `morph`, escrito pelo
+  componente e nunca escolhido.
+
+  Além do escopo: `buffer` (uma segunda quantidade, recebida e não processada),
+  `wave` (o indicador ondulado do M3 Expressive, na barra e no anel),
+  `contained` (o contentor do M3 atrás da forma), `placement="page"` — que é
+  todo o `loading-bar` —, `minDuration` ao lado de `delay`, `decorative`, e o
+  par `format`/`locale` que escreve o número com `Intl`.
+
+  Duas decisões saem da família. `measurement` deixa de ser mutável em
+  `specs/contract.schema.mjs`: um indicador de progresso não decide que
+  progrediu, e o vocabulário obrigava-o a declarar um pedido que ninguém emite.
+  E `progressbar` é _children presentational_ na ARIA 1.3, o que apaga qualquer
+  live region dentro da raiz — por isso `live` e `announceStep` foram desenhados
+  e retirados, e a frase que um leitor ouve pertence a `inline-message`, que a
+  secção 9 do guia já nomeia para progresso.
+
+  O anel do Button ainda desenha a sua própria borda girando: a troca são duas
+  declarações e um elemento em três ficheiros, e os três estavam a ser editados
+  por uma sessão concorrente nesta worktree. Registado em `docs/BUILD-LOG.md`.
+  A geometria já corresponde — o traço é um oitavo do diâmetro nos dois.
+
 - **`status-indicator`** — ponto, ícone ou rótulo curto de estado operacional,
   sempre com texto acessível e alternativa não cromática. Pulso só para mudança
   viva, respeitando reduced motion.
@@ -223,17 +473,104 @@ implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
 
 Sequencial. Cada item reusa a decisão de anatomia do anterior.
 
-1. `field field-group` — refazer. Base de label, descrição, mensagem, marca de
-   obrigatório e relação por ID. `fieldset` é absorvido aqui.
-2. `text-field` — refazer, substitui `input`.
-3. `textarea` — refazer.
-4. `checkbox radio-group` — novo. Decisão única sobre onde desenhar o check e o
-   dot, `indeterminate` e roving focus.
+1. `field field-group` — feito em 2026-09-02. Base de label, descrição,
+   mensagem, marca de obrigatório e relação por ID; `fieldset` foi absorvido em
+   `field-group`. Além do escopo acima, as duas famílias entregam `size`,
+   `labelPlacement` com refluxo por container query, `requiredMark` com marca ou
+   palavras, contador, e defaults de aplicação — provider no React, token e
+   `SlFieldDefaultsSource` no Angular. A descrição e o erro das duas são
+   `inline-message`.
+2. `text-field` — feito em 2026-09-02. Substitui `input`. O controle deixa de
+   ser o `input` sozinho e passa a ser uma moldura em volta dele, porque oito
+   das treze implementações pesquisadas colocam conteúdo dentro da borda e um
+   elemento vazio não tem filho — e porque a WAI-ARIA limita os filhos de um
+   `textbox` a conteúdo não interativo. Além do escopo acima, a família entrega
+   valor controlado/não controlado com razão, `start` e `end`, botão de limpar,
+   alternância de senha com `aria-pressed`, contagem publicada para o `field`,
+   `variant` com `plain` para célula de tabela, `mono`, e defaults de aplicação
+   nos dois bindings. Nada é ligado a Escape.
+3. `textarea` — feito em 2026-09-02. Continua sendo o próprio elemento, sem
+   moldura: nada do que foi pesquisado coloca adorno dentro de um textarea, e o
+   canto é da alça. Além do escopo acima, entrega `autoSize` por
+   `field-sizing: content` com `rows` como piso e `maxRows` como teto, `resize`
+   com padrão `block`, `variant`, `mono`, contagem e defaults de aplicação.
+   Enter cria linha e nunca envia.
+4. `checkbox checkbox-group radio-group` — novo. Uma invocação, três famílias:
+   a marca é desenhada num irmão do input, e não num pseudo-elemento dele, em
+   `checkbox` e em `radio-group`; `checkbox-group` recebeu o valor em array e o
+   checkbox pai que deriva `indeterminate` de seus filhos. `checkbox-group` não
+   estava nesta linha e entrou porque quatro das implementações pesquisadas o
+   entregam e `field-group` só é dono do agrupamento, não do valor. Um radio é
+   `data-part="item"` do grupo, e não uma família, porque um radio fora de um
+   grupo não é um controle. Roving focus e toda a tabela de teclado do APG são
+   da plataforma: os radios nativos compartilham um `name`. As três também
+   entregam `variant: 'plain' | 'tile'` — a escolha desenhada como superfície
+   emoldurada, cuja área inteira é o alvo. Três das implementações pesquisadas
+   a colocam na própria família de checkbox, e o `defer to card` registrado
+   antes foi revertido: `card` é um contêiner de conteúdo e não conhece `size`
+   vindo do `field`, `invalid`, `readonly` nem `required`. O arranjo continua
+   sendo de `grid`. Decisões em
+   `docs/superpowers/specs/2026-09-03-choice-controls-design.md`.
 5. `switch` — refazer.
-6. `number-field` — novo.
-7. `slider` — novo.
+6. `number-field` — novo. Valor `number | null` controlado/não controlado com
+   razão, `min`, `max`, `step`, `largeStep` (Shift e PageUp/PageDown) e
+   `smallStep` (Alt), `Home`/`End` nos limites, dois botões de passo fora da
+   ordem de tabulação, `stepper` com `stacked`, `split` e `none`, política de
+   clamp (`blur`, `strict`, `none`), `snapToStep`, `stepFrom`, roda do mouse
+   desligada por padrão, formatação por `Intl.NumberFormat` com `locale`
+   explícito, adornos `start` e `end`, `size`, `variant` e os estados
+   compartilhados com o `field`. O controle é `input[type=text]` com
+   `role="spinbutton"`: `type="number"` sanitiza qualquer texto que não seja um
+   número de ponto flutuante válido, então nenhum separador de milhar nem
+   símbolo de moeda sobrevive a ele. O parser e a aritmética moram em
+   `@slotted/core/number`, novo entry point, para que os dois bindings não
+   discordem sobre o que `1.234` significa. Decisões em
+   `docs/superpowers/specs/2026-09-03-number-field-design.md`.
+7. `slider` — novo. Valor único ou intervalo em `number | number[]`
+   controlado/não controlado com razão, `onValueCommit` separado da mudança,
+   `min`, `max`, `step`, `largeStep` (Shift e PageUp/PageDown),
+   `minStepsBetween`, `origin`, `orientation`, `marks` com rótulo, `format` por
+   `Intl.NumberFormat` com `locale` explícito, `valueLabel` com bolha no polegar,
+   `thumbLabels`, `size` e os estados compartilhados com o `field`. Cada polegar
+   é um `input[type=range]` real — a mesma escolha do `mat-slider` e do Base UI —
+   invisível e não clicável, então papel, conjunto de valores, submissão, reset e
+   `disabled` vêm da plataforma. O `min` e o `max` de cada polegar acompanham o
+   vizinho, que é o que o padrão multi-thumb da APG exige do intervalo anunciado.
+   O teclado inteiro é da família, porque os navegadores discordam sobre PageUp
+   num `input[type=range]`. `readonly` é da família também: o elemento não o
+   responde. A geometria mora em `@slotted/core/slider`, novo entry point.
+   Decisões em `docs/superpowers/specs/2026-09-03-slider-and-form-design.md`.
 8. `form` — novo. Submissão, validação e integração com Reactive Forms no
-   binding Angular.
+   binding Angular. A família guarda só o mapa de erros — `docs/component-features.md`
+   § 6 diz que ela coordena "sem possuir o estado de cada framework" — e lê o
+   resto da plataforma: valores de `FormData`, validade de `checkValidity()`,
+   sujeira dos eventos `input`. Três fontes se fundem num mapa ordenado pelo
+   documento: o `errors` de um servidor, a validação de restrição nativa e o que
+   o `onSubmit` devolveu. Entrega o resumo de erros do GOV.UK item por item —
+   região focável, título, um link por erro apontando para o controle —, foco
+   depois de uma submissão que falhou, `validate` com quatro políticas, submissão
+   assíncrona que recusa a segunda, linha de ações com refluxo por container
+   query, guarda de saída com trabalho não salvo, e no Angular a leitura dos
+   erros do Reactive Forms por um registro de mensagens. `validity` entrou no
+   vocabulário de capacidades em `specs/contract.schema.mjs`. A fusão e a
+   colheita moram em `@slotted/core/form`, novo entry point.
+9. `currency-field` — novo, feito em 2026-09-03. Entrou na onda fora da fila,
+   por invocação direta, e não tinha parágrafo de escopo: este é o escopo,
+   escrito com a família. Valor `number | null` em unidade maior,
+   controlado/não controlado, com a requisição carregando a moeda e o inteiro
+   exato em unidades menores. `currency` (ISO 4217) decide símbolo e casas
+   decimais; `locale` decide separadores, posição do símbolo e sistema de
+   numeração. Eixos `entry` (`cents` e `natural`), `align` (`end` e `start`),
+   `size`, `variant`, `stepper` — padrão `none` — e `clamp`. `entry="cents"` é o
+   modelo de caixa registradora que a ngx-currency chama de `Financial`: os
+   dígitos entram na casa menor e deslocam para a esquerda, o separador nunca é
+   digitado, o sinal é tecla própria e o cursor tem uma única posição legal.
+   Uma colagem é interpretada, não acumulada. `moeda e percentual são
+formatações` (guia §6) continua valendo: o que esta família acrescenta é o
+   modelo de digitação e a unidade menor, não um segundo formatador. O motor
+   mora em `@slotted/core/currency`, novo entry point sobre
+   `@slotted/core/number`. Decisões em
+   `docs/superpowers/specs/2026-09-03-currency-field-design.md`.
 
 ## Onda 4 — Navegação e disclosure sem overlay
 
@@ -253,6 +590,30 @@ Sequencial. Cada item reusa a decisão de anatomia do anterior.
   distintas (guia 17).
 - `toolbar` fecha a onda sem o overflow para menu; o overflow depende de `menu`
   e volta como refino na onda 5.
+
+### Escopo por família — onda 4
+
+- **`tabs`** — entregue em 2026-09-03, na mesma invocação que `toolbar`. Um
+  membro e nove partes: `root`, `list`, `item`, `tab`, `label`, `dismiss`,
+  `panel`, `scroll` e `actions`. Eixos `activation`, `orientation`, `size`,
+  `variant` (`line`/`contained`), `fit` (`auto`/`equal`) e `mount`
+  (`active`/`lazy`/`eager`, os nomes da Cloudscape). Modelo de estado em
+  `selection`, com razões `pointer`, `keyboard`, `remove` e `programmatic`, e
+  requisição cancelável — o que nenhuma implementação pesquisada oferece. Tabs
+  dispensáveis com `Delete`, foco e seleção indo para o vizinho conforme a
+  regra do próprio APG. Lista que rola com dois controles de paginação fora da
+  sequência de tabulação. Tab como âncora por `href`, com clique modificado
+  entregue ao navegador. O marcador não é medido: a raiz registra
+  `data-activation-direction` e a folha de estilo transforma isso em origem de
+  transformação, o que mantém a família correta antes da hidratação.
+- **`toolbar`** — entregue em 2026-09-03. Um membro e quatro partes: `root`,
+  `group`, `separator` e `spacer`. Eixos `orientation`, `size`, `variant`
+  (`plain`/`outline`) e `overflow` (`wrap`/`scroll`). Os itens são os controles
+  do próprio consumidor, encontrados por serem focáveis, e um item pode ficar
+  com as setas de que precisa para operar — o conselho do APG escrito como
+  comportamento. `disabled` é recusado: um contêiner não desabilita controles
+  que não são dele, e `<fieldset disabled>` é a resposta da plataforma. Sem eixo
+  de arranjo: gap, alinhamento e barra unida continuam de `button-group`.
 
 ## Onda 5 — Infraestrutura de overlay e overlays
 
@@ -317,7 +678,7 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
 | `visually-hidden`, `divider`, `card`                                                        | refazer                             | 1    |
 | `button`, `link`, `badge`, `tag`, `avatar`, `kbd`, `skeleton`, `alert`                      | refazer                             | 2    |
 | `spinner`, `progress-bar`, `loading-bar`                                                    | consolidar em `progress-indicator`  | 2    |
-| `field`, `fieldset`                                                                         | consolidar em `field field-group`   | 3    |
+| `field`, `fieldset`                                                                         | consolidado em `field field-group`  | 3 ✓  |
 | `input`                                                                                     | renomear para `text-field`          | 3    |
 | `textarea`, `switch`                                                                        | refazer                             | 3    |
 | `tabs`, `breadcrumb`, `pagination`, `collapsible`, `stepper`, `description-list`, `toolbar` | refazer                             | 4    |

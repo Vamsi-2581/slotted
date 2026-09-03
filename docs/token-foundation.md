@@ -7,7 +7,7 @@ are the default theme's authored values.
 
 These rules are binding for every family the rebuild has reached. A family
 listed in `specs/legacy-families.json` predates this foundation and is exempt
-until it is rebuilt in the order `docs/rebuild-order.md` sets; that list only
+until it is rebuilt in the order `docs/build-order.md` sets; that list only
 shrinks, and nothing may be added to it.
 
 ## Layers
@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 73     |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 78     |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 94     |
 | `component` | One family adjusting a semantic value for itself.              | 5      |
 
@@ -214,6 +214,14 @@ alpha when it is used with `mask-image`.
 
 | `--slotted-icon-circle-question` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M9.5 9.3a2.6 2.6 0 0 1 5.05.87c0 1.73-2.6 2.6-2.6 2.6'/%3E%3Cpath d='M12 16.4h.01'/%3E%3C/svg%3E")` |
 
+| `--slotted-icon-inbox` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 13h-5l-1.6 2.6H9.6L8 13H3'/%3E%3Cpath d='M6.2 4.9 3 13v4.3A1.7 1.7 0 0 0 4.7 19h14.6a1.7 1.7 0 0 0 1.7-1.7V13l-3.2-8.1A1.7 1.7 0 0 0 16.2 3.8H7.8a1.7 1.7 0 0 0-1.6 1.1Z'/%3E%3C/svg%3E")` |
+
+| `--slotted-icon-search-x` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.7'/%3E%3Cpath d='m8.3 8.3 4.4 4.4'/%3E%3Cpath d='m12.7 8.3-4.4 4.4'/%3E%3Cpath d='m20.5 20.5-4.9-4.9'/%3E%3C/svg%3E")` |
+
+| `--slotted-icon-lock` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='10.4' width='16' height='9.6' rx='2.2'/%3E%3Cpath d='M7.8 10.4V7.6a4.2 4.2 0 0 1 8.4 0v2.8'/%3E%3C/svg%3E")` |
+
+| `--slotted-icon-cloud-off` | `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.4 18.6H8.9a6.4 6.4 0 0 1-.5-12.7 6.6 6.6 0 0 1 6.7 3.6h2.3a4.5 4.5 0 0 1 3 7.9'/%3E%3Cpath d='M3.6 3.6 20.4 20.4'/%3E%3C/svg%3E")` |
+
 A component-owned icon is a mask from a glyph token; a character is never an
 icon.
 
@@ -253,6 +261,17 @@ and the triangle is the one silhouette that has to be recognised before its
 colour is. The set is consumed by `status-indicator`, and by `alert` and
 `inline-message`, all three of which are required to say what they mean by icon
 as well as by tone.
+
+The last four are the marks that carry a whole region rather than annotate a
+line, and they were added for `result-state`, whose `status` axis has seven
+values and only three marks that already existed. Each one is a silhouette
+nothing in the set above can stand in for: a lock is not an alert, a struck
+cloud is not a question, a tray is not a dot, and a magnifier is not in the
+scale at all. Without them five of the seven statuses would draw the same
+circle, which is the reading the axis exists to pass — WCAG 2.2 SC 1.4.1, and
+`forced-colors`, where every tone ground becomes one system colour and the shape
+is all that is left. They carry their own container for the reason the status
+set does: a result state gives its mark no box.
 
 ## Target size
 

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 5,
+  "family": "result-state",
+  "ui": "result-state",
+  "axes": {
+    "status": ["empty", "no-results", "not-found", "error", "forbidden", "offline", "success"],
+    "reach": ["inline", "section", "page"],
+    "align": ["center", "start"],
+    "live": ["off", "polite", "assertive"]
+  },
+  "statusTones": {
+    "empty": "secondary",
+    "no-results": "secondary",
+    "not-found": "secondary",
+    "error": "danger",
+    "forbidden": "warning",
+    "offline": "warning",
+    "success": "success"
+  },
+  "statusGlyphs": {
+    "empty": "--slotted-icon-inbox",
+    "no-results": "--slotted-icon-search-x",
+    "not-found": "--slotted-icon-circle-question",
+    "error": "--slotted-icon-circle-alert",
+    "forbidden": "--slotted-icon-lock",
+    "offline": "--slotted-icon-cloud-off",
+    "success": "--slotted-icon-circle-check"
+  },
+  "liveRoles": {
+    "off": null,
+    "polite": "status",
+    "assertive": "alert"
+  },
+  "members": {
+    "resultState": {
+      "nativeElement": "section",
+      "defaults": {
+        "status": "empty",
+        "reach": "section",
+        "align": "center",
+        "live": "polite",
+        "hideMedia": false
+      },
+      "capabilities": ["appearance", "arrangement", "status", "live"],
+      "states": ["default", "focus-visible"],
+      "parts": ["root", "media", "content", "title", "description", "actions", "footer"]
+    }
+  },
+  "scenarios": {
+    "resultState": [
+      "playground",
+      "statuses",
+      "reach",
+      "align",
+      "media",
+      "actions",
+      "live",
+      "content",
+      "composition",
+      "accessibility"
+    ]
+  }
+}

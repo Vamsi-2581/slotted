@@ -402,6 +402,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-plus",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-dot",
       "layer": "primitive",
       "axis": "base",
@@ -416,6 +423,20 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-eye",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-eye-off",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-chevron-right",
       "layer": "primitive",
       "axis": "base",
@@ -423,7 +444,77 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-chevrons-right",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-chevron-down",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-external",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-person",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-circle",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-circle-info",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-circle-check",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-triangle-alert",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-circle-alert",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-circle-x",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-circle-question",
       "layer": "primitive",
       "axis": "base",
       "type": "image",
@@ -468,11 +559,11 @@
       "type": "length"
     },
     {
-      "name": "--slotted-control-shadow",
+      "name": "--slotted-control-shadow-focus-geometry",
       "layer": "semantic",
       "axis": "base",
       "type": "shadow",
-      "literal": "a flat control is the default, not an elevation step"
+      "root": true
     },
     {
       "name": "--slotted-control-transition-duration",
@@ -518,6 +609,13 @@
       "axis": "scheme",
       "type": "color",
       "root": true,
+      "forcedColor": "Highlight"
+    },
+    {
+      "name": "--slotted-focus-ring-color-invalid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
       "forcedColor": "Highlight"
     },
     {
@@ -1009,6 +1107,22 @@
       "forcedColor": "CanvasText"
     },
     {
+      "name": "--slotted-control-border-color",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonBorder"
+    },
+    {
+      "name": "--slotted-control-shadow",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "shadow",
+      "root": true,
+      "forcedColor": "none"
+    },
+    {
       "name": "--slotted-scrim",
       "layer": "semantic",
       "axis": "scheme",
@@ -1122,173 +1236,39 @@
       "root": true
     },
     {
-      "name": "--slotted-button-gap",
+      "name": "--slotted-avatar-size-xs",
       "layer": "component",
-      "axis": "base",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-radius-sm",
-      "layer": "component",
-      "axis": "base",
+      "axis": "density",
       "type": "length",
-      "literal": "optical correction: a small control reads rounder at one radius"
+      "root": true
     },
     {
-      "name": "--slotted-button-radius-md",
+      "name": "--slotted-avatar-size-sm",
       "layer": "component",
-      "axis": "base",
+      "axis": "density",
       "type": "length",
-      "literal": "optical correction against the control radius"
+      "root": true
     },
     {
-      "name": "--slotted-button-radius-lg",
+      "name": "--slotted-avatar-size-md",
       "layer": "component",
-      "axis": "base",
+      "axis": "density",
       "type": "length",
-      "literal": "optical correction: a large control reads rounder at one radius"
+      "root": true
     },
     {
-      "name": "--slotted-button-ghost-text-decoration",
+      "name": "--slotted-avatar-size-lg",
       "layer": "component",
-      "axis": "base",
-      "type": "keyword",
-      "literal": "a keyword, not a value a scale can hold"
-    },
-    {
-      "name": "--slotted-button-loading-opacity",
-      "layer": "component",
-      "axis": "base",
-      "type": "number",
-      "literal": "the ratio a loading label fades to"
-    },
-    {
-      "name": "--slotted-button-loading-indicator-size",
-      "layer": "component",
-      "axis": "base",
+      "axis": "density",
       "type": "length",
-      "literal": "one em ties the ring to the label it accompanies"
+      "root": true
     },
     {
-      "name": "--slotted-button-loading-indicator-stroke-width",
+      "name": "--slotted-avatar-size-xl",
       "layer": "component",
-      "axis": "base",
+      "axis": "density",
       "type": "length",
-      "literal": "the ring stroke reads thinner than a border"
-    },
-    {
-      "name": "--slotted-button-loading-indicator-duration",
-      "layer": "component",
-      "axis": "base",
-      "type": "duration"
-    },
-    {
-      "name": "--slotted-button-group-gap",
-      "layer": "component",
-      "axis": "base",
-      "type": "length",
-      "literal": "adjacent buttons share one border and touch"
-    },
-    {
-      "name": "--slotted-button-group-adjacent-offset",
-      "layer": "component",
-      "axis": "base",
-      "type": "length",
-      "literal": "derived from the control border width"
-    },
-    {
-      "name": "--slotted-button-group-inner-radius",
-      "layer": "component",
-      "axis": "base",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-outline-background",
-      "layer": "component",
-      "axis": "scheme",
-      "type": "color",
-      "root": true,
-      "forcedColor": "transparent"
-    },
-    {
-      "name": "--slotted-button-ghost-background",
-      "layer": "component",
-      "axis": "scheme",
-      "type": "color",
-      "root": true,
-      "forcedColor": "transparent"
-    },
-    {
-      "name": "--slotted-button-height-sm",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-height-md",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-height-lg",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-padding-inline-sm",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-padding-inline-md",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-padding-inline-lg",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-font-size-sm",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-font-size-md",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-font-size-lg",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-icon-size-sm",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-icon-size-md",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
-    },
-    {
-      "name": "--slotted-button-icon-size-lg",
-      "layer": "component",
-      "axis": "density",
-      "type": "length"
+      "root": true
     }
   ]
 }

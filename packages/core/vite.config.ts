@@ -17,6 +17,8 @@ export default defineConfig({
         loading: resolve(import.meta.dirname, 'src/loading/index.ts'),
         measure: resolve(import.meta.dirname, 'src/measure/index.ts'),
         number: resolve(import.meta.dirname, 'src/number/index.ts'),
+        overflow: resolve(import.meta.dirname, 'src/overflow/index.ts'),
+        progress: resolve(import.meta.dirname, 'src/progress/index.ts'),
         pagination: resolve(import.meta.dirname, 'src/pagination/index.ts'),
         slider: resolve(import.meta.dirname, 'src/slider/index.ts'),
         state: resolve(import.meta.dirname, 'src/state/index.ts'),

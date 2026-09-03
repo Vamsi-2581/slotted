@@ -8,6 +8,8 @@ export * from './keys';
 export * from './loading';
 export * from './measure';
 export * from './number';
+export * from './overflow';
+export * from './progress';
 export * from './pagination';
 export * from './slider';
 export * from './state';

@@ -21,24 +21,31 @@ Anti-use for both: a set of two or three visible choices, which is
 `radio-group`; a list of commands, which is `menu`; a set the reader builds,
 which is `multi-select` in wave 6 item 5.
 
-## 2. The dependency this session did not have
+## 2. The dependency, and the session running beside this one
 
 `docs/build-order.md` puts `listbox` at wave 6 item 2 and the collection-engine
-review at item 1, both before these two. Neither has been built: `packages/core/src/collection`
-holds `virtualWindow` and nothing else, and `specs/components/listbox/` does not
-exist.
+review at item 1, both before these two. When this session opened, neither had
+landed: `packages/core/src/collection` held `virtualWindow` and nothing else,
+and `specs/components/listbox/` did not exist. A second session began building
+`listbox` in this same worktree while this one was writing its stylesheets, and
+is writing `packages/core/src/collection/items.ts` and `selection.ts` as it
+goes.
 
 The decision taken, rather than left open: **these two families do not compose a
 `listbox` family, and never were going to.** A select's popup and a combobox's
 popup are each that family's own surface, as they are in all eight surveyed
-implementations; what the three share is behaviour, and behaviour belongs in
-`packages/core`. So the collection engine's first real consumer is this pair
-rather than `listbox`, and the module is written here — in its own commit,
-before the families, as `docs/build-briefing.md` requires of shared tooling.
+implementations; a standalone listbox is a third widget with its own role, its
+own tab stop and its own selection model. What the three share is behaviour, and
+behaviour belongs in `packages/core`.
 
-`listbox` keeps its place in wave 6 as the standalone, always-visible list
-widget, and consumes the same module when it is built. Its entry in
-`docs/build-order.md` gains that sentence as part of this work.
+So this session writes only what its own two families need —
+`packages/core/src/collection/navigation.ts` and `filter.ts`, in their own
+commit, before the families, as `docs/build-briefing.md` requires of shared
+tooling — and imports nothing from the other session's in-flight modules. Two
+sessions writing one directory can add files to it; neither may build on the
+other's unfinished export. If `createCollection` and `nextSelection` land and
+turn out to say what these families say in their own bindings, a later session
+reconciles them; the reconciliation is cheap and a mid-write dependency is not.
 
 ## 3. The collection engine, as this pair needs it
 

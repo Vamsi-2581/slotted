@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 5,
+  "family": "select",
+  "ui": "select",
+  "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
+  "examplePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/",
+  "listboxPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/listbox/",
+  "patternStatus": "Three pages answer this family. The combobox pattern owns the control, its role and its properties; the select-only combobox example owns the key table, because a combobox that takes no text is what this family is; the listbox pattern owns the popup, its options, its groups and its selection states. All three were read on 2026-09-04 and transcribed into docs/superpowers/specs/2026-09-04-select-and-combobox-design.md §4.",
+  "roles": {
+    "trigger": "combobox",
+    "content": "listbox",
+    "item": "option",
+    "group": "group",
+    "separator": "separator",
+    "status": "status"
+  },
+  "nativeElement": {
+    "considered": "select",
+    "refused": true,
+    "reason": "A native select cannot hold an option with an icon, a description or a check mark; it cannot be styled past its closed state in any browser; and its popup is drawn by the operating system, so it answers no density, no colour scheme and no direction. The cost of refusing it is the whole key table, the whole popup, and a visually hidden native select carried alongside so a plain form still submits and reset() still restores."
+  },
+  "modal": false,
+  "composes": ["positioner", "presence", "portal", "dismissable-layer", "typeahead", "collection"],
+  "adds": {
+    "collection": {
+      "module": "packages/core/src/collection",
+      "reason": "moveIndex, because the highlight is aria-activedescendant rather than DOM focus and packages/core/src/focus/arrow-navigation moves real focus. createFilter and matchRanges, because docs/component-features.md §2.9 asks that search compare the way the reader's locale compares and §6 refuses an assumed contains — combobox is the consumer, and select shares the module for movement alone.",
+      "nextConsumer": "listbox"
+    }
+  },
+  "portalledIdentity": {
+    "elements": ["root", "positioner"],
+    "reason": "The family is two subtrees: the control, where the consumer wrote it, and the popup, portalled to the end of the document. A stylesheet has no way to reach a subtree that is no longer inside the root, so data-ui is written on both. menu did not face this — its layer is its root and its trigger belongs to the consumer — and popover, tooltip and dialog each declined a trigger part for the same reason. A consumer's [data-ui='select'] selector therefore matches the control and the popup, and both rows are in the anatomy table."
+  },
+  "layer": {
+    "modal": false,
+    "scrollLock": false,
+    "branches": [
+      "the control root, so pressing the trigger again closes rather than dismissing twice"
+    ],
+    "depthProperty": "--slotted-layer-depth",
+    "zIndexToken": "--slotted-z-index-popover",
+    "reason": "One layer in the single stack, at the token popover and menu already use: an anchored surface above the page and below a toast. Modality is declined to dialog, as popover and menu both declined it, because inerting the page would inert the control that has to close the popup."
+  },
+  "highlight": {
+    "mechanism": "aria-activedescendant",
+    "attribute": "data-current",
+    "focus": "stays on the trigger for the whole interaction",
+    "scroll": "scrollIntoView({ block: 'nearest' }) on every change",
+    "reason": "The APG's own select-only example keeps DOM focus on the combobox and marks the option with aria-activedescendant, and combobox — this family's pair — has no choice, because its input must keep focus for the reader to type. One model across both is what lets data-current and aria-selected mean the same thing in both popups. The cost is that focus/arrow-navigation cannot be used and the family binds its own keys."
+  },
+  "wiring": {
+    "role": "combobox on the trigger, listbox on the content, option on each item",
+    "aria-haspopup": "listbox, on the trigger. Redundant for role=combobox, whose implicit value is listbox, and written anyway because the element is a button and role=combobox replaces button on it.",
+    "aria-expanded": "true while the popup is open, false while it is closed, always written",
+    "aria-controls": "the trigger names the content while the popup is open",
+    "aria-activedescendant": "the trigger names the highlighted option, and nothing while there is none",
+    "aria-selected": "true on every committed option, false on every other selectable one, which is what the listbox pattern requires",
+    "aria-multiselectable": "true on the content when multiple is set",
+    "aria-labelledby": "the trigger takes the field's label, because a button is not reliably reached by a label element",
+    "aria-describedby": "the trigger takes the field's description and error",
+    "aria-disabled": "never written. The trigger is a real button and carries the native attribute, which a disabled fieldset can also set on its own.",
+    "aria-readonly": "on the trigger, because neither a button nor role=combobox has a readonly the platform enforces",
+    "aria-required": "on the trigger, from the prop or from the field",
+    "aria-invalid": "on the trigger, from the prop or from the field",
+    "aria-busy": "on the content while loading",
+    "aria-setsize": "on each option when total is given, which is what an incrementally loaded list sets",
+    "aria-posinset": "beside aria-setsize, for the same reason",
+    "aria-modal": "never written. The page behind the popup is still there and still reachable."
+  },
+  "keyboard": [
+    {
+      "key": "ArrowDown",
+      "effect": "closed, opens the popup onto the selected option or the first; open, moves the highlight to the next option, wrapping only when loop is true",
+      "focus": "stays on the trigger; the highlight moves and aria-activedescendant follows it",
+      "source": "pattern"
+    },
+    {
+      "key": "ArrowUp",
+      "effect": "closed, opens the popup onto the last option; open, moves the highlight to the previous option. The example opens onto the first; the last is the mirror of ArrowDown and what every surveyed implementation does, and the departure is recorded in the design.",
+      "focus": "the trigger",
+      "source": "family"
+    },
+    {
+      "key": "Alt+ArrowDown",
+      "effect": "opens the popup without moving the highlight",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "Alt+ArrowUp",
+      "effect": "commits the highlighted option and closes",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "Enter",
+      "effect": "closed, opens; open, commits the highlighted option and closes",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "Space",
+      "effect": "closed, opens; open and single, commits and closes; open and multiple, toggles the highlighted option and keeps the popup open, which is the listbox pattern's recommended multiple-selection model",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "Home",
+      "effect": "opens if closed, and highlights the first option",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "End",
+      "effect": "opens if closed, and highlights the last option",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "PageDown",
+      "effect": "moves the highlight ten options on, or to the last, and never wraps",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "PageUp",
+      "effect": "moves the highlight ten options back, or to the first, and never wraps",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "Printable character",
+      "effect": "opens if closed, and highlights the first option whose label begins with the sequence typed; the same character repeated cycles through the options beginning with it",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "Escape",
+      "effect": "closes without committing anything",
+      "focus": "the trigger",
+      "source": "pattern"
+    },
+    {
+      "key": "Tab",
+      "effect": "commits the highlighted option, closes, and moves on. The example states this and notes it differs from a native select, which closes and does not move.",
+      "focus": "the next element in the page",
+      "source": "pattern"
+    }
+  ],
+  "focus": {
+    "onOpen": "nothing moves; the trigger keeps focus and the highlight goes to the selected option, or to the first",
+    "roving": false,
+    "contained": false,
+    "restore": "never leaves the trigger, so there is nothing to restore",
+    "disabledItems": "A disabled option is announced with aria-disabled, carries data-disabled, keeps its place in the collection and is skipped by every movement key. It cannot be committed.",
+    "guards": false,
+    "guardsReason": "popover needs two focus guards because Tab inside a non-modal portalled layer has nowhere to go. Focus never enters this layer, so there is nothing inside it for Tab to reach.",
+    "removal": "The option holding the highlight cannot be removed while it holds focus, because it never holds focus. When the collection loses the highlighted option the highlight falls back to the selected option, then to the first, then to nothing."
+  },
+  "typeahead": {
+    "module": "typeahead",
+    "timeout": 500,
+    "label": "the item's textValue, or its label part's text",
+    "locale": "Intl.Collator at base sensitivity, so Ä matches a",
+    "reason": "The listbox pattern recommends it for every listbox and especially above seven options, and the select-only example ships it. menu recorded listbox as the module's next consumer; this family is the one that arrived first."
+  },
+  "overflow": {
+    "part": "content",
+    "property": "--slotted-positioner-available-height",
+    "reason": "The same bound menu takes, for the same reason: Radix, Base UI and React Aria each publish the remaining height and none of them bounds itself, so a list of a hundred options runs off the bottom of the screen."
+  },
+  "measure": {
+    "value": "the anchor's width by default, and the content's own width when width is content",
+    "property": "--slotted-positioner-anchor-width",
+    "reason": "A select's popup is a list of the values the control shows, so it is the control's width; a menu's is a list of commands and hangs at its own. width=\"content\" is for a popup with descriptions, which needs more room than the field it fills."
+  },
+  "value": {
+    "part": "value",
+    "unmatched": "data-unmatched",
+    "summary": "the first selected label, then +N",
+    "reason": "Every surveyed implementation paints the placeholder when a controlled value matches no option, which is what an async list shows on its first render while it still holds a value. The value part renders the consumer's own function instead, and data-unmatched says the label could not be resolved, so a form never looks empty while holding a value."
+  },
+  "form": {
+    "react": "a visually hidden native select carrying name, required, form and one option per value",
+    "angular": "ControlValueAccessor and Validator",
+    "reason": "Neither ecosystem has the other's mechanism. The hidden select is what makes a plain form submit, a native reset() restore and a browser's own validation bubble point at the right control; Radix ships the same element for the same reason. Recording the asymmetry is what docs/superpowers/specs/2026-09-04-select-and-combobox-design.md §11 asks instead of levelling both to the smaller shape."
+  },
+  "mount": {
+    "active": "the layer exists only while it is open",
+    "lazy": "built on the first open and kept afterwards",
+    "eager": "exists from the start, closed",
+    "default": "active",
+    "reason": "The same axis tooltip, popover, collapsible and menu declare."
+  },
+  "motion": {
+    "property": "scale",
+    "companion": "opacity",
+    "origin": "--slotted-positioner-transform-origin",
+    "measured": false,
+    "reason": "The popup grows from the control that opened it, which is what says where it came from. The same grammar tooltip, popover and menu use, so four anchored layers do not open four different ways."
+  },
+  "runtimeProperties": [
+    "--slotted-layer-depth",
+    "--slotted-positioner-anchor-width",
+    "--slotted-positioner-available-height",
+    "--slotted-positioner-available-width",
+    "--slotted-positioner-transform-origin"
+  ],
+  "positioning": {
+    "side": "bottom",
+    "align": "start",
+    "sideOffset": 4,
+    "alignOffset": 0,
+    "collisionPadding": 8,
+    "reason": "The popup hangs from the start edge of the control and is as wide as it, so the value in the control and the labels in the list share one edge. The offset is four rather than menu's zero: a menu's gap is its layer's own padding, needed so a pointer travelling into a submenu never crosses page, and this family has no submenu and no grace area to protect."
+  },
+  "declined": {
+    "itemAligned": {
+      "reason": "Radix ships position=\"item-aligned\" and makes it the default, and Material has disableOptionCentering for the same behaviour; Radix's own examples set position=\"popper\". It scrolls and offsets the popup so the selected option lands under the pointer, which needs a measured scroll on every open, cannot survive a bounded height, and is a macOS convention rather than a web one. No composition replaces it, and the cost is recorded rather than hidden."
+    },
+    "modal": {
+      "deferTo": "dialog",
+      "reason": "Base UI defaults its select to modal. docs/component-features.md §8 gives the modal surface to Dialog, and popover and menu each declined it there. applyInert in dismissable-layer inerts everything outside the layer, the control included, so a modal select could not be closed by pressing the control again."
+    },
+    "backdrop": {
+      "deferTo": "dialog",
+      "reason": "Base UI ships Select.Backdrop. A backdrop darkens the page behind a modal and catches the press that closes it; modality is declined above and the press outside already belongs to the dismissable layer."
+    },
+    "arrow": {
+      "deferTo": "popover",
+      "reason": "Base UI and Ark both ship an arrow on a select. The popup is as wide as its control and hangs directly under it, so the control already says where it came from; the anchored surface that points at something is popover. Declining it is also what frees the part name arrow for the chevron on the trigger."
+    },
+    "chips": {
+      "deferTo": "multi-select",
+      "reason": "docs/component-features.md §6 files removable chips, creation, limits, duplicates, reorder and paste under MultiSelect / Tags Input, which is wave 6 item 5. This family ships multiple with a summary in the trigger — the same paragraph asks for \"resumo\" — and a consumer who needs chips reaches for the family that owns them."
+    },
+    "freeText": {
+      "deferTo": "combobox",
+      "reason": "docs/component-features.md §6 ends the Select paragraph with it: \"Não inclui entrada de texto livre. Grande volume ou busca explícita usa Combobox.\" The two families ship together for that reason."
+    },
+    "virtualization": {
+      "deferTo": "collection",
+      "reason": "docs/component-features.md §2.10 makes virtualization a capability of the collection engine rather than a parallel component, and menu deferred it there. A bounded, scrolling popup plus typeahead, Home, End and the page keys hold a hundred options, which the harness proves."
+    },
+    "debounce": {
+      "reason": "Not applicable to a family with no query, and declined for combobox in the same session: a debounce belongs to the consumer's fetch, and a family that delayed its own request would delay a controlled consumer's re-render and drop characters."
+    }
+  },
+  "axes": {
+    "size": ["sm", "md", "lg"],
+    "variant": ["outline", "subtle", "plain"],
+    "side": ["bottom", "top", "inline-start", "inline-end", "left", "right"],
+    "align": ["start", "center", "end"],
+    "width": ["anchor", "content"],
+    "mount": ["active", "lazy", "eager"],
+    "strategy": ["absolute", "fixed"],
+    "multiple": [true, false],
+    "clearable": [true, false],
+    "loop": [true, false],
+    "typeahead": [true, false],
+    "closeOnSelect": [true, false],
+    "closeOnEscape": [true, false],
+    "closeOnOutsidePress": [true, false],
+    "flip": [true, false],
+    "shift": [true, false],
+    "hideWhenDetached": [true, false],
+    "portal": [true, false],
+    "fullWidth": [true, false],
+    "disabled": [true, false],
+    "readOnly": [true, false],
+    "required": [true, false],
+    "invalid": [true, false],
+    "loading": [true, false]
+  },
+  "resolution": {
+    "size": ["prop", "defaults", "md"],
+    "variant": ["prop", "defaults", "outline"],
+    "side": ["prop", "defaults", "bottom"],
+    "align": ["prop", "defaults", "start"],
+    "width": ["prop", "defaults", "anchor"],
+    "mount": ["prop", "defaults", "active"],
+    "strategy": ["prop", "defaults", "absolute"],
+    "multiple": ["prop", "defaults", false],
+    "clearable": ["prop", "defaults", false],
+    "loop": ["prop", "defaults", false],
+    "typeahead": ["prop", "defaults", true],
+    "closeOnSelect": ["prop", "defaults", true],
+    "closeOnEscape": ["prop", "defaults", true],
+    "closeOnOutsidePress": ["prop", "defaults", true],
+    "flip": ["prop", "defaults", true],
+    "shift": ["prop", "defaults", true],
+    "hideWhenDetached": ["prop", "defaults", true],
+    "portal": ["prop", "defaults", true],
+    "fullWidth": ["prop", "defaults", true],
+    "disabled": ["prop", "defaults", false],
+    "readOnly": ["prop", "defaults", false],
+    "required": ["prop", "defaults", false],
+    "invalid": ["prop", "defaults", false],
+    "loading": ["prop", "defaults", false]
+  },
+  "provides": {
+    "selectDefaults": [
+      "size",
+      "variant",
+      "side",
+      "align",
+      "width",
+      "mount",
+      "strategy",
+      "multiple",
+      "clearable",
+      "loop",
+      "typeahead",
+      "closeOnSelect",
+      "closeOnEscape",
+      "closeOnOutsidePress",
+      "flip",
+      "shift",
+      "hideWhenDetached",
+      "portal",
+      "fullWidth",
+      "disabled",
+      "readOnly",
+      "required",
+      "invalid",
+      "loading",
+      "sideOffset",
+      "alignOffset",
+      "collisionPadding",
+      "typeaheadTimeout",
+      "clearLabel",
+      "emptyLabel",
+      "loadingLabel"
+    ]
+  },
+  "stateAttributes": {
+    "open": "data-open",
+    "disabled": "data-disabled",
+    "readonly": "data-readonly",
+    "invalid": "data-invalid",
+    "required": "data-required",
+    "loading": "data-loading",
+    "selected": "data-selected",
+    "current": "data-current"
+  },
+  "stateModel": {
+    "selection": {
+      "controlled": "value",
+      "uncontrolled": "defaultValue",
+      "request": "onValueChange",
+      "reasons": ["pointer", "keyboard", "clear", "select", "programmatic"]
+    },
+    "open": {
+      "controlled": "open",
+      "uncontrolled": "defaultOpen",
+      "request": "onOpenChange",
+      "reasons": [
+        "pointer",
+        "keyboard",
+        "escape",
+        "outsidePress",
+        "select",
+        "dismiss",
+        "blur",
+        "programmatic"
+      ]
+    },
+    "current": {
+      "controlled": "highlightedValue",
+      "uncontrolled": "defaultHighlightedValue",
+      "request": "onHighlightedValueChange",
+      "reasons": ["pointer", "keyboard", "programmatic"]
+    }
+  },
+  "members": {
+    "select": {
+      "nativeElement": "div",
+      "defaults": {
+        "size": "md",
+        "variant": "outline",
+        "side": "bottom",
+        "align": "start",
+        "width": "anchor",
+        "mount": "active",
+        "strategy": "absolute",
+        "multiple": false,
+        "clearable": false,
+        "loop": false,
+        "typeahead": true,
+        "closeOnSelect": true,
+        "closeOnEscape": true,
+        "closeOnOutsidePress": true,
+        "flip": true,
+        "shift": true,
+        "hideWhenDetached": true,
+        "portal": true,
+        "fullWidth": true,
+        "disabled": false,
+        "readOnly": false,
+        "required": false,
+        "invalid": false,
+        "loading": false,
+        "sideOffset": 4,
+        "alignOffset": 0,
+        "collisionPadding": 8,
+        "typeaheadTimeout": 500,
+        "clearLabel": "Clear selection",
+        "emptyLabel": "No options",
+        "loadingLabel": "Loading…"
+      },
+      "capabilities": [
+        "selection",
+        "open",
+        "current",
+        "size",
+        "appearance",
+        "placement",
+        "content",
+        "fullWidth",
+        "disabled",
+        "loading",
+        "readOnly",
+        "required",
+        "invalid",
+        "wiring"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "active",
+        "focus-visible",
+        "open",
+        "disabled",
+        "readonly",
+        "invalid",
+        "required",
+        "loading",
+        "selected",
+        "current"
+      ],
+      "parts": [
+        "root",
+        "trigger",
+        "value",
+        "arrow",
+        "clear",
+        "positioner",
+        "content",
+        "group",
+        "group-label",
+        "item",
+        "indicator",
+        "icon",
+        "label",
+        "description",
+        "separator",
+        "empty",
+        "status"
+      ]
+    }
+  },
+  "scenarios": {
+    "select": [
+      "playground",
+      "selection",
+      "placeholder",
+      "groups",
+      "multiple",
+      "clearable",
+      "sizes",
+      "variants",
+      "states",
+      "loading-and-empty",
+      "long-content",
+      "placement",
+      "keyboard",
+      "form",
+      "composition"
+    ]
+  }
+}

@@ -45,13 +45,60 @@ test('finds every stylesheet in the package', () => {
   assert.ok(stylesheets().length >= 4);
 });
 
+/**
+ * The one rule whose inputs are already physical.
+ *
+ * `packages/core/src/positioner` measures the arrow with the engine and writes
+ * `--slotted-positioner-arrow-x` and `-arrow-y` as offsets from the layer's own
+ * left and top, in the same physical coordinates `transform-origin` is written
+ * in. `data-side` is physical for the same reason: it names the edge of the
+ * anchor the layer landed on, not an edge of the reader's writing direction.
+ *
+ * Placing a physical number against a physical side takes a physical inset, and
+ * mirroring it would move an already-correct arrow to the wrong edge in a
+ * right-to-left document. Every other physical inset in the repository is still
+ * refused, including one in the same stylesheet.
+ */
+const PHYSICAL_BY_MEASUREMENT = /\[data-part=['"]arrow['"]\]/;
+
+/**
+ * Every declaration in a sheet, with the selectors it is nested inside. The
+ * path rather than the innermost selector, so a rule inside `@media` or
+ * `@layer` still carries the part it is about.
+ */
+export function declarations(css) {
+  const found = [];
+  const stack = [];
+  let buffer = '';
+
+  for (const character of css) {
+    if (character === '{') {
+      stack.push(buffer.trim());
+      buffer = '';
+    } else if (character === '}') {
+      stack.pop();
+      buffer = '';
+    } else if (character === ';') {
+      found.push({ declaration: buffer.trim(), path: stack.join(' ') });
+      buffer = '';
+    } else {
+      buffer += character;
+    }
+  }
+
+  return found.filter((entry) => entry.declaration.length > 0);
+}
+
 test('writes every rule in logical properties', () => {
   const violations = [];
 
   for (const { css, path } of stylesheets()) {
-    for (const line of css.split('\n')) {
+    for (const { declaration, path: selector } of declarations(css)) {
+      if (PHYSICAL_BY_MEASUREMENT.test(selector)) continue;
       for (const { logical, pattern } of PHYSICAL) {
-        if (pattern.test(line)) violations.push(`${path}: ${line.trim()} — use ${logical}`);
+        if (pattern.test(`;${declaration}`)) {
+          violations.push(`${path}: ${declaration} — use ${logical}`);
+        }
       }
     }
   }
@@ -61,5 +108,22 @@ test('writes every rule in logical properties', () => {
     [],
     `Physical properties break a right-to-left document:
   ${violations.join('\n  ')}`,
+  );
+});
+
+test('keeps the arrow exemption narrow enough to still catch a mirrored rule', () => {
+  const sheet = `
+    [data-ui='popover'] [data-part='arrow'] { left: var(--slotted-positioner-arrow-x); }
+    [data-ui='popover'] [data-part='content'] { left: 0; padding-left: 4px; }
+  `;
+  const offending = declarations(sheet).filter(
+    ({ declaration, path }) =>
+      !PHYSICAL_BY_MEASUREMENT.test(path) &&
+      PHYSICAL.some(({ pattern }) => pattern.test(`;${declaration}`)),
+  );
+
+  assert.deepEqual(
+    offending.map(({ declaration }) => declaration),
+    ['left: 0', 'padding-left: 4px'],
   );
 });

@@ -267,7 +267,7 @@ const accessibility = [
 
 const snippets = [
   defineSnippet({
-    id: 'tooltip-application-defaults',
+    id: 'tooltip-react-application-defaults',
     label: 'Application defaults',
     language: 'tsx',
     source: `
@@ -297,7 +297,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'A hint on a control',
     note: 'Hover the button, or Tab to it: focus opens the hint in the same task and the pointer waits out the delay first.',
     snippet: defineSnippet({
-      id: 'tooltip-playground',
+      id: 'tooltip-react-playground',
       label: 'Playground',
       language: 'tsx',
       source: `
@@ -316,7 +316,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Inverse, and surface',
     note: 'The inverse hint separates itself from a light page with no edge at all; the surface one takes the raised surface and the hairline it needs on a dark ground.',
     snippet: defineSnippet({
-      id: 'tooltip-variant',
+      id: 'tooltip-react-variant',
       label: 'Variant',
       language: 'tsx',
       source: `
@@ -335,7 +335,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Two type steps',
     note: 'Small is the hint inside a dense table row; medium is everywhere else. Switch the density in the toolbar and both tighten without either changing meaning.',
     snippet: defineSnippet({
-      id: 'tooltip-sizes',
+      id: 'tooltip-react-sizes',
       label: 'Sizes',
       language: 'tsx',
       source: `
@@ -353,7 +353,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Which edge it takes',
     note: 'Four sides around one anchor. inline-start and inline-end mirror with the direction; left and right do not, which is why the arrow stays put when the toolbar switches to rtl.',
     snippet: defineSnippet({
-      id: 'tooltip-placement',
+      id: 'tooltip-react-placement',
       label: 'Placement',
       language: 'tsx',
       source: `
@@ -372,7 +372,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'The warmup, and the group window',
     note: 'Cross the row of buttons quickly and nothing opens. Rest on one, wait, and it opens; move to its neighbour inside the group window and that one opens in the same task.',
     snippet: defineSnippet({
-      id: 'tooltip-delay',
+      id: 'tooltip-react-delay',
       label: 'Delay',
       language: 'tsx',
       source: `
@@ -387,12 +387,12 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Description, or name',
     note: 'The left button is labelled and the hint describes it. The right one has no words of its own, so the hint is its accessible name and the layer is in the document before anyone opens it.',
     snippet: defineSnippet({
-      id: 'tooltip-describes',
+      id: 'tooltip-react-describes',
       label: 'Describes',
       language: 'tsx',
       source: `
 <Tooltip describes="label">
-  <TooltipTrigger render={(props) => <Button {...props} shape="circle" />} />
+  <TooltipTrigger render={(props) => <Button {...props}>+</Button>} />
   <TooltipLayer>
     <TooltipContent>Archive</TooltipContent>
   </TooltipLayer>
@@ -405,7 +405,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Reaching the hint with the pointer',
     note: 'Open the left one and move the pointer onto it: it stays, because the gap is the layer’s own padding. The right one is hoverable={false} and lets the pointer straight through.',
     snippet: defineSnippet({
-      id: 'tooltip-hoverable',
+      id: 'tooltip-react-hoverable',
       label: 'Hoverable',
       language: 'tsx',
       source: `
@@ -423,7 +423,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Content the family did not choose',
     note: 'A sentence long enough to meet the measure, a single unbroken token, and a string in another script. The cap is a token rather than an axis, because measure belongs to Container.',
     snippet: defineSnippet({
-      id: 'tooltip-content',
+      id: 'tooltip-react-content',
       label: 'Content',
       language: 'tsx',
       source: `
@@ -438,7 +438,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'A hint on a control that is out of action',
     note: 'A native disabled button fires no pointer events, so its explanation is unreachable. Use aria-disabled on a control that stays focusable, or put the trigger on a wrapper.',
     snippet: defineSnippet({
-      id: 'tooltip-disabled',
+      id: 'tooltip-react-disabled',
       label: 'Disabled',
       language: 'tsx',
       source: `
@@ -456,7 +456,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'In a row of icon buttons',
     note: 'Where a tooltip actually lives. Every trigger is the consumer’s own Button, reached through render, and one provider sets the delays for the whole row.',
     snippet: defineSnippet({
-      id: 'tooltip-composition',
+      id: 'tooltip-react-composition',
       label: 'Composition',
       language: 'tsx',
       source: `
@@ -474,7 +474,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'What the keyboard does',
     note: 'Tab in and the hint opens with no delay; press Escape and it goes without the focus moving; press Enter and the button acts and the hint clears itself away.',
     snippet: defineSnippet({
-      id: 'tooltip-keyboard',
+      id: 'tooltip-react-keyboard',
       label: 'Keyboard',
       language: 'tsx',
       source: `

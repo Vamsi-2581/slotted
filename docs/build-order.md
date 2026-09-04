@@ -114,11 +114,11 @@ decisões, e é onde a inconsistência atual se origina.
 independentes entre si.
 
 `typography` entrega **Text** e **Heading**. **Prose** — o recipe editorial da
-seção 10 — fica adiado: o ritmo que ele precisa fixar é definido sobre `list` e
+seção 10 — ficou adiado: o ritmo que ele fixa é definido sobre `list` e
 `list-item` (onda 4), `link` (onda 2), `table` (onda 6) e `code-block` (onda 8).
 Escrito antes disso, seria uma segunda escala privada para elementos que a
-reconstrução ainda não alcançou. Volta como invocação própria no fim da onda 4,
-quando lista e link já existirem; tabela e código entram como refino posterior.
+reconstrução ainda não alcançou. Foi entregue no fim da onda 4, com lista e link
+já existentes; tabela e código entram como refino posterior.
 
 ### Escopo por família — onda 1
 
@@ -586,6 +586,7 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
 | `stepper`               | refazer    | 7    |
 | `description-list`      | refazer    | 10   |
 | `list list-item`        | novo       | 10   |
+| `prose`                 | novo       | 10   |
 | `result-state`          | consolidar | 9    |
 | `toolbar`               | refazer    | 5    |
 
@@ -728,6 +729,38 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   `docs/superpowers/specs/2026-09-03-list-and-list-item-capability-inventory.md`,
   decisões em `docs/superpowers/specs/2026-09-03-list-and-list-item-design.md`.
 
+- **`prose`** — entregue em 2026-09-04. A tipografia de uma região que a
+  aplicação não escreveu elemento por elemento: a árvore chega de um renderizador
+  de Markdown, de um CMS ou de um modelo de linguagem, e a página nunca põe um
+  atributo no `h2`. Texto que a aplicação escreve continua sendo `typography`; a
+  fronteira é quem escreveu as tags. Um membro e seis partes — `root`, `lead`,
+  `anchor`, `scroll`, `exclude` e `footnotes` — e dois eixos: `size`
+  (`md`/`lg`/`xl`, nomeado pelos passos da própria escala de tipo, com padrão
+  `lg` porque um parágrafo não é o rótulo de um botão) e `flow`
+  (`tight`/`normal`/`loose`, o único número de que derivam todos os vãos da
+  página). Sem modelo de estado: a família não guarda valor mutável, e o teste de
+  contrato afirma a ausência com a razão.
+  Toda regra de conteúdo pesa 0-1-0 — `:where()` mais a rosquinha
+  `:not(:where([data-part='exclude'], …))` — porque precisa perder para duas
+  coisas: uma família Slotted colocada dentro da região e a regra do próprio
+  consumidor. `@scope` diz o mesmo em uma linha e foi recusado por data: chegou
+  ao Baseline em março de 2026, e um bloco que o navegador não interpreta derruba
+  a folha inteira em vez de uma declaração.
+  Medida fica com `container`, e densidade é recusada porque `flow` já responde à
+  mesma pergunta — o mesmo argumento que `container` usou para o próprio inset.
+  A escada de títulos é a única razão literal da família, em `em`, registrada com
+  o custo: um título editorial é dimensionado em relação ao texto que apresenta, e
+  a escala da fundação para em 1.5rem porque nenhum controle precisa de mais.
+  A parte `scroll` é o único comportamento: um bloco largo recebe
+  `role="region"`, `tabindex="0"` e um nome **apenas enquanto transborda**,
+  medido por `@slotted/core/overflow`. Nenhuma das quatro implementações
+  pesquisadas deixa uma tabela larga alcançável sem ponteiro, e uma parada de
+  tabulação num bloco que cabe não faz nada.
+  Realce de sintaxe fica com `code-block` (onda 8) e comportamento de tabela com
+  `table` (onda 6). Inventário em
+  `docs/superpowers/specs/2026-09-04-prose-capability-inventory.md`, decisões em
+  `docs/superpowers/specs/2026-09-04-prose-design.md`.
+
 ## Onda 5 — Infraestrutura de overlay e overlays
 
 Infraestrutura primeiro, em `packages/core`, com teste próprio e sem UI:
@@ -759,7 +792,36 @@ Depois, nesta ordem:
    `tokens.json` da família com fallback de fundação. Um valor de runtime não tem
    fallback de fundação: o defeito é do teste compartilhado e é corrigido em
    commit próprio, antes da família, como o briefing exige.
-2. `popover`
+
+   Entregue com `popover` em 2026-09-04, em uma sessão só. A correção
+   compartilhada saiu antes das duas famílias e vale para todas as que vierem:
+   `packages/styles/src/runtime-properties.mjs` nomeia os prefixos que o script
+   escreve, `tokens.test.mjs` os subtrai antes de comparar, e
+   `logical.test.mjs` passou a permitir um inset físico em uma regra que
+   seleciona `[data-part='arrow']` — a seta é medida pelo engine em coordenadas
+   físicas e `data-side` nomeia uma borda física, então espelhá-la levaria uma
+   resposta correta para a borda errada em RTL.
+
+   O que a família decidiu e as próximas herdam: o vão entre o gatilho e a
+   superfície é o padding da própria layer e não o `sideOffset`, porque um vão
+   feito de offset é página vazia que o ponteiro atravessa — WCAG 2.2 SC 1.4.13
+   Hoverable; `hideWhenDetached` esconde e não fecha; o gatilho não é uma parte,
+   porque dezesseis folhas de estilo aqui selecionam `[data-part='root']`; e o
+   tooltip é uma `dismissable-layer`, então Escape, o press externo e o
+   empilhamento vêm todos do mesmo mecanismo. Inventário em
+   `docs/superpowers/specs/2026-09-04-tooltip-and-popover-capability-inventory.md`,
+   decisões em
+   `docs/superpowers/specs/2026-09-04-tooltip-and-popover-design.md`.
+
+2. `popover` — o diálogo **não modal** da APG, entregue com `tooltip` na mesma
+   sessão porque os dois são o mesmo posicionamento com políticas de dismissal
+   diferentes. `modal` fica com `dialog`, como manda o guia, seção 8. O corpo é
+   a única parte que rola, limitada por
+   `--slotted-positioner-available-height`, e é por isso que a anatomia tem
+   header, body e footer em vez de uma caixa só. Duas sentinelas
+   `data-part="focus-guard"` respondem o que `Tab` faz na borda de uma layer
+   portalizada e não modal: fecham e devolvem o foco ao gatilho. Nenhuma das
+   bibliotecas pesquisadas responde essa pergunta.
 3. `dialog alert-dialog` — entregue em 2026-09-04, como **uma família com dois
    membros**, `dialog` e `alertDialog`, sob um único `data-ui="dialog"`. O
    precedente é `button`, cujo contrato declara `iconButton` enquanto o guia dá

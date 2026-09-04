@@ -28,7 +28,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     disabled: Disabled,
     composition: Composition,
     keyboard: Keyboard,
-  }) as never;
+  });
 
 /**
  * One demonstration: what it is called, what to look at, and the stage that
@@ -227,7 +227,7 @@ export const Describes: Story = {
           'An icon-only button described by its tooltip and named by nothing is announced as “button”. Under label the hint is the name, so the layer is in the document before anyone opens it.',
           viewport(`
             <ng-container slTooltip describes="label" [portal]="false" side="bottom">
-              <button slButton shape="circle" tone="secondary" variant="outline" slTooltipTrigger type="button">+</button>
+              <button slButton tone="secondary" variant="outline" slTooltipTrigger type="button">+</button>
               <ng-template slTooltipLayer>
                 <div slTooltipContent>Add a row</div>
                 <div slTooltipArrow></div>
@@ -338,21 +338,21 @@ export const Composition: Story = {
         'These keep the default portal, so each layer is rendered at the end of the document and inherits the theme, scheme, density and direction of the region it was opened from. One provider names the hint and the delays for the whole row.',
         viewport(`
           <ng-container slTooltip side="bottom">
-            <button slButton shape="circle" size="sm" tone="secondary" variant="ghost" slTooltipTrigger type="button">↧</button>
+            <button slButton size="sm" tone="secondary" variant="ghost" slTooltipTrigger type="button">↧</button>
             <ng-template slTooltipLayer>
               <div slTooltipContent>Download</div>
               <div slTooltipArrow></div>
             </ng-template>
           </ng-container>
           <ng-container slTooltip side="bottom">
-            <button slButton shape="circle" size="sm" tone="secondary" variant="ghost" slTooltipTrigger type="button">⧉</button>
+            <button slButton size="sm" tone="secondary" variant="ghost" slTooltipTrigger type="button">⧉</button>
             <ng-template slTooltipLayer>
               <div slTooltipContent>Duplicate</div>
               <div slTooltipArrow></div>
             </ng-template>
           </ng-container>
           <ng-container slTooltip side="bottom">
-            <button slButton shape="circle" size="sm" tone="danger" variant="ghost" slTooltipTrigger type="button">✕</button>
+            <button slButton size="sm" tone="danger" variant="ghost" slTooltipTrigger type="button">✕</button>
             <ng-template slTooltipLayer>
               <div slTooltipContent>Delete</div>
               <div slTooltipArrow></div>

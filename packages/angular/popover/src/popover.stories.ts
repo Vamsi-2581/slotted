@@ -42,7 +42,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     composition: Composition,
     nested: Nested,
     keyboard: Keyboard,
-  }) as never;
+  });
 
 const scene = (label: string, note: string, body: string) => `
   <section class="slotted-demo-scene">

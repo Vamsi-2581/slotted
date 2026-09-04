@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/tooltip/contract.json';
 import { SlTooltip } from './tooltip';

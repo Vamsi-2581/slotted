@@ -1,5 +1,6 @@
 import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
 import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
+import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/tooltip/contract.json';
 import { ANGULAR_TOOLTIP_DOCS } from './tooltip.docs';

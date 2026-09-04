@@ -861,7 +861,7 @@ Do not start T4 until T3 is complete. `Dialog` must be the first overlay.
 - Decisions: `specs/legacy-families.json` is the ratchet. The 29 families built
   before the foundation stay on schema 4 and are exempt from the motion,
   precedence and identity laws; a family leaves the list when it is rebuilt, and
-  `specs/rebuild-ledger.test.mjs` refuses to let the list grow. Without it,
+  `specs/legacy-ledger.test.mjs` refuses to let the list grow. Without it,
   either the new law would be unenforceable or 29 families slated for rebuild
   would have to be edited first.
 - Defects found: the light scheme's `--slotted-text-muted` measured 4.47:1
@@ -880,7 +880,7 @@ Do not start T4 until T3 is complete. `Dialog` must be the first overlay.
   page multiplies scenes by three schemes and three widths. Density and
   direction are page-wide query parameters instead, or the review view would
   carry 54 cells per scene.
-- Follow-on: `docs/rebuild-order.md` holds the order the 29 families are
+- Follow-on: `docs/build-order.md` holds the order the 29 families are
   rebuilt in. Wave 1 starts at `typography` and `icon`, because the type scale
   and the glyph system are what every later family reads.
 
@@ -1048,8 +1048,8 @@ Do not start T4 until T3 is complete. `Dialog` must be the first overlay.
   establishing containment on the consumer's element is a side effect a layout
   primitive has no reason to impose. A child that must cross two tracks sets
   `grid-column: span 2` on itself.
-- Decisions: measure belongs to `container` alone. `docs/rebuild-briefing.md`
-  named "`container` and `stack`" as its future owners; `docs/rebuild-order.md`
+- Decisions: measure belongs to `container` alone. `docs/build-briefing.md`
+  named "`container` and `stack`" as its future owners; `docs/build-order.md`
   already assigns it to `container`, and two families offering a maximum measure
   would be two answers to one question. The briefing line now names one.
 - Decisions: `arrangement` joins `KNOWN_CAPABILITIES`, and
@@ -1999,7 +1999,7 @@ application. `badge` leaves `specs/legacy-families.json` in the same commit.
   snapshot would have fixed the paint at the moment the first button was created.
 - **Deferred, with the family and the wave named:** roving focus and one tab
   stop to `toolbar` (wave 4); overflow into a menu to `menu` (wave 5), already
-  recorded in `docs/rebuild-order.md`. Text and input addons inside a joined
+  recorded in `docs/build-order.md`. Text and input addons inside a joined
   shape are declined to `input`/`field` in wave 3: an addon belongs to the
   field's box, reads the field's height and its invalid state, and does not
   belong to a family whose name says it groups buttons.
@@ -2377,7 +2377,7 @@ arrived`. `status` is therefore not in `MUTABLE_CAPABILITIES`, the consumer's
   repository now satisfies schema 5, so the ledger has nothing left to hold. It
   stays as the ratchet it is — the list may only shrink, and nothing may be
   added — and it is now a list of nothing.
-- **`docs/rebuild-order.md` is unchanged.** The queue is the plan for writing
+- **`docs/build-order.md` is unchanged.** The queue is the plan for writing
   these families again, and every one of the twenty-one is still in it, in its
   wave, with its scope paragraph. None of them claimed to be delivered.
 - Defect found at the gate, and the worst one in this family: every avatar's
@@ -3336,7 +3336,7 @@ decisions three of them forced. No contract, anatomy or state model moved.
 ## Checkbox, Checkbox Group and Radio Group — 2026-09-03
 
 Wave 3 item 4, invoked as `radio-group` and built as the pair
-`docs/rebuild-order.md` declares. It became three families rather than two, and
+`docs/build-order.md` declares. It became three families rather than two, and
 the reason is written under **The split** below. Every decision here is in
 `docs/superpowers/specs/2026-09-03-choice-controls-design.md`, with the survey
 of fourteen implementations that produced it.
@@ -3499,7 +3499,7 @@ demonstration must not show.
 
 ## Switch — 2026-09-03
 
-Wave 3, item 5. `docs/rebuild-order.md` calls it a rebuild; the schema-4 family
+Wave 3, item 5. `docs/build-order.md` calls it a rebuild; the schema-4 family
 had already been deleted with the rest of the old library, so the work was a
 build against the field, with `git show HEAD:specs/components/switch/contract.json`
 read beside the inventory as the delta.
@@ -3595,7 +3595,7 @@ The inventory is `docs/superpowers/specs/2026-09-03-switch-capability-inventory.
 
 One monetary amount, in one currency, typed the way a cash register is typed.
 The family entered wave 3 out of the queue's order, by direct invocation, and
-its scope paragraph was written with it into `docs/rebuild-order.md`.
+its scope paragraph was written with it into `docs/build-order.md`.
 
 ### Decisions
 
@@ -4537,3 +4537,53 @@ servers next should run it on `components-drawer--reference` on both ports.
 same Window Splitter pattern between two panes rather than at one edge.
 `loading-overlay` and `menu` in this wave take the same overlay modules, and
 `result-state` owns the message an empty drawer shows.
+
+## Tooltip and Popover — 2026-09-04
+
+Only what another family has to know. The decisions are in
+`docs/superpowers/specs/2026-09-04-tooltip-and-popover-design.md` and the scope
+in `docs/build-order.md`.
+
+**A defect with a lesson: `data-part` on an element the family does not own.**
+Both families mark a trigger the consumer wrote, and the obvious shape is to
+write `data-part="trigger"` on it. That element is very often another family's
+root — a `button`, a `badge`, an `avatar`, a `checkbox` — and sixteen
+stylesheets in `packages/styles` key on `[data-part='root']`. Writing over it
+unstyles that family silently, and no test in the repository can see it. Neither
+family claims the element: they write the ARIA relationship and `data-open` and
+nothing else.
+
+`field` has the same hazard today. `SlFieldControl` writes `data-part="control"`
+onto whatever element the consumer put the directive on, and the control in this
+library is usually a `text-field` root. It belongs to that family and is
+recorded here rather than fixed from this lane. The general rule this pair
+followed: **a family may write state and wiring on an element it does not own,
+and may not write identity.**
+
+**Debt this pair owns, and the next overlay family inherits.** The composition
+of `positioner`, `presence`, `portal` and `dismissable-layer` — build the layer,
+place it, join the stack, paint the attributes, tear all four down — is written
+four times: once per family, once per binding. That is what
+`docs/superpowers/specs/2026-09-03-overlay-infrastructure-design.md` intends
+(“a family composes them”), and it is right for two families and wrong for
+eight. `menu`, `select`, `combobox` and `date-picker` all take the same four.
+The third overlay family to write it should extract it instead: a private module
+in `packages/react/src`, and a new public entry point in Angular, which is a
+change to ground other families stand on and therefore a decision for its gate,
+not a refactor to slip in.
+
+**Two Angular lessons the next family will meet.** An element created inside an
+effect has to be held in a `signal`: the effects that place, stack and paint the
+layer all read it, and with a plain field none of them re-ran when a later flush
+filled it in — the layer existed carrying no attribute the stylesheet reads, and
+every test was green. And `createPresence` without `present` is _uncontrolled_,
+so `sync` is ignored; a family that owns `open` passes it, `false` included.
+
+**Debt this pair owns.** The four reference pages were not read rendered. Both
+Storybook servers answer and neither draws the new pages, for the reason
+`drawer` records above: a running server cannot see a new subpath export in
+`packages/styles/package.json`, and the briefing says to ask before restarting
+one. `tools/harness/audit.mjs` therefore has no output for
+`components-tooltip--reference` or `components-popover--reference` on either
+port, and the two defects it exists to catch have not been ruled out. Whoever
+restarts those servers should run it on both pages of both families.

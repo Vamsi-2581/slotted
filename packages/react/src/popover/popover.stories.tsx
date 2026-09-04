@@ -94,27 +94,26 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyboard: Keyboard,
   });
 
-const meta: Meta<typeof Popover> = {
+const meta = {
   title: 'Components/Popover',
   component: Popover,
   parameters: {
     docs: {
-      page: () =>
-        createReferencePage({
-          ...REACT_POPOVER_DOCS.popover,
-          description:
-            'Interactive, non-modal content anchored to the control that opened it. Nothing behind it becomes inert, the page keeps scrolling and focus is not contained — the modal surface is Dialog.',
-          framework: 'React',
-          scenes: referenceScenes,
-          title: 'Popover',
-          tokens: REACT_POPOVER_TOKENS,
-        }),
+      page: createReferencePage({
+        ...REACT_POPOVER_DOCS.popover,
+        description:
+          'Interactive, non-modal content anchored to the control that opened it. Nothing behind it becomes inert, the page keeps scrolling and focus is not contained — the modal surface is Dialog.',
+        framework: 'React',
+        scenes: referenceScenes,
+        title: 'Popover',
+        tokens: REACT_POPOVER_TOKENS,
+      }),
     },
   },
-};
+} satisfies Meta<typeof Popover>;
 
 export default meta;
-type Story = StoryObj<typeof Popover>;
+type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   parameters: scenario('playground'),

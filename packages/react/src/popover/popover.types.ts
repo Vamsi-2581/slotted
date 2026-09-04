@@ -47,6 +47,17 @@ export type PopoverFocusTarget = Element | { current: Element | null } | string;
 /** Whether a press outside the panel counts as a dismissal. */
 export type PopoverOutsidePress = boolean | ((target: EventTarget | null, event: Event) => boolean);
 
+/**
+ * The ref a `render` prop is handed.
+ *
+ * A callback rather than `Ref<HTMLElement>`, and the difference is what a
+ * consumer feels: a callback taking `HTMLElement | null` is assignable to
+ * `Ref<HTMLButtonElement>` — parameters are contravariant — while a
+ * `RefObject<HTMLElement>` is not, so every `render` that returned a Button
+ * would have had to cast. The family only ever calls it.
+ */
+export type PartRef = (node: HTMLElement | null) => void;
+
 /** What an application sets once for every popover under it. */
 export interface PopoverDefaults {
   align: PopoverAlign;
@@ -132,7 +143,7 @@ export interface PopoverContextValue {
 
 /** What `render` receives for the layer. */
 export interface PopoverLayerRootProps extends HTMLAttributes<HTMLElement> {
-  ref?: Ref<HTMLElement> | undefined;
+  ref?: PartRef | undefined;
   'data-align': PopoverAlign;
   'data-open'?: '' | undefined;
   'data-part': string;
@@ -143,7 +154,7 @@ export interface PopoverLayerRootProps extends HTMLAttributes<HTMLElement> {
 
 /** What `render` receives for the panel. */
 export interface PopoverContentRootProps extends HTMLAttributes<HTMLElement> {
-  ref?: Ref<HTMLElement> | undefined;
+  ref?: PartRef | undefined;
   'aria-describedby'?: string | undefined;
   'aria-labelledby'?: string | undefined;
   'data-part': string;
@@ -154,7 +165,7 @@ export interface PopoverContentRootProps extends HTMLAttributes<HTMLElement> {
 
 /** What `render` receives for the trigger, which is the consumer's own element. */
 export interface PopoverTriggerRootProps extends HTMLAttributes<HTMLElement> {
-  ref?: Ref<HTMLElement> | undefined;
+  ref?: PartRef | undefined;
   'aria-controls': string;
   'aria-expanded': boolean;
   'aria-haspopup': 'dialog';

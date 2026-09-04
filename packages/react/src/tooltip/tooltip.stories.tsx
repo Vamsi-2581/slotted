@@ -53,27 +53,26 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyboard: Keyboard,
   });
 
-const meta: Meta<typeof Tooltip> = {
+const meta = {
   title: 'Components/Tooltip',
   component: Tooltip,
   parameters: {
     docs: {
-      page: () =>
-        createReferencePage({
-          ...REACT_TOOLTIP_DOCS.tooltip,
-          description:
-            'A short, non-interactive sentence about the element under the pointer or under focus. It never takes focus and never holds a control — the APG names the non-modal dialog for that, which is Popover.',
-          framework: 'React',
-          scenes: referenceScenes,
-          title: 'Tooltip',
-          tokens: REACT_TOOLTIP_TOKENS,
-        }),
+      page: createReferencePage({
+        ...REACT_TOOLTIP_DOCS.tooltip,
+        description:
+          'A short, non-interactive sentence about the element under the pointer or under focus. It never takes focus and never holds a control — the APG names the non-modal dialog for that, which is Popover.',
+        framework: 'React',
+        scenes: referenceScenes,
+        title: 'Tooltip',
+        tokens: REACT_TOOLTIP_TOKENS,
+      }),
     },
   },
-};
+} satisfies Meta<typeof Tooltip>;
 
 export default meta;
-type Story = StoryObj<typeof Tooltip>;
+type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   parameters: scenario('playground'),
@@ -236,7 +235,7 @@ export const Describes: Story = {
           <Tooltip describes="label" portal={false} side="bottom">
             <TooltipTrigger
               render={(props) => (
-                <Button {...props} shape="circle" tone="secondary" variant="outline">
+                <Button {...props} tone="secondary" variant="outline">
                   +
                 </Button>
               )}
@@ -372,7 +371,7 @@ export const Composition: Story = {
             <Tooltip side="bottom">
               <TooltipTrigger
                 render={(props) => (
-                  <Button {...props} shape="circle" size="sm" tone="secondary" variant="ghost">
+                  <Button {...props} size="sm" tone="secondary" variant="ghost">
                     ↧
                   </Button>
                 )}
@@ -385,7 +384,7 @@ export const Composition: Story = {
             <Tooltip side="bottom">
               <TooltipTrigger
                 render={(props) => (
-                  <Button {...props} shape="circle" size="sm" tone="secondary" variant="ghost">
+                  <Button {...props} size="sm" tone="secondary" variant="ghost">
                     ⧉
                   </Button>
                 )}
@@ -398,7 +397,7 @@ export const Composition: Story = {
             <Tooltip side="bottom">
               <TooltipTrigger
                 render={(props) => (
-                  <Button {...props} shape="circle" size="sm" tone="danger" variant="ghost">
+                  <Button {...props} size="sm" tone="danger" variant="ghost">
                     ✕
                   </Button>
                 )}

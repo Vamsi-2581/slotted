@@ -1,5 +1,5 @@
 import type { ChangeRequest } from '@slotted/core/state';
-import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
+import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
 /**
  * How the hint is painted. `inverse` is a surface opposite to the page, which
@@ -56,6 +56,17 @@ export type TooltipOpenReason = Extract<
 
 /** The request the family emits before the layer moves. */
 export type TooltipChangeRequest = ChangeRequest<boolean>;
+
+/**
+ * The ref a `render` prop is handed.
+ *
+ * A callback rather than `Ref<HTMLElement>`, and the difference is what a
+ * consumer feels: a callback taking `HTMLElement | null` is assignable to
+ * `Ref<HTMLButtonElement>` — parameters are contravariant — while a
+ * `RefObject<HTMLElement>` is not, so every `render` that returned a Button
+ * would have had to cast. The family only ever calls it.
+ */
+export type PartRef = (node: HTMLElement | null) => void;
 
 /** What an application sets once for every tooltip under it. */
 export interface TooltipDefaults {
@@ -161,7 +172,7 @@ export interface TooltipContextValue {
  * consumer actually rendered.
  */
 export interface TooltipLayerRootProps extends HTMLAttributes<HTMLElement> {
-  ref?: Ref<HTMLElement> | undefined;
+  ref?: PartRef | undefined;
   'data-align': TooltipAlign;
   'data-hoverable'?: '' | undefined;
   'data-open'?: '' | undefined;
@@ -184,7 +195,7 @@ export interface TooltipContentRootProps extends HTMLAttributes<HTMLElement> {
  * against, so the family has to reach the element however it was rendered.
  */
 export interface TooltipTriggerRootProps extends HTMLAttributes<HTMLElement> {
-  ref?: Ref<HTMLElement> | undefined;
+  ref?: PartRef | undefined;
   'data-open'?: '' | undefined;
 }
 

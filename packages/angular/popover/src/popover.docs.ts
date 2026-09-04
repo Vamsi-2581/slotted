@@ -304,17 +304,17 @@ const accessibility = [
 
 const snippets = [
   defineSnippet({
-    id: 'popover-application-defaults',
+    id: 'popover-angular-application-defaults',
     label: 'Application defaults',
-    language: 'tsx',
+    language: 'angular',
     source: `
 <PopoverDefaultsProvider closeLabel="Fechar" size="lg">
-  <App />
-</PopoverDefaultsProvider>;
+  <App /> </PopoverDefaultsProvider
+>;
 `,
   }),
   defineSnippet({
-    id: 'popover-public-tokens',
+    id: 'popover-tokens',
     label: 'Retuning the family',
     language: 'css',
     source: `
@@ -334,7 +334,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'A panel on a button',
     note: 'Press the button: the panel opens, takes the focus and says its own name. Escape closes it and the focus goes back where it came from.',
     snippet: defineSnippet({
-      id: 'popover-playground',
+      id: 'popover-angular-playground',
       label: 'Playground',
       language: 'angular',
       source: `
@@ -359,7 +359,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Three width steps',
     note: 'Sixteen, twenty and twenty-four rems. The inset and the title step move with the width, and the controls inside move with the density.',
     snippet: defineSnippet({
-      id: 'popover-sizes',
+      id: 'popover-angular-sizes',
       label: 'Sizes',
       language: 'angular',
       source: `
@@ -375,7 +375,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'As wide as its words, or as wide as the field',
     note: 'width="anchor" reads the anchor measured width, which is the one case Radix publishes a custom property for and the shape a filter panel under a search field needs.',
     snippet: defineSnippet({
-      id: 'popover-width',
+      id: 'popover-angular-width',
       label: 'Width',
       language: 'angular',
       source: `
@@ -391,7 +391,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Which edge it takes',
     note: 'The four physical sides and the two logical ones. Switch the toolbar to rtl: inline-start and inline-end swap, left and right stay where they are.',
     snippet: defineSnippet({
-      id: 'popover-placement',
+      id: 'popover-angular-placement',
       label: 'Placement',
       language: 'angular',
       source: `
@@ -407,7 +407,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Pointing at something other than the button',
     note: 'The panel hangs off the whole row and the button only opens it. Nothing is written on the anchor: it is measured and nothing else.',
     snippet: defineSnippet({
-      id: 'popover-anchor',
+      id: 'popover-angular-anchor',
       label: 'Anchor',
       language: 'angular',
       source: `
@@ -426,7 +426,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Where the keyboard goes',
     note: 'The first panel takes the focus itself; the second sends it to its search field; the third leaves it on the trigger. Close each one and watch where the focus comes back to.',
     snippet: defineSnippet({
-      id: 'popover-focus',
+      id: 'popover-angular-focus',
       label: 'Focus',
       language: 'angular',
       source: `
@@ -442,7 +442,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'Every way it closes, and the reason it carries',
     note: 'Escape, a press outside, the close control, the trigger again. Each one reports a different reason, and a consumer may refuse any of them before anything moves.',
     snippet: defineSnippet({
-      id: 'popover-dismissal',
+      id: 'popover-angular-dismissal',
       label: 'Dismissal',
       language: 'angular',
       source: `
@@ -458,7 +458,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'More content than room',
     note: 'The body is the only part that scrolls, bounded by the height the engine says is left. The title and the actions keep theirs, and the fade at the cut says there is more.',
     snippet: defineSnippet({
-      id: 'popover-scrolling',
+      id: 'popover-angular-scrolling',
       label: 'Scrolling',
       language: 'angular',
       source: `
@@ -479,7 +479,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'A panel holding a real form',
     note: 'Fields, a footer of actions and a close control. The controls inside are the consumer own and reach their form untouched: the family holds no value of theirs.',
     snippet: defineSnippet({
-      id: 'popover-composition',
+      id: 'popover-angular-composition',
       label: 'Composition',
       language: 'angular',
       source: `
@@ -497,7 +497,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'A tooltip on a control inside the panel',
     note: 'Two layers at once. The tooltip is a later layer, so it draws above the panel and Escape reaches it first; the panel closes on the second Escape and not before.',
     snippet: defineSnippet({
-      id: 'popover-nested',
+      id: 'popover-angular-nested',
       label: 'Nested',
       language: 'angular',
       source: `
@@ -517,7 +517,7 @@ const scenes: ReferenceSceneMeta[] = [
     title: 'What the keyboard does',
     note: 'Enter or Space opens it. Tab walks the panel and, past the last control, closes it and returns to the trigger — one extra Tab, and the reading order intact.',
     snippet: defineSnippet({
-      id: 'popover-keyboard',
+      id: 'popover-angular-keyboard',
       label: 'Keyboard',
       language: 'angular',
       source: `

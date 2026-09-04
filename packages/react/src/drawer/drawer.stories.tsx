@@ -67,6 +67,31 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * What a demonstration that stands open has to say for itself.
+ *
+ * A modal layer takes the page over: `dismissable-layer` writes `inert` on
+ * every sibling up to the document root and locks the document scroll, and a
+ * page carrying fifteen of them at once is a page nobody can scroll or click.
+ * The first published version of these stories did exactly that — twenty-one
+ * panels open, `body { overflow: hidden }` on a page twenty-three thousand
+ * pixels tall, and one press anywhere closing fifteen of them at once, because
+ * each read it as a press outside itself.
+ *
+ * So a scene that exists to be *looked at* is not modal, does not take focus
+ * and cannot be dismissed. Nothing here changes the picture: the scrim belongs
+ * to the layer rather than to the dismissal policy, so `modal` decides only
+ * what happens to the page behind it. A scene that exists to be *operated*
+ * keeps its real behaviour and is opened from a trigger, one at a time — which
+ * is also what the reader does in an application.
+ */
+const STILL = {
+  escape: 'none',
+  initialFocus: false,
+  modal: false,
+  outsidePress: 'none',
+} as const satisfies Partial<DrawerProps>;
+
 /** One panel, written once, so a scene shows the axis rather than the markup. */
 function Panel({
   actions = true,
@@ -87,7 +112,7 @@ function Panel({
   title?: string;
 }) {
   return (
-    <Drawer container={container} defaultOpen {...props}>
+    <Drawer container={container} defaultOpen {...STILL} {...props}>
       <DrawerPanel>
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
@@ -106,6 +131,19 @@ function Panel({
         {resizer ? <DrawerResizer /> : null}
       </DrawerPanel>
     </Drawer>
+  );
+}
+
+/**
+ * One line of its own. `Text` renders a `span`, so three of them in a drawer's
+ * body ran together as `TodasRecentesArquivadas` on the published page — the
+ * Angular page reads correctly because `p slText` is a block there.
+ */
+function Line({ children }: { children: ReactNode }) {
+  return (
+    <Text render={(props) => <p {...props} />} size="sm">
+      {children}
+    </Text>
   );
 }
 
@@ -189,9 +227,9 @@ export const Mode: Story = {
                 <DrawerTitle>Coleções</DrawerTitle>
               </DrawerHeader>
               <DrawerBody>
-                <Text size="sm">Todas</Text>
-                <Text size="sm">Recentes</Text>
-                <Text size="sm">Arquivadas</Text>
+                <Line>Todas</Line>
+                <Line>Recentes</Line>
+                <Line>Arquivadas</Line>
               </DrawerBody>
             </DrawerPanel>
           </Drawer>
@@ -325,13 +363,32 @@ export const Modal: Story = {
     <Grid columns={2}>
       <Scene
         label="modal — the page is out of reach"
-        note="Everything outside the layer is inert, which takes the page out of the accessibility tree as well as out of the pointer’s reach; the scroll is locked and Tab wraps inside the panel."
+        note="Press Open: the scroll locks, everything outside the layer goes inert, and Tab wraps inside the panel. It is opened from a trigger because a modal layer takes the whole page over, and a page showing several at once would be lying about what one does."
       >
-        <Layer>{(container) => <Panel container={container} size="sm" />}</Layer>
+        <Layer>
+          {(container) => (
+            <Drawer container={container} size="sm">
+              <DrawerTrigger
+                render={({ children, ...props }) => <Button {...props}>{children}</Button>}
+              >
+                Abrir modal
+              </DrawerTrigger>
+              <DrawerPanel>
+                <DrawerHeader>
+                  <DrawerTitle>Modal</DrawerTitle>
+                  <DrawerDescription>
+                    A rolagem está travada e o resto da página está inert.
+                  </DrawerDescription>
+                  <DrawerClose />
+                </DrawerHeader>
+              </DrawerPanel>
+            </Drawer>
+          )}
+        </Layer>
       </Scene>
       <Scene
-        label="modal={false} — and no scrim"
-        note="Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal and no scrim is painted. A drawer that puts nothing out of reach has nothing to dim."
+        label="modal={false} — and no aria-modal"
+        note="Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The scrim stays: it belongs to the layer rather than to the dismissal policy, and it is why every still demonstration on this page can be this one."
       >
         <Layer>
           {(container) => <Panel container={container} modal={false} size="sm" title="Detalhes" />}
@@ -346,28 +403,37 @@ function Guarded({ container }: { container: Element }) {
   const [saving, setSaving] = useState(true);
 
   return (
-    <Drawer
-      container={container}
-      onOpenChange={(next, request) => {
-        if (!next && saving) return request.cancel();
-        setOpen(next);
-      }}
-      open={open}
-      size="sm"
-    >
-      <DrawerPanel>
-        <DrawerHeader>
-          <DrawerTitle>Salvando</DrawerTitle>
-          <DrawerDescription>Escape, o ✕ e um clique fora são todos recusados.</DrawerDescription>
-          <DrawerClose />
-        </DrawerHeader>
-        <DrawerBody>
-          <Button onClick={() => setSaving((value) => !value)} size="sm" variant="outline">
-            {saving ? 'Concluir o salvamento' : 'Voltar a salvar'}
-          </Button>
-        </DrawerBody>
-      </DrawerPanel>
-    </Drawer>
+    <>
+      <Button onClick={() => setSaving((value) => !value)} size="sm" variant="outline">
+        {saving ? 'Terminar de salvar' : 'Voltar a salvar'}
+      </Button>
+      <Button disabled={open} onClick={() => setOpen(true)} size="sm" variant="ghost">
+        Abrir de novo
+      </Button>
+      <Drawer
+        container={container}
+        initialFocus={false}
+        modal={false}
+        onOpenChange={(next, request) => {
+          if (!next && saving) return request.cancel();
+          setOpen(next);
+        }}
+        open={open}
+        size="sm"
+      >
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Salvando</DrawerTitle>
+            <DrawerDescription>
+              {saving
+                ? 'Escape, um clique fora e o ✕ estão todos recusados pelo mesmo guard.'
+                : 'O guard saiu: agora as cinco saídas funcionam.'}
+            </DrawerDescription>
+            <DrawerClose />
+          </DrawerHeader>
+        </DrawerPanel>
+      </Drawer>
+    </>
   );
 }
 
@@ -377,7 +443,8 @@ export const Policy: Story = {
     <Grid columns={1}>
       <Scene
         label="One guard, every way out"
-        note="Press Escape, the ✕ or the scrim while it is saving: each one asks, and the same handler refuses all three. Release the guard with the button and any of them closes it."
+        layout="stack"
+        note="Press Escape, click the scrim, then the ✕: all three are refused by the same three lines, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work."
       >
         <Layer>{(container) => <Guarded container={container} />}</Layer>
       </Scene>
@@ -389,7 +456,10 @@ function Focused({ container }: { container: Element }) {
   const search = useRef<HTMLInputElement>(null);
 
   return (
-    <Drawer container={container} defaultOpen initialFocus={search} size="sm">
+    <Drawer container={container} initialFocus={search} size="sm">
+      <DrawerTrigger render={({ children, ...props }) => <Button {...props}>{children}</Button>}>
+        Buscar faturas
+      </DrawerTrigger>
       <DrawerPanel>
         <DrawerHeader>
           <DrawerTitle>Buscar faturas</DrawerTitle>
@@ -406,10 +476,10 @@ function Focused({ container }: { container: Element }) {
 export const Focus: Story = {
   parameters: scenario('focus'),
   render: () => (
-    <Grid columns={2}>
+    <Grid columns={1}>
       <Scene
         label="An overlay drawer takes focus"
-        note="initialFocus names the field rather than the first tabbable element, which here is the close button. Tab wraps inside the panel while it is modal, and Escape gives focus back to the trigger."
+        note="Press the trigger: initialFocus names the field rather than the first tabbable element, which here is the close button. Tab wraps inside the panel while it is modal, and Escape gives focus back to the trigger it came from."
       >
         <Layer>{(container) => <Focused container={container} />}</Layer>
       </Scene>
@@ -563,7 +633,7 @@ export const Content: Story = {
 export const Composition: Story = {
   parameters: scenario('composition'),
   render: () => (
-    <Grid columns={2}>
+    <Grid columns={1}>
       <Scene
         label="The trigger is the library’s Button"
         note="render hands it every attribute the family wrote — aria-expanded, aria-controls, aria-haspopup and the id — so nothing is reimplemented and nothing is wrapped."
@@ -604,8 +674,8 @@ export const Composition: Story = {
                 <DrawerTitle>Seções</DrawerTitle>
               </DrawerHeader>
               <DrawerBody>
-                <Text size="sm">Resumo</Text>
-                <Text size="sm">Histórico</Text>
+                <Line>Resumo</Line>
+                <Line>Histórico</Line>
               </DrawerBody>
             </DrawerPanel>
           </Drawer>

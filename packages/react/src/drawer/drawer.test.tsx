@@ -282,11 +282,25 @@ describe('Drawer', () => {
     expect(layer()?.hasAttribute('data-open') ?? false).toBe(false);
   });
 
-  it('paints no scrim where there is nothing to put out of reach', () => {
+  /**
+   * The scrim belongs to the layer, not to the dismissal policy. `modal`
+   * decides what happens to the page *behind* it — inert, the scroll lock,
+   * focus containment — and never what is painted. Tying the two cost a
+   * reference page: a demonstration that stands open must not be modal, and
+   * with the scrim gated on modality every still picture lost the scrim that
+   * is half of it.
+   */
+  it('paints the scrim wherever there is a layer, modal or not', () => {
     const { rerender } = render(<Basic defaultOpen />);
     expect(document.querySelector('[data-part="backdrop"]')).not.toBeNull();
 
-    rerender(<Basic defaultOpen mode="inline" />);
+    rerender(<Basic defaultOpen modal={false} />);
+    expect(document.querySelector('[data-part="backdrop"]')).not.toBeNull();
+    expect(document.querySelector('[data-part="panel"]')?.hasAttribute('aria-modal')).toBe(false);
+  });
+
+  it('paints no scrim where there is no layer', () => {
+    render(<Basic defaultOpen mode="inline" />);
     expect(document.querySelector('[data-part="backdrop"]')).toBeNull();
   });
 

@@ -126,6 +126,25 @@ const page = (
     <p slText size="sm" tone="muted">${text}</p>
   </main>`;
 
+/**
+ * What a demonstration that stands open has to say for itself.
+ *
+ * A modal layer takes the page over: `dismissable-layer` writes `inert` on
+ * every sibling up to the document root and locks the document scroll, and a
+ * page carrying fifteen of them at once is a page nobody can scroll or click.
+ * The first published version of these stories did exactly that — twenty-one
+ * panels open, `body { overflow: hidden }` on a page twenty-three thousand
+ * pixels tall, and one press anywhere closing fifteen of them at once, because
+ * each read it as a press outside itself.
+ *
+ * So a scene that exists to be *looked at* is not modal, does not take focus
+ * and cannot be dismissed. Nothing here changes the picture: the scrim belongs
+ * to the layer rather than to the dismissal policy, so `modal` decides only
+ * what happens to the page behind it. A scene that exists to be *operated*
+ * keeps its real behaviour and is opened from a trigger, one at a time.
+ */
+const STILL = '[modal]="false" escape="none" outsidePress="none" [initialFocus]="false"';
+
 const panel = (
   attributes = '',
   {
@@ -139,7 +158,7 @@ const panel = (
     title = 'Fatura 4471',
   } = {},
 ) =>
-  layer(`<sl-drawer [container]="box" [open]="true" ${attributes}>
+  layer(`<sl-drawer [container]="box" [open]="true" ${STILL} ${attributes}>
     <header slDrawerHeader>
       <h2 slDrawerTitle>${title}</h2>
       ${description === '' ? '' : `<p slDrawerDescription>${description}</p>`}
@@ -313,13 +332,20 @@ export const Modal: Story = {
       2,
       scene(
         'modal — the page is out of reach',
-        'Everything outside the layer is inert, which takes the page out of the accessibility tree as well as out of the pointer’s reach; the scroll is locked and Tab wraps inside the panel.',
-        panel('size="sm"'),
+        'Press Open: the scroll locks, everything outside the layer goes inert, and Tab wraps inside the panel. It is opened from a trigger because a modal layer takes the whole page over, and a page showing several at once would be lying about what one does.',
+        layer(`<button slButton [slDrawerTrigger]="m">Abrir modal</button>
+          <sl-drawer #m="slDrawer" [container]="box" size="sm">
+            <header slDrawerHeader>
+              <h2 slDrawerTitle>Modal</h2>
+              <p slDrawerDescription>A rolagem está travada e o resto da página está inert.</p>
+              <button slDrawerClose></button>
+            </header>
+          </sl-drawer>`),
       ) +
         scene(
-          'modal="false" — and no scrim',
-          'Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal and no scrim is painted. A drawer that puts nothing out of reach has nothing to dim.',
-          panel('size="sm" [modal]="false"', { title: 'Detalhes' }),
+          'modal="false" — and no aria-modal',
+          'Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The scrim stays: it belongs to the layer rather than to the dismissal policy, and it is why every still demonstration on this page can be this one.',
+          panel('size="sm"', { title: 'Detalhes' }),
         ),
     ),
   }),
@@ -340,6 +366,8 @@ export const Policy: Story = {
           [container]="box"
           [open]="true"
           size="sm"
+          [modal]="false"
+          [initialFocus]="false"
           (openChangeRequest)="guard($event)"
         >
           <header slDrawerHeader>
@@ -360,11 +388,12 @@ export const Focus: Story = {
   parameters: scenario('focus'),
   render: () => ({
     template: grid(
-      2,
+      1,
       scene(
         'An overlay drawer takes focus',
-        'initialFocus names the field rather than the first tabbable element, which here is the close button. Tab wraps inside the panel while it is modal, and Escape gives focus back to the trigger.',
-        layer(`<sl-drawer [container]="box" [open]="true" size="sm" [initialFocus]="search">
+        'Press the trigger: initialFocus names the field rather than the first tabbable element, which here is the close button. Tab wraps inside the panel while it is modal, and Escape gives focus back to the trigger it came from.',
+        layer(`<button slButton [slDrawerTrigger]="f">Buscar faturas</button>
+          <sl-drawer #f="slDrawer" [container]="box" size="sm" [initialFocus]="search">
           <header slDrawerHeader>
             <h2 slDrawerTitle>Buscar faturas</h2>
             <button slDrawerClose></button>
@@ -470,7 +499,7 @@ export const Composition: Story = {
   parameters: scenario('composition'),
   render: () => ({
     template: grid(
-      2,
+      1,
       scene(
         'The trigger is the library’s button',
         'The directive goes on the consumer’s own element, so it carries aria-expanded, aria-controls, aria-haspopup and the id without anything being wrapped.',

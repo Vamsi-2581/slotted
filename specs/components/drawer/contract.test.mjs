@@ -372,6 +372,19 @@ test('declares the states the stylesheet may paint, and no others', () => {
  * could scroll and the axis `dialog` needs would be an axis with one useful
  * value. Ant, Fluent and MUI all scroll the body and none ships an axis.
  */
+/**
+ * The scrim belongs to the layer and not to the dismissal policy. Tying the two
+ * cost a reference page: a demonstration that stands open must not be modal —
+ * a modal layer locks the document scroll and reads every press elsewhere as an
+ * outside press — and with the scrim gated on modality, every still picture on
+ * the page lost the scrim that is half of it.
+ */
+test('paints the scrim wherever there is a layer, modal or not', () => {
+  assert.match(contract.anatomy.backdrop, /whether the layer is modal or not/);
+  assert.match(contract.anatomy.backdrop, /never what is painted/);
+  assert.match(contract.wiring['aria-modal'], /only while modal is true/);
+});
+
 test('scrolls the body and ships no axis for it', () => {
   assert.ok(!('scroll' in contract.axes));
   assert.match(contract.scroll.reason, /never exceeds the layer/);

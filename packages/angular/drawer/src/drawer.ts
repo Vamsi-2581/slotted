@@ -247,9 +247,13 @@ export class SlDrawer {
     this.resolvedMode() === 'inline' ? this.open() : this.status() === 'open',
   );
 
-  protected readonly showBackdrop = computed(
-    () => this.resolvedMode() === 'overlay' && this.resolvedModal(),
-  );
+  /**
+   * The scrim belongs to the layer, not to the dismissal policy: `modal`
+   * decides what happens to the page behind it and never what is painted.
+   * `dialog` draws it the same way, and a consumer who wants none sets
+   * `--slotted-drawer-scrim: transparent`.
+   */
+  protected readonly showBackdrop = computed(() => this.resolvedMode() === 'overlay');
   protected readonly extentLength = computed(() => this.measured());
   protected readonly labelledBy = computed(() =>
     this.hasTitle() && this.writtenLabel === null ? this.titleId : null,

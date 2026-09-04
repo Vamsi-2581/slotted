@@ -4524,13 +4524,25 @@ Two things a later family needs and none of the other three places can hold.
   form: a part that spans one axis cannot share that axis with the rules of the
   rows it spans.
 
-**Debt this family owns.** Neither reference page was read rendered. Both
-Storybook servers answer and neither draws — including the page of a family that
-landed before this one — because a running server cannot see a new subpath
-export in `packages/styles/package.json`, and the briefing says to ask before
-restarting one. `tools/harness/audit.mjs` therefore has no output, and the two
-defects it exists to catch have not been ruled out. Whoever restarts those
-servers next should run it on `components-drawer--reference` on both ports.
+- **A demonstration that stands open must not be a modal layer.** Fifteen of
+  them on one page put `overflow: hidden` on a `body` twenty-three thousand
+  pixels tall, and one click anywhere closed all fifteen, because each read it
+  as a press outside itself. `dialog` had already met this and written the
+  recipe; these stories were published before that recipe existed and shipped
+  the defect the reviewer found in a minute. **The lesson for a later overlay
+  family is the second half of it:** adopting the recipe was blocked because
+  this family had tied the scrim to `modal`, so a non-modal demonstration lost
+  the scrim that is half its picture. `modal` decides what happens to the page
+  _behind_ the scrim and never what is painted — Ant separates `mask` from
+  `maskClosable` for the same reason — and any overlay family that conflates
+  the two cannot demonstrate itself.
+
+**Debt this family owns.** `tools/harness/audit.mjs` measures as soon as the
+first demonstration stage appears, which on a page of twenty-two stages is four
+of them. It reported a clean page while two scenes were squeezing their content
+to zero width, and the same measurement run after the page settles found them.
+Its clean result therefore means less than a reader takes it to mean, and the
+tool should wait for the stage count to stop changing.
 
 **Follow-on:** `splitter` in wave 8 is the second consumer of
 `packages/core/src/extent` and of the `extent` capability, and it answers the

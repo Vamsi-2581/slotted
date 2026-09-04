@@ -318,7 +318,11 @@ export function DrawerPanel({
           : ({ '--slotted-drawer-extent': extentLength } as CSSProperties)
       }
     >
-      {overlay && drawer.modal ? <div data-part="backdrop" /> : null}
+      {/* The scrim belongs to the layer, not to the dismissal policy: `modal`
+          decides what happens to the page behind it and never what is painted.
+          `dialog` draws it the same way, and a consumer who wants none sets
+          `--slotted-drawer-scrim: transparent`. */}
+      {overlay ? <div data-part="backdrop" /> : null}
       {render === undefined ? <div {...panelProps} /> : render(panelProps)}
     </div>
   );

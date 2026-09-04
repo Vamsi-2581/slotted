@@ -308,20 +308,42 @@ Angular page and three on the React one; composition and accessibility are their
 own sections. `specs/reference-pages.test.mjs` and `referencePageErrors` both
 pass, and every snippet is Prettier-formatted.
 
-**The pages were not read rendered, and that is a gap in this dimension rather
-than a claim of completeness.** Both Storybook servers answer on 6006 and 6007,
-and neither renders: `tools/harness/audit.mjs` reports no demonstration stage
-within fifteen seconds for `components-drawer--reference` on either port — and
-for `components-dialog--reference` too, which is a family that landed before
-this one. The running servers predate this family's subpath export in
-`packages/styles/package.json`, which `docs/build-briefing.md` says makes a
-restart necessary, and the same briefing says to ask before restarting because
-it interrupts the other lane. It was not restarted. `tools/harness/audit.mjs`
-therefore has **no output to report**, and the two defects it exists to catch —
-an element collapsed to a sliver, content overflowing its box — have not been
-ruled out.
+**The pages were read rendered, after the first published version of them was
+broken and the reviewer found it.** What was wrong, and what it cost:
 
-What was read instead: the harness page,
+- **The page could not be scrolled and one click emptied it.** Fifteen
+  demonstrations stood open as *modal* layers. A modal layer locks the document
+  scroll and reads every press elsewhere as an outside press, so `body` carried
+  `overflow: hidden` on a page twenty-three thousand pixels tall, and one click
+  anywhere closed fifteen panels at once. `dialog` had met this and written the
+  recipe — a scene that exists to be looked at is not modal, does not take focus
+  and cannot be dismissed — and these stories were written before that recipe
+  existed and never picked it up.
+- **Adopting it was blocked by a defect of the family**, which is why the fix
+  reaches past the stories: the scrim was gated on `modal`, so a non-modal
+  demonstration lost the scrim that is half its picture. `modal` decides what
+  happens to the page *behind* the scrim and never what is painted, which is how
+  `dialog` draws it. Both bindings, the contract and both pages changed with it.
+- **Two scenes put an inline drawer in half a page.** The panel alone is
+  eighteen rems and the half was 275 pixels, so the page beside it was squeezed
+  to its own padding — 32 pixels of box holding 32 pixels of inset. Both pages
+  had it; only the Angular measurement caught it, because its paragraph
+  overflowed by thirteen pixels where React's did not. Those two scenes take one
+  column now, which is what `stories.md` says of a family that answers its own
+  width.
+
+After the corrections, measured on both pages at 1280 and 620: **22 stages, no
+collapsed element, no overflowing box, no sideways scroll**, `body` scrolling
+normally, and a click changing nothing. Read at 1280 in light and in dark: the
+inline scene, the resize scene and the modal pair.
+
+`tools/harness/audit.mjs` reports no finding on either page at either width, but
+its result is weaker than it looks on a page this long: it measures as soon as
+the first stage appears and saw four of the twenty-two. The numbers above come
+from the same measurement run after the page settles, which is the gap this
+family leaves for whoever touches that tool next.
+
+What was also read: the harness page,
 `tools/harness/out/drawer.html`, nine scenes across the axes below.
 
 | Capture | Read for |
@@ -339,9 +361,12 @@ What was read instead: the harness page,
 | `loading`, light at 420 | the floor, and a header that stays operable |
 | `nested`, light at 420 | two layers, one stack |
 
-**The one change:** reading both pages rendered at 1280 and 620, in light and
-dark, with `audit.mjs` on each. It was **not made**, for the reason above, and
-it is the one thing this family owes before it is called finished.
+**The one change:** `audit.mjs` measuring after the page settles rather than at
+the first stage it sees, so its clean result on a twenty-two-stage page means
+what a reader takes it to mean. It was **not made** here — it is a shared tool,
+and changing its timing while another lane is mid-write in the same package is
+the kind of fix that lands on somebody else's failure. It is written in
+`docs/BUILD-LOG.md` as a debt with the evidence attached.
 
 ---
 

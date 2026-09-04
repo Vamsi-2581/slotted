@@ -109,10 +109,14 @@ function Panel({
   );
 }
 
-/** The page an inline drawer stands beside, so the reflow is visible. */
+/**
+ * The page an inline drawer stands beside, so the reflow is visible. The shell
+ * primitive owns its inset: a story that padded it inline would answer no
+ * density and no scheme, which is what `specs/reference-pages.test.mjs` refuses.
+ */
 function Page({ children }: { children?: ReactNode }) {
   return (
-    <main style={{ minInlineSize: 0, padding: 'var(--slotted-space-6)' }}>
+    <main>
       <Text size="sm" tone="muted">
         {children ??
           'Sem scrim, sem portal e sem z-index. O conteúdo ao lado reflui porque o grid do consumidor diz isso.'}
@@ -138,8 +142,10 @@ export const Playground: Story = {
       {(container) => (
         <Drawer {...args} container={container}>
           <DrawerTrigger
-            render={({ children, ...props }) => <Button {...props}>Abrir detalhes</Button>}
-          />
+            render={({ children, ...props }) => <Button {...props}>{children}</Button>}
+          >
+            Abrir detalhes
+          </DrawerTrigger>
           <DrawerPanel>
             <DrawerHeader>
               <DrawerTitle>Fatura 4471</DrawerTitle>
@@ -443,7 +449,7 @@ export const Loading: Story = {
           {(container) => (
             <Panel
               body={
-                <div style={{ display: 'grid', gap: 'var(--slotted-space-4)' }}>
+                <div className="slotted-demo-stack">
                   <Skeleton shape="text" />
                   <Skeleton shape="text" />
                 </div>
@@ -477,10 +483,12 @@ export const Nested: Story = {
                   <DrawerTrigger
                     render={({ children, ...props }) => (
                       <Button {...props} size="sm" variant="outline">
-                        Ver o item 3
+                        {children}
                       </Button>
                     )}
-                  />
+                  >
+                    Ver o item 3
+                  </DrawerTrigger>
                   <DrawerPanel>
                     <DrawerHeader>
                       <DrawerTitle>Item 3</DrawerTitle>
@@ -566,10 +574,12 @@ export const Composition: Story = {
               <DrawerTrigger
                 render={({ children, ...props }) => (
                   <Button {...props} tone="secondary" variant="outline">
-                    Abrir detalhes
+                    {children}
                   </Button>
                 )}
-              />
+              >
+                Abrir detalhes
+              </DrawerTrigger>
               <DrawerPanel>
                 <DrawerHeader>
                   <DrawerTitle>Fatura 4471</DrawerTitle>

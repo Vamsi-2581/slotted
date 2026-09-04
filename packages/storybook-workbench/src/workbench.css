@@ -606,6 +606,17 @@
 }
 
 /**
+ * The page half of it. The primitive owns both tracks, or a story would have to
+ * reach for an inline style to keep its own text off the panel's edge — which
+ * is the thing `specs/reference-pages.test.mjs` refuses, and rightly: an inline
+ * padding answers no density and no scheme.
+ */
+.slotted-demo-viewport[data-layout='shell'] > :last-child {
+  min-inline-size: 0;
+  padding: var(--slotted-space-6);
+}
+
+/**
  * The box a family that pins something to a scroll container is demonstrated
  * inside. A sticky heading holds still only while something scrolls past it,
  * and a page-length stage cannot show that in a screenshot: the reader has to

@@ -455,7 +455,7 @@ const snippets = [
 </div>`,
   }),
   defineSnippet({
-    id: 'drawer-angular-theming',
+    id: 'drawer-theming',
     language: 'css',
     label: 'Retuning the family for an application',
     source: `[data-ui='drawer'] {

@@ -90,17 +90,17 @@ describe('Drawer', () => {
     for (const part of contract.members.drawer.parts) {
       expect(parts, `${part} is declared and never rendered`).toContain(part);
     }
-    expect(layer()?.dataset.ui).toBe('drawer');
+    expect(layer()?.dataset['ui']).toBe('drawer');
   });
 
   it('writes every axis the stylesheet keys on', () => {
     render(<Basic defaultOpen mount="eager" side="bottom" size="lg" />);
 
     const root = layer() as HTMLElement;
-    expect(root.dataset.mode).toBe('overlay');
-    expect(root.dataset.side).toBe('bottom');
-    expect(root.dataset.size).toBe('lg');
-    expect(root.dataset.mount).toBe('eager');
+    expect(root.dataset['mode']).toBe('overlay');
+    expect(root.dataset['side']).toBe('bottom');
+    expect(root.dataset['size']).toBe('lg');
+    expect(root.dataset['mount']).toBe('eager');
     expect(root.hasAttribute('data-modal')).toBe(true);
   });
 
@@ -262,7 +262,7 @@ describe('Drawer', () => {
     rerender(<Basic defaultOpen mode="inline" />);
     expect(panel()?.hasAttribute('role')).toBe(false);
     expect(panel()?.hasAttribute('aria-modal')).toBe(false);
-    expect(layer()?.dataset.mode).toBe('inline');
+    expect(layer()?.dataset['mode']).toBe('inline');
   });
 
   it('keeps an inline drawer in the document and makes it inert when closed', () => {
@@ -474,9 +474,9 @@ describe('Drawer', () => {
       </DrawerDefaultsProvider>,
     );
 
-    expect(layer()?.dataset.side).toBe('start');
-    expect(layer()?.dataset.size).toBe('xl');
-    expect(layer()?.dataset.mode).toBe('inline');
+    expect(layer()?.dataset['side']).toBe('start');
+    expect(layer()?.dataset['size']).toBe('xl');
+    expect(layer()?.dataset['mode']).toBe('inline');
   });
 
   it('lets an explicit value win over the provider', () => {
@@ -486,7 +486,7 @@ describe('Drawer', () => {
       </DrawerDefaultsProvider>,
     );
 
-    expect(layer()?.dataset.size).toBe('sm');
+    expect(layer()?.dataset['size']).toBe('sm');
   });
 
   /** `render` substitutes the panel, which is how an inline drawer is a nav. */
@@ -500,7 +500,7 @@ describe('Drawer', () => {
     );
 
     const nav = screen.getByRole('navigation', { name: 'Sections' });
-    expect(nav.dataset.part).toBe('panel');
+    expect(nav.dataset['part']).toBe('panel');
   });
 
   it('gives the consumer the three actions they cannot write declaratively', () => {

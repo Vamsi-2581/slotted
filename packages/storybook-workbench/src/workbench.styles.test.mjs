@@ -31,6 +31,15 @@ test('offers a two-track box for a panel that stands beside the page', () => {
 
   assert.match(rule, /display:\s*grid/);
   assert.match(rule, /grid-template-columns:/);
+
+  /* The primitive owns both tracks. Leaving the page half to the story would
+     send it reaching for the inline padding `reference-pages.test.mjs` refuses. */
+  const page =
+    /\.slotted-demo-viewport\[data-layout='shell'\]\s*>\s*:last-child\s*\{([\s\S]*?)\}/.exec(
+      css,
+    )?.[1] ?? '';
+  assert.match(page, /padding:/);
+  assert.match(page, /min-inline-size:\s*0/);
 });
 
 /**

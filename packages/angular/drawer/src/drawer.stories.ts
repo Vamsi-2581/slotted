@@ -122,7 +122,7 @@ const grid = (columns: 1 | 2 | 3, body: string) =>
 const page = (
   text = 'Sem scrim, sem portal e sem z-index. O conteúdo ao lado reflui porque o grid do consumidor diz isso.',
 ) =>
-  `<main style="min-inline-size: 0; padding: var(--slotted-space-6)">
+  `<main>
     <p slText size="sm" tone="muted">${text}</p>
   </main>`;
 

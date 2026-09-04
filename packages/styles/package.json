@@ -41,6 +41,8 @@
     "./dialog/tokens.json": "./src/dialog/dialog.tokens.json",
     "./divider/divider.css": "./src/divider/divider.css",
     "./divider/tokens.json": "./src/divider/divider.tokens.json",
+    "./drawer/drawer.css": "./src/drawer/drawer.css",
+    "./drawer/tokens.json": "./src/drawer/drawer.tokens.json",
     "./field-group/field-group.css": "./src/field-group/field-group.css",
     "./field-group/tokens.json": "./src/field-group/field-group.tokens.json",
     "./field/field.css": "./src/field/field.css",

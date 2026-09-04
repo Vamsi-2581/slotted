@@ -1,0 +1,765 @@
+@layer slotted.components {
+  /**
+   * A panel that comes in from an edge, and either covers the page or stands
+   * beside it.
+   *
+   * Two boxes, and the second one is the whole family:
+   *
+   *   ┌─ root ──────────────────────────────────────────────┐
+   *   │ ┌─ backdrop ────────────────────────────────────────┐│
+   *   │ │                     ┌─ panel ────────────────────┐││
+   *   │ │                     │ ⁞ header                  │││
+   *   │ │                     │ ⁞ ───────────────────────  │││
+   *   │ │                     │ ⁞ body           (scrolls) │││
+   *   │ │                     │ ⁞ ───────────────────────  │││
+   *   │ │                     │ ⁞ footer                  │││
+   *   │ │                     └─┴──────────────────────────┘││
+   *   │ └───────────────────────┬───────────────────────────┘│
+   *   └─────────────────────────┼────────────────────────────┘
+   *                          resizer
+   *
+   * `dialog` needs a third box between its layer and its panel because its root
+   * declares `container-type: inline-size`, which applies `contain: layout`,
+   * which makes a scrim positioned inside a scrolling root part of what
+   * scrolls. This root declares no container and never scrolls: the panel is
+   * pinned to an edge and bounded to the layer by construction, so `backdrop`
+   * and `panel` are two cells of one one-cell grid and nothing is positioned.
+   *
+   * The resizer is `--slotted-target-min` thick, which is the WCAG 2.2 floor,
+   * and it is a row of the panel's grid on a block side and an overlay on its
+   * inner edge on an inline side. The section that draws it says why the two
+   * differ; in one sentence, every rule in this panel runs across the inline
+   * axis, and a column would cut all of them.
+   *
+   * Every part is reached with a child combinator. A drawer opened from inside
+   * a drawer is the ordinary case, and a descendant rule would paint the inner
+   * panel with the outer panel's geometry.
+   */
+  [data-ui='drawer'] {
+    /**
+     * The panel's resting measure, per size step. Five named steps rather than
+     * the pixel string Ant and MUI both take: a theme retunes a step and cannot
+     * retune `width: 400px`, and a family that accepted one would be carrying a
+     * second scale of its own.
+     */
+    --_step: var(--slotted-drawer-extent-md, 24rem);
+    /**
+     * What the panel actually measures. `--slotted-drawer-extent` is the one
+     * name for it, and it is read from two places: an application setting one
+     * measure for every drawer writes it on `[data-ui='drawer']`, and the
+     * binding writes the length the reader dragged to as an inline custom
+     * property on this element. Both are lengths, so the cascade decides
+     * between them the way it decides everything else.
+     */
+    --_extent: var(--slotted-drawer-extent, var(--_step));
+    /** The panel's own inset, which every row reads. */
+    --_padding-inline: var(--slotted-space-7, 1.25rem);
+    --_padding-block: var(--slotted-space-6, 1rem);
+    --_gap: var(--slotted-space-5, 0.75rem);
+    --_rule-size: var(--slotted-border-width-thin, 1px);
+    /**
+     * The title is on the type scale rather than on the control type scale: a
+     * control's label is 12 to 14 pixels because it lives inside a button, and
+     * a drawer's title is a heading set like every other heading in the library.
+     */
+    --_title-font-size: var(--slotted-font-size-lg, 1rem);
+    --_description-font-size: var(--slotted-font-size-md, 0.875rem);
+    --_body-font-size: var(--slotted-font-size-md, 0.875rem);
+    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    /** The reader's hand, and the WCAG 2.2 floor in the axis it is thin in. */
+    --_resizer-thickness: var(--slotted-target-min, 24px);
+    --_grip-thickness: var(--slotted-border-width-thick, 2px);
+    --_grip-length: var(--slotted-space-10, 2.5rem);
+    --_radius: var(--slotted-radius-lg, 8px);
+
+    /**
+     * One name for the timing every moving part reads, so the three of them —
+     * the scrim's fade, the panel's slide and an inline drawer's own measure —
+     * cannot disagree about how long a drawer takes to arrive.
+     *
+     * It is a custom property rather than three pairs of rules because of the
+     * cascade: the side rules that set the exit offset carry the same
+     * specificity as an `[data-open]` rule would, and the last one written
+     * would decide. A property is resolved on the element instead, and the
+     * three states below read as what they are.
+     */
+    --_move: var(--slotted-duration-medium) var(--slotted-easing-enter);
+    /**
+     * `allow-discrete` is the whole of it. Without it the rule that hides a
+     * closed drawer takes effect at the first frame of the exit and the
+     * milliseconds `presence` is holding the node mounted for show nothing;
+     * with it, the flip to `hidden` happens at the end of the duration instead.
+     * `mount="active"` never reaches the closed state — the layer is gone — so
+     * this is what `eager`, `lazy` and every inline drawer need in order to
+     * animate at all.
+     */
+    --_reveal: content-visibility var(--slotted-duration-medium) allow-discrete;
+
+    /**
+     * The repository has no global reset, so a family that gives a box an
+     * explicit measure states this itself. Without it the panel's own edge is
+     * a pixel *outside* the extent a consumer asked for — and under `inline`
+     * the root clips at that extent, so the edge that separates the drawer
+     * from the page beside it disappeared entirely in the first capture.
+     */
+    box-sizing: border-box;
+    display: grid;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+
+    color: var(--slotted-drawer-color, var(--slotted-text, CanvasText));
+    font-family: var(--slotted-control-font-family, var(--slotted-font-family-sans));
+
+    content-visibility: visible;
+    transition: var(--_reveal);
+  }
+
+  /** Leaving is shorter than arriving: a reader who has decided is waiting. */
+  [data-ui='drawer']:not([data-open]) {
+    --_move: var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  /**
+   * While the pointer is down nothing eases. An extent that transitioned toward
+   * every pointer position would lag the hand by the whole duration, and a
+   * bottom sheet the reader is pulling has to follow it.
+   */
+  [data-ui='drawer'][data-dragging] {
+    --_move: var(--slotted-duration-instant) var(--slotted-easing-standard);
+  }
+
+  [data-ui='drawer'][data-size='sm'] {
+    --_step: var(--slotted-drawer-extent-sm, 18rem);
+    --_padding-inline: var(--slotted-space-6, 1rem);
+  }
+
+  [data-ui='drawer'][data-size='lg'] {
+    --_step: var(--slotted-drawer-extent-lg, 30rem);
+  }
+
+  [data-ui='drawer'][data-size='xl'] {
+    --_step: var(--slotted-drawer-extent-xl, 40rem);
+    --_padding-inline: var(--slotted-space-8, 1.5rem);
+    --_title-font-size: var(--slotted-font-size-xl, 1.125rem);
+  }
+
+  /** The step a drawer that is a page takes: the whole layer, and no measure. */
+  [data-ui='drawer'][data-size='full'] {
+    --_step: 100%;
+  }
+
+  /* ── The layer, and the box that is not one ───────────────────────────── */
+
+  /**
+   * The one z-index in the family, and it is a sum. `dismissable-layer` writes
+   * `--slotted-layer-depth` on this element as it opens, so a drawer opened
+   * over a dialog is one step above it on the single stack the library keeps
+   * rather than a number this stylesheet guessed.
+   */
+  [data-ui='drawer'][data-mode='overlay'] {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--slotted-z-index-overlay, 1000) + var(--slotted-layer-depth, 0));
+  }
+
+  /**
+   * Under `inline` there is no layer: the root is a box in the consumer's own
+   * layout and its own measure is what opens and closes. `overflow: clip` is
+   * what lets the panel keep its measure while the box around it collapses — a
+   * panel that reflowed as it closed would rewrap its text on the way out.
+   *
+   * The sibling content reflows because the consumer's grid says so, which is
+   * what replaces Angular Material's `push` and MUI's `persistent`. Neither is
+   * a mode here, because a family writing a margin on an element it does not
+   * own is a family deciding someone else's layout.
+   */
+  [data-ui='drawer'][data-mode='inline'] {
+    overflow: clip;
+  }
+
+  [data-ui='drawer'][data-mode='inline'][data-side='start'],
+  [data-ui='drawer'][data-mode='inline'][data-side='end'] {
+    inline-size: 0;
+    transition:
+      inline-size var(--_move),
+      var(--_reveal);
+  }
+
+  [data-ui='drawer'][data-mode='inline'][data-side='top'],
+  [data-ui='drawer'][data-mode='inline'][data-side='bottom'] {
+    block-size: 0;
+    transition:
+      block-size var(--_move),
+      var(--_reveal);
+  }
+
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='start'],
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='end'] {
+    inline-size: var(--_extent);
+  }
+
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='top'],
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='bottom'] {
+    block-size: var(--_extent);
+  }
+
+  /**
+   * Mounted and closed. `eager` and `lazy` leave the layer in the document and
+   * an inline drawer never leaves it at all, so a panel the eye reads as closed
+   * would otherwise keep its controls in the tab sequence — the defect MUI's
+   * `persistent` variant ships. The binding writes `inert` alongside this, so a
+   * browser without `content-visibility` cannot put focus inside one either.
+   */
+  [data-ui='drawer']:not([data-open]) {
+    content-visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* ── The scrim ────────────────────────────────────────────────────────── */
+
+  /**
+   * `--slotted-scrim` is a foundation token the theme restates per scheme and
+   * remaps to `Canvas` under forced colours, where it becomes an opaque ground.
+   * That is why the panel below carries an edge of its own: every shadow token
+   * is `none` in that mode, and a panel separated only by elevation would sit on
+   * an opaque ground with nothing marking where it starts.
+   */
+  [data-ui='drawer'] > [data-part='backdrop'] {
+    grid-area: 1 / 1;
+    background: var(--slotted-drawer-scrim, var(--slotted-scrim, Canvas));
+    opacity: 0;
+    transition: opacity var(--_move);
+  }
+
+  [data-ui='drawer'][data-open] > [data-part='backdrop'] {
+    opacity: 1;
+  }
+
+  /* ── The panel ────────────────────────────────────────────────────────── */
+
+  /**
+   * Three rows and, when a resizer is rendered, one track beside them. The
+   * middle row is bounded, which is what keeps the actions on screen when the
+   * body is long — the failure Vaul, MUI and Angular Material all leave to each
+   * consumer's own CSS, because none of the three ships a layout.
+   */
+  [data-ui='drawer'] > [data-part='panel'] {
+    grid-area: 1 / 1;
+    box-sizing: border-box;
+    /* The containing block for the separator, on the two sides it lies over. */
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-inline-size: 0;
+    min-block-size: 0;
+
+    /**
+     * The inset each row keeps on each edge. A side widens the one its
+     * separator lies over, so the words never start under the reader's hand,
+     * and `max()` means a size step whose inset is already larger keeps it.
+     */
+    --_row-padding-inline-start: var(--_padding-inline);
+    --_row-padding-inline-end: var(--_padding-inline);
+
+    background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
+    /**
+     * `--slotted-border-strong` and not `--slotted-border-subtle`. The
+     * foundation defines the strong step as the line between two surfaces and
+     * holds it to 3:1 against each of them; the subtle step is a line inside one
+     * surface, which is what the header and footer rules below are. A drawer's
+     * inner edge is the first kind: in the dark scheme the panel is `#1c1c20` on
+     * a scrim of black at 62% and every shadow token is black on black.
+     */
+    border-color: var(--slotted-drawer-border-color, var(--slotted-border-strong, ButtonBorder));
+    border-style: solid;
+    border-width: 0;
+    /* So the leading corners clip the row that scrolls under them. */
+    overflow: hidden;
+  }
+
+  /**
+   * The exit, and the only physical value in the family.
+   *
+   * Grid alignment is flow-relative, so the panel lands on the right edge in
+   * both directions with no rule of its own. `translate` is not: it takes a
+   * physical axis, and a start-side panel leaves toward the left of a
+   * left-to-right document and toward the right of a mirrored one.
+   */
+  [data-ui='drawer'][data-mode='overlay'] > [data-part='panel'] {
+    box-shadow: var(--slotted-shadow-lg);
+    translate: 0 0;
+    transition: translate var(--_move);
+  }
+
+  [data-ui='drawer'][data-mode='overlay']:not([data-open]) > [data-part='panel'] {
+    translate: var(--_shift-x, 0) var(--_shift-y, 0);
+  }
+
+  /* ── Where the panel sits, and where it goes when it leaves ───────────── */
+
+  [data-ui='drawer'][data-side='start'] > [data-part='panel'],
+  [data-ui='drawer'][data-side='end'] > [data-part='panel'] {
+    align-self: stretch;
+    inline-size: min(var(--_extent), 100%);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  [data-ui='drawer'][data-side='top'] > [data-part='panel'],
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] {
+    justify-self: stretch;
+    block-size: min(var(--_extent), 100%);
+  }
+
+  [data-ui='drawer'][data-side='start'] > [data-part='panel'] {
+    justify-self: start;
+    --_shift-x: -100%;
+    /* The resizer lies over this edge, so the rows keep clear of it. */
+    --_row-padding-inline-end: max(var(--_padding-inline), var(--_resizer-thickness));
+    border-inline-end-width: var(--_rule-size);
+  }
+
+  [data-ui='drawer'][data-side='end'] > [data-part='panel'] {
+    justify-self: end;
+    --_shift-x: 100%;
+    --_row-padding-inline-start: max(var(--_padding-inline), var(--_resizer-thickness));
+    border-inline-start-width: var(--_rule-size);
+  }
+
+  /**
+   * A sheet keeps its leading corners and a side drawer keeps none. An
+   * edge-anchored panel that spans the whole block extent reads as a wall rather
+   * than as a card, which is what Fluent, Ant, MUI and Angular Material all
+   * draw; a sheet coming up from the bottom is the one case where the two
+   * corners the reader can see are what say it is a sheet.
+   *
+   * On a block side the resizer is a row of its own — see the section below for
+   * why it is a row here and an overlay on an inline side — so the four rows are
+   * placed explicitly rather than left to fall in DOM order. A panel with no
+   * resizer would otherwise put its body in an `auto` track and lose the one
+   * declaration that keeps the footer on screen.
+   */
+  [data-ui='drawer'][data-side='top'] > [data-part='panel'] {
+    align-self: start;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    --_shift-y: -100%;
+    border-block-end-width: var(--_rule-size);
+    border-end-start-radius: var(--slotted-drawer-radius, var(--_radius));
+    border-end-end-radius: var(--slotted-drawer-radius, var(--_radius));
+  }
+
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] {
+    align-self: end;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    --_shift-y: 100%;
+    border-block-start-width: var(--_rule-size);
+    border-start-start-radius: var(--slotted-drawer-radius, var(--_radius));
+    border-start-end-radius: var(--slotted-drawer-radius, var(--_radius));
+  }
+
+  /**
+   * A sheet's separator takes the first row, so the three that follow move down
+   * one. `top` needs no such rule: its separator is the fourth row and the
+   * three above it are already where the base puts them.
+   */
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='header'] {
+    grid-row: 2;
+  }
+
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='body'] {
+    grid-row: 3;
+  }
+
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='footer'] {
+    grid-row: 4;
+  }
+
+  /** `start` is the left edge in one direction and the right edge in the other. */
+  [data-ui='drawer'][data-side='start']:dir(rtl) > [data-part='panel'] {
+    --_shift-x: 100%;
+  }
+
+  [data-ui='drawer'][data-side='end']:dir(rtl) > [data-part='panel'] {
+    --_shift-x: -100%;
+  }
+
+  /**
+   * `full` is the panel covering the layer, so its inner edge separates it from
+   * nothing and the hairline it would draw sits on the edge of the screen —
+   * which on a phone reads as a stray line under the browser chrome. `dialog`
+   * removed the same line from its own full-screen step for the same reason.
+   *
+   * A step the layer is too narrow to honour is clamped by `min(…, 100%)` and
+   * still draws its edge. CSS cannot compare a resolved length to its
+   * container, and the four container queries that would answer it — one per
+   * step, because a container condition cannot hold a custom property — buy one
+   * hairline at the extreme edge of the viewport.
+   */
+  [data-ui='drawer'][data-size='full'] > [data-part='panel'] {
+    border-width: 0;
+    border-radius: 0;
+  }
+
+  /**
+   * Under `inline` the panel keeps the measure the root is collapsing away
+   * from, which is what `overflow: clip` on the root is for. `min(…, 100%)`
+   * would resolve against a box that is on its way to nought.
+   */
+  [data-ui='drawer'][data-mode='inline'][data-side='start'] > [data-part='panel'],
+  [data-ui='drawer'][data-mode='inline'][data-side='end'] > [data-part='panel'] {
+    inline-size: var(--_extent);
+  }
+
+  [data-ui='drawer'][data-mode='inline'][data-side='top'] > [data-part='panel'],
+  [data-ui='drawer'][data-mode='inline'][data-side='bottom'] > [data-part='panel'] {
+    block-size: var(--_extent);
+  }
+
+  /* ── The separator the reader moves ───────────────────────────────────── */
+
+  /**
+   * A focusable `separator`, which is the widget form of the role, from the
+   * WAI-ARIA Window Splitter pattern. Ant's resizer and Vaul's snap dragging
+   * are both pointer-only; this one is a target a keyboard can reach, which is
+   * what `docs/component-features.md` §2.8 asks of every resize.
+   *
+   * **It is a row on a block side and an overlay on an inline side**, and the
+   * asymmetry has one cause: every rule in this panel runs across the inline
+   * axis. A resizer row above the header or below the footer crosses none of
+   * them, while a resizer *column* would cut all of them — the first capture
+   * showed exactly that, a rule under the header stopping twenty-four pixels
+   * short of the panel's own edge, which reads as an unfinished line rather
+   * than as a track. A line cannot cross an opaque box, so on an inline side
+   * the separator lies over the panel instead and the rows keep clear of it
+   * with `--_row-padding-inline-*`.
+   *
+   * The cost is written rather than hidden: on `side="start"` the separator
+   * sits at the panel's inline-end edge, which is where a left-to-right
+   * document also puts the body's scrollbar. The wheel still scrolls and the
+   * scrollbar's inner half is still reachable, and every desktop application
+   * with a resizable sidebar has the same overlap.
+   *
+   * `touch-action: none` so a drag is not read as a scroll on the way past.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer'] {
+    display: grid;
+    place-items: center;
+    background: transparent;
+    touch-action: none;
+    transition: background-color
+      var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer'],
+  [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer'] {
+    position: absolute;
+    inset-block: 0;
+    inline-size: var(--_resizer-thickness);
+    cursor: col-resize;
+  }
+
+  /**
+   * On an inline side the grip sits *on* the edge it moves, not floating a
+   * dozen pixels inside it: the first capture had a bar hanging in the panel's
+   * white with nothing to say what it was attached to. Flush against the
+   * border it reads as a thickened, gripped segment of the edge, which is what
+   * a resizable edge is. The twenty-four pixels of hit area still run inward
+   * from it, where they cost nothing.
+   *
+   * A sheet's grip stays centred in its own row instead, because there the
+   * gesture is a pull rather than a slide and every bottom sheet in the field
+   * draws it that way.
+   */
+  [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer'] {
+    inset-inline-end: 0;
+    justify-items: end;
+  }
+
+  [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer'] {
+    inset-inline-start: 0;
+    justify-items: start;
+  }
+
+  [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer'],
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer'] {
+    block-size: var(--_resizer-thickness);
+    cursor: row-resize;
+  }
+
+  /**
+   * The row takes the panel's own leading corners, so the focus ring follows
+   * them instead of drawing two square corners inside two round ones.
+   */
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer'] {
+    grid-row: 1;
+    border-start-start-radius: inherit;
+    border-start-end-radius: inherit;
+  }
+
+  [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer'] {
+    grid-row: 4;
+    border-end-start-radius: inherit;
+    border-end-end-radius: inherit;
+  }
+
+  /**
+   * The grip. Real geometry rather than a character, and the one mark in the
+   * family: a short bar across the axis the panel moves in, which is what a
+   * hand reads as *pull me*. It is the same mark in both orientations, and it
+   * takes a foundation colour rather than a system one so that an unthemed
+   * decoration disappears instead of shouting.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']::after {
+    content: '';
+    border-radius: var(--slotted-radius-full, 9999px);
+    background: var(--slotted-drawer-grip-color, var(--slotted-border-strong));
+    transition: background-color
+      var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer']::after,
+  [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer']::after {
+    inline-size: var(--_grip-thickness);
+    block-size: var(--_grip-length);
+  }
+
+  [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer']::after,
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer']::after {
+    inline-size: var(--_grip-length);
+    block-size: var(--_grip-thickness);
+  }
+
+  /**
+   * Hover and press are held back for `disabled`, which this separator does not
+   * have today. The guard is the shared rule from
+   * `packages/styles/src/states.test.mjs`, and it is written here so that a
+   * disabled resize, if one ever arrives, cannot ship without it.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:not([data-disabled]):hover {
+    background: var(--slotted-drawer-resizer-hover-background, var(--slotted-surface-sunken));
+  }
+
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover::after {
+    background: var(--slotted-drawer-grip-hover-color, var(--slotted-text-muted));
+  }
+
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
+  }
+
+  /**
+   * The mark says the reader has hold of it, and the ring says where they are.
+   * Focus colours the mark as well: on an inline side the mark sits flush with
+   * the edge and the inset ring lands on top of it, so a ring alone reads as a
+   * grip that vanished the moment it was reached.
+   */
+  [data-ui='drawer'][data-dragging] > [data-part='panel'] > [data-part='resizer']::after,
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:focus-visible::after {
+    background: var(--slotted-drawer-grip-active-color, var(--slotted-focus-ring-color));
+  }
+
+  /* ── The header ───────────────────────────────────────────────────────── */
+
+  /**
+   * Two columns: the words and the close button. The button keeps a column of
+   * its own, so a title that wraps to two lines grows the row instead of
+   * pushing it off the line.
+   *
+   * The header draws no rule of its own. Every rule in the panel belongs to the
+   * row *below* it, which is what makes the count right for every combination a
+   * consumer can write: a header, a body and a footer draw two rules; a header
+   * and a footer alone draw one; and a panel that is only a body draws none.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] {
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: var(--_gap);
+    row-gap: var(--slotted-space-2, 0.25rem);
+    padding-block: var(--_padding-block);
+    padding-inline: var(--_row-padding-inline-start) var(--_row-padding-inline-end);
+  }
+
+  /**
+   * `overflow-wrap: anywhere` and a zero minimum are the pair that answer a
+   * hostile string. A ninety-character unbroken token in a title widens the
+   * panel past its own measure, and a panel pinned to an edge then pushes its
+   * inner edge across the layer.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='title'] {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--_title-font-size);
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    line-height: var(--slotted-line-height-lg, 1.5);
+    color: var(--slotted-drawer-title-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='description'] {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 0;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--_description-font-size);
+    line-height: var(--slotted-line-height-md, 1.5);
+    color: var(--slotted-drawer-description-color, var(--slotted-text-muted, GrayText));
+  }
+
+  /* ── The close button ─────────────────────────────────────────────────── */
+
+  /**
+   * An icon-only control is under the WCAG 2.2 minimum in both axes if it is
+   * only as big as its mark, so the box is the control height rather than the
+   * glyph and the glyph is centred in it. The theme grows the control height
+   * again under `pointer: coarse`, so a touch target needs nothing from here.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close'] {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+    display: inline-grid;
+    place-items: center;
+    block-size: var(--slotted-control-height-md, 34px);
+    inline-size: var(--slotted-control-height-md, 34px);
+    /* The button's own edge is the panel's, so the mark aligns with the title. */
+    margin-inline-end: calc(-1 * var(--slotted-space-4, 0.5rem));
+    padding: 0;
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-radius: var(--slotted-control-radius, var(--slotted-radius-sm, 4px));
+    color: var(--slotted-drawer-close-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    transition:
+      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close']::after {
+    content: '';
+    background: currentcolor;
+    block-size: var(--_icon-size);
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-icon-x);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='header']
+    > [data-part='close']:not(:disabled):hover {
+    background: var(
+      --slotted-drawer-close-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    color: var(--slotted-drawer-close-hover-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='header']
+    > [data-part='close']:not(:disabled):active {
+    background: var(
+      --slotted-drawer-close-active-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+  }
+
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='header']
+    > [data-part='close']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
+  }
+
+  /* ── The row that scrolls ─────────────────────────────────────────────── */
+
+  /**
+   * `overscroll-behavior: contain` is what keeps a wheel that reaches the end of
+   * this box from scrolling the page behind it. The scroll lock in
+   * `dismissable-layer` covers the modal case; this covers the other two, where
+   * the page behind is not locked at all.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='body'] {
+    grid-row: 2;
+    min-block-size: 0;
+    min-inline-size: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--_padding-block);
+    padding-inline: var(--_row-padding-inline-start) var(--_row-padding-inline-end);
+    font-size: var(--_body-font-size);
+    line-height: var(--slotted-line-height-md, 1.5);
+    color: var(--slotted-drawer-body-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='body']:not(:first-child) {
+    border-block-start: var(--_rule-size) solid
+      var(--slotted-drawer-rule-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  /**
+   * Content that is not there yet. Only Ant among the surveyed implementations
+   * has a state for it, so elsewhere a consumer renders a spinner conditionally
+   * and the panel jumps to size when the data lands. The row keeps a floor here
+   * instead, and the header, the close button, Escape and the resizer all stay
+   * operable: a loading drawer a reader cannot leave is the worse failure.
+   */
+  [data-ui='drawer'][data-loading] > [data-part='panel'] > [data-part='body'] {
+    min-block-size: var(--slotted-space-12, 4rem);
+  }
+
+  /* ── The actions ──────────────────────────────────────────────────────── */
+
+  /**
+   * `flex-wrap` rather than a grid: two actions that do not fit on one line
+   * stack, and the primary one stays last in both readings. This row is the
+   * reason the middle one is bounded — an unbounded panel pushes it past the
+   * fold, which is the whole failure the three-row grid exists to prevent.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='footer'] {
+    grid-row: 3;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--_gap);
+    padding-block: var(--_padding-block);
+    padding-inline: var(--_row-padding-inline-start) var(--_row-padding-inline-end);
+    background: var(--slotted-drawer-footer-surface, var(--slotted-surface-sunken, Canvas));
+  }
+
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='footer']:not(:first-child) {
+    border-block-start: var(--_rule-size) solid
+      var(--slotted-drawer-rule-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  /* ── Forced colours ───────────────────────────────────────────────────── */
+
+  /**
+   * The theme remaps every token this family reads, so the only rule here is the
+   * one the theme cannot reach: `--slotted-scrim` becomes `Canvas`, an opaque
+   * ground, and the panel on it needs an edge the shadow no longer draws. The
+   * border above already states one; this thickens it to the weight a system
+   * border is read at, and gives the panel the three edges its side does not.
+   */
+  @media (forced-colors: active) {
+    [data-ui='drawer'] > [data-part='panel'] {
+      border-width: var(--slotted-border-width-thick, 2px);
+      border-color: CanvasText;
+    }
+  }
+}

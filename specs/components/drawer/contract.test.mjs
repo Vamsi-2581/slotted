@@ -210,15 +210,21 @@ test('places the scrim and the panel in one cell, with no third box', () => {
 });
 
 /**
- * The resizer is a track of the panel's grid rather than a strip lying over it:
- * the track is `--slotted-target-min` thick, and twenty-four pixels of overlay
- * would eat the pointer on a scrollbar, a field or the first character of a
- * line. With no resizer rendered the track collapses to nothing.
+ * Every rule in the panel runs across the inline axis. A resizer *row* — which
+ * is what a block side gets — crosses none of them; a resizer *column* would
+ * cut all of them, and the first capture showed exactly that: a rule under the
+ * header stopping twenty-four pixels short of the panel's own edge. A line
+ * cannot cross an opaque box, so on an inline side the separator lies over the
+ * panel and the rows keep clear of it instead.
  */
-test('gives the resizer a track of its own rather than an overlay', () => {
-  assert.match(contract.anatomy.resizer, /track of the panel/);
+test('gives the resizer a row on a block side and an overlay on an inline one', () => {
   assert.match(contract.anatomy.resizer, /--slotted-target-min/);
-  assert.match(contract.anatomy.resizer, /collapses to nothing/);
+  assert.match(contract.anatomy.resizer, /row of the panel's grid on a block side/);
+  assert.match(contract.anatomy.resizer, /overlay on the inner edge on an inline side/);
+  /* The reason, which is what keeps the asymmetry from reading as an accident. */
+  assert.match(contract.anatomy.resizer, /every rule in the panel runs across the inline axis/);
+  /* And the cost of the half that overlaps. */
+  assert.match(contract.extent.overlapCost, /scrollbar/);
 });
 
 /**

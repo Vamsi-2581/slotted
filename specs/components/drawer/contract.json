@@ -113,7 +113,7 @@
     "root": "the layer under mode=overlay — fixed to the viewport, stacked with --slotted-z-index-overlay plus the depth dismissable-layer writes — and the flow box under mode=inline, whose own size is what transitions. A one-cell grid either way",
     "backdrop": "the scrim, in that one cell. Painted under mode=overlay with modal only",
     "panel": "the surface, in the same cell, aligned to the side. Two boxes and not three: dialog needs a viewport between the layer and the panel because its root is a query container, which makes a scrim inside a scrolling root part of what scrolls. A drawer's root declares no container and never scrolls, because the panel is bounded to the layer by construction",
-    "resizer": "one track of the panel's own grid, --slotted-target-min thick, spanning the panel on the edge the reader reaches from. A track rather than a strip lying over the panel, because twenty-four pixels of overlay would eat the pointer on whatever is under it. When no resizer is rendered the track is auto and collapses to nothing"
+    "resizer": "--slotted-target-min thick, spanning the panel on the edge the reader reaches from. It is a row of the panel's grid on a block side and an overlay on the inner edge on an inline side, and the asymmetry has one cause: every rule in the panel runs across the inline axis, so a resizer row crosses none of them and a resizer column would cut all of them. The first capture showed exactly that — a rule under the header stopping twenty-four pixels short of the panel's own edge, which reads as an unfinished line rather than as a track. On an inline side the rows keep clear of it with an inset of max(the panel padding, the separator thickness)"
   },
   "scroll": {
     "body": "the body scrolls; the header, the footer and the resizer stay",
@@ -142,6 +142,7 @@
     "step": "0.05 of the layer per arrow press, when there are no snap points",
     "snapPoints": "an array of fractions, empty by default. With them an arrow moves to the adjacent stop, Home and End go to the first and last, a drag releases onto the nearest, and minExtent and maxExtent default to the first and the last",
     "dismissThreshold": "a drag released below minExtent asks to close, carrying pointer; a close the consumer cancels leaves the panel at minExtent. That is what MUI's SwipeableDrawer and Vaul's dismiss gesture both do, expressed as a consequence of the resize rather than as a second mechanism",
+    "overlapCost": "On side=start the separator sits at the panel's inline-end edge, which is where a left-to-right document also puts the body's scrollbar. The wheel still scrolls and the scrollbar's inner half is still reachable, and every desktop application with a resizable sidebar has the same overlap",
     "capability": "Rendering the resizer part is the capability. There is no resizable prop, so a resizable prop with no resizer part, and a resizer part a prop has switched off, are both states this family cannot be in",
     "reason": "A fraction and not a length: the Window Splitter pattern's three aria values are then the fraction times a hundred, the limits and the snap points are the same kind of number so one clamp covers all three, and a keyboard step is a proportion rather than a pixel literal the family would have to tokenise"
   },

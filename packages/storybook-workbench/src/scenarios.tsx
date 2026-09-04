@@ -91,7 +91,16 @@ const capabilityApi = {
    * a prop called `live` would say the opposite of what the family does.
    */
   live: [],
-  current: ['current'],
+  /**
+   * Nothing, for the reason `selection` and `placement` ask for nothing: the
+   * table cannot see what a family calls the thing the reader is currently on.
+   * `pagination` calls it `page`, `stepper` calls it `step`, and `select` and
+   * `combobox` call it `highlightedValue` — the option the highlight is on,
+   * which is not the option that is chosen. Requiring the literal word made the
+   * table the authority on a prop it cannot know, and every declared default is
+   * already required row by row below.
+   */
+  current: [],
   open: ['open'],
   /**
    * Nothing, for the reason `selection` asks for nothing: the table cannot see

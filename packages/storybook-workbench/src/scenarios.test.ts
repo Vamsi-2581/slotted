@@ -210,9 +210,19 @@ describe('a state model the contract declares', () => {
   });
 
   it('leaves a family with no model reading the table, as before', () => {
-    expect(apiMetadataErrors({ capabilities: ['current'], defaults: {} }, [])).toEqual([
-      'missing API current',
+    expect(apiMetadataErrors({ capabilities: ['loading'], defaults: {} }, [])).toEqual([
+      'missing API loading',
     ]);
+  });
+
+  /**
+   * `current` used to ask for a prop of that name, and no family has one:
+   * pagination calls it `page`, stepper `step`, and select and combobox
+   * `highlightedValue`. The table cannot know, so it asks for nothing and the
+   * model — or the declared defaults — answers instead.
+   */
+  it('asks for nothing where the table cannot know the name', () => {
+    expect(apiMetadataErrors({ capabilities: ['current'], defaults: {} }, [])).toEqual([]);
   });
 });
 

@@ -229,7 +229,7 @@ listbox have a viewport at all.
 
 | Question                                                          | Answer                                                                                                                             |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Two-way value in the signal form the ecosystem expects?           | yes — `model()` for `value` and `activeKey`, `output()` for the requests that carry a reason.                                       |
+| Two-way value in the signal form the ecosystem expects?           | `input()` for `value` and `activeKey`, `input()` for their `default…` pair, `output()` for the requests. Not `model()` — see below. |
 | Reactive Forms and template forms?                                | yes — `ControlValueAccessor` on the root directive, plus `Validator` for `required`, since a listbox is where a form holds a choice. |
 | Application defaults set once?                                    | yes — `LISTBOX_DEFAULTS` and `provideListboxDefaults()`.                                                                            |
 | Can a template reach the instance?                                | yes — `exportAs: 'slottedListbox'`, and `slottedListboxOption` for one option.                                                      |
@@ -239,10 +239,32 @@ listbox have a viewport at all.
 | Does a static attribute the consumer wrote survive?               | yes — `HostAttributeToken` reads `role`, `aria-label` and `id` before the host bindings write anything.                             |
 | Does an entry point others depend on stay a single class?         | yes — imported through `@slotted/angular/listbox`.                                                                                  |
 
-The asymmetry is deliberate and is `frameworks.md`'s own instruction: Angular
-gets `ControlValueAccessor` and a DI token because Angular has forms and DI, and
-React gets a `render` prop and a context provider because React has neither.
-Neither binding is levelled down to the other's shape.
+**`model()` was considered and refused.** A `model()` cannot express the one
+thing `docs/state-and-events.md` requires of every mutable value: that the mode
+is decided once, by whether the controlled value is present. A model the
+consumer never binds is written by the component, which is uncontrolled; the
+same model bound one-way is also written by the component, which is not. The
+library already answers this with `value` + `defaultValue` + a request — it is
+what `radio-group`, `checkbox-group` and every other stateful family here
+ship — and two families disagreeing about how a controlled value is spelled is
+worse than one family missing a banana in a box. `ControlValueAccessor` is the
+two-way binding an Angular consumer actually reaches for, and this family has
+it.
+
+Three asymmetries between the bindings, each deliberate:
+
+- **`emptyContent` and `loaderContent` are React-only.** Angular projects
+  content, so a template writes `<div slListboxEmpty>` inside an `@if` and it
+  appears whether or not the collection was handed in. React renders `children`
+  or the collection but not both, so the two messages have to be props there.
+- **`renderOption` is a function in React and an `ng-template` in Angular.**
+  Same capability, each ecosystem's own mechanism, and the Angular one stays
+  lazy.
+- **`ControlValueAccessor`, `Validator` and `provideListboxDefaults()` are
+  Angular-only; `render` on every part and `ListboxDefaultsProvider` are
+  React-only.** That is `frameworks.md`'s instruction rather than an oversight:
+  the binding that has a real integration point uses it, and neither is levelled
+  down to the smaller shape.
 
 ---
 

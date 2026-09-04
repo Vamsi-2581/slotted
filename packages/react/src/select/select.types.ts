@@ -1,0 +1,241 @@
+import type { ChangeRequest } from '@slotted/core/state';
+import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
+
+export type SelectSize = 'sm' | 'md' | 'lg';
+export type SelectVariant = 'outline' | 'subtle' | 'plain';
+export type SelectSide = 'bottom' | 'top' | 'inline-start' | 'inline-end' | 'left' | 'right';
+export type SelectAlign = 'start' | 'center' | 'end';
+/** As wide as the control it hangs from, or as wide as its own options. */
+export type SelectWidth = 'anchor' | 'content';
+export type SelectMount = 'active' | 'lazy' | 'eager';
+export type SelectStrategy = 'absolute' | 'fixed';
+
+/**
+ * An option's value is a string, and that is a decision rather than a
+ * simplification. Every collection API in the field ends at a stable primitive
+ * key — React Aria's `Key`, Ark's `string`, the `value` of an HTML `option` —
+ * and a key is what a form submits, what an `id` is built from and what a
+ * consumer stores. A family that took an object would need `compareWith` to say
+ * when two of them are the same option, which is a question this shape cannot
+ * ask.
+ */
+export type SelectOptionValue = string;
+
+/** What is selected: one value, several, or nothing. */
+export type SelectSelection = SelectOptionValue | readonly SelectOptionValue[] | null;
+
+export type SelectOpenReason =
+  | 'pointer'
+  | 'keyboard'
+  | 'escape'
+  | 'outsidePress'
+  | 'select'
+  | 'dismiss'
+  | 'blur'
+  | 'programmatic';
+
+export type SelectValueReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'programmatic';
+
+export type SelectHighlightReason = 'pointer' | 'keyboard' | 'programmatic';
+
+/**
+ * What the family needs to know about an option before the popup has ever been
+ * built: enough to draw the closed control. It is not how options are rendered
+ * — that is `SelectItem` — and it never has to be given.
+ */
+export interface SelectOption {
+  value: SelectOptionValue;
+  label: string;
+  disabled?: boolean;
+}
+
+export interface SelectOptionGroup {
+  label: string;
+  options: readonly SelectOption[];
+}
+
+export type SelectItems = readonly (SelectOption | SelectOptionGroup)[];
+
+/** The decisions an application takes once rather than per instance. */
+export interface SelectDefaults {
+  align: SelectAlign;
+  alignOffset: number;
+  clearable: boolean;
+  clearLabel: string;
+  closeOnEscape: boolean;
+  closeOnOutsidePress: boolean;
+  closeOnSelect: boolean;
+  collisionPadding: number;
+  disabled: boolean;
+  emptyLabel: string;
+  flip: boolean;
+  fullWidth: boolean;
+  hideWhenDetached: boolean;
+  invalid: boolean;
+  loading: boolean;
+  loadingLabel: string;
+  loop: boolean;
+  mount: SelectMount;
+  multiple: boolean;
+  portal: boolean;
+  readOnly: boolean;
+  required: boolean;
+  shift: boolean;
+  side: SelectSide;
+  sideOffset: number;
+  size: SelectSize;
+  strategy: SelectStrategy;
+  typeahead: boolean;
+  typeaheadTimeout: number;
+  variant: SelectVariant;
+  width: SelectWidth;
+}
+
+export interface SelectDefaultsProviderProps extends Partial<SelectDefaults> {
+  children?: ReactNode;
+  /** Where every popup below this provider is portalled to. */
+  container?: Element | null;
+}
+
+/** The imperative actions a consumer cannot express declaratively, and no more. */
+export interface SelectHandle {
+  close: () => void;
+  focus: () => void;
+  open: () => void;
+  /** Brings an option into view, for a list the consumer has just replaced. */
+  scrollToKey: (value: SelectOptionValue) => void;
+}
+
+export interface SelectProps {
+  align?: SelectAlign;
+  alignOffset?: number;
+  children?: ReactNode;
+  clearable?: boolean;
+  clearLabel?: string;
+  closeOnEscape?: boolean;
+  closeOnOutsidePress?: boolean;
+  closeOnSelect?: boolean;
+  collisionPadding?: number;
+  defaultHighlightedValue?: SelectOptionValue | null;
+  defaultOpen?: boolean;
+  defaultValue?: SelectSelection;
+  disabled?: boolean;
+  emptyLabel?: string;
+  flip?: boolean;
+  /** The form this control submits with, when it is not the enclosing one. */
+  form?: string;
+  fullWidth?: boolean;
+  hideWhenDetached?: boolean;
+  highlightedValue?: SelectOptionValue | null;
+  invalid?: boolean;
+  /** Labels for values, so a closed control can name a value it never rendered. */
+  items?: SelectItems;
+  loading?: boolean;
+  loadingLabel?: string;
+  loop?: boolean;
+  mount?: SelectMount;
+  multiple?: boolean;
+  /** The submission name of the hidden native control. */
+  name?: string;
+  onHighlightedValueChange?: (
+    value: SelectOptionValue | null,
+    request: ChangeRequest<SelectOptionValue | null>,
+  ) => void;
+  onOpenChange?: (open: boolean, request: ChangeRequest<boolean>) => void;
+  onValueChange?: (value: SelectSelection, request: ChangeRequest<SelectSelection>) => void;
+  open?: boolean;
+  portal?: boolean;
+  readOnly?: boolean;
+  ref?: Ref<SelectHandle>;
+  required?: boolean;
+  shift?: boolean;
+  side?: SelectSide;
+  sideOffset?: number;
+  size?: SelectSize;
+  strategy?: SelectStrategy;
+  /** How many options the whole collection holds, when only a window is rendered. */
+  total?: number;
+  typeahead?: boolean;
+  typeaheadTimeout?: number;
+  value?: SelectSelection;
+  variant?: SelectVariant;
+  width?: SelectWidth;
+}
+
+/** What `render` receives for the frame around the control. */
+export interface SelectTriggerRootProps extends HTMLAttributes<HTMLElement> {
+  children?: ReactNode;
+  'data-disabled'?: '' | undefined;
+  'data-full-width'?: '' | undefined;
+  'data-invalid'?: '' | undefined;
+  'data-loading'?: '' | undefined;
+  'data-multiple'?: '' | undefined;
+  'data-open'?: '' | undefined;
+  'data-part': string;
+  'data-readonly'?: '' | undefined;
+  'data-required'?: '' | undefined;
+  'data-size': SelectSize;
+  'data-ui': string;
+  'data-variant': SelectVariant;
+  ref?: Ref<HTMLDivElement> | undefined;
+}
+
+export interface SelectTriggerProps extends Omit<
+  ComponentPropsWithRef<'button'>,
+  'children' | 'value'
+> {
+  children?: ReactNode;
+  ref?: Ref<HTMLButtonElement>;
+  /** Replaces the frame around the control, not the control itself. */
+  render?: (props: SelectTriggerRootProps) => ReactNode;
+}
+
+export interface SelectValueProps extends Omit<ComponentPropsWithRef<'span'>, 'children'> {
+  /** The summary, when the family's own is not the right one. */
+  children?: (selection: readonly SelectOptionValue[], labels: readonly string[]) => ReactNode;
+  placeholder?: ReactNode;
+}
+
+/** What `render` receives for the layer the positioner writes on. */
+export interface SelectPositionerProps extends HTMLAttributes<HTMLElement> {
+  children?: ReactNode;
+  'data-align': SelectAlign;
+  'data-open'?: '' | undefined;
+  'data-part': string;
+  'data-size': SelectSize;
+  'data-ui': string;
+  'data-width': SelectWidth;
+  inert?: boolean | undefined;
+  ref?: Ref<HTMLDivElement> | undefined;
+}
+
+export interface SelectContentProps extends ComponentPropsWithRef<'div'> {
+  /** What the popup says when it holds no options. Replaces `emptyLabel`. */
+  empty?: ReactNode;
+  ref?: Ref<HTMLDivElement>;
+  render?: (props: SelectPositionerProps) => ReactNode;
+  /** What the popup says while an answer is travelling. Replaces `loadingLabel`. */
+  status?: ReactNode;
+}
+
+export interface SelectItemProps extends Omit<ComponentPropsWithRef<'div'>, 'children'> {
+  children?: ReactNode;
+  description?: ReactNode;
+  disabled?: boolean;
+  icon?: ReactNode;
+  ref?: Ref<HTMLDivElement>;
+  /**
+   * This option's place in the whole collection, one-based, for a list of which
+   * only a window is rendered. Given together with `total` on the select, it
+   * becomes `aria-posinset` and `aria-setsize` — the pair the listbox pattern
+   * asks for when the DOM does not hold every option.
+   */
+  position?: number;
+  /** What typeahead matches on, when the label is not plain text. */
+  textValue?: string;
+  value: SelectOptionValue;
+}
+
+export interface SelectGroupProps extends ComponentPropsWithRef<'div'> {
+  label?: ReactNode;
+}

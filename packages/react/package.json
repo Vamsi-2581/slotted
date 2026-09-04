@@ -112,6 +112,10 @@
       "types": "./dist/types/list-item/index.d.ts",
       "import": "./dist/list-item.js"
     },
+    "./listbox": {
+      "types": "./dist/types/listbox/index.d.ts",
+      "import": "./dist/listbox.js"
+    },
     "./pagination": {
       "types": "./dist/types/pagination/index.d.ts",
       "import": "./dist/pagination.js"
@@ -123,6 +127,10 @@
     "./result-state": {
       "types": "./dist/types/result-state/index.d.ts",
       "import": "./dist/result-state.js"
+    },
+    "./select": {
+      "types": "./dist/types/select/index.d.ts",
+      "import": "./dist/select.js"
     },
     "./skeleton": {
       "types": "./dist/types/skeleton/index.d.ts",

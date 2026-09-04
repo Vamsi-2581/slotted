@@ -286,11 +286,11 @@ function withLayout() {
   Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
     configurable: true,
     get(this: HTMLElement) {
-      return Number(this.dataset.testWidth ?? 0);
+      return Number(this.dataset['testWidth'] ?? 0);
     },
   });
   HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect(this: HTMLElement) {
-    const width = Number(this.dataset.testWidth ?? 0);
+    const width = Number(this.dataset['testWidth'] ?? 0);
     return { bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0 } as DOMRect;
   };
 }

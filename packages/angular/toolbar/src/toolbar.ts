@@ -347,6 +347,8 @@ export class SlToolbarItem {
  * counterpart rather than a second input — one fact, in the place a reader is
  * already looking, and no way for the two to disagree.
  */
+let unitCount = 0;
+
 function declareUnit(counterpart: () => TemplateRef<unknown> | undefined) {
   const toolbar = inject(SlToolbar, { optional: true });
   const destroyRef = inject(DestroyRef);
@@ -365,8 +367,6 @@ function declareUnit(counterpart: () => TemplateRef<unknown> | undefined) {
 
   return { id };
 }
-
-let unitCount = 0;
 
 /**
  * A hairline between two runs.

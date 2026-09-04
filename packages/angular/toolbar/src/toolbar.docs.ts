@@ -223,7 +223,7 @@ const scenes: ReferenceSceneMeta[] = [
     note: 'The bar measures itself and gives way from the end. What stays visible is what has nowhere to go: an item that declares no counterpart cannot be hidden, which is how the primary action survives without a priority ranking it above the others. The counterpart is an ng-template, so a menu item that is never reached builds nothing.',
     snippet: defineSnippet({
       id: 'toolbar-angular-overflow-menu',
-      language: 'html',
+      language: 'angular',
       label: 'A bar that gives way from the end',
       source: `<div slToolbar aria-label="Documento" overflow="menu">
   <!-- No counterpart, so it is pinned: the primary action stays visible. -->

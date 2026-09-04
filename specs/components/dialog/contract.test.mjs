@@ -129,6 +129,7 @@ test('declares the anatomy each member renders', () => {
     'root',
     'trigger',
     'backdrop',
+    'viewport',
     'content',
     'header',
     'title',
@@ -141,6 +142,7 @@ test('declares the anatomy each member renders', () => {
     'root',
     'trigger',
     'backdrop',
+    'viewport',
     'content',
     'header',
     'icon',
@@ -205,6 +207,19 @@ test('writes aria-modal only where the background is actually inert', () => {
 /** `aria-haspopup` has no `alertdialog` token; `dialog` is correct for both. */
 test('names the popup the trigger opens with the only token that exists', () => {
   assert.equal(contract.wiring['aria-haspopup'], 'dialog on the trigger of both members');
+});
+
+/**
+ * A scrim inside the box that scrolls scrolls away with it, and a scrim outside
+ * that box cannot be a cell of the same grid. Base UI reached the same third
+ * element and calls it `Viewport`; Ark calls it `Positioner`.
+ */
+test('separates the box that scrolls from the box the scrim is painted on', () => {
+  for (const member of [dialog, alert]) {
+    assert.ok(member.parts.includes('viewport'));
+    assert.ok(member.parts.indexOf('backdrop') < member.parts.indexOf('viewport'));
+  }
+  assert.match(contract.anatomy.viewport, /scrolls away/);
 });
 
 test('answers its own inline size at a literal breakpoint, as CSS requires', () => {

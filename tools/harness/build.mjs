@@ -187,8 +187,9 @@ export function renderHarness({
   .stage[data-fixed] { contain: layout paint }
   /* A layer takes its parent's size and gives none back, so a stage holding
      only a layer would be zero pixels tall and the capture would be empty. The
-     scene supplies the page behind the scrim; this is the floor under it. */
-  .stage[data-fixed] { min-block-size: 220px }
+     scene supplies the page behind the scrim; this is the floor under it, and
+     it is deep enough to hold a panel rather than only to prove one exists. */
+  .stage[data-fixed] { min-block-size: 420px }
   /* A cell is exactly as wide as the stage it holds, and the row wraps.
      Laid out on a grid of minmax(320px, 1fr) tracks, a 420-pixel stage
      overflowed its track and a 720-pixel one overflowed it by four hundred

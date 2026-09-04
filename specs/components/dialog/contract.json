@@ -56,6 +56,12 @@
     "parts": ["close", "cancel", "action"],
     "reason": "What the platform calls returnValue and Angular Material returns from afterClosed(). It rides on the close request rather than declaring a second state model: nothing about a result is controlled, there is no initial one, and a consumer owning it would own a value only the family can produce"
   },
+  "anatomy": {
+    "root": "the layer: fixed to the viewport, the query container, and a one-cell grid the backdrop and the viewport are both placed in",
+    "backdrop": "the scrim, in that one cell",
+    "viewport": "the other element in that cell: the box that centres the panel and, under scroll=viewport, the box that scrolls. It is separate from the root because a scrim inside a scrolling box scrolls away with it, and a scrim outside one cannot be a cell of the same grid",
+    "content": "the panel: a three-row grid, auto minmax(0, 1fr) auto"
+  },
   "container": {
     "name": "slotted-dialog",
     "element": "root",
@@ -113,7 +119,6 @@
     "escape": ["close", "none"],
     "outsidePress": ["close", "none"],
     "tone": ["accent", "secondary", "success", "warning", "danger"],
-    "icon": ["tone", "none"],
     "initialFocus": ["first", "container", "cancel"]
   },
   "resolution": {
@@ -126,7 +131,6 @@
     "escape": ["prop", "defaults", "member"],
     "outsidePress": ["prop", "defaults", "member"],
     "tone": ["prop", "member"],
-    "icon": ["prop", "member"],
     "initialFocus": ["prop", "member"]
   },
   "provides": {
@@ -190,12 +194,13 @@
         "loading": false
       },
       "fixed": {},
-      "capabilities": ["open", "size", "appearance", "placement", "content", "loading", "wiring"],
+      "capabilities": ["open", "size", "appearance", "placement", "loading", "wiring"],
       "states": ["default", "hover", "active", "focus-visible", "open", "loading"],
       "parts": [
         "root",
         "trigger",
         "backdrop",
+        "viewport",
         "content",
         "header",
         "title",
@@ -219,19 +224,19 @@
         "outsidePress": "none",
         "initialFocus": "cancel",
         "tone": "danger",
-        "icon": "tone",
         "loading": false
       },
       "fixed": {
         "outsidePress": true,
         "modal": true
       },
-      "capabilities": ["open", "size", "appearance", "status", "content", "loading", "wiring"],
+      "capabilities": ["open", "size", "appearance", "loading", "wiring"],
       "states": ["default", "hover", "active", "focus-visible", "open", "loading"],
       "parts": [
         "root",
         "trigger",
         "backdrop",
+        "viewport",
         "content",
         "header",
         "icon",

@@ -1,0 +1,496 @@
+import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { createFocusScope } from '@slotted/core/focus';
+import { createPortalRoot } from '@slotted/core/portal';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+
+import { useDialog } from './dialog';
+import type {
+  AlertDialogActionProps,
+  AlertDialogCancelProps,
+  AlertDialogIconProps,
+  DialogBodyProps,
+  DialogCloseProps,
+  DialogContentProps,
+  DialogContextValue,
+  DialogFooterProps,
+  DialogHeaderProps,
+  DialogOpenReason,
+  DialogDescriptionProps,
+  DialogRootProps,
+  DialogTitleProps,
+  DialogTriggerProps,
+  DialogTriggerRootProps,
+} from './dialog.types';
+
+/**
+ * A click synthesised by the keyboard reports no detail; a real one reports the
+ * click count. It is how `Enter`, `Space` and a pointer are told apart without
+ * a key listener existing for something the platform already handles.
+ */
+function activationReason(event: MouseEvent): DialogOpenReason {
+  return event.detail === 0 ? 'keyboard' : 'pointer';
+}
+
+/** Layout on the client, and nothing at all on the server. */
+const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
+
+/**
+ * The control that opens the layer.
+ *
+ * It stays where it is written while the layer is portalled out, which is why
+ * it is also the layer's *branch*: a press on it is inside the layer as far as
+ * `dismissable-layer` is concerned, or opening would immediately be read as an
+ * outside press and close what it just opened.
+ *
+ * `dialog.css` writes no appearance for it. A real application's trigger is a
+ * `Button`, reached with `render`, and a substituted trigger therefore loses
+ * nothing.
+ */
+export function DialogTrigger({
+  children,
+  className,
+  onClick,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: DialogTriggerProps) {
+  const dialog = useDialog();
+
+  const rootProps: DialogTriggerRootProps = {
+    ...nativeProps,
+    'aria-controls': dialog.mounted ? `${dialog.triggerId}-content` : undefined,
+    'aria-expanded': dialog.open,
+    /* `dialog` for both members: `aria-haspopup` has no `alertdialog` token,
+       and the role on the layer is what distinguishes them. */
+    'aria-haspopup': 'dialog',
+    children,
+    className,
+    'data-part': 'trigger',
+    ...(dialog.open ? { 'data-open': '' } : {}),
+    id: dialog.triggerId,
+    onClick: (event: MouseEvent<HTMLButtonElement>) => {
+      /* The consumer's handler runs first, and preventDefault() refuses the
+         open — composed with, never replaced. */
+      onClick?.(event);
+      if (event.defaultPrevented) return;
+      dialog.openWith(activationReason(event), event);
+    },
+    ref: (node: HTMLButtonElement | null) => {
+      dialog.registerTrigger(node);
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    style,
+    type: 'button',
+  };
+
+  if (render !== undefined) return render(rootProps);
+  return <button {...rootProps} />;
+}
+
+/** Where the layer is placed, and what it inherits once it is there. */
+function usePortalContainer(dialog: DialogContextValue): Element | null {
+  const [layer, setLayer] = useState<Element | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    if (!dialog.mounted) return;
+
+    /**
+     * The trigger is the origin, and that is a rule rather than a fallback: it
+     * is the element the layer was opened from, so its region is the one whose
+     * scheme, density, theme and direction the layer inherits. A layer opened
+     * from code has no trigger, and the document is then the honest origin.
+     *
+     * Angular has it better — `<sl-dialog>`'s host element is written in place,
+     * so its own parent is the origin whether a trigger exists or not — and the
+     * design document records the asymmetry rather than levelling both down.
+     */
+    const root = createPortalRoot({
+      origin: dialog.nodes.trigger,
+      ...(dialog.container === undefined ? {} : { container: dialog.container }),
+    });
+    setLayer(root.container);
+
+    return () => {
+      setLayer(null);
+      root.release();
+    };
+  }, [dialog.container, dialog.mounted, dialog.nodes]);
+
+  return layer;
+}
+
+/**
+ * The layer, the scrim and the panel.
+ *
+ * Three boxes rather than two. `root` declares `container-type: inline-size`,
+ * which applies `contain: layout`, which makes it the containing block for
+ * every positioned descendant — so a scrim inside a root that scrolls is part
+ * of what scrolls, and under `scroll="viewport"` it slides off the top of the
+ * layer. `backdrop` and `viewport` are two things in one grid cell instead.
+ */
+export function DialogContent({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: DialogContentProps) {
+  const dialog = useDialog();
+  const layer = usePortalContainer(dialog);
+  const [content, setContent] = useState<HTMLElement | null>(null);
+
+  const contentId = `${dialog.triggerId}-content`;
+  const labelled = dialog.titleId !== '' && nativeProps['aria-label'] === undefined;
+  const described = dialog.descriptionId !== '';
+
+  /**
+   * The alert dialog pattern *requires* `aria-describedby`; the modal dialog
+   * pattern makes it optional. A confirmation announced as a title and two
+   * buttons, with the sentence saying what is about to be destroyed left out,
+   * is the failure the requirement exists for — so it fails loudly rather than
+   * shipping.
+   */
+  useEffect(() => {
+    if (dialog.member !== 'alertDialog' || content === null) return;
+    /* The DOM rather than the context: a child's effect runs before its
+       parent's, so the description has registered itself in the DOM and has not
+       yet reached the state this component reads. */
+    if (content.querySelector('[data-part="description"]') !== null) return;
+    throw new Error(
+      'AlertDialog requires a DialogDescription: the alertdialog pattern makes aria-describedby mandatory.',
+    );
+  }, [content, dialog.member]);
+
+  /**
+   * Everything the layer does while it is open, taken down when it closes
+   * rather than when the node unmounts — `presence` keeps the node mounted
+   * through the exit, and a layer still holding the scroll lock and the
+   * background's `inert` for those two hundred milliseconds is a page nobody
+   * can touch.
+   */
+  useEffect(() => {
+    if (content === null || !dialog.open) return;
+
+    const root = content.closest<HTMLElement>('[data-ui="dialog"]');
+    if (root === null) return;
+
+    const branches = dialog.nodes.trigger === null ? [] : [dialog.nodes.trigger];
+    const layerHandle = createDismissableLayer(root, {
+      branches,
+      escape: dialog.escape === 'close',
+      modal: dialog.modal,
+      onDismiss: (request) => {
+        if (request.reason === 'outsidePress' && dialog.outsidePress === 'none') {
+          return request.cancel();
+        }
+        dialog.close(request.reason as DialogOpenReason, undefined, request.source);
+      },
+      outsidePress: dialog.outsidePress === 'close',
+    });
+
+    const wanted = dialog.initialFocus;
+    const returnTo = dialog.finalFocus;
+    const scope = createFocusScope(content, {
+      contain: dialog.modal,
+      initial:
+        wanted === 'cancel'
+          ? () => dialog.nodes.cancel
+          : typeof wanted === 'object' && wanted !== null
+            ? () => wanted.current
+            : wanted,
+      ...(returnTo === undefined
+        ? {}
+        : { restore: returnTo === false ? (false as const) : () => returnTo.current }),
+    });
+    scope.enter();
+
+    return () => {
+      scope.destroy();
+      layerHandle.destroy();
+    };
+  }, [content, dialog]);
+
+  if (!dialog.mounted || layer === null) return null;
+
+  const rootProps = {
+    'data-full-screen': dialog.fullScreen,
+    ...(dialog.loading ? { 'data-loading': '' } : {}),
+    ...(dialog.modal ? { 'data-modal': '' } : {}),
+    'data-mount': dialog.mount,
+    ...(dialog.visible ? { 'data-open': '' } : {}),
+    'data-outside-press': dialog.outsidePress,
+    'data-part': 'root',
+    'data-placement': dialog.placement,
+    'data-scroll': dialog.scroll,
+    'data-size': dialog.size,
+    ...(dialog.tone === undefined ? {} : { 'data-tone': dialog.tone }),
+    'data-ui': 'dialog',
+  };
+
+  const panel: ReactNode = (
+    <div
+      {...nativeProps}
+      {...(described ? { 'aria-describedby': dialog.descriptionId } : {})}
+      {...(labelled ? { 'aria-labelledby': dialog.titleId } : {})}
+      {...(dialog.modal ? { 'aria-modal': true } : {})}
+      className={className}
+      data-part="content"
+      id={contentId}
+      ref={(node: HTMLDivElement | null) => {
+        setContent(node);
+        dialog.registerContent(node);
+        if (typeof ref === 'function') ref(node);
+        else if (ref) ref.current = node;
+      }}
+      role={dialog.member === 'alertDialog' ? 'alertdialog' : 'dialog'}
+      style={style}
+    >
+      {children}
+    </div>
+  );
+
+  /* `inert` alongside the stylesheet's own closed state, so a browser without
+     `content-visibility` still cannot put focus inside a layer that is shut. */
+  return createPortal(
+    <div {...rootProps} {...(dialog.visible ? {} : { inert: true })} ref={dialog.registerLayer}>
+      <div data-part="backdrop" />
+      <div data-part="viewport">{panel}</div>
+    </div>,
+    layer,
+  );
+}
+
+export function DialogHeader({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...rest
+}: DialogHeaderProps) {
+  const rootProps = { ...rest, children, className, 'data-part': 'header' as const, style };
+  if (render !== undefined) return render(rootProps);
+  return <header {...rootProps} ref={ref} />;
+}
+
+/** The visible name, which `aria-labelledby` points at. */
+export function DialogTitle({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...rest
+}: DialogTitleProps) {
+  const dialog = useDialog();
+  useEffect(() => dialog.announce('title', null), [dialog]);
+
+  const rootProps = {
+    ...rest,
+    children,
+    className,
+    'data-part': 'title' as const,
+    id: dialog.titleId === '' ? undefined : dialog.titleId,
+    style,
+  };
+  if (render !== undefined) return render(rootProps);
+  return <h2 {...rootProps} ref={ref} />;
+}
+
+/** The sentence that says what the dialog is about. */
+export function DialogDescription({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...rest
+}: DialogDescriptionProps) {
+  const dialog = useDialog();
+  useEffect(() => dialog.announce('description', null), [dialog]);
+
+  const rootProps = {
+    ...rest,
+    children,
+    className,
+    'data-part': 'description' as const,
+    id: dialog.descriptionId === '' ? undefined : dialog.descriptionId,
+    style,
+  };
+  if (render !== undefined) return render(rootProps);
+  return <p {...rootProps} ref={ref} />;
+}
+
+/**
+ * The one row that scrolls, and the row `aria-busy` belongs to while the
+ * content is still on its way — the header, the close button and Escape all
+ * stay operable, because a loading dialog a reader cannot leave is the worse
+ * failure of the two.
+ */
+export function DialogBody({ children, className, ref, render, style, ...rest }: DialogBodyProps) {
+  const dialog = useDialog();
+  const rootProps = {
+    ...rest,
+    ...(dialog.loading ? { 'aria-busy': true } : {}),
+    children,
+    className,
+    'data-part': 'body' as const,
+    style,
+  };
+  if (render !== undefined) return render(rootProps);
+  return <div {...rootProps} ref={ref} />;
+}
+
+export function DialogFooter({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...rest
+}: DialogFooterProps) {
+  const rootProps = { ...rest, children, className, 'data-part': 'footer' as const, style };
+  if (render !== undefined) return render(rootProps);
+  return <footer {...rootProps} ref={ref} />;
+}
+
+/** What every control that closes the layer shares. */
+function useClosingButton(
+  part: 'close' | 'cancel' | 'action',
+  reason: DialogOpenReason,
+  onClick: ((event: MouseEvent<HTMLButtonElement>) => void) | undefined,
+  value: string | undefined,
+) {
+  const dialog = useDialog();
+  return {
+    dialog,
+    handleClick: (event: MouseEvent<HTMLButtonElement>) => {
+      onClick?.(event);
+      if (event.defaultPrevented) return;
+      dialog.close(reason, value, event);
+    },
+    part,
+  };
+}
+
+/**
+ * The ✕ in the corner. It carries `dismiss`, which is the word the closed
+ * vocabulary in `docs/state-and-events.md` already has for what a close button
+ * means; `docs/component-features.md` §8 calls the source `closeButton`, and a
+ * twelfth reason would be a change to a contract outside this family.
+ */
+export function DialogClose({
+  children,
+  className,
+  onClick,
+  ref,
+  render,
+  style,
+  value,
+  ...rest
+}: DialogCloseProps) {
+  const { dialog, handleClick } = useClosingButton('close', 'dismiss', onClick, value);
+
+  if (dialog.member === 'alertDialog') {
+    throw new Error(
+      'AlertDialog has no close part: a confirmation is answered with AlertDialogCancel or AlertDialogAction, not dismissed by an ✕.',
+    );
+  }
+
+  const rootProps = {
+    'aria-label': 'Close',
+    ...rest,
+    children,
+    className,
+    'data-part': 'close' as const,
+    onClick: handleClick,
+    style,
+    type: 'button' as const,
+  };
+  if (render !== undefined) return render(rootProps);
+  return <button {...rootProps} ref={ref} />;
+}
+
+/** The tone's own mark, which is geometry rather than a character. */
+export function AlertDialogIcon({ className, ref, render, style, ...rest }: AlertDialogIconProps) {
+  const rootProps = {
+    'aria-hidden': true,
+    ...rest,
+    className,
+    'data-part': 'icon' as const,
+    style,
+  };
+  if (render !== undefined) return render(rootProps);
+  return <span {...rootProps} ref={ref} />;
+}
+
+/**
+ * The least destructive action, and where focus lands when the layer opens.
+ * That is the APG's own advice for a step that is not easily reversible, and it
+ * is a default of the member rather than something a consumer remembers.
+ */
+export function AlertDialogCancel({
+  children,
+  className,
+  onClick,
+  ref,
+  render,
+  style,
+  value,
+  ...rest
+}: AlertDialogCancelProps) {
+  const { dialog, handleClick } = useClosingButton('cancel', 'dismiss', onClick, value ?? 'cancel');
+
+  const rootProps = {
+    ...rest,
+    children,
+    className,
+    'data-part': 'cancel' as const,
+    onClick: handleClick,
+    style,
+    type: 'button' as const,
+  };
+
+  const attach = (node: HTMLButtonElement | null) => {
+    dialog.announce('cancel', node);
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  };
+
+  if (render !== undefined) return render({ ...rootProps, ref: attach });
+  return <button {...rootProps} ref={attach} />;
+}
+
+/**
+ * The action being confirmed. It carries `submit`, because confirming is what
+ * the reader came to do, and `dismiss` is what the other two controls mean.
+ */
+export function AlertDialogAction({
+  children,
+  className,
+  onClick,
+  ref,
+  render,
+  style,
+  value,
+  ...rest
+}: AlertDialogActionProps) {
+  const { handleClick } = useClosingButton('action', 'submit', onClick, value ?? 'confirm');
+
+  const rootProps = {
+    ...rest,
+    children,
+    className,
+    'data-part': 'action' as const,
+    onClick: handleClick,
+    style,
+    type: 'button' as const,
+  };
+  if (render !== undefined) return render(rootProps);
+  return <button {...rootProps} ref={ref} />;
+}

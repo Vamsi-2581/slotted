@@ -16,6 +16,7 @@ export default defineConfig({
         card: resolve(import.meta.dirname, 'src/card/index.ts'),
         container: resolve(import.meta.dirname, 'src/container/index.ts'),
         'description-list': resolve(import.meta.dirname, 'src/description-list/index.ts'),
+        dialog: resolve(import.meta.dirname, 'src/dialog/index.ts'),
         divider: resolve(import.meta.dirname, 'src/divider/index.ts'),
         grid: resolve(import.meta.dirname, 'src/grid/index.ts'),
         icon: resolve(import.meta.dirname, 'src/icon/index.ts'),

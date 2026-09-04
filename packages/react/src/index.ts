@@ -13,6 +13,7 @@ export * from './collapsible';
 export * from './container';
 export * from './currency-field';
 export * from './description-list';
+export * from './dialog';
 export * from './divider';
 export * from './field';
 export * from './field-group';

@@ -52,6 +52,10 @@
       "types": "./dist/types/description-list/index.d.ts",
       "import": "./dist/description-list.js"
     },
+    "./dialog": {
+      "types": "./dist/types/dialog/index.d.ts",
+      "import": "./dist/dialog.js"
+    },
     "./divider": {
       "types": "./dist/types/divider/index.d.ts",
       "import": "./dist/divider.js"

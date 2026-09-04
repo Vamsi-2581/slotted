@@ -84,7 +84,7 @@ test('says what Tab does at the edge of a portalled non-modal layer', () => {
 
 test('composes the four core modules and rewrites none of them', () => {
   assert.deepEqual(contract.composes, ['positioner', 'presence', 'portal', 'dismissable-layer']);
-  assert.deepEqual(contract.layer.branches, ['trigger', 'anchor']);
+  assert.deepEqual(contract.layer.branches, ['the trigger element', 'the anchor element']);
   assert.equal(contract.layer.modal, false);
   assert.equal(contract.layer.scrollLock, false);
   assert.equal(contract.layer.zIndexToken, '--slotted-z-index-popover');
@@ -93,8 +93,6 @@ test('composes the four core modules and rewrites none of them', () => {
 test('names every part, including the plumbing it will not hide', () => {
   assert.deepEqual(member.parts, [
     'root',
-    'trigger',
-    'anchor',
     'content',
     'header',
     'title',
@@ -107,6 +105,7 @@ test('names every part, including the plumbing it will not hide', () => {
   ]);
   assert.deepEqual(member.states, ['default', 'hover', 'active', 'focus-visible', 'open']);
   assert.deepEqual(contract.stateAttributes, { open: 'data-open' });
+  assert.ok(contract.declined.triggerPart.reason.includes("data-part='root'"));
 });
 
 /**
@@ -186,4 +185,20 @@ test('keeps a task on screen where a hint would leave', () => {
   assert.equal(contract.resolution.hideWhenDetached[2], false);
   assert.equal(tooltip.resolution.hideWhenDetached[2], true);
   assert.ok(contract.declined.hideWhenDetachedByDefault.reason.length > 0);
+});
+
+test('makes the gap out of padding rather than out of offset', () => {
+  assert.equal(contract.positioning.sideOffset, 0);
+  assert.equal(contract.positioning.gap.token, '--slotted-popover-gap');
+  assert.equal(contract.members.popover.defaults.sideOffset, 0);
+});
+
+/**
+ * Three width steps the family owns, and one axis value that replaces them with
+ * the anchor's measured width — the filter panel under a search field.
+ */
+test('caps its own width with tokens, or with the anchor', () => {
+  assert.match(contract.measure.value, /16rem/);
+  assert.ok(!('measure' in contract.axes));
+  assert.deepEqual(contract.axes.width, ['auto', 'anchor']);
 });

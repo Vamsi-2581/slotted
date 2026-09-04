@@ -84,17 +84,18 @@ what holds a header the body may scroll under.
 | `data-part` | Element                                | Always | What it is                                                                                                                  |
 | ----------- | -------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | `root`      | `div`                                  | yes    | The layer. Carries `data-ui="tooltip"`, `data-side`, `data-align`, `data-open`, `data-detached` and the animation.           |
-| `trigger`   | the consumer's own element             | yes    | Marked, never rendered. Carries `aria-describedby` (or `aria-labelledby`) and `data-open`.                                   |
 | `content`   | `div`, `role="tooltip"`                | yes    | The painted surface and the text.                                                                                            |
 | `arrow`     | `div`                                  | no     | A rotated square, a child of the layer and painted behind the surface at `z-index: -1`, so its inner half never shows.       |
+
+The trigger is **not** a part. It is the consumer's own element, and the family
+writes only `aria-describedby` (or `aria-labelledby`) and `data-open` on it. See
+**The trigger is not a part** below.
 
 ### popover
 
 | `data-part`   | Element                                     | Always | What it is                                                                                                                       |
 | ------------- | ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `root`        | `div`                                       | yes    | The layer. `data-ui="popover"`, `data-side`, `data-align`, `data-open`, `data-detached`.                                          |
-| `trigger`     | the consumer's own element                  | yes    | `aria-expanded`, `aria-haspopup="dialog"`, `aria-controls`, `data-open`.                                                          |
-| `anchor`      | the consumer's own element                  | no     | What the layer points at, when that is not the button that opened it.                                                            |
 | `content`     | `div`, `role="dialog"`, `tabindex="-1"`     | yes    | The panel. `aria-labelledby` names the title, `aria-describedby` the description, `aria-modal` is never written.                  |
 | `header`      | `div`                                       | no     | The title, the description and the close control, on one line that stays put while the body scrolls.                             |
 | `title`       | `div`, or the element `render` returns      | no     | The panel's accessible name. A `div` rather than a heading, for the reason `result-state` records: only the page knows whether this belongs in its outline. |
@@ -104,6 +105,27 @@ what holds a header the body may scroll under.
 | `close`       | `button type="button"`                      | no     | Draws `--slotted-icon-x` as a mask. Its accessible name comes from the defaults provider so one application translates it once.   |
 | `arrow`       | `div`                                       | no     | As the tooltip's.                                                                                                                |
 | `focus-guard` | `span tabindex="0" aria-hidden="true"` (×2) | yes    | The two sentinels that make Tab leave a portalled non-modal layer sensibly. See **Focus** below.                                  |
+
+The trigger and the anchor are not parts either. The trigger carries
+`aria-expanded`, `aria-haspopup="dialog"`, `aria-controls` and `data-open`; the
+anchor carries nothing at all and is only measured.
+
+## The trigger is not a part
+
+`data-part` names a part of the family that owns the element. A trigger is the
+consumer's own element, and in this library it is very often another family's
+root: a `button`, a `badge`, an `avatar`, a `checkbox`. Sixteen stylesheets in
+`packages/styles` key on `[data-part='root']`, so writing `trigger` over one
+would silently unstyle it and no test would report it.
+
+So the family writes on the trigger only what it has to: the ARIA relationship,
+and `data-open` so a consumer can style their own element while the layer is
+showing. Nothing is lost — a trigger is not inside the layer, so no stylesheet
+of this family could have reached it through a descendant selector anyway.
+
+The same hazard exists today in `field`, whose `slFieldControl` directive writes
+`data-part="control"` onto whatever element the consumer puts it on. It belongs
+to that family and is recorded in `docs/BUILD-LOG.md` rather than fixed here.
 
 Both families render the same shape, so a reader who has written one has written
 the other:

@@ -14,7 +14,7 @@
       },
       "hoverable": {
         "answeredBy": "hoverable",
-        "reason": "The pointer may leave the trigger and cross the sideOffset gap into the layer without the layer disappearing. The gap is bridged by a rule on the layer rather than by shrinking the offset, so the picture is unchanged and the pointer still lands."
+        "reason": "The pointer may leave the trigger and reach the painted surface without the layer disappearing, because the distance between them is the layer's own padding rather than empty space. A gap made of the positioner's side offset is a gap the pointer falls through, and this criterion is exactly the requirement that it must not."
       },
       "persistent": {
         "answeredBy": "closeDelay",
@@ -31,7 +31,7 @@
   "layer": {
     "modal": false,
     "scrollLock": false,
-    "branches": ["trigger"],
+    "branches": ["the trigger element"],
     "depthProperty": "--slotted-layer-depth",
     "zIndexToken": "--slotted-z-index-popover",
     "reason": "A tooltip is a dismissable layer so that Escape, the outside press and the stacking all come from the one mechanism the overlay infrastructure already owns. It draws above the popover it was opened inside because it is a later layer, not because the stacking scale gained a step. The trigger is registered as a branch so that a press on it is not an outside press: the family closes on it deliberately, with the reason pointer."
@@ -92,7 +92,7 @@
     },
     "closeDelay": {
       "default": 150,
-      "reason": "The window the pointer has to cross the sideOffset gap into the layer. Zero makes a hoverable tooltip unreachable, which is SC 1.4.13 Hoverable failing while the option that satisfies it is switched on."
+      "reason": "The window the pointer has to travel from the trigger onto the layer. Zero makes a hoverable tooltip unreachable, which is SC 1.4.13 Hoverable failing while the option that satisfies it is switched on."
     },
     "groupDelay": {
       "default": 400,
@@ -120,8 +120,14 @@
       "emits": "pointer",
       "reason": "Reported as pointer rather than as outsidePress. From the reader's side a press on the trigger and a press on the page are the same gesture taking the hint away, and a consumer writing one handler for it should not have to write two."
     },
-    "escape": { "emits": "escape", "effect": "the topmost layer only" },
-    "blur": { "emits": "blur", "effect": "focus leaves the trigger" },
+    "escape": {
+      "emits": "escape",
+      "effect": "the topmost layer only"
+    },
+    "blur": {
+      "emits": "blur",
+      "effect": "focus leaves the trigger"
+    },
     "detached": {
       "emits": "programmatic",
       "effect": "the anchor left the document or its clipping ancestor",
@@ -164,11 +170,16 @@
     "--slotted-positioner-transform-origin"
   ],
   "positioning": {
-    "sideOffset": 8,
+    "sideOffset": 0,
     "alignOffset": 0,
     "collisionPadding": 8,
     "arrowPadding": 8,
-    "reason": "The side offset is the gap the arrow stands in and the distance the pointer crosses under hoverable. The collision padding keeps the layer off the viewport edge; the arrow padding keeps the arrow off the layer's own rounded corner, which is where a start-aligned layer would otherwise put it."
+    "reason": "The side offset is the gap the arrow stands in and the distance the pointer crosses under hoverable. The collision padding keeps the layer off the viewport edge; the arrow padding keeps the arrow off the layer's own rounded corner, which is where a start-aligned layer would otherwise put it.",
+    "gap": {
+      "token": "--slotted-tooltip-gap",
+      "default": "var(--slotted-space-4)",
+      "reason": "The distance between the trigger and the painted surface is the layer's own padding, not the positioner's side offset. A gap made of offset is empty space the pointer falls through, and SC 1.4.13 Hoverable is exactly the requirement that it must not; a gap made of padding belongs to the layer, so the pointer crosses it without leaving. `sideOffset` is therefore 0 by default and means additional distance beyond the standard gap. It is also what makes the bridge one symmetric declaration rather than four rules keyed on a physical side."
+    }
   },
   "declined": {
     "interactiveContent": {
@@ -184,6 +195,9 @@
     "tone": {
       "deferTo": "inline-message",
       "reason": "A tooltip tinted for danger is a validation message, and a validation message belongs under the control it is about, where it is not conditional on hover."
+    },
+    "triggerPart": {
+      "reason": "`data-part` names a part of the family that owns the element, and a trigger is the consumer's own — very often another Slotted family's root. Sixteen stylesheets in this repository key on `[data-part='root']`, so writing `trigger` over it would silently unstyle a `badge`, an `avatar` or a `checkbox` used as a trigger, and nothing would report it. The family therefore writes only the wiring and the state on the trigger: the ARIA relationship, and `data-open` so a consumer can style their own element while the layer is showing."
     }
   },
   "axes": {
@@ -284,14 +298,14 @@
         "closeDelay": 150,
         "groupDelay": 400,
         "touchDelay": 500,
-        "sideOffset": 8,
+        "sideOffset": 0,
         "alignOffset": 0,
         "collisionPadding": 8,
         "arrowPadding": 8
       },
       "capabilities": ["open", "placement", "size", "appearance", "disabled", "content", "wiring"],
       "states": ["default", "open"],
-      "parts": ["root", "trigger", "content", "arrow"]
+      "parts": ["root", "content", "arrow"]
     }
   },
   "scenarios": {
@@ -308,5 +322,9 @@
       "composition",
       "keyboard"
     ]
+  },
+  "measure": {
+    "value": "18rem",
+    "reason": "A tooltip in a portal is `max-content` wide, so one long sentence would set a single line the width of the viewport. Every surveyed implementation caps it. The cap is the family's own token rather than a `measure` axis, because `docs/build-briefing.md` gives measure to `container` and to it alone; a consumer who needs a different one retunes `--slotted-tooltip-measure`, and a consumer who needs a paragraph is holding a popover."
   }
 }

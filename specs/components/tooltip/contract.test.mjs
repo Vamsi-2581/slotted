@@ -97,13 +97,8 @@ test('reports a press that dismisses as pointer rather than as outsidePress', ()
 });
 
 test('composes the four core modules and rewrites none of them', () => {
-  assert.deepEqual(contract.composes, [
-    'positioner',
-    'presence',
-    'portal',
-    'dismissable-layer',
-  ]);
-  assert.deepEqual(contract.layer.branches, ['trigger']);
+  assert.deepEqual(contract.composes, ['positioner', 'presence', 'portal', 'dismissable-layer']);
+  assert.deepEqual(contract.layer.branches, ['the trigger element']);
   assert.equal(contract.layer.modal, false);
   assert.equal(contract.layer.scrollLock, false);
   assert.equal(contract.layer.depthProperty, '--slotted-layer-depth');
@@ -153,8 +148,15 @@ test('holds the disabled capability without declaring a state nothing paints', (
   assert.match(contract.declined.disabledState.reason, /never opens/);
 });
 
-test('names every part the two elements and the trigger are made of', () => {
-  assert.deepEqual(member.parts, ['root', 'trigger', 'content', 'arrow']);
+/**
+ * The trigger is not a part. `data-part` names a part of the family that owns
+ * the element, and sixteen stylesheets here key on `[data-part='root']`, so
+ * writing `trigger` over a `badge` or a `checkbox` used as a trigger would
+ * unstyle it and nothing would report it.
+ */
+test('names its own parts and claims none of the consumer\u2019s', () => {
+  assert.deepEqual(member.parts, ['root', 'content', 'arrow']);
+  assert.ok(contract.declined.triggerPart.reason.includes("data-part='root'"));
   assert.deepEqual(member.states, ['default', 'open']);
   assert.deepEqual(contract.stateAttributes, { open: 'data-open' });
 });
@@ -218,4 +220,27 @@ test('agrees with popover everywhere the pair share an answer', () => {
   assert.equal(contract.motion.property, popover.motion.property);
   assert.equal(contract.arrow.placedBy, popover.arrow.placedBy);
   assert.notEqual(contract.roles.content, popover.roles.content);
+});
+
+/**
+ * The distance between the trigger and the painted surface is the layer's own
+ * padding, not the positioner's offset. A gap made of offset is empty space the
+ * pointer falls through on the way in, which is SC 1.4.13 Hoverable failing.
+ */
+test('makes the gap out of padding rather than out of offset', () => {
+  assert.equal(contract.positioning.sideOffset, 0);
+  assert.equal(contract.positioning.gap.token, '--slotted-tooltip-gap');
+  assert.equal(contract.positioning.gap.default, 'var(--slotted-space-4)');
+  assert.equal(popover.positioning.sideOffset, 0);
+  assert.equal(popover.positioning.gap.token, '--slotted-popover-gap');
+});
+
+/**
+ * `docs/build-briefing.md` gives measure to `container` and to it alone, so the
+ * cap is a token the family owns rather than an axis it offers.
+ */
+test('caps its own width with a token and offers no measure axis', () => {
+  assert.equal(contract.measure.value, '18rem');
+  assert.ok(!('measure' in contract.axes));
+  assert.match(contract.measure.reason, /container/);
 });

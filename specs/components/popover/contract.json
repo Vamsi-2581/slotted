@@ -13,7 +13,7 @@
   "layer": {
     "modal": false,
     "scrollLock": false,
-    "branches": ["trigger", "anchor"],
+    "branches": ["the trigger element", "the anchor element"],
     "depthProperty": "--slotted-layer-depth",
     "zIndexToken": "--slotted-z-index-popover",
     "reason": "One layer in the single stack. The trigger and the anchor are branches, so pressing either is inside the layer and does not dismiss it; a popover opened from inside another popover records that one as its parent, so a press inside the child never closes the parent."
@@ -123,11 +123,16 @@
     "--slotted-positioner-transform-origin"
   ],
   "positioning": {
-    "sideOffset": 8,
+    "sideOffset": 0,
     "alignOffset": 0,
     "collisionPadding": 8,
     "arrowPadding": 12,
-    "reason": "A larger arrow padding than tooltip's, because the panel's radius is larger and a start-aligned panel would otherwise put the arrow on the curve."
+    "reason": "A larger arrow padding than tooltip's, because the panel's radius is larger and a start-aligned panel would otherwise put the arrow on the curve.",
+    "gap": {
+      "token": "--slotted-popover-gap",
+      "default": "var(--slotted-space-4)",
+      "reason": "As tooltip's: the gap is the layer's padding, so the pointer never crosses empty space and the arrow has a band to stand in. `sideOffset` means additional distance beyond it."
+    }
   },
   "labels": {
     "close": "Close",
@@ -151,6 +156,9 @@
     },
     "disabledState": {
       "reason": "The family holds the disabled capability and declares no disabled visual state. A disabled popover never opens, so under the default mount there is no element to carry data-disabled and nothing to paint. The capability is observable where it happens: no layer is created, and the trigger keeps aria-expanded=\"false\"."
+    },
+    "triggerPart": {
+      "reason": "`data-part` names a part of the family that owns the element, and a trigger is the consumer's own — very often another Slotted family's root. Sixteen stylesheets in this repository key on `[data-part='root']`, so writing `trigger` over it would silently unstyle a `badge`, an `avatar` or a `checkbox` used as a trigger, and nothing would report it. The family therefore writes only the wiring and the state on the trigger: the ARIA relationship, and `data-open` so a consumer can style their own element while the layer is showing. The anchor is the consumer's element for the same reason."
     }
   },
   "axes": {
@@ -240,7 +248,7 @@
         "hideWhenDetached": false,
         "portal": true,
         "disabled": false,
-        "sideOffset": 8,
+        "sideOffset": 0,
         "alignOffset": 0,
         "collisionPadding": 8,
         "arrowPadding": 12,
@@ -259,8 +267,6 @@
       "states": ["default", "hover", "active", "focus-visible", "open"],
       "parts": [
         "root",
-        "trigger",
-        "anchor",
         "content",
         "header",
         "title",
@@ -287,5 +293,9 @@
       "nested",
       "keyboard"
     ]
+  },
+  "measure": {
+    "value": "16rem / 20rem / 24rem by size",
+    "reason": "A panel has to be wide enough for a sentence and narrow enough to point at something. The three steps are the family's own tokens; `width: 'anchor'` replaces the cap with the anchor's measured width, which is what a filter panel under a search field wants."
   }
 }

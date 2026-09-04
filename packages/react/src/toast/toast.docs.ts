@@ -260,14 +260,12 @@ const events: EventRow[] = [
   {
     name: 'onToastsChange',
     payload: '(toasts, request)',
-    description:
-      'Asks to change the queue. The first argument is the queue as it will be; the request carries the value it replaces, the reason — programmatic, dismiss, escape, keyboard, pointer, timeout or clear — the originating event, and cancel(). Calling cancel() refuses the change and nothing moves.',
+    when: 'Asks to change the queue. The first argument is the queue as it will be; the request carries the value it replaces, the reason — programmatic, dismiss, escape, keyboard, pointer, timeout or clear — the originating event, and cancel(). Calling cancel() refuses the change and nothing moves.',
   },
   {
     name: 'onStatusChange',
     payload: '(status, message)',
-    description:
-      'Per message, passed to the call that showed it. Reports visible when it reaches the screen, closing when it has left the queue and is still leaving the document, and removed once it is gone.',
+    when: 'Per message, passed to the call that showed it. Reports visible when it reaches the screen, closing when it has left the queue and is still leaving the document, and removed once it is gone.',
   },
 ];
 

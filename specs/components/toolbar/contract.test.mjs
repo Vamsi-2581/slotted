@@ -60,7 +60,7 @@ test('duplicates the cross-axis pair, which is what the pattern permits', () => 
     provide navigation that wraps from row to row." */
 test('wraps from row to row when the bar wrapped', () => {
   assert.match(keyboard('ArrowRight').effect, /row to row/);
-  assert.deepEqual(contract.axes.overflow, ['wrap', 'scroll']);
+  assert.deepEqual(contract.axes.overflow, ['wrap', 'scroll', 'menu']);
   assert.equal(member.defaults.overflow, 'wrap');
 });
 
@@ -132,11 +132,61 @@ test('leaves the shape of a run of actions to the family that owns it', () => {
   assert.ok(buttonGroup.members.buttonGroup.capabilities.includes('arrangement'));
 });
 
-test('names the parts it draws, and no item among them', () => {
-  assert.deepEqual(member.parts, ['root', 'group', 'separator', 'spacer']);
+test('names the parts it draws', () => {
+  assert.deepEqual(member.parts, ['root', 'group', 'separator', 'spacer', 'item', 'overflow']);
   assert.equal(contract.roles.root, 'toolbar');
   assert.equal(contract.roles.group, 'group');
   assert.equal(contract.roles.separator, 'separator');
+});
+
+/**
+ * The keyboard finds items by being focusable, at any depth, and never wrapped.
+ * The collapse acts on the boxes the bar lays out, and a control that can
+ * disappear has to be a box the family owns — so the two definitions are
+ * deliberately different, and the contract says so rather than letting a reader
+ * assume one answers the other.
+ */
+test('separates the unit it can hide from the item it moves focus to', () => {
+  assert.equal(contract.items.found, 'focusable-descendants');
+  assert.equal(contract.collapse.unit, 'direct-children');
+  assert.match(contract.collapse.order, /reversed/);
+  assert.match(contract.collapse.pinned, /declares no counterpart/);
+});
+
+/**
+ * The rule the refinement exists for. The primary action stays visible because
+ * it has nowhere to go, not because a prop ranked it above the others.
+ */
+test('takes what is left over rather than what is convenient to hide', () => {
+  assert.equal(contract.declined.overflowPriority.deferTo, 'the bar order');
+  assert.match(contract.collapse.degradation, /scrolls/);
+  assert.ok(!Object.keys(contract.axes).includes('priority'));
+});
+
+/** A hidden control cannot hold focus, and the browser's answer is `body`. */
+test('moves focus before it hides the control under it', () => {
+  assert.match(contract.collapse.focus, /before/);
+  assert.match(contract.collapse.focus, /trigger/);
+});
+
+/**
+ * The bar is the participant that hid the units, so it is the only one that
+ * knows which boundaries still divide something. Fluent asks the consumer to
+ * wire the same outcome with `useIsOverflowGroupVisible`.
+ */
+test('carries the bar own structure into the surface', () => {
+  assert.match(contract.collapse.separator, /menu separator/);
+  assert.match(contract.collapse.trigger, /hidden until/);
+});
+
+/**
+ * The set that does not fit is read from the layout. A controlled pair over it
+ * would let a consumer assert that a bar fits when the browser says otherwise.
+ */
+test('declares overflow as a capability and not as a value', () => {
+  assert.ok(member.capabilities.includes('overflow'));
+  assert.equal('stateModel' in contract, false);
+  assert.equal(contract.declined.collapsedState.deferTo, 'the layout');
 });
 
 /**
@@ -174,7 +224,7 @@ test('leaves a bar out of action to the element that can actually do it', () => 
 });
 
 test('says what it does not do, and who does it instead', () => {
-  assert.equal(contract.declined.overflowMenu.deferTo, 'menu');
+  assert.equal(contract.declined.overflowSection.deferTo, 'popover');
   assert.equal(contract.declined.checkedValues.deferTo, 'toggle-group');
   assert.equal(contract.declined.pagingControls.deferTo, 'menu');
   for (const [name, entry] of Object.entries(contract.declined)) {
@@ -193,6 +243,7 @@ test('declares one scenario per demonstration the reference page owes', () => {
     'keyOwners',
     'disabled',
     'overflow',
+    'overflowMenu',
     'composition',
   ]);
 });

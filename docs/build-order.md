@@ -849,7 +849,15 @@ Depois, nesta ordem:
    família; `splitter`, na onda 8, é o segundo consumidor de ambos e responde ao
    mesmo padrão Window Splitter. Inventário, decisões e autoavaliação em
    `docs/superpowers/specs/2026-09-04-drawer-*.md`.
-5. `menu menubar`
+5. `menu menubar` — entregues em 2026-09-04. Duas famílias, uma máquina: o
+   menubar é um contêiner sobre `menu` sem reexportar nada, e um submenu é a
+   mesma família aberta a partir de um item. Dois módulos novos em
+   `packages/core` vieram com elas e ficam disponíveis para quem vier depois:
+   `typeahead`, que a revisão da onda 6 herda em vez de escrever de novo, e
+   `pointer-intent`, cujo segundo consumidor é `preview-card` na onda 8.
+   Inventário em
+   `docs/superpowers/specs/2026-09-04-menu-and-menubar-capability-inventory.md`,
+   decisões em `docs/superpowers/specs/2026-09-04-menu-and-menubar-design.md`.
 6. `toast` — a região é a raiz, não a mensagem: um `section` com nome, marco de
    navegação e nunca live region. O anúncio sai por
    `packages/core/src/live-announcer`, porque uma live region criada na mesma
@@ -895,8 +903,31 @@ avaliação em
    seleção, carregamento incremental e virtualização como capacidade opcional.
    `virtual-list` deixa de ser família pública e sua entrada em
    `specs/components/` é retirada aqui (guia 2.10).
-2. `listbox` — primeiro consumidor real do motor, e o teste de janela com
-   seleção simultânea.
+2. `listbox` — entregue em 2026-09-04. Primeiro consumidor real do motor, e o
+   teste de janela com seleção simultânea: um `tabindex` rotativo não sobrevive
+   à reciclagem do próprio elemento, então `focusMode` tem o valor `auto`, que
+   lê um fato — se o conjunto está em janela — e responde `activedescendant`
+   quando está. A opção ativa e a âncora do intervalo ficam fixadas na janela,
+   porque um `aria-activedescendant` que aponta para um id fora do documento
+   deixa o leitor operando um widget sem opção focada.
+   Um membro e doze partes — `root`, `canvas`, `group`, `group-label`, `option`,
+   `indicator`, `icon`, `label`, `description`, `meta`, `empty` e `loader` —
+   com dezenove eixos e dois valores mutáveis: `selection` e `current`, que o
+   padrão declara distintos ("DOM focus is functionally distinct from the
+   selected state"). Os dois modelos de seleção do padrão são implementados,
+   escolhidos por `selectionBehavior`.
+   Em seleção única o valor é um escalar, como fazem três das quatro
+   implementações pesquisadas; a forma sempre-array do CDK é o que obriga cada
+   consumidor a escrever `value[0]`. `aria-setsize` e `aria-posinset` são
+   escritos apenas quando a coleção é entregue à família, que é exatamente a
+   condição do padrão e a única forma que sobrevive ao servidor.
+   `columns` é um número declarado e não medido, para que o desenho e o teclado
+   não possam discordar; o custo é que o consumidor o redeclara no próprio
+   breakpoint. Inventário em
+   `docs/superpowers/specs/2026-09-04-listbox-capability-inventory.md`, decisões
+   em `docs/superpowers/specs/2026-09-04-listbox-design.md`, revisão do motor em
+   `docs/superpowers/specs/2026-09-04-collection-engine-review.md`, avaliação em
+   `docs/superpowers/specs/2026-09-04-listbox-self-assessment.md`.
 3. `select`
 4. `combobox`
 5. `multi-select`

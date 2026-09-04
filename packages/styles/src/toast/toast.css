@@ -201,6 +201,15 @@
        `card` and `alert` both accepted and recorded. */
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_glyph-size: var(--slotted-control-icon-size-md, 16px);
+    /**
+     * The band of the title the mark is centred on, and the distance that puts
+     * it there. `vertical-align` raises a box by the distance from the text's
+     * baseline to the box's own bottom edge, so centring a box of `--_glyph-size`
+     * on a band of `--slotted-toast-icon-axis` is half the difference between
+     * the two — negative, because every mark in this scale is taller than the
+     * letters beside it.
+     */
+    --_mark-offset: calc((var(--slotted-toast-icon-axis, 1ex) - var(--_glyph-size)) / 2);
     --_line-height: var(--slotted-line-height-md, 1.5);
 
     --_inset-block: var(--slotted-toast-padding-block, var(--slotted-space-5, 0.75rem));
@@ -356,47 +365,96 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * One line box tall, with the glyph centred inside it by the mask rather
-   * than by a second element. `1lh` resolves against the message's own line
-   * box, so the mark sits on the first line at every density and every type
-   * size without a number saying how.
+   * The mark is centred on the **title's own axis**, and the axis is the band
+   * of the text rather than the box the text sits in.
+   *
+   * A mark one line box tall with the artwork centred in it — which is what
+   * this family drew first, and what `alert`, `inline-message` and
+   * `status-indicator` still draw — lands on the *line box* centre. That is
+   * not where the words are. Measured on the default theme at `comfortable`:
+   * the line box is 19.5 pixels, the baseline sits 14 from its top, a capital
+   * is 9 tall and an x is 7. The line box centre is therefore 9.75 from the
+   * top, the capitals are centred at 9.5 and the lowercase band at 10.5 — so
+   * the mark sat a quarter of a pixel below the capitals and three quarters
+   * above the letters that carry the word, and it read high in every capture.
+   *
+   * Worse than the three quarters of a pixel is what produced it: the two
+   * centres agree only because this font's ascent and descent happen to make
+   * them agree. A theme with a taller descent moves the baseline down the line
+   * box and the mark stays where it was.
+   *
+   * So the baseline is asked for rather than assumed. The slot is one line box
+   * tall and holds an inline-block, which the browser places against the same
+   * baseline the title's first line uses — the two boxes start at the same
+   * block position and inherit the same font. `vertical-align` then puts the
+   * mark's own centre exactly where `--slotted-toast-icon-axis` says, in the
+   * font's own units, and nothing here needs to know where the baseline landed.
+   *
+   * The axis defaults to the midpoint of the capital band and the lowercase
+   * band. The capitals alone are where a mark drawn at cap height belongs; a
+   * mark whose artwork is wider than a capital — every glyph in this scale is,
+   * at three quarters of a sixteen-pixel box against a nine-pixel capital —
+   * overshoots the cap line, and the eye reads the overshoot as height because
+   * there is nothing above a cap line and there is descender room below a
+   * baseline. Half a band down is the correction, and it is one token.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
-    background-color: var(--_mark);
     block-size: 1lh;
+    color: var(--_mark);
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_glyph-size);
     margin-inline-end: var(--_column-gap);
+  }
+
+  /**
+   * The artwork. It is a pseudo-element rather than the slot itself because a
+   * mask on the slot cannot be baseline-aligned: `vertical-align` moves an
+   * inline-level box, and the slot is a grid item.
+   *
+   * It paints `currentcolor` so the slot alone decides the colour, which is
+   * also what keeps forced colours out of a decorative rule —
+   * `packages/styles/src/fallbacks.test.mjs` refuses a system colour inside a
+   * `::before`, and rightly.
+   */
+  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon']::before {
+    background-color: currentcolor;
+    block-size: var(--_glyph-size);
+    content: '';
+    display: inline-block;
+    inline-size: var(--_glyph-size);
     mask-image: var(--slotted-toast-icon, var(--_glyph));
     mask-position: center;
     mask-repeat: no-repeat;
     mask-size: var(--_glyph-size) var(--_glyph-size);
+    vertical-align: var(--_mark-offset);
   }
 
   /**
    * A mark the page supplied instead of the tone's own — a spinner from
    * `progress-indicator` while a promise is in flight, a product's own
-   * artwork. The box keeps its size and its place on the first line; the mask
-   * goes, because a mask over an element that now has content of its own would
-   * cut that content into the shape of a circle.
+   * artwork. It takes the same axis: an icon a consumer wrote is an icon, and
+   * the line it belongs to has not moved.
+   *
+   * The box takes the size of what was put in it rather than the glyph's, with
+   * the glyph's size as its floor. Held at the glyph's width, a spinner
+   * overflowed it on both sides and was drawn over the first letter of the
+   * title — which is what the loading capture showed before this line existed.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon']:not(:empty) {
-    align-items: center;
-    background-color: transparent;
-    display: flex;
-    /**
-     * The box takes the size of what was put in it rather than the glyph's,
-     * with the glyph's size as its floor. Held at the glyph's width, a spinner
-     * from `progress-indicator` overflowed it on both sides and was drawn over
-     * the first letter of the title — which is what the loading capture showed
-     * before this line existed. The floor is what keeps a smaller mark on the
-     * same optical column as the tone's own.
-     */
     inline-size: auto;
-    justify-content: center;
-    mask-image: none;
     min-inline-size: var(--_glyph-size);
+  }
+
+  [data-ui='toast']
+    > [data-part='list']
+    > [data-part='item']
+    > [data-part='icon']:not(:empty)::before {
+    content: none;
+  }
+
+  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] > * {
+    vertical-align: var(--_mark-offset);
   }
 
   /**
@@ -778,7 +836,7 @@
     }
 
     [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
-      background-color: CanvasText;
+      color: CanvasText;
     }
 
     /**

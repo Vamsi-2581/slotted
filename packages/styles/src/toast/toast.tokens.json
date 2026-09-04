@@ -47,6 +47,7 @@
   "--slotted-toast-font-family",
   "--slotted-toast-gap",
   "--slotted-toast-icon",
+  "--slotted-toast-icon-axis",
   "--slotted-toast-measure",
   "--slotted-toast-offset",
   "--slotted-toast-padding-block",

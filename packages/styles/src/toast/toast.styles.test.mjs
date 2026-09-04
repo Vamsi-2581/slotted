@@ -124,6 +124,52 @@ test('draws every part the contract declares, and shows it in the harness', () =
   }
 });
 
+/**
+ * The defect the reviewer named at the visual gate, and the reason the mark is
+ * a pseudo-element at all.
+ *
+ * A mark one line box tall with its artwork centred in it lands on the centre
+ * of the *line box*. Measured on the default theme at `comfortable`: the line
+ * is 19.5 pixels, its centre 9.75 from the top, the baseline 14 down, a capital
+ * 9 tall and an x 7 — so the mark sat 0.75 of a pixel above the band the
+ * lowercase letters occupy, and read high in every capture. The two centres
+ * agree at all only because this font's ascent and descent happen to make them
+ * agree, so the next theme would move the text and leave the mark behind.
+ *
+ * The browser is asked for the baseline instead: the artwork is an inline-block
+ * on the slot's own line, and `vertical-align` places it against the same
+ * baseline the title's first line uses.
+ */
+test('places the mark against the title baseline rather than in its line box', () => {
+  const mark = rule(`${item}>[data-part='icon']::before`);
+  assert.match(mark, /display:inline-block/);
+  assert.match(mark, /vertical-align:var\(--_mark-offset\)/);
+
+  const offset = rule(item);
+  assert.match(offset, /--_mark-offset:calc\(\(var\(--slotted-toast-icon-axis/);
+  assert.ok(
+    !/\[data-part='icon'\]\{[^}]*mask-image/.test(normalized),
+    'the slot masks itself again, which cannot be baseline-aligned',
+  );
+});
+
+/**
+ * The slot carries the colour and the artwork paints `currentcolor`, which is
+ * what lets one rule repaint both under forced colours —
+ * `packages/styles/src/fallbacks.test.mjs` refuses a system colour inside a
+ * `::before`, so the mark could not name one itself.
+ */
+test('lets one colour reach the mark, so forced colours can replace it', () => {
+  assert.match(rule(`${item}>[data-part='icon']`), /color:var\(--_mark\)/);
+  assert.match(rule(`${item}>[data-part='icon']::before`), /background-color:currentcolor/);
+  assert.match(normalized, /forced-colors[^@]*\[data-part='icon'\]\{color:CanvasText/);
+});
+
+/** A mark a page supplies takes the same axis: it is an icon on the same line. */
+test('gives a supplied mark the axis the family draws its own on', () => {
+  assert.match(rule(`${item}>[data-part='icon']>*`), /vertical-align:var\(--_mark-offset\)/);
+});
+
 /** Every tone draws the mark the shared map names, and no other. */
 test('takes its marks from the map alert and status-indicator share', () => {
   for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {

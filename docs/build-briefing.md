@@ -139,6 +139,30 @@ other families stand on. Justify it at the gate before writing it.
   the space that is left, the transform origin and the arrow, and
   `--slotted-layer-depth` for the single overlay stack. They are runtime values,
   not design tokens, and they are not in `packages/tokens/src/contract.json`.
+- **A mark beside a line of text is aligned to the text, not to the line box.**
+  A box one line tall with its artwork centred in it lands on the centre of the
+  line box, which is not where the words are. Measured on the default theme at
+  `comfortable`: the line is 19.5 pixels and its centre 9.75 from the top, the
+  baseline is 14 down, a capital is 9 tall and an x is 7 — so the centred mark
+  sits a quarter of a pixel below the capitals and three quarters above the band
+  the lowercase letters occupy, and it reads high. The two centres agree only
+  because this font's ascent and descent happen to make them agree; a theme with
+  a deeper descent moves the text and leaves the mark behind.
+
+  The browser is asked for the baseline instead of the number being assumed. The
+  slot stays one line box tall and the artwork becomes an inline-block on that
+  line, so the browser places it against the same baseline the title's first
+  line uses; `vertical-align: calc((<band> - <mark size>) / 2)` then centres the
+  mark on whichever band of the text the family names. `toast` names `1ex`, the
+  band the lowercase letters occupy, because every glyph in the icon scale is
+  taller than a capital — three quarters of a sixteen-pixel box against a
+  nine-pixel capital — and a mark that overshoots the cap line reads high, while
+  the same overshoot below the baseline falls in descender room the eye expects
+  to be occupied. `1cap` is the other defensible band and one token away.
+
+  `alert`, `inline-message`, `status-indicator`, `list-item` and `badge` still
+  centre their marks in the line box: they predate the measurement, and none of
+  them is this session's to edit. Each takes the rule when it is next opened.
 
 ## Working beside another session
 
@@ -175,9 +199,8 @@ node tools/harness/shoot.mjs <family> --scheme light --density dense
 node tools/harness/shoot.mjs <family> --scheme light --dir rtl
 ```
 
-The capture is the whole page; `--scene <name>` narrows it to one scene when a
-detail needs to fill the view. Read every image. The exit condition is the right
-picture, not finished code.
+The capture is the whole page; `--scene <name>` narrows it to one scene. Read
+every image. The exit condition is the right picture, not finished code.
 
 ## Verification
 
@@ -189,15 +212,8 @@ pnpm check:full
 
 ## The gate
 
-Stop before committing and hand over:
-
-- the absolute path of the harness page and of the captures read;
-- the URLs of the reference pages in both Storybooks, and the widths and
-  schemes they were read at;
-- the weighing from step 3 — adopt, adapt or decline, one sentence each;
-- the self-assessment across the eight rubric dimensions plus section 18 of the
-  guide;
-- the decisions taken on what would otherwise have been an open question, and
-  the two categories above if either applies.
-
-Then wait.
+Stop before committing and hand over the harness path and the captures read, the
+reference-page URLs with the widths and schemes they were read at and the output
+of `tools/harness/audit.mjs` on both, the weighing
+from step 3, the self-assessment against the rubric and section 18, and the
+decisions taken on what would otherwise have been left open. Then wait.

@@ -48,6 +48,15 @@ const meta: Meta<AlertDialogStoryArgs> = {
 export default meta;
 type Story = StoryObj<AlertDialogStoryArgs>;
 
+/**
+ * A confirmation is opened, never left standing.
+ *
+ * The member fixes `modal` at true, which is the pattern's own rule: the page
+ * behind is inert and the document scroll is locked while it is up. A reference
+ * page carrying eight of them at once would therefore lock its own scroll eight
+ * times and inert everything around them — so each one is behind the trigger a
+ * reader presses, which is also what happens in an application.
+ */
 const confirm = (
   attributes = '',
   {
@@ -57,9 +66,13 @@ const confirm = (
     cancel = 'Manter projeto',
     description = 'O projeto e seus 42 documentos saem para todo mundo. Isso não pode ser desfeito.',
     title = 'Excluir este projeto?',
+    trigger = 'Excluir projeto',
   } = {},
 ) =>
-  layer(`<sl-alert-dialog [container]="box" [open]="true" ${attributes}>
+  layer(`<button slButton tone="${actionTone}" variant="outline" [slDialogTrigger]="d">
+    ${trigger}
+  </button>
+  <sl-alert-dialog #d="slAlertDialog" [container]="box" ${attributes}>
     <header slDialogHeader>
       <span slAlertDialogIcon></span>
       <h2 slDialogTitle>${title}</h2>
@@ -114,18 +127,19 @@ export const Tones: Story = {
       2,
       scene(
         'danger — the default',
-        'A struck circle, because what follows cannot be undone. The mark is a mask from a glyph token, so it survives forced colours, where the tone’s colour does not.',
+        'Press Excluir projeto: a struck circle, because what follows cannot be undone. The mark is a mask from a glyph token, so it survives forced colours, where the tone’s colour does not.',
         confirm(),
       ) +
         scene(
           'warning — a decision, not a deletion',
-          'A triangle: the one silhouette in the set that has to be recognised before its colour is. The action reads as the consequence rather than as a threat.',
+          'Press Sair sem salvar: a triangle, the one silhouette in the set that has to be recognised before its colour is. The action reads as the consequence rather than as a threat.',
           confirm('tone="warning"', {
             action: 'Descartar edições',
             actionTone: 'warning',
             cancel: 'Continuar editando',
             description: 'Suas últimas três edições ainda não foram salvas.',
             title: 'Sair sem salvar?',
+            trigger: 'Sair sem salvar',
           }),
         ),
     ),
@@ -139,7 +153,7 @@ export const Actions: Story = {
       2,
       scene(
         'Labels that name the action',
-        '“Excluir projeto” and “Manter projeto”, not “Sim” and “Não”. A reader who hears only the buttons still knows which one does what, which is the whole reason the pattern asks for concrete labels.',
+        'Open it and read the two buttons: “Excluir projeto” and “Manter projeto”, not “Sim” and “Não”. A reader who hears only the buttons still knows which one does what, which is the whole reason the pattern asks for concrete labels.',
         confirm(),
       ) +
         scene(
@@ -151,6 +165,7 @@ export const Actions: Story = {
             cancel: 'Revisar',
             description: 'Três destinatários estão fora da sua organização.',
             title: 'Enviar para fora da organização?',
+            trigger: 'Enviar assim mesmo',
           }),
         ),
     ),
@@ -164,7 +179,7 @@ export const Policy: Story = {
       2,
       scene(
         'The scrim does nothing',
-        'Click outside the panel: nothing happens, and there is no input that changes it. A destructive confirmation a stray click dismisses is what fixing the policy to the member prevents.',
+        'Open it, then click outside the panel: nothing happens, and there is no input that changes it. A destructive confirmation a stray click dismisses is what fixing the policy to the member prevents.',
         confirm(),
       ) +
         scene(
@@ -175,6 +190,7 @@ export const Policy: Story = {
             cancel: 'Continuar migração',
             description: 'Encerrar agora deixa 1.204 registros pela metade.',
             title: 'Encerrar a migração?',
+            trigger: 'Encerrar migração',
           }),
         ),
     ),
@@ -186,7 +202,7 @@ export const Focus: Story = {
   render: () => ({
     template: scene(
       'The ring is on “Manter projeto”',
-      'Not on the first tabbable element, which would be the destructive one here. The APG asks for the least destructive action on a step that is not easily reversible, and the member does it without being asked.',
+      'Open it and look at the ring: it is on the cancel, not on the first tabbable element, which would be the destructive one here. The APG asks for the least destructive action on a step that is not easily reversible, and the member does it without being asked.',
       confirm(),
     ),
   }),
@@ -204,6 +220,7 @@ export const Content: Story = {
           body: '<p slText size="sm">Relatório mensal, Apresentação de resultados e Rascunho da proposta.</p>',
           description: 'Isso não pode ser desfeito.',
           title: 'Excluir 3 documentos?',
+          trigger: 'Excluir 3 documentos',
         }),
       ) +
         scene(
@@ -212,6 +229,7 @@ export const Content: Story = {
           confirm('', {
             description: 'Der Vorgang entfernt sämtliche Bereitstellungsartefakte unwiderruflich.',
             title: 'Produktions-Bereitstellungspipeline endgültig entfernen?',
+            trigger: 'Pipeline entfernen',
           }),
         ),
     ),

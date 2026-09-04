@@ -70,6 +70,29 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * What a demonstration that stands open has to say for itself.
+ *
+ * A modal layer takes the page over: `dismissable-layer` writes `inert` on every
+ * sibling up to the document root and locks the document scroll, and a page
+ * carrying a dozen of them at once is a page nobody can scroll or click. The
+ * first published version of these stories did exactly that — one press
+ * anywhere closed every panel at once, because each of them read it as a press
+ * outside itself.
+ *
+ * So a scene that exists to be *looked at* is not modal, does not take focus and
+ * cannot be dismissed. Nothing here changes the picture: `modal` decides what
+ * happens to the page behind the scrim, never what the panel looks like. A scene
+ * that exists to be *operated* keeps its real behaviour and is opened from a
+ * trigger, one at a time — which is also what the reader does in an application.
+ */
+const STILL = {
+  escape: 'none',
+  initialFocus: false,
+  modal: false,
+  outsidePress: 'none',
+} as const satisfies Partial<DialogProps>;
+
 /** One panel, written once, so a scene shows the axis rather than the markup. */
 function Panel({
   actions = true,
@@ -86,7 +109,7 @@ function Panel({
   title?: string;
 }) {
   return (
-    <Dialog container={container} defaultOpen {...props}>
+    <Dialog container={container} defaultOpen {...STILL} {...props}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -256,7 +279,7 @@ export const Surface: Story = {
       >
         <Layer>
           {(container) => (
-            <Dialog container={container} defaultOpen fullScreen="never" surface="plain">
+            <Dialog container={container} defaultOpen {...STILL} fullScreen="never" surface="plain">
               <DialogContent>
                 <Card fill="elevated">
                   <DialogTitle>Um card, dentro da layer</DialogTitle>
@@ -299,13 +322,28 @@ export const Modal: Story = {
     <Grid columns={2}>
       <Scene
         label="modal — the page is out of reach"
-        note="Everything outside the layer is inert, which takes the page out of the accessibility tree as well as out of the pointer’s reach; the scroll is locked and Tab wraps inside the panel."
+        note="Press Open: the scroll locks, everything outside the layer goes inert, and Tab wraps inside the panel. It is opened from a trigger because a modal layer takes the whole page over, and a page showing several at once would be lying about what one does."
       >
-        <Layer>{(container) => <Panel container={container} fullScreen="never" />}</Layer>
+        <Layer>
+          {(container) => (
+            <Dialog container={container} fullScreen="never">
+              <DialogTrigger render={(props) => <Button {...props}>Abrir modal</Button>} />
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Modal</DialogTitle>
+                  <DialogDescription>
+                    A rolagem está travada e o resto da página está inert.
+                  </DialogDescription>
+                  <DialogClose />
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+          )}
+        </Layer>
       </Scene>
       <Scene
         label="modal={false} — and no aria-modal"
-        note="Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The APG warns that marking a dialog modal without all of that is worse for a screen-reader reader than not marking it at all."
+        note="Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The APG warns that marking a dialog modal without all of that is worse for a screen-reader reader than not marking it at all — and it is why every still demonstration on this page is this one."
       >
         <Layer>
           {(container) => (
@@ -322,32 +360,37 @@ function Guarded({ container }: { container: Element }) {
   const [saving, setSaving] = useState(true);
 
   return (
-    <Dialog
-      container={container}
-      fullScreen="never"
-      onOpenChange={(next, request) => {
-        if (!next && saving) return request.cancel();
-        setOpen(next);
-      }}
-      open={open}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Salvando</DialogTitle>
-          <DialogDescription>
-            {saving
-              ? 'Escape, um clique fora e o ✕ estão todos recusados pelo mesmo guard.'
-              : 'O guard saiu: agora as seis saídas funcionam.'}
-          </DialogDescription>
-          <DialogClose />
-        </DialogHeader>
-        <DialogFooter>
-          <Button onClick={() => setSaving((value) => !value)} size="sm" variant="outline">
-            {saving ? 'Terminar de salvar' : 'Voltar a salvar'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Button onClick={() => setSaving((value) => !value)} size="sm" variant="outline">
+        {saving ? 'Terminar de salvar' : 'Voltar a salvar'}
+      </Button>
+      <Button disabled={open} onClick={() => setOpen(true)} size="sm" variant="ghost">
+        Abrir de novo
+      </Button>
+      <Dialog
+        container={container}
+        fullScreen="never"
+        initialFocus={false}
+        modal={false}
+        onOpenChange={(next, request) => {
+          if (!next && saving) return request.cancel();
+          setOpen(next);
+        }}
+        open={open}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Salvando</DialogTitle>
+            <DialogDescription>
+              {saving
+                ? 'Escape, um clique fora e o ✕ estão todos recusados pelo mesmo guard.'
+                : 'O guard saiu: agora as seis saídas funcionam.'}
+            </DialogDescription>
+            <DialogClose />
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -356,7 +399,8 @@ export const Policy: Story = {
   render: () => (
     <Scene
       label="One guard, six ways out"
-      note="Press Escape, click the scrim, then the ✕: all three are refused by the same three lines, because they are one request carrying a reason rather than four callbacks."
+      layout="stack"
+      note="Press Escape, click the scrim, then the ✕: all three are refused by the same three lines, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work."
     >
       <Layer>{(container) => <Guarded container={container} />}</Layer>
     </Scene>
@@ -367,7 +411,8 @@ function Named({ container }: { container: Element }) {
   const second = useRef<HTMLInputElement>(null);
 
   return (
-    <Dialog container={container} defaultOpen fullScreen="never" initialFocus={second} size="lg">
+    <Dialog container={container} fullScreen="never" initialFocus={second} size="lg">
+      <DialogTrigger render={(props) => <Button {...props}>Convidar alguém</Button>} />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Convidar alguém</DialogTitle>
@@ -411,7 +456,7 @@ export const Focus: Story = {
       </Scene>
       <Scene
         label="An element the consumer names"
-        note="initialFocus takes a ref, so the caret starts where the reader is going to type rather than on the field that happens to be first in the DOM."
+        note="Press Convidar: the caret starts in the second field rather than the first, because initialFocus takes a ref. Opened from a trigger, because where focus goes on open cannot be shown by a panel that was already open."
       >
         <Layer>{(container) => <Named container={container} />}</Layer>
       </Scene>
@@ -452,11 +497,11 @@ export const Nested: Story = {
   render: () => (
     <Scene
       label="A confirmation over a dialog"
-      note="Press Escape once: only the confirmation closes, because dismissable-layer asks the topmost layer and stops there. The depth comes from the single stack, so neither layer states a z-index."
+      note="Press Cancelar assinatura, then Escape once: only the confirmation closes, because dismissable-layer asks the topmost layer and stops there. The depth comes from the single stack, so neither layer states a z-index."
     >
       <Layer>
         {(container) => (
-          <Dialog container={container} defaultOpen fullScreen="never" size="lg">
+          <Dialog container={container} defaultOpen {...STILL} fullScreen="never" size="lg">
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Faturamento</DialogTitle>
@@ -464,7 +509,14 @@ export const Nested: Story = {
                 <DialogClose />
               </DialogHeader>
               <DialogBody>
-                <AlertDialog container={container} defaultOpen>
+                <AlertDialog container={container}>
+                  <DialogTrigger
+                    render={(props) => (
+                      <Button {...props} size="sm" tone="danger" variant="outline">
+                        Cancelar assinatura
+                      </Button>
+                    )}
+                  />
                   <DialogContent>
                     <DialogHeader>
                       <AlertDialogIcon />

@@ -347,9 +347,30 @@ over the documentation. The primitive that makes it possible —
 `.slotted-demo-viewport[data-size="tall"]` — was added to the workbench with its
 own test, in its own commit, as the briefing requires of every shared tool.
 
-**Not finished, and it is the one thing this assessment cannot close:** the pages
-were validated by their tests and not read rendered. Both Storybook servers are
-running and both predate the family, so `iframe.html?viewMode=docs&id=components-dialog--reference`
+**The defect a reader found and no test could.** The first published version of
+these pages left a dozen modal layers standing open at once. Each one locked the
+document scroll, wrote `inert` on every sibling up to the root, and read any
+press on the page as a press outside itself — so the page could not be scrolled,
+nothing on it could be clicked, and one press emptied it. Every offline check
+passed: the scenarios were covered, the snippets formatted, the API tables
+complete. It was found by opening the page.
+
+The rule that came out of it: **a scene that exists to be looked at is not
+modal, does not take focus and cannot be dismissed; a scene that exists to be
+operated is opened from a trigger, one at a time.** `modal` decides what happens
+to the page behind the scrim and never what the panel looks like, so the picture
+is unchanged. `AlertDialog` fixes `modal` at true — the pattern's own rule — so
+every one of its demonstrations is behind a trigger, which is what Radix's own
+page does and what a reader does in an application.
+
+`packages/react/src/dialog/dialog.page.test.tsx` renders every story on both
+pages and asserts three things a docs page owes the page it is drawn on: the
+body scroll is not locked, nothing at the top level is `inert`, and a press on
+the page around a demonstration does not close it. It is the check that would
+have found this first.
+
+**Still not closed:** the pages have still not been read rendered by this
+machine. Both Storybook servers are running and both predate the family, so `iframe.html?viewMode=docs&id=components-dialog--reference`
 navigates away rather than rendering — `tools/harness/audit.mjs` fails on it and
 succeeds on `collapsible` on the same server, which is exactly the restart
 `docs/build-briefing.md` says a new family needs. The restart interrupts the

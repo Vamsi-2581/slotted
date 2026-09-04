@@ -124,6 +124,24 @@ export const scene = (label: string, note: string, body: string, layout = 'block
 export const grid = (columns: 1 | 2 | 3, body: string) =>
   `<div class="slotted-demo-grid" data-columns="${columns}">${body}</div>`;
 
+/**
+ * What a demonstration that stands open has to say for itself.
+ *
+ * A modal layer takes the page over: `dismissable-layer` writes `inert` on every
+ * sibling up to the document root and locks the document scroll, and a page
+ * carrying a dozen of them at once is a page nobody can scroll or click. The
+ * first published version of these stories did exactly that — one press
+ * anywhere closed every panel at once, because each of them read it as a press
+ * outside itself.
+ *
+ * So a scene that exists to be *looked at* is not modal, does not take focus and
+ * cannot be dismissed. Nothing here changes the picture: `modal` decides what
+ * happens to the page behind the scrim, never what the panel looks like. A scene
+ * that exists to be *operated* keeps its real behaviour and is opened from a
+ * trigger, one at a time — which is also what the reader does in an application.
+ */
+const STILL = '[modal]="false" [initialFocus]="false" escape="none" outsidePress="none"';
+
 const panel = (
   attributes = '',
   {
@@ -136,7 +154,7 @@ const panel = (
     title = 'Editar projeto',
   } = {},
 ) =>
-  layer(`<sl-dialog [container]="box" [open]="true" ${attributes}>
+  layer(`<sl-dialog [container]="box" [open]="true" ${STILL} ${attributes}>
     <header slDialogHeader>
       <h2 slDialogTitle>${title}</h2>
       <p slDialogDescription>${description}</p>
@@ -268,7 +286,7 @@ export const Surface: Story = {
         scene(
           'plain — you paint it',
           'No ground, no border, no radius, no shadow, no rows and no padding. The portal, the scrim, the focus containment and the dismissal policy are all still here; only the picture is yours.',
-          layer(`<sl-dialog [container]="box" [open]="true" surface="plain" fullScreen="never">
+          layer(`<sl-dialog [container]="box" [open]="true" ${STILL} surface="plain" fullScreen="never">
             <div slCard fill="elevated">
               <h2 slDialogTitle>Um card, dentro da layer</h2>
               <p slDialogDescription>
@@ -307,13 +325,20 @@ export const Modal: Story = {
       2,
       scene(
         'modal — the page is out of reach',
-        'Everything outside the layer is inert, which takes the page out of the accessibility tree as well as out of the pointer’s reach; the scroll is locked and Tab wraps inside the panel.',
-        panel('fullScreen="never"'),
+        'Press Abrir modal: the scroll locks, everything outside the layer goes inert, and Tab wraps inside the panel. It is opened from a trigger because a modal layer takes the whole page over, and a page showing several at once would be lying about what one does.',
+        layer(`<button slButton [slDialogTrigger]="d">Abrir modal</button>
+          <sl-dialog #d="slDialog" [container]="box" fullScreen="never">
+            <header slDialogHeader>
+              <h2 slDialogTitle>Modal</h2>
+              <p slDialogDescription>A rolagem está travada e o resto da página está inert.</p>
+              <button slDialogClose></button>
+            </header>
+          </sl-dialog>`),
       ) +
         scene(
           'modal={false} — and no aria-modal',
-          'Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The APG warns that marking a dialog modal without all of that is worse for a screen-reader reader than not marking it at all.',
-          panel('[modal]="false" fullScreen="never"', { title: 'Detalhes' }),
+          'Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The APG warns that marking a dialog modal without all of that is worse for a screen-reader reader than not marking it at all — and it is why every still demonstration on this page is this one.',
+          panel('fullScreen="never"', { title: 'Detalhes' }),
         ),
     ),
   }),
@@ -323,6 +348,7 @@ export const Policy: Story = {
   parameters: scenario('policy'),
   render: () => ({
     props: {
+      open: true,
       saving: true,
       refuse(this: { saving: boolean }, request: { value: boolean; cancel: () => void }) {
         if (!request.value && this.saving) request.cancel();
@@ -330,11 +356,19 @@ export const Policy: Story = {
     },
     template: scene(
       'One guard, six ways out',
-      'Press Escape, click the scrim, then the ✕: all three are refused by the same handler, because they are one request carrying a reason rather than four callbacks.',
-      layer(`<sl-dialog
+      'Press Escape, click the scrim, then the ✕: all three are refused by the same handler, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work.',
+      layer(`<button slButton size="sm" variant="outline" (click)="saving = !saving">
+        {{ saving ? 'Terminar de salvar' : 'Voltar a salvar' }}
+      </button>
+      <button slButton size="sm" variant="ghost" [disabled]="open" (click)="open = true">
+        Abrir de novo
+      </button>
+      <sl-dialog
         [container]="box"
-        [open]="true"
+        [(open)]="open"
         fullScreen="never"
+        [modal]="false"
+        [initialFocus]="false"
         (openChangeRequest)="refuse($event)"
       >
         <header slDialogHeader>
@@ -369,8 +403,9 @@ export const Focus: Story = {
       ) +
         scene(
           'An element the consumer names',
-          'initialFocus takes an element, so the caret starts where the reader is going to type rather than on the field that happens to be first in the DOM.',
-          layer(`<sl-dialog [container]="box" [open]="true" [initialFocus]="email" size="lg" fullScreen="never">
+          'Press Convidar: the caret starts in the second field rather than the first, because initialFocus takes an element. Opened from a trigger, because where focus goes on open cannot be shown by a panel that was already open.',
+          layer(`<button slButton [slDialogTrigger]="d">Convidar alguém</button>
+            <sl-dialog #d="slDialog" [container]="box" [initialFocus]="email" size="lg" fullScreen="never">
             <header slDialogHeader>
               <h2 slDialogTitle>Convidar alguém</h2>
               <p slDialogDescription>O foco não cai no primeiro campo, e sim no segundo.</p>
@@ -406,15 +441,18 @@ export const Nested: Story = {
   render: () => ({
     template: scene(
       'A confirmation over a dialog',
-      'Press Escape once: only the confirmation closes, because dismissable-layer asks the topmost layer and stops there. The depth comes from the single stack, so neither layer states a z-index.',
-      layer(`<sl-dialog [container]="box" [open]="true" size="lg" fullScreen="never">
+      'Press Cancelar assinatura, then Escape once: only the confirmation closes, because dismissable-layer asks the topmost layer and stops there. The depth comes from the single stack, so neither layer states a z-index.',
+      layer(`<sl-dialog [container]="box" [open]="true" ${STILL} size="lg" fullScreen="never">
         <header slDialogHeader>
           <h2 slDialogTitle>Faturamento</h2>
           <p slDialogDescription>A camada de baixo.</p>
           <button slDialogClose></button>
         </header>
         <div slDialogBody>
-          <sl-alert-dialog [container]="box" [open]="true">
+          <button slButton size="sm" tone="danger" variant="outline" [slDialogTrigger]="inner">
+            Cancelar assinatura
+          </button>
+          <sl-alert-dialog #inner="slAlertDialog" [container]="box">
             <header slDialogHeader>
               <span slAlertDialogIcon></span>
               <h2 slDialogTitle>Cancelar a assinatura?</h2>

@@ -57,6 +57,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * A confirmation is opened, never left standing.
+ *
+ * The member fixes `modal` at true, which is the pattern's own rule: the page
+ * behind is inert and the document scroll is locked while it is up. A reference
+ * page carrying eight of them at once would therefore lock its own scroll eight
+ * times and inert everything around them — so each one is behind the trigger a
+ * reader presses, which is also what happens in an application.
+ *
+ * The panel is the picture in every scene below; the trigger is how the reader
+ * gets to it.
+ */
 function Confirm({
   action = 'Excluir projeto',
   body,
@@ -64,6 +76,7 @@ function Confirm({
   container,
   description = 'O projeto e seus 42 documentos saem para todo mundo. Isso não pode ser desfeito.',
   title = 'Excluir este projeto?',
+  trigger = 'Excluir projeto',
   ...props
 }: Partial<AlertDialogProps> & {
   action?: string;
@@ -72,9 +85,21 @@ function Confirm({
   container: Element;
   description?: string;
   title?: string;
+  trigger?: string;
 }) {
   return (
-    <AlertDialog container={container} defaultOpen {...props}>
+    <AlertDialog container={container} {...props}>
+      <DialogTrigger
+        render={(control) => (
+          <Button
+            {...control}
+            tone={props.tone === 'warning' ? 'warning' : 'danger'}
+            variant="outline"
+          >
+            {trigger}
+          </Button>
+        )}
+      />
       <DialogContent>
         <DialogHeader>
           <AlertDialogIcon />
@@ -162,13 +187,13 @@ export const Tones: Story = {
     <Grid columns={2}>
       <Scene
         label="danger — the default"
-        note="A struck circle, because what follows cannot be undone. The mark is a mask from a glyph token, so it survives forced colours, where the tone’s colour does not."
+        note="Press Excluir projeto: a struck circle, because what follows cannot be undone. The mark is a mask from a glyph token, so it survives forced colours, where the tone’s colour does not."
       >
         <Layer>{(container) => <Confirm container={container} />}</Layer>
       </Scene>
       <Scene
         label="warning — a decision, not a deletion"
-        note="A triangle: the one silhouette in the set that has to be recognised before its colour is. The action reads as the consequence rather than as a threat."
+        note="Press Sair sem salvar: a triangle, the one silhouette in the set that has to be recognised before its colour is. The action reads as the consequence rather than as a threat."
       >
         <Layer>
           {(container) => (
@@ -178,6 +203,7 @@ export const Tones: Story = {
               container={container}
               description="Suas últimas três edições ainda não foram salvas."
               title="Sair sem salvar?"
+              trigger="Sair sem salvar"
               tone="warning"
             />
           )}
@@ -193,7 +219,7 @@ export const Actions: Story = {
     <Grid columns={2}>
       <Scene
         label="Labels that name the action"
-        note="“Excluir projeto” and “Manter projeto”, not “Sim” and “Não”. A reader who hears only the buttons still knows which one does what, which is the whole reason the pattern asks for concrete labels."
+        note="Open it and read the two buttons: “Excluir projeto” and “Manter projeto”, not “Sim” and “Não”. A reader who hears only the buttons still knows which one does what, which is the whole reason the pattern asks for concrete labels."
       >
         <Layer>{(container) => <Confirm container={container} />}</Layer>
       </Scene>
@@ -209,6 +235,7 @@ export const Actions: Story = {
               container={container}
               description="Três destinatários estão fora da sua organização."
               title="Enviar para fora da organização?"
+              trigger="Enviar assim mesmo"
               tone="warning"
             />
           )}
@@ -224,7 +251,7 @@ export const Policy: Story = {
     <Grid columns={2}>
       <Scene
         label="The scrim does nothing"
-        note="Click outside the panel: nothing happens, and there is no prop that changes it. A destructive confirmation a stray click dismisses is what fixing the policy to the member prevents."
+        note="Open it, then click outside the panel: nothing happens, and there is no prop that changes it. A destructive confirmation a stray click dismisses is what fixing the policy to the member prevents."
       >
         <Layer>{(container) => <Confirm container={container} />}</Layer>
       </Scene>
@@ -241,6 +268,7 @@ export const Policy: Story = {
               description="Encerrar agora deixa 1.204 registros pela metade."
               escape="none"
               title="Encerrar a migração?"
+              trigger="Encerrar migração"
             />
           )}
         </Layer>
@@ -254,7 +282,7 @@ export const Focus: Story = {
   render: () => (
     <Scene
       label="The ring is on “Manter projeto”"
-      note="Not on the first tabbable element, which would be the destructive one here. The APG asks for the least destructive action on a step that is not easily reversible, and the member does it without being asked."
+      note="Open it and look at the ring: it is on the cancel, not on the first tabbable element, which would be the destructive one here. The APG asks for the least destructive action on a step that is not easily reversible, and the member does it without being asked."
     >
       <Layer>{(container) => <Confirm container={container} />}</Layer>
     </Scene>
@@ -280,6 +308,7 @@ export const Content: Story = {
               container={container}
               description="Isso não pode ser desfeito."
               title="Excluir 3 documentos?"
+              trigger="Excluir 3 documentos"
             />
           )}
         </Layer>
@@ -294,6 +323,7 @@ export const Content: Story = {
               container={container}
               description="Der Vorgang entfernt sämtliche Bereitstellungsartefakte unwiderruflich."
               title="Produktions-Bereitstellungspipeline endgültig entfernen?"
+              trigger="Pipeline entfernen"
             />
           )}
         </Layer>

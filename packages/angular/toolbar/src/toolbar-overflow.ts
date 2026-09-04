@@ -8,6 +8,7 @@ import {
   ElementRef,
   HostAttributeToken,
   inject,
+  Injector,
   input,
   ViewEncapsulation,
   viewChild,
@@ -33,6 +34,13 @@ import type { ToolbarOverflowLabel } from './toolbar';
  * nothing. That is where the two bindings differ most, and it is idiom rather
  * than asymmetry: React's `ReactNode` is built with the element that declares
  * it, which is React's own answer and its own cost.
+ *
+ * **A template resolves its dependencies where it was written, not where it is
+ * rendered.** The counterpart is authored beside the control it replaces, which
+ * is outside the surface, so `slMenuItem` looked for the `SlMenu` above the bar
+ * and found none — `NG0201`. The outlet is therefore given an injector that
+ * provides the surface this component draws, and the item finds the menu it is
+ * actually inside. The DOM was never wrong; only the injector was.
  *
  * The host is `display: contents`, so the `button` below is a child of the bar
  * itself: the part that carries the geometry has to be the box the bar lays
@@ -66,7 +74,9 @@ import type { ToolbarOverflowLabel } from './toolbar';
         @if (unit.separatorBefore) {
           <hr slMenuSeparator />
         }
-        <ng-container *ngTemplateOutlet="toolbar.counterpart(unit.id)!" />
+        <ng-container
+          *ngTemplateOutlet="toolbar.counterpart(unit.id)!; injector: surfaceInjector()"
+        />
       }
     </sl-menu>
   `,
@@ -98,12 +108,45 @@ export class SlToolbarOverflow {
   });
 
   private readonly trigger = viewChild.required<ElementRef<HTMLElement>>('trigger');
+  private readonly surface = viewChild(SlMenu);
+  private readonly injector = inject(Injector);
+
+  /**
+   * `null` until the view exists, which is also while nothing has collapsed and
+   * the outlet renders nothing.
+   */
+  protected readonly surfaceInjector = computed(() => {
+    const menu = this.surface();
+    if (menu === undefined) return null;
+    return Injector.create({
+      parent: this.injector,
+      providers: [{ provide: SlMenu, useValue: menu }],
+    });
+  });
 
   constructor() {
     const destroyRef = inject(DestroyRef);
 
-    /* The bar measures the control, so it has to hold it. */
-    afterNextRender(() => this.toolbar.registerTrigger(this.trigger().nativeElement));
+    afterNextRender(() => {
+      const element = this.trigger().nativeElement;
+
+      /**
+       * `slMenuTriggerFor` binds `[attr.data-part]` and resolves it to `null`
+       * for a trigger that is neither a bar's item nor a submenu's, and a host
+       * binding of `null` removes the attribute the author wrote. The part is
+       * therefore written back after the first change detection, where nothing
+       * writes over it again: the expression is a constant, so Angular applies
+       * it once.
+       *
+       * React does not have the problem because the family's own props are
+       * spread after the menu's; here the two writers are directives on one
+       * element and the last one wins.
+       */
+      element.setAttribute('data-part', 'overflow');
+
+      /* The bar measures the control, so it has to hold it. */
+      this.toolbar.registerTrigger(element);
+    });
     destroyRef.onDestroy(() => this.toolbar.registerTrigger(null));
   }
 }

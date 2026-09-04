@@ -65,6 +65,10 @@ describe('SlToolbar', () => {
     TestBed.configureTestingModule({ imports: [Host] });
     fixture = TestBed.createComponent(Host);
     fixture.autoDetectChanges();
+    /* Two cycles: the first renders the bar and the trigger, the second is the
+       one the trigger's registration starts — the collapse is created from a
+       signal the first cycle writes. */
+    await fixture.whenStable();
     await fixture.whenStable();
   });
 
@@ -259,15 +263,21 @@ describe('SlToolbar under overflow="menu"', () => {
       box.textContent?.includes(label),
     ) as HTMLElement;
 
+  /* The trigger is drawn inside `sl-toolbar-overflow`, whose host is
+     `display: contents`, so the room stated on the element the test wrote is
+     read from the nearest box that states one. */
+  const stated = (element: HTMLElement) =>
+    Number(element.closest('[data-test-width]')?.getAttribute('data-test-width') ?? 0);
+
   beforeEach(() => {
     Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
       configurable: true,
       get(this: HTMLElement) {
-        return Number(this.dataset['testWidth'] ?? 0);
+        return stated(this);
       },
     });
     HTMLElement.prototype.getBoundingClientRect = function rect(this: HTMLElement) {
-      const width = Number(this.dataset['testWidth'] ?? 0);
+      const width = stated(this);
       return { bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0 } as DOMRect;
     };
   });
@@ -281,6 +291,10 @@ describe('SlToolbar under overflow="menu"', () => {
     fixture = TestBed.createComponent(OverflowHost);
     fixture.componentInstance.room.set(room);
     fixture.autoDetectChanges();
+    /* Two cycles: the first renders the bar and the trigger, the second is the
+       one the trigger's registration starts — the collapse is created from a
+       signal the first cycle writes. */
+    await fixture.whenStable();
     await fixture.whenStable();
   }
 

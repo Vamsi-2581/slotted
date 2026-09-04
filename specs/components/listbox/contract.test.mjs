@@ -56,7 +56,7 @@ test('states the roles, and the cost of the elements it did not use', () => {
   assert.equal(contract.roles.canvas, 'presentation');
   assert.equal(contract.members.listbox.nativeElement, 'div');
   assert.match(contract.element.reason, /ul|li/);
-  assert.equal(contract.wiring['aria-setsize'].includes('every option'), true);
+  assert.match(contract.wiring['aria-setsize'], /hydration/);
 });
 
 /**
@@ -185,7 +185,7 @@ test('declares virtualization, and names the engine that answers it', () => {
  * which is what both windowing and incremental loading produce.
  */
 test('tells the reader how large the set is when it is not all present', () => {
-  assert.match(contract.wiring['aria-setsize'], /aria-setsize|setSize|every option/);
+  assert.match(contract.wiring['aria-setsize'], /not in the DOM/);
   assert.match(contract.wiring['aria-posinset'], /position|posinset/i);
   assert.equal(contract.incremental.threshold, 0);
   assert.equal(contract.incremental.request, 'onLoadMore');

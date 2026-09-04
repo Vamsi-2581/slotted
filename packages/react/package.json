@@ -44,6 +44,10 @@
       "types": "./dist/types/collapsible/index.d.ts",
       "import": "./dist/collapsible.js"
     },
+    "./combobox": {
+      "types": "./dist/types/combobox/index.d.ts",
+      "import": "./dist/combobox.js"
+    },
     "./container": {
       "types": "./dist/types/container/index.d.ts",
       "import": "./dist/container.js"

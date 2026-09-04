@@ -14,6 +14,7 @@ export default defineConfig({
         badge: resolve(import.meta.dirname, 'src/badge/index.ts'),
         button: resolve(import.meta.dirname, 'src/button/index.ts'),
         card: resolve(import.meta.dirname, 'src/card/index.ts'),
+        combobox: resolve(import.meta.dirname, 'src/combobox/index.ts'),
         container: resolve(import.meta.dirname, 'src/container/index.ts'),
         'description-list': resolve(import.meta.dirname, 'src/description-list/index.ts'),
         dialog: resolve(import.meta.dirname, 'src/dialog/index.ts'),

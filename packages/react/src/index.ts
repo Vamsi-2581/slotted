@@ -10,6 +10,7 @@ export * from './card';
 export * from './checkbox';
 export * from './checkbox-group';
 export * from './collapsible';
+export * from './combobox';
 export * from './container';
 export * from './currency-field';
 export * from './description-list';

@@ -42,9 +42,17 @@ role and `role="option"` replaces `li`'s `listitem`, so the elements would
 contribute nothing but a promise the roles then break — and the windowed shape
 needs a `role="presentation"` element between the root and the options, which is
 not a valid child of `ul`. The cost is that nothing is inherited: set position
-and size come from `aria-setsize` and `aria-posinset`, which the family writes on
-every option whether or not it is windowed. `list` and `list-item` keep `ul`/`li`
-because they are a static list with no role to replace.
+and size come from `aria-setsize` and `aria-posinset` rather than from the
+elements. `list` and `list-item` keep `ul`/`li` because they are a static list
+with no role to replace.
+
+The pair is written on every option of a collection the family was handed, and
+on none when the options were written as children. That is exactly the
+pattern's condition — the attributes are required "if the complete set of
+available options is not present in the DOM due to dynamic loading" — and it is
+also the only shape that survives the server: a count React could reach only by
+reading the DOM is nothing on the server and a number on the client, which is a
+hydration mismatch for a value the platform was already computing.
 
 **`canvas` exists only while `virtual` is set**, and it carries
 `role="presentation"` so the options stay owned by the listbox. It is the

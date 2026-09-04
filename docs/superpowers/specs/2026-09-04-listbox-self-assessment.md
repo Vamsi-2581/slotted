@@ -278,15 +278,29 @@ scenes. Captured and read: light/dark/high-contrast at 420, light at 240 and
 light and dark, `--hover` on the first option, and the `windowed` scene on its
 own in three schemes.
 
-**Reference pages.** `http://localhost:6006/iframe.html?viewMode=docs&id=components-listbox--reference`
-and the same on 6007 **have not been opened**, and `tools/harness/audit.mjs` has
-not been run against either. Both Storybook servers read
-`packages/styles/package.json` for the new subpath export and
-`packages/angular/tsconfig.base.json` for the new entry point, and neither sees a
-new family without a restart — which `docs/build-briefing.md` says to ask for
-rather than do. The offline half of the same contract is green:
-`specs/reference-pages.test.mjs`, `specs/story-layout.test.mjs`, and the
-per-family stories specs in both bindings.
+**Reference pages.** Both servers answer — 6006 and 6007 each return 200 — and
+neither renders this family. `tools/harness/audit.mjs` was run against both:
+
+```
+node tools/harness/audit.mjs "http://localhost:6006/iframe.html?viewMode=docs&id=components-listbox--reference"
+node tools/harness/audit.mjs "http://localhost:6007/iframe.html?viewMode=docs&id=components-listbox--reference"
+→ rendered no demonstration stage within 15 seconds
+```
+
+That is the restart `docs/build-briefing.md` names: the React server resolved
+`packages/styles/package.json` at startup and cannot see the new
+`./listbox/listbox.css` subpath, and the Angular server read its entry-point
+directories once and cannot see `packages/angular/listbox`. Restarting either
+interrupts the other session working in this worktree, so it is asked for at the
+gate rather than done. **Neither page has been read rendered, and the audit has
+not passed.** That is the one step of this skill left open, and it is left open
+deliberately.
+
+The offline half of the same contract is green: `specs/reference-pages.test.mjs`
+lists no listbox failure, `specs/story-layout.test.mjs` passes, and the
+per-family stories specs pass in both bindings — scenario coverage, the API
+table against every declared default and both state models, the reference-page
+contract, and Prettier over every curated snippet.
 
 **Concurrency.** Another session was writing `packages/core/src/collection` in
 this same worktree while this family was built. It added `navigation.ts`,

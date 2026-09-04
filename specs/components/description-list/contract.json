@@ -2,7 +2,7 @@
   "schemaVersion": 5,
   "family": "description-list",
   "ui": "description-list",
-  "rootElement": "dl",
+  "rootElement": "div",
   "itemElement": "div",
   "termElement": "dt",
   "descriptionElement": "dd",
@@ -24,11 +24,12 @@
   },
   "tracks": {
     "term": "1",
-    "description": "2 / -2",
+    "description": "2 / -1, and 2 / -2 in a list that holds an action",
     "action": "-2 / -1",
     "engine": "subgrid",
     "reason": "The terms share one track sized to the widest of them, which is what a dl of independent groups cannot do without subgrid. The same three placements serve an item that spans two columns, because its value simply stretches across the middle tracks.",
-    "separation": "padding on the cells, not column-gap: a gap applies between tracks whether or not the action track has any width."
+    "separation": "padding on the cells, not column-gap: a gap applies between tracks whether or not the action track has any width.",
+    "owner": "list"
   },
   "reflow": {
     "container": "slotted-description-list",
@@ -69,12 +70,13 @@
     "api": "navigator.clipboard.writeText",
     "announce": "@slotted/core/live-announcer, politely",
     "declined": "document.execCommand('copy')",
-    "reason": "The fallback exists for insecure contexts, and a panel showing an account identifier over plain HTTP has a larger problem than a copy button. A refused write returns the control to rest, carries the failure in the request, and leaves the value selectable."
+    "reason": "The fallback exists for insecure contexts, and a panel showing an account identifier over plain HTTP has a larger problem than a copy button. A refused write returns the control to rest, carries the failure in the request, and leaves the value selectable.",
+    "feedback": "data-complete on the control for two seconds, the check glyph in place of the clipboard, and the message announced politely. `complete` is the vocabulary's word for something that has finished, and a copy that finished is exactly that; the alternative was a second word for one family."
   },
   "empty": {
     "part": "placeholder",
     "mark": "a rule drawn in CSS at the value's optical centre",
-    "text": "data-ui=\"visually-hidden\", default Not provided",
+    "text": "data-ui=\"visually-hidden\", carrying the placeholder label",
     "reason": "An empty cell is a row a reader cannot tell from a defect. Ant renders one; GOV.UK renders a link to the question that would fill it. Colour and shape alone never carry the meaning, so the reason is text."
   },
   "declined": {
@@ -118,23 +120,28 @@
       "columns",
       "variant",
       "termWidth",
-      "placeholder",
-      "copyLabel",
-      "copiedLabel",
-      "revealLabel",
-      "collapseLabel"
+      "labels"
     ],
-    "toParts": ["layout", "columns", "variant"]
+    "toParts": [
+      "layout",
+      "columns",
+      "variant"
+    ]
   },
   "stateAttributes": {
-    "revealed": "data-revealed"
+    "revealed": "data-revealed",
+    "complete": "data-complete"
   },
   "stateModel": {
     "revealed": {
       "controlled": "revealed",
       "uncontrolled": "defaultRevealed",
       "request": "onRevealedChange",
-      "reasons": ["pointer", "keyboard", "programmatic"]
+      "reasons": [
+        "pointer",
+        "keyboard",
+        "programmatic"
+      ]
     }
   },
   "literals": {
@@ -143,19 +150,46 @@
     "--slotted-description-list-placeholder-width": "The drawn rule standing in for a missing value is a proportion of the type it replaces, which is geometry rather than a step on a scale."
   },
   "axes": {
-    "layout": ["row", "stack"],
-    "columns": ["1", "2", "3"],
-    "variant": ["plain", "ruled", "framed"]
+    "layout": [
+      "row",
+      "stack"
+    ],
+    "columns": [
+      "1",
+      "2",
+      "3"
+    ],
+    "variant": [
+      "plain",
+      "ruled",
+      "framed"
+    ]
   },
   "resolution": {
-    "layout": ["prop", "defaults", "row"],
-    "columns": ["prop", "defaults", "1"],
-    "variant": ["prop", "defaults", "plain"],
-    "termWidth": ["prop", "defaults", "14rem"]
+    "layout": [
+      "prop",
+      "defaults",
+      "row"
+    ],
+    "columns": [
+      "prop",
+      "defaults",
+      "1"
+    ],
+    "variant": [
+      "prop",
+      "defaults",
+      "plain"
+    ],
+    "termWidth": [
+      "prop",
+      "defaults",
+      "14rem"
+    ]
   },
   "members": {
     "descriptionList": {
-      "nativeElement": "dl",
+      "nativeElement": "div",
       "defaults": {
         "layout": "row",
         "columns": "1",
@@ -165,17 +199,26 @@
         "clamp": 0,
         "copy": false,
         "empty": false,
-        "defaultRevealed": false,
-        "placeholder": "Not provided",
-        "copyLabel": "Copy",
-        "copiedLabel": "Copied",
-        "revealLabel": "Show more",
-        "collapseLabel": "Show less"
+        "defaultRevealed": false
       },
-      "capabilities": ["arrangement", "appearance", "content", "revealed", "copyable", "wiring"],
-      "states": ["default", "hover", "active", "focus-visible", "revealed"],
+      "capabilities": [
+        "arrangement",
+        "appearance",
+        "revealed",
+        "copyable",
+        "wiring"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "active",
+        "focus-visible",
+        "revealed",
+        "complete"
+      ],
       "parts": [
         "root",
+        "list",
         "item",
         "term",
         "hint",
@@ -204,5 +247,15 @@
       "content",
       "keyboard"
     ]
-  }
+  },
+  "listElement": "dl",
+  "rootReason": "A container cannot answer its own container query: `container-type: inline-size` makes an element a query container for its descendants and not for itself. The tracks and the arrangement are what the query changes, so the query container is the root and the grid is the list — the same division `stepper` makes between its root and its `ol`, and `breadcrumb` between its `nav` and its own.",
+  "labels": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "reveal": "Show more",
+    "collapse": "Show less",
+    "placeholder": "Not provided"
+  },
+  "labelsReason": "The five words the family says, in one input rather than five: an application translates them once and a family that spread them across the root would make four of the five a prop nobody sets. `stepper` groups its own the same way, and neither set is a declared default — a default is a value a consumer overrides one at a time."
 }

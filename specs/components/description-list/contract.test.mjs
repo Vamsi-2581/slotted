@@ -22,9 +22,10 @@ test('declares one member, because every part reads one list', () => {
   assert.deepEqual(Object.keys(contract.members), ['descriptionList']);
 });
 
-test('names the ten parts a pair is made of', () => {
+test('names the eleven parts a pair is made of', () => {
   assert.deepEqual(list.parts, [
     'root',
+    'list',
     'item',
     'term',
     'hint',
@@ -45,8 +46,9 @@ test('names the ten parts a pair is made of', () => {
  * one grid area.
  */
 test('takes the list, the term and the definition from the platform', () => {
-  assert.equal(list.nativeElement, 'dl');
-  assert.equal(contract.rootElement, 'dl');
+  assert.equal(list.nativeElement, 'div');
+  assert.equal(contract.listElement, 'dl');
+  assert.equal(contract.rootElement, 'div');
   assert.equal(contract.itemElement, 'div');
   assert.equal(contract.termElement, 'dt');
   assert.equal(contract.descriptionElement, 'dd');
@@ -131,6 +133,29 @@ test('paints the revealed state through the shared attribute vocabulary', () => 
 });
 
 /**
+ * `container-type: inline-size` makes an element a query container for its
+ * descendants and not for itself, and what the query changes here is the grid
+ * the root would otherwise be. So the root is the container and the `dl` is the
+ * grid — the division `stepper` makes between its root and its `ol`.
+ */
+test('separates the query container from the grid it resizes', () => {
+  assert.ok(list.parts.indexOf('root') < list.parts.indexOf('list'));
+  assert.match(contract.rootReason, /container query/);
+  assert.equal(contract.tracks.owner, 'list');
+});
+
+/**
+ * A copy that finished is something that has finished, which is the word the
+ * vocabulary already holds. Painting it needs no second word for one family,
+ * and the control returns to rest on its own.
+ */
+test('says a copy finished in the vocabulary the library already speaks', () => {
+  assert.ok(list.states.includes('complete'));
+  assert.equal(contract.stateAttributes.complete, STATE_ATTRIBUTES.complete);
+  assert.match(contract.copy.feedback, /data-complete/);
+});
+
+/**
  * Section 10: a long value may be copied or revealed, never truncated without
  * access. Both routes are declared parts, and neither removes text from the
  * DOM.
@@ -139,8 +164,8 @@ test('gives a long value two ways out and takes none of it away', () => {
   assert.ok(list.parts.includes('copy'));
   assert.ok(list.parts.includes('toggle'));
   assert.equal(list.defaults.clamp, 0);
-  assert.equal(list.defaults.revealLabel, 'Show more');
-  assert.equal(list.defaults.collapseLabel, 'Show less');
+  assert.equal(contract.labels.reveal, 'Show more');
+  assert.equal(contract.labels.collapse, 'Show less');
 });
 
 /**
@@ -168,8 +193,10 @@ test('answers its own inline size, count first and arrangement second', () => {
 test('places every cell once, through the tracks the root declares', () => {
   assert.equal(contract.tracks.engine, 'subgrid');
   assert.equal(contract.tracks.term, '1');
-  assert.equal(contract.tracks.description, '2 / -2');
+  assert.match(contract.tracks.description, /^2 \/ -1\b/);
+  assert.match(contract.tracks.description, /2 \/ -2/);
   assert.equal(contract.tracks.action, '-2 / -1');
+  assert.equal(contract.tracks.owner, 'list');
   assert.match(contract.tracks.separation, /padding/);
 });
 
@@ -190,7 +217,7 @@ test('names a row action by the term it belongs to', () => {
 test('draws a missing value and says why it is missing', () => {
   assert.equal(contract.empty.part, 'placeholder');
   assert.match(contract.empty.text, /visually-hidden/);
-  assert.equal(list.defaults.placeholder, 'Not provided');
+  assert.equal(contract.labels.placeholder, 'Not provided');
 });
 
 test('answers every axis from the prop, then the provider, then a stated default', () => {
@@ -224,9 +251,38 @@ test('states the reason for every literal it writes', () => {
  * An application decides its arrangement, its labels and its placeholder once.
  * Every value the provider carries is a value a part reads.
  */
+/**
+ * The five words the family says are one input rather than five declared
+ * defaults. A default is a value a consumer overrides one at a time; a
+ * vocabulary is translated once, which is why `stepper` groups its own the same
+ * way and why neither set appears in `defaults`.
+ */
+test('holds the words it says apart from the values it defaults', () => {
+  assert.deepEqual(Object.keys(contract.labels).sort(), [
+    'collapse',
+    'copied',
+    'copy',
+    'placeholder',
+    'reveal',
+  ]);
+  for (const [key, word] of Object.entries(contract.labels)) {
+    assert.ok(word.length > 0, `${key} says nothing`);
+  }
+  /* `copy` is a word here and a boolean input there — the control's name and
+     whether it is drawn are two questions, and neither borrows the other's
+     answer. Every other word stays out of the defaults entirely. */
+  for (const key of ['collapse', 'copied', 'placeholder', 'reveal']) {
+    assert.ok(!(key in list.defaults), `${key} is a word, not a default`);
+  }
+  assert.ok(contract.labelsReason.length > 40);
+});
+
 test('lets an application set the whole family once', () => {
   for (const key of contract.provides.descriptionListDefaults) {
-    assert.ok(key in list.defaults, `${key} is provided and is not a default`);
+    assert.ok(
+      key in list.defaults || key === 'labels',
+      `${key} is provided and is neither a default nor the vocabulary`,
+    );
   }
   for (const axis of contract.provides.toParts) {
     assert.ok(axis in contract.axes, `${axis} reaches the parts and is not an axis`);

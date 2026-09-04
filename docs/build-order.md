@@ -1,8 +1,11 @@
-# Ordem de reconstrução
+# Ordem de construção
 
-Sequência de invocações de `/component` para refazer a biblioteca a partir da
-camada mais primitiva. Deriva de `docs/component-features.md` (guia de features)
-e do estado atual de `specs/components/`.
+Sequência de invocações de `/component`, da camada mais primitiva para fora.
+Algumas famílias são novas; outras substituem uma construída antes desta
+fundação. A coluna de modo diz qual é qual.
+
+Deriva de `docs/component-features.md` (guia de features) e do estado atual de
+`specs/components/`.
 
 ## Como ler
 
@@ -67,7 +70,7 @@ evento de origem opaco e cancelamento antes do commit. A lei está em
 ### Ratchet da reconstrução
 
 `specs/legacy-families.json` lista as 29 famílias ainda na versão 4 do schema.
-`specs/rebuild-ledger.test.mjs` recusa uma família fora da lista que não
+`specs/legacy-ledger.test.mjs` recusa uma família fora da lista que não
 satisfaça a versão 5, recusa uma família listada que já satisfaça, e recusa o
 crescimento da lista. Sair da lista é o que define "refeita".
 
@@ -614,8 +617,20 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   do consumidor, nunca um botão da família. Reflow por container query abaixo de
   30rem transforma linha em coluna.
 
-- `result-state` cobre empty e error na mesma família visual com semânticas
-  distintas (guia 17).
+- **`result-state`** — entregue em 2026-09-04. A região que substitui o conteúdo
+  que não está lá, e diz o que fazer em seguida; não é `alert`, que fica ao lado
+  do conteúdo de que fala. Um membro e sete partes: `root`, `media`, `content`,
+  `title`, `description`, `actions` e `footer`. Sete status — `empty`,
+  `no-results`, `not-found`, `error`, `forbidden`, `offline` e `success` — cada
+  um com um tom que o tema já mede e uma silhueta própria, o que custou quatro
+  glyphs novos à fundação. Eixos `reach` (as mesmas três palavras de `alert`),
+  `align` e `live`. Sem modelo de estado: a família não guarda valor mutável, e
+  o teste de contrato afirma a ausência com a razão. `live` tem padrão `polite`,
+  contra o `off` de `alert` — o documento de entendimento do WCAG 2.2 SC 4.1.3
+  nomeia o texto desta família como seu exemplo de status message, e nenhuma das
+  sete implementações pesquisadas escreve papel vivo algum. Medida fica com
+  `container` e moldura com `card`. Decisões em
+  `docs/superpowers/specs/2026-09-03-result-state-design.md`.
 - `toolbar` fecha a onda sem o overflow para menu; o overflow depende de `menu`
   e volta como refino na onda 5.
 
@@ -634,6 +649,27 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   entregue ao navegador. O marcador não é medido: a raiz registra
   `data-activation-direction` e a folha de estilo transforma isso em origem de
   transformação, o que mantém a família correta antes da hidratação.
+- **`collapsible accordion`** — entregues em 2026-09-03, na mesma invocação.
+  `collapsible` é uma divulgação: um cabeçalho que o leitor opera e um painel
+  que ele controla. Nove partes — `root`, `header`, `trigger`, `indicator`,
+  `label`, `description`, `actions`, `panel` e `content` — e seis eixos:
+  `size`, `variant` (`plain`/`ruled`/`framed`), `indicator`
+  (`chevron`/`plus-minus`/`none`), `togglePlacement`, `level` e `mount`
+  (`active`/`lazy`/`eager`/`until-found`). O gatilho é `button` e não `summary`:
+  o padrão do APG exige que o botão seja o único elemento dentro do heading, e
+  `summary` não aceita nenhum dos dois arranjos. O painel abre com uma pista de
+  grade entre `0fr` e `1fr`, sem medir nada. `mount="until-found"` escreve
+  `hidden="until-found"` e responde a `beforematch`, de modo que a busca do
+  próprio navegador abre o painel que encontrou.
+  `accordion` é o conjunto: uma parte, `root`, e o valor que os itens
+  compartilham. `multiple`, `requireOpen` — com o `aria-disabled="true"` que o
+  padrão pede no cabeçalho que não pode fechar —, `loop`, `headingLevel` e um
+  `variant` de quatro valores mapeado no `variant` que ele entrega a cada item.
+  As setas, `Home` e `End` são aditivas: nada escreve `tabindex`, porque
+  `w3c/aria-practices#3434` removeu o foco rotativo do padrão. Nenhuma regra do
+  conjunto alcança `[data-ui='collapsible']`, que é a regra de `checkbox-group`.
+  Acordeão horizontal é recusado e fica com `tabs`.
+
 - **`toolbar`** — entregue em 2026-09-03. Um membro e quatro partes: `root`,
   `group`, `separator` e `spacer`. Eixos `orientation`, `size`, `variant`
   (`plain`/`outline`) e `overflow` (`wrap`/`scroll`). Os itens são os controles
@@ -703,13 +739,30 @@ Infraestrutura primeiro, em `packages/core`, com teste próprio e sem UI:
    sem expor a engine.
 4. `live-announcer` — prioridade, deduplicação e limpeza.
 
-`focus` já existe e é revisado, não reescrito.
+Os cinco foram entregues em 2026-09-03, na mesma invocação. Inventário em
+`docs/superpowers/specs/2026-09-03-overlay-infrastructure-capability-inventory.md`,
+decisões em `docs/superpowers/specs/2026-09-03-overlay-infrastructure-design.md`.
+Nenhum importa outro: a família compõe.
+
+`focus` já existe e é revisado, não reescrito. A revisão encontrou as duas
+capacidades que o guia, seção 3, pede dele e que ele não tem — contenção de foco
+em overlay e restauração ao gatilho. Elas ficam com `dialog`, o primeiro
+consumidor, e não com `dismissable-layer`, que responderia a mesma pergunta uma
+segunda vez.
 
 Depois, nesta ordem:
 
-1. `tooltip`
+1. `tooltip` — primeiro consumidor de `positioner` e de `presence`. A folha de
+   estilo lê `--slotted-positioner-anchor-width` e as outras propriedades que o
+   posicionador escreve em tempo de execução, e `packages/styles/src/tokens.test.mjs`
+   exige que todo `--slotted-*` lido por uma folha esteja declarado no
+   `tokens.json` da família com fallback de fundação. Um valor de runtime não tem
+   fallback de fundação: o defeito é do teste compartilhado e é corrigido em
+   commit próprio, antes da família, como o briefing exige.
 2. `popover`
-3. `dialog alert-dialog`
+3. `dialog alert-dialog` — traz para `packages/core/src/focus` a contenção de
+   foco e a restauração ao gatilho, com teste próprio, antes das partes da
+   família.
 4. `drawer`
 5. `menu menubar`
 6. `toast`

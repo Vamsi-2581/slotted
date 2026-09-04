@@ -156,7 +156,14 @@ const capabilityApi = {
    * Every declared default is still required row by row below.
    */
   removable: [],
-  virtualization: ['itemCount', 'itemSize', 'overscan'],
+  /**
+   * The row height and the buffer, and not the count. `itemCount` was a prop of
+   * `virtual-list`, the family `docs/build-order.md` retired in wave 6 when
+   * windowing became a capability of the collection engine: a family that
+   * windows now holds a collection and the count is the collection's, so the
+   * table demanded a prop no such family can declare.
+   */
+  virtualization: ['itemSize', 'overscan'],
   files: ['accept', 'files', 'maxSize', 'multiple'],
   checked: ['checked'],
   /**

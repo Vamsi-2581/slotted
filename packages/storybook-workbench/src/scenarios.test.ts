@@ -251,3 +251,25 @@ describe('bindScenes typing', () => {
     expect(first?.title).toBe('T');
   });
 });
+
+/**
+ * `virtual-list` was retired in wave 6 and windowing became a capability of the
+ * collection engine, so a family that windows holds a collection and its count
+ * is the collection's rather than a prop. The table asked for `itemCount`, and
+ * `listbox` — the first family to declare the capability since — could not have
+ * answered it without inventing a prop to satisfy a test.
+ */
+describe('the virtualization capability', () => {
+  it('asks for the geometry a windowed family states and not for its count', () => {
+    const member = {
+      capabilities: ['virtualization'],
+      defaults: { itemSize: 36, overscan: 4 },
+    };
+    expect(
+      apiMetadataErrors(member, [
+        { name: 'itemSize', defaultValue: '36' },
+        { name: 'overscan', defaultValue: '4' },
+      ]),
+    ).toEqual([]);
+  });
+});

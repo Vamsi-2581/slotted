@@ -46,7 +46,7 @@ const meta = {
       page: createReferencePage({
         title: 'Toast',
         description:
-          'Transient feedback about something that already happened — a tone, a mark, a sentence, sometimes a control that acts on it, and a clock that stops whenever the reader is reading.',
+          'Transient feedback about something that already happened — a tone, a mark, a sentence, sometimes a control that acts on it, and a clock that stops whenever the reader is reading. The dashed box in every demonstration stands in for the screen: in an application the region is fixed against the viewport and the messages are given a duration.',
         framework: 'React',
         ...REACT_TOAST_DOCS.toast,
         tokens: REACT_TOAST_TOKENS,
@@ -78,7 +78,7 @@ export const Playground: Story = {
             tone: 'accent',
           },
         ]}
-        size="tall"
+        size="layer"
         trigger={(toaster) => (
           <Button
             onClick={() =>
@@ -164,7 +164,7 @@ export const Timing: Story = {
           },
           { title: 'Sessão expirada', tone: 'danger', duration: 0 },
         ]}
-        size="tall"
+        size="layer"
       />
     </div>
   ),
@@ -176,7 +176,7 @@ export const Actions: Story = {
     <div className="slotted-demo-stage" data-layout="block">
       <DemoRegion
         seed={[]}
-        size="tall"
+        size="layer"
         trigger={(toaster) => (
           <Button
             onClick={() => {
@@ -211,7 +211,7 @@ export const PromiseScene: Story = {
     <div className="slotted-demo-stage" data-layout="block">
       <DemoRegion
         seed={[]}
-        size="tall"
+        size="layer"
         trigger={(toaster) => (
           <Button
             onClick={() =>
@@ -249,7 +249,7 @@ export const Queue: Story = {
           { title: 'Terceira', tone: 'success' },
           { title: 'Quarta', tone: 'warning' },
         ]}
-        size="tall"
+        size="layer"
       />
       <Text size="sm" tone="muted">
         Duas na tela, duas à espera. Feche uma e a seguinte aparece — e só então o relógio dela
@@ -274,7 +274,7 @@ export const Stacking: Story = {
             tone: 'success',
           },
         ]}
-        size="tall"
+        size="layer"
         stacking="stack"
       />
     </div>
@@ -316,7 +316,7 @@ export const Keyboard: Story = {
           },
           { title: 'Rascunho salvo', tone: 'accent' },
         ]}
-        size="tall"
+        size="layer"
       />
       <Text size="sm" tone="muted">
         F6 leva o foco à mensagem mais recente. Tab percorre os controlos, Escape fecha a mensagem
@@ -362,7 +362,7 @@ export const Composition: Story = {
             description: 'O comportamento continua a ser da família.',
           },
         ]}
-        size="tall"
+        size="layer"
       >
         {(message) => (
           <Toast key={message.id} message={message}>

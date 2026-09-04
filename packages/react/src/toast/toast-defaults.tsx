@@ -104,15 +104,11 @@ function spokenFrom(input: ToastInput): string {
 
 /** The store's own fields, and the rest carried whole as the message's payload. */
 function split(input: ToastInput) {
-  const {
-    id,
-    duration,
-    priority,
-    announcement: _announcement,
-    loading,
-    onStatusChange,
-    ...content
-  } = input;
+  /* `announcement` is read by `spokenFrom` rather than carried through, so it
+     is dropped here on purpose. */
+  const { id, duration, priority, loading, onStatusChange, ...rest } = input;
+  const { announcement, ...content } = rest;
+  void announcement;
 
   return {
     ...(id === undefined ? {} : { id }),

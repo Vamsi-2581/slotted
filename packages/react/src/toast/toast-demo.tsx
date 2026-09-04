@@ -37,9 +37,10 @@ export function DemoRegion({
   useEffect(() => {
     for (const message of seed) toaster.show({ duration: 0, ...message });
     return () => toaster.clear();
-    /* The seed is read once: a demonstration is a still, not a feed. */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toaster]);
+    /* The seed is read once, deliberately: a demonstration is a still, not a
+       feed, and a page that re-seeded on every render would grow one message
+       per keystroke of the controls. */
+  }, [seed, toaster]);
 
   return (
     <ToasterProvider value={toaster}>
@@ -48,7 +49,7 @@ export function DemoRegion({
           {children}
         </ToastRegion>
       </div>
-      {trigger?.(toaster)}
+      {trigger === undefined ? null : <div className="slotted-demo-row">{trigger(toaster)}</div>}
     </ToasterProvider>
   );
 }

@@ -60,7 +60,7 @@ const meta: Meta<ToastStoryArgs> = {
       page: createReferencePage({
         title: 'Toast',
         description:
-          'Transient feedback about something that already happened — a tone, a mark, a sentence, sometimes a control that acts on it, and a clock that stops whenever the reader is reading.',
+          'Transient feedback about something that already happened — a tone, a mark, a sentence, sometimes a control that acts on it, and a clock that stops whenever the reader is reading. The dashed box in every demonstration stands in for the screen: in an application the region is fixed against the viewport and the messages are given a duration.',
         framework: 'Angular',
         ...ANGULAR_TOAST_DOCS.toast,
         tokens: ANGULAR_TOAST_TOKENS,
@@ -93,7 +93,7 @@ export const Playground: Story = {
     template: stage(`
       <sl-toast-demo
         #demo="slToastDemo"
-        size="tall"
+        size="layer"
         [limit]="limit"
         [placement]="placement"
         [seed]="seed"
@@ -180,7 +180,7 @@ export const Timing: Story = {
         { title: 'Sessão expirada', tone: 'danger', duration: 0 },
       ],
     },
-    template: stage('<sl-toast-demo size="tall" [limit]="2" [seed]="seed" />'),
+    template: stage('<sl-toast-demo size="layer" [limit]="2" [seed]="seed" />'),
   }),
 };
 
@@ -194,7 +194,7 @@ export const Actions: Story = {
           Desfazer
         </button>
       </ng-template>
-      <sl-toast-demo #demo="slToastDemo" size="tall">
+      <sl-toast-demo #demo="slToastDemo" size="layer">
         <button
           slButton
           size="sm"
@@ -222,7 +222,7 @@ export const PromiseScene: Story = {
       }),
     },
     template: stage(`
-      <sl-toast-demo #demo="slToastDemo" size="tall">
+      <sl-toast-demo #demo="slToastDemo" size="layer">
         <button
           slButton
           size="sm"
@@ -247,7 +247,7 @@ export const Queue: Story = {
       ],
     },
     template: stage(`
-      <sl-toast-demo size="tall" [limit]="2" [seed]="seed" />
+      <sl-toast-demo size="layer" [limit]="2" [seed]="seed" />
       <p slText size="sm" tone="muted">
         Duas na tela, duas à espera. Feche uma e a seguinte aparece — e só então o relógio dela
         começa.
@@ -269,7 +269,7 @@ export const Stacking: Story = {
         },
       ],
     },
-    template: stage('<sl-toast-demo size="tall" stacking="stack" [limit]="3" [seed]="seed" />'),
+    template: stage('<sl-toast-demo size="layer" stacking="stack" [limit]="3" [seed]="seed" />'),
   }),
 };
 
@@ -298,7 +298,7 @@ export const Keyboard: Story = {
     },
     template: stage(`
       <button slButton size="sm" type="button">Um controlo qualquer da página</button>
-      <sl-toast-demo size="tall" [limit]="2" [seed]="seed" />
+      <sl-toast-demo size="layer" [limit]="2" [seed]="seed" />
       <p slText size="sm" tone="muted">
         F6 leva o foco à mensagem mais recente. Tab percorre os controlos, Escape fecha a mensagem
         onde o foco está e devolve-o ao controlo acima.
@@ -339,7 +339,7 @@ export const Composition: Story = {
           <p slToastDescription>{{ message.data.description }}</p>
         </div>
       </ng-template>
-      <sl-toast-demo #demo="slToastDemo" size="tall">
+      <sl-toast-demo #demo="slToastDemo" size="layer">
         <button
           slButton
           size="sm"

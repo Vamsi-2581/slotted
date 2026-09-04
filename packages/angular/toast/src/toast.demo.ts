@@ -46,7 +46,7 @@ import type {
         [swipe]="swipe()"
       />
     </div>
-    <ng-content />`,
+    <div class="slotted-demo-row"><ng-content /></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: { style: 'display: contents' },

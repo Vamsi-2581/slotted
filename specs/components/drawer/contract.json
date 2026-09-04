@@ -241,7 +241,6 @@
         "outsidePress": "close",
         "minExtent": 0.2,
         "maxExtent": 1,
-        "snapPoints": [],
         "loading": false
       },
       "fixed": {

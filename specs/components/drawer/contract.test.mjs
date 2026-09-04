@@ -249,7 +249,11 @@ test('measures the extent as a fraction of the layer', () => {
   assert.match(contract.extent.unit, /rather than a CSS length/);
   assert.equal(drawer.defaults.minExtent, 0.2);
   assert.equal(drawer.defaults.maxExtent, 1);
-  assert.deepEqual(drawer.defaults.snapPoints, []);
+  /* No stops by default, and the absence is a described value rather than a
+     declared one: `[]` stringifies to nothing, and a reference page's API table
+     is required to print every declared default as it stands. */
+  assert.ok(!('snapPoints' in drawer.defaults));
+  assert.match(contract.extent.snapPoints, /empty by default/);
   assert.match(contract.wiring.resizerValue, /times a hundred/);
 });
 

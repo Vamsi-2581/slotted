@@ -24,9 +24,11 @@ export const ANGULAR_TOOLBAR_TOKENS = toolbarTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { SlToolbar, SlToolbarGroup, SlToolbarSeparator, SlToolbarSpacer } from '@slotted/angular/toolbar';",
-  selector: '[slToolbar], [slToolbarGroup], [slToolbarSeparator], [slToolbarSpacer]',
-  exportAs: 'slToolbar, slToolbarGroup, slToolbarSeparator, slToolbarSpacer',
+    "import { SlToolbar, SlToolbarGroup, SlToolbarItem, SlToolbarOverflow, SlToolbarSeparator, SlToolbarSpacer } from '@slotted/angular/toolbar';",
+  selector:
+    '[slToolbar], [slToolbarGroup], [slToolbarItem], sl-toolbar-overflow, [slToolbarSeparator], [slToolbarSpacer]',
+  exportAs:
+    'slToolbar, slToolbarGroup, slToolbarItem, slToolbarOverflow, slToolbarSeparator, slToolbarSpacer',
 };
 
 const anatomy: AnatomyRow[] = [
@@ -57,6 +59,20 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The free space between two runs, so what follows sits at the end of the bar. It replaces a justify axis: an axis decides where every control sits, and a bar needs one boundary.',
+  },
+  {
+    part: 'item',
+    element: 'div carrying slToolbarItem',
+    required: false,
+    purpose:
+      'One unit the bar may give up under overflow="menu", carrying what its control becomes in the surface. A unit is a direct child of the root, which is deliberately not the same thing as an item: the keyboard finds items by being focusable at any depth, and the collapse acts on the boxes the bar lays out. An slButtonGroup inside one of these is one unit and four items.',
+  },
+  {
+    part: 'overflow',
+    element: 'button inside sl-toolbar-overflow, carrying the Menu family’s own trigger',
+    required: false,
+    purpose:
+      'The control that opens what did not fit. It prints U+2026, its accessible name carries the count, and the bar writes hidden on it while nothing has given way — the same measurement that decides whether it is needed is the one that reveals it to read its width. The host is display: contents, so the button is a child of the bar itself.',
   },
 ];
 
@@ -196,9 +212,36 @@ const scenes: ReferenceSceneMeta[] = [
     snippet: defineSnippet({
       id: 'toolbar-angular-overflow',
       language: 'angular',
-      label: 'Two answers, and the third arrives with menu',
+      label: 'One line, or two',
       source: `<div slToolbar aria-label="Muitas ações" overflow="wrap"></div>
 <div slToolbar aria-label="Muitas ações, rolando" overflow="scroll"></div>`,
+    }),
+  },
+  {
+    id: 'overflowMenu',
+    title: 'What is left over, behind one control',
+    note: 'The bar measures itself and gives way from the end. What stays visible is what has nowhere to go: an item that declares no counterpart cannot be hidden, which is how the primary action survives without a priority ranking it above the others. The counterpart is an ng-template, so a menu item that is never reached builds nothing.',
+    snippet: defineSnippet({
+      id: 'toolbar-angular-overflow-menu',
+      language: 'html',
+      label: 'A bar that gives way from the end',
+      source: `<div slToolbar aria-label="Documento" overflow="menu">
+  <!-- No counterpart, so it is pinned: the primary action stays visible. -->
+  <div slToolbarItem>
+    <button slButton tone="accent">Publicar</button>
+  </div>
+  <div slToolbarSeparator></div>
+  <div slToolbarItem [slToolbarItemCounterpart]="duplicate">
+    <button slButton variant="ghost">Duplicar</button>
+  </div>
+  <div slToolbarItem [slToolbarItemCounterpart]="archive">
+    <button slButton variant="ghost">Arquivar</button>
+  </div>
+  <sl-toolbar-overflow />
+</div>
+
+<ng-template #duplicate><button slMenuItem>Duplicar</button></ng-template>
+<ng-template #archive><button slMenuItem>Arquivar</button></ng-template>`,
     }),
   },
   {
@@ -249,10 +292,38 @@ export const ANGULAR_TOOLBAR_DOCS = {
       ],
       [
         'overflow',
-        "'wrap' | 'scroll'",
+        "'wrap' | 'scroll' | 'menu'",
         'wrap',
         'slToolbar, provideToolbarDefaults',
-        'What a bar does with more controls than it has room for. The overflow menu that Primer, Kendo and Fluent reach for arrives with the menu family',
+        'What a bar does with more controls than it has room for. wrap keeps every control on a second row, scroll is one line the arrows reveal, and menu is one line whose units give way from the end into a surface. A menu bar with no sl-toolbar-overflow in it has nothing to give way to, so it scrolls',
+      ],
+      [
+        'overflowChange',
+        'output<number>',
+        '—',
+        'slToolbar',
+        'How many units gave way, once per change. There is no two-way binding over the collapsed set: it is a measurement, and a consumer who owned it could assert that a bar fits when the layout says it does not',
+      ],
+      [
+        'slToolbarItemCounterpart, slToolbarGroupCounterpart',
+        'TemplateRef',
+        '—',
+        'slToolbarItem, slToolbarGroup',
+        'What the unit becomes in the surface when the bar has no room for it, rendered through NgTemplateOutlet only while it is collapsed. A unit that declares none is pinned — pinning is the absence of a counterpart rather than a second input, so the two can never disagree. It is not called overflow, because that word is the bar’s own axis',
+      ],
+      [
+        'label',
+        'string | ((hidden: number) => string)',
+        'counted',
+        'sl-toolbar-overflow',
+        'The accessible name of the control that holds what did not fit. The default counts — "3 more actions" — because three dots say nothing about how much is behind them; a bar in another language replaces the sentence rather than translating the mark, and an aria-label written on the host wins over both',
+      ],
+      [
+        'align, side, size',
+        'MenuAlign | MenuSide | MenuSize',
+        'from provideMenuDefaults',
+        'sl-toolbar-overflow',
+        'Where the surface sits against the trigger, and its own measure. Everything else about the layer an application sets once with provideMenuDefaults(): a second configuration surface over the same layer would be two answers to one question',
       ],
       [
         'loop',
@@ -279,7 +350,7 @@ export const ANGULAR_TOOLBAR_DOCS = {
     composition: apiRows([
       [
         'exportAs',
-        'slToolbar | slToolbarGroup | slToolbarSeparator | slToolbarSpacer',
+        'slToolbar | slToolbarGroup | slToolbarItem | slToolbarOverflow | slToolbarSeparator | slToolbarSpacer',
         '—',
         'every directive',
         'A template reaches the instance by name: #bar="slToolbar" hands a page the resolved axes, which is what a bar that answers a route needs',
@@ -289,7 +360,7 @@ export const ANGULAR_TOOLBAR_DOCS = {
         'any element',
         '—',
         'every directive',
-        'The four parts are directives on the consumer’s own element, so a bar can be a nav and a rule an hr',
+        'Five of the six parts are directives on the consumer’s own element, so a bar can be a nav and a rule an hr. The overflow is the exception: it is a component, because it renders both the trigger and the surface, and its host is display: contents so the button it draws is still a child of the bar',
       ],
       [
         'items',
@@ -306,6 +377,13 @@ export const ANGULAR_TOOLBAR_DOCS = {
         'The five decisions an application takes once, in the bootstrap file or on a route. A bar that states any of them itself still wins',
       ],
       [
+        'collapsedUnits(), counterpart(id)',
+        'signal<ToolbarCollapsedUnit[]>, TemplateRef | null',
+        '—',
+        'slToolbar',
+        'What the parts read: the units that gave way, in the order the bar held them, and what each one becomes. A consumer’s own trigger reads the same signals through #bar="slToolbar"',
+      ],
+      [
         'fieldset',
         'the platform’s own element',
         '—',
@@ -318,6 +396,7 @@ export const ANGULAR_TOOLBAR_DOCS = {
       'The APG asks an author to avoid controls whose operation needs the navigation arrows and, failing that, to place one such control last. The bar enforces it instead: a text entry, a select, a slider, a spin button and a contenteditable keep the keys of the flow axis, and focus leaves them on the cross axis or with Tab.',
       'A control that announces aria-disabled keeps its place in the ring, which the pattern allows where discoverability of a function is crucial and which is what Button’s focusableWhenDisabled renders. A control carrying the native attribute is skipped, because the platform will not focus it either — including every control inside a disabled fieldset.',
       'The bar names itself with the consumer’s aria-label or aria-labelledby, and each group names itself the same way. The pattern uses the role for three or more controls; that is documented rather than enforced, because a role that disappeared when a permission filter removed a button would be a semantic changing behind the author.',
+      'Under overflow="menu" the control that holds what did not fit is a control of the bar like any other: the arrows, Home and End reach it, and it leaves the ring the moment the bar has room for everything, because a hidden control cannot hold focus. Its name carries the count rather than the mark, and focus is moved onto it before the control under focus is hidden — so a reader who was on the fifth button lands on the control that now holds it rather than on the document body.',
       'Nothing in the bar is painted over: every control keeps its own states, its own focus ring and its own contrast. What the bar adds is the boundary between runs — a group, a rule, a spacer — and under forced colours the rule keeps its own paint, because a background flattens to Canvas and would take the boundary with it.',
     ],
     snippets: [
@@ -333,7 +412,8 @@ export const ANGULAR_TOOLBAR_DOCS = {
   data-orientation="horizontal"
   data-size="md"
   data-variant="outline"
-  data-overflow="wrap"
+  data-overflow="menu"
+  data-collapsed="1"
 >
   <div data-part="group" role="group" aria-label="Alinhamento">
     <button tabindex="0">Início</button>
@@ -341,7 +421,15 @@ export const ANGULAR_TOOLBAR_DOCS = {
   </div>
   <div data-part="separator" role="separator" aria-orientation="vertical"></div>
   <div data-part="spacer" aria-hidden="true"></div>
-  <button tabindex="-1">Excluir</button>
+  <div data-part="item" data-unit="slotted-toolbar-unit-1">
+    <button tabindex="-1">Excluir</button>
+  </div>
+  <div data-part="item" data-unit="slotted-toolbar-unit-2" hidden>
+    <button tabindex="-1">Arquivar</button>
+  </div>
+  <button data-part="overflow" type="button" tabindex="-1" aria-label="1 more action">
+    <span aria-hidden="true">…</span>
+  </button>
 </div>`,
       }),
       defineSnippet({
@@ -353,6 +441,8 @@ export const ANGULAR_TOOLBAR_DOCS = {
   --slotted-toolbar-inset: var(--slotted-space-4);
   --slotted-toolbar-separator-color: var(--slotted-border-subtle);
   --slotted-toolbar-background: var(--slotted-surface-sunken);
+  --slotted-toolbar-overflow-color: var(--slotted-text);
+  --slotted-toolbar-overflow-hover-background: var(--slotted-tone-accent-subtle-hover);
 }`,
       }),
     ],

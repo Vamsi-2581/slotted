@@ -24,7 +24,7 @@ export const REACT_TOOLBAR_TOKENS = toolbarTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { Toolbar, ToolbarDefaultsProvider, ToolbarGroup, ToolbarSeparator, ToolbarSpacer } from '@slotted/react';",
+    "import { Toolbar, ToolbarDefaultsProvider, ToolbarGroup, ToolbarItem, ToolbarOverflow, ToolbarSeparator, ToolbarSpacer } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -55,6 +55,20 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The free space between two runs, so what follows sits at the end of the bar. It replaces a justify axis: an axis decides where every control sits, and a bar needs one boundary.',
+  },
+  {
+    part: 'item',
+    element: 'div',
+    required: false,
+    purpose:
+      'One unit the bar may give up under overflow="menu", carrying what its control becomes in the surface. A unit is a direct child of the root, which is deliberately not the same thing as an item: the keyboard finds items by being focusable at any depth, and the collapse acts on the boxes the bar lays out. A ButtonGroup inside one of these is one unit and four items.',
+  },
+  {
+    part: 'overflow',
+    element: 'button, from the Menu family’s own trigger',
+    required: false,
+    purpose:
+      'The control that opens what did not fit. It prints U+2026, its accessible name carries the count, and the bar writes hidden on it while nothing has given way — the same measurement that decides whether it is needed is the one that reveals it to read its width.',
   },
 ];
 
@@ -204,6 +218,30 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'overflowMenu',
+    title: 'What is left over, behind one control',
+    note: 'The bar measures itself and gives way from the end. What stays visible is what has nowhere to go: an item that declares no counterpart cannot be hidden, which is how the primary action survives without a priority ranking it above the others.',
+    snippet: defineSnippet({
+      id: 'toolbar-react-overflow-menu',
+      language: 'tsx',
+      label: 'A bar that gives way from the end',
+      source: `<Toolbar aria-label="Documento" overflow="menu">
+  {/* No counterpart, so it is pinned: the primary action stays visible. */}
+  <ToolbarItem>
+    <Button tone="accent">Publicar</Button>
+  </ToolbarItem>
+  <ToolbarSeparator />
+  <ToolbarItem counterpart={<MenuItem>Duplicar</MenuItem>}>
+    <Button variant="ghost">Duplicar</Button>
+  </ToolbarItem>
+  <ToolbarItem counterpart={<MenuItem>Arquivar</MenuItem>}>
+    <Button variant="ghost">Arquivar</Button>
+  </ToolbarItem>
+  <ToolbarOverflow />
+</Toolbar>;`,
+    }),
+  },
+  {
     id: 'composition',
     title: 'Setting it once, and standing beside other families',
     note: 'The provider carries the five decisions an application takes once, and the bar is what belongs in a tab list’s actions slot — one tab stop for however many actions the page puts there.',
@@ -256,10 +294,38 @@ export const REACT_TOOLBAR_DOCS = {
       ],
       [
         'overflow',
-        "'wrap' | 'scroll'",
+        "'wrap' | 'scroll' | 'menu'",
         'wrap',
         'Toolbar, ToolbarDefaultsProvider',
-        'What a bar does with more controls than it has room for. The overflow menu that Primer, Kendo and Fluent reach for arrives with the menu family',
+        'What a bar does with more controls than it has room for. wrap keeps every control on a second row, scroll is one line the arrows reveal, and menu is one line whose units give way from the end into a surface. A menu bar with no ToolbarOverflow in it has nothing to give way to, so it scrolls',
+      ],
+      [
+        'onOverflowChange',
+        '(hidden: number) => void',
+        '—',
+        'Toolbar',
+        'How many units gave way, once per change. There is no controlled pair over the collapsed set: it is a measurement, and a consumer who owned it could assert that a bar fits when the layout says it does not',
+      ],
+      [
+        'counterpart',
+        'ReactNode',
+        '—',
+        'ToolbarItem, ToolbarGroup',
+        'What the unit becomes in the surface when the bar has no room for it. A unit that declares none is pinned — pinning is the absence of a counterpart rather than a second prop, so the two can never disagree. It is not called overflow, because that word is the bar’s own axis',
+      ],
+      [
+        'label',
+        'string | ((hidden: number) => string)',
+        'counted',
+        'ToolbarOverflow',
+        'The accessible name of the control that holds what did not fit. The default counts — "3 more actions" — because three dots say nothing about how much is behind them; a bar in another language replaces the sentence rather than translating the mark',
+      ],
+      [
+        'align, side, size',
+        'MenuAlign | MenuSide | MenuSize',
+        'from the Menu defaults',
+        'ToolbarOverflow',
+        'Where the surface sits against the trigger, and its own measure. Everything else about the layer an application sets once with MenuDefaultsProvider: a second configuration surface over the same layer would be two answers to one question',
       ],
       [
         'loop',
@@ -288,8 +354,22 @@ export const REACT_TOOLBAR_DOCS = {
         'render',
         '(props) => ReactNode',
         '—',
-        'Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarSpacer',
-        'Substitutes any of the four roots and hands it every attribute — a bar can be a nav, a rule an hr',
+        'Toolbar, ToolbarGroup, ToolbarItem, ToolbarOverflow, ToolbarSeparator, ToolbarSpacer',
+        'Substitutes any of the six roots and hands it every attribute — a bar can be a nav, a rule an hr, and the overflow trigger the consumer’s own IconButton with the Menu wiring on it',
+      ],
+      [
+        'menuRef',
+        'Ref<MenuHandle>',
+        '—',
+        'ToolbarOverflow',
+        'Reaches the surface’s imperative actions — open, close and focus — which belong to the Menu family rather than to this one',
+      ],
+      [
+        'useToolbarOverflow',
+        '() => { collapsed, counterpart }',
+        '—',
+        'inside Toolbar',
+        'What the parts read: the units that gave way, in the order the bar held them, and what each one becomes. A consumer’s own trigger reads the same value',
       ],
       [
         'ref',
@@ -325,6 +405,7 @@ export const REACT_TOOLBAR_DOCS = {
       'The APG asks an author to avoid controls whose operation needs the navigation arrows and, failing that, to place one such control last. The bar enforces it instead: a text entry, a select, a slider, a spin button and a contenteditable keep the keys of the flow axis, and focus leaves them on the cross axis or with Tab.',
       'A control that announces aria-disabled keeps its place in the ring, which the pattern allows where discoverability of a function is crucial and which is what Button’s focusableWhenDisabled renders. A control carrying the native attribute is skipped, because the platform will not focus it either — including every control inside a disabled fieldset.',
       'The bar names itself with the consumer’s aria-label or aria-labelledby, and each group names itself the same way. The pattern uses the role for three or more controls; that is documented rather than enforced, because a role that disappeared when a permission filter removed a button would be a semantic changing behind the author.',
+      'Under overflow="menu" the control that holds what did not fit is a control of the bar like any other: the arrows, Home and End reach it, and it leaves the ring the moment the bar has room for everything, because a hidden control cannot hold focus. Its name carries the count rather than the mark, and focus is moved onto it before the control under focus is hidden — so a reader who was on the fifth button lands on the control that now holds it rather than on the document body.',
       'Nothing in the bar is painted over: every control keeps its own states, its own focus ring and its own contrast. What the bar adds is the boundary between runs — a group, a rule, a spacer — and under forced colours the rule keeps its own paint, because a background flattens to Canvas and would take the boundary with it.',
     ],
     snippets: [
@@ -340,7 +421,8 @@ export const REACT_TOOLBAR_DOCS = {
   data-orientation="horizontal"
   data-size="md"
   data-variant="outline"
-  data-overflow="wrap"
+  data-overflow="menu"
+  data-collapsed="1"
 >
   <div data-part="group" role="group" aria-label="Alinhamento">
     <button tabindex="0">Início</button>
@@ -348,7 +430,15 @@ export const REACT_TOOLBAR_DOCS = {
   </div>
   <div data-part="separator" role="separator" aria-orientation="vertical" />
   <div data-part="spacer" aria-hidden="true" />
-  <button tabindex="-1">Excluir</button>
+  <div data-part="item" data-unit="«r3»">
+    <button tabindex="-1">Excluir</button>
+  </div>
+  <div data-part="item" data-unit="«r4»" hidden>
+    <button tabindex="-1">Arquivar</button>
+  </div>
+  <button data-part="overflow" type="button" tabindex="-1" aria-label="1 more action">
+    <span aria-hidden="true">…</span>
+  </button>
 </div>;`,
       }),
       defineSnippet({
@@ -360,6 +450,8 @@ export const REACT_TOOLBAR_DOCS = {
   --slotted-toolbar-inset: var(--slotted-space-4);
   --slotted-toolbar-separator-color: var(--slotted-border-subtle);
   --slotted-toolbar-background: var(--slotted-surface-sunken);
+  --slotted-toolbar-overflow-color: var(--slotted-text);
+  --slotted-toolbar-overflow-hover-background: var(--slotted-tone-accent-subtle-hover);
 }`,
       }),
     ],

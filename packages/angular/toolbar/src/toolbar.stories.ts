@@ -1,17 +1,26 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlButton } from '@slotted/angular/button';
-import { SlCheckbox, SlCheckboxControl } from '@slotted/angular/checkbox';
+import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlTab, SlTabActions, SlTabList, SlTabPanel, SlTabs } from '@slotted/angular/tabs';
 import { SlTextField, SlTextFieldControl } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
-import { SlToolbar, SlToolbarGroup, SlToolbarSeparator, SlToolbarSpacer } from './toolbar';
+import { SlMenuItem } from '@slotted/angular/menu';
+
+import {
+  SlToolbar,
+  SlToolbarGroup,
+  SlToolbarItem,
+  SlToolbarSeparator,
+  SlToolbarSpacer,
+} from './toolbar';
+import { SlToolbarOverflow } from './toolbar-overflow';
 import type {
   ToolbarOrientation,
-  ToolbarOverflow,
+  ToolbarOverflowMode,
   ToolbarSize,
   ToolbarVariant,
 } from './toolbar-defaults';
@@ -20,7 +29,7 @@ import { ANGULAR_TOOLBAR_DOCS, ANGULAR_TOOLBAR_TOKENS } from './toolbar.docs';
 interface ToolbarStoryArgs {
   loop: boolean;
   orientation: ToolbarOrientation;
-  overflow: ToolbarOverflow;
+  overflow: ToolbarOverflowMode;
   size: ToolbarSize;
   variant: ToolbarVariant;
 }
@@ -36,6 +45,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyOwners: KeyOwners,
     disabled: Disabled,
     overflow: Overflow,
+    overflowMenu: OverflowMenu,
     composition: Composition,
   }) as never;
 
@@ -46,11 +56,13 @@ const meta: Meta<ToolbarStoryArgs> = {
       imports: [
         SlToolbar,
         SlToolbarGroup,
+        SlToolbarItem,
+        SlToolbarOverflow,
         SlToolbarSeparator,
         SlToolbarSpacer,
+        SlMenuItem,
         SlButton,
         SlCheckbox,
-        SlCheckboxControl,
         SlTextField,
         SlTextFieldControl,
         SlTabs,
@@ -310,7 +322,7 @@ export const Overflow: Story = {
       ) +
         scene(
           'scroll — one line, whatever it holds',
-          'The bar scrolls past its controls rather than squeezing them, and the arrows still reach every one. The overflow menu the field agrees on arrives with the menu family.',
+          'The bar scrolls past its controls rather than squeezing them, and the arrows still reach every one. It is also what a menu bar falls back to when every unit in it is pinned.',
           `<div class="slotted-demo-measure">
           <div slToolbar aria-label="Muitas ações, rolando" size="sm" variant="outline" overflow="scroll">
             @for (action of actions; track action) {
@@ -320,6 +332,107 @@ export const Overflow: Story = {
         </div>`,
         ),
     ),
+  }),
+};
+
+/**
+ * The four actions of the document bar, written out rather than looped: each
+ * one names the `ng-template` it becomes in the surface, and a template
+ * variable is not something a `@for` can hand to an input.
+ */
+const DOCUMENT_BAR = (
+  label: string,
+) => `<div slToolbar aria-label="${label}" overflow="menu" size="sm" variant="outline">
+  <div slToolbarItem>
+    <button slButton size="sm" tone="accent">Publicar</button>
+  </div>
+  <div slToolbarSeparator></div>
+  <div slToolbarItem [slToolbarItemCounterpart]="duplicate">
+    <button slButton size="sm" variant="ghost">Duplicar</button>
+  </div>
+  <div slToolbarItem [slToolbarItemCounterpart]="rename">
+    <button slButton size="sm" variant="ghost">Renomear</button>
+  </div>
+  <div slToolbarItem [slToolbarItemCounterpart]="exportAction">
+    <button slButton size="sm" variant="ghost">Exportar</button>
+  </div>
+  <div slToolbarItem [slToolbarItemCounterpart]="archive">
+    <button slButton size="sm" variant="ghost">Arquivar</button>
+  </div>
+  <sl-toolbar-overflow />
+</div>`;
+
+const DOCUMENT_TEMPLATES = `
+<ng-template #duplicate><button slMenuItem>Duplicar</button></ng-template>
+<ng-template #rename><button slMenuItem>Renomear</button></ng-template>
+<ng-template #exportAction><button slMenuItem>Exportar</button></ng-template>
+<ng-template #archive><button slMenuItem>Arquivar</button></ng-template>
+<ng-template #alignment>
+  <button slMenuItem>Alinhar à esquerda</button>
+  <button slMenuItem>Centralizar</button>
+  <button slMenuItem>Justificar</button>
+  <button slMenuItem>Distribuir</button>
+</ng-template>
+<ng-template #schedule><button slMenuItem>Agendar</button></ng-template>
+<ng-template #share><button slMenuItem>Compartilhar</button></ng-template>`;
+
+export const OverflowMenu: Story = {
+  parameters: scenario('overflowMenu'),
+  render: () => ({
+    props: {
+      countedLabel: (hidden: number) => `Mais ${hidden} ${hidden === 1 ? 'ação' : 'ações'}`,
+    },
+    template:
+      grid(
+        2,
+        scene(
+          'A bar that ran out of room',
+          'Resize the panel and watch the end give way first. Publicar declares no counterpart, so it cannot be hidden — that is the whole of how a primary action survives, and there is no priority input ranking it above the others.',
+          `<div class="slotted-demo-measure">${DOCUMENT_BAR('Documento, estreito')}</div>`,
+        ) +
+          scene(
+            'The same bar with room to spare',
+            'Nothing has given way, so the control that would hold it is not drawn at all: a bar that permanently spent a control’s width on a menu with nothing in it would have lost a control’s width.',
+            DOCUMENT_BAR('Documento, largo'),
+          ) +
+          scene(
+            'A run that moves as one',
+            'A group carries its own counterpart, so the whole run reaches the surface together and keeps its name there. The rule that divided it goes with it: a hairline dividing nothing is a stray line.',
+            `<div class="slotted-demo-measure">
+  <div slToolbar aria-label="Parágrafo" overflow="menu" size="sm" variant="outline">
+    <div slToolbarItem>
+      <button slButton size="sm" tone="accent">Salvar</button>
+    </div>
+    <div slToolbarSeparator></div>
+    <div slToolbarGroup aria-label="Alinhamento" [slToolbarGroupCounterpart]="alignment">
+      <button slButton size="sm" variant="ghost">Esquerda</button>
+      <button slButton size="sm" variant="ghost">Centro</button>
+      <button slButton size="sm" variant="ghost">Justificar</button>
+      <button slButton size="sm" variant="ghost">Distribuir</button>
+    </div>
+    <sl-toolbar-overflow />
+  </div>
+</div>`,
+          ) +
+          scene(
+            'The name says how much, not what the mark is',
+            'The trigger announces “2 more actions” rather than three dots, and a bar in another language replaces the sentence through label rather than translating a glyph.',
+            `<div class="slotted-demo-measure">
+  <div slToolbar aria-label="Relatório" overflow="menu" size="sm" variant="outline">
+    <div slToolbarItem>
+      <button slButton size="sm" tone="accent">Gerar</button>
+    </div>
+    <div slToolbarItem [slToolbarItemCounterpart]="schedule">
+      <button slButton size="sm" variant="ghost">Agendar</button>
+    </div>
+    <div slToolbarItem [slToolbarItemCounterpart]="share">
+      <button slButton size="sm" variant="ghost">Compartilhar</button>
+    </div>
+    <sl-toolbar-overflow [label]="countedLabel" />
+  </div>
+</div>`,
+          ),
+      ) + DOCUMENT_TEMPLATES,
   }),
 };
 

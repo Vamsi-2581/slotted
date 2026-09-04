@@ -8,11 +8,15 @@
     "group": "group",
     "separator": "separator"
   },
+  "stateAttributes": {
+    "open": "data-open"
+  },
   "wiring": {
     "aria-label": "the consumer's own, and the toolbar writes none of its own",
     "aria-orientation": "written on the root only when vertical, and on a separator always, perpendicular to the bar",
     "aria-disabled": "an item that says it stays in the ring; a native disabled attribute is skipped",
-    "aria-label on the overflow trigger": "the count of what is hidden, from `label`; a string the consumer states is used verbatim"
+    "aria-label on the overflow trigger": "the count of what is hidden, from `label`; a string the consumer states is used verbatim",
+    "disabled on the overflow trigger": "the platform's own `:disabled`, from a `<fieldset disabled>` around the bar. The family writes no `data-disabled` and declares no `disabled` state, because it does not own the capability."
   },
   "items": {
     "found": "focusable-descendants",
@@ -138,7 +142,7 @@
         "loop": true
       },
       "capabilities": ["orientation", "size", "appearance", "overflow"],
-      "states": ["default"],
+      "states": ["default", "hover", "active", "focus-visible", "open"],
       "parts": ["root", "group", "separator", "spacer", "item", "overflow"]
     }
   },

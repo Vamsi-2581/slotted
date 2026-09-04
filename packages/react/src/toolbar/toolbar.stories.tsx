@@ -2,15 +2,17 @@ import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-wo
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '../button';
+import { Button, ButtonLink, ToggleButton } from '../button';
 import { Checkbox } from '../checkbox';
 import { Grid, Measure, Scene } from '../field/field-demo';
 import { Tab, TabActions, TabList, TabPanel, Tabs } from '../tabs';
 import { TextField } from '../text-field';
 import { Text } from '../typography';
+import { MenuItem } from '../menu';
 import { Toolbar } from './toolbar';
 import { ToolbarDefaultsProvider } from './toolbar-defaults';
-import { ToolbarGroup, ToolbarSeparator, ToolbarSpacer } from './toolbar-parts';
+import { ToolbarOverflow } from './toolbar-overflow';
+import { ToolbarGroup, ToolbarItem, ToolbarSeparator, ToolbarSpacer } from './toolbar-parts';
 import { REACT_TOOLBAR_DOCS, REACT_TOOLBAR_TOKENS } from './toolbar.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -24,6 +26,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyOwners: KeyOwners,
     disabled: Disabled,
     overflow: Overflow,
+    overflowMenu: OverflowMenu,
     composition: Composition,
   }) as never;
 
@@ -110,7 +113,7 @@ export const Orientation: Story = {
             Lápis
           </Button>
           <Button size="sm" variant="ghost">
-            Pincel
+            Pincel de pintura
           </Button>
           <ToolbarSeparator />
           <Button size="sm" variant="ghost">
@@ -175,9 +178,9 @@ export const Groups: Story = {
             <Button size="sm" variant="outline">
               Início
             </Button>
-            <Button pressed size="sm" variant="outline">
+            <ToggleButton pressed size="sm" variant="outline">
               Centro
-            </Button>
+            </ToggleButton>
             <Button size="sm" variant="outline">
               Fim
             </Button>
@@ -208,9 +211,9 @@ export const Keyboard: Story = {
           </Button>
           <Checkbox size="sm">Rascunho</Checkbox>
           <ToolbarSeparator />
-          <Button render={(props) => <a {...props} href="#ajuda" />} size="sm" variant="ghost">
+          <ButtonLink href="#ajuda" size="sm" variant="ghost">
             Ajuda
-          </Button>
+          </ButtonLink>
         </Toolbar>
       </Scene>
       <Scene
@@ -306,6 +309,129 @@ export const Overflow: Story = {
                 {action}
               </Button>
             ))}
+          </Toolbar>
+        </Measure>
+      </Scene>
+    </Grid>
+  ),
+};
+
+/**
+ * The two bars are the same markup with different amounts of work in them, so
+ * the collapse reads as a decision rather than as a state: one runs out of room
+ * and the other does not, at whatever width the page gives them.
+ */
+function DocumentBar({ actions, label }: { actions: readonly string[]; label: string }) {
+  return (
+    <Toolbar aria-label={label} overflow="menu" size="sm" variant="outline">
+      <ToolbarItem>
+        <Button size="sm" tone="accent">
+          Publicar
+        </Button>
+      </ToolbarItem>
+      <ToolbarSeparator />
+      {actions.map((action) => (
+        <ToolbarItem key={action} counterpart={<MenuItem>{action}</MenuItem>}>
+          <Button size="sm" variant="ghost">
+            {action}
+          </Button>
+        </ToolbarItem>
+      ))}
+      <ToolbarOverflow />
+    </Toolbar>
+  );
+}
+
+export const OverflowMenu: Story = {
+  parameters: scenario('overflowMenu'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="A bar that ran out of room"
+        note="Resize the panel and watch the end give way first. Publicar declares no counterpart, so it cannot be hidden — that is the whole of how a primary action survives, and there is no priority prop ranking it above the others."
+      >
+        <Measure>
+          <DocumentBar
+            actions={['Duplicar', 'Renomear', 'Exportar', 'Arquivar']}
+            label="Documento, estreito"
+          />
+        </Measure>
+      </Scene>
+      <Scene
+        label="The same bar with room to spare"
+        note="Nothing has given way, so the control that would hold it is not drawn at all: a bar that permanently spent a control's width on a menu with nothing in it would have lost a control's width."
+      >
+        <DocumentBar actions={['Duplicar']} label="Documento, com folga" />
+      </Scene>
+      <Scene
+        label="A run that moves as one"
+        note="A group carries its own counterpart, so the whole run reaches the surface together and keeps its name there. The rule that divided it goes with it: a hairline dividing nothing is a stray line."
+      >
+        <Measure>
+          <Toolbar aria-label="Parágrafo" overflow="menu" size="sm" variant="outline">
+            <ToolbarItem>
+              <Button size="sm" tone="accent">
+                Salvar
+              </Button>
+            </ToolbarItem>
+            <ToolbarSeparator />
+            <ToolbarGroup
+              aria-label="Alinhamento"
+              counterpart={
+                <>
+                  <MenuItem>Alinhar à esquerda</MenuItem>
+                  <MenuItem>Centralizar</MenuItem>
+                  <MenuItem>Justificar</MenuItem>
+                  <MenuItem>Distribuir</MenuItem>
+                </>
+              }
+            >
+              <Button size="sm" variant="ghost">
+                Esquerda
+              </Button>
+              <Button size="sm" variant="ghost">
+                Centro
+              </Button>
+              <Button size="sm" variant="ghost">
+                Justificar
+              </Button>
+              <Button size="sm" variant="ghost">
+                Distribuir
+              </Button>
+            </ToolbarGroup>
+            <ToolbarOverflow />
+          </Toolbar>
+        </Measure>
+      </Scene>
+      <Scene
+        label="The name says how much, not what the mark is"
+        note="The trigger announces the count in the page’s own words rather than three dots. A bar in another language replaces the sentence through label; a glyph cannot be translated."
+      >
+        <Measure>
+          <Toolbar aria-label="Relatório" overflow="menu" size="sm" variant="outline">
+            <ToolbarItem>
+              <Button size="sm" tone="accent">
+                Gerar
+              </Button>
+            </ToolbarItem>
+            <ToolbarItem counterpart={<MenuItem>Agendar</MenuItem>}>
+              <Button size="sm" variant="ghost">
+                Agendar
+              </Button>
+            </ToolbarItem>
+            <ToolbarItem counterpart={<MenuItem>Compartilhar</MenuItem>}>
+              <Button size="sm" variant="ghost">
+                Compartilhar
+              </Button>
+            </ToolbarItem>
+            <ToolbarItem counterpart={<MenuItem>Baixar em PDF</MenuItem>}>
+              <Button size="sm" variant="ghost">
+                Baixar em PDF
+              </Button>
+            </ToolbarItem>
+            <ToolbarOverflow
+              label={(hidden) => `Mais ${hidden} ${hidden === 1 ? 'ação' : 'ações'}`}
+            />
           </Toolbar>
         </Measure>
       </Scene>

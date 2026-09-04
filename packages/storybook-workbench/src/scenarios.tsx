@@ -68,7 +68,19 @@ interface ContractMember {
  */
 const capabilityApi = {
   appearance: [],
-  arrangement: ['gap', 'align', 'justify'],
+  /**
+   * Nothing, for the reason `appearance` and `placement` ask for nothing: the
+   * table cannot see what a family's arrangement *is*. `stack` arranges
+   * children along one axis and names the distance between them `gap`;
+   * `description-list` arranges pairs into columns and names them `layout` and
+   * `columns`, and declined an alignment axis in writing — so the table
+   * demanded three rows for props the contract does not declare, and the
+   * family that had the other shape would have had to document props it does
+   * not have. A family that does ship `gap`, `align` or `justify` still
+   * documents each one, because it is in its declared defaults and every
+   * default is required row by row below.
+   */
+  arrangement: [],
   size: ['size'],
   shape: ['shape'],
   measurement: ['value', 'max'],

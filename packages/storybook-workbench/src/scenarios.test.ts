@@ -71,6 +71,22 @@ describe('workbench scenario metadata', () => {
     ).toEqual([]);
   });
 
+  /**
+   * `stack` arranges children along one axis and calls the distance between
+   * them `gap`; `description-list` arranges pairs into columns and calls them
+   * `layout` and `columns`, and declined an alignment axis in writing. The
+   * table cannot know which, so it asks for neither and holds the declared
+   * defaults instead.
+   */
+  it('asks a family that arranges something for no name it cannot know', () => {
+    expect(
+      apiMetadataErrors({ capabilities: ['arrangement'], defaults: { columns: '1' } }, [
+        { name: 'columns', defaultValue: '1' },
+        { name: 'layout', defaultValue: 'row' },
+      ]),
+    ).toEqual([]);
+  });
+
   it('asks a family that paints itself for no size step it does not declare', () => {
     expect(
       apiMetadataErrors({ capabilities: ['appearance'], defaults: { variant: 'accent' } }, [

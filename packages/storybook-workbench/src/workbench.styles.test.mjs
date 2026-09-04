@@ -33,6 +33,31 @@ test('offers a box a fixed-position demonstration can be pinned inside', () => {
   assert.match(rule, /block-size:/);
 });
 
+/**
+ * The same box, tall enough to hold a layer. Four rems holds a bar across the
+ * top of a page and clips a dialog at both edges, so an overlay family asks for
+ * the taller one and the scrim reads as a scrim.
+ */
+test('offers a viewport tall enough for an overlay family to open inside', () => {
+  const rule = /\.slotted-demo-viewport\[data-size='tall'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  assert.match(rule, /block-size:/);
+});
+
+/**
+ * The primitive a family that pins something to a scroll container is
+ * demonstrated inside. A sticky heading holds still only while something
+ * scrolls past it, and a stage as long as its content shows nothing: the box
+ * has to be shorter than what it holds and it has to scroll. Added when `list`
+ * needed to show a group heading staying put over its own rows.
+ */
+test('offers a box a sticky demonstration can be scrolled inside', () => {
+  const rule = /\.slotted-demo-scroll\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  assert.match(rule, /overflow:\s*auto/);
+  assert.match(rule, /block-size:/);
+});
+
 test('workbench CSS keeps the reference-sheet layout and accessibility invariants', () => {
   assert.match(css, /@import '@fontsource-variable\/inter';/);
   assert.match(css, /@import '@fontsource-variable\/jetbrains-mono';/);
@@ -318,6 +343,27 @@ test('scenes placed side by side start their stages on the same line', () => {
     /\.slotted-demo-grid > \.slotted-demo-scene\s*\{[\s\S]*?grid-template-rows:\s*subgrid/,
   );
   assert.match(css, /\.slotted-demo-grid\s*\{[\s\S]*?grid-auto-rows:\s*auto/);
+
+  /**
+   * A scene is read at the full width of the page unless the story says
+   * otherwise. Two columns were the default, so a family that never asked was
+   * reviewed in half the room it will actually get — and a family that reflows
+   * was corrected against a constraint no consumer imposes.
+   */
+  assert.match(
+    css,
+    /\.slotted-demo-grid\s*\{[\s\S]*?repeat\(var\(--slotted-demo-columns, 1\)/,
+    'the demo grid defaults to one column',
+  );
+  for (const columns of ['2', '3']) {
+    assert.match(
+      css,
+      new RegExp(
+        `\\.slotted-demo-grid\\[data-columns='${columns}'\\]\\s*\\{\\s*--slotted-demo-columns: ${columns}`,
+      ),
+      `a story can still ask for ${columns} columns`,
+    );
+  }
 });
 
 /**

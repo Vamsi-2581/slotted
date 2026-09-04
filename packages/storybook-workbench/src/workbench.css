@@ -247,22 +247,24 @@
   min-inline-size: 0;
 }
 
+/**
+ * One column by default. Two used to be, and a scene that never asked for a
+ * width was reviewed at half the page — which is the whole page for a badge and
+ * far too little for anything that reflows. A component judged with more room
+ * than it will get is a mild inaccuracy; one judged in a third of the room it
+ * needs breaks in the picture and is corrected against a constraint the
+ * consumer will never impose. Asking for two or three is for members narrow
+ * enough to sit beside each other: a badge, a key, a chip, an avatar.
+ */
 .slotted-demo-grid {
   display: grid;
   gap: var(--slotted-workbench-scene-gap);
   grid-auto-rows: auto;
-  grid-template-columns: repeat(var(--slotted-demo-columns, 2), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--slotted-demo-columns, 1), minmax(0, 1fr));
 }
 
-/**
- * A scene that has to be read at the full width of the page asks for one
- * column. Only `3` was answered before this, so a story that asked for `1`
- * silently received the default two and was reviewed at half the width it
- * requested — which is how a layout family's reflow demonstration collapsed to
- * the same picture in every column count.
- */
-.slotted-demo-grid[data-columns='1'] {
-  --slotted-demo-columns: 1;
+.slotted-demo-grid[data-columns='2'] {
+  --slotted-demo-columns: 2;
 }
 
 .slotted-demo-grid[data-columns='3'] {
@@ -571,6 +573,38 @@
   contain: paint;
   inline-size: 100%;
   position: relative;
+}
+
+/**
+ * Four rems is enough to hold a bar across the top of a page and nothing
+ * enough to hold a panel. An overlay family — a dialog, a drawer, a sheet —
+ * needs a box tall enough for the layer to be centred in and for the scrim to
+ * read as a scrim, or every demonstration is a panel clipped at both edges.
+ *
+ * Added when `dialog` needed to show an open layer inside a scene rather than
+ * over the whole reference page.
+ */
+.slotted-demo-viewport[data-size='tall'] {
+  block-size: 22rem;
+}
+
+/**
+ * The box a family that pins something to a scroll container is demonstrated
+ * inside. A sticky heading holds still only while something scrolls past it,
+ * and a page-length stage cannot show that in a screenshot: the reader has to
+ * be able to scroll a few rows without scrolling the page.
+ *
+ * Added when `list` needed to show a group heading staying put over its own
+ * rows. The height is short on purpose — enough content has to run past the
+ * heading for the behaviour to be visible in one view.
+ */
+.slotted-demo-scroll {
+  background: var(--slotted-surface);
+  block-size: 12rem;
+  border: 1px dashed var(--slotted-border-subtle);
+  border-radius: 6px;
+  inline-size: 100%;
+  overflow: auto;
 }
 
 /**

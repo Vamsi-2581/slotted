@@ -209,7 +209,9 @@
      * the two — negative, because every mark in this scale is taller than the
      * letters beside it.
      */
-    --_mark-offset: calc((var(--slotted-toast-icon-axis, 1ex) - var(--_glyph-size)) / 2);
+    --_mark-offset: calc(
+      (var(--slotted-toast-icon-axis, (1cap + 1ex) / 2) - var(--_glyph-size)) / 2
+    );
     --_line-height: var(--slotted-line-height-md, 1.5);
 
     --_inset-block: var(--slotted-toast-padding-block, var(--slotted-space-5, 0.75rem));
@@ -390,13 +392,19 @@
    * mark's own centre exactly where `--slotted-toast-icon-axis` says, in the
    * font's own units, and nothing here needs to know where the baseline landed.
    *
-   * The axis defaults to the midpoint of the capital band and the lowercase
-   * band. The capitals alone are where a mark drawn at cap height belongs; a
-   * mark whose artwork is wider than a capital — every glyph in this scale is,
-   * at three quarters of a sixteen-pixel box against a nine-pixel capital —
-   * overshoots the cap line, and the eye reads the overshoot as height because
-   * there is nothing above a cap line and there is descender room below a
-   * baseline. Half a band down is the correction, and it is one token.
+   * The axis is the midpoint of the capital band and the lowercase band, and
+   * the three candidates were rendered at four times the type size and read
+   * against the word `Hxp` before one was chosen — every quantity in the rule
+   * is font-relative, so the ratio judged there is the ratio at thirteen
+   * pixels, four times easier to see.
+   *
+   * `1cap` is where a mark drawn at cap height belongs and it reads high here,
+   * because every glyph in this scale is taller than a capital — twelve pixels
+   * of ink against a nine-pixel cap — and the overshoot above a cap line has
+   * nothing to sit against. `1ex` puts the mark's ink where the text's ink is
+   * and reads low, because the mark then hangs below the descender line. The
+   * midpoint is where the two readings meet, and it is a quarter of a pixel
+   * below the line-box centre this family drew first.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
     block-size: 1lh;

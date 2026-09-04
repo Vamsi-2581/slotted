@@ -147,6 +147,10 @@ test('places the mark against the title baseline rather than in its line box', (
 
   const offset = rule(item);
   assert.match(offset, /--_mark-offset:calc\(\(var\(--slotted-toast-icon-axis/);
+  /* The band, chosen by rendering all three at four times the type size:
+     `1cap` reads high because the artwork is taller than a capital, `1ex`
+     reads low because it then hangs below the descender line. */
+  assert.match(offset, /--slotted-toast-icon-axis,\(1cap \+ 1ex\) \/ 2\)/);
   assert.ok(
     !/\[data-part='icon'\]\{[^}]*mask-image/.test(normalized),
     'the slot masks itself again, which cannot be baseline-aligned',

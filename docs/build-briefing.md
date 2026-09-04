@@ -153,12 +153,19 @@ other families stand on. Justify it at the gate before writing it.
   slot stays one line box tall and the artwork becomes an inline-block on that
   line, so the browser places it against the same baseline the title's first
   line uses; `vertical-align: calc((<band> - <mark size>) / 2)` then centres the
-  mark on whichever band of the text the family names. `toast` names `1ex`, the
-  band the lowercase letters occupy, because every glyph in the icon scale is
-  taller than a capital — three quarters of a sixteen-pixel box against a
-  nine-pixel capital — and a mark that overshoots the cap line reads high, while
-  the same overshoot below the baseline falls in descender room the eye expects
-  to be occupied. `1cap` is the other defensible band and one token away.
+  mark on whichever band of the text the family names.
+
+  `toast` names the midpoint of the two, `calc((1cap + 1ex) / 2)`, and the three
+  candidates were rendered at four times the type size and read against the word
+  `Hxp` before one was chosen — every quantity in the rule is font-relative, so
+  the ratio judged there is the ratio at thirteen pixels, four times easier to
+  see. `1cap` is where a mark drawn at cap height belongs and it reads high,
+  because every glyph in the icon scale is taller than a capital — twelve pixels
+  of ink against nine — and the overshoot above a cap line has nothing to sit
+  against. `1ex` puts the mark's ink where the text's ink is and reads low,
+  because the mark then hangs below the descender line. Both readings came from
+  the reviewer, one after the other, which is what fixed the answer between
+  them.
 
   `alert`, `inline-message`, `status-indicator`, `list-item` and `badge` still
   centre their marks in the line box: they predate the measurement, and none of

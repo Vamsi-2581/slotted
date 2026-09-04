@@ -55,6 +55,12 @@ test('offers a box a fixed-position demonstration can be pinned inside', () => {
   assert.match(rule, /contain:\s*paint/);
   assert.match(rule, /position:\s*relative/);
   assert.match(rule, /block-size:/);
+  /**
+   * `contain: paint` clips what escapes and is not what a positioning engine
+   * walks: an engine reads `overflow`, so a layer measured inside this box was
+   * told the whole viewport was available and ran out of the scene.
+   */
+  assert.match(rule, /overflow:\s*hidden/);
 });
 
 /**
@@ -440,6 +446,17 @@ test('offers a viewport an anchored layer fills rather than rattles around in', 
   const rule = /\.slotted-demo-viewport\[data-size='layer'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
 
   assert.match(rule, /block-size:/);
+});
+
+/**
+ * Centring is an attribute of its own rather than part of a height, because an
+ * anchored family wants its trigger in the middle at every size and a family
+ * that pins something to an edge of the box wants the opposite.
+ */
+test('offers a viewport that puts what it holds in the middle, at any size', () => {
+  const rule =
+    /\.slotted-demo-viewport\[data-place='center'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
   assert.match(rule, /align-items:\s*center/);
   assert.match(rule, /justify-items:\s*center/);
 });

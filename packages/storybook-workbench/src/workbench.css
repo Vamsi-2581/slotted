@@ -572,6 +572,16 @@
   border-radius: 6px;
   contain: paint;
   inline-size: 100%;
+  /**
+   * `contain: paint` clips what escapes and does not make the box a *clipping
+   * ancestor* for a positioning engine: the engine walks `overflow`, so a layer
+   * measured inside this box was told the whole viewport was available and ran
+   * out of the scene. `tools/harness/audit.mjs` reported a 24rem panel 343
+   * pixels wide inside a 273-pixel box, which is the overflow it exists to
+   * catch. With this, the layer narrows to the room the box actually has —
+   * which is what it does in an application inside `overflow: hidden`.
+   */
+  overflow: hidden;
   position: relative;
 }
 
@@ -594,16 +604,37 @@
  * neither, and `tooltip`'s first rendered page showed why — a 34-pixel button
  * at the top of a 352-pixel box, and the rest of the box blank. That is the
  * empty canvas `.claude/skills/component/references/stories.md` refuses.
- *
- * It centres what it holds as well as shortening it, so the layer has room on
- * both sides of the trigger and the scene reads as a demonstration rather than
- * as something that fell to the top.
  */
 .slotted-demo-viewport[data-size='layer'] {
+  block-size: 13rem;
+}
+
+/**
+ * Puts what the box holds in the middle of it, at any size.
+ *
+ * An anchored family is demonstrated by opening a layer beside its trigger, so
+ * the trigger belongs in the centre and the layer has room on either side of
+ * it. A family that pins something to an edge of the box wants the opposite,
+ * which is why this is an attribute of its own rather than part of a height.
+ */
+.slotted-demo-viewport[data-place='center'] {
   align-items: center;
-  block-size: 11rem;
   display: grid;
   justify-items: center;
+}
+
+/**
+ * The same, with the trigger held near the top instead of the middle. A layer
+ * that opens *below* its trigger and is taller than the trigger — a popover
+ * panel, where a tooltip is one line — needs the room under it rather than
+ * around it, and a centred trigger clipped the panel against the bottom of the
+ * box.
+ */
+.slotted-demo-viewport[data-place='top'] {
+  align-items: start;
+  display: grid;
+  justify-items: center;
+  padding-block-start: var(--slotted-space-6, 1rem);
 }
 
 /**

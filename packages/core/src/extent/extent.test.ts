@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  anchorsAtStart,
   extentBounds,
   extentAtPoint,
   isInlineSide,
@@ -18,6 +19,23 @@ describe('isInlineSide', () => {
     expect(isInlineSide('end')).toBe(true);
     expect(isInlineSide('top')).toBe(false);
     expect(isInlineSide('bottom')).toBe(false);
+  });
+});
+
+describe('anchorsAtStart', () => {
+  it('reads start and end against the document direction', () => {
+    expect(anchorsAtStart('start')).toBe(true);
+    expect(anchorsAtStart('start', true)).toBe(false);
+    expect(anchorsAtStart('end')).toBe(false);
+    expect(anchorsAtStart('end', true)).toBe(true);
+  });
+
+  /** A block axis has no reading direction, so the two sides never swap. */
+  it('leaves the block sides alone', () => {
+    expect(anchorsAtStart('top')).toBe(true);
+    expect(anchorsAtStart('top', true)).toBe(true);
+    expect(anchorsAtStart('bottom')).toBe(false);
+    expect(anchorsAtStart('bottom', true)).toBe(false);
   });
 });
 

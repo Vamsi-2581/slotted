@@ -58,6 +58,22 @@ export function isInlineSide(side: ExtentSide): boolean {
 }
 
 /**
+ * Whether the panel is anchored at the physically first edge of its axis — the
+ * left in a left-to-right document, the top always.
+ *
+ * It is the one fact both halves of the pattern need. A pointer's distance is
+ * measured from the anchored edge, and a key that moves the separator toward
+ * the physically first edge grows the panel exactly when the panel is *not*
+ * anchored there. Deriving it twice is how the pointer and the keyboard come to
+ * disagree about which way is bigger in a mirrored document.
+ */
+export function anchorsAtStart(side: ExtentSide, rtl = false): boolean {
+  if (side === 'start') return !rtl;
+  if (side === 'end') return rtl;
+  return side === 'top';
+}
+
+/**
  * The stops in ascending order, with anything outside `[0, 1]` dropped and
  * duplicates removed. A caller's array is not modified.
  */
@@ -74,18 +90,13 @@ export function orderSnapPoints(snapPoints: readonly number[]): number[] {
  * because `start` and `end` are the two that the reading direction names.
  */
 export function extentAtPoint({ point, rect, rtl = false, side }: ExtentPointRequest): number {
-  if (isInlineSide(side)) {
-    if (rect.width <= 0) return 0;
-    const fromLeft = (point.x - rect.x) / rect.width;
-    /* `start` is the left edge in a left-to-right document and the right edge
-       in a mirrored one; `end` is the other one in each case. */
-    const anchoredLeft = side === 'start' ? !rtl : rtl;
-    return clamp(anchoredLeft ? fromLeft : 1 - fromLeft, 0, 1);
-  }
+  const inline = isInlineSide(side);
+  const span = inline ? rect.width : rect.height;
+  if (span <= 0) return 0;
 
-  if (rect.height <= 0) return 0;
-  const fromTop = (point.y - rect.y) / rect.height;
-  return clamp(side === 'top' ? fromTop : 1 - fromTop, 0, 1);
+  const fromFirstEdge = inline ? (point.x - rect.x) / span : (point.y - rect.y) / span;
+  const measured = anchorsAtStart(side, rtl) ? fromFirstEdge : 1 - fromFirstEdge;
+  return clamp(measured, 0, 1);
 }
 
 /**

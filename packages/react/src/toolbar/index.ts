@@ -1,12 +1,19 @@
 export { Toolbar } from './toolbar';
+export { useToolbarOverflow } from './toolbar-context';
+export type { ToolbarCollapsedUnit, ToolbarOverflowValue } from './toolbar-context';
 export { ToolbarDefaultsProvider, useToolbarDefaults } from './toolbar-defaults';
-export { ToolbarGroup, ToolbarSeparator, ToolbarSpacer } from './toolbar-parts';
+export { ToolbarOverflow } from './toolbar-overflow';
+export { ToolbarGroup, ToolbarItem, ToolbarSeparator, ToolbarSpacer } from './toolbar-parts';
 export type {
   ToolbarDefaults,
   ToolbarDefaultsProviderProps,
   ToolbarGroupProps,
+  ToolbarItemProps,
   ToolbarOrientation,
-  ToolbarOverflow,
+  ToolbarOverflowLabel,
+  ToolbarOverflowMode,
+  ToolbarOverflowProps,
+  ToolbarOverflowRootProps,
   ToolbarProps,
   ToolbarRootProps,
   ToolbarSeparatorProps,

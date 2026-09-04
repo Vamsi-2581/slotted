@@ -1,10 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/toolbar/contract.json';
+import { MenuItem } from '../menu';
 import { Toolbar } from './toolbar';
 import { ToolbarDefaultsProvider } from './toolbar-defaults';
-import { ToolbarGroup, ToolbarSeparator, ToolbarSpacer } from './toolbar-parts';
+import { ToolbarOverflow } from './toolbar-overflow';
+import { ToolbarGroup, ToolbarItem, ToolbarSeparator, ToolbarSpacer } from './toolbar-parts';
 
 const bar = () => screen.getByRole('toolbar');
 const controls = () => screen.getAllByRole('button');
@@ -25,13 +27,16 @@ function Bar(props: Record<string, unknown>) {
 describe('Toolbar', () => {
   it('renders the role, the label and every part the contract names', () => {
     render(
-      <Toolbar aria-label="Seleção">
+      <Toolbar aria-label="Seleção" overflow="menu">
         <ToolbarGroup aria-label="Alinhamento">
           <button type="button">Início</button>
         </ToolbarGroup>
         <ToolbarSeparator />
         <ToolbarSpacer />
-        <button type="button">Excluir</button>
+        <ToolbarItem counterpart={<MenuItem>Excluir</MenuItem>}>
+          <button type="button">Excluir</button>
+        </ToolbarItem>
+        <ToolbarOverflow />
       </Toolbar>,
     );
 
@@ -259,5 +264,194 @@ describe('Toolbar', () => {
     fireEvent.click(control(0), { detail: 1 });
 
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * The collapse is a measurement, and jsdom lays nothing out. The room each box
+ * takes is therefore stated on it, which is what a browser would have reported:
+ * `data-test-width` on a unit is its width, and on the bar it is the room the
+ * bar has. Nothing else about the arithmetic is stubbed — it is the same
+ * `collapseState` a browser runs.
+ */
+function withLayout() {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get(this: HTMLElement) {
+      return Number(this.dataset.testWidth ?? 0);
+    },
+  });
+  HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect(this: HTMLElement) {
+    const width = Number(this.dataset.testWidth ?? 0);
+    return { bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0 } as DOMRect;
+  };
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  Reflect.deleteProperty(HTMLElement.prototype, 'clientWidth');
+});
+
+/* Read from the DOM rather than by role: a hidden control is out of the
+   accessibility tree, which is the whole point of hiding it. */
+const trigger = () => bar().querySelector("[data-part='overflow']") as HTMLElement;
+const unit = (name: string) => screen.getByText(name).closest('[data-part]') as HTMLElement;
+
+function Overflowing({ room, ...props }: { room: number } & Record<string, unknown>) {
+  return (
+    <Toolbar aria-label="Documento" data-test-width={room} overflow="menu" {...props}>
+      <ToolbarItem data-test-width={40}>
+        <button type="button">Publicar</button>
+      </ToolbarItem>
+      <ToolbarSeparator data-test-width={10} />
+      <ToolbarItem data-test-width={40} counterpart={<MenuItem>Duplicar</MenuItem>}>
+        <button type="button">Duplicar</button>
+      </ToolbarItem>
+      <ToolbarItem data-test-width={40} counterpart={<MenuItem>Arquivar</MenuItem>}>
+        <button type="button">Arquivar</button>
+      </ToolbarItem>
+      <ToolbarOverflow data-test-width={30} />
+    </Toolbar>
+  );
+}
+
+describe('Toolbar under overflow="menu"', () => {
+  it('hides the trigger and every control while the bar has room', () => {
+    withLayout();
+    render(<Overflowing room={400} />);
+
+    expect(bar()).toHaveAttribute('data-collapsed', '0');
+    expect(screen.getByText('Arquivar')).toBeVisible();
+    expect(trigger()).toHaveAttribute('hidden');
+  });
+
+  /**
+   * The end gives way first, which is what "the overflow takes what is left
+   * over" means when the bar is read in its own order.
+   */
+  it('gives way from the end and draws the trigger with the count in its name', () => {
+    withLayout();
+    render(<Overflowing room={125} />);
+
+    expect(unit('Arquivar')).toHaveAttribute('hidden');
+    expect(unit('Duplicar')).not.toHaveAttribute('hidden');
+    expect(unit('Publicar')).not.toHaveAttribute('hidden');
+    expect(trigger()).not.toHaveAttribute('hidden');
+    expect(trigger()).toHaveAccessibleName('1 more action');
+  });
+
+  /**
+   * The rule the refinement exists for. A control with nothing to become has
+   * nowhere to go, so it stays — which is how the primary action survives a bar
+   * that ran out of room, without a priority ranking it above the others.
+   */
+  it('never hides a unit that declares no counterpart', () => {
+    withLayout();
+    render(<Overflowing room={30} />);
+
+    expect(unit('Publicar')).not.toHaveAttribute('hidden');
+    expect(unit('Duplicar')).toHaveAttribute('hidden');
+    expect(unit('Arquivar')).toHaveAttribute('hidden');
+    expect(trigger()).toHaveAccessibleName('2 more actions');
+  });
+
+  /** A rule that divides nothing is a stray line. */
+  it('takes a separator that is left dividing nothing', () => {
+    withLayout();
+    render(<Overflowing room={60} />);
+
+    expect(bar().querySelector("[data-part='separator']")).toHaveAttribute('hidden');
+  });
+
+  it('puts the counterpart of every collapsed unit in the surface, in the bar order', async () => {
+    withLayout();
+    render(<Overflowing room={60} />);
+
+    fireEvent.click(trigger());
+    const items = await screen.findAllByRole('menuitem');
+    expect(items.map((item) => item.textContent)).toEqual(['Duplicar', 'Arquivar']);
+  });
+
+  it('reports the count once per change', () => {
+    withLayout();
+    const onOverflowChange = vi.fn();
+    render(<Overflowing room={125} onOverflowChange={onOverflowChange} />);
+
+    expect(onOverflowChange).toHaveBeenCalledTimes(1);
+    expect(onOverflowChange).toHaveBeenCalledWith(1);
+  });
+
+  /** A control the platform will not focus is not a stop the arrows can land on. */
+  it('takes a collapsed control out of the ring', () => {
+    withLayout();
+    render(<Overflowing room={100} />);
+
+    const first = screen.getByText('Publicar');
+    first.focus();
+    press(first, 'End');
+
+    expect(document.activeElement).toBe(trigger());
+  });
+
+  /**
+   * With nothing to give way to, every unit is pinned and the bar scrolls —
+   * the same degradation a bar of pinned units gets, which is one rule rather
+   * than two.
+   */
+  it('collapses nothing when the bar holds no trigger', () => {
+    withLayout();
+    render(
+      <Toolbar aria-label="Documento" data-test-width={40} overflow="menu">
+        <ToolbarItem data-test-width={40} counterpart={<MenuItem>Duplicar</MenuItem>}>
+          <button type="button">Duplicar</button>
+        </ToolbarItem>
+        <ToolbarItem data-test-width={40} counterpart={<MenuItem>Arquivar</MenuItem>}>
+          <button type="button">Arquivar</button>
+        </ToolbarItem>
+      </Toolbar>,
+    );
+
+    expect(bar()).toHaveAttribute('data-collapsed', '0');
+    expect(unit('Arquivar')).not.toHaveAttribute('hidden');
+  });
+
+  /** A whole run moves at once, with no wrapper around a box the family owns. */
+  it('collapses a group into the surface as one unit', async () => {
+    withLayout();
+    render(
+      <Toolbar aria-label="Documento" data-test-width={60} overflow="menu">
+        <ToolbarItem data-test-width={40}>
+          <button type="button">Publicar</button>
+        </ToolbarItem>
+        <ToolbarGroup
+          aria-label="Alinhamento"
+          data-test-width={60}
+          counterpart={
+            <>
+              <MenuItem>Início</MenuItem>
+              <MenuItem>Fim</MenuItem>
+            </>
+          }
+        >
+          <button type="button">Início</button>
+          <button type="button">Fim</button>
+        </ToolbarGroup>
+        <ToolbarOverflow data-test-width={30} />
+      </Toolbar>,
+    );
+
+    expect(bar().querySelector("[data-part='group']")).toHaveAttribute('hidden');
+    fireEvent.click(trigger());
+    const items = await screen.findAllByRole('menuitem');
+    expect(items).toHaveLength(2);
   });
 });

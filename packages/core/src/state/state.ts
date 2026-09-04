@@ -29,7 +29,13 @@ export type ChangeReason =
   | 'outsidePress'
   | 'blur'
   | 'submit'
-  | 'programmatic';
+  | 'programmatic'
+  /**
+   * The time the component was given ran out. Not `dismiss`, which is the
+   * reader pressing the control, and not `programmatic`, which is the
+   * application asking. `toast` is the first family with a timer of its own.
+   */
+  | 'timeout';
 
 export interface ChangeRequest<T> {
   readonly value: T;

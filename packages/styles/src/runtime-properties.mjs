@@ -22,6 +22,21 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-positioner-',
   /** `packages/core/src/dismissable-layer` — this layer's position in the single stack. */
   '--slotted-layer-depth',
+  /**
+   * `packages/core/src/toast` — how far a message is from the front of the
+   * stack, how many are visible, whether the timers are running, and how far
+   * the pointer has taken a message it is dragging away.
+   *
+   * They are named one by one rather than by a `--slotted-toast-` prefix,
+   * because the family also owns theme tokens under that prefix — its measure,
+   * its offset, its gap — and a prefix would file every one of them as a value
+   * no theme can retune.
+   */
+  '--slotted-toast-index',
+  '--slotted-toast-count',
+  '--slotted-toast-play-state',
+  '--slotted-toast-swipe-x',
+  '--slotted-toast-swipe-y',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

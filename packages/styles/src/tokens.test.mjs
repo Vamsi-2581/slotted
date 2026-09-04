@@ -77,7 +77,18 @@ test('never files a runtime value as a theme-owned token', () => {
 });
 
 test('names every runtime prefix once, where a family can find the reason', () => {
-  assert.deepEqual(RUNTIME_PROPERTY_PREFIXES, ['--slotted-positioner-', '--slotted-layer-depth']);
+  assert.deepEqual(RUNTIME_PROPERTY_PREFIXES, [
+    '--slotted-positioner-',
+    '--slotted-layer-depth',
+    '--slotted-toast-index',
+    '--slotted-toast-count',
+    '--slotted-toast-play-state',
+    '--slotted-toast-swipe-x',
+    '--slotted-toast-swipe-y',
+  ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
   assert.equal(isRuntimeProperty('--slotted-space-4'), false);
+  assert.equal(isRuntimeProperty('--slotted-toast-play-state'), true);
+  /* The family owns theme tokens under the same prefix, and they are not this. */
+  assert.equal(isRuntimeProperty('--slotted-toast-gap'), false);
 });

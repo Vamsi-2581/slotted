@@ -108,6 +108,16 @@ export const CHANGE_REASONS = [
   'blur',
   'submit',
   'programmatic',
+  /**
+   * The time the component was given ran out. It is neither `dismiss`, which is
+   * the reader pressing the control, nor `programmatic`, which is the
+   * application asking; a consumer who has to tell an expiry from a dismissal
+   * by elimination writes the wrong handler, which is the failure this
+   * vocabulary exists to prevent.
+   *
+   * `toast` is the first family in the library with a timer of its own.
+   */
+  'timeout',
 ];
 
 export const KNOWN_CAPABILITIES = [
@@ -191,6 +201,17 @@ export const KNOWN_CAPABILITIES = [
    * for what it holds.
    */
   'validity',
+  /**
+   * An ordered collection of transient entries the component both holds and
+   * expires on its own, and which a consumer may own instead.
+   *
+   * `files` is the closest word already here and it names a list the reader
+   * chose; `value` names what one control holds. Neither says "the messages
+   * currently on screen, the ones waiting behind them, and the order they leave
+   * in". `toast` found the gap, and a later family with a queue of its own —
+   * an upload list, a background-job tray — reads the same word.
+   */
+  'queue',
 ];
 
 /** Capabilities that hold state a consumer can own, and therefore need a model. */
@@ -205,6 +226,7 @@ export const MUTABLE_CAPABILITIES = [
   'value',
   'revealed',
   'validity',
+  'queue',
 ];
 
 export function strongestState(states) {

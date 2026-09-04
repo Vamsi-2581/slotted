@@ -115,18 +115,8 @@
     }
   },
   "provides": {
-    "descriptionListDefaults": [
-      "layout",
-      "columns",
-      "variant",
-      "termWidth",
-      "labels"
-    ],
-    "toParts": [
-      "layout",
-      "columns",
-      "variant"
-    ]
+    "descriptionListDefaults": ["layout", "columns", "variant", "termWidth", "labels"],
+    "toParts": ["layout", "columns", "variant"]
   },
   "stateAttributes": {
     "revealed": "data-revealed",
@@ -137,11 +127,7 @@
       "controlled": "revealed",
       "uncontrolled": "defaultRevealed",
       "request": "onRevealedChange",
-      "reasons": [
-        "pointer",
-        "keyboard",
-        "programmatic"
-      ]
+      "reasons": ["pointer", "keyboard", "programmatic"]
     }
   },
   "literals": {
@@ -150,42 +136,15 @@
     "--slotted-description-list-placeholder-width": "The drawn rule standing in for a missing value is a proportion of the type it replaces, which is geometry rather than a step on a scale."
   },
   "axes": {
-    "layout": [
-      "row",
-      "stack"
-    ],
-    "columns": [
-      "1",
-      "2",
-      "3"
-    ],
-    "variant": [
-      "plain",
-      "ruled",
-      "framed"
-    ]
+    "layout": ["row", "stack"],
+    "columns": ["1", "2", "3"],
+    "variant": ["plain", "ruled", "framed"]
   },
   "resolution": {
-    "layout": [
-      "prop",
-      "defaults",
-      "row"
-    ],
-    "columns": [
-      "prop",
-      "defaults",
-      "1"
-    ],
-    "variant": [
-      "prop",
-      "defaults",
-      "plain"
-    ],
-    "termWidth": [
-      "prop",
-      "defaults",
-      "14rem"
-    ]
+    "layout": ["prop", "defaults", "row"],
+    "columns": ["prop", "defaults", "1"],
+    "variant": ["prop", "defaults", "plain"],
+    "termWidth": ["prop", "defaults", "14rem"]
   },
   "members": {
     "descriptionList": {
@@ -201,21 +160,8 @@
         "empty": false,
         "defaultRevealed": false
       },
-      "capabilities": [
-        "arrangement",
-        "appearance",
-        "revealed",
-        "copyable",
-        "wiring"
-      ],
-      "states": [
-        "default",
-        "hover",
-        "active",
-        "focus-visible",
-        "revealed",
-        "complete"
-      ],
+      "capabilities": ["arrangement", "appearance", "revealed", "copyable", "wiring"],
+      "states": ["default", "hover", "active", "focus-visible", "revealed", "complete"],
       "parts": [
         "root",
         "list",

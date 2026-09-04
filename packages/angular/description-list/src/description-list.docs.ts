@@ -429,7 +429,7 @@ export const ANGULAR_DESCRIPTION_LIST_DOCS = {
           '<div\n  data-columns="1"\n  data-layout="row"\n  data-part="root"\n  data-ui="description-list"\n  data-variant="plain"\n>\n  <dl data-part="list">\n    <div data-part="item">\n      <dt data-part="term" id="slotted-description-list-1">\n        Retention\n        <span data-part="hint">How long a deleted object stays recoverable.</span>\n      </dt>\n      <dd data-part="description">\n        <span data-part="value">30 days</span>\n        <button aria-label="Copy" data-part="copy" type="button"></button>\n      </dd>\n      <dd aria-describedby="slotted-description-list-1" data-part="action">\n        <a href="/retention">Change</a>\n      </dd>\n    </div>\n  </dl>\n</div>',
       }),
       defineSnippet({
-        id: 'description-list-angular-theming',
+        id: 'description-list-theming',
         language: 'css',
         label: 'Retuning the family for an application',
         source:

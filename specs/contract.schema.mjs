@@ -137,6 +137,22 @@ export const KNOWN_CAPABILITIES = [
    * emit and a reason no vocabulary holds.
    */
   'measurement',
+  /**
+   * What a container does with more content than it has room for: keeping it
+   * on a second row, scrolling past it, or hiding it behind a control that
+   * holds it.
+   *
+   * It is deliberately not mutable, for the reason `measurement` is not. The
+   * set that does not fit is read from the layout, so a consumer who owned it
+   * could assert that a bar fits when the browser says it does not, and the
+   * DOM would then contradict the model. What the consumer gets instead is the
+   * fact — the count in the DOM and a callback when it changes.
+   *
+   * `toolbar` put the word in this vocabulary. `tabs` scrolls its own list and
+   * `breadcrumb` folds its trail behind an ellipsis; each takes the word when
+   * it is next opened.
+   */
+  'overflow',
   'live',
   'current',
   'open',

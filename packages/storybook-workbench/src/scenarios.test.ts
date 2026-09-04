@@ -138,12 +138,26 @@ describe('workbench scenario metadata', () => {
   it('reports duplicate API rows before checking capability rows or defaults', () => {
     expect(
       apiMetadataErrors({ capabilities: ['appearance'], defaults: { variant: 'accent' } }, [
-        { name: 'variant', defaultValue: 'accent' },
-        { name: 'variant', defaultValue: 'secondary' },
-        { name: 'fill', defaultValue: 'solid' },
-        { name: 'size', defaultValue: 'md' },
+        { appliesTo: 'Badge', name: 'variant', defaultValue: 'accent' },
+        { appliesTo: 'Badge', name: 'variant', defaultValue: 'secondary' },
+        { appliesTo: 'Badge', name: 'fill', defaultValue: 'solid' },
+        { appliesTo: 'Badge', name: 'size', defaultValue: 'md' },
       ]),
     ).toEqual(['duplicate API variant']);
+  });
+
+  /**
+   * A compound family holds the same word on two parts on purpose: `select`
+   * has a `value` on its root and a `value` on each of its options. The check
+   * keys on the part as well as on the prop for that reason.
+   */
+  it('lets one prop name appear on two parts', () => {
+    expect(
+      apiMetadataErrors({ capabilities: [], defaults: {} }, [
+        { appliesTo: 'Select', name: 'value', defaultValue: '—' },
+        { appliesTo: 'SelectItem', name: 'value', defaultValue: '—' },
+      ]),
+    ).toEqual([]);
   });
 });
 

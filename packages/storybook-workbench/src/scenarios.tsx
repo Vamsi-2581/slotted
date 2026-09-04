@@ -204,13 +204,27 @@ interface StateModelEntry {
  */
 export function apiMetadataErrors(
   member: ContractMember,
-  rows: readonly { name: string; defaultValue: string }[],
+  rows: readonly { appliesTo?: string; name: string; defaultValue: string }[],
   stateModel?: Readonly<Record<string, StateModelEntry>> | undefined,
 ) {
   const errors: string[] = [];
   const names = rows.map((row) => row.name);
+  /**
+   * A row is identified by the prop **and the part it is on**, not by the prop
+   * alone. A compound family holds the same word twice on purpose — `select`
+   * has a `value` on its root and a `value` on each of its options, and a
+   * `disabled` on both — and a check that keyed on the name refused a table
+   * that documented the second one. Every family before it either had no
+   * item-level props or left them undocumented, which is why the narrower rule
+   * held for as long as it did.
+   */
+  const keys = rows.map((row) => `${row.appliesTo ?? ''}.${row.name}`);
   const duplicates = [
-    ...new Set(names.filter((name) => names.filter((candidate) => candidate === name).length > 1)),
+    ...new Set(
+      rows
+        .filter((_, index) => keys.indexOf(keys[index] as string) !== index)
+        .map((row) => row.name),
+    ),
   ];
   if (duplicates.length > 0) return duplicates.map((name) => `duplicate API ${name}`);
   for (const capability of member.capabilities) {

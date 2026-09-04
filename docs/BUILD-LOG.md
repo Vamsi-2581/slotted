@@ -4424,3 +4424,116 @@ there would put one family's roving focus inside another's.
   `progress-indicator` owns the bar the stepper exposes only as a percentage.
   `toolbar`'s overflow and `table`'s row actions are the next two callers for
   `--slotted-icon-chevrons-right` and for the ellipsis-as-text decision.
+
+## Collapsible and Accordion — 2026-09-03
+
+- **The platform's element is refused, and the cost is written down.**
+  `details` and `summary` supply the disclosure role, `Enter`, `Space`,
+  find-in-page and — through `name` — exclusive opening, and the family still
+  uses a `button` and a region. Four reasons, in order of weight: the accordion
+  pattern requires the trigger to be the only element inside a heading, and
+  `summary` may neither be wrapped in one nor hold one without putting the
+  heading inside the button; `details` opens itself, so a controlled family is a
+  frame behind and has to write the value back, which the 2026-08-31 entry above
+  already recorded as a real cost; `name` expresses exclusive opening and neither
+  `multiple` nor `requireOpen` nor a request carrying a reason; and animating
+  `::details-content` to an intrinsic height still needs `interpolate-size`,
+  which MDN records as limited availability. What is lost is stated on both
+  reference pages: a page with JavaScript disabled cannot open a panel.
+- **The panel opens without being measured.** `grid-template-rows` transitions
+  between `0fr` and `1fr`, so the height is the content's own at every frame.
+  Radix writes `--radix-collapsible-content-height`, Base UI
+  `--collapsible-panel-height`, and Ark and Angular Material each measure in
+  their own words; all four are wrong for one frame in a server response and
+  stale until a resize observer fires. It is the same decision `tabs` took for
+  its marker.
+- **Decision: the box always exists; `mount` drops its content.** Radix and Base
+  UI remove the whole panel, and the trigger's `aria-controls` then names an
+  element that is not there. The empty box costs one element and keeps the
+  pattern's own wiring true at every moment.
+- **Decision: the arrows are additive, and never a roving tab stop.**
+  `w3c/aria-practices#3434` removed the optional arrow navigation from the
+  accordion pattern, and Base UI deprecated `loopFocus` and `orientation` in the
+  same change. Radix and Ark still ship the keys and readers have learned them,
+  so they are shipped on top of a full tab sequence: nothing writes `tabindex`.
+  The cost is a key the pattern does not name, and it is recorded in the
+  contract's `keyboardDeparture`.
+- **Decision: find-in-page carries the reason `programmatic`.** The vocabulary
+  in `docs/state-and-events.md` holds no word for a browser's page search. The
+  move is the browser's rather than an interaction with the family's own
+  control, so the eleventh reason is used rather than a twelfth added. Raised at
+  the gate, because a new reason would be a change to a contract outside this
+  family.
+- **Decision: the title is set on the type scale, not the control type scale.**
+  The first capture showed a header set smaller than the paragraph it revealed.
+  Density still moves the row's height, its padding, its gap and its mark, all
+  of which come from the control scales, so a dense accordion is a tighter
+  accordion rather than a smaller one.
+- **Decision: the heading element differs between the bindings, deliberately.**
+  React renders `h1`–`h6` from `level`, because the component owns the tag.
+  Angular takes the element the consumer wrote — a directive on their own
+  element is what that ecosystem composes with — and supplies `role="heading"`
+  and `aria-level` only when it is not already a heading, which is the
+  alternative the pattern itself names. Both reach the same accessibility tree.
+- **Shared tools changed first, in their own commit.** The arrow movement inside
+  `createRovingTabindex` is extracted into `createArrowNavigation`, which moves
+  focus and writes no `tabindex`; the roving stop is now that engine plus the
+  stop. `@slotted/core/disclosure` holds the toggle arithmetic both bindings
+  read — `nextOpenValues`, `isHeldOpen`, `sameOpenValues` — so `multiple` and
+  `requireOpen` cannot be answered twice.
+- **Defects found by looking, which no test could have caught:** a header set
+  smaller than its own panel text; the panel's content indented to the box
+  rather than to the title under `togglePlacement="start"`; a Latin title
+  stranded against the far edge of a right-to-left page, because `plaintext`
+  resolves `start` against the string rather than the page — `isolate` is the
+  right half of that pair for a heading; two hairlines a pixel apart at the top
+  of a framed set; and eight pixels of dead space under every closed panel,
+  because a `0fr` track still carries its item's padding.
+- **Defects found in the rendered reference page, which the harness could not
+  show:** every disclosure collapsed to one character wide on a stage that
+  shrink-wraps its children. `container-type: inline-size` makes a box's
+  intrinsic width zero — `alert` recorded the same lesson — so the root states
+  `inline-size: 100%`. A `button` also does not stretch into its grid cell on
+  its own, and the mark sat against the last word until `justify-self: stretch`
+  said so.
+- **Follow-on:** `sidebar` in wave 6 owns the drawer that opens along the inline
+  axis, which is why `collapsible` declines a horizontal collapse. `result-state`
+  owns the message an empty accordion shows. `list` owns virtualising a hundred
+  headers. `menu` in wave 5 is what an `actions` slot holding more than three
+  controls will reach for.
+
+## Drawer — 2026-09-04
+
+Two things a later family needs and none of the other three places can hold.
+
+- **The repository ships no global `box-sizing` reset.** A family that gives a
+  box an explicit measure has to state `box-sizing: border-box` itself, or its
+  own border sits a pixel _outside_ the measure a consumer asked for. It cost a
+  whole edge here: an inline drawer clips at its extent, so the one-pixel line
+  separating the panel from the page beside it was clipped away and the two
+  surfaces met with nothing between them. No test can see it — the declaration
+  is correct CSS and the token is correctly read — and the capture showed it in
+  one glance. Every family that sizes a bordered box meets the same thing.
+- **A line cannot cross an opaque box.** The separator started as a track of the
+  panel's grid, which is the safe shape: it obscures nothing and its
+  twenty-four pixels are real estate rather than an overlay. Every rule in the
+  panel then stopped twenty-four pixels short of the panel's own edge, which
+  reads as an unfinished line rather than as a track. A resizer _row_ crosses no
+  rule and a resizer _column_ cuts them all, so the family draws the first on a
+  block side and lies the separator over the panel on an inline one. The general
+  form: a part that spans one axis cannot share that axis with the rules of the
+  rows it spans.
+
+**Debt this family owns.** Neither reference page was read rendered. Both
+Storybook servers answer and neither draws — including the page of a family that
+landed before this one — because a running server cannot see a new subpath
+export in `packages/styles/package.json`, and the briefing says to ask before
+restarting one. `tools/harness/audit.mjs` therefore has no output, and the two
+defects it exists to catch have not been ruled out. Whoever restarts those
+servers next should run it on `components-drawer--reference` on both ports.
+
+**Follow-on:** `splitter` in wave 8 is the second consumer of
+`packages/core/src/extent` and of the `extent` capability, and it answers the
+same Window Splitter pattern between two panes rather than at one edge.
+`loading-overlay` and `menu` in this wave take the same overlay modules, and
+`result-state` owns the message an empty drawer shows.

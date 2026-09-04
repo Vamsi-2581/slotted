@@ -99,11 +99,17 @@ a test:
   still centred with the scrim above and below it, because a percentage block
   size resolves against a grid area `safe center` had already sized to the
   content. `align-content: stretch` was the missing half.
-- **The panel's edge could not be found in the dark scheme.** `#1c1c20` on black
-  at 62%, with every shadow token black on black. The outer edge moved to
-  `--slotted-border-strong` — the foundation's own name for the line between two
-  surfaces — while the header and footer rules stayed on the subtle step, which
-  is the line inside one surface.
+- **The panel's edge, twice.** The first dark capture read as an edge that could
+  not be found, so the outer border moved to `--slotted-border-strong`; a reader
+  then reported it as a drawn stroke around every dialog, and they were right —
+  the strong step is `#71717a` against a `#1c1c20` panel, a jump of eighty-five
+  per channel. The mistake was in the diagnosis rather than in the value: what
+  tells the panel apart from the scrim is its **fill**, `#1c1c20` over a backdrop
+  that composites to about `#070708` in dark and white over about `#93979f` in
+  light. The border only finishes the edge, so it is the subtle step in both, and
+  the one place it does have to carry the separation — forced colours, where the
+  scrim becomes an opaque `Canvas` and every shadow token becomes `none` — is the
+  one place it thickens.
 - **An alert dialog drew two rules as one.** With no body between them, the
   header's bottom rule and the footer's top rule stacked into two pixels. Every
   rule now belongs to the row below it, which makes the count right for every

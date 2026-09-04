@@ -232,17 +232,27 @@
 
     background: var(--slotted-dialog-surface, var(--slotted-surface-raised, Canvas));
     /**
-     * `--slotted-border-strong` and not `--slotted-border-subtle`, which is
-     * what every other raised box in the library takes. The foundation defines
-     * the strong step as the line between two surfaces and holds it to 3:1
-     * against each of them; the subtle step is a line inside one surface, which
-     * is what the header and footer rules below are. A dialog's outer edge is
-     * the first kind: in the dark scheme the panel is `#1c1c20` on a scrim of
-     * black at 62%, every shadow token is black on black, and the first dark
-     * capture had a panel whose edge could not be found.
+     * The subtle step, and the reason is what is actually doing the separating.
+     *
+     * The panel is told apart from the scrim by its **fill**, not by its edge:
+     * in the dark scheme the panel is `#1c1c20` over a backdrop that composites
+     * to about `#070708`, and in the light scheme it is white over about
+     * `#93979f`. The border only finishes the edge, so it takes the step for a
+     * line inside a surface rather than the step for a line between two.
+     *
+     * It was the strong step for one iteration, on the reading that a shadow of
+     * black on black leaves nothing in the dark scheme. That is true of the
+     * shadow and not of the panel: the strong step is `#71717a` against a
+     * `#1c1c20` panel, a jump of eighty-five per channel, and it read as a
+     * drawn stroke around every dialog.
+     *
+     * Forced colours is where an edge does have to carry the separation, since
+     * `--slotted-scrim` becomes an opaque `Canvas` there and every shadow token
+     * becomes `none`. The rule at the end of this file is that case, and it
+     * thickens the border to say so.
      */
     border: var(--_rule-size) solid
-      var(--slotted-dialog-border-color, var(--slotted-border-strong, ButtonBorder));
+      var(--slotted-dialog-border-color, var(--slotted-border-subtle, ButtonBorder));
     border-radius: var(--slotted-dialog-radius, var(--slotted-radius-lg, 8px));
     box-shadow: var(--slotted-shadow-lg);
     /* So the radius clips the row that scrolls under it. */

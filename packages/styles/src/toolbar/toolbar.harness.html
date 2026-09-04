@@ -34,41 +34,137 @@
 
   <div data-demo-column>
     <p data-demo-label>plain — the default</p>
-    <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Formatação"
-      data-orientation="horizontal" data-size="md" data-variant="plain" data-overflow="wrap">
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="0">Negrito</button>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="-1">Itálico</button>
+    <div
+      data-ui="toolbar"
+      data-part="root"
+      role="toolbar"
+      aria-label="Formatação"
+      data-orientation="horizontal"
+      data-size="md"
+      data-variant="plain"
+      data-overflow="wrap"
+    >
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="0"
+      >
+        Negrito
+      </button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="-1"
+      >
+        Itálico
+      </button>
       <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="-1">Link</button>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="-1" aria-disabled="true" data-disabled>Código</button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="-1"
+      >
+        Link
+      </button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="-1"
+        aria-disabled="true"
+        data-disabled
+      >
+        Código
+      </button>
     </div>
 
     <p data-demo-label>outline, with a group and a spacer</p>
     <div data-demo-frame>
-      <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Seleção"
-        data-orientation="horizontal" data-size="md" data-variant="outline" data-overflow="wrap">
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Seleção"
+        data-orientation="horizontal"
+        data-size="md"
+        data-variant="outline"
+        data-overflow="wrap"
+      >
         <div data-part="group" role="group" aria-label="Alinhamento">
-          <button data-ui="button" data-part="root" data-variant="outline" data-tone="secondary"
-            data-size="md" type="button" tabindex="0">Início</button>
-          <button data-ui="button" data-part="root" data-variant="outline" data-tone="secondary"
-            data-size="md" type="button" tabindex="-1" data-pressed>Centro</button>
-          <button data-ui="button" data-part="root" data-variant="outline" data-tone="secondary"
-            data-size="md" type="button" tabindex="-1">Fim</button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+            tabindex="0"
+          >
+            Início
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+            data-pressed
+          >
+            Centro
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+          >
+            Fim
+          </button>
         </div>
         <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-        <span data-ui="checkbox" data-part="root" data-size="md" data-variant="plain"
-          data-label-placement="end">
+        <span
+          data-ui="checkbox"
+          data-part="root"
+          data-size="md"
+          data-variant="plain"
+          data-label-placement="end"
+        >
           <input data-part="control" type="checkbox" id="tb-grid" tabindex="-1" />
           <span data-part="indicator"></span>
           <label data-part="label" for="tb-grid">Grade</label>
         </span>
         <div data-part="spacer"></div>
-        <button data-ui="button" data-part="root" data-variant="solid" data-tone="danger"
-          data-size="md" type="button" tabindex="-1">Excluir</button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="solid"
+          data-tone="danger"
+          data-size="md"
+          type="button"
+          tabindex="-1"
+        >
+          Excluir
+        </button>
       </div>
     </div>
   </div>
@@ -77,37 +173,142 @@
 <section data-scene="sizes">
   <div data-demo-column>
     <p data-demo-label>sm / md / lg — the bar's own inset and gap, never the controls' step</p>
-    <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Compacto"
-      data-orientation="horizontal" data-size="sm" data-variant="outline" data-overflow="wrap">
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="sm" type="button" tabindex="0">Recortar</button>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="sm" type="button" tabindex="-1">Copiar</button>
+    <div
+      data-ui="toolbar"
+      data-part="root"
+      role="toolbar"
+      aria-label="Compacto"
+      data-orientation="horizontal"
+      data-size="sm"
+      data-variant="outline"
+      data-overflow="wrap"
+    >
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="sm"
+        type="button"
+        tabindex="0"
+      >
+        Recortar
+      </button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="sm"
+        type="button"
+        tabindex="-1"
+      >
+        Copiar
+      </button>
       <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="sm" type="button" tabindex="-1">Colar</button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="sm"
+        type="button"
+        tabindex="-1"
+      >
+        Colar
+      </button>
     </div>
 
-    <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Padrão"
-      data-orientation="horizontal" data-size="md" data-variant="outline" data-overflow="wrap">
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="0">Recortar</button>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="-1">Copiar</button>
+    <div
+      data-ui="toolbar"
+      data-part="root"
+      role="toolbar"
+      aria-label="Padrão"
+      data-orientation="horizontal"
+      data-size="md"
+      data-variant="outline"
+      data-overflow="wrap"
+    >
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="0"
+      >
+        Recortar
+      </button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="-1"
+      >
+        Copiar
+      </button>
       <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="-1">Colar</button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="-1"
+      >
+        Colar
+      </button>
     </div>
 
-    <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Confortável"
-      data-orientation="horizontal" data-size="lg" data-variant="outline" data-overflow="wrap">
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="lg" type="button" tabindex="0">Recortar</button>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="lg" type="button" tabindex="-1">Copiar</button>
+    <div
+      data-ui="toolbar"
+      data-part="root"
+      role="toolbar"
+      aria-label="Confortável"
+      data-orientation="horizontal"
+      data-size="lg"
+      data-variant="outline"
+      data-overflow="wrap"
+    >
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="lg"
+        type="button"
+        tabindex="0"
+      >
+        Recortar
+      </button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="lg"
+        type="button"
+        tabindex="-1"
+      >
+        Copiar
+      </button>
       <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="lg" type="button" tabindex="-1">Colar</button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="lg"
+        type="button"
+        tabindex="-1"
+      >
+        Colar
+      </button>
     </div>
   </div>
 </section>
@@ -115,18 +316,53 @@
 <section data-scene="vertical">
   <div data-demo-column>
     <p data-demo-label>vertical, where the separator and the group boundary turn a quarter</p>
-    <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Ferramentas"
-      aria-orientation="vertical" data-orientation="vertical" data-size="md" data-variant="outline"
-      data-overflow="wrap">
+    <div
+      data-ui="toolbar"
+      data-part="root"
+      role="toolbar"
+      aria-label="Ferramentas"
+      aria-orientation="vertical"
+      data-orientation="vertical"
+      data-size="md"
+      data-variant="outline"
+      data-overflow="wrap"
+    >
       <div data-part="group" role="group" aria-label="Desenho">
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="md" type="button" tabindex="0">Lápis</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="md" type="button" tabindex="-1">Pincel</button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+          tabindex="0"
+        >
+          Lápis
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+          tabindex="-1"
+        >
+          Pincel
+        </button>
       </div>
       <div data-part="separator" role="separator" aria-orientation="horizontal"></div>
-      <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-        data-size="md" type="button" tabindex="-1">Borracha</button>
+      <button
+        data-ui="button"
+        data-part="root"
+        data-variant="ghost"
+        data-tone="secondary"
+        data-size="md"
+        type="button"
+        tabindex="-1"
+      >
+        Borracha
+      </button>
     </div>
   </div>
 </section>
@@ -135,17 +371,49 @@
   <div data-demo-column>
     <p data-demo-label>an item that keeps the inline arrows for itself, and it is the last one</p>
     <div data-demo-frame>
-      <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Filtro"
-        data-orientation="horizontal" data-size="md" data-variant="plain" data-overflow="wrap">
-        <button data-ui="button" data-part="root" data-variant="outline" data-tone="secondary"
-          data-size="md" type="button" tabindex="0">Todos</button>
-        <button data-ui="button" data-part="root" data-variant="outline" data-tone="secondary"
-          data-size="md" type="button" tabindex="-1">Abertos</button>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Filtro"
+        data-orientation="horizontal"
+        data-size="md"
+        data-variant="plain"
+        data-overflow="wrap"
+      >
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+          tabindex="0"
+        >
+          Todos
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+          tabindex="-1"
+        >
+          Abertos
+        </button>
         <div data-part="separator" role="separator" aria-orientation="vertical"></div>
         <div data-part="spacer"></div>
         <span data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
-          <input data-part="control" type="search" placeholder="Buscar" tabindex="-1"
-            data-toolbar-keys="inline" aria-label="Buscar" />
+          <input
+            data-part="control"
+            type="search"
+            placeholder="Buscar"
+            tabindex="-1"
+            data-toolbar-keys="inline"
+            aria-label="Buscar"
+          />
         </span>
       </div>
     </div>
@@ -156,37 +424,152 @@
   <div data-demo-column>
     <p data-demo-label>wrap — every control stays visible on a second row</p>
     <div data-demo-frame>
-      <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Muitas ações"
-        data-orientation="horizontal" data-size="sm" data-variant="outline" data-overflow="wrap">
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="0">Duplicar</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Mover</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Renomear</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Compartilhar</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Arquivar</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Exportar</button>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Muitas ações"
+        data-orientation="horizontal"
+        data-size="sm"
+        data-variant="outline"
+        data-overflow="wrap"
+      >
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="0"
+        >
+          Duplicar
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Mover
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Renomear
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Compartilhar
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Arquivar
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Exportar
+        </button>
       </div>
     </div>
 
     <p data-demo-label>scroll — the bar scrolls past its controls instead of squeezing them</p>
     <div data-demo-frame>
-      <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Muitas ações, rolando"
-        data-orientation="horizontal" data-size="sm" data-variant="outline" data-overflow="scroll">
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="0">Duplicar</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Mover</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Renomear</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Compartilhar</button>
-        <button data-ui="button" data-part="root" data-variant="ghost" data-tone="secondary"
-          data-size="sm" type="button" tabindex="-1">Arquivar</button>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Muitas ações, rolando"
+        data-orientation="horizontal"
+        data-size="sm"
+        data-variant="outline"
+        data-overflow="scroll"
+      >
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="0"
+        >
+          Duplicar
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Mover
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Renomear
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Compartilhar
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="ghost"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          tabindex="-1"
+        >
+          Arquivar
+        </button>
       </div>
     </div>
   </div>
@@ -199,16 +582,380 @@
       natively disabled control cannot be focused
     </p>
     <fieldset disabled style="border: 0; margin: 0; padding: 0">
-      <div data-ui="toolbar" data-part="root" role="toolbar" aria-label="Somente leitura"
-        data-orientation="horizontal" data-size="md" data-variant="outline" data-overflow="wrap">
-        <button data-ui="button" data-part="root" data-variant="outline" data-tone="secondary"
-          data-size="md" type="button" tabindex="0">Editar</button>
-        <button data-ui="button" data-part="root" data-variant="outline" data-tone="secondary"
-          data-size="md" type="button" tabindex="-1">Comentar</button>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Somente leitura"
+        data-orientation="horizontal"
+        data-size="md"
+        data-variant="outline"
+        data-overflow="wrap"
+      >
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+          tabindex="0"
+        >
+          Editar
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="md"
+          type="button"
+          tabindex="-1"
+        >
+          Comentar
+        </button>
         <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-        <button data-ui="button" data-part="root" data-variant="solid" data-tone="danger"
-          data-size="md" type="button" tabindex="-1">Excluir</button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="solid"
+          data-tone="danger"
+          data-size="md"
+          type="button"
+          tabindex="-1"
+        >
+          Excluir
+        </button>
       </div>
     </fieldset>
+  </div>
+</section>
+
+<!--
+  The collapse is script: the bar measures, hides the units it has no room for,
+  and reveals the trigger. What a framework-free page can show is the result,
+  which is what these three bars are — the `hidden` attributes below are the
+  ones `createCollapse` writes.
+-->
+<section data-scene="overflowMenu">
+  <div data-demo-column>
+    <p data-demo-label>
+      menu — two units fit, three gave way, and the separator that divided nothing went with them
+    </p>
+    <div data-demo-frame>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Documento"
+        data-orientation="horizontal"
+        data-size="sm"
+        data-variant="outline"
+        data-overflow="menu"
+        data-collapsed="3"
+      >
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="sm"
+            type="button"
+            tabindex="0"
+          >
+            Publicar
+          </button>
+        </div>
+        <div data-part="separator" role="separator" aria-orientation="vertical"></div>
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+            tabindex="-1"
+          >
+            Salvar
+          </button>
+        </div>
+        <div data-part="separator" role="separator" aria-orientation="vertical" hidden></div>
+        <div data-part="item" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+            tabindex="-1"
+          >
+            Duplicar
+          </button>
+        </div>
+        <div data-part="item" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+            tabindex="-1"
+          >
+            Exportar
+          </button>
+        </div>
+        <div data-part="item" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+            tabindex="-1"
+          >
+            Arquivar
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          tabindex="-1"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-label="Mais 3 ações"
+        >
+          <span aria-hidden="true">…</span>
+        </button>
+      </div>
+    </div>
+
+    <p data-demo-label>
+      the same bar with the surface open, and the same bar with room for everything — where the
+      trigger is not drawn at all
+    </p>
+    <div data-demo-frame>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Documento, aberto"
+        data-orientation="horizontal"
+        data-size="md"
+        data-variant="outline"
+        data-overflow="menu"
+        data-collapsed="1"
+      >
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+            tabindex="0"
+          >
+            Publicar
+          </button>
+        </div>
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+          >
+            Salvar
+          </button>
+        </div>
+        <div data-part="item" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+          >
+            Arquivar
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          tabindex="-1"
+          data-open
+          aria-haspopup="menu"
+          aria-expanded="true"
+          aria-label="Mais 1 ação"
+        >
+          <span aria-hidden="true">…</span>
+        </button>
+      </div>
+    </div>
+
+    <div data-demo-frame>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Documento, com espaço de sobra"
+        data-orientation="horizontal"
+        data-size="md"
+        data-variant="outline"
+        data-overflow="menu"
+        data-collapsed="0"
+      >
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+            tabindex="0"
+          >
+            Publicar
+          </button>
+        </div>
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+          >
+            Salvar
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          tabindex="-1"
+          hidden
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-label="Mais 0 ações"
+        >
+          <span aria-hidden="true">…</span>
+        </button>
+      </div>
+    </div>
+
+    <p data-demo-label>sm / lg — the trigger takes the bar's own step, never the controls'</p>
+    <div data-demo-frame>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Compacto, com overflow"
+        data-orientation="horizontal"
+        data-size="sm"
+        data-variant="plain"
+        data-overflow="menu"
+        data-collapsed="1"
+      >
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+            tabindex="0"
+          >
+            Recortar
+          </button>
+        </div>
+        <div data-part="item" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+            tabindex="-1"
+          >
+            Colar
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          tabindex="-1"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-label="Mais 1 ação"
+        >
+          <span aria-hidden="true">…</span>
+        </button>
+      </div>
+    </div>
+
+    <div data-demo-frame>
+      <div
+        data-ui="toolbar"
+        data-part="root"
+        role="toolbar"
+        aria-label="Confortável, com overflow"
+        data-orientation="horizontal"
+        data-size="lg"
+        data-variant="plain"
+        data-overflow="menu"
+        data-collapsed="1"
+      >
+        <div data-part="item">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="lg"
+            type="button"
+            tabindex="0"
+          >
+            Recortar
+          </button>
+        </div>
+        <div data-part="item" hidden>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="outline"
+            data-tone="secondary"
+            data-size="lg"
+            type="button"
+            tabindex="-1"
+          >
+            Colar
+          </button>
+        </div>
+        <button
+          data-part="overflow"
+          type="button"
+          tabindex="-1"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-label="Mais 1 ação"
+        >
+          <span aria-hidden="true">…</span>
+        </button>
+      </div>
+    </div>
   </div>
 </section>

@@ -100,7 +100,13 @@ test('answers every size the contract declares from the control scales', () => {
  */
 test('sizes the bar and never the controls in it', () => {
   assert.doesNotMatch(declarations, /\[data-ui='button'\]/);
-  assert.doesNotMatch(declarations, /font-size/);
+  for (const line of declarations.split('}')) {
+    if (!line.includes('font-size')) continue;
+    assert.ok(
+      line.includes("[data-part='overflow']") || line.includes('--_font-size:'),
+      'a type step is set on something other than the one control this family draws',
+    );
+  }
   assert.match(rule(ui), /padding:var\(--slotted-toolbar-inset,var\(--_pad\)\)/);
 });
 
@@ -118,7 +124,7 @@ test('leaves the shape of a run of actions to the family that owns it', () => {
 test('answers every axis value the contract declares', () => {
   assert.ok(normalized.includes(`${ui}[data-orientation='vertical']{`));
   assert.ok(normalized.includes(`${ui}[data-variant='outline']{`));
-  assert.ok(normalized.includes(`${ui}[data-overflow='scroll']{`));
+  assert.ok(normalized.includes(`${ui}:is([data-overflow='scroll'],[data-overflow='menu']){`));
 });
 
 /**
@@ -127,9 +133,10 @@ test('answers every axis value the contract declares', () => {
  * squeezed buttons is not a row that scrolls.
  */
 test('scrolls past its controls instead of shrinking them', () => {
-  assert.match(rule(`${ui}[data-overflow='scroll']`), /flex-wrap:nowrap/);
-  assert.match(rule(`${ui}[data-overflow='scroll']`), /overflow-x:auto/);
-  assert.match(rule(`${ui}[data-overflow='scroll']>*`), /flex:none/);
+  const oneLine = rule(`${ui}:is([data-overflow='scroll'],[data-overflow='menu'])`);
+  assert.match(oneLine, /flex-wrap:nowrap/);
+  assert.match(oneLine, /overflow-x:auto/);
+  assert.match(rule(`${ui}:is([data-overflow='scroll'],[data-overflow='menu'])>*`), /flex:none/);
   assert.match(rule(ui), /flex-wrap:wrap/);
 });
 
@@ -180,7 +187,8 @@ test('keeps the rule visible when the system replaces the palette', () => {
  */
 test('pushes a run to the end without deciding where every control sits', () => {
   assert.match(rule(part('spacer')), /flex:1 1 0/);
-  assert.doesNotMatch(declarations, /justify-content/);
+  assert.doesNotMatch(rule(ui), /justify-content/);
+  assert.doesNotMatch(rule(part('group')), /justify-content/);
 });
 
 /**
@@ -191,10 +199,35 @@ test('takes no room when it holds nothing', () => {
   assert.match(rule(`${ui}:empty`), /display:none/);
 });
 
-test('paints no state of its own, because every state in a bar belongs to a control', () => {
-  assert.deepEqual(member.states, ['default']);
-  assert.doesNotMatch(declarations, /:hover|:active(?![-\w])/);
+/**
+ * Every state of a control in a bar belongs to that control, and the family
+ * paints none of them: no rule here reaches a `[data-ui]` other than its own,
+ * and none writes the `data-disabled` a `button` sets on itself.
+ *
+ * The one exception is the one control the family draws: the overflow trigger
+ * is this family's own `button`, so its states are this family's to paint, and
+ * the contract declares each of them.
+ */
+test('paints only the states of the one control it draws itself', () => {
+  assert.deepEqual(member.states, ['default', 'hover', 'active', 'focus-visible', 'open']);
   assert.doesNotMatch(declarations, /\[data-disabled\]/);
+
+  for (const state of [':hover', ':active', ':focus-visible', ':disabled', '[data-open]']) {
+    for (const line of declarations.split('}')) {
+      if (!line.includes(state)) continue;
+      assert.match(
+        line,
+        /\[data-part='overflow'\]/,
+        `${state} is painted on something other than the control this family draws`,
+      );
+    }
+  }
+});
+
+/** A weaker state holds itself back for the stronger ones. */
+test('holds hover and press back for a trigger the platform disabled', () => {
+  assert.ok(normalized.includes(`${part('overflow')}:not(:disabled):hover{`));
+  assert.ok(normalized.includes(`${part('overflow')}:not(:disabled):active{`));
 });
 
 test('writes every rule in logical properties, and takes no duration at all', () => {

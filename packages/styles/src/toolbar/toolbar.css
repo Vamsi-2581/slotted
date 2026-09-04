@@ -23,6 +23,7 @@
     --_inset: var(--slotted-space-2, 0.25rem);
     --_height: var(--slotted-control-height-md, 34px);
     --_separator-inset: var(--slotted-space-2, 0.25rem);
+    --_font-size: var(--slotted-control-font-size-md, 0.875rem);
     /**
      * What the bar actually pads with. It is the size step for a bar with no
      * frame, and at least the reach of a focus ring for one with a frame: the
@@ -46,6 +47,7 @@
     --_inset: var(--slotted-space-1, 0.125rem);
     --_height: var(--slotted-control-height-sm, 30px);
     --_separator-inset: var(--slotted-space-1, 0.125rem);
+    --_font-size: var(--slotted-control-font-size-sm, 0.8125rem);
   }
 
   [data-ui='toolbar'][data-size='lg'] {
@@ -53,6 +55,7 @@
     --_inset: var(--slotted-space-3, 0.375rem);
     --_height: var(--slotted-control-height-lg, 40px);
     --_separator-inset: var(--slotted-space-3, 0.375rem);
+    --_font-size: var(--slotted-control-font-size-lg, 0.9375rem);
   }
 
   /**
@@ -103,30 +106,200 @@
    * `wrap` is the default, and it is the half of the answer that needs no
    * menu: every control stays visible on a second row, and the arrows wrap
    * from row to row because the item list is linear — which is the APG's own
-   * multi-row bullet, for free. The menu that Primer, Kendo and Fluent move
-   * the overflow into arrives with `menu` in wave 5.
+   * multi-row bullet, for free.
+   *
+   * `scroll` and `menu` are both one line. They share this rule because they
+   * share the same last resort: a bar that cannot give anything up scrolls
+   * past what is left rather than cutting a control in half, which is what
+   * `menu` does when every unit in it is pinned and what Primer does by
+   * design — its spacer exists so the first item "can wrap to the next line
+   * and get clipped".
    */
-  [data-ui='toolbar'][data-overflow='scroll'] {
+  [data-ui='toolbar']:is([data-overflow='scroll'], [data-overflow='menu']) {
+    /**
+     * A scroll container clips at its padding edge whether or not a scrollbar
+     * is drawn, and a control's focus ring is drawn outward. The bar therefore
+     * takes the frame's own floor here too: without it the ring of the first
+     * control was cut against the edge of a bar that was not even overflowing.
+     */
+    --_pad: max(
+      var(--_inset),
+      calc(var(--slotted-focus-ring-offset, 2px) + var(--slotted-focus-ring-width, 2px))
+    );
+
     flex-wrap: nowrap;
     overflow-x: auto;
     overscroll-behavior-inline: contain;
     scrollbar-width: thin;
   }
 
-  [data-ui='toolbar'][data-overflow='scroll'][data-orientation='vertical'] {
+  [data-ui='toolbar']:is(
+      [data-overflow='scroll'],
+      [data-overflow='menu']
+    )[data-orientation='vertical'] {
     inline-size: auto;
     overflow-x: hidden;
     overflow-y: auto;
   }
 
   /**
-   * A scrolling bar must not shrink its controls to fit; it scrolls past them.
-   * Without this a flex item narrower than its content is the browser's
-   * preferred answer, and a row of squeezed buttons is what a reader gets
-   * instead of a row that scrolls.
+   * A one-line bar must not shrink its controls to fit; it scrolls past them,
+   * or hides them. Without this a flex item narrower than its content is the
+   * browser's preferred answer, and a row of squeezed buttons is what a reader
+   * gets instead — and the collapse would then measure a control at a width it
+   * only has while it is being squeezed.
    */
-  [data-ui='toolbar'][data-overflow='scroll'] > * {
+  [data-ui='toolbar']:is([data-overflow='scroll'], [data-overflow='menu']) > * {
     flex: none;
+  }
+
+  /* ── What the collapse hides, and the control that holds it ───────────── */
+
+  /**
+   * A unit the bar may give up. It is a box rather than nothing, because the
+   * family is the thing that hides it and a family cannot hide what it does not
+   * own — which is the one place this family's own anatomy bends: the items are
+   * found by being focusable at any depth, and a *unit* is a direct child of
+   * the root. A `button-group` in a bar is one unit and four items.
+   *
+   * It paints nothing. Everything a reader sees inside it belongs to the
+   * control the consumer placed.
+   */
+  [data-ui='toolbar'] [data-part='item'] {
+    align-items: center;
+    display: inline-flex;
+    min-inline-size: 0;
+  }
+
+  [data-ui='toolbar'][data-orientation='vertical'] [data-part='item'] {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  /**
+   * `display: none` written by this family rather than left to the user agent,
+   * for the reason `breadcrumb` records: an author's `display: flex` on the
+   * same element beats the user agent's own `[hidden] { display: none }`, so
+   * without this rule every collapsed unit stayed on the bar and the collapse
+   * did nothing at all.
+   */
+  [data-ui='toolbar']
+    :is(
+      [data-part='item'],
+      [data-part='group'],
+      [data-part='separator'],
+      [data-part='overflow']
+    )[hidden] {
+    display: none;
+  }
+
+  /**
+   * The control that opens what did not fit. It is `menu`'s own trigger wearing
+   * this family's geometry: the bar's height, the minimum target in the other
+   * axis, and the muted ink `tabs` gives the one control it draws itself.
+   *
+   * The mark is U+2026 as text, which is the exception rule 3 of
+   * `docs/token-foundation.md` allows and which `breadcrumb` already takes: the
+   * rule forbids drawing an *icon* from a character, and U+2026 stands in for
+   * nothing — it is the typographic mark for omitted content, and omitted
+   * content is what the control holds. Text also survives `forced-colors`,
+   * where a painted mask is replaced by the page's own background, and it
+   * scales with the type where a fixed mask would not.
+   *
+   * Its accessible name carries the count, so what a reader hears is a number
+   * rather than three dots.
+   */
+  [data-ui='toolbar'] [data-part='overflow'] {
+    align-items: center;
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--slotted-control-radius, 4px);
+    color: var(--slotted-toolbar-overflow-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    font-family: var(--slotted-control-font-family, inherit);
+    /**
+     * One step above the bar's own type. Three dots set at the size of a label
+     * are a row of specks; at the next step up they read as a control, and the
+     * quantity is still font-relative, so the three densities move it.
+     */
+    font-size: calc(var(--_font-size) * 1.5);
+    justify-content: center;
+    line-height: 1;
+    min-block-size: var(--_height);
+    min-inline-size: max(var(--slotted-target-min, 24px), var(--_height));
+    padding: 0;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  /**
+   * The three dots sit on the baseline, and a line box centred in the control
+   * puts its baseline about four fifths of the way down — so the mark lands a
+   * fifth of a line below the middle of the control and reads low against the
+   * labels beside it. Lifting it by half an x-height, less the height of the
+   * dots themselves, is what puts the row of ink on the optical middle.
+   *
+   * Every quantity is font-relative, which is the rule the briefing records for
+   * a mark beside text: the ratio judged at four times the type size is the
+   * ratio at thirteen pixels.
+   */
+  [data-ui='toolbar'] [data-part='overflow'] > * {
+    display: block;
+    transform: translateY(calc(-0.5ex + 0.05em));
+  }
+
+  [data-ui='toolbar'] [data-part='overflow']:not(:disabled):hover {
+    background-color: var(
+      --slotted-toolbar-overflow-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    color: var(--slotted-toolbar-overflow-hover-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='toolbar'] [data-part='overflow']:not(:disabled):active {
+    background-color: var(
+      --slotted-toolbar-overflow-active-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+  }
+
+  /**
+   * The surface is open, and the control that opened it says so: without it a
+   * reader who moved the pointer off the trigger loses every sign of which
+   * control the layer belongs to.
+   */
+  [data-ui='toolbar'] [data-part='overflow'][data-open] {
+    background-color: var(
+      --slotted-toolbar-overflow-open-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+    color: var(--slotted-toolbar-overflow-hover-color, var(--slotted-text, CanvasText));
+  }
+
+  /**
+   * A bar out of action is a `fieldset` around it, and the platform disables
+   * every control inside — this one included. It says so rather than looking
+   * operable, and it answers neither hover nor press, which is the precedence
+   * `docs/state-and-events.md` fixes.
+   */
+  [data-ui='toolbar'] [data-part='overflow']:disabled {
+    color: var(--slotted-disabled-foreground, GrayText);
+    cursor: default;
+  }
+
+  /**
+   * The inward ring the scroll container needs. The bar clips at its padding
+   * edge, and the trigger is the control closest to it, so an outward ring here
+   * is the one this family cannot afford.
+   */
+  [data-ui='toolbar'] [data-part='overflow']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
   /* ── A group inside the bar ───────────────────────────────────────────── */

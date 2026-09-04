@@ -772,7 +772,21 @@ Depois, nesta ordem:
    `packages/core/src/focus`, com teste próprio, como esta linha pedia.
    Inventário, decisões e autoavaliação em
    `docs/superpowers/specs/2026-09-04-dialog-and-alert-dialog-*.md`.
-4. `drawer`
+4. `drawer` — entregue em 2026-09-04, como **família própria**, `data-ui="drawer"`,
+   e não como membro de `dialog`. O que decide é que um drawer persistente não
+   tem papel `dialog` nenhum: um alert dialog _é_ um dialog, então uma regra do
+   consumidor para `[data-ui='dialog']` vale para ele também; um drawer `inline`
+   é uma região da página, e `role="dialog"` nele seria a afirmação que a APG
+   chama de severa. O custo — cabeçalho, botão de fechar e regra de
+   forced-colors escritos duas vezes — está em `contract.json`, campo `identity`.
+   Modal e persistente são **um membro com um eixo `mode`**, porque a troca é o
+   ponto: dois componentes fariam o consumidor trocar um elemento por outro no
+   breakpoint, e os dois frameworks destroem a subárvore quando isso acontece.
+   `packages/core/src/extent` e a palavra `extent` no vocabulário de
+   `specs/contract.schema.mjs` chegaram aqui, em commit próprio antes da
+   família; `splitter`, na onda 8, é o segundo consumidor de ambos e responde ao
+   mesmo padrão Window Splitter. Inventário, decisões e autoavaliação em
+   `docs/superpowers/specs/2026-09-04-drawer-*.md`.
 5. `menu menubar`
 6. `toast`
 7. `loading-overlay`

@@ -78,7 +78,16 @@
      * lets the list state the second and each pair state the first.
      */
     --_pair-gap: var(--slotted-description-list-column-gap, var(--slotted-control-gap-md, 8px));
-    --_group-gap: var(--slotted-description-list-group-gap, var(--slotted-space-9, 2rem));
+    /**
+     * Three times the distance a term stands from its own value, and it follows
+     * the density with it: a dense list packs its column groups as tightly as
+     * it packs everything else, where a fixed two rem left the one distance on
+     * the page that never answered the axis.
+     */
+    --_group-gap: var(
+      --slotted-description-list-group-gap,
+      calc(var(--slotted-control-gap-md, 8px) * 3)
+    );
     --_row-gap: var(
       --slotted-description-list-row-gap,
       calc(var(--slotted-control-gap-md, 8px) + var(--slotted-space-2, 0.25rem))
@@ -259,6 +268,27 @@
    * clamped value ends mid-sentence and a control on that line would read as
    * part of it.
    */
+  /**
+   * A value with no clamp and no toggle is text, and the control that copies it
+   * belongs at the end of that text — not at the far edge of the row, which is
+   * where a grid track put it the moment the value wrapped. Inline flow is the
+   * only thing that follows a last line, so a description with nothing but a
+   * value and a copy control is a block, and the grid below is for the ones
+   * that have a second row to place.
+   */
+  [data-ui='description-list'] [data-part='description']:not([data-clamp]) {
+    display: block;
+  }
+
+  [data-ui='description-list'] [data-part='description']:not([data-clamp]) [data-part='value'] {
+    display: inline;
+  }
+
+  [data-ui='description-list'] [data-part='description']:not([data-clamp]) [data-part='copy'] {
+    margin-inline-start: var(--_pair-gap);
+    vertical-align: text-bottom;
+  }
+
   [data-ui='description-list'] [data-part='description'] {
     align-items: baseline;
     /**

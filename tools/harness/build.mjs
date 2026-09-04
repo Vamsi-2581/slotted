@@ -6,7 +6,7 @@ export const WIDTHS = [240, 420, 720];
 export const DENSITIES = ['comfortable', 'compact', 'dense'];
 export const DIRECTIONS = ['ltr', 'rtl'];
 
-const SCENE_OPEN = /<section\s+data-scene="([^"]+)"\s*>/g;
+const SCENE_OPEN = /<section\s+data-scene="([^"]+)"((?:\s+[a-z-]+(?:="[^"]*")?)*)\s*>/g;
 const SECTION_TAG = /<section\b|<\/section\s*>/g;
 const IDENTIFIER = /data-ui=['"]([a-z0-9-]+)['"]/g;
 
@@ -20,6 +20,9 @@ const IDENTIFIER = /data-ui=['"]([a-z0-9-]+)['"]/g;
  * write a live role on its box — so the first alert in a scene closed the scene
  * around it, and every alert after it disappeared from the page. Nothing in the
  * capture said so: the picture was a correct rendering of one alert.
+ *
+ * A scene may declare `data-fixed`, which the stage carries. See the page
+ * stylesheet below for what it is and why an overlay family needs it.
  */
 export function parseScenes(fragment) {
   const scenes = [];
@@ -40,7 +43,11 @@ export function parseScenes(fragment) {
     }
 
     if (end === -1) throw new Error(`the scene "${open[1]}" is never closed`);
-    scenes.push({ name: open[1], markup: fragment.slice(start, end) });
+    scenes.push({
+      name: open[1],
+      markup: fragment.slice(start, end),
+      fixed: (open[2] ?? '').includes('data-fixed'),
+    });
     SCENE_OPEN.lastIndex = end;
   }
 
@@ -94,39 +101,65 @@ export function scopeControlNames(markup, suffix) {
   );
 }
 
-export function renderHarness({ family, fragment, familyCss, composedCss = '', themeCss }) {
+/**
+ * The theme name selects the block the stylesheet emits, so the attribute in
+ * the document and the theme the stylesheet was built from have to agree. A
+ * page that names one theme and loads another paints nothing.
+ */
+export function renderHarness({
+  family,
+  fragment,
+  familyCss,
+  composedCss = '',
+  themeCss,
+  theme = 'default',
+}) {
   const scenes = parseScenes(fragment);
   if (scenes.length === 0) {
     throw new Error(`${family}: the harness fragment declares no scene`);
   }
 
-  const cells = scenes.flatMap(({ name, markup }) =>
-    SCHEMES.flatMap((scheme) =>
-      WIDTHS.map(
-        (width) => `
+  /**
+   * Width first, scheme second. Read scheme-major the three widths alternated
+   * at every step, so no two neighbouring cells were the same size and the
+   * page read as a mosaic. Grouped by width, each run of three is the same
+   * scene at the same size in the three schemes — which is also the comparison
+   * a reviewer actually makes.
+   */
+  const cells = scenes.flatMap(({ name, markup, fixed }) =>
+    WIDTHS.flatMap(
+      (width) =>
+        SCHEMES.map(
+          (scheme) => `
       <figure class="cell" data-scheme="${scheme}">
         <figcaption>${name} · ${scheme} · ${width}px<span data-axes></span></figcaption>
         <div
           class="stage"
           id="${name}-${scheme}-${width}"
-          data-scene="${name}"
+          data-scene="${name}"${fixed ? '\n          data-fixed' : ''}
           data-slotted-scheme="${scheme}"
           style="inline-size: ${width}px"
         >${scopeControlNames(markup, `${scheme}-${width}`)}</div>
       </figure>`,
-      ),
+        ).join('') +
+        /* One scene at one width in the three schemes is a line of its own.
+           Left to wrap freely a line held the tail of one width group and the
+           head of the next — a 720-pixel tile beside a 240-pixel one — which is
+           the mosaic a reviewer read as disorder. The break carries no size and
+           no border; it only ends the line. */
+        '<div class="break"></div>',
     ),
   );
 
   return `<!doctype html>
-<html lang="en" dir="ltr" data-slotted-theme="default" data-slotted-density="comfortable">
+<html lang="en" dir="ltr" data-slotted-theme="${theme}" data-slotted-density="comfortable">
 <meta charset="utf-8">
 <title>${family} harness</title>
 <style>${themeCss}</style>
 <style>${composedCss}</style>
 <style>${familyCss}</style>
 <style>
-  body { margin: 0; font: 12px ui-sans-serif, system-ui, sans-serif; background: #f4f5f7 }
+  body { margin: 0; font: 12px ui-sans-serif, system-ui, sans-serif; background: #eceef1 }
   .cell { margin: 0; padding: 12px }
   .cell[data-scheme="dark"] { background: #0b0b0d; color: #fafafa }
   .cell[data-scheme="light"] { background: #ffffff; color: #0f172a }
@@ -140,13 +173,51 @@ export function renderHarness({ family, fragment, familyCss, composedCss = '', t
     background: var(--slotted-surface);
     color: var(--slotted-text);
   }
-  main { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1px; background: #d8dade }
-  /* A filtered page is one capture, so it is one column. The review view packs
-     cells side by side to compare them, and the same packing at the widest step
-     put two 720-pixel stages in two 400-pixel tracks: the stage overflowed its
-     track and the shooter clipped every line of text at the viewport edge. A
-     capture the reader cannot read is worse than no capture. */
-  body[data-only] main { grid-template-columns: 1fr }
+  /* An overlay family positions its layer against the viewport, and a stage is
+     not a containing block for a fixed descendant. Nine cells of one page would
+     each paint a full-viewport layer, over the page and over each other, and
+     the capture would show one dialog and eight it had covered.
+
+     Containing the layout makes the stage the containing block for fixed and
+     absolutely positioned descendants; containing the paint clips them to it.
+     The pair is what lets a layer be photographed in a cell. It is opt-in per
+     scene, because containment also changes where an existing family's own
+     absolutely positioned parts resolve, and no family that does not ask for it
+     may be moved by it. */
+  .stage[data-fixed] { contain: layout paint }
+  /* A layer takes its parent's size and gives none back, so a stage holding
+     only a layer would be zero pixels tall and the capture would be empty. The
+     scene supplies the page behind the scrim; this is the floor under it. */
+  .stage[data-fixed] { min-block-size: 220px }
+  /* A cell is exactly as wide as the stage it holds, and the row wraps.
+     Laid out on a grid of minmax(320px, 1fr) tracks, a 420-pixel stage
+     overflowed its track and a 720-pixel one overflowed it by four hundred
+     pixels — drawn over the cells beside it, on every family's review page.
+     The earlier fix gave the *filtered* page one column and left the review
+     page overlapping, which is the page a reviewer opens by hand.
+     A track cannot both hold the widest stage and pack the narrow ones, because
+     repeat(auto-fill, ...) needs a definite maximum and the stages are three
+     different definite widths. Wrapping boxes sized by their own content is the
+     layout that has no track to overflow. */
+  /* No align-items, so every cell on a wrapped line takes the height of the
+     tallest one and its own scheme background fills it. Read as start, each
+     cell was only as tall as its content, and the page's own ground showed
+     through under every cell shorter than its neighbour — the gaps a reviewer
+     saw between the tiles. A line of cells is a line, not a shelf of boxes.
+
+     The separator is an edge on the cell rather than a gap over a coloured
+     ground, for the same reason: an edge belongs to the box it separates and
+     has nothing to leak through. */
+  main { display: flex; flex-wrap: wrap }
+  /* Grows to fill its line and never shrinks. A basis that did not grow left
+     the ground of the page showing to the right of every short line: a
+     720-pixel stage is one cell on a 1440-pixel window, and the other seven
+     hundred pixels were bare.
+     Growing costs the stage nothing, because the stage states its own width;
+     what grows is the cell around it. Shrink stays at zero, which is what keeps
+     a stage from ever being squeezed under the width its caption claims. */
+  .cell { flex: 1 0 auto; border-inline-end: 1px solid #c9ccd2; border-block-end: 1px solid #c9ccd2 }
+  .break { flex-basis: 100%; block-size: 0 }
   body[data-only] .cell { display: none }
   body[data-only] .cell.shown { display: block }
 </style>
@@ -187,8 +258,12 @@ export function renderHarness({ family, fragment, familyCss, composedCss = '', t
 }
 
 async function main() {
-  const family = process.argv[2];
-  if (!family) throw new Error('usage: node tools/harness/build.mjs <family>');
+  const args = process.argv.slice(2);
+  const family = args.find((argument) => !argument.startsWith('--'));
+  if (!family) throw new Error('usage: node tools/harness/build.mjs <family> [--theme=<name>]');
+
+  const theme =
+    args.find((argument) => argument.startsWith('--theme='))?.slice('--theme='.length) ?? 'default';
 
   const root = new URL('../../', import.meta.url);
   const read = (path) => readFile(new URL(path, root), 'utf8');
@@ -205,7 +280,8 @@ async function main() {
     fragment,
     familyCss: await read(`packages/styles/src/${family}/${family}.css`),
     composedCss: composed.join('\n'),
-    themeCss: await read('packages/themes/default/dist/styles.css'),
+    themeCss: await read(`packages/themes/${theme}/dist/styles.css`),
+    theme,
   });
 
   const out = new URL('tools/harness/out/', root);

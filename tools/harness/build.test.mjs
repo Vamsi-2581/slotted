@@ -26,6 +26,20 @@ const render = () =>
     themeCss: '[data-slotted-theme="default"] { --t: 1px }',
   });
 
+test('names the theme the stylesheet it was handed was built from', () => {
+  assert.match(render(), /data-slotted-theme="default"/);
+  assert.match(
+    renderHarness({
+      family: 'demo',
+      fragment,
+      familyCss: '',
+      themeCss: '[data-slotted-theme="other"] { --t: 2px }',
+      theme: 'other',
+    }),
+    /data-slotted-theme="other"/,
+  );
+});
+
 test('emits one document carrying both stylesheets', () => {
   const html = render();
   assert.match(html, /^<!doctype html>/i);
@@ -47,13 +61,94 @@ test('renders every scene in every scheme at every width', () => {
   }
 });
 
-test('gives a filtered page one column, so the widest stage is not clipped', () => {
+/**
+ * The review page is the one a reviewer opens by hand, and it is where the
+ * defect lived: cells were laid on a grid of `minmax(320px, 1fr)` tracks while
+ * each stage carries a definite 240, 420 or 720 pixel width, so every stage
+ * wider than its track was drawn over the cells beside it. A reviewer reported
+ * it as "impossible to check anything", which is what an overlapping page is.
+ *
+ * The layout may not size a cell independently of the stage inside it. A
+ * wrapping row of content-sized boxes has no track to overflow; a grid with a
+ * definite track always can, because `repeat(auto-fill, …)` needs a definite
+ * maximum and the three stage widths are three different definite values.
+ */
+test('sizes each cell by its own stage, so no stage is drawn over its neighbour', () => {
   const html = render();
-  assert.match(html, /body\[data-only\] main \{ grid-template-columns: 1fr \}/);
+  assert.match(html, /main \{ display: flex; flex-wrap: wrap \}/);
+  assert.match(html, /\.cell \{ flex: 1 0 auto;/);
   assert.ok(
-    html.indexOf('body[data-only] main') > html.indexOf('main { display: grid'),
-    'the single-column rule has to come after the review grid to win',
+    !/main \{[^}]*display: grid/.test(html),
+    'a definite grid track is what the widest stage overflowed',
   );
+});
+
+/**
+ * The gaps a reviewer reported between the tiles were the page's own ground,
+ * seen under every cell shorter than its neighbour. Two rules let it through:
+ * `align-items: start`, which sized each cell to its own content while the flex
+ * line took the height of the tallest, and a one-pixel gap over a coloured
+ * background, which reads as a hairline only while every cell is one size — and
+ * the cells are three sizes by design.
+ *
+ * A cell must therefore fill its line, and the separator must belong to the box
+ * it separates.
+ */
+test('lets no cell leave the page ground showing beside it', () => {
+  const html = render();
+  assert.ok(
+    !/main \{[^}]*align-items: start/.test(html),
+    'a cell sized to its own content leaves the line height under it empty',
+  );
+  assert.ok(
+    !/main \{[^}]*gap: 1px/.test(html),
+    'a one-pixel gap over a ground is what showed through between uneven tiles',
+  );
+  assert.match(
+    html,
+    /\.cell \{ flex: 1 0 auto;/,
+    'a cell that does not grow leaves its line short',
+  );
+  assert.match(html, /\.cell \{[^}]*border-inline-end: 1px solid/);
+});
+
+/**
+ * Grouped scheme-major the three stage widths alternated at every step, so no
+ * two neighbouring cells were the same size. Width-major puts the three schemes
+ * of one scene at one size side by side, which is both tidier and the
+ * comparison the page is for.
+ */
+/**
+ * A wrapped line that holds the tail of one width group and the head of the
+ * next puts a 720-pixel tile beside a 240-pixel one, which is the mosaic a
+ * reviewer read as disorder. The break ends the line and carries no size.
+ */
+test('ends the line after each width group, so no line mixes two sizes', () => {
+  const html = render();
+  assert.match(html, /\.break \{ flex-basis: 100%; block-size: 0 \}/);
+  const breaks = [...html.matchAll(/<div class="break"><\/div>/g)];
+  assert.equal(breaks.length, 2 * WIDTHS.length, 'one break per scene per width');
+
+  const between = html.split('<div class="break"></div>');
+  for (const chunk of between.slice(0, -1)) {
+    const widths = [...chunk.matchAll(/id="[a-z-]+-[a-z-]+-(\d+)"/g)].map(([, width]) => width);
+    assert.equal(new Set(widths).size, 1, `a line holds one width, found ${widths.join(', ')}`);
+  }
+});
+
+test('groups the cells by width, so neighbouring cells are the same size', () => {
+  const order = [...render().matchAll(/id="default-([a-z-]+)-(\d+)"/g)].map(
+    ([, scheme, width]) => `${width}:${scheme}`,
+  );
+  assert.deepEqual(order.slice(0, 3), ['240:light', '240:dark', '240:high-contrast']);
+  assert.deepEqual(order.slice(3, 6), ['420:light', '420:dark', '420:high-contrast']);
+  assert.deepEqual(order.slice(6, 9), ['720:light', '720:dark', '720:high-contrast']);
+});
+
+test('shows one cell on a filtered page and hides the rest', () => {
+  const html = render();
+  assert.match(html, /body\[data-only\] \.cell \{ display: none \}/);
+  assert.match(html, /body\[data-only\] \.cell\.shown \{ display: block \}/);
 });
 
 test('gives each cell the scheme attribute the theme selects on', () => {
@@ -241,6 +336,34 @@ test('refuses a fragment that declares no scene', () => {
 
 test('keeps the scene markup verbatim, so the harness shows the real DOM', () => {
   assert.ok(render().includes('<b class="x">one</b>'));
+});
+
+/**
+ * An overlay family's layer is `position: fixed`, and a stage is not a
+ * containing block for one. Without this a page's nine cells each paint a
+ * full-viewport layer over the whole page, and the capture shows one layer and
+ * eight it covered.
+ */
+test('contains a fixed layer inside the stage of a scene that asks for it', () => {
+  const html = renderHarness({
+    family: 'demo',
+    fragment: '<section data-scene="modal" data-fixed><b>layer</b></section>',
+    familyCss: '',
+    themeCss: '',
+  });
+
+  assert.match(html, /data-scene="modal"\s+data-fixed/, 'the stage does not carry the flag');
+  assert.match(html, /\.stage\[data-fixed\][^}]*contain: layout paint/);
+});
+
+test('leaves a scene that does not ask for containment untouched by it', () => {
+  assert.doesNotMatch(render(), /data-scene="default"\s+data-fixed/);
+  assert.equal(parseScenes('<section data-scene="a"><b>x</b></section>')[0].fixed, false);
+  assert.equal(
+    parseScenes('<section data-scene="a" data-fixed><b>x</b></section>')[0].fixed,
+    true,
+    'the flag is not read from the section',
+  );
 });
 
 test('photographs the page once, at the scale the emulation already set', () => {

@@ -429,3 +429,17 @@ test('the demonstration list is a list with no marker and no inset', () => {
   assert.match(list, /padding:\s*0/);
   assert.match(list, /min-inline-size:\s*0/);
 });
+
+/**
+ * The step between the bar and the dialog. A layer anchored beside its trigger
+ * fills neither four rems nor twenty-two, and `tooltip`'s first rendered page
+ * put a button at the top of a box four times its height with the rest blank —
+ * the empty canvas the page contract refuses.
+ */
+test('offers a viewport an anchored layer fills rather than rattles around in', () => {
+  const rule = /\.slotted-demo-viewport\[data-size='layer'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  assert.match(rule, /block-size:/);
+  assert.match(rule, /align-items:\s*center/);
+  assert.match(rule, /justify-items:\s*center/);
+});

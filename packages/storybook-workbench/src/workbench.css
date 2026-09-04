@@ -589,6 +589,24 @@
 }
 
 /**
+ * The step between the two. Four rems holds a bar across the top of a page and
+ * twenty-two holds a dialog; a layer anchored beside its own trigger needs
+ * neither, and `tooltip`'s first rendered page showed why — a 34-pixel button
+ * at the top of a 352-pixel box, and the rest of the box blank. That is the
+ * empty canvas `.claude/skills/component/references/stories.md` refuses.
+ *
+ * It centres what it holds as well as shortening it, so the layer has room on
+ * both sides of the trigger and the scene reads as a demonstration rather than
+ * as something that fell to the top.
+ */
+.slotted-demo-viewport[data-size='layer'] {
+  align-items: center;
+  block-size: 11rem;
+  display: grid;
+  justify-items: center;
+}
+
+/**
  * The same box as two tracks: a panel in the flow and the page beside it.
  *
  * It is the shape an *inline* drawer lives in, and it has to be written out

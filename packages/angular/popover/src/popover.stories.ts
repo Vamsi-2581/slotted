@@ -64,7 +64,7 @@ const grid = (columns: 1 | 2 | 3, scenes: string) =>
  * `composition` pairs it with `[portal]="false"`.
  */
 const viewport = (body: string) =>
-  `<div class="slotted-demo-viewport" data-size="tall"><div class="slotted-demo-row">${body}</div></div>`;
+  `<div class="slotted-demo-viewport" data-place="top" data-size="tall"><div class="slotted-demo-row">${body}</div></div>`;
 
 const rows = (label: string, value: string) =>
   `<div class="slotted-demo-rows"><span>${label}</span><span>${value}</span></div>`;
@@ -84,8 +84,8 @@ const panel = (attributes: string, label: string, title: string, body: string, f
         }
         <div slPopoverBody>${body}</div>
         ${footer === '' ? '' : `<div slPopoverFooter>${footer}</div>`}
-        <div slPopoverArrow></div>
       </div>
+      <div slPopoverArrow></div>
     </ng-template>
   </ng-container>`;
 
@@ -145,7 +145,7 @@ export const Playground: Story = {
         'It focuses the panel itself rather than its first control, so a reader hears the panel name before its contents. Escape closes it and the focus goes back to the button.',
         viewport(
           panel(
-            'side="bottom"',
+            'side="bottom" [open]="true"',
             'Filters',
             'Filter invoices',
             'Unpaid, overdue and disputed invoices issued in the last quarter.',
@@ -167,19 +167,19 @@ export const Sizes: Story = {
         'The inset and the title step move with the width. The panel own inset is on the space scale, as slCard and slAlert are, and density moves what it holds.',
         viewport(
           panel(
-            'side="bottom" size="sm"',
+            'side="bottom" size="sm" [open]="true"',
             'Small',
             'Small',
             'The tighter inset and the medium type step.',
           ) +
             panel(
-              'side="bottom" size="md"',
+              'side="bottom" size="md" [open]="true"',
               'Medium',
               'Medium',
               'The step every popover starts at.',
             ) +
             panel(
-              'side="bottom" size="lg"',
+              'side="bottom" size="lg" [open]="true"',
               'Large',
               'Large',
               'For a panel that holds a form rather than a sentence.',
@@ -200,7 +200,7 @@ export const Width: Story = {
         'auto sizes the panel to its content and stops at the measure its size step gives it. Past that the text wraps rather than setting one line the width of the page.',
         viewport(
           panel(
-            'side="bottom" align="start" width="auto"',
+            'side="bottom" align="start" width="auto" [open]="true"',
             'Automatic',
             '',
             'Sized by what is written in it.',
@@ -212,7 +212,7 @@ export const Width: Story = {
           'anchor reads the anchor measured width, which is the one case Radix publishes a custom property for and never uses. It is what a filter panel under a search field needs.',
           viewport(
             panel(
-              'side="bottom" align="start" width="anchor"',
+              'side="bottom" align="start" width="anchor" [open]="true"',
               'An unusually wide trigger',
               '',
               'Exactly as wide as the button above.',
@@ -259,7 +259,7 @@ export const Anchor: Story = {
         'The panel hangs off the row, not off the button',
         'The button only opens it; the anchor is what it points at and is measured for. Nothing at all is written on the anchor element.',
         viewport(`
-          <ng-container slPopover [portal]="false" side="bottom" align="end">
+          <ng-container slPopover [portal]="false" side="bottom" align="end" [open]="true">
             <div slPopoverAnchor class="slotted-demo-rows">
               <span>Invoice 2026-014</span>
               <span><button slButton size="sm" tone="secondary" variant="ghost" slPopoverTrigger type="button">⋯</button></span>
@@ -267,8 +267,8 @@ export const Anchor: Story = {
             <ng-template slPopoverLayer>
               <div slPopoverContent aria-label="Row actions">
                 <div slPopoverBody>Duplicate, archive, delete.</div>
-                <div slPopoverArrow></div>
               </div>
+              <div slPopoverArrow></div>
             </ng-template>
           </ng-container>`),
       ),
@@ -336,8 +336,8 @@ export const Dismissal: Story = {
                   <button slPopoverClose></button>
                 </div>
                 <div slPopoverBody>Each way out carries a different reason.</div>
-                <div slPopoverArrow></div>
               </div>
+              <div slPopoverArrow></div>
             </ng-template>
           </ng-container>`)}${rows('Last reason', '{{ reason }}')}`,
       ),
@@ -355,7 +355,7 @@ export const Scrolling: Story = {
         'Bounded by the height the engine says is left. The title and the actions keep theirs, and the fade at the cut says there is more below — a panel bounded as a whole would have scrolled its own name out of sight.',
         viewport(
           panel(
-            'side="bottom"',
+            'side="bottom" [open]="true"',
             'Notifications',
             'Notification settings',
             '<p>Send me an email when an invoice is issued.</p><p>Send me an email when a payment fails.</p><p>Send me a weekly summary on Monday morning.</p><p>Send me an email when a dispute is opened.</p><p>Send me an email when a refund is settled.</p><p>Send me an email when the balance falls below the threshold.</p>',
@@ -398,8 +398,8 @@ export const Composition: Story = {
                   <button slButton size="sm" tone="secondary" variant="ghost" type="button">Cancel</button>
                   <button slButton size="sm" type="button">Create</button>
                 </div>
-                <div slPopoverArrow></div>
               </div>
+              <div slPopoverArrow></div>
             </ng-template>
           </ng-container>`),
       ),
@@ -435,8 +435,8 @@ export const Nested: Story = {
                   </ng-container>
                   <button slButton size="sm" type="button">Apply</button>
                 </div>
-                <div slPopoverArrow></div>
               </div>
+              <div slPopoverArrow></div>
             </ng-template>
           </ng-container>`),
       ),

@@ -61,6 +61,19 @@ describe('Tooltip', () => {
    * trigger and nothing else. The layer is what carries the portal, the
    * positioner and the layer stack, and none of them exist until it does.
    */
+  /**
+   * The stylesheet selects the arrow as a direct child of the layer, so an
+   * arrow written inside the content is an unstyled div — which is what the
+   * first rendered reference page showed, and no offline test could see.
+   */
+  it('keeps the arrow beside the content rather than inside it', async () => {
+    render(<Basic defaultOpen />);
+    await waitFor(() => expect(layer()).not.toBeNull());
+
+    const arrow = document.querySelector('[data-part="arrow"]');
+    expect(arrow?.parentElement).toBe(layer());
+  });
+
   it('builds no layer at all until it is opened', () => {
     render(<Basic />);
     expect(layer()).toBeNull();

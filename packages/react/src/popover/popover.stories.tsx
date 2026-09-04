@@ -72,8 +72,8 @@ function Panel({
           )}
           <PopoverBody>{body}</PopoverBody>
           {footer === undefined ? null : <PopoverFooter>{footer}</PopoverFooter>}
-          <PopoverArrow />
         </PopoverContent>
+        <PopoverArrow />
       </PopoverLayer>
     </Popover>
   );
@@ -125,6 +125,7 @@ export const Playground: Story = {
       >
         <Viewport>
           <Panel
+            defaultOpen
             body="Unpaid, overdue and disputed invoices issued in the last quarter."
             description="Applies to the current view only."
             footer={
@@ -148,20 +149,40 @@ export const Playground: Story = {
 export const Sizes: Story = {
   parameters: scenario('sizes'),
   render: () => (
-    <Grid>
+    <Grid columns={2}>
       <Scene
-        label="Sixteen, twenty and twenty-four rems"
-        note="The inset and the title step move with the width. The panel's own inset is on the space scale, as Card's and Alert's are, and density moves what it holds."
+        label="Small — sixteen rems"
+        note="The tighter inset and the medium title step, for a panel that holds a sentence and a control."
       >
         <Viewport>
-          <Panel body="The tighter inset and the medium type step." size="sm" title="Small">
+          <Panel
+            defaultOpen
+            body="The tighter inset and the medium type step."
+            size="sm"
+            title="Small"
+          >
             Small
           </Panel>
-          <Panel body="The step every popover starts at." size="md" title="Medium">
+        </Viewport>
+      </Scene>
+      <Scene
+        label="Medium — twenty rems"
+        note="The step every popover starts at, and the one the provider changes when a product wants another."
+      >
+        <Viewport>
+          <Panel defaultOpen body="The step every popover starts at." size="md" title="Medium">
             Medium
           </Panel>
+        </Viewport>
+      </Scene>
+      <Scene
+        label="Large — twenty-four rems"
+        note="For a panel that holds a form. The panel's own inset is on the space scale, as Card's and Alert's are, and density moves what it holds."
+      >
+        <Viewport>
           <Panel
             body="For a panel that holds a form rather than a sentence."
+            defaultOpen
             size="lg"
             title="Large"
           >
@@ -250,7 +271,7 @@ export const Anchor: Story = {
         note="The button only opens it; the anchor is what it points at and is measured for. Nothing at all is written on the anchor element."
       >
         <Viewport>
-          <Popover align="end" portal={false} side="bottom">
+          <Popover align="end" defaultOpen portal={false} side="bottom">
             <PopoverAnchor>
               <div className="slotted-demo-rows">
                 <span>Invoice 2026-014</span>
@@ -266,8 +287,8 @@ export const Anchor: Story = {
             <PopoverLayer>
               <PopoverContent aria-label="Row actions">
                 <PopoverBody>Duplicate, archive, delete.</PopoverBody>
-                <PopoverArrow />
               </PopoverContent>
+              <PopoverArrow />
             </PopoverLayer>
           </Popover>
         </Viewport>
@@ -346,8 +367,8 @@ export const Dismissal: Story = {
                     <PopoverClose />
                   </PopoverHeader>
                   <PopoverBody>Escape, outside, close, or the trigger again.</PopoverBody>
-                  <PopoverArrow />
                 </PopoverContent>
+                <PopoverArrow />
               </PopoverLayer>
             </Popover>
           </Viewport>
@@ -382,8 +403,8 @@ export const Dismissal: Story = {
                     <PopoverClose />
                   </PopoverHeader>
                   <PopoverBody>Press outside: nothing happens while the guard is on.</PopoverBody>
-                  <PopoverArrow />
                 </PopoverContent>
+                <PopoverArrow />
               </PopoverLayer>
             </Popover>
           </Viewport>
@@ -411,6 +432,7 @@ export const Scrolling: Story = {
       >
         <Viewport>
           <Panel
+            defaultOpen
             body={
               <>
                 <p>Send me an email when an invoice is issued.</p>
@@ -461,8 +483,8 @@ export const Composition: Story = {
                     </Button>
                     <Button size="sm">Create</Button>
                   </PopoverFooter>
-                  <PopoverArrow />
                 </PopoverContent>
+                <PopoverArrow />
               </PopoverLayer>
             </Popover>
           </Viewport>
@@ -481,7 +503,7 @@ export const Nested: Story = {
         note="Two layers at once. The tooltip is created later, so it takes a greater depth in the single stack: it draws above the panel and Escape reaches it first, closing it and leaving the panel open."
       >
         <Viewport>
-          <Popover portal={false} side="bottom">
+          <Popover defaultOpen portal={false} side="bottom">
             <PopoverTrigger
               render={(props) => (
                 <Button {...props} tone="secondary" variant="outline">
@@ -512,8 +534,8 @@ export const Nested: Story = {
                   </Tooltip>
                   <Button size="sm">Apply</Button>
                 </PopoverFooter>
-                <PopoverArrow />
               </PopoverContent>
+              <PopoverArrow />
             </PopoverLayer>
           </Popover>
         </Viewport>

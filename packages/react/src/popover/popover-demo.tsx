@@ -51,7 +51,7 @@ export function Grid({ children, columns = 1 }: { children: ReactNode; columns?:
  */
 export function Viewport({ children }: { children: ReactNode }) {
   return (
-    <div className="slotted-demo-viewport" data-size="tall">
+    <div className="slotted-demo-viewport" data-place="top" data-size="tall">
       <div className="slotted-demo-row">{children}</div>
     </div>
   );

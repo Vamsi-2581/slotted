@@ -4579,11 +4579,24 @@ filled it in — the layer existed carrying no attribute the stylesheet reads, a
 every test was green. And `createPresence` without `present` is _uncontrolled_,
 so `sync` is ignored; a family that owns `open` passes it, `false` included.
 
-**Debt this pair owns.** The four reference pages were not read rendered. Both
-Storybook servers answer and neither draws the new pages, for the reason
-`drawer` records above: a running server cannot see a new subpath export in
-`packages/styles/package.json`, and the briefing says to ask before restarting
-one. `tools/harness/audit.mjs` therefore has no output for
-`components-tooltip--reference` or `components-popover--reference` on either
-port, and the two defects it exists to catch have not been ruled out. Whoever
-restarts those servers should run it on both pages of both families.
+**What reading the rendered pages found, and no offline test could.** The
+reviewer restarted both Storybook servers, and five defects came out of the
+first read. Two of them are the workbench's and are fixed there: a
+demonstration viewport with no step between "a bar across a page" and "a
+dialog", so every anchored family's scene was a small button in a large empty
+box; and a viewport whose `contain: paint` clips what escapes but is **not**
+what a positioning engine walks — an engine reads `overflow` — so a 24rem panel
+was told the whole viewport was available and ran 343 pixels out of a
+273-pixel box on a page every test passed.
+
+The third is the lesson for every family with an arrow. The stylesheet selects
+it as a **direct child of the layer**, and the natural thing to write is the
+arrow inside the content; it then renders as an unstyled div, and nothing
+reports it. Both bindings now assert the arrow's parent, and both anatomy
+tables say where it goes. `menu`, `select`, `combobox` and `date-picker` will
+each write an arrow.
+
+The fourth and fifth were this pair's own: a painted ground wrapped _around_ a
+viewport is invisible, because the viewport paints its own surface over it; and
+a demonstration opened in one binding is not opened in the other unless both
+stories say so.

@@ -336,20 +336,40 @@ switched off, so a layer opened in one scene cannot draw over the scene above
 it; the one scene per family that keeps the portal says so in its caption,
 because that is the default an application gets.
 
-**Not finished, and this is the honest statement of it.** The four pages were
-**not read rendered**. Both Storybook servers answer, and neither draws the new
-pages: a running Vite server cannot see the new subpath exports added to
-`packages/styles/package.json`, and `docs/build-briefing.md` says to ask before
-restarting one because it interrupts the other session in this worktree. The
-reviewer was asked and chose to restart the servers themselves.
-`tools/harness/audit.mjs` therefore has no output for
-`components-tooltip--reference` or `components-popover--reference` on either
-port, and the two geometries it exists to catch — an element collapsed to a
-sliver, and content overflowing the box that owns it — have not been ruled out.
-It is recorded as this pair's debt in `docs/BUILD-LOG.md`.
+**Read rendered, and five defects came out of it that no offline test could
+see.** The reviewer restarted both Storybook servers; the four pages were then
+read at 1280 and at 620, in light and in dark, with every code drawer opened.
 
-**The one change:** read all four pages at 1280 and 620 pixels in light and dark
-and run the audit on each. **Not made, and it is the one thing outstanding.**
+- Every demonstration was **a mostly empty canvas**: a 34-pixel button at the
+  top of a 352-pixel box. The workbench gained `data-size="layer"` and a
+  `data-place` attribute — an anchored family wants its trigger centred, a
+  family that pins something to an edge wants the opposite — and the scenes that
+  are about what a layer *looks like* now open it, so the page shows the family
+  rather than the button that opens it.
+- **The `surface` variant was demonstrated on white.** A painted ground wrapped
+  *around* the viewport is invisible, because the viewport paints
+  `--slotted-surface` over it. The ground is painted on the box now, and the
+  trigger on it is a solid button, because an outline one in the page's own text
+  colour is unreadable on a dark surface.
+- **The arrow was an unstyled div on every popover demonstration.** The
+  stylesheet selects it as a direct child of the layer and the stories had
+  written it inside the panel. Both bindings now have a test asserting the
+  arrow's parent is the layer, and both anatomy tables say where it goes.
+- **A 24rem panel ran 343 pixels out of a 273-pixel box.** `contain: paint`
+  clips what escapes and is not what a positioning engine walks — it reads
+  `overflow` — so the layer was told the whole viewport was available. The
+  workbench viewport is a real clipping ancestor now, and the layer narrows the
+  way it already does inside an application's own `overflow: hidden`.
+- **The Angular pages showed no layers at all**, because `[open]="true"` had
+  been added to the React stories alone.
+
+`tools/harness/audit.mjs` now reports no finding on any of the eight
+combinations — both families, both frameworks, 1280 and 620.
+
+**The one change:** the popover's `placement` scene still asks the reader to
+press six buttons to see six sides, where the tooltip's shows four at once.
+**Not made** — six open panels around one row overlap, and the alternative is
+six scenes for one axis. The caption says which button to press.
 
 ---
 
@@ -418,8 +438,11 @@ Read as images: `/tmp/tooltip-{light,dark,high-contrast}-*-420.png`,
 `/tmp/tooltip-{variant,sides}-light-comfortable-ltr-720.png`, and the same set
 for `popover`, plus `/tmp/popover-anatomy-{focus,hover,active}-data-part-close-*.png`.
 
-Not verified: the four reference pages rendered, and `tools/harness/audit.mjs`
-on them. A screen reader and a touch device.
+```
+tools/harness/audit.mjs on both pages of both families, at 1280 and 620   no findings
+```
+
+Not verified: a screen reader, and a touch device.
 
 Outside this pair, and not this lane's: `specs/legacy-ledger.test.mjs` fails on a
 missing `specs/components/dialog/contract.json`, and `pnpm check:affected`

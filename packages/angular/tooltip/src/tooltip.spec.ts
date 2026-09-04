@@ -77,6 +77,19 @@ describe('SlTooltip', () => {
     expect(layer()).toBeNull();
   });
 
+  /**
+   * The stylesheet selects the arrow as a direct child of the layer, so an
+   * arrow written inside the content is an unstyled div — which is what the
+   * first rendered reference page showed, and no offline test could see.
+   */
+  it('keeps the arrow beside the content rather than inside it', async () => {
+    fixture.componentInstance.open.set(true);
+    await settle(fixture);
+
+    const arrow = document.querySelector('[data-part="arrow"]');
+    expect(arrow?.parentElement).toBe(layer() as HTMLElement);
+  });
+
   it('renders the anatomy the contract declares', async () => {
     fixture.componentInstance.open.set(true);
     await settle(fixture);

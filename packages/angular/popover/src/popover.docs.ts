@@ -91,7 +91,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'A rotated square painted over the panel, so its background covers the panel border where they meet and its two outward edges continue the outline.',
+      'A rotated square painted over the panel, so its background covers the panel border where they meet and its two outward edges continue the outline. It goes **beside** the content inside ng-template[slPopoverLayer], not inside the content: the stylesheet selects it as a direct child of the layer.',
   },
   {
     part: 'focus-guard',
@@ -353,8 +353,8 @@ const scenes: ReferenceSceneMeta[] = [
         <button slPopoverClose></button>
       </div>
       <div slPopoverBody>Unpaid, overdue and disputed.</div>
-      <div slPopoverArrow></div>
     </div>
+    <div slPopoverArrow></div>
   </ng-template>
 </ng-container>
 `,

@@ -48,7 +48,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'A rotated square painted over the surface, so its background covers the surface border where they meet and its two outward edges continue the outline. The family draws it; the positioner measures it and says where it goes. Hidden from assistive technology.',
+      'A rotated square painted over the surface, so its background covers the surface border where they meet and its two outward edges continue the outline. It goes **beside** the content inside TooltipLayer, not inside the content: the stylesheet selects it as a direct child of the layer. Hidden from assistive technology.',
   },
 ];
 

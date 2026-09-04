@@ -49,19 +49,26 @@ export function Grid({ children, columns = 1 }: { children: ReactNode; columns?:
  * demonstration here pairs it with `portal={false}`. The one demonstration
  * about the portal itself says so in its caption.
  */
-export function Viewport({ children, tall }: { children: ReactNode; tall?: boolean }) {
-  return (
-    <div className="slotted-demo-viewport" {...(tall === true ? { 'data-size': 'tall' } : {})}>
-      <div className="slotted-demo-row">{children}</div>
-    </div>
-  );
-}
+export function Viewport({ children, inverse }: { children: ReactNode; inverse?: boolean }) {
+  /**
+   * `inverse` paints the ground rather than wrapping the box in one. A painted
+   * surface *around* the viewport is invisible: the viewport paints
+   * `--slotted-surface` over it, and the first rendered page showed a dark
+   * frame with a white middle and the `surface` variant demonstrated on white.
+   * The two classes together work because the surface rule is the more specific
+   * of the pair.
+   */
+  const className =
+    inverse === true ? 'slotted-demo-viewport slotted-demo-surface' : 'slotted-demo-viewport';
 
-/** A painted ground, for the one demonstration about the surface variant. */
-export function Inverse({ children }: { children: ReactNode }) {
   return (
-    <div className="slotted-demo-surface" data-surface="inverse">
-      {children}
+    <div
+      className={className}
+      data-place="center"
+      data-size="layer"
+      {...(inverse === true ? { 'data-surface': 'inverse' } : {})}
+    >
+      <div className="slotted-demo-row">{children}</div>
     </div>
   );
 }

@@ -37,8 +37,8 @@ function Basic({ label = 'Filters', ...props }: Partial<PopoverProps> & { label?
           <PopoverFooter>
             <button type="button">Apply</button>
           </PopoverFooter>
-          <PopoverArrow />
         </PopoverContent>
+        <PopoverArrow />
       </PopoverLayer>
     </Popover>
   );
@@ -58,6 +58,19 @@ describe('Popover', () => {
       (part) => document.querySelector(`[data-part="${part}"]`) !== null,
     );
     expect(present).toEqual(contract.members.popover.parts);
+  });
+
+  /**
+   * The stylesheet selects the arrow as a direct child of the layer, so an
+   * arrow written inside the panel is an unstyled div — which is exactly what
+   * the first rendered reference page showed, and no offline test could see.
+   */
+  it('keeps the arrow beside the panel rather than inside it', async () => {
+    render(<Basic defaultOpen />);
+    await waitFor(() => expect(layer()).not.toBeNull());
+
+    const arrow = document.querySelector('[data-part="arrow"]');
+    expect(arrow?.parentElement).toBe(layer());
   });
 
   it('builds nothing until it is opened', () => {

@@ -88,7 +88,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'A rotated square painted over the panel, so its background covers the panel border where they meet and its two outward edges continue the outline.',
+      'A rotated square painted over the panel, so its background covers the panel border where they meet and its two outward edges continue the outline. It goes **beside** the content inside PopoverLayer, not inside the content: the stylesheet selects it as a direct child of the layer.',
   },
   {
     part: 'focus-guard',
@@ -339,8 +339,8 @@ const scenes: ReferenceSceneMeta[] = [
         <PopoverClose />
       </PopoverHeader>
       <PopoverBody>Unpaid, overdue and disputed.</PopoverBody>
-      <PopoverArrow />
     </PopoverContent>
+    <PopoverArrow />
   </PopoverLayer>
 </Popover>;
 `,

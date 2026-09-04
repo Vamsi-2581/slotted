@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Button } from '../button';
 import { Tooltip } from './tooltip';
 import { TooltipDefaultsProvider } from './tooltip-defaults';
-import { Grid, Inverse, Scene, Viewport } from './tooltip-demo';
+import { Grid, Scene, Viewport } from './tooltip-demo';
 import { TooltipArrow, TooltipContent, TooltipLayer, TooltipTrigger } from './tooltip-parts';
 import { REACT_TOOLTIP_DOCS, REACT_TOOLTIP_TOKENS } from './tooltip.docs';
 import type { TooltipProps } from './tooltip.types';
@@ -82,8 +82,8 @@ export const Playground: Story = {
         label="Hover, or Tab"
         note="The pointer waits out the 600 ms warmup; keyboard focus opens it in the same task, because a delay a reader cannot shorten by moving faster is a delay for nothing."
       >
-        <Viewport tall>
-          <Hint hint="Sends the draft to every subscriber on the list" side="bottom">
+        <Viewport>
+          <Hint defaultOpen hint="Sends the draft to every subscriber on the list" side="bottom">
             Publish
           </Hint>
         </Viewport>
@@ -100,8 +100,8 @@ export const Variant: Story = {
         label="Inverse, on the page"
         note="A surface opposite to the page separates itself in every scheme without an edge, which is why it is the default and carries no border at all."
       >
-        <Viewport tall>
-          <Hint hint="Opposite to the page, in every scheme" side="bottom">
+        <Viewport>
+          <Hint defaultOpen hint="Opposite to the page, in every scheme" side="bottom">
             Inverse
           </Hint>
         </Viewport>
@@ -110,17 +110,21 @@ export const Variant: Story = {
         label="Surface, on a dark ground"
         note="On a page that is already dark the inverse hint is the brightest thing on it. The raised surface takes a hairline instead, and the arrow's outline continues it."
       >
-        <Inverse>
-          <Viewport tall>
-            <Hint
-              hint="Reads as a small panel rather than as a label"
-              side="bottom"
-              variant="surface"
-            >
-              Surface
-            </Hint>
-          </Viewport>
-        </Inverse>
+        <Viewport inverse>
+          <Tooltip defaultOpen portal={false} side="bottom" variant="surface">
+            <TooltipTrigger
+              render={(props) => (
+                <Button {...props} tone="accent">
+                  Surface
+                </Button>
+              )}
+            />
+            <TooltipLayer>
+              <TooltipContent>Reads as a small panel rather than as a label</TooltipContent>
+              <TooltipArrow />
+            </TooltipLayer>
+          </Tooltip>
+        </Viewport>
       </Scene>
     </Grid>
   ),
@@ -134,11 +138,11 @@ export const Sizes: Story = {
         label="Small, and medium"
         note="Twelve pixels and thirteen. Switch the density in the toolbar: both tighten their padding and neither changes what it means, because both read the control scales."
       >
-        <Viewport tall>
-          <Hint hint="Twelve pixels, in a row that has no room" side="bottom" size="sm">
+        <Viewport>
+          <Hint defaultOpen hint="Twelve pixels, in a row that has no room" side="bottom" size="sm">
             Small
           </Hint>
-          <Hint hint="Thirteen pixels, everywhere else" side="bottom" size="md">
+          <Hint defaultOpen hint="Thirteen pixels, everywhere else" side="bottom" size="md">
             Medium
           </Hint>
         </Viewport>
@@ -155,7 +159,7 @@ export const Placement: Story = {
         label="The four physical sides"
         note="Each button asks for one edge. Narrow the window until one collides and it flips to the opposite side, then slides along it rather than leaving the screen."
       >
-        <Viewport tall>
+        <Viewport>
           <Hint hint="Above" side="top">
             top
           </Hint>
@@ -174,7 +178,7 @@ export const Placement: Story = {
         label="The two logical sides"
         note="Switch the toolbar to rtl: these two swap and the physical pair above does not. No surveyed library but Base UI offers them, in a repository whose layout law is logical properties."
       >
-        <Viewport tall>
+        <Viewport>
           <Hint hint="Mirrors with the direction" side="inline-start">
             inline-start
           </Hint>
@@ -196,7 +200,7 @@ export const Delay: Story = {
         note="Cross the row quickly and nothing opens. Rest on one until it opens, then move to its neighbour: the second arrives with no delay, because the group window starts when the first one closes."
       >
         <TooltipDefaultsProvider groupDelay={400} openDelay={600}>
-          <Viewport tall>
+          <Viewport>
             <Hint hint="Copy the row" side="bottom">
               Duplicate
             </Hint>
@@ -221,7 +225,7 @@ export const Describes: Story = {
         label="A description, on a labelled control"
         note="The button already says what it does; the hint adds a sentence about it, and the trigger points at it with aria-describedby only while it is open."
       >
-        <Viewport tall>
+        <Viewport>
           <Hint hint="Publishing cannot be undone from here" side="bottom">
             Publish
           </Hint>
@@ -231,7 +235,7 @@ export const Describes: Story = {
         label="A name, on a control that has none"
         note="An icon-only button described by its tooltip and named by nothing is announced as “button”. Under label the hint is the name, so the layer is in the document before anyone opens it."
       >
-        <Viewport tall>
+        <Viewport>
           <Tooltip describes="label" portal={false} side="bottom">
             <TooltipTrigger
               render={(props) => (
@@ -259,7 +263,7 @@ export const Hoverable: Story = {
         label="The pointer can land on it"
         note="Open it and move the pointer onto the hint: it stays. The distance between the button and the surface is the layer's own padding, so the pointer never crosses empty page — SC 1.4.13 Hoverable."
       >
-        <Viewport tall>
+        <Viewport>
           <Hint hint="Move the pointer onto me" side="bottom">
             Hoverable
           </Hint>
@@ -269,7 +273,7 @@ export const Hoverable: Story = {
         label="The pointer passes straight through"
         note="hoverable={false} takes the layer out of the pointer's way entirely, for a hint over something the reader has to keep clicking. It is a criterion before it is an option, so switching it off is a decision."
       >
-        <Viewport tall>
+        <Viewport>
           <Hint hoverable={false} hint="Nothing here takes the pointer" side="bottom">
             Not hoverable
           </Hint>
@@ -287,8 +291,9 @@ export const Content: Story = {
         label="Long enough to meet the measure"
         note="The cap is a family token rather than an axis, because measure belongs to Container and to it alone. Past it the sentence wraps instead of setting one line the width of the page."
       >
-        <Viewport tall>
+        <Viewport>
           <Hint
+            defaultOpen
             hint="Publishing sends the draft to every subscriber on the list and cannot be undone from here."
             side="bottom"
           >
@@ -300,8 +305,8 @@ export const Content: Story = {
         label="One unbroken token"
         note="overflow-wrap: anywhere breaks it rather than letting it run past the measure. A hostile string is a string with no spaces in it."
       >
-        <Viewport tall>
-          <Hint hint="webhook_delivery_failure_retry_backoff_seconds" side="bottom">
+        <Viewport>
+          <Hint defaultOpen hint="webhook_delivery_failure_retry_backoff_seconds" side="bottom">
             Unbroken
           </Hint>
         </Viewport>
@@ -310,8 +315,8 @@ export const Content: Story = {
         label="Another script"
         note="unicode-bidi: plaintext takes each paragraph's direction from its own first strong character, so an Arabic hint reads right to left on this page and an English one reads left to right on an Arabic page."
       >
-        <Viewport tall>
-          <Hint hint="يحفظ المسودة دون نشرها على أي قائمة بريدية" side="bottom">
+        <Viewport>
+          <Hint defaultOpen hint="يحفظ المسودة دون نشرها على أي قائمة بريدية" side="bottom">
             Translated
           </Hint>
         </Viewport>
@@ -328,7 +333,7 @@ export const Disabled: Story = {
         label="aria-disabled, which still reports the pointer"
         note="A control the page disabled with the native attribute fires no pointer events, so the one explanation of why it is disabled is the one nobody can reach. This shape keeps it focusable and reachable."
       >
-        <Viewport tall>
+        <Viewport>
           <Tooltip portal={false} side="bottom">
             <TooltipTrigger
               render={(props) => (
@@ -348,7 +353,7 @@ export const Disabled: Story = {
         label="The family switched off"
         note="disabled on the Tooltip itself is a different thing: no layer is created at all, and the trigger never gets data-open. It is a configuration rather than a state, so nothing is painted for it."
       >
-        <Viewport tall>
+        <Viewport>
           <Hint disabled hint="This never appears" side="bottom">
             Nothing opens
           </Hint>
@@ -367,7 +372,7 @@ export const Composition: Story = {
         note="These keep the default portal, so each layer is rendered at the end of the document and inherits the theme, scheme, density and direction of the region it was opened from. One provider names the hint and the delays for the whole row."
       >
         <TooltipDefaultsProvider describes="label" groupDelay={400} openDelay={400} size="sm">
-          <Viewport tall>
+          <Viewport>
             <Tooltip side="bottom">
               <TooltipTrigger
                 render={(props) => (
@@ -425,7 +430,7 @@ export const Keyboard: Story = {
           label="Every key, and the reason it carries"
           note="Tab in and the hint opens without a delay. Escape dismisses it and the focus stays on the button. Enter activates the button and clears the hint away. The last reason the family emitted is printed under the row."
         >
-          <Viewport tall>
+          <Viewport>
             <Tooltip
               onOpenChange={(_open, request) => setReason(request.reason)}
               portal={false}

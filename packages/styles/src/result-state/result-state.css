@@ -117,7 +117,23 @@
       --slotted-result-state-font-family,
       var(--slotted-font-family-sans, sans-serif)
     );
+    /**
+     * The root's own type is the title's, so `1lh` on any child resolves
+     * against the line box the title actually draws. It is what puts the mark
+     * and the row of actions on the message's first line at `inline` reach
+     * without a number saying how — the rule `alert` and `status-indicator`
+     * both draw their marks with.
+     *
+     * Stating it here rather than on the mark is the correction the first draft
+     * needed: `1lh` read on the mark itself resolved against the mark's own
+     * inherited twelve pixels and `normal`, which is a fourteen-pixel line box
+     * against the title's nineteen. The mark sat two and a half pixels above
+     * the line it was supposed to be centred on, which is visible and was
+     * reported from the picture rather than by a test.
+     */
+    font-size: var(--_title-font-size);
     grid-template-columns: minmax(0, 1fr);
+    line-height: var(--_title-line-height);
     padding-block: var(--_inset-block);
     padding-inline: var(--_inset-inline);
     row-gap: var(--_row-gap);
@@ -317,17 +333,19 @@
     max-inline-size: 100%;
   }
 
+  /**
+   * On the message's first line rather than on the middle of the row. The box
+   * is one line box tall and the mask is centred inside it, so the mark lands
+   * on the words at every density and every reach without arithmetic — and it
+   * stays on the first line when the description runs to three, which centring
+   * on the whole block would not.
+   */
   [data-ui='result-state'][data-reach='inline'] > [data-part='media'] {
-    /**
-     * On the first line of the message rather than on the centre of the row.
-     * `1lh` resolves against the title's own line box, which is what puts the
-     * mark on the words' first line at every density without a number saying
-     * how — the rule `alert` and `status-indicator` both draw their marks with.
-     */
     align-self: start;
+    block-size: 1lh;
     grid-column: 1;
     grid-row: 1;
-    margin-block-start: calc((1lh - var(--_media-size)) / 2);
+    mask-size: var(--_media-size) var(--_media-size);
   }
 
   /* ── The words, which are the live region ─────────────────────────────
@@ -404,7 +422,28 @@
     justify-content: center;
   }
 
+  /**
+   * On the same line as the mark, and for the same reason. The grid row is as
+   * tall as its tallest item, so a control taller than a line of text made the
+   * row thirty pixels deep: the mark and the words then sat at the top of it
+   * while the control sat in the middle, and a row with one thing at the top
+   * and another in the centre reads as a mistake. Reported from the picture.
+   *
+   * The box is one line box tall and the control is centred in it, which lets
+   * the control stand proud of the line by the same distance above and below —
+   * a distance the region's own block inset already holds.
+   */
   [data-ui='result-state'][data-reach='inline'] > [data-part='actions'] {
+    /**
+     * `align-content` rather than `align-items`, because the row is allowed to
+     * wrap and a wrapping flex container aligns its *lines*: with the line
+     * taller than the box, `align-items: center` centres the control inside a
+     * line that is itself parked at the top, which left the control exactly
+     * half its overhang too low.
+     */
+    align-content: center;
+    align-self: start;
+    block-size: 1lh;
     grid-column: 3;
     grid-row: 1;
   }
@@ -469,7 +508,12 @@
       grid-template-columns: auto minmax(0, 1fr);
     }
 
+    /**
+     * Below the words now, so the box goes back to its own height: a row of
+     * controls held to one line box only makes sense while it is on that line.
+     */
     [data-ui='result-state'][data-reach='inline'] > [data-part='actions'] {
+      block-size: auto;
       grid-column: 2;
       grid-row: 2;
     }

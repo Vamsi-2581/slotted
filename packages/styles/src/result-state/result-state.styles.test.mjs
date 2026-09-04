@@ -118,6 +118,43 @@ test('owns a named container and states its own width', () => {
 });
 
 /**
+ * At `inline` reach the mark, the words and the controls share one line, and
+ * all three are held to it by the same rule: a box exactly one line box tall,
+ * with the content centred inside it. The root carries the title's own type so
+ * that `1lh` on any child resolves against the line the title draws.
+ *
+ * Both halves were reported from the picture. `1lh` read on the mark itself
+ * resolved against the mark's inherited twelve pixels rather than the title's
+ * thirteen, and the mark sat two and a half pixels above its own line. The
+ * controls were worse: a control taller than a line made the grid row thirty
+ * pixels deep, so the mark and the words sat at the top of it while the control
+ * sat in the middle. `align-content` rather than `align-items` is what centres
+ * the control, because the row is allowed to wrap and a wrapping flex container
+ * aligns its lines.
+ */
+test('puts the mark, the words and the controls on one line at inline reach', () => {
+  const base = rule(root);
+  assert.match(base, /font-size:var\(--_title-font-size\)/);
+  assert.match(base, /line-height:var\(--_title-line-height\)/);
+
+  const media = rule(`${ui}[data-reach='inline']>[data-part='media']`);
+  assert.match(media, /block-size:1lh/);
+  assert.match(media, /align-self:start/);
+
+  const actions = rule(`${ui}[data-reach='inline']>[data-part='actions']`);
+  assert.match(actions, /block-size:1lh/);
+  assert.match(actions, /align-self:start/);
+  assert.match(actions, /align-content:center/);
+
+  /* Below the breakpoint the controls leave that line, so the box goes back to
+     its own height rather than squashing them into one. */
+  assert.match(
+    normalized.split('@container slotted-result-state (max-width:20rem){')[1] ?? '',
+    /\[data-reach='inline'\]>\[data-part='actions'\]\{block-size:auto/,
+  );
+});
+
+/**
  * Measure belongs to `container` and to it alone —
  * `docs/build-briefing.md`. Polaris caps its empty state at four hundred pixels
  * and Atlassian ships a `width: narrow`; a second family answering the same

@@ -24,8 +24,14 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-layer-depth',
   /**
    * `packages/core/src/toast` — how far a message is from the front of the
-   * stack, how many are visible, whether the timers are running, and how far
-   * the pointer has taken a message it is dragging away.
+   * stack, how many are visible, how long this one was given, whether the
+   * timers are running, and how far the pointer has taken a message it is
+   * dragging away.
+   *
+   * `--slotted-toast-duration` is the one that looks like a motion token and is
+   * not: it is the time *this message* was given, which a consumer states per
+   * message and no theme can know. The remaining-time bar reads it so the
+   * picture and the timer are the same number.
    *
    * They are named one by one rather than by a `--slotted-toast-` prefix,
    * because the family also owns theme tokens under that prefix — its measure,
@@ -34,6 +40,7 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    */
   '--slotted-toast-index',
   '--slotted-toast-count',
+  '--slotted-toast-duration',
   '--slotted-toast-play-state',
   '--slotted-toast-swipe-x',
   '--slotted-toast-swipe-y',

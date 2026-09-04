@@ -218,6 +218,7 @@ test('collapses a stack without measuring anything', () => {
 test('names every runtime property it writes, and files none as a token', () => {
   assert.deepEqual(contract.runtimeProperties, [
     '--slotted-toast-count',
+    '--slotted-toast-duration',
     '--slotted-toast-index',
     '--slotted-toast-play-state',
     '--slotted-toast-swipe-x',

@@ -157,6 +157,7 @@
   },
   "runtimeProperties": [
     "--slotted-toast-count",
+    "--slotted-toast-duration",
     "--slotted-toast-index",
     "--slotted-toast-play-state",
     "--slotted-toast-swipe-x",

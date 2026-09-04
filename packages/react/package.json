@@ -175,6 +175,14 @@
     "./spinner": {
       "types": "./dist/types/spinner/index.d.ts",
       "import": "./dist/spinner.js"
+    },
+    "./popover": {
+      "types": "./dist/types/popover/index.d.ts",
+      "import": "./dist/popover.js"
+    },
+    "./tooltip": {
+      "types": "./dist/types/tooltip/index.d.ts",
+      "import": "./dist/tooltip.js"
     }
   },
   "scripts": {

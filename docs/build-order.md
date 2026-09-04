@@ -850,7 +850,28 @@ Depois, nesta ordem:
    mesmo padrão Window Splitter. Inventário, decisões e autoavaliação em
    `docs/superpowers/specs/2026-09-04-drawer-*.md`.
 5. `menu menubar`
-6. `toast`
+6. `toast` — a região é a raiz, não a mensagem: um `section` com nome, marco de
+   navegação e nunca live region. O anúncio sai por
+   `packages/core/src/live-announcer`, porque uma live region criada na mesma
+   tarefa do seu texto fica muda (ARIA 1.2 §6.4) e um papel live numa caixa com
+   Fechar e Desfazer é lido com os dois botões dentro da frase. Dez partes —
+   `root`, `list`, `item`, `icon`, `content`, `title`, `description`, `actions`,
+   `close` e `progress` — e eixos `placement` (seis, lógicos), `attach`
+   (`portal`/`viewport`/`inline`), `stacking` (`list`/`stack`), `tone`,
+   `variant` (`raised`/`soft`/`solid`), `priority`, `dismissible`, `swipe`,
+   `progress`, `pauseOnHover` e `pauseWhenHidden`.
+   O relógio começa quando a mensagem fica visível, para em hover, em foco
+   dentro e em documento oculto, e retoma no tempo que restava; o que chega com
+   a tela cheia espera. Uma mensagem com ação, ou à espera de uma promessa, não
+   recebe duração nenhuma salvo indicação — a regra que só o Angular Material
+   enuncia. O modelo, os relógios e a fila ficam em `packages/core/src/toast`;
+   `presence` faz a saída e `focus/removal-focus` responde para onde vai o
+   teclado quando a mensagem que o tinha sai.
+   Duas palavras novas no vocabulário partilhado, em commit próprio antes da
+   família: a razão `timeout` e a capacidade `queue`. Inventário em
+   `docs/superpowers/specs/2026-09-04-toast-capability-inventory.md`, decisões
+   em `docs/superpowers/specs/2026-09-04-toast-design.md`, avaliação em
+   `docs/superpowers/specs/2026-09-04-toast-self-assessment.md`.
 7. `loading-overlay`
 
 Refino de `toolbar` com overflow ao final da onda.

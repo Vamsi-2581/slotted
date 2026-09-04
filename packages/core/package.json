@@ -73,6 +73,10 @@
       "types": "./dist/types/number/index.d.ts",
       "import": "./dist/number.js"
     },
+    "./pointer-intent": {
+      "types": "./dist/types/pointer-intent/index.d.ts",
+      "import": "./dist/pointer-intent.js"
+    },
     "./portal": {
       "types": "./dist/types/portal/index.d.ts",
       "import": "./dist/portal.js"
@@ -104,6 +108,14 @@
     "./steps": {
       "types": "./dist/types/steps/index.d.ts",
       "import": "./dist/steps.js"
+    },
+    "./toast": {
+      "types": "./dist/types/toast/index.d.ts",
+      "import": "./dist/toast.js"
+    },
+    "./typeahead": {
+      "types": "./dist/types/typeahead/index.d.ts",
+      "import": "./dist/typeahead.js"
     }
   },
   "scripts": {

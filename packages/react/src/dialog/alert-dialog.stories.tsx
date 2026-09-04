@@ -115,7 +115,7 @@ export const Playground: Story = {
       {(container) => (
         <AlertDialog {...args} container={container}>
           <DialogTrigger
-            render={({ children, ...props }) => (
+            render={(props) => (
               <Button {...props} tone="danger" variant="outline">
                 Excluir projeto
               </Button>

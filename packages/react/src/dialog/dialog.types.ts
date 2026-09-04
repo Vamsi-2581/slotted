@@ -217,7 +217,7 @@ export interface DialogTriggerProps
 }
 
 export interface DialogContentProps
-  extends ComponentPropsWithRef<'div'>, WithRender<DialogRootProps> {}
+  extends ComponentPropsWithRef<'div'>, WithRender<PartProps<HTMLDivElement>> {}
 
 export interface DialogHeaderProps
   extends ComponentPropsWithRef<'header'>, WithRender<PartProps<HTMLElement>> {}
@@ -240,9 +240,9 @@ interface ClosingButtonProps
   value?: string | undefined;
 }
 
-export interface DialogCloseProps extends ClosingButtonProps {}
-export interface AlertDialogCancelProps extends ClosingButtonProps {}
-export interface AlertDialogActionProps extends ClosingButtonProps {}
+export type DialogCloseProps = ClosingButtonProps;
+export type AlertDialogCancelProps = ClosingButtonProps;
+export type AlertDialogActionProps = ClosingButtonProps;
 
 export interface AlertDialogIconProps
   extends ComponentPropsWithRef<'span'>, WithRender<PartProps<HTMLSpanElement>> {}

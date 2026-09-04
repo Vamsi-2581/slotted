@@ -122,9 +122,7 @@ export const Playground: Story = {
     <Layer>
       {(container) => (
         <Dialog {...args} container={container}>
-          <DialogTrigger
-            render={({ children, ...props }) => <Button {...props}>Editar projeto</Button>}
-          />
+          <DialogTrigger render={(props) => <Button {...props}>Editar projeto</Button>} />
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Editar projeto</DialogTitle>
@@ -361,9 +359,7 @@ export const Focus: Story = {
         <Layer>
           {(container) => (
             <Dialog container={container} fullScreen="never">
-              <DialogTrigger
-                render={({ children, ...props }) => <Button {...props}>Abrir</Button>}
-              />
+              <DialogTrigger render={(props) => <Button {...props}>Abrir</Button>} />
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Renomear</DialogTitle>
@@ -569,7 +565,7 @@ export const Composition: Story = {
           {(container) => (
             <Dialog container={container} fullScreen="never" size="sm">
               <DialogTrigger
-                render={({ children, ...props }) => (
+                render={(props) => (
                   <Button {...props} tone="secondary" variant="outline">
                     Editar projeto
                   </Button>
@@ -630,9 +626,7 @@ export const Accessibility: Story = {
       <Layer>
         {(container) => (
           <Dialog container={container} fullScreen="never">
-            <DialogTrigger
-              render={({ children, ...props }) => <Button {...props}>Abrir e tabular</Button>}
-            />
+            <DialogTrigger render={(props) => <Button {...props}>Abrir e tabular</Button>} />
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Três paradas de tabulação</DialogTitle>

@@ -16,9 +16,8 @@ import type {
   DialogContextValue,
   DialogFooterProps,
   DialogHeaderProps,
-  DialogOpenReason,
   DialogDescriptionProps,
-  DialogRootProps,
+  DialogOpenReason,
   DialogTitleProps,
   DialogTriggerProps,
   DialogTriggerRootProps,
@@ -232,27 +231,33 @@ export function DialogContent({
     'data-ui': 'dialog',
   };
 
-  const panel: ReactNode = (
-    <div
-      {...nativeProps}
-      {...(described ? { 'aria-describedby': dialog.descriptionId } : {})}
-      {...(labelled ? { 'aria-labelledby': dialog.titleId } : {})}
-      {...(dialog.modal ? { 'aria-modal': true } : {})}
-      className={className}
-      data-part="content"
-      id={contentId}
-      ref={(node: HTMLDivElement | null) => {
-        setContent(node);
-        dialog.registerContent(node);
-        if (typeof ref === 'function') ref(node);
-        else if (ref) ref.current = node;
-      }}
-      role={dialog.member === 'alertDialog' ? 'alertdialog' : 'dialog'}
-      style={style}
-    >
-      {children}
-    </div>
-  );
+  /**
+   * `render` substitutes the panel and not the layer. The layer, the scrim and
+   * the box that centres them are the mechanism — a consumer who replaced the
+   * layer would be replacing the thing `dismissable-layer` and `presence` are
+   * holding — while the panel is the element a consumer has a reason to change:
+   * a `form` that submits, a `section` that is a landmark.
+   */
+  const panelProps = {
+    ...nativeProps,
+    ...(described ? { 'aria-describedby': dialog.descriptionId } : {}),
+    ...(labelled ? { 'aria-labelledby': dialog.titleId } : {}),
+    ...(dialog.modal ? { 'aria-modal': true } : {}),
+    children,
+    className,
+    'data-part': 'content' as const,
+    id: contentId,
+    ref: (node: HTMLDivElement | null) => {
+      setContent(node);
+      dialog.registerContent(node);
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    role: dialog.member === 'alertDialog' ? ('alertdialog' as const) : ('dialog' as const),
+    style,
+  };
+
+  const panel: ReactNode = render === undefined ? <div {...panelProps} /> : render(panelProps);
 
   /* `inert` alongside the stylesheet's own closed state, so a browser without
      `content-visibility` still cannot put focus inside a layer that is shut. */

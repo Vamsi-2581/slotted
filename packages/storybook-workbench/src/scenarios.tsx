@@ -84,7 +84,13 @@ const capabilityApi = {
   size: ['size'],
   shape: ['shape'],
   measurement: ['value', 'max'],
-  live: ['live'],
+  /**
+   * Nothing, for the reason `content` asks for nothing. `alert` names the axis
+   * `live` because the box itself becomes a live region; `toast` names it
+   * `priority`, per message, because the box deliberately never becomes one and
+   * a prop called `live` would say the opposite of what the family does.
+   */
+  live: [],
   current: ['current'],
   open: ['open'],
   /**
@@ -98,7 +104,17 @@ const capabilityApi = {
    */
   placement: [],
   status: ['status'],
-  content: ['start', 'end'],
+  /**
+   * Nothing, for the reason `appearance` and `arrangement` ask for nothing: the
+   * table cannot see what a family's content *is*. A control has something
+   * before its label and something after it, and names them `start` and `end`;
+   * a message has a name and a sentence, and names them `title` and
+   * `description`. Requiring the first pair made the table the authority on
+   * slots the second family does not have — `toast` would have had to document
+   * two props it never accepts — and every declared default is already
+   * required row by row below.
+   */
+  content: [],
   fullWidth: ['fullWidth'],
   disabled: ['disabled'],
   loading: ['loading'],
@@ -108,7 +124,14 @@ const capabilityApi = {
   required: ['required'],
   readOnly: ['readOnly'],
   wiring: [],
-  focusable: ['focusable'],
+  /**
+   * Nothing, for the same reason. A family that lets a consumer decide whether
+   * a part can hold focus ships `focusable` and documents it as a declared
+   * default; one whose parts are always reachable — `toast`, whose region and
+   * messages carry `tabindex="-1"` so a hotkey has somewhere to land — has no
+   * such prop, and the table cannot tell the two apart.
+   */
+  focusable: [],
   decorative: ['decorative'],
   underline: ['underline'],
   external: ['external'],

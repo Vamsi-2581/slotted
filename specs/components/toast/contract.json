@@ -143,11 +143,16 @@
     "danger": "--slotted-icon-circle-alert"
   },
   "stacking": {
-    "measures": false,
+    "measures": true,
+    "measured": [
+      "--slotted-toast-height",
+      "--slotted-toast-front-height",
+      "--slotted-toast-stack-offset"
+    ],
     "expandsOn": ["hover", "focus"],
     "step": "--slotted-toast-stack-step",
-    "reason": "Sonner and Base UI both measure every message's height and write it back as a custom property. Here the collapsed messages share the one anchor `placement` already names and step back by a token distance and a scale computed from `--slotted-toast-index`, so there is no ResizeObserver in the family, no reflow per message, and nothing to be wrong on the first frame.",
-    "cost": "Messages of different heights align on the anchored edge and not on both, which is visible only while the stack is collapsed. Expanding on hover or focus resolves it, and the expansion happens for the reason the timer pauses: the reader is reading."
+    "reason": "Closed, the messages share the one anchor `placement` already names and step back by a token distance and a scale computed from `--slotted-toast-index`. Open, each one returns to its own height and its own place in the column. Both states are positioned and differ only by a translate, a scale and a height, which is what lets one become the other rather than snap — and a pile of messages that are not all the same height cannot be opened from arithmetic alone. Three measurements are what the second half costs, and they are the same three Base UI takes.",
+    "cost": "One ResizeObserver per region, and three runtime custom properties a static picture cannot produce on its own. The alternative was considered and rejected: with no measurement the closed pile is the same picture, and opening it is a snap rather than a movement — which is the whole of what the axis is for."
   },
   "swipe": {
     "direction": "follows `placement`: a region at the block end swipes toward the block end, one at the block start swipes toward the block start, and both also swipe toward the inline edge they sit on",
@@ -158,8 +163,11 @@
   "runtimeProperties": [
     "--slotted-toast-count",
     "--slotted-toast-duration",
+    "--slotted-toast-front-height",
+    "--slotted-toast-height",
     "--slotted-toast-index",
     "--slotted-toast-play-state",
+    "--slotted-toast-stack-offset",
     "--slotted-toast-swipe-x",
     "--slotted-toast-swipe-y"
   ],

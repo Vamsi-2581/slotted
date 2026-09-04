@@ -204,13 +204,21 @@ test('paints a tone in three ways, and names the neutral one as its default', ()
 });
 
 /**
- * The collapsed stack is Sonner's and Base UI's picture without their
- * measurement, and the cost of that is written rather than discovered.
+ * The pile is Sonner's and Base UI's picture, and it is measured the way they
+ * measure it. What is written here is what that costs, because the first draft
+ * claimed the picture could be had without measuring and the expand read as a
+ * snap.
  */
-test('collapses a stack without measuring anything', () => {
+test('says what the pile measures, and what measuring it costs', () => {
   assert.deepEqual(contract.axes.stacking, ['list', 'stack']);
   assert.equal(member.defaults.stacking, 'list');
-  assert.equal(contract.stacking.measures, false);
+  assert.equal(contract.stacking.measures, true);
+  for (const measured of contract.stacking.measured) {
+    assert.ok(
+      contract.runtimeProperties.includes(measured),
+      `${measured} is measured and is not declared a runtime property`,
+    );
+  }
   assert.ok(contract.stacking.cost.length > 0);
   assert.deepEqual(contract.stacking.expandsOn, ['hover', 'focus']);
 });
@@ -219,8 +227,11 @@ test('names every runtime property it writes, and files none as a token', () => 
   assert.deepEqual(contract.runtimeProperties, [
     '--slotted-toast-count',
     '--slotted-toast-duration',
+    '--slotted-toast-front-height',
+    '--slotted-toast-height',
     '--slotted-toast-index',
     '--slotted-toast-play-state',
+    '--slotted-toast-stack-offset',
     '--slotted-toast-swipe-x',
     '--slotted-toast-swipe-y',
   ]);

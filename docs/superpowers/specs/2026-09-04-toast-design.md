@@ -206,18 +206,20 @@ height, separated by the gap.
 behind step back by a distance and a scale, and the whole stack expands when the
 pointer is over the region or focus is inside it.
 
-Sonner and Base UI both measure each message's height and write it back as a
-custom property. **This family measures nothing.** The collapsed messages are
-absolutely positioned against the region's own edge — the edge `placement`
-already names — and step back by a token distance and a scale computed from
-`--slotted-toast-index`. The picture is the same, there is no `ResizeObserver`
-in the family, no reflow per message, and nothing to be wrong on the first
-frame.
+Closed, the messages are positioned against the region's own edge — the edge
+`placement` already names — and step back by a token distance and a scale
+computed from `--slotted-toast-index`. Open, each one returns to its own height
+and its own place in the column. Both states are positioned, so one becomes the
+other by a translate, a scale and a height rather than by a snap.
 
-The cost: messages of different heights align on the anchored edge and not on
-both, which is visible only while the stack is collapsed. Expanding on hover or
-focus is what resolves it, and the expansion happens for the same reason the
-timer pauses — the reader is reading.
+**It measures, and the first draft did not.** The claim was that the same
+picture could be had from arithmetic alone: it can, while the pile is closed,
+and opening it then jumps, because a column of messages that are not all the
+same height cannot be laid out without their heights. Three measurements buy
+it — `--slotted-toast-height` per message, `--slotted-toast-front-height` for
+the one at the edge, and `--slotted-toast-stack-offset` for the room the
+messages in front of it take. The cost is one `ResizeObserver` per region, and
+it is written in the contract rather than discovered by the next family.
 
 **Swipe.** Default on. The direction follows `placement`: a region at the block
 end swipes down, one at the block start swipes up, and both swipe toward the
@@ -283,11 +285,15 @@ positioner's:
 
 | Property                     | Written by       | What it is                                                                    |
 | ---------------------------- | ---------------- | ------------------------------------------------------------------------------- |
-| `--slotted-toast-index`      | the region       | How far a message is from the front of the stack. `0` is the frontmost.        |
-| `--slotted-toast-count`      | the region       | How many messages are visible, so the stack can shrink its step as it grows.   |
-| `--slotted-toast-play-state` | the region       | `running` or `paused`, resolved from all three pause conditions at once.       |
-| `--slotted-toast-swipe-x`    | the message      | How far the pointer has taken it, along the inline axis.                       |
-| `--slotted-toast-swipe-y`    | the message      | The same along the block axis.                                                 |
+| `--slotted-toast-index`        | the message | How far it is from the front of the stack. `0` is the frontmost.               |
+| `--slotted-toast-count`        | the region  | How many messages are visible, so one rule serves any depth.                   |
+| `--slotted-toast-duration`     | the message | The time this message was given, which the remaining-time bar runs for.        |
+| `--slotted-toast-height`       | the message | Its own measured height, which is what it returns to when the pile opens.      |
+| `--slotted-toast-front-height` | the region  | The frontmost message's height, which is what the pile is while it is closed.  |
+| `--slotted-toast-stack-offset` | the message | The room the messages in front of it take, gaps included.                      |
+| `--slotted-toast-play-state`   | the region  | `running` or `paused`, resolved from all three pause conditions at once.       |
+| `--slotted-toast-swipe-x`      | the message | How far the pointer has taken it, along the inline axis.                       |
+| `--slotted-toast-swipe-y`      | the message | The same along the block axis.                                                 |
 
 None of them is a design token: no theme can answer "how far has the pointer
 dragged this", and a reference page that printed them under theme-owned

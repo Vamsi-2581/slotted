@@ -589,6 +589,23 @@
 }
 
 /**
+ * The same box as two tracks: a panel in the flow and the page beside it.
+ *
+ * It is the shape an *inline* drawer lives in, and it has to be written out
+ * rather than hidden inside a family's own stylesheet, because it is what
+ * replaces Angular Material's `push` and MUI's `persistent`. The sibling
+ * reflows because this grid says so, not because the family wrote a margin on
+ * an element it does not own — and a demonstration that hid the grid would be
+ * claiming the family does something it deliberately does not.
+ *
+ * Added when `drawer` needed to show a persistent panel beside a page.
+ */
+.slotted-demo-viewport[data-layout='shell'] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+/**
  * The box a family that pins something to a scroll container is demonstrated
  * inside. A sticky heading holds still only while something scrolls past it,
  * and a page-length stage cannot show that in a screenshot: the reader has to

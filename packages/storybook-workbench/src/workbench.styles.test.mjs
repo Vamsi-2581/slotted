@@ -19,6 +19,21 @@ const fontStack = (name) =>
     .trim();
 
 /**
+ * The same box as two tracks, for a panel that stands *beside* the page rather
+ * than over it. A drawer in `inline` mode has no scrim and no portal: the page
+ * reflows because the consumer's own grid says so, and a demonstration that hid
+ * that grid would be claiming the family writes a margin it deliberately does
+ * not. Added when `drawer` needed to show a persistent panel.
+ */
+test('offers a two-track box for a panel that stands beside the page', () => {
+  const rule =
+    /\.slotted-demo-viewport\[data-layout='shell'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  assert.match(rule, /display:\s*grid/);
+  assert.match(rule, /grid-template-columns:/);
+});
+
+/**
  * The primitive a family that pins itself to a viewport edge is demonstrated
  * inside. `contain: paint` is what makes the box the containing block for a
  * fixed-position child; without it a page-level bar escapes its scene, draws

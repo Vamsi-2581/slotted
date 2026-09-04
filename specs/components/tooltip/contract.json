@@ -201,6 +201,9 @@
     },
     "closeOnDetached": {
       "reason": "Considered and dropped while the behavioural tests were written. It made `hideWhenDetached` do two things, and the second one moved a controlled consumer's state from under them because a rectangle changed size."
+    },
+    "contentCapability": {
+      "reason": "The `content` capability in `specs/contract.schema.mjs` names a family that takes adornments through `start` and `end` props. This family takes its content as children, so declaring it would oblige the reference page to document two props that do not exist."
     }
   },
   "axes": {
@@ -306,7 +309,7 @@
         "collisionPadding": 8,
         "arrowPadding": 8
       },
-      "capabilities": ["open", "placement", "size", "appearance", "disabled", "content", "wiring"],
+      "capabilities": ["open", "placement", "size", "appearance", "disabled", "wiring"],
       "states": ["default", "open"],
       "parts": ["root", "content", "arrow"]
     }

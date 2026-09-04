@@ -159,6 +159,12 @@
     },
     "triggerPart": {
       "reason": "`data-part` names a part of the family that owns the element, and a trigger is the consumer's own — very often another Slotted family's root. Sixteen stylesheets in this repository key on `[data-part='root']`, so writing `trigger` over it would silently unstyle a `badge`, an `avatar` or a `checkbox` used as a trigger, and nothing would report it. The family therefore writes only the wiring and the state on the trigger: the ARIA relationship, and `data-open` so a consumer can style their own element while the layer is showing. The anchor is the consumer's element for the same reason."
+    },
+    "contentCapability": {
+      "reason": "The `content` capability in `specs/contract.schema.mjs` names a family that takes adornments through `start` and `end` props. This family takes its content as children, so declaring it would oblige the reference page to document two props that do not exist."
+    },
+    "focusableCapability": {
+      "reason": "The `focusable` capability names a family that offers a `focusable` prop — `link` does. This one is focusable because a dialog is, not because a consumer switches it on, and the focus behaviour is documented under `autoFocus`, `initialFocus` and `finalFocus` instead."
     }
   },
   "axes": {
@@ -254,16 +260,7 @@
         "arrowPadding": 12,
         "closeLabel": "Close"
       },
-      "capabilities": [
-        "open",
-        "placement",
-        "size",
-        "appearance",
-        "disabled",
-        "content",
-        "wiring",
-        "focusable"
-      ],
+      "capabilities": ["open", "placement", "size", "appearance", "disabled", "wiring"],
       "states": ["default", "hover", "active", "focus-visible", "open"],
       "parts": [
         "root",

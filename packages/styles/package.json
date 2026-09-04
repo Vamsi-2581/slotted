@@ -37,6 +37,8 @@
     "./currency-field/tokens.json": "./src/currency-field/currency-field.tokens.json",
     "./description-list/description-list.css": "./src/description-list/description-list.css",
     "./description-list/tokens.json": "./src/description-list/description-list.tokens.json",
+    "./dialog/dialog.css": "./src/dialog/dialog.css",
+    "./dialog/tokens.json": "./src/dialog/dialog.tokens.json",
     "./divider/divider.css": "./src/divider/divider.css",
     "./divider/tokens.json": "./src/divider/divider.tokens.json",
     "./field-group/field-group.css": "./src/field-group/field-group.css",

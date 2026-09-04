@@ -1,0 +1,601 @@
+@layer slotted.components {
+  /**
+   * A window over the page, and the scrim that says the page is out of reach.
+   *
+   * Three boxes, and the third one is not decoration:
+   *
+   *   ┌─ root ───────────────────────────────────────────────┐
+   *   │ ┌─ backdrop ─────────────────────────────────────────┐│
+   *   │ │ ┌─ viewport ───────────────────────────────────────┐│
+   *   │ │ │            ┌─ content ────────────┐              ││
+   *   │ │ │            │ header               │              ││
+   *   │ │ │            ├──────────────────────┤              ││
+   *   │ │ │            │ body        (scrolls)│              ││
+   *   │ │ │            ├──────────────────────┤              ││
+   *   │ │ │            │ footer               │              ││
+   *   │ │ │            └──────────────────────┘              ││
+   *   │ │ └──────────────────────────────────────────────────┘│
+   *   │ └────────────────────────────────────────────────────┘│
+   *   └──────────────────────────────────────────────────────┘
+   *
+   * `root` declares `container-type: inline-size`, which applies `contain:
+   * layout`, which makes it the containing block for every positioned
+   * descendant. A scrim positioned inside a root that scrolls is therefore part
+   * of what scrolls, and under `scroll="viewport"` it slides off the top of the
+   * layer and the page reappears behind the panel. `backdrop` and `viewport`
+   * are two cells of one one-cell grid instead: they stack with no positioning
+   * at all, and only the second of them ever scrolls.
+   *
+   * `content` is a three-row grid whose middle row is bounded. That one
+   * declaration is what keeps the actions on screen when the body is long —
+   * the failure Radix and React Aria leave to each consumer's own CSS, because
+   * neither ships a layout.
+   *
+   * Every part is reached with a child combinator. A dialog opened from inside
+   * a dialog is the ordinary case, and a descendant rule would paint the inner
+   * panel's header with the outer panel's tone.
+   */
+  [data-ui='dialog'] {
+    /**
+     * The panel's measure, per size step. Five named steps rather than the
+     * pixel string Material, Carbon and Ant all take: a theme can retune a
+     * step and cannot retune `width: '600px'`, and a family that accepted one
+     * would be carrying a second scale of its own.
+     */
+    --_measure: 32rem;
+    /** The air between the panel and the edge of the layer. */
+    --_layer-padding: var(--slotted-space-8, 1.5rem);
+    /** The panel's own inset, which every row reads. */
+    --_padding-inline: var(--slotted-space-8, 1.5rem);
+    --_padding-block: var(--slotted-space-7, 1.25rem);
+    --_gap: var(--slotted-space-5, 0.75rem);
+    --_rule-size: var(--slotted-border-width-thin, 1px);
+    /**
+     * The title is on the type scale rather than on the control type scale.
+     * A control's label is 12 to 14 pixels because it lives inside a button; a
+     * dialog's title is a heading, and the outline it belongs to is set like
+     * every other heading in the library. Density still moves the geometry,
+     * which is what "density changes size without changing meaning" asks for.
+     */
+    --_title-font-size: var(--slotted-font-size-xl, 1.125rem);
+    --_description-font-size: var(--slotted-font-size-md, 0.875rem);
+    --_body-font-size: var(--slotted-font-size-md, 0.875rem);
+    --_icon-size: var(--slotted-control-icon-size-lg, 18px);
+    /** The mark of an alert dialog, which is larger than a control's glyph. */
+    --_status-size: var(--slotted-font-size-3xl, 1.5rem);
+    --_tone-icon: var(--slotted-icon-triangle-alert);
+    --_tone-color: var(--slotted-tone-danger-text, CanvasText);
+
+    /**
+     * The one z-index in the family, and it is a sum. `dismissable-layer`
+     * writes `--slotted-layer-depth` on this element as it opens, so a dialog
+     * opened over a dialog is one step above it on the single stack the
+     * library keeps rather than a number this stylesheet guessed.
+     */
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--slotted-z-index-overlay, 1000) + var(--slotted-layer-depth, 0));
+
+    display: grid;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+
+    container-type: inline-size;
+    container-name: slotted-dialog;
+
+    color: var(--slotted-dialog-color, var(--slotted-text, CanvasText));
+    font-family: var(--slotted-control-font-family, var(--slotted-font-family-sans));
+
+    /**
+     * `allow-discrete` is the whole of it. Without this line the rule below
+     * hides the layer at the first frame of the exit and the two hundred
+     * milliseconds `presence` is holding the node mounted for show nothing;
+     * with it, the flip to `hidden` happens at the end of the duration instead.
+     * `mount="active"` never reaches the closed state — the layer is gone — so
+     * this is what `eager` and `lazy` need to animate at all.
+     */
+    content-visibility: visible;
+    transition: content-visibility var(--slotted-duration-medium) allow-discrete;
+  }
+
+  /**
+   * Mounted and closed. `eager` and `lazy` leave the layer in the document, and
+   * a layer left visible would cover the page it is not on. The binding writes
+   * `inert` alongside this, so a browser without `content-visibility` still
+   * cannot put focus inside a closed layer.
+   */
+  [data-ui='dialog']:not([data-open]) {
+    content-visibility: hidden;
+    pointer-events: none;
+  }
+
+  [data-ui='dialog'][data-size='sm'] {
+    --_measure: 24rem;
+    --_padding-inline: var(--slotted-space-7, 1.25rem);
+    --_padding-block: var(--slotted-space-6, 1rem);
+    --_title-font-size: var(--slotted-font-size-lg, 1rem);
+  }
+
+  [data-ui='dialog'][data-size='lg'] {
+    --_measure: 42rem;
+  }
+
+  [data-ui='dialog'][data-size='xl'] {
+    --_measure: 56rem;
+  }
+
+  /**
+   * `full` is the step a dialog that is a document takes: the panel spends the
+   * whole layer minus its padding, and the measure stops capping it.
+   */
+  [data-ui='dialog'][data-size='full'] {
+    --_measure: none;
+  }
+
+  /* ── The scrim ────────────────────────────────────────────────────────── */
+
+  /**
+   * `--slotted-scrim` is a foundation token the theme restates per scheme and
+   * remaps to `Canvas` under forced colours, where it becomes an opaque ground.
+   * That is why the panel below carries a border of its own: every shadow token
+   * is `none` in that mode, and a panel separated only by elevation would sit
+   * on an opaque ground with nothing to mark its edge.
+   */
+  [data-ui='dialog'] > [data-part='backdrop'] {
+    grid-area: 1 / 1;
+    background: var(--slotted-dialog-scrim, var(--slotted-scrim, Canvas));
+    opacity: 0;
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui='dialog'][data-open] > [data-part='backdrop'] {
+    opacity: 1;
+    transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  /* ── The box the panel sits in ────────────────────────────────────────── */
+
+  /**
+   * `safe center` rather than `center`. A panel taller than the layer, centred
+   * by the unsafe keyword, overflows equally at both ends — and the end that
+   * carries the title is the one that leaves the screen. `safe` aligns to the
+   * start edge as soon as the item cannot fit, which is the only reading that
+   * keeps the title reachable at 200% zoom and in a short window.
+   */
+  [data-ui='dialog'] > [data-part='viewport'] {
+    grid-area: 1 / 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: safe center;
+    justify-items: center;
+    padding: var(--_layer-padding);
+    /**
+     * The last resort, in both scroll modes. Under `scroll="content"` the panel
+     * is bounded to the layer and its body is what scrolls — but a panel with
+     * no body, or one whose header and footer alone are taller than the layer,
+     * has no row that can shrink, and `auto` rows do not. The first capture
+     * showed exactly that: a title of three lines and a description of three
+     * more pushed the actions past the bottom edge of a short layer, and the
+     * only thing between the reader and an unreachable button was this line.
+     */
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  [data-ui='dialog'][data-placement='top'] > [data-part='viewport'] {
+    align-content: safe start;
+  }
+
+  /**
+   * Under `scroll="viewport"` the panel is unbounded and this box is what
+   * scrolls it, which is the rule below on `content`. The scrim does not move
+   * with it, because it is the other cell of the grid above rather than a child
+   * of this box.
+   */
+  /* ── The panel ────────────────────────────────────────────────────────── */
+
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    inline-size: 100%;
+    max-inline-size: var(--_measure);
+    /* Bounded, so the middle row is the one that scrolls and the footer stays. */
+    max-block-size: 100%;
+
+    background: var(--slotted-dialog-surface, var(--slotted-surface-raised, Canvas));
+    /**
+     * `--slotted-border-strong` and not `--slotted-border-subtle`, which is
+     * what every other raised box in the library takes. The foundation defines
+     * the strong step as the line between two surfaces and holds it to 3:1
+     * against each of them; the subtle step is a line inside one surface, which
+     * is what the header and footer rules below are. A dialog's outer edge is
+     * the first kind: in the dark scheme the panel is `#1c1c20` on a scrim of
+     * black at 62%, every shadow token is black on black, and the first dark
+     * capture had a panel whose edge could not be found.
+     */
+    border: var(--_rule-size) solid
+      var(--slotted-dialog-border-color, var(--slotted-border-strong, ButtonBorder));
+    border-radius: var(--slotted-dialog-radius, var(--slotted-radius-lg, 8px));
+    box-shadow: var(--slotted-shadow-lg);
+    /* So the radius clips the row that scrolls under it. */
+    overflow: hidden;
+
+    opacity: 0;
+    scale: 0.96;
+    translate: 0 calc(-1 * var(--slotted-space-4, 0.5rem));
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      scale var(--slotted-duration-short) var(--slotted-easing-exit),
+      translate var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  /**
+   * Arriving is longer than leaving, and on a different curve. A dialog
+   * appearing is a state change the eye has to follow, because the page it
+   * covers is still visible behind it; a reader who has decided to close is
+   * waiting, so the exit is the short duration.
+   */
+  [data-ui='dialog'][data-open] > [data-part='viewport'] > [data-part='content'] {
+    opacity: 1;
+    scale: 1;
+    translate: 0 0;
+    transition:
+      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
+      scale var(--slotted-duration-medium) var(--slotted-easing-enter),
+      translate var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  [data-ui='dialog'][data-scroll='viewport'] > [data-part='viewport'] > [data-part='content'] {
+    max-block-size: none;
+  }
+
+  /* ── The header ───────────────────────────────────────────────────────── */
+
+  /**
+   * Three columns: the mark, the words, and the close button. The mark and the
+   * button each keep a column of their own, so a title that wraps to two lines
+   * grows the row instead of pushing either off the line.
+   *
+   * The header draws no rule of its own. Every rule in the panel belongs to the
+   * row *below* it, which is what makes the count right for every combination a
+   * consumer can write: a header, a body and a footer draw two rules; a header
+   * and a footer alone draw one; and a panel that is only a body draws none.
+   * The first capture of an alert dialog — a header and a footer, with no body
+   * between them — showed the header's bottom rule and the footer's top rule
+   * stacked into one line of two pixels.
+   *
+   * The rules are drawn whether the body scrolls or not. `scroll-state()`
+   * container queries would let the stylesheet know, and they are limited
+   * availability — the same ground on which `collapsible` declined
+   * `interpolate-size`. The cost is a rule over a footer that sometimes has
+   * nothing above it to separate.
+   */
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='header'] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: var(--_gap);
+    row-gap: var(--slotted-space-2, 0.25rem);
+    padding-block: var(--_padding-block);
+    padding-inline: var(--_padding-inline);
+  }
+
+  /* ── The mark an alert dialog carries ─────────────────────────────────── */
+
+  /**
+   * Real geometry from a glyph token, masked so it takes the tone's own text
+   * colour. WCAG 2.2 SC 1.4.1 asks that colour not be the only carrier, and a
+   * destructive confirmation is the place that matters most: under forced
+   * colours every tone ground becomes one system colour and the silhouette is
+   * all that is left.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='icon'] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: start;
+    background: var(--_tone-color);
+    block-size: var(--_status-size);
+    inline-size: var(--_status-size);
+    flex: none;
+    mask-image: var(--_tone-icon);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    /* The mark sits on the title's own optical line rather than on its box. */
+    margin-block-start: calc(
+      (var(--_title-font-size) * var(--slotted-line-height-xl, 1.45) - var(--_status-size)) / 2
+    );
+  }
+
+  [data-ui='dialog'][data-tone='accent'] {
+    --_tone-icon: var(--slotted-icon-circle-info);
+    --_tone-color: var(--slotted-tone-accent-text, CanvasText);
+  }
+
+  [data-ui='dialog'][data-tone='secondary'] {
+    --_tone-icon: var(--slotted-icon-circle-info);
+    --_tone-color: var(--slotted-tone-secondary-text, CanvasText);
+  }
+
+  [data-ui='dialog'][data-tone='success'] {
+    --_tone-icon: var(--slotted-icon-circle-check);
+    --_tone-color: var(--slotted-tone-success-text, CanvasText);
+  }
+
+  [data-ui='dialog'][data-tone='warning'] {
+    --_tone-icon: var(--slotted-icon-triangle-alert);
+    --_tone-color: var(--slotted-tone-warning-text, CanvasText);
+  }
+
+  [data-ui='dialog'][data-tone='danger'] {
+    --_tone-icon: var(--slotted-icon-circle-alert);
+    --_tone-color: var(--slotted-tone-danger-text, CanvasText);
+  }
+
+  /* ── The words ────────────────────────────────────────────────────────── */
+
+  /**
+   * `overflow-wrap: anywhere` and a zero minimum are the pair that answer a
+   * hostile string. A ninety-character unbroken token in a title widens the
+   * panel past the layer, and the panel is centred, so both of its edges leave
+   * the screen at once.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='title'] {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--_title-font-size);
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    line-height: var(--slotted-line-height-xl, 1.45);
+    color: var(--slotted-dialog-title-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='description'] {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--_description-font-size);
+    line-height: var(--slotted-line-height-md, 1.5);
+    color: var(--slotted-dialog-description-color, var(--slotted-text-muted, GrayText));
+  }
+
+  /* ── The close button ─────────────────────────────────────────────────── */
+
+  /**
+   * An icon-only control is smaller than the WCAG 2.2 minimum in both axes if
+   * it is only as big as its mark, so the box is the control height rather
+   * than the glyph, and the glyph is centred in it. The theme grows the
+   * control height again under `pointer: coarse`, so a touch target needs
+   * nothing from this family.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='close'] {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: start;
+    display: inline-grid;
+    place-items: center;
+    block-size: var(--slotted-control-height-md, 34px);
+    inline-size: var(--slotted-control-height-md, 34px);
+    /* The button's own edge is the panel's, so the mark aligns with the title. */
+    margin-inline-end: calc(-1 * var(--slotted-space-4, 0.5rem));
+    padding: 0;
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-radius: var(--slotted-control-radius, var(--slotted-radius-sm, 4px));
+    color: var(--slotted-dialog-close-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    transition:
+      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='close']::after {
+    content: '';
+    background: currentcolor;
+    block-size: var(--_icon-size);
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-icon-x);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='close']:not(:disabled):hover {
+    background: var(
+      --slotted-dialog-close-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    color: var(--slotted-dialog-close-hover-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='close']:not(:disabled):active {
+    background: var(
+      --slotted-dialog-close-active-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='close']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
+  }
+
+  /* ── The row that scrolls ─────────────────────────────────────────────── */
+
+  /**
+   * `overscroll-behavior: contain` is what keeps a wheel that reaches the end
+   * of this box from scrolling the page behind the layer. The scroll lock in
+   * `dismissable-layer` covers the modal case; this covers the non-modal one,
+   * where the page behind is not locked at all.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='body']:not(:first-child) {
+    border-block-start: var(--_rule-size) solid
+      var(--slotted-dialog-rule-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='body'] {
+    min-block-size: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--_padding-block);
+    padding-inline: var(--_padding-inline);
+    font-size: var(--_body-font-size);
+    line-height: var(--slotted-line-height-md, 1.5);
+    color: var(--slotted-dialog-body-color, var(--slotted-text, CanvasText));
+  }
+
+  [data-ui='dialog'][data-scroll='viewport']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='body'] {
+    overflow: visible;
+  }
+
+  /**
+   * Content that is not there yet. No surveyed implementation has a state for
+   * it, so a consumer renders a spinner conditionally and the panel jumps to
+   * size when the data lands. The row keeps a floor here instead, and the
+   * header, the close button and Escape all stay operable: a loading dialog a
+   * reader cannot leave is the worse failure of the two.
+   */
+  [data-ui='dialog'][data-loading]
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='body'] {
+    min-block-size: var(--slotted-space-12, 4rem);
+  }
+
+  /* ── The actions ──────────────────────────────────────────────────────── */
+
+  /**
+   * `flex-wrap` rather than a grid: two actions that do not fit on one line
+   * stack, and the primary one stays last in both readings. The row is the
+   * reason `content` is bounded — an unbounded panel pushes it past the fold,
+   * which is the whole failure the three-row grid exists to prevent.
+   */
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='footer'] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--_gap);
+    padding-block: var(--_padding-block);
+    padding-inline: var(--_padding-inline);
+    background: var(--slotted-dialog-footer-surface, var(--slotted-surface-sunken, Canvas));
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='footer']:not(:first-child) {
+    border-block-start: var(--_rule-size) solid
+      var(--slotted-dialog-rule-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  /* ── Full screen ──────────────────────────────────────────────────────── */
+
+  /**
+   * The panel spends the whole layer: no margins, no radius, no measure.
+   *
+   * `align-content: stretch` on the viewport is the half of it that is easy to
+   * miss. The first capture had the padding gone and the panel still floating
+   * in the middle of the layer with the scrim above and below it, because a
+   * percentage block size resolves against a grid area that `safe center` had
+   * already sized to the content. The track has to stretch before the panel can
+   * fill it.
+   *
+   * A
+   * container query rather than a viewport one, because the family answers its
+   * own inline size — a dialog inside a consumer-named portal container is as
+   * narrow as that container and not as narrow as the window. The breakpoint is
+   * a literal because `@container (max-inline-size: var(--x))` is invalid CSS.
+   */
+  @container slotted-dialog (max-inline-size: 30rem) {
+    [data-ui='dialog'][data-full-screen='narrow'] > [data-part='viewport'] {
+      align-content: stretch;
+      padding: 0;
+    }
+
+    [data-ui='dialog'][data-full-screen='narrow'] > [data-part='viewport'] > [data-part='content'] {
+      max-inline-size: none;
+      block-size: 100%;
+      border-radius: 0;
+      border: 0;
+    }
+  }
+
+  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'] {
+    align-content: stretch;
+    padding: 0;
+  }
+
+  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'] > [data-part='content'] {
+    max-inline-size: none;
+    block-size: 100%;
+    border-radius: 0;
+    /**
+     * No border, not only no radius. A panel that covers the layer hides the
+     * scrim entirely, so the edge separates the panel from nothing — and the
+     * first full-screen capture had a hairline across the very top of the
+     * layer, which on a phone is a stray line under the browser chrome.
+     */
+    border: 0;
+  }
+
+  /* ── Forced colours ───────────────────────────────────────────────────── */
+
+  /**
+   * The theme remaps every token this family reads, so the only rule here is
+   * the one the theme cannot reach: `--slotted-scrim` becomes `Canvas`, an
+   * opaque ground, and the panel on it needs an edge the shadow no longer
+   * draws. The border above already states one; this thickens it to the weight
+   * a system border is read at.
+   */
+  @media (forced-colors: active) {
+    [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] {
+      border-color: CanvasText;
+      border-width: var(--slotted-border-width-thick, 2px);
+    }
+  }
+}

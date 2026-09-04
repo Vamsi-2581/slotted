@@ -1,10 +1,18 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { SlMenuItem } from '@slotted/angular/menu';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SlToolbar, SlToolbarGroup, SlToolbarSeparator, SlToolbarSpacer } from './toolbar';
+import {
+  SlToolbar,
+  SlToolbarGroup,
+  SlToolbarItem,
+  SlToolbarSeparator,
+  SlToolbarSpacer,
+} from './toolbar';
 import { provideToolbarDefaults } from './toolbar-defaults';
+import { SlToolbarOverflow } from './toolbar-overflow';
 
 @Component({
   standalone: true,
@@ -201,5 +209,147 @@ describe('SlToolbar', () => {
     scoped.componentInstance.size.set('lg');
     await scoped.whenStable();
     expect(root.getAttribute('data-size')).toBe('lg');
+  });
+});
+
+/**
+ * The collapse is a measurement, and the test environment lays nothing out. The
+ * room each box takes is therefore stated on it, which is what a browser would
+ * have reported: `data-test-width` on a unit is its width, and on the bar it is
+ * the room the bar has. Nothing else is stubbed — it is the same `collapseState`
+ * a browser runs.
+ */
+@Component({
+  standalone: true,
+  imports: [SlToolbar, SlToolbarItem, SlToolbarSeparator, SlToolbarOverflow, SlMenuItem],
+  template: `<div
+    slToolbar
+    aria-label="Documento"
+    overflow="menu"
+    [attr.data-test-width]="room()"
+    (overflowChange)="hidden.set($event)"
+  >
+    <div slToolbarItem data-test-width="40">
+      <button type="button">Publicar</button>
+    </div>
+    <div slToolbarSeparator data-test-width="10"></div>
+    <div slToolbarItem data-test-width="40" [slToolbarItemCounterpart]="duplicate">
+      <button type="button">Duplicar</button>
+    </div>
+    <div slToolbarItem data-test-width="40" [slToolbarItemCounterpart]="archive">
+      <button type="button">Arquivar</button>
+    </div>
+    <sl-toolbar-overflow data-test-width="30" />
+    <ng-template #duplicate><button slMenuItem>Duplicar</button></ng-template>
+    <ng-template #archive><button slMenuItem>Arquivar</button></ng-template>
+  </div>`,
+})
+class OverflowHost {
+  readonly room = signal(400);
+  readonly hidden = signal(-1);
+}
+
+describe('SlToolbar under overflow="menu"', () => {
+  let fixture: ComponentFixture<OverflowHost>;
+
+  const bar = () => fixture.nativeElement.querySelector('[data-ui="toolbar"]') as HTMLElement;
+  const trigger = () => bar().querySelector('[data-part="overflow"]') as HTMLElement;
+  const unit = (label: string) =>
+    [...bar().querySelectorAll<HTMLElement>('[data-part="item"]')].find((box) =>
+      box.textContent?.includes(label),
+    ) as HTMLElement;
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+      configurable: true,
+      get(this: HTMLElement) {
+        return Number(this.dataset.testWidth ?? 0);
+      },
+    });
+    HTMLElement.prototype.getBoundingClientRect = function rect(this: HTMLElement) {
+      const width = Number(this.dataset.testWidth ?? 0);
+      return { bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0 } as DOMRect;
+    };
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(HTMLElement.prototype, 'clientWidth');
+  });
+
+  async function mount(room: number) {
+    TestBed.configureTestingModule({ imports: [OverflowHost] });
+    fixture = TestBed.createComponent(OverflowHost);
+    fixture.componentInstance.room.set(room);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+  }
+
+  it('hides the trigger and every control while the bar has room', async () => {
+    await mount(400);
+
+    expect(bar().getAttribute('data-collapsed')).toBe('0');
+    expect(trigger().hasAttribute('hidden')).toBe(true);
+    expect(unit('Arquivar').hasAttribute('hidden')).toBe(false);
+  });
+
+  /**
+   * The end gives way first, which is what "the overflow takes what is left
+   * over" means when the bar is read in its own order.
+   */
+  it('gives way from the end and draws the trigger with the count in its name', async () => {
+    await mount(125);
+
+    expect(unit('Arquivar').hasAttribute('hidden')).toBe(true);
+    expect(unit('Duplicar').hasAttribute('hidden')).toBe(false);
+    expect(trigger().hasAttribute('hidden')).toBe(false);
+    expect(trigger().getAttribute('aria-label')).toBe('1 more action');
+  });
+
+  /**
+   * A control with nothing to become has nowhere to go, so it stays — which is
+   * how the primary action survives a bar that ran out of room, without a
+   * priority ranking it above the others.
+   */
+  it('never hides a unit that declares no counterpart', async () => {
+    await mount(30);
+
+    expect(unit('Publicar').hasAttribute('hidden')).toBe(false);
+    expect(unit('Duplicar').hasAttribute('hidden')).toBe(true);
+    expect(trigger().getAttribute('aria-label')).toBe('2 more actions');
+  });
+
+  /** A rule that divides nothing is a stray line. */
+  it('takes a separator that is left dividing nothing', async () => {
+    await mount(60);
+
+    const rule = bar().querySelector('[data-part="separator"]') as HTMLElement;
+    expect(rule.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('renders the counterpart of every collapsed unit, in the bar order', async () => {
+    await mount(60);
+
+    trigger().click();
+    await fixture.whenStable();
+
+    const items = [...document.querySelectorAll('[role="menuitem"]')];
+    expect(items.map((entry) => entry.textContent?.trim())).toEqual(['Duplicar', 'Arquivar']);
+  });
+
+  it('reports the count once per change', async () => {
+    await mount(125);
+
+    expect(fixture.componentInstance.hidden()).toBe(1);
+  });
+
+  /** A control the platform will not focus is not a stop the arrows can land on. */
+  it('takes a collapsed control out of the ring', async () => {
+    await mount(60);
+
+    const first = bar().querySelector('button') as HTMLElement;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'End' }));
+
+    expect(document.activeElement).toBe(trigger());
   });
 });

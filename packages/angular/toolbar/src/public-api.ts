@@ -1,4 +1,13 @@
-export { SlToolbar, SlToolbarGroup, SlToolbarSeparator, SlToolbarSpacer } from './toolbar';
+export {
+  SlToolbar,
+  SlToolbarGroup,
+  SlToolbarItem,
+  SlToolbarSeparator,
+  SlToolbarSpacer,
+  TOOLBAR_UNIT_ATTRIBUTE,
+} from './toolbar';
+export type { ToolbarCollapsedUnit, ToolbarOverflowLabel } from './toolbar';
+export { SlToolbarOverflow } from './toolbar-overflow';
 export {
   injectToolbarDefaults,
   provideToolbarDefaults,
@@ -7,7 +16,7 @@ export {
 export type {
   ToolbarDefaults,
   ToolbarOrientation,
-  ToolbarOverflow,
+  ToolbarOverflowMode,
   ToolbarSize,
   ToolbarVariant,
 } from './toolbar-defaults';

@@ -14,12 +14,12 @@ export type ToolbarVariant = 'plain' | 'outline';
  * one of them visible on a second row, and the arrows wrap from row to row
  * because the item list is linear.
  */
-export type ToolbarOverflow = 'wrap' | 'scroll';
+export type ToolbarOverflowMode = 'wrap' | 'scroll' | 'menu';
 
 export interface ToolbarDefaults {
   loop: boolean;
   orientation: ToolbarOrientation;
-  overflow: ToolbarOverflow;
+  overflow: ToolbarOverflowMode;
   size: ToolbarSize;
   variant: ToolbarVariant;
 }

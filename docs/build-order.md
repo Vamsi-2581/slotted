@@ -760,9 +760,18 @@ Depois, nesta ordem:
    fallback de fundação: o defeito é do teste compartilhado e é corrigido em
    commit próprio, antes da família, como o briefing exige.
 2. `popover`
-3. `dialog alert-dialog` — traz para `packages/core/src/focus` a contenção de
-   foco e a restauração ao gatilho, com teste próprio, antes das partes da
-   família.
+3. `dialog alert-dialog` — entregue em 2026-09-04, como **uma família com dois
+   membros**, `dialog` e `alertDialog`, sob um único `data-ui="dialog"`. O
+   precedente é `button`, cujo contrato declara `iconButton` enquanto o guia dá
+   a Icon Button uma seção própria; o que decide é
+   `packages/styles/src/identity.test.mjs`, que recusa uma folha de estilo
+   apoiada no `data-ui` de outra família — duas famílias significariam a mesma
+   layer, a mesma geometria de painel, o mesmo modelo de scroll e a mesma regra
+   de forced-colors escritas duas vezes. Não existe `specs/components/alert-dialog/`.
+   `createFocusScope` — contenção e restauração ao gatilho — está em
+   `packages/core/src/focus`, com teste próprio, como esta linha pedia.
+   Inventário, decisões e autoavaliação em
+   `docs/superpowers/specs/2026-09-04-dialog-and-alert-dialog-*.md`.
 4. `drawer`
 5. `menu menubar`
 6. `toast`

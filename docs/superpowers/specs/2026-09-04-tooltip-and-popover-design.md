@@ -179,7 +179,7 @@ which is `keyboard`. `dismiss` is the Close part.
 | `blur`         | focus leaving the trigger                                     | not emitted                                        |
 | `outsidePress` | not emitted — see below                                       | a press outside the layer and outside its branches  |
 | `dismiss`      | not emitted                                                   | the Close part                                     |
-| `programmatic` | `open()` / `close()` on the handle, and a detached anchor      | the same                                           |
+| `programmatic` | `open()` and `close()` on the handle                           | the same                                           |
 
 A tooltip dismissed by a press outside reports `pointer` rather than
 `outsidePress`: from the reader's side it is the same gesture as pressing the
@@ -222,11 +222,18 @@ provider, not per tooltip, which is what makes "the next one" mean anything.
 | Escape                                    | closes                                                 | closes, and focus returns to the trigger                     |
 | Focus leaves the trigger                  | closes                                                 | nothing — focus is inside the layer                          |
 | Scroll                                    | nothing; the layer follows its anchor                  | nothing                                                      |
-| The anchor leaves the document or clipper | closes (`hideWhenDetached`, default on)                | stays (`hideWhenDetached`, default off)                      |
+| The anchor leaves the document or clipper | hidden while it is gone (`hideWhenDetached`, default on) | stays visible (`hideWhenDetached`, default off)             |
 
-The last row is the one asymmetry worth stating. A hint whose anchor scrolled
-away has nothing left to explain; a task the reader is halfway through must not
-vanish because the row behind it scrolled.
+The last row is the one asymmetry worth stating, and the behaviour behind it was
+narrowed while the tests were written. `hideWhenDetached` **hides and does not
+close**: it answers one question — is the anchor still on screen — and answers it
+in the stylesheet, through `data-detached`. Closing as well would answer a second
+one, whether the reader is done with the hint, and would move a controlled
+consumer's `open` because a rectangle changed size. Radix, Base UI and Ark all
+hide without closing. A hint whose anchor scrolled away is closed by the pointer
+leaving it, which has already happened; a task the reader is halfway through must
+not even blink because the row behind it scrolled, which is why the popover's
+default is off.
 
 ---
 

@@ -129,9 +129,9 @@
       "effect": "focus leaves the trigger"
     },
     "detached": {
-      "emits": "programmatic",
-      "effect": "the anchor left the document or its clipping ancestor",
-      "reason": "A hint whose anchor scrolled away has nothing left to explain. The move is the browser's rather than an interaction with this family's control, so it carries programmatic — the reason collapsible chose for find-in-page, for the same reason."
+      "emits": null,
+      "effect": "the layer is hidden while its anchor is out of the clipping ancestor, and shows again when the anchor comes back",
+      "reason": "`hideWhenDetached` answers one question — is the anchor still on screen — and answers it in the stylesheet, through `data-detached`. Closing as well would answer a second: whether the reader is done with the hint. Radix, Base UI and Ark all hide without closing, and closing would also mean a consumer's `open` moved for a reason they never acted on. The pointer leaving the trigger is what closes a tooltip."
     }
   },
   "touch": {
@@ -198,6 +198,9 @@
     },
     "triggerPart": {
       "reason": "`data-part` names a part of the family that owns the element, and a trigger is the consumer's own — very often another Slotted family's root. Sixteen stylesheets in this repository key on `[data-part='root']`, so writing `trigger` over it would silently unstyle a `badge`, an `avatar` or a `checkbox` used as a trigger, and nothing would report it. The family therefore writes only the wiring and the state on the trigger: the ARIA relationship, and `data-open` so a consumer can style their own element while the layer is showing."
+    },
+    "closeOnDetached": {
+      "reason": "Considered and dropped while the behavioural tests were written. It made `hideWhenDetached` do two things, and the second one moved a controlled consumer's state from under them because a rectangle changed size."
     }
   },
   "axes": {

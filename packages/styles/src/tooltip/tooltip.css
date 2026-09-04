@@ -150,9 +150,9 @@
   }
 
   /**
-   * The anchor left the screen or the document. The family closes on it, and
-   * this is what covers the frame between the engine noticing and the close
-   * landing.
+   * The anchor left the screen or its clipping ancestor. Hiding is the whole of
+   * `hideWhenDetached`: the layer comes back when the anchor does, and nothing
+   * has moved the consumer's own `open` because a rectangle changed size.
    */
   [data-ui='tooltip'][data-detached] {
     visibility: hidden;

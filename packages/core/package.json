@@ -21,6 +21,18 @@
       "types": "./dist/types/currency/index.d.ts",
       "import": "./dist/currency.js"
     },
+    "./disclosure": {
+      "types": "./dist/types/disclosure/index.d.ts",
+      "import": "./dist/disclosure.js"
+    },
+    "./dismissable-layer": {
+      "types": "./dist/types/dismissable-layer/index.d.ts",
+      "import": "./dist/dismissable-layer.js"
+    },
+    "./extent": {
+      "types": "./dist/types/extent/index.d.ts",
+      "import": "./dist/extent.js"
+    },
     "./files": {
       "types": "./dist/types/files/index.d.ts",
       "import": "./dist/files.js"
@@ -41,6 +53,10 @@
       "types": "./dist/types/keys/index.d.ts",
       "import": "./dist/keys.js"
     },
+    "./live-announcer": {
+      "types": "./dist/types/live-announcer/index.d.ts",
+      "import": "./dist/live-announcer.js"
+    },
     "./loading": {
       "types": "./dist/types/loading/index.d.ts",
       "import": "./dist/loading.js"
@@ -56,6 +72,18 @@
     "./number": {
       "types": "./dist/types/number/index.d.ts",
       "import": "./dist/number.js"
+    },
+    "./portal": {
+      "types": "./dist/types/portal/index.d.ts",
+      "import": "./dist/portal.js"
+    },
+    "./positioner": {
+      "types": "./dist/types/positioner/index.d.ts",
+      "import": "./dist/positioner.js"
+    },
+    "./presence": {
+      "types": "./dist/types/presence/index.d.ts",
+      "import": "./dist/presence.js"
     },
     "./progress": {
       "types": "./dist/types/progress/index.d.ts",
@@ -90,5 +118,8 @@
     "typescript": "6.0.3",
     "vite": "8.2.2",
     "vitest": "4.1.11"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "1.8.0"
   }
 }

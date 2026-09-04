@@ -202,6 +202,23 @@ export const KNOWN_CAPABILITIES = [
    */
   'validity',
   /**
+   * How much of the space available to it a panel takes, as a fraction the
+   * reader can move.
+   *
+   * The vocabulary had three words that look like this one and are not.
+   * `size` is a step on an appearance scale and is deliberately immutable;
+   * `measurement` is a quantity the consumer states and the family only draws;
+   * `value` is the text a control holds. None of them says "how much of the
+   * layer this panel takes, and the reader decides".
+   *
+   * `drawer` found the gap — `docs/component-features.md` §8 asks it for
+   * "extent com limites" — and `splitter` in wave 8 holds the same value
+   * between two panes. Both answer the WAI-ARIA Window Splitter pattern, whose
+   * separator has a value, a minimum and a maximum, which is exactly the shape
+   * a state model gives it.
+   */
+  'extent',
+  /**
    * An ordered collection of transient entries the component both holds and
    * expires on its own, and which a consumer may own instead.
    *
@@ -227,6 +244,7 @@ export const MUTABLE_CAPABILITIES = [
   'revealed',
   'validity',
   'queue',
+  'extent',
 ];
 
 export function strongestState(states) {

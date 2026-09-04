@@ -198,6 +198,35 @@ test('requires a state model from a family that reveals a hidden value', () => {
   assert.throws(() => assertContractShape(contract), /revealed holds state/);
 });
 
+/**
+ * A measure the reader moves. `size` is a step on an appearance scale and is
+ * not mutable, `measurement` is a quantity the family only draws, and `value`
+ * is the text a control holds — so a resizable panel had no word, and would
+ * have shipped a mutable value with no model, which is the failure the schema
+ * exists to catch. `drawer` found the gap and `splitter` reads the same word.
+ */
+test('requires a state model from a family whose measure the reader moves', () => {
+  const contract = structuredClone(valid);
+  contract.members.example.capabilities.push('extent');
+  assert.throws(() => assertContractShape(contract), /extent holds state/);
+
+  contract.stateModel = {
+    extent: {
+      controlled: 'extent',
+      uncontrolled: 'defaultExtent',
+      request: 'onExtentChange',
+      reasons: ['pointer', 'keyboard', 'programmatic'],
+    },
+  };
+  assert.doesNotThrow(() => assertContractShape(contract));
+});
+
+test('keeps every mutable capability inside the known vocabulary', () => {
+  for (const capability of MUTABLE_CAPABILITIES) {
+    assert.ok(KNOWN_CAPABILITIES.includes(capability), `${capability} is mutable and unknown`);
+  }
+});
+
 test('names every reason a request can carry', () => {
   assert.deepEqual(CHANGE_REASONS.includes('programmatic'), true);
   assert.equal(new Set(CHANGE_REASONS).size, CHANGE_REASONS.length);

@@ -171,6 +171,18 @@ other families stand on. Justify it at the gate before writing it.
   centre their marks in the line box: they predate the measurement, and none of
   them is this session's to edit. Each takes the rule when it is next opened.
 
+- **A family that renders another family's part composes its ref, not only its
+  props.** `menu`'s trigger hands `render` a `ref` alongside the wiring, and it
+  is the anchor the positioner measures against. `toolbar`'s overflow control
+  spread the props and then wrote its own `ref` after them, which replaced the
+  anchor: the surface opened at the corner of the page with the trigger sitting
+  correctly in the bar. Nothing failed — no test, no type, no lint — because a
+  ref that is never called is not an error. The rendered page is what showed it.
+
+  So: destructure the `ref` out of what `render` gives you, and attach it beside
+  your own. A part that takes a `ref` from another family is taking a
+  measurement, and dropping it is dropping the measurement.
+
 ## Working beside another session
 
 Another session may be building a different family in this same worktree at the

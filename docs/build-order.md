@@ -874,7 +874,20 @@ Depois, nesta ordem:
    `docs/superpowers/specs/2026-09-04-toast-self-assessment.md`.
 7. `loading-overlay`
 
-Refino de `toolbar` com overflow ao final da onda.
+Refino de `toolbar` com overflow — entregue em 2026-09-04. `overflow` ganha o
+valor `menu` ao lado de `wrap` e `scroll`, e a família ganha duas partes:
+`item`, a unidade que a barra pode ceder, e `overflow`, o gatilho que guarda o
+que não coube. A ordem é a da própria barra, invertida: a última unidade que
+pode ceder é a primeira que cede, e o que precisa continuar visível é o que não
+tem para onde ir — declarar nenhum `counterpart` é o que fixa a ação primária,
+sem prop de prioridade. Uma barra sem gatilho, ou só com unidades fixas, rola em
+vez de recortar. `@slotted/core/overflow` ganha `collapseState` e
+`createCollapse`, uma medição para as duas ligações; `createArrowNavigation`
+deixa de recolher item que a plataforma não foca. Inventário em
+`docs/superpowers/specs/2026-09-04-toolbar-overflow-capability-inventory.md`,
+decisões em `docs/superpowers/specs/2026-09-04-toolbar-overflow-design.md`,
+avaliação em
+`docs/superpowers/specs/2026-09-04-toolbar-overflow-self-assessment.md`.
 
 ## Onda 6 — Coleções
 

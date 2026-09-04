@@ -4537,6 +4537,15 @@ Two things a later family needs and none of the other three places can hold.
   `maskClosable` for the same reason — and any overlay family that conflates
   the two cannot demonstrate itself.
 
+- **`presence.setNode(null)` during an exit ends the exit, and React calls an
+  inline ref callback with `null` on every render.** The render that starts an
+  exit therefore ends it in the same frame, and the panel disappears instead of
+  leaving. Two things follow for the next overlay family: the layer's ref has to
+  be one stable callback, and **no test can catch this** — jsdom reports no
+  transition duration, so the exit is instant there whatever the code does, and
+  the two bindings disagreed with every test passing. It was found by tracing
+  `translate` frame by frame in a browser, which is the only place it exists.
+
 **Debt this family owns.** `tools/harness/audit.mjs` measures as soon as the
 first demonstration stage appears, which on a page of twenty-two stages is four
 of them. It reported a clean page while two scenes were squeezing their content

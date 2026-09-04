@@ -34,30 +34,57 @@ token instead.
 
 ## 2. Motion
 
-Four transitions, all from the motion scale, all named in one place:
-`--_move` resolves to `medium`/`enter` while open, `short`/`exit` while closed,
-and `instant` while `data-dragging`. The scrim fades, the panel slides, and an
-inline drawer's own measure is what moves. Nothing loops, so nothing needs the
-explicit stop `docs/token-foundation.md` requires of infinite animation; reduced
-motion is inherited from the theme, which collapses all four scale durations.
+Every duration and easing comes from the motion scale, and the scale is read
+through two names rather than one, because the family animates two distances.
 
-The panel slides and does not fade, which is the one departure from `dialog`:
-that family fades and scales because a centred panel has nowhere to come from,
-while a drawer arrives from outside the layer and its position already carries
-the whole change. Adding opacity would make one motion read as two.
+| What moves | Enter | Exit | While dragging |
+| ---------- | ----- | ---- | -------------- |
+| the panel's slide, `--_slide` | `long` / `enter` | `medium` / `exit` | — |
+| the scrim, and every measure, `--_move` | `medium` / `enter` | `medium` / `exit` | `instant` |
+| the discrete hide, `--_reveal` | — | `medium` | — |
+
+The first version of this took `dialog`'s timing whole, and that was wrong for a
+reason worth writing down: **`dialog`'s panel moves eight pixels and this one
+moves the width of itself.** A 120-millisecond exit across three hundred and
+eighty pixels is not a movement a reader can follow; it is a disappearance. The
+slide takes the top of the scale arriving and one step down leaving, and the
+scrim stays a step below the slide so the page has finished dimming by the time
+the panel lands rather than the two arriving together.
+
+The measure eases too, which is what a snap point actually feels like. `--_move`
+is `instant` while the pointer is down — so the panel follows the hand — and
+returns to the enter step the moment the hand leaves, so a release lands on its
+stop rather than jumping to it. It is one custom property doing both, and the
+earlier version animated nothing at all: the extent changed between two frames.
+
+**Two defects the browser found and no test could.**
+
+The first: **the exit never ran in React.** `@slotted/core/presence` measures the
+node it is given to know how long to hold it, and the React binding never gave
+it one — so the layer unmounted in the same frame the close was asked for and
+the panel vanished. Angular was correct throughout; the two bindings disagreed
+and every test passed, because jsdom reports no transition duration and the exit
+is instant there whatever the code does.
+
+The second was underneath it: **`presence.setNode(null)` during an exit ends the
+exit**, and React calls an *inline* ref callback with `null` and then with the
+node on every render. The render that starts the exit therefore ended it. The
+registration is one stable callback now, and the trace reads as it should — the
+panel eases off over about two hundred milliseconds and the layer unmounts at
+234, where it used to be gone at 16.
 
 State pairs that do **not** transition, and why: `data-loading` on and off is a
 content swap the reader asked for, and animating it would delay the content;
-`data-dragging` on and off deliberately removes the transition rather than
-adding one, because an extent that eased toward every pointer position would lag
-the hand by the whole duration.
+`data-dragging` deliberately removes a transition rather than adding one.
+Reduced motion is inherited from the theme, which collapses all four
+motion-scale durations. Nothing loops, so nothing needs the explicit stop
+`docs/token-foundation.md` requires of infinite animation.
 
-**The one change:** a bottom sheet released between two snap points lands on the
-nearest one instantly, because the extent's transition is the same `--_move`
-that the drag turned off, and the release does not turn it back on before
-committing. The fix is one frame of bookkeeping in both bindings, and it was
-**not made** — the value is correct and only the arrival is abrupt, which is the
-smaller of the two defects a rushed fix could produce.
+**The one change:** `--_reveal` was a step longer than the exit, which left the
+panel sitting off screen, inert and invisible, for a hundred and fifty
+milliseconds after it had finished leaving — and a hundred and fifty
+milliseconds before `closed` fires. It **was made**: the two are the same step
+now, and the layer unmounts the frame the panel lands off screen.
 
 ## 3. Responsiveness
 
@@ -102,6 +129,11 @@ before the stylesheet was committed:
   attached to nothing the eye could find. It is flush with that edge now.
 - **The focus ring erased the grip.** The inset ring lands exactly on a flush
   grip, so focus colours the mark as well as drawing the ring.
+- **Hover had nothing to answer with.** A separator is twenty-four invisible
+  pixels and a two-pixel bar, so a background fill lands on a target the reader
+  cannot see the edges of. The mark grows toward the hand instead — one step up
+  the space scale on hover, on focus and while dragging — which is the only
+  dimension a bar has to speak in.
 
 Density is answered the way this library requires and no further:
 `docs/token-foundation.md` says a family answers density **only** by reading a

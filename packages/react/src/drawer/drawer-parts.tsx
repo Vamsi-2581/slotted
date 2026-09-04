@@ -9,7 +9,7 @@ import {
 import { createFocusScope } from '@slotted/core/focus';
 import { clamp } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -215,6 +215,20 @@ export function DrawerPanel({
   const labelled = drawer.titleId !== '' && nativeProps['aria-label'] === undefined;
 
   /**
+   * One stable callback, because an inline one is re-run with `null` on every
+   * render and `presence` reads that as the exit being over. See
+   * `registerLayer` in `drawer.tsx` for what it cost.
+   */
+  const { registerLayer } = drawer;
+  const attachLayer = useCallback(
+    (node: HTMLDivElement | null) => {
+      setLayer(node);
+      registerLayer(node);
+    },
+    [registerLayer],
+  );
+
+  /**
    * Everything the drawer does while it is open, taken down when it closes
    * rather than when the node unmounts — `presence` keeps the node mounted
    * through the exit, and a layer still holding the scroll lock and the
@@ -308,10 +322,7 @@ export function DrawerPanel({
       {...(drawer.modal ? { 'data-modal': '' } : {})}
       {...(drawer.visible ? {} : { inert: true })}
       {...(drawer.visible ? { 'data-open': '' } : {})}
-      ref={(node: HTMLDivElement | null) => {
-        setLayer(node);
-        drawer.nodes.layer = node;
-      }}
+      ref={attachLayer}
       style={
         extentLength === undefined
           ? undefined

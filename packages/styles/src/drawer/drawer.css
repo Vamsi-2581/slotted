@@ -70,19 +70,33 @@
     --_resizer-thickness: var(--slotted-target-min, 24px);
     --_grip-thickness: var(--slotted-border-width-thick, 2px);
     --_grip-length: var(--slotted-space-10, 2.5rem);
+    /** The same mark, once a hand is on it. */
+    --_grip-reach: var(--slotted-space-11, 3rem);
     --_radius: var(--slotted-radius-lg, 8px);
 
     /**
-     * One name for the timing every moving part reads, so the three of them —
-     * the scrim's fade, the panel's slide and an inline drawer's own measure —
-     * cannot disagree about how long a drawer takes to arrive.
+     * Two timings, because two distances.
      *
-     * It is a custom property rather than three pairs of rules because of the
+     * `--_slide` is the panel crossing the whole layer from outside it, which
+     * is the longest travel any family in the library animates — `dialog`'s
+     * panel moves eight pixels and this one moves the width of itself, so the
+     * duration it borrowed from that family read as a snap. It takes the top of
+     * the motion scale arriving and one step down leaving, because a reader who
+     * has decided to close is waiting.
+     *
+     * `--_move` is everything that travels a fraction of that: the scrim's
+     * opacity, and any measure that changes — an inline drawer opening, and a
+     * separator released onto a snap point. One step below the slide, so the
+     * scrim has settled by the time the panel lands rather than arriving with
+     * it.
+     *
+     * Both are custom properties rather than pairs of rules because of the
      * cascade: the side rules that set the exit offset carry the same
-     * specificity as an `[data-open]` rule would, and the last one written
-     * would decide. A property is resolved on the element instead, and the
-     * three states below read as what they are.
+     * specificity as a `[data-open]` rule would, and the last one written would
+     * decide. A property is resolved on the element instead, and the three
+     * states below read as what they are.
      */
+    --_slide: var(--slotted-duration-long) var(--slotted-easing-enter);
     --_move: var(--slotted-duration-medium) var(--slotted-easing-enter);
     /**
      * `allow-discrete` is the whole of it. Without it the rule that hides a
@@ -92,6 +106,14 @@
      * `mount="active"` never reaches the closed state — the layer is gone — so
      * this is what `eager`, `lazy` and every inline drawer need in order to
      * animate at all.
+     */
+    /**
+     * The same step the exit takes, because this only has to outlast the
+     * movement and `presence` reads the longest transition on this element to
+     * know how long to hold the node. A step longer left the panel sitting off
+     * screen, inert and invisible, for a hundred and fifty milliseconds after
+     * it had finished leaving — which is a hundred and fifty milliseconds
+     * before `closed` fires.
      */
     --_reveal: content-visibility var(--slotted-duration-medium) allow-discrete;
 
@@ -115,7 +137,8 @@
 
   /** Leaving is shorter than arriving: a reader who has decided is waiting. */
   [data-ui='drawer']:not([data-open]) {
-    --_move: var(--slotted-duration-short) var(--slotted-easing-exit);
+    --_slide: var(--slotted-duration-medium) var(--slotted-easing-exit);
+    --_move: var(--slotted-duration-medium) var(--slotted-easing-exit);
   }
 
   /**
@@ -245,6 +268,16 @@
   [data-ui='drawer'] > [data-part='panel'] {
     grid-area: 1 / 1;
     box-sizing: border-box;
+    /**
+     * The measure eases, which is the whole of what a snap point feels like: a
+     * release with no transition puts the panel on its stop between two frames
+     * and reads as a jump. `--_move` is `instant` while the pointer is down, so
+     * the panel still follows the hand, and returns to the enter step the
+     * moment the hand leaves.
+     */
+    transition:
+      inline-size var(--_move),
+      block-size var(--_move);
     /* The containing block for the separator, on the two sides it lies over. */
     position: relative;
     display: grid;
@@ -287,7 +320,13 @@
   [data-ui='drawer'][data-mode='overlay'] > [data-part='panel'] {
     box-shadow: var(--slotted-shadow-lg);
     translate: 0 0;
-    transition: translate var(--_move);
+    /* The measure is restated here, or this rule would replace the base one:
+       `transition` is one property and the more specific declaration wins it
+       whole. */
+    transition:
+      translate var(--_slide),
+      inline-size var(--_move),
+      block-size var(--_move);
   }
 
   [data-ui='drawer'][data-mode='overlay']:not([data-open]) > [data-part='panel'] {
@@ -512,9 +551,17 @@
     content: '';
     border-radius: var(--slotted-radius-full, 9999px);
     background: var(--slotted-drawer-grip-color, var(--slotted-border-strong));
-    transition: background-color
-      var(--slotted-control-transition-duration, var(--slotted-duration-short))
-      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+    /**
+     * The mark grows toward the hand. A separator is a target with no edges of
+     * its own — twenty-four invisible pixels and a two-pixel bar — so hover has
+     * nothing to fill and only the bar can answer. Growing it says *this is the
+     * thing you have hold of* in the one dimension the bar has.
+     */
+    transition:
+      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      inline-size var(--slotted-duration-short) var(--slotted-easing-standard),
+      block-size var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
   [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer']::after,
@@ -527,6 +574,48 @@
   [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer']::after {
     inline-size: var(--_grip-length);
     block-size: var(--_grip-thickness);
+  }
+
+  [data-ui='drawer'][data-side='start']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover::after,
+  [data-ui='drawer'][data-side='start']
+    > [data-part='panel']
+    > [data-part='resizer']:focus-visible::after,
+  [data-ui='drawer'][data-side='end']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover::after,
+  [data-ui='drawer'][data-side='end']
+    > [data-part='panel']
+    > [data-part='resizer']:focus-visible::after,
+  [data-ui='drawer'][data-dragging][data-side='start']
+    > [data-part='panel']
+    > [data-part='resizer']::after,
+  [data-ui='drawer'][data-dragging][data-side='end']
+    > [data-part='panel']
+    > [data-part='resizer']::after {
+    block-size: var(--_grip-reach);
+  }
+
+  [data-ui='drawer'][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover::after,
+  [data-ui='drawer'][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']:focus-visible::after,
+  [data-ui='drawer'][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover::after,
+  [data-ui='drawer'][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']:focus-visible::after,
+  [data-ui='drawer'][data-dragging][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']::after,
+  [data-ui='drawer'][data-dragging][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']::after {
+    inline-size: var(--_grip-reach);
   }
 
   /**

@@ -185,6 +185,21 @@ export function Drawer({
     };
   }, []);
 
+  /**
+   * Stable for the life of the component, and that is the whole point.
+   * `@slotted/core/presence` treats `setNode(null)` during an exit as the exit
+   * ending — a node that has gone has nothing left to animate — and React calls
+   * an *inline* ref callback with `null` and then with the node on every single
+   * render. The render that starts the exit therefore ended it in the same
+   * frame, and the panel disappeared instead of leaving. Only a browser shows
+   * it: jsdom reports no transition duration, so the exit is instant there
+   * whatever this does.
+   */
+  const registerLayer = useCallback((node: HTMLElement | null) => {
+    nodes.current.layer = node;
+    presence.current?.setNode(node);
+  }, []);
+
   const requestOpen = useCallback(
     (next: boolean, reason: DrawerOpenReason, result: string | undefined, source: unknown) => {
       if (next === currentOpen) return;
@@ -289,6 +304,7 @@ export function Drawer({
       openWith: (reason, source) => requestOpen(true, reason, undefined, source),
       outsidePress: resolvedOutsidePress,
       panelId: `${baseId}panel`,
+      registerLayer,
       requestExtent,
       setDragging,
       side: resolvedSide,
@@ -313,6 +329,7 @@ export function Drawer({
       initialFocus,
       loading,
       mounted,
+      registerLayer,
       requestExtent,
       requestOpen,
       resolvedEscape,

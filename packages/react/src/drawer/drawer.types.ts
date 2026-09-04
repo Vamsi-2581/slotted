@@ -138,6 +138,13 @@ export interface DrawerContextValue {
   open: boolean;
   /** Asks to open, carrying the reason and the event. */
   openWith: (reason: DrawerOpenReason, source: unknown) => void;
+  /**
+   * Records the layer, which is the node `@slotted/core/presence` measures its
+   * own exit on. Without it presence has nothing to read a duration from and
+   * completes the exit in the same frame the close was asked for, so the panel
+   * disappears instead of leaving.
+   */
+  registerLayer: (node: HTMLElement | null) => void;
   outsidePress: DrawerDismissPolicy;
   panelId: string;
   /** Asks to move the measure, carrying the reason and the event. */

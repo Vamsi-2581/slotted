@@ -56,6 +56,10 @@
       "types": "./dist/types/dialog/index.d.ts",
       "import": "./dist/dialog.js"
     },
+    "./drawer": {
+      "types": "./dist/types/drawer/index.d.ts",
+      "import": "./dist/drawer.js"
+    },
     "./divider": {
       "types": "./dist/types/divider/index.d.ts",
       "import": "./dist/divider.js"
@@ -111,6 +115,10 @@
     "./pagination": {
       "types": "./dist/types/pagination/index.d.ts",
       "import": "./dist/pagination.js"
+    },
+    "./prose": {
+      "types": "./dist/types/prose/index.d.ts",
+      "import": "./dist/prose.js"
     },
     "./result-state": {
       "types": "./dist/types/result-state/index.d.ts",

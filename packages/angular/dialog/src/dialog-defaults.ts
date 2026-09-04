@@ -18,6 +18,19 @@ export type DialogPlacement = 'center' | 'top';
 export type DialogScroll = 'content' | 'viewport';
 
 /**
+ * Whether the family paints the panel at all. `plain` turns off the surface,
+ * the border, the radius, the shadow, the rows and the padding, and keeps
+ * everything that is not paint: the portal, the scrim, presence, the focus
+ * containment and restoration, the dismissal policy and the z-index stack.
+ *
+ * It is what a consumer reaches for to put the layer around a box of their own
+ * — a `slCard`, a media viewer, an image at its own aspect ratio. The cost is
+ * that a plain panel does not keep its footer on screen for a long body,
+ * because the three rows go with the paint.
+ */
+export type DialogSurface = 'panel' | 'plain';
+
+/**
  * When the layer exists. `active` builds it on opening and drops it once the
  * exit is over, `lazy` builds it on the first open and keeps it, `eager` builds
  * it up front and hides it.
@@ -77,6 +90,7 @@ export interface DialogDefaults {
   placement: DialogPlacement;
   scroll: DialogScroll;
   size: DialogSize;
+  surface: DialogSurface;
 }
 
 const FALLBACK: DialogDefaults = {
@@ -88,6 +102,7 @@ const FALLBACK: DialogDefaults = {
   placement: 'center',
   scroll: 'content',
   size: 'md',
+  surface: 'panel',
 };
 
 export const DIALOG_DEFAULTS = new InjectionToken<DialogDefaults>('slotted dialog defaults', {

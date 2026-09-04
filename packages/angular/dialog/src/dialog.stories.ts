@@ -1,6 +1,7 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlButton } from '@slotted/angular/button';
+import { SlCard } from '@slotted/angular/card';
 import { SlSkeleton } from '@slotted/angular/skeleton';
 import { SlTextField } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
@@ -47,6 +48,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     sizes: Sizes,
     placement: Placement,
     scroll: Scroll,
+    surface: Surface,
     fullScreen: FullScreen,
     modal: Modal,
     policy: Policy,
@@ -73,6 +75,7 @@ export const DIALOG_IMPORTS = [
   SlAlertDialogCancel,
   SlAlertDialogAction,
   SlButton,
+  SlCard,
   SlText,
   SlTextField,
   SlSkeleton,
@@ -247,6 +250,32 @@ export const Scroll: Story = {
           'viewport — the panel scrolls',
           'For content that is read rather than acted on. The scrim stays where it is while the panel moves under it, because it is the other cell of the layer’s grid rather than a child of the box that scrolls.',
           panel('scroll="viewport" fullScreen="never"', { body: LONG, title: 'Termos de uso' }),
+        ),
+    ),
+  }),
+};
+
+export const Surface: Story = {
+  parameters: scenario('surface'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'panel — the family paints it',
+        'The default: a raised surface, a border that survives forced colours, a radius, a shadow, and the three rows that keep the actions on screen however long the body is.',
+        panel('fullScreen="never"'),
+      ) +
+        scene(
+          'plain — you paint it',
+          'No ground, no border, no radius, no shadow, no rows and no padding. The portal, the scrim, the focus containment and the dismissal policy are all still here; only the picture is yours.',
+          layer(`<sl-dialog [container]="box" [open]="true" surface="plain" fullScreen="never">
+            <div slCard fill="elevated">
+              <h2 slDialogTitle>Um card, dentro da layer</h2>
+              <p slDialogDescription>
+                A família não pinta nada aqui. Escape ainda fecha, o foco ainda fica contido.
+              </p>
+            </div>
+          </sl-dialog>`),
         ),
     ),
   }),

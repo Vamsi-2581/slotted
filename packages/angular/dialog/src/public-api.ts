@@ -17,6 +17,7 @@ export type {
   DialogPlacement,
   DialogScroll,
   DialogSize,
+  DialogSurface,
   DialogTone,
 } from './dialog-defaults';
 export {

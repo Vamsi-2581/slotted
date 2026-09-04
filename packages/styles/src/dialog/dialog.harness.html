@@ -515,3 +515,67 @@
     </div>
   </div>
 </section>
+
+<section data-scene="header-content" data-fixed>
+  <p style="margin: 0; color: var(--slotted-text-muted)">A badge the family did not place.</p>
+
+  <div data-ui="dialog" data-part="root" data-open data-size="md" data-full-screen="never">
+    <div data-part="backdrop"></div>
+    <div data-part="viewport">
+      <div data-part="content" role="dialog" aria-modal="true" aria-labelledby="d9-title">
+        <header data-part="header">
+          <h2 data-part="title" id="d9-title">Fatura 4471</h2>
+          <p data-part="description">Emitida em 3 de setembro.</p>
+          <span
+            data-ui="status-indicator"
+            data-part="root"
+            data-status="warning"
+            data-mark="dot"
+            data-size="sm"
+            ><span data-part="mark" aria-hidden="true"></span
+            ><span data-part="label">Em atraso</span></span
+          >
+          <button data-part="close" type="button" aria-label="Close"></button>
+        </header>
+        <div data-part="body">
+          <p style="margin: 0">
+            Everything in the header lands in the words column unless the family placed it somewhere
+            else. The badge is under the description, not where the mark would go.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="plain-surface" data-fixed>
+  <p style="margin: 0; color: var(--slotted-text-muted)">
+    The layer, and a box the consumer paints.
+  </p>
+
+  <div
+    data-ui="dialog"
+    data-part="root"
+    data-open
+    data-size="md"
+    data-surface="plain"
+    data-full-screen="never"
+  >
+    <div data-part="backdrop"></div>
+    <div data-part="viewport">
+      <div data-part="content" role="dialog" aria-modal="true" aria-labelledby="d10-title">
+        <div data-ui="card" data-part="root" data-variant="raised" data-size="md">
+          <div data-part="body">
+            <h2 data-part="title" id="d10-title" style="margin: 0 0 var(--slotted-space-4)">
+              Um card, dentro da layer
+            </h2>
+            <p data-part="description" style="margin: 0">
+              A família não pinta nada aqui: sem superfície, sem borda, sem raio, sem sombra e sem
+              linhas. O portal, o scrim, o foco contido e a política de fechamento continuam.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

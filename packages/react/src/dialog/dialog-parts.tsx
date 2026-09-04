@@ -227,6 +227,7 @@ export function DialogContent({
     'data-placement': dialog.placement,
     'data-scroll': dialog.scroll,
     'data-size': dialog.size,
+    'data-surface': dialog.surface,
     ...(dialog.tone === undefined ? {} : { 'data-tone': dialog.tone }),
     'data-ui': 'dialog',
   };

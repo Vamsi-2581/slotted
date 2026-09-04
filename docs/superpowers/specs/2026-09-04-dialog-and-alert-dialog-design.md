@@ -173,6 +173,13 @@ once for every overlay family rather than by each of them.
 `alertDialog` has no `close`: a confirmation is answered, not dismissed by an ✕
 in the corner, and a corner ✕ next to Cancel is two controls for one outcome.
 
+The header places four parts in a three-column grid, and **everything else a
+consumer writes there lands in the words column**, under the description and
+aligned with the title. Before that rule those children auto-placed into whichever
+cell was free — column one whenever no icon was rendered, which is where an alert
+dialog's mark goes — so a status indicator beside a title moved as soon as a tone
+was set. Where it goes is now a rule rather than an accident of the grid.
+
 `content` is a three-row grid — `auto minmax(0, 1fr) auto` — inside a bounded
 block size. That single declaration is what keeps the footer on screen when the
 body is long, which §4 of the inventory records as the gap every library leaves
@@ -191,6 +198,7 @@ appearance for it, so a substituted trigger loses nothing.
 | Axis          | Values                          | Default (`dialog`) | Default (`alertDialog`) |
 | ------------- | ------------------------------- | ------------------ | ----------------------- |
 | `size`        | `sm` `md` `lg` `xl` `full`      | `md`               | `sm`                    |
+| `surface`     | `panel` `plain`                 | `panel`            | `panel`                 |
 | `placement`   | `center` `top`                  | `center`           | `center`                |
 | `scroll`      | `content` `viewport`            | `content`          | `content`               |
 | `mount`       | `active` `lazy` `eager`         | `active`           | `active`                |
@@ -205,6 +213,17 @@ it cannot retune `width: '600px'`, and a family that accepted one would be
 carrying a second scale — which `docs/token-foundation.md` gives the three
 layers to prevent. `full` is the step a document-sized dialog uses, and a
 consumer needing an exact measure still writes `max-inline-size` on `content`.
+
+`surface` is the one axis that turns the family's own paint off. `render`
+substitutes the element the panel is drawn on and not the drawing, so a consumer
+who wanted the mechanism around a box of their own — a card, a media viewer, an
+image at its own aspect ratio — had no way to say so. `plain` removes the
+ground, the border, the radius, the shadow, the three rows and the padding, and
+keeps the portal, the scrim, `presence`, the focus containment and restoration,
+the dismissal policy and the single z-index stack. It is where this library meets
+a headless one: Radix and Base UI ship no panel at all, so `plain` is what their
+`Content` already is. The cost is that a plain panel does not keep its footer on
+screen for a long body, because the rows go with the paint.
 
 `fullScreen: 'narrow'` is a container query at a literal breakpoint on `root`,
 which `docs/token-foundation.md` rule 4 requires: a container condition cannot

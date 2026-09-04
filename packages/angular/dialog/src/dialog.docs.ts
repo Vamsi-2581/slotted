@@ -80,7 +80,7 @@ const sharedAnatomy: AnatomyRow[] = [
     element: 'header, with the directive on it',
     required: false,
     purpose:
-      'Three columns: the mark, the words, and the close button. The mark and the button each keep a column of their own, so a title that wraps grows the row instead of pushing either off the line.',
+      'Three columns: the mark, the words, and the close button. The mark and the button each keep a column of their own, so a title that wraps grows the row instead of pushing either off the line. Anything else you write here — a status indicator, a badge, a line of your own — lands in the words column under the description, aligned with the title.',
   },
   {
     part: 'title',
@@ -222,6 +222,22 @@ const scenes: ReferenceSceneMeta[] = [
   <header slDialogHeader><h2 slDialogTitle>Termos de uso</h2></header>
   <div slDialogBody>{{ longText }}</div>
   <footer slDialogFooter><button slButton>Aceitar</button></footer>
+</sl-dialog>`,
+    }),
+  },
+  {
+    id: 'surface',
+    title: 'The layer, around a box you painted',
+    note: 'surface="plain" turns the family’s own paint off — no ground, no border, no radius, no shadow, no rows — and keeps the portal, the scrim, the containment and the dismissal policy. It is what a headless library ships by default, offered here as an axis rather than as the only shape.',
+    snippet: defineSnippet({
+      id: 'dialog-angular-surface',
+      language: 'angular',
+      label: 'A card as the whole panel',
+      source: `<sl-dialog surface="plain" [(open)]="open">
+  <div slCard fill="elevated">
+    <h2 slDialogTitle>Um card, dentro da layer</h2>
+    <p slDialogDescription>A família não pinta nada aqui.</p>
+  </div>
 </sl-dialog>`,
     }),
   },
@@ -695,6 +711,13 @@ export const ANGULAR_DIALOG_DOCS = {
         'Whether a press outside the layer asks to close it. AlertDialog fixes it at none',
       ],
       [
+        'surface',
+        "'panel' | 'plain'",
+        'panel',
+        'sl-dialog, provideDialogDefaults',
+        'Whether the family paints the panel. plain turns off the ground, the border, the radius, the shadow, the rows and the padding, and keeps everything that is not paint — so the layer can be wrapped around a slCard, a media viewer or an image at its own aspect ratio. The cost is that a plain panel does not keep its footer on screen for a long body, because the rows go with the paint',
+      ],
+      [
         'fullScreen',
         "'never' | 'narrow' | 'always'",
         'narrow',
@@ -751,6 +774,13 @@ export const ANGULAR_DIALOG_DOCS = {
         'none',
         'sl-alert-dialog',
         'Fixed. An outside press never closes an alert dialog, which is one of the two rules the pattern gives the member',
+      ],
+      [
+        'surface',
+        "'panel' | 'plain'",
+        'panel',
+        'sl-alert-dialog',
+        'Whether the family paints the panel. A confirmation almost never wants plain — the panel is the interruption — but the axis is here because the member declares the same default',
       ],
       [
         'fullScreen',

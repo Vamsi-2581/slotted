@@ -74,6 +74,7 @@ function DialogFamily({
   ref,
   scroll,
   size,
+  surface,
   tone,
 }: FamilyProps) {
   const defaults = useDialogDefaults();
@@ -92,6 +93,7 @@ function DialogFamily({
   const resolvedEscape = escape ?? defaults.escape;
   const resolvedPlacement = placement ?? defaults.placement;
   const resolvedScroll = scroll ?? defaults.scroll;
+  const resolvedSurface = surface ?? defaults.surface;
 
   /**
    * The status rather than a boolean. `entering` is one frame long and it is
@@ -228,6 +230,7 @@ function DialogFamily({
       },
       scroll: resolvedScroll,
       size: resolvedSize,
+      surface: resolvedSurface,
       titleId: titleRendered ? `${baseId}title` : '',
       tone: isAlert ? (tone ?? 'danger') : undefined,
       triggerId: `${baseId}trigger`,
@@ -255,6 +258,7 @@ function DialogFamily({
       resolvedPlacement,
       resolvedScroll,
       resolvedSize,
+      resolvedSurface,
       status,
       titleRendered,
       tone,

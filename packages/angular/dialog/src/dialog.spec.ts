@@ -37,6 +37,7 @@ import {
       #d="slDialog"
       [(open)]="open"
       [size]="size()"
+      [surface]="surface()"
       [modal]="modal()"
       [escape]="escape()"
       [outsidePress]="outsidePress()"
@@ -59,6 +60,7 @@ import {
 class DialogHost {
   readonly open = signal(false);
   readonly size = signal<'sm' | 'md' | 'lg' | 'xl' | 'full' | undefined>(undefined);
+  readonly surface = signal<'panel' | 'plain' | undefined>(undefined);
   readonly modal = signal(true);
   readonly escape = signal<'close' | 'none' | undefined>(undefined);
   readonly outsidePress = signal<'close' | 'none' | undefined>(undefined);
@@ -359,6 +361,21 @@ describe('SlDialog', () => {
     expect(part('body').getAttribute('aria-busy')).toBe('true');
     expect(layer()?.hasAttribute('data-loading')).toBe(true);
     expect((part('close') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  /**
+   * The layer without the picture: the portal, the scrim, the containment and
+   * the dismissal policy all stay, and the family paints nothing.
+   */
+  it('turns the family’s own paint off and keeps everything that is not paint', () => {
+    fixture.componentInstance.surface.set('plain');
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+
+    expect(layer()?.getAttribute('data-surface')).toBe('plain');
+    expect(document.querySelector('[data-part="backdrop"]')).not.toBeNull();
+    expect(panel()?.getAttribute('aria-modal')).toBe('true');
+    expect(panel()?.contains(document.activeElement)).toBe(true);
   });
 
   it('takes an explicit size over the one the application set', () => {

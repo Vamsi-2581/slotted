@@ -11,6 +11,7 @@ const FALLBACK: DialogDefaults = {
   placement: 'center',
   scroll: 'content',
   size: 'md',
+  surface: 'panel',
 };
 
 const DialogDefaultsContext = createContext<DialogDefaults>(FALLBACK);
@@ -43,6 +44,7 @@ export function DialogDefaultsProvider({ children, ...defaults }: DialogDefaults
         placement: defaults.placement ?? inherited.placement,
         scroll: defaults.scroll ?? inherited.scroll,
         size: defaults.size ?? inherited.size,
+        surface: defaults.surface ?? inherited.surface,
       }}
     >
       {children}

@@ -39,6 +39,7 @@ import type {
   DialogPlacement,
   DialogScroll,
   DialogSize,
+  DialogSurface,
   DialogTone,
 } from './dialog-defaults';
 
@@ -70,6 +71,7 @@ export abstract class SlDialogBase {
   readonly size = input<DialogSize | undefined>(undefined);
   readonly placement = input<DialogPlacement | undefined>(undefined);
   readonly scroll = input<DialogScroll | undefined>(undefined);
+  readonly surface = input<DialogSurface | undefined>(undefined);
   readonly mount = input<DialogMount | undefined>(undefined);
   readonly fullScreen = input<DialogFullScreen | undefined>(undefined);
   readonly escape = input<DialogDismissPolicy | undefined>(undefined);
@@ -146,6 +148,7 @@ export abstract class SlDialogBase {
   );
   readonly resolvedPlacement = computed(() => this.placement() ?? this.defaults.placement);
   readonly resolvedScroll = computed(() => this.scroll() ?? this.defaults.scroll);
+  readonly resolvedSurface = computed(() => this.surface() ?? this.defaults.surface);
   readonly resolvedFullScreen = computed(
     () => this.fullScreen() ?? (this.isAlert() ? 'never' : this.defaults.fullScreen),
   );
@@ -346,6 +349,7 @@ const LAYER_TEMPLATE = `
       [attr.data-size]="resolvedSize()"
       [attr.data-placement]="resolvedPlacement()"
       [attr.data-scroll]="resolvedScroll()"
+      [attr.data-surface]="resolvedSurface()"
       [attr.data-mount]="resolvedMount()"
       [attr.data-full-screen]="resolvedFullScreen()"
       [attr.data-outside-press]="resolvedOutsidePress()"

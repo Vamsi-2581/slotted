@@ -279,6 +279,38 @@
     padding-inline: var(--_padding-inline);
   }
 
+  /**
+   * Everything in the header lands in the words column unless the family placed
+   * it somewhere else. The four rules below place the mark, the title, the
+   * description and the close button; this is what happens to the fifth thing —
+   * a badge beside the title, a breadcrumb, a line the consumer wrote.
+   *
+   * Without it those children auto-placed into whichever cell was free, which is
+   * column one whenever no icon was rendered: a consumer's own element landed
+   * where the mark would have gone, and moved as soon as a tone was set. Where
+   * it goes is now a rule rather than an accident of the grid.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > *:not(
+      [data-part='icon'],
+      [data-part='title'],
+      [data-part='description'],
+      [data-part='close']
+    ) {
+    grid-column: 2;
+    /**
+     * `start`, not the grid's own `stretch`. A badge stretched across the words
+     * column paints its ground the full width and centres its label in it,
+     * which is what the first capture showed. The four placed parts are excluded
+     * by name rather than by `:not([data-part])`, because what a consumer puts
+     * here is usually another family and that carries a `data-part` of its own.
+     */
+    justify-self: start;
+  }
+
   /* ── The mark an alert dialog carries ─────────────────────────────────── */
 
   /**
@@ -531,6 +563,47 @@
     > [data-part='footer']:not(:first-child) {
     border-block-start: var(--_rule-size) solid
       var(--slotted-dialog-rule-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  /* ── A panel the consumer paints ──────────────────────────────────────── */
+
+  /**
+   * The layer without the picture.
+   *
+   * `render` substitutes the element the panel is drawn on and not the drawing,
+   * so a consumer who wanted the mechanism and their own box — a media viewer,
+   * an image at its own aspect ratio, a `card` — had no way to say so. Here the
+   * family paints nothing: no surface, no border, no radius, no shadow, no rows
+   * and no padding.
+   *
+   * Everything that is not paint stays: the portal, the scrim, `presence`, the
+   * focus containment and restoration, the dismissal policy, the single z-index
+   * stack and the motion. It is the one place this library meets a headless one
+   * — Radix and Base UI ship no panel at all, so this is what their Content
+   * already is — and it is an axis rather than a second family because
+   * everything but the paint is the same.
+   *
+   * The rows go with the paint, so a plain panel does not keep its footer on
+   * screen for a long body. That is the cost, and a consumer who wants both
+   * writes their own three-row grid, which is the whole of what they are taking
+   * over.
+   */
+  [data-ui='dialog'][data-surface='plain'] > [data-part='viewport'] > [data-part='content'] {
+    display: block;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  [data-ui='dialog'][data-surface='plain']
+    > [data-part='viewport']
+    > [data-part='content']
+    > :is([data-part='header'], [data-part='body'], [data-part='footer']) {
+    background: none;
+    border: 0;
+    padding: 0;
   }
 
   /* ── Full screen ──────────────────────────────────────────────────────── */

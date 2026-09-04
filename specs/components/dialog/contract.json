@@ -113,6 +113,7 @@
     "size": ["sm", "md", "lg", "xl", "full"],
     "placement": ["center", "top"],
     "scroll": ["content", "viewport"],
+    "surface": ["panel", "plain"],
     "mount": ["active", "lazy", "eager"],
     "fullScreen": ["never", "narrow", "always"],
     "modal": [true, false],
@@ -125,6 +126,7 @@
     "size": ["prop", "defaults", "member"],
     "placement": ["prop", "defaults", "member"],
     "scroll": ["prop", "defaults", "member"],
+    "surface": ["prop", "defaults", "member"],
     "mount": ["prop", "defaults", "member"],
     "fullScreen": ["prop", "defaults", "member"],
     "modal": ["prop", "defaults", "member"],
@@ -138,6 +140,7 @@
       "size",
       "placement",
       "scroll",
+      "surface",
       "mount",
       "fullScreen",
       "modal",
@@ -185,6 +188,7 @@
         "size": "md",
         "placement": "center",
         "scroll": "content",
+        "surface": "panel",
         "mount": "active",
         "fullScreen": "narrow",
         "modal": true,
@@ -217,6 +221,7 @@
         "size": "sm",
         "placement": "center",
         "scroll": "content",
+        "surface": "panel",
         "mount": "active",
         "fullScreen": "never",
         "modal": true,
@@ -255,6 +260,7 @@
       "sizes",
       "placement",
       "scroll",
+      "surface",
       "fullScreen",
       "modal",
       "policy",
@@ -276,5 +282,17 @@
       "composition",
       "accessibility"
     ]
+  },
+  "header": {
+    "parts": ["icon", "title", "description", "close"],
+    "free": "the words column, under the description",
+    "reason": "The header is a three-column grid and the family places four parts in it. Anything else a consumer writes there — a badge beside the title, a breadcrumb, a second line — used to auto-place into whichever cell was free, which is column one when no icon is rendered. Every unplaced child now lands in the words column instead, under the description, so where it goes is a rule rather than an accident of the grid."
+  },
+  "surface": {
+    "panel": "the family paints the panel: surface, border, radius, shadow, and the three rows that keep the footer on screen",
+    "plain": "the family paints nothing at all — no background, no border, no radius, no shadow, no rows and no padding — and the consumer supplies the box",
+    "keeps": "plain keeps the whole mechanism: the portal, the scrim, presence, focus containment and restoration, the dismissal policy and the single z-index stack",
+    "default": "panel",
+    "reason": "render substitutes the element the panel is drawn on and not the drawing, so a consumer who wanted the layer without the picture — a media viewer, an image at its own aspect ratio, a card of their own — had no way to say so. It is an axis rather than a second family because everything but the paint is identical, and it is the one place this library differs from a headless one: Radix and Base UI ship no panel at all, so plain is what their Content already is."
   }
 }

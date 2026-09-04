@@ -274,6 +274,33 @@ test('keeps the footer on screen by bounding the row that scrolls', () => {
   assert.match(contract.scroll.reason, /footer/);
 });
 
+/**
+ * A header holds more than the four parts the family places: a badge beside the
+ * title, a breadcrumb, a second line the consumer wrote. Before this the words
+ * column was two fixed rows and anything else auto-placed into whatever cell
+ * happened to be free — column one when no icon was rendered — so where a
+ * consumer's own element landed was an accident of the grid rather than a rule.
+ */
+test('gives a consumer’s own header content a column of its own to land in', () => {
+  assert.equal(contract.header.free, 'the words column, under the description');
+  assert.match(contract.header.reason, /auto-plac/i);
+});
+
+/**
+ * The layer is the mechanism and the panel is the picture, and a consumer who
+ * wants the first without the second had no way to say so: `render` substitutes
+ * the panel's element and keeps `data-part="content"`, so the family's surface,
+ * border, radius and rows came with it. `plain` is the family's whole visual
+ * layer turned off, with presence, containment, dismissal and the scrim intact.
+ */
+test('lets a consumer bring their own panel and keep the layer', () => {
+  assert.deepEqual(contract.axes.surface, ['panel', 'plain']);
+  assert.equal(contract.members.dialog.defaults.surface, 'panel');
+  assert.equal(contract.members.alertDialog.defaults.surface, 'panel');
+  assert.match(contract.surface.plain, /no background|paints nothing/i);
+  assert.match(contract.surface.keeps, /presence|focus|dismiss/i);
+});
+
 test('declares the states each member paints', () => {
   for (const member of [dialog, alert]) {
     assert.ok(member.states.includes('open'));

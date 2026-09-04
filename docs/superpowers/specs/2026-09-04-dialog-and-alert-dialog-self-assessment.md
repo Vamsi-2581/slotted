@@ -287,6 +287,23 @@ the contract says why.
 
 Seven differentiators and seven gaps, each with the answer the family ships.
 
+Two capabilities were added after the release gate, both from questions a reader
+asked of the pages rather than of the code, and both cheap because the anatomy
+was already right:
+
+- **`surface="plain"`.** `render` substitutes the element the panel is drawn on
+  and not the drawing, so the layer could not be wrapped around a box the
+  consumer paints. The axis turns the family's own paint off and keeps everything
+  that is not paint. It is what a headless library ships by default, offered here
+  as an axis rather than as the only shape.
+- **A column for a consumer's own header content.** The header places four parts;
+  anything else auto-placed into whichever cell was free — column one whenever no
+  icon was rendered, which is where an alert dialog's mark goes. A status
+  indicator beside a title therefore moved as soon as a tone was set. Everything
+  unplaced now lands in the words column, aligned with the title, and
+  `justify-self: start` keeps it from stretching across the column and painting
+  its ground the full width, which the first capture showed.
+
 **The one change that would most improve it:** a `Dialog.createHandle()`
 equivalent — Base UI's detached trigger, which lets a trigger live outside the
 provider. **Not made:** React's context already reaches every descendant, and a

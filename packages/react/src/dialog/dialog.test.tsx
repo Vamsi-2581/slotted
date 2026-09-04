@@ -303,6 +303,50 @@ describe('Dialog', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeEnabled();
   });
 
+  /**
+   * The layer without the picture. `render` substitutes the element the panel is
+   * drawn on and not the drawing, so this is the only way to keep the portal,
+   * the scrim, the containment and the dismissal policy around a box the
+   * consumer paints.
+   */
+  it('turns the family’s own paint off and keeps everything that is not paint', () => {
+    render(<Basic defaultOpen surface="plain" />);
+
+    expect(layer()?.dataset['surface']).toBe('plain');
+    expect(document.querySelector('[data-part="backdrop"]')).not.toBeNull();
+    expect(panel()).toHaveAttribute('aria-modal', 'true');
+    expect(panel()?.contains(document.activeElement)).toBe(true);
+  });
+
+  /**
+   * The header places four parts and a consumer's fifth thing used to land in
+   * whichever cell was free — column one when no icon was rendered, which is
+   * where an alert dialog's mark goes.
+   */
+  it('gives a consumer’s own header content a column of its own', () => {
+    render(
+      <Dialog defaultOpen>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Fatura</DialogTitle>
+            <DialogDescription>Emitida em 3 de setembro.</DialogDescription>
+            <span data-testid="badge">Em atraso</span>
+            <DialogClose />
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>,
+    );
+
+    const header = document.querySelector('[data-part="header"]') as HTMLElement;
+    expect(header.contains(screen.getByTestId('badge'))).toBe(true);
+    expect([...header.children].map((node) => node.getAttribute('data-part'))).toEqual([
+      'title',
+      'description',
+      null,
+      'close',
+    ]);
+  });
+
   it('lets an application set its defaults once', () => {
     render(
       <DialogDefaultsProvider size="xl" placement="top">

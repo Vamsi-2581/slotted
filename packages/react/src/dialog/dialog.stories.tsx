@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { Button } from '../button';
+import { Card } from '../card';
 import { Grid, Scene } from '../field/field-demo';
 import { Skeleton } from '../skeleton';
 import { TextField } from '../text-field';
@@ -34,6 +35,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     sizes: Sizes,
     placement: Placement,
     scroll: Scroll,
+    surface: Surface,
     fullScreen: FullScreen,
     modal: Modal,
     policy: Policy,
@@ -231,6 +233,39 @@ export const Scroll: Story = {
               scroll="viewport"
               title="Termos de uso"
             />
+          )}
+        </Layer>
+      </Scene>
+    </Grid>
+  ),
+};
+
+export const Surface: Story = {
+  parameters: scenario('surface'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="panel — the family paints it"
+        note="The default: a raised surface, a border that survives forced colours, a radius, a shadow, and the three rows that keep the actions on screen however long the body is."
+      >
+        <Layer>{(container) => <Panel container={container} fullScreen="never" />}</Layer>
+      </Scene>
+      <Scene
+        label="plain — you paint it"
+        note="No ground, no border, no radius, no shadow, no rows and no padding. The portal, the scrim, the focus containment and the dismissal policy are all still here; only the picture is yours."
+      >
+        <Layer>
+          {(container) => (
+            <Dialog container={container} defaultOpen fullScreen="never" surface="plain">
+              <DialogContent>
+                <Card fill="elevated">
+                  <DialogTitle>Um card, dentro da layer</DialogTitle>
+                  <DialogDescription>
+                    A família não pinta nada aqui. Escape ainda fecha, o foco ainda fica contido.
+                  </DialogDescription>
+                </Card>
+              </DialogContent>
+            </Dialog>
           )}
         </Layer>
       </Scene>

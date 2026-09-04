@@ -20,6 +20,20 @@ export type DialogPlacement = 'center' | 'top';
 export type DialogScroll = 'content' | 'viewport';
 
 /**
+ * Whether the family paints the panel at all. `plain` turns off the surface,
+ * the border, the radius, the shadow, the rows and the padding, and keeps
+ * everything that is not paint: the portal, the scrim, presence, the focus
+ * containment and restoration, the dismissal policy and the z-index stack.
+ *
+ * `render` substitutes the element the panel is drawn on and not the drawing,
+ * so a consumer who wants the layer around a box of their own — a `Card`, a
+ * media viewer, an image at its own aspect ratio — reaches for this instead.
+ * The cost is that a plain panel does not keep its footer on screen for a long
+ * body, because the three rows go with the paint.
+ */
+export type DialogSurface = 'panel' | 'plain';
+
+/**
  * When the layer exists. `active` builds it on opening and drops it once the
  * exit is over, `lazy` builds it on the first open and keeps it, `eager` builds
  * it up front and hides it.
@@ -92,6 +106,7 @@ export interface DialogDefaults {
   placement: DialogPlacement;
   scroll: DialogScroll;
   size: DialogSize;
+  surface: DialogSurface;
 }
 
 export interface DialogDefaultsProviderProps extends Partial<DialogDefaults> {
@@ -144,6 +159,7 @@ export interface DialogContextValue {
   registerTrigger: (node: HTMLElement | null) => void;
   scroll: DialogScroll;
   size: DialogSize;
+  surface: DialogSurface;
   titleId: string;
   tone: DialogTone | undefined;
   triggerId: string;
@@ -165,6 +181,7 @@ interface DialogOwnProps {
   size?: DialogSize | undefined;
   placement?: DialogPlacement | undefined;
   scroll?: DialogScroll | undefined;
+  surface?: DialogSurface | undefined;
   mount?: DialogMount | undefined;
   fullScreen?: DialogFullScreen | undefined;
   escape?: DialogDismissPolicy | undefined;

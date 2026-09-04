@@ -571,6 +571,13 @@ const composition = apiRows([
     'On a part it reaches the element. On the family it is a handle with open(), close(result) and focus() — the three actions a consumer cannot express declaratively, and nothing more',
   ],
   [
+    '--slotted-dialog-measure',
+    'length',
+    'from size',
+    'the root part',
+    'The panel’s measure, for the width the five steps do not hold — a two-column form at 46rem, a media viewer at the width of its own image. A family token rather than a prop, so it is set per instance with a style attribute, per region with a rule, or once for an application in the theme; every step reads it, so an explicit measure wins over the step whichever step is asked for',
+  ],
+  [
     'container',
     'Element | null',
     '—',
@@ -658,6 +665,8 @@ const snippets = [
     language: 'css',
     label: 'Retuning the family for an application',
     source: `[data-ui='dialog'] {
+  /* The measure the five size steps do not hold. It wins over the step. */
+  --slotted-dialog-measure: 46rem;
   --slotted-dialog-scrim: rgb(12 20 40 / 0.6);
   --slotted-dialog-radius: var(--slotted-radius-lg);
   --slotted-dialog-border-color: var(--slotted-border-subtle);

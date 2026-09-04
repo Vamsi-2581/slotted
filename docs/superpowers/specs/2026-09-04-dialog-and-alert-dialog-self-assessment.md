@@ -50,12 +50,15 @@ frame of an exit `presence` was still holding the node mounted for. The root now
 carries `transition: content-visibility … allow-discrete`, which is what makes
 `mount="eager"` and `mount="lazy"` animate out at all.
 
-**The one change that would most improve it:** the panel arrives with a
+**The one change that would most improve it:** the panel arrived with a
 `translate` of eight pixels from the block-start, which is a direction chosen
-rather than derived — a panel could as honestly grow from the trigger it was
-opened from. **Not made.** Growing from the trigger needs the trigger's box
-measured at open, which is a layout read this family otherwise does not do, and
-it has no answer at all for a layer opened from code.
+rather than derived — there is nothing for a centred panel's movement to be
+*from*. **Made:** a centred panel now grows into place with opacity and scale
+alone, and only `placement="top"` translates, because a panel hung off the start
+edge does have an edge to come from. Growing from the trigger instead was
+considered and refused: it needs the trigger's box measured at open, which is a
+layout read this family otherwise does not do, and it has no answer at all for a
+layer opened from code.
 
 ## 3. Responsiveness
 
@@ -113,6 +116,16 @@ wash that reads at a glance without shouting; press goes one step darker on the
 same token pair; nothing shifts by a pixel between the three, because all three
 paint colour and none paints geometry.
 
+One correction a reader found after the release gate, and it was three numbers
+doing one job: the header, the body and the footer all carried the same block
+inset. The body is prose and the inset is what its air is for; the header is a
+title block whose line height already carries some, and stacking its bottom inset
+against the body's put forty pixels between a description and the paragraph it
+introduces; the footer is a row of controls, and a control carries its own height
+— twenty above and below a thirty-four pixel button is a seventy-four pixel bar
+for one line. Three named insets now, one reason each, and the panel is
+forty-six pixels shorter at `md` for it.
+
 **The one change that would most improve it, with another hour:** the close
 button's negative inline-end margin pulls its box past the panel's padding so
 the *glyph* lines up with the title's inset, and the value is one space step
@@ -140,15 +153,19 @@ The family adds nothing to the component layer of
 a theme retunes; a consumer who needs an exact measure writes `max-inline-size`
 on the content part.
 
-**The one change that would most improve it:** the five measures are `24rem`,
-`32rem`, `42rem`, `56rem` and `none`, stated in the stylesheet rather than
-composed from a foundation scale. **Not made, and it is a deliberate departure:**
-there is no width scale in the foundation, and adding one for one family is the
-component-layer bar `docs/token-foundation.md` sets and Avatar cleared for a
-reason this family does not have. A theme that wants other measures retunes
-`--slotted-dialog-*`… and cannot, because the measure is a private property. That
-is the honest cost, and the reference page's theming snippet says so by not
-offering it.
+**The one change that would most improve it:** the measure was a private
+property, so the five steps were the only widths the family had and a consumer
+who needed a sixth had nothing to set. **Made.** Every step now reads
+`--slotted-dialog-measure` as its own fallback, so an explicit measure wins over
+whichever step was asked for, and it is set per instance with a style attribute,
+per region with a rule, or once for an application in the theme. It is on both
+theming snippets and in the composition table.
+
+The five steps themselves stay stated in the stylesheet rather than composed from
+a foundation scale, and that is a deliberate departure: there is no width scale
+in the foundation, and adding one for one family is the component-layer bar
+`docs/token-foundation.md` sets and Avatar cleared for a reason this family does
+not have. The token above is what makes the absence of that scale cost nothing.
 
 ## 6. Patterns
 

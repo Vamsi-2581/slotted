@@ -41,13 +41,40 @@
      * pixel string Material, Carbon and Ant all take: a theme can retune a
      * step and cannot retune `width: '600px'`, and a family that accepted one
      * would be carrying a second scale of its own.
+     *
+     * `--slotted-dialog-measure` is the way out for the panel the five steps do
+     * not hold — a two-column form at 46rem, a media viewer at the width of its
+     * own image. It is a family token rather than a prop, so it is set per
+     * instance with a style attribute, per region with a rule, or once for an
+     * application in the theme; and because every step reads it, an explicit
+     * measure wins over the step whichever step is asked for.
      */
-    --_measure: 32rem;
+    --_measure: var(--slotted-dialog-measure, 32rem);
     /** The air between the panel and the edge of the layer. */
     --_layer-padding: var(--slotted-space-8, 1.5rem);
     /** The panel's own inset, which every row reads. */
     --_padding-inline: var(--slotted-space-8, 1.5rem);
+    /**
+     * Three insets, not one number used three times, because the three rows
+     * hold three different things.
+     *
+     * The **body** is prose, and prose is what the generous inset is for: it is
+     * the one row whose air is read as air.
+     *
+     * The **header** is a title block whose own line height already carries
+     * some. A step down from the body keeps the title from floating and closes
+     * the gap between the description and the first line below the rule, which
+     * was two full insets stacked — forty pixels of nothing between a sentence
+     * and the paragraph it introduces.
+     *
+     * The **footer** is a row of controls, and a control carries its own height
+     * and its own optical padding. The same inset that reads as air around a
+     * paragraph reads as a slab around a button: twenty above and below a
+     * thirty-four pixel control is a seventy-four pixel bar for one line.
+     */
     --_padding-block: var(--slotted-space-7, 1.25rem);
+    --_header-padding-block: var(--slotted-space-6, 1rem);
+    --_footer-padding-block: var(--slotted-space-5, 0.75rem);
     --_gap: var(--slotted-space-5, 0.75rem);
     --_rule-size: var(--slotted-border-width-thin, 1px);
     /**
@@ -109,18 +136,20 @@
   }
 
   [data-ui='dialog'][data-size='sm'] {
-    --_measure: 24rem;
+    --_measure: var(--slotted-dialog-measure, 24rem);
     --_padding-inline: var(--slotted-space-7, 1.25rem);
     --_padding-block: var(--slotted-space-6, 1rem);
+    --_header-padding-block: var(--slotted-space-5, 0.75rem);
+    --_footer-padding-block: var(--slotted-space-4, 0.5rem);
     --_title-font-size: var(--slotted-font-size-lg, 1rem);
   }
 
   [data-ui='dialog'][data-size='lg'] {
-    --_measure: 42rem;
+    --_measure: var(--slotted-dialog-measure, 42rem);
   }
 
   [data-ui='dialog'][data-size='xl'] {
-    --_measure: 56rem;
+    --_measure: var(--slotted-dialog-measure, 56rem);
   }
 
   /**
@@ -128,7 +157,7 @@
    * whole layer minus its padding, and the measure stops capping it.
    */
   [data-ui='dialog'][data-size='full'] {
-    --_measure: none;
+    --_measure: var(--slotted-dialog-measure, none);
   }
 
   /* ── The scrim ────────────────────────────────────────────────────────── */
@@ -219,13 +248,24 @@
     /* So the radius clips the row that scrolls under it. */
     overflow: hidden;
 
+    /**
+     * A centred panel grows into place and does not travel: there is nothing
+     * for eight pixels of movement to be *from*, and a direction chosen rather
+     * than derived is the kind of motion the rubric refuses. A panel placed at
+     * the start edge does have an edge to come from, and slides from it — see
+     * the rule below.
+     */
     opacity: 0;
     scale: 0.96;
-    translate: 0 calc(-1 * var(--slotted-space-4, 0.5rem));
+    translate: 0 0;
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-exit),
       scale var(--slotted-duration-short) var(--slotted-easing-exit),
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui='dialog'][data-placement='top'] > [data-part='viewport'] > [data-part='content'] {
+    translate: 0 calc(-1 * var(--slotted-space-5, 0.75rem));
   }
 
   /**
@@ -275,7 +315,7 @@
     align-items: start;
     column-gap: var(--_gap);
     row-gap: var(--slotted-space-2, 0.25rem);
-    padding-block: var(--_padding-block);
+    padding-block: var(--_header-padding-block);
     padding-inline: var(--_padding-inline);
   }
 
@@ -552,7 +592,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: var(--_gap);
-    padding-block: var(--_padding-block);
+    padding-block: var(--_footer-padding-block);
     padding-inline: var(--_padding-inline);
     background: var(--slotted-dialog-footer-surface, var(--slotted-surface-sunken, Canvas));
   }

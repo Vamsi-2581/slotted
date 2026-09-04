@@ -18,6 +18,7 @@
   "--slotted-dialog-color",
   "--slotted-dialog-description-color",
   "--slotted-dialog-footer-surface",
+  "--slotted-dialog-measure",
   "--slotted-dialog-radius",
   "--slotted-dialog-rule-color",
   "--slotted-dialog-scrim",

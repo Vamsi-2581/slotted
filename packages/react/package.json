@@ -96,9 +96,21 @@
       "types": "./dist/types/link/index.d.ts",
       "import": "./dist/link.js"
     },
+    "./list": {
+      "types": "./dist/types/list/index.d.ts",
+      "import": "./dist/list.js"
+    },
+    "./list-item": {
+      "types": "./dist/types/list-item/index.d.ts",
+      "import": "./dist/list-item.js"
+    },
     "./pagination": {
       "types": "./dist/types/pagination/index.d.ts",
       "import": "./dist/pagination.js"
+    },
+    "./result-state": {
+      "types": "./dist/types/result-state/index.d.ts",
+      "import": "./dist/result-state.js"
     },
     "./skeleton": {
       "types": "./dist/types/skeleton/index.d.ts",

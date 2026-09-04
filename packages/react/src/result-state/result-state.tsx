@@ -1,0 +1,86 @@
+import '@slotted/styles/result-state/result-state.css';
+
+import { useCallback, useId, useMemo, useState } from 'react';
+
+import { useResultStateDefaults } from './result-state-defaults';
+import { ResultStateProvider } from './result-state-parts';
+import type { ResultStateProps, ResultStateRootProps } from './result-state.types';
+
+/**
+ * The region that stands in for content that is not there, and says what to do
+ * next: a mark, a title, a description, the controls that get the reader out,
+ * and a line of documentation under them.
+ *
+ * It is not `alert`. An alert sits beside the content it is about; this
+ * replaces it. `inline-message` is a line of text under one control.
+ *
+ * **The box is a landmark, not a live region.** It renders a `section`, named
+ * by its own title through `aria-labelledby`, so a reader can jump to it; the
+ * region that announces is `ResultStateContent`, which holds only the text.
+ * MDN's `alert` role reference is explicit that the role "should only be used
+ * for text content, not interactive elements such as links or buttons".
+ *
+ * **It announces by default.** WCAG 2.2's Understanding document for SC 4.1.3
+ * names this family's own text as its example of a status message: "brief text
+ * messages displayed about the completion or status of the search, such as
+ * 'Searching…', '18 results returned' or 'No results returned' would be status
+ * updates if they do not take focus or cause a page refresh." `alert` defaults
+ * to silence because an alert may be a standing notice; a result is always the
+ * outcome of an operation. None of the seven surveyed implementations writes a
+ * live role of any kind.
+ *
+ * **The keyboard has somewhere to go.** The root carries `tabIndex={-1}`, so an
+ * application that has just emptied a table can send the reader to the message
+ * through the ref. The family never moves focus by itself — that would be a
+ * change of context nobody asked for.
+ */
+export function ResultState({
+  align,
+  children,
+  hideMedia = false,
+  live,
+  media,
+  reach,
+  ref,
+  render,
+  status,
+  ...nativeProps
+}: ResultStateProps) {
+  const defaults = useResultStateDefaults();
+  /** The identifier the title actually carries, which is not always ours. */
+  const [labelId, setLabelId] = useState<string | null>(null);
+  const id = useId();
+  const titleId = `${id}title`;
+
+  const registerTitle = useCallback((next: string | null) => setLabelId(next), []);
+
+  const context = useMemo(
+    () => ({ live: live ?? defaults.live, registerTitle, titleId }),
+    [defaults.live, live, registerTitle, titleId],
+  );
+
+  const rootProps: ResultStateRootProps = {
+    ...(labelId === null ? {} : { 'aria-labelledby': labelId }),
+    ...nativeProps,
+    children: (
+      <ResultStateProvider value={context}>
+        {hideMedia ? null : (
+          <div aria-hidden="true" data-part="media">
+            {media}
+          </div>
+        )}
+        {children}
+      </ResultStateProvider>
+    ),
+    'data-align': align ?? defaults.align,
+    'data-live': live ?? defaults.live,
+    'data-part': 'root',
+    'data-reach': reach ?? defaults.reach,
+    'data-status': status ?? defaults.status,
+    'data-ui': 'result-state',
+    ref,
+    tabIndex: nativeProps.tabIndex ?? -1,
+  };
+
+  return render === undefined ? <section {...rootProps} /> : render(rootProps);
+}

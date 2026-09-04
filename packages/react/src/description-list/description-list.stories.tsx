@@ -315,7 +315,7 @@ export const Copy: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label="copy"
-        note="Press either control and watch the mark change to a check for two seconds; a screen reader hears it politely at the same moment. The second row copies a value the reader never sees in that form."
+        note="Press either control: in an application the mark turns to a check for two seconds and a screen reader hears it, and here in an iframe with no clipboard permission the value is selected instead so you can still take it. The second row copies a value the reader never sees in that form."
       >
         <DescriptionList>
           <Pair copy term="Resource name">

@@ -206,7 +206,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'copy',
     title: 'A value worth taking away',
-    note: 'An identifier, a key, an ARN. The control writes the rendered text unless you state another, says it finished by its mark as well as its colour for two seconds, and announces the result politely.',
+    note: 'An identifier, a key, an ARN. The control writes the rendered text unless you state another, says it finished by its mark as well as its colour for two seconds, and announces the result politely. Pressing it on this page selects the value instead: a browser refuses the clipboard inside an iframe that carries no clipboard-write permission, and the family does the part it still can.',
     snippet: defineSnippet({
       id: 'description-list-react-copy',
       language: 'tsx',

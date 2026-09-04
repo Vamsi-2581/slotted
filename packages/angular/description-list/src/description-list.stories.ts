@@ -321,7 +321,7 @@ export const Copy: Story = {
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'copy',
-    'Press either control and watch the mark change to a check for two seconds; a screen reader hears it politely at the same moment. The second row copies a value the reader never sees in that form.',
+    'Press either control: in an application the mark turns to a check for two seconds and a screen reader hears it, and here in an iframe with no clipboard permission the value is selected instead so you can still take it. The second row copies a value the reader never sees in that form.',
     `<div slDescriptionList>
       ${pair('Resource name', 'arn:aws:iam::421900075512:role/billing-reconciler', ' copy')}
       ${pair('IBAN', 'GB29 NWBK 6016 1331 9268 19', ' copy copyValue="GB29NWBK60161331926819"')}

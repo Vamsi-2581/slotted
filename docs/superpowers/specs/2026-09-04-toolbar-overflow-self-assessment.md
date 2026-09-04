@@ -162,6 +162,18 @@ writing `ref` after the spread replaced the positioner's own reference, and the
 surface then opened at the corner of the page. The rendered page is what showed
 it; no offline test could have.
 
+Angular had the same shape of defect from the other side, and it took two forms.
+`slMenuTriggerFor` binds `[attr.data-part]` and resolves it to `null` for a
+trigger that is neither a bar's item nor a submenu's, and a host binding of
+`null` removes the attribute the author wrote: the button lost
+`data-part="overflow"`, which took the stylesheet's geometry with it and stopped
+`sl-toolbar-overflow` from being recognised as the element holding the trigger,
+so the host counted as a pinned unit and the bar hid one control too many. And a
+template resolves its dependencies where it was written rather than where it is
+rendered, so `slMenuItem` in a counterpart looked for the `SlMenu` above the bar
+and found none. Both are fixed and both are in the briefing, because both bind
+any family that puts another family's directive on its own part.
+
 ## 9. Capability
 
 Against `docs/superpowers/specs/2026-09-04-toolbar-overflow-capability-inventory.md`:
@@ -286,7 +298,7 @@ identically.
 | Arithmetic                    | `packages/core/src/overflow/collapse.ts`, `collapse.test.ts` — 11 tests, no layout engine                                                  |
 | The ring's new rule           | `packages/core/src/focus/arrow-navigation.ts`, `arrow-navigation.test.ts` — 13 tests, four of them the new rule                                                        |
 | Behaviour, React              | `packages/react/src/toolbar/toolbar.test.tsx` — 24 tests, nine of them the collapse                                                            |
-| Behaviour, Angular            | `packages/angular/toolbar/src/toolbar.spec.ts` — 18 tests, seven of them the collapse                                                          |
+| Behaviour, Angular            | `packages/angular/toolbar/src/toolbar.spec.ts` — 18 tests, seven of them the collapse, run with `ng test slotted-angular --include='**/toolbar/**/*.spec.ts'` |
 | Stylesheet                    | `packages/styles/src/toolbar/toolbar.css`, `toolbar.styles.test.mjs` — 19 tests                                                            |
 | Harness                       | `packages/styles/src/toolbar/toolbar.harness.html`, scene `overflowMenu`; `tools/harness/out/toolbar.html`                                  |
 | Captures read                 | light/dark/high-contrast at 420, light at 240 and 720, dense, RTL, and `--focus "[data-part='overflow']"` in light and dark                 |

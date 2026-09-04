@@ -183,6 +183,19 @@ other families stand on. Justify it at the gate before writing it.
   your own. A part that takes a `ref` from another family is taking a
   measurement, and dropping it is dropping the measurement.
 
+- **Two Angular directives on one element write host attributes into the same
+  slot, and a binding of `null` removes what the author wrote.** `menu` records
+  the rule for its own trigger; the family that puts that trigger on its own
+  part inherits it from the other side. `toolbar`'s overflow control declared
+  `data-part="overflow"` as a static attribute and `slMenuTriggerFor` erased it,
+  which took the stylesheet's geometry with it and made the family stop
+  recognising its own part in the DOM.
+
+  React does not have the problem, because the family's own props are spread
+  after the other family's. In Angular, write the part back after the first
+  change detection — the erasing expression is a constant, so nothing writes
+  over it again — and say in a comment which directive erased it.
+
 ## Working beside another session
 
 Another session may be building a different family in this same worktree at the

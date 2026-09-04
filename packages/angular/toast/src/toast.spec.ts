@@ -1,0 +1,226 @@
+import { Component, inject } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import contract from '../../../../specs/components/toast/contract.json';
+import { SlToastRegion } from './toast';
+import { provideToastDefaults, SlToastService } from './toast-defaults';
+
+@Component({
+  standalone: true,
+  imports: [SlToastRegion],
+  template: `<button type="button">outside</button> <sl-toast-region attach="inline" />`,
+})
+class Host {
+  readonly toasts = inject(SlToastService);
+}
+
+function render(providers: unknown[] = []) {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({ providers: providers as never[] });
+  const fixture = TestBed.createComponent(Host);
+  fixture.detectChanges();
+  return fixture;
+}
+
+const region = (fixture: { nativeElement: HTMLElement }) =>
+  fixture.nativeElement.querySelector<HTMLElement>('[data-ui="toast"]') as HTMLElement;
+const items = (fixture: { nativeElement: HTMLElement }) => [
+  ...region(fixture).querySelectorAll<HTMLElement>('[data-part="item"]'),
+];
+
+beforeEach(() => {
+  /* `presence` schedules the frame that turns an arriving message from closed
+     into open, and completes an exit on a timer when the browser reports none. */
+  vi.useFakeTimers({
+    toFake: ['setTimeout', 'clearTimeout', 'Date', 'requestAnimationFrame', 'cancelAnimationFrame'],
+  });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe('SlToastRegion', () => {
+  it('is a named landmark, and writes no live role anywhere', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({ title: 'Draft saved' });
+    fixture.detectChanges();
+
+    const root = region(fixture);
+    expect(root.tagName).toBe('SECTION');
+    expect(root.getAttribute('role')).toBe('region');
+    expect(root.getAttribute('aria-label')).toBe('Notifications');
+    expect(root.querySelector('[aria-live]')).toBeNull();
+    expect(root.querySelector('[role="alert"], [role="status"]')).toBeNull();
+    expect(root.querySelector('[data-part="list"]')?.tagName).toBe('OL');
+  });
+
+  it('writes every axis a consumer may style on, and the contract’s defaults', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({ title: 'Draft saved' });
+    fixture.detectChanges();
+
+    const defaults = contract.members.toast.defaults;
+    const root = region(fixture);
+    expect(root.getAttribute('data-placement')).toBe(defaults.placement);
+    expect(root.getAttribute('data-stacking')).toBe(defaults.stacking);
+    expect(items(fixture)[0]?.getAttribute('data-tone')).toBe(defaults.tone);
+    expect(items(fixture)[0]?.getAttribute('data-variant')).toBe(defaults.variant);
+  });
+
+  it('draws the anatomy the contract declares', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({
+      title: 'Message archived',
+      description: 'Out of the inbox.',
+      progress: true,
+      duration: 4000,
+    });
+    fixture.detectChanges();
+
+    const item = items(fixture)[0] as HTMLElement;
+    const parts = [...item.children].map((child) => child.getAttribute('data-part'));
+    expect(parts).toEqual(['icon', 'content', 'close', 'progress']);
+    expect(item.querySelector('[data-part="title"]')?.textContent).toBe('Message archived');
+  });
+
+  /** The one number the bar and the clock share, so they cannot disagree. */
+  it('publishes the duration and the play state the stylesheet reads', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({ title: 'Exported', duration: 4000 });
+    fixture.detectChanges();
+
+    expect(items(fixture)[0]?.style.getPropertyValue('--slotted-toast-duration')).toBe('4000ms');
+    expect(region(fixture).style.getPropertyValue('--slotted-toast-play-state')).toBe('running');
+
+    region(fixture).dispatchEvent(new PointerEvent('pointerenter'));
+    fixture.detectChanges();
+    expect(region(fixture).style.getPropertyValue('--slotted-toast-play-state')).toBe('paused');
+    expect(region(fixture).hasAttribute('data-expanded')).toBe(true);
+  });
+
+  it('holds the clock while the pointer is over the region', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({ id: 'one', title: 'Draft saved', duration: 1000 });
+    fixture.detectChanges();
+
+    region(fixture).dispatchEvent(new PointerEvent('pointerenter'));
+    vi.advanceTimersByTime(5000);
+    fixture.detectChanges();
+    expect(items(fixture)).toHaveLength(1);
+
+    region(fixture).dispatchEvent(new PointerEvent('pointerleave'));
+    vi.advanceTimersByTime(1000);
+    fixture.detectChanges();
+    expect(items(fixture)[0]?.hasAttribute('data-open')).toBe(false);
+  });
+});
+
+describe('dismissal', () => {
+  it('names the reason the message left', () => {
+    const fixture = render();
+    const reasons: string[] = [];
+    fixture.componentInstance.toasts.store.onRequest((request) => reasons.push(request.reason));
+
+    fixture.componentInstance.toasts.show({ id: 'one', title: 'Draft saved' });
+    fixture.detectChanges();
+
+    region(fixture).querySelector<HTMLButtonElement>('[data-part="close"]')?.click();
+    expect(reasons.at(-1)).toBe('dismiss');
+  });
+
+  it('closes the message the keyboard is inside when Escape is pressed', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({ id: 'one', title: 'Draft saved' });
+    fixture.detectChanges();
+
+    const item = items(fixture)[0] as HTMLElement;
+    item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(item.hasAttribute('data-open')).toBe(false);
+  });
+
+  it('takes the message out of the document once its exit has finished', () => {
+    const fixture = render();
+    fixture.componentInstance.toasts.show({ id: 'one', title: 'Draft saved' });
+    fixture.detectChanges();
+    vi.advanceTimersByTime(100);
+    fixture.detectChanges();
+
+    fixture.componentInstance.toasts.dismiss('one');
+    fixture.detectChanges();
+    expect(items(fixture)).toHaveLength(1);
+
+    vi.advanceTimersByTime(100);
+    fixture.detectChanges();
+    expect(items(fixture)).toHaveLength(0);
+  });
+});
+
+describe('the keyboard', () => {
+  /**
+   * The whole of this family's claim on the keyboard. The APG's Alert pattern
+   * is explicit that an arriving message must not move focus, so the reader
+   * moves it.
+   */
+  it('moves focus into the region on the hotkey, and never on its own', () => {
+    const fixture = render();
+    const outside = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    outside.focus();
+
+    fixture.componentInstance.toasts.show({ id: 'one', title: 'Draft saved' });
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(outside);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F6', bubbles: true }));
+    expect(document.activeElement).toBe(items(fixture)[0]);
+  });
+});
+
+describe('what an application decides once', () => {
+  it('reads the injection token for every axis a message did not state', () => {
+    const fixture = render([
+      provideToastDefaults({
+        closeLabel: 'Fechar',
+        label: 'Notificações',
+        placement: 'top-start',
+        tone: 'success',
+        variant: 'soft',
+      }),
+    ]);
+    fixture.componentInstance.toasts.show({ title: 'Salvo' });
+    fixture.detectChanges();
+
+    const root = region(fixture);
+    expect(root.getAttribute('aria-label')).toBe('Notificações');
+    expect(root.getAttribute('data-placement')).toBe('top-start');
+    expect(items(fixture)[0]?.getAttribute('data-tone')).toBe('success');
+    expect(items(fixture)[0]?.getAttribute('data-variant')).toBe('soft');
+    expect(root.querySelector('[data-part="close"]')?.getAttribute('aria-label')).toBe('Fechar');
+  });
+
+  it('lets a message overrule the token it is under', () => {
+    const fixture = render([provideToastDefaults({ tone: 'success' })]);
+    fixture.componentInstance.toasts.show({ title: 'Falhou', tone: 'danger' });
+    fixture.detectChanges();
+
+    expect(items(fixture)[0]?.getAttribute('data-tone')).toBe('danger');
+  });
+});
+
+describe('the service', () => {
+  it('reads as signals, so a zoneless application renders on them', () => {
+    const fixture = render();
+    const service = fixture.componentInstance.toasts;
+
+    expect(service.visible()).toHaveLength(0);
+    service.show({ id: 'one', title: 'Draft saved' });
+    expect(service.visible()).toHaveLength(1);
+    expect(service.paused()).toBe(false);
+
+    service.pauseAll();
+    expect(service.paused()).toBe(true);
+  });
+});

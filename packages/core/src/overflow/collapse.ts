@@ -25,6 +25,13 @@ export interface CollapseUnitInput {
    * the surface stays in the bar however little room is left.
    */
   collapsible: boolean;
+  /**
+   * Whether the unit only means something between two others. A rule that
+   * divides nothing is a stray line, so it goes once nothing is left after it —
+   * which the order alone almost does, and does not do when the collapse stops
+   * as soon as the bar fits.
+   */
+  divides?: boolean;
 }
 
 export interface CollapseInput {
@@ -101,6 +108,14 @@ export function collapseState({
     if (roomTaken(sizes + triggerSize, boxes + 1, gap) <= limit) break;
   }
 
+  /* Whatever is now last and only means something between two others goes as
+     well. It can only free room, so nothing has to be measured again. */
+  for (let index = units.length - 1; index >= 0; index -= 1) {
+    if (collapsed.has(index)) continue;
+    if (units[index]?.divides !== true) break;
+    collapsed.add(index);
+  }
+
   return { collapsed: [...collapsed].sort((a, b) => a - b), triggerVisible: true };
 }
 
@@ -113,6 +128,8 @@ export interface CollapseOptions {
   units: () => readonly HTMLElement[];
   /** Whether a unit has somewhere to go. */
   collapsible: (unit: HTMLElement) => boolean;
+  /** Whether a unit only means something between two others. */
+  divides?: (unit: HTMLElement) => boolean;
   /**
    * The room a unit takes, when the caller knows it cannot be measured. A
    * spacer grows into whatever is left, so its size is nought and it is still
@@ -228,6 +245,7 @@ export function createCollapse(container: HTMLElement, options: CollapseOptions)
       triggerSize: triggerRoom(trigger),
       units: units.map((unit) => ({
         collapsible: trigger !== null && options.collapsible(unit),
+        divides: options.divides?.(unit) ?? false,
         size: room.get(unit) ?? 0,
       })),
     });

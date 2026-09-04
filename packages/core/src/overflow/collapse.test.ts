@@ -122,6 +122,33 @@ describe('collapseState', () => {
     expect(state).toEqual({ collapsed: [], triggerVisible: false });
   });
 
+  /**
+   * A rule that divides nothing is a stray line. The order alone almost gets
+   * there — the end gives way first — and misses when the collapse stops as
+   * soon as the bar fits.
+   */
+  it('takes a rule that is left dividing nothing', () => {
+    const state = collapseState({
+      available: 100,
+      gap: 0,
+      triggerSize: 20,
+      units: [unit(40), { collapsible: false, divides: true, size: 10 }, unit(60)],
+    });
+
+    expect(state.collapsed).toEqual([1, 2]);
+  });
+
+  it('leaves a rule that still divides two visible units', () => {
+    const state = collapseState({
+      available: 120,
+      gap: 0,
+      triggerSize: 20,
+      units: [unit(40), { collapsible: false, divides: true, size: 10 }, unit(40), unit(60)],
+    });
+
+    expect(state.collapsed).toEqual([3]);
+  });
+
   it('reports an empty bar as fitting', () => {
     expect(collapseState({ available: 0, gap: 8, triggerSize: 20, units: [] })).toEqual({
       collapsed: [],

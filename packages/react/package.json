@@ -156,6 +156,10 @@
       "types": "./dist/types/textarea/index.d.ts",
       "import": "./dist/textarea.js"
     },
+    "./toast": {
+      "types": "./dist/types/toast/index.d.ts",
+      "import": "./dist/toast.js"
+    },
     "./toolbar": {
       "types": "./dist/types/toolbar/index.d.ts",
       "import": "./dist/toolbar.js"

@@ -144,8 +144,26 @@ export interface ToastPromiseOptions<Value, Data> {
   error: ToastOptions<Data> | ((reason: unknown) => ToastOptions<Data>);
 }
 
+/** What a host may retune after the store exists. */
+export type ToastStoreSettings<Data> = Pick<
+  ToastStoreOptions<Data>,
+  'limit' | 'duration' | 'pauseOnHover' | 'pauseWhenHidden'
+>;
+
 export interface ToastStore<Data> {
   readonly snapshot: ToastSnapshot<Data>;
+  /**
+   * The values a host states rather than the store: how many messages its
+   * region shows, how long they stay, and which of the two pointer conditions
+   * hold the clock. They are settable rather than fixed at construction
+   * because the store is created once, at module scope, and the region that
+   * renders it is written in a tree that may say otherwise.
+   */
+  configure: (settings: ToastStoreSettings<Data>) => void;
+  /** Adds a listener to every request, and returns the way to remove it. */
+  onRequest: (
+    listener: (request: ChangeRequest<readonly ToastMessage<Data>[]>) => void,
+  ) => () => void;
   /** The shape `useSyncExternalStore` and an Angular signal both read. */
   subscribe: (listener: () => void) => () => void;
   /** Adds a message, or updates the one that already carries this id. */
@@ -202,13 +220,15 @@ interface Clock {
 export function createToastStore<Data = unknown>(
   options: ToastStoreOptions<Data> = {},
 ): ToastStore<Data> {
-  const {
-    limit = DEFAULT_TOAST_LIMIT,
-    duration: defaultDuration = DEFAULT_TOAST_DURATION,
-    pauseOnHover = true,
-    pauseWhenHidden = true,
-    now = () => Date.now(),
-  } = options;
+  const { now = () => Date.now() } = options;
+
+  let limit = options.limit ?? DEFAULT_TOAST_LIMIT;
+  let defaultDuration = options.duration ?? DEFAULT_TOAST_DURATION;
+  let pauseOnHover = options.pauseOnHover ?? true;
+  let pauseWhenHidden = options.pauseWhenHidden ?? true;
+
+  const requested = new Set<(request: ChangeRequest<readonly ToastMessage<Data>[]>) => void>();
+  if (options.onRequest) requested.add(options.onRequest);
 
   const doc = options.document ?? (globalThis as { document?: Document }).document;
   const announce =
@@ -232,7 +252,9 @@ export function createToastStore<Data = unknown>(
     controlled: options.toasts,
     initial: messages,
     equals: (a, b) => a === b,
-    ...(options.onRequest ? { onRequest: options.onRequest } : {}),
+    onRequest: (request) => {
+      for (const listener of requested) listener(request);
+    },
   });
 
   /* A visibility change is the one thing this module listens for itself: a
@@ -500,6 +522,27 @@ export function createToastStore<Data = unknown>(
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
+    },
+    onRequest(listener) {
+      requested.add(listener);
+      return () => requested.delete(listener);
+    },
+    configure(settings) {
+      const before = [limit, defaultDuration, pauseOnHover, pauseWhenHidden];
+      limit = settings.limit ?? limit;
+      defaultDuration = settings.duration ?? defaultDuration;
+      pauseOnHover = settings.pauseOnHover ?? pauseOnHover;
+      pauseWhenHidden = settings.pauseWhenHidden ?? pauseWhenHidden;
+      if (
+        before.every(
+          (value, index) =>
+            value === [limit, defaultDuration, pauseOnHover, pauseWhenHidden][index],
+        )
+      ) {
+        return;
+      }
+      settle();
+      publish();
     },
     show,
     update,

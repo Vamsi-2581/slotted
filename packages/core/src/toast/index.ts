@@ -9,4 +9,5 @@ export type {
   ToastStatus,
   ToastStore,
   ToastStoreOptions,
+  ToastStoreSettings,
 } from './toast';

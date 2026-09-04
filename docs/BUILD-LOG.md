@@ -4621,3 +4621,37 @@ The fourth and fifth were this pair's own: a painted ground wrapped _around_ a
 viewport is invisible, because the viewport paints its own surface over it; and
 a demonstration opened in one binding is not opened in the other unless both
 stories say so.
+
+## Listbox — 2026-09-04
+
+**Two defects with a lesson, neither of which a test could have caught and both
+of which the next windowed collection will meet.** `table` in this wave and
+`timeline` in wave 8 are the families this is written for.
+
+**A grid with a definite block size stretches its automatic rows.** The window's
+canvas states the whole list's height so the scrollbar is the length of the
+data, and it is a grid so the option subgrid survives. With `align-content` left
+at `normal`, eight options inside a six-thousand-pixel canvas became eight rows
+of eight hundred and fifty, and the slice rendered entirely below the fold — a
+listbox that scrolled correctly, sized correctly, passed every test and showed
+an empty box. `align-content: start` **and** `grid-auto-rows: min-content`
+together; neither alone is enough. It was found by reading a capture.
+
+**A family that moves focus itself must not treat its own move as a blur.**
+Under a roving `tabindex` the family calls `.focus()` on an option for every
+arrow and every typeahead match, and each of those raises a `focusout` on the
+root. A blur handler that reset the typeahead buffer therefore cleared it after
+every character, so a sequence longer than one letter was impossible — and a
+test of a single letter passed throughout. The guard is
+`relatedTarget === null || !root.contains(relatedTarget)`. `menu` does not have
+this defect because it resets only when the menu closes; `tree` and `table` will
+both rove and typeahead, and will.
+
+**A debt this family leaves.** Neither reference page has been read rendered and
+`tools/harness/audit.mjs` has not passed on either: both running Storybooks
+answer 200 and neither renders the family, because the React server resolved the
+styles package's exports map at startup and the Angular server read its
+entry-point directories once. Restarting either interrupts the other session in
+this worktree. It is the one step of the skill left open, and
+`docs/superpowers/specs/2026-09-04-listbox-self-assessment.md` §12 says so in
+those words.

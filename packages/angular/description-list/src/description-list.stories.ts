@@ -269,7 +269,7 @@ export const Empty: Story = {
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'empty',
-    'Both rows draw the same rule, and a screen reader hears two different sentences: the first says nothing was provided, the second says what this row says instead. The mark is geometry; the reason is text.',
+    'The first row draws a mark and reads as “Not provided” to a screen reader, because a panel of twelve empty rows saying it aloud is noise. The second was given words, so it shows them.',
     `<div slDescriptionList variant="ruled">
       <div slDescriptionListItem>
         <dt slDescriptionListTerm>Owner</dt>
@@ -339,11 +339,15 @@ export const Reveal: Story = {
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     '[clamp]="2"',
-    'Two lines and a control. Select the clamped text and paste it: every character is still there, which is what keeps a long value reachable rather than truncated.',
+    'Two lines and a control on the value that has more than two; none on the value that has one, because a clamp is a maximum rather than a promise. Select the clamped text and paste it: every character is still there.',
     `<div slDescriptionList>
       <div slDescriptionListItem>
         <dt slDescriptionListTerm>Change note</dt>
         <dd slDescriptionListDescription [clamp]="2">{{ note }}</dd>
+      </div>
+      <div slDescriptionListItem>
+        <dt slDescriptionListTerm>Note that fits</dt>
+        <dd slDescriptionListDescription [clamp]="2">Rotated the credentials.</dd>
       </div>
     </div>`,
   )}

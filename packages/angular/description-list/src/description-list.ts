@@ -1,14 +1,17 @@
 import {
+  afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
   Directive,
+  effect,
   ElementRef,
   HostAttributeToken,
   inject,
   input,
+  Injector,
   numberAttribute,
   output,
   signal,
@@ -27,6 +30,8 @@ import {
   DESCRIPTION_LIST_DEFAULT_LAYOUT,
   DESCRIPTION_LIST_DEFAULT_VARIANT,
   injectDescriptionListDefaults,
+  overflowsClamp,
+  selectValue,
   SlDescriptionListIdFactory,
   spanWithin,
   type DescriptionListColumns,
@@ -105,6 +110,8 @@ export class SlDescriptionList {
       collapse: own.collapse ?? provided.collapse ?? DESCRIPTION_LIST_DEFAULT_LABELS.collapse,
       copied: own.copied ?? provided.copied ?? DESCRIPTION_LIST_DEFAULT_LABELS.copied,
       copy: own.copy ?? provided.copy ?? DESCRIPTION_LIST_DEFAULT_LABELS.copy,
+      copyBlocked:
+        own.copyBlocked ?? provided.copyBlocked ?? DESCRIPTION_LIST_DEFAULT_LABELS.copyBlocked,
       placeholder:
         own.placeholder ?? provided.placeholder ?? DESCRIPTION_LIST_DEFAULT_LABELS.placeholder,
       reveal: own.reveal ?? provided.reveal ?? DESCRIPTION_LIST_DEFAULT_LABELS.reveal,
@@ -193,8 +200,12 @@ export class SlDescriptionListHint {}
     <span #value data-part="value">
       <ng-content></ng-content>
       @if (empty()) {
-        <span aria-hidden="true" data-part="placeholder"></span>
-        <span data-ui="visually-hidden">{{ placeholderText() }}</span>
+        @if (placeholder()) {
+          <span data-part="placeholder">{{ placeholder() }}</span>
+        } @else {
+          <span aria-hidden="true" data-part="placeholder"></span>
+          <span data-ui="visually-hidden">{{ placeholderText() }}</span>
+        }
       }
     </span>
     @if (copy()) {
@@ -207,7 +218,7 @@ export class SlDescriptionListHint {}
         (keydown)="onKeydown($event)"
       ></button>
     }
-    @if (clampValue() > 0) {
+    @if (clampValue() > 0 && overflows()) {
       <button
         [attr.aria-expanded]="revealed()"
         data-part="toggle"
@@ -274,21 +285,65 @@ export class SlDescriptionListDescription {
 
   private readonly own = signal(false);
   private readonly done = signal(false);
+  private readonly overflowing = signal(false);
   private readonly value = viewChild<ElementRef<HTMLElement>>('value');
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
   private timer: ReturnType<typeof setTimeout> | undefined;
+  private observer: ResizeObserver | undefined;
   private keyed = false;
 
   readonly revealed = computed(() => this.revealedValue() ?? this.own());
   readonly clampValue = computed(() => Math.max(0, Math.trunc(this.clamp())));
   readonly copied = computed(() => this.done());
+  /** Whether the value wants more room than the clamp gives it. */
+  readonly overflows = computed(() => this.overflowing());
   readonly placeholderText = computed(
     () => this.placeholder() ?? this.list.labelsValue().placeholder,
   );
 
   constructor() {
     this.own.set(this.defaultRevealed());
-    this.destroyRef.onDestroy(() => clearTimeout(this.timer));
+    this.destroyRef.onDestroy(() => {
+      clearTimeout(this.timer);
+      this.observer?.disconnect();
+    });
+
+    /**
+     * A control that reveals nothing is a control a reader presses once and
+     * learns to distrust. A clamp is a maximum rather than a promise: most
+     * values in a panel are shorter than it, and the toggle appears only for
+     * the ones that are not. The value is remeasured whenever its box changes,
+     * which is what the container query does to it at every breakpoint.
+     */
+    afterNextRender(
+      () => {
+        effect(
+          () => {
+            const lines = this.clampValue();
+            const node = this.value()?.nativeElement;
+            this.observer?.disconnect();
+            this.observer = undefined;
+
+            if (lines <= 0 || !node || typeof ResizeObserver === 'undefined') {
+              this.overflowing.set(false);
+              return;
+            }
+
+            const measure = () => {
+              const lineHeight = Number.parseFloat(getComputedStyle(node).lineHeight);
+              this.overflowing.set(overflowsClamp(node.scrollHeight, lineHeight, lines));
+            };
+
+            measure();
+            this.observer = new ResizeObserver(measure);
+            this.observer.observe(node);
+          },
+          { injector: this.injector },
+        );
+      },
+      { injector: this.injector },
+    );
   }
 
   /**
@@ -317,6 +372,7 @@ export class SlDescriptionListDescription {
        is what the reader sees, and `copyValue` is for when it is not. */
     const text = this.copyValue() ?? this.value()?.nativeElement.textContent?.trim() ?? '';
     const copied = await copyToClipboard(text);
+    let selected = false;
 
     if (copied) {
       this.done.set(true);
@@ -325,9 +381,20 @@ export class SlDescriptionListDescription {
       /* Through the shared announcer rather than a region this family owns, so
          two copies in one update are both heard. */
       getLiveAnnouncer().announce(this.list.labelsValue().copied);
+    } else {
+      /**
+       * A refused write used to leave the control at rest and the reader with
+       * nothing — which is indistinguishable from a broken button, and is
+       * exactly what a browser does when the document is not focused or the
+       * page is in an iframe carrying no `clipboard-write` permission. So the
+       * family does the part it still can: it selects the value, which the
+       * reader can see and copy with the keyboard, and says so.
+       */
+      selected = selectValue(this.value()?.nativeElement);
+      getLiveAnnouncer().announce(this.list.labelsValue().copyBlocked);
     }
 
-    this.copied$.emit({ copied, reason, source: event, value: text });
+    this.copied$.emit({ copied, reason, selected, source: event, value: text });
   }
 
   private takeReason(): 'pointer' | 'keyboard' {

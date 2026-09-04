@@ -137,12 +137,14 @@ test('clamps a long value without taking any of it out of the DOM', () => {
 
 /**
  * A component-owned mark is geometry from a glyph token; a character is never
- * an icon. The placeholder is the same rule applied to the absence of a value.
+ * an icon. The placeholder is the same rule applied to the absence of a value,
+ * and only where the absence has no words of its own — `:empty` is what tells
+ * the drawn form from the written one.
  */
 test('draws every mark it owns as geometry', () => {
   assert.ok(normalized.includes('mask-image:var(--slotted-description-list-copy-icon'));
   assert.ok(normalized.includes('mask-image:var(--slotted-description-list-toggle-icon'));
-  assert.ok(normalized.includes("[data-part='placeholder']::after{background-color:"));
+  assert.ok(normalized.includes("[data-part='placeholder']:empty{background-color:"));
 });
 
 /**

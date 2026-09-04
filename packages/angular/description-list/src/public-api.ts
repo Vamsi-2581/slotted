@@ -15,7 +15,9 @@ export {
   DESCRIPTION_LIST_DEFAULT_LAYOUT,
   DESCRIPTION_LIST_DEFAULT_VARIANT,
   injectDescriptionListDefaults,
+  overflowsClamp,
   provideDescriptionListDefaults,
+  selectValue,
   SlDescriptionListIdFactory,
   spanWithin,
 } from './description-list.constants';

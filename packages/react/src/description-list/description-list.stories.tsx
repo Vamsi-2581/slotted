@@ -275,7 +275,7 @@ export const Empty: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label="A value the data did not have"
-        note="Both rows draw the same rule, and a screen reader hears two different sentences: the first says nothing was provided, the second says what this row says instead. The mark is geometry; the reason is text."
+        note="The first row draws a mark and reads as “Not provided” to a screen reader, because a panel of twelve empty rows saying it aloud is noise. The second was given words, so it shows them."
       >
         <DescriptionList variant="ruled">
           <Pair term="Owner">{null}</Pair>
@@ -355,11 +355,14 @@ export const Reveal: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label="clamp={2}"
-        note="Two lines and a control. Select the clamped text and paste it: every character is still there, which is what keeps a long value reachable rather than truncated."
+        note="Two lines and a control on the value that has more than two; none on the value that has one, because a clamp is a maximum rather than a promise. Select the clamped text and paste it: every character is still there."
       >
         <DescriptionList>
           <Pair clamp={2} term="Change note">
             {NOTE}
+          </Pair>
+          <Pair clamp={2} term="Note that fits">
+            Rotated the credentials.
           </Pair>
         </DescriptionList>
       </Scene>

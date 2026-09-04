@@ -27,6 +27,11 @@ export interface DescriptionListCopyRequest {
   readonly reason: 'pointer' | 'keyboard';
   /** `false` when the platform refused the write or offers no clipboard. */
   readonly copied: boolean;
+  /**
+   * `true` when the write was refused and the value was selected instead, so
+   * the reader can copy it with the keyboard.
+   */
+  readonly selected: boolean;
   readonly source?: unknown;
 }
 
@@ -46,6 +51,12 @@ export interface DescriptionListLabels {
   collapse?: string | undefined;
   /** What a screen reader reads in place of a value that is missing. */
   placeholder?: string | undefined;
+  /**
+   * Announced when the platform refuses the clipboard and the family selects
+   * the value instead. A browser blocks `writeText` where the document is not
+   * focused, and inside an iframe that carries no `clipboard-write` permission.
+   */
+  copyBlocked?: string | undefined;
 }
 
 export interface DescriptionListDefaults {

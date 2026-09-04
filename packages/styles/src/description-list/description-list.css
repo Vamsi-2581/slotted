@@ -341,28 +341,39 @@
   }
 
   /**
-   * A value that is missing. An empty cell is a row a reader cannot tell from a
-   * defect, so the absence is drawn — a rule at the value's optical centre — and
-   * said, in text a screen reader reads from the visually hidden sibling. The
-   * rule is geometry rather than an em dash, so it holds its weight against the
-   * type at every density and needs no font to contain it.
+   * A value that is missing, in one of two forms.
+   *
+   * With words, it is those words: a consumer who writes "Not set yet" means a
+   * reader to see it, and a row that says what it is missing is worth more than
+   * a mark that says only *something*.
+   *
+   * Without them it is a drawn rule, and the accompanying sentence is read
+   * rather than shown — because a panel of twelve empty rows saying "Not
+   * provided" twelve times is noise, and the mark is what a reader scans past.
+   * `:empty` tells the two apart, so no attribute has to.
+   *
+   * The rule is geometry rather than an em dash: it holds its weight against
+   * the type at every density and needs no font to contain the character.
    */
   [data-ui='description-list'] [data-part='placeholder'] {
-    align-items: center;
-    block-size: 1lh;
-    display: inline-flex;
+    color: var(--_placeholder-ink);
   }
 
-  [data-ui='description-list'] [data-part='placeholder']::after {
+  [data-ui='description-list'] [data-part='placeholder']:empty {
     background-color: var(--_placeholder-ink);
     block-size: var(
       --slotted-description-list-placeholder-thickness,
       var(--slotted-border-width-thick, 2px)
     );
     border-radius: var(--slotted-radius-full, 9999px);
-    content: '';
-    display: block;
-    inline-size: var(--slotted-description-list-placeholder-width, 1.25em);
+    display: inline-block;
+    inline-size: var(--slotted-description-list-placeholder-width, 0.875em);
+    /**
+     * The middle of a lower-case letter, not the middle of the line box. The
+     * two are a descender apart, and centring in the line box put the mark
+     * visibly below the text it stands in for on every row that had one.
+     */
+    vertical-align: var(--slotted-description-list-placeholder-offset, 0.3em);
   }
 
   /* ── The controls ──────────────────────────────────────────────────── */

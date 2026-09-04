@@ -12,6 +12,7 @@ import {
   DescriptionListHint,
   DescriptionListItem,
   DescriptionListTerm,
+  overflowsClamp,
   spanWithin,
 } from './description-list-parts';
 import type { DescriptionListProps } from './description-list.types';
@@ -44,6 +45,40 @@ function Panel(props: Partial<DescriptionListProps>) {
  */
 const list = () => document.querySelector('dl') as HTMLElement;
 const root = () => list().parentElement as HTMLElement;
+
+/**
+ * jsdom has no layout, so a value's `scrollHeight` is zero and its resolved
+ * line height is empty — and the control that reveals a clamped value appears
+ * only for a value that has more text than the clamp allows. The measurement
+ * is stubbed rather than skipped, because what is being tested is what the
+ * family does with the answer.
+ */
+function withLayout(scrollHeight: number, lineHeight = '20px') {
+  const computed = window.getComputedStyle.bind(window);
+  vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+    const style = computed(element as Element, pseudo as string | undefined);
+    Object.defineProperty(style, 'lineHeight', { configurable: true, get: () => lineHeight });
+    return style;
+  });
+  Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
+    configurable: true,
+    get: () => scrollHeight,
+  });
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  Reflect.deleteProperty(HTMLElement.prototype, 'scrollHeight');
+});
 
 describe('DescriptionList', () => {
   it('is selected in public by the family identifier and its parts', () => {
@@ -162,7 +197,36 @@ describe('DescriptionListDescription', () => {
     expect(screen.getByText('Rotated the credentials.')).toBeVisible();
   });
 
+  /**
+   * A clamp is a maximum rather than a promise. Most values in a panel are
+   * shorter than it, and a control that reveals nothing is one a reader presses
+   * once and learns to distrust.
+   */
+  it('decides whether there is anything to reveal by measuring, not by asking', () => {
+    expect(overflowsClamp(60, 20, 2)).toBe(true);
+    expect(overflowsClamp(40, 20, 2)).toBe(false);
+    expect(overflowsClamp(41, 20, 2)).toBe(false);
+    expect(overflowsClamp(100, Number.NaN, 2)).toBe(false);
+    expect(overflowsClamp(100, 20, 0)).toBe(false);
+  });
+
+  it('draws no control for a value the clamp already fits', () => {
+    withLayout(20);
+    render(
+      <DescriptionList>
+        <DescriptionListItem>
+          <DescriptionListTerm>Note</DescriptionListTerm>
+          <DescriptionListDescription clamp={2}>Rotated.</DescriptionListDescription>
+        </DescriptionListItem>
+      </DescriptionList>,
+    );
+
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByText('Rotated.').closest('dd')).toHaveAttribute('data-clamp', '');
+  });
+
   it('reveals a clamped value and clamps it again, uncontrolled', () => {
+    withLayout(200);
     render(
       <DescriptionList>
         <DescriptionListItem>
@@ -189,6 +253,7 @@ describe('DescriptionListDescription', () => {
 
   /** Controlled means the component asks and waits; it never moves itself. */
   it('never moves a controlled value on its own', () => {
+    withLayout(200);
     const onRevealedChange = vi.fn();
     render(
       <DescriptionList>
@@ -218,6 +283,7 @@ describe('DescriptionListDescription', () => {
    * and a consumer that has to guess writes the wrong handler.
    */
   it('carries the reason a reveal was asked for, and can be refused', () => {
+    withLayout(200);
     const onRevealedChange = vi.fn();
     render(
       <DescriptionList>
@@ -265,6 +331,41 @@ describe('DescriptionListDescription', () => {
     expect(mark.textContent).toBe('');
   });
 
+  /**
+   * Words a consumer states are meant to be seen. Without them the mark is
+   * drawn and the sentence is read instead, because a panel of twelve empty
+   * rows saying "Not provided" twelve times is noise.
+   */
+  it('shows the words it was given, and draws the mark when it was given none', () => {
+    const { rerender } = render(
+      <DescriptionList>
+        <DescriptionListItem>
+          <DescriptionListTerm>Owner</DescriptionListTerm>
+          <DescriptionListDescription empty placeholder="Not set yet" />
+        </DescriptionListItem>
+      </DescriptionList>,
+    );
+
+    const words = screen.getByText('Not set yet');
+    expect(words).toHaveAttribute('data-part', 'placeholder');
+    expect(words).not.toHaveAttribute('aria-hidden');
+    expect(document.querySelector('[data-ui="visually-hidden"]')).toBeNull();
+
+    rerender(
+      <DescriptionList>
+        <DescriptionListItem>
+          <DescriptionListTerm>Owner</DescriptionListTerm>
+          <DescriptionListDescription empty />
+        </DescriptionListItem>
+      </DescriptionList>,
+    );
+
+    const mark = document.querySelector('[data-part="placeholder"]') as HTMLElement;
+    expect(mark.textContent).toBe('');
+    expect(mark).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText('Not provided')).toHaveAttribute('data-ui', 'visually-hidden');
+  });
+
   it('takes the placeholder text from the instance, then the provider', () => {
     const { rerender } = render(
       <DescriptionListDefaultsProvider labels={{ placeholder: 'Sem valor' }}>
@@ -307,7 +408,7 @@ describe('copying', () => {
     Reflect.deleteProperty(globalThis.navigator, 'clipboard');
   });
 
-  function Copyable(props: { copyValue?: string; onCopy?: () => void }) {
+  function Copyable(props: { copyValue?: string; onCopy?: (request: unknown) => void }) {
     return (
       <DescriptionList>
         <DescriptionListItem>
@@ -366,6 +467,25 @@ describe('copying', () => {
     await waitFor(() => expect(onCopy).toHaveBeenCalled());
     expect(onCopy.mock.calls[0]?.[0]).toMatchObject({ copied: false, reason: 'pointer' });
     expect(control).not.toHaveAttribute('data-complete');
+  });
+
+  /**
+   * A browser refuses `writeText` where the document is not focused, and inside
+   * an iframe carrying no `clipboard-write` permission — which is where a
+   * Storybook page lives. Leaving the control at rest made a working button
+   * indistinguishable from a broken one, so the family does the part it still
+   * can: it selects the value and says so.
+   */
+  it('selects the value where the clipboard is refused, so the reader can take it', async () => {
+    writeText.mockRejectedValue(new Error('denied'));
+    const onCopy = vi.fn();
+    render(<Copyable onCopy={onCopy} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
+
+    await waitFor(() => expect(onCopy).toHaveBeenCalled());
+    expect(onCopy.mock.calls[0]?.[0]).toMatchObject({ copied: false, selected: true });
+    expect(String(document.getSelection())).toContain('arn:aws:iam');
   });
 
   it('reports the same refusal where the platform offers no clipboard at all', async () => {
@@ -451,6 +571,7 @@ describe('composition', () => {
 
   /** A consumer owning the value keeps it after every render. */
   it('lets a consumer own the revealed state', () => {
+    withLayout(200);
     function Owner() {
       const [revealed, setRevealed] = useState(false);
       return (

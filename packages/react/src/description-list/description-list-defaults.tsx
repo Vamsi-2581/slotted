@@ -16,6 +16,7 @@ export const DEFAULT_DESCRIPTION_LIST_LABELS: DescriptionListResolvedLabels = {
   collapse: 'Show less',
   copied: 'Copied',
   copy: 'Copy',
+  copyBlocked: 'Value selected — copy it with your keyboard',
   placeholder: 'Not provided',
   reveal: 'Show more',
 };

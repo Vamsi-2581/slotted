@@ -127,6 +127,29 @@ test('declares copying as a capability that holds no state', () => {
   assert.match(contract.copy.declined, /execCommand/);
 });
 
+/**
+ * A control that fails silently is indistinguishable from a broken one, and a
+ * browser refuses the write for two reasons a family cannot prevent: an
+ * unfocused document, and an iframe with no clipboard-write permission. What is
+ * left to offer is the selection.
+ */
+test('does the part it still can when the platform refuses the clipboard', () => {
+  assert.match(contract.copy.blocked, /selects the value/);
+  assert.match(contract.copy.blocked, /clipboard-write/);
+  assert.equal(contract.labels.copyBlocked.length > 0, true);
+});
+
+/**
+ * A clamp is a maximum rather than a promise. Most values in a panel are
+ * shorter than it, and a control that reveals nothing is one a reader presses
+ * once and learns to distrust.
+ */
+test('draws the reveal control only where there is something to reveal', () => {
+  assert.equal(contract.reveal.control, 'toggle');
+  assert.match(contract.reveal.measured, /scrollHeight/);
+  assert.match(contract.reveal.reason, /maximum rather than a promise/);
+});
+
 test('paints the revealed state through the shared attribute vocabulary', () => {
   assert.ok(list.states.includes('revealed'));
   assert.equal(contract.stateAttributes.revealed, STATE_ATTRIBUTES.revealed);
@@ -217,6 +240,7 @@ test('names a row action by the term it belongs to', () => {
 test('draws a missing value and says why it is missing', () => {
   assert.equal(contract.empty.part, 'placeholder');
   assert.match(contract.empty.text, /visually-hidden/);
+  assert.match(contract.empty.forms, /:empty/);
   assert.equal(contract.labels.placeholder, 'Not provided');
 });
 
@@ -262,6 +286,7 @@ test('holds the words it says apart from the values it defaults', () => {
     'collapse',
     'copied',
     'copy',
+    'copyBlocked',
     'placeholder',
     'reveal',
   ]);
@@ -271,7 +296,7 @@ test('holds the words it says apart from the values it defaults', () => {
   /* `copy` is a word here and a boolean input there — the control's name and
      whether it is drawn are two questions, and neither borrows the other's
      answer. Every other word stays out of the defaults entirely. */
-  for (const key of ['collapse', 'copied', 'placeholder', 'reveal']) {
+  for (const key of ['collapse', 'copied', 'copyBlocked', 'placeholder', 'reveal']) {
     assert.ok(!(key in list.defaults), `${key} is a word, not a default`);
   }
   assert.ok(contract.labelsReason.length > 40);

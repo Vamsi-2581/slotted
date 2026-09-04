@@ -20,6 +20,11 @@ export interface DescriptionListCopyRequest {
   readonly reason: 'pointer' | 'keyboard';
   /** `false` when the platform refused the write or offers no clipboard. */
   readonly copied: boolean;
+  /**
+   * `true` when the write was refused and the value was selected instead, so
+   * the reader can copy it with the keyboard.
+   */
+  readonly selected: boolean;
   readonly source?: Event;
 }
 
@@ -39,6 +44,12 @@ export interface DescriptionListLabels {
   collapse?: string;
   /** What a screen reader reads in place of a value that is missing. */
   placeholder?: string;
+  /**
+   * Announced when the platform refuses the clipboard and the family selects
+   * the value instead. A browser blocks `writeText` where the document is not
+   * focused, and inside an iframe that carries no `clipboard-write` permission.
+   */
+  copyBlocked?: string;
 }
 
 export interface DescriptionListDefaults {
@@ -59,6 +70,7 @@ export const DESCRIPTION_LIST_DEFAULT_LABELS: Required<DescriptionListLabels> = 
   collapse: 'Show less',
   copied: 'Copied',
   copy: 'Copy',
+  copyBlocked: 'Value selected — copy it with your keyboard',
   placeholder: 'Not provided',
   reveal: 'Show more',
 };
@@ -97,6 +109,43 @@ export function spanWithin(span: number | undefined, columns: number): number | 
   if (span === undefined) return undefined;
   const clamped = Math.min(Math.max(Math.trunc(span), 1), columns);
   return clamped > 1 ? clamped : undefined;
+}
+
+/**
+ * Whether a value wants more room than the lines it was given.
+ *
+ * It compares the height the text wants against the height the clamp allows,
+ * rather than comparing the box to itself: `scrollHeight` reports the full
+ * content either way, so the answer does not change when the clamp is released
+ * and the control does not disappear under the hand that pressed it. A line
+ * height CSS cannot resolve — `normal`, or an element with no layout — answers
+ * no, which leaves the control absent rather than present and useless.
+ *
+ * Shared with the React binding through the tests that assert the same table.
+ */
+export function overflowsClamp(scrollHeight: number, lineHeight: number, lines: number): boolean {
+  if (!Number.isFinite(lineHeight) || lineHeight <= 0 || lines <= 0) return false;
+  return scrollHeight > lineHeight * lines + 1;
+}
+
+/**
+ * Puts the value under the reader's own selection, which is the one thing left
+ * to offer when the platform refuses the clipboard. It returns whether it
+ * managed to, so the request can say what actually happened.
+ */
+export function selectValue(node: HTMLElement | null | undefined): boolean {
+  const selection = node?.ownerDocument.defaultView?.getSelection();
+  if (!node || !selection) return false;
+
+  try {
+    selection.removeAllRanges();
+    const range = node.ownerDocument.createRange();
+    range.selectNodeContents(node);
+    selection.addRange(range);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**

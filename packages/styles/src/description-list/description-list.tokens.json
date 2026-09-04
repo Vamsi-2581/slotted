@@ -30,6 +30,7 @@
   "--slotted-description-list-hint-font-size",
   "--slotted-description-list-line-height",
   "--slotted-description-list-placeholder-color",
+  "--slotted-description-list-placeholder-offset",
   "--slotted-description-list-placeholder-thickness",
   "--slotted-description-list-placeholder-width",
   "--slotted-description-list-radius",

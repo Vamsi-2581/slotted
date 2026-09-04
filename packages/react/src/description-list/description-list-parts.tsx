@@ -8,6 +8,8 @@ import {
   useDescriptionList,
   useDescriptionListItem,
 } from './description-list';
+import type { ReactNode } from 'react';
+
 import type {
   DescriptionListActionProps,
   DescriptionListActionRootProps,
@@ -24,6 +26,60 @@ import type {
 
 /** How long the copy control says it succeeded before returning to rest. */
 export const COPIED_FOR = 2000;
+
+/**
+ * A missing value in one of two forms. Words a consumer stated are shown, because
+ * someone who writes "Not set yet" means a reader to see it; with none stated the
+ * mark is drawn and the sentence is read instead, because a panel of twelve empty
+ * rows saying "Not provided" twelve times is noise. The stylesheet tells the two
+ * apart with `:empty`, so no attribute has to.
+ */
+function placeholderContent(stated: ReactNode | undefined, fallback: string) {
+  if (stated !== undefined && stated !== null && stated !== '') {
+    return <span data-part="placeholder">{stated}</span>;
+  }
+  return (
+    <>
+      <span aria-hidden="true" data-part="placeholder" />
+      <span data-ui="visually-hidden">{fallback}</span>
+    </>
+  );
+}
+
+/**
+ * Whether a value wants more room than the lines it was given.
+ *
+ * It compares the height the text wants against the height the clamp allows,
+ * rather than comparing the box to itself: `scrollHeight` reports the full
+ * content either way, so the answer does not change when the clamp is released
+ * and the control does not disappear under the hand that pressed it. A line
+ * height CSS cannot resolve — `normal`, or an element with no layout — answers
+ * no, which leaves the control absent rather than present and useless.
+ */
+export function overflowsClamp(scrollHeight: number, lineHeight: number, lines: number): boolean {
+  if (!Number.isFinite(lineHeight) || lineHeight <= 0 || lines <= 0) return false;
+  return scrollHeight > lineHeight * lines + 1;
+}
+
+/**
+ * Puts the value under the reader's own selection, which is the one thing left
+ * to offer when the platform refuses the clipboard. It returns whether it
+ * managed to, so the request can say what actually happened.
+ */
+export function selectValue(node: HTMLElement | null): boolean {
+  const selection = node === null ? null : node.ownerDocument.defaultView?.getSelection();
+  if (node === null || selection === null || selection === undefined) return false;
+
+  try {
+    selection.removeAllRanges();
+    const range = node.ownerDocument.createRange();
+    range.selectNodeContents(node);
+    selection.addRange(range);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * A span is stated in columns and the list may have fewer, so a pair asking for
@@ -150,6 +206,7 @@ export function DescriptionListDescription({
 
   const [own, setOwn] = useState(defaultRevealed ?? false);
   const [copied, setCopied] = useState(false);
+  const [overflows, setOverflows] = useState(false);
   const current = revealed ?? own;
 
   const lines = clamp === undefined ? 0 : Math.max(0, Math.trunc(clamp));
@@ -157,6 +214,36 @@ export function DescriptionListDescription({
   const missing = empty ?? (children === undefined || children === null || children === '');
 
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  /**
+   * A control that reveals nothing is a control a reader presses once and
+   * learns to distrust. A clamp is a maximum rather than a promise: most values
+   * in a panel are shorter than it, and the toggle appears only for the ones
+   * that are not.
+   *
+   * The measurement is the same in both states, so revealing does not make the
+   * control disappear under the hand that pressed it: `scrollHeight` is the
+   * height the text wants, clamped or not, and the answer is whether it wants
+   * more than the lines it was given. It is remeasured whenever the value's box
+   * changes, which is what the container query does to it at every breakpoint.
+   */
+  useEffect(() => {
+    const node = value.current;
+    if (!clamped || node === null || typeof ResizeObserver === 'undefined') {
+      setOverflows(false);
+      return;
+    }
+
+    const measure = () => {
+      const lineHeight = Number.parseFloat(getComputedStyle(node).lineHeight);
+      setOverflows(overflowsClamp(node.scrollHeight, lineHeight, lines));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [clamped, lines]);
 
   const reveal = (next: boolean, reason: 'pointer' | 'keyboard', source?: unknown) => {
     const state = createControllable<boolean>({
@@ -172,6 +259,7 @@ export function DescriptionListDescription({
        value is what the reader sees, and `copyValue` is for when it is not. */
     const text = copyValue ?? value.current?.textContent?.trim() ?? '';
     const done = await copyToClipboard(text);
+    let selected = false;
 
     if (done) {
       setCopied(true);
@@ -180,9 +268,26 @@ export function DescriptionListDescription({
       /* Through the shared announcer rather than a region this family owns, so
          two copies in one update are both heard. */
       getLiveAnnouncer().announce(list.labels.copied);
+    } else {
+      /**
+       * A refused write used to leave the control at rest and the reader with
+       * nothing — which is indistinguishable from a broken button, and is
+       * exactly what a browser does when the document is not focused or the
+       * page is in an iframe carrying no `clipboard-write` permission. So the
+       * family does the part it still can: it selects the value, which the
+       * reader can see and copy with the keyboard, and says so.
+       */
+      selected = selectValue(value.current);
+      getLiveAnnouncer().announce(list.labels.copyBlocked);
     }
 
-    const request: DescriptionListCopyRequest = { copied: done, reason, source, value: text };
+    const request: DescriptionListCopyRequest = {
+      copied: done,
+      reason,
+      selected,
+      source,
+      value: text,
+    };
     onCopy?.(request);
   };
 
@@ -210,14 +315,7 @@ export function DescriptionListDescription({
     children: (
       <>
         <span data-part="value" ref={value}>
-          {missing ? (
-            <>
-              <span aria-hidden="true" data-part="placeholder" />
-              <span data-ui="visually-hidden">{placeholder ?? list.labels.placeholder}</span>
-            </>
-          ) : (
-            children
-          )}
+          {missing ? placeholderContent(placeholder, list.labels.placeholder) : children}
         </span>
         {copy === true ? (
           <button
@@ -229,7 +327,7 @@ export function DescriptionListDescription({
             type="button"
           />
         ) : null}
-        {clamped ? (
+        {clamped && overflows ? (
           <button
             aria-expanded={current}
             data-part="toggle"

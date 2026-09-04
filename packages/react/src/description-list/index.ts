@@ -12,6 +12,8 @@ export {
   DescriptionListHint,
   DescriptionListItem,
   DescriptionListTerm,
+  overflowsClamp,
+  selectValue,
   spanWithin,
 } from './description-list-parts';
 export type {

@@ -14,10 +14,45 @@ import {
 } from './description-list';
 import {
   copyToClipboard,
+  overflowsClamp,
   provideDescriptionListDefaults,
   spanWithin,
   type DescriptionListCopyRequest,
 } from './description-list.constants';
+
+/**
+ * jsdom has no layout, so a value's `scrollHeight` is zero and its resolved
+ * line height is empty — and the control that reveals a clamped value appears
+ * only for a value that has more text than the clamp allows. The measurement is
+ * stubbed rather than skipped, because what is being tested is what the family
+ * does with the answer.
+ */
+function withLayout(scrollHeight: number, lineHeight = '20px') {
+  const computed = window.getComputedStyle.bind(window);
+  vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+    const style = computed(element as Element, pseudo as string | undefined);
+    Object.defineProperty(style, 'lineHeight', { configurable: true, get: () => lineHeight });
+    return style;
+  });
+  Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
+    configurable: true,
+    get: () => scrollHeight,
+  });
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  Reflect.deleteProperty(HTMLElement.prototype, 'scrollHeight');
+});
 
 const PARTS = [
   SlDescriptionList,
@@ -184,8 +219,10 @@ class Clamped {
 }
 
 describe('a clamped value', () => {
-  function clamped() {
+  function clamped(scrollHeight = 200) {
+    withLayout(scrollHeight);
     const fixture = TestBed.createComponent(Clamped);
+    fixture.detectChanges();
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     return {
@@ -194,6 +231,25 @@ describe('a clamped value', () => {
       toggle: () => root.querySelector('[data-part="toggle"]') as HTMLButtonElement,
     };
   }
+
+  /**
+   * A clamp is a maximum rather than a promise. Most values in a panel are
+   * shorter than it, and a control that reveals nothing is one a reader presses
+   * once and learns to distrust.
+   */
+  it('decides whether there is anything to reveal by measuring, not by asking', () => {
+    expect(overflowsClamp(60, 20, 2)).toBe(true);
+    expect(overflowsClamp(40, 20, 2)).toBe(false);
+    expect(overflowsClamp(41, 20, 2)).toBe(false);
+    expect(overflowsClamp(100, Number.NaN, 2)).toBe(false);
+    expect(overflowsClamp(100, 20, 0)).toBe(false);
+  });
+
+  it('draws no control for a value the clamp already fits', () => {
+    const { toggle, description } = clamped(20);
+    expect(toggle()).toBeNull();
+    expect(description.getAttribute('data-clamp')).toBe('');
+  });
 
   it('keeps every character in the DOM and says how many lines it shows', () => {
     const { description } = clamped();
@@ -271,7 +327,7 @@ describe('a clamped value', () => {
       </div>
       <div slDescriptionListItem>
         <dt slDescriptionListTerm>Owner</dt>
-        <dd slDescriptionListDescription empty></dd>
+        <dd slDescriptionListDescription empty [placeholder]="placeholder()"></dd>
       </div>
       <div slDescriptionListItem>
         <dt slDescriptionListTerm id="own-term">Name</dt>
@@ -283,6 +339,7 @@ describe('a clamped value', () => {
 })
 class Panels {
   readonly copyValue = signal<string | undefined>(undefined);
+  readonly placeholder = signal<string | undefined>(undefined);
   readonly results: DescriptionListCopyRequest[] = [];
 }
 
@@ -351,6 +408,11 @@ describe('copying, the missing value and the row action', () => {
     await expect(copyToClipboard('value')).resolves.toBe(false);
   });
 
+  /**
+   * Words a consumer states are meant to be seen. Without them the mark is drawn
+   * and the sentence is read instead, because a panel of twelve empty rows
+   * saying "Not provided" twelve times is noise.
+   */
   it('draws the placeholder for a value that is missing, and says why', () => {
     const { root } = panels();
     const mark = root.querySelector('[data-part="placeholder"]') as HTMLElement;
@@ -358,6 +420,36 @@ describe('copying, the missing value and the row action', () => {
     expect(mark.getAttribute('aria-hidden')).toBe('true');
     expect(mark.textContent).toBe('');
     expect(root.querySelector('[data-ui="visually-hidden"]')?.textContent).toBe('Not provided');
+  });
+
+  it('shows the words it was given rather than drawing over them', () => {
+    const { fixture, root } = panels();
+    fixture.componentInstance.placeholder.set('Not set yet');
+    fixture.detectChanges();
+
+    const mark = root.querySelector('[data-part="placeholder"]') as HTMLElement;
+    expect(mark.textContent?.trim()).toBe('Not set yet');
+    expect(mark.getAttribute('aria-hidden')).toBeNull();
+    expect(root.querySelector('[data-ui="visually-hidden"]')).toBeNull();
+  });
+
+  /**
+   * A browser refuses `writeText` where the document is not focused, and inside
+   * an iframe carrying no `clipboard-write` permission — which is where a
+   * Storybook page lives. Leaving the control at rest made a working button
+   * indistinguishable from a broken one, so the family does the part it still
+   * can: it selects the value and says so.
+   */
+  it('selects the value where the clipboard is refused, so the reader can take it', async () => {
+    writeText.mockRejectedValue(new Error('denied'));
+    const { fixture, root } = panels();
+
+    (root.querySelector('[data-part="copy"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.results[0]).toMatchObject({ copied: false, selected: true });
+    expect(String(document.getSelection())).toContain('arn:aws:iam');
   });
 
   /** A static attribute the consumer wrote survives, and is composed with. */

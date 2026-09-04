@@ -4,6 +4,11 @@ Against `.claude/skills/component/references/rubric.md` and section 18 of
 `docs/component-features.md`. Every dimension names the one change that would
 most improve it, and says whether it was made.
 
+Three things came back from the release gate and were fixed before it closed:
+the mark standing in for a missing value, the copy control that appeared to do
+nothing, and a reveal control offered for values with nothing to reveal. Each is
+recorded in the dimension it belongs to rather than in a list of its own.
+
 Evidence read: the harness page at
 `tools/harness/out/description-list.html`; captures in light, dark and
 high-contrast at 420, light at 240 and 720, dense, right-to-left, `--focus` on
@@ -25,10 +30,17 @@ system colour under forced colours. No mark is direction-sensitive: the chevron
 points down and up, and the right-to-left capture shows the same component
 mirrored rather than rearranged.
 
-**The one change:** make the placeholder a glyph token so a theme can replace
-the mark. **Not made** — the placeholder is a rule 0.75em wide and one border
-width thick, which is a proportion of the type it stands in for. Geometry is not
-artwork, and a token would invite a theme to put a character back.
+**The one change:** the mark standing in for a missing value read badly — too
+long, and centred in the line box, which is a descender below the middle of the
+text it stands in for. **Made**: it is shorter, it sits at the middle of a
+lower-case letter through `vertical-align`, and it is drawn only where the
+absence has no words of its own. Words a consumer states are now shown as they
+were written, because someone who writes "Not set yet" means a reader to see it;
+`:empty` tells the two forms apart, so no attribute has to.
+
+Making it a glyph token was considered and declined: the rule is a proportion of
+the type it replaces, geometry rather than artwork, and a token would invite a
+theme to put a character back.
 
 ## 2. Motion
 
@@ -93,6 +105,9 @@ the moment the value wrapped, so a three-line checksum ended two lines above its
 own button. **Made**: a description with nothing but a value and a control is a
 block, so the control follows the last line in inline flow; the grid stays for
 the ones with a toggle on a second row.
+
+A fourth, found at the gate: the placeholder mark sat a descender low and read as
+attached to the label above it. **Made**, under Icons above.
 
 Holds at 200% zoom: the floor, the breakpoints and the term width are all in
 `rem`, so the whole arrangement scales together rather than reflowing.
@@ -180,9 +195,18 @@ order, for every state the contract declares.
   rather than a region this family owns, so two copies in one update are both
   heard, and it changes its mark as well as its colour.
 
-**The one change:** announce the reveal as well as the copy. **Not made** —
-`aria-expanded` on the toggle already says it at the moment the reader presses
-it, and a live message would say it twice.
+**The one change:** the copy control failed silently. A browser refuses
+`writeText` where the document is not focused, and inside an iframe carrying no
+`clipboard-write` permission — a Storybook page is both, which is how the defect
+was found. The control returned to rest and the reader was left with nothing,
+which is indistinguishable from a broken button. **Made**: a refused write now
+puts the value under the reader's own selection, announces that it did, and
+reports `selected: true` in the request. The reader sees the highlight and
+copies it with the keyboard.
+
+Announcing the reveal as well was considered and declined: `aria-expanded` on the
+toggle already says it at the moment the reader presses it, and a live message
+would say it twice.
 
 **What this machine cannot verify:** no screen reader, no touch device and no
 real screen were used. What was checked in their place: the accessible names and
@@ -239,9 +263,17 @@ the platform. The keyboard table is checked key by key against the sourced
 pattern, including the focus destination — which is "stays on the control" for
 all three, because nothing here removes the element a reader is on.
 
-**The one change:** ship the help popover PatternFly puts on a term. **Deferred**
-to `popover`, wave 5, in writing. The half that needs no layer — a sentence under
-the name — ships now as the `hint` part.
+**The one change:** the reveal control appeared for every clamped value, including
+the ones already shorter than the clamp — a control that reveals nothing is one a
+reader presses once and learns to distrust. **Made**: the value is measured
+against the height its clamp allows and remeasured by a `ResizeObserver`, which
+is what the container query needs at every breakpoint; the same comparison
+answers in both states, so revealing does not make the control disappear under
+the hand that pressed it.
+
+Shipping the help popover PatternFly puts on a term is **deferred** to `popover`,
+wave 5, in writing. The half that needs no layer — a sentence under the name —
+ships now as the `hint` part.
 
 ## 10. Ecosystem integration
 
@@ -318,7 +350,8 @@ the gate rather than taken.
    theme, with no infinite animation to stop.
 8. **Loading, empty, error, disabled, extreme content.** Loading is `skeleton` in
    the value slot, proven in the composition story. Empty is the `placeholder`
-   part. There is no error state: a read-only pair cannot be invalid, and a
+   part, in two forms: words a consumer states are shown, and with none stated
+   the mark is drawn and the sentence is read instead. There is no error state: a read-only pair cannot be invalid, and a
    value that failed to load is the consumer's own message in the slot. Disabled
    is the platform's on both controls. Extreme content — a 64-character hash, a
    German compound, a right-to-left pair — has a scene in the harness and a
@@ -332,7 +365,7 @@ the gate rather than taken.
 10. **Examples.** Thirteen demonstrations per page, including the family in a
     card beside `status-indicator`, `tag`, `skeleton` and `link`, content the
     family did not choose, and the keyboard.
-11. **Behavioural tests shared between bindings.** Twenty-six in React, twenty in
+11. **Behavioural tests shared between bindings.** Thirty in React, twenty-four in
     Angular, asserting the same outcomes: the elements and parts, no invented
     role, the axis resolution order, the term width custom property, the span
     clamp, the clamp keeping every character, the uncontrolled and controlled

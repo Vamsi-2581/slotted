@@ -28,6 +28,7 @@ function answer(labels: DescriptionListLabels): DescriptionListResolvedLabels {
     collapse: labels.collapse ?? DEFAULT_DESCRIPTION_LIST_LABELS.collapse,
     copied: labels.copied ?? DEFAULT_DESCRIPTION_LIST_LABELS.copied,
     copy: labels.copy ?? DEFAULT_DESCRIPTION_LIST_LABELS.copy,
+    copyBlocked: labels.copyBlocked ?? DEFAULT_DESCRIPTION_LIST_LABELS.copyBlocked,
     placeholder: labels.placeholder ?? DEFAULT_DESCRIPTION_LIST_LABELS.placeholder,
     reveal: labels.reveal ?? DEFAULT_DESCRIPTION_LIST_LABELS.reveal,
   };

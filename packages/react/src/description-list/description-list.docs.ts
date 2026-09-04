@@ -83,21 +83,21 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: false,
     purpose:
-      'Drawn in place of a value that is missing: a rule in CSS, with the reason beside it in text a screen reader reads.',
+      'A value that is missing, in one of two forms: words a consumer stated, shown as they were written, or a rule drawn in CSS with the reason beside it in text a screen reader reads.',
   },
   {
     part: 'copy',
     element: 'button',
     required: false,
     purpose:
-      'Puts the value on the clipboard and says it finished, by its mark as well as by its colour.',
+      'Puts the value on the clipboard and says it finished, by its mark as well as by its colour. Where the platform refuses the write it selects the value instead, so the reader can take it with the keyboard.',
   },
   {
     part: 'toggle',
     element: 'button',
     required: false,
     purpose:
-      'Reveals a clamped value and clamps it again. It carries aria-expanded, which is the APG Disclosure pattern.',
+      'Reveals a clamped value and clamps it again, and appears only where the value wants more room than the clamp gives it. It carries aria-expanded, which is the APG Disclosure pattern.',
   },
   {
     part: 'action',
@@ -182,7 +182,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'empty',
     title: 'A value that is not there',
-    note: 'An empty cell is a row a reader cannot tell from a defect. Nullish children draw the placeholder — a rule, not an em dash — and a screen reader hears the reason rather than silence.',
+    note: 'An empty cell is a row a reader cannot tell from a defect. Nullish children draw the mark — a rule, not an em dash — and a screen reader hears the reason; words you state are shown as you wrote them.',
     snippet: defineSnippet({
       id: 'description-list-react-empty',
       language: 'tsx',
@@ -218,7 +218,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'reveal',
     title: 'A value longer than its row',
-    note: 'Clamping is visual: every character stays in the DOM, selectable and readable by a screen reader, and the control brings the rest into view. Hold revealed yourself when the choice should survive a navigation.',
+    note: 'Clamping is visual: every character stays in the DOM, selectable and readable by a screen reader, and the control brings the rest into view — and appears only where there is a rest to bring. Hold revealed yourself when the choice should survive a navigation.',
     snippet: defineSnippet({
       id: 'description-list-react-reveal',
       language: 'tsx',
@@ -274,7 +274,7 @@ const events: EventRow[] = [
   {
     name: 'onCopy',
     payload: '(request: DescriptionListCopyRequest)',
-    when: 'After the clipboard write, whether or not the platform accepted it. It carries the exact text, the reason, and copied — false where there is no clipboard or the write was refused. It is not a ChangeRequest: there is nothing to cancel and no state the family holds.',
+    when: 'After the clipboard write, whether or not the platform accepted it. It carries the exact text, the reason, copied — false where there is no clipboard or the write was refused — and selected, true where the family put the value under the reader’s own selection instead. It is not a ChangeRequest: there is nothing to cancel and no state the family holds.',
   },
 ];
 
@@ -312,7 +312,7 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
         'DescriptionListLabels',
         '—',
         'DescriptionList',
-        'The five words the family says: copy, copied, reveal, collapse, placeholder',
+        'The six words the family says: copy, copied, copyBlocked, reveal, collapse, placeholder',
       ],
       [
         'span',
@@ -354,7 +354,7 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
         'ReactNode',
         '—',
         'DescriptionListDescription',
-        'What is read in place of a value that is missing; the labels answer where it is unset',
+        'Words shown in place of a value that is missing. Unset, the mark is drawn and the labels answer what is read instead',
       ],
       [
         'revealed',
@@ -410,6 +410,8 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
       'The reveal toggle is the APG Disclosure pattern — role button, aria-expanded true while the content is visible, Enter and Space toggling — and the copy control is a plain button, so both take their keyboard behaviour from the platform. The family adds no key of its own: a read-only list of pairs is not a composite widget, and inventing arrow navigation would take Tab away from controls that need it.',
       'Clamping is visual only. Every character stays in the DOM, selectable, copyable and readable by a screen reader, which is what the repository means by never truncating without access.',
       'A finished copy is announced politely through the shared live announcer rather than a region this family owns, so two copies in one update are both heard; and the control changes its mark as well as its colour, so a reader who cannot see the green still sees it finish.',
+      'A browser refuses the clipboard where the document is not focused, and inside an iframe carrying no clipboard-write permission — a Storybook page is both. A control that failed silently there would be indistinguishable from a broken one, so the family selects the value instead and announces that it did: the reader sees the selection and copies it with the keyboard.',
+      'A clamp is a maximum rather than a promise, so the reveal control appears only for a value that has more text than the clamp allows. A control that reveals nothing is one a reader presses once and learns to distrust.',
     ],
     snippets: [
       defineSnippet({

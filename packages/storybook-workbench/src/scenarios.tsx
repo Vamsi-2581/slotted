@@ -217,11 +217,19 @@ export function apiMetadataErrors(
  * already proved the story existed, and the only thing left to get wrong was
  * the copy. A whole reference page failed to render over one missing line, and
  * every test passed.
+ *
+ * The scene type is generic so that it survives. Declaring the parameter as
+ * `{ snippet: unknown }` widened every scene's snippet to `unknown` on the way
+ * out, and the result was then assignable to nothing — which is why forty
+ * stories files ended a call to this function with `as never`. A cast is not a
+ * convention; it is a defect wearing one, and every one of those files was
+ * silently opting out of the check that the scene it bound is the scene the
+ * page declares.
  */
-export function bindScenes<Story>(
-  scenes: readonly { id: string; title: string; note: string; snippet: unknown }[],
-  stories: Record<string, Story>,
-) {
+export function bindScenes<
+  Scene extends { id: string; title: string; note: string; snippet: unknown },
+  Story,
+>(scenes: readonly Scene[], stories: Record<string, Story>): (Scene & { of: Story })[] {
   const declared = new Map<string, Story>();
   for (const [name, story] of Object.entries(stories)) {
     if (name === 'default') continue;

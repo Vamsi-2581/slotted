@@ -231,3 +231,23 @@ describe('bindScenes', () => {
     expect(() => bindScenes([scene('missing')], {})).toThrow(/bound to no story/);
   });
 });
+
+/**
+ * The scene type has to survive the call. A parameter declared as
+ * `{ snippet: unknown }` widened it on the way out, and the result was
+ * assignable to nothing — which is what put `as never` at the end of forty
+ * stories files, each one quietly opting out of the check that the scene it
+ * bound is the scene the page declares.
+ */
+describe('bindScenes typing', () => {
+  it('keeps the scene it was given, and adds the story to it', () => {
+    const snippet = { id: 's', label: 'S', language: 'tsx' as const, source: 'x\n' };
+    const scenes = [{ id: 'playground', title: 'T', note: 'N', snippet }];
+    const bound = bindScenes(scenes, { playground: { parameters: scenario('playground') } });
+
+    const [first] = bound;
+    expect(first?.snippet.source).toBe('x\n');
+    expect(first?.of).toBeDefined();
+    expect(first?.title).toBe('T');
+  });
+});

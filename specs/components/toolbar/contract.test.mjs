@@ -206,9 +206,10 @@ test('documents the pattern guidance it does not enforce', () => {
  * the consumer placed. A container that painted them would be painting over a
  * family it does not own.
  */
-test('paints no state, because every state in a bar belongs to a control', () => {
-  assert.deepEqual(member.states, ['default']);
-  assert.equal('stateAttributes' in contract, false);
+test('paints only the states of the one control it draws itself', () => {
+  assert.deepEqual(member.states, ['default', 'hover', 'active', 'focus-visible', 'open']);
+  assert.deepEqual(contract.stateAttributes, { open: 'data-open' });
+  assert.match(contract.wiring['disabled on the overflow trigger'], /writes no `data-disabled`/);
 });
 
 /**

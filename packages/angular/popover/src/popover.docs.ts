@@ -103,7 +103,13 @@ const anatomy: AnatomyRow[] = [
 ];
 
 const api = apiRows([
-  ['open', 'boolean', '—', 'Popover', 'Present means controlled, for the life of the component.'],
+  [
+    'open',
+    'boolean',
+    'false',
+    'slPopover',
+    'Two-way. Bind it with [(open)] and a template owns the value; leave it and the family does.',
+  ],
   [
     'defaultOpen',
     'boolean',
@@ -153,7 +159,7 @@ const api = apiRows([
     'slPopover',
     'fixed for a layer inside overflow: hidden, absolute for one inside a transform.',
   ],
-  ['arrow', 'boolean', 'true', 'Popover', 'Whether the layer draws the arrow at all.'],
+  ['arrow', 'boolean', 'true', 'slPopover', 'Whether the layer draws the arrow at all.'],
   [
     'autoFocus',
     'boolean',
@@ -161,7 +167,7 @@ const api = apiRows([
     'slPopover',
     'Whether the panel takes focus on open. It focuses the panel itself rather than its first control, so a reader hears the panel’s name first and a panel whose first control is destructive does not arrive pre-armed.',
   ],
-  ['closeOnEscape', 'boolean', 'true', 'Popover', 'Escape closes, from the topmost layer only.'],
+  ['closeOnEscape', 'boolean', 'true', 'slPopover', 'Escape closes, from the topmost layer only.'],
   [
     'closeOnOutsidePress',
     'boolean | (target, event) => boolean',
@@ -169,8 +175,8 @@ const api = apiRows([
     'slPopover',
     'A press outside closes it. A predicate decides which presses count, for a panel that has to survive a press on a toast beside it.',
   ],
-  ['flip', 'boolean', 'true', 'Popover', 'Move to the opposite side when this one collides.'],
-  ['shift', 'boolean', 'true', 'Popover', 'Slide along the side to stay inside the boundary.'],
+  ['flip', 'boolean', 'true', 'slPopover', 'Move to the opposite side when this one collides.'],
+  ['shift', 'boolean', 'true', 'slPopover', 'Slide along the side to stay inside the boundary.'],
   [
     'hideWhenDetached',
     'boolean',
@@ -206,7 +212,7 @@ const api = apiRows([
     'slPopover',
     'Distance beyond the standard gap, which is the layer’s own padding rather than empty page.',
   ],
-  ['alignOffset', 'number', '0', 'Popover', 'Distance along the alignment axis.'],
+  ['alignOffset', 'number', '0', 'slPopover', 'Distance along the alignment axis.'],
   [
     'collisionPadding',
     'number',
@@ -306,11 +312,11 @@ const snippets = [
   defineSnippet({
     id: 'popover-angular-application-defaults',
     label: 'Application defaults',
-    language: 'angular',
+    language: 'ts',
     source: `
-<PopoverDefaultsProvider closeLabel="Fechar" size="lg">
-  <App /> </PopoverDefaultsProvider
->;
+bootstrapApplication(App, {
+  providers: [providePopoverDefaults({ closeLabel: 'Fechar', size: 'lg' })],
+});
 `,
   }),
   defineSnippet({

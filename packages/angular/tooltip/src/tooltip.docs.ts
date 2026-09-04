@@ -65,7 +65,7 @@ const api = apiRows([
     'open',
     'boolean',
     '—',
-    'Tooltip',
+    'slTooltip',
     'Two-way. Bind it with [(open)] and a template owns the value; leave it and the family does.',
   ],
   [
@@ -131,7 +131,7 @@ const api = apiRows([
     'slTooltip',
     'fixed for a layer inside overflow: hidden, absolute for one inside a transform.',
   ],
-  ['arrow', 'boolean', 'true', 'Tooltip', 'Whether the layer draws the arrow at all.'],
+  ['arrow', 'boolean', 'true', 'slTooltip', 'Whether the layer draws the arrow at all.'],
   [
     'hoverable',
     'boolean',
@@ -146,8 +146,8 @@ const api = apiRows([
     'slTooltip',
     'Whether pressing the trigger closes the hint, so it is not left over the dialog its button just opened.',
   ],
-  ['flip', 'boolean', 'true', 'Tooltip', 'Move to the opposite side when this one collides.'],
-  ['shift', 'boolean', 'true', 'Tooltip', 'Slide along the side to stay inside the boundary.'],
+  ['flip', 'boolean', 'true', 'slTooltip', 'Move to the opposite side when this one collides.'],
+  ['shift', 'boolean', 'true', 'slTooltip', 'Slide along the side to stay inside the boundary.'],
   [
     'hideWhenDetached',
     'boolean',
@@ -166,7 +166,7 @@ const api = apiRows([
     'disabled',
     'boolean',
     'false',
-    'Tooltip',
+    'slTooltip',
     'The tooltip never opens. The trigger’s own disabled is the consumer’s.',
   ],
   [
@@ -204,12 +204,12 @@ const api = apiRows([
     'slTooltip',
     'Distance beyond the standard gap, which is the layer’s own padding rather than empty page.',
   ],
-  ['alignOffset', 'number', '0', 'Tooltip', 'Distance along the alignment axis.'],
+  ['alignOffset', 'number', '0', 'slTooltip', 'Distance along the alignment axis.'],
   [
     'collisionPadding',
     'number',
     '8',
-    'Tooltip',
+    'slTooltip',
     'How close to the boundary edge the layer may sit.',
   ],
   [

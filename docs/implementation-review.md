@@ -11,15 +11,15 @@ Documento de trabalho para um agente executor. Cada item descreve: sintoma obser
 
 ## Layout do repositório relevante
 
-| Camada | Caminho | Conteúdo |
-| --- | --- | --- |
-| Contrato | `specs/components/<componente>/contract.json` | Props, partes, estados. Toda remoção ou adição de prop começa aqui. |
-| Estilo | `packages/styles/src/<componente>/<componente>.css` + `.tokens.json` + `.harness.html` | Fonte única de estilo para React e Angular. |
-| Tema | `packages/themes/default/src/theme.json` | Valores por esquema (`light`, `dark`, `high-contrast`), incluindo glifos `--slotted-icon-*`. |
-| Tokens | `packages/tokens/src/contract.json` | Declaração dos tokens. |
-| Comportamento | `packages/core/src/<módulo>` | `positioner`, `presence`, `dismissable-layer`, `portal`, `collection`, `number`, `focus`. |
-| React | `packages/react/src/<componente>` | Componente, stories, testes. |
-| Angular | `packages/angular/<componente>/src` | Componente, stories, testes. |
+| Camada        | Caminho                                                                                | Conteúdo                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Contrato      | `specs/components/<componente>/contract.json`                                          | Props, partes, estados. Toda remoção ou adição de prop começa aqui.                          |
+| Estilo        | `packages/styles/src/<componente>/<componente>.css` + `.tokens.json` + `.harness.html` | Fonte única de estilo para React e Angular.                                                  |
+| Tema          | `packages/themes/default/src/theme.json`                                               | Valores por esquema (`light`, `dark`, `high-contrast`), incluindo glifos `--slotted-icon-*`. |
+| Tokens        | `packages/tokens/src/contract.json`                                                    | Declaração dos tokens.                                                                       |
+| Comportamento | `packages/core/src/<módulo>`                                                           | `positioner`, `presence`, `dismissable-layer`, `portal`, `collection`, `number`, `focus`.    |
+| React         | `packages/react/src/<componente>`                                                      | Componente, stories, testes.                                                                 |
+| Angular       | `packages/angular/<componente>/src`                                                    | Componente, stories, testes.                                                                 |
 
 Verificação obrigatória após cada correção: `pnpm check` e `turbo run verify --filter <pacote afetado>`.
 
@@ -198,7 +198,7 @@ Localização: `packages/styles/src/select/select.css`, `packages/react/src/sele
   1. O positioner lê `getBoundingClientRect()` do overlay já transformado (`translate`) e soma o deslocamento anterior ao novo cálculo (acumulação). Correção: medir com `transform: none` ou usar `offsetWidth`/`offsetHeight` mais posição do âncora.
   2. `hover` altera a largura de uma opção (por exemplo, `font-weight` ou scrollbar), disparando `ResizeObserver` do overlay, que reposiciona com base na largura já deslocada.
   3. O `Popover` de largura igual ao controle (`#Popover:1`) mede a largura do controle incluindo borda em um caso e excluindo em outro.
-  Ação obrigatória: escrever teste em `positioner.test.ts` que simula 10 reposicionamentos consecutivos com o mesmo âncora e verifica que o resultado é idêntico em cada iteração (`x`, `y` estáveis). O teste falha antes da correção e passa depois. Verificar depois nos quatro componentes consumidores.
+     Ação obrigatória: escrever teste em `positioner.test.ts` que simula 10 reposicionamentos consecutivos com o mesmo âncora e verifica que o resultado é idêntico em cada iteração (`x`, `y` estáveis). O teste falha antes da correção e passa depois. Verificar depois nos quatro componentes consumidores.
 - [ ] **SL2 — Direção da animação de abertura.** Estado atual: entrada horizontal (esquerda para direita). Esperado: ver R7 (vertical, na direção da abertura). Corrigir em `select.css` e no ponto de origem compartilhado se a animação vier de `popover.css` ou de `presence`. (MAOC)
 - [ ] **SL3 — Ícones à direita (clear, chevron) pequenos em `compact` e `dense`.** Esperado: o glifo usa `--slotted-control-icon-size-<densidade>` com piso de 14px. Em `compact` o controle pode ter 24px de altura e o glifo 14px; nunca abaixo disso. Relacionado a R2 (o botão de clear é parte interna). (MAOC — `Combobox`, `TextField`, `NumberField`, `CurrencyField`)
 - [ ] **SL4 — Prévia de múltipla seleção "Apple +1".** Esperado: renderizar os valores selecionados como `Tag` compactas (altura igual a `--slotted-control-icon-size-<densidade>` + 4px) dentro do controle, com overflow calculado por `ResizeObserver`: as tags que não cabem colapsam em uma única tag `+N`. Cada tag tem botão interno de remoção (R2). Fallback textual "N selecionados" apenas quando o controle está abaixo de 120px de largura. (MAOC — `Combobox` múltiplo)
@@ -223,7 +223,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
   - Sublinhado de 1px em `accent-border` via `text-decoration: underline` com `text-underline-offset: 2px` e `text-decoration-thickness: 1px`, ou `box-shadow: inset 0 -1px 0 var(--slotted-tone-accent-border)`.
   - Em `data-disabled`: fundo transparente, cor `inherit`, sublinhado mantido.
   - `forced-colors`: `Mark`/`MarkText`, já implementado; preservar.
-  Critério de aceite: a largura da string com e sem `<mark>` difere em 0px (testar via `getBoundingClientRect().width` do label com e sem `matchRanges`). (MAOC)
+    Critério de aceite: a largura da string com e sem `<mark>` difere em 0px (testar via `getBoundingClientRect().width` do label com e sem `matchRanges`). (MAOC)
 - [ ] **CB7 — Valor livre não validado.** Esperado: prop `allowCustomValue` (padrão `false`). Com `false`, ao perder o foco (`blur`) com texto que não corresponde a nenhum item, o campo volta ao último valor válido (ou vazio) e emite `onInputReset`. Com `true`, o texto é aceito como valor. Documentar no contrato e nas stories dos dois frameworks.
 - [ ] **CB8 — Criação de novo valor.** Esperado: prop `onCreate` (ou `creatable`) que, quando presente e a query não corresponde a nenhum item, renderiza uma opção final `Criar "<query>"` no listbox. Selecioná-la chama `onCreate(query)` e o consumidor decide se adiciona o item à coleção. Modo múltiplo integra com as tags de `#Select:4`. Story obrigatória: input de tags com criação.
 

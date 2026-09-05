@@ -87,15 +87,23 @@ test('gives every tone the mark the contract maps it to', () => {
 });
 
 /**
- * The mark is geometry rather than a character, and it is one line box tall so
- * it lands on the message's first line at every reach and every density. The
- * escape hatch is the outer half of the `var()`, so an application with its own
- * icon set keeps the tone, the size and the alignment.
+ * The mark is geometry rather than a character, and it is the title's own size
+ * on the title's first line (R5): a square of `1em` — the root's font size is
+ * the title's — pushed down by half the difference between one line and the
+ * mark, so it lands on the message's first line at every reach and every
+ * density and stays there when the title wraps. The escape hatch is the outer
+ * half of the `var()`, so an application with its own icon set keeps the tone,
+ * the size and the alignment. `packages/styles/src/status-mark.test.mjs` holds
+ * the same rule for every family that draws one.
  */
-test('draws the mark as a mask, sized to the first line of the message', () => {
+test('draws the mark as a mask, the title’s size, on the title’s first line', () => {
+  assert.match(rule(root), /--_mark-size:1em/);
   const icon = rule(`${ui}>[data-part='icon']`);
   assert.match(icon, /mask-image:var\(--slotted-alert-icon,var\(--_glyph\)\)/);
-  assert.match(icon, /block-size:1lh/);
+  assert.match(icon, /align-self:start/);
+  assert.match(icon, /block-size:var\(--_mark-size\)/);
+  assert.match(icon, /inline-size:var\(--_mark-size\)/);
+  assert.match(icon, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
   assert.match(icon, /background-color:currentcolor/);
   assert.ok(!/content:'[^']/.test(icon), 'the mark is drawn with a character');
 });
@@ -121,7 +129,7 @@ test('takes the corners off the reach that runs to the edges', () => {
   assert.match(page, /border-block-start-width:0/);
 });
 
-test('scales its type and its mark with density, through the control scales', () => {
+test('scales its type and its dismiss glyph with density, through the control scales', () => {
   for (const [reach, step] of [
     ['inline', 'sm'],
     ['page', 'lg'],

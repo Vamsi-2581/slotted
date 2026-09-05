@@ -195,23 +195,20 @@
       transparent
     );
 
-    /* Type and glyph from the control scales, the only ones the theme restates
-       per density, so a message inside a dense application shrinks with it.
-       The box's own inset is on the space scale, which does not — the cost
-       `card` and `alert` both accepted and recorded. */
+    /* Type and the close glyph from the control scales, the only ones the
+       theme restates per density, so a message inside a dense application
+       shrinks with it. The box's own inset is on the space scale, which does
+       not — the cost `card` and `alert` both accepted and recorded. */
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_glyph-size: var(--slotted-control-icon-size-md, 16px);
     /**
-     * The band of the title the mark is centred on, and the distance that puts
-     * it there. `vertical-align` raises a box by the distance from the text's
-     * baseline to the box's own bottom edge, so centring a box of `--_glyph-size`
-     * on a band of `--slotted-toast-icon-axis` is half the difference between
-     * the two — negative, because every mark in this scale is taller than the
-     * letters beside it.
+     * The status mark is the title's own size (R5), which is the rule `alert`
+     * draws its mark with: `1em` resolves against this box, whose font size is
+     * the title's. A sixteen-pixel glyph beside thirteen-pixel type was three
+     * pixels taller than the capitals it stood next to, and read as a sticker
+     * on the surface rather than as part of the sentence.
      */
-    --_mark-offset: calc(
-      (var(--slotted-toast-icon-axis, (1cap + 1ex) / 2) - var(--_glyph-size)) / 2
-    );
+    --_mark-size: 1em;
     --_line-height: var(--slotted-line-height-md, 1.5);
 
     --_inset-block: var(--slotted-toast-padding-block, var(--slotted-space-5, 0.75rem));
@@ -375,102 +372,60 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * The mark is centred on the **title's own axis**, and the axis is the band
-   * of the text rather than the box the text sits in.
+   * A square the title's own size, on the title's first line (R5), and the
+   * rule `alert` draws its mark with. The box is exactly the glyph — no line
+   * box around it, no ground behind it — and it is pushed down from the start
+   * of the row by half the difference between one line and the mark. `1lh`
+   * and `1em` both resolve against the message, whose font size and leading
+   * are the title's, so the mark's centre is the first line's centre at every
+   * density without a number saying how, and it stays there when the title
+   * wraps.
    *
-   * A mark one line box tall with the artwork centred in it — which is what
-   * this family drew first, and what `alert`, `inline-message` and
-   * `status-indicator` still draw — lands on the *line box* centre. That is
-   * not where the words are. Measured on the default theme at `comfortable`:
-   * the line box is 19.5 pixels, the baseline sits 14 from its top, a capital
-   * is 9 tall and an x is 7. The line box centre is therefore 9.75 from the
-   * top, the capitals are centred at 9.5 and the lowercase band at 10.5 — so
-   * the mark sat a quarter of a pixel below the capitals and three quarters
-   * above the letters that carry the word, and it read high in every capture.
+   * This family drew the mark against the title's baseline before, as an
+   * inline-block raised by a font-relative offset, and measured a quarter of a
+   * pixel between the two centres in the default theme. That quarter is inside
+   * the tolerance every other family accepts, and the offset it bought came
+   * with a pseudo-element, a token and a second rule for supplied artwork. One
+   * rule for every status mark in the library is worth more than a quarter of
+   * a pixel in one of them.
    *
-   * Worse than the three quarters of a pixel is what produced it: the two
-   * centres agree only because this font's ascent and descent happen to make
-   * them agree. A theme with a taller descent moves the baseline down the line
-   * box and the mark stays where it was.
-   *
-   * So the baseline is asked for rather than assumed. The slot is one line box
-   * tall and holds an inline-block, which the browser places against the same
-   * baseline the title's first line uses — the two boxes start at the same
-   * block position and inherit the same font. `vertical-align` then puts the
-   * mark's own centre exactly where `--slotted-toast-icon-axis` says, in the
-   * font's own units, and nothing here needs to know where the baseline landed.
-   *
-   * The axis is the midpoint of the capital band and the lowercase band, and
-   * the three candidates were rendered at four times the type size and read
-   * against the word `Hxp` before one was chosen — every quantity in the rule
-   * is font-relative, so the ratio judged there is the ratio at thirteen
-   * pixels, four times easier to see.
-   *
-   * `1cap` is where a mark drawn at cap height belongs and it reads high here,
-   * because every glyph in this scale is taller than a capital — twelve pixels
-   * of ink against a nine-pixel cap — and the overshoot above a cap line has
-   * nothing to sit against. `1ex` puts the mark's ink where the text's ink is
-   * and reads low, because the mark then hangs below the descender line. The
-   * midpoint is where the two readings meet, and it is a quarter of a pixel
-   * below the line-box centre this family drew first.
+   * The slot carries the colour and the mask paints `currentcolor`, so on a
+   * `solid` message the mark takes the on-solid ink with the words, and under
+   * forced colours one declaration repaints it.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
-    block-size: 1lh;
+    align-self: start;
+    background-color: currentcolor;
+    block-size: var(--_mark-size);
     color: var(--_mark);
     grid-column: 1;
     grid-row: 1;
-    inline-size: var(--_glyph-size);
+    inline-size: var(--_mark-size);
+    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
     margin-inline-end: var(--_column-gap);
-  }
-
-  /**
-   * The artwork. It is a pseudo-element rather than the slot itself because a
-   * mask on the slot cannot be baseline-aligned: `vertical-align` moves an
-   * inline-level box, and the slot is a grid item.
-   *
-   * It paints `currentcolor` so the slot alone decides the colour, which is
-   * also what keeps forced colours out of a decorative rule —
-   * `packages/styles/src/fallbacks.test.mjs` refuses a system colour inside a
-   * `::before`, and rightly.
-   */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon']::before {
-    background-color: currentcolor;
-    block-size: var(--_glyph-size);
-    content: '';
-    display: inline-block;
-    inline-size: var(--_glyph-size);
     mask-image: var(--slotted-toast-icon, var(--_glyph));
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: var(--_glyph-size) var(--_glyph-size);
-    vertical-align: var(--_mark-offset);
+    mask-size: 100% 100%;
   }
 
   /**
    * A mark the page supplied instead of the tone's own — a spinner from
    * `progress-indicator` while a promise is in flight, a product's own
-   * artwork. It takes the same axis: an icon a consumer wrote is an icon, and
-   * the line it belongs to has not moved.
+   * artwork. It takes the same place: an icon a consumer wrote is an icon, and
+   * the line it belongs to has not moved. The artwork is centred in the box,
+   * so an icon drawn at `1em` fills it and a larger one overhangs it equally
+   * on both sides of the same axis rather than pushing the words along.
    *
-   * The box takes the size of what was put in it rather than the glyph's, with
-   * the glyph's size as its floor. Held at the glyph's width, a spinner
-   * overflowed it on both sides and was drawn over the first letter of the
-   * title — which is what the loading capture showed before this line existed.
+   * The mask goes, because a mask over an element that now has content of its
+   * own would cut that content into the shape of a circle.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon']:not(:empty) {
-    inline-size: auto;
-    min-inline-size: var(--_glyph-size);
-  }
-
-  [data-ui='toast']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='icon']:not(:empty)::before {
-    content: none;
-  }
-
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] > * {
-    vertical-align: var(--_mark-offset);
+    align-items: center;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    mask-image: none;
   }
 
   /**
@@ -483,6 +438,7 @@
     > [data-part='list']
     > [data-part='item'][data-loading]
     > [data-part='icon']:empty {
+    background-color: transparent;
     mask-image: none;
   }
 
@@ -854,15 +810,15 @@
     }
 
     [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
-      color: CanvasText;
+      background-color: CanvasText;
     }
 
     /**
-     * The mark is painted in `currentcolor`, so giving the control a system
-     * colour repaints it. Writing the colour on the pseudo-element instead
-     * would put a system colour inside a decorative rule, which the shared
-     * fallback test refuses — and rightly: decoration with no theme behind it
-     * should disappear rather than shout.
+     * The control's glyph is painted in `currentcolor`, so giving the control
+     * a system colour repaints it. Writing the colour on the pseudo-element
+     * instead would put a system colour inside a decorative rule, which the
+     * shared fallback test refuses — and rightly: decoration with no theme
+     * behind it should disappear rather than shout.
      */
     [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close'] {
       color: CanvasText;

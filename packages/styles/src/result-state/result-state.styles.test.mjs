@@ -137,8 +137,13 @@ test('puts the mark, the words and the controls on one line at inline reach', ()
   assert.match(base, /font-size:var\(--_title-font-size\)/);
   assert.match(base, /line-height:var\(--_title-line-height\)/);
 
-  const media = rule(`${ui}[data-reach='inline']>[data-part='media']`);
-  assert.match(media, /block-size:1lh/);
+  assert.match(base, /--_mark-size:1em/);
+  const mark = rule(`${ui}>[data-part='media']:empty`);
+  assert.match(mark, /block-size:var\(--_mark-size\)/);
+  assert.match(mark, /inline-size:var\(--_mark-size\)/);
+
+  const media = rule(`${ui}[data-reach='inline']>[data-part='media']:empty`);
+  assert.match(media, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
   assert.match(media, /align-self:start/);
 
   const actions = rule(`${ui}[data-reach='inline']>[data-part='actions']`);

@@ -60,12 +60,19 @@ test('places the mark and the sentence rather than letting the grid guess', () =
 });
 
 /**
- * The mark is one line box tall rather than centred on the whole message, so it
- * stays on the first line when the sentence wraps to three. `status-indicator`
- * and `alert` both reach the same rule for the same reason.
+ * The mark is the sentence's own size on its first line (R5), drawn with the
+ * rule `alert` draws its own: a square of `1em`, pushed down by half the
+ * difference between one line and the mark, so it stays on the first line when
+ * the sentence wraps to three. `packages/styles/src/status-mark.test.mjs` holds
+ * the same rule for every family that draws one.
  */
 test('keeps the mark on the message’s first line however far it runs', () => {
-  assert.match(rule(`${ui}>[data-part='icon']`), /block-size:1lh/);
+  assert.match(rule(root), /--_mark-size:1em/);
+  const icon = rule(`${ui}>[data-part='icon']`);
+  assert.match(icon, /align-self:start/);
+  assert.match(icon, /block-size:var\(--_mark-size\)/);
+  assert.match(icon, /inline-size:var\(--_mark-size\)/);
+  assert.match(icon, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
 });
 
 /**
@@ -117,7 +124,7 @@ test('draws one neutral bullet for every tone when the mark is a dot', () => {
   assert.deepEqual(contract.axes.mark, ['glyph', 'dot']);
   const dot = rule(`${root}[data-mark='dot']`);
   assert.match(dot, /--_glyph:var\(--slotted-icon-dot\)/);
-  assert.match(dot, /--_dot-size:calc\(var\(--_glyph-size\) \/ 3\)/);
+  assert.match(dot, /--_dot-size:calc\(var\(--_mark-size\) \/ 3\)/);
 
   const bullet = rule(`${ui}[data-mark='dot']>[data-part='icon']:empty`);
   assert.match(bullet, /inline-size:var\(--_dot-size\)/);
@@ -131,7 +138,7 @@ test('draws one neutral bullet for every tone when the mark is a dot', () => {
  * message's own left edge rather than in the middle of a glyph's column.
  */
 test('gives the wait a round ring even when the mark is a dot', () => {
-  assert.match(rule(`${ui}[data-loading]>[data-part='icon']`), /inline-size:var\(--_glyph-size\)/);
+  assert.match(rule(`${ui}[data-loading]>[data-part='icon']`), /inline-size:var\(--_mark-size\)/);
 });
 
 /**
@@ -161,19 +168,21 @@ test('reads the tone map the contract declares', () => {
 });
 
 /**
- * Both size steps read the control scales, which are the only ones the theme
+ * Both size steps read the control type scale, which is the only one the theme
  * restates per density. A message under a dense field therefore shrinks with
- * the rows around it without the family knowing what a density is.
+ * the rows around it without the family knowing what a density is — and the
+ * mark, sized in `em`, shrinks with the type rather than reading a second
+ * scale of its own.
  */
-test('takes its type and its glyph from the scales density restates', () => {
+test('takes its type from the scale density restates, and its mark from the type', () => {
   for (const [size, step] of [
     ['sm', 'sm'],
     ['md', 'md'],
   ]) {
     const declarations = rule(`${root}[data-size='${size}']`);
     assert.ok(declarations.includes(`--slotted-control-font-size-${step}`));
-    assert.ok(declarations.includes(`--slotted-control-icon-size-${step}`));
   }
+  assert.doesNotMatch(normalized, /--slotted-control-icon-size-/);
 });
 
 /**

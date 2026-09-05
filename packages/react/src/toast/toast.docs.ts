@@ -534,7 +534,7 @@ export const REACT_TOAST_DOCS = {
         language: 'css',
         label: 'Retuning the family for an application',
         source:
-          "[data-ui='toast'] {\n  --slotted-toast-measure: 22rem;\n  --slotted-toast-offset: var(--slotted-space-7);\n  --slotted-toast-gap: var(--slotted-space-6);\n  --slotted-toast-icon-axis: 1cap;\n}",
+          "[data-ui='toast'] {\n  --slotted-toast-measure: 22rem;\n  --slotted-toast-offset: var(--slotted-space-7);\n  --slotted-toast-gap: var(--slotted-space-6);\n}",
       }),
     ],
   },

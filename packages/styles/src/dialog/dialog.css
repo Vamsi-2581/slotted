@@ -97,8 +97,14 @@
       var(--slotted-target-min, 24px),
       calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
     );
-    /** The mark of an alert dialog, which is larger than a control's glyph. */
-    --_status-size: var(--slotted-font-size-3xl, 1.5rem);
+    /**
+     * The mark of an alert dialog is the title's own size (R5), and eight
+     * pixels from it. It was a step and a half above the title before, which
+     * put a twenty-four-pixel glyph beside an eighteen-pixel headline and read
+     * as a picture standing next to the words rather than as part of them.
+     */
+    --_status-size: var(--_title-font-size);
+    --_mark-gap: var(--slotted-space-4, 0.5rem);
     --_tone-icon: var(--slotted-icon-triangle-alert);
     --_tone-color: var(--slotted-tone-danger-text, CanvasText);
 
@@ -351,7 +357,11 @@
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: start;
-    column-gap: var(--_gap);
+    /* The distance from the mark to the words belongs to the mark, and the
+       distance from the words to the close button to the button: a column gap
+       is drawn beside an empty track too, so a dialog with no mark would start
+       its title one gap in from the inset. */
+    column-gap: 0;
     row-gap: var(--slotted-space-2, 0.25rem);
     padding-block: var(--_header-padding-block);
     padding-inline: var(--_padding-inline);
@@ -406,18 +416,21 @@
     grid-column: 1;
     grid-row: 1 / span 2;
     align-self: start;
-    background: var(--_tone-color);
+    background-color: var(--_tone-color);
     block-size: var(--_status-size);
     inline-size: var(--_status-size);
     flex: none;
     mask-image: var(--_tone-icon);
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: contain;
-    /* The mark sits on the title's own optical line rather than on its box. */
+    mask-size: 100% 100%;
+    /* The mark sits on the title's first line rather than on its box: half
+       the difference between the title's line and the mark, in the title's own
+       type, because the header's line is not the title's. */
     margin-block-start: calc(
       (var(--_title-font-size) * var(--slotted-line-height-xl, 1.45) - var(--_status-size)) / 2
     );
+    margin-inline-end: var(--_mark-gap);
   }
 
   [data-ui='dialog'][data-tone='accent'] {
@@ -507,6 +520,7 @@
     /* The box overhangs the panel's edge by its own air, so the mark aligns
        with the title. */
     margin-inline-end: calc(-1 * (var(--_close-size) - var(--_icon-size)) / 2);
+    margin-inline-start: var(--_gap);
     padding: 0;
     appearance: none;
     background-color: transparent;

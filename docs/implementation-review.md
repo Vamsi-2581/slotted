@@ -127,6 +127,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 - [x] **G4 — Glifos escritos à mão.** Ver R4.
 - [ ] **G6 — `pnpm typecheck` falha na primeira execução após `turbo run verify`.** Observado em DG3, G2 e LB2: logo após `turbo run verify` (build do React), `tsc --build tsconfig.base.json` reporta erros circulares em toda `*.stories.tsx` (`referenceScenes` implicitly any, `Story` circularly references itself) e a segunda execução passa sem alteração. Causa provável: estado incremental (`.tsbuildinfo`) escrito pelo build do React com `dist` como saída e lido pelo typecheck da raiz. Esperado: `pnpm check` determinístico após qualquer build; separar os `tsbuildinfo` dos dois modos ou excluir `dist` das referências do typecheck.
 - [ ] **G5 — `tools/harness/audit.mjs` conta `script` e `style` como parte colapsada.** Observado durante G4, sem alteração de layout: nas cenas `states` de `Checkbox` e `Collapsible` e `track`/`variant` de `Tabs`, o audit reporta `collapsed 0px inside a 446px stage` para elementos `script` e `style` do fragmento. Esperado: o audit ignora elementos não renderizados (`script`, `style`, `template`) ao medir o palco.
+- [ ] **G7 — `tools/harness/audit.mjs` mede o eixo do glifo contra a caixa das palavras, não contra a primeira linha.** Observado durante AL1, sem alteração de layout: em `alert` e `toast` o irmão com texto do `[data-part='icon']` é o `content` (título mais descrição), e `Range.getClientRects()` sobre esse elemento devolve a caixa inteira do título (39px quando quebra em duas linhas), não a sua primeira linha; o audit reporta `off-axis 9.75px` para um glifo que a sonda `tools/harness/out/review-loop/al1/probe.mjs` (Range sobre o primeiro nó de texto) mede a 0.25px do centro da primeira linha. Em `result-state` a reach `section`/`page` põe o glifo acima do título por desenho e o audit reporta o mesmo achado. Esperado: `firstLineOf` desce até o primeiro nó de texto do irmão e mede a primeira linha dele; um glifo em linha própria acima do texto (`grid-row` distinta) não é medido.
 
 ---
 
@@ -143,7 +144,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Alert
 
-- [ ] **AL1 — Ícone solto na superfície.** Ver R5. Aplicar em `packages/styles/src/alert/alert.css` (`[data-part='icon']`, grid `auto minmax(0, 1fr) auto`). Afeta `Toast` (`#Toast:1`), `ResultState`, `AlertDialog`, `InlineMessage`, `Field` (`#Field:1`).
+- [x] **AL1 — Ícone solto na superfície.** Ver R5. Aplicar em `packages/styles/src/alert/alert.css` (`[data-part='icon']`, grid `auto minmax(0, 1fr) auto`). Afeta `Toast` (`#Toast:1`), `ResultState`, `AlertDialog`, `InlineMessage`, `Field` (`#Field:1`).
 - [ ] **AL2 — Conteúdo transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G3, sem alteração de layout: na cena `content`, `[data-part='content']` mede 156px dentro de 149px disponíveis nos três esquemas. Esperado: o conteúdo quebra dentro da largura do palco (`min-inline-size: 0` na coluna do grid e `overflow-wrap: anywhere` em título e descrição); nada transborda o palco.
 
 ---
@@ -380,7 +381,7 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 
 ## Toast
 
-- [ ] **TO1 — `#Alert:1`.** Aplicar R5.
+- [x] **TO1 — `#Alert:1`.** Aplicar R5.
 - [ ] **TO2 — Conteúdo transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G3, sem alteração de layout: na cena `content`, `[data-part='content']` mede 183px dentro de 149px disponíveis nos três esquemas. Esperado: mesma regra de `#Alert:2`.
 
 ---

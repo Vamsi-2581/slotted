@@ -66,21 +66,29 @@
     );
 
     /**
-     * Type and glyph come from the control scales, the only ones the theme
-     * restates per density, so an alert inside a dense table shrinks with the
-     * rows around it. The box's inset comes from the space scale, which does
-     * not vary by density — the cost `card` accepted for the same reason, and
-     * recorded in `docs/superpowers/specs/2026-09-02-alert-family-design.md`:
-     * at `dense` the box keeps its inset while the type inside it shrinks.
+     * Type and the dismiss glyph come from the control scales, the only ones
+     * the theme restates per density, so an alert inside a dense table shrinks
+     * with the rows around it. The box's inset comes from the space scale,
+     * which does not vary by density — the cost `card` accepted for the same
+     * reason, and recorded in
+     * `docs/superpowers/specs/2026-09-02-alert-family-design.md`: at `dense`
+     * the box keeps its inset while the type inside it shrinks.
      *
      * `--_font-size` is the *title's* size and the root's own, and the
-     * description steps down from it. That is what lets the mark be one line
-     * box tall and land on the message's first line at every reach without a
+     * description steps down from it. That is what lets the mark be sized in
+     * `em` and land on the message's first line at every reach without a
      * number saying how.
+     *
+     * The status mark is the title's own size (R5): a glyph from the control
+     * scale beside a title from the control type scale was three pixels taller
+     * than the capitals it stood next to at every reach, and read as a sticker
+     * on the surface rather than as part of the sentence. `1em` here resolves
+     * against the root, whose font size is the title's.
      */
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_description-font-size: var(--slotted-control-font-size-md, 13px);
     --_glyph-size: var(--slotted-control-icon-size-md, 16px);
+    --_mark-size: 1em;
     --_line-height: var(--slotted-line-height-md, 1.5);
 
     /**
@@ -92,10 +100,12 @@
     --_inset-block: var(--slotted-alert-padding-block, var(--slotted-space-5, 0.75rem));
     --_inset-inline: var(--slotted-alert-padding-inline, var(--slotted-space-6, 1rem));
     /**
-     * The distance from the mark to the words it belongs to. One step below the
-     * box's own inset on purpose: read at 420 pixels with the inset and the gap
-     * equal, the mark sat as far from its own sentence as it did from the edge
-     * of the box, and belonged to neither.
+     * The distance from the mark to the words it belongs to: eight pixels at
+     * every reach (R5). One step below the box's own inset on purpose: read at
+     * 420 pixels with the inset and the gap equal, the mark sat as far from its
+     * own sentence as it did from the edge of the box, and belonged to neither.
+     * It does not step with the reach — the mark already does, through `em`,
+     * and a gap that shrank beside a smaller mark pulled the two apart twice.
      */
     --_column-gap: var(--slotted-alert-column-gap, var(--slotted-space-4, 0.5rem));
     --_row-gap: var(--slotted-alert-row-gap, var(--slotted-space-5, 0.75rem));
@@ -325,7 +335,6 @@
     --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
     --_inset-block: var(--slotted-alert-padding-block, var(--slotted-space-4, 0.5rem));
     --_inset-inline: var(--slotted-alert-padding-inline, var(--slotted-space-5, 0.75rem));
-    --_column-gap: var(--slotted-alert-column-gap, var(--slotted-space-3, 0.375rem));
     --_row-gap: var(--slotted-alert-row-gap, var(--slotted-space-4, 0.5rem));
     --_radius: var(--slotted-alert-radius, var(--slotted-radius-sm, 4px));
   }
@@ -364,35 +373,44 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * One line box tall, with the glyph centred inside it by the mask rather
-   * than by a second element. `1lh` resolves against the root's own line box,
-   * and the root's font size is the title's, so the mark sits on the message's
-   * first line at every reach, every density and every type size without a
-   * number saying how. It is the rule `status-indicator` uses for its own dot,
-   * with the centring moved into `mask-position` so the part stays one span.
+   * A square the title's own size, on the title's first line (R5). The box is
+   * exactly the glyph — no line box around it, no ground behind it — and it is
+   * pushed down from the start of the row by half the difference between one
+   * line and the mark. `1lh` and `1em` both resolve against the root, whose
+   * font size and leading are the title's, so the mark's centre is the first
+   * line's centre at every reach, every density and every type size without a
+   * number saying how — and it stays there when the title wraps, which a mark
+   * centred on the whole block would not.
+   *
+   * The mark is painted in `currentcolor`, so on a `solid` alert it takes the
+   * same ink as the words with no rule of its own.
    *
    * `--slotted-alert-icon` is the escape hatch: an application with its own
    * icon set writes one declaration and keeps the tone, the size, the
    * alignment and the part name.
    */
   [data-ui='alert'] > [data-part='icon'] {
+    align-self: start;
     background-color: currentcolor;
-    block-size: 1lh;
+    block-size: var(--_mark-size);
     grid-column: 1;
     grid-row: 1;
-    inline-size: var(--_glyph-size);
+    inline-size: var(--_mark-size);
+    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
     margin-inline-end: var(--_column-gap);
     mask-image: var(--slotted-alert-icon, var(--_glyph));
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: var(--_glyph-size) var(--_glyph-size);
+    mask-size: 100% 100%;
   }
 
   /**
    * A mark the page supplied instead of the tone's own. The box keeps its size
-   * and its place on the first line; the mask goes, because a mask over an
-   * element that now has content of its own would cut that content into the
-   * shape of a circle.
+   * and its place on the first line, and the artwork is centred in it, so an
+   * icon drawn at `1em` fills it and a larger one overhangs it equally on both
+   * sides of the same axis; the mask goes, because a mask over an element that
+   * now has content of its own would cut that content into the shape of a
+   * circle.
    */
   [data-ui='alert'] > [data-part='icon']:not(:empty) {
     align-items: center;

@@ -109,7 +109,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'reach',
     title: 'How far the region reaches',
-    note: 'A row inside a table cell, a panel inside a card, the whole route — the same three words alert uses. At inline the mark drops to control-glyph size and the actions join the message’s first line; at page the title takes the top step of the type scale.',
+    note: 'A row inside a table cell, a panel inside a card, the whole route — the same three words alert uses. The mark is the title’s own size at every reach and stands over the title at section and page; at inline it sits on the message’s first line and the actions join it, and at page the title takes the top step of the type scale.',
     snippet: defineSnippet({
       id: 'result-state-angular-reach',
       language: 'angular',

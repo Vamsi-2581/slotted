@@ -42,19 +42,26 @@
     --_glyph: none;
 
     /**
-     * Type and glyph come from the control scales, the only ones the theme
-     * restates per density, so a message under a dense field shrinks with it.
-     * The leading does not: a control's `line-height` of `1` is for a box
-     * holding one line, and this box holds a sentence.
+     * Type comes from the control scales, the only ones the theme restates per
+     * density, so a message under a dense field shrinks with it. The leading
+     * does not: a control's `line-height` of `1` is for a box holding one
+     * line, and this box holds a sentence.
+     *
+     * The mark is the sentence's own size (R5), the rule `alert` draws its
+     * mark with: `1em` resolves against this box, so the mark steps with the
+     * size and the density through the type rather than through a second
+     * scale. A fourteen-pixel glyph beside twelve-pixel type was two pixels
+     * taller than the capitals it stood next to.
      */
     --_font-size: var(--slotted-control-font-size-sm, 12px);
-    --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
+    --_mark-size: 1em;
     /**
-     * The distance from the mark to its own sentence. One step tighter than
-     * `alert` uses, because there is no box here for the mark to be inside: the
-     * only thing that says the mark belongs to these words is how close it is.
+     * The distance from the mark to its own sentence: eight pixels, the step
+     * `alert` uses (R5). It does not step with the size — the mark already
+     * does, through `em`, and a gap that shrank beside a smaller mark pulled
+     * the two apart twice.
      */
-    --_column-gap: var(--slotted-inline-message-column-gap, var(--slotted-space-3, 0.375rem));
+    --_column-gap: var(--slotted-inline-message-column-gap, var(--slotted-space-4, 0.5rem));
 
     color: var(--_text);
     /**
@@ -121,20 +128,10 @@
 
   [data-ui='inline-message'][data-part='root'][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
-    --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
   }
 
-  /**
-   * The gap steps with the mark, which is the correction the `sizes` capture
-   * asked for. Held at one value, the larger mark sat proportionally closer to
-   * its own sentence than the smaller one did — the same distance reads as
-   * generous beside a fourteen-pixel mark and as tight beside a sixteen-pixel
-   * one, and two messages one above the other showed it.
-   */
   [data-ui='inline-message'][data-part='root'][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
-    --_glyph-size: var(--slotted-control-icon-size-md, 16px);
-    --_column-gap: var(--slotted-inline-message-column-gap, var(--slotted-space-4, 0.5rem));
   }
 
   /**
@@ -180,27 +177,32 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * A box one line box tall with the glyph centred inside it by the mask
-   * rather than by a second element. `1lh` resolves against the root's own line
-   * box, so the mark sits on the message's first line at every size, every
-   * density and every type step without a number saying how.
+   * A square the sentence's own size, on its first line (R5), and the rule
+   * `alert` draws its mark with. The box is exactly the glyph — no line box
+   * around it, no ground behind it — pushed down from the start of the row by
+   * half the difference between one line and the mark. `1lh` and `1em` both
+   * resolve against the root, so the mark's centre is the first line's centre
+   * at every size, every density and every type step without a number saying
+   * how, and it stays there when the sentence wraps to three.
    *
    * `--slotted-inline-message-icon` is the escape hatch: an application with
    * its own icon set writes one declaration and keeps the tone, the size, the
    * alignment and the part name.
    */
   [data-ui='inline-message'] > [data-part='icon'] {
+    align-self: start;
     background-color: currentcolor;
-    block-size: 1lh;
+    block-size: var(--_mark-size);
     box-sizing: border-box;
     grid-column: 1;
     grid-row: 1;
-    inline-size: var(--_glyph-size);
+    inline-size: var(--_mark-size);
+    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
     margin-inline-end: var(--_column-gap);
     mask-image: var(--slotted-inline-message-icon, var(--_glyph));
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: var(--_glyph-size) var(--_glyph-size);
+    mask-size: 100% 100%;
   }
 
   /**
@@ -214,9 +216,9 @@
    * that draws no mark at all otherwise, so every message under a field starts
    * on one left edge and only the ink changes between them.
    *
-   * The disc is a third of the glyph scale — 4.67 pixels under 12-pixel type —
-   * so it steps with the size step and with the density like every other mark.
-   * The box is the disc's own width and the mask is twice that, because
+   * The disc is a third of the mark — 4 pixels under 12-pixel type — so it
+   * steps with the size step and with the density like every other mark. The
+   * box is the disc's own width and the mask is twice that, because
    * `--slotted-icon-dot` draws a circle half the width of its own viewBox: at
    * twice the box the disc fills the box exactly, and the bullet sits on the
    * message's left edge under the label above it rather than inside a column
@@ -227,7 +229,7 @@
    */
   [data-ui='inline-message'][data-part='root'][data-mark='dot'] {
     --_glyph: var(--slotted-icon-dot);
-    --_dot-size: calc(var(--_glyph-size) / 3);
+    --_dot-size: calc(var(--_mark-size) / 3);
   }
 
   [data-ui='inline-message'][data-mark='dot'] > [data-part='icon']:empty {
@@ -305,28 +307,26 @@
    * were — so “Verificando disponibilidade…” becomes “Nome disponível” with no
    * geometry moving under the reader's eye.
    *
-   * It is the ring `button` draws for the same reason, at the same duration.
-   * The box stops being one line box tall and becomes square, then is pushed
-   * down by half the difference so the circle sits on the first line where the
-   * mark it replaced was.
+   * It is the ring `button` draws for the same reason, at the same duration,
+   * in the mark's own square on the first line where the mark it replaced was.
    */
   [data-ui='inline-message'][data-loading] > [data-part='icon'] {
     animation: slotted-inline-message-spin var(--slotted-duration-loop-fast) linear infinite;
     background-color: transparent;
-    block-size: var(--_glyph-size);
-    border: max(var(--slotted-border-width-thin, 1px), calc(var(--_glyph-size) / 8)) solid
+    block-size: var(--_mark-size);
+    border: max(var(--slotted-border-width-thin, 1px), calc(var(--_mark-size) / 8)) solid
       currentcolor;
     /* One missing quarter, named logically so the gap leads the turn in both
        directions. */
     border-inline-end-color: transparent;
     border-radius: var(--slotted-radius-full, 9999px);
     display: block;
-    /* Restated for the bullet: a ring drawn in a column sized for a 4.67-pixel
+    /* Restated for the bullet: a ring drawn in a column sized for a 4-pixel
        dot is an ellipse. The text moves by the difference for as long as the
        message is waiting, which is the cost of a bullet that starts at the
        message's own left edge. */
-    inline-size: var(--_glyph-size);
-    margin-block-start: calc((1lh - var(--_glyph-size)) / 2);
+    inline-size: var(--_mark-size);
+    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
     mask-image: none;
   }
 

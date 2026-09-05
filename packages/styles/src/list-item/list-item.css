@@ -533,6 +533,11 @@
    */
   [data-ui='list-item'] > [data-part='actions'] {
     align-items: center;
+    /* The box counts its own inset (LI4). Below the breakpoint it takes the
+       whole line and the row's inline inset on both sides, and read as
+       content it stood the row's width plus twenty-six pixels: a 266px line in
+       a 240px list, in every scheme. */
+    box-sizing: border-box;
     display: flex;
     flex: none;
     gap: var(--_gap);

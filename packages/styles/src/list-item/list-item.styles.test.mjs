@@ -67,3 +67,23 @@ test('stands a chooser in the leading column on the title’s first line', () =>
   assert.match(start, /margin-inline-end:var\(--_gap\)/);
   assert.doesNotMatch(chooser, /margin-inline|padding-inline/);
 });
+
+/**
+ * Nothing leaves the row at 240px (LI4, the rule `#Alert:2` sets): the text
+ * column can shrink below its longest word, and the independent targets take
+ * their own line below the breakpoint — a line that counts its own inset,
+ * because at `flex-basis: 100%` a content box plus the row's inline padding
+ * stood twenty-six pixels wider than the row.
+ */
+test('yields at 240px: the content shrinks and the actions take a line that fits', () => {
+  assert.match(rule(`${ui}>[data-part='content']`), /min-inline-size:0/);
+  assert.match(rule(`${ui} [data-part='body']`), /min-inline-size:0/);
+  const actions = rule(`${ui}>[data-part='actions']`);
+  assert.match(actions, /box-sizing:border-box/);
+  const narrow = normalized.split('@container slotted-list-item (max-inline-size:22rem){')[1] ?? '';
+  assert.match(
+    narrow.split(`${ui}>[data-part='actions']{`)[1]?.split('}')[0] ?? '',
+    /flex-basis:100%/,
+    'the actions do not take their own line below the breakpoint',
+  );
+});

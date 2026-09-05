@@ -297,6 +297,123 @@ describe('createPositioner', () => {
     });
   });
 
+  /**
+   * SL1 and P1. A layer as wide as its anchor is placed inside a clipping
+   * container that leaves no room for the boundary padding on either side.
+   * The shift middleware resolved the start edge first and slid the layer past
+   * its anchor; the layer then overflowed the container, a hover scrolled the
+   * container to reveal the option, the anchor moved and the positioner slid
+   * the layer again. Every hover moved the popup one step further from the
+   * control it belongs to.
+   */
+  describe('a layer as wide as its anchor', () => {
+    const CONTAINER = { x: 0, y: 0, width: 400, height: 300 };
+    const FIELD = { x: 1, y: 40, width: 398, height: 32 };
+
+    function clippedScene() {
+      document.body.innerHTML =
+        '<div id="container"><button id="anchor"></button><div id="floating"></div></div>';
+      const container = document.getElementById('container') as HTMLElement;
+      const anchor = document.getElementById('anchor') as HTMLElement;
+      const floating = document.getElementById('floating') as HTMLElement;
+      container.style.position = 'relative';
+      container.style.overflow = 'hidden';
+      rect(container, CONTAINER);
+      for (const [name, value] of Object.entries({
+        clientWidth: CONTAINER.width,
+        clientHeight: CONTAINER.height,
+        clientLeft: 0,
+        clientTop: 0,
+      })) {
+        Object.defineProperty(container, name, { get: () => value, configurable: true });
+      }
+      rect(anchor, FIELD);
+      sized(floating, FIELD.width, 120);
+      return { container, anchor, floating };
+    }
+
+    it('sits on the anchor rather than on the boundary padding', async () => {
+      const { anchor, floating } = clippedScene();
+      const positioner = createPositioner(anchor, floating, {
+        align: 'start',
+        boundaryPadding: 8,
+        matchWidth: true,
+      });
+
+      await positioner.update();
+
+      expect(floating.style.left).toBe(`${FIELD.x}px`);
+      expect(floating.style.getPropertyValue(POSITIONER_PROPERTIES.anchorWidth)).toBe(
+        `${FIELD.width}px`,
+      );
+      positioner.destroy();
+    });
+
+    it('lands in the same place on every measurement, whatever a hover scrolls', async () => {
+      const { anchor, floating } = clippedScene();
+      const positioner = createPositioner(anchor, floating, {
+        align: 'start',
+        boundaryPadding: 8,
+        matchWidth: true,
+      });
+      const field = { ...FIELD };
+      const positions: string[] = [];
+
+      for (let step = 0; step < 10; step += 1) {
+        await positioner.update();
+        positions.push(floating.style.left);
+        /**
+         * What the page does between two measurements: a highlighted option
+         * is scrolled into view, and a container the layer overflows scrolls
+         * by the overflow, which carries the anchor with it.
+         */
+        const overflow = parseFloat(floating.style.left) + FIELD.width - CONTAINER.width;
+        if (overflow > 0) {
+          field.x -= overflow;
+          rect(anchor, field);
+        }
+      }
+
+      expect(positions).toEqual(Array.from({ length: 10 }, () => `${FIELD.x}px`));
+      positioner.destroy();
+    });
+
+    it('centres a frame wider than the anchor, so the panel inside it shares the anchor edge', async () => {
+      const { anchor, floating } = clippedScene();
+      sized(floating, FIELD.width + 16, 120);
+      const positioner = createPositioner(anchor, floating, {
+        align: 'start',
+        boundaryPadding: 8,
+        matchWidth: true,
+      });
+
+      await positioner.update();
+
+      expect(floating.style.left).toBe(`${FIELD.x - 8}px`);
+      expect(floating.getAttribute('data-align')).toBe('start');
+      positioner.destroy();
+    });
+
+    it('still slides along a side the width does not run along', async () => {
+      const { anchor, floating } = clippedScene();
+      rect(anchor, { ...FIELD, y: 250 });
+      sized(floating, 100, 120);
+      const positioner = createPositioner(anchor, floating, {
+        align: 'start',
+        boundaryPadding: 8,
+        flip: false,
+        matchWidth: true,
+        side: 'right',
+      });
+
+      await positioner.update();
+
+      /* 250 + 120 runs past 300 − 8, so the layer slides up to 172. */
+      expect(floating.style.top).toBe('172px');
+      positioner.destroy();
+    });
+  });
+
   describe('an anchor that is no longer there', () => {
     it('reports the anchor scrolled out of its clipper', async () => {
       const { anchor, floating } = scene({ ...ANCHOR, y: -400 });

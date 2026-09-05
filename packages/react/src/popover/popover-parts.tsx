@@ -198,6 +198,7 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     side,
     sideOffset,
     strategy,
+    width,
   } = popover;
   const anchor = popover.anchorNode ?? popover.triggerNode;
 
@@ -211,6 +212,7 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
       boundaryPadding: collisionPadding,
       flip,
       hideWhenDetached,
+      matchWidth: width === 'anchor',
       shift,
       side,
       sideOffset,
@@ -244,6 +246,7 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     side,
     sideOffset,
     strategy,
+    width,
   ]);
 
   /**

@@ -217,6 +217,7 @@ export class SlPopoverLayer {
       boundaryPadding: this.popover.resolvedCollisionPadding(),
       flip: this.popover.resolvedFlip(),
       hideWhenDetached: this.popover.resolvedHideWhenDetached(),
+      matchWidth: this.popover.resolvedWidth() === 'anchor',
       shift: this.popover.resolvedShift(),
       side: this.popover.resolvedSide(),
       sideOffset: this.popover.resolvedSideOffset(),

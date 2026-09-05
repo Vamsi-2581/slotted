@@ -475,6 +475,7 @@ export function SelectContent({
     side,
     sideOffset,
     strategy,
+    width,
   } = select;
 
   useEffect(() => {
@@ -487,6 +488,7 @@ export function SelectContent({
       boundaryPadding: collisionPadding,
       flip,
       hideWhenDetached,
+      matchWidth: width === 'anchor',
       shift,
       side,
       sideOffset,
@@ -514,6 +516,7 @@ export function SelectContent({
     side,
     sideOffset,
     strategy,
+    width,
   ]);
 
   /**

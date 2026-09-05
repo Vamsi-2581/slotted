@@ -73,6 +73,16 @@ export interface PositionerOptions {
   arrowPadding?: number;
   /** Report the anchor as gone once it is scrolled out of its clipper. Default `false`. */
   hideWhenDetached?: boolean;
+  /**
+   * The layer is as wide as its anchor — the stylesheet reads the width this
+   * module publishes — so along that width there is nowhere better for it than
+   * over the anchor. It is centred on the anchor and never slid along it: a
+   * slide that keeps the boundary padding moves a popup off the control it
+   * belongs to, for no room gained. A layer wider than the anchor by a frame
+   * (a padding the family draws around its panel) is centred the same way, so
+   * the panel and the anchor share an edge. Default `false`.
+   */
+  matchWidth?: boolean;
   onPositioned?: (position: ResolvedPosition) => void;
 }
 
@@ -145,6 +155,9 @@ export function createPositioner(
     const direction = writingDirection(floating);
     const side = resolveSide(settings.side ?? 'bottom', direction);
     const align = settings.align ?? 'center';
+    /* Only along the anchor's width: a layer beside its anchor still slides. */
+    const matched = settings.matchWidth === true && (side === 'top' || side === 'bottom');
+    const placementAlign = matched ? 'center' : align;
     const strategy = settings.strategy ?? 'absolute';
     const padding = settings.boundaryPadding ?? 0;
     const element = anchorElement(current);
@@ -178,7 +191,7 @@ export function createPositioner(
               ...(settings.fallbackSides
                 ? {
                     fallbackPlacements: settings.fallbackSides.map((fallback) =>
-                      toPlacement(resolveSide(fallback, direction), align),
+                      toPlacement(resolveSide(fallback, direction), placementAlign),
                     ),
                   }
                 : {}),
@@ -188,6 +201,7 @@ export function createPositioner(
         ? []
         : [
             shiftMiddleware({
+              mainAxis: !matched,
               padding,
               ...(settings.boundary ? { boundary: settings.boundary } : {}),
             }),
@@ -206,15 +220,24 @@ export function createPositioner(
       ...(settings.hideWhenDetached === true ? [hideMiddleware({ padding })] : []),
     ];
 
+    /**
+     * One reading of the anchor for everything written below. The engine
+     * takes its own inside `computePosition`, and nothing lays out between the
+     * two: the awaits are microtasks, and the document does not change under
+     * a microtask.
+     */
+    const anchorRect = current.getBoundingClientRect();
     const result = await computePosition(current, floating, {
-      placement: toPlacement(side, align),
+      placement: toPlacement(side, placementAlign),
       strategy,
       middleware,
     });
     if (destroyed || token !== generation) return;
 
-    const resolved = fromPlacement(result.placement);
-    const anchorRect = current.getBoundingClientRect();
+    const placed = fromPlacement(result.placement);
+    /* Over an anchor of its own width, start, centre and end are one place;
+       the attribute keeps the consumer's word for it. */
+    const resolved = { side: placed.side, align: matched ? align : placed.align };
     const arrowData = result.middlewareData.arrow;
     const arrowSize = measure(settings.arrow);
     const detached = result.middlewareData.hide?.referenceHidden === true;

@@ -716,6 +716,7 @@ export class SlSelect implements ControlValueAccessor, Validator {
         boundaryPadding: this.collisionPadding() ?? this.defaults.collisionPadding,
         flip: this.flip() ?? this.defaults.flip,
         hideWhenDetached: this.hideWhenDetached() ?? this.defaults.hideWhenDetached,
+        matchWidth: this.resolvedWidth() === 'anchor',
         shift: this.shift() ?? this.defaults.shift,
         side: this.resolvedSide(),
         sideOffset: this.sideOffset() ?? this.defaults.sideOffset,

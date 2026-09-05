@@ -413,6 +413,7 @@ export function ComboboxContent({
     side,
     sideOffset,
     strategy,
+    width,
   } = combobox;
 
   useEffect(() => {
@@ -430,6 +431,7 @@ export function ComboboxContent({
       boundaryPadding: collisionPadding,
       flip,
       hideWhenDetached,
+      matchWidth: width === 'anchor',
       shift,
       side,
       sideOffset,
@@ -457,6 +459,7 @@ export function ComboboxContent({
     side,
     sideOffset,
     strategy,
+    width,
   ]);
 
   useEffect(() => {

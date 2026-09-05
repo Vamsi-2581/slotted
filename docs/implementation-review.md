@@ -356,7 +356,8 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 
 ## Switch
 
-- [ ] **SW1 — Espaço entre controle e rótulo.** Esperado: `gap` de `--slotted-control-gap-<densidade>` (8px em `md`), o mesmo valor usado por `Checkbox` e `Radio`, para que os três alinhem em um formulário.
+- [x] **SW1 — Espaço entre controle e rótulo.** Esperado: `gap` de `--slotted-control-gap-<densidade>` (8px em `md`), o mesmo valor usado por `Checkbox` e `Radio`, para que os três alinhem em um formulário.
+- [ ] **SW2 — Linha do Switch mais alta que a de Checkbox e Radio.** Observado durante SW1, sem alteração de layout: `switch.css` mantém `min-block-size: 24px` na raiz e na label mais a folga `--_label-slack`, o modelo que CK3 retirou de checkbox e radio; uma linha de Switch de uma linha mede 24px e as de Checkbox e Radio 19.5px em `md` (Storybook React, `--sizes`), e no harness (cena `sizes`, com descrição) 28.5–30px. Esperado: a linha é a altura da linha da label (a pílula de 22px define a linha quando é mais alta que o texto), o alvo de 24px é o `control` esticado sobre a pílula, e a descrição fica a `--slotted-space-3` da label como em checkbox.
 
 ---
 

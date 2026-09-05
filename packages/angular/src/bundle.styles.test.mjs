@@ -70,6 +70,16 @@ test('carries the family stylesheet into its own bundle', () => {
   }
 });
 
+/**
+ * A family whose root is its host writes the identifier as a host attribute,
+ * which the partial compiler emits as `"data-ui": "name"`. An overlay family
+ * renders its root inside its template, behind `@if (mounted())`, and the
+ * partial compiler keeps that template as a string — a template literal
+ * verbatim, a folded constant with its quotes escaped. A family that builds
+ * its layer by hand writes the attribute with `setAttribute`. Each spelling is
+ * the family selecting itself; a bundle carrying none renders nothing the
+ * stylesheet can find.
+ */
 test('writes the identifier a rebuilt family is selected by', () => {
   const rebuilt = entryPoints().filter(({ legacy }) => !legacy);
   if (rebuilt.length === 0) return;
@@ -78,7 +88,9 @@ test('writes the identifier a rebuilt family is selected by', () => {
     const source = readFileSync(bundle, 'utf8');
     assert.match(
       source,
-      new RegExp(`"data-ui": "${name}"`),
+      new RegExp(
+        `"data-ui": "${name}"|data-ui=\\\\?"${name}\\\\?"|setAttribute\\('data-ui', '${name}'\\)`,
+      ),
       `${name} renders no element carrying its own identifier`,
     );
   }

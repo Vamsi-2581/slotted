@@ -31,15 +31,11 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
   type EmbeddedViewRef,
+  type OnInit,
   type TemplateRef,
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
-import type {
-  AbstractControl,
-  ControlValueAccessor,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
 import { SlField } from '@slotted/angular/field';
 
 import { injectComboboxDefaults } from './combobox-defaults';
@@ -224,7 +220,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
     </ng-template>
   `,
 })
-export class SlCombobox implements ControlValueAccessor, Validator {
+export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   private static readonly flag = (given: boolean | string | undefined) =>
     given === undefined ? undefined : booleanAttribute(given);
   private static readonly count = (given: number | string | undefined) =>
@@ -233,6 +229,8 @@ export class SlCombobox implements ControlValueAccessor, Validator {
   /** The chosen option's key. */
   readonly value = model<ComboboxOptionValue | null>(null);
   readonly valueChangeRequest = output<ChangeRequest<ComboboxOptionValue | null>>();
+  /** What an unbound `value` starts from, read once. It seeds the key and not the text. */
+  readonly defaultValue = input<ComboboxOptionValue | null | undefined>(undefined);
 
   /** The characters in the field, which are not the chosen key. */
   readonly inputValue = model<string>('');
@@ -430,6 +428,19 @@ export class SlCombobox implements ControlValueAccessor, Validator {
     });
 
     destroyRef.onDestroy(() => this.teardown());
+  }
+
+  /**
+   * The uncontrolled start, read once. It is read here rather than in the
+   * constructor because that is where Angular has finished writing the inputs.
+   * A `value` the consumer bound is already in the model and wins; the seed
+   * fills a model still at its declared default, and leaves `inputValue`
+   * alone because the text and the key are two contracts.
+   */
+  ngOnInit() {
+    const seed = this.defaultValue();
+    if (seed === undefined || seed === null || this.value() !== null) return;
+    this.value.set(seed);
   }
 
   optionId(value: ComboboxOptionValue): string {
@@ -883,7 +894,7 @@ export class SlCombobox implements ControlValueAccessor, Validator {
    * describe: a required control with nothing chosen, and a control holding
    * text that matches no option when a custom value is not allowed.
    */
-  validate(_control: AbstractControl): ValidationErrors | null {
+  validate(): ValidationErrors | null {
     if (this.resolvedRequired() && this.value() === null) return { required: true };
     if (this.resolvedAllowsCustomValue()) return null;
     if (this.value() === null && this.inputValue() !== '') return { unmatched: true };

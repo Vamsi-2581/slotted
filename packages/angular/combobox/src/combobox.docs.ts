@@ -218,7 +218,9 @@ const scenes: ReferenceSceneMeta[] = [
   [loading]="pending()"
   [(inputValue)]="query"
   (loadMore)="fetchNextPage()"
->…</sl-combobox>`,
+>
+  …
+</sl-combobox>`,
     }),
   },
   {
@@ -371,6 +373,13 @@ const api = apiRows([
     'null',
     'sl-combobox',
     'The chosen option’s key. Two-way, and a ControlValueAccessor for Reactive Forms.',
+  ],
+  [
+    'defaultValue',
+    'string | null',
+    '—',
+    'sl-combobox',
+    'What an unbound value starts from, read once at init. It seeds the key and not the text.',
   ],
   ['open', 'model<boolean>', 'false', 'sl-combobox', 'Whether the popup is showing.'],
   [
@@ -767,7 +776,13 @@ const code = defineSnippet({
   language: 'angular',
   label: 'The anatomy as it reaches the DOM',
   source: `<sl-combobox data-ui="combobox" data-part="root" data-size="md" data-open>
-  <input data-part="input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="true" />
+  <input
+    data-part="input"
+    type="text"
+    role="combobox"
+    aria-autocomplete="list"
+    aria-expanded="true"
+  />
   <button data-part="clear" type="button" aria-label="Clear"></button>
   <button data-part="trigger" type="button" tabindex="-1" aria-label="Show options">
     <span data-part="arrow"></span>
@@ -776,7 +791,7 @@ const code = defineSnippet({
 });
 
 const theming = defineSnippet({
-  id: 'combobox-angular-theming',
+  id: 'combobox-theming',
   language: 'css',
   label: 'What an application retunes',
   source: `[data-ui='combobox'] {

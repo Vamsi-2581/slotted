@@ -793,7 +793,7 @@ const accessibility = [
 ];
 
 const code = defineSnippet({
-  id: 'combobox-anatomy',
+  id: 'combobox-react-anatomy',
   language: 'tsx',
   label: 'The anatomy as it reaches the DOM',
   source: `<div

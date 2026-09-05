@@ -37,12 +37,7 @@ import {
   type EmbeddedViewRef,
 } from '@angular/core';
 import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
-import type {
-  AbstractControl,
-  ControlValueAccessor,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import type { ControlValueAccessor, ValidationErrors, Validator } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { SlField } from '@slotted/angular/field';
 
@@ -840,7 +835,7 @@ export class SlSelect implements ControlValueAccessor, Validator {
    * carries always holds one — so the browser cannot answer the question and
    * the family answers it here.
    */
-  validate(_control: AbstractControl): ValidationErrors | null {
+  validate(): ValidationErrors | null {
     if (!this.resolvedRequired()) return null;
     return this.selection().length === 0 ? { required: true } : null;
   }

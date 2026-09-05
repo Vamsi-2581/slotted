@@ -725,7 +725,7 @@ const accessibility = [
 ];
 
 const code = defineSnippet({
-  id: 'select-anatomy',
+  id: 'select-react-anatomy',
   language: 'tsx',
   label: 'The anatomy as it reaches the DOM',
   source: `<div

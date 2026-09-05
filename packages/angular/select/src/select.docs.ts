@@ -727,7 +727,7 @@ const code = defineSnippet({
 });
 
 const theming = defineSnippet({
-  id: 'select-angular-theming',
+  id: 'select-theming',
   language: 'css',
   label: 'What an application retunes',
   source: `[data-ui='select'] {

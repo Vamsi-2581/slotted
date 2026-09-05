@@ -47,37 +47,28 @@
      */
     --_halo-size: var(--slotted-selection-halo-size, 32px);
     /**
-     * The height a one-line label is missing before it is a WCAG 2.2 target,
-     * split above and below its text. It is padding rather than a minimum
-     * alone: a minimum sinks the whole difference below the text, and the
-     * description under it then sat further from the label it belongs to than
-     * from the next choice. Proximity said the wrong thing, and it said it by
-     * four and a half pixels at `md` and six at `dense`.
+     * The target: the WCAG 2.2 minimum, which the box is under and the row no
+     * longer pads itself out to. It is the halo's own box (below), so a
+     * one-line row is exactly its line and the twenty-four pixels are hit
+     * around the box rather than laid out beside it. The label used to carry
+     * them as a minimum plus slack, and with `box-sizing: content-box` the two
+     * added up: the row stood 28.5px tall at `md` and 30px at `dense` for one
+     * line of text.
      */
-    --_label-slack: max(
-      0px,
-      (var(--slotted-target-min, 24px) - var(--_font-size) * var(--_line-height)) / 2
-    );
+    --_target: var(--slotted-target-min, 24px);
     /**
      * The distance from the top of the label's box to the top of the square, so
      * the box sits on the first line of a label that wraps to three rather than
      * in the middle of the block. Stated rather than centred: `align-items:
      * center` on a wrapped label is what puts a checkbox beside the second line,
      * and `align-content: center` stops answering the moment the label wraps.
-     * The slack is inside it because the label's own text starts one slack down.
      */
-    --_lift: calc(
-      var(--_label-slack) + (var(--_font-size) * var(--_line-height) - var(--_size)) / 2
-    );
+    --_lift: calc((var(--_font-size) * var(--_line-height) - var(--_size)) / 2);
     /**
-     * The distance from the label's text to the description under it, stated
-     * once so both variants land on it. `field` puts `--slotted-space-3`
-     * between its own rows and a description belongs to the label above it at
-     * the same step; the label's slack already supplies part of that distance
-     * in the plain variant and none of it in a tile, so the padding is what is
-     * left over rather than a second number.
+     * The distance from the label's text to the description under it: the step
+     * `field` puts between its own rows, in both variants.
      */
-    --_description-gap: max(0px, var(--slotted-space-3, 0.375rem) - var(--_label-slack));
+    --_description-gap: var(--slotted-space-3, 0.375rem);
 
     color: var(--slotted-checkbox-color, var(--slotted-text, CanvasText));
     display: grid;
@@ -94,6 +85,21 @@
     line-height: var(--_line-height);
     /* The containing block for the halo. */
     position: relative;
+  }
+
+  /**
+   * The direction the halo and the target are placed in. A positioned box's
+   * flow-relative insets follow its own writing mode, and the label's can
+   * differ from the root's — a label in Arabic inside a form in Portuguese —
+   * so the two pseudo-elements take the root's direction rather than the
+   * label's, or they land on the far side of the row.
+   */
+  [data-ui='checkbox'][data-part='root'] {
+    --_direction: ltr;
+  }
+
+  [data-ui='checkbox'][data-part='root']:dir(rtl) {
+    --_direction: rtl;
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────
@@ -224,49 +230,64 @@
   /* ── The label, and the target ────────────────────────────────────────
    *
    * The label is the control's own element and it names it through `for`, so a
-   * description below it can be read without toggling anything. It carries the
-   * whole target: the square is sixteen pixels, under WCAG 2.2's 24, and the
-   * correction is the family's to make rather than the theme's.
+   * description below it can be read without toggling anything. Its box is its
+   * line: the target the square is too small to be is the halo below, which is
+   * the label's own pseudo-element, and the row is not padded out to it.
    */
 
   [data-ui='checkbox'] [data-part='label'] {
     cursor: pointer;
     grid-column: 2;
     grid-row: 1;
-    /** The minimum never binds, because the padding already reaches it at one
-        line and the label is taller than it at two. It states the requirement
-        the padding meets, so a theme that retunes the target moves both. */
-    min-block-size: var(--slotted-target-min, 24px);
-    padding-block: var(--_label-slack);
     padding-inline-start: var(--_gap);
     /** A label that is one unbroken token — an id, a hash, a URL — breaks. */
     overflow-wrap: anywhere;
   }
 
   /**
-   * The halo: a circle twice the box, centred on it and drawn behind it, that
-   * shows under the pointer. It is the label's pseudo-element and not the
-   * indicator's, because the label is the element that toggles the control,
-   * and it sits at a negative stack level inside the root, so the box paints
-   * over its middle.
+   * The halo, and the target. A circle the size of the WCAG minimum, centred
+   * on the box and drawn behind it, whose shadow spread to the halo size is
+   * what shows under the pointer. Both are the label's pseudo-elements and not
+   * the indicator's, because the label is the element that toggles the
+   * control, and both sit at a negative stack level inside the root, so the
+   * box paints over their middle and takes the pointer there.
    *
-   * The pseudo-element is the box's own circle, exactly over the box, and the
-   * halo is its shadow spread out to the halo size: a spread shadow keeps the
-   * corner radius of the box it leaves, so a circle stays a circle. Ink rather
-   * than a laid-out box of thirty-two pixels, because a positioned box that
-   * size hung eight pixels past the root's end edge in the label-first
-   * arrangement and five past its bottom in both, and every one of those
-   * pixels was scrollable overflow in whatever the checkbox stood in.
+   * The target is `::before`: a square of the WCAG minimum, hit but never
+   * seen. It is not centred on the box. A positioned box that hangs past the
+   * root's end or bottom edge is scrollable overflow in whatever the checkbox
+   * stands in, and a centred square hangs four pixels past the end in the
+   * label-first arrangement and two past the bottom in both; hanging past the
+   * start or the top is overflow nobody can scroll to. So the square ends
+   * where the box ends, and the eight pixels it adds are above the box and on
+   * its start side — which for a pointer is the same twenty-four.
    *
-   * The tile has no halo. Its surface is the target and answers the pointer
-   * itself, and its label's `::after` already stretches over that surface.
+   * The halo is `::after`: the box's own circle, exactly over the box, with
+   * its shadow spread out to the halo size. A spread shadow keeps the corner
+   * radius of the box it leaves, so a circle stays a circle, and ink is
+   * scrollable overflow nowhere — which is why the picture is centred and the
+   * target is not.
+   *
+   * The tile has neither. Its surface is the target and answers the pointer
+   * itself, and its label's `::after` stretches over that surface instead.
    */
   [data-ui='checkbox'][data-part='root']:not([data-variant='tile']) [data-part='label']::before {
+    block-size: var(--_target);
+    content: '';
+    direction: var(--_direction);
+    inline-size: var(--_target);
+    inset-block-start: calc(var(--_lift) + var(--_size) - var(--_target));
+    inset-inline-start: calc((var(--_size) - var(--_target)) / 2);
+    position: absolute;
+    z-index: -1;
+  }
+
+  [data-ui='checkbox'][data-part='root']:not([data-variant='tile']) [data-part='label']::after {
     block-size: var(--_size);
     border-radius: var(--slotted-radius-full, 9999px);
     box-shadow: 0 0 0 calc((var(--_halo-size) - var(--_size)) / 2)
       var(--slotted-checkbox-halo-color, var(--slotted-tone-accent-surface));
     content: '';
+    direction: var(--_direction);
     inline-size: var(--_size);
     inset-block-start: var(--_lift);
     inset-inline-start: 0;
@@ -326,7 +347,10 @@
     padding-inline-start: 0;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label']::before {
+  /* The target and the halo follow the box to the end of the row; the target
+     ends where the row ends, for the reason its rule gives. */
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label']::before,
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label']::after {
     inset-inline-end: 0;
     inset-inline-start: auto;
   }
@@ -351,10 +375,10 @@
 
   [data-ui='checkbox'][data-part='root']:not([data-readonly])
     [data-part='control']:hover:not(:disabled)
-    ~ [data-part='label']::before,
+    ~ [data-part='label']::after,
   [data-ui='checkbox'][data-part='root']:not([data-readonly])
     [data-part='control']:not(:disabled)
-    ~ [data-part='label']:hover::before {
+    ~ [data-part='label']:hover::after {
     opacity: var(--slotted-selection-halo-opacity, 0.4);
   }
 
@@ -527,12 +551,6 @@
   [data-ui='checkbox'][data-part='root'][data-variant='tile'] {
     /* Current. The gated rules below move these three and nothing else, so a
        state change is one declaration rather than a repainted rule. */
-    /* The tile is the target, at every size and density, so the label stops
-       carrying a minimum it no longer needs — and the slack that minimum
-       required goes with it. A one-line tile is then its inset plus its line
-       rather than its inset plus twenty-four pixels, and the description sits
-       at the same distance from its label that `field` puts between its rows. */
-    --_label-slack: 0px;
     --_tile-surface: var(--slotted-checkbox-tile-background, var(--slotted-surface, Canvas));
     --_tile-edge: var(
       --slotted-checkbox-tile-border-color,
@@ -591,11 +609,6 @@
     content: '';
     inset: 0;
     position: absolute;
-  }
-
-  /* The tile carries the target the label used to. */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'] [data-part='label'] {
-    min-block-size: 0;
   }
 
   /* ── The tile's states ────────────────────────────────────────────────

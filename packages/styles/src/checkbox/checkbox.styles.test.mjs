@@ -160,17 +160,17 @@ test('draws the glyph in a box that is a fraction of the square, inset equally o
  * thirty-two pixels are scrollable overflow nowhere.
  */
 test('draws the halo behind the box as ink on the label, lit by hover alone', () => {
-  const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::before`);
+  const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::after`);
   assert.match(halo, /block-size:var\(--_size\)/);
   assert.match(halo, /inline-size:var\(--_size\)/);
+  assert.match(halo, /inset-block-start:var\(--_lift\)/);
+  assert.match(halo, /direction:var\(--_direction\)/);
   assert.match(halo, /border-radius:var\(--slotted-radius-full,9999px\)/);
   assert.match(
     halo,
     /box-shadow:0 0 0 calc\(\(var\(--_halo-size\) - var\(--_size\)\) \/ 2\) var\(--slotted-checkbox-halo-color,var\(--slotted-tone-accent-surface\)\)/,
   );
   assert.doesNotMatch(halo, /background-color/);
-  assert.match(halo, /inset-block-start:var\(--_lift\)/);
-  assert.match(halo, /inset-inline-start:0/);
   assert.match(halo, /opacity:0/);
   assert.match(halo, /z-index:-1/);
   assert.match(rule(root), /--_halo-size:var\(--slotted-selection-halo-size,32px\)/);
@@ -178,7 +178,7 @@ test('draws the halo behind the box as ink on the label, lit by hover alone', ()
   assert.match(rule(root), /position:relative/);
   assert.ok(
     normalized.includes(
-      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::before,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::before{opacity:var(--slotted-selection-halo-opacity,0.4);}`,
+      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::after,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::after{opacity:var(--slotted-selection-halo-opacity,0.4);}`,
     ),
     'hover does not light the halo, or lights it from somewhere else',
   );
@@ -191,7 +191,9 @@ test('draws the halo behind the box as ink on the label, lit by hover alone', ()
   assert.doesNotMatch(hover, /background-color/);
   /* The other placement puts the halo on the other side. */
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
+    rule(
+      `${root}[data-label-placement='start'] [data-part='label']::before,${root}[data-label-placement='start'] [data-part='label']::after`,
+    ),
     /inset-inline-end:0;inset-inline-start:auto/,
   );
 });
@@ -204,7 +206,7 @@ test('draws the halo behind the box as ink on the label, lit by hover alone', ()
 test('lifts the box onto the first line of a label that wraps', () => {
   assert.match(
     rule(root),
-    /--_lift:calc\(var\(--_label-slack\) \+ \(var\(--_font-size\) \* var\(--_line-height\) - var\(--_size\)\) \/ 2\)/,
+    /--_lift:calc\(\(var\(--_font-size\) \* var\(--_line-height\) - var\(--_size\)\) \/ 2\)/,
   );
   assert.match(rule(part('control')), /margin-block-start:var\(--_lift\)/);
   /* The mark rides the same lift, plus its own inset inside the box. */
@@ -212,27 +214,33 @@ test('lifts the box onto the first line of a label that wraps', () => {
 });
 
 /**
- * At `dense`/`sm` the square is twelve pixels, under WCAG 2.2's 24 × 24. The
- * label carries the target instead, which is the correction
- * `docs/token-foundation.md` says belongs to the family and not to the theme.
+ * The row is its line (CK3). The label carries no minimum and no slack — with
+ * `content-box` the two added up to 28.5px at `md` for one line of text — and
+ * the WCAG 2.2 target the box is too small to be is the halo's own box, hit
+ * around the box rather than laid out beside it.
  */
-/**
- * The slack a one-line label is short of the target is split above and below
- * its text rather than sunk below it. Sunk, it pushed the description further
- * from the label it belongs to than from the next choice, and proximity named
- * the wrong owner.
- */
-test('splits the target slack around the label text rather than below it', () => {
+test('keeps the row at its line and hits the target around the box', () => {
+  const label = rule(part('label'));
+  assert.doesNotMatch(label, /min-block-size/);
+  assert.doesNotMatch(label, /padding-block/);
+  assert.match(label, /cursor:pointer/);
+  assert.doesNotMatch(declarations, /--_label-slack/);
+  assert.match(rule(root), /--_target:var\(--slotted-target-min,24px\)/);
+  const target = rule(`${root}:not([data-variant='tile']) [data-part='label']::before`);
+  assert.match(target, /block-size:var\(--_target\)/);
+  assert.match(target, /inline-size:var\(--_target\)/);
   assert.match(
-    rule(root),
-    /--_label-slack:max\(0px,\(var\(--slotted-target-min,24px\) - var\(--_font-size\) \* var\(--_line-height\)\) \/ 2\)/,
+    target,
+    /inset-block-start:calc\(var\(--_lift\) \+ var\(--_size\) - var\(--_target\)\)/,
   );
-  assert.match(rule(part('label')), /padding-block:var\(--_label-slack\)/);
-});
-
-test('gives the label the target the box is too small to be', () => {
-  assert.match(rule(part('label')), /min-block-size:var\(--slotted-target-min,24px\)/);
-  assert.match(rule(part('label')), /cursor:pointer/);
+  assert.match(target, /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2\)/);
+  assert.doesNotMatch(target, /box-shadow|opacity/);
+  /* Placed in the root's direction, not the label's: a label in another
+     script inside the row would otherwise send both to the far side. */
+  assert.match(target, /direction:var\(--_direction\)/);
+  assert.ok(normalized.includes(`${root}{--_direction:ltr;}`));
+  assert.ok(normalized.includes(`${root}:dir(rtl){--_direction:rtl;}`));
+  assert.doesNotMatch(declarations, /overflow-clip-margin/);
 });
 
 /** A label that is one unbroken token — an id, a hash, a URL — has to break. */
@@ -347,14 +355,10 @@ test('dims the label of a control the browser disabled, not only of a mirrored o
 });
 
 /**
- * The distance from a label to its description is one number in both variants.
- * The label's slack supplies part of it in the plain variant and none of it in
- * a tile, so the padding is the remainder rather than a second decision.
+ * The distance from a label to its description is one number in both variants:
+ * the step `field` puts between its rows.
  */
 test('puts a description the same distance from its label in both variants', () => {
-  assert.match(
-    rule(root),
-    /--_description-gap:max\(0px,var\(--slotted-space-3,0\.375rem\) - var\(--_label-slack\)\)/,
-  );
+  assert.match(rule(root), /--_description-gap:var\(--slotted-space-3,0\.375rem\)/);
   assert.match(rule(part('description')), /padding-block-start:var\(--_description-gap\)/);
 });

@@ -27,6 +27,9 @@
     --_min-block: var(--slotted-list-item-min-block-size, var(--slotted-control-height-md, 34px));
     --_font-size: var(--slotted-list-item-font-size, var(--slotted-control-font-size-md, 13px));
     --_icon-size: var(--slotted-list-item-icon-size, var(--slotted-control-icon-size-md, 16px));
+    /* The chooser's square, when the leading column holds one: the selection
+       scale `checkbox` draws in, which density does not move. */
+    --_control-size: var(--slotted-list-item-control-size, var(--slotted-selection-size-md, 16px));
     --_gap: var(--slotted-list-item-gap, var(--slotted-control-gap-md, 8px));
     --_pad-inline: var(
       --slotted-list-item-padding-inline,
@@ -136,6 +139,10 @@
     );
     --_font-size: var(--slotted-list-item-font-size-sm, var(--slotted-control-font-size-sm, 12px));
     --_icon-size: var(--slotted-list-item-icon-size-sm, var(--slotted-control-icon-size-sm, 14px));
+    --_control-size: var(
+      --slotted-list-item-control-size-sm,
+      var(--slotted-selection-size-sm, 14px)
+    );
     --_gap: var(--slotted-list-item-gap-sm, var(--slotted-control-gap-sm, 6px));
     --_pad-inline: var(
       --slotted-list-item-padding-inline-sm,
@@ -151,6 +158,10 @@
     );
     --_font-size: var(--slotted-list-item-font-size-lg, var(--slotted-control-font-size-lg, 14px));
     --_icon-size: var(--slotted-list-item-icon-size-lg, var(--slotted-control-icon-size-lg, 18px));
+    --_control-size: var(
+      --slotted-list-item-control-size-lg,
+      var(--slotted-selection-size-lg, 18px)
+    );
     --_gap: var(--slotted-list-item-gap-lg, var(--slotted-control-gap-lg, 8px));
     --_pad-inline: var(
       --slotted-list-item-padding-inline-lg,
@@ -409,6 +420,25 @@
     /* The column is the control glyph's, so an icon, an avatar and a checkbox
        each land on the same line however tall they are. */
     min-inline-size: var(--_icon-size);
+  }
+
+  /**
+   * A chooser in the leading column (LI2). `checkbox` lifts its own box onto
+   * the first line of the text beside it — the same line box this row sets
+   * its title in, at the same step — so the column only has to stand at the
+   * top of that line and be as tall as it: the box then sits on the title's
+   * centre by the chooser's own arithmetic rather than by a second one here.
+   * Centred on the block, as an icon is, a one-line row put the box a pixel
+   * low and a two-line row put it between the lines.
+   *
+   * The column is the chooser's own square, fixed across densities as the
+   * chooser is (CK1); the gap beside it is the row's control gap, the same
+   * distance the chooser puts between its box and its own label.
+   */
+  [data-ui='list-item'] [data-part='start']:has(> [data-ui='checkbox']) {
+    align-items: start;
+    inline-size: var(--_control-size);
+    min-block-size: calc(var(--_font-size) * var(--slotted-line-height-md, 1.5));
   }
 
   /* A leading visual beside a three-line row sits on the title's line, and the

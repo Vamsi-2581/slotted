@@ -445,17 +445,33 @@
   /* ── The words ────────────────────────────────────────────────────────
    *
    * `min-inline-size: 0` is what lets the column shrink below its content
-   * inside the grid, and it is the half of the pair that `minmax(0, 1fr)` on
-   * the track cannot supply on its own.
+   * inside the message's grid, and it is the half of the pair that
+   * `minmax(0, 1fr)` on the track cannot supply on its own. The same pair is
+   * restated inside: the words are a grid of their own, and its one track has
+   * to be clamped too, or an unbreakable word in the title sizes the track to
+   * itself and the words run past the box that holds them.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='content'] {
     display: grid;
     grid-column: 2;
     grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
     min-inline-size: 0;
     row-gap: var(--_text-gap);
   }
 
+  /**
+   * `anywhere` breaks the one string a message is likeliest to carry that no
+   * language can break — a deployment id, a container digest, a compound noun,
+   * a host name without a hyphen — and, unlike `break-word`, lowers the
+   * min-content size the grid reads, so the track never grows past the box to
+   * fit the word. Nothing is removed: the whole string stays in the DOM, in the
+   * accessibility tree, and findable by a page search.
+   *
+   * The 240-pixel capture is what asked for it: with `break-word` the title
+   * `Zwischenspeicherung` set the track to 183 pixels inside a box of 155, and
+   * the words stood outside the message in every scheme.
+   */
   [data-ui='toast']
     > [data-part='list']
     > [data-part='item']
@@ -463,14 +479,10 @@
     > [data-part='title'] {
     font-weight: var(--slotted-toast-title-font-weight, var(--slotted-font-weight-semibold, 600));
     margin: 0;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
   }
 
-  /**
-   * `break-word` breaks the one string a message is likeliest to carry that no
-   * language can break — a deployment id, a container digest, a host name
-   * without a hyphen. Nothing is removed: the whole string stays in the DOM,
-   * in the accessibility tree, and findable by a page search.
-   */
   [data-ui='toast']
     > [data-part='list']
     > [data-part='item']
@@ -479,7 +491,7 @@
     color: var(--_ink-muted);
     margin: 0;
     min-inline-size: 0;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
   }
 
   /* ── The actions ──────────────────────────────────────────────────────

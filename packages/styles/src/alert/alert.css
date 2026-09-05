@@ -423,39 +423,48 @@
   /* ── The words, which are the live region ─────────────────────────────
    *
    * `min-inline-size: 0` is what lets the column shrink below its content
-   * inside the grid, and it is the half of the pair that `minmax(0, 1fr)` on
-   * the track cannot supply on its own.
+   * inside the root's grid, and it is the half of the pair that
+   * `minmax(0, 1fr)` on the track cannot supply on its own. The same pair is
+   * restated inside: the words are a grid of their own, and its one track has
+   * to be clamped too, or an unbreakable word in the title sizes the track to
+   * itself and the words run past the box that holds them.
    */
   [data-ui='alert'] > [data-part='content'] {
     display: grid;
     grid-column: 2;
     grid-row: 1;
+    grid-template-columns: minmax(0, 1fr);
     min-inline-size: 0;
     row-gap: var(--_text-gap);
   }
 
+  /**
+   * `anywhere` breaks the one string a message is likeliest to carry that no
+   * language can break — a deployment id, a container digest, a compound noun,
+   * a host name without a hyphen — and, unlike `break-word`, lowers the
+   * min-content size the grid reads, so the track never grows past the box to
+   * fit the word. Nothing is removed: the whole string stays in the DOM, in the
+   * accessibility tree, and findable by a page search.
+   *
+   * The 240-pixel capture is what asked for it: with `break-word` the title
+   * `Zahlungsbestätigung` set the track to its own width and the words stood
+   * outside the box by a few pixels in every scheme; the digest under it broke
+   * at the track's edge rather than at the box's. An ordinary word breaks only
+   * in a column narrower than the word, which at this type size is a column
+   * too narrow for the message anyway.
+   */
   [data-ui='alert'] [data-part='title'] {
     font-weight: var(--slotted-alert-title-font-weight, var(--slotted-font-weight-semibold, 600));
     margin: 0;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
   }
 
-  /**
-   * `break-word` breaks the one string a message is likeliest to carry that no
-   * language can break — a deployment id, a container digest, a host name
-   * without a hyphen. Nothing is removed: the whole string stays in the DOM, in
-   * the accessibility tree, and findable by a page search.
-   *
-   * `anywhere` would break the same string and also lower the paragraph's
-   * min-content size to one character, which is a second answer to a question
-   * `minmax(0, 1fr)` on the text column has already answered — and one that
-   * invites an ordinary word to break in a column narrow enough. `break-word`
-   * breaks only what would otherwise overflow.
-   */
   [data-ui='alert'] [data-part='description'] {
     font-size: var(--_description-font-size);
     margin: 0;
     min-inline-size: 0;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
   }
 
   /* ── The actions ──────────────────────────────────────────────────────

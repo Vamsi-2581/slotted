@@ -300,3 +300,19 @@ test('makes the box a programmatic focus destination and never a tab stop', () =
   assert.match(fragment, /tabindex="-1"/);
   assert.ok(!/tabindex="0"/.test(fragment), 'the box is in the tab sequence');
 });
+
+/**
+ * A word no language can break must not size the words' own track. The
+ * 240-pixel capture showed `Zahlungsbestätigung` setting the track to its own
+ * width and the words standing outside the box: `break-word` wraps only after
+ * the track has already grown to fit the word. `anywhere` lowers the
+ * min-content size the grid reads, and the clamped track is the other half.
+ */
+test('breaks an unbreakable title inside the box rather than growing the box', () => {
+  assert.match(rule(`${ui}>[data-part='content']`), /grid-template-columns:minmax\(0,1fr\)/);
+  for (const part of ['title', 'description']) {
+    const words = rule(`${ui} [data-part='${part}']`);
+    assert.match(words, /overflow-wrap:anywhere/, `${part} keeps break-word`);
+    assert.match(words, /min-inline-size:0/, `${part} does not shrink`);
+  }
+});

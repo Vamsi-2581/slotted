@@ -145,7 +145,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 ## Alert
 
 - [x] **AL1 — Ícone solto na superfície.** Ver R5. Aplicar em `packages/styles/src/alert/alert.css` (`[data-part='icon']`, grid `auto minmax(0, 1fr) auto`). Afeta `Toast` (`#Toast:1`), `ResultState`, `AlertDialog`, `InlineMessage`, `Field` (`#Field:1`).
-- [ ] **AL2 — Conteúdo transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G3, sem alteração de layout: na cena `content`, `[data-part='content']` mede 156px dentro de 149px disponíveis nos três esquemas. Esperado: o conteúdo quebra dentro da largura do palco (`min-inline-size: 0` na coluna do grid e `overflow-wrap: anywhere` em título e descrição); nada transborda o palco.
+- [x] **AL2 — Conteúdo transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G3, sem alteração de layout: na cena `content`, `[data-part='content']` mede 156px dentro de 149px disponíveis nos três esquemas. Esperado: o conteúdo quebra dentro da largura do palco (`min-inline-size: 0` na coluna do grid e `overflow-wrap: anywhere` em título e descrição); nada transborda o palco.
 
 ---
 
@@ -382,7 +382,7 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 ## Toast
 
 - [x] **TO1 — `#Alert:1`.** Aplicar R5.
-- [ ] **TO2 — Conteúdo transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G3, sem alteração de layout: na cena `content`, `[data-part='content']` mede 183px dentro de 149px disponíveis nos três esquemas. Esperado: mesma regra de `#Alert:2`.
+- [x] **TO2 — Conteúdo transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G3, sem alteração de layout: na cena `content`, `[data-part='content']` mede 183px dentro de 149px disponíveis nos três esquemas. Esperado: mesma regra de `#Alert:2`.
 
 ---
 

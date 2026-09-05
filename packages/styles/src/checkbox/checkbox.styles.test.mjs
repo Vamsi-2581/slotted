@@ -358,7 +358,12 @@ test('dims the label of a control the browser disabled, not only of a mirrored o
  * The distance from a label to its description is one number in both variants:
  * the step `field` puts between its rows.
  */
-test('puts a description the same distance from its label in both variants', () => {
+test('puts a description one step from its label, and one step nearer inside a tile', () => {
   assert.match(rule(root), /--_description-gap:var\(--slotted-space-3,0\.375rem\)/);
   assert.match(rule(part('description')), /padding-block-start:var\(--_description-gap\)/);
+  /* CK2: 4px inside the frame, where the inset already holds the pair apart. */
+  assert.match(
+    rule(`${root}[data-variant='tile']`),
+    /--_description-gap:var\(--slotted-checkbox-tile-description-gap,var\(--slotted-space-2,0\.25rem\)\)/,
+  );
 });

@@ -348,7 +348,11 @@ test('separates two described choices by twice the distance it separates bare on
  * The label's slack supplies part of it in the plain variant and none of it in
  * a tile, so the padding is the remainder rather than a second decision.
  */
-test('puts a description the same distance from its label in both variants', () => {
+test('puts a description one step from its label, and one step nearer inside a tile', () => {
   assert.match(rule(root), /--_description-gap:var\(--slotted-space-3,0\.375rem\)/);
   assert.match(rule(part('description')), /padding-block-start:var\(--_description-gap\)/);
+  assert.match(
+    rule(`${root}[data-variant='tile'] [data-part='item']`),
+    /--_description-gap:var\(--slotted-radio-group-tile-description-gap,var\(--slotted-space-2,0\.25rem\)\)/,
+  );
 });

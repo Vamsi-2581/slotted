@@ -450,6 +450,12 @@
    */
 
   [data-ui='radio-group'][data-part='root'][data-variant='tile'] [data-part='item'] {
+    /* The description sits one step nearer its label inside a frame, as
+       `checkbox` keeps it (CK2). */
+    --_description-gap: var(
+      --slotted-radio-group-tile-description-gap,
+      var(--slotted-space-2, 0.25rem)
+    );
     /* Current. The gated rules below move these three and nothing else. */
     --_tile-surface: var(--slotted-radio-group-tile-background, var(--slotted-surface, Canvas));
     --_tile-edge: var(

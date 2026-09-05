@@ -549,6 +549,13 @@
    */
 
   [data-ui='checkbox'][data-part='root'][data-variant='tile'] {
+    /* The description sits one step nearer its label inside a frame (CK2):
+       the tile's own inset already holds the pair apart from everything else,
+       and the plain variant's distance read as a third row inside the box. */
+    --_description-gap: var(
+      --slotted-checkbox-tile-description-gap,
+      var(--slotted-space-2, 0.25rem)
+    );
     /* Current. The gated rules below move these three and nothing else, so a
        state change is one declaration rather than a repainted rule. */
     --_tile-surface: var(--slotted-checkbox-tile-background, var(--slotted-surface, Canvas));

@@ -121,7 +121,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Geral
 
-- [ ] **G1 — Botões internos de componentes compostos.** Ver R2. Auditar todos os componentes listados em R2 e substituir instâncias de `Button`/`IconButton` por parte interna.
+- [ ] **G1 — Botões internos de componentes compostos.** Ver R2. Auditar todos os componentes listados em R2 e substituir instâncias de `Button`/`IconButton` por parte interna. Fato verificado (auditoria registrada em `docs/implementation-review-log.md`, nota para G1): nenhuma das 14 famílias importa ou renderiza `Button`/`IconButton` em React ou Angular; todas já têm parte interna (`clear`, `dismiss`, `close`, `remove`, `ellipsis`, `scroll`, `overflow`, `increment`/`decrement`). O item passa a ser a aplicação das regras de estilo de R2 a essas partes (tamanho por `--slotted-control-icon-size-<densidade>`, sem borda e sombra em repouso, `hover`/`active` em um passo, anel R3, alvo de 24px via `::before`), com guarda em `packages/styles/src`; BC1, T1, TF1 e SL3 fecham junto.
 - [x] **G2 — Rails laterais para estado.** Ver R1. Remover todas as ocorrências.
 - [x] **G3 — Anel de foco branco em `dark`.** Ver R3.
 - [x] **G4 — Glifos escritos à mão.** Ver R4.

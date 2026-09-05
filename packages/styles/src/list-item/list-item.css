@@ -35,7 +35,23 @@
       --slotted-list-item-padding-inline,
       var(--slotted-control-padding-inline-md, 13px)
     );
-    --_pad-block: var(--slotted-list-item-padding-block, var(--slotted-space-4, 0.5rem));
+    /**
+     * The block inset is what is left of the control height around one line
+     * of the title, so a one-line row is exactly the control height at every
+     * density — 34, 28 and 26 pixels at `md` — and a row of two lines grows by
+     * its second line and nothing else (LI3). Stated as a step of the space
+     * scale it was eight pixels at every density, and the row stood at 34px in
+     * `dense` as in `comfortable`: the one control on the page that density
+     * did not move. A floor of one space step keeps a row whose text is taller
+     * than its control from losing its inset.
+     */
+    --_pad-block: var(
+      --slotted-list-item-padding-block,
+      max(
+        var(--slotted-space-2, 0.25rem),
+        calc((var(--_min-block) - var(--_font-size) * var(--slotted-line-height-md, 1.5)) / 2)
+      )
+    );
     --_radius: var(--slotted-list-item-radius, var(--slotted-radius-md, 6px));
 
     /* Ink. `secondary` is the library's neutral, and a neutral row takes the
@@ -148,7 +164,13 @@
       --slotted-list-item-padding-inline-sm,
       var(--slotted-control-padding-inline-sm, 10px)
     );
-    --_pad-block: var(--slotted-list-item-padding-block-sm, var(--slotted-space-3, 0.375rem));
+    --_pad-block: var(
+      --slotted-list-item-padding-block-sm,
+      max(
+        var(--slotted-space-2, 0.25rem),
+        calc((var(--_min-block) - var(--_font-size) * var(--slotted-line-height-md, 1.5)) / 2)
+      )
+    );
   }
 
   [data-ui='list-item'][data-size='lg'] {
@@ -167,7 +189,13 @@
       --slotted-list-item-padding-inline-lg,
       var(--slotted-control-padding-inline-lg, 16px)
     );
-    --_pad-block: var(--slotted-list-item-padding-block-lg, var(--slotted-space-5, 0.75rem));
+    --_pad-block: var(
+      --slotted-list-item-padding-block-lg,
+      max(
+        var(--slotted-space-2, 0.25rem),
+        calc((var(--_min-block) - var(--_font-size) * var(--slotted-line-height-md, 1.5)) / 2)
+      )
+    );
   }
 
   /**

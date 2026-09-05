@@ -23,8 +23,8 @@ export abstract class SlFieldMessage {
   /** Whether the message announces itself when it arrives. */
   readonly live = input<InlineMessageLive | undefined>(undefined);
   /**
-   * Which mark the message draws. A field's messages default to `dot`, and
-   * `glyph` asks for the tone's own silhouette back.
+   * Which mark the message draws. A field's messages default to `glyph`, the
+   * tone's own silhouette, and `dot` asks for one neutral bullet instead.
    */
   readonly mark = input<InlineMessageMark | undefined>(undefined);
   /** The word read before the message; the empty string removes it. */

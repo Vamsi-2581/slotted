@@ -21,6 +21,7 @@
   "--slotted-field-mark-gap",
   "--slotted-field-mark-text-color",
   "--slotted-field-row-gap",
+  "--slotted-font-size-xs",
   "--slotted-font-weight-medium",
   "--slotted-font-weight-regular",
   "--slotted-line-height-sm",

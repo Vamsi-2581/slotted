@@ -17,6 +17,8 @@
   "--slotted-field-group-mark-text-color",
   "--slotted-field-group-message-gap",
   "--slotted-field-group-track-min",
+  "--slotted-font-size-xs",
+  "--slotted-font-weight-medium",
   "--slotted-font-weight-regular",
   "--slotted-font-weight-semibold",
   "--slotted-line-height-sm",

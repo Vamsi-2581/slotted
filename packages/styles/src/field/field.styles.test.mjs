@@ -216,3 +216,25 @@ test('withdraws an empty message unless the form asked for its line', () => {
 test('lets the control shrink and touches nothing else about it', () => {
   assert.equal(rule(`${ui}>[data-part='control']`).trim(), 'min-inline-size:0;');
 });
+
+/**
+ * F1. Help under a field is muted text at the regular weight with no mark; an
+ * outcome — error or success — carries the tone's own silhouette at the type's
+ * size (`inline-message`, R5), the tone's ink, and one weight up. The size is
+ * one step under the smallest control type, from the type scale. The selector
+ * carries the root's part so it outweighs the message family's own root rule.
+ */
+test('sets the type of what the field says: xs, and a weight up for an outcome', () => {
+  const message = rule(`${root}>[data-ui='inline-message']`);
+  assert.match(message, /font-size:var\(--slotted-font-size-xs,0\.75rem\)/);
+  for (const tone of ['danger', 'success']) {
+    assert.ok(
+      normalized.includes(`${root}>[data-ui='inline-message'][data-tone='${tone}']`),
+      `${tone} is not set a weight up`,
+    );
+  }
+  const outcome = normalized.split(`${root}>[data-ui='inline-message'][data-tone='danger']`)[1];
+  assert.match(outcome ?? '', /^,[^{]*\{font-weight:var\(--slotted-font-weight-medium,500\);\}/);
+  assert.equal(contract.messageMark, 'glyph', 'the field still asks for bullets');
+  assert.ok(!fragment.includes('data-mark="dot"'), 'the fragment still draws bullets');
+});

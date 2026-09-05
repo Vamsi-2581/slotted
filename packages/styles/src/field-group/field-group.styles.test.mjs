@@ -155,3 +155,19 @@ test('withdraws an empty message unless the form asked for its line', () => {
 test('shows the family it exists to hold', () => {
   assert.match(fragment, /data-ui="field"/);
 });
+
+/**
+ * F1, stated once for the set and the fields inside it: the group's messages
+ * take the field's type — `xs` from the type scale, and a weight up for an
+ * outcome over the help.
+ */
+test('sets the type of what the group says the way the field does', () => {
+  const message = rule(`${root}>[data-ui='inline-message']`);
+  assert.match(message, /font-size:var\(--slotted-font-size-xs,0\.75rem\)/);
+  const outcome = normalized.split(`${root}>[data-ui='inline-message'][data-tone='danger']`)[1];
+  assert.match(
+    outcome ?? '',
+    /^,[^{]*\[data-tone='success'\]\{font-weight:var\(--slotted-font-weight-medium,500\);\}/,
+  );
+  assert.equal(contract.messageMark, 'glyph', 'the group still asks for bullets');
+});

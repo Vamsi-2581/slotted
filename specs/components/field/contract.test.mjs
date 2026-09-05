@@ -51,10 +51,11 @@ test('renders a div holding a native label and a native control', () => {
  * the family that already does, so a field error and a status light about the
  * same thing speak the same word.
  *
- * The one value the field answers rather than passes is the mark. A form is
- * read as a column of sentences, so every message under a field draws the same
- * bullet in the tone's ink and they all start on one left edge; the tone's own
- * silhouette is what `mark='glyph'` asks for back.
+ * The one value the field answers rather than passes is the mark, and the
+ * answer is the tone's own silhouette (F1): help draws no mark, because its
+ * tone has none, and an error draws the same mark as the alert about it, at the
+ * type's own size. `mark='dot'` is still there for a page that wants a column
+ * of bullets.
  */
 test('speaks through the message family instead of drawing a message', () => {
   assert.equal(contract.messageFamily, 'inline-message');
@@ -64,7 +65,7 @@ test('speaks through the message family instead of drawing a message', () => {
     'the field claims a part it does not own',
   );
   assert.equal(contract.messagePlacement, 'after');
-  assert.equal(contract.messageMark, 'dot');
+  assert.equal(contract.messageMark, 'glyph');
   assert.ok(
     message.axes.mark.includes(contract.messageMark),
     'the field asks for a mark inline-message does not draw',

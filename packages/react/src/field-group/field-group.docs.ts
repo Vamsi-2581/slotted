@@ -243,9 +243,9 @@ export const REACT_FIELD_GROUP_DOCS = {
       [
         'mark',
         "'glyph' | 'dot'",
-        'dot',
+        'glyph',
         'FieldGroupDescription, FieldGroupError',
-        'Which mark the message draws. A group’s messages are bullets in the tone’s ink, the same as the fields inside it, so the whole set reads as one column of sentences',
+        'Which mark the message draws. A group’s messages draw the tone’s own silhouette, the same as the fields inside it: help has none, an error draws the same mark as the alert about it; dot asks for one neutral bullet instead',
       ],
       [
         'live',

@@ -150,7 +150,7 @@ export function FieldDescription({ children, mark, tone, ...rest }: FieldMessage
       {...rest}
       disabled={field?.disabled}
       id={field?.ids.description}
-      mark={mark ?? 'dot'}
+      mark={mark ?? 'glyph'}
       size={field?.messageSize}
       tone={tone ?? 'secondary'}
     >
@@ -181,7 +181,7 @@ export function FieldError({ children, mark, tone, ...rest }: FieldMessageProps)
       {...rest}
       disabled={field?.disabled}
       id={field?.ids.error}
-      mark={mark ?? 'dot'}
+      mark={mark ?? 'glyph'}
       size={field?.messageSize}
       tone={tone ?? 'danger'}
     >

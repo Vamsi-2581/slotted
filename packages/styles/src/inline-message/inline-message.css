@@ -35,9 +35,8 @@
      * No mark for help, because help is not a severity. The four tones that are
      * one restate this with the glyph `specs/components/inline-message/contract.json`
      * maps them to — the same map `status-indicator` and `alert` declare, so a
-     * status light and an alert about the same thing draw the same silhouette.
-     * A message under a field draws neither: `mark='dot'` below is what `field`
-     * asks for, and the tone's ink is what carries the severity there.
+     * status light and an alert about the same thing draw the same silhouette,
+     * and an error under a field the same as the alert about it (F1).
      */
     --_glyph: none;
 
@@ -208,13 +207,12 @@
   /**
    * ── A bullet instead of a silhouette ──────────────────────────────────
    *
-   * `mark='dot'` is what a form asks for. Four fields with a description and an
-   * error each draw eight marks of four different shapes, and the shapes carry
-   * nothing the tone's ink and the clipped severity word do not already carry:
-   * the reader is reading a column of sentences, not identifying a severity by
-   * its outline. The dot is the same for every tone, including the help tone
-   * that draws no mark at all otherwise, so every message under a field starts
-   * on one left edge and only the ink changes between them.
+   * `mark='dot'` is for a page that wants a column of sentences rather than a
+   * column of silhouettes — a checklist, a changelog. The dot is the same for
+   * every tone, including the help tone that draws no mark at all otherwise,
+   * so every message in the column starts on one left edge and only the ink
+   * changes between them. `field` asked for it once and no longer does (F1):
+   * help under a field draws no mark, and an error draws the tone's own.
    *
    * The disc is a third of the mark — 4 pixels under 12-pixel type — so it
    * steps with the size step and with the density like every other mark. The

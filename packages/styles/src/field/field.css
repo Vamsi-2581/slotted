@@ -229,7 +229,8 @@
   /* ── The messages ─────────────────────────────────────────────────────
    *
    * `inline-message` roots, placed by the grid and styled by their own family.
-   * The field adds two rules, and neither of them paints.
+   * The field adds the rules below: one withdraws, and two set the type of
+   * what a field says — the size and, for an outcome, the weight.
    *
    * A message with nothing to say is withdrawn rather than left as an empty
    * line. `inline-message` already withdraws its mark and its severity word in
@@ -240,6 +241,33 @@
    */
   [data-ui='field'] > [data-ui='inline-message']:not([data-reserve]):has([data-part='text']:empty) {
     display: none;
+  }
+
+  /**
+   * What a field says under its control, and how (F1). The type is one step
+   * under the smallest control type, from the type scale rather than the
+   * control scale: a message is quieter than the control it is about at every
+   * size the field takes, and it does not grow with the control. The message's
+   * own `size` still places its mark — sized in `em`, it follows this.
+   *
+   * The selector carries the root's part so it outweighs the message family's
+   * own root rule, which has the same two attributes; equal specificity would
+   * leave the winner to stylesheet order.
+   */
+  [data-ui='field'][data-part='root'] > [data-ui='inline-message'] {
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+  }
+
+  /**
+   * An outcome — the value is wrong, or it was accepted — is set a weight up
+   * from the help under it. The help is muted ink at the regular weight and
+   * draws no mark; the outcome draws the tone's own silhouette at the type's
+   * size (`inline-message`, R5) and its own ink, and the weight is what makes
+   * the two read as two kinds of sentence rather than one.
+   */
+  [data-ui='field'][data-part='root'] > [data-ui='inline-message'][data-tone='danger'],
+  [data-ui='field'][data-part='root'] > [data-ui='inline-message'][data-tone='success'] {
+    font-weight: var(--slotted-font-weight-medium, 500);
   }
 
   /* ── Placement: the label above the control, or beside it ─────────────

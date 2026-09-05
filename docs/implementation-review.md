@@ -285,7 +285,7 @@ Localização: `packages/styles/src/drawer/drawer.css`.
 
 ## Field
 
-- [ ] **F1 — Mensagens de descrição e erro.** Esperado: mensagem de descrição sem glifo, apenas texto em `--slotted-text-muted`, tamanho `--slotted-font-size-xs`. Mensagem de erro com glifo `circle-alert` (R4, R5) de `1em`, texto em `--slotted-tone-danger-text` com `font-weight: 500`. Mensagem de sucesso segue o padrão de erro com tom `success`. Aplicar em `packages/styles/src/field/field.css`.
+- [x] **F1 — Mensagens de descrição e erro.** Esperado: mensagem de descrição sem glifo, apenas texto em `--slotted-text-muted`, tamanho `--slotted-font-size-xs`. Mensagem de erro com glifo `circle-alert` (R4, R5) de `1em`, texto em `--slotted-tone-danger-text` com `font-weight: 500`. Mensagem de sucesso segue o padrão de erro com tom `success`. Aplicar em `packages/styles/src/field/field.css`.
 
 ---
 

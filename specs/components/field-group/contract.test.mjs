@@ -63,9 +63,9 @@ test('speaks through the message family, before the controls rather than after',
   assert.deepEqual(contract.messageTones, field.messageTones);
   assert.equal(contract.messagePlacement, 'before');
   assert.equal(field.messagePlacement, 'after');
-  /* The mark is the one value the two agree on: a group's messages are bullets
-     for the reason a field's are, so a set and the fields inside it read as one
-     column of sentences. */
+  /* The mark is the one value the two agree on: a group's messages draw the
+     tone's own silhouette for the reason a field's do (F1), so a set and the
+     fields inside it read as one form. */
   assert.equal(contract.messageMark, field.messageMark);
   assert.ok(
     !group.parts.includes('description') && !group.parts.includes('error'),

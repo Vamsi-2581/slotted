@@ -146,6 +146,23 @@
     display: none;
   }
 
+  /**
+   * The type of what a group says, and it is the field's (F1): one step under
+   * the smallest control type, from the type scale, and one weight up for an
+   * outcome — an error or a success — over the help. A set and the fields
+   * inside it are read as one form, so the two families state one rule. The
+   * selector carries the root's part so it outweighs the message family's own
+   * root rule, which has the same two attributes.
+   */
+  [data-ui='field-group'][data-part='root'] > [data-ui='inline-message'] {
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+  }
+
+  [data-ui='field-group'][data-part='root'] > [data-ui='inline-message'][data-tone='danger'],
+  [data-ui='field-group'][data-part='root'] > [data-ui='inline-message'][data-tone='success'] {
+    font-weight: var(--slotted-font-weight-medium, 500);
+  }
+
   /* ── The set ──────────────────────────────────────────────────────────
    *
    * The fields, in a column or in a row. `orientation` here means what it means

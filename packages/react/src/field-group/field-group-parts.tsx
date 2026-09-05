@@ -94,7 +94,7 @@ export function FieldGroupDescription({ children, mark, tone, ...rest }: FieldGr
     <InlineMessage
       {...rest}
       id={group?.ids.description}
-      mark={mark ?? 'dot'}
+      mark={mark ?? 'glyph'}
       size={group?.messageSize}
       tone={tone ?? 'secondary'}
     >
@@ -116,7 +116,7 @@ export function FieldGroupError({ children, mark, tone, ...rest }: FieldGroupMes
     <InlineMessage
       {...rest}
       id={group?.ids.error}
-      mark={mark ?? 'dot'}
+      mark={mark ?? 'glyph'}
       size={group?.messageSize}
       tone={tone ?? 'danger'}
     >

@@ -269,9 +269,9 @@ export const ANGULAR_FIELD_DOCS = {
       [
         'mark',
         "'glyph' | 'dot'",
-        'dot',
+        'glyph',
         'slFieldDescription, slFieldError',
-        'Which mark the message draws. A field’s messages are bullets in the tone’s ink, so a description and an error start on one left edge; glyph asks for the tone’s own silhouette back',
+        'Which mark the message draws. A field’s messages draw the tone’s own silhouette at the type’s size: help has none, an error draws the same mark as the alert about it; dot asks for one neutral bullet instead',
       ],
       [
         'live',

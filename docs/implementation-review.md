@@ -291,7 +291,7 @@ Localização: `packages/styles/src/drawer/drawer.css`.
 
 ## InlineMessage
 
-- [ ] **IM1 — Avaliar remoção.** O componente sobrepõe `Alert` (variante `subtle`, sem título) e `Field` (mensagem). Decisão pendente após F1 e AL1: se `Alert` com `size="sm"` e sem título cobre o caso de uso, remover `InlineMessage` do contrato, dos pacotes e das docs, com registro em `docs/decisions/`. Se mantido, redesenhar segundo R5 e reutilizar o CSS de `Alert` por composição.
+- [x] **IM1 — Avaliar remoção.** O componente sobrepõe `Alert` (variante `subtle`, sem título) e `Field` (mensagem). Decisão pendente após F1 e AL1: se `Alert` com `size="sm"` e sem título cobre o caso de uso, remover `InlineMessage` do contrato, dos pacotes e das docs, com registro em `docs/decisions/`. Se mantido, redesenhar segundo R5 e reutilizar o CSS de `Alert` por composição.
 
 ---
 

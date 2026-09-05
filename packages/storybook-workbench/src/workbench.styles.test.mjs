@@ -104,6 +104,24 @@ test('workbench CSS keeps the reference-sheet layout and accessibility invariant
 });
 
 /**
+ * The page's grey ring is for the page's own controls. Unlayered, the rule
+ * outranked every family stylesheet, and a focused `Button` in the `dark`
+ * scheme measured `#d4d4d8` where the theme says `#60a5fa` (R3). A family's
+ * ring is the one the theme states, so `[data-ui]` roots and everything under
+ * them are stood out of — with `:where`, so the page's own controls keep the
+ * specificity they had.
+ */
+test('workbench CSS leaves the focus ring of a demonstrated family to the family', () => {
+  const selector =
+    /\.slotted-workbench-preview\s+:where\(button, a, summary\):where\(:not\(\[data-ui\], \[data-ui\] \*\)\):focus-visible,/;
+  assert.match(css, selector);
+  assert.doesNotMatch(
+    css,
+    /\.slotted-workbench-preview\s+:where\(button, a, summary\):focus-visible/,
+  );
+});
+
+/**
  * A painted ground a story can stand a block-level family on, and the one that
  * states a scheme rather than inverting a surface. Both were added when `alert`
  * needed to show that its quiet variant survives a dark region — which it does

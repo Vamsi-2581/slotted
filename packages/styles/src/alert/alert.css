@@ -551,12 +551,13 @@
    * Measured rather than assumed: `--slotted-focus-ring-color` reads 1.30 : 1
    * against `--slotted-tone-accent-solid` in the light scheme, 1.03 against
    * `success` and 1.07 against `danger`. The ring the theme calibrated against
-   * the page's surface disappears on the tone's own fill, so a solid alert
-   * draws it in the one colour the contrast test holds against that fill — the
-   * ink its own words are written in.
+   * the page's surface disappears on the tone's own fill. The ring keeps the
+   * theme's colour in every scheme (R3); what a solid alert adds is a halo one
+   * ring-width wide just inside it, in the ink its own words are written in,
+   * so the ring is read against that halo rather than against the fill.
    */
   [data-ui='alert'][data-variant='solid'] > [data-part='dismiss']:focus-visible {
-    outline-color: var(--_on-solid);
+    box-shadow: inset 0 0 0 calc(2 * var(--slotted-focus-ring-width, 2px)) var(--_on-solid);
   }
 
   [data-ui='alert'][data-part='root']:focus-visible {

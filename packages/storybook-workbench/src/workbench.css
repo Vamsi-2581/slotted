@@ -68,7 +68,16 @@
   color: var(--slotted-workbench-text);
 }
 
-.slotted-workbench-preview :where(button, a, summary):focus-visible,
+/**
+ * The page's own controls take the page's grey ring. A family's controls do
+ * not: this rule is unlayered, so it outranked `slotted.components` on every
+ * `button` inside a demonstration, and a focused `Button` in the `dark` scheme
+ * read `#d4d4d8` where `--slotted-focus-ring-color` says `#60a5fa` (R3). The
+ * ring a demonstration shows is the one the family ships, so `[data-ui]` roots
+ * and their descendants are stood out of.
+ */
+.slotted-workbench-preview
+  :where(button, a, summary):where(:not([data-ui], [data-ui] *)):focus-visible,
 .slotted-matrix-scroll:focus-visible,
 .slotted-api-scroll:focus-visible,
 .slotted-token-scroll:focus-visible {

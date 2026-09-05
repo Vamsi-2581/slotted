@@ -628,15 +628,17 @@
   /**
    * Measured rather than assumed, and `alert` measured it first: the ring the
    * theme calibrated against the page's surface reads about 1.3 : 1 against a
-   * tone's own fill. On a solid message it is drawn in the one colour the
-   * contrast test holds against that fill — the ink its own words are in.
+   * tone's own fill. The ring keeps the theme's colour in every scheme (R3).
+   * The message's own ring sits outside it, against the page the theme
+   * calibrated for, and needs nothing more. The control's ring is inset in the
+   * fill, so a solid message adds a halo one ring-width wide just inside it,
+   * in the ink its own words are in, for the ring to be read against.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-variant='solid']:focus-visible,
   [data-ui='toast']
     > [data-part='list']
     > [data-part='item'][data-variant='solid']
     > [data-part='close']:focus-visible {
-    outline-color: var(--_on-solid);
+    box-shadow: inset 0 0 0 calc(2 * var(--slotted-focus-ring-width, 2px)) var(--_on-solid);
   }
 
   /* ── How much time is left ────────────────────────────────────────────

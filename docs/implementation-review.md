@@ -124,7 +124,8 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 - [ ] **G1 — Botões internos de componentes compostos.** Ver R2. Auditar todos os componentes listados em R2 e substituir instâncias de `Button`/`IconButton` por parte interna.
 - [ ] **G2 — Rails laterais para estado.** Ver R1. Remover todas as ocorrências.
 - [x] **G3 — Anel de foco branco em `dark`.** Ver R3.
-- [ ] **G4 — Glifos escritos à mão.** Ver R4.
+- [x] **G4 — Glifos escritos à mão.** Ver R4.
+- [ ] **G5 — `tools/harness/audit.mjs` conta `script` e `style` como parte colapsada.** Observado durante G4, sem alteração de layout: nas cenas `states` de `Checkbox` e `Collapsible` e `track`/`variant` de `Tabs`, o audit reporta `collapsed 0px inside a 446px stage` para elementos `script` e `style` do fragmento. Esperado: o audit ignora elementos não renderizados (`script`, `style`, `template`) ao medir o palco.
 
 ---
 
@@ -343,6 +344,7 @@ Localização: `packages/styles/src/listbox/listbox.css`.
 Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/specs/2026-09-03-breadcrumb-pagination-stepper-self-assessment.md`.
 
 - [ ] **ST1 — Verificação funcional.** Escrever ou completar testes de story cobrindo: navegação por clique em passo concluído, bloqueio de passo futuro quando `linear`, estados `completed`/`current`/`upcoming`/`error`/`disabled`, teclado (`ArrowLeft`/`ArrowRight`/`Home`/`End`), `aria-current="step"` no passo atual. Ambos os frameworks.
+- [ ] **ST3 — Itens transbordam o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: nas cenas `content` (155px em 120px), `statuses` (191px em 144px), `panels` e `placement` (335px em 240px), `li[data-part='item']` transborda nos três esquemas. Esperado: mesma regra de `#Alert:2` — `min-inline-size: 0` na coluna e quebra do rótulo dentro da largura do palco.
 - [ ] **ST2 — Variante `compact` com conectores descentralizados.** Esperado: o conector (`[data-part='connector']`) é uma linha de 1px a 2px posicionada em `top: calc(var(--_indicator-size) / 2)` com `transform: translateY(-50%)`, estendendo-se entre o centro de um indicador e o centro do próximo. Em `compact`, o indicador reduz para 20px e o rótulo vai para baixo do indicador ou some (`labelPlacement="hidden"`); o conector recalcula pelo novo tamanho do indicador. Testar `getBoundingClientRect()` do conector contra o centro do indicador (diferença ≤ 0.5px).
 
 ---
@@ -355,7 +357,14 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 
 ## Tabs
 
+- [ ] **T2 — Painel transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: na cena `content`, `[data-part='panel']` mede 599px em 222px nos três esquemas. Esperado: mesma regra de `#Alert:2`.
 - [ ] **T1 — `IconButton` de overflow/scroll desalinhado e grande.** Ver R2. Esperado: partes internas `[data-part='scroll-start']` e `[data-part='scroll-end']` com altura igual à altura da aba, largura de 24px a 28px, glifo `chevron-left`/`chevron-right` em `--slotted-control-icon-size-<densidade>`, sem borda, fundo com gradiente para a superfície da barra de abas (máscara de fade de 16px) e `hover` em `secondary-subtle-hover`. Visíveis apenas quando há overflow no respectivo lado, calculado por `scrollLeft` e `scrollWidth`.
+
+---
+
+## Tag
+
+- [ ] **TG1 — Cena `group` do harness colapsa a 0px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: `div[data-ui='tag'][data-part='group']` mede 0px de altura nos três esquemas a 420px e 720px, embora a captura mostre as tags. Verificar se o grupo é `display: contents` ou se o audit mede o elemento errado; se o grupo não tem caixa própria, o audit deve medir os filhos.
 
 ---
 

@@ -7,7 +7,7 @@ import { VisuallyHidden } from '../visually-hidden';
 import { Tag } from './tag';
 import { TagButton } from './tag-button';
 import { TagDefaultsProvider } from './tag-defaults';
-import { DemoScene, GLYPH_TAG, Glyph, LabSection } from './tag-demo';
+import { DemoScene, GLYPH_TAG, LabSection } from './tag-demo';
 import { TagGroup } from './tag-group';
 import { TagLink } from './tag-link';
 import { TagToggle } from './tag-toggle';
@@ -84,7 +84,7 @@ export const Matrix: Story = {
       >
         <TagGroup aria-label="Tag" role="list">
           <Tag>Design</Tag>
-          <Tag start={<Glyph path={GLYPH_TAG} />} tone="success">
+          <Tag start={GLYPH_TAG} tone="success">
             entregue
           </Tag>
           <Tag onRemove={() => undefined}>Ana Reis</Tag>

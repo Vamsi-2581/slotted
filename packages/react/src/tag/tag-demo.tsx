@@ -1,3 +1,4 @@
+import { ChevronDown, Tag } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 /**
@@ -67,24 +68,6 @@ export function DemoScene({
   );
 }
 
-/** The artwork belongs to the consumer; these pages draw geometry, never a character. */
-export function Glyph({ path }: { path: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      focusable="false"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d={path} />
-    </svg>
-  );
-}
-
-export const GLYPH_CHECK = 'M20 6 9 17l-5-5';
-export const GLYPH_TAG = 'M3 3h8l10 10-8 8L3 11zM7.5 7.5h.01';
-export const GLYPH_CHEVRON = 'm6 9 6 6 6-6';
+/** The artwork belongs to the consumer, and it is Lucide's; a character is never an icon. */
+export const GLYPH_TAG = <Tag aria-hidden="true" focusable="false" />;
+export const GLYPH_CHEVRON = <ChevronDown aria-hidden="true" focusable="false" />;

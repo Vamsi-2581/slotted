@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Text } from '../typography';
 import { Tag } from './tag';
 import { TagButton } from './tag-button';
-import { DemoScene, GLYPH_CHEVRON, Glyph } from './tag-demo';
+import { DemoScene, GLYPH_CHEVRON } from './tag-demo';
 import { TagGroup } from './tag-group';
 import { REACT_TAG_DOCS, REACT_TAG_TOKENS } from './tag.docs';
 
@@ -66,12 +66,7 @@ function Overflow() {
         <Tag key={person}>{person}</Tag>
       ))}
       {all ? null : (
-        <TagButton
-          end={<Glyph path={GLYPH_CHEVRON} />}
-          onClick={() => setAll(true)}
-          tone="accent"
-          variant="outline"
-        >
+        <TagButton end={GLYPH_CHEVRON} onClick={() => setAll(true)} tone="accent" variant="outline">
           +{people.length - shown.length}
         </TagButton>
       )}

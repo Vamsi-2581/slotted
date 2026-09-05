@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { Text } from '../typography';
 import { Tag } from './tag';
-import { DemoScene, GLYPH_TAG, Glyph } from './tag-demo';
+import { DemoScene, GLYPH_TAG } from './tag-demo';
 import { TagGroup } from './tag-group';
 import { REACT_TAG_DOCS, REACT_TAG_TOKENS } from './tag.docs';
 
@@ -132,10 +132,10 @@ export const Content: Story = {
         note="A glyph before or after the words, in a box the family sizes and centres. The artwork is the consumer’s."
       >
         <TagGroup aria-label="Com glifos" role="list">
-          <Tag start={<Glyph path={GLYPH_TAG} />} tone="accent">
+          <Tag start={GLYPH_TAG} tone="accent">
             entidade
           </Tag>
-          <Tag start={<Glyph path={GLYPH_TAG} />} onRemove={() => undefined} tone="success">
+          <Tag start={GLYPH_TAG} onRemove={() => undefined} tone="success">
             entregue
           </Tag>
           <Tag shape="square" tone="warning" variant="outline">

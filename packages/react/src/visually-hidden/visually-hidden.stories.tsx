@@ -1,6 +1,7 @@
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Check, X } from 'lucide-react';
 
 import { VisuallyHidden } from './visually-hidden';
 import { REACT_VISUALLY_HIDDEN_DOCS, REACT_VISUALLY_HIDDEN_TOKENS } from './visually-hidden.docs';
@@ -10,32 +11,12 @@ const referenceStories: ReferencePageConfig['stories'] = () => ({
 });
 
 /**
- * The icon belongs to the consumer, and the Icon family has not been built
- * yet, so these pages draw geometry rather than a character. A character is
- * never an icon, and a reference page that used one would be teaching the
- * wrong thing beside the right one.
+ * The icon belongs to the consumer, and it is Lucide's. A character is never an
+ * icon, and a reference page that used one would be teaching the wrong thing
+ * beside the right one.
  */
-function Glyph({ path }: { path: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      viewBox="0 0 24 24"
-      width="14"
-      height="14"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={path} />
-    </svg>
-  );
-}
-
-const CROSS = 'M18 6 6 18M6 6l12 12';
-const CHECK = 'M20 6 9 17l-5-5';
+const CROSS = <X aria-hidden="true" focusable="false" size={14} />;
+const CHECK = <Check aria-hidden="true" focusable="false" size={14} />;
 
 const meta = {
   title: 'Components/VisuallyHidden',
@@ -65,7 +46,7 @@ export const Playground: Story = {
     <div className="slotted-demo-measure">
       <div className="slotted-demo-stack">
         <button type="button">
-          <Glyph path={CROSS} />
+          {CROSS}
           <VisuallyHidden {...args} />
         </button>
         <p>
@@ -157,7 +138,7 @@ export const Accessibility: Story = {
               <tr>
                 <th scope="col">Invoice</th>
                 <th scope="col">
-                  <Glyph path={CHECK} />
+                  {CHECK}
                   <VisuallyHidden>Paid</VisuallyHidden>
                 </th>
               </tr>

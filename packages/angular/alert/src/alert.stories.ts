@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideShield } from '@ng-icons/lucide';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -47,6 +49,7 @@ const meta: Meta<AlertStoryArgs> = {
   decorators: [
     moduleMetadata({
       imports: [
+        NgIcon,
         SlAlert,
         SlAlertActions,
         SlAlertContent,
@@ -56,6 +59,7 @@ const meta: Meta<AlertStoryArgs> = {
         SlButton,
         SlText,
       ],
+      providers: [provideIcons({ lucideShield })],
     }),
   ],
   parameters: {
@@ -425,14 +429,7 @@ export const Composition: Story = {
           'The page’s own mark',
           'An element carrying slAlertIcon is projected into the box the family draws, so it keeps the size, the colour and the place on the first line the tone’s mark would have had.',
           `<section slAlert tone="accent">
-             <svg slAlertIcon aria-hidden="true" viewBox="0 0 24 24" width="1em" height="1em" fill="none">
-               <path
-                 d="M12 3 5 6v5.5c0 4.2 2.9 7.9 7 9.5 4.1-1.6 7-5.3 7-9.5V6l-7-3Z"
-                 stroke="currentColor"
-                 stroke-width="1.8"
-                 stroke-linejoin="round"
-               />
-             </svg>
+             <ng-icon slAlertIcon aria-hidden="true" name="lucideShield"></ng-icon>
              <div slAlertContent>
                <div slAlertTitle>Verificação em duas etapas</div>
                <p slAlertDescription>A arte é da aplicação; a caixa é da família.</p>

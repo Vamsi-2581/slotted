@@ -3,10 +3,15 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 
+import { DEFAULT_STROKE_WIDTH, GLYPH_PREFIX, renderGlyph } from './generate-icon-glyphs.mjs';
+
 const ROOT = new URL('..', import.meta.url).pathname;
 const contract = JSON.parse(readFileSync(join(ROOT, 'packages/tokens/src/contract.json'), 'utf8'));
 const theme = JSON.parse(
   readFileSync(join(ROOT, 'packages/themes/default/src/theme.json'), 'utf8'),
+);
+const glyphs = JSON.parse(
+  readFileSync(join(ROOT, 'packages/themes/default/src/glyphs.json'), 'utf8'),
 );
 const foundation = readFileSync(join(ROOT, 'docs/token-foundation.md'), 'utf8');
 const buildLog = readFileSync(join(ROOT, 'docs/BUILD-LOG.md'), 'utf8');
@@ -80,6 +85,27 @@ function assertBaseTable(title, prefix) {
 }
 
 /**
+ * A glyph is documented by the Lucide icon it is drawn from and how it is
+ * painted, not by its data URI: the URI is generated, and the table says what
+ * `glyphs.json` says.
+ */
+function paint(entry) {
+  return entry.paint === 'fill'
+    ? 'fill'
+    : `stroke ${entry['stroke-width'] ?? DEFAULT_STROKE_WIDTH}`;
+}
+
+function assertGlyphTable() {
+  const entries = names((token) => token.axis === 'base' && token.name.startsWith(GLYPH_PREFIX));
+  assert.ok(entries.length > 0, 'Glyph documents no token');
+  assertExactTable(
+    'Glyph',
+    ['Token', 'Lucide icon', 'Paint'],
+    entries.map((name) => [`\`${name}\``, `\`${glyphs[name]?.icon}\``, paint(glyphs[name] ?? {})]),
+  );
+}
+
+/**
  * The predicate reads the token, not its name. Splitting the scheme tables by
  * name prefix held only while every shadow was called `--slotted-shadow-*`,
  * and it broke the moment a control named its own: `--slotted-control-shadow`
@@ -109,8 +135,34 @@ test('documents every foundation value in its source-specific table', () => {
   assertBaseTable('Font family', '--slotted-font-family-');
   assertBaseTable('Border width', '--slotted-border-width-');
   assertBaseTable('Stacking', '--slotted-z-index-');
-  assertBaseTable('Glyph', '--slotted-icon-');
+  assertGlyphTable();
   assertBaseTable('Target size', '--slotted-target-');
+});
+
+test('draws every glyph from the Lucide icon its manifest names', () => {
+  const declared = names((token) => token.name.startsWith(GLYPH_PREFIX));
+  assert.deepEqual(
+    Object.keys(glyphs).sort(),
+    [...declared].sort(),
+    'glyphs.json must name an icon for exactly the glyph tokens the contract declares',
+  );
+  for (const name of declared) {
+    assert.equal(
+      theme.base[name],
+      renderGlyph(glyphs[name]),
+      `${name} is not the Lucide "${glyphs[name].icon}" drawing; run node scripts/generate-icon-glyphs.mjs`,
+    );
+  }
+});
+
+test('reads Lucide at the version the React stories draw with', () => {
+  const root = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+  const react = JSON.parse(readFileSync(join(ROOT, 'packages/react/package.json'), 'utf8'));
+  assert.equal(
+    root.devDependencies.lucide,
+    react.devDependencies['lucide-react'],
+    'a theme glyph and a story icon must be the same Lucide drawing',
+  );
 });
 
 test('documents the layer every token belongs to', () => {

@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideShield } from '@ng-icons/lucide';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -43,7 +45,10 @@ const meta: Meta<InlineMessageStoryArgs> = {
   title: 'Components/Inline Message',
   component: SlInlineMessage,
   decorators: [
-    moduleMetadata({ imports: [SlButton, SlInlineMessage, SlInlineMessageIcon, SlLink] }),
+    moduleMetadata({
+      imports: [NgIcon, SlButton, SlInlineMessage, SlInlineMessageIcon, SlLink],
+      providers: [provideIcons({ lucideShield })],
+    }),
   ],
   parameters: {
     controls: { disable: true },
@@ -336,21 +341,7 @@ export const Content: Story = {
              Aceitamos cartão, boleto e Pix. <a slLink href="#tarifas">Ver tarifas</a>
            </p>
            <p slInlineMessage tone="accent">
-             <svg
-               slInlineMessageIcon
-               aria-hidden="true"
-               viewBox="0 0 24 24"
-               width="1em"
-               height="1em"
-               fill="none"
-             >
-               <path
-                 d="M12 3 5 6v5.5c0 4.2 2.9 7.9 7 9.5 4.1-1.6 7-5.3 7-9.5V6l-7-3Z"
-                 stroke="currentColor"
-                 stroke-width="1.8"
-                 stroke-linejoin="round"
-               />
-             </svg>
+             <ng-icon slInlineMessageIcon aria-hidden="true" name="lucideShield"></ng-icon>
              A verificação em duas etapas protege esta conta.
            </p>`,
         ),
@@ -386,21 +377,7 @@ export const Composition: Story = {
           'The page’s own mark, and none at all',
           'A projected slInlineMessageIcon keeps the box, the colour and the place on the first line; hideIcon removes the box and leaves the severity word a reader hears.',
           `<p slInlineMessage tone="accent">
-             <svg
-               slInlineMessageIcon
-               aria-hidden="true"
-               viewBox="0 0 24 24"
-               width="1em"
-               height="1em"
-               fill="none"
-             >
-               <path
-                 d="M12 3 5 6v5.5c0 4.2 2.9 7.9 7 9.5 4.1-1.6 7-5.3 7-9.5V6l-7-3Z"
-                 stroke="currentColor"
-                 stroke-width="1.8"
-                 stroke-linejoin="round"
-               />
-             </svg>
+             <ng-icon slInlineMessageIcon aria-hidden="true" name="lucideShield"></ng-icon>
              A arte é da aplicação; a caixa é da família.
            </p>
            ${message('hideIcon tone="danger"', 'Sem marca nenhuma, e ainda anunciado como erro.')}`,

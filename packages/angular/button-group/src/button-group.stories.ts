@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideChevronDown, lucideRedo2, lucideTrash2, lucideUndo2 } from '@ng-icons/lucide';
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlButton, SlIconButton, SlToggleButton } from '@slotted/angular/button';
@@ -38,13 +40,6 @@ const demo = {
   row: 'display: grid; gap: var(--slotted-space-3); grid-template-columns: minmax(0, 1fr); justify-items: start',
 };
 
-const GLYPH = {
-  undo: 'M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-4',
-  redo: 'm15 14 5-5-5-5M20 9H9a5 5 0 0 0 0 10h4',
-  trash: 'M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13',
-  chevron: 'm6 9 6 6 6-6',
-};
-
 const referenceStories: ReferencePageConfig['stories'] = () => ({
   essential: Playground as never,
   matrix: Attachment as never,
@@ -55,7 +50,15 @@ const meta: Meta<ButtonGroupStoryArgs> = {
   component: SlButtonGroup,
   decorators: [
     moduleMetadata({
-      imports: [SlButtonGroup, SlButtonGroupSeparator, SlButton, SlIconButton, SlToggleButton],
+      imports: [
+        NgIcon,
+        SlButtonGroup,
+        SlButtonGroupSeparator,
+        SlButton,
+        SlIconButton,
+        SlToggleButton,
+      ],
+      providers: [provideIcons({ lucideChevronDown, lucideRedo2, lucideTrash2, lucideUndo2 })],
     }),
   ],
   parameters: {
@@ -117,7 +120,7 @@ export const Playground: Story = {
 export const Attachment: Story = {
   parameters: scenario('attachment'),
   render: () => ({
-    props: { demo, glyph: GLYPH },
+    props: { demo },
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   <section class="slotted-demo-scene">
@@ -153,9 +156,7 @@ export const Attachment: Story = {
             <button slButton>Publish</button>
             <button slButton>Schedule</button>
             <button slIconButton aria-label="More publish options" tone="accent" variant="solid">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path [attr.d]="glyph.chevron" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+              <ng-icon aria-hidden="true" name="lucideChevronDown"></ng-icon>
             </button>
           </div>
         </div>
@@ -229,7 +230,7 @@ export const Orientation: Story = {
 export const Separation: Story = {
   parameters: scenario('separation'),
   render: () => ({
-    props: { demo, glyph: GLYPH, steps: [2, 4, 8] },
+    props: { demo, steps: [2, 4, 8] },
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   <section class="slotted-demo-scene">
@@ -270,20 +271,14 @@ export const Separation: Story = {
           <span [style]="demo.caption">a rule inside a joined icon bar</span>
           <div slButtonGroup aria-label="Editor tools" attached>
             <button slIconButton aria-label="Undo">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path [attr.d]="glyph.undo" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+              <ng-icon aria-hidden="true" name="lucideUndo2"></ng-icon>
             </button>
             <button slIconButton aria-label="Redo">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path [attr.d]="glyph.redo" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+              <ng-icon aria-hidden="true" name="lucideRedo2"></ng-icon>
             </button>
             <div slButtonGroupSeparator></div>
             <button slIconButton aria-label="Delete" tone="danger">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path [attr.d]="glyph.trash" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+              <ng-icon aria-hidden="true" name="lucideTrash2"></ng-icon>
             </button>
           </div>
         </div>

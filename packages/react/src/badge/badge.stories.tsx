@@ -1,6 +1,7 @@
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Bell, Check, ChevronDown } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { useId } from 'react';
 
@@ -26,29 +27,12 @@ const PLACEMENTS: readonly BadgePlacement[] = [
 ];
 
 /**
- * The artwork belongs to the consumer. These pages draw geometry rather than a
- * character, because a character is never an icon.
+ * The artwork belongs to the consumer, and it is Lucide's: a character is never
+ * an icon, and a story draws no artwork of its own.
  */
-function Glyph({ path }: { path: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      focusable="false"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d={path} />
-    </svg>
-  );
-}
-
-const CHECK = 'M20 6 9 17l-5-5';
-const BELL = 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0';
-const CHEVRON = 'm6 9 6 6 6-6';
+const CHECK = <Check aria-hidden="true" focusable="false" />;
+const BELL = <Bell aria-hidden="true" focusable="false" />;
+const CHEVRON = <ChevronDown aria-hidden="true" focusable="false" />;
 
 const TABLE: CSSProperties = { borderCollapse: 'collapse', inlineSize: '100%', textAlign: 'start' };
 const CELL: CSSProperties = { paddingBlock: 'var(--slotted-space-3)' };
@@ -163,13 +147,7 @@ export const Sizes: Story = {
         <div className="slotted-demo-stage">
           <div className="slotted-demo-row">
             {SIZES.map((size) => (
-              <Badge
-                key={size}
-                size={size}
-                start={<Glyph path={CHECK} />}
-                tone="accent"
-                variant="solid"
-              >
+              <Badge key={size} size={size} start={CHECK} tone="accent" variant="solid">
                 Verified
               </Badge>
             ))}
@@ -188,7 +166,7 @@ export const Sizes: Story = {
           <div className="slotted-demo-row">
             <Badge tone="secondary">Draft</Badge>
             <Badge count={8} tone="danger" variant="solid" />
-            <Badge end={<Glyph path={CHEVRON} />} tone="accent" variant="outline">
+            <Badge end={CHEVRON} tone="accent" variant="outline">
               Sort
             </Badge>
           </div>
@@ -499,9 +477,7 @@ export const Accessibility: Story = {
           <div className="slotted-demo-row" style={{ gap: 'var(--slotted-space-10)' }}>
             <DescribedHost />
             <BadgeAnchor>
-              <IconButton aria-label="Notifications, 12 new">
-                <Glyph path={BELL} />
-              </IconButton>
+              <IconButton aria-label="Notifications, 12 new">{BELL}</IconButton>
               <Badge count={12} size="sm" tone="danger" variant="solid" />
             </BadgeAnchor>
           </div>

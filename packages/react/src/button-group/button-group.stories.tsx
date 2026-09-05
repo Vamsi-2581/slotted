@@ -1,6 +1,7 @@
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { ChevronDown, Redo2, Trash2, Undo2 } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 
 import { Button, IconButton, ToggleButton } from '../button';
@@ -32,27 +33,11 @@ function Frame({ children }: { children: ReactNode }) {
   );
 }
 
-/** Consumer content, drawn here so the page needs no icon family to read. */
-function Glyph({ path }: { path: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-    >
-      <path d={path} />
-    </svg>
-  );
-}
-
-const UNDO = 'M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-4';
-const REDO = 'm15 14 5-5-5-5M20 9H9a5 5 0 0 0 0 10h4';
-const TRASH = 'M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13';
-const CHEVRON = 'm6 9 6 6 6-6';
+/** Consumer content, and it is Lucide's, so the page needs no icon family to read. */
+const UNDO = <Undo2 aria-hidden="true" focusable="false" />;
+const REDO = <Redo2 aria-hidden="true" focusable="false" />;
+const TRASH = <Trash2 aria-hidden="true" focusable="false" />;
+const CHEVRON = <ChevronDown aria-hidden="true" focusable="false" />;
 
 const column: CSSProperties = {
   display: 'grid',
@@ -168,7 +153,7 @@ export const Attachment: Story = {
                 <Button>Publish</Button>
                 <Button>Schedule</Button>
                 <IconButton aria-label="More publish options" tone="accent" variant="solid">
-                  <Glyph path={CHEVRON} />
+                  {CHEVRON}
                 </IconButton>
               </ButtonGroup>
             </div>
@@ -285,15 +270,11 @@ export const Separation: Story = {
             <div style={row}>
               <Caption>a rule inside a joined icon bar</Caption>
               <ButtonGroup aria-label="Editor tools" attached>
-                <IconButton aria-label="Undo">
-                  <Glyph path={UNDO} />
-                </IconButton>
-                <IconButton aria-label="Redo">
-                  <Glyph path={REDO} />
-                </IconButton>
+                <IconButton aria-label="Undo">{UNDO}</IconButton>
+                <IconButton aria-label="Redo">{REDO}</IconButton>
                 <ButtonGroupSeparator />
                 <IconButton aria-label="Delete" tone="danger">
-                  <Glyph path={TRASH} />
+                  {TRASH}
                 </IconButton>
               </ButtonGroup>
             </div>

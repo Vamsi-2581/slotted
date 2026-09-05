@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCheck, lucideX } from '@ng-icons/lucide';
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -19,21 +21,24 @@ const referenceStories: ReferencePageConfig['stories'] = () => ({
 });
 
 /**
- * The icon belongs to the consumer, and the Icon family has not been built
- * yet, so these pages draw geometry rather than a character. A character is
- * never an icon, and a reference page that used one would be teaching the
- * wrong thing beside the right one.
+ * The icon belongs to the consumer, and it is Lucide's. A character is never an
+ * icon, and a reference page that used one would be teaching the wrong thing
+ * beside the right one.
  */
-const glyph = (path: string) =>
-  `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${path}" /></svg>`;
+const glyph = (name: string) => `<ng-icon aria-hidden="true" name="${name}" size="14"></ng-icon>`;
 
-const CROSS = glyph('M18 6 6 18M6 6l12 12');
-const CHECK = glyph('M20 6 9 17l-5-5');
+const CROSS = glyph('lucideX');
+const CHECK = glyph('lucideCheck');
 
 const meta: Meta<VisuallyHiddenStoryArgs> = {
   title: 'Components/VisuallyHidden',
   component: SlVisuallyHidden,
-  decorators: [moduleMetadata({ imports: [SlVisuallyHidden] })],
+  decorators: [
+    moduleMetadata({
+      imports: [NgIcon, SlVisuallyHidden],
+      providers: [provideIcons({ lucideCheck, lucideX })],
+    }),
+  ],
   parameters: {
     controls: { disable: true },
     docs: {

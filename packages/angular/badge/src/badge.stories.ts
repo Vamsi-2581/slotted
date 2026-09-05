@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideBell, lucideCheck, lucideChevronDown } from '@ng-icons/lucide';
 import { createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -30,12 +32,11 @@ const SIZES = ['sm', 'md', 'lg'];
 const PLACEMENTS = ['top-end', 'top-start', 'bottom-end', 'bottom-start'];
 const LOCALES = ['en-US', 'de-DE', 'fr-FR', 'ar-EG'];
 
-const CHECK = 'M20 6 9 17l-5-5';
-const BELL = 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0';
-const CHEVRON = 'm6 9 6 6 6-6';
-
-const glyph = (path: string) =>
-  `<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${path}" /></svg>`;
+/** The artwork belongs to the consumer, and it is Lucide's: a character is never an icon. */
+const glyph = (name: string) => `<ng-icon aria-hidden="true" name="${name}"></ng-icon>`;
+const CHECK = glyph('lucideCheck');
+const BELL = glyph('lucideBell');
+const CHEVRON = glyph('lucideChevronDown');
 
 /** A round host, so the circular overlap has something to sit on. */
 const AVATAR = [
@@ -60,6 +61,7 @@ const scene = (label: string, note: string, body: string) => `
   </section>`;
 
 const IMPORTS = [
+  NgIcon,
   SlBadge,
   SlBadgeAnchor,
   SlBadgeEnd,
@@ -80,7 +82,12 @@ const referenceStories: ReferencePageConfig['stories'] = () => ({
 const meta: Meta<BadgeStoryArgs> = {
   title: 'Components/Badge',
   component: SlBadge,
-  decorators: [moduleMetadata({ imports: IMPORTS })],
+  decorators: [
+    moduleMetadata({
+      imports: IMPORTS,
+      providers: [provideIcons({ lucideBell, lucideCheck, lucideChevronDown })],
+    }),
+  ],
   parameters: {
     controls: { disable: true },
     docs: {
@@ -149,7 +156,7 @@ export const Sizes: Story = {
     '<code>slBadgeStart</code> and <code>slBadgeEnd</code> put a glyph on either side of the words.',
     `<div class="slotted-demo-row">${SIZES.map(
       (size) =>
-        `<span slBadge tone="accent" variant="solid" size="${size}"><span slBadgeStart>${glyph(CHECK)}</span>Verified</span>`,
+        `<span slBadge tone="accent" variant="solid" size="${size}"><span slBadgeStart>${CHECK}</span>Verified</span>`,
     ).join('')}</div>`,
   )}
   ${scene(
@@ -158,7 +165,7 @@ export const Sizes: Story = {
     `<div class="slotted-demo-row">
       <span slBadge>Draft</span>
       <span slBadge tone="danger" variant="solid" [count]="8"></span>
-      <span slBadge tone="accent" variant="outline">Sort<span slBadgeEnd>${glyph(CHEVRON)}</span></span>
+      <span slBadge tone="accent" variant="outline">Sort<span slBadgeEnd>${CHEVRON}</span></span>
     </div>`,
   )}
 </div>`,
@@ -359,7 +366,7 @@ export const Accessibility: Story = {
         <span id="badge-inbox-count" slBadge tone="danger" variant="solid" size="sm" [count]="4"><span slVisuallyHidden>unread messages</span></span>
       </span>
       <span slBadgeAnchor>
-        <button slIconButton type="button" aria-label="Notifications, 12 new">${glyph(BELL)}</button>
+        <button slIconButton type="button" aria-label="Notifications, 12 new">${BELL}</button>
         <span slBadge tone="danger" variant="solid" size="sm" [count]="12"></span>
       </span>
     </div>`,

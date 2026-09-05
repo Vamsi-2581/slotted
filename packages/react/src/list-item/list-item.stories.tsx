@@ -1,6 +1,7 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Folder, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { Badge } from '../badge';
@@ -23,31 +24,9 @@ import {
 } from './list-item-parts';
 import { REACT_LIST_ITEM_DOCS, REACT_LIST_ITEM_TOKENS } from './list-item.docs';
 
-const FolderGlyph = () => (
-  <svg
-    fill="none"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-  >
-    <path d="M3 7a2 2 0 0 1 2-2h3.6l2 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
-  </svg>
-);
+const FolderGlyph = () => <Folder aria-hidden="true" focusable="false" />;
 
-const TrashGlyph = () => (
-  <svg
-    fill="none"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-  >
-    <path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13" />
-  </svg>
-);
+const TrashGlyph = () => <Trash2 aria-hidden="true" focusable="false" />;
 
 const Scene = ({ children, label, note }: { children: ReactNode; label: string; note: string }) => (
   <section className="slotted-demo-scene">

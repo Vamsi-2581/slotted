@@ -1,6 +1,7 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { ArrowUpRight, Copy } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
@@ -61,39 +62,13 @@ const Trigger = ({ children }: { children: string }) => (
 const FOLDERS = ['Inbox', 'Archive', 'Drafts', 'Sent', 'Spam', 'Trash', 'Receipts', 'Travel'];
 
 /**
- * The consumer's own artwork, which is what the icon column holds. A story may
- * not paint with an inline style, so the mark is content rather than a custom
- * property pointed at a glyph token.
+ * The consumer's own artwork, which is what the icon column holds, and it is
+ * Lucide's. A story may not paint with an inline style, so the mark is content
+ * rather than a custom property pointed at a glyph token.
  */
-const Mark = ({ children }: { children: ReactNode }) => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    height="16"
-    stroke="currentColor"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    width="16"
-  >
-    {children}
-  </svg>
-);
+const CopyMark = () => <Copy aria-hidden="true" focusable="false" size={16} />;
 
-const CopyMark = () => (
-  <Mark>
-    <rect height="14" rx="2" width="14" x="8" y="8" />
-    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-  </Mark>
-);
-
-const ExternalMark = () => (
-  <Mark>
-    <path d="M7 7h10v10" />
-    <path d="M7 17 17 7" />
-  </Mark>
-);
+const ExternalMark = () => <ArrowUpRight aria-hidden="true" focusable="false" size={16} />;
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
   bindScenes(REACT_MENU_DOCS.menu.scenes, {

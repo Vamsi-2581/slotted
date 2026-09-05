@@ -1,3 +1,5 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideArrowUpRight, lucideCopy } from '@ng-icons/lucide';
 import { SlButton } from '@slotted/angular/button';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
@@ -55,6 +57,7 @@ const meta: Meta<MenuStoryArgs> = {
   decorators: [
     moduleMetadata({
       imports: [
+        NgIcon,
         SlButton,
         SlMenu,
         SlMenuEmpty,
@@ -65,6 +68,7 @@ const meta: Meta<MenuStoryArgs> = {
         SlMenuSeparator,
         SlMenuTrigger,
       ],
+      providers: [provideIcons({ lucideArrowUpRight, lucideCopy })],
     }),
   ],
   parameters: {
@@ -173,19 +177,13 @@ export const Icons: Story = {
         <sl-menu #menu [open]="true" [portal]="false">
           <button slMenuItem>
             <span slMenuItemIcon>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="8" y="8" width="14" height="14" rx="2" />
-                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-              </svg>
+              <ng-icon aria-hidden="true" name="lucideCopy" size="16"></ng-icon>
             </span>
             Duplicate
           </button>
           <button slMenuItem>
             <span slMenuItemIcon>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M7 7h10v10" />
-                <path d="M7 17 17 7" />
-              </svg>
+              <ng-icon aria-hidden="true" name="lucideArrowUpRight" size="16"></ng-icon>
             </span>
             Open in new tab
           </button>

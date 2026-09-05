@@ -1,3 +1,4 @@
+import { Shield } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 /**
@@ -75,14 +76,5 @@ export function LabelledInput({
 
 /** A shield, for the one demonstration where the page supplies its own mark. */
 export function ShieldGlyph() {
-  return (
-    <svg aria-hidden="true" fill="none" height="1em" viewBox="0 0 24 24" width="1em">
-      <path
-        d="M12 3 5 6v5.5c0 4.2 2.9 7.9 7 9.5 4.1-1.6 7-5.3 7-9.5V6l-7-3Z"
-        stroke="currentColor"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
+  return <Shield aria-hidden="true" focusable="false" size="1em" />;
 }

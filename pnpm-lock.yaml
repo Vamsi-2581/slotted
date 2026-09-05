@@ -44,6 +44,9 @@ importers:
       jsdom:
         specifier: 30.0.1
         version: 30.0.1
+      lucide:
+        specifier: 1.24.0
+        version: 1.24.0
       ng-packagr:
         specifier: 22.1.1
         version: 22.1.1(@angular/compiler-cli@22.1.4(@angular/compiler@22.1.4)(typescript@6.0.3))(tslib@2.8.1)(typescript@6.0.3)
@@ -3878,6 +3881,9 @@ packages:
     resolution: {integrity: sha512-YT6mBD8lGKkg4nM39enlm94/sfJIiW0YKUT60fBy4YK8tai31ylg1VhGNWxkpSKHo9UagfnZqwIff3HTDQwXeA==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  lucide@1.24.0:
+    resolution: {integrity: sha512-oMAaeuNDc5VCnBb3IjwKYGRT56tqanUm1fyDFT5Tl8hWSZND59gztgjvXje08jKLPVAq0gHJcwZUE8GCQxzBeg==}
 
   lunr@2.3.9:
     resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
@@ -8108,6 +8114,8 @@ snapshots:
   lucide-react@1.24.0(react@19.2.8):
     dependencies:
       react: 19.2.8
+
+  lucide@1.24.0: {}
 
   lunr@2.3.9: {}
 

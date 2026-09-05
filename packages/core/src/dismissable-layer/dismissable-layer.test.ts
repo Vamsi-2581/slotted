@@ -272,6 +272,74 @@ describe('createDismissableLayer', () => {
       expect(layer.reasons).toEqual(['outsidePress']);
       handle.destroy();
     });
+
+    /**
+     * DG1. A dialog's node is a frame — a scrim and a viewport around the
+     * panel — and a press on the scrim landed inside the node, so the scrim
+     * was never a way out. The frame still carries the depth and the `inert`
+     * boundary; the panel is what a press is inside of.
+     */
+    describe('a frame around the content', () => {
+      beforeEach(() => {
+        mount(`
+          <div id="frame">
+            <div id="scrim"></div>
+            <div id="viewport"><div id="panel"><button id="inside">ok</button></div></div>
+          </div>
+          <main id="page"></main>`);
+      });
+
+      it('reads a press on the frame as outside, and a press in the content as inside', () => {
+        const layer = recorder();
+        const handle = createDismissableLayer(element('frame'), {
+          ...layer,
+          content: element('panel'),
+        });
+
+        press(element('inside'));
+        expect(layer.reasons).toEqual([]);
+
+        press(element('scrim'));
+        press(element('viewport'));
+        expect(layer.reasons).toEqual(['outsidePress', 'outsidePress']);
+        expect(element('frame').style.getPropertyValue(LAYER_DEPTH_PROPERTY)).toBe('0');
+        handle.destroy();
+      });
+
+      /** A selection dragged out of the panel ends over the scrim, and clicks it. */
+      it('ignores a click whose press began inside the content', () => {
+        const layer = recorder();
+        const handle = createDismissableLayer(element('frame'), {
+          ...layer,
+          content: element('panel'),
+          outsidePressEvent: 'click',
+        });
+
+        press(element('inside'), 'pointerdown');
+        press(element('scrim'), 'click');
+        expect(layer.reasons).toEqual([]);
+
+        press(element('scrim'), 'pointerdown');
+        press(element('scrim'), 'click');
+        expect(layer.reasons).toEqual(['outsidePress']);
+        handle.destroy();
+      });
+
+      it('forgets where the pointer went down once a key is pressed', () => {
+        const layer = recorder();
+        const handle = createDismissableLayer(element('frame'), {
+          ...layer,
+          content: element('panel'),
+          outsidePressEvent: 'click',
+        });
+
+        press(element('inside'), 'pointerdown');
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+        press(element('page'), 'click');
+        expect(layer.reasons).toEqual(['outsidePress']);
+        handle.destroy();
+      });
+    });
   });
 
   describe('focus leaving the layer', () => {

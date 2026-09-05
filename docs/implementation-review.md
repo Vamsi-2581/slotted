@@ -253,7 +253,7 @@ Localização: `packages/react/src/description-list/description-list.tsx` (label
 
 Localização: `packages/styles/src/dialog/dialog.css`, `packages/core/src/dismissable-layer`, `packages/core/src/presence`.
 
-- [ ] **DG1 — Clique no backdrop não fecha.** Verificar `dismissable-layer.ts`: o listener de `pointerdown` fora deve considerar o backdrop como "fora" do painel. Verificar se o backdrop tem `pointer-events: none` ou se está fora da árvore observada. Esperado: `closeOnBackdrop` (padrão `true`) fecha no `pointerup` no backdrop quando o `pointerdown` também ocorreu no backdrop (evita fechar ao arrastar seleção de texto para fora). Testar também `Escape` e o botão de fechar. Story com os três modos e uma story `closeOnBackdrop={false}`.
+- [x] **DG1 — Clique no backdrop não fecha.** Verificar `dismissable-layer.ts`: o listener de `pointerdown` fora deve considerar o backdrop como "fora" do painel. Verificar se o backdrop tem `pointer-events: none` ou se está fora da árvore observada. Esperado: `closeOnBackdrop` (padrão `true`) fecha no `pointerup` no backdrop quando o `pointerdown` também ocorreu no backdrop (evita fechar ao arrastar seleção de texto para fora). Testar também `Escape` e o botão de fechar. Story com os três modos e uma story `closeOnBackdrop={false}`.
 - [ ] **DG2 — Botão de tela cheia.** Esperado: prop `fullscreenToggle` (padrão `false`) que renderiza uma parte interna `[data-part='fullscreen']` (R2) no cabeçalho, alternando `data-fullscreen` no root. Em `data-fullscreen`, o painel ocupa `inset: 0`, sem raio, com transição em `transform`/`opacity` (não em `width`/`height`). Prop controlada `fullscreen` e evento `onFullscreenChange`.
 - [x] **DG3 — Animações ausentes.** Fato verificado: `dialog.css:172-181` e `268-292` já declaram transições de `opacity` no backdrop e no painel condicionadas a `[data-open]`. O sintoma indica que `data-open` é aplicado no mesmo frame em que o elemento é montado, sem frame inicial em `opacity: 0`. Esperado: `createPresence` em `presence.ts` deve garantir um frame em `entering` antes de `open` (`requestAnimationFrame` duplo ou `getComputedStyle` forçando reflow). Aplicar R7. Testar em `presence.test.ts` que o status passa por `entering` e que o elemento recebe `data-open` apenas após o primeiro frame. (MAOC — `Drawer`, `Popover`, `Menu`, `Select`, `Combobox`, `Tooltip`, `Toast`)
 
@@ -263,7 +263,7 @@ Localização: `packages/styles/src/dialog/dialog.css`, `packages/core/src/dismi
 
 Localização: `packages/styles/src/drawer/drawer.css`.
 
-- [ ] **DR1 — `#Dialog:1`.** Mesma causa em `dismissable-layer`.
+- [x] **DR1 — `#Dialog:1`.** Mesma causa em `dismissable-layer`.
 - [x] **DR2 — `#Dialog:3`.** Mesma causa em `presence`.
 - [x] **DR3 — Backdrop e painel aparecem sem transição.** Coberto por DR2 e R7: painel entra com `translateX(100%)→0` (lado `end`), `translateX(−100%)→0` (lado `start`), `translateY(100%)→0` (lado `bottom`).
 - [ ] **DR4 — Borda lateral clara demais em `dark`.** Esperado: a borda do painel usa `--slotted-border-subtle` do esquema `dark`, não um valor fixo. Verificar em `drawer.css` se a borda usa token de esquema ou literal. Em `dark`, a separação entre painel e backdrop deve vir da sombra de elevação nível 3, com borda de 1px em `--slotted-border-subtle` a no máximo 12% de contraste sobre a superfície do painel.

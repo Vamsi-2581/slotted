@@ -242,6 +242,24 @@ describe('SlDrawer', () => {
     expect(host.open()).toBe(true);
   });
 
+  /** DR1. The scrim is inside the layer's node; the panel is what a press is inside of. */
+  it('closes on a press on the scrim, and not on one that began in the panel', () => {
+    host.open.set(true);
+    fixture.detectChanges();
+    const scrim = document.querySelector('[data-part="backdrop"]') as HTMLElement;
+    const panel = document.querySelector('[role="dialog"]') as HTMLElement;
+
+    panel.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    scrim.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.open()).toBe(true);
+
+    scrim.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    scrim.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.open()).toBe(false);
+  });
+
   /**
    * One cancellable request covers every way out. Angular Material's
    * `disableClose` refuses two of the four sources and cannot refuse the third.

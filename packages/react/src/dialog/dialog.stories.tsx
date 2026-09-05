@@ -397,15 +397,44 @@ function Guarded({ container }: { container: Element }) {
 export const Policy: Story = {
   parameters: scenario('policy'),
   render: () => (
-    <Scene
-      label="One guard, six ways out"
-      layout="stack"
-      note="Press Escape, click the scrim, then the ✕: all three are refused by the same three lines, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work."
-    >
-      <Layer>{(container) => <Guarded container={container} />}</Layer>
-    </Scene>
+    <Grid columns={3}>
+      <Scene
+        label="Three ways out"
+        note="Press Abrir, then Escape, the scrim or the ✕: each closes it, and each carries its own reason — escape, outsidePress, dismiss. The scrim decides on the click, so a selection dragged out of the panel and let go over it closes nothing."
+      >
+        <Layer>{(container) => <Opened container={container} />}</Layer>
+      </Scene>
+      <Scene
+        label="One guard, six ways out"
+        layout="stack"
+        note="Press Escape, click the scrim, then the ✕: all three are refused by the same three lines, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work."
+      >
+        <Layer>{(container) => <Guarded container={container} />}</Layer>
+      </Scene>
+      <Scene
+        label='outsidePress="none"'
+        note="The scrim is not a way out: a press on it does nothing, while Escape and the ✕ still close it. For a form a stray click must not throw away."
+      >
+        <Layer>{(container) => <Opened container={container} outsidePress="none" />}</Layer>
+      </Scene>
+    </Grid>
   ),
 };
+
+function Opened({ container, ...props }: Partial<DialogProps> & { container: Element }) {
+  return (
+    <Dialog container={container} fullScreen="never" {...props}>
+      <DialogTrigger render={(triggerProps) => <Button {...triggerProps}>Abrir</Button>} />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar projeto</DialogTitle>
+          <DialogDescription>Escape, a scrim e o ✕ são as três saídas.</DialogDescription>
+          <DialogClose />
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function Named({ container }: { container: Element }) {
   const second = useRef<HTMLInputElement>(null);

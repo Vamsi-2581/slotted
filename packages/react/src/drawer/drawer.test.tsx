@@ -197,6 +197,24 @@ describe('Drawer', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
+  /** DR1. The scrim is inside the layer's node; the panel is what a press is inside of. */
+  it('closes on a press on the scrim, and not on one that began in the panel', () => {
+    const onOpenChange = vi.fn();
+    render(<Basic defaultOpen onOpenChange={onOpenChange} />);
+    const scrim = document.querySelector('[data-part="backdrop"]') as HTMLElement;
+
+    fireEvent.pointerDown(screen.getByRole('dialog'));
+    fireEvent.click(scrim);
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(scrim);
+    fireEvent.click(scrim);
+    expect(onOpenChange).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: 'outsidePress' }),
+    );
+  });
+
   /**
    * One cancellable request covers every way out. Angular Material's
    * `disableClose` refuses two of the four sources and cannot refuse the third;

@@ -261,9 +261,34 @@ describe('SlDialog', () => {
     fixture.detectChanges();
 
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
 
     expect(fixture.componentInstance.requests.at(-1)?.reason).toBe('outsidePress');
+  });
+
+  /**
+   * DG1. The scrim is inside the layer's node and was never a way out. It is
+   * the click that decides, so a selection dragged out of the panel and let go
+   * over the scrim closes nothing.
+   */
+  it('closes on a press on the scrim, and not on one that began in the panel', () => {
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    fixture.componentInstance.requests.length = 0;
+    const scrim = document.querySelector('[data-part="backdrop"]') as HTMLElement;
+    const panel = document.querySelector('[role="dialog"]') as HTMLElement;
+
+    panel.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    scrim.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.requests).toHaveLength(0);
+
+    scrim.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    scrim.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.requests.at(-1)?.reason).toBe('outsidePress');
+    expect(fixture.componentInstance.open()).toBe(false);
   });
 
   /** The trigger is a branch of the layer, or opening would close it again. */
@@ -284,8 +309,10 @@ describe('SlDialog', () => {
     fixture.componentInstance.outsidePress.set('none');
     fixture.componentInstance.open.set(true);
     fixture.detectChanges();
+    const scrim = document.querySelector('[data-part="backdrop"]') as HTMLElement;
 
-    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    scrim.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    scrim.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     fixture.detectChanges();
 
     expect(fixture.componentInstance.open()).toBe(true);

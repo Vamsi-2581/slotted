@@ -352,8 +352,12 @@ export class SlDrawer {
       const trigger = this.triggerNode();
 
       if (overlay) {
+        /* The panel is what a press is inside of; the scrim is the way out, on
+           the click rather than the pointerdown so a selection dragged out of
+           the panel is not a press on the scrim. */
         this.layer = createDismissableLayer(node, {
           branches: trigger === null ? [] : [trigger],
+          content: panel,
           escape,
           modal,
           onDismiss: (request) => {
@@ -361,6 +365,7 @@ export class SlDrawer {
             this.request(false, request.reason as DrawerOpenReason, undefined, request.source);
           },
           outsidePress,
+          outsidePressEvent: 'click',
         });
       }
 

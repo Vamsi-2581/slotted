@@ -233,8 +233,13 @@ export abstract class SlDialogBase {
       const modal = this.resolvedModal();
       const trigger = this.triggerNode();
 
+      /* The frame is the layer and the panel is what a press is inside of: the
+         scrim and the viewport around the panel are the way out. The click, not
+         the pointerdown, so a selection dragged out of the panel is not a press
+         on the scrim. */
       this.layer = createDismissableLayer(node, {
         branches: trigger === null ? [] : [trigger],
+        content: panel,
         escape,
         modal,
         onDismiss: (request) => {
@@ -242,6 +247,7 @@ export abstract class SlDialogBase {
           this.request(false, request.reason as DialogOpenReason, undefined, request.source);
         },
         outsidePress,
+        outsidePressEvent: 'click',
       });
 
       const wanted = this.resolvedInitialFocus();

@@ -179,8 +179,13 @@ export function DialogContent({
     if (root === null) return;
 
     const branches = dialog.nodes.trigger === null ? [] : [dialog.nodes.trigger];
+    /* The frame is the layer and the panel is what a press is inside of: the
+       scrim and the viewport around the panel are the way out. The click, not
+       the pointerdown, so a selection dragged out of the panel is not a press
+       on the scrim. */
     const layerHandle = createDismissableLayer(root, {
       branches,
+      content,
       escape: dialog.escape === 'close',
       modal: dialog.modal,
       onDismiss: (request) => {
@@ -190,6 +195,7 @@ export function DialogContent({
         dialog.close(request.reason as DialogOpenReason, undefined, request.source);
       },
       outsidePress: dialog.outsidePress === 'close',
+      outsidePressEvent: 'click',
     });
 
     const wanted = dialog.initialFocus;

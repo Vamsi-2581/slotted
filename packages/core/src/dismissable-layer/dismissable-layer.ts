@@ -58,6 +58,13 @@ export interface DismissableLayerOptions {
   scrollLock?: boolean;
   /** Nodes outside the layer that count as inside it — the trigger, first of all. */
   branches?: Iterable<Element>;
+  /**
+   * What a press is inside of, where that is less than the node. A dialog's
+   * node is the whole frame — a scrim and a viewport around a panel — and the
+   * frame is what carries the depth and the `inert` boundary; the panel is the
+   * only part a press is *in*. Defaults to the node.
+   */
+  content?: Element;
 }
 
 export interface DismissableLayerHandle {
@@ -83,6 +90,8 @@ export const LAYER_DEPTH_PROPERTY = '--slotted-layer-depth';
 
 interface Layer {
   node: HTMLElement;
+  /** What a press is inside of: the node, or the part of it the consumer named. */
+  content: Element;
   options: DismissableLayerOptions;
   /** The layer that was topmost when this one opened, or none. */
   parent: Layer | null;
@@ -93,6 +102,13 @@ interface Layer {
 
 interface DocumentStack {
   layers: Layer[];
+  /**
+   * Where the pointer went down, for the layers that wait for the click. A
+   * click is dispatched wherever the pointer comes up, so a reader who selects
+   * text in a panel and lets go over the scrim clicks the scrim — and a press
+   * that began inside is not a press outside, whatever ends it.
+   */
+  pressStart: EventTarget | null;
   detach: () => void;
 }
 
@@ -110,7 +126,7 @@ function documentStack(doc: Document): DocumentStack {
   const existing = stacks.get(doc);
   if (existing) return existing;
 
-  const state: DocumentStack = { layers: [], detach: () => {} };
+  const state: DocumentStack = { layers: [], pressStart: null, detach: () => {} };
 
   const onKeyDown = (event: Event) => handleKeyDown(state, event as KeyboardEvent);
   const onPress = (event: Event) => handlePress(state, event);
@@ -144,7 +160,7 @@ function isDescendant(candidate: Layer, ancestor: Layer): boolean {
 }
 
 function claims(layer: Layer, target: Node): boolean {
-  if (layer.node.contains(target)) return true;
+  if (layer.content.contains(target)) return true;
   for (const branch of layer.branches) if (branch.contains(target)) return true;
   return false;
 }
@@ -172,6 +188,8 @@ function request(layer: Layer, reason: DismissReason, source?: Event): boolean {
 }
 
 function handleKeyDown(state: DocumentStack, event: KeyboardEvent) {
+  /* A key ends the pointer sequence: a click the keyboard makes began nowhere. */
+  state.pressStart = null;
   if (event.key !== 'Escape') return;
   /* A held key closes one layer; Escape cancelling an IME composition closes none. */
   if (event.repeat || event.isComposing) return;
@@ -184,6 +202,10 @@ function handleKeyDown(state: DocumentStack, event: KeyboardEvent) {
 }
 
 function handlePress(state: DocumentStack, event: Event) {
+  if (event.type === 'pointerdown') state.pressStart = event.target;
+  const began = event.type === 'click' ? state.pressStart : null;
+  if (event.type === 'click') state.pressStart = null;
+
   /* Top down, so a submenu is asked before the menu it opened from. */
   for (const layer of [...state.layers].reverse()) {
     const wanted = layer.options.outsidePressEvent ?? 'pointerdown';
@@ -192,6 +214,7 @@ function handlePress(state: DocumentStack, event: Event) {
     const outside = layer.options.outsidePress ?? true;
     if (outside === false) continue;
     if (owns(state, layer, event.target)) continue;
+    if (began !== null && owns(state, layer, began)) continue;
     if (typeof outside === 'function' && !outside(event.target, event)) continue;
 
     if (!request(layer, 'outsidePress', event)) return;
@@ -296,6 +319,7 @@ export function createDismissableLayer(
 
   const layer: Layer = {
     node,
+    content: options.content ?? node,
     options,
     /* The layer that was topmost when this one opened is its ancestor. */
     parent: state.layers.at(-1) ?? null,

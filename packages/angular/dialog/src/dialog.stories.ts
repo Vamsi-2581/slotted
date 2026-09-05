@@ -354,10 +354,24 @@ export const Policy: Story = {
         if (!request.value && this.saving) request.cancel();
       },
     },
-    template: scene(
-      'One guard, six ways out',
-      'Press Escape, click the scrim, then the ✕: all three are refused by the same handler, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work.',
-      layer(`<button slButton size="sm" variant="outline" (click)="saving = !saving">
+    template: grid(
+      3,
+      scene(
+        'Three ways out',
+        'Press Abrir, then Escape, the scrim or the ✕: each closes it, and each carries its own reason — escape, outsidePress, dismiss. The scrim decides on the click, so a selection dragged out of the panel and let go over it closes nothing.',
+        layer(`<button slButton [slDialogTrigger]="a">Abrir</button>
+          <sl-dialog #a="slDialog" [container]="box" fullScreen="never">
+            <header slDialogHeader>
+              <h2 slDialogTitle>Editar projeto</h2>
+              <p slDialogDescription>Escape, a scrim e o ✕ são as três saídas.</p>
+              <button slDialogClose></button>
+            </header>
+          </sl-dialog>`),
+      ) +
+        scene(
+          'One guard, six ways out',
+          'Press Escape, click the scrim, then the ✕: all three are refused by the same handler, because they are one request carrying a reason rather than four callbacks. Let the save finish and the same three work.',
+          layer(`<button slButton size="sm" variant="outline" (click)="saving = !saving">
         {{ saving ? 'Terminar de salvar' : 'Voltar a salvar' }}
       </button>
       <button slButton size="sm" variant="ghost" [disabled]="open" (click)="open = true">
@@ -379,6 +393,20 @@ export const Policy: Story = {
           <button slDialogClose></button>
         </header>
       </sl-dialog>`),
+          'stack',
+        ) +
+        scene(
+          'outsidePress="none"',
+          'The scrim is not a way out: a press on it does nothing, while Escape and the ✕ still close it. For a form a stray click must not throw away.',
+          layer(`<button slButton [slDialogTrigger]="n">Abrir</button>
+          <sl-dialog #n="slDialog" [container]="box" fullScreen="never" outsidePress="none">
+            <header slDialogHeader>
+              <h2 slDialogTitle>Editar projeto</h2>
+              <p slDialogDescription>A scrim não fecha; Escape e o ✕ fecham.</p>
+              <button slDialogClose></button>
+            </header>
+          </sl-dialog>`),
+        ),
     ),
   }),
 };

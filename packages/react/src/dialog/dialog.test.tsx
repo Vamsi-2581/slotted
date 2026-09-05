@@ -170,7 +170,30 @@ describe('Dialog', () => {
     render(<Basic defaultOpen onOpenChange={onOpenChange} />);
 
     fireEvent.pointerDown(document.body);
+    fireEvent.click(document.body);
     expect((onOpenChange.mock.calls[0]?.[1] as DialogChangeRequest).reason).toBe('outsidePress');
+  });
+
+  /**
+   * DG1. The scrim is inside the layer's node and was never a way out. It is
+   * the click that decides, so a selection dragged out of the panel and let go
+   * over the scrim closes nothing.
+   */
+  it('closes on a press on the scrim, and not on one that began in the panel', () => {
+    const onOpenChange = vi.fn();
+    render(<Basic defaultOpen onOpenChange={onOpenChange} />);
+    const scrim = document.querySelector('[data-part="backdrop"]') as HTMLElement;
+
+    fireEvent.pointerDown(screen.getByRole('dialog'));
+    fireEvent.click(scrim);
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(scrim);
+    fireEvent.click(scrim);
+    expect(onOpenChange).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: 'outsidePress' }),
+    );
   });
 
   /** The trigger is a branch of the layer, or opening would close it again. */
@@ -185,8 +208,10 @@ describe('Dialog', () => {
   it('refuses an outside press when the consumer says so', () => {
     const onOpenChange = vi.fn();
     render(<Basic defaultOpen outsidePress="none" onOpenChange={onOpenChange} />);
+    const scrim = document.querySelector('[data-part="backdrop"]') as HTMLElement;
 
-    fireEvent.pointerDown(document.body);
+    fireEvent.pointerDown(scrim);
+    fireEvent.click(scrim);
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
@@ -380,7 +405,9 @@ describe('Dialog', () => {
           <button type="button" onClick={() => handle.current?.close('saved')}>
             close
           </button>
-          <Dialog ref={handle} onOpenChange={onOpenChange}>
+          {/* The buttons are outside the layer, and a press on them is a press
+              outside: the policy is off so the handle is what closes it. */}
+          <Dialog onOpenChange={onOpenChange} outsidePress="none" ref={handle}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>From code</DialogTitle>

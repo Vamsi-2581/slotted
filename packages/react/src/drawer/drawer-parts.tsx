@@ -239,8 +239,12 @@ export function DrawerPanel({
 
     const branches = drawer.nodes.trigger === null ? [] : [drawer.nodes.trigger];
     const dismissable = overlay
-      ? createDismissableLayer(layer, {
+      ? /* The panel is what a press is inside of; the scrim is the way out, on
+           the click rather than the pointerdown so a selection dragged out of
+           the panel is not a press on the scrim. */
+        createDismissableLayer(layer, {
           branches,
+          content: panel,
           escape: drawer.escape === 'close',
           modal: drawer.modal,
           onDismiss: (request) => {
@@ -250,6 +254,7 @@ export function DrawerPanel({
             drawer.close(request.reason as DrawerOpenReason, undefined, request.source);
           },
           outsidePress: drawer.outsidePress === 'close',
+          outsidePressEvent: 'click',
         })
       : null;
 

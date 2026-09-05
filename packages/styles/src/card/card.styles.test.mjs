@@ -270,29 +270,34 @@ test('holds hover back for a disabled card and a disabled action', () => {
 });
 
 /**
- * Every tone border becomes one system colour in a forced-colours document, so
- * the selected edge has to be thicker rather than merely a different colour.
+ * Selected is the accent ground under a one-pixel accent edge (C1, R1): the
+ * pair a selected row paints, never a thicker stroke. Hover and press on a
+ * chosen card step the ground through the accent's tints, as a chosen row's
+ * do. The control inside carries the state where the scheme flattens both.
  */
-/**
- * Every tone border becomes one system colour in a forced-colours document, so
- * the selected edge has to be thicker rather than merely a different colour.
- *
- * The colour is the inverse surface and not the accent. Carbon, Fluent and
- * Spectrum each refuse the accent here, and in this theme
- * `--slotted-focus-ring-color` and `--slotted-tone-accent-border` resolve to the
- * same hex — a selected card and a focused card were the same image.
- */
-test('says selected with a thicker edge, in a colour focus never uses', () => {
+test('says selected with the accent ground and a hairline accent edge', () => {
   const selected = rule(`${ui}[data-selected]`);
-  assert.ok(selected.includes('var(--slotted-border-width-thick'), 'the edge does not thicken');
-  assert.ok(
-    selected.includes('var(--slotted-surface-inverse'),
-    'selection borrows a colour the focus ring also paints',
+  assert.match(
+    selected,
+    /--_card-surface-rest:var\(--slotted-card-background-selected,var\(--slotted-tone-accent-surface,Canvas\)\)/,
   );
-  assert.ok(
-    !selected.includes('--slotted-tone-accent'),
-    'selection reaches for the accent, which the focus ring already owns',
+  assert.match(
+    selected,
+    /--_card-surface-hover:var\(--slotted-card-background-selected-hover,var\(--slotted-tone-accent-subtle-hover,Canvas\)\)/,
   );
+  assert.match(
+    selected,
+    /--_card-surface-active:var\(--slotted-card-background-selected-active,var\(--slotted-tone-accent-subtle-active,Canvas\)\)/,
+  );
+  assert.match(
+    selected,
+    /--_card-edge-rest:var\(--slotted-card-edge-color-selected,var\(--slotted-tone-accent-border,CanvasText\)\)/,
+  );
+  assert.match(
+    selected,
+    /--_card-edge-width:var\(--slotted-card-edge-width-selected,var\(--slotted-border-width-thin,1px\)\)/,
+  );
+  assert.doesNotMatch(selected, /border-width-thick|surface-inverse/);
 });
 
 /**
@@ -310,17 +315,26 @@ test('keeps a column for the control that makes the card a choice', () => {
   const selection = rule(`${ui} > [data-part='header'] > [data-part='selection']`);
   assert.ok(selection.includes('grid-column:1'), 'the control does not lead');
   assert.ok(selection.includes('grid-row:1'), 'the control leaves the title row');
-  assert.ok(selection.includes('align-self:center'), 'the control is not centred on the title');
+  /* On the title's first line (C1, R5): a slot one line of the title's step
+     tall, the control centred in it, so a wrapped title keeps its control
+     beside the first line rather than in the middle of the block. */
+  assert.ok(selection.includes('align-self:start'), 'the control is centred on the block');
+  assert.ok(selection.includes('align-items:center'), 'the control is not centred on the line');
+  assert.match(selection, /block-size:var\(--_selection-line\)/);
+  assert.match(
+    selection,
+    /--_selection-line:var\(--slotted-card-selection-line,calc\(var\(--slotted-font-size-lg,1rem\) \* var\(--slotted-line-height-lg,1\.5\)\)\)/,
+  );
 });
 
 /**
- * Density governs control geometry, and the control is the one piece of control
- * geometry a card holds. Before this the comfortable and the dense capture of a
- * card were identical to the byte.
+ * The control is the selection scale's square, the one checkbox and radio draw
+ * in, fixed across densities (C1 after CK1).
  */
-test('sizes that control from the scale density actually moves', () => {
+test('sizes that control from the selection scale', () => {
   const control = rule(`${ui} > [data-part='header'] > [data-part='selection'] >:is(input,button)`);
-  assert.ok(control.includes('var(--slotted-control-icon-size-md)'));
+  assert.ok(control.includes('var(--slotted-selection-size-md,16px)'));
+  assert.ok(!control.includes('--slotted-control-icon-size'));
   assert.ok(
     !control.includes('accent-color:'),
     'the card paints the control, which follows the scheme on its own',

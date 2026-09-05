@@ -93,7 +93,7 @@ export const REACT_CARD_DOCS = {
       'CardActions and CardFooter both sit above the stretched hit area, so a control in either stays operable. An interactive element anywhere else needs position: relative of its own.',
       'Text over the stretched area cannot be selected with the pointer. That is the cost of the whole-card target, and the reason a card with no CardLink stretches nothing.',
       'selected and disabled are painted, never announced. The radio, checkbox or button inside the card is what carries the state for assistive technology.',
-      'The selected edge is thicker as well as accented, so it survives a forced-colours document where every tone border becomes one system colour. elevated keeps its hairline for the same reason: a shadow is removed there outright.',
+      'selected is the accent surface under a hairline accent edge, the pair a selected row paints. In high contrast and forced colours both flatten, and the checked control inside is what carries the state. elevated keeps its hairline because a shadow is removed there outright.',
       'The focus ring is drawn on the card while the link has focus. In a browser without :has() the link keeps its own native outline instead.',
       'A rule between two regions is a Divider written between them. It is announced as a separator unless it is marked decorative, which is usually what a rule inside one card is.',
     ],

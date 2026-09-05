@@ -516,6 +516,36 @@
         >
       </div>
     </label>
+
+    <!-- A title that wraps: the control stays beside its first line. -->
+    <label
+      data-part="root"
+      data-ui="card"
+      data-fill="outline"
+      data-selected
+      style="
+        font-family: var(--slotted-font-family-sans);
+        font-size: var(--slotted-font-size-md);
+        line-height: var(--slotted-line-height-md);
+        display: block;
+      "
+    >
+      <div data-part="header">
+        <span data-part="selection"
+          ><input type="checkbox" name="retention" value="long" checked
+        /></span>
+        <span
+          style="
+            font-size: var(--slotted-font-size-lg);
+            font-weight: var(--slotted-font-weight-semibold);
+          "
+          >Retenção estendida dos registros de auditoria e das exportações mensais</span
+        >
+        <span style="color: var(--slotted-text-muted); font-size: var(--slotted-font-size-sm)"
+          >Guardado por dez anos.</span
+        >
+      </div>
+    </label>
   </div>
 </section>
 

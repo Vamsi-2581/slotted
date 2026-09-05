@@ -171,7 +171,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Card
 
-- [ ] **C1 — Variantes com `Checkbox`/`Radio` mal posicionadas.** Dependente de `#Checkbox:1` e `#Checkbox:5`. Após a refatoração dos controles, o card selecionável deve alinhar o controle à primeira linha do título (mesma regra de R5) e usar `gap` de `--slotted-space-3`. O card inteiro é o alvo de clique; o controle é apenas o indicador. Estado `selected` do card usa borda `accent-border` de 1px mais superfície `accent-subtle`, sem rail (R1).
+- [x] **C1 — Variantes com `Checkbox`/`Radio` mal posicionadas.** Dependente de `#Checkbox:1` e `#Checkbox:5`. Após a refatoração dos controles, o card selecionável deve alinhar o controle à primeira linha do título (mesma regra de R5) e usar `gap` de `--slotted-space-3`. O card inteiro é o alvo de clique; o controle é apenas o indicador. Estado `selected` do card usa borda `accent-border` de 1px mais superfície `accent-subtle`, sem rail (R1).
 
 ---
 

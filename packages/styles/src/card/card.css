@@ -313,8 +313,22 @@
   }
 
   [data-ui='card'] > [data-part='header'] > [data-part='selection'] {
-    /* Centred on the title's own row, for the reason `actions` is. */
-    align-self: center;
+    /**
+     * On the title's first line, not in the middle of its block (C1, the rule
+     * R5 gives every mark beside a title): the slot is one line of the title's
+     * step tall and centres the control inside it, so a title that wraps to
+     * two lines keeps its control beside the first. The step is the large one,
+     * which is the title a card header holds; a header set at another step
+     * retunes the line with the family token.
+     */
+    --_selection-line: var(
+      --slotted-card-selection-line,
+      calc(var(--slotted-font-size-lg, 1rem) * var(--slotted-line-height-lg, 1.5))
+    );
+
+    align-items: center;
+    align-self: start;
+    block-size: var(--_selection-line);
     display: flex;
     grid-column: 1;
     grid-row: 1;
@@ -324,9 +338,10 @@
   }
 
   /**
-   * The control follows control geometry, which is what makes the card answer
-   * density — the axis it previously answered nowhere, its comfortable and
-   * dense captures being identical to the byte.
+   * The control is the selection scale's square, the one `checkbox` and
+   * `radio-group` draw in, and it does not follow density: the control glyph
+   * scale it read before fell to thirteen pixels at `dense`, and a chooser
+   * smaller than the check beside it in the same form was two answers.
    *
    * The card sizes and places the control and paints none of it. Tinting it
    * with `accent-color` was tried and reverted: the accent is a dark blue, so
@@ -342,8 +357,8 @@
    * card, which is the correction the token foundation asks a family to make.
    */
   [data-ui='card'] > [data-part='header'] > [data-part='selection'] > :is(input, button) {
-    block-size: var(--slotted-card-selection-size, var(--slotted-control-icon-size-md));
-    inline-size: var(--slotted-card-selection-size, var(--slotted-control-icon-size-md));
+    block-size: var(--slotted-card-selection-size, var(--slotted-selection-size-md, 16px));
+    inline-size: var(--slotted-card-selection-size, var(--slotted-selection-size-md, 16px));
     margin: 0;
   }
 
@@ -515,39 +530,47 @@
   }
 
   /**
-   * Selection says it with the edge and nothing else. The accent surface it
-   * used to fill with is calibrated on a badge: at card area it flooded the
-   * light scheme, and in the dark scheme it sat four units from the card's own
-   * background and vanished.
+   * Selection is the accent surface under a one-pixel accent edge (C1, by R1:
+   * `selected` is the `accent-subtle` ground, never a rail or a heavier
+   * stroke), the same pair `list-item` paints on a selected row, so a chosen
+   * card and a chosen row in one page are one state. The edge keeps the
+   * resting width; the ground is what says chosen.
    *
-   * The colour is the inverse surface rather than the accent, which is what
-   * Carbon, Fluent and Spectrum each reach for. It inverts by definition, so
-   * one declaration reads as a near-black edge on a light card and a
-   * near-white one on a dark card, and it survives forced colours because the
-   * edge is thicker rather than merely another colour.
+   * The `high-contrast` scheme paints the accent surface white and the accent
+   * edge black, like every other border, so there the card itself says
+   * nothing — and does not have to: the control inside is checked, and the
+   * check is what carries the state, as it does for assistive technology. The
+   * inverse-surface edge this replaced survived that scheme by being thicker,
+   * and was the rail R1 removes.
+   *
+   * A selected card still answers the pointer: the ground steps to the
+   * accent's hover and active tints, as a selected row's does, and the edge
+   * holds, because it is already saying the stronger thing.
    */
   [data-ui='card'][data-selected] {
+    --_card-surface-rest: var(
+      --slotted-card-background-selected,
+      var(--slotted-tone-accent-surface, Canvas)
+    );
+    --_card-surface-hover: var(
+      --slotted-card-background-selected-hover,
+      var(--slotted-tone-accent-subtle-hover, Canvas)
+    );
+    --_card-surface-active: var(
+      --slotted-card-background-selected-active,
+      var(--slotted-tone-accent-subtle-active, Canvas)
+    );
     --_card-edge-rest: var(
       --slotted-card-edge-color-selected,
-      var(--slotted-surface-inverse, CanvasText)
+      var(--slotted-tone-accent-border, CanvasText)
     );
     --_card-edge: var(--_card-edge-rest);
     --_card-edge-hover: var(--_card-edge-rest);
     --_card-edge-active: var(--_card-edge-rest);
     --_card-edge-width: var(
       --slotted-card-edge-width-selected,
-      var(--slotted-border-width-thick, 2px)
+      var(--slotted-border-width-thin, 1px)
     );
-  }
-
-  /**
-   * A selected card still answers the pointer. Carbon paints `hover selected`
-   * as its own row and Fluent gives every appearance a `selected + hover`
-   * column; the surface moves and the edge holds, because the edge is already
-   * saying the stronger thing.
-   */
-  [data-ui='card'][data-selected][data-fill='subtle'] {
-    --_card-surface-hover: var(--slotted-surface-raised, Canvas);
   }
 
   /**

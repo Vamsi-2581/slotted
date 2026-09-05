@@ -35,6 +35,13 @@ export type PresenceStatus = 'unmounted' | 'entering' | 'open' | 'exiting';
 /** Milliseconds allowed past the declared duration before an exit is completed anyway. */
 export const DEFAULT_EXIT_GRACE = 50;
 
+/**
+ * Frames `entering` waits for the family to hand over its node before opening
+ * without one. A family that registers no node is not animating this presence,
+ * and holding it in `entering` for longer only delays a layer nobody will fade.
+ */
+export const ENTERING_FRAME_LIMIT = 3;
+
 export interface PresenceOptions {
   /** The consumer's value. Present at all puts presence in controlled mode. */
   present?: boolean | undefined;
@@ -140,13 +147,9 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
   });
 
   let applied = state.value;
-  let status: PresenceStatus = !applied
-    ? 'unmounted'
-    : skipInitialAnimation || reducedMotion()
-      ? 'open'
-      : 'entering';
+  let status: PresenceStatus = !applied ? 'unmounted' : skipInitialAnimation ? 'open' : 'entering';
 
-  if (status === 'entering') scheduleFrame(() => setStatus('open'));
+  if (status === 'entering') enter();
 
   function reducedMotion(): boolean {
     if (options.reducedMotion) return options.reducedMotion();
@@ -186,6 +189,40 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
   function clearFrame() {
     cancelFrame?.();
     cancelFrame = null;
+  }
+
+  /**
+   * The frame `entering` exists for, and the guarantee it makes: the node has
+   * been in the document in its closed style before `open` is reported.
+   *
+   * A frame alone did not make it. The framework renders `entering` on its own
+   * schedule, and `requestAnimationFrame` runs before the browser computes
+   * style for that render — so `open` landed in the same style update as the
+   * mount, the transition had no closed style to start from, and a dialog
+   * appeared at full opacity. Two things fix that: the wait continues until
+   * the family has registered the node it rendered, and that node's style is
+   * read, which makes the browser compute the closed style now rather than
+   * fold it into the open one.
+   */
+  function enter() {
+    let waited = 0;
+    const step = () => {
+      if (status !== 'entering') return;
+      const current = node;
+      if (!current && waited < ENTERING_FRAME_LIMIT) {
+        waited += 1;
+        scheduleFrame(step);
+        return;
+      }
+      if (current) closedStyle(current);
+      setStatus('open');
+    };
+    scheduleFrame(step);
+  }
+
+  /** Reading one computed value is what makes the browser compute them all. */
+  function closedStyle(target: HTMLElement): string | undefined {
+    return target.ownerDocument.defaultView?.getComputedStyle(target).opacity;
   }
 
   function setStatus(next: PresenceStatus) {
@@ -247,9 +284,12 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
       /* An interrupted exit returns to open: the node never left the document. */
       if (status === 'exiting') return setStatus('open');
       if (status !== 'unmounted') return;
-      if (immediate || reducedMotion()) return setStatus('open');
+      if (immediate) return setStatus('open');
+      /* Reduced motion still takes the frame: the family keeps its opacity
+         fade and drops only its transforms, which is R7's rule, not this
+         module's. The exit below is what reduced motion cuts short. */
       setStatus('entering');
-      scheduleFrame(() => setStatus('open'));
+      enter();
       return;
     }
 

@@ -333,6 +333,20 @@
     translate: var(--_shift-x, 0) var(--_shift-y, 0);
   }
 
+  /**
+   * Reduced motion drops the slide and keeps the scrim's fade: the panel is
+   * simply there, behind a scrim that still says something opened. The
+   * closed panel sits at rest because the layer hides it whole, above.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='drawer'][data-mode='overlay'] > [data-part='panel'] {
+      translate: 0 0;
+      transition:
+        inline-size var(--_move),
+        block-size var(--_move);
+    }
+  }
+
   /* ── Where the panel sits, and where it goes when it leaves ───────────── */
 
   [data-ui='drawer'][data-side='start'] > [data-part='panel'],

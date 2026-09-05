@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createPresence } from './presence';
+import { ENTERING_FRAME_LIMIT, createPresence } from './presence';
 
 /**
  * The module schedules on `requestAnimationFrame`, which Vitest does not fake
@@ -53,11 +53,79 @@ describe('createPresence', () => {
     presence.request(true, 'pointer');
     expect(presence.status).toBe('entering');
     expect(presence.mounted).toBe(true);
+    presence.setNode(mount());
 
     vi.advanceTimersToNextFrame();
     expect(presence.status).toBe('open');
     expect(status).toEqual(['entering', 'open']);
     presence.destroy();
+  });
+
+  /**
+   * DG3. The framework renders `entering` on its own schedule, and a frame
+   * that fired before the render had committed reported `open` into the same
+   * style update as the mount: the layer appeared at full opacity with no
+   * transition. `open` now waits for the node the family rendered, and reads
+   * its style so the browser computes the closed one before the open one.
+   */
+  describe('the entering frame', () => {
+    it('holds entering until the family has registered its node', () => {
+      const presence = createPresence();
+      presence.request(true, 'pointer');
+
+      vi.advanceTimersToNextFrame();
+      expect(presence.status).toBe('entering');
+
+      presence.setNode(mount());
+      vi.advanceTimersToNextFrame();
+      expect(presence.status).toBe('open');
+      presence.destroy();
+    });
+
+    it('reads the closed style of the node before it opens', () => {
+      const node = mount();
+      const presence = createPresence();
+      const seen: string[] = [];
+      const computed = vi.spyOn(window, 'getComputedStyle').mockImplementation((element) => {
+        if (element === node) seen.push(presence.status);
+        return { opacity: '0' } as CSSStyleDeclaration;
+      });
+
+      presence.request(true, 'pointer');
+      presence.setNode(node);
+      vi.advanceTimersToNextFrame();
+
+      expect(presence.status).toBe('open');
+      expect(seen).toEqual(['entering']);
+      computed.mockRestore();
+      presence.destroy();
+    });
+
+    it('opens without a node once the wait has run out', () => {
+      const presence = createPresence();
+      presence.request(true, 'pointer');
+
+      for (let frame = 0; frame < ENTERING_FRAME_LIMIT; frame += 1) {
+        vi.advanceTimersToNextFrame();
+        expect(presence.status).toBe('entering');
+      }
+      vi.advanceTimersToNextFrame();
+      expect(presence.status).toBe('open');
+      presence.destroy();
+    });
+
+    /** R7: reduced motion drops the transforms and keeps the opacity fade. */
+    it('takes the frame under reduced motion, so the fade still has a start', () => {
+      const presence = createPresence({ reducedMotion: () => true });
+
+      presence.request(true, 'pointer');
+      expect(presence.status).toBe('entering');
+      presence.setNode(mount());
+
+      vi.advanceTimersToNextFrame();
+      expect(presence.status).toBe('open');
+      presence.destroy();
+    });
   });
 
   it('opens without the entering frame when it is present on the first mount', () => {
@@ -71,6 +139,7 @@ describe('createPresence', () => {
     const presence = createPresence({ initialPresent: true, skipInitialAnimation: false });
 
     expect(presence.status).toBe('entering');
+    presence.setNode(mount());
     vi.advanceTimersToNextFrame();
     expect(presence.status).toBe('open');
     presence.destroy();

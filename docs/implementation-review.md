@@ -255,7 +255,7 @@ Localização: `packages/styles/src/dialog/dialog.css`, `packages/core/src/dismi
 
 - [ ] **DG1 — Clique no backdrop não fecha.** Verificar `dismissable-layer.ts`: o listener de `pointerdown` fora deve considerar o backdrop como "fora" do painel. Verificar se o backdrop tem `pointer-events: none` ou se está fora da árvore observada. Esperado: `closeOnBackdrop` (padrão `true`) fecha no `pointerup` no backdrop quando o `pointerdown` também ocorreu no backdrop (evita fechar ao arrastar seleção de texto para fora). Testar também `Escape` e o botão de fechar. Story com os três modos e uma story `closeOnBackdrop={false}`.
 - [ ] **DG2 — Botão de tela cheia.** Esperado: prop `fullscreenToggle` (padrão `false`) que renderiza uma parte interna `[data-part='fullscreen']` (R2) no cabeçalho, alternando `data-fullscreen` no root. Em `data-fullscreen`, o painel ocupa `inset: 0`, sem raio, com transição em `transform`/`opacity` (não em `width`/`height`). Prop controlada `fullscreen` e evento `onFullscreenChange`.
-- [ ] **DG3 — Animações ausentes.** Fato verificado: `dialog.css:172-181` e `268-292` já declaram transições de `opacity` no backdrop e no painel condicionadas a `[data-open]`. O sintoma indica que `data-open` é aplicado no mesmo frame em que o elemento é montado, sem frame inicial em `opacity: 0`. Esperado: `createPresence` em `presence.ts` deve garantir um frame em `entering` antes de `open` (`requestAnimationFrame` duplo ou `getComputedStyle` forçando reflow). Aplicar R7. Testar em `presence.test.ts` que o status passa por `entering` e que o elemento recebe `data-open` apenas após o primeiro frame. (MAOC — `Drawer`, `Popover`, `Menu`, `Select`, `Combobox`, `Tooltip`, `Toast`)
+- [x] **DG3 — Animações ausentes.** Fato verificado: `dialog.css:172-181` e `268-292` já declaram transições de `opacity` no backdrop e no painel condicionadas a `[data-open]`. O sintoma indica que `data-open` é aplicado no mesmo frame em que o elemento é montado, sem frame inicial em `opacity: 0`. Esperado: `createPresence` em `presence.ts` deve garantir um frame em `entering` antes de `open` (`requestAnimationFrame` duplo ou `getComputedStyle` forçando reflow). Aplicar R7. Testar em `presence.test.ts` que o status passa por `entering` e que o elemento recebe `data-open` apenas após o primeiro frame. (MAOC — `Drawer`, `Popover`, `Menu`, `Select`, `Combobox`, `Tooltip`, `Toast`)
 
 ---
 
@@ -264,8 +264,8 @@ Localização: `packages/styles/src/dialog/dialog.css`, `packages/core/src/dismi
 Localização: `packages/styles/src/drawer/drawer.css`.
 
 - [ ] **DR1 — `#Dialog:1`.** Mesma causa em `dismissable-layer`.
-- [ ] **DR2 — `#Dialog:3`.** Mesma causa em `presence`.
-- [ ] **DR3 — Backdrop e painel aparecem sem transição.** Coberto por DR2 e R7: painel entra com `translateX(100%)→0` (lado `end`), `translateX(−100%)→0` (lado `start`), `translateY(100%)→0` (lado `bottom`).
+- [x] **DR2 — `#Dialog:3`.** Mesma causa em `presence`.
+- [x] **DR3 — Backdrop e painel aparecem sem transição.** Coberto por DR2 e R7: painel entra com `translateX(100%)→0` (lado `end`), `translateX(−100%)→0` (lado `start`), `translateY(100%)→0` (lado `bottom`).
 - [ ] **DR4 — Borda lateral clara demais em `dark`.** Esperado: a borda do painel usa `--slotted-border-subtle` do esquema `dark`, não um valor fixo. Verificar em `drawer.css` se a borda usa token de esquema ou literal. Em `dark`, a separação entre painel e backdrop deve vir da sombra de elevação nível 3, com borda de 1px em `--slotted-border-subtle` a no máximo 12% de contraste sobre a superfície do painel.
 - [ ] **DR5 — Redimensionamento sem desempenho e visualmente inadequado.** Referência de comportamento: SAP Fundamental Styles Splitter (https://sap.github.io/fundamental-styles/?path=/docs/sap-design-btp-splitter--docs). Esperado:
   - Alça de 4px (`[data-part='resizer']`) na borda interna, com área de captura de 12px via `::before`. Em repouso, a alça é invisível; em `hover` ou durante o arraste, mostra linha de 2px em `accent-border`. Sem cabo, sem pontos, sem ícone.
@@ -274,6 +274,7 @@ Localização: `packages/styles/src/drawer/drawer.css`.
   - Limites `minSize`/`maxSize` em px ou `%`. Duplo clique na alça restaura o tamanho padrão.
   - Teclado: alça focável, setas ajustam em passos de 16px, `Shift+seta` em 64px, `Home`/`End` vão aos limites.
   - Critério de aceite: arraste contínuo mantém ≥ 55 fps no profiler do Chrome com painel contendo 200 itens de lista.
+- [ ] **DR6 — Modo `inline` transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante DG3, sem alteração de layout: na cena `inline-open`, o `main` mede 94px dentro de 32px disponíveis nos três esquemas. Esperado: em largura estreita o conteúdo ao lado do painel inline não fica abaixo de zero de largura; o painel cede (`min-inline-size: 0` no `main` ou colapso do painel) e nada transborda o palco.
 
 ---
 

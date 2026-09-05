@@ -266,7 +266,7 @@
      * the rule below.
      */
     opacity: 0;
-    scale: 0.96;
+    scale: 0.98;
     translate: 0 0;
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-exit),
@@ -292,6 +292,25 @@
       opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
       scale var(--slotted-duration-medium) var(--slotted-easing-enter),
       translate var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  /**
+   * Reduced motion keeps the fade and drops the movement. A panel that
+   * appears from nothing is still a change the eye has to find, and the fade
+   * is what says where; the growth and the slide are what the preference
+   * refuses. `motion.test.mjs` holds the rule for every family.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'],
+    [data-ui='dialog'][data-placement='top'] > [data-part='viewport'] > [data-part='content'] {
+      scale: 1;
+      translate: 0 0;
+      transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+    }
+
+    [data-ui='dialog'][data-open] > [data-part='viewport'] > [data-part='content'] {
+      transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+    }
   }
 
   [data-ui='dialog'][data-scroll='viewport'] > [data-part='viewport'] > [data-part='content'] {

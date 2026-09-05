@@ -23,14 +23,22 @@
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
-    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    /**
+     * The glyph scale falls to 13px and 12px at the dense step, and a clear
+     * mark that small is a speck beside the text (SL3). The floor is the
+     * family's own token so a theme can retune it; 14px is the size the
+     * comfortable `sm` step draws, and the smallest a two-stroke mark reads at.
+     */
+    --_icon-floor: var(--slotted-text-field-icon-size-min, 14px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
 
     /**
      * The drawn button, and only the drawn button. It is sized by its glyph —
-     * half a space step of gutter on each side — and bounded by the frame, so
-     * two pixels of the frame's inner box always show above and below it. A
-     * button as tall as that box touched both borders and left the frame with
-     * no vertical air at all.
+     * a step of air on each side, the same box every inner control in the
+     * library draws (R2) — and bounded by the frame, so two pixels of the
+     * frame's inner box always show above and below it. A button as tall as
+     * that box touched both borders and left the frame with no vertical air
+     * at all.
      *
      * The WCAG 2.2 minimum is not this measurement. At `sm` and `dense` the
      * whole control is 24 pixels tall, so a button inset inside it cannot also
@@ -40,7 +48,7 @@
     --_action-size: var(
       --slotted-text-field-action-size,
       min(
-        calc(var(--_icon-size) + var(--slotted-space-5, 0.75rem)),
+        calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)),
         calc(
           var(--_height) - var(--slotted-control-border-width, 1px) * 2 -
             var(--slotted-space-2, 0.25rem)
@@ -174,7 +182,7 @@
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_gap: var(--slotted-control-gap-sm, 6px);
-    --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
   }
 
   [data-ui='text-field'][data-part='root'][data-size='md'] {
@@ -182,7 +190,7 @@
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
-    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
   }
 
   [data-ui='text-field'][data-part='root'][data-size='lg'] {
@@ -190,7 +198,7 @@
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_gap: var(--slotted-control-gap-lg, 8px);
-    --_icon-size: var(--slotted-control-icon-size-lg, 18px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-lg, 18px));
   }
 
   /* ── Variant: how much frame the control shows ────────────────────────
@@ -327,6 +335,9 @@
     flex: 0 0 auto;
     inline-size: var(--_action-size);
     justify-content: center;
+    /* The user agent pads a button, and inside a box sized to its glyph that
+       padding squeezed the glyph to twelve pixels. */
+    padding: 0;
     /* The containing block of the hit area below. */
     position: relative;
     /* No tap delay waiting for a second tap the button cannot use. */
@@ -394,7 +405,6 @@
       --slotted-text-field-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
-    color: var(--slotted-text-field-action-hover-color, var(--slotted-text, CanvasText));
   }
 
   [data-ui='text-field'] > [data-part='clear']:active:not(:disabled):not([data-disabled]),

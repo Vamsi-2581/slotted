@@ -543,8 +543,13 @@
   /**
    * One per end, in a track of its own. Standing beside the list rather than
    * over it costs two `auto` columns that collapse while the controls are
-   * absent, and it buys back the gradient, its mirrored twin, and the hole a
-   * gradient leaves in the hairline it covers.
+   * absent, and it keeps the list's own hairline whole: what fades is the
+   * list's edge, below, not a gradient painted over it.
+   *
+   * Each is an inner control, not a button (R2): as tall as a tab, as wide
+   * as the glyph plus a step of air on each side, floored at the WCAG 2.2
+   * minimum. It was a square the height of the bar before, which put a
+   * thirty-four pixel box beside a sixteen pixel chevron.
    *
    * They are out of the tab sequence and out of the accessibility tree: every
    * tab is already reachable through the roving stop, the arrows scroll the
@@ -561,7 +566,10 @@
     color: var(--slotted-tabs-scroll-color, var(--slotted-text-muted, GrayText));
     cursor: pointer;
     display: inline-flex;
-    inline-size: max(var(--slotted-target-min, 24px), var(--_height));
+    inline-size: max(
+      var(--slotted-target-min, 24px),
+      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+    );
     justify-content: center;
     min-block-size: var(--_height);
     padding: 0;
@@ -569,6 +577,63 @@
       background-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  /**
+   * The list fades into the control on the side that has more to show: a
+   * sixteen-pixel mask on that edge, so a tab cut by the scroller's edge
+   * dissolves toward the chevron instead of ending on a hard line. The side
+   * is read from the control itself — a paging control at its end is
+   * disabled — so the family needs no second signal for it.
+   */
+  [data-ui='tabs']:has([data-part='scroll'][data-direction='start']:not(:disabled))
+    [data-part='list'] {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--slotted-tabs-fade-size, var(--slotted-space-6, 1rem))
+    );
+  }
+
+  [data-ui='tabs']:has([data-part='scroll'][data-direction='end']:not(:disabled))
+    [data-part='list'] {
+    mask-image: linear-gradient(
+      to left,
+      transparent,
+      black var(--slotted-tabs-fade-size, var(--slotted-space-6, 1rem))
+    );
+  }
+
+  /* The start edge is the right one in a right-to-left document. */
+  [data-ui='tabs']:dir(rtl):has([data-part='scroll'][data-direction='start']:not(:disabled))
+    [data-part='list'] {
+    mask-image: linear-gradient(
+      to left,
+      transparent,
+      black var(--slotted-tabs-fade-size, var(--slotted-space-6, 1rem))
+    );
+  }
+
+  [data-ui='tabs']:dir(rtl):has([data-part='scroll'][data-direction='end']:not(:disabled))
+    [data-part='list'] {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--slotted-tabs-fade-size, var(--slotted-space-6, 1rem))
+    );
+  }
+
+  [data-ui='tabs']:has([data-part='scroll'][data-direction='start']:not(:disabled)):has(
+      [data-part='scroll'][data-direction='end']:not(:disabled)
+    )
+    [data-part='list'] {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--slotted-tabs-fade-size, var(--slotted-space-6, 1rem)),
+      black calc(100% - var(--slotted-tabs-fade-size, var(--slotted-space-6, 1rem))),
+      transparent
+    );
   }
 
   [data-ui='tabs'] [data-part='scroll'][data-direction='start'] {
@@ -610,12 +675,12 @@
     transform: scaleX(-1);
   }
 
+  /* The ground moves under the pointer and nothing else does (R2). */
   [data-ui='tabs'] [data-part='scroll']:not(:disabled):hover {
     background-color: var(
       --slotted-tabs-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
-    color: var(--slotted-tabs-hover-color, var(--slotted-text, CanvasText));
   }
 
   [data-ui='tabs'] [data-part='scroll']:not(:disabled):active {
@@ -625,14 +690,20 @@
     );
   }
 
+  [data-ui='tabs'] [data-part='scroll']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
+  }
+
   /**
-   * At an end there is nowhere to go, and the control says so rather than
-   * disappearing: a control that comes and goes moves the list under the
-   * pointer that is using it.
+   * At an end there is nowhere to go, and the control is not shown: only the
+   * side with more to reveal carries a chevron. It keeps its track — hidden,
+   * not removed — so the list never moves under the pointer that is using
+   * the other one.
    */
   [data-ui='tabs'] [data-part='scroll']:disabled {
-    color: var(--slotted-disabled-foreground, GrayText);
     cursor: default;
+    visibility: hidden;
   }
 
   [data-ui='tabs'][data-orientation='vertical'] [data-part='scroll'] {

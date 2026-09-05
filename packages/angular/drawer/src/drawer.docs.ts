@@ -413,7 +413,7 @@ const accessibility = [
   'The one departure from that pattern is Enter. “Collapses the pane” would mean closing the drawer, and Escape already means that; a reader who presses Enter on a separator expects the separator to still be there afterwards. The other is aria-valuetext, which is absent: a reader hears “40” rather than “40 per cent”, because the string would have to be built from a locale this family does not take.',
   'The closed panel is inert in both modes, so a drawer the eye reads as closed keeps its controls out of the tab sequence and out of the accessibility tree. MUI’s persistent variant leaves them reachable, which is the defect this answers.',
   'Focus moves into an overlay panel on open — the first tabbable element by default, or an element the consumer names — and returns to the element that held it. An inline drawer moves nothing on open and still restores, because the scope moves focus back only when focus is inside it or on the body. A trigger that has since left the document falls back to that row’s nearest connected ancestor rather than dropping focus on the body.',
-  'The close button is the height of a medium control rather than of its mark, and the separator is --slotted-target-min thick, so both clear the WCAG 2.2 minimum of 24 by 24 pixels. The theme grows the control height again under pointer: coarse.',
+  'The close button is an inner control rather than a Button (R2): its box is the mark plus a step of air on each side, floored at --slotted-target-min, and the separator is --slotted-target-min thick, so both clear the WCAG 2.2 minimum of 24 by 24 pixels.',
 ];
 
 const snippets = [

@@ -93,7 +93,12 @@ test('takes every step from the control scales rather than stating one', () => {
       step,
       new RegExp(`--_padding-inline:var\\(--slotted-control-padding-inline-${size}`),
     );
-    assert.match(step, new RegExp(`--_icon-size:var\\(--slotted-control-icon-size-${size}`));
+    assert.match(
+      step,
+      new RegExp(
+        `--_icon-size:max\\(var\\(--_icon-floor\\),var\\(--slotted-control-icon-size-${size}`,
+      ),
+    );
   }
   assert.doesNotMatch(declarations, /block-size:\s*\d+px/, 'a step is stated in pixels');
 });
@@ -112,7 +117,7 @@ test('takes every step from the control scales rather than stating one', () => {
 test('draws both buttons inside the frame and keeps the target minimum', () => {
   const frame = rule(root);
   assert.match(frame, /--_action-size:var\(--slotted-text-field-action-size,min\(/);
-  assert.match(frame, /calc\(var\(--_icon-size\) \+ var\(--slotted-space-5/);
+  assert.match(frame, /calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2/);
   assert.match(frame, /calc\(var\(--_height\) - var\(--slotted-control-border-width,1px\) \* 2 - /);
 
   const action = rule(`${ui}>[data-part='clear'],${ui}>[data-part='reveal']`);

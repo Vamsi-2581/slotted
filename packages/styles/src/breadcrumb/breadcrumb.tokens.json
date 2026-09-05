@@ -6,10 +6,7 @@
   "--slotted-breadcrumb-ellipsis-background-active",
   "--slotted-breadcrumb-ellipsis-background-hover",
   "--slotted-breadcrumb-ellipsis-focus-ring-offset",
-  "--slotted-breadcrumb-ellipsis-font-size",
-  "--slotted-breadcrumb-ellipsis-lift",
-  "--slotted-breadcrumb-ellipsis-size",
-  "--slotted-breadcrumb-ellipsis-tracking",
+  "--slotted-breadcrumb-ellipsis-radius",
   "--slotted-breadcrumb-focus-ring-offset",
   "--slotted-breadcrumb-font-family",
   "--slotted-breadcrumb-font-size",
@@ -27,6 +24,7 @@
   "--slotted-breadcrumb-underline-thickness",
   "--slotted-control-font-size-md",
   "--slotted-control-gap-md",
+  "--slotted-control-icon-size-md",
   "--slotted-control-radius",
   "--slotted-duration-short",
   "--slotted-easing-standard",
@@ -36,8 +34,11 @@
   "--slotted-font-weight-medium",
   "--slotted-line-height-sm",
   "--slotted-radius-full",
+  "--slotted-radius-xs",
   "--slotted-space-2",
   "--slotted-target-min",
   "--slotted-text",
-  "--slotted-text-muted"
+  "--slotted-text-muted",
+  "--slotted-tone-secondary-subtle-active",
+  "--slotted-tone-secondary-subtle-hover"
 ]

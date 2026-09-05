@@ -121,7 +121,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Geral
 
-- [ ] **G1 — Botões internos de componentes compostos.** Ver R2. Auditar todos os componentes listados em R2 e substituir instâncias de `Button`/`IconButton` por parte interna. Fato verificado (auditoria registrada em `docs/implementation-review-log.md`, nota para G1): nenhuma das 14 famílias importa ou renderiza `Button`/`IconButton` em React ou Angular; todas já têm parte interna (`clear`, `dismiss`, `close`, `remove`, `ellipsis`, `scroll`, `overflow`, `increment`/`decrement`). O item passa a ser a aplicação das regras de estilo de R2 a essas partes (tamanho por `--slotted-control-icon-size-<densidade>`, sem borda e sombra em repouso, `hover`/`active` em um passo, anel R3, alvo de 24px via `::before`), com guarda em `packages/styles/src`; BC1, T1, TF1 e SL3 fecham junto.
+- [x] **G1 — Botões internos de componentes compostos.** Ver R2. Fato verificado (auditoria em `docs/implementation-review-log.md`, nota para G1): nenhuma das 14 famílias importa ou renderiza `Button`/`IconButton` em React ou Angular; o critério de DOM de R2 já era atendido. O item é a regra de estilo das partes internas existentes (`clear`, `reveal`, `dismiss`, `close`, `remove`, `ellipsis`, `scroll`, `overflow`, `increment`/`decrement`): caixa derivada de `--slotted-control-icon-size-<densidade>` mais um passo de ar (`--slotted-space-2`) por lado, nunca de uma altura de controle; sem borda, sombra ou fundo em repouso; `hover` e `active` alteram apenas `background-color`, em um passo; `:focus-visible` com o anel de R3; alvo de 24px pela própria caixa ou por pseudo-elemento transparente. Guarda: `packages/styles/src/inner-control.test.mjs` (16 partes em 14 famílias, mais o piso de glifo de SL3). BC1, T1, TF1, SL3 e CB3 fecham junto.
 - [x] **G2 — Rails laterais para estado.** Ver R1. Remover todas as ocorrências.
 - [x] **G3 — Anel de foco branco em `dark`.** Ver R3.
 - [x] **G4 — Glifos escritos à mão.** Ver R4.
@@ -162,7 +162,8 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Breadcrumb
 
-- [ ] **BC1 — Controle de expansão (ellipsis) desalinhado.** Causa: uso de `IconButton` (R2). Esperado: parte interna `[data-part='expand']` com a mesma altura de linha dos itens do breadcrumb, glifo `ellipsis` do Lucide em `--slotted-control-icon-size-<densidade>`, sem borda, `hover` com superfície `secondary-subtle-hover` e raio `--slotted-radius-xs`. Alinhamento vertical pela linha de base dos itens, não `align-items: center` sobre um botão mais alto.
+- [x] **BC1 — Controle de expansão (ellipsis) desalinhado.** Causa: uso de `IconButton` (R2). Esperado: parte interna `[data-part='expand']` com a mesma altura de linha dos itens do breadcrumb, glifo `ellipsis` do Lucide em `--slotted-control-icon-size-<densidade>`, sem borda, `hover` com superfície `secondary-subtle-hover` e raio `--slotted-radius-xs`. Alinhamento vertical pela linha de base dos itens, não `align-items: center` sobre um botão mais alto.
+- [ ] **BC2 — Glifo `ellipsis` do Lucide no controle de expansão.** BC1 pede o glifo `ellipsis` do Lucide; `theme.json` não tem `--slotted-icon-ellipsis` e o token não pôde ser adicionado na sessão de G1 (theme e tokens reservados a outra sessão). O controle segue desenhando U+2026 como texto no tamanho do trail (decisão registrada em `breadcrumb.css`), o que é o que o alinha à linha de base. Esperado: adicionar `ellipsis` a `packages/themes/default/src/glyphs.json` (R4), trocar o texto pela máscara em `--_icon-size` em `breadcrumb.css` e em `toolbar.css` (`[data-part='overflow']`, mesma decisão), e atualizar `breadcrumb.styles.test.mjs` e `toolbar.styles.test.mjs`. Decidir antes se a regra 3 de `docs/token-foundation.md` (U+2026 não é ícone) é mantida.
 
 ---
 
@@ -203,7 +204,7 @@ Localização: `packages/styles/src/select/select.css`, `packages/react/src/sele
   3. O `Popover` de largura igual ao controle (`#Popover:1`) mede a largura do controle incluindo borda em um caso e excluindo em outro.
      Ação obrigatória: escrever teste em `positioner.test.ts` que simula 10 reposicionamentos consecutivos com o mesmo âncora e verifica que o resultado é idêntico em cada iteração (`x`, `y` estáveis). O teste falha antes da correção e passa depois. Verificar depois nos quatro componentes consumidores.
 - [ ] **SL2 — Direção da animação de abertura.** Estado atual: entrada horizontal (esquerda para direita). Esperado: ver R7 (vertical, na direção da abertura). Corrigir em `select.css` e no ponto de origem compartilhado se a animação vier de `popover.css` ou de `presence`. (MAOC)
-- [ ] **SL3 — Ícones à direita (clear, chevron) pequenos em `compact` e `dense`.** Esperado: o glifo usa `--slotted-control-icon-size-<densidade>` com piso de 14px. Em `compact` o controle pode ter 24px de altura e o glifo 14px; nunca abaixo disso. Relacionado a R2 (o botão de clear é parte interna). (MAOC — `Combobox`, `TextField`, `NumberField`, `CurrencyField`)
+- [x] **SL3 — Ícones à direita (clear, chevron) pequenos em `compact` e `dense`.** Esperado: o glifo usa `--slotted-control-icon-size-<densidade>` com piso de 14px. Em `compact` o controle pode ter 24px de altura e o glifo 14px; nunca abaixo disso. Relacionado a R2 (o botão de clear é parte interna). (MAOC — `Combobox`, `TextField`, `NumberField`, `CurrencyField`)
 - [ ] **SL4 — Prévia de múltipla seleção "Apple +1".** Esperado: renderizar os valores selecionados como `Tag` compactas (altura igual a `--slotted-control-icon-size-<densidade>` + 4px) dentro do controle, com overflow calculado por `ResizeObserver`: as tags que não cabem colapsam em uma única tag `+N`. Cada tag tem botão interno de remoção (R2). Fallback textual "N selecionados" apenas quando o controle está abaixo de 120px de largura. (MAOC — `Combobox` múltiplo)
 - [ ] **SL5 — Variante `plain` com sombra.** Localização: `select.css:359` (`[data-variant='plain']`). Esperado: `plain` sem `box-shadow`, sem borda, sem fundo em repouso; `hover` com superfície `secondary-subtle-hover`; `focus-visible` com anel R3. Verificar se `TextField`, `Combobox` e `NumberField` têm a mesma variante e aplicar a mesma regra. (MAOC)
 - [ ] **SL6 — Estado `loading`.** Decisão: não usar `Loader`/`LoaderScene` com superfície dentro do overlay. Esperado: spinner inline de B4 no lugar do chevron enquanto carrega; dentro do overlay, três linhas de `Skeleton` com a altura de uma opção. (MAOC — `Combobox`)
@@ -217,7 +218,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
 
 - [x] **CB1 — `#Select:1`.** Mesma causa raiz no positioner.
 - [ ] **CB2 — `#Select:2`.**
-- [ ] **CB3 — `#Select:3`.**
+- [x] **CB3 — `#Select:3`.**
 - [ ] **CB4 — `#Select:4`.**
 - [ ] **CB5 — `#Select:6`.**
 - [ ] **CB6 — Destaque do match do filtro.** Localização: `combobox.css:665` (`[data-part='match']`): `font-weight: 600`, `padding-inline: 0.1em`, `border-radius: 2px`, fundo `accent-surface`. O peso e o padding alteram a métrica da palavra e o trecho destacado parece deslocado. Esperado, extraído para um componente compartilhado (`packages/styles/src/highlight/highlight.css`, parte `[data-ui='highlight']` ou `[data-part='match']` global), consumido por `Combobox`, `Select` com filtro, `Listbox` com filtro e `Menu` com busca (R6):
@@ -360,7 +361,8 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 ## Tabs
 
 - [ ] **T2 — Painel transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: na cena `content`, `[data-part='panel']` mede 599px em 222px nos três esquemas. Esperado: mesma regra de `#Alert:2`.
-- [ ] **T1 — `IconButton` de overflow/scroll desalinhado e grande.** Ver R2. Esperado: partes internas `[data-part='scroll-start']` e `[data-part='scroll-end']` com altura igual à altura da aba, largura de 24px a 28px, glifo `chevron-left`/`chevron-right` em `--slotted-control-icon-size-<densidade>`, sem borda, fundo com gradiente para a superfície da barra de abas (máscara de fade de 16px) e `hover` em `secondary-subtle-hover`. Visíveis apenas quando há overflow no respectivo lado, calculado por `scrollLeft` e `scrollWidth`.
+- [x] **T1 — `IconButton` de overflow/scroll desalinhado e grande.** Ver R2. Esperado: partes internas `[data-part='scroll-start']` e `[data-part='scroll-end']` com altura igual à altura da aba, largura de 24px a 28px, glifo `chevron-left`/`chevron-right` em `--slotted-control-icon-size-<densidade>`, sem borda, fundo com gradiente para a superfície da barra de abas (máscara de fade de 16px) e `hover` em `secondary-subtle-hover`. Visíveis apenas quando há overflow no respectivo lado, calculado por `scrollLeft` e `scrollWidth`.
+- [ ] **T3 — Trilho vazio do controle de paginação oculto.** Introduzido por T1: o controle de paginação de um lado sem overflow fica `visibility: hidden` e mantém a coluna de 24px, para a lista não se mover sob o ponteiro (mesma escolha do MUI `TabScrollButton`); na cena `dismissible` do harness a lista começa 24px mais o gap depois da borda enquanto está no início. Decidir entre manter o trilho ou colapsar a coluna (`display: none`) aceitando o deslocamento da lista na primeira rolagem.
 
 ---
 
@@ -372,7 +374,7 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 
 ## TextField, Textarea, NumberField, CurrencyField
 
-- [ ] **TF1 — Botões de limpar e ícones internos.** Ver R2 e `#Select:3`. Aplicar a mesma parte interna e as mesmas medidas em todos os campos. Os quatro componentes devem compartilhar o CSS de `Field` para adorno inicial/final (`[data-part='adornment-start']`, `[data-part='adornment-end']`) e para o botão de limpar.
+- [x] **TF1 — Botões de limpar e ícones internos.** Ver R2 e `#Select:3`. Aplicar a mesma parte interna e as mesmas medidas em todos os campos. Os quatro componentes devem compartilhar o CSS de `Field` para adorno inicial/final (`[data-part='adornment-start']`, `[data-part='adornment-end']`) e para o botão de limpar.
 
 ---
 

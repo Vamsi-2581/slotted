@@ -66,6 +66,15 @@
     --_description-font-size: var(--slotted-font-size-md, 0.875rem);
     --_body-font-size: var(--slotted-font-size-md, 0.875rem);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    /**
+     * The close control's box: an inner control, not a button (R2), so the
+     * glyph plus a step of air on each side, floored at the WCAG 2.2 minimum
+     * so the target holds at every density.
+     */
+    --_close-size: max(
+      var(--slotted-target-min, 24px),
+      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+    );
     /** The reader's hand, and the WCAG 2.2 floor in the axis it is thin in. */
     --_resizer-thickness: var(--slotted-target-min, 24px);
     --_grip-thickness: var(--slotted-border-width-thick, 2px);
@@ -719,10 +728,10 @@
   /* ── The close button ─────────────────────────────────────────────────── */
 
   /**
-   * An icon-only control is under the WCAG 2.2 minimum in both axes if it is
-   * only as big as its mark, so the box is the control height rather than the
-   * glyph and the glyph is centred in it. The theme grows the control height
-   * again under `pointer: coarse`, so a touch target needs nothing from here.
+   * An inner control, not a button (R2): the box is the glyph plus a step of
+   * air on each side, floored at the WCAG 2.2 minimum, and the glyph is
+   * centred in it. It was the control height before, a thirty-four pixel
+   * square beside a sixteen pixel mark.
    */
   [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close'] {
     grid-column: 2;
@@ -730,13 +739,14 @@
     align-self: start;
     display: inline-grid;
     place-items: center;
-    block-size: var(--slotted-control-height-md, 34px);
-    inline-size: var(--slotted-control-height-md, 34px);
-    /* The button's own edge is the panel's, so the mark aligns with the title. */
-    margin-inline-end: calc(-1 * var(--slotted-space-4, 0.5rem));
+    block-size: var(--_close-size);
+    inline-size: var(--_close-size);
+    /* The box overhangs the panel's edge by its own air, so the mark aligns
+       with the title. */
+    margin-inline-end: calc(-1 * (var(--_close-size) - var(--_icon-size)) / 2);
     padding: 0;
     appearance: none;
-    background: transparent;
+    background-color: transparent;
     border: 0;
     border-radius: var(--slotted-control-radius, var(--slotted-radius-sm, 4px));
     color: var(--slotted-drawer-close-color, var(--slotted-text-muted, GrayText));
@@ -763,18 +773,18 @@
     > [data-part='panel']
     > [data-part='header']
     > [data-part='close']:not(:disabled):hover {
-    background: var(
+    /* The ground moves under the pointer and nothing else does (R2). */
+    background-color: var(
       --slotted-drawer-close-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
-    color: var(--slotted-drawer-close-hover-color, var(--slotted-text, CanvasText));
   }
 
   [data-ui='drawer']
     > [data-part='panel']
     > [data-part='header']
     > [data-part='close']:not(:disabled):active {
-    background: var(
+    background-color: var(
       --slotted-drawer-close-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );

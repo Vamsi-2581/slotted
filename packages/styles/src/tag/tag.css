@@ -387,11 +387,14 @@
   /**
    * ── The remove control ─────────────────────────────────────────────────
    *
-   * A square as tall as the chip, at its end. That is Carbon's and Fluent's
+   * A segment as tall as the chip, at its end. That is Carbon's and Fluent's
    * picture, and it is the one geometry that makes the target reach the WCAG
-   * 2.2 2.5.8 minimum in both axes without a hidden hit area — an invisible
-   * box larger than the chip would reach past it and take the pointer from the
-   * neighbour in a wrapped run.
+   * 2.2 2.5.8 minimum in the block axis without a hidden hit area — an
+   * invisible box taller than the chip would reach past it and take the
+   * pointer from the neighbour in a wrapped run. Its width is the inner
+   * control's (R2): the glyph plus a step of air on each side, floored at the
+   * same minimum, so the segment is a square on the `sm` and `md` chips and
+   * a step narrower than tall on `lg`.
    *
    * The cost, on a pill: a hovered remove is a rounded-ended segment rather
    * than a disc. That is the shape of the target, which is the truth.
@@ -408,7 +411,10 @@
     cursor: pointer;
     display: inline-flex;
     flex: none;
-    inline-size: var(--_block-size);
+    inline-size: max(
+      var(--slotted-target-min, 24px),
+      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+    );
     justify-content: center;
     padding: 0;
     transition: background-color var(--slotted-control-transition-duration)

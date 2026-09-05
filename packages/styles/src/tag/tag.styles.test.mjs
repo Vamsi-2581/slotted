@@ -86,12 +86,16 @@ test('paints the chip on the root and the inset on the body', () => {
 /**
  * `docs/token-foundation.md` names this family's remove control as the case a
  * theme cannot correct on the family's behalf. The control is as tall as the
- * chip and as wide as it is tall, so flooring the chip at the WCAG minimum is
- * what makes it hittable at every size and every density.
+ * chip, so flooring the chip at the WCAG minimum is what makes it hittable at
+ * every size and every density. Its width is the inner control's (R2): the
+ * glyph plus a step of air on each side, floored at the same minimum.
  */
-test('floors the chip at the target minimum, and makes the remove control square', () => {
+test('floors the chip and the remove control at the target minimum', () => {
   assert.match(rule(root), /--_block-size:max\(var\(--slotted-target-min,24px\)/);
-  assert.match(rule(`${ui} [data-part='remove']`), /inline-size:var\(--_block-size\)/);
+  assert.match(
+    rule(`${ui} [data-part='remove']`),
+    /inline-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,
+  );
 });
 
 test('draws the remove glyph and the selection mark from glyph tokens', () => {

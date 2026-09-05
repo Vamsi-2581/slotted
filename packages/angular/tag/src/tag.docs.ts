@@ -98,7 +98,7 @@ const ACCESSIBILITY_SHARED = [
   'The remove control’s name is composed, not repeated: aria-labelledby joins a hidden word to the tag’s own label, so it announces “Remove Design” rather than “Remove”. Text referenced by aria-labelledby counts even when the element holding it is hidden.',
   'Backspace and Delete on any control inside a removable tag ask for the same removal the X does, and the request says which of the two it was.',
   'The focus ring is drawn on the control, never on the chip: a chip can hold two controls, and a ring around the whole box could not say which one has focus.',
-  'The remove control is as tall as the chip and as wide as it is tall, which carries it past the WCAG 2.2 2.5.8 minimum of 24 by 24 CSS pixels at every size and density. The chip’s own height is floored at that minimum for the same reason.',
+  'The remove control is as tall as the chip and as wide as its glyph plus a step of air on each side, floored at the WCAG 2.2 2.5.8 minimum of 24 CSS pixels, which carries it past that minimum in both axes at every size and every density. The chip’s own height is floored at that minimum for the same reason.',
   'A tag is one line. A value too long for its container is clipped with an ellipsis rather than reflowed, and the clipping is visual only: the whole value stays in the DOM, in the accessibility tree, and findable by page search.',
   'The label is a bidi isolate whose direction comes from its own first strong character, so an Arabic value inside an English page reads right to left and is clipped at its own end.',
   'Under forced colours every tone ground becomes one system colour, so the family draws its edge in currentColor there, and a selected chip takes the system’s own Highlight pair.',

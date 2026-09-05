@@ -177,12 +177,15 @@ test('holds hover and press back for a disabled control and for the selected tab
  * twenty-four WCAG 2.2 SC 2.5.8 asks for. The box around it is the target.
  */
 test('gives the two glyph controls the target their glyphs are too small to be', () => {
-  /* The paging control is as tall as the row it pages; the closing control is
-     the mark with a step of air around it, never below the minimum target. */
+  /* Both are inner controls (R2): the mark with a step of air around it, never
+     below the minimum target. The paging control is as tall as the row it
+     pages and that wide; the closing control is that square. */
+  const scroll = rule(part('scroll'));
   assert.match(
-    rule(part('scroll')),
-    /inline-size:max\(var\(--slotted-target-min,24px\),var\(--_height\)\)/,
+    scroll,
+    /inline-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,
   );
+  assert.match(scroll, /min-block-size:var\(--_height\)/);
   assert.match(
     rule(ui),
     /--_dismiss-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,

@@ -71,7 +71,9 @@
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
-    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    /** The floor under the glyph scale at the dense step (SL3); a family token so a theme can retune it. */
+    --_icon-floor: var(--slotted-select-icon-size-min, 14px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
 
     /**
      * The drawn clear button, sized by its glyph and bounded by the frame, so
@@ -82,7 +84,7 @@
     --_action-size: var(
       --slotted-select-action-size,
       min(
-        calc(var(--_icon-size) + var(--slotted-space-5, 0.75rem)),
+        calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)),
         calc(
           var(--_height) - var(--slotted-control-border-width, 1px) * 2 -
             var(--slotted-space-2, 0.25rem)
@@ -268,6 +270,9 @@
         (var(--_action-size) - var(--_icon-size)) / 2
     );
     justify-content: center;
+    /* The user agent pads a button, and inside a box sized to its glyph that
+       padding squeezed the glyph to twelve pixels. */
+    padding: 0;
     /* Out of flow, and after the trigger in document order, so it takes its own
        presses back from the button running underneath it. */
     position: absolute;
@@ -317,7 +322,7 @@
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_gap: var(--slotted-control-gap-sm, 6px);
-    --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
   }
 
   [data-ui='select'][data-part='root'][data-size='md'] {
@@ -325,7 +330,7 @@
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
-    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
   }
 
   [data-ui='select'][data-part='root'][data-size='lg'] {
@@ -333,7 +338,7 @@
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_gap: var(--slotted-control-gap-lg, 8px);
-    --_icon-size: var(--slotted-control-icon-size-lg, 18px);
+    --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-lg, 18px));
   }
 
   /* ── Variant ──────────────────────────────────────────────────────────
@@ -478,7 +483,6 @@
       --slotted-select-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
-    color: var(--slotted-select-action-hover-color, var(--slotted-text, CanvasText));
   }
 
   [data-ui='select'] > [data-part='clear']:active:not(:disabled):not([data-disabled]) {

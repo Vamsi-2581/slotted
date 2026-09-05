@@ -104,14 +104,19 @@
     --_border-width: var(--slotted-alert-border-width, var(--slotted-border-width-thin, 1px));
 
     /**
-     * The dismiss control is a control, so it takes the smallest control
-     * height rather than a number of its own. That is what carries it past
-     * WCAG 2.2 2.5.8's twenty-four pixels at every density — the tightest step
-     * is exactly twenty-four — and what makes it grow under
-     * `@media (pointer: coarse)`, which the theme applies to control heights
-     * and to nothing else.
+     * The dismiss control is an inner control, not a button (R2): its box is
+     * the glyph plus a step of air on each side, floored at WCAG 2.2 2.5.8's
+     * twenty-four pixels so the pointer target holds at every density. It
+     * used to take the smallest control height, which put a thirty-pixel
+     * square beside a sixteen-pixel mark and a line of text twenty tall.
      */
-    --_dismiss-size: var(--slotted-alert-dismiss-size, var(--slotted-control-height-sm, 30px));
+    --_dismiss-size: var(
+      --slotted-alert-dismiss-size,
+      max(
+        var(--slotted-target-min, 24px),
+        calc(var(--_glyph-size) + 2 * var(--slotted-space-2, 0.25rem))
+      )
+    );
 
     /**
      * Two composition changes that answer the box rather than the window.

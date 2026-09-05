@@ -54,6 +54,7 @@
   "--slotted-tabs-dismiss-color",
   "--slotted-tabs-dismiss-hover-background",
   "--slotted-tabs-dismiss-hover-color",
+  "--slotted-tabs-fade-size",
   "--slotted-tabs-gap",
   "--slotted-tabs-hover-background",
   "--slotted-tabs-hover-color",

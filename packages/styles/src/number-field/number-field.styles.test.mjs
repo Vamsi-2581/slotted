@@ -77,7 +77,12 @@ test('takes every step from the control scales rather than stating one', () => {
       step,
       new RegExp(`--_padding-inline:var\\(--slotted-control-padding-inline-${size}`),
     );
-    assert.match(step, new RegExp(`--_icon-size:var\\(--slotted-control-icon-size-${size}`));
+    assert.match(
+      step,
+      new RegExp(
+        `--_icon-size:max\\(var\\(--_icon-floor\\),var\\(--slotted-control-icon-size-${size}`,
+      ),
+    );
     assert.match(step, new RegExp(`--_gap:var\\(--slotted-control-gap-${size}`));
   }
 });
@@ -117,7 +122,7 @@ test('floors the stepper at the target minimum and bounds it by the frame', () =
     frame,
     /--_stepper-size:var\(--slotted-number-field-stepper-size,max\(var\(--slotted-target-min/,
   );
-  assert.match(frame, /min\(calc\(var\(--_icon-size\) \+ var\(--slotted-space-5/);
+  assert.match(frame, /min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2/);
 });
 
 /**

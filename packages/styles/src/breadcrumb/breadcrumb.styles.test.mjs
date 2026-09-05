@@ -65,17 +65,24 @@ test('truncates against the trail rather than against a measure it chose', () =>
 /**
  * The ellipsis is the character U+2026 rendered as text, so the family carries
  * no artwork for it and nothing to repaint when the system takes the palette.
- * The button is a real target in both axes, which three characters never are.
+ * The control is one line of the trail tall, so it sits on the crumbs' own
+ * line (BC1), the control glyph plus a step of air wide (R2), and a real
+ * target in both axes — the halo around the paint completes the minimum where
+ * the line is shorter than it.
  */
-test('gives the ellipsis a whole target and no artwork', () => {
+test('sets the ellipsis on the crumbs’ line, with a whole target and no artwork', () => {
+  const ellipsis = normalized.slice(normalized.indexOf("[data-part='ellipsis']{"));
+  assert.ok(ellipsis.includes('block-size:1lh;'));
   assert.ok(
-    normalized.includes(
-      "[data-part='ellipsis']{align-items:center;appearance:none;background:none;block-size:var(--slotted-breadcrumb-ellipsis-size,var(--slotted-target-min,24px))",
+    ellipsis.includes(
+      'inline-size:max(var(--slotted-target-min,24px),calc(var(--_icon-size)+2*var(--slotted-space-2,0.25rem)))',
     ),
   );
+  assert.ok(ellipsis.includes('font:inherit;'), 'the mark keeps the trail’s own type');
+  assert.ok(!ellipsis.includes('translate:'), 'nothing lifts the mark off the baseline');
   assert.ok(
     normalized.includes(
-      'inline-size:var(--slotted-breadcrumb-ellipsis-size,var(--slotted-target-min,24px))',
+      "[data-part='ellipsis']::before{content:'';inset:min(0px,calc((100%-var(--slotted-target-min,24px))/2));position:absolute",
     ),
   );
 });

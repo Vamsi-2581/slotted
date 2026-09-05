@@ -92,7 +92,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Puts the message away. Rendered when dismissible, named by closeLabel, and sized from the smallest control height so it clears the WCAG 2.2 minimum at every density.',
+      'Puts the message away. Rendered when dismissible, named by closeLabel, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
   },
   {
     part: 'progress',

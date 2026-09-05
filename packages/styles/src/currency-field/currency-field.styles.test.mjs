@@ -99,7 +99,12 @@ test('takes every step from the control scales rather than stating one', () => {
       step,
       new RegExp(`--_padding-inline:var\\(--slotted-control-padding-inline-${size}`),
     );
-    assert.match(step, new RegExp(`--_icon-size:var\\(--slotted-control-icon-size-${size}`));
+    assert.match(
+      step,
+      new RegExp(
+        `--_icon-size:max\\(var\\(--_icon-floor\\),var\\(--slotted-control-icon-size-${size}`,
+      ),
+    );
   }
 });
 

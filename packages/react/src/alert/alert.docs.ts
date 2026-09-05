@@ -76,7 +76,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'Closes the message. Rendered when dismissible, named by dismissLabel, and sized from the smallest control height so it clears the WCAG 2.2 minimum at every density.',
+      'Closes the message. Rendered when dismissible, named by dismissLabel, and sized from its glyph plus a step of air, floored at the WCAG 2.2 minimum so the target holds at every density (R2).',
   },
 ];
 
@@ -331,7 +331,7 @@ export const REACT_ALERT_DOCS = {
       'The box is a landmark, not a live region. MDN’s alert role reference states that the role “should only be used for text content, not interactive elements such as links or buttons”, and every alert worth shipping has a dismiss control. The root renders a section named by its own title through aria-labelledby, and the region that announces is the content part, which holds the title and the description alone.',
       'live defaults to off because the APG records that “screen readers do not inform users of alerts that are present on the page before page load completes”. An alert already on the page announces nothing whatever role it carries; polite and assertive are for a message that arrives while the reader is working, and both are written as a role that already implies aria-live and aria-atomic.',
       'Every tone carries a mark as well as a colour. Under forced colours the five grounds become one system colour and the five borders one more, so the circle, the triangle and the crossed circle are the only thing distinguishing an error from a note — WCAG 2.2 1.4.1.',
-      'The dismiss control is a real button with a real name, and its box is the smallest control height rather than the size of its glyph: 24 CSS pixels at the tightest density, which is the WCAG 2.2 2.5.8 minimum, and larger under a coarse pointer because the theme raises control heights there.',
+      'The dismiss control is a real button with a real name and an inner control rather than a Button (R2): its box is the glyph plus a step of air on each side, floored at --slotted-target-min, which is the WCAG 2.2 2.5.8 minimum of 24 CSS pixels; at rest it has no frame and no ground, and hover moves only the ground.',
       'When the message closes with focus inside it, the keyboard goes back to the element it came from. None of the ten surveyed implementations answers this, and the failure it prevents is the one a real product hits first: the dismiss control is destroyed, focus falls to the document body, and the next Tab starts again at the top of the page.',
       'Closing hides rather than unmounts, so the live region is still in the document if the message comes back and data-open is a state a consumer can style. An application that must not pay for the hidden subtree renders the alert conditionally and never passes defaultOpen.',
       'Escape does not close the message. An alert is not a dismissable layer, and one inside a dialog would swallow the dialog’s own Escape; a message that must interrupt the reader is an alert dialog rather than an alert.',

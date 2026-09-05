@@ -24,8 +24,14 @@
       color-mix(in oklab, var(--_rest) 72%, transparent)
     );
     --_gap: var(--slotted-breadcrumb-gap, var(--slotted-control-gap-md, 8px));
-    --_ellipsis-hover: color-mix(in oklab, currentColor 10%, transparent);
-    --_ellipsis-active: color-mix(in oklab, currentColor 18%, transparent);
+    /**
+     * The control glyph scale sizes the ellipsis control's box, as it sizes
+     * every inner control in the library (R2); the mark inside it is text and
+     * keeps the trail's own type.
+     */
+    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_ellipsis-hover: var(--slotted-tone-secondary-subtle-hover);
+    --_ellipsis-active: var(--slotted-tone-secondary-subtle-active);
 
     color: var(--_rest);
     display: block;
@@ -201,19 +207,23 @@
 
   /* ── The ellipsis ───────────────────────────────────────────────────────
    *
-   * What the collapse hides, and the control that reveals it. It is a button
-   * with a real hit area rather than three characters' worth of one: the
-   * button fills the minimum target in both axes, and the ellipsis inside it
-   * is the character U+2026 rendered as text.
+   * What the collapse hides, and the control that reveals it. It is an inner
+   * control, not a button (R2, BC1): one line of the trail tall, so it sits
+   * on the crumbs' own line and not on a taller box centred over it; the
+   * control glyph plus a step of air wide, floored at the WCAG 2.2 minimum;
+   * and the rest of that minimum in the block axis is a transparent halo
+   * around the paint, so the target is whole without the box being tall.
    *
-   * That is deliberate, and it is the one place in the library where a
-   * character is the right answer. Rule 3 of `docs/token-foundation.md`
-   * forbids drawing an *icon* from a character — a mark standing in for a
-   * concept, like an arrow or a check. U+2026 stands in for nothing: it is the
-   * typographic mark for omitted content, and omitted content is exactly what
-   * this control holds. Text also survives `forced-colors`, where every
-   * painted decoration is replaced by the page's own background, and it scales
-   * with the type where a fixed mask would not.
+   * The ellipsis inside it is the character U+2026 rendered as text, at the
+   * trail's own size. That is deliberate, and it is the one place in the
+   * library where a character is the right answer. Rule 3 of
+   * `docs/token-foundation.md` forbids drawing an *icon* from a character — a
+   * mark standing in for a concept, like an arrow or a check. U+2026 stands
+   * in for nothing: it is the typographic mark for omitted content, and
+   * omitted content is exactly what this control holds. Set in the trail's
+   * type, its dots sit on the crumbs' baseline, which is the alignment BC1
+   * asks for; text also survives `forced-colors`, where every painted
+   * decoration is replaced by the page's own background.
    *
    * The button's accessible name says how many crumbs it hides, so what a
    * reader hears is a count rather than three dots.
@@ -222,46 +232,38 @@
   [data-ui='breadcrumb'] [data-part='ellipsis'] {
     align-items: center;
     appearance: none;
-    background: none;
-    block-size: var(--slotted-breadcrumb-ellipsis-size, var(--slotted-target-min, 24px));
+    background-color: transparent;
+    block-size: 1lh;
     border: 0;
-    border-radius: var(--slotted-breadcrumb-radius, var(--slotted-control-radius, 4px));
+    border-radius: var(--slotted-breadcrumb-ellipsis-radius, var(--slotted-radius-xs, 2px));
     color: inherit;
     cursor: pointer;
     display: flex;
     font: inherit;
-    inline-size: var(--slotted-breadcrumb-ellipsis-size, var(--slotted-target-min, 24px));
+    inline-size: max(
+      var(--slotted-target-min, 24px),
+      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+    );
     justify-content: center;
-    /**
-     * The mark is set larger than the trail's own type, because it sits alone
-     * inside a target box and three dots at label size read as a gap rather
-     * than as a control.
-     */
-    font-size: var(--slotted-breadcrumb-ellipsis-font-size, 1.15em);
-    letter-spacing: var(--slotted-breadcrumb-ellipsis-tracking, 0.05em);
-    /**
-     * The ink of an ellipsis sits on the baseline, and a centred line box puts
-     * the baseline below the middle of the box. Half a cap height is the
-     * distance between the baseline and the optical centre of Latin text,
-     * which is the same correction the `icon` family derives for an inline
-     * box — here applied to the text rather than to a glyph.
-     */
-    line-height: 1;
     padding: 0;
-    transition:
-      background-color var(--slotted-duration-short) var(--slotted-easing-standard),
-      color var(--slotted-duration-short) var(--slotted-easing-standard);
-    translate: 0 calc(-1 * var(--slotted-breadcrumb-ellipsis-lift, 0.5cap));
+    position: relative;
+    transition: background-color var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
+  /* The halo that completes the target where the line is shorter than it. */
+  [data-ui='breadcrumb'] [data-part='ellipsis']::before {
+    content: '';
+    inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
+    position: absolute;
+  }
+
+  /* The ground moves under the pointer and nothing else does (R2). */
   [data-ui='breadcrumb'] [data-part='ellipsis']:not([data-disabled]):hover {
     background-color: var(--slotted-breadcrumb-ellipsis-background-hover, var(--_ellipsis-hover));
-    color: var(--_hover);
   }
 
   [data-ui='breadcrumb'] [data-part='ellipsis']:not([data-disabled]):active {
     background-color: var(--slotted-breadcrumb-ellipsis-background-active, var(--_ellipsis-active));
-    color: var(--_strong);
   }
 
   /* ── Forced colours ─────────────────────────────────────────────────────

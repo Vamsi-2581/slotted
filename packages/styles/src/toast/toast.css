@@ -221,9 +221,17 @@
     --_text-gap: var(--slotted-toast-text-gap, var(--slotted-space-2, 0.25rem));
     --_radius: var(--slotted-toast-radius, var(--slotted-radius-lg, 8px));
     --_border-width: var(--slotted-toast-border-width, var(--slotted-border-width-thin, 1px));
-    /* A control, so it takes the smallest control height and clears WCAG 2.2
-       SC 2.5.8 at every density — the tightest step is exactly the minimum. */
-    --_close-size: var(--slotted-toast-close-size, var(--slotted-control-height-sm, 30px));
+    /* An inner control, not a button (R2): the glyph plus a step of air on
+       each side, floored at WCAG 2.2 SC 2.5.8's minimum so the target holds at
+       every density. It took the smallest control height before, a thirty-pixel
+       square beside a sixteen-pixel mark. */
+    --_close-size: var(
+      --slotted-toast-close-size,
+      max(
+        var(--slotted-target-min, 24px),
+        calc(var(--_glyph-size) + 2 * var(--slotted-space-2, 0.25rem))
+      )
+    );
     --_progress-size: var(--slotted-toast-progress-size, var(--slotted-space-1, 0.125rem));
 
     background-color: var(--_ground);

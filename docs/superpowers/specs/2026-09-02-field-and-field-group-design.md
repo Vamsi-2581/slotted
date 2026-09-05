@@ -9,7 +9,7 @@ one description, one error and one disabled switch, using the platform's own
 
 The two consolidate `field` and `fieldset`, which shipped on schema 4 before the
 token foundation, the state vocabulary and the identity rule. Both entries leave
-`docs/rebuild-order.md`'s "29 famílias atuais" table in the same commit.
+`docs/build-order.md`'s "29 famílias atuais" table in the same commit.
 
 The capability inventory this design implements is
 `docs/superpowers/specs/2026-09-02-field-capability-inventory.md`.
@@ -68,7 +68,7 @@ stays a block, and the `content` element is the grid that holds the fields.
 
 ## The Message Is an Inline Message
 
-`docs/rebuild-order.md` states it: `inline-message` "é a peça que `field` (onda 3)
+`docs/build-order.md` states it: `inline-message` "é a peça que `field` (onda 3)
 consome para mensagem e erro". Four members render it — the field's description
 and error, and the group's — so a field error is a message with a glyph, a tone,
 a clipped severity word an application translates once, a reserved line, and a

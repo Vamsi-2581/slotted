@@ -14,7 +14,6 @@ import {
   numberAttribute,
   output,
   signal,
-  TemplateRef,
   untracked,
   ViewEncapsulation,
 } from '@angular/core';

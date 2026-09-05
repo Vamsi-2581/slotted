@@ -280,7 +280,6 @@ export function Tabs({
     if (item !== undefined) affordance.current?.reveal(item);
     /* Only when the selection or the list moves. Revealing on every render
        would fight a reader who has just scrolled the list by hand. */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, list]);
 
   const context: TabsContextValue = {

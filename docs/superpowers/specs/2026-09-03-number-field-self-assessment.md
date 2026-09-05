@@ -177,7 +177,7 @@ around its content — 161 against 129 pixels, and 338 against 306.
 
 **Most improving change:** the Angular page could not be read rendered. **Not
 made:** the Angular Storybook was started before this entry point existed and
-throws `SyntaxError: Unexpected token 'export'`; `docs/rebuild-briefing.md`
+throws `SyntaxError: Unexpected token 'export'`; `docs/build-briefing.md`
 assigns that restart to the reviewer, so it is raised at the gate rather than
 done unannounced.
 

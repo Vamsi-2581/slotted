@@ -97,7 +97,12 @@ export function Tab({
   const { panelId, tabId } = tabs.identify(value);
 
   const selected = tabs.value === value;
-  const resolvedDisabled = disabled ?? tabs.disabled;
+  /**
+   * A family out of action takes every tab with it, and a tab's own prop can
+   * only add to that. `disabled={false}` on a tab inside a disabled family says
+   * nothing about the family.
+   */
+  const resolvedDisabled = tabs.disabled === true || disabled === true;
 
   function handleClick(event: MouseEvent<HTMLElement>) {
     onClick?.(event as MouseEvent<HTMLButtonElement>);

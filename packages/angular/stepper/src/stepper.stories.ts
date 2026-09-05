@@ -85,7 +85,7 @@ const scene = (
   label: string,
   note: string,
   body: string,
-  layout: 'row' | 'stack' | 'prose' = 'stack',
+  layout: 'row' | 'stack' | 'block' | 'prose' = 'block',
 ) => `
   <section class="slotted-demo-scene">
     <header class="slotted-demo-scene__header">
@@ -115,7 +115,7 @@ export const Playground: Story = {
   render: (args) => ({
     props: args,
     template: `
-<div class="slotted-demo-stage" data-layout="stack">
+<div class="slotted-demo-stage" data-layout="block">
   <div
     slStepper
     label="Checkout"

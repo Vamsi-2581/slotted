@@ -3,17 +3,22 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "slotted-build-theme": "./scripts/build-theme-cli.mjs"
+  },
   "exports": {
     "./contract.json": "./src/contract.json",
     "./contract": "./src/contract.mjs",
     "./layer-order": "./src/layer-order.mjs",
+    "./render-theme": "./src/render-theme.mjs",
+    "./theme-conformance": "./src/theme-conformance.mjs",
     "./validate-theme": "./src/validate-theme.mjs",
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test test/validate-theme.test.mjs test/resolve.test.mjs test/layer-order.test.mjs",
-    "typecheck": "node --check src/validate-theme.mjs && node --check src/contract.mjs && node --check src/layer-order.mjs && node --check scripts/build.mjs",
+    "test": "node --test test/validate-theme.test.mjs test/resolve.test.mjs test/layer-order.test.mjs test/render-theme.test.mjs",
+    "typecheck": "node --check src/validate-theme.mjs && node --check src/contract.mjs && node --check src/layer-order.mjs && node --check src/render-theme.mjs && node --check src/theme-conformance.mjs && node --check scripts/build.mjs && node --check scripts/build-theme-cli.mjs",
     "verify": "pnpm build && pnpm test && pnpm typecheck"
   }
 }

@@ -112,9 +112,8 @@ export function Pagination({
   useEffect(() => {
     if (count === undefined || requestedPage === currentPage) return;
     requestPage(currentPage, 'programmatic');
-    /* eslint-disable-next-line react-hooks/exhaustive-deps -- the clamp is the
-       only dependency that matters, and the request closure changes every
-       render. */
+    /* The clamp is the only dependency that matters here; the request closure
+       changes every render and would run this on each one. */
   }, [count, currentPage, requestedPage]);
 
   const goToPage = (next: number, reason: PaginationPageReason = 'pointer', source?: unknown) => {

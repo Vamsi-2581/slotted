@@ -5,7 +5,7 @@ Read this first; full source docs are for decisions this file does not settle.
 
 ## Non-negotiable law
 
-- Read `docs/rebuild-briefing.md` first for the active rebuild mode and queue.
+- Read `docs/build-briefing.md` first for the active rebuild mode and queue.
 - The contract is law: `specs/contract.schema.mjs` requires `ui`, parts, and
   `stateModel` for every mutable capability.
 - `docs/state-and-events.md` governs controlled/uncontrolled pairs, request
@@ -22,7 +22,7 @@ Read this first; full source docs are for decisions this file does not settle.
 
 In order:
 
-1. `docs/rebuild-briefing.md`
+1. `docs/build-briefing.md`
 2. `references/quick-law.md` (this file)
 3. Family paragraph in `docs/component-features.md` + sections 2 and 18
 4. `docs/superpowers/specs/*` design doc for that family if it exists

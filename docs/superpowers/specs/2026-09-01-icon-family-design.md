@@ -7,7 +7,7 @@ colour, optical alignment with adjacent text, presence in the accessibility
 tree, and mirroring in right-to-left documents. The artwork stays the
 consumer's.
 
-This closes the question `docs/rebuild-order.md` leaves open for the family —
+This closes the question `docs/build-order.md` leaves open for the family —
 where the registry lives — and question 6 of `PROJECT-PRD.md` §49, "what will
 the official icon strategy be".
 

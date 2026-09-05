@@ -32,7 +32,7 @@ The invocation names the pair of components, not a pair of families.
 
 Every root carries `data-ui="button"` and `data-part="root"`.
 
-`buttonGroup` leaves the family. `docs/rebuild-order.md` lists `button-group`
+`buttonGroup` leaves the family. `docs/build-order.md` lists `button-group`
 as the next invocation in mode **novo**, so the current one is expected to be
 discarded rather than carried forward, and its stylesheet cannot stay in this
 directory once the law tests reach it.

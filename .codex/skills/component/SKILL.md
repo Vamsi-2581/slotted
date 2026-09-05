@@ -51,7 +51,7 @@ When reading source, prefer the narrowest useful set. Read the next source only 
 
 Follow these steps in order. Replace `<family>` with the invoked family name. When the invocation names a tightly related pair, apply every step and every gate to both.
 
-1. **Load the law before component code.** Read `docs/rebuild-briefing.md` first — it holds the environment, the constraints and the decisions already taken. Then `docs/token-foundation.md`, `docs/state-and-events.md`, `references/rubric.md`, and `references/capability.md`. Read the section of `docs/component-features.md` that covers this family, and its sections 2 and 18. Read `references/stories.md` before step 10 rather than after it: what the reference page has to prove decides which demonstrations the stories are written as. For a form control, also read `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`. Do not inspect the family implementation first.
+1. **Load the law before component code.** Read `docs/build-briefing.md` first — it holds the environment, the constraints and the decisions already taken. Then `docs/token-foundation.md`, `docs/state-and-events.md`, `references/rubric.md`, and `references/capability.md`. Read the section of `docs/component-features.md` that covers this family, and its sections 2 and 18. Read `references/stories.md` before step 10 rather than after it: what the reference page has to prove decides which demonstrations the stories are written as. For a form control, also read `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`. Do not inspect the family implementation first.
 
 2. **Detect the mode. Both modes reach the same bar.** If `specs/components/<family>/` exists, rebuild the family; otherwise, create it. A family listed in `specs/legacy-families.json` moves to the current contract schema and leaves that list in the same commit.
 
@@ -63,7 +63,7 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
    The inventory is produced in both modes, from the field rather than from the family. In rebuild mode, produce it before reading the current implementation, then put the two side by side and name the delta: what shipped, what the field ships, and what this family will ship. A capability the family already has is not automatically kept — it is inventoried like every other, and dropped if the field and this library's own context say it was wrong.
 
-   The scope paragraph in `docs/rebuild-order.md` is a floor, not a ceiling. A capability two or more surveyed implementations ship is adopted or adapted; declining one requires naming the family that owns it instead, or the two or three lines of consumer code that compose it. "Not needed yet" is not a reason, and neither is a shared tool that cannot express it.
+   The scope paragraph in `docs/build-order.md` is a floor, not a ceiling. A capability two or more surveyed implementations ship is adopted or adapted; declining one requires naming the family that owns it instead, or the two or three lines of consumer code that compose it. "Not needed yet" is not a reason, and neither is a shared tool that cannot express it.
 
    Present the inventory before writing code.
 
@@ -79,7 +79,7 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
    node --test specs/components/<family>/*.test.mjs
    ```
 
-   Never weaken a test to make an implementation pass, and never narrow the contract to fit a shared tool. A schema, a workbench map or a story check that cannot express the right contract is a defect in that tool, fixed first, in its own commit, as `docs/rebuild-briefing.md` requires.
+   Never weaken a test to make an implementation pass, and never narrow the contract to fit a shared tool. A schema, a workbench map or a story check that cannot express the right contract is a defect in that tool, fixed first, in its own commit, as `docs/build-briefing.md` requires.
 
 7. **Write the stylesheet against the foundation.** Work in `packages/styles/src/<family>/<family>.css` and its token file. Read each visual decision against `docs/token-foundation.md`, but evaluate it in the component's context. Document intentional departures and their cost. Do not create or run a regex-based policy gate over CSS; open-ended design rules cannot be made complete that way. Progress using behavioural tests, rendered evidence, and explicit review.
 
@@ -138,6 +138,6 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
 
 12. **Write the self-assessment.** Assess all eleven dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, Native API, Capability, Ecosystem integration, and Documentation. Follow its Scoring rule: for each dimension name the one change that would most improve it, and say whether it was made. Then state, against `docs/component-features.md` section 18, the family's anatomy, its controlled and uncontrolled contract with reasons, its state matrix, its density and direction behaviour, and its loading, empty, error and extreme-content cases. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
 
-13. **Stop at the human gate.** Decide every open question first, as `docs/rebuild-briefing.md` requires: the gate carries decisions already taken, not questions for the reviewer. Hand over the absolute harness path, the reference-page URLs with the widths and schemes they were read at, the step 3 capability inventory with its four sections, the eleven-dimension self-assessment, and the decisions taken. Ask the person to open the harness and, if storybook is already running on 6006 (React) or 6007 (Angular), open that one reference page and exercise hover, focus, keyboard, and resizing; do not start a Storybook server solely to satisfy this step.
+13. **Stop at the human gate.** Decide every open question first, as `docs/build-briefing.md` requires: the gate carries decisions already taken, not questions for the reviewer. Hand over the absolute harness path, the reference-page URLs with the widths and schemes they were read at, the step 3 capability inventory with its four sections, the eleven-dimension self-assessment, and the decisions taken. Ask the person to open the harness and, if storybook is already running on 6006 (React) or 6007 (Angular), open that one reference page and exercise hover, focus, keyboard, and resizing; do not start a Storybook server solely to satisfy this step.
 
 14. **Commit after the human gate.** Make one commit per step of substance, name every staged file explicitly, and include only this family's work. Do not stage a directory. Record the completed family in `docs/BUILD-LOG.md` when the active plan requires it.

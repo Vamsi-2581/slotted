@@ -99,7 +99,7 @@ const scene = (
   label: string,
   note: string,
   body: string,
-  layout: 'row' | 'stack' | 'prose' = 'stack',
+  layout: 'row' | 'stack' | 'block' | 'prose' = 'stack',
 ) => `
   <section class="slotted-demo-scene">
     <header class="slotted-demo-scene__header">

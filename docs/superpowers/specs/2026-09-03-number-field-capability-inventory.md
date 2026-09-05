@@ -1,7 +1,7 @@
 # Number Field — capability inventory
 
 Produced from the field rather than from the family, before any design or code.
-`docs/rebuild-order.md` lists `number-field` as **novo** in wave 3 with no scope
+`docs/build-order.md` lists `number-field` as **novo** in wave 3 with no scope
 paragraph, so the scope is derived from `docs/component-features.md` § "Number
 Field" and written back into the queue as part of this work.
 

@@ -70,7 +70,7 @@ function Scene({
 }: {
   children: ReactNode;
   label: string;
-  layout?: 'row' | 'stack' | 'prose';
+  layout?: 'row' | 'stack' | 'block' | 'prose';
   note: ReactNode;
 }) {
   return (

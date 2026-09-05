@@ -315,11 +315,13 @@ bootstrapApplication(App, {
       id: 'tabs-angular-keyboard',
       language: 'ts',
       label: 'Which device asked, and why',
-      source: `// 'pointer', 'keyboard' or 'remove' — and request.cancel() refuses the move
-// before anything commits, which is what an unsaved panel needs.
-onValueChange(request: ChangeRequest<string | undefined>) {
-  if (this.dirty()) request.cancel();
-  else this.reason.set(request.reason);
+      source: `export class PanelTabs {
+  // 'pointer', 'keyboard' or 'remove' — and request.cancel() refuses the move
+  // before anything commits, which is what an unsaved panel needs.
+  onValueChange(request: ChangeRequest<string | undefined>) {
+    if (this.dirty()) request.cancel();
+    else this.reason.set(request.reason);
+  }
 }`,
     }),
   },

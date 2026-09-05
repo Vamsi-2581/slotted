@@ -4,7 +4,7 @@
 
 `Container` bounds the inline size of a region, insets it from the edge of the
 space it was given, and places it inside that space. It is the owner of
-comfortable measure, which `docs/rebuild-briefing.md` assigned to this family
+comfortable measure, which `docs/build-briefing.md` assigned to this family
 and to no other while Typography, Stack, Inline and Grid were built.
 
 It paints nothing, separates nothing and claims no semantics. Separation is

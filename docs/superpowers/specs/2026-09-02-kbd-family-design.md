@@ -1,7 +1,7 @@
 # Kbd family design
 
 Wave 2, guide section 5 (“Keyboard Shortcut / Kbd”). The mode written in
-`docs/rebuild-order.md` is `refazer`; the family was removed with the other
+`docs/build-order.md` is `refazer`; the family was removed with the other
 twenty on 2 September 2026, so the work builds it from nothing and the previous
 public API is recorded here as a break rather than carried.
 

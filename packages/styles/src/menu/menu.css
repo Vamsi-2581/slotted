@@ -1,0 +1,590 @@
+@layer slotted.components {
+  /**
+   * A list of commands on a layer, opened from a control, from an item of
+   * another menu, or from a trigger on a menubar.
+   *
+   * The two boxes are `tooltip`'s and `popover`'s: the **layer** is what
+   * `packages/core/src/positioner` writes `position`, `left` and `top` onto and
+   * what scales and fades, because the module leaves `transform` alone; the
+   * **content** is the painted surface and the only thing that takes the
+   * pointer. The gap between the trigger and the surface is the layer's own
+   * padding rather than the positioner's offset, so the pointer never crosses
+   * empty page on its way from a parent item into a submenu — which is half of
+   * what makes the grace area work.
+   *
+   *   ┌─ root ─ the layer ─────────────────────────────────────┐
+   *   │  ┌─ content ─ role="menu" ─ scrolls ───────────────┐   │
+   *   │  │ group ▸ group-label                             │   │
+   *   │  │ item ▸ indicator or icon │ label   │ shortcut   │   │
+   *   │  │                            description           │  │
+   *   │  │ separator                                       │   │
+   *   │  │ empty                                           │   │
+   *   │  └─────────────────────────────────────────────────┘   │
+   *   └────────────────────────────────────────────────────────┘
+   *
+   * ── Why the surface is a grid and the item is a subgrid ──────────────
+   *
+   * Every surveyed implementation lays an item out as a flex row with the
+   * shortcut pushed to the end, which lets a long translated label eat the
+   * shortcut's space and leaves two items' labels out of line whenever one has
+   * an icon and the other does not. Here the surface owns three columns — the
+   * mark, the label, the shortcut — and every item, group and group label
+   * passes through them with `grid-template-columns: subgrid`. Labels line up
+   * across the whole menu, the shortcut column is as wide as the widest
+   * shortcut and never narrower, and the label column is the only one that
+   * gives way.
+   *
+   * The mark column holds the indicator or the icon, and not both. A checkbox
+   * item's mark is its icon: an item that carried a check in one gutter and a
+   * glyph in a second would open every menu with two empty columns down its
+   * start edge, which is the shape a menu inherits from a desktop menu bar and
+   * not one a product needs. Radix, Base UI and Ark all draw the two in one
+   * place for the same reason.
+   *
+   * The columns carry no `column-gap`. A gap would be drawn between two tracks
+   * even when the first is empty, so a menu with no icons at all would open
+   * with a gutter down its start edge. Each optional cell carries its own
+   * margin instead, and a column nothing occupies collapses to nothing.
+   *
+   * ── Density ─────────────────────────────────────────────────────────
+   *
+   * An item is a control, so every measurement it makes reads control
+   * geometry: its height, its inset, its type, its glyph and its gap. A dense
+   * menu holds more commands and is the same component; only the surface's own
+   * inset and radius come off the space and radius scales, as `popover`'s do.
+   */
+  [data-ui='menu'] {
+    --_gap: var(--slotted-menu-gap, var(--slotted-space-2, 0.25rem));
+
+    --_surface: var(--slotted-menu-surface, var(--slotted-surface-raised, #ffffff));
+    --_text: var(--slotted-menu-text, var(--slotted-text, #0f172a));
+    --_muted: var(--slotted-menu-text-muted, var(--slotted-text-muted, #5b6b7f));
+    --_border-color: var(--slotted-menu-border-color, var(--slotted-border-subtle, #e2e8f0));
+    --_border-width: var(--slotted-border-width-thin, 1px);
+    --_radius: var(--slotted-menu-radius, var(--slotted-radius-lg, 8px));
+    --_shadow: var(--slotted-menu-shadow, var(--slotted-shadow-md));
+
+    /* The highlight is one step of the neutral tone at rest and the next one
+       under the press, which is the same pair every control in this library
+       uses for a subtle surface. A tone on an item retargets both. */
+    --_highlight: var(--slotted-menu-highlight, var(--slotted-tone-secondary-subtle-hover));
+    --_highlight-active: var(
+      --slotted-menu-highlight-active,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+    --_accent: var(--_text);
+
+    --_inset-block: var(--slotted-menu-padding-block, var(--slotted-space-2, 0.25rem));
+    --_inset-inline: var(--slotted-menu-padding-inline, var(--slotted-space-2, 0.25rem));
+    --_item-inset: var(--slotted-control-padding-inline-md, 0.8125rem);
+    --_item-height: var(--slotted-control-height-md, 34px);
+    --_item-radius: var(--slotted-menu-item-radius, var(--slotted-control-radius));
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_secondary-font-size: var(--slotted-control-font-size-sm, 12px);
+    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_column-gap: var(--slotted-control-gap-md, 0.5rem);
+
+    /**
+     * The cap. Measure belongs to `container`, so the family offers no axis for
+     * it and still has to stop a `max-content` surface from setting one command
+     * the width of the page. Wide enough for a label and a shortcut beside it,
+     * narrow enough to hang off a button.
+     */
+    --_measure: var(--slotted-menu-measure, 16rem);
+
+    /* Only the block inset: the positioner writes `left` and never `right`, and
+       `inset-inline-start` would resolve to `right` in a right-to-left document
+       and win over the measured value. */
+    position: absolute;
+    inset-block-start: 0;
+
+    z-index: calc(var(--slotted-z-index-popover, 1100) + var(--slotted-layer-depth, 0));
+    isolation: isolate;
+
+    box-sizing: border-box;
+    inline-size: max-content;
+    max-inline-size: min(var(--_measure), var(--slotted-positioner-available-width, 100vw));
+
+    /**
+     * The gap sits on the axis that faces the anchor and on no other. A layer
+     * padded on all four sides drops a submenu's first item below the item that
+     * opened it by the padding it does not need, and the reader reads a list
+     * that starts under its own parent rather than beside it. `data-side` is
+     * physical, because the engine measures in physical coordinates.
+     */
+    padding-block: var(--_gap);
+    padding-inline: 0;
+
+    /* The layer is only a frame around the surface; the surface takes the
+       pointer, and the frame must not swallow a press meant for the page. */
+    pointer-events: none;
+
+    opacity: 0;
+    scale: 0.96;
+    transform-origin: var(--slotted-positioner-transform-origin, center);
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      scale var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui='menu']:is([data-side='left'], [data-side='right']) {
+    padding-block: 0;
+    padding-inline: var(--_gap);
+  }
+
+  [data-ui='menu'][data-open] {
+    opacity: 1;
+    scale: 1;
+    transition:
+      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
+      scale var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  /* The anchor scrolled out of its own clipper. The menu is still open and its
+     commands still belong to a control the reader can no longer see. */
+  [data-ui='menu'][data-detached] {
+    visibility: hidden;
+  }
+
+  [data-ui='menu'][data-size='sm'] {
+    --_item-inset: var(--slotted-control-padding-inline-sm, 0.625rem);
+    --_item-height: var(--slotted-control-height-sm, 30px);
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+    --_secondary-font-size: var(--slotted-font-size-xs, 0.75rem);
+    --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+    --_column-gap: var(--slotted-control-gap-sm, 0.375rem);
+    --_measure: var(--slotted-menu-measure-sm, 14rem);
+  }
+
+  [data-ui='menu'][data-size='lg'] {
+    --_item-inset: var(--slotted-control-padding-inline-lg, 1rem);
+    --_item-height: var(--slotted-control-height-lg, 38px);
+    --_font-size: var(--slotted-control-font-size-lg, 14px);
+    --_secondary-font-size: var(--slotted-control-font-size-sm, 12px);
+    --_icon-size: var(--slotted-control-icon-size-lg, 18px);
+    --_column-gap: var(--slotted-control-gap-lg, 0.5rem);
+    --_measure: var(--slotted-menu-measure-lg, 20rem);
+  }
+
+  /* ── The surface ──────────────────────────────────────────────────────── */
+
+  /**
+   * Four columns, and the height the positioner says is left. Radix, Base UI
+   * and React Aria each publish the remaining height as a custom property and
+   * none of them bounds itself by default, so a menu of thirty commands runs
+   * off the bottom of the screen. `overscroll-behavior` keeps the page still
+   * once the surface has scrolled to its end.
+   */
+  [data-ui='menu'] > [data-part='content'] {
+    background: var(--_surface);
+    border: var(--_border-width) solid var(--_border-color);
+    border-radius: var(--_radius);
+    box-shadow: var(--_shadow);
+    box-sizing: border-box;
+    color: var(--_text);
+    display: grid;
+    font-family: var(--slotted-font-family-sans);
+    font-size: var(--_font-size);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    max-block-size: calc(var(--slotted-positioner-available-height, 100vh) - 2 * var(--_gap));
+    outline: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--_inset-block);
+    padding-inline: var(--_inset-inline);
+    pointer-events: auto;
+  }
+
+  /**
+   * The surface itself never takes a focus ring. Focus lives on an item from
+   * the moment the menu opens, and a ring around the whole surface would say
+   * the surface is the thing being operated.
+   */
+  [data-ui='menu'] > [data-part='content']:focus-visible {
+    outline: none;
+  }
+
+  /* ── Groups ───────────────────────────────────────────────────────────── */
+
+  /**
+   * A group is a grid area spanning every column, and a grid of its own that
+   * inherits them, so its items keep the menu's columns instead of starting a
+   * second set. Without the subgrid a group would align its own labels and
+   * disagree with the items outside it.
+   */
+  [data-ui='menu'] [data-part='group'] {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+
+  [data-ui='menu'] [data-part='group-label'] {
+    color: var(--_muted);
+    font-size: var(--_secondary-font-size);
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    grid-column: 1 / -1;
+    line-height: var(--slotted-line-height-sm, 1.45);
+    padding-block: var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--_item-inset);
+  }
+
+  /* ── Items ────────────────────────────────────────────────────────────── */
+
+  /**
+   * A native `button` carrying `role="menuitem"`: the platform gives the press,
+   * the Enter and Space handling and the pointer semantics, and the role
+   * replaces `button` so a reader hears an item. Base UI and Ark render a `div`
+   * and reimplement all three.
+   *
+   * `min-block-size` rather than a height, because an item with a description
+   * is two lines tall and still has to clear the target minimum.
+   */
+  [data-ui='menu'] [data-part='item'] {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-radius: var(--_item-radius);
+    box-sizing: border-box;
+    color: inherit;
+    cursor: default;
+    display: grid;
+    font: inherit;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-content: center;
+    /**
+     * The line box belongs to the item, and every cell inherits it. `1lh` on a
+     * mark resolves against the mark's *own* line-height, so a mark inside an
+     * item that left the line box at `normal` measured 15 pixels while the
+     * label beside it measured 19.5 — and start-aligned in the same row, the
+     * mark sat two pixels above the text it annotates. Stating it once here is
+     * what makes `1lh` mean the same thing in all four columns.
+     */
+    line-height: var(--slotted-line-height-md, 1.5);
+    min-block-size: var(--_item-height);
+    padding-block: var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--_item-inset);
+    /* The one gap inside an item, between a label and the line under it. The
+       two lines set solid read as one wrapped sentence rather than as a
+       command and its explanation. */
+    row-gap: var(--slotted-space-1, 0.125rem);
+    text-align: start;
+    text-decoration: none;
+    transition:
+      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  /**
+   * The highlight is painted on focus rather than on hover, and that is the
+   * decision the family turns on: the pointer entering an item moves real focus
+   * to it, so exactly one item is highlighted whichever device is driving.
+   * Hovering one item while the keyboard has moved to another is the state
+   * `data-highlighted` exists to prevent in Radix and Ark; here the platform
+   * prevents it, because there is only ever one focused element.
+   */
+  [data-ui='menu'] [data-part='item']:focus {
+    background-color: var(--_highlight);
+    color: var(--_accent);
+  }
+
+  /**
+   * The ring only when the keyboard put focus there. A pointer-driven highlight
+   * is already unambiguous, and a ring under the pointer would draw a box the
+   * reader did not ask for. Inset, so it never overflows the surface's own
+   * rounded edge.
+   */
+  [data-ui='menu'] [data-part='item']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid
+      var(--slotted-focus-ring-color, currentColor);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
+  }
+
+  [data-ui='menu'] [data-part='item']:not([data-disabled]):active {
+    background-color: var(--_highlight-active);
+  }
+
+  /**
+   * A parent item stays highlighted while its submenu is open, so the path from
+   * the bar to the surface under the pointer reads as one line.
+   */
+  [data-ui='menu'] [data-part='item'][data-open] {
+    background-color: var(--_highlight);
+  }
+
+  /**
+   * Disabled items are focusable and cannot be activated, which the pattern
+   * requires. They therefore have to answer focus with something, and answer it
+   * more quietly than an item that would do anything: the ground is the theme's
+   * disabled surface rather than the highlight, and the text stays legible
+   * instead of being faded toward it.
+   */
+  [data-ui='menu'] [data-part='item'][data-disabled] {
+    color: var(--slotted-disabled-foreground, #64748b);
+  }
+
+  [data-ui='menu'] [data-part='item'][data-disabled]:focus {
+    background-color: var(--slotted-disabled-background, #e2e8f0);
+    color: var(--slotted-disabled-foreground, #64748b);
+  }
+
+  /* ── The cells ────────────────────────────────────────────────────────── */
+
+  /**
+   * Column one, and the reason a checkbox item and a command item line their
+   * labels up: the mark's box exists whether or not the mark is drawn, so a
+   * menu of options does not shift by sixteen pixels as one is checked.
+   */
+  [data-ui='menu'] :is([data-part='indicator'], [data-part='icon']),
+  [data-ui='menu'] [data-part='item'][aria-haspopup='menu']::after {
+    /**
+     * One line box tall, so a mark beside a label that wrapped onto three
+     * lines sits on the first of them rather than in the middle of the item —
+     * and, because the item states the line box every cell inherits, exactly
+     * as tall as the line it sits beside. The mark is then centred on the text
+     * by construction rather than by a nudge that has to be retuned at every
+     * size and density.
+     */
+    block-size: 1lh;
+  }
+
+  [data-ui='menu'] [data-part='indicator'] {
+    background-color: currentColor;
+    grid-column: 1;
+    grid-row: 1;
+    inline-size: var(--_icon-size);
+    justify-self: center;
+    margin-inline-end: var(--_column-gap);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    opacity: 0;
+  }
+
+  [data-ui='menu'] [data-part='item'][data-checked] > [data-part='indicator'] {
+    opacity: 1;
+  }
+
+  [data-ui='menu'] [data-part='item'][role='menuitemcheckbox'] > [data-part='indicator'] {
+    mask-image: var(--slotted-menu-checked-icon, var(--slotted-icon-check));
+  }
+
+  [data-ui='menu'] [data-part='item'][role='menuitemradio'] > [data-part='indicator'] {
+    mask-image: var(--slotted-menu-selected-icon, var(--slotted-icon-dot));
+    scale: 0.7;
+  }
+
+  /**
+   * The same column the indicator uses, and never both on one item. The
+   * consumer supplies the icon and the family supplies the column, so a menu
+   * whose second and fifth items have icons still reads as one list rather
+   * than as two.
+   *
+   * The mark takes the item's own colour rather than the muted one. Painted
+   * muted, a disabled item's icon was the same grey as an enabled item's —
+   * `--slotted-text-muted` and `--slotted-disabled-foreground` are four points
+   * apart in the light scheme — so the state the item was in could be read from
+   * its label and not from its mark.
+   *
+   * Two ways to fill it, as `alert`'s icon part takes them: a glyph token in
+   * `--slotted-menu-item-icon`, drawn as a mask at the column's own size, or an
+   * element of the consumer's own, centred. An empty box that painted a mask
+   * over content would cut that content into the shape of the mark.
+   */
+  [data-ui='menu'] [data-part='icon'] {
+    background-color: currentColor;
+    grid-column: 1;
+    grid-row: 1;
+    inline-size: var(--_icon-size);
+    justify-self: center;
+    margin-inline-end: var(--_column-gap);
+    mask-image: var(--slotted-menu-item-icon, none);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  [data-ui='menu'] [data-part='icon']:not(:empty) {
+    align-items: center;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    mask-image: none;
+  }
+
+  /* Column two, and the only column that gives way. */
+  [data-ui='menu'] [data-part='label'] {
+    grid-column: 2;
+    grid-row: 1;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  [data-ui='menu'] [data-part='description'] {
+    color: var(--_muted);
+    font-size: var(--_secondary-font-size);
+    grid-column: 2;
+    grid-row: 2;
+    line-height: var(--slotted-line-height-sm, 1.45);
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  [data-ui='menu'] [data-part='item'][data-disabled] > [data-part='description'] {
+    color: inherit;
+  }
+
+  /**
+   * Column three. The shortcut is set in the same face as the label and one step
+   * quieter, so it reads as an annotation rather than as a second command; a
+   * `kbd` placed here instead paints its own keys and this rule leaves it
+   * alone. Never narrower than its own content: a long label wraps in column
+   * three rather than pushing the binding off the surface.
+   */
+  [data-ui='menu'] [data-part='shortcut'] {
+    color: var(--_muted);
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    margin-inline-start: var(--slotted-space-6, 1rem);
+    white-space: nowrap;
+  }
+
+  [data-ui='menu'] [data-part='item'][data-disabled] > [data-part='shortcut'] {
+    color: inherit;
+  }
+
+  /**
+   * The mark that says an item opens a submenu, drawn from the glyph scale
+   * rather than from a character, and mirrored in a right-to-left document with
+   * `:dir()` so a menu inside a mirrored region turns without an ancestor
+   * saying so. It takes the shortcut's column, because an item that opens a
+   * submenu runs no command and so carries no binding.
+   */
+  [data-ui='menu'] [data-part='item'][aria-haspopup='menu']::after {
+    background-color: currentColor;
+    content: '';
+    grid-column: 3;
+    grid-row: 1;
+    inline-size: var(--_icon-size);
+    justify-self: end;
+    margin-inline-start: var(--_column-gap);
+    mask-image: var(--slotted-menu-submenu-icon, var(--slotted-icon-chevron-right));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    opacity: 0.7;
+  }
+
+  [data-ui='menu'] [data-part='item'][aria-haspopup='menu']:dir(rtl)::after {
+    scale: -1 1;
+  }
+
+  /* ── Separator, empty, loading ────────────────────────────────────────── */
+
+  [data-ui='menu'] [data-part='separator'] {
+    background-color: var(--slotted-menu-separator-color, var(--_border-color));
+    block-size: var(--_border-width);
+    border: 0;
+    grid-column: 1 / -1;
+    margin-block: var(--slotted-space-2, 0.25rem);
+    margin-inline: 0;
+  }
+
+  /**
+   * A menu whose items were all filtered away, and a menu still waiting for
+   * them. Both keep the surface's measure rather than collapsing to a
+   * two-pixel box, which is what a consumer sees flash when the state is not
+   * painted at all.
+   */
+  [data-ui='menu'] [data-part='empty'] {
+    color: var(--_muted);
+    grid-column: 1 / -1;
+    min-inline-size: 12rem;
+    padding-block: var(--slotted-space-5, 0.75rem);
+    padding-inline: var(--_item-inset);
+    text-align: center;
+  }
+
+  [data-ui='menu'] > [data-part='content'][data-loading] {
+    cursor: progress;
+  }
+
+  /* ── Tones ────────────────────────────────────────────────────────────── */
+
+  /**
+   * A destructive command reads as destructive before it is read at all. The
+   * tone paints the label, the icon and the highlight together, from the five
+   * the theme already carries at the contrast every scheme needs; `danger` is
+   * the one a product reaches for, and the other four cost one line each.
+   */
+  [data-ui='menu'] [data-part='item'][data-tone='accent'] {
+    --_accent: var(--slotted-tone-accent-text);
+    --_highlight: var(--slotted-tone-accent-surface);
+    --_highlight-active: var(--slotted-tone-accent-subtle-active);
+
+    color: var(--slotted-tone-accent-text);
+  }
+
+  [data-ui='menu'] [data-part='item'][data-tone='secondary'] {
+    --_accent: var(--slotted-tone-secondary-text);
+    --_highlight: var(--slotted-tone-secondary-surface);
+    --_highlight-active: var(--slotted-tone-secondary-subtle-active);
+
+    color: var(--slotted-tone-secondary-text);
+  }
+
+  [data-ui='menu'] [data-part='item'][data-tone='success'] {
+    --_accent: var(--slotted-tone-success-text);
+    --_highlight: var(--slotted-tone-success-surface);
+    --_highlight-active: var(--slotted-tone-success-subtle-active);
+
+    color: var(--slotted-tone-success-text);
+  }
+
+  [data-ui='menu'] [data-part='item'][data-tone='warning'] {
+    --_accent: var(--slotted-tone-warning-text);
+    --_highlight: var(--slotted-tone-warning-surface);
+    --_highlight-active: var(--slotted-tone-warning-subtle-active);
+
+    color: var(--slotted-tone-warning-text);
+  }
+
+  [data-ui='menu'] [data-part='item'][data-tone='danger'] {
+    --_accent: var(--slotted-tone-danger-text);
+    --_highlight: var(--slotted-tone-danger-surface);
+    --_highlight-active: var(--slotted-tone-danger-subtle-active);
+
+    color: var(--slotted-tone-danger-text);
+  }
+
+  [data-ui='menu'] [data-part='item'][data-tone][data-disabled] {
+    --_accent: var(--slotted-disabled-foreground, #64748b);
+    --_highlight: var(--slotted-disabled-background, #e2e8f0);
+
+    color: var(--slotted-disabled-foreground, #64748b);
+  }
+
+  /* ── Forced colours ───────────────────────────────────────────────────── */
+
+  /**
+   * The one thing the theme cannot reach. Every tone surface becomes `Canvas`
+   * under forced colours, so the highlight — which is this family's selection
+   * indicator, not decoration — would disappear and leave a reader with no way
+   * to tell which command they are on.
+   */
+  @media (forced-colors: active) {
+    [data-ui='menu'] [data-part='item']:focus {
+      background-color: Highlight;
+      color: HighlightText;
+      forced-color-adjust: none;
+    }
+
+    [data-ui='menu'] [data-part='item'][data-disabled]:focus {
+      background-color: Highlight;
+      color: GrayText;
+    }
+  }
+}

@@ -49,7 +49,7 @@ function Scene({
 }: {
   children: React.ReactNode;
   label: string;
-  layout?: 'row' | 'stack' | 'prose';
+  layout?: 'row' | 'stack' | 'block' | 'prose';
   note: string;
 }) {
   return (

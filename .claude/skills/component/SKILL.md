@@ -11,11 +11,13 @@ Do not emit suggestions, prompts, or detours about explaining work in a web brow
 
 Build or rebuild one family, or a tightly related pair, without hiding framework-native APIs. The same bar applies whether the family exists or not.
 
-Two steps are the reason this skill exists, and they fail in opposite directions.
+Three steps are the reason this skill exists, and they fail in different directions.
 
 Step 8 answers _is the picture right_. The library already had a rigorous checklist; it passed while the components looked poor. Do not leave the visual loop because the code is finished. Leave it because the picture is right.
 
 Step 3 answers _is there enough component here_. Every other step in this skill can be satisfied by a box with one attribute, and the rubric will score it well: fourteen of the library's families shipped with exactly one capability, `toolbar` shipped with one part and no keyboard, and one family in thirty-four declares a state model. A lawful, beautiful, empty component is the failure this step exists to catch. Do not leave the capability inventory because the scope paragraph is covered. Leave it because a team building a real product would not have to reach past the family.
+
+Step 9 answers _is this worth building on_. Four fifths of a family is written after the picture is right and before anyone has seen it, so the gate that catches a wrong anatomy belongs there, not at the end.
 
 The target is a family a team would choose over the best headless library plus their own CSS. The anti-goal is a styled `div` with one prop — an unstyled Bootstrap, with neither the features nor the looks.
 
@@ -33,7 +35,7 @@ Repeatedly re-reading the same source is discouraged; skipping required reads is
 
 Performance constraints for this skill:
 
-- Treat each invocation as one-family scope; finish Step 13 for that family and then reset for the next family.
+- Treat each invocation as one-family scope; finish Step 15 for that family and then reset for the next family.
 - If multiple `/component` tasks are running, queue them unless the request is explicitly independent and file-disjoint.
 - Do not spawn subagents by default for standard component rebuilds. Use them only for independent, parallelizable work (for example, parallel proofing of shared docs/tests) on disjoint paths.
 
@@ -57,7 +59,7 @@ Do not rerun broad edits in search of improvement. If one issue persists after t
 - list 1–2 concrete hypotheses,
 - and ask for an explicit unblock decision before continuing.
 
-Do not create intermediate human gates for process control. Record decisions in artifacts, then continue to the next step; only stop for explicit release-level review at Step 13.
+There are exactly two human gates, at Step 9 and Step 14, and no others. Do not invent one for process control: between steps, record the decision in an artifact and carry on.
 
 When reading source, prefer the narrowest useful set. Read the next source only when a dependency or decision point requires it; do not broaden scope merely because it is faster to "have all context first."
 
@@ -65,8 +67,8 @@ When reading source, prefer the narrowest useful set. Read the next source only 
 
 Follow these steps in order. Replace `<family>` with the invoked family name. When the invocation names a tightly related pair, apply every step and every gate to both.
 
-1. **Load the law before component code.** Read `docs/rebuild-briefing.md` first, then `references/quick-law.md`.
-Then read:
+1. **Load the law before component code.** Read `docs/build-briefing.md` first, then `references/quick-law.md`.
+   Then read:
 
 - the section of `docs/component-features.md` that covers this family, and sections 2 and 18;
 - `references/frameworks.md` and the family-specific design doc in `docs/superpowers/specs/` if it exists.
@@ -74,7 +76,7 @@ Then read:
 Only when the compact brief and these files leave an unresolved question, read
 `docs/token-foundation.md`, `docs/state-and-events.md`, `references/rubric.md`,
 `references/patterns.md`, `references/stories.md`, and `references/capability.md`.
-Read `references/stories.md` before step 10 rather than after it.
+Read `references/stories.md` before step 11 rather than after it.
 
 When this is the first pass on a family, read the full-law list in that order before
 coding. In follow-up passes, read only what is necessary to close the open decision.
@@ -91,7 +93,7 @@ Do not inspect the family implementation first.
 
    The inventory is produced in both modes, from the field rather than from the family. In rebuild mode, produce it before reading the current implementation, then put the two side by side and name the delta: what shipped, what the field ships, and what this family will ship. A capability the family already has is not automatically kept — it is inventoried like every other, and dropped if the field and this library's own context say it was wrong.
 
-   The scope paragraph in `docs/rebuild-order.md` is a floor, not a ceiling. A capability two or more surveyed implementations ship is adopted or adapted; declining one requires naming the family that owns it instead, or the two or three lines of consumer code that compose it. "Not needed yet" is not a reason, and neither is a shared tool that cannot express it.
+   The scope paragraph in `docs/build-order.md` is a floor, not a ceiling. A capability two or more surveyed implementations ship is adopted or adapted; declining one requires naming the family that owns it instead, or the two or three lines of consumer code that compose it. "Not needed yet" is not a reason, and neither is a shared tool that cannot express it.
 
    Present the inventory before writing code.
 
@@ -101,13 +103,15 @@ Do not inspect the family implementation first.
 
    When responsibility, anatomy, state ownership, composition, cross-framework behaviour, or a public API break needs a decision, write a design in `docs/superpowers/specs/` and proceed after recording the decision and rationale. A rebuild that changes any of those needs the document as much as a new family does; only a change that alters no decision skips it, and the integration tables are answered either way.
 
+   Write the shortest document that records the decision and what it costs. The reader is the family that inherits the decision, not a reviewer being persuaded: a decision that outlives this family is worth a page, and one that does not is worth a paragraph in the contract or the stylesheet beside the rule it explains.
+
 6. **Change the contract and its test first.** Create or update `specs/components/<family>/contract.json` and its contract test. The contract declares `ui`, the parts, the states from the shared vocabulary, and a `stateModel` for every mutable capability. Run the focused test, watch it fail for the intended missing behaviour, implement the smallest contract change, and run it again:
 
    ```bash
    node --test specs/components/<family>/*.test.mjs
    ```
 
-   Never weaken a test to make an implementation pass, and never narrow the contract to fit a shared tool. A schema, a workbench map or a story check that cannot express the right contract is a defect in that tool, fixed first, in its own commit, as `docs/rebuild-briefing.md` requires.
+   Never weaken a test to make an implementation pass, and never narrow the contract to fit a shared tool. A schema, a workbench map or a story check that cannot express the right contract is a defect in that tool, fixed first, in its own commit, as `docs/build-briefing.md` requires.
 
 7. **Write the stylesheet against the foundation.** Work in `packages/styles/src/<family>/<family>.css` and its token file. Read each visual decision against `docs/token-foundation.md`, but evaluate it in the component's context. Document intentional departures and their cost. Do not create or run a regex-based policy gate over CSS; open-ended design rules cannot be made complete that way. Progress using behavioural tests, rendered evidence, and explicit review.
 
@@ -153,9 +157,15 @@ Do not inspect the family implementation first.
 
    Code completion is not the exit condition, and neither is a correct picture. The exit condition is a picture with nothing left to fix — and the way to find what is left is to name, in writing, the one detail you would change if you had another hour, then change it.
 
-9. **Implement both frameworks.** Follow `references/frameworks.md`. Keep the conceptual contract shared, React idiomatic to React, and Angular idiomatic to Angular. Preserve native props, events, and explicit consumer values.
+9. **Stop at the visual gate.** The picture is settled and nothing has been bound to a framework yet. Hand over the harness page path and the captures read, the step 3 capability inventory with its four sections, the anatomy the contract declares — parts, states, state model — and every decision taken so far. Ask the reviewer to open the harness and exercise hover, focus, keyboard and resizing there. Wait, and incorporate the answer before step 10.
 
-10. **Write both reference pages, then read them rendered.** Follow `references/stories.md`. The pages are where a consumer meets the family's API, and they are held to a contract of their own: the import, the anatomy, one captioned demonstration per declared scenario with the code that produced it, the inputs, the outputs, the composition surface, and the accessibility decisions. Two demonstrations and no source is the shape this step used to produce, and `specs/reference-pages.test.mjs` now refuses it.
+   This gate exists because the five steps after it produce four fifths of the family: bindings, behavioural tests and the two reference pages were 84% of the lines the Button family cost, and every one of them is written on top of the anatomy and the picture confirmed here. An anatomy corrected at this gate costs the stylesheet. The same correction after step 13 costs the family.
+
+   Say what a wrong answer would cost, so the reviewer knows what is cheap to change now and expensive later.
+
+10. **Implement both frameworks.** Follow `references/frameworks.md`. Keep the conceptual contract shared, React idiomatic to React, and Angular idiomatic to Angular. Preserve native props, events, and explicit consumer values.
+
+11. **Write both reference pages, then read them rendered.** Follow `references/stories.md`. The pages are where a consumer meets the family's API, and they are held to a contract of their own: the import, the anatomy, one captioned demonstration per declared scenario with the code that produced it, the inputs, the outputs, the composition surface, and the accessibility decisions. Two demonstrations and no source is the shape this step used to produce, and `specs/reference-pages.test.mjs` now refuses it.
 
     Lay every demonstration out with the workbench primitives; the stage owns the gap between examples, and a story that reaches for an inline style is refused. Then, if a Storybook reference page is already running, read it at 1280 and 720 pixels, in light and in dark — the page, not the story file:
 
@@ -171,23 +181,34 @@ Do not inspect the family implementation first.
 
     A demonstration in a mostly empty canvas, two examples with no distance between them, a caption that repeats the title, a clipped table, a snippet that no longer matches the demonstration above it, a snippet whose columns do not line up, or anything drawn outside the box that owns it — each is a defect of this step, and each was found by looking rather than by a test.
 
+    Then measure the page rather than only looking at it, at 1280 and at 620 pixels:
+
+    ```bash
+    node tools/harness/audit.mjs "http://localhost:6006/iframe.html?viewMode=docs&id=components-<family>--reference"
+    node tools/harness/audit.mjs "http://localhost:6007/iframe.html?viewMode=docs&id=components-<family>--reference"
+    ```
+
+    It exits non-zero on an element collapsed to a sliver inside a wide stage, or on content overflowing the box that owns it — the two defects a screenshot can show and no offline test can see. `pagination` shipped with its root at zero pixels inside a 676-pixel stage and 171 pixels of spill, on a page that passed every test. A finding is a defect of this step.
+
     A defect in the workbench is fixed in the workbench, with a test in `packages/storybook-workbench`, before the family's own work continues — as step 6 requires of every shared tool.
 
-11. **Run the automatic gates.** Format every changed file, then require:
+12. **Run the automatic gates.** Format every changed file, then require:
 
     ```bash
     pnpm check:affected
     ```
 
-   If this is a shared-tool change (schema, harness, core utilities, or tests that
-   affect every family), or if `pnpm check:affected` is not available, run
-   `pnpm check` instead.
+If this is a shared-tool change (schema, harness, core utilities, or tests that
+affect every family), or if `pnpm check:affected` is not available, run
+`pnpm check` instead.
 
-   Do not pipe a verification command into `head`, `tail`, or `grep`; preserve its exit status.
-   Run only the minimum verification for the current cycle and do not add extra verification passes to chase a lower command count.
+Do not pipe a verification command into `head`, `tail`, or `grep`; preserve its exit status.
+Run only the minimum verification for the current cycle and do not add extra verification passes to chase a lower command count.
 
-12. **Write the self-assessment.** Assess all eleven dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, Native API, Capability, Ecosystem integration, and Documentation. Follow its Scoring rule: for each dimension name the one change that would most improve it, and say whether it was made. Then state, against `docs/component-features.md` section 18, the family's anatomy, its controlled and uncontrolled contract with reasons, its state matrix, its density and direction behaviour, and its loading, empty, error and extreme-content cases. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
+13. **Write the self-assessment.** Assess all eleven dimensions in `references/rubric.md`: Icons, Motion, Responsiveness, Refinement, Tokens, Patterns, Accessibility, Native API, Capability, Ecosystem integration, and Documentation. Follow its Scoring rule: for each dimension name the one change that would most improve it, and say whether it was made. Then state, against `docs/component-features.md` section 18, the family's anatomy, its controlled and uncontrolled contract with reasons, its state matrix, its density and direction behaviour, and its loading, empty, error and extreme-content cases. Cite capture paths, behavioural tests, the APG checklist, relevant code, and the reasoning behind context-dependent choices. Fix anything below the bar before continuing.
 
-13. **Stop at the human gate.** Decide every open question first, as `docs/rebuild-briefing.md` requires: the gate carries decisions already taken, not questions for the reviewer. Hand over the absolute harness path, the reference-page URLs with the widths and schemes they were read at, the step 3 capability inventory with its four sections, the eleven-dimension self-assessment, and the decisions taken. Ask the person to open the harness and, if storybook is already running on 6006 (React) or 6007 (Angular), open that one reference page and exercise hover, focus, keyboard, and resizing; do not start a Storybook server solely to satisfy this step.
+14. **Stop at the release gate.** The picture was approved at step 9; this gate is about everything built on top of it. Decide every open question first, as `docs/build-briefing.md` requires: the gate carries decisions already taken, not questions for the reviewer. Hand over the absolute harness path, the reference-page URLs with the widths and schemes they were read at, the step 3 capability inventory with its four sections, the eleven-dimension self-assessment, and the decisions taken. Ask the person to open the harness and, if storybook is already running on 6006 (React) or 6007 (Angular), open that one reference page and exercise hover, focus, keyboard, and resizing; do not start a Storybook server solely to satisfy this step.
 
-14. **Commit after the human gate.** Make one commit per step of substance, name every staged file explicitly, and include only this family's work. Do not stage a directory. Record the completed family in `docs/BUILD-LOG.md` when the active plan requires it.
+15. **Commit after the release gate.** Make one commit per step of substance, name every staged file explicitly, and include only this family's work. Do not stage a directory.
+
+    `docs/BUILD-LOG.md` is not a diary. A decision that binds another family goes to the briefing's _Decisions already taken_; a pending item goes to that family's scope in `docs/build-order.md`; a convention goes to the comment of the test that enforces it. Write in the log only what a later family must know and none of those three places can hold — a defect with a lesson, or a debt nobody else owns.

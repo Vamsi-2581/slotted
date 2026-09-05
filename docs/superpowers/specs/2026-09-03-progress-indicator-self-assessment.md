@@ -14,15 +14,14 @@ and `/tmp`, from
 
 The family owns no icon and draws none. Its three marks are geometry: a
 rectangle, an SVG arc, and a `clip-path` polygon. Nothing is a character, and
-the only artwork is the wavy ring's path and the wave mask's sine, both of
+the only artwork is the two wavy paths, the ring's and the bar's, both of
 which are shapes rather than glyphs.
 
-Two consequences were checked in the pictures. The wave mask is a
-`mask-image`, and a mask is not replaced by a forced palette, so the
-forced-colours block removes it — a mask left in place would go on cutting a
-system colour into a shape nobody chose. And the morphing loader keeps its
-silhouette under forced colours, which is the whole reason it is a shape and
-not a ring.
+Two consequences were checked in the pictures. Both waves are strokes on a
+real path, so a forced palette reaches them the way it reaches the plain ring:
+the path takes `Highlight` and keeps its crests. And the morphing loader keeps
+its silhouette under forced colours, which is the whole reason it is a shape
+and not a ring.
 
 Direction: nothing mirrors, and that is deliberate. A clock runs the same way
 in every language, so the arc turns clockwise in `rtl` as it does in `ltr`,
@@ -47,10 +46,10 @@ Every state pair, and whether it moves:
 | circular indeterminate | yes, `loop` rotation over `loop-slow` sweep | two periods that do not divide, so no frame repeats in the same orientation |
 | loader morph | yes, `2 × loop-slow` on `emphasized` | 640 ms a shape, which is M3's own 650. The `1.3` overshoot is the spring: the outline carries past each target and settles |
 | loader rotation | yes, and it is the point | two parcels summed, as `LoadingIndicatorAnimatorDelegate.java` decomposes them — 90° a shape on the morph's own spring and boundaries, 50° a shape linear underneath. The sprung parcel is 64% of the turn, so the object throws itself around as it changes form |
-| wave travel, bar | yes, `loop-fast`, linear | M3's own `PHASE_ANIMATION_DURATION_MS = 1000` with a null interpolator. One registered `<number>` carries the phase, and the mask's travel and the round cap's height are both read from it, so the cap cannot drift off the crest |
+| wave travel, bar | yes, `loop-fast`, linear | M3's own `PHASE_ANIMATION_DURATION_MS = 1000` with a null interpolator. One registered `<number>` carries the phase; the path moves by it and the dash hides the same distance, so the window always starts at the track and ends in a round cap on whatever crest is there |
 | wave travel, ring | yes, `loop-fast`, linear | a rotation of one crest, which for `R + A·sin(Nθ)` *is* a travelling wave and loops without a seam. The dash follows it back by the same 12.5 of 100 path units, so the arc holds twelve o'clock to within 0.6° — measured across the cycle, not asserted |
-| wave amplitude, bar | yes, on the value's own transition | full only between a tenth and nine tenths, per M3's two constants. The wave layer's box carries the excursion and a flat band grows beside it as the box shrinks; the two are unioned, so the bar is a bar at either end of the ramp |
-| wave amplitude, ring | yes, on the value's own transition | the same two constants, morphing `d` between the wound sine and the same fitting at amplitude nought. The keyframe is paused and scrubbed by a negative delay, which is a CSS animation used as a function of a value rather than of time |
+| wave amplitude, bar | yes, `long`, `standard` on and `exit` off | full only between a tenth and ninety-five hundredths, per M3's two constants. A registered switch the transitioning percentage throws, a style query that reads it, and `d` transitioning to the same path at amplitude nought — M3's own animator, with its own two easings. `pathLength` is the path's reach, so the end stays at the value while the amplitude is mid-transition |
+| wave amplitude, ring | yes, `long`, `standard` on and `exit` off | the same switch and the same transition, between the wound sine and the same fitting at amplitude nought |
 | withheld → painted | no | it appears because `delay` elapsed, which is already a deliberate wait; a fade on top would delay it twice |
 | painted → withdrawn | no | the same, in reverse: `minDuration` is the delay, and a fade would extend it |
 | → complete | yes, by the same value transition | the gap and the stop dot are removed at the end of the fill rather than during it |
@@ -218,8 +217,8 @@ single departure is priced.
   and the accessibility scene writes them.
 - Forced colours: the track takes a `ButtonBorder` edge on a real element
   rather than a pseudo-element — a decorative rule may not name a system colour
-  at all — the indicator takes `Highlight`, the wave mask is removed and the
-  loader keeps its silhouette.
+  at all — the indicator takes `Highlight` — the wavy path along with the ring — and
+  the loader keeps its silhouette.
 - Reduced motion: every loop stops, and the rest positions were photographed.
 - Target size: nothing is a target. The family has no hit area, which is why
   `--slotted-target-min` does not appear.

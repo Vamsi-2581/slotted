@@ -2,7 +2,7 @@
 
 Produced before either family was designed or read, as
 `.claude/skills/component/references/capability.md` requires. Both families are
-new: `docs/rebuild-order.md` lists `slider` as item 7 and `form` as item 8 of
+new: `docs/build-order.md` lists `slider` as item 7 and `form` as item 8 of
 wave 3, and neither had a scope paragraph before this work.
 
 Sources were read on 3 September 2026.
@@ -143,5 +143,5 @@ primeiro erro **sem possuir o estado de cada framework**".
 | **Leaving a half-filled form.** None of the nine guards it.                     | `guardUnsaved` registers a `beforeunload` listener while the form is dirty and removes it on submit and on reset.                                             |
 | **The second submit.** A double-clicked button submits twice in Radix and in a bare `<form>`. | A submit while one is pending is refused, and the state is in the DOM as `data-loading` so the button can say so.                                             |
 | **An error for a control that is not in the form.** A server may name a field the page no longer renders. | Such an error is kept in the summary, without a link, rather than dropped silently — a message a reader cannot reach is still a message they must be given.  |
-| **A hundred errors.** GOV.UK lists every one; Carbon shows a count.             | The summary lists every error and the region is scrollable rather than truncated: `docs/rebuild-briefing.md` forbids removing content from the DOM.           |
+| **A hundred errors.** GOV.UK lists every one; Carbon shows a count.             | The summary lists every error and the region is scrollable rather than truncated: `docs/build-briefing.md` forbids removing content from the DOM.           |
 | **A form inside a form.** Illegal in HTML and produced by composition anyway.   | A nested `form` element is refused by the parser, so the family scopes every query to its own element rather than to the document, and a second `form` family instance inside the first one still reads its own controls. |

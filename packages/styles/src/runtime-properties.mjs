@@ -24,24 +24,31 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-layer-depth',
   /**
    * `packages/core/src/toast` — how far a message is from the front of the
-   * stack, how many are visible, how long this one was given, whether the
-   * timers are running, and how far the pointer has taken a message it is
-   * dragging away.
+   * stack, how many are visible, how tall each one is and how much room the
+   * ones in front of it take, how long this one was given, whether the timers
+   * are running, and how far the pointer has taken a message it is dragging
+   * away.
    *
-   * `--slotted-toast-duration` is the one that looks like a motion token and is
-   * not: it is the time *this message* was given, which a consumer states per
-   * message and no theme can know. The remaining-time bar reads it so the
-   * picture and the timer are the same number.
+   * Two of them are the ones that look like something else and are not.
+   * `--slotted-toast-duration` looks like a motion token: it is the time *this
+   * message* was given, stated per message, which no theme can know, and the
+   * remaining-time bar reads it so the picture and the timer are one number.
+   * `--slotted-toast-height` looks like a size token: it is the height this
+   * message turned out to be, measured, and it is what lets a collapsed pile
+   * open into a readable column instead of snapping into one.
    *
    * They are named one by one rather than by a `--slotted-toast-` prefix,
    * because the family also owns theme tokens under that prefix — its measure,
    * its offset, its gap — and a prefix would file every one of them as a value
    * no theme can retune.
    */
-  '--slotted-toast-index',
   '--slotted-toast-count',
   '--slotted-toast-duration',
+  '--slotted-toast-front-height',
+  '--slotted-toast-height',
+  '--slotted-toast-index',
   '--slotted-toast-play-state',
+  '--slotted-toast-stack-offset',
   '--slotted-toast-swipe-x',
   '--slotted-toast-swipe-y',
 ];

@@ -322,14 +322,3 @@ function optionalNumber(value: number | string | undefined) {
   const parsed = numberAttribute(value);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
-
-/**
- * One per trail, and only ever used to point focus at an element inside this
- * component's own subtree. A server and a client walk the same tree in the same
- * order, so the two agree; nothing outside the family reads it.
- */
-let counter = 0;
-function nextId() {
-  counter += 1;
-  return counter;
-}

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 5,
+  "family": "progress-indicator",
+  "ui": "progress-indicator",
+  "absorbs": ["spinner", "progress-bar", "loading-bar"],
+  "components": {
+    "progressBar": "linear",
+    "progressCircle": "circular",
+    "loader": "morph"
+  },
+  "measured": ["progressBar", "progressCircle"],
+  "axes": {
+    "size": ["sm", "md", "lg"],
+    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "placement": ["inline", "page"]
+  },
+  "stateAttributes": {
+    "indeterminate": "data-indeterminate",
+    "complete": "data-complete"
+  },
+  "members": {
+    "progressIndicator": {
+      "nativeElement": "div",
+      "defaults": {
+        "min": 0,
+        "max": 100,
+        "size": "md",
+        "tone": "accent",
+        "placement": "inline",
+        "hideLabel": false,
+        "showValue": false,
+        "wave": false,
+        "contained": false,
+        "decorative": false,
+        "loading": true,
+        "delay": 0,
+        "minDuration": 0
+      },
+      "capabilities": ["measurement", "appearance", "size", "placement", "loading", "decorative"],
+      "states": ["default", "indeterminate", "complete"],
+      "parts": ["root", "label", "value", "track", "indicator"]
+    }
+  },
+  "scenarios": {
+    "progressIndicator": [
+      "playground",
+      "recipes",
+      "determinate",
+      "indeterminate",
+      "loader",
+      "wave",
+      "waveRamp",
+      "wavePace",
+      "waveIndeterminate",
+      "waveSizes",
+      "buffer",
+      "sizes",
+      "tones",
+      "timing",
+      "page",
+      "content",
+      "composition",
+      "accessibility"
+    ]
+  }
+}

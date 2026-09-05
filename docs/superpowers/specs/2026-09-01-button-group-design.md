@@ -1,6 +1,6 @@
 # Button group — arrangement of related actions
 
-Wave 2 of `docs/rebuild-order.md`, mode `novo`, guide section 5. The family
+Wave 2 of `docs/build-order.md`, mode `novo`, guide section 5. The family
 arranges actions that belong together and does not touch the semantics of any
 one of them.
 
@@ -63,7 +63,7 @@ arrangement this family is.
 | Substitute the rendered element                         | MUI (`component`), Primer (`as`), shadcn (`render`), Polaris (—)             | adopt              | React `render`; Angular is a directive on the consumer's own element, so substitution is writing a different tag.                                                                    |
 | Group-level `disabled`                                  | MUI (`disabled`), Spectrum (`isDisabled`)                                    | **decline**        | Availability is a fact about one control. Composing it is two lines: `{actions.map((a) => <Button key={a.id} disabled={saving} onClick={a.run}>{a.label}</Button>)}`. Shipping it as a provided default would require `button` to tell an absent `disabled` from an explicit `false`, which a boolean attribute cannot do — and that is `button`'s public contract, not this family's. |
 | Roving focus / one tab stop                             | APG Toolbar, Radix, Base UI, React Aria, Primer (`role="toolbar"` only)      | **defer to `toolbar`** | Wave 4. Primer draws the same line: its focus zone is `disabled: role !== 'toolbar'`. A group of buttons is several tab stops; a composite control is one. Two families, two answers. |
-| Overflow into a menu                                    | Spectrum (guidelines), Carbon (guidelines), Bootstrap (nested dropdown)      | **defer to `menu`**    | Wave 5. `docs/rebuild-order.md` already records the dependency and the return as a refinement.                                                                                       |
+| Overflow into a menu                                    | Spectrum (guidelines), Carbon (guidelines), Bootstrap (nested dropdown)      | **defer to `menu`**    | Wave 5. `docs/build-order.md` already records the dependency and the return as a refinement.                                                                                       |
 | Text and input addons inside the joined shape           | shadcn (`ButtonGroupText`), Ant (`Space.Compact` with `Input`), Bootstrap    | **decline**        | That is an input group: the addon belongs to the field's box, reads the field's height and its invalid state. It goes with `input` and `field`, wave 3, not with a family whose name says it groups buttons. |
 | Reorder buttons by emphasis when stacked                | Carbon (`buttonOrder`, reversed when `isStacked`)                            | **decline**        | Visual order would stop matching DOM order, which is WCAG 2.2 SC 1.3.2 failure F1 and breaks the Tab sequence. `stack`, `inline` and `grid` already refused the same capability for the same reason. |
 

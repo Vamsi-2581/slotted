@@ -1,7 +1,7 @@
 # Switch — capability inventory
 
 Produced from the field rather than from the family, before any design or code.
-`docs/rebuild-order.md` lists `switch` as a rebuild, and the family it names was
+`docs/build-order.md` lists `switch` as a rebuild, and the family it names was
 deleted with the rest of the schema-4 library: the tree holds no `switch`, and
 `git show HEAD:specs/components/switch/contract.json` holds what shipped. The
 delta against that contract is the last section.

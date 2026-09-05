@@ -1,0 +1,537 @@
+<!--
+  The harness runs no script, so every layer carries what
+  `packages/core/src/positioner` would have written on it — `top`, `left`,
+  `data-side`, the transform origin, and the room the engine says is left.
+  `--slotted-positioner-available-width` is a percentage rather than the
+  engine's pixels: it resolves against the stage, so one value holds at all
+  three capture widths. The inline placement is `inset-inline-start` where the
+  engine writes `left`: the engine measures a mirrored document and writes the
+  physical answer, and a fragment that wrote `left` would strand every layer on
+  the same edge in a right-to-left capture, which is the one thing that capture
+  exists to check.
+
+  Focus is the state this family turns on, and it is photographed rather than
+  faked: `shoot.mjs --focus "[data-scene='states'] [data-part='item']:nth-of-type(2)"`
+  puts real focus on an item after a Tab press, so `:focus` and `:focus-visible`
+  are both the browser's own.
+
+  A scene that shows a menu hanging from something carries `data-fixed` and
+  places its layer absolutely, as the engine would. A scene that is only about
+  the surface makes the layer `position: relative` instead, so the stage is as
+  tall as the surface and not a floor of 420 pixels with a menu in one corner.
+-->
+<section data-scene="anatomy" data-fixed>
+  <div style="position: relative; padding: 12px">
+    <button
+      data-ui="button"
+      data-part="root"
+      data-tone="secondary"
+      data-variant="outline"
+      data-size="md"
+      type="button"
+      aria-haspopup="menu"
+      aria-expanded="true"
+      data-open
+    >
+      <span data-part="label">Document</span>
+    </button>
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="md"
+      data-open
+      style="
+        top: 56px;
+        inset-inline-start: 12px;
+        --slotted-positioner-available-width: 92%;
+        --slotted-positioner-transform-origin: left top;
+      "
+    >
+      <div data-part="content" role="menu" aria-label="Document">
+        <div data-part="group" role="group" aria-labelledby="menu-anatomy-file">
+          <div data-part="group-label" id="menu-anatomy-file">File</div>
+          <button data-part="item" role="menuitem" type="button">
+            <span
+              data-part="icon"
+              style="--slotted-menu-item-icon: var(--slotted-icon-copy)"
+            ></span>
+            <span data-part="label">Duplicate</span>
+            <span data-part="shortcut">⌘D</span>
+          </button>
+          <button data-part="item" role="menuitem" type="button">
+            <span
+              data-part="icon"
+              style="--slotted-menu-item-icon: var(--slotted-icon-external)"
+            ></span>
+            <span data-part="label">Open in new tab</span>
+            <span data-part="shortcut">⇧⌘O</span>
+          </button>
+          <button data-part="item" role="menuitem" type="button" aria-disabled="true" data-disabled>
+            <span
+              data-part="icon"
+              style="--slotted-menu-item-icon: var(--slotted-icon-lock)"
+            ></span>
+            <span data-part="label">Publish</span>
+            <span data-part="shortcut">⌘P</span>
+          </button>
+        </div>
+        <hr data-part="separator" role="separator" aria-orientation="horizontal" />
+        <button
+          data-part="item"
+          role="menuitemcheckbox"
+          type="button"
+          aria-checked="true"
+          data-checked
+        >
+          <span data-part="indicator"></span>
+          <span data-part="label">Show comments</span>
+          <span data-part="shortcut">⌘/</span>
+        </button>
+        <button
+          data-part="item"
+          role="menuitem"
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span data-part="label">Export as</span>
+        </button>
+        <hr data-part="separator" role="separator" aria-orientation="horizontal" />
+        <button data-part="item" role="menuitem" type="button" data-tone="danger">
+          <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-x)"></span>
+          <span data-part="label">Delete document</span>
+          <span data-part="description">This cannot be undone.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="sizes">
+  <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start">
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="sm"
+      data-open
+      style="position: relative; --slotted-positioner-available-width: 100%"
+    >
+      <div data-part="content" role="menu" aria-label="Small">
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-copy)"></span>
+          <span data-part="label">Rename</span>
+          <span data-part="shortcut">F2</span>
+        </button>
+        <button
+          data-part="item"
+          role="menuitemcheckbox"
+          type="button"
+          aria-checked="true"
+          data-checked
+        >
+          <span data-part="indicator"></span>
+          <span data-part="label">Move to…</span>
+        </button>
+      </div>
+    </div>
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="md"
+      data-open
+      style="position: relative; --slotted-positioner-available-width: 100%"
+    >
+      <div data-part="content" role="menu" aria-label="Medium">
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-copy)"></span>
+          <span data-part="label">Rename</span>
+          <span data-part="shortcut">F2</span>
+        </button>
+        <button
+          data-part="item"
+          role="menuitemcheckbox"
+          type="button"
+          aria-checked="true"
+          data-checked
+        >
+          <span data-part="indicator"></span>
+          <span data-part="label">Move to…</span>
+        </button>
+      </div>
+    </div>
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="lg"
+      data-open
+      style="position: relative; --slotted-positioner-available-width: 100%"
+    >
+      <div data-part="content" role="menu" aria-label="Large">
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-copy)"></span>
+          <span data-part="label">Rename</span>
+          <span data-part="shortcut">F2</span>
+        </button>
+        <button
+          data-part="item"
+          role="menuitemcheckbox"
+          type="button"
+          aria-checked="true"
+          data-checked
+        >
+          <span data-part="indicator"></span>
+          <span data-part="label">Move to…</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="states">
+  <div
+    data-ui="menu"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-open
+    style="position: relative; --slotted-positioner-available-width: 100%"
+  >
+    <div data-part="content" role="menu" aria-label="States">
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Default</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Focus and hover</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button" aria-disabled="true" data-disabled>
+        <span data-part="label">Disabled</span>
+        <span data-part="shortcut">⌘Z</span>
+      </button>
+      <button
+        data-part="item"
+        role="menuitemcheckbox"
+        type="button"
+        aria-checked="true"
+        data-checked
+      >
+        <span data-part="indicator"></span>
+        <span data-part="label">Checked</span>
+      </button>
+      <button data-part="item" role="menuitemcheckbox" type="button" aria-checked="false">
+        <span data-part="indicator"></span>
+        <span data-part="label">Unchecked</span>
+      </button>
+      <button
+        data-part="item"
+        role="menuitem"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded="true"
+        data-open
+      >
+        <span data-part="label">Open submenu</span>
+      </button>
+      <button
+        data-part="item"
+        role="menuitem"
+        type="button"
+        data-tone="danger"
+        aria-disabled="true"
+        data-disabled
+      >
+        <span data-part="label">Danger, disabled</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="choice">
+  <div
+    data-ui="menu"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-open
+    style="position: relative; --slotted-positioner-available-width: 100%"
+  >
+    <div data-part="content" role="menu" aria-label="View">
+      <div data-part="group" role="group" aria-labelledby="menu-choice-show">
+        <div data-part="group-label" id="menu-choice-show">Show</div>
+        <button
+          data-part="item"
+          role="menuitemcheckbox"
+          type="button"
+          aria-checked="true"
+          data-checked
+        >
+          <span data-part="indicator"></span>
+          <span data-part="label">Ruler</span>
+        </button>
+        <button data-part="item" role="menuitemcheckbox" type="button" aria-checked="false">
+          <span data-part="indicator"></span>
+          <span data-part="label">Grid</span>
+          <span data-part="shortcut">⌘'</span>
+        </button>
+      </div>
+      <hr data-part="separator" role="separator" aria-orientation="horizontal" />
+      <div data-part="group" role="group" aria-labelledby="menu-choice-sort">
+        <div data-part="group-label" id="menu-choice-sort">Sort by</div>
+        <button
+          data-part="item"
+          role="menuitemradio"
+          type="button"
+          aria-checked="true"
+          data-checked
+        >
+          <span data-part="indicator"></span>
+          <span data-part="label">Name</span>
+        </button>
+        <button data-part="item" role="menuitemradio" type="button" aria-checked="false">
+          <span data-part="indicator"></span>
+          <span data-part="label">Date modified</span>
+        </button>
+        <button data-part="item" role="menuitemradio" type="button" aria-checked="false">
+          <span data-part="indicator"></span>
+          <span data-part="label">Size</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="submenu" data-fixed>
+  <div style="position: relative; padding: 12px">
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="md"
+      data-open
+      style="
+        top: 12px;
+        inset-inline-start: 12px;
+        --slotted-positioner-available-width: 60%;
+        --slotted-positioner-transform-origin: left top;
+      "
+    >
+      <div data-part="content" role="menu" aria-label="Share">
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Copy link</span>
+        </button>
+        <button
+          data-part="item"
+          role="menuitem"
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="true"
+          data-open
+        >
+          <span data-part="label">Send to</span>
+        </button>
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Embed</span>
+        </button>
+      </div>
+    </div>
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="right"
+      data-align="start"
+      data-size="md"
+      data-open
+      style="
+        top: 46px;
+        inset-inline-start: 46%;
+        --slotted-positioner-available-width: 52%;
+        --slotted-positioner-transform-origin: left top;
+      "
+    >
+      <div data-part="content" role="menu" aria-label="Send to">
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Slack</span>
+        </button>
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Email</span>
+        </button>
+        <button
+          data-part="item"
+          role="menuitem"
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          <span data-part="label">More</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="content">
+  <div
+    data-ui="menu"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-open
+    style="position: relative; --slotted-positioner-available-width: 100%"
+  >
+    <div data-part="content" role="menu" aria-label="Content">
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-inbox)"></span>
+        <span data-part="label">Move every unread message to the archive</span>
+        <span data-part="shortcut">⇧⌘A</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Benutzerkontensteuerungseinstellungen</span>
+        <span data-part="description"
+          >A translated label wraps in its own column and leaves the binding where it was.</span
+        >
+        <span data-part="shortcut">⌥⌘,</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label"
+          >https://example.com/a/very/long/unbroken/path/that/cannot/wrap</span
+        >
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-eye)"></span>
+        <span data-part="label">Preview</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="scrolling">
+  <div
+    data-ui="menu"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-open
+    style="
+      position: relative;
+      --slotted-positioner-available-width: 100%;
+      --slotted-positioner-available-height: 232px;
+    "
+  >
+    <div data-part="content" role="menu" aria-label="Move to">
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Inbox</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Archive</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Drafts</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Sent</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Spam</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Trash</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Receipts</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button">
+        <span data-part="label">Travel</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="tones">
+  <div
+    data-ui="menu"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-open
+    style="position: relative; --slotted-positioner-available-width: 100%"
+  >
+    <div data-part="content" role="menu" aria-label="Tones">
+      <button data-part="item" role="menuitem" type="button" data-tone="accent">
+        <span
+          data-part="icon"
+          style="--slotted-menu-item-icon: var(--slotted-icon-circle-info)"
+        ></span>
+        <span data-part="label">Accent</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button" data-tone="secondary">
+        <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-circle)"></span>
+        <span data-part="label">Secondary</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button" data-tone="success">
+        <span
+          data-part="icon"
+          style="--slotted-menu-item-icon: var(--slotted-icon-circle-check)"
+        ></span>
+        <span data-part="label">Success</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button" data-tone="warning">
+        <span
+          data-part="icon"
+          style="--slotted-menu-item-icon: var(--slotted-icon-triangle-alert)"
+        ></span>
+        <span data-part="label">Warning</span>
+      </button>
+      <button data-part="item" role="menuitem" type="button" data-tone="danger">
+        <span
+          data-part="icon"
+          style="--slotted-menu-item-icon: var(--slotted-icon-circle-x)"
+        ></span>
+        <span data-part="label">Danger</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="empty">
+  <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start">
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="md"
+      data-open
+      style="position: relative; --slotted-positioner-available-width: 100%"
+    >
+      <div data-part="content" role="menu" aria-label="No labels">
+        <div data-part="empty">No labels yet</div>
+      </div>
+    </div>
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="md"
+      data-open
+      style="position: relative; --slotted-positioner-available-width: 100%"
+    >
+      <div data-part="content" role="menu" aria-label="Loading" data-loading aria-busy="true">
+        <div data-part="empty">Loading labels…</div>
+      </div>
+    </div>
+  </div>
+</section>

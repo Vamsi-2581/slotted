@@ -1,6 +1,6 @@
 # Skeleton family design
 
-Rebuild of `skeleton`, wave 2 of `docs/rebuild-order.md`. The family that
+Rebuild of `skeleton`, wave 2 of `docs/build-order.md`. The family that
 shipped in August is one `span` carrying one attribute; this document records
 what replaces it and what the replacement costs.
 

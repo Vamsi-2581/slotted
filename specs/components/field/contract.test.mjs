@@ -46,7 +46,7 @@ test('renders a div holding a native label and a native control', () => {
 
 /**
  * The description and the error are `inline-message`, which
- * `docs/rebuild-order.md` states as the reason that family was built in wave 2.
+ * `docs/build-order.md` states as the reason that family was built in wave 2.
  * The field draws neither a mark nor a severity word of its own; it points at
  * the family that already does, so a field error and a status light about the
  * same thing speak the same word.
@@ -220,7 +220,7 @@ test('lets the counter go over its limit before the field is in error', () => {
 
 /**
  * The field is told its state; it holds none. The value belongs to the control
- * and the validity to `form` in wave 3, which `docs/rebuild-order.md` names as
+ * and the validity to `form` in wave 3, which `docs/build-order.md` names as
  * the owner of submission and validation. The assertion keeps the absence a
  * decision rather than an oversight.
  */

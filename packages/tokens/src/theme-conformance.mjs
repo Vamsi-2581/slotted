@@ -1,0 +1,390 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+
+import { LAYER_ORDER_STATEMENT } from './layer-order.mjs';
+import { renderThemeCss } from './render-theme.mjs';
+
+/**
+ * The rules every theme is held to, in one place, so a second theme is a JSON
+ * file rather than a JSON file and a copied test suite. What a theme *chose* —
+ * its shadow scale, its neutral, the white it puts on a solid — is not here:
+ * that is the theme's identity, and it belongs to the theme's own tests.
+ */
+
+const VARIANTS = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const SOLID_STATES = ['solid', 'solid-hover', 'solid-active'];
+const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
+
+/**
+ * A scheme named for contrast has to earn the name. `high-contrast` is held to
+ * the AAA ratio for body text rather than the AA ratio the other schemes meet,
+ * and its borders are held to the non-text ratio, because a border is what
+ * separates two surfaces that no longer differ in fill.
+ */
+const TEXT_RATIO = { light: 4.5, dark: 4.5, 'high-contrast': 7 };
+const NON_TEXT_RATIO = 3;
+
+/** The collapsed duration is short enough to read as instant, and never zero. */
+const MAX_REDUCED_MOTION_MS = 1;
+
+function channel(value) {
+  const normalized = value / 255;
+  return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+}
+
+function luminance(hex) {
+  const match = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex);
+  assert.ok(match, `Expected a literal six-digit hex color, received ${hex}`);
+  const [, red = '00', green = '00', blue = '00'] = match;
+  return (
+    0.2126 * channel(Number.parseInt(red, 16)) +
+    0.7152 * channel(Number.parseInt(green, 16)) +
+    0.0722 * channel(Number.parseInt(blue, 16))
+  );
+}
+
+export function contrast(first, second) {
+  const high = Math.max(luminance(first), luminance(second));
+  const low = Math.min(luminance(first), luminance(second));
+  return (high + 0.05) / (low + 0.05);
+}
+
+function milliseconds(value) {
+  const match = /^(\d+(?:\.\d+)?)(ms|s)$/.exec(String(value).trim());
+  return match ? Number(match[1]) * (match[2] === 's' ? 1000 : 1) : undefined;
+}
+
+function names(contract, axis) {
+  return contract.tokens.filter((token) => token.axis === axis).map((token) => token.name);
+}
+
+function reducedMotionNames(contract) {
+  return contract.tokens.filter((token) => token.reducedMotion).map((token) => token.name);
+}
+
+function glyphNames(contract) {
+  return names(contract, 'base').filter((name) => name.startsWith('--slotted-icon-'));
+}
+
+function expectedReducedMotionBlock(contract, theme) {
+  const declarations = reducedMotionNames(contract)
+    .map((name) => `      ${name}: ${theme.reducedMotion[name]};`)
+    .join('\n');
+  return (
+    `  @media (prefers-reduced-motion: reduce) {\n` +
+    `    [data-slotted-theme="${theme.name}"] {\n` +
+    `${declarations}\n` +
+    `    }\n` +
+    `  }`
+  );
+}
+
+function payloadFor(theme, name) {
+  const value = theme.base[name];
+  assert.ok(value !== undefined, `${name} is missing`);
+
+  const match = /^url\("data:image\/svg\+xml,([^"]*)"\)$/.exec(value);
+  assert.ok(match, `${name} is not a complete SVG data URI`);
+  return match[1];
+}
+
+function structureCases(contract, theme, distUrl) {
+  const label = theme.name;
+
+  /**
+   * A scheme is a palette and a UA hint. Without the hint every native control,
+   * scrollbar and form widget renders in the light user-agent style whatever
+   * scheme the application selected, so an unchecked radio on a dark card came
+   * out a solid white dot that read as checked. Card was the first rebuilt
+   * family to render a native control, and it is where this was found.
+   */
+  test(`${label} tells the user agent which scheme its own widgets are painted for`, () => {
+    const css = renderThemeCss(contract, theme);
+    for (const [scheme, expected] of [
+      ['light', 'light'],
+      ['dark', 'dark'],
+      ['high-contrast', 'light'],
+    ]) {
+      const block = css.split(`[data-slotted-scheme="${scheme}"] {`)[1]?.split('}')[0];
+      assert.ok(
+        block?.includes(`color-scheme: ${expected};`),
+        `${scheme} declares no color-scheme`,
+      );
+    }
+  });
+
+  test(`${label} collapses every duration the contract marks, and never to zero`, () => {
+    assert.deepEqual(Object.keys(theme.reducedMotion).sort(), reducedMotionNames(contract).sort());
+
+    for (const [name, value] of Object.entries(theme.reducedMotion)) {
+      const duration = milliseconds(value);
+      assert.ok(duration !== undefined, `${name} collapses to ${value}, which is not a duration`);
+      assert.ok(
+        duration > 0 && duration <= MAX_REDUCED_MOTION_MS,
+        `${name} collapses to ${value}, outside (0, ${MAX_REDUCED_MOTION_MS}ms]`,
+      );
+    }
+  });
+
+  test(`${label} collapses every duration under its own theme selector`, () => {
+    const css = renderThemeCss(contract, theme);
+    const queryStart = css.indexOf('@media (prefers-reduced-motion: reduce)');
+    const expected = expectedReducedMotionBlock(contract, theme);
+
+    assert.notEqual(queryStart, -1, 'The theme emits no reduced-motion block');
+    assert.equal(css.slice(queryStart - 2, queryStart - 2 + expected.length), expected);
+  });
+
+  test(`${label} emits the reduced-motion block after the block it overrides`, () => {
+    const css = renderThemeCss(contract, theme);
+    assert.ok(
+      css.indexOf('@media (prefers-reduced-motion: reduce)') >
+        css.indexOf(reducedMotionNames(contract)[0]),
+      'A media query adds no specificity, so source order is what makes the override win',
+    );
+  });
+
+  test(`${label} emits the reduced-motion block as the final theme content`, () => {
+    const css = renderThemeCss(contract, theme);
+    const queryStart = css.indexOf('@media (prefers-reduced-motion: reduce)');
+
+    assert.notEqual(queryStart, -1, 'The theme emits no reduced-motion block');
+    assert.equal(
+      css.slice(queryStart),
+      `${expectedReducedMotionBlock(contract, theme).slice(2)}\n}\n`,
+      'No later theme block may override reduced motion',
+    );
+  });
+
+  test(`${label} grows every control to the comfortable target under a coarse pointer`, () => {
+    const css = renderThemeCss(contract, theme);
+    const query = css.slice(css.indexOf('@media (pointer: coarse)'));
+
+    for (const density of contract.requiredDensities) {
+      assert.match(query, new RegExp(`data-slotted-density="${density}"`));
+    }
+    assert.match(
+      query,
+      /--slotted-control-height-md: max\([^)]+, var\(--slotted-target-comfortable\)\)/,
+    );
+    assert.ok(
+      css.indexOf('@media (pointer: coarse)') > css.indexOf('--slotted-control-height-md:'),
+      'The coarse-pointer block must follow the density block it overrides',
+    );
+  });
+
+  test(`${label} maps every scheme token to a system colour under forced colours`, () => {
+    const css = renderThemeCss(contract, theme);
+    const query = css.slice(
+      css.indexOf('@media (forced-colors: active)'),
+      css.indexOf('@media (prefers-reduced-motion: reduce)'),
+    );
+
+    for (const name of names(contract, 'scheme')) {
+      assert.match(query, new RegExp(`${name}: [A-Za-z]+;`), `${name} is unmapped`);
+    }
+    for (const scheme of contract.requiredSchemes) {
+      assert.match(
+        query,
+        new RegExp(`\\[data-slotted-scheme="${scheme}"\\]`),
+        `forced colours must carry the specificity of the ${scheme} block`,
+      );
+    }
+  });
+
+  test(`${label} scopes every block to its own name`, () => {
+    const css = renderThemeCss(contract, theme);
+    const scopes = new Set(
+      [...css.matchAll(/\[data-slotted-theme="([^"]+)"\]/g)].map(([, name]) => name),
+    );
+
+    assert.deepEqual([...scopes], [theme.name], 'Two themes must emit disjoint selectors');
+  });
+
+  test(`${label} opens the stylesheet with the published layer order`, () => {
+    assert.ok(renderThemeCss(contract, theme).startsWith(LAYER_ORDER_STATEMENT));
+  });
+
+  if (distUrl !== undefined) {
+    test(`${label} opens the built stylesheet with the published layer order`, async () => {
+      const css = await readFile(distUrl, 'utf8');
+      assert.ok(css.startsWith(LAYER_ORDER_STATEMENT));
+    });
+  }
+}
+
+function contrastCases(theme) {
+  const label = theme.name;
+
+  /**
+   * One radius for every control, at every size. Button carried three of its
+   * own — 7, 6 and 5 pixels — so a small button read rounder than a large one,
+   * which is a scale nothing else in the library shares. The rebuild dropped
+   * them, and this is what keeps a second corner scale from reappearing beside
+   * the first.
+   */
+  test(`${label} leaves the corner of a control to one token`, () => {
+    assert.deepEqual(
+      Object.keys(theme.base).filter(
+        (name) => /radius/.test(name) && !name.startsWith('--slotted-radius-'),
+      ),
+      ['--slotted-control-radius'],
+    );
+    assert.match(theme.base['--slotted-control-radius'], /^var\(--slotted-radius-[a-z]+\)$/);
+  });
+
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const required = TEXT_RATIO[scheme];
+
+    test(`${label} ${scheme} text reads on every surface`, () => {
+      for (const surface of SURFACES) {
+        for (const text of ['--slotted-text', '--slotted-text-muted']) {
+          assert.ok(
+            contrast(values[surface], values[text]) >= required,
+            `${scheme} ${text} on ${surface} is below ${required}:1`,
+          );
+        }
+      }
+    });
+
+    test(`${label} ${scheme} inverts a surface without losing its text`, () => {
+      assert.ok(
+        contrast(values['--slotted-surface-inverse'], values['--slotted-text-inverse']) >= required,
+        `${scheme} inverse text is below ${required}:1`,
+      );
+    });
+
+    /**
+     * A border and a focus ring are non-text elements, and the surface they are
+     * drawn against is not always `--slotted-surface`: an `outline` control
+     * takes whatever ground it is placed on, so a form inside a raised card and
+     * the same form on a sunken page are both cases the ratio has to survive.
+     * Holding only the default surface is what let the control border soften
+     * past the floor on one of the other two without anything saying so.
+     */
+    test(`${label} ${scheme} separates surfaces with a visible border`, () => {
+      for (const surface of SURFACES) {
+        for (const line of ['--slotted-border-strong', '--slotted-control-border-color']) {
+          assert.ok(
+            contrast(values[surface], values[line]) >= NON_TEXT_RATIO,
+            `${scheme} ${line} on ${surface} is below ${NON_TEXT_RATIO}:1`,
+          );
+        }
+        assert.ok(
+          contrast(values[surface], values['--slotted-focus-ring-color']) >= NON_TEXT_RATIO,
+          `${scheme} focus ring on ${surface} is below ${NON_TEXT_RATIO}:1`,
+        );
+      }
+    });
+
+    /**
+     * The edge of a control is lighter than the line between two surfaces, and
+     * the two are separate tokens for that reason. Reading
+     * `--slotted-border-strong` on a control drew a frame that was the darkest
+     * line on the form.
+     */
+    test(`${label} ${scheme} keeps the control edge lighter than the surface separator`, () => {
+      assert.ok(
+        contrast(values['--slotted-surface'], values['--slotted-control-border-color']) <
+          contrast(values['--slotted-surface'], values['--slotted-border-strong']) ||
+          scheme === 'high-contrast',
+        `${scheme} control border is not lighter than the strong border`,
+      );
+    });
+
+    test(`${label} ${scheme} solid variants meet the ratio the scheme promises`, () => {
+      for (const variant of VARIANTS) {
+        const foreground = values[`--slotted-tone-${variant}-on-solid`];
+        for (const state of SOLID_STATES) {
+          assert.ok(
+            contrast(values[`--slotted-tone-${variant}-${state}`], foreground) >= required,
+            `${scheme}.${variant}.${state} is below ${required}:1`,
+          );
+        }
+      }
+    });
+
+    /**
+     * The tinted rectangle each tone carries — its `surface` role under its
+     * `text` role — is what `badge`, `tag` and `alert` are made of, and Button
+     * handed the pair to them when `soft` left its painting axis. Nothing held
+     * the ratio: the solid roles were covered from the first commit and the
+     * tinted ones never were, so the first family to depend on them would have
+     * been the one to discover a shortfall, in a screenshot.
+     *
+     * `outline` puts the same text on the page instead, so both grounds are
+     * held here.
+     */
+    test(`${label} ${scheme} keeps a tinted ground readable`, () => {
+      for (const variant of VARIANTS) {
+        const text = values[`--slotted-tone-${variant}-text`];
+        for (const ground of [`--slotted-tone-${variant}-surface`, ...SURFACES]) {
+          assert.ok(
+            contrast(values[ground], text) >= required,
+            `${scheme} ${variant} text on ${ground} is below ${required}:1`,
+          );
+        }
+      }
+    });
+
+    test(`${label} ${scheme} keeps disabled text legible`, () => {
+      assert.ok(
+        contrast(
+          values['--slotted-disabled-background'],
+          values['--slotted-disabled-foreground'],
+        ) >= NON_TEXT_RATIO,
+        `${scheme} disabled text is below ${NON_TEXT_RATIO}:1`,
+      );
+    });
+  }
+}
+
+function glyphCases(contract, theme) {
+  const label = theme.name;
+  const glyphs = glyphNames(contract);
+
+  test(`${label} gives every glyph a fully encoded, complete SVG payload a mask can use`, () => {
+    assert.ok(glyphs.length > 0, 'The contract declares no glyph');
+
+    for (const name of glyphs) {
+      const payload = payloadFor(theme, name);
+      assert.doesNotMatch(payload, /[<>#]/, `${name} leaves SVG syntax unencoded`);
+
+      const svg = decodeURIComponent(payload);
+      assert.match(svg, /^<svg\b[^>]*>[\s\S]*<\/svg>$/, `${name} is not a complete SVG document`);
+    }
+  });
+
+  test(`${label} uses black or none only for its mask alpha geometry`, () => {
+    for (const name of glyphs) {
+      const svg = decodeURIComponent(payloadFor(theme, name));
+      const attributes = [...svg.matchAll(/\b(fill|stroke)=['"]([^'"]+)['"]/g)];
+      assert.ok(attributes.length > 0, `${name} has no fill or stroke alpha geometry`);
+
+      for (const [, attribute, value] of attributes) {
+        assert.ok(
+          value === 'black' || value === 'none',
+          `${name} uses ${value} for ${attribute}, not black or none mask alpha geometry`,
+        );
+      }
+    }
+  });
+
+  test(`${label} declares one viewBox for every glyph, so one size rule fits all`, () => {
+    for (const name of glyphs) {
+      const svg = decodeURIComponent(payloadFor(theme, name));
+      assert.ok(svg.includes("viewBox='0 0 24 24'"), `${name} has a foreign viewBox`);
+    }
+  });
+}
+
+/**
+ * Registers every case a theme has to pass. `distUrl` is the built stylesheet;
+ * omit it to run the suite against a theme that has not been built.
+ */
+export function themeConformance({ contract, theme, distUrl }) {
+  structureCases(contract, theme, distUrl);
+  contrastCases(theme);
+  glyphCases(contract, theme);
+}

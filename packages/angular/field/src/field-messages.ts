@@ -40,7 +40,7 @@ export abstract class SlFieldMessage {
  *
  * It arrives with a tone, a mark, a clipped severity word an application
  * translates once and a reserved line — none of which the field reimplements.
- * `docs/rebuild-order.md` states that as the reason `inline-message` was built
+ * `docs/build-order.md` states that as the reason `inline-message` was built
  * in wave 2.
  */
 @Directive({

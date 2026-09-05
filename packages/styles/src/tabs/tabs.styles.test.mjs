@@ -238,11 +238,10 @@ test('rings the closing control from outside and the tab from inside', () => {
  * Cloudscape ships a whole `container` variant for the same case.
  */
 test('can stand on a line the page already drew', () => {
-  assert.ok(normalized.includes(`${ui}[data-variant='line'][data-track='line'] [data-part='list']{`));
-  assert.match(
-    rule(`${ui}[data-track='none'] [data-part='item']::after`),
-    /inset-block-end:0/,
+  assert.ok(
+    normalized.includes(`${ui}[data-variant='line'][data-track='line'] [data-part='list']{`),
   );
+  assert.match(rule(`${ui}[data-track='none'] [data-part='item']::after`), /inset-block-end:0/);
   assert.match(fragment, /data-track="none"/);
 });
 

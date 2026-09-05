@@ -103,7 +103,7 @@ class Devtools {
   }
 }
 
-async function launch() {
+export async function launch() {
   const profile = await mkdtemp(join(tmpdir(), 'slotted-harness-'));
   const chrome = spawn(process.env['CHROME_BIN'] ?? 'google-chrome', [
     '--headless=new',

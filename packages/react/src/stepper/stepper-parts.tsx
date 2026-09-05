@@ -64,8 +64,8 @@ export function StepperList({
     if (lastKey.current === key) return;
     lastKey.current = key;
     register?.(registrations);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps -- the serialized
-       registrations are the dependency; the array itself is new every render. */
+    /* The serialized registrations are the dependency; the array itself is new
+       every render. */
   }, [key, register]);
 
   const rootProps: StepperListRootProps = {
@@ -142,6 +142,14 @@ export function StepperStep({
   render,
   ...nativeProps
 }: StepperStepProps) {
+  /**
+   * `complete` is the consumer's fact about this step, and `StepperList` reads
+   * it from the element itself rather than from here. It is destructured only
+   * to keep it off the DOM: without that, it lands on the rendered element as
+   * an attribute the platform does not know.
+   */
+  void complete;
+
   const stepper = useStepper();
   const step = useStepperStep();
   const index = step?.index ?? 0;

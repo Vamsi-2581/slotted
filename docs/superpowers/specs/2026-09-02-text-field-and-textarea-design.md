@@ -103,7 +103,7 @@ the schema could not express the one thing the control does. `value` and
 `revealed` join `KNOWN_CAPABILITIES`, and both join `MUTABLE_CAPABILITIES`, so
 every future control that holds text is required to declare a state model for
 it. The fix lands in its own commit, before either family, as
-`docs/rebuild-briefing.md` requires of a shared tool that cannot express the
+`docs/build-briefing.md` requires of a shared tool that cannot express the
 right contract.
 
 ## What the control takes from the field

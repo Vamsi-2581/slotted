@@ -8,6 +8,17 @@ export const SCHEMES = ['light', 'dark', 'high-contrast'] as const;
 export const DENSITIES = ['comfortable', 'compact', 'dense'] as const;
 export const DIRECTIONS = ['ltr', 'rtl'] as const;
 
+/**
+ * One entry per theme package whose stylesheet the preview loads. The value
+ * written to `data-slotted-theme` is what selects that theme's block, so a
+ * name no loaded stylesheet carries leaves the subtree with no custom property
+ * defined at all: every family falls through to the system colours it keeps as
+ * a last resort, and a `transition` naming an undefined duration is dropped
+ * whole. That is what a grey, motionless workbench means.
+ */
+export const THEMES = ['default'] as const;
+
+export type WorkbenchTheme = (typeof THEMES)[number];
 export type WorkbenchScheme = (typeof SCHEMES)[number];
 export type WorkbenchDensity = (typeof DENSITIES)[number];
 export type WorkbenchDirection = (typeof DIRECTIONS)[number];
@@ -27,7 +38,7 @@ export const INITIAL_GLOBALS = {
 } as const;
 
 export const GLOBAL_TYPES = {
-  theme: { toolbar: { icon: 'paintbrush', items: ['default'] as string[] } },
+  theme: { toolbar: { icon: 'paintbrush', items: [...THEMES] as string[] } },
   scheme: { toolbar: { icon: 'contrast', items: [...SCHEMES] as string[] } },
   density: { toolbar: { icon: 'component', items: [...DENSITIES] as string[] } },
   direction: { toolbar: { icon: 'transfer', items: [...DIRECTIONS] as string[] } },
@@ -40,6 +51,7 @@ function oneOf<T extends string>(values: readonly T[], value: unknown, fallback:
 }
 
 export function resolveWorkbenchGlobals(globals: StorybookGlobals) {
+  const theme = oneOf(THEMES, globals?.['theme'], 'default');
   const scheme = oneOf(SCHEMES, globals?.['scheme'], 'light');
   const density = oneOf(DENSITIES, globals?.['density'], 'comfortable');
   const direction = oneOf(DIRECTIONS, globals?.['direction'], 'ltr');
@@ -49,6 +61,6 @@ export function resolveWorkbenchGlobals(globals: StorybookGlobals) {
     density,
     direction,
     scheme,
-    theme: 'default',
+    theme,
   } as const;
 }

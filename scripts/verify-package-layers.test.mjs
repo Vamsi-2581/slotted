@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { LAYERS, layerViolations } from './verify-package-layers.mjs';
+import { LAYERS, layerViolations, rankOf } from './verify-package-layers.mjs';
 
 const dependency = (name, kind = 'dependencies') => ({ name, kind });
 
@@ -9,13 +9,31 @@ test('assigns every workspace package to a layer', () => {
   assert.deepEqual(LAYERS, {
     '@slotted/tokens': 10,
     '@slotted/styles': 10,
-    '@slotted/theme-default': 11,
     '@slotted/core': 20,
     '@slotted/react': 30,
     '@slotted/angular': 30,
     '@slotted/testing': 40,
     '@slotted/storybook-workbench': 40,
   });
+});
+
+test('ranks every theme from its name rather than from the map', () => {
+  assert.equal(rankOf('@slotted/theme-default'), 11);
+  assert.equal(rankOf('@slotted/theme-anything-added-later'), 11);
+  assert.equal(rankOf('@slotted/core'), 20);
+  assert.equal(rankOf('react'), undefined);
+});
+
+test('rejects a theme depending on another theme', () => {
+  assert.deepEqual(
+    layerViolations([
+      {
+        name: '@slotted/theme-second',
+        dependencies: [dependency('@slotted/theme-default')],
+      },
+    ]),
+    ['@slotted/theme-second (rank 11) must not depend on @slotted/theme-default (rank 11)'],
+  );
 });
 
 test('allows a package to depend on a lower layer', () => {

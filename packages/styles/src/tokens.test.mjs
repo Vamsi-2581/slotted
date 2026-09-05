@@ -80,10 +80,13 @@ test('names every runtime prefix once, where a family can find the reason', () =
   assert.deepEqual(RUNTIME_PROPERTY_PREFIXES, [
     '--slotted-positioner-',
     '--slotted-layer-depth',
-    '--slotted-toast-index',
     '--slotted-toast-count',
     '--slotted-toast-duration',
+    '--slotted-toast-front-height',
+    '--slotted-toast-height',
+    '--slotted-toast-index',
     '--slotted-toast-play-state',
+    '--slotted-toast-stack-offset',
     '--slotted-toast-swipe-x',
     '--slotted-toast-swipe-y',
   ]);

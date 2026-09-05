@@ -78,7 +78,7 @@ test('shows the summary when focus is moved to it', () => {
 
 /**
  * A hundred errors is a real answer from a real server. The list scrolls rather
- * than truncating, because `docs/rebuild-briefing.md` refuses to take content
+ * than truncating, because `docs/build-briefing.md` refuses to take content
  * out of the DOM, and the ceiling is in lines of its own type rather than a
  * fraction of the viewport.
  */

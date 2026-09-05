@@ -53,3 +53,16 @@ build when the bundled stylesheet does not open with it.
 
 Applications written against `slotted.overrides` before this change move those
 rules to their own layer or leave them unlayered.
+
+## Addendum, 3 September 2026
+
+`docs/superpowers/specs/2026-09-03-css-theming-design.md` adds two layer
+names, `slotted.theme-overrides` and `slotted.preferences`, and does not
+revive `slotted.overrides`.
+
+The decision above stands as written. A theme is not the case it ruled on: its
+rules are scoped by `data-slotted-theme`, and the validator that admits a theme
+requires the file to open with `LAYER_ORDER_STATEMENT`. That obligation is what
+application CSS never carried, and it is what made the removed layer lose its
+rules silently. Both new names belong to artifacts the library validates, so
+their position is one the library still controls.

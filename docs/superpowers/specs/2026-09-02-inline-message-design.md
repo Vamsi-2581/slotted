@@ -5,7 +5,7 @@ Wave 2, guide 9, new family. Written before any code, as
 anatomy, an announcement policy, a translation surface and a layout-shift
 policy, and it is the piece `field` consumes in wave 3.
 
-Scope, from `docs/rebuild-order.md`: “mensagem ligada a um campo, seção ou ação,
+Scope, from `docs/build-order.md`: “mensagem ligada a um campo, seção ou ação,
 com ID estável e política de anúncio. Sem layout shift severo, e nunca tooltip
 para erro obrigatório. É a peça que `field` (onda 3) consome para mensagem e
 erro.” Guide 9 adds the kinds: “ajuda, erro, warning, success ou progresso”.

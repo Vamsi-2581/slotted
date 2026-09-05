@@ -75,16 +75,71 @@ Every demonstration is laid out with the workbench primitives. A story that
 reaches for an inline style is reaching past one, and
 `specs/reference-pages.test.mjs` refuses it.
 
-| Primitive                                                                             | What it is for                                                                                             |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `.slotted-demo-grid` with `data-columns="1\|2\|3"`                                    | The row of scenes. Scenes share a subgrid, so stages start on the same line however long the captions are. |
-| `.slotted-demo-scene` with `__header`, `__label`, `__note`                            | One scene: its name and its caption.                                                                       |
-| `.slotted-demo-stage` with `data-layout="row\|stack\|prose"` and `data-align="start"` | The ground the examples stand on. **It owns the gap**: nothing placed on it can touch anything else.       |
-| `.slotted-demo-surface` with `data-surface="inverse\|raised\|sunken"`                 | A painted context, from foundation tokens, so it answers the scheme switch.                                |
-| `.slotted-demo-rows`                                                                  | A dense two-column table context, for a family whose real home is a row.                                   |
-| `.slotted-demo-measure`                                                               | A narrow column, for showing what happens at 360 pixels and below.                                         |
-| `.slotted-demo-stack`, `.slotted-demo-row`                                            | A column or a wrapping row of examples inside a stage.                                                     |
-| `--slotted-demo-gap`                                                                  | The one distance a story may retune, and it is a custom property rather than a style attribute.            |
+| Primitive                                                                                    | What it is for                                                                                             |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `.slotted-demo-grid` with `data-columns="1\|2\|3"`                                           | The row of scenes. Scenes share a subgrid, so stages start on the same line however long the captions are. |
+| `.slotted-demo-scene` with `__header`, `__label`, `__note`                                   | One scene: its name and its caption.                                                                       |
+| `.slotted-demo-stage` with `data-layout="row\|stack\|block\|prose"` and `data-align="start"` | The ground the examples stand on. **It owns the gap**: nothing placed on it can touch anything else.       |
+| `.slotted-demo-surface` with `data-surface="inverse\|raised\|sunken"`                        | A painted context, from foundation tokens, so it answers the scheme switch.                                |
+| `.slotted-demo-rows`                                                                         | A dense two-column table context, for a family whose real home is a row.                                   |
+| `.slotted-demo-measure`                                                                      | A narrow column, for showing what happens at 360 pixels and below.                                         |
+| `.slotted-demo-stack`, `.slotted-demo-row`                                                   | A column or a wrapping row of examples inside a stage.                                                     |
+| `--slotted-demo-gap`                                                                         | The one distance a story may retune, and it is a custom property rather than a style attribute.            |
+
+### How much room a demonstration gets
+
+A scene is read at the full width of the page. `data-columns` is an opt-in for
+members narrow enough to sit beside each other — a badge, a key, a chip, an
+avatar — and asking for two or three is a claim that the family reads correctly
+in half or a third of the page. A family that reflows, wraps, truncates or
+answers its own width takes one column, which is the default.
+
+More room than the consumer will give is a mild inaccuracy. Less room breaks the
+component in the picture, and the correction is then made against a constraint
+nobody imposes.
+
+### Measure the page, do not only look at it
+
+A page can pass every test, look plausible in a screenshot, and still be drawn
+wrong: `pagination` stood at **zero pixels** inside a 676-pixel stage on the
+published page, with its content spilling 171 pixels past the box that owned it.
+Nothing offline could see it, because the defect exists only once a browser has
+laid the page out.
+
+With a Storybook already running:
+
+```bash
+node tools/harness/audit.mjs "http://localhost:6006/iframe.html?viewMode=docs&id=components-<family>--reference"
+node tools/harness/audit.mjs "http://localhost:6007/iframe.html?viewMode=docs&id=components-<family>--reference"
+node tools/harness/audit.mjs "<url>" --width 620
+```
+
+It reports two geometries and exits non-zero on either: an element **collapsed**
+to a sliver inside a wide stage, and content that **overflows** the box that owns
+it. Both are read as measurements rather than as causes, so the guard holds for
+the next cause nobody predicted. A finding is a defect of this step.
+
+### Which layout a stage takes
+
+`stack` is a column of things that keep their own width: right for a chip, a key,
+a badge. `block` is a column whose children fill it.
+
+**A family that declares `container-type: inline-size` on its root takes
+`block`.** Its contents no longer contribute to its intrinsic width, so a stage
+that shrink-wraps its children resolves it to nothing: `collapsible`,
+`pagination` and `stepper` each stood about one character wide and broke their
+text one letter per line, on a page that passed every test.
+`specs/story-layout.test.mjs` now refuses the pairing.
+
+Eight families answer their own width today — `alert`, `button-group`, `card`,
+`collapsible`, `field`, `form`, `pagination` and `stepper` — and any family that
+puts a container query on its root joins them.
+
+The root is what the rule is about. `progress-indicator` declares a container on
+the track of its linear shape, so a dash stated in stroke thicknesses can
+measure the track; its root contributes its width as any other element does, and
+a circle of its own on a `stack` stage is correct. The test reads the selector
+rather than the file for that reason.
 
 If a demonstration needs a ground the primitives do not have, add the primitive
 to `workbench.css` with a test, in its own commit, and use it. That is the same

@@ -1,0 +1,453 @@
+import { SlButton } from '@slotted/angular/button';
+import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import type { ReferencePageConfig } from '@slotted/storybook-workbench';
+import type { Meta, StoryObj } from '@storybook/angular-vite';
+import { moduleMetadata } from '@storybook/angular-vite';
+
+import { SlMenu } from './menu';
+import type { MenuAlign, MenuSide, MenuSize } from './menu-defaults';
+import {
+  SlMenuEmpty,
+  SlMenuGroup,
+  SlMenuItem,
+  SlMenuItemDescription,
+  SlMenuRadioGroup,
+  SlMenuSeparator,
+} from './menu-items';
+import { SlMenuTrigger } from './menu-trigger';
+import { ANGULAR_MENU_DOCS, ANGULAR_MENU_TOKENS } from './menu.docs';
+
+interface MenuStoryArgs {
+  align: MenuAlign;
+  closeOnSelect: boolean;
+  disabled: boolean;
+  loop: boolean;
+  side: MenuSide;
+  size: MenuSize;
+  typeahead: boolean;
+}
+
+/**
+ * Every demonstration opens `[portal]="false"` inside the workbench's own
+ * viewport box, so a surface opened in one scene cannot draw over the scene
+ * above it.
+ */
+const referenceScenes: ReferencePageConfig['scenes'] = () =>
+  bindScenes(ANGULAR_MENU_DOCS.menu.scenes, {
+    'checkbox-items': CheckboxItems,
+    commands: Commands,
+    composition: Composition,
+    groups: Groups,
+    icons: Icons,
+    keyboard: Keyboard,
+    placement: Placement,
+    playground: Playground,
+    'radio-items': RadioItems,
+    scrolling: Scrolling,
+    shortcuts: Shortcuts,
+    states: States,
+    submenu: Submenus,
+    tone: Tone,
+  }) as never;
+
+const meta: Meta<MenuStoryArgs> = {
+  title: 'Components/Menu',
+  decorators: [
+    moduleMetadata({
+      imports: [
+        SlButton,
+        SlMenu,
+        SlMenuEmpty,
+        SlMenuGroup,
+        SlMenuItem,
+        SlMenuItemDescription,
+        SlMenuRadioGroup,
+        SlMenuSeparator,
+        SlMenuTrigger,
+      ],
+    }),
+  ],
+  parameters: {
+    controls: { disable: true },
+    docs: {
+      page: createReferencePage({
+        title: 'Menu',
+        description:
+          'A list of commands on a layer, opened from a control, from an item of another menu, or from a trigger on a menubar.',
+        framework: 'Angular',
+        ...ANGULAR_MENU_DOCS.menu,
+        tokens: ANGULAR_MENU_TOKENS,
+        scenes: referenceScenes,
+      }),
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<MenuStoryArgs>;
+
+export const Playground: Story = {
+  args: {
+    align: 'start',
+    closeOnSelect: true,
+    disabled: false,
+    loop: true,
+    side: 'bottom',
+    size: 'md',
+    typeahead: true,
+  },
+  parameters: { ...scenario('playground'), controls: { disable: false } },
+  render: (args) => ({
+    props: args,
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="document">Document</button>
+        <sl-menu
+          #document
+          [open]="true"
+          [portal]="false"
+          [align]="align"
+          [closeOnSelect]="closeOnSelect"
+          [disabled]="disabled"
+          [loop]="loop"
+          [side]="side"
+          [size]="size"
+          [typeahead]="typeahead"
+        >
+          <button slMenuItem shortcut="Mod+D">Duplicate</button>
+          <button slMenuItem [disabled]="true">Publish</button>
+          <hr slMenuSeparator />
+          <button slMenuItem tone="danger">Delete…</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const Commands: Story = {
+  parameters: scenario('commands'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-grid" data-columns="2">
+        <section class="slotted-demo-scene">
+          <header class="slotted-demo-scene__header">
+            <span class="slotted-demo-scene__label">Running an item closes the menu</span>
+            <span class="slotted-demo-scene__note">The default, and what a command is: the reader asked for one thing and the surface has said what it was.</span>
+          </header>
+          <div class="slotted-demo-stage" data-layout="block">
+            <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+              <button slButton size="sm" variant="outline" [slMenuTriggerFor]="one">Document</button>
+              <sl-menu #one [open]="true" [portal]="false">
+                <button slMenuItem>Duplicate</button>
+                <button slMenuItem>Rename…</button>
+              </sl-menu>
+            </div>
+          </div>
+        </section>
+        <section class="slotted-demo-scene">
+          <header class="slotted-demo-scene__header">
+            <span class="slotted-demo-scene__label">An item that stays</span>
+            <span class="slotted-demo-scene__note">[closeOnSelect]="false" keeps the surface open, which is what a command a reader presses three times in a row needs.</span>
+          </header>
+          <div class="slotted-demo-stage" data-layout="block">
+            <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+              <button slButton size="sm" variant="outline" [slMenuTriggerFor]="two">View</button>
+              <sl-menu #two [open]="true" [portal]="false">
+                <button slMenuItem [closeOnSelect]="false">Zoom in</button>
+                <button slMenuItem [closeOnSelect]="false">Zoom out</button>
+              </sl-menu>
+            </div>
+          </div>
+        </section>
+      </div>
+    `,
+  }),
+};
+
+export const Icons: Story = {
+  parameters: scenario('icons'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Document</button>
+        <sl-menu #menu [open]="true" [portal]="false">
+          <button slMenuItem>
+            <span slMenuItemIcon>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="8" y="8" width="14" height="14" rx="2" />
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+              </svg>
+            </span>
+            Duplicate
+          </button>
+          <button slMenuItem>
+            <span slMenuItemIcon>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 7h10v10" />
+                <path d="M7 17 17 7" />
+              </svg>
+            </span>
+            Open in new tab
+          </button>
+          <button slMenuItem>Rename…</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const Shortcuts: Story = {
+  parameters: scenario('shortcuts'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">File</button>
+        <sl-menu #menu [open]="true" [portal]="false">
+          <button slMenuItem shortcut="Mod+S">Save</button>
+          <button slMenuItem shortcut="Shift+Mod+S">Save as…</button>
+          <button slMenuItem shortcut="Mod+P">Print…</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const CheckboxItems: Story = {
+  parameters: scenario('checkbox-items'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">View</button>
+        <sl-menu #menu [open]="true" [portal]="false">
+          <button slMenuCheckboxItem [checked]="true">Rulers</button>
+          <button slMenuCheckboxItem shortcut="Mod+'">Pixel grid</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const RadioItems: Story = {
+  parameters: scenario('radio-items'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Sort</button>
+        <sl-menu #menu [open]="true" [portal]="false">
+          <sl-menu-radio-group value="name">
+            <button slMenuRadioItem value="name">Name</button>
+            <button slMenuRadioItem value="date">Date modified</button>
+            <button slMenuRadioItem value="size">Size</button>
+          </sl-menu-radio-group>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const Groups: Story = {
+  parameters: scenario('groups'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Document</button>
+        <sl-menu #menu [open]="true" [portal]="false">
+          <sl-menu-group label="File">
+            <button slMenuItem>Duplicate</button>
+            <button slMenuItem>Move to…</button>
+          </sl-menu-group>
+          <hr slMenuSeparator />
+          <sl-menu-group label="Share">
+            <button slMenuItem>Copy link</button>
+            <button slMenuItem>Invite…</button>
+          </sl-menu-group>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const Submenus: Story = {
+  parameters: scenario('submenu'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="share">Share</button>
+        <sl-menu #share [open]="true" [portal]="false">
+          <button slMenuItem>Copy link</button>
+          <button slMenuItem [slMenuTriggerFor]="sendTo">Send to</button>
+          <sl-menu #sendTo [open]="true" [portal]="false">
+            <button slMenuItem>Slack</button>
+            <button slMenuItem>Email</button>
+          </sl-menu>
+          <button slMenuItem>Embed…</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const Tone: Story = {
+  parameters: scenario('tone'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Document</button>
+        <sl-menu #menu [open]="true" [portal]="false">
+          <button slMenuItem>Duplicate</button>
+          <hr slMenuSeparator />
+          <button slMenuItem tone="danger">
+            Delete document
+            <span slMenuItemDescription>This cannot be undone.</span>
+          </button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const Placement: Story = {
+  parameters: scenario('placement'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-grid" data-columns="2">
+        <section class="slotted-demo-scene">
+          <header class="slotted-demo-scene__header">
+            <span class="slotted-demo-scene__label">Under the control, from its start edge</span>
+            <span class="slotted-demo-scene__note">The default: the control's text and the items' labels share one edge, which is what a menu hanging from a button should do.</span>
+          </header>
+          <div class="slotted-demo-stage" data-layout="block">
+            <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+              <button slButton size="sm" variant="outline" [slMenuTriggerFor]="below">Actions</button>
+              <sl-menu #below [open]="true" [portal]="false" side="bottom" align="start">
+                <button slMenuItem>Rename…</button>
+                <button slMenuItem>Duplicate</button>
+              </sl-menu>
+            </div>
+          </div>
+        </section>
+        <section class="slotted-demo-scene">
+          <header class="slotted-demo-scene__header">
+            <span class="slotted-demo-scene__label">Beside the control</span>
+            <span class="slotted-demo-scene__note">side="inline-end" puts the surface where a submenu goes, and mirrors with the reading direction rather than staying on the right.</span>
+          </header>
+          <div class="slotted-demo-stage" data-layout="block">
+            <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+              <button slButton size="sm" variant="outline" [slMenuTriggerFor]="beside">Actions</button>
+              <sl-menu #beside [open]="true" [portal]="false" side="inline-end" align="start">
+                <button slMenuItem>Rename…</button>
+                <button slMenuItem>Duplicate</button>
+              </sl-menu>
+            </div>
+          </div>
+        </section>
+      </div>
+    `,
+  }),
+};
+
+export const Scrolling: Story = {
+  parameters: scenario('scrolling'),
+  render: () => ({
+    props: { folders: ['Inbox', 'Archive', 'Drafts', 'Sent', 'Spam', 'Trash', 'Receipts'] },
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Move to</button>
+        <sl-menu #menu [open]="true" [portal]="false" aria-label="Move to">
+          @for (folder of folders; track folder) {
+            <button slMenuItem>{{ folder }}</button>
+          }
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const States: Story = {
+  parameters: scenario('states'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-grid" data-columns="2">
+        <section class="slotted-demo-scene">
+          <header class="slotted-demo-scene__header">
+            <span class="slotted-demo-scene__label">Disabled, checked, and a parent while its submenu shows</span>
+            <span class="slotted-demo-scene__note">A disabled item still takes focus and still runs nothing; the parent item keeps its highlight while the surface it opened is showing.</span>
+          </header>
+          <div class="slotted-demo-stage" data-layout="block">
+            <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+              <button slButton size="sm" variant="outline" [slMenuTriggerFor]="states">Document</button>
+              <sl-menu #states [open]="true" [portal]="false">
+                <button slMenuItem [disabled]="true" shortcut="Mod+P">Publish</button>
+                <button slMenuCheckboxItem [checked]="true">Show comments</button>
+                <button slMenuItem [slMenuTriggerFor]="exportAs">Export as</button>
+                <sl-menu #exportAs [open]="true" [portal]="false">
+                  <button slMenuItem>PDF</button>
+                </sl-menu>
+              </sl-menu>
+            </div>
+          </div>
+        </section>
+        <section class="slotted-demo-scene">
+          <header class="slotted-demo-scene__header">
+            <span class="slotted-demo-scene__label">Waiting, and holding nothing</span>
+            <span class="slotted-demo-scene__note">Both keep the surface's measure rather than collapsing to a two-pixel box, and the waiting one says so with aria-busy.</span>
+          </header>
+          <div class="slotted-demo-stage" data-layout="block">
+            <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+              <button slButton size="sm" variant="outline" [slMenuTriggerFor]="labels">Labels</button>
+              <sl-menu #labels [open]="true" [portal]="false" [loading]="true" aria-label="Labels">
+                <div slMenuEmpty>Loading labels…</div>
+              </sl-menu>
+            </div>
+          </div>
+        </section>
+      </div>
+    `,
+  }),
+};
+
+export const Keyboard: Story = {
+  parameters: scenario('keyboard'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Commands</button>
+        <sl-menu #menu [open]="true" [portal]="false">
+          <button slMenuItem shortcut="Mod+S">Save</button>
+          <button slMenuItem shortcut="Shift+Mod+S">Save as…</button>
+          <button slMenuItem>Settings…</button>
+          <hr slMenuSeparator />
+          <button slMenuItem>Sign out</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+export const Composition: Story = {
+  parameters: scenario('composition'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button
+          slButton
+          size="sm"
+          variant="ghost"
+          aria-label="Row actions"
+          [slMenuTriggerFor]="rowActions"
+        >
+          ⋯
+        </button>
+        <sl-menu #rowActions [open]="true" [portal]="false" align="end" aria-label="Row actions">
+          <button slMenuItem>Open</button>
+          <button slMenuItem shortcut="Mod+D">Duplicate</button>
+          <hr slMenuSeparator />
+          <button slMenuItem tone="danger">
+            Delete row
+            <span slMenuItemDescription>This cannot be undone.</span>
+          </button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};

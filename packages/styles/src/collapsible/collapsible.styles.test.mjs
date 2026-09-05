@@ -1,0 +1,155 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import test from 'node:test';
+
+const contract = JSON.parse(
+  readFileSync(
+    new URL('../../../../specs/components/collapsible/contract.json', import.meta.url),
+    'utf8',
+  ),
+);
+const css = readFileSync(new URL('./collapsible.css', import.meta.url), 'utf8');
+const fragment = readFileSync(new URL('./collapsible.harness.html', import.meta.url), 'utf8');
+const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
+const normalized = declarations
+  .replace(/\s+/g, ' ')
+  .replace(/\s*([{};,:>])\s*/g, '$1')
+  .replace(/\(\s+/g, '(')
+  .replace(/\s+\)/g, ')');
+
+const ui = `[data-ui='${contract.ui}']`;
+const member = contract.members.collapsible;
+
+function rule(selector) {
+  return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
+}
+
+test('lives in the component layer', () => {
+  assert.match(css, /@layer slotted\.components/);
+});
+
+test('is selected by the identifier the contract declares', () => {
+  assert.ok(normalized.includes(`${ui}{`), 'the family has no base rule keyed on data-ui');
+});
+
+test('styles every part the contract declares', () => {
+  for (const declared of member.parts) {
+    if (declared === 'root') continue;
+    assert.ok(
+      normalized.includes(`[data-part='${declared}']`),
+      `no rule reaches the ${declared} part`,
+    );
+  }
+});
+
+test('renders every part the contract declares, in at least one scene', () => {
+  for (const declared of member.parts) {
+    assert.match(
+      fragment,
+      new RegExp(`data-part="${declared}"`),
+      `${declared} appears in no scene`,
+    );
+  }
+});
+
+/**
+ * A collapsible inside another collapsible's panel is the ordinary case — a
+ * nested accordion is two of these — and a descendant rule would open the inner
+ * panel because the outer one is open. Every rule the family owns therefore
+ * reaches its parts with a child combinator.
+ */
+test('reaches its own parts with a child combinator, never a descendant one', () => {
+  const owned = ['header', 'actions', 'panel'];
+  for (const part of owned) {
+    const descendant = new RegExp(`\\[data-ui='collapsible'\\][^{>]*?] \\[data-part='${part}'\\]`);
+    assert.ok(
+      !descendant.test(normalized),
+      `a descendant rule reaches ${part}, so a nested collapsible would inherit it`,
+    );
+  }
+  assert.match(fragment, /data-part="content"[\s\S]*data-ui="collapsible"/);
+});
+
+/** The one axis the family answers with a mask, and it is real geometry. */
+test('draws the indicator from a glyph token rather than a character', () => {
+  const indicator = rule(
+    `${ui}>[data-part='header']>[data-part='trigger']>[data-part='indicator']`,
+  );
+  assert.match(indicator, /mask-image:var\(--slotted-icon-chevron-down\)/);
+  assert.ok(!/content:/.test(indicator), 'the mark is drawn with content rather than geometry');
+  assert.match(normalized, /mask-image:var\(--slotted-icon-plus\)/);
+  assert.match(normalized, /mask-image:var\(--slotted-icon-minus\)/);
+});
+
+/**
+ * The mark turns rather than pointing along the inline axis, so a right-to-left
+ * document needs no mirrored artwork at all.
+ */
+test('turns the mark instead of mirroring it', () => {
+  assert.match(normalized, /\[data-open\][^{]*\[data-part='indicator'\]\{rotate:180deg;\}/);
+  assert.ok(!/scale\(-1/.test(normalized), 'the mark is mirrored somewhere');
+});
+
+/** The differentiator: the panel opens to its own height with nothing measured. */
+test('opens the panel with a grid track rather than a measured height', () => {
+  const panel = rule(`${ui}>[data-part='panel']`);
+  assert.match(panel, /grid-template-rows:0fr/);
+  assert.match(panel, /transition:grid-template-rows/);
+  assert.match(normalized, /\[data-open\]>\[data-part='panel'\]\{grid-template-rows:1fr;\}/);
+  assert.ok(
+    !/--slotted-collapsible-(content|panel)-(height|width)/.test(css),
+    'the family writes a measured size into a custom property',
+  );
+});
+
+/**
+ * Closed content is out of the accessibility tree, out of the tab sequence and
+ * out of the browser's page search, and it stays visible for the length of the
+ * closing transition rather than vanishing at the first frame.
+ */
+test('takes closed content out of the tree without taking it out of the transition', () => {
+  const content = rule(`${ui}>[data-part='panel']>[data-part='content']`);
+  assert.match(content, /content-visibility:hidden/);
+  assert.match(content, /transition:content-visibility var\(--slotted-duration-medium\)/);
+  assert.match(content, /allow-discrete/);
+  assert.match(fragment, /inert/, 'the harness never shows the attribute the binding writes');
+});
+
+test('holds hover and press back for a control the browser has disabled', () => {
+  for (const state of [':hover', ':active']) {
+    const selectors = [...normalized.matchAll(/([^{}]+)\{/g)]
+      .map(([, selector]) => selector)
+      .filter((selector) => selector.includes(state));
+    assert.ok(selectors.length > 0, `nothing paints ${state}`);
+    for (const selector of selectors) {
+      assert.ok(
+        selector.includes(':not([data-disabled])') && selector.includes(':enabled'),
+        `${selector} paints ${state} with no guard`,
+      );
+    }
+  }
+});
+
+test('answers its own inline size rather than the viewport', () => {
+  assert.match(normalized, /container-type:inline-size/);
+  assert.match(normalized, /container-name:slotted-collapsible/);
+  assert.match(css, /@container slotted-collapsible \(max-inline-size: 22rem\)/);
+  assert.ok(!/@media \(m(in|ax)-width/.test(css), 'a viewport query controls the layout');
+});
+
+/** Every declared state has to be photographable, which means it has to exist. */
+test('renders every declared state in at least one scene', () => {
+  for (const [state, attribute] of Object.entries(contract.stateAttributes)) {
+    assert.match(fragment, new RegExp(attribute), `${state} appears in no scene`);
+  }
+  assert.match(fragment, /aria-disabled="true"/);
+  assert.match(fragment, /aria-busy="true"/);
+});
+
+test('writes the wiring the pattern asks for in every scene', () => {
+  assert.match(fragment, /aria-expanded="true"/);
+  assert.match(fragment, /aria-expanded="false"/);
+  assert.match(fragment, /aria-controls="/);
+  assert.match(fragment, /aria-labelledby="/);
+  assert.match(fragment, /<h3 data-part="header">/);
+});

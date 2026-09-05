@@ -16,6 +16,12 @@
  * the source files do not.
  */
 import '@slotted/tokens/styles.css';
+/**
+ * Every theme the toolbar offers is loaded here. Two themes are two disjoint
+ * selector sets, so loading both costs nothing at render time and lets the
+ * `data-slotted-theme` attribute switch between them without a reload. A theme
+ * offered by the toolbar and missing from this list paints nothing at all.
+ */
 import '@slotted/theme-default/styles.css';
 import '@slotted/storybook-workbench/styles.css';
 

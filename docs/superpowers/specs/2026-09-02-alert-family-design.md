@@ -5,7 +5,7 @@ Wave 2, guide 9, rebuild. Written before any code, as
 root element, the anatomy, every axis name, the state ownership and the
 accessibility model, and it adds a state model where the family had none.
 
-Scope, from `docs/rebuild-order.md`: “uma família com recipes por alcance:
+Scope, from `docs/build-order.md`: “uma família com recipes por alcance:
 alerta contextual, callout editorial e banner de página. `tone`, título,
 descrição, ícone, ações, `dismissible`. Os cinco tons comunicam por texto e
 ícone além de cor. Alerta presente na montagem não é live region; atualização

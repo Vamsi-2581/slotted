@@ -145,7 +145,7 @@ and it is what `specs/contract.schema.mjs` forces: one `data-ui` per family, and
 every member's root part carrying it. Two members with a `root` part in one
 family would be one selector for two different boxes.
 
-`docs/rebuild-order.md` wave 3 item 4 is updated from `checkbox radio-group` to
+`docs/build-order.md` wave 3 item 4 is updated from `checkbox radio-group` to
 name the third family, in the same commit.
 
 ### The root is a `div`; the `label` names the control through `for`
@@ -340,7 +340,7 @@ the one change that would most improve it and whether it was made.
 11. **Shared behavioural tests.** 71 React and 33 Angular behavioural tests over
     the same contract, plus 37 contract tests read by both.
 12. **Changelog and migration.** New families; nothing to migrate. Recorded in
-    `docs/BUILD-LOG.md`, and the wave-3 line in `docs/rebuild-order.md` updated to
+    `docs/BUILD-LOG.md`, and the wave-3 line in `docs/build-order.md` updated to
     name the third family and the reason it exists.
 
 ## 10. The framed choice, and why the earlier decline was wrong

@@ -143,7 +143,15 @@ export class SlTab {
   readonly tabs = inject(SlTabs);
 
   readonly selected = computed(() => this.tabs.holds(this.value()));
-  readonly resolvedDisabled = computed(() => this.disabled() ?? this.tabs.disabled());
+  /**
+   * A family out of action takes every tab with it. The tab's own input can
+   * only add to that, never subtract: a consumer that writes `[disabled]="false"`
+   * on a tab inside a disabled family is saying nothing about that family, and a
+   * template that binds an expression writes `false` where it means "not this
+   * one" — which is how every tab stayed operable while the family reported
+   * itself disabled.
+   */
+  readonly resolvedDisabled = computed(() => this.tabs.disabled() || (this.disabled() ?? false));
 
   protected readonly tabId = computed(() => this.tabs.identify(this.value()).tabId);
   protected readonly panelId = computed(() => this.tabs.identify(this.value()).panelId);

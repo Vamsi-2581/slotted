@@ -1,6 +1,6 @@
 # Stack, Inline and Grid — layout primitives
 
-Wave 1 of `docs/rebuild-order.md`, mode `novo`, guide section 4. One invocation,
+Wave 1 of `docs/build-order.md`, mode `novo`, guide section 4. One invocation,
 three families. This document records the architecture decisions the invocation
 forced; the mechanical work is not described here.
 
@@ -123,9 +123,9 @@ placement is the CSS DSL this family exists to avoid.
 
 ## Measure belongs to `container`, not to `stack`
 
-`docs/rebuild-briefing.md` records that measure belongs to the container and
+`docs/build-briefing.md` records that measure belongs to the container and
 names "`container` and `stack`" as its future owners. This invocation resolves
-that to `container` alone, which `docs/rebuild-order.md` already describes as
+that to `container` alone, which `docs/build-order.md` already describes as
 "o dono da medida confortável de texto". Two families offering a maximum measure
 would be two answers to one question.
 

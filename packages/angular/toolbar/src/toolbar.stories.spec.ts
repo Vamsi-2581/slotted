@@ -28,7 +28,10 @@ describe('Angular TOOLBAR stories', () => {
         framework: 'Angular',
         member: contract.members.toolbar,
         scenarioIds: contract.scenarios.toolbar,
-        stateModel: 'stateModel' in contract ? contract.stateModel : undefined,
+        /* Toolbar holds no state a consumer can own, so its contract declares
+           no model; reading it through the optional shape keeps the check the
+           same as every other family's. */
+        stateModel: (contract as { stateModel?: Record<string, unknown> }).stateModel,
       }),
     ).toEqual([]);
   });

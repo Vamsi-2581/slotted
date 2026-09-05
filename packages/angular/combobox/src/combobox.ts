@@ -1,0 +1,892 @@
+import { createFilter, moveIndex } from '@slotted/core/collection';
+import type { Filter, MoveIntent } from '@slotted/core/collection';
+import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
+import { createPortalRoot } from '@slotted/core/portal';
+import type { PortalRootHandle } from '@slotted/core/portal';
+import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
+import { createPresence } from '@slotted/core/presence';
+import type { PresenceHandle } from '@slotted/core/presence';
+import { createControllable } from '@slotted/core/state';
+import type { ChangeRequest } from '@slotted/core/state';
+import {
+  afterNextRender,
+  booleanAttribute,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  forwardRef,
+  HostAttributeToken,
+  inject,
+  input,
+  model,
+  numberAttribute,
+  output,
+  signal,
+  untracked,
+  viewChild,
+  ViewContainerRef,
+  ViewEncapsulation,
+  type EmbeddedViewRef,
+  type TemplateRef,
+} from '@angular/core';
+import { NG_VALIDATORS, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type {
+  AbstractControl,
+  ControlValueAccessor,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
+import { SlField } from '@slotted/angular/field';
+
+import { injectComboboxDefaults } from './combobox-defaults';
+import type {
+  ComboboxAlign,
+  ComboboxAutocomplete,
+  ComboboxFilter,
+  ComboboxHighlightReason,
+  ComboboxInputReason,
+  ComboboxItems,
+  ComboboxMount,
+  ComboboxOpenOn,
+  ComboboxOpenReason,
+  ComboboxOption,
+  ComboboxOptionGroup,
+  ComboboxOptionValue,
+  ComboboxSide,
+  ComboboxSize,
+  ComboboxStrategy,
+  ComboboxValueReason,
+  ComboboxVariant,
+  ComboboxWidth,
+} from './combobox-defaults';
+
+export * from './combobox-defaults';
+
+type Entry = 'selected' | 'first' | 'last' | 'none';
+
+/**
+ * A filtered-out option stays in the DOM and is hidden, so that the element a
+ * reader's pointer is over survives a keystroke. It is therefore not part of
+ * the result set, and every count, every move and every completion has to skip
+ * it — which is what the `:not([hidden])` is for.
+ */
+const OPTION_SELECTOR = "[data-part='item']:not([hidden])";
+
+const isGroup = (entry: ComboboxItems[number]): entry is ComboboxOptionGroup => 'options' in entry;
+
+const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
+  items === undefined ? [] : items.flatMap((entry) => (isGroup(entry) ? entry.options : [entry]));
+
+/**
+ * A text input with a listbox of options filtered by what was typed.
+ *
+ * **The host element is the control**, as `sl-select`'s is: the frame carries
+ * `data-ui`, and the input, the clear button, the trigger and the hidden
+ * submission field are its template. The popup is an `ng-template` built into
+ * the portal when it opens.
+ *
+ * **The typed text and the chosen key are two contracts.** `inputValue` and
+ * `value` are separate models, each with its own request, because a list whose
+ * labels are not unique cannot derive one from the other.
+ *
+ * **Every text-editing key stays the browser's.** The key handler binds the
+ * arrows, `Enter`, `Escape` and the page keys, and nothing else — the pattern's
+ * IMPORTANT note asks exactly that.
+ */
+@Component({
+  selector: 'sl-combobox',
+  standalone: true,
+  exportAs: 'slCombobox',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  styleUrl: '../../../styles/src/combobox/combobox.css',
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlCombobox), multi: true },
+    { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlCombobox), multi: true },
+  ],
+  host: {
+    'data-ui': 'combobox',
+    'data-part': 'root',
+    '[attr.data-size]': 'resolvedSize()',
+    '[attr.data-variant]': 'resolvedVariant()',
+    '[attr.data-full-width]': "resolvedFullWidth() ? '' : null",
+    '[attr.data-open]': "isOpen() ? '' : null",
+    '[attr.data-disabled]': "resolvedDisabled() ? '' : null",
+    '[attr.data-readonly]': "resolvedReadOnly() ? '' : null",
+    '[attr.data-invalid]': "resolvedInvalid() ? '' : null",
+    '[attr.data-required]': "resolvedRequired() ? '' : null",
+    '[attr.data-loading]': "loading() ? '' : null",
+  },
+  template: `
+    <input
+      #control
+      type="text"
+      role="combobox"
+      data-part="input"
+      [id]="controlId()"
+      [value]="display()"
+      [disabled]="resolvedDisabled()"
+      [readOnly]="resolvedReadOnly()"
+      [required]="resolvedRequired()"
+      [placeholder]="placeholder()"
+      [attr.aria-autocomplete]="resolvedAutocomplete()"
+      [attr.aria-expanded]="isOpen()"
+      [attr.aria-controls]="isOpen() ? contentId : null"
+      [attr.aria-activedescendant]="activeDescendant()"
+      [attr.aria-label]="ariaLabel() ?? null"
+      [attr.aria-describedby]="describedBy()"
+      [attr.aria-readonly]="resolvedReadOnly() ? true : null"
+      [attr.aria-invalid]="resolvedInvalid() ? true : null"
+      (input)="onInput($event)"
+      (keydown)="onKeyDown($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur($event)"
+    />
+
+    @if (showClear()) {
+      <button
+        type="button"
+        data-part="clear"
+        [attr.aria-label]="resolvedClearLabel()"
+        (click)="onClear($event)"
+      ></button>
+    }
+    <button
+      type="button"
+      tabindex="-1"
+      data-part="trigger"
+      [disabled]="resolvedDisabled()"
+      [attr.aria-label]="resolvedTriggerLabel()"
+      (click)="onToggle($event)"
+    >
+      <span data-part="arrow"></span>
+    </button>
+
+    @if (name(); as submissionName) {
+      <input
+        type="text"
+        aria-hidden="true"
+        tabindex="-1"
+        readonly
+        [name]="submissionName"
+        [attr.form]="form() ?? null"
+        [value]="value() ?? ''"
+        [required]="resolvedRequired()"
+        style="
+          position: absolute;
+          inline-size: 1px;
+          block-size: 1px;
+          padding: 0;
+          border: 0;
+          overflow: hidden;
+          clip-path: inset(50%);
+          white-space: nowrap;
+        "
+      />
+    }
+
+    <ng-template #layer>
+      <div
+        data-ui="combobox"
+        data-part="positioner"
+        [attr.data-align]="resolvedAlign()"
+        [attr.data-size]="resolvedSize()"
+        [attr.data-width]="resolvedWidth()"
+        [attr.data-open]="isOpen() ? '' : null"
+        [attr.inert]="isOpen() ? null : ''"
+      >
+        <div
+          data-part="content"
+          role="listbox"
+          [id]="contentId"
+          [attr.aria-label]="ariaLabel() ?? null"
+          [attr.aria-busy]="loading() ? true : null"
+          [attr.data-loading]="loading() ? '' : null"
+        >
+          <ng-content />
+          @if (!loading() && optionCount() === 0) {
+            <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+          }
+          <div
+            data-part="status"
+            role="status"
+            aria-live="polite"
+            [attr.data-loading]="loading() ? '' : null"
+          >
+            {{ statusMessage() }}
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  `,
+})
+export class SlCombobox implements ControlValueAccessor, Validator {
+  private static readonly flag = (given: boolean | string | undefined) =>
+    given === undefined ? undefined : booleanAttribute(given);
+  private static readonly count = (given: number | string | undefined) =>
+    given === undefined ? undefined : numberAttribute(given);
+
+  /** The chosen option's key. */
+  readonly value = model<ComboboxOptionValue | null>(null);
+  readonly valueChangeRequest = output<ChangeRequest<ComboboxOptionValue | null>>();
+
+  /** The characters in the field, which are not the chosen key. */
+  readonly inputValue = model<string>('');
+  readonly inputValueChangeRequest = output<ChangeRequest<string>>();
+
+  readonly open = model<boolean>(false);
+  readonly openChangeRequest = output<ChangeRequest<boolean>>();
+
+  readonly highlightedValue = model<ComboboxOptionValue | null>(null);
+  readonly highlightedValueChangeRequest = output<ChangeRequest<ComboboxOptionValue | null>>();
+
+  /** The last option came into view; the consumer fetches the next page. */
+  readonly loadMore = output<void>();
+
+  readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
+  readonly placeholder = input<string>('');
+  readonly name = input<string | undefined>(undefined);
+  readonly form = input<string | undefined>(undefined);
+  readonly items = input<ComboboxItems | undefined>(undefined);
+  readonly total = input(undefined, { transform: SlCombobox.count });
+  readonly locale = input<string | undefined>(undefined);
+  readonly filter = input<ComboboxFilter | undefined>(undefined);
+
+  readonly size = input<ComboboxSize | undefined>(undefined);
+  readonly variant = input<ComboboxVariant | undefined>(undefined);
+  readonly side = input<ComboboxSide | undefined>(undefined);
+  readonly align = input<ComboboxAlign | undefined>(undefined);
+  readonly width = input<ComboboxWidth | undefined>(undefined);
+  readonly mount = input<ComboboxMount | undefined>(undefined);
+  readonly strategy = input<ComboboxStrategy | undefined>(undefined);
+  readonly autocomplete = input<ComboboxAutocomplete | undefined>(undefined);
+  readonly openOn = input<ComboboxOpenOn | undefined>(undefined);
+  readonly clearLabel = input<string | undefined>(undefined);
+  readonly emptyLabel = input<string | undefined>(undefined);
+  readonly loadingLabel = input<string | undefined>(undefined);
+  readonly triggerLabel = input<string | undefined>(undefined);
+  readonly countLabel = input<string | undefined>(undefined);
+
+  readonly sideOffset = input(undefined, { transform: SlCombobox.count });
+  readonly alignOffset = input(undefined, { transform: SlCombobox.count });
+  readonly collisionPadding = input(undefined, { transform: SlCombobox.count });
+
+  readonly allowsCustomValue = input(undefined, { transform: SlCombobox.flag });
+  readonly autoHighlight = input(undefined, { transform: SlCombobox.flag });
+  readonly highlightMatch = input(undefined, { transform: SlCombobox.flag });
+  readonly clearable = input(undefined, { transform: SlCombobox.flag });
+  readonly loop = input(undefined, { transform: SlCombobox.flag });
+  readonly closeOnSelect = input(undefined, { transform: SlCombobox.flag });
+  readonly closeOnEscape = input(undefined, { transform: SlCombobox.flag });
+  readonly closeOnOutsidePress = input(undefined, { transform: SlCombobox.flag });
+  readonly flip = input(undefined, { transform: SlCombobox.flag });
+  readonly shift = input(undefined, { transform: SlCombobox.flag });
+  readonly hideWhenDetached = input(undefined, { transform: SlCombobox.flag });
+  readonly portal = input(undefined, { transform: SlCombobox.flag });
+  readonly fullWidth = input(undefined, { transform: SlCombobox.flag });
+  readonly disabled = input(undefined, { transform: SlCombobox.flag });
+  readonly readOnly = input(undefined, { transform: SlCombobox.flag });
+  readonly required = input(undefined, { transform: SlCombobox.flag });
+  readonly invalid = input(undefined, { transform: SlCombobox.flag });
+  readonly loading = input(false, { transform: booleanAttribute });
+
+  private readonly defaults = injectComboboxDefaults();
+  private readonly viewContainer = inject(ViewContainerRef);
+  private readonly template = viewChild.required<TemplateRef<unknown>>('layer');
+  private readonly controlRef = viewChild.required<{ nativeElement: HTMLInputElement }>('control');
+
+  readonly field = inject(SlField, { optional: true });
+
+  private readonly identifier = Math.random().toString(36).slice(2, 8);
+  readonly contentId = `sl-combobox-${this.identifier}`;
+  private readonly ownId = `sl-combobox-input-${this.identifier}`;
+
+  private readonly registry = signal(new Map<ComboboxOptionValue, string>());
+  readonly optionCount = signal(0);
+  /**
+   * The completion `autocomplete="both"` shows: the rest of the first match, or
+   * `null`. It is part of what the input renders rather than a write onto the
+   * element, so nothing has to fight Angular for the value.
+   */
+  readonly completion = signal<string | null>(null);
+  private wantsCompletion = false;
+  private entry: Entry = 'none';
+
+  private view: EmbeddedViewRef<unknown> | null = null;
+  private layerNode: HTMLElement | null = null;
+  private surfaceNode: HTMLElement | null = null;
+  private portalRoot: PortalRootHandle | null = null;
+  private positioner: PositionerHandle | null = null;
+  private layer: DismissableLayerHandle | null = null;
+  private presence: PresenceHandle | null = null;
+  private observer: IntersectionObserver | null = null;
+  private disabledByForm = signal<boolean | undefined>(undefined);
+
+  private readonly hostId = inject(new HostAttributeToken('id'), { optional: true });
+
+  private onChange: (value: ComboboxOptionValue | null) => void = () => undefined;
+  private onTouched: () => void = () => undefined;
+
+  readonly resolvedSize = computed(() => this.size() ?? this.field?.size() ?? this.defaults.size);
+  readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
+  readonly resolvedAlign = computed(() => this.align() ?? this.defaults.align);
+  readonly resolvedSide = computed(() => this.side() ?? this.defaults.side);
+  readonly resolvedWidth = computed(() => this.width() ?? this.defaults.width);
+  readonly resolvedMount = computed(() => this.mount() ?? this.defaults.mount);
+  readonly resolvedAutocomplete = computed(() => this.autocomplete() ?? this.defaults.autocomplete);
+  readonly resolvedOpenOn = computed(() => this.openOn() ?? this.defaults.openOn);
+  readonly resolvedLoop = computed(() => this.loop() ?? this.defaults.loop);
+  readonly resolvedClearable = computed(() => this.clearable() ?? this.defaults.clearable);
+  readonly resolvedFullWidth = computed(() => this.fullWidth() ?? this.defaults.fullWidth);
+  readonly resolvedCloseOnSelect = computed(
+    () => this.closeOnSelect() ?? this.defaults.closeOnSelect,
+  );
+  readonly resolvedAllowsCustomValue = computed(
+    () => this.allowsCustomValue() ?? this.defaults.allowsCustomValue,
+  );
+  readonly resolvedAutoHighlight = computed(
+    () => this.autoHighlight() ?? this.defaults.autoHighlight,
+  );
+  readonly resolvedHighlightMatch = computed(
+    () => this.highlightMatch() ?? this.defaults.highlightMatch,
+  );
+  readonly resolvedClearLabel = computed(() => this.clearLabel() ?? this.defaults.clearLabel);
+  readonly resolvedEmptyLabel = computed(() => this.emptyLabel() ?? this.defaults.emptyLabel);
+  readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
+  readonly resolvedTriggerLabel = computed(() => this.triggerLabel() ?? this.defaults.triggerLabel);
+  readonly resolvedCountLabel = computed(() => this.countLabel() ?? this.defaults.countLabel);
+
+  readonly resolvedDisabled = computed(
+    () =>
+      this.disabled() ?? this.disabledByForm() ?? this.field?.disabled() ?? this.defaults.disabled,
+  );
+  readonly resolvedReadOnly = computed(
+    () => this.readOnly() ?? this.field?.readOnly() ?? this.defaults.readOnly,
+  );
+  readonly resolvedRequired = computed(
+    () => this.required() ?? this.field?.required() ?? this.defaults.required,
+  );
+  readonly resolvedInvalid = computed(
+    () => this.invalid() ?? this.field?.invalid() ?? this.defaults.invalid,
+  );
+
+  readonly isOpen = computed(() => this.open() && !this.resolvedDisabled());
+  readonly controlId = computed(() => this.hostId ?? this.field?.ids().control ?? this.ownId);
+  readonly describedBy = computed(() => this.field?.describedBy() ?? null);
+  readonly display = computed(() => this.completion() ?? this.inputValue());
+
+  private readonly declared = computed(() => {
+    const table = new Map<ComboboxOptionValue, string>();
+    for (const option of flatten(this.items())) table.set(option.value, option.label);
+    return table;
+  });
+
+  /**
+   * The query the options filter against, and it is not always the typed text:
+   * once an option has been committed the input holds its label, and filtering
+   * on that would leave the popup showing the one option already chosen.
+   */
+  readonly query = computed(() => {
+    const held = this.value();
+    const committed = held === null ? undefined : this.labelFor(held);
+    return this.inputValue() === committed ? '' : this.inputValue();
+  });
+
+  private readonly fallbackFilter = computed<Filter>(() => createFilter({ locale: this.locale() }));
+
+  readonly showClear = computed(
+    () =>
+      this.resolvedClearable() &&
+      this.inputValue() !== '' &&
+      !this.resolvedDisabled() &&
+      !this.resolvedReadOnly(),
+  );
+
+  readonly activeDescendant = computed(() => {
+    const held = this.highlightedValue();
+    return this.isOpen() && held !== null ? this.optionId(held) : null;
+  });
+
+  readonly statusMessage = computed(() => {
+    if (this.loading()) return this.resolvedLoadingLabel();
+    const count = this.optionCount();
+    return count === 0 ? '' : this.resolvedCountLabel().replace('{count}', String(count));
+  });
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+
+    effect(() => {
+      const open = this.isOpen();
+      untracked(() => (open ? this.show() : this.hide()));
+    });
+
+    afterNextRender(() => {
+      if (this.resolvedMount() === 'eager' && !this.isOpen()) this.build();
+    });
+
+    destroyRef.onDestroy(() => this.teardown());
+  }
+
+  optionId(value: ComboboxOptionValue): string {
+    return `${this.contentId}-option-${encodeURIComponent(value)}`;
+  }
+
+  labelFor(value: ComboboxOptionValue): string | undefined {
+    return this.declared().get(value) ?? this.registry().get(value);
+  }
+
+  registerLabel(value: ComboboxOptionValue, label: string) {
+    if (this.registry().get(value) === label) return;
+    const next = new Map(this.registry());
+    next.set(value, label);
+    this.registry.set(next);
+  }
+
+  /**
+   * Three answers, and `undefined` is not one of them: an absent `filter` asks
+   * for the library's own locale-sensitive `contains`, `null` turns filtering
+   * off, and a function replaces the comparison.
+   */
+  matches(label: string): boolean {
+    const query = this.query();
+    const given = this.filter();
+    if (query === '' || given === null) return true;
+    if (given !== undefined) return given(label, query);
+    return this.fallbackFilter().contains(label, query);
+  }
+
+  recount() {
+    this.optionCount.set(this.options().length);
+    this.applyCompletion();
+    this.dropStaleHighlight();
+  }
+
+  options(): HTMLElement[] {
+    return [...(this.surfaceNode?.querySelectorAll<HTMLElement>(OPTION_SELECTOR) ?? [])];
+  }
+
+  focus() {
+    this.controlRef().nativeElement.focus({ preventScroll: true });
+  }
+
+  scrollToKey(value: ComboboxOptionValue) {
+    const option = this.options().find((candidate) => candidate.dataset['value'] === value);
+    if (typeof option?.scrollIntoView === 'function') option.scrollIntoView({ block: 'nearest' });
+  }
+
+  setOpen(next: boolean, reason: ComboboxOpenReason, source?: Event) {
+    if (next === this.isOpen()) return;
+    const state = createControllable<boolean>({
+      initial: this.isOpen(),
+      onRequest: (request) => this.openChangeRequest.emit(request),
+    });
+    if (!state.request(next, reason, source)) return;
+    this.open.set(next);
+    if (!next) {
+      this.highlightedValue.set(null);
+      this.entry = 'none';
+    }
+  }
+
+  setHighlighted(
+    next: ComboboxOptionValue | null,
+    reason: ComboboxHighlightReason,
+    source?: Event,
+  ) {
+    if (next === this.highlightedValue()) return;
+    const state = createControllable<ComboboxOptionValue | null>({
+      initial: this.highlightedValue(),
+      onRequest: (request) => this.highlightedValueChangeRequest.emit(request),
+    });
+    if (state.request(next, reason, source)) {
+      this.highlightedValue.set(next);
+      if (next !== null) this.scrollToKey(next);
+    }
+  }
+
+  setInputValue(next: string, reason: ComboboxInputReason, source?: Event) {
+    /* Whatever moves the text withdraws the completion: it is an offer about
+       text that no longer exists. */
+    this.completion.set(null);
+    if (next === this.inputValue()) return;
+    const state = createControllable<string>({
+      initial: this.inputValue(),
+      onRequest: (request) => this.inputValueChangeRequest.emit(request),
+    });
+    if (state.request(next, reason, source)) this.inputValue.set(next);
+  }
+
+  select(next: ComboboxOptionValue | null, reason: ComboboxValueReason, source?: Event) {
+    if (next === this.value()) return;
+    const state = createControllable<ComboboxOptionValue | null>({
+      initial: this.value(),
+      onRequest: (request) => this.valueChangeRequest.emit(request),
+    });
+    if (!state.request(next, reason, source)) return;
+    this.value.set(next);
+    this.onChange(next);
+    this.onTouched();
+  }
+
+  clear(reason: ComboboxValueReason, source?: Event) {
+    this.select(null, reason, source);
+    this.setInputValue('', reason === 'clear' ? 'clear' : 'programmatic', source);
+  }
+
+  /** Takes an option: the key, the label into the field, and the popup shut. */
+  commitOption(value: ComboboxOptionValue, reason: ComboboxValueReason, source?: Event) {
+    this.select(value, reason, source);
+    this.setInputValue(this.labelFor(value) ?? value, 'select', source);
+    if (this.resolvedCloseOnSelect()) this.setOpen(false, 'select', source);
+  }
+
+  protected onInput(event: Event) {
+    const next = (event.target as HTMLInputElement).value;
+    const growing = next.length > this.inputValue().length;
+    this.setInputValue(next, 'keyboard', event);
+    /* A reader who is deleting is taking the text apart; writing the rest of a
+       word back into a field they are emptying is what makes `both` unusable. */
+    this.wantsCompletion = this.resolvedAutocomplete() === 'both' && growing;
+    if (this.resolvedOpenOn() === 'input' && !this.isOpen() && !this.resolvedReadOnly()) {
+      this.entry = this.resolvedAutoHighlight() ? 'first' : 'none';
+      this.setOpen(true, 'keyboard', event);
+    } else {
+      this.recount();
+    }
+  }
+
+  protected onFocus() {
+    if (this.resolvedOpenOn() !== 'focus' || this.resolvedReadOnly() || this.isOpen()) return;
+    this.entry = 'selected';
+    this.setOpen(true, 'keyboard');
+  }
+
+  protected onBlur(event: FocusEvent) {
+    this.onTouched();
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.surfaceNode?.contains(next) === true) return;
+    if (this.isOpen()) this.setOpen(false, 'blur', event);
+  }
+
+  protected onClear(event: MouseEvent) {
+    this.clear('clear', event);
+    this.focus();
+  }
+
+  protected onToggle(event: MouseEvent) {
+    if (this.resolvedDisabled() || this.resolvedReadOnly()) return;
+    this.entry = 'selected';
+    this.setOpen(!this.isOpen(), 'pointer', event);
+    this.focus();
+  }
+
+  protected onKeyDown(event: KeyboardEvent) {
+    if (this.resolvedDisabled()) return;
+    const alt = event.altKey;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        if (this.resolvedReadOnly()) return;
+        event.preventDefault();
+        if (!this.isOpen()) this.openWith(alt ? 'none' : 'first', event);
+        else if (!alt) this.move('next', event);
+        return;
+      case 'ArrowUp':
+        if (this.resolvedReadOnly()) return;
+        event.preventDefault();
+        if (alt) this.setOpen(false, 'keyboard', event);
+        else if (!this.isOpen()) this.openWith('last', event);
+        else this.move('previous', event);
+        return;
+      case 'PageDown':
+        if (!this.isOpen()) return;
+        event.preventDefault();
+        this.move('pageDown', event);
+        return;
+      case 'PageUp':
+        if (!this.isOpen()) return;
+        event.preventDefault();
+        this.move('pageUp', event);
+        return;
+      case 'Enter':
+        if (!this.isOpen() && !this.resolvedAllowsCustomValue()) return;
+        event.preventDefault();
+        this.commitFromKeyboard(event);
+        return;
+      case 'Escape':
+        this.onEscape(event);
+        return;
+      case 'Tab':
+        /* Not prevented, and no highlight is committed: one the reader arrowed
+           past is not a choice they made. A completion still standing is. */
+        if (this.completion() !== null) this.commitFromKeyboard(event);
+        else if (this.isOpen()) this.setOpen(false, 'dismiss', event);
+        return;
+      default:
+        /* Every other key is the browser's, which the pattern asks for by name. */
+        break;
+    }
+  }
+
+  private onEscape(event: KeyboardEvent) {
+    if (this.isOpen()) {
+      event.preventDefault();
+      this.setOpen(false, 'escape', event);
+      return;
+    }
+    const held = this.value();
+    if (held === null) return;
+    event.preventDefault();
+    const label = this.labelFor(held) ?? '';
+    if (this.inputValue() === label) this.clear('keyboard', event);
+    else this.setInputValue(label, 'keyboard', event);
+  }
+
+  private commitFromKeyboard(event: Event) {
+    const standing = this.completion();
+    if (this.highlightedValue() === null && standing !== null) {
+      const suggested = this.options().find((option) => this.labelOf(option) === standing);
+      if (suggested !== undefined) {
+        this.commitOption(suggested.dataset['value'] ?? '', 'keyboard', event);
+        return;
+      }
+    }
+
+    const held = this.highlightedValue();
+    if (held !== null) {
+      this.commitOption(held, 'keyboard', event);
+      return;
+    }
+    if (this.resolvedAllowsCustomValue()) {
+      this.select(this.inputValue() === '' ? null : this.inputValue(), 'keyboard', event);
+    } else {
+      const value = this.value();
+      this.setInputValue(value === null ? '' : (this.labelFor(value) ?? ''), 'select', event);
+    }
+    this.setOpen(false, 'select', event);
+  }
+
+  private labelOf(option: HTMLElement): string {
+    return (
+      option.dataset['textValue'] ??
+      option.querySelector("[data-part='label']")?.textContent?.trim() ??
+      ''
+    );
+  }
+
+  private openWith(entry: Entry, event: Event) {
+    this.entry = entry;
+    this.setOpen(true, 'keyboard', event);
+  }
+
+  private move(intent: MoveIntent, event?: Event) {
+    const list = this.options();
+    if (list.length === 0) return;
+    const held = this.highlightedValue();
+    const index = moveIndex({
+      enabled: list.map((option) => option.dataset['disabled'] === undefined),
+      from: held === null ? -1 : list.findIndex((option) => option.dataset['value'] === held),
+      intent,
+      loop: this.resolvedLoop(),
+    });
+    if (index !== -1) this.setHighlighted(list[index]?.dataset['value'] ?? null, 'keyboard', event);
+  }
+
+  /** The filter took the highlighted option away, so the highlight goes too. */
+  private dropStaleHighlight() {
+    const held = this.highlightedValue();
+    if (held === null) return;
+    const kept = this.options().some((option) => option.dataset['value'] === held);
+    if (!kept) this.setHighlighted(null, 'keyboard');
+  }
+
+  private applyCompletion() {
+    if (!this.wantsCompletion) return;
+    this.wantsCompletion = false;
+    const typed = this.inputValue();
+    if (typed === '') return;
+    const first = this.options().find((option) => option.dataset['disabled'] === undefined);
+    if (first === undefined) return;
+    const label = this.labelOf(first);
+    if (!label.toLowerCase().startsWith(typed.toLowerCase()) || label === typed) return;
+    this.completion.set(label);
+    /* The completion is shown as a selected range, so the next character typed
+       replaces it and Backspace withdraws it. */
+    queueMicrotask(() => {
+      const element = this.controlRef().nativeElement;
+      if (element.value === label) element.setSelectionRange(typed.length, label.length);
+    });
+  }
+
+  private show() {
+    this.build();
+    this.position();
+    this.bind();
+    this.enter();
+  }
+
+  private build() {
+    if (this.view !== null) {
+      this.presence?.sync(this.isOpen());
+      this.view.detectChanges();
+      return;
+    }
+
+    this.portalRoot = createPortalRoot({
+      origin: this.controlRef().nativeElement,
+      disabled: this.portal() === false,
+    });
+
+    this.view = this.viewContainer.createEmbeddedView(this.template());
+    this.view.detectChanges();
+
+    this.layerNode = this.view.rootNodes.find(
+      (node: unknown): node is HTMLElement => node instanceof HTMLElement,
+    ) as HTMLElement | null;
+    this.surfaceNode = this.layerNode?.querySelector<HTMLElement>("[data-part='content']") ?? null;
+    if (this.layerNode === null) return;
+
+    this.portalRoot.container?.append(this.layerNode);
+    this.presence = createPresence({ present: this.isOpen() });
+    this.presence.setNode(this.layerNode);
+  }
+
+  private position() {
+    if (this.layerNode === null) return;
+    const anchor = this.controlRef().nativeElement.parentElement;
+    if (anchor === null) return;
+
+    this.positioner?.destroy();
+    this.positioner = createPositioner(anchor, this.layerNode, {
+      align: this.resolvedAlign(),
+      alignOffset: this.alignOffset() ?? this.defaults.alignOffset,
+      boundaryPadding: this.collisionPadding() ?? this.defaults.collisionPadding,
+      flip: this.flip() ?? this.defaults.flip,
+      hideWhenDetached: this.hideWhenDetached() ?? this.defaults.hideWhenDetached,
+      shift: this.shift() ?? this.defaults.shift,
+      side: this.resolvedSide(),
+      sideOffset: this.sideOffset() ?? this.defaults.sideOffset,
+      strategy: this.strategy() ?? this.defaults.strategy,
+    });
+    void this.positioner.update();
+  }
+
+  private bind() {
+    if (this.layerNode === null) return;
+
+    this.layer = createDismissableLayer(this.layerNode, {
+      branches: [this.controlRef().nativeElement.parentElement].filter(
+        (branch): branch is HTMLElement => branch !== null,
+      ),
+      escape: this.closeOnEscape() ?? this.defaults.closeOnEscape,
+      focusOutside: false,
+      modal: false,
+      outsidePress: this.closeOnOutsidePress() ?? this.defaults.closeOnOutsidePress,
+      scrollLock: false,
+      onDismiss: (request) => {
+        this.setOpen(
+          false,
+          request.reason === 'escape' ? 'escape' : 'outsidePress',
+          request.source as Event | undefined,
+        );
+      },
+    });
+
+    this.observeEnd();
+  }
+
+  /**
+   * The last row came into view, so there is more to fetch. An observer rather
+   * than a scroll listener: the question is whether the end of the list is
+   * visible, and a scroll handler answers it by measuring on every frame.
+   */
+  private observeEnd() {
+    this.observer?.disconnect();
+    this.observer = null;
+    const root = this.surfaceNode;
+    if (root === null || typeof IntersectionObserver !== 'function') return;
+    const last = this.options().at(-1);
+    if (last === undefined) return;
+
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) this.loadMore.emit();
+      },
+      { root },
+    );
+    this.observer.observe(last);
+  }
+
+  private enter() {
+    this.recount();
+    if (this.entry === 'none') return;
+    if (this.entry === 'selected') {
+      const held = this.value();
+      if (held !== null) this.setHighlighted(held, 'keyboard');
+      return;
+    }
+    this.move(this.entry);
+  }
+
+  private hide() {
+    this.unbind();
+    if (this.resolvedMount() === 'active') this.teardown();
+  }
+
+  private unbind() {
+    this.layer?.destroy();
+    this.positioner?.destroy();
+    this.observer?.disconnect();
+    this.layer = null;
+    this.positioner = null;
+    this.observer = null;
+  }
+
+  private teardown() {
+    this.unbind();
+    this.presence?.destroy();
+    this.portalRoot?.release();
+    this.layerNode?.remove();
+    this.view?.destroy();
+
+    this.presence = null;
+    this.portalRoot = null;
+    this.layerNode = null;
+    this.surfaceNode = null;
+    this.view = null;
+  }
+
+  writeValue(value: ComboboxOptionValue | null) {
+    this.value.set(value ?? null);
+    this.inputValue.set(value === null ? '' : (this.labelFor(value) ?? value));
+  }
+
+  registerOnChange(fn: (value: ComboboxOptionValue | null) => void) {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void) {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean) {
+    this.disabledByForm.set(isDisabled);
+  }
+
+  /**
+   * Two validities the family owns, and neither is one a native input can
+   * describe: a required control with nothing chosen, and a control holding
+   * text that matches no option when a custom value is not allowed.
+   */
+  validate(_control: AbstractControl): ValidationErrors | null {
+    if (this.resolvedRequired() && this.value() === null) return { required: true };
+    if (this.resolvedAllowsCustomValue()) return null;
+    if (this.value() === null && this.inputValue() !== '') return { unmatched: true };
+    return null;
+  }
+}

@@ -19,8 +19,13 @@ part is a control and no binding implements `ControlValueAccessor`.
 
 ## The element
 
-`dl` for the root, `div` for the pair, `dt` for the term, `dd` for the value and
-a second `dd` for the row action.
+`div` for the root, `dl` for the list, `div` for the pair, `dt` for the term,
+`dd` for the value and a second `dd` for the row action.
+
+The root and the list are two elements because `container-type: inline-size`
+makes an element a query container for its descendants and not for itself, and
+what the container query changes here is the grid. `stepper` splits its root
+from its `ol` for the same reason, and `breadcrumb` its `nav` from its own.
 
 The HTML Standard permits a `dl` whose children are `div` elements, each holding
 one or more `dt` followed by one or more `dd`. That form is what makes a pair a
@@ -40,7 +45,8 @@ bought below with subgrid instead.
 
 | Part          | Element  | Always | What it is                                                          |
 | ------------- | -------- | ------ | ------------------------------------------------------------------- |
-| `root`        | `dl`     | yes    | The list. Owns the arrangement, the container query and the tracks. |
+| `root`        | `div`    | yes    | The query container. Owns nothing visual.                           |
+| `list`        | `dl`     | yes    | The list. Owns the arrangement and the tracks.                      |
 | `item`        | `div`    | yes    | One name-value pair. The box a rule, a tint or a span applies to.   |
 | `term`        | `dt`     | yes    | The name.                                                           |
 | `hint`        | `span`   | no     | One line explaining the term, inside the `dt`.                      |
@@ -63,14 +69,19 @@ platform's: a `dt` may be followed by more than one `dd`.
 The root declares the tracks and every item borrows them:
 
 ```css
-[data-ui='description-list'][data-layout='row'][data-columns='1'] {
-  grid-template-columns: fit-content(var(--slotted-description-list-term-width, 14rem)) minmax(0, 1fr) auto;
+[data-layout='row'][data-columns='1'] [data-part='list'] {
+  grid-template-columns: fit-content(var(--slotted-description-list-term-width, 14rem)) minmax(0, 1fr);
 }
-[data-ui='description-list'][data-layout='row'] [data-part='item'] {
+[data-layout='row'] [data-part='item'] {
   display: grid;
   grid-template-columns: subgrid;
 }
 ```
+
+The action track is added by `:has([data-part='action'])` rather than declared
+always. A gap applies between two tracks whether or not the second has any
+width, so a list with no actions would carry a rule or a gap at the end of every
+row that nothing asked for.
 
 `fit-content()` sizes the term column to the widest term in the list and stops
 at a maximum a theme can retune. PatternFly needs a stated `termWidth` to line
@@ -81,20 +92,19 @@ notices first.
 Three tracks per column, whatever the column count, so one set of rules places
 every cell:
 
-| Cell          | Column                                             |
-| ------------- | -------------------------------------------------- |
-| `term`        | `1`                                                |
-| `description` | `2 / -2`                                           |
-| `action`      | `-2 / -1`                                          |
+| Cell          | Column                                                    |
+| ------------- | --------------------------------------------------------- |
+| `term`        | `1`                                                       |
+| `description` | `2 / -1`, and `2 / -2` in a list that holds an action     |
+| `action`      | `-2 / -1`                                                 |
 
 An item that spans two columns borrows six tracks instead of three, and the same
 three rules place its cells: the value simply stretches across the middle
 tracks. No second placement exists for the spanning case.
 
-The separation between the term and the value is padding on the cells, not
-`column-gap`. A gap applies between tracks whether or not the action track has
-any width, so a list with no actions would carry a trailing gap it never asked
-for.
+A subgrid's own `gap` overrides the one it inherits, so each variant states the
+separation it wants: a gap in `plain` and `ruled`, and cell padding with a
+hairline in `framed`.
 
 ## Axes and their values
 

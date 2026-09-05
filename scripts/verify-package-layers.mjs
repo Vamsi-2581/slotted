@@ -6,7 +6,6 @@ export const LAYERS = {
   // Tens digit is the architectural layer; ones digit orders packages inside it.
   '@slotted/tokens': 10,
   '@slotted/styles': 10,
-  '@slotted/theme-default': 11,
   '@slotted/core': 20,
   '@slotted/react': 30,
   '@slotted/angular': 30,
@@ -15,15 +14,26 @@ export const LAYERS = {
 };
 
 const TOOLING_LAYER = 40;
+const THEME_LAYER = 11;
 const DEPENDENCY_KINDS = ['dependencies', 'devDependencies', 'peerDependencies'];
+
+/**
+ * Every theme sits one step above the contract it is written against, and the
+ * rank is taken from the name rather than from a list, so a theme added later
+ * is checked without anyone remembering to enumerate it here.
+ */
+export function rankOf(name) {
+  if (name in LAYERS) return LAYERS[name];
+  return name.startsWith('@slotted/theme-') ? THEME_LAYER : undefined;
+}
 
 export function layerViolations(manifests) {
   return manifests.flatMap((manifest) => {
-    const layer = LAYERS[manifest.name];
+    const layer = rankOf(manifest.name);
     if (layer === undefined) return [];
 
     return manifest.dependencies.flatMap((dependency) => {
-      const dependencyLayer = LAYERS[dependency.name];
+      const dependencyLayer = rankOf(dependency.name);
       if (dependencyLayer === undefined || dependencyLayer < layer) return [];
 
       const isInternalTooling =

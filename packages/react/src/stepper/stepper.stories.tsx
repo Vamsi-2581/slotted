@@ -54,7 +54,7 @@ function Scene({
 }: {
   children: React.ReactNode;
   label: string;
-  layout?: 'row' | 'stack' | 'prose';
+  layout?: 'row' | 'stack' | 'block' | 'prose';
   note: string;
 }) {
   return (
@@ -97,7 +97,7 @@ export const Playground: Story = {
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => (
-    <div className="slotted-demo-stage" data-layout="stack">
+    <div className="slotted-demo-stage" data-layout="block">
       <Flow {...args} />
     </div>
   ),
@@ -108,12 +108,14 @@ export const Orientation: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label='orientation="horizontal"'
         note="A row of equal columns: five steps divide the width evenly however long their names are, and the connectors line up on one axis."
       >
         <Flow defaultStep={1} />
       </Scene>
       <Scene
+        layout="block"
         label='orientation="vertical"'
         note="A column, with the connector running down the marker's own centre line and room under each step for the content behind it."
       >
@@ -134,6 +136,7 @@ export const Statuses: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label="complete, invalid, current, pending, disabled"
         note="Every status is a fill and a shape as well as a colour: a check on a filled disc, a cross on a red one, a ring where the reader is, and an outline for what is still ahead."
       >
@@ -156,6 +159,7 @@ export const Linear: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label="linear"
         note="Only the step after the last complete one can be reached. Press a later header and nothing moves, but Tab still lands on it and it says it is unavailable."
       >
@@ -169,6 +173,7 @@ export const Linear: Story = {
         </Stepper>
       </Scene>
       <Scene
+        layout="block"
         label="without linear"
         note="The same four steps with the policy off: every header is reachable, which is the flow a reader may enter at any point."
       >
@@ -183,12 +188,14 @@ export const Navigation: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label='navigation="button"'
         note="A control the reader presses. Hover underlines the name and the marker gives a little under the press, so it reads as pressable before it is pressed."
       >
         <Flow defaultStep={1} names={['Cart', 'Address', 'Payment']} />
       </Scene>
       <Scene
+        layout="block"
         label='navigation="link"'
         note="A destination with a URL of its own, so a middle click opens the step in a tab and a crawler can follow the flow."
       >
@@ -201,6 +208,7 @@ export const Navigation: Story = {
         </Stepper>
       </Scene>
       <Scene
+        layout="block"
         label='navigation="none"'
         note="Nothing to press: the header is a span, and the same markup is the read-only progress indicator the field ships as a separate component."
       >
@@ -221,12 +229,14 @@ export const Placement: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label='labelPlacement="end"'
         note="The name sits beside the marker and the connector takes whatever the name leaves, so a short flow reads as one continuous track."
       >
         <Flow defaultStep={1} names={['Cart', 'Address', 'Payment']} />
       </Scene>
       <Scene
+        layout="block"
         label='labelPlacement="bottom"'
         note="The marker centres over its own column and the name runs under it, which is what a row of long names needs to stay legible."
       >
@@ -245,6 +255,7 @@ export const Panels: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label="StepperPanel"
         note="One panel at a time, the one belonging to the current step. Press another header and the content behind it replaces this, with no animation to wait through."
       >
@@ -273,6 +284,7 @@ export const Compact: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label="Below 30rem"
         note="The same horizontal stepper in a narrow column. It turns into a column rather than shrinking five names to two characters each, and the connectors turn with it."
       >
@@ -289,6 +301,7 @@ export const Content: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label="Six steps, long names"
         note="A German compound and a phrase of four words. The label wraps inside its own column, the marker never does, and no step widens the row past its share."
       >
@@ -304,6 +317,7 @@ export const Content: Story = {
         </Stepper>
       </Scene>
       <Scene
+        layout="block"
         label="A second line"
         note="The description renders inside the label, so the marker sits against the whole text block and both lines wrap together."
       >
@@ -355,6 +369,7 @@ export const Composition: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label="useStepper()"
         note="The move and whether it is available, handed to a button this family did not paint. Press Continue and the flow advances; the button is yours to theme with every other one."
       >
@@ -368,6 +383,7 @@ export const Composition: Story = {
         </Stepper>
       </Scene>
       <Scene
+        layout="block"
         label="StepperDefaultsProvider"
         note="One decision for every stepper below it: which way the flow runs, where the labels sit, and whether the order is enforced."
       >
@@ -384,6 +400,7 @@ export const Keyboard: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
+        layout="block"
         label="Tab, arrows, Home, End, Enter"
         note="Tab reaches every header and the arrows reach the same ones, following the reading direction and wrapping at the ends. Enter and Space move to a step the flow has opened."
       >

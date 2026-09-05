@@ -5,7 +5,7 @@ Wave 2, guide 9, new family. Written before any code, as
 responsibility, anatomy, composition and cross-framework behaviour for the
 first time and it adds six tokens to the foundation's glyph scale.
 
-Scope, from `docs/rebuild-order.md`: “ponto, ícone ou rótulo curto de estado
+Scope, from `docs/build-order.md`: “ponto, ícone ou rótulo curto de estado
 operacional, sempre com texto acessível e alternativa não cromática. Pulso só
 para mudança viva, respeitando reduced motion.”
 
@@ -77,7 +77,7 @@ The cost is real and is recorded rather than hidden: a corner mark composed
 this way carries `badge`'s dot, so it cannot carry this family's status glyph.
 A product that needs the glyph on a corner puts the whole indicator there
 itself. Two families placing a mark on a corner would be two answers to one
-question, which is the objection `docs/rebuild-briefing.md` records against
+question, which is the objection `docs/build-briefing.md` records against
 two families owning measure.
 
 ## 3. Differentiators
@@ -164,7 +164,7 @@ and a second non-chromatic system would be two answers to one question.
 ### 5.3 Six glyph tokens added to the foundation
 
 This is the one decision that reaches outside the family, and
-`docs/rebuild-briefing.md` names that as something to state at the gate rather
+`docs/build-briefing.md` names that as something to state at the gate rather
 than to ask about.
 
 `--slotted-icon-circle`, `--slotted-icon-circle-info`,
@@ -183,7 +183,7 @@ The justification the foundation asks for:
   forms are the right artwork rather than a stylistic preference.
 - They are the wave's icon set rather than this family's luxury. `alert`
   and `inline-message`, the next two entries in wave 2, are both required by
-  `docs/rebuild-order.md` to communicate their five tones “por texto e ícone
+  `docs/build-order.md` to communicate their five tones “por texto e ícone
   além de cor”, and they consume the same six.
 - They are drawn in the same idiom as the eight already there: a 24-unit view
   box, `stroke="black"` with round caps and joins, so the mask reads the same

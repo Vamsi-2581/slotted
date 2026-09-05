@@ -17,17 +17,19 @@
    * stylesheet depends on the other's selectors.
    */
   [data-ui='radio-group'][data-part='root'] {
-    --_size: var(--slotted-radio-group-size, var(--slotted-control-icon-size-md, 16px));
+    /**
+     * The circle is the selection scale's, the same square `checkbox` draws
+     * in: 16px at `md`, stated once by the theme and not moved by density.
+     */
+    --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-md, 16px));
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_line-height: var(--slotted-radio-group-line-height, var(--slotted-line-height-md, 1.5));
     /**
-     * The dot inside its box. The glyph scale's circle is authored at half the
-     * 24-unit grid, so a mask inset to seven eighths of the box draws a dot of
-     * about seven pixels in a box of sixteen — the proportion every surveyed
-     * implementation lands on, stated once instead of per size.
+     * The halo behind the circle: the ring of ink that answers the pointer,
+     * the same one `checkbox` draws behind its square.
      */
-    --_mark-inset: var(--slotted-radio-group-mark-inset, 0.875);
+    --_halo-size: var(--slotted-selection-halo-size, 32px);
     /**
      * The height a one-line label is missing before it is a WCAG 2.2 target,
      * split above and below its text, for the reason `checkbox` splits it: a
@@ -88,7 +90,7 @@
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
   [data-ui='radio-group'][data-part='root'][data-size='sm'] {
-    --_size: var(--slotted-radio-group-size, var(--slotted-control-icon-size-sm, 14px));
+    --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-sm, 14px));
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_tile-inset: var(
@@ -98,7 +100,7 @@
   }
 
   [data-ui='radio-group'][data-part='root'][data-size='md'] {
-    --_size: var(--slotted-radio-group-size, var(--slotted-control-icon-size-md, 16px));
+    --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-md, 16px));
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_tile-inset: var(
@@ -108,7 +110,7 @@
   }
 
   [data-ui='radio-group'][data-part='root'][data-size='lg'] {
-    --_size: var(--slotted-radio-group-size, var(--slotted-control-icon-size-lg, 18px));
+    --_size: var(--slotted-radio-group-size, var(--slotted-selection-size-lg, 18px));
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_gap: var(--slotted-control-gap-lg, 8px);
     --_tile-inset: var(
@@ -122,13 +124,21 @@
   [data-ui='radio-group'] [data-part='item'] {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
+    /* The halo sits at a negative stack level, and this is the stacking
+       context it is negative inside of — see `checkbox`. */
+    isolation: isolate;
+    /* The containing block for the halo. */
+    position: relative;
   }
 
   [data-ui='radio-group'] [data-part='control'] {
     appearance: none;
     background-color: var(--slotted-radio-group-background, var(--slotted-surface, Canvas));
-    border: var(--slotted-control-border-width, 1px) solid
-      var(--slotted-radio-group-border-color, var(--slotted-control-border-color, ButtonBorder));
+    /* The medium step in the strong border colour, as `checkbox` edges its
+       square: a sixteen-pixel circle is edged too lightly at one pixel and too
+       heavily at two. */
+    border: var(--slotted-radio-group-border-width, var(--slotted-border-width-medium, 1.5px)) solid
+      var(--slotted-radio-group-border-color, var(--slotted-border-strong, ButtonBorder));
     /** A circle, and the one place this family and `checkbox` differ visually. */
     border-radius: var(--slotted-radius-full, 9999px);
     block-size: var(--_size);
@@ -145,8 +155,21 @@
         var(--slotted-control-transition-easing);
   }
 
+  /**
+   * The dot: the accent's solid step on the surface, inside a circle whose
+   * edge has turned the same colour. The glyph scale's circle is authored at
+   * half its grid, so a mask that fills the box draws a dot of eight pixels in
+   * a circle of sixteen — the proportion every surveyed implementation lands
+   * on — and the box the dot is centred in is the control's own, of whole
+   * pixels, so the two are concentric at every step.
+   *
+   * A dot rather than a hole punched in a thick accent edge, which was the
+   * other reading of the item: the hole is four pixels at `sm`, the contract
+   * names the dot glyph as this part's mark, and the mark then enters with the
+   * same growth `checkbox`'s does.
+   */
   [data-ui='radio-group'] [data-part='indicator'] {
-    background-color: var(--slotted-radio-group-mark-color, var(--slotted-tone-accent-on-solid));
+    background-color: var(--slotted-radio-group-mark-color, var(--slotted-tone-accent-solid));
     block-size: var(--_size);
     grid-area: 1 / 1;
     inline-size: var(--_size);
@@ -154,13 +177,15 @@
     mask-image: var(--slotted-radio-group-mark-image, var(--slotted-icon-dot));
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: calc(var(--_size) * var(--_mark-inset)) calc(var(--_size) * var(--_mark-inset));
+    mask-size: contain;
     opacity: 0;
     pointer-events: none;
+    /* The mark grows in at the medium step, one above the edge — the same
+       motion `checkbox` gives its check. */
     scale: 0.6;
     transition:
-      opacity var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
-      scale var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+      opacity var(--slotted-duration-medium) var(--slotted-control-transition-easing),
+      scale var(--slotted-duration-medium) var(--slotted-control-transition-easing);
   }
 
   [data-ui='radio-group'] [data-part='control']:checked + [data-part='indicator'] {
@@ -178,6 +203,29 @@
     overflow-wrap: anywhere;
     padding-block: var(--_label-slack);
     padding-inline-start: var(--_gap);
+  }
+
+  /**
+   * The halo, as `checkbox` draws it: the label's pseudo-element — the label is
+   * what selects the item — sized to the circle and laid exactly over it, with
+   * its shadow spread out to the halo size, behind the control. Ink rather
+   * than a laid-out box, so the thirty-two pixels are scrollable overflow
+   * nowhere. The tile has none; its surface answers the pointer itself.
+   */
+  [data-ui='radio-group'][data-part='root']:not([data-variant='tile']) [data-part='label']::before {
+    block-size: var(--_size);
+    border-radius: var(--slotted-radius-full, 9999px);
+    box-shadow: 0 0 0 calc((var(--_halo-size) - var(--_size)) / 2)
+      var(--slotted-radio-group-halo-color, var(--slotted-tone-accent-surface));
+    content: '';
+    inline-size: var(--_size);
+    inset-block-start: var(--_lift);
+    inset-inline-start: 0;
+    opacity: 0;
+    position: absolute;
+    transition: opacity var(--slotted-control-transition-duration)
+      var(--slotted-control-transition-easing);
+    z-index: -1;
   }
 
   [data-ui='radio-group'] [data-part='description'] {
@@ -223,15 +271,31 @@
     padding-inline-start: 0;
   }
 
+  [data-ui='radio-group'][data-part='root'][data-label-placement='start']
+    [data-part='label']::before {
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+  }
+
   /* ── States ───────────────────────────────────────────────────────────── */
 
+  /**
+   * Hover is the edge and the halo, and the ground stays — the same answer
+   * `checkbox` gives, lit from the circle and from the label alike because
+   * both are the one target.
+   */
   [data-ui='radio-group'][data-part='root']:not([data-readonly])
     [data-part='control']:hover:not(:disabled) {
-    background-color: var(
-      --slotted-radio-group-hover-background,
-      var(--slotted-tone-accent-subtle-hover)
-    );
     border-color: var(--slotted-radio-group-hover-border-color, var(--slotted-tone-accent-border));
+  }
+
+  [data-ui='radio-group'][data-part='root']:not([data-readonly])
+    [data-part='control']:hover:not(:disabled)
+    ~ [data-part='label']::before,
+  [data-ui='radio-group'][data-part='root']:not([data-readonly])
+    [data-part='control']:not(:disabled)
+    ~ [data-part='label']:hover::before {
+    opacity: var(--slotted-selection-halo-opacity, 0.4);
   }
 
   [data-ui='radio-group'][data-part='root']:not([data-readonly])
@@ -242,34 +306,28 @@
     );
   }
 
+  /**
+   * Chosen is the edge and the dot in the accent's solid step, on the surface
+   * the circle already stood on: the ground does not fill, because the dot is
+   * what says chosen and a filled circle with a white dot is a checkbox with a
+   * different corner.
+   */
   [data-ui='radio-group'] [data-part='control']:checked {
-    background-color: var(
-      --slotted-radio-group-checked-background,
-      var(--slotted-tone-accent-solid)
-    );
-    border-color: var(--slotted-radio-group-checked-background, var(--slotted-tone-accent-solid));
+    border-color: var(--slotted-radio-group-checked-border-color, var(--slotted-tone-accent-solid));
   }
 
   [data-ui='radio-group'][data-part='root']:not([data-readonly])
     [data-part='control']:checked:hover:not(:disabled) {
-    background-color: var(
-      --slotted-radio-group-checked-hover-background,
-      var(--slotted-tone-accent-solid-hover)
-    );
     border-color: var(
-      --slotted-radio-group-checked-hover-background,
+      --slotted-radio-group-checked-hover-border-color,
       var(--slotted-tone-accent-solid-hover)
     );
   }
 
   [data-ui='radio-group'][data-part='root']:not([data-readonly])
     [data-part='control']:checked:active:not(:disabled) {
-    background-color: var(
-      --slotted-radio-group-checked-active-background,
-      var(--slotted-tone-accent-solid-active)
-    );
     border-color: var(
-      --slotted-radio-group-checked-active-background,
+      --slotted-radio-group-checked-active-border-color,
       var(--slotted-tone-accent-solid-active)
     );
   }
@@ -303,12 +361,17 @@
   }
 
   [data-ui='radio-group'][data-part='root'][data-invalid] [data-part='control']:checked {
-    background-color: var(
-      --slotted-radio-group-invalid-checked-background,
+    border-color: var(
+      --slotted-radio-group-invalid-checked-border-color,
       var(--slotted-tone-danger-solid)
     );
-    border-color: var(
-      --slotted-radio-group-invalid-checked-background,
+  }
+
+  [data-ui='radio-group'][data-part='root'][data-invalid]
+    [data-part='control']:checked
+    + [data-part='indicator'] {
+    background-color: var(
+      --slotted-radio-group-invalid-mark-color,
       var(--slotted-tone-danger-solid)
     );
   }
@@ -624,12 +687,12 @@
     }
 
     [data-ui='radio-group'] [data-part='control']:checked {
-      background-color: Highlight;
+      background-color: Field;
       border-color: Highlight;
     }
 
     [data-ui='radio-group'] [data-part='control']:checked + [data-part='indicator'] {
-      background-color: HighlightText;
+      background-color: Highlight;
     }
 
     [data-ui='radio-group'] [data-part='control']:disabled {

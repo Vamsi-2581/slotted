@@ -1,4 +1,9 @@
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import {
+  bindScenes,
+  createReferencePage,
+  scenario,
+  WorkbenchMatrix,
+} from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
@@ -8,6 +13,7 @@ import { CheckboxGroup } from '../checkbox-group';
 import { Grid, Measure, Scene } from '../field/field-demo';
 import { Grid as LayoutGrid } from '../grid';
 import { FieldGroup, FieldGroupLegend } from '../field-group';
+import { Radio, RadioGroup } from '../radio-group';
 import { Text } from '../typography';
 import { Checkbox } from './checkbox';
 import { CheckboxDefaultsProvider } from './checkbox-defaults';
@@ -453,5 +459,115 @@ export const Keyboard: Story = {
         </Scene>
       </Grid>
     );
+  },
+};
+
+/* ── Checkbox beside Radio, every state, every density, every scheme ──────
+ *
+ * The acceptance picture for the selection controls (CK1–CK5): the square and
+ * the circle side by side so a reader sees, in one place, that the two read
+ * the same scale, the same edge, the same halo and the same motion. Not a
+ * contract scenario, so it has no reference-page scene; it is the picture the
+ * review asked for.
+ */
+
+const COMPARISON_SCHEMES = ['light', 'dark', 'high-contrast'] as const;
+const COMPARISON_DENSITIES = ['comfortable', 'compact', 'dense'] as const;
+const COMPARISON_STATES = [
+  'default',
+  'hover',
+  'focus-visible',
+  'checked',
+  'indeterminate',
+  'disabled',
+  'invalid',
+] as const;
+type ComparisonState = (typeof COMPARISON_STATES)[number];
+
+const COMPARISON_LABELS: Record<ComparisonState, string> = {
+  default: 'default',
+  hover: 'hover — move the pointer over a box or a circle',
+  'focus-visible': 'focus-visible — the first cell holds focus; Tab moves it',
+  checked: 'checked',
+  indeterminate: 'indeterminate',
+  disabled: 'disabled',
+  invalid: 'invalid',
+};
+
+function ComparisonCell({
+  density,
+  scheme,
+  state,
+}: {
+  density: (typeof COMPARISON_DENSITIES)[number];
+  scheme: (typeof COMPARISON_SCHEMES)[number];
+  state: ComparisonState;
+}) {
+  const key = `${scheme}-${density}-${state}`;
+  const disabled = state === 'disabled';
+  const invalid = state === 'invalid';
+  return (
+    <div
+      data-comparison-focus={state === 'focus-visible' ? '' : undefined}
+      data-slotted-density={density}
+    >
+      <div className="slotted-demo-stage" data-layout="row">
+        <Checkbox
+          defaultChecked={state === 'checked'}
+          disabled={disabled}
+          indeterminate={state === 'indeterminate'}
+          invalid={invalid}
+        >
+          Caixa
+        </Checkbox>
+        {state === 'indeterminate' ? (
+          <Text size="sm" tone="muted">
+            sem equivalente
+          </Text>
+        ) : (
+          <RadioGroup
+            aria-label={`Rádio ${key}`}
+            defaultValue={state === 'checked' ? 'a' : undefined}
+            disabled={disabled}
+            invalid={invalid}
+            name={key}
+          >
+            <Radio value="a">Rádio</Radio>
+          </RadioGroup>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export const Comparison: Story = {
+  render: () => (
+    <div className="slotted-demo-stage" data-layout="stack">
+      {COMPARISON_SCHEMES.map((scheme) => (
+        <div
+          className="slotted-demo-surface"
+          data-flow="stack"
+          data-slotted-scheme={scheme}
+          data-surface="scheme"
+          key={scheme}
+        >
+          <Text size="sm" tone="muted">
+            {scheme}
+          </Text>
+          <WorkbenchMatrix
+            columns={[...COMPARISON_DENSITIES]}
+            rows={COMPARISON_STATES.map((state) => ({
+              label: COMPARISON_LABELS[state],
+              cells: COMPARISON_DENSITIES.map((density) => (
+                <ComparisonCell density={density} key={density} scheme={scheme} state={state} />
+              )),
+            }))}
+          />
+        </div>
+      ))}
+    </div>
+  ),
+  play: ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLInputElement>('[data-comparison-focus] input')?.focus();
   },
 };

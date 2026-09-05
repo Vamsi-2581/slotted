@@ -99,7 +99,100 @@ test('differs from checkbox in the corner and in nothing else structural', () =>
   assert.match(checkboxCss, /--slotted-selection-size-md/);
   assert.match(
     rule(root),
-    /--_size:var\(--slotted-radio-group-size,var\(--slotted-control-icon-size-md,16px\)\)/,
+    /--_size:var\(--slotted-radio-group-size,var\(--slotted-selection-size-md,16px\)\)/,
+  );
+});
+
+/**
+ * The circle is the selection scale's, fixed across densities, edged at the
+ * medium step in the strong colour — the same decisions `checkbox` takes for
+ * its square (CK5, CK3).
+ */
+test('takes its circle from the selection scale and edges it as checkbox does', () => {
+  for (const [size, px] of [
+    ['sm', '14px'],
+    ['md', '16px'],
+    ['lg', '18px'],
+  ]) {
+    assert.match(
+      rule(`${root}[data-size='${size}']`),
+      new RegExp(
+        `--_size:var\\(--slotted-radio-group-size,var\\(--slotted-selection-size-${size},${px}\\)\\)`,
+      ),
+      `data-size="${size}" does not read the selection scale`,
+    );
+  }
+  assert.doesNotMatch(declarations, /--slotted-control-icon-size-/);
+  assert.match(
+    rule(part('control')),
+    /border:var\(--slotted-radio-group-border-width,var\(--slotted-border-width-medium,1\.5px\)\) solid var\(--slotted-radio-group-border-color,var\(--slotted-border-strong,ButtonBorder\)\)/,
+  );
+});
+
+/**
+ * Chosen is a dot of the accent's solid step on the surface, inside an edge of
+ * the same colour: the ground does not fill (CK5). The dot fills the control's
+ * own box — the glyph is authored at half its grid — so its centre is the
+ * circle's centre at every step (CK4).
+ */
+test('says chosen with the edge and the dot, and leaves the ground alone', () => {
+  const checked = rule(`${part('control')}:checked`);
+  assert.match(
+    checked,
+    /border-color:var\(--slotted-radio-group-checked-border-color,var\(--slotted-tone-accent-solid\)\)/,
+  );
+  assert.doesNotMatch(checked, /background-color/);
+  const indicator = rule(part('indicator'));
+  assert.match(
+    indicator,
+    /background-color:var\(--slotted-radio-group-mark-color,var\(--slotted-tone-accent-solid\)\)/,
+  );
+  assert.match(indicator, /block-size:var\(--_size\)/);
+  assert.match(indicator, /inline-size:var\(--_size\)/);
+  assert.match(indicator, /mask-size:contain/);
+  assert.match(indicator, /scale:0\.6/);
+  /* Invalid moves the dot with the edge. */
+  assert.match(
+    rule(`${root}[data-invalid] [data-part='control']:checked + [data-part='indicator']`),
+    /background-color:var\(--slotted-radio-group-invalid-mark-color,var\(--slotted-tone-danger-solid\)\)/,
+  );
+});
+
+/**
+ * The halo, as `checkbox` draws it: the label's pseudo-element sized to the
+ * circle and laid over it, its shadow spread to the halo size, behind the
+ * control inside the item's own stacking context, lit by hover alone.
+ */
+test('draws the same halo checkbox does, behind the circle, lit by hover alone', () => {
+  const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::before`);
+  assert.match(halo, /block-size:var\(--_size\)/);
+  assert.match(halo, /inline-size:var\(--_size\)/);
+  assert.match(halo, /border-radius:var\(--slotted-radius-full,9999px\)/);
+  assert.match(
+    halo,
+    /box-shadow:0 0 0 calc\(\(var\(--_halo-size\) - var\(--_size\)\) \/ 2\) var\(--slotted-radio-group-halo-color,var\(--slotted-tone-accent-surface\)\)/,
+  );
+  assert.match(halo, /inset-block-start:var\(--_lift\)/);
+  assert.match(halo, /opacity:0/);
+  assert.match(halo, /z-index:-1/);
+  assert.match(rule(root), /--_halo-size:var\(--slotted-selection-halo-size,32px\)/);
+  assert.match(rule(part('item')), /isolation:isolate/);
+  assert.match(rule(part('item')), /position:relative/);
+  assert.ok(
+    normalized.includes(
+      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::before,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::before{opacity:var(--slotted-selection-halo-opacity,0.4);}`,
+    ),
+    'hover does not light the halo, or lights it from somewhere else',
+  );
+  const hover = rule(`${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled)`);
+  assert.match(
+    hover,
+    /border-color:var\(--slotted-radio-group-hover-border-color,var\(--slotted-tone-accent-border\)\)/,
+  );
+  assert.doesNotMatch(hover, /background-color/);
+  assert.match(
+    rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
+    /inset-inline-end:0;inset-inline-start:auto/,
   );
 });
 
@@ -194,13 +287,23 @@ test('restates the pair forced colors would collapse', () => {
       `@media (forced-colors:active){${part('control')}{background-color:Field;border-color:FieldText;}`,
     ),
   );
-  assert.ok(normalized.includes('background-color:HighlightText'));
+  /* The dot is the accent on the field, so under forced colours it is
+     Highlight on Field rather than HighlightText on Highlight. */
+  assert.ok(
+    normalized.includes(
+      `${part('control')}:checked + [data-part='indicator']{background-color:Highlight;}`,
+    ),
+  );
 });
 
 test('transitions the two changes the eye has to follow, from the scale', () => {
   assert.match(
     rule(part('indicator')),
-    /transition:opacity var\(--slotted-control-transition-duration\)/,
+    /transition:opacity var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\),scale var\(--slotted-duration-medium\)/,
+  );
+  assert.match(
+    rule(part('control')),
+    /transition:background-color var\(--slotted-control-transition-duration\)/,
   );
   assert.doesNotMatch(declarations, /\d+m?s(?![\w-])/);
 });

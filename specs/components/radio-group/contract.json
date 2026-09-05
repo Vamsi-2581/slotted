@@ -104,9 +104,6 @@
       "reasons": ["pointer", "keyboard"]
     }
   },
-  "literals": {
-    "--slotted-radio-group-mark-scale": "The dot is half the box, which is the proportion the glyph scale's own circle is authored at and the one every surveyed implementation draws. It is a ratio over the box token rather than a step on a scale, and no scale in docs/token-foundation.md holds a proportion."
-  },
   "members": {
     "radioGroup": {
       "nativeElement": "div",

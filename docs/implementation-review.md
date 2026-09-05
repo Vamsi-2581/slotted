@@ -178,7 +178,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 Localização: `packages/styles/src/checkbox/checkbox.css`, `packages/styles/src/radio-group/radio-group.css`, `packages/styles/src/checkbox-group/`.
 
-- [ ] **CK1 — Redesenho do checkbox.** Problemas: glifo de check não cabe em densidades menores (`--_mark-inset: 0.875` produz um check que toca a borda em 14px), espaçamento interno mal calculado, `hover` e `focus` sem tratamento. Esperado:
+- [x] **CK1 — Redesenho do checkbox.** Problemas: glifo de check não cabe em densidades menores (`--_mark-inset: 0.875` produz um check que toca a borda em 14px), espaçamento interno mal calculado, `hover` e `focus` sem tratamento. Esperado:
   - Caixa: 16px em `md`, 14px em `sm`, 18px em `lg`. Raio `--slotted-radius-xs` (2px a 3px). Borda 1.5px em `--slotted-border-strong`.
   - Glifo: path de check do Lucide com `stroke-width` 3 em `viewBox 0 0 24 24`, ocupando 70% da caixa (`inset` de 15%), `stroke-linecap: round`.
   - `checked`: fundo `accent-solid`, glifo em `accent-solid-text`, sem borda visível.

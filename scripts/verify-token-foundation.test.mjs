@@ -137,6 +137,7 @@ test('documents every foundation value in its source-specific table', () => {
   assertBaseTable('Stacking', '--slotted-z-index-');
   assertGlyphTable();
   assertBaseTable('Target size', '--slotted-target-');
+  assertBaseTable('Selection geometry', '--slotted-selection-');
 });
 
 test('draws every glyph from the Lucide icon its manifest names', () => {

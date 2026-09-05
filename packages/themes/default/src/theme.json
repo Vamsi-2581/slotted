@@ -6,6 +6,7 @@
     "--slotted-font-family-mono": "ui-monospace, SFMono-Regular, Menlo, monospace",
     "--slotted-border-width-thin": "1px",
     "--slotted-border-width-thick": "2px",
+    "--slotted-border-width-medium": "1.5px",
     "--slotted-duration-loop-fast": "700ms",
     "--slotted-duration-loop": "1.1s",
     "--slotted-duration-loop-slow": "1.6s",
@@ -91,7 +92,12 @@
     "--slotted-icon-lock": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2' ry='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E\")",
     "--slotted-icon-cloud-off": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057'/%3E%3Cpath d='M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78'/%3E%3Cpath d='m2 2 20 20'/%3E%3C/svg%3E\")",
     "--slotted-target-min": "24px",
-    "--slotted-target-comfortable": "44px"
+    "--slotted-target-comfortable": "44px",
+    "--slotted-selection-size-sm": "14px",
+    "--slotted-selection-size-md": "16px",
+    "--slotted-selection-size-lg": "18px",
+    "--slotted-selection-halo-size": "32px",
+    "--slotted-selection-halo-opacity": "0.4"
   },
   "schemes": {
     "light": {

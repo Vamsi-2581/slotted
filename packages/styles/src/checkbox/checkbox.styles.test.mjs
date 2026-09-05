@@ -87,21 +87,113 @@ test('draws both marks as a mask from the glyph scale, never as a character', ()
 });
 
 /**
- * The square is the control glyph scale's, which the theme restates per
- * density. A component scale for it would restate a scale that already exists,
- * which is the one thing the component layer's bar forbids.
+ * The square is the selection scale's, which the theme states once and density
+ * does not move: the control glyph scale fell to twelve pixels at `dense`,
+ * below the size a mark can be drawn in (CK1, CK3).
  */
-test('takes its box from a scale that already answers density', () => {
+test('takes its box from the selection scale, at every density', () => {
   assert.match(
     rule(root),
-    /--_size:var\(--slotted-checkbox-size,var\(--slotted-control-icon-size-md,16px\)\)/,
+    /--_size:var\(--slotted-checkbox-size,var\(--slotted-selection-size-md,16px\)\)/,
   );
-  for (const size of contract.axes.size) {
-    assert.ok(
-      normalized.includes(`${root}[data-size='${size}']{`),
-      `no rule answers data-size="${size}"`,
+  for (const [size, px] of [
+    ['sm', '14px'],
+    ['md', '16px'],
+    ['lg', '18px'],
+  ]) {
+    assert.match(
+      rule(`${root}[data-size='${size}']`),
+      new RegExp(
+        `--_size:var\\(--slotted-checkbox-size,var\\(--slotted-selection-size-${size},${px}\\)\\)`,
+      ),
+      `data-size="${size}" does not read the selection scale`,
     );
   }
+  assert.doesNotMatch(declarations, /--slotted-control-icon-size-/);
+});
+
+/**
+ * The edge and the corner (CK1): the medium step of the border scale in the
+ * strong border colour, and the smallest radius, so the square does not read
+ * as the radio's circle's cousin.
+ */
+test('edges the box at the medium step, in the strong colour, with the smallest corner', () => {
+  const control = rule(part('control'));
+  assert.match(
+    control,
+    /border:var\(--slotted-checkbox-border-width,var\(--slotted-border-width-medium,1\.5px\)\) solid var\(--slotted-checkbox-border-color,var\(--slotted-border-strong,ButtonBorder\)\)/,
+  );
+  assert.match(
+    control,
+    /border-radius:var\(--slotted-checkbox-radius,var\(--slotted-radius-xs,2px\)\)/,
+  );
+});
+
+/**
+ * The glyph is its own box at seven tenths of the square, inset by the same
+ * fraction on every side, so its centre is the box's centre at every step and
+ * every density — the measurement CK4 asks for (`getBoundingClientRect()` of
+ * the mark against the box, centre difference ≤ 0.5px).
+ */
+test('draws the glyph in a box that is a fraction of the square, inset equally on every side', () => {
+  assert.match(rule(root), /--_mark-inset:var\(--slotted-checkbox-mark-inset,0\.15\)/);
+  assert.match(
+    rule(root),
+    /--_mark-size:calc\(var\(--_size\) \* \(1 - 2 \* var\(--_mark-inset\)\)\)/,
+  );
+  const indicator = rule(part('indicator'));
+  assert.match(indicator, /block-size:var\(--_mark-size\)/);
+  assert.match(indicator, /inline-size:var\(--_mark-size\)/);
+  assert.match(
+    indicator,
+    /margin-block-start:calc\(var\(--_lift\) \+ var\(--_size\) \* var\(--_mark-inset\)\)/,
+  );
+  assert.match(indicator, /margin-inline-start:calc\(var\(--_size\) \* var\(--_mark-inset\)\)/);
+  assert.match(indicator, /mask-size:contain/);
+});
+
+/**
+ * The halo (CK1): a circle twice the box, behind it, lit under the pointer. It
+ * is the label's pseudo-element because the label toggles the control, and it
+ * sits at a negative stack level inside the root's own stacking context. It is
+ * the box's own circle with its shadow spread to the halo size — ink, so the
+ * thirty-two pixels are scrollable overflow nowhere.
+ */
+test('draws the halo behind the box as ink on the label, lit by hover alone', () => {
+  const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::before`);
+  assert.match(halo, /block-size:var\(--_size\)/);
+  assert.match(halo, /inline-size:var\(--_size\)/);
+  assert.match(halo, /border-radius:var\(--slotted-radius-full,9999px\)/);
+  assert.match(
+    halo,
+    /box-shadow:0 0 0 calc\(\(var\(--_halo-size\) - var\(--_size\)\) \/ 2\) var\(--slotted-checkbox-halo-color,var\(--slotted-tone-accent-surface\)\)/,
+  );
+  assert.doesNotMatch(halo, /background-color/);
+  assert.match(halo, /inset-block-start:var\(--_lift\)/);
+  assert.match(halo, /inset-inline-start:0/);
+  assert.match(halo, /opacity:0/);
+  assert.match(halo, /z-index:-1/);
+  assert.match(rule(root), /--_halo-size:var\(--slotted-selection-halo-size,32px\)/);
+  assert.match(rule(root), /isolation:isolate/);
+  assert.match(rule(root), /position:relative/);
+  assert.ok(
+    normalized.includes(
+      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::before,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::before{opacity:var(--slotted-selection-halo-opacity,0.4);}`,
+    ),
+    'hover does not light the halo, or lights it from somewhere else',
+  );
+  /* Hover moves the edge and the halo, and nothing on the ground. */
+  const hover = rule(`${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled)`);
+  assert.match(
+    hover,
+    /border-color:var\(--slotted-checkbox-hover-border-color,var\(--slotted-tone-accent-border\)\)/,
+  );
+  assert.doesNotMatch(hover, /background-color/);
+  /* The other placement puts the halo on the other side. */
+  assert.match(
+    rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
+    /inset-inline-end:0;inset-inline-start:auto/,
+  );
 });
 
 /**
@@ -115,7 +207,8 @@ test('lifts the box onto the first line of a label that wraps', () => {
     /--_lift:calc\(var\(--_label-slack\) \+ \(var\(--_font-size\) \* var\(--_line-height\) - var\(--_size\)\) \/ 2\)/,
   );
   assert.match(rule(part('control')), /margin-block-start:var\(--_lift\)/);
-  assert.match(rule(part('indicator')), /margin-block-start:var\(--_lift\)/);
+  /* The mark rides the same lift, plus its own inset inside the box. */
+  assert.match(rule(part('indicator')), /margin-block-start:calc\(var\(--_lift\) \+ /);
 });
 
 /**
@@ -213,11 +306,21 @@ test('restates the pair forced colors would collapse', () => {
   assert.ok(normalized.includes('background-color:HighlightText'));
 });
 
-/** Every duration comes from the motion scale, so reduced motion collapses it. */
+/**
+ * Every duration comes from the motion scale, so reduced motion collapses it.
+ * The ground and the edge take the control step; the mark grows in at the
+ * medium step, one above it (CK1).
+ */
 test('transitions the two changes the eye has to follow, from the scale', () => {
+  const indicator = rule(part('indicator'));
+  assert.match(indicator, /scale:0\.6/);
   assert.match(
-    rule(part('indicator')),
-    /transition:opacity var\(--slotted-control-transition-duration\)/,
+    indicator,
+    /transition:opacity var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\),scale var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\)/,
+  );
+  assert.match(
+    rule(part('control')),
+    /transition:background-color var\(--slotted-control-transition-duration\)/,
   );
   assert.doesNotMatch(declarations, /\d+m?s(?![\w-])/);
 });

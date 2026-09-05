@@ -63,7 +63,7 @@
     }
   },
   "literals": {
-    "--slotted-checkbox-mark-inset": "The mark is drawn at seven eighths of the box because the glyph scale's artwork is authored inside a 24-unit grid with two units of margin, so a mark that filled the box would touch its border. It is arithmetic over the box token rather than a step on a scale, and no scale in docs/token-foundation.md holds the inset of a mask inside its own box."
+    "--slotted-checkbox-mark-inset": "The mark's box is inset by fifteen hundredths of the square on every side, so the check occupies seven tenths of it and clears a border of one and a half pixels at the smallest step. It is a fraction of the box token rather than a step on a scale, and no scale in docs/token-foundation.md holds the inset of a mark inside its own box."
   },
   "members": {
     "checkbox": {

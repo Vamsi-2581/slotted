@@ -20,8 +20,8 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 78     |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 94     |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 79     |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 99     |
 | `component` | One family adjusting a semantic value for itself.              | 5      |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -132,10 +132,15 @@ This scale answers which typeface a component sets text in.
 
 This scale answers how thick a border or ring is drawn.
 
-| Token                          | Default value |
-| ------------------------------ | ------------- |
-| `--slotted-border-width-thin`  | `1px`         |
-| `--slotted-border-width-thick` | `2px`         |
+| Token                           | Default value |
+| ------------------------------- | ------------- |
+| `--slotted-border-width-thin`   | `1px`         |
+| `--slotted-border-width-thick`  | `2px`         |
+| `--slotted-border-width-medium` | `1.5px`       |
+
+`medium` is the edge of a selection control — a checkbox's square, a radio's
+circle — whose box is sixteen pixels and reads too light at one pixel and too
+heavy at two.
 
 ## Motion
 
@@ -293,6 +298,24 @@ A target smaller than the minimum in one axis — an icon-only control, a remove
 button inside a tag — is corrected by the family, either by expanding the hit
 area or by spacing the targets apart. Neither is something the theme can do on
 the family's behalf.
+
+## Selection geometry
+
+This scale answers the size of a selection control — the box `checkbox` draws
+and the circle `radio-group` draws — and the halo that answers the pointer
+behind it. It varies by the family's `size` step and by nothing else: the
+control glyph scale shrinks with density, and a box that followed it fell to
+twelve pixels at `dense`, below the size a mark can be drawn in. The touch
+target is not the box either; it is the halo, which `--slotted-target-min` is
+inside of.
+
+| Token                              | Default value |
+| ---------------------------------- | ------------- |
+| `--slotted-selection-size-sm`      | `14px`        |
+| `--slotted-selection-size-md`      | `16px`        |
+| `--slotted-selection-size-lg`      | `18px`        |
+| `--slotted-selection-halo-size`    | `32px`        |
+| `--slotted-selection-halo-opacity` | `0.4`         |
 
 ## Control typography
 

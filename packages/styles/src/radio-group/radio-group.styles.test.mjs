@@ -96,7 +96,7 @@ test('draws the dot as a mask from the glyph scale, never as a character', () =>
 test('differs from checkbox in the corner and in nothing else structural', () => {
   assert.match(rule(part('control')), /border-radius:var\(--slotted-radius-full,9999px\)/);
   assert.doesNotMatch(declarations, /data-ui=['"]checkbox['"]/);
-  assert.match(checkboxCss, /--slotted-control-icon-size-md/);
+  assert.match(checkboxCss, /--slotted-selection-size-md/);
   assert.match(
     rule(root),
     /--_size:var\(--slotted-radio-group-size,var\(--slotted-control-icon-size-md,16px\)\)/,

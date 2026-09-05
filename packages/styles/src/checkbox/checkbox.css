@@ -23,23 +23,29 @@
    */
   [data-ui='checkbox'][data-part='root'] {
     /**
-     * The box is the control glyph scale's square, which the theme restates
-     * per density: 16px at `md`, and the same square Radix, Carbon and Primer
-     * all draw. No component scale is invented for it, because inventing one
-     * would restate a scale that exists.
+     * The box is the selection scale's square: 16px at `md`, the same square
+     * Radix, Carbon and Primer all draw, and the theme states it once. It does
+     * not follow density — see the size rules below.
      */
-    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-md, 16px));
+    --_size: var(--slotted-checkbox-size, var(--slotted-selection-size-md, 16px));
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_line-height: var(--slotted-checkbox-line-height, var(--slotted-line-height-md, 1.5));
     /**
-     * The mark inside its box. The glyph scale's artwork is drawn inside a
-     * 24-unit grid with two to three units of margin already in it, so a mark
-     * that filled the box would still not touch the border — but the box has a
-     * border of its own, and seven eighths is the inset at which the check
-     * clears it at every step and every density.
+     * The mark inside its box: the fraction of the box between each of its
+     * edges and the edge of the glyph's own box, so the check occupies seven
+     * tenths of the square. A fraction of a box whose size is a whole number
+     * of pixels puts the same distance on both sides and the glyph's centre on
+     * the box's centre at every step, which is what a mask sized by arithmetic
+     * over `rem` did not.
      */
-    --_mark-inset: var(--slotted-checkbox-mark-inset, 0.875);
+    --_mark-inset: var(--slotted-checkbox-mark-inset, 0.15);
+    --_mark-size: calc(var(--_size) * (1 - 2 * var(--_mark-inset)));
+    /**
+     * The halo behind the box: the circle that answers the pointer and, being
+     * part of the label, the target the box on its own is too small to be.
+     */
+    --_halo-size: var(--slotted-selection-halo-size, 32px);
     /**
      * The height a one-line label is missing before it is a WCAG 2.2 target,
      * split above and below its text. It is padding rather than a minimum
@@ -78,18 +84,29 @@
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
     grid-template-columns: auto minmax(0, 1fr);
+    /**
+     * The halo is drawn behind the box at a negative stack level, and the
+     * stacking context it is negative inside of is this one: without it the
+     * halo would sink behind whatever surface the checkbox stands on — a
+     * list row's wash, a card — and appear on none of them.
+     */
+    isolation: isolate;
     line-height: var(--_line-height);
+    /* The containing block for the halo. */
+    position: relative;
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────
    *
-   * Three steps against the control scales, the only ones the theme restates
-   * per density, so a `sm` checkbox in a `dense` table is one decision and not
-   * six.
+   * Three steps. The box reads the selection scale, which the theme states
+   * once and density does not move: the control glyph scale it read before
+   * fell to twelve pixels at `dense`, below the size a mark can be drawn in,
+   * and a box that shrinks with the text around it is a target that shrinks
+   * with it. The text, the gap and the tile's inset still follow density.
    */
 
   [data-ui='checkbox'][data-part='root'][data-size='sm'] {
-    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-sm, 14px));
+    --_size: var(--slotted-checkbox-size, var(--slotted-selection-size-sm, 14px));
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_tile-inset: var(
@@ -99,7 +116,7 @@
   }
 
   [data-ui='checkbox'][data-part='root'][data-size='md'] {
-    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-md, 16px));
+    --_size: var(--slotted-checkbox-size, var(--slotted-selection-size-md, 16px));
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_tile-inset: var(
@@ -109,7 +126,7 @@
   }
 
   [data-ui='checkbox'][data-part='root'][data-size='lg'] {
-    --_size: var(--slotted-checkbox-size, var(--slotted-control-icon-size-lg, 18px));
+    --_size: var(--slotted-checkbox-size, var(--slotted-selection-size-lg, 18px));
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_gap: var(--slotted-control-gap-lg, 8px);
     --_tile-inset: var(
@@ -124,13 +141,16 @@
     appearance: none;
     background-color: var(--slotted-checkbox-background, var(--slotted-surface, Canvas));
     /**
-     * The control step of the border scale rather than the strong one: the edge
-     * of a control and a separator between two surfaces hold the same 3:1 ratio
-     * and are not the same weight.
+     * The medium step of the border scale in the strong border colour. A
+     * sixteen-pixel box is edged too lightly at one pixel and too heavily at
+     * two, and the control border colour that separates a field from its
+     * ground is a weaker grey than a box this small can carry.
      */
-    border: var(--slotted-control-border-width, 1px) solid
-      var(--slotted-checkbox-border-color, var(--slotted-control-border-color, ButtonBorder));
-    border-radius: var(--slotted-checkbox-radius, var(--slotted-control-radius, 4px));
+    border: var(--slotted-checkbox-border-width, var(--slotted-border-width-medium, 1.5px)) solid
+      var(--slotted-checkbox-border-color, var(--slotted-border-strong, ButtonBorder));
+    /* The smallest radius: a rounder corner on a sixteen-pixel square reads
+       as a circle's cousin, and the circle is the radio's. */
+    border-radius: var(--slotted-checkbox-radius, var(--slotted-radius-xs, 2px));
     block-size: var(--_size);
     box-sizing: border-box;
     cursor: pointer;
@@ -150,37 +170,40 @@
    * One element for two glyphs. The check and the dash are the same mask
    * property pointed at a different token, so the swap between checked and
    * mixed is one declaration and the two states cannot drift apart.
+   *
+   * The element is the glyph's own box: seven tenths of the square, set in
+   * the same grid cell as the box by the inset on each side, so the two are
+   * concentric by construction and `getBoundingClientRect()` on the mark is
+   * the mark. The mask fills that box, which is what keeps the artwork the
+   * same fraction of the square at every step.
    */
 
   [data-ui='checkbox'] [data-part='indicator'] {
     --_glyph: var(--slotted-checkbox-mark-image, var(--slotted-icon-check));
 
     background-color: var(--slotted-checkbox-mark-color, var(--slotted-tone-accent-on-solid));
-    /**
-     * The same square as the box, so the two grid items are concentric without
-     * a second offset to keep in step. The inset is applied to the mask rather
-     * than to the element, which is what keeps the mark centred at every step.
-     */
-    block-size: var(--_size);
+    block-size: var(--_mark-size);
     grid-area: 1 / 1;
-    inline-size: var(--_size);
-    margin-block-start: var(--_lift);
+    inline-size: var(--_mark-size);
+    margin-block-start: calc(var(--_lift) + var(--_size) * var(--_mark-inset));
+    margin-inline-start: calc(var(--_size) * var(--_mark-inset));
     mask-image: var(--_glyph);
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: calc(var(--_size) * var(--_mark-inset)) calc(var(--_size) * var(--_mark-inset));
+    mask-size: contain;
     opacity: 0;
     /** Nothing here answers the pointer; the control underneath does. */
     pointer-events: none;
     /**
      * The mark grows into a box that was empty, which is a change the eye has
-     * to follow. It is the shortest step on the motion scale, so the state is
-     * legible before the transition ends rather than because of it.
+     * to follow: it takes the medium step of the motion scale, one step above
+     * the ground and the edge, so the state is legible before the transition
+     * ends rather than because of it.
      */
     scale: 0.6;
     transition:
-      opacity var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
-      scale var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+      opacity var(--slotted-duration-medium) var(--slotted-control-transition-easing),
+      scale var(--slotted-duration-medium) var(--slotted-control-transition-easing);
   }
 
   [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
@@ -202,8 +225,8 @@
    *
    * The label is the control's own element and it names it through `for`, so a
    * description below it can be read without toggling anything. It carries the
-   * whole target: at `dense`/`sm` the square is 12px, under WCAG 2.2's 24, and
-   * the correction is the family's to make rather than the theme's.
+   * whole target: the square is sixteen pixels, under WCAG 2.2's 24, and the
+   * correction is the family's to make rather than the theme's.
    */
 
   [data-ui='checkbox'] [data-part='label'] {
@@ -218,6 +241,40 @@
     padding-inline-start: var(--_gap);
     /** A label that is one unbroken token — an id, a hash, a URL — breaks. */
     overflow-wrap: anywhere;
+  }
+
+  /**
+   * The halo: a circle twice the box, centred on it and drawn behind it, that
+   * shows under the pointer. It is the label's pseudo-element and not the
+   * indicator's, because the label is the element that toggles the control,
+   * and it sits at a negative stack level inside the root, so the box paints
+   * over its middle.
+   *
+   * The pseudo-element is the box's own circle, exactly over the box, and the
+   * halo is its shadow spread out to the halo size: a spread shadow keeps the
+   * corner radius of the box it leaves, so a circle stays a circle. Ink rather
+   * than a laid-out box of thirty-two pixels, because a positioned box that
+   * size hung eight pixels past the root's end edge in the label-first
+   * arrangement and five past its bottom in both, and every one of those
+   * pixels was scrollable overflow in whatever the checkbox stood in.
+   *
+   * The tile has no halo. Its surface is the target and answers the pointer
+   * itself, and its label's `::after` already stretches over that surface.
+   */
+  [data-ui='checkbox'][data-part='root']:not([data-variant='tile']) [data-part='label']::before {
+    block-size: var(--_size);
+    border-radius: var(--slotted-radius-full, 9999px);
+    box-shadow: 0 0 0 calc((var(--_halo-size) - var(--_size)) / 2)
+      var(--slotted-checkbox-halo-color, var(--slotted-tone-accent-surface));
+    content: '';
+    inline-size: var(--_size);
+    inset-block-start: var(--_lift);
+    inset-inline-start: 0;
+    opacity: 0;
+    position: absolute;
+    transition: opacity var(--slotted-control-transition-duration)
+      var(--slotted-control-transition-easing);
+    z-index: -1;
   }
 
   /**
@@ -269,6 +326,11 @@
     padding-inline-start: 0;
   }
 
+  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label']::before {
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+  }
+
   /* ── States ───────────────────────────────────────────────────────────
    *
    * In the order `STATE_PRECEDENCE` declares, each weaker one held back for
@@ -276,13 +338,24 @@
    * read-only one answers no press.
    */
 
+  /**
+   * Hover is the edge and the halo, and the ground stays: the halo is the
+   * pointer's answer, and a ground that tinted with it was two answers.
+   * The halo lights from the box and from the label alike, because both are
+   * the same target — the label is what toggles the control.
+   */
   [data-ui='checkbox'][data-part='root']:not([data-readonly])
     [data-part='control']:hover:not(:disabled) {
-    background-color: var(
-      --slotted-checkbox-hover-background,
-      var(--slotted-tone-accent-subtle-hover)
-    );
     border-color: var(--slotted-checkbox-hover-border-color, var(--slotted-tone-accent-border));
+  }
+
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:hover:not(:disabled)
+    ~ [data-part='label']::before,
+  [data-ui='checkbox'][data-part='root']:not([data-readonly])
+    [data-part='control']:not(:disabled)
+    ~ [data-part='label']:hover::before {
+    opacity: var(--slotted-selection-halo-opacity, 0.4);
   }
 
   [data-ui='checkbox'][data-part='root']:not([data-readonly])

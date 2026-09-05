@@ -41,6 +41,13 @@
       "root": true
     },
     {
+      "name": "--slotted-border-width-medium",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
       "name": "--slotted-duration-loop-fast",
       "layer": "primitive",
       "axis": "base",
@@ -636,6 +643,41 @@
       "layer": "semantic",
       "axis": "base",
       "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-selection-size-sm",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-selection-size-md",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-selection-size-lg",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-selection-halo-size",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-selection-halo-opacity",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "number",
       "root": true
     },
     {

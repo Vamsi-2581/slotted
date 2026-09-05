@@ -575,6 +575,25 @@
     color: var(--_selected-color);
   }
 
+  /**
+   * Two chosen neighbours are one block (LB2). Every item keeps its own
+   * radius, so two selected siblings painted with the same ground met at a
+   * waist — four rounded corners inside the block — and a multiple selection
+   * read as a column of separate chips. The second gives up its top corners
+   * and the first its bottom ones, so the block is rounded only where the
+   * selection begins and ends. `select` and `combobox` draw the same ground
+   * and answer the same way; `selection-block.test.mjs` holds the three to it.
+   */
+  [data-ui='combobox'] [data-part='item'][data-selected] + [data-part='item'][data-selected] {
+    border-start-end-radius: 0;
+    border-start-start-radius: 0;
+  }
+
+  [data-ui='combobox'] [data-part='item'][data-selected]:has(+ [data-part='item'][data-selected]) {
+    border-end-end-radius: 0;
+    border-end-start-radius: 0;
+  }
+
   [data-ui='combobox'] [data-part='item'][data-selected] > [data-part='label'] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }

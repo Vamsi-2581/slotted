@@ -125,6 +125,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 - [x] **G2 — Rails laterais para estado.** Ver R1. Remover todas as ocorrências.
 - [x] **G3 — Anel de foco branco em `dark`.** Ver R3.
 - [x] **G4 — Glifos escritos à mão.** Ver R4.
+- [ ] **G6 — `pnpm typecheck` falha na primeira execução após `turbo run verify`.** Observado em DG3, G2 e LB2: logo após `turbo run verify` (build do React), `tsc --build tsconfig.base.json` reporta erros circulares em toda `*.stories.tsx` (`referenceScenes` implicitly any, `Story` circularly references itself) e a segunda execução passa sem alteração. Causa provável: estado incremental (`.tsbuildinfo`) escrito pelo build do React com `dist` como saída e lido pelo typecheck da raiz. Esperado: `pnpm check` determinístico após qualquer build; separar os `tsbuildinfo` dos dois modos ou excluir `dist` das referências do typecheck.
 - [ ] **G5 — `tools/harness/audit.mjs` conta `script` e `style` como parte colapsada.** Observado durante G4, sem alteração de layout: nas cenas `states` de `Checkbox` e `Collapsible` e `track`/`variant` de `Tabs`, o audit reporta `collapsed 0px inside a 446px stage` para elementos `script` e `style` do fragmento. Esperado: o audit ignora elementos não renderizados (`script`, `style`, `template`) ao medir o palco.
 
 ---
@@ -316,7 +317,7 @@ Componente inteiro requer passada de polimento. Ordem de execução: LI1 → LI2
 Localização: `packages/styles/src/listbox/listbox.css`.
 
 - [x] **LB1 — Rail lateral no estado `selected`.** Ver R1. Remover a barra dentro de `[data-part='option'][data-selected]` (`listbox.css:416`). Estado `selected` usa superfície `accent-subtle`, texto `accent-text` e o `[data-part='indicator']` já existente (`listbox.css:499`).
-- [ ] **LB2 — Múltiplos itens selecionados colados formam ondulação nas laterais.** Causa: cada opção tem `border-radius` próprio e as superfícies adjacentes não se fundem. Esperado: opções com `border-radius` apenas nas extremidades de um bloco contíguo de seleção, via seletores `[data-selected] + [data-selected]` (remove raio superior do segundo) e `:has(+ [data-selected])` (remove raio inferior do primeiro). Alternativa quando `:has` não é aceitável: `gap` de 2px entre opções e raio em todas, evitando a fusão. Escolher a primeira. Verificar em `Select`, `Combobox` e `Menu` múltiplos. (MAOC)
+- [x] **LB2 — Múltiplos itens selecionados colados formam ondulação nas laterais.** Causa: cada opção tem `border-radius` próprio e as superfícies adjacentes não se fundem. Esperado: opções com `border-radius` apenas nas extremidades de um bloco contíguo de seleção, via seletores `[data-selected] + [data-selected]` (remove raio superior do segundo) e `:has(+ [data-selected])` (remove raio inferior do primeiro). Alternativa quando `:has` não é aceitável: `gap` de 2px entre opções e raio em todas, evitando a fusão. Escolher a primeira. Verificar em `Select`, `Combobox` e `Menu` múltiplos. (MAOC)
 
 ---
 

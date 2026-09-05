@@ -48,24 +48,35 @@
     --_solid-hover: var(--slotted-tone-secondary-solid-hover, ButtonFace);
     --_solid-active: var(--slotted-tone-secondary-solid-active, ButtonFace);
     --_surface: var(--slotted-tone-secondary-surface, Canvas);
-    /* The edge a selected row carries. Every tone surface is white in the
-       `high-contrast` scheme, so a selection said with a fill alone is a
-       selection that scheme cannot show — the defect the first high-contrast
-       capture found. `tag` reached for the same answer for the same reason. */
-    --_selected-edge: var(--slotted-tone-secondary-border, ButtonBorder);
     --_hover: var(--slotted-list-item-background-hover, var(--_subtle-hover));
     --_active: var(--slotted-list-item-background-active, var(--_subtle-active));
-    --_selected-surface: var(--slotted-list-item-background-selected, var(--_surface));
-    --_selected-text: var(--_text);
-    /* The bar a current row carries. It inverts by definition in the neutral
-       tone, so one declaration reads as a near-black mark on a light list and a
-       near-white one on a dark list, and it survives forced colours because it
-       is geometry rather than a second colour. `card` reached for the same
-       token for the same reason. */
-    --_current-bar: var(--slotted-list-item-current-color, var(--slotted-text, CanvasText));
+    /* A selected row is the accent ground with the accent ink, and the edge it
+       carries is a one-pixel ring in the accent border. Every tone surface is
+       white in the `high-contrast` scheme, so a selection said with a fill
+       alone is a selection that scheme cannot show — the defect the first
+       high-contrast capture found. `tag` reached for the same answer for the
+       same reason. The pointer states of a selected row are the accent pair's
+       own steps, so hovering a selected row never lands on the surface an
+       unselected hovered row has (R1). */
+    --_selected-edge: var(--slotted-tone-accent-border, ButtonBorder);
+    --_selected-surface: var(
+      --slotted-list-item-background-selected,
+      var(--slotted-tone-accent-surface, Canvas)
+    );
+    --_selected-text: var(--slotted-tone-accent-text, CanvasText);
+    --_selected-hover: var(--slotted-tone-accent-subtle-hover, ButtonFace);
+    --_selected-active: var(--slotted-tone-accent-subtle-active, ButtonFace);
+    /* A current row is the neutral ground with a one-pixel ring in the neutral
+       border, whatever the row's tone: it is where the reader is, not what
+       they chose, and it stays out of the tone's way so a row can be both at
+       once with the selection winning (R1). */
+    --_current-surface: var(
+      --slotted-list-item-background-current,
+      var(--slotted-tone-secondary-surface, Canvas)
+    );
+    --_current-edge: var(--slotted-tone-secondary-border, ButtonBorder);
     --_rule: var(--slotted-list-item-border-color, var(--slotted-border-subtle, ButtonBorder));
     --_rule-width: var(--slotted-list-item-border-width, var(--slotted-border-width-thin, 1px));
-    --_bar-width: var(--slotted-list-item-current-width, var(--slotted-border-width-thick, 2px));
     --_marker-size: calc(var(--_icon-size) * 0.75);
 
     /* The row counts itself, whatever the marker is. Incrementing only under
@@ -111,8 +122,6 @@
     flex-wrap: wrap;
     list-style: none;
     min-inline-size: 0;
-    /* The containing block for the current-row bar. */
-    position: relative;
   }
 
   /**
@@ -159,9 +168,9 @@
    * would be the invention rather than the restraint.
    *
    * A tone moves three things and no more: the ink of the title and the mark,
-   * the wash under the pointer, and the bar a current row carries. It never
-   * fills a resting row, because a list of rows each filled with a tone is a
-   * list nobody can read.
+   * the wash under the pointer, and the ground and ink of a selected row. It
+   * never fills a resting row, because a list of rows each filled with a tone
+   * is a list nobody can read. The current row is not the tone's to move.
    */
   [data-ui='list-item'][data-tone='accent'] {
     --_text: var(--slotted-tone-accent-text, CanvasText);
@@ -171,7 +180,10 @@
     --_solid-active: var(--slotted-tone-accent-solid-active, ButtonFace);
     --_surface: var(--slotted-tone-accent-surface, Canvas);
     --_selected-edge: var(--slotted-tone-accent-border, ButtonBorder);
+    --_selected-surface: var(--slotted-list-item-background-selected, var(--_surface));
     --_selected-text: var(--slotted-tone-accent-text, CanvasText);
+    --_selected-hover: var(--_subtle-hover);
+    --_selected-active: var(--_subtle-active);
   }
 
   [data-ui='list-item'][data-tone='success'] {
@@ -182,7 +194,10 @@
     --_solid-active: var(--slotted-tone-success-solid-active, ButtonFace);
     --_surface: var(--slotted-tone-success-surface, Canvas);
     --_selected-edge: var(--slotted-tone-success-border, ButtonBorder);
+    --_selected-surface: var(--slotted-list-item-background-selected, var(--_surface));
     --_selected-text: var(--slotted-tone-success-text, CanvasText);
+    --_selected-hover: var(--_subtle-hover);
+    --_selected-active: var(--_subtle-active);
   }
 
   [data-ui='list-item'][data-tone='warning'] {
@@ -193,7 +208,10 @@
     --_solid-active: var(--slotted-tone-warning-solid-active, ButtonFace);
     --_surface: var(--slotted-tone-warning-surface, Canvas);
     --_selected-edge: var(--slotted-tone-warning-border, ButtonBorder);
+    --_selected-surface: var(--slotted-list-item-background-selected, var(--_surface));
     --_selected-text: var(--slotted-tone-warning-text, CanvasText);
+    --_selected-hover: var(--_subtle-hover);
+    --_selected-active: var(--_subtle-active);
   }
 
   [data-ui='list-item'][data-tone='danger'] {
@@ -204,7 +222,10 @@
     --_solid-active: var(--slotted-tone-danger-solid-active, ButtonFace);
     --_surface: var(--slotted-tone-danger-surface, Canvas);
     --_selected-edge: var(--slotted-tone-danger-border, ButtonBorder);
+    --_selected-surface: var(--slotted-list-item-background-selected, var(--_surface));
     --_selected-text: var(--slotted-tone-danger-text, CanvasText);
+    --_selected-hover: var(--_subtle-hover);
+    --_selected-active: var(--_subtle-active);
   }
 
   /**
@@ -589,6 +610,24 @@
   }
 
   /**
+   * Current is a ground, and the two states are told apart by which ground: a
+   * row can be the one the reader is on **and** one of the rows they have
+   * chosen, and when it is both the selection is the one that shows, because
+   * it is declared after this and the reader already knows where they are.
+   *
+   * `aria-current` is the one selection-shaped state ARIA 1.2 lets a `listitem`
+   * announce for itself, so this is also the only one of the two the row says
+   * out loud.
+   */
+  [data-ui='list-item'][data-current] {
+    --_fill: var(--_current-surface);
+    /* The edge is an inset shadow rather than a border, so the state changes
+       no measurement and moves no text. It is what carries the state in
+       `high-contrast`, where every tone surface is the page's own white. */
+    --_edge-shadow: inset 0 0 0 var(--_rule-width) var(--_current-edge);
+  }
+
+  /**
    * Selected is a fill, and it is a paint rather than a model: `aria-selected`
    * is not valid on `listitem`, so the row mirrors a selection the page owns
    * and the control the page puts in `start` — a `checkbox` — is what announces
@@ -596,18 +635,16 @@
    */
   [data-ui='list-item'][data-selected] {
     /* A selected row that is hovered has to darken, not lighten. The resting
-       fill is already the tone's subtle step, so the two pointer states move up
-       to the solid pair rather than staying where an unselected row leaves
-       them — otherwise hovering a selected row washed it out. */
-    --_hover: var(--_solid-hover);
-    --_active: var(--_solid-active);
+       fill is already the tone's subtle step, so the two pointer states move
+       one step along the same subtle pair rather than staying where an
+       unselected row leaves them — otherwise hovering a selected row washed it
+       out. */
+    --_hover: var(--_selected-hover);
+    --_active: var(--_selected-active);
   }
 
   [data-ui='list-item'][data-selected] {
     --_fill: var(--_selected-surface);
-    /* The edge is an inset shadow rather than a border, so a selection changes
-       no measurement and moves no text. It is what carries the state in
-       `high-contrast`, where every tone surface is the page's own white. */
     --_edge-shadow: inset 0 0 0 var(--_rule-width) var(--_selected-edge);
   }
 
@@ -617,32 +654,6 @@
       --slotted-list-item-font-weight-selected,
       var(--slotted-font-weight-medium, 500)
     );
-  }
-
-  /**
-   * Current is a bar, and the two states use different channels on purpose: a
-   * row can be the one the reader is on **and** one of the rows they have
-   * chosen, and a design that spent the fill on both would have nothing left to
-   * say the second thing with.
-   *
-   * `aria-current` is the one selection-shaped state ARIA 1.2 lets a `listitem`
-   * announce for itself, so this is also the only one of the two the row says
-   * out loud.
-   */
-  [data-ui='list-item'][data-current]::after {
-    background-color: var(--_current-bar);
-    border-end-end-radius: var(--_bar-width);
-    border-start-end-radius: var(--_bar-width);
-    content: '';
-    inline-size: var(--_bar-width);
-    inset-block: var(--_pad-block);
-    inset-inline-start: 0;
-    position: absolute;
-    /* Above the focus ring, which the row draws just inside its own edge and in
-       exactly the two pixels the bar occupies. Without this the current row's
-       mark disappeared the moment it was focused, and the reader lost the one
-       state of the two the row announces. */
-    z-index: 1;
   }
 
   [data-ui='list-item'][data-current] > [data-part='content'] {
@@ -775,18 +786,15 @@
    * ── Forced colours ─────────────────────────────────────────────────────
    *
    * The theme remaps every semantic token once, so the row needs a rule only
-   * for what it paints itself. The bar is a masked shape and a fill: both are
-   * replaced by the system's own ink, so a current row keeps its mark where a
-   * background colour would have been dropped.
+   * for what it paints itself. The two grounds and the two rings are all
+   * dropped here, so both states have to be said again in the system's own
+   * colours.
    */
   @media (forced-colors: active) {
     /**
      * Every tone surface is remapped to `Canvas`, so a selected row and a
      * resting one would be the same rectangle. Selection is the accent state,
      * and the system's own selected pair is what says so.
-     *
-     * The current row's bar needs no rule: it is painted with
-     * `--slotted-text`, which the theme has already remapped to `CanvasText`.
      */
     [data-ui='list-item'][data-selected] {
       background-color: Highlight;
@@ -794,6 +802,16 @@
 
     [data-ui='list-item'][data-selected] > [data-part='content'] {
       color: HighlightText;
+    }
+
+    /**
+     * The current row keeps its ring as a one-pixel outline in the selection
+     * colour, drawn inward so it changes no measurement: the inset shadow that
+     * says it elsewhere is decoration the theme cannot reach (R1).
+     */
+    [data-ui='list-item'][data-current]:not([data-selected]) {
+      outline: var(--slotted-border-width-thin, 1px) solid Highlight;
+      outline-offset: calc(-1 * var(--slotted-border-width-thin, 1px));
     }
   }
 }

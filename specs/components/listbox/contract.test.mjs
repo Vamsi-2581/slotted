@@ -260,7 +260,9 @@ test('says selection with a mark as well as with a ground', () => {
   assert.deepEqual(contract.axes.indicator, ['check', 'none']);
   assert.equal(contract.members.listbox.defaults.indicator, 'check');
   assert.match(contract.selection.forcedColors, /forced-colors|Canvas/);
-  assert.match(contract.selection.indicatorNone, /bar|edge/i);
+  /* R1: without the mark the ground and the ink say it, never a rail. */
+  assert.match(contract.selection.indicatorNone, /ground/i);
+  assert.match(contract.selection.indicatorNone, /no rail|R1/i);
 });
 
 test('names one reference page, covering every scenario the family declares', () => {

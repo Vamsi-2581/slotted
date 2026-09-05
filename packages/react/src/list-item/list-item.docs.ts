@@ -153,7 +153,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'tone',
     title: 'The five the theme carries',
-    note: 'A tone moves the ink, the wash under the pointer and the current bar, and never fills a resting row: forty rows each filled with a tone is a list nobody can read.',
+    note: 'A tone moves the ink, the wash under the pointer and the ground of a selected row, and never fills a resting row: forty rows each filled with a tone is a list nobody can read.',
     snippet: defineSnippet({
       id: 'list-item-react-tone',
       language: 'tsx',
@@ -166,7 +166,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'states',
     title: 'Every state the row paints',
-    note: 'Selection is a fill and an edge together, because every tone surface is white in the high-contrast scheme. Current is a bar, so a row can be both at once without either of them being lost.',
+    note: 'Selection is the accent ground, the accent ink and a one-pixel edge together, because every tone surface is white in the high-contrast scheme. Current is the neutral ground with its own edge, so a row can be both at once and the selection is what shows without either of them being lost.',
     snippet: defineSnippet({
       id: 'list-item-react-states',
       language: 'tsx',
@@ -277,7 +277,7 @@ export const REACT_LIST_ITEM_DOCS = {
         "'secondary' | 'accent' | 'success' | 'warning' | 'danger'",
         'secondary',
         'ListItem',
-        'The row ink, the wash under the pointer and the bar a current row carries. It never fills a resting row',
+        'The row ink, the wash under the pointer and the ground of a selected row. It never fills a resting row',
       ],
       [
         'size',

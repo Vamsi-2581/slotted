@@ -122,7 +122,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 ## Geral
 
 - [ ] **G1 — Botões internos de componentes compostos.** Ver R2. Auditar todos os componentes listados em R2 e substituir instâncias de `Button`/`IconButton` por parte interna.
-- [ ] **G2 — Rails laterais para estado.** Ver R1. Remover todas as ocorrências.
+- [x] **G2 — Rails laterais para estado.** Ver R1. Remover todas as ocorrências.
 - [x] **G3 — Anel de foco branco em `dark`.** Ver R3.
 - [x] **G4 — Glifos escritos à mão.** Ver R4.
 - [ ] **G5 — `tools/harness/audit.mjs` conta `script` e `style` como parte colapsada.** Observado durante G4, sem alteração de layout: nas cenas `states` de `Checkbox` e `Collapsible` e `track`/`variant` de `Tabs`, o audit reporta `collapsed 0px inside a 446px stage` para elementos `script` e `style` do fragmento. Esperado: o audit ignora elementos não renderizados (`script`, `style`, `template`) ao medir o palco.
@@ -304,8 +304,9 @@ Localização: `packages/styles/src/list-item/list-item.css`, `docs/superpowers/
 
 Componente inteiro requer passada de polimento. Ordem de execução: LI1 → LI2 → LI3.
 
-- [ ] **LI1 — Rails laterais.** Ver R1. Remover `[data-current]::after` e variáveis associadas. `current` passa a usar superfície `secondary-subtle`; `selected` usa `accent-subtle` mais texto `accent-text`.
+- [x] **LI1 — Rails laterais.** Ver R1. Remover `[data-current]::after` e variáveis associadas. `current` passa a usar superfície `secondary-subtle`; `selected` usa `accent-subtle` mais texto `accent-text`.
 - [ ] **LI2 — Checkbox desalinhado.** Dependente de CK1. Após CK1, o checkbox da linha alinha pelo centro vertical da primeira linha de texto (`align-self: start` mais `margin-block-start: calc((var(--_line-height) * var(--_font-size) - var(--_size)) / 2)`). A coluna do controle tem largura fixa igual ao tamanho do controle mais `--slotted-space-2`.
+- [ ] **LI4 — Linha transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G2, sem alteração de layout (reproduz no HEAD anterior): na cena `anatomy`, `li[data-ui='list-item']` e o `ul` mede 266px em 240px nos três esquemas. Esperado: mesma regra de `#Alert:2` — a linha cede (`min-inline-size: 0` no conteúdo, `actions` quebra para a própria linha) e nada transborda o palco.
 - [ ] **LI3 — Passada de consistência.** Verificar contra a lista: altura de linha por densidade (32px `dense`, 36px `default`, 40px `comfortable`, 28px `compact`); padding inline único por densidade; ícone inicial em `--slotted-control-icon-size-<densidade>` monocromático (sem círculo tintado); texto secundário em `--slotted-text-muted` na linha abaixo com `gap` de 2px; ações à direita como partes internas (R2); separador entre linhas de 1px em `--slotted-border-subtle` apenas quando `divided`. Cinco aparências distintas em cada linha interativa: `hover`, `focus-visible`, `active`, `selected`, `disabled`. `hover` e `selected` com superfícies diferentes.
 
 ---
@@ -314,7 +315,7 @@ Componente inteiro requer passada de polimento. Ordem de execução: LI1 → LI2
 
 Localização: `packages/styles/src/listbox/listbox.css`.
 
-- [ ] **LB1 — Rail lateral no estado `selected`.** Ver R1. Remover a barra dentro de `[data-part='option'][data-selected]` (`listbox.css:416`). Estado `selected` usa superfície `accent-subtle`, texto `accent-text` e o `[data-part='indicator']` já existente (`listbox.css:499`).
+- [x] **LB1 — Rail lateral no estado `selected`.** Ver R1. Remover a barra dentro de `[data-part='option'][data-selected]` (`listbox.css:416`). Estado `selected` usa superfície `accent-subtle`, texto `accent-text` e o `[data-part='indicator']` já existente (`listbox.css:499`).
 - [ ] **LB2 — Múltiplos itens selecionados colados formam ondulação nas laterais.** Causa: cada opção tem `border-radius` próprio e as superfícies adjacentes não se fundem. Esperado: opções com `border-radius` apenas nas extremidades de um bloco contíguo de seleção, via seletores `[data-selected] + [data-selected]` (remove raio superior do segundo) e `:has(+ [data-selected])` (remove raio inferior do primeiro). Alternativa quando `:has` não é aceitável: `gap` de 2px entre opções e raio em todas, evitando a fusão. Escolher a primeira. Verificar em `Select`, `Combobox` e `Menu` múltiplos. (MAOC)
 
 ---

@@ -543,7 +543,7 @@ const api: ApiRow[] = apiRows([
     "'check' | 'none'",
     'check',
     'SlListbox',
-    'Whether a chosen option draws a mark as well as its ground and its start-edge bar',
+    'Whether a chosen option draws a mark as well as its ground and its ink',
   ],
   ['loop', 'boolean', 'false', 'SlListbox', 'Whether the arrows wrap past the ends'],
   ['typeahead', 'boolean', 'true', 'SlListbox', 'Whether printable characters move the highlight'],

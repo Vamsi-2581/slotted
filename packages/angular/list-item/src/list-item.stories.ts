@@ -282,7 +282,7 @@ export const Tone: Story = {
 <div class="slotted-demo-grid">
 ${scene(
   'Five tones, on the rows that mean them',
-  'A tone moves the ink, the wash under the pointer and the current bar, and never fills a resting row: forty rows each filled with a tone is a list nobody can read. Primer ships danger alone and hides the rest behind a boolean.',
+  'A tone moves the ink, the wash under the pointer and the ground of a selected row, and never fills a resting row: forty rows each filled with a tone is a list nobody can read. Primer ships danger alone and hides the rest behind a boolean.',
   set(
     'Tones',
     `${button('Rename workspace', 'tone="secondary"')}${button('Invite a collaborator', 'tone="accent"')}${button('Publish the changes', 'tone="success"')}${button('Revoke every session', 'tone="warning"')}${button('Delete the workspace', 'tone="danger"')}`,
@@ -299,7 +299,7 @@ export const States: Story = {
 <div class="slotted-demo-grid">
 ${scene(
   'Every state the row paints',
-  'Selection is a fill and an edge together, because every tone surface is white in the high-contrast scheme. Current is a bar, so a row can be both at once. Hover the operable rows and Tab through them to see the rest.',
+  'Selection is the accent ground, the accent ink and a one-pixel edge together, because every tone surface is white in the high-contrast scheme. Current is the neutral ground with its own edge, so a row can be both at once and the selection is what shows. Hover the operable rows and Tab through them to see the rest.',
   set(
     'States',
     `${button('Default')}

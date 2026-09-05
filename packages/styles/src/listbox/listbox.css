@@ -73,7 +73,6 @@
       var(--slotted-tone-accent-surface)
     );
     --_selected-text: var(--slotted-listbox-selected-text, var(--slotted-tone-accent-text));
-    --_selected-border: var(--slotted-listbox-selected-border, var(--slotted-tone-accent-border));
 
     --_inset-block: var(--slotted-listbox-padding-block, var(--slotted-space-2, 0.25rem));
     --_inset-inline: var(--slotted-listbox-padding-inline, var(--slotted-space-2, 0.25rem));
@@ -407,30 +406,18 @@
   }
 
   /**
-   * What the reader chose. The ground says it at a glance and the mark says it
-   * where the ground cannot: every tone surface becomes `Canvas` under forced
-   * colours, so a selection painted with a fill alone disappears in the mode
-   * that needs it most — the same failure WCAG 2.2 SC 1.4.1 describes for
-   * colour on its own.
+   * What the reader chose. The ground says it at a glance, the ink says it
+   * again, and the mark says it where neither can: in the `high-contrast`
+   * scheme the accent surface *is* the plain surface, and every tone surface
+   * becomes `Canvas` under forced colours, so a selection painted with a fill
+   * alone disappears in the mode that needs it most — the same failure WCAG
+   * 2.2 SC 1.4.1 describes for colour on its own. A bar on the start edge said
+   * it once; a rail for state is out of the system (R1), and the `indicator`
+   * below is the mark that carries it instead.
    */
   [data-ui='listbox'] [data-part='option'][data-selected] {
     background-color: var(--_selected-surface);
-    /**
-     * A bar at the start edge, and it is not decoration. In the `high-contrast`
-     * scheme the accent surface *is* the plain surface, so a chosen option
-     * painted with a ground alone read as less emphatic than the merely
-     * highlighted one beside it — the two signals inverted. Under
-     * `forced-colors: active` the ground disappears outright.
-     *
-     * A bar rather than a ring, because a ring is what the active option draws
-     * and two rings a pixel apart in weight is a reader guessing which is which.
-     * It is a logical border with the inset compensating for it, so the label
-     * does not move as an option is chosen, and it mirrors in a right-to-left
-     * document without a rule of its own.
-     */
-    border-inline-start: var(--slotted-border-width-thick, 2px) solid var(--_selected-border);
     color: var(--_selected-text);
-    padding-inline-start: calc(var(--_option-inset) - var(--slotted-border-width-thick, 2px));
   }
 
   [data-ui='listbox']:not([data-disabled])
@@ -640,10 +627,6 @@
 
     [data-ui='listbox'] [data-part='option'][data-disabled] {
       color: GrayText;
-    }
-
-    [data-ui='listbox'] [data-part='option'][data-selected] {
-      border-inline-start-color: HighlightText;
     }
   }
 }

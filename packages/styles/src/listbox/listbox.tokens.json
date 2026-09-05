@@ -1,6 +1,5 @@
 [
   "--slotted-border-subtle",
-  "--slotted-border-width-thick",
   "--slotted-border-width-thin",
   "--slotted-control-border-color",
   "--slotted-control-font-size-lg",
@@ -50,7 +49,6 @@
   "--slotted-listbox-padding-inline",
   "--slotted-listbox-radius",
   "--slotted-listbox-rows",
-  "--slotted-listbox-selected-border",
   "--slotted-listbox-selected-icon",
   "--slotted-listbox-selected-surface",
   "--slotted-listbox-selected-text",
@@ -66,7 +64,6 @@
   "--slotted-surface",
   "--slotted-text",
   "--slotted-text-muted",
-  "--slotted-tone-accent-border",
   "--slotted-tone-accent-subtle-active",
   "--slotted-tone-accent-subtle-hover",
   "--slotted-tone-accent-surface",

@@ -286,7 +286,7 @@ export const Tone: Story = {
     <div className="slotted-demo-grid">
       <Scene
         label="Five tones, on the rows that mean them"
-        note="A tone moves the ink, the wash under the pointer and the current bar, and never fills a resting row: forty rows each filled with a tone is a list nobody can read. Primer ships danger alone and hides the rest behind a boolean."
+        note="A tone moves the ink, the wash under the pointer and the ground of a selected row, and never fills a resting row: forty rows each filled with a tone is a list nobody can read. Primer ships danger alone and hides the rest behind a boolean."
       >
         <Set label="Tones">
           <ListItem tone="secondary">
@@ -336,7 +336,7 @@ export const States: Story = {
     <div className="slotted-demo-grid">
       <Scene
         label="Every state the row paints"
-        note="Selection is a fill and an edge together, because every tone surface is white in the high-contrast scheme. Current is a bar, so a row can be both at once. Hover the operable rows and Tab through them to see the rest."
+        note="Selection is the accent ground, the accent ink and a one-pixel edge together, because every tone surface is white in the high-contrast scheme. Current is the neutral ground with its own edge, so a row can be both at once and the selection is what shows. Hover the operable rows and Tab through them to see the rest."
       >
         <Set label="States">
           <ListItem>

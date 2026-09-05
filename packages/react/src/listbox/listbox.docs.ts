@@ -526,7 +526,7 @@ const api: ApiRow[] = apiRows([
     "'check' | 'none'",
     'check',
     'Listbox',
-    'Whether a chosen option draws a mark as well as its ground and its start-edge bar',
+    'Whether a chosen option draws a mark as well as its ground and its ink',
   ],
   ['loop', 'boolean', 'false', 'Listbox', 'Whether the arrows wrap past the ends'],
   ['typeahead', 'boolean', 'true', 'Listbox', 'Whether printable characters move the highlight'],

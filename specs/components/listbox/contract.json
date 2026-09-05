@@ -43,7 +43,7 @@
       "replace": "makes the span the selection"
     },
     "forcedColors": "Under forced-colors: active every tone surface becomes Canvas, so a family that said \"selected\" with a tinted ground alone would say nothing in the mode that needs it most. The mark is what survives, and it is the same failure WCAG 2.2 SC 1.4.1 describes for colour on its own.",
-    "indicatorNone": "A start-edge bar drawn in the accent tone, sized in border widths so it survives forced colours where the ground does not. It is what a listbox whose rows are wide enough for the ground to be unambiguous takes instead of the mark."
+    "indicatorNone": "The accent ground and the accent ink alone, with no mark and no rail (R1). It is what a listbox whose rows are wide enough for the ground to be unambiguous takes; under forced colours the system's own selected pair says it."
   },
   "value": {
     "single": "string | null",

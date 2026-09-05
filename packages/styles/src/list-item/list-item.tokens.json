@@ -1,6 +1,5 @@
 [
   "--slotted-border-subtle",
-  "--slotted-border-width-thick",
   "--slotted-border-width-thin",
   "--slotted-control-font-size-lg",
   "--slotted-control-font-size-md",
@@ -34,6 +33,7 @@
   "--slotted-line-height-sm",
   "--slotted-list-item-background",
   "--slotted-list-item-background-active",
+  "--slotted-list-item-background-current",
   "--slotted-list-item-background-hover",
   "--slotted-list-item-background-selected",
   "--slotted-list-item-body-gap",
@@ -42,8 +42,6 @@
   "--slotted-list-item-color",
   "--slotted-list-item-color-disabled",
   "--slotted-list-item-color-muted",
-  "--slotted-list-item-current-color",
-  "--slotted-list-item-current-width",
   "--slotted-list-item-description-font-size",
   "--slotted-list-item-font-size",
   "--slotted-list-item-font-size-lg",

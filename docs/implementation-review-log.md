@@ -569,3 +569,18 @@ Measurement: `overflows` de **921 para 894** em `comfortable` e de 939 para 912 
 
 Decision: (1) Os três fecham num commit, pelas razões da nota de processo acima. (2) `annotatesTheLine` aceita um registo sem bandas como partilhando a linha, para o julgamento de tolerância continuar testável sozinho — é o que os seis casos que já existiam exercitam. (3) A retirada de G10 é do tamanho da volta e não da presença dela: um slot que tenha um anel _e_ algo genuinamente largo demais mantém o achado, e há um teste para isso. (4) Os quatro achados sobreviventes que não são M3 viram itens novos (G12, G13, CL1, SI1) em vez de serem corrigidos aqui: `kbd`, `collapsible`, `accordion`, `status-indicator` e `slider` não estão no âmbito deste lote.
 Captures: nenhuma; os três itens são de ferramenta e não alteram pintura. Evidência em `tools/harness/out/review-loop/g5/{before,after}-{comfortable,compact}.txt` e `tools/harness/out/review-loop/g10/frozen-{comfortable,compact}.txt`.
+
+START TG1 2026-09-06T18:40:57Z
+
+## TG1 — Cena `group` do harness colapsa a 0px (2026-09-06T21:30:00Z)
+
+Files: nenhum pacote alterado; o achado era do audit e saiu com G5.
+Reprodução: sonda nova `tools/harness/out/review-loop/tg1/probe.mjs`, que mede cada `[data-ui='tag'][data-part='group']` da página — o que desenha, se tem caixa própria, quantos chips leva, e quanto medem ele e o primeiro chip. Saída em `probe.txt`.
+Measurement: a cena `group` tem **três** grupos, em cada uma das três larguras e dos três esquemas:
+
+1. "Active filters" — `display: flex`, 1 retângulo, 5 chips, 240 | 420 | 720px de largura;
+2. "Rótulos" — `display: flex`, 1 retângulo, 2 chips, **102.33px** (é vertical, `inline-size: fit-content`);
+3. "Nenhum filtro" — **`display: none`, 0 retângulos, 0 chips, 0px**.
+   O audit media o terceiro e reportava `collapsed 0px inside a 446px stage`, seis vezes (três esquemas × as duas larguras acima do mínimo de palco). Depois de G5 o audit reporta **0 achados** em `tag.html` nas três densidades (`audit-after.txt`).
+   Decision: **fechado por medição, sem alteração de folha nem de fragmento** — como SL7. O item levanta duas hipóteses e a segunda é a certa: o grupo não é `display: contents`; o audit media o elemento errado. O terceiro grupo é um grupo vazio que o fragmento renderiza de propósito, e `tag.css:649` (`[data-ui='tag'][data-part='group']:empty { display: none }`) tira-o da disposição — "um grupo vazio não ocupa espaço. Uma área de ações construída a partir de um filtro de permissões renderiza um com frequência". Desenhar nada é o que aquela metade da cena existe para demonstrar, e a captura mostra os dois grupos que têm chips e nenhum terceiro, que é o que o item observou ao dizer que "a captura mostra as tags". A regra que o resolveu está em `collapsedElements` e tem caso próprio em `audit.test.mjs` ("does not count an element the stylesheet took out of the layout").
+   Captures: tools/harness/out/review-loop/tg1/after/tag-group-{light,dark,high-contrast}-comfortable-ltr-420.png

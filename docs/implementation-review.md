@@ -388,7 +388,7 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 
 ## Tag
 
-- [ ] **TG1 — Cena `group` do harness colapsa a 0px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: `div[data-ui='tag'][data-part='group']` mede 0px de altura nos três esquemas a 420px e 720px, embora a captura mostre as tags. Verificar se o grupo é `display: contents` ou se o audit mede o elemento errado; se o grupo não tem caixa própria, o audit deve medir os filhos.
+- [x] **TG1 — Cena `group` do harness colapsa a 0px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: `div[data-ui='tag'][data-part='group']` mede 0px de altura nos três esquemas a 420px e 720px, embora a captura mostre as tags. Verificar se o grupo é `display: contents` ou se o audit mede o elemento errado; se o grupo não tem caixa própria, o audit deve medir os filhos.
 
 ---
 

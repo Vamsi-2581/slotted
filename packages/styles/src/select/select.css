@@ -506,7 +506,7 @@
 
   /**
    * What `packages/core/src/positioner` writes `position`, `left` and `top`
-   * onto, and what scales and fades — the module leaves `transform` alone on
+   * onto, and what slides and fades — the module leaves `transform` alone on
    * purpose. The painted surface is one element in, as `tooltip`, `popover` and
    * `menu` are built.
    */
@@ -570,19 +570,50 @@
     pointer-events: none;
 
     opacity: 0;
-    scale: 0.96;
-    transform-origin: var(--slotted-positioner-transform-origin, center);
+    /**
+     * R7: the layer arrives along the axis it opens on — from one space step
+     * above its place when it opens downward, from one step below when it
+     * opens upward — and never along the inline axis. A `scale` from the
+     * corner the positioner named as origin moved the far edge by four per
+     * cent of the width, which read as an entrance from the left.
+     */
+    --_enter-distance: var(--slotted-space-2, 0.25rem);
+    translate: 0 calc(-1 * var(--_enter-distance));
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      scale var(--slotted-duration-short) var(--slotted-easing-exit);
+      translate var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui='select'][data-part='positioner'][data-side='top'] {
+    translate: 0 var(--_enter-distance);
+  }
+
+  /* A lateral side has no block direction to arrive from, so it only fades. */
+  [data-ui='select'][data-part='positioner']:is([data-side='left'], [data-side='right']) {
+    translate: 0 0;
   }
 
   [data-ui='select'][data-part='positioner'][data-open] {
     opacity: 1;
-    scale: 1;
+    translate: 0 0;
     transition:
       opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      scale var(--slotted-duration-medium) var(--slotted-easing-enter);
+      translate var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  /* Stillness keeps the fade and drops the movement (R7). */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='select'][data-part='positioner'],
+    [data-ui='select'][data-part='positioner'][data-side='top'],
+    [data-ui='select'][data-part='positioner'][data-side='left'],
+    [data-ui='select'][data-part='positioner'][data-side='right'] {
+      translate: 0 0;
+      transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+    }
+
+    [data-ui='select'][data-part='positioner'][data-open] {
+      transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+    }
   }
 
   /* The anchor scrolled out of its own clipper. The popup is still open and

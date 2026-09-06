@@ -207,7 +207,7 @@ Localização: `packages/styles/src/select/select.css`, `packages/react/src/sele
   2. `hover` altera a largura de uma opção (por exemplo, `font-weight` ou scrollbar), disparando `ResizeObserver` do overlay, que reposiciona com base na largura já deslocada.
   3. O `Popover` de largura igual ao controle (`#Popover:1`) mede a largura do controle incluindo borda em um caso e excluindo em outro.
      Ação obrigatória: escrever teste em `positioner.test.ts` que simula 10 reposicionamentos consecutivos com o mesmo âncora e verifica que o resultado é idêntico em cada iteração (`x`, `y` estáveis). O teste falha antes da correção e passa depois. Verificar depois nos quatro componentes consumidores.
-- [ ] **SL2 — Direção da animação de abertura.** Estado atual: entrada horizontal (esquerda para direita). Esperado: ver R7 (vertical, na direção da abertura). Corrigir em `select.css` e no ponto de origem compartilhado se a animação vier de `popover.css` ou de `presence`. (MAOC)
+- [x] **SL2 — Direção da animação de abertura.** Estado atual: entrada horizontal (esquerda para direita). Esperado: ver R7 (vertical, na direção da abertura). Corrigir em `select.css` e no ponto de origem compartilhado se a animação vier de `popover.css` ou de `presence`. (MAOC)
 - [x] **SL3 — Ícones à direita (clear, chevron) pequenos em `compact` e `dense`.** Esperado: o glifo usa `--slotted-control-icon-size-<densidade>` com piso de 14px. Em `compact` o controle pode ter 24px de altura e o glifo 14px; nunca abaixo disso. Relacionado a R2 (o botão de clear é parte interna). (MAOC — `Combobox`, `TextField`, `NumberField`, `CurrencyField`)
 - [ ] **SL4 — Prévia de múltipla seleção "Apple +1".** Esperado: renderizar os valores selecionados como `Tag` compactas (altura igual a `--slotted-control-icon-size-<densidade>` + 4px) dentro do controle, com overflow calculado por `ResizeObserver`: as tags que não cabem colapsam em uma única tag `+N`. Cada tag tem botão interno de remoção (R2). Fallback textual "N selecionados" apenas quando o controle está abaixo de 120px de largura. (MAOC — `Combobox` múltiplo)
 - [ ] **SL5 — Variante `plain` com sombra.** Localização: `select.css:359` (`[data-variant='plain']`). Esperado: `plain` sem `box-shadow`, sem borda, sem fundo em repouso; `hover` com superfície `secondary-subtle-hover`; `focus-visible` com anel R3. Verificar se `TextField`, `Combobox` e `NumberField` têm a mesma variante e aplicar a mesma regra. (MAOC)
@@ -221,7 +221,7 @@ Localização: `packages/styles/src/select/select.css`, `packages/react/src/sele
 Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/combobox`, `packages/angular/combobox/src`.
 
 - [x] **CB1 — `#Select:1`.** Mesma causa raiz no positioner.
-- [ ] **CB2 — `#Select:2`.**
+- [x] **CB2 — `#Select:2`.**
 - [x] **CB3 — `#Select:3`.**
 - [ ] **CB4 — `#Select:4`.**
 - [ ] **CB5 — `#Select:6`.**
@@ -330,6 +330,7 @@ Localização: `packages/styles/src/listbox/listbox.css`.
 
 - [ ] **M1 — Animação de abertura.** Aplicar R7. Submenus entram com `translateX(−4px)→0` (na direção de abertura lateral), com a mesma duração.
 - [ ] **M2 — Submenus abertos por padrão e sem separação.** Esperado: submenu fechado até `hover` com atraso de 150ms ou `ArrowRight`/`Enter` no item pai. Ao abrir, o submenu é posicionado pelo positioner com `offset` de 4px em relação à borda do menu pai (não colado) e sobreposição vertical alinhada ao item pai (o primeiro item do submenu alinha com o item que o abriu). Verificar nas stories se `defaultOpen` está sendo passado apenas para demonstração; se sim, mover para uma story dedicada `SubmenuOpen` e manter as demais fechadas.
+- [ ] **M3 — Cena `scrolling` do harness colapsada.** Observado por `tools/harness/audit.mjs` durante SL2, sem alteração de layout: na cena `scrolling` de `menu.harness.html` a raiz `[data-ui='menu']` mede 91px (`comfortable`) e 81px (`compact`) dentro de um palco de 446px, abaixo do piso de 96px do audit; o menu é `inline-size: max-content` e os rótulos da cena (`Inbox`, `Archive`, `Drafts`) são curtos. Esperado: decidir entre um `min-inline-size` de família para o menu (as demais cenas medem acima do piso) ou rótulos mais longos na cena; registrar a escolha.
 
 ---
 

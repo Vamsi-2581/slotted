@@ -17,6 +17,7 @@
   "--slotted-radius-sm",
   "--slotted-radius-xs",
   "--slotted-shadow-xs",
+  "--slotted-space-2",
   "--slotted-space-4",
   "--slotted-surface-inverse",
   "--slotted-surface-raised",

@@ -6,7 +6,7 @@
    * Two boxes, and the split is what makes the family animate at all. The
    * **layer** is what `packages/core/src/positioner` writes `position`, `left`
    * and `top` onto; the module deliberately leaves `transform` alone, so the
-   * layer is also what scales and fades. The **content** inside it is the
+   * layer is also what slides and fades. The **content** inside it is the
    * painted surface, and the arrow is the layer's other child, painted behind
    * the content so only its two outer edges show.
    *
@@ -125,11 +125,27 @@
     pointer-events: none;
 
     opacity: 0;
-    scale: 0.96;
-    transform-origin: var(--slotted-positioner-transform-origin, center);
+    /**
+     * R7: the layer arrives along the axis it opens on — from one space step
+     * above its place when it opens downward, from one step below when it
+     * opens upward — and never along the inline axis. A `scale` from the
+     * corner the positioner named as origin moved the far edge by four per
+     * cent of the width, which read as an entrance from the left.
+     */
+    --_enter-distance: var(--slotted-space-2, 0.25rem);
+    translate: 0 calc(-1 * var(--_enter-distance));
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      scale var(--slotted-duration-short) var(--slotted-easing-exit);
+      translate var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui='tooltip'][data-side='top'] {
+    translate: 0 var(--_enter-distance);
+  }
+
+  /* A lateral side has no block direction to arrive from, so it only fades. */
+  [data-ui='tooltip']:is([data-side='left'], [data-side='right']) {
+    translate: 0 0;
   }
 
   /**
@@ -139,10 +155,25 @@
    */
   [data-ui='tooltip'][data-open] {
     opacity: 1;
-    scale: 1;
+    translate: 0 0;
     transition:
       opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      scale var(--slotted-duration-medium) var(--slotted-easing-enter);
+      translate var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  /* Stillness keeps the fade and drops the movement (R7). */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='tooltip'],
+    [data-ui='tooltip'][data-side='top'],
+    [data-ui='tooltip'][data-side='left'],
+    [data-ui='tooltip'][data-side='right'] {
+      translate: 0 0;
+      transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+    }
+
+    [data-ui='tooltip'][data-open] {
+      transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+    }
   }
 
   [data-ui='tooltip'][data-open][data-hoverable] {

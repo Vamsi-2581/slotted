@@ -49,9 +49,14 @@ import {
     ><span data-part="label"><ng-content></ng-content></span
     ><ng-content select="[slButtonEnd]"></ng-content>
     @if (waiting() && !hasVisualSlot()) {
-      <span data-part="indicator" role="progressbar" [attr.aria-label]="loadingLabel()"></span>
+      <span
+        data-part="indicator"
+        data-ui="spinner"
+        role="progressbar"
+        [attr.aria-label]="loadingLabel()"
+      ></span>
     }`,
-  styleUrl: '../../../styles/src/button/button.css',
+  styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slButton',

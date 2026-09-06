@@ -143,6 +143,8 @@ describe('SlIconButton', () => {
     expect(button.disabled).toBe(false);
     const indicator = button.querySelector('[data-part="indicator"]');
     expect(indicator?.getAttribute('role')).toBe('progressbar');
+    /* The ring is the shared spinner, drawn once for every family that waits. */
+    expect(indicator?.getAttribute('data-ui')).toBe('spinner');
     expect(button.querySelector('[data-part="icon"]')).toContain(indicator);
     expect(button.getAttribute('aria-pressed')).toBe('false');
     expect(host.onPressedChange).not.toHaveBeenCalled();

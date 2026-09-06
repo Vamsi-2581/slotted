@@ -1,0 +1,62 @@
+@layer slotted.components {
+  /**
+   * One ring, drawn once. The indeterminate wait every family shows the same
+   * way — a button that is working, a select or combobox whose options are
+   * still on their way — was drawn by the first family to need it, in that
+   * family's own sheet, as a border with one transparent side: a thin square-
+   * ended arc whose stroke was a fraction of its diameter, so it was a hair at
+   * the small step and a slab at the large one. The second family would have
+   * copied it. It is drawn here instead, and a host names it and places it.
+   *
+   * The arc is a glyph, like every other glyph in the foundation (R4): the
+   * theme generates it from Lucide's `loader-circle` at a stroke of 3 on the
+   * 24-unit grid, which is 2px across a 16px box and keeps the round caps
+   * Lucide draws. Masking the glyph over `currentColor` is what lets the ring
+   * take whatever ink its host is already writing with — the label's colour
+   * on a filled button, the tone on a bare one, the muted text of a field —
+   * and answer every scheme without a colour of its own.
+   *
+   * The box is the host's glyph box, read through `--slotted-spinner-size`:
+   * a host that sizes its icons sizes the ring the same way, so the ring that
+   * stands in for a glyph is the size of the glyph it replaces. Left alone it
+   * is the medium control icon.
+   */
+  [data-ui='spinner'] {
+    --_size: var(--slotted-spinner-size, var(--slotted-control-icon-size-md, 16px));
+
+    /**
+     * One full turn per loop step, linear: a ring that eases would read as
+     * stalling once a turn. The loop token is the theme's, so a theme that
+     * slows every loop slows this one with it.
+     */
+    animation: slotted-spinner-turn var(--slotted-duration-loop) linear infinite;
+    background-color: currentColor;
+    block-size: var(--_size);
+    box-sizing: border-box;
+    display: inline-block;
+    /* A ring that shrinks is not a ring: it keeps its size in a flex row. */
+    flex: none;
+    inline-size: var(--_size);
+    mask-image: var(--slotted-icon-loader-circle);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    vertical-align: middle;
+  }
+
+  /**
+   * A frozen ring still communicates waiting. Stopping it entirely is less
+   * distracting than replacing one continuous motion with a slower one.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='spinner'] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes slotted-spinner-turn {
+  to {
+    transform: rotate(1turn);
+  }
+}

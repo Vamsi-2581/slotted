@@ -141,6 +141,8 @@ describe('Button', () => {
     const indicator = screen.getByRole('progressbar', { name: 'Saving' });
 
     expect(indicator).toHaveAttribute('data-part', 'indicator');
+    /* The ring is the shared spinner, drawn once for every family that waits. */
+    expect(indicator).toHaveAttribute('data-ui', 'spinner');
     expect(indicator).not.toHaveAttribute('aria-valuenow');
     expect(screen.getByRole('button', { name: /Save/ })).toContainElement(indicator);
   });

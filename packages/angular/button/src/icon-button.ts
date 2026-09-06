@@ -54,10 +54,15 @@ import {
   template: `<span data-part="icon"
     ><ng-content></ng-content>
     @if (waiting()) {
-      <span data-part="indicator" role="progressbar" [attr.aria-label]="loadingLabel()"></span>
+      <span
+        data-part="indicator"
+        data-ui="spinner"
+        role="progressbar"
+        [attr.aria-label]="loadingLabel()"
+      ></span>
     }
   </span>`,
-  styleUrl: '../../../styles/src/button/button.css',
+  styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slIconButton',

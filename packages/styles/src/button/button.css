@@ -499,21 +499,14 @@
   }
 
   /**
-   * The stroke is a proportion of the ring rather than an arbitrary pixel, so
-   * it remains visibly the same object at every button size. The transparent
-   * logical-end edge gives the circle one missing quarter without naming a
-   * physical direction.
+   * The ring is the `spinner` sheet's: one arc, drawn once, for every family
+   * that waits. This family only says how big it is — the glyph box of its
+   * own step — and where it sits.
    */
   [data-ui='button'] [data-part='indicator'] {
-    animation: slotted-button-spin var(--slotted-duration-loop-fast) linear infinite;
-    block-size: var(--_icon-size);
-    border: max(var(--slotted-border-width-thin, 1px), calc(var(--_icon-size) / 8)) solid
-      currentColor;
-    border-inline-end-color: transparent;
-    border-radius: var(--slotted-radius-full, 9999px);
-    box-sizing: border-box;
+    --slotted-spinner-size: var(--_icon-size);
+
     flex: none;
-    inline-size: var(--_icon-size);
   }
 
   /* Only the ring that has no visual slot to sit in is placed against the box. */
@@ -725,19 +718,14 @@
     }
   }
   /**
-   * A frozen ring still communicates waiting. Stopping it entirely is less
-   * distracting than replacing one continuous motion with a slower one.
+   * A frozen ring still communicates waiting. The spinner sheet stops itself
+   * under reduced motion; it is restated here because this is the family that
+   * shows the wait, and the sweep above is the loop this sheet owns.
    */
   @media (prefers-reduced-motion: reduce) {
     [data-ui='button'] [data-part='indicator'] {
       animation: none;
     }
-  }
-}
-
-@keyframes slotted-button-spin {
-  to {
-    transform: rotate(1turn);
   }
 }
 

@@ -22,5 +22,6 @@
   "--slotted-icon-inbox": { "icon": "inbox" },
   "--slotted-icon-search-x": { "icon": "search-x" },
   "--slotted-icon-lock": { "icon": "lock" },
-  "--slotted-icon-cloud-off": { "icon": "cloud-off" }
+  "--slotted-icon-cloud-off": { "icon": "cloud-off" },
+  "--slotted-icon-loader-circle": { "icon": "loader-circle", "stroke-width": 3.5 }
 }

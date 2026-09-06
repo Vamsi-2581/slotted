@@ -31,7 +31,6 @@
   "--slotted-disabled-foreground",
   "--slotted-duration-instant",
   "--slotted-duration-loop",
-  "--slotted-duration-loop-fast",
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",
   "--slotted-focus-ring-width",

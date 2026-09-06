@@ -1,5 +1,9 @@
+import '@slotted/styles/spinner/spinner.css';
+
 /**
- * The ring, and the only thing that announces the wait.
+ * The ring, and the only thing that announces the wait. It carries the
+ * `spinner` identifier: the ring itself is drawn by that shared sheet, once,
+ * for every family that waits, and this family only names it and places it.
  *
  * `role="progressbar"` with a name rather than `aria-busy` on the control:
  * `aria-busy` is not reliably announced on a button, and React Aria's pending
@@ -13,5 +17,5 @@
  * which is exactly the claim being made.
  */
 export function ButtonIndicator({ label }: { label: string }) {
-  return <span aria-label={label} data-part="indicator" role="progressbar" />;
+  return <span aria-label={label} data-part="indicator" data-ui="spinner" role="progressbar" />;
 }

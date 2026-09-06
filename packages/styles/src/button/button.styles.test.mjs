@@ -411,12 +411,22 @@ test('waits without losing the size or the name of the control', () => {
   assert.ok(rule(`${ui}[data-loading]`).includes('cursor:progress'));
 });
 
+/**
+ * The ring is the `spinner` sheet's, drawn once for every family that waits;
+ * this family only says how big it is — its own glyph box, through the size
+ * token that sheet reads — and where it sits. It drew the ring itself before
+ * this, as a border with one transparent side, and the second family to wait
+ * would have copied it.
+ */
 test('sizes the ring to the glyph it stands in for, wherever it is drawn', () => {
   const indicator = rule(`${ui} [data-part='indicator']`);
-  assert.ok(indicator.includes('inline-size:var(--_icon-size)'), 'the ring is not the icon size');
-  assert.ok(indicator.includes('block-size:var(--_icon-size)'));
+  assert.ok(
+    indicator.includes('--slotted-spinner-size:var(--_icon-size)'),
+    'the ring is not the icon size',
+  );
   assert.ok(indicator.includes('flex:none'), 'the ring can be squeezed inside its slot');
-  assert.ok(indicator.includes('border-inline-end-color:transparent'));
+  assert.doesNotMatch(indicator, /border|animation|border-radius/);
+  assert.doesNotMatch(css, /slotted-button-spin/, 'the family still draws a ring of its own');
 
   const centred = dense.split(`${ui}>[data-part='indicator']{`)[1]?.split('}')[0] ?? '';
   assert.ok(centred.includes('position:absolute'), 'the ring without a slot is in the flow');

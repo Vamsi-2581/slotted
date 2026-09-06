@@ -8,6 +8,12 @@
     "size": ["sm", "md", "lg"],
     "shape": ["square", "circle"]
   },
+  "spinner": {
+    "ui": "spinner",
+    "part": "indicator",
+    "glyph": "--slotted-icon-loader-circle",
+    "stylesheet": "spinner/spinner.css"
+  },
   "stateAttributes": {
     "disabled": "data-disabled",
     "loading": "data-loading",

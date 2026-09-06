@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 79     |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 80     |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 99     |
 | `component` | One family adjusting a semantic value for itself.              | 5      |
 
@@ -197,32 +197,33 @@ the black becomes the mask's alpha when it is used with `mask-image`.
 rendering with round caps and joins, at width 2 unless the manifest says
 otherwise; `fill` is the same geometry painted solid, with no stroke.
 
-| Token                            | Lucide icon            | Paint    |
-| -------------------------------- | ---------------------- | -------- |
-| `--slotted-icon-check`           | `check`                | stroke 3 |
-| `--slotted-icon-minus`           | `minus`                | stroke 3 |
-| `--slotted-icon-plus`            | `plus`                 | stroke 3 |
-| `--slotted-icon-dot`             | `circle-small`         | fill     |
-| `--slotted-icon-x`               | `x`                    | stroke 2 |
-| `--slotted-icon-copy`            | `copy`                 | stroke 2 |
-| `--slotted-icon-eye`             | `eye`                  | stroke 2 |
-| `--slotted-icon-eye-off`         | `eye-off`              | stroke 2 |
-| `--slotted-icon-chevron-right`   | `chevron-right`        | stroke 2 |
-| `--slotted-icon-chevron-down`    | `chevron-down`         | stroke 2 |
-| `--slotted-icon-chevrons-right`  | `chevrons-right`       | stroke 2 |
-| `--slotted-icon-external`        | `arrow-up-right`       | stroke 2 |
-| `--slotted-icon-person`          | `user-round`           | fill     |
-| `--slotted-icon-circle`          | `circle`               | stroke 2 |
-| `--slotted-icon-circle-info`     | `info`                 | stroke 2 |
-| `--slotted-icon-circle-check`    | `circle-check`         | stroke 2 |
-| `--slotted-icon-triangle-alert`  | `triangle-alert`       | stroke 2 |
-| `--slotted-icon-circle-alert`    | `circle-alert`         | stroke 2 |
-| `--slotted-icon-circle-x`        | `circle-x`             | stroke 2 |
-| `--slotted-icon-circle-question` | `circle-question-mark` | stroke 2 |
-| `--slotted-icon-inbox`           | `inbox`                | stroke 2 |
-| `--slotted-icon-search-x`        | `search-x`             | stroke 2 |
-| `--slotted-icon-lock`            | `lock`                 | stroke 2 |
-| `--slotted-icon-cloud-off`       | `cloud-off`            | stroke 2 |
+| Token                            | Lucide icon            | Paint      |
+| -------------------------------- | ---------------------- | ---------- |
+| `--slotted-icon-check`           | `check`                | stroke 3   |
+| `--slotted-icon-minus`           | `minus`                | stroke 3   |
+| `--slotted-icon-plus`            | `plus`                 | stroke 3   |
+| `--slotted-icon-dot`             | `circle-small`         | fill       |
+| `--slotted-icon-x`               | `x`                    | stroke 2   |
+| `--slotted-icon-copy`            | `copy`                 | stroke 2   |
+| `--slotted-icon-eye`             | `eye`                  | stroke 2   |
+| `--slotted-icon-eye-off`         | `eye-off`              | stroke 2   |
+| `--slotted-icon-chevron-right`   | `chevron-right`        | stroke 2   |
+| `--slotted-icon-chevron-down`    | `chevron-down`         | stroke 2   |
+| `--slotted-icon-chevrons-right`  | `chevrons-right`       | stroke 2   |
+| `--slotted-icon-external`        | `arrow-up-right`       | stroke 2   |
+| `--slotted-icon-person`          | `user-round`           | fill       |
+| `--slotted-icon-circle`          | `circle`               | stroke 2   |
+| `--slotted-icon-circle-info`     | `info`                 | stroke 2   |
+| `--slotted-icon-circle-check`    | `circle-check`         | stroke 2   |
+| `--slotted-icon-triangle-alert`  | `triangle-alert`       | stroke 2   |
+| `--slotted-icon-circle-alert`    | `circle-alert`         | stroke 2   |
+| `--slotted-icon-circle-x`        | `circle-x`             | stroke 2   |
+| `--slotted-icon-circle-question` | `circle-question-mark` | stroke 2   |
+| `--slotted-icon-inbox`           | `inbox`                | stroke 2   |
+| `--slotted-icon-search-x`        | `search-x`             | stroke 2   |
+| `--slotted-icon-lock`            | `lock`                 | stroke 2   |
+| `--slotted-icon-cloud-off`       | `cloud-off`            | stroke 2   |
+| `--slotted-icon-loader-circle`   | `loader-circle`        | stroke 3.5 |
 
 A component-owned icon is a mask from a glyph token; a character is never an
 icon.

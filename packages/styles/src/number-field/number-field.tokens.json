@@ -47,6 +47,7 @@
   "--slotted-number-field-invalid-border-color",
   "--slotted-number-field-invalid-focus-ring-color",
   "--slotted-number-field-placeholder-color",
+  "--slotted-number-field-plain-hover-background",
   "--slotted-number-field-radius",
   "--slotted-number-field-readonly-background",
   "--slotted-number-field-readonly-border-color",

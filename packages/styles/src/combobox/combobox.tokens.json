@@ -39,6 +39,7 @@
   "--slotted-combobox-measure",
   "--slotted-combobox-open-border-color",
   "--slotted-combobox-placeholder-color",
+  "--slotted-combobox-plain-hover-background",
   "--slotted-combobox-radius",
   "--slotted-combobox-readonly-background",
   "--slotted-combobox-selected-color",

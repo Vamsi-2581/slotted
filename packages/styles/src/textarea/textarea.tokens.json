@@ -41,6 +41,7 @@
   "--slotted-textarea-line-height",
   "--slotted-textarea-max-rows",
   "--slotted-textarea-placeholder-color",
+  "--slotted-textarea-plain-hover-background",
   "--slotted-textarea-radius",
   "--slotted-textarea-readonly-background",
   "--slotted-textarea-rows",

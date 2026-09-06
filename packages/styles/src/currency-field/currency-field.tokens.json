@@ -37,6 +37,7 @@
   "--slotted-currency-field-invalid-border-color",
   "--slotted-currency-field-invalid-focus-ring-color",
   "--slotted-currency-field-placeholder-color",
+  "--slotted-currency-field-plain-hover-background",
   "--slotted-currency-field-radius",
   "--slotted-currency-field-readonly-background",
   "--slotted-currency-field-readonly-border-color",

@@ -81,6 +81,7 @@
   "--slotted-select-measure",
   "--slotted-select-open-border-color",
   "--slotted-select-placeholder-color",
+  "--slotted-select-plain-hover-background",
   "--slotted-select-radius",
   "--slotted-select-readonly-background",
   "--slotted-select-selected-color",

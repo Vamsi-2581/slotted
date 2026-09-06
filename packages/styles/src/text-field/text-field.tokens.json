@@ -55,6 +55,7 @@
   "--slotted-text-field-invalid-border-color",
   "--slotted-text-field-invalid-focus-ring-color",
   "--slotted-text-field-placeholder-color",
+  "--slotted-text-field-plain-hover-background",
   "--slotted-text-field-radius",
   "--slotted-text-field-readonly-background",
   "--slotted-text-field-reveal-icon",

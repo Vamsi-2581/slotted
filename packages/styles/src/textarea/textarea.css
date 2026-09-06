@@ -132,8 +132,12 @@
     );
   }
 
+  /* No edge, no lift and no ground of its own: the row it sits in is the
+     ground, and the resting shadow would draw the cell where there is none. */
   [data-ui='textarea'][data-part='root'][data-variant='plain'] {
+    background-color: transparent;
     border-color: transparent;
+    box-shadow: none;
   }
 
   /** A transparent border has no system colour to be remapped to. */
@@ -216,6 +220,17 @@
       --slotted-textarea-subtle-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
+  }
+
+  [data-ui='textarea'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+      :disabled
+    ):not([data-readonly]):not([data-invalid]) {
+    background-color: var(
+      --slotted-textarea-plain-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    /* The accent edge the other variants take would draw the cell's outline. */
+    border-color: transparent;
   }
 
   [data-ui='textarea'][data-part='root']:focus-visible {

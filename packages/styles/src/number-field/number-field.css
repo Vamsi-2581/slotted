@@ -202,8 +202,12 @@
     );
   }
 
+  /* No edge, no lift and no ground of its own: the row it sits in is the
+     ground, and the resting shadow would draw the cell where there is none. */
   [data-ui='number-field'][data-part='root'][data-variant='plain'] {
+    background-color: transparent;
     border-color: transparent;
+    box-shadow: none;
   }
 
   /**
@@ -520,6 +524,17 @@
       --slotted-number-field-subtle-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
+  }
+
+  [data-ui='number-field'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+      [data-readonly]
+    ):not([data-invalid]) {
+    background-color: var(
+      --slotted-number-field-plain-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+    /* The accent edge the other variants take would draw the cell's outline. */
+    border-color: transparent;
   }
 
   /**

@@ -212,7 +212,7 @@ Localização: `packages/styles/src/select/select.css`, `packages/react/src/sele
 - [ ] **SL4 — Prévia de múltipla seleção "Apple +1".** Esperado: renderizar os valores selecionados como `Tag` compactas (altura igual a `--slotted-control-icon-size-<densidade>` + 4px) dentro do controle, com overflow calculado por `ResizeObserver`: as tags que não cabem colapsam em uma única tag `+N`. Cada tag tem botão interno de remoção (R2). Fallback textual "N selecionados" apenas quando o controle está abaixo de 120px de largura. (MAOC — `Combobox` múltiplo)
 - [ ] **SL5 — Variante `plain` com sombra.** Localização: `select.css:359` (`[data-variant='plain']`). Esperado: `plain` sem `box-shadow`, sem borda, sem fundo em repouso; `hover` com superfície `secondary-subtle-hover`; `focus-visible` com anel R3. Verificar se `TextField`, `Combobox` e `NumberField` têm a mesma variante e aplicar a mesma regra. (MAOC)
 - [ ] **SL6 — Estado `loading`.** Decisão: não usar `Loader`/`LoaderScene` com superfície dentro do overlay. Esperado: spinner inline de B4 no lugar do chevron enquanto carrega; dentro do overlay, três linhas de `Skeleton` com a altura de uma opção. (MAOC — `Combobox`)
-- [ ] **SL7 — Indicador desalinhado em opção de duas linhas.** Observado por `tools/harness/audit.mjs` durante SL1, sem alteração de CSS: na cena `long-content`, `[data-part='indicator']` fica 39.25px acima da linha que anota (centralizado no bloco de duas linhas mais descrição). Esperado: indicador alinhado à primeira linha do label, pela mesma regra de R5. (MAOC — `Combobox`)
+- [x] **SL7 — Indicador desalinhado em opção de duas linhas.** Observado por `tools/harness/audit.mjs` durante SL1, sem alteração de CSS: na cena `long-content`, `[data-part='indicator']` fica 39.25px acima da linha que anota (centralizado no bloco de duas linhas mais descrição). Esperado: indicador alinhado à primeira linha do label, pela mesma regra de R5. (MAOC — `Combobox`)
 
 ---
 
@@ -235,7 +235,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
     Critério de aceite: a largura da string com e sem `<mark>` difere em 0px (testar via `getBoundingClientRect().width` do label com e sem `matchRanges`). (MAOC)
 - [ ] **CB7 — Valor livre não validado.** Esperado: prop `allowCustomValue` (padrão `false`). Com `false`, ao perder o foco (`blur`) com texto que não corresponde a nenhum item, o campo volta ao último valor válido (ou vazio) e emite `onInputReset`. Com `true`, o texto é aceito como valor. Documentar no contrato e nas stories dos dois frameworks.
 - [ ] **CB8 — Criação de novo valor.** Esperado: prop `onCreate` (ou `creatable`) que, quando presente e a query não corresponde a nenhum item, renderiza uma opção final `Criar "<query>"` no listbox. Selecioná-la chama `onCreate(query)` e o consumidor decide se adiciona o item à coleção. Modo múltiplo integra com as tags de `#Select:4`. Story obrigatória: input de tags com criação.
-- [ ] **CB9 — `#Select:7`.**
+- [x] **CB9 — `#Select:7`.**
 
 ---
 

@@ -223,7 +223,7 @@ test('hovers a pressed toggle on the accent ground, never on the neutral one', (
   const pressing = rule(
     `${ui}[data-pressed]:active:not(:disabled):not([data-disabled]):not([data-loading])`,
   );
-  assert.equal(pressing, 'background:var(--slotted-tone-accent-subtle-active,Highlight);');
+  assert.ok(pressing.startsWith('background:var(--slotted-tone-accent-subtle-active,Highlight);'));
   assert.doesNotMatch(on, /secondary-subtle-hover/);
 });
 
@@ -318,6 +318,43 @@ test('keeps an unavailable control legible, and leaves the disabled grey to :dis
   /* The native state keeps its own tokens, which say "cannot be operated". */
   assert.ok(
     rule(`${ui}:disabled,${ui}[data-disabled]`).includes('color:var(--slotted-disabled-foreground'),
+  );
+});
+
+/**
+ * A press answers at once and releases at the control's pace: the `:active`
+ * rules enter on the instant step and the base rule's duration eases the
+ * release. A filled control drops one hairline and loses its shadow — the
+ * control that was lifted off the page is put down on it; a bare control has
+ * nothing to put down, so only its ground changes, to the darker neutral step
+ * that pairs with the neutral hover ground.
+ */
+test('presses a filled control down by a hairline, and a bare one only in colour', () => {
+  /* Every space taken out, because the selectors are reflowed across lines. */
+  const compact = declarations.replace(/\s+/g, '');
+  const block = (selector) => compact.split(`${selector}{`)[1]?.split('}')[0] ?? '';
+  const guard = ':not(:disabled):not([data-disabled]):not([data-loading]):not([data-pressed])';
+  const solid = block(`${ui}[data-variant='solid']:active${guard}`);
+  assert.equal(
+    solid,
+    'background:var(--_solid-active,Highlight);box-shadow:none;transform:translateY(var(--slotted-border-width-thin,1px));transition-duration:var(--slotted-duration-instant);',
+  );
+  const bare = block(
+    `${ui}[data-variant='outline']:active${guard},${ui}[data-variant='ghost']:active${guard}`,
+  );
+  assert.equal(
+    bare,
+    'background:var(--slotted-tone-secondary-subtle-active,ButtonFace);transition-duration:var(--slotted-duration-instant);',
+  );
+  assert.doesNotMatch(
+    declarations,
+    /--_subtle-active/,
+    'a tone still carries a press ground of its own',
+  );
+  /* The release eases back: transform is in the base transition list. */
+  assert.match(
+    rule(ui),
+    /transform var\(--slotted-control-transition-duration\) var\(--slotted-control-transition-easing\)/,
   );
 });
 

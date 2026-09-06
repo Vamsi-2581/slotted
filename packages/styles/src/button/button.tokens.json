@@ -29,6 +29,7 @@
   "--slotted-disabled-background",
   "--slotted-disabled-border",
   "--slotted-disabled-foreground",
+  "--slotted-duration-instant",
   "--slotted-duration-loop",
   "--slotted-duration-loop-fast",
   "--slotted-focus-ring-color",
@@ -51,7 +52,6 @@
   "--slotted-tone-danger-solid",
   "--slotted-tone-danger-solid-active",
   "--slotted-tone-danger-solid-hover",
-  "--slotted-tone-danger-subtle-active",
   "--slotted-tone-danger-text",
   "--slotted-tone-secondary-on-solid",
   "--slotted-tone-secondary-solid",
@@ -64,12 +64,10 @@
   "--slotted-tone-success-solid",
   "--slotted-tone-success-solid-active",
   "--slotted-tone-success-solid-hover",
-  "--slotted-tone-success-subtle-active",
   "--slotted-tone-success-text",
   "--slotted-tone-warning-on-solid",
   "--slotted-tone-warning-solid",
   "--slotted-tone-warning-solid-active",
   "--slotted-tone-warning-solid-hover",
-  "--slotted-tone-warning-subtle-active",
   "--slotted-tone-warning-text"
 ]

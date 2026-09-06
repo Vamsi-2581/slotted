@@ -25,7 +25,6 @@
     --_solid-hover: var(--slotted-tone-accent-solid-hover);
     --_solid-active: var(--slotted-tone-accent-solid-active);
     --_on-solid: var(--slotted-tone-accent-on-solid);
-    --_subtle-active: var(--slotted-tone-accent-subtle-active);
     --_text: var(--slotted-tone-accent-text);
     /**
      * The edge of a filled control is the fill itself. A border a shade away
@@ -125,7 +124,9 @@
       border-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
       box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
-      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
+      /* The press below moves the control, and the release eases it back. */ transform
+        var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
     user-select: none;
     /* A control written inside a sentence sits on the text's centre, not on its baseline. */
     vertical-align: middle;
@@ -139,7 +140,6 @@
     --_solid-hover: var(--slotted-tone-secondary-solid-hover);
     --_solid-active: var(--slotted-tone-secondary-solid-active);
     --_on-solid: var(--slotted-tone-secondary-on-solid);
-    --_subtle-active: var(--slotted-tone-secondary-subtle-active);
     --_text: var(--slotted-tone-secondary-text);
     /**
      * The one fill that cannot be its own edge: measured against the surface it
@@ -163,7 +163,6 @@
     --_solid-hover: var(--slotted-tone-success-solid-hover);
     --_solid-active: var(--slotted-tone-success-solid-active);
     --_on-solid: var(--slotted-tone-success-on-solid);
-    --_subtle-active: var(--slotted-tone-success-subtle-active);
     --_text: var(--slotted-tone-success-text);
   }
 
@@ -172,7 +171,6 @@
     --_solid-hover: var(--slotted-tone-warning-solid-hover);
     --_solid-active: var(--slotted-tone-warning-solid-active);
     --_on-solid: var(--slotted-tone-warning-on-solid);
-    --_subtle-active: var(--slotted-tone-warning-subtle-active);
     --_text: var(--slotted-tone-warning-text);
   }
 
@@ -181,7 +179,6 @@
     --_solid-hover: var(--slotted-tone-danger-solid-hover);
     --_solid-active: var(--slotted-tone-danger-solid-active);
     --_on-solid: var(--slotted-tone-danger-on-solid);
-    --_subtle-active: var(--slotted-tone-danger-subtle-active);
     --_text: var(--slotted-tone-danger-text);
   }
 
@@ -315,6 +312,17 @@
    * tinted ground under an outline or ghost action read as five different
    * status chips before it read as five hovered buttons; the tone stays in
    * the label, where it was.
+   *
+   * A press answers at once and releases at the control's own pace. The
+   * active rules set the transition into the state to the instant step,
+   * so the fill, the shadow and the shift land on the same frame the button
+   * went down on; the base rule's duration is what the release eases out
+   * with, because a transition's timing is read from the state being
+   * entered. A filled control drops one hairline and loses its shadow —
+   * Primer's press, chosen over Radix's brightness filter: the control that
+   * was lifted off the page is put down on it. A bare control has no shadow
+   * to lose and nothing to put down, so it takes the darker neutral ground
+   * and nothing moves.
    */
 
   [data-ui='button'][data-variant='solid']:hover:not(:disabled):not([data-disabled]):not(
@@ -327,6 +335,9 @@
       [data-loading]
     ):not([data-pressed]) {
     background: var(--_solid-active, Highlight);
+    box-shadow: none;
+    transform: translateY(var(--slotted-border-width-thin, 1px));
+    transition-duration: var(--slotted-duration-instant);
   }
 
   [data-ui='button'][data-variant='outline']:hover:not(:disabled):not([data-disabled]):not(
@@ -344,7 +355,8 @@
   [data-ui='button'][data-variant='ghost']:active:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]) {
-    background: var(--_subtle-active, ButtonFace);
+    background: var(--slotted-tone-secondary-subtle-active, ButtonFace);
+    transition-duration: var(--slotted-duration-instant);
   }
 
   /**
@@ -358,6 +370,7 @@
 
   [data-ui='button'][data-pressed]:active:not(:disabled):not([data-disabled]):not([data-loading]) {
     background: var(--slotted-tone-accent-subtle-active, Highlight);
+    transition-duration: var(--slotted-duration-instant);
   }
 
   /* ── Focus ────────────────────────────────────────────────────────────── */

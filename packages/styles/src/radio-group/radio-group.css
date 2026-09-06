@@ -204,7 +204,10 @@
    * records: the label's `::before` is the WCAG-minimum square, ending where
    * the circle ends so it never hangs past the item's end or bottom; its
    * `::after` is the circle's own ring of ink, centred, with its shadow spread
-   * to the halo size. The tile has neither; its surface answers the pointer.
+   * to the halo size, in the accent's text tone rather than its surface tone,
+   * which is a ground and disappeared into the page in `dark` and in
+   * `high-contrast` (CK7). The tile has neither; its surface answers the
+   * pointer.
    */
   [data-ui='radio-group'][data-part='root']:not([data-variant='tile']) [data-part='label']::before {
     block-size: var(--_target);
@@ -221,7 +224,7 @@
     block-size: var(--_size);
     border-radius: var(--slotted-radius-full, 9999px);
     box-shadow: 0 0 0 calc((var(--_halo-size) - var(--_size)) / 2)
-      var(--slotted-radio-group-halo-color, var(--slotted-tone-accent-surface));
+      var(--slotted-radio-group-halo-color, var(--slotted-tone-accent-text));
     content: '';
     direction: var(--_direction);
     inline-size: var(--_size);
@@ -303,7 +306,7 @@
   [data-ui='radio-group'][data-part='root']:not([data-readonly])
     [data-part='control']:not(:disabled)
     ~ [data-part='label']:hover::after {
-    opacity: var(--slotted-selection-halo-opacity, 0.4);
+    opacity: var(--slotted-selection-halo-opacity, 0.12);
   }
 
   [data-ui='radio-group'][data-part='root']:not([data-readonly])

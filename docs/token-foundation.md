@@ -316,7 +316,7 @@ inside of.
 | `--slotted-selection-size-md`      | `16px`        |
 | `--slotted-selection-size-lg`      | `18px`        |
 | `--slotted-selection-halo-size`    | `32px`        |
-| `--slotted-selection-halo-opacity` | `0.4`         |
+| `--slotted-selection-halo-opacity` | `0.12`        |
 
 ## Control typography
 

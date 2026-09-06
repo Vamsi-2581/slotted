@@ -93,6 +93,7 @@
   "--slotted-tone-accent-subtle-active",
   "--slotted-tone-accent-subtle-hover",
   "--slotted-tone-accent-surface",
+  "--slotted-tone-accent-text",
   "--slotted-tone-danger-border",
   "--slotted-tone-danger-solid",
   "--slotted-tone-danger-surface",

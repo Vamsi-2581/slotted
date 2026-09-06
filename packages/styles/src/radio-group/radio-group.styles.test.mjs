@@ -172,7 +172,7 @@ test('draws the same halo checkbox does, behind the circle, lit by hover alone',
   assert.match(halo, /border-radius:var\(--slotted-radius-full,9999px\)/);
   assert.match(
     halo,
-    /box-shadow:0 0 0 calc\(\(var\(--_halo-size\) - var\(--_size\)\) \/ 2\) var\(--slotted-radio-group-halo-color,var\(--slotted-tone-accent-surface\)\)/,
+    /box-shadow:0 0 0 calc\(\(var\(--_halo-size\) - var\(--_size\)\) \/ 2\) var\(--slotted-radio-group-halo-color,var\(--slotted-tone-accent-text\)\)/,
   );
   assert.match(halo, /opacity:0/);
   assert.match(halo, /z-index:-1/);
@@ -181,7 +181,7 @@ test('draws the same halo checkbox does, behind the circle, lit by hover alone',
   assert.match(rule(part('item')), /position:relative/);
   assert.ok(
     normalized.includes(
-      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::after,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::after{opacity:var(--slotted-selection-halo-opacity,0.4);}`,
+      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::after,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::after{opacity:var(--slotted-selection-halo-opacity,0.12);}`,
     ),
     'hover does not light the halo, or lights it from somewhere else',
   );

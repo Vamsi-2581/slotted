@@ -14,6 +14,15 @@ import { HOVER_SHARE, hoverOf, shareOf } from '@slotted/tokens/tone-hover';
  */
 const theme = JSON.parse(await readFile(new URL('../src/theme.json', import.meta.url), 'utf8'));
 
+/** A colour laid over another at `alpha`, as a browser composites it. */
+function over(ink, ground, alpha) {
+  const channels = (hex) => [1, 3, 5].map((at) => Number.parseInt(hex.slice(at, at + 2), 16));
+  const mixed = channels(ink).map(
+    (value, index) => alpha * value + (1 - alpha) * channels(ground)[index],
+  );
+  return `#${mixed.map((value) => Math.round(value).toString(16).padStart(2, '0')).join('')}`;
+}
+
 const REDUCED_MOTION_VALUES = {
   '--slotted-duration-instant': '1ms',
   '--slotted-duration-short': '1ms',
@@ -155,4 +164,34 @@ test('derives every solid hover from its fill by the one rule', () => {
   for (const share of reached) {
     assert.ok(share > 0.025 && share < 0.09, `a hover moved ${(share * 100).toFixed(1)}%`);
   }
+});
+
+/**
+ * The halo the selection scale describes — the circle `checkbox` and
+ * `radio-group` light under the pointer — is a tone laid over the page at
+ * `--slotted-selection-halo-opacity`, so what a reader sees is the mix and the
+ * mix is what has to separate from the page. The ink is the accent's text
+ * tone, which every scheme keeps legible on the surface, and the same twelfth
+ * of it therefore lands in the same place in all three.
+ *
+ * It was the accent's surface tone at four tenths. A surface tone is a ground,
+ * tuned to sit under text rather than to be told apart from the page: the halo
+ * measured 1.09:1 in `light`, 1.03:1 in `dark` and 1.00:1 in `high-contrast`,
+ * where the token is the page's own white — a gesture one scheme out of three
+ * could see (CK7).
+ */
+test('lights the selection halo where every scheme can see it', () => {
+  const alpha = Number(theme.base['--slotted-selection-halo-opacity']);
+  const reached = [];
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const surface = values['--slotted-surface'];
+    const ratio = contrast(over(values['--slotted-tone-accent-text'], surface, alpha), surface);
+    assert.ok(ratio >= 1.2, `the halo reads ${ratio.toFixed(3)}:1 against the page in ${scheme}`);
+    reached.push(ratio);
+  }
+  /* The same gesture in all three, not three strengths of one. */
+  assert.ok(
+    Math.max(...reached) - Math.min(...reached) <= 0.1,
+    `the halo reads ${reached.map((ratio) => ratio.toFixed(3)).join(', ')} across the schemes`,
+  );
 });

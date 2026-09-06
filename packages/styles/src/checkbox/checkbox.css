@@ -301,6 +301,17 @@
    * scrollable overflow nowhere — which is why the picture is centred and the
    * target is not.
    *
+   * Its ink is the accent's text tone at the halo opacity, and not the accent
+   * surface (CK7). A surface tone is a ground, tuned to sit under text on the
+   * page rather than to be told apart from it: at four tenths it measured
+   * 1.087:1 against the page in `light`, 1.026:1 in `dark` and 1.000:1 in
+   * `high-contrast`, where the token is the page's own white — the halo was a
+   * gesture one scheme out of three could see. The text tone is the accent the
+   * theme guarantees legible on the page in every scheme, so a twelfth of it
+   * lands in the same place in all three. `accent-border` carries the same
+   * guarantee and was not taken: `high-contrast` paints every border black, so
+   * the halo would have turned grey there and blue elsewhere.
+   *
    * The tile has neither. Its surface is the target and answers the pointer
    * itself, and its label's `::after` stretches over that surface instead.
    */
@@ -319,7 +330,7 @@
     block-size: var(--_size);
     border-radius: var(--slotted-radius-full, 9999px);
     box-shadow: 0 0 0 calc((var(--_halo-size) - var(--_size)) / 2)
-      var(--slotted-checkbox-halo-color, var(--slotted-tone-accent-surface));
+      var(--slotted-checkbox-halo-color, var(--slotted-tone-accent-text));
     content: '';
     direction: var(--_direction);
     inline-size: var(--_size);
@@ -413,7 +424,7 @@
   [data-ui='checkbox'][data-part='root']:not([data-readonly])
     [data-part='control']:not(:disabled)
     ~ [data-part='label']:hover::after {
-    opacity: var(--slotted-selection-halo-opacity, 0.4);
+    opacity: var(--slotted-selection-halo-opacity, 0.12);
   }
 
   [data-ui='checkbox'][data-part='root']:not([data-readonly])

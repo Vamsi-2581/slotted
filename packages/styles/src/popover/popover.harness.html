@@ -5,7 +5,10 @@
   origin, and the room the engine says is left. The arrow offsets and the
   available width are percentages of the layer and the stage rather than the
   engine's pixels: an inset percentage resolves against the same box, so one
-  value holds at all three capture widths.
+  value holds at all three capture widths. The room is measured from the
+  layer's own edge, as the engine measures it, so a layer set 8px in from the
+  stage has `calc(100% - 8px)` of it; a scene that gave it the whole stage
+  overflowed by those 8px at 240px (P2).
 
   `--slotted-positioner-available-height` is stated only in the scene that is
   about it. Everywhere else the family's own `100vh` fallback is the right
@@ -96,7 +99,7 @@
       style="
         top: 8px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
       "
@@ -124,7 +127,7 @@
       style="
         top: 152px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
       "
@@ -152,7 +155,7 @@
       style="
         top: 296px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
       "
@@ -251,7 +254,7 @@
       style="
         top: 8px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-available-height: 260px;
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
@@ -316,7 +319,7 @@
       style="
         top: 8px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-anchor-width: 260px;
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
@@ -341,7 +344,7 @@
       style="
         top: 128px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
       "
@@ -375,7 +378,7 @@
       style="
         top: 8px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
       "
@@ -399,7 +402,7 @@
       style="
         top: 112px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
       "
@@ -429,7 +432,7 @@
       style="
         top: 300px;
         left: 8px;
-        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-width: calc(100% - 8px);
         --slotted-positioner-arrow-x: 1.5rem;
         --slotted-positioner-transform-origin: left top;
       "

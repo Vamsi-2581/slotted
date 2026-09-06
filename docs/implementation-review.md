@@ -337,7 +337,7 @@ Localização: `packages/styles/src/listbox/listbox.css`.
 ## Popover
 
 - [x] **P1 — Largura igual ao controle desalinhada.** Relacionado a `#Select:1` (positioner). Causa provável: largura medida por `offsetWidth` do controle enquanto a posição usa `getBoundingClientRect().left` com borda incluída, ou o `transform` de entrada (`#Select:2`) aplica deslocamento horizontal residual. Esperado: `matchWidth` usa `getBoundingClientRect().width` do âncora e a posição `x` usa `getBoundingClientRect().left` do mesmo retângulo, na mesma leitura. Teste em `positioner.test.ts`: com `matchWidth`, `overlay.left === anchor.left` e `overlay.width === anchor.width`, tolerância 0px.
-- [ ] **P2 — Harness transborda a 240px.** Observado por `tools/harness/audit.mjs` durante SL1, sem alteração de CSS: nas cenas `width` e `content` o painel mede 248px dentro de um palco de 240px. Esperado: o painel respeita `--slotted-positioner-available-width` e a largura do palco em todos os esquemas.
+- [x] **P2 — Harness transborda a 240px.** Observado por `tools/harness/audit.mjs` durante SL1, sem alteração de CSS: nas cenas `width` e `content` o painel mede 248px dentro de um palco de 240px. Esperado: o painel respeita `--slotted-positioner-available-width` e a largura do palco em todos os esquemas.
 
 ---
 

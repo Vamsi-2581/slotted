@@ -99,7 +99,10 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
   exportAs: 'slCombobox',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styleUrl: '../../../styles/src/combobox/combobox.css',
+  styleUrls: [
+    '../../../styles/src/combobox/combobox.css',
+    '../../../styles/src/highlight/highlight.css',
+  ],
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlCombobox), multi: true },
     { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlCombobox), multi: true },

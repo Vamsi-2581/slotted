@@ -772,50 +772,17 @@
   }
 
   /**
-   * The span the query matched. A `mark` element, so a reader whose browser
-   * exposes the role hears the emphasis as well as sees it, and painted with
-   * the accent tone the theme already measures rather than the browser's
-   * yellow — which is unreadable on a dark scheme and disappears under forced
-   * colours.
+   * The span the query matched is not painted here. It is the shared mark of
+   * R6 — `highlight/highlight.css`, `data-ui='highlight'` worn beside this
+   * family's `match` part — because every list a reader types into says the
+   * same thing about the same span, and `select` with a filter, `listbox` with
+   * a filter and `menu` with a search would otherwise each have answered it
+   * again. The contract names the sheet under `mark`.
    *
-   * The weight carries the mark and the ground supports it. Ground alone is
-   * lost in a highlighted row, whose own background is a step of the same
-   * neutral; weight alone is too quiet at thirteen pixels.
+   * What lived here also changed the metric of the word: 600 weight and 0.1em
+   * of inline padding made `Blueberry` 6.86px wider marked than plain, and the
+   * run moved on every keystroke as the filter re-marked the label (CB6).
    */
-  [data-ui='combobox'] [data-part='match'] {
-    background-color: var(--slotted-combobox-match-background, var(--slotted-tone-accent-surface));
-    border-radius: var(--slotted-radius-xs, 2px);
-    color: var(--slotted-combobox-match-color, var(--slotted-tone-accent-text));
-    font-weight: var(--slotted-font-weight-semibold, 600);
-    /* The tint is a band behind the letters rather than a box around them: a
-       padded mark inside a clamped line changes the line's height. */
-    padding-inline: 0.1em;
-  }
-
-  /**
-   * A disabled option's mark steps down with the rest of the row. The mark says
-   * "this is why the option is here", and saying it in the accent tone on a row
-   * that answers nothing puts the loudest thing on the surface on the one
-   * option a reader cannot take.
-   */
-  [data-ui='combobox'] [data-part='item'][data-disabled] [data-part='match'] {
-    background-color: var(--slotted-combobox-disabled-match-background, transparent);
-    color: inherit;
-  }
-
-  /**
-   * Under forced colours the accent ground becomes `Canvas` and the mark would
-   * vanish. `Mark` and `MarkText` are the system pair for exactly this element,
-   * and they are the one case where a family names a system colour because the
-   * theme has no token that maps to it.
-   */
-  @media (forced-colors: active) {
-    [data-ui='combobox'] [data-part='match'] {
-      background-color: Mark;
-      color: MarkText;
-      forced-color-adjust: none;
-    }
-  }
 
   [data-ui='combobox'] [data-part='description'] {
     color: var(--_muted);

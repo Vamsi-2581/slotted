@@ -69,6 +69,21 @@ describe('Combobox', () => {
     expect(optionNamed('Blueberry').querySelector("[data-part='match']")).toHaveTextContent('berr');
   });
 
+  /**
+   * R6/CB6: the mark is the shared one. It wears `data-ui='highlight'` beside
+   * this family's own part, so one sheet paints the span every list a reader
+   * types into found.
+   */
+  it('wears the shared highlight identifier on the span it marked', async () => {
+    render(<Basic />);
+    input().focus();
+    type('berr');
+    await screen.findByRole('listbox');
+    const mark = optionNamed('Blueberry').querySelector("[data-part='match']");
+    expect(mark?.tagName).toBe('MARK');
+    expect(mark).toHaveAttribute('data-ui', 'highlight');
+  });
+
   /** §2.9: the comparison is the reader's locale's, not an English fold. */
   it('matches across an accent, and marks the span the collator matched', async () => {
     render(

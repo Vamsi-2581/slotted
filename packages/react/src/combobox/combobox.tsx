@@ -1,4 +1,5 @@
 import '@slotted/styles/combobox/combobox.css';
+import '@slotted/styles/highlight/highlight.css';
 
 import { createFilter } from '@slotted/core/collection';
 import { createControllable } from '@slotted/core/state';

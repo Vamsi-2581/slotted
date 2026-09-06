@@ -80,7 +80,7 @@ const enabled = (item: HTMLElement) => item.dataset['disabled'] === undefined;
   exportAs: 'slMenu',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styleUrl: '../../../styles/src/menu/menu.css',
+  styleUrls: ['../../../styles/src/menu/menu.css', '../../../styles/src/highlight/highlight.css'],
   host: { style: 'display: none' },
   template: `
     <ng-template #layer>

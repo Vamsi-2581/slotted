@@ -43,7 +43,38 @@ class BoundHost {
 const field = () =>
   document.querySelector<HTMLInputElement>("[data-part='input']") as HTMLInputElement;
 
+const marks = () => [...document.querySelectorAll("[data-part='match']")];
+
 describe('SlCombobox', () => {
+  /**
+   * R6/CB6: the span the query found is the shared mark. It wears
+   * `data-ui='highlight'` beside this family's own part, so one sheet paints
+   * what every list a reader types into found, and the same element is written
+   * here, in React, and in the harness fragment.
+   */
+  describe('the marked span', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    });
+
+    it('wears the shared highlight identifier', async () => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.detectChanges();
+      field().focus();
+      field().value = 'berr';
+      field().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(marks().length).toBeGreaterThan(0);
+      for (const mark of marks()) {
+        expect(mark.tagName).toBe('MARK');
+        expect(mark.getAttribute('data-ui')).toBe('highlight');
+      }
+    });
+  });
+
   describe('defaultValue', () => {
     let fixture: ComponentFixture<Host>;
 

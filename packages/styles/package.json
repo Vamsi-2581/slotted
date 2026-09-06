@@ -53,6 +53,8 @@
     "./form/tokens.json": "./src/form/form.tokens.json",
     "./grid/grid.css": "./src/grid/grid.css",
     "./grid/tokens.json": "./src/grid/grid.tokens.json",
+    "./highlight/highlight.css": "./src/highlight/highlight.css",
+    "./highlight/tokens.json": "./src/highlight/highlight.tokens.json",
     "./icon/icon.css": "./src/icon/icon.css",
     "./icon/tokens.json": "./src/icon/icon.tokens.json",
     "./inline-message/inline-message.css": "./src/inline-message/inline-message.css",

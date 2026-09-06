@@ -182,6 +182,12 @@
     "guardsReason": "Focus never enters the layer, so there is nothing inside it for Tab to reach.",
     "removal": "A filter that removes the highlighted option moves the highlight to the option that took its index, then to the first, then to nothing."
   },
+  "mark": {
+    "ui": "highlight",
+    "part": "match",
+    "stylesheet": "highlight/highlight.css",
+    "reason": "The span a query found is drawn by one sheet for every list a reader types into, so `select` with a filter, `listbox` with a filter and `menu` with a search cannot answer it three other ways (R6). The element wears the shared identifier beside this family's own part, the way the ring `spinner` draws wears `data-ui='spinner'` beside a button's `indicator`. It changes no metric of the word it marks: at 600 weight and 0.1em of inline padding the label was 6.86px wider marked than plain, and the marked run moved on every keystroke (CB6)."
+  },
   "filtering": {
     "default": "createFilter().contains, locale-sensitive at base sensitivity",
     "adapter": "filter: (item, query) => boolean",

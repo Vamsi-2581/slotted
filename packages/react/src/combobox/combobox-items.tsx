@@ -60,7 +60,7 @@ export function ComboboxItem({
     if (!runs.some((run) => run.matched)) return children;
     return runs.map((run, index) =>
       run.matched ? (
-        <mark data-part="match" key={index}>
+        <mark data-part="match" data-ui="highlight" key={index}>
           {run.text}
         </mark>
       ) : (

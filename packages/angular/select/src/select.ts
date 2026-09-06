@@ -100,7 +100,10 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
   imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  styleUrl: '../../../styles/src/select/select.css',
+  styleUrls: [
+    '../../../styles/src/select/select.css',
+    '../../../styles/src/highlight/highlight.css',
+  ],
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlSelect), multi: true },
     { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlSelect), multi: true },

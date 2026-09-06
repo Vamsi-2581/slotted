@@ -60,7 +60,7 @@ import type { ComboboxOptionValue } from './combobox-defaults';
     <span data-part="label">
       @for (run of runs(); track $index) {
         @if (run.matched) {
-          <mark data-part="match">{{ run.text }}</mark>
+          <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
         } @else {
           {{ run.text }}
         }

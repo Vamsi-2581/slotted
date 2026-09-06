@@ -1,4 +1,5 @@
 import '@slotted/styles/menu/menu.css';
+import '@slotted/styles/highlight/highlight.css';
 
 import { createControllable } from '@slotted/core/state';
 import {

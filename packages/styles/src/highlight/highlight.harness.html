@@ -1,0 +1,65 @@
+<!--
+  The mark on its own. It is only ever seen inside a host — an option in a
+  `combobox`, `select` or `listbox`, an item in a `menu` — so the page shows it
+  the way a host shows it: inside a line of the host's own text, with the same
+  line beside it unmarked, which is the comparison the metric rule exists for.
+-->
+<section data-scene="metric">
+  <style>
+    [data-demo-line] {
+      font-family: var(--slotted-control-font-family);
+      font-size: var(--slotted-control-font-size-md);
+      line-height: var(--slotted-line-height-md);
+    }
+
+    [data-demo-label] {
+      color: var(--slotted-text-muted);
+      font-family: ui-monospace, monospace;
+      font-size: 11px;
+    }
+  </style>
+  <p data-demo-label>marked, then the same line unmarked</p>
+  <p data-demo-line>
+    <span data-part="label">Blue<mark data-ui="highlight" data-part="match">berr</mark>y</span>
+  </p>
+  <p data-demo-line><span data-part="label">Blueberry</span></p>
+  <p data-demo-line>
+    <span data-part="label">Rasp<mark data-ui="highlight" data-part="match">berr</mark>y</span>
+  </p>
+  <p data-demo-line><span data-part="label">Raspberry</span></p>
+</section>
+
+<section data-scene="runs">
+  <p data-demo-label>several runs, and a run at each end</p>
+  <p data-demo-line>
+    <span data-part="label"
+      ><mark data-ui="highlight" data-part="match">Ro</mark>man Pet<mark
+        data-ui="highlight"
+        data-part="match"
+        >ro</mark
+      >v</span
+    >
+  </p>
+  <p data-demo-line>
+    <span data-part="label"
+      >urn:acme:catalogue:<mark data-ui="highlight" data-part="match">9f2c41ab</mark></span
+    >
+  </p>
+</section>
+
+<section data-scene="wrapping">
+  <p data-demo-label>a run that wraps across a line</p>
+  <p data-demo-line style="inline-size: 9rem">
+    <span data-part="label"
+      >Relatório <mark data-ui="highlight" data-part="match">consolidado anual</mark> de
+      vendas</span
+    >
+  </p>
+</section>
+
+<section data-scene="disabled">
+  <p data-demo-label>inside a row that answers nothing</p>
+  <p data-demo-line data-disabled style="color: var(--slotted-disabled-foreground)">
+    <span data-part="label">Cloud<mark data-ui="highlight" data-part="match">berr</mark>y</span>
+  </p>
+</section>

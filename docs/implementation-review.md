@@ -232,7 +232,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
 - [x] **CB3 — `#Select:3`.**
 - [ ] **CB4 — `#Select:4`.**
 - [ ] **CB5 — `#Select:6`.**
-- [ ] **CB6 — Destaque do match do filtro.** Localização: `combobox.css:665` (`[data-part='match']`): `font-weight: 600`, `padding-inline: 0.1em`, `border-radius: 2px`, fundo `accent-surface`. O peso e o padding alteram a métrica da palavra e o trecho destacado parece deslocado. Esperado, extraído para um componente compartilhado (`packages/styles/src/highlight/highlight.css`, parte `[data-ui='highlight']` ou `[data-part='match']` global), consumido por `Combobox`, `Select` com filtro, `Listbox` com filtro e `Menu` com busca (R6):
+- [x] **CB6 — Destaque do match do filtro.** Localização: `combobox.css:665` (`[data-part='match']`): `font-weight: 600`, `padding-inline: 0.1em`, `border-radius: 2px`, fundo `accent-surface`. O peso e o padding alteram a métrica da palavra e o trecho destacado parece deslocado. Esperado, extraído para um componente compartilhado (`packages/styles/src/highlight/highlight.css`, parte `[data-ui='highlight']` ou `[data-part='match']` global), consumido por `Combobox`, `Select` com filtro, `Listbox` com filtro e `Menu` com busca (R6):
   - `font-weight: inherit`. `padding: 0`. `border-radius: 0`. `letter-spacing: inherit`.
   - `color: var(--slotted-tone-accent-text)`.
   - `background-color: var(--slotted-tone-accent-surface)` com `box-decoration-break: clone`.
@@ -243,6 +243,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
 - [ ] **CB7 — Valor livre não validado.** Esperado: prop `allowCustomValue` (padrão `false`). Com `false`, ao perder o foco (`blur`) com texto que não corresponde a nenhum item, o campo volta ao último valor válido (ou vazio) e emite `onInputReset`. Com `true`, o texto é aceito como valor. Documentar no contrato e nas stories dos dois frameworks.
 - [ ] **CB8 — Criação de novo valor.** Esperado: prop `onCreate` (ou `creatable`) que, quando presente e a query não corresponde a nenhum item, renderiza uma opção final `Criar "<query>"` no listbox. Selecioná-la chama `onCreate(query)` e o consumidor decide se adiciona o item à coleção. Modo múltiplo integra com as tags de `#Select:4`. Story obrigatória: input de tags com criação.
 - [x] **CB9 — `#Select:7`.**
+- [ ] **CB10 — Fundo da marca de match invisível em `dark` e `high-contrast`.** Observado durante CB6, medido: `--slotted-tone-accent-surface`, que R6 nomeia como fundo da marca, mede 1.014:1 contra `--slotted-surface-raised` em `dark` e 1.000:1 em `high-contrast` (1.220:1 em `light`); a marca é carregada pela cor do texto (5.49 | 9.56 | 10.00:1 contra o próprio fundo) e pela regra sublinhada (4.24 | 6.78 | 21.00:1), e a banda de tinta não existe em dois dos três esquemas. Mesma causa de CK7: um tom `*-surface` é um fundo e não separa da superfície em que assenta. Esperado: decidir no tema se o fundo da marca passa a um tom que separa nos três esquemas (por exemplo `accent-text` a uma fração de opacidade, como CK7 fez com o halo) ou se a marca assume que a cor e a regra a carregam e o fundo sai da folha `highlight`. Medir o contraste da banda contra `--slotted-surface-raised` nos três esquemas. (MAOC — a folha é partilhada por `combobox`, `select`, `listbox` e `menu`)
 
 ---
 

@@ -1,4 +1,4 @@
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
@@ -76,14 +76,18 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   parameters: scenario('playground'),
-  render: () => (
+  render: (_, context) => (
     <Grid>
       <Scene
         label="Hover, or Tab"
         note="The pointer waits out the 600 ms warmup; keyboard focus opens it in the same task, because a delay a reader cannot shorten by moving faster is a delay for nothing."
       >
         <Viewport>
-          <Hint defaultOpen hint="Sends the draft to every subscriber on the list" side="bottom">
+          <Hint
+            defaultOpen={isolated(context)}
+            hint="Sends the draft to every subscriber on the list"
+            side="bottom"
+          >
             Publish
           </Hint>
         </Viewport>
@@ -94,14 +98,18 @@ export const Playground: Story = {
 
 export const Variant: Story = {
   parameters: scenario('variant'),
-  render: () => (
+  render: (_, context) => (
     <Grid columns={2}>
       <Scene
         label="Inverse, on the page"
         note="A surface opposite to the page separates itself in every scheme without an edge, which is why it is the default and carries no border at all."
       >
         <Viewport>
-          <Hint defaultOpen hint="Opposite to the page, in every scheme" side="bottom">
+          <Hint
+            defaultOpen={isolated(context)}
+            hint="Opposite to the page, in every scheme"
+            side="bottom"
+          >
             Inverse
           </Hint>
         </Viewport>
@@ -111,7 +119,7 @@ export const Variant: Story = {
         note="On a page that is already dark the inverse hint is the brightest thing on it. The raised surface takes a hairline instead, and the arrow's outline continues it."
       >
         <Viewport inverse>
-          <Tooltip defaultOpen portal={false} side="bottom" variant="surface">
+          <Tooltip defaultOpen={isolated(context)} portal={false} side="bottom" variant="surface">
             <TooltipTrigger
               render={(props) => (
                 <Button {...props} tone="accent">
@@ -132,17 +140,27 @@ export const Variant: Story = {
 
 export const Sizes: Story = {
   parameters: scenario('sizes'),
-  render: () => (
+  render: (_, context) => (
     <Grid>
       <Scene
         label="Small, and medium"
         note="Twelve pixels and thirteen. Switch the density in the toolbar: both tighten their padding and neither changes what it means, because both read the control scales."
       >
         <Viewport>
-          <Hint defaultOpen hint="Twelve pixels, in a row that has no room" side="bottom" size="sm">
+          <Hint
+            defaultOpen={isolated(context)}
+            hint="Twelve pixels, in a row that has no room"
+            side="bottom"
+            size="sm"
+          >
             Small
           </Hint>
-          <Hint defaultOpen hint="Thirteen pixels, everywhere else" side="bottom" size="md">
+          <Hint
+            defaultOpen={isolated(context)}
+            hint="Thirteen pixels, everywhere else"
+            side="bottom"
+            size="md"
+          >
             Medium
           </Hint>
         </Viewport>
@@ -285,7 +303,7 @@ export const Hoverable: Story = {
 
 export const Content: Story = {
   parameters: scenario('content'),
-  render: () => (
+  render: (_, context) => (
     <Grid columns={3}>
       <Scene
         label="Long enough to meet the measure"
@@ -293,7 +311,7 @@ export const Content: Story = {
       >
         <Viewport>
           <Hint
-            defaultOpen
+            defaultOpen={isolated(context)}
             hint="Publishing sends the draft to every subscriber on the list and cannot be undone from here."
             side="bottom"
           >
@@ -306,7 +324,11 @@ export const Content: Story = {
         note="overflow-wrap: anywhere breaks it rather than letting it run past the measure. A hostile string is a string with no spaces in it."
       >
         <Viewport>
-          <Hint defaultOpen hint="webhook_delivery_failure_retry_backoff_seconds" side="bottom">
+          <Hint
+            defaultOpen={isolated(context)}
+            hint="webhook_delivery_failure_retry_backoff_seconds"
+            side="bottom"
+          >
             Unbroken
           </Hint>
         </Viewport>
@@ -316,7 +338,11 @@ export const Content: Story = {
         note="unicode-bidi: plaintext takes each paragraph's direction from its own first strong character, so an Arabic hint reads right to left on this page and an English one reads left to right on an Arabic page."
       >
         <Viewport>
-          <Hint defaultOpen hint="يحفظ المسودة دون نشرها على أي قائمة بريدية" side="bottom">
+          <Hint
+            defaultOpen={isolated(context)}
+            hint="يحفظ المسودة دون نشرها على أي قائمة بريدية"
+            side="bottom"
+          >
             Translated
           </Hint>
         </Viewport>

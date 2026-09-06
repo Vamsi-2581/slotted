@@ -2,6 +2,18 @@ export function scenario(id: string) {
   return { slotted: { scenarioId: id } } as const;
 }
 
+/**
+ * Whether a story is on its own page. A layer a story opens for the picture —
+ * a tooltip with `defaultOpen`, a menu that mounts open — opens only there: on
+ * a reference page (`viewMode: 'docs'`) nine demonstrations share one page,
+ * and every layer open on it is a layer the reader did not ask for (TT1).
+ * Storybook hands the view mode to `render` in its context; a story rendered
+ * with no context at all — a test, a screenshot tool — is treated as isolated.
+ */
+export function isolated(context: { viewMode?: string } | undefined) {
+  return context?.viewMode !== 'docs';
+}
+
 /** The scenario a story declares through `scenario()`, or nothing. */
 function scenarioIdOf(value: unknown) {
   if (typeof value !== 'object' || value === null) return undefined;

@@ -1,6 +1,7 @@
 import { apiMetadataErrors, scenarioCoverageErrors } from '@slotted/storybook-workbench';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import { referencePageErrors, snippetFormatErrors } from '@slotted/storybook-workbench/testing';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/tooltip/contract.json';
 import { REACT_TOOLTIP_DOCS } from './tooltip.docs';
@@ -45,5 +46,41 @@ describe('Tooltip stories', () => {
       ...docs.scenes.map((scene) => scene.snippet),
     ]);
     expect(await snippetFormatErrors(snippets)).toEqual([]);
+  });
+
+  /**
+   * A story opens its tooltip for the picture, on its own page. Inside the
+   * reference page the same story is one demonstration among many, and a
+   * tooltip nobody hovered is a layer nobody asked for (TT1).
+   */
+  describe('a layer opened for the picture', () => {
+    afterEach(cleanup);
+    const pictured = [
+      tooltipStories.Playground,
+      tooltipStories.Variant,
+      tooltipStories.Sizes,
+      tooltipStories.Content,
+    ];
+
+    it('is open on a story of its own', async () => {
+      for (const story of pictured) {
+        const { container } = render(story.render!({}, { viewMode: 'story' } as never) as never);
+        await waitFor(() =>
+          expect(
+            container.querySelectorAll("[data-ui='tooltip'][data-open]").length,
+          ).toBeGreaterThan(0),
+        );
+        cleanup();
+      }
+    });
+
+    it('mounts no layer on the reference page until the reader asks', async () => {
+      for (const story of pictured) {
+        const { container } = render(story.render!({}, { viewMode: 'docs' } as never) as never);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        expect(container.querySelectorAll("[data-ui='tooltip']").length).toBe(0);
+        cleanup();
+      }
+    });
   });
 });

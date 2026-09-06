@@ -40,4 +40,39 @@ describe('Tooltip stories', () => {
     ]);
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
+
+  /**
+   * A story opens its tooltip for the picture, on its own page. Inside the
+   * reference page the same story is one demonstration among many, and a
+   * tooltip nobody hovered is a layer nobody asked for (TT1).
+   */
+  describe('a layer opened for the picture', () => {
+    const pictured = [
+      tooltipStories.Playground,
+      tooltipStories.Variant,
+      tooltipStories.Sizes,
+      tooltipStories.Content,
+    ];
+
+    it('is open on a story of its own', () => {
+      for (const story of pictured) {
+        const rendered = story.render!({} as never, { viewMode: 'story' } as never) as {
+          props?: { open?: boolean };
+          template?: string;
+        };
+        expect(rendered.props?.open).toBe(true);
+        expect(rendered.template).toContain('[open]="open"');
+        expect(rendered.template).not.toContain('[open]="true"');
+      }
+    });
+
+    it('is closed on the reference page until the reader asks', () => {
+      for (const story of pictured) {
+        const rendered = story.render!({} as never, { viewMode: 'docs' } as never) as {
+          props?: { open?: boolean };
+        };
+        expect(rendered.props?.open).toBe(false);
+      }
+    });
+  });
 });

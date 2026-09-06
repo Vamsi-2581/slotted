@@ -1,4 +1,4 @@
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { isolated, bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
@@ -105,7 +105,8 @@ type Story = StoryObj<SlTooltip>;
 
 export const Playground: Story = {
   parameters: scenario('playground'),
-  render: () => ({
+  render: (_, context) => ({
+    props: { open: isolated(context) },
     template: grid(
       1,
       scene(
@@ -113,7 +114,7 @@ export const Playground: Story = {
         'The pointer waits out the 600 ms warmup; keyboard focus opens it in the same task, because a delay a reader cannot shorten by moving faster is a delay for nothing.',
         viewport(
           hint(
-            'side="bottom" [open]="true"',
+            'side="bottom" [open]="open"',
             'Publish',
             'Sends the draft to every subscriber on the list',
           ),
@@ -125,21 +126,22 @@ export const Playground: Story = {
 
 export const Variant: Story = {
   parameters: scenario('variant'),
-  render: () => ({
+  render: (_, context) => ({
+    props: { open: isolated(context) },
     template: grid(
       2,
       scene(
         'Inverse, on the page',
         'A surface opposite to the page separates itself in every scheme without an edge, which is why it is the default and carries no border at all.',
         viewport(
-          hint('side="bottom" [open]="true"', 'Inverse', 'Opposite to the page, in every scheme'),
+          hint('side="bottom" [open]="open"', 'Inverse', 'Opposite to the page, in every scheme'),
         ),
       ) +
         scene(
           'Surface, on a dark ground',
           'On a page that is already dark the inverse hint is the brightest thing on it. The raised surface takes a hairline instead, and the arrow outline continues it.',
           viewport(
-            `<ng-container slTooltip [portal]="false" side="bottom" variant="surface" [open]="true">
+            `<ng-container slTooltip [portal]="false" side="bottom" variant="surface" [open]="open">
                <button slButton tone="accent" slTooltipTrigger type="button">Surface</button>
                <ng-template slTooltipLayer>
                  <div slTooltipContent>Reads as a small panel rather than as a label</div>
@@ -155,7 +157,8 @@ export const Variant: Story = {
 
 export const Sizes: Story = {
   parameters: scenario('sizes'),
-  render: () => ({
+  render: (_, context) => ({
+    props: { open: isolated(context) },
     template: grid(
       1,
       scene(
@@ -163,12 +166,12 @@ export const Sizes: Story = {
         'Twelve pixels and thirteen. Switch the density in the toolbar: both tighten their padding and neither changes what it means, because both read the control scales.',
         viewport(
           hint(
-            'side="bottom" size="sm" [open]="true"',
+            'side="bottom" size="sm" [open]="open"',
             'Small',
             'Twelve pixels, in a row that has no room',
           ) +
             hint(
-              'side="bottom" size="md" [open]="true"',
+              'side="bottom" size="md" [open]="open"',
               'Medium',
               'Thirteen pixels, everywhere else',
             ),
@@ -279,7 +282,8 @@ export const Hoverable: Story = {
 
 export const Content: Story = {
   parameters: scenario('content'),
-  render: () => ({
+  render: (_, context) => ({
+    props: { open: isolated(context) },
     template: grid(
       3,
       scene(
@@ -287,7 +291,7 @@ export const Content: Story = {
         'The cap is a family token rather than an axis, because measure belongs to Container and to it alone. Past it the sentence wraps instead of setting one line the width of the page.',
         viewport(
           hint(
-            'side="bottom" [open]="true"',
+            'side="bottom" [open]="open"',
             'Long',
             'Publishing sends the draft to every subscriber on the list and cannot be undone from here.',
           ),
@@ -298,7 +302,7 @@ export const Content: Story = {
           'overflow-wrap: anywhere breaks it rather than letting it run past the measure. A hostile string is a string with no spaces in it.',
           viewport(
             hint(
-              'side="bottom" [open]="true"',
+              'side="bottom" [open]="open"',
               'Unbroken',
               'webhook_delivery_failure_retry_backoff_seconds',
             ),
@@ -309,7 +313,7 @@ export const Content: Story = {
           'unicode-bidi: plaintext takes each paragraph direction from its own first strong character, so an Arabic hint reads right to left on this page and an English one reads left to right on an Arabic page.',
           viewport(
             hint(
-              'side="bottom" [open]="true"',
+              'side="bottom" [open]="open"',
               'Translated',
               'يحفظ المسودة دون نشرها على أي قائمة بريدية',
             ),

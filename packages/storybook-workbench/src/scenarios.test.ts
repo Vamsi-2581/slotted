@@ -6,6 +6,7 @@ import {
   scenario,
   scenarioCoverageErrors,
   storyScenarioIds,
+  isolated,
 } from './scenarios';
 
 describe('workbench scenario metadata', () => {
@@ -295,5 +296,13 @@ describe('the virtualization capability', () => {
         { name: 'overscan', defaultValue: '4' },
       ]),
     ).toEqual([]);
+  });
+});
+
+describe('isolated', () => {
+  it('opens a layer for the picture only on a story of its own', () => {
+    expect(isolated({ viewMode: 'story' })).toBe(true);
+    expect(isolated({ viewMode: 'docs' })).toBe(false);
+    expect(isolated(undefined)).toBe(true);
   });
 });

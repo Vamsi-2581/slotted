@@ -13,6 +13,7 @@ export type { ReferenceDocs, ReferenceSceneMeta } from './reference-audit';
 export {
   apiMetadataErrors,
   bindScenes,
+  isolated,
   scenario,
   scenarioCoverageErrors,
   storyScenarioIds,

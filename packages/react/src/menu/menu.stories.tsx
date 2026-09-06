@@ -1,4 +1,4 @@
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ArrowUpRight, Copy } from 'lucide-react';
@@ -122,9 +122,9 @@ export const Playground: Story = {
     typeahead: true,
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
-  render: (args) => (
+  render: (args, context) => (
     <Viewport>
-      <Menu {...args} defaultOpen portal={false}>
+      <Menu {...args} defaultOpen={isolated(context)} portal={false}>
         <Trigger>Document</Trigger>
         <MenuContent>
           <MenuItem shortcut="Mod+D">Duplicate</MenuItem>
@@ -139,14 +139,14 @@ export const Playground: Story = {
 
 export const Commands: Story = {
   parameters: scenario('commands'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Running an item closes the menu"
         note="The default, and what a command is: the reader asked for one thing and the surface has said what it was."
       >
         <Viewport>
-          <Menu defaultOpen portal={false}>
+          <Menu defaultOpen={isolated(context)} portal={false}>
             <Trigger>Document</Trigger>
             <MenuContent>
               <MenuItem>Duplicate</MenuItem>
@@ -160,7 +160,7 @@ export const Commands: Story = {
         note="closeOnSelect={false} keeps the surface open, which is what a command a reader presses three times in a row needs."
       >
         <Viewport>
-          <Menu defaultOpen portal={false}>
+          <Menu defaultOpen={isolated(context)} portal={false}>
             <Trigger>View</Trigger>
             <MenuContent>
               <MenuItem closeOnSelect={false}>Zoom in</MenuItem>
@@ -175,9 +175,9 @@ export const Commands: Story = {
 
 export const Icons: Story = {
   parameters: scenario('icons'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport>
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>Document</Trigger>
         <MenuContent>
           <MenuItem icon={<CopyMark />}>Duplicate</MenuItem>
@@ -192,9 +192,9 @@ export const Icons: Story = {
 
 export const Shortcuts: Story = {
   parameters: scenario('shortcuts'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport>
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>File</Trigger>
         <MenuContent>
           <MenuItem shortcut="Mod+S">Save</MenuItem>
@@ -208,13 +208,13 @@ export const Shortcuts: Story = {
 
 export const CheckboxItems: Story = {
   parameters: scenario('checkbox-items'),
-  render: function Render() {
+  render: function Render(_args, context) {
     const [rulers, setRulers] = useState(true);
     const [grid, setGrid] = useState(false);
 
     return (
       <Viewport>
-        <Menu defaultOpen portal={false}>
+        <Menu defaultOpen={isolated(context)} portal={false}>
           <Trigger>View</Trigger>
           <MenuContent>
             <MenuCheckboxItem checked={rulers} onCheckedChange={setRulers}>
@@ -232,12 +232,12 @@ export const CheckboxItems: Story = {
 
 export const RadioItems: Story = {
   parameters: scenario('radio-items'),
-  render: function Render() {
+  render: function Render(_args, context) {
     const [sort, setSort] = useState('name');
 
     return (
       <Viewport>
-        <Menu defaultOpen portal={false}>
+        <Menu defaultOpen={isolated(context)} portal={false}>
           <Trigger>Sort</Trigger>
           <MenuContent>
             <MenuRadioGroup onValueChange={setSort} value={sort}>
@@ -254,9 +254,9 @@ export const RadioItems: Story = {
 
 export const Groups: Story = {
   parameters: scenario('groups'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>Document</Trigger>
         <MenuContent>
           <MenuGroup label="File">
@@ -276,9 +276,9 @@ export const Groups: Story = {
 
 export const Submenus: Story = {
   parameters: scenario('submenu'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport>
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>Share</Trigger>
         <MenuContent>
           <MenuItem>Copy link</MenuItem>
@@ -300,13 +300,13 @@ export const Submenus: Story = {
    from the parent's edge, its first item level with the item that opened it. */
 export const SubmenuOpen: Story = {
   parameters: scenario('submenu-open'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport>
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>Share</Trigger>
         <MenuContent>
           <MenuItem>Copy link</MenuItem>
-          <Menu defaultOpen portal={false}>
+          <Menu defaultOpen={isolated(context)} portal={false}>
             <MenuTrigger>Send to</MenuTrigger>
             <MenuContent>
               <MenuItem>Slack</MenuItem>
@@ -322,9 +322,9 @@ export const SubmenuOpen: Story = {
 
 export const Tone: Story = {
   parameters: scenario('tone'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport>
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>Document</Trigger>
         <MenuContent>
           <MenuItem>Duplicate</MenuItem>
@@ -340,14 +340,14 @@ export const Tone: Story = {
 
 export const Placement: Story = {
   parameters: scenario('placement'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Under the control, from its start edge"
         note="The default: the control's text and the items' labels share one edge, which is what a menu hanging from a button should do."
       >
         <Viewport>
-          <Menu align="start" defaultOpen portal={false} side="bottom">
+          <Menu align="start" defaultOpen={isolated(context)} portal={false} side="bottom">
             <Trigger>Actions</Trigger>
             <MenuContent>
               <MenuItem>Rename…</MenuItem>
@@ -361,7 +361,7 @@ export const Placement: Story = {
         note='side="inline-end" puts the surface where a submenu goes, and mirrors with the reading direction rather than staying on the right.'
       >
         <Viewport>
-          <Menu align="start" defaultOpen portal={false} side="inline-end">
+          <Menu align="start" defaultOpen={isolated(context)} portal={false} side="inline-end">
             <Trigger>Actions</Trigger>
             <MenuContent>
               <MenuItem>Rename…</MenuItem>
@@ -376,9 +376,9 @@ export const Placement: Story = {
 
 export const Scrolling: Story = {
   parameters: scenario('scrolling'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>Move to</Trigger>
         <MenuContent aria-label="Move to">
           {FOLDERS.map((folder) => (
@@ -392,21 +392,21 @@ export const Scrolling: Story = {
 
 export const States: Story = {
   parameters: scenario('states'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Disabled, checked, and a parent while its submenu shows"
         note="A disabled item still takes focus and still runs nothing; the parent item keeps its highlight while the surface it opened is showing."
       >
         <Viewport>
-          <Menu defaultOpen portal={false}>
+          <Menu defaultOpen={isolated(context)} portal={false}>
             <Trigger>Document</Trigger>
             <MenuContent>
               <MenuItem disabled shortcut="Mod+P">
                 Publish
               </MenuItem>
               <MenuCheckboxItem defaultChecked>Show comments</MenuCheckboxItem>
-              <Menu defaultOpen portal={false}>
+              <Menu defaultOpen={isolated(context)} portal={false}>
                 <MenuTrigger>Export as</MenuTrigger>
                 <MenuContent>
                   <MenuItem>PDF</MenuItem>
@@ -421,7 +421,7 @@ export const States: Story = {
         note="Both keep the surface's measure rather than collapsing to a two-pixel box, and the waiting one says so with aria-busy."
       >
         <Viewport>
-          <Menu defaultOpen portal={false}>
+          <Menu defaultOpen={isolated(context)} portal={false}>
             <Trigger>Labels</Trigger>
             <MenuContent aria-label="Labels" loading>
               <MenuEmpty>Loading labels…</MenuEmpty>
@@ -435,9 +435,9 @@ export const States: Story = {
 
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Menu defaultOpen portal={false}>
+      <Menu defaultOpen={isolated(context)} portal={false}>
         <Trigger>Commands</Trigger>
         <MenuContent>
           <MenuItem shortcut="Mod+S">Save</MenuItem>
@@ -453,10 +453,10 @@ export const Keyboard: Story = {
 
 export const Composition: Story = {
   parameters: scenario('composition'),
-  render: () => (
+  render: (_args, context) => (
     <MenuDefaultsProvider align="end" side="bottom">
       <Viewport>
-        <Menu defaultOpen portal={false}>
+        <Menu defaultOpen={isolated(context)} portal={false}>
           <MenuTrigger
             render={(props) => (
               <Button

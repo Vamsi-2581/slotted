@@ -1,7 +1,7 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideArrowUpRight, lucideCopy } from '@ng-icons/lucide';
 import { SlButton } from '@slotted/angular/button';
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
@@ -102,14 +102,14 @@ export const Playground: Story = {
     typeahead: true,
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
-  render: (args) => ({
-    props: args,
+  render: (args, context) => ({
+    props: { ...args, pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="layer">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="document">Document</button>
         <sl-menu
           #document
-          [open]="true"
+          [open]="pictured"
           [portal]="false"
           [align]="align"
           [closeOnSelect]="closeOnSelect"
@@ -131,7 +131,8 @@ export const Playground: Story = {
 
 export const Commands: Story = {
   parameters: scenario('commands'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         <section class="slotted-demo-scene">
@@ -142,7 +143,7 @@ export const Commands: Story = {
           <div class="slotted-demo-stage" data-layout="block">
             <div class="slotted-demo-viewport" data-place="top" data-size="layer">
               <button slButton size="sm" variant="outline" [slMenuTriggerFor]="one">Document</button>
-              <sl-menu #one [open]="true" [portal]="false">
+              <sl-menu #one [open]="pictured" [portal]="false">
                 <button slMenuItem>Duplicate</button>
                 <button slMenuItem>Rename…</button>
               </sl-menu>
@@ -157,7 +158,7 @@ export const Commands: Story = {
           <div class="slotted-demo-stage" data-layout="block">
             <div class="slotted-demo-viewport" data-place="top" data-size="layer">
               <button slButton size="sm" variant="outline" [slMenuTriggerFor]="two">View</button>
-              <sl-menu #two [open]="true" [portal]="false">
+              <sl-menu #two [open]="pictured" [portal]="false">
                 <button slMenuItem [closeOnSelect]="false">Zoom in</button>
                 <button slMenuItem [closeOnSelect]="false">Zoom out</button>
               </sl-menu>
@@ -171,11 +172,12 @@ export const Commands: Story = {
 
 export const Icons: Story = {
   parameters: scenario('icons'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="layer">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Document</button>
-        <sl-menu #menu [open]="true" [portal]="false">
+        <sl-menu #menu [open]="pictured" [portal]="false">
           <button slMenuItem>
             <span slMenuItemIcon>
               <ng-icon aria-hidden="true" name="lucideCopy" size="16"></ng-icon>
@@ -197,11 +199,12 @@ export const Icons: Story = {
 
 export const Shortcuts: Story = {
   parameters: scenario('shortcuts'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="layer">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">File</button>
-        <sl-menu #menu [open]="true" [portal]="false">
+        <sl-menu #menu [open]="pictured" [portal]="false">
           <button slMenuItem shortcut="Mod+S">Save</button>
           <button slMenuItem shortcut="Shift+Mod+S">Save as…</button>
           <button slMenuItem shortcut="Mod+P">Print…</button>
@@ -213,11 +216,12 @@ export const Shortcuts: Story = {
 
 export const CheckboxItems: Story = {
   parameters: scenario('checkbox-items'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="layer">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">View</button>
-        <sl-menu #menu [open]="true" [portal]="false">
+        <sl-menu #menu [open]="pictured" [portal]="false">
           <button slMenuCheckboxItem [checked]="true">Rulers</button>
           <button slMenuCheckboxItem shortcut="Mod+'">Pixel grid</button>
         </sl-menu>
@@ -228,11 +232,12 @@ export const CheckboxItems: Story = {
 
 export const RadioItems: Story = {
   parameters: scenario('radio-items'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="layer">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Sort</button>
-        <sl-menu #menu [open]="true" [portal]="false">
+        <sl-menu #menu [open]="pictured" [portal]="false">
           <sl-menu-radio-group value="name">
             <button slMenuRadioItem value="name">Name</button>
             <button slMenuRadioItem value="date">Date modified</button>
@@ -246,11 +251,12 @@ export const RadioItems: Story = {
 
 export const Groups: Story = {
   parameters: scenario('groups'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="tall">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Document</button>
-        <sl-menu #menu [open]="true" [portal]="false">
+        <sl-menu #menu [open]="pictured" [portal]="false">
           <sl-menu-group label="File">
             <button slMenuItem>Duplicate</button>
             <button slMenuItem>Move to…</button>
@@ -268,11 +274,12 @@ export const Groups: Story = {
 
 export const Submenus: Story = {
   parameters: scenario('submenu'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="tall">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="share">Share</button>
-        <sl-menu #share [open]="true" [portal]="false">
+        <sl-menu #share [open]="pictured" [portal]="false">
           <button slMenuItem>Copy link</button>
           <button slMenuItem [slMenuTriggerFor]="sendTo">Send to</button>
           <sl-menu #sendTo [portal]="false">
@@ -290,14 +297,15 @@ export const Submenus: Story = {
    from the parent's edge, its first item level with the item that opened it. */
 export const SubmenuOpen: Story = {
   parameters: scenario('submenu-open'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="tall">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="share">Share</button>
-        <sl-menu #share [open]="true" [portal]="false">
+        <sl-menu #share [open]="pictured" [portal]="false">
           <button slMenuItem>Copy link</button>
           <button slMenuItem [slMenuTriggerFor]="sendTo">Send to</button>
-          <sl-menu #sendTo [open]="true" [portal]="false">
+          <sl-menu #sendTo [open]="pictured" [portal]="false">
             <button slMenuItem>Slack</button>
             <button slMenuItem>Email</button>
           </sl-menu>
@@ -310,11 +318,12 @@ export const SubmenuOpen: Story = {
 
 export const Tone: Story = {
   parameters: scenario('tone'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="layer">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Document</button>
-        <sl-menu #menu [open]="true" [portal]="false">
+        <sl-menu #menu [open]="pictured" [portal]="false">
           <button slMenuItem>Duplicate</button>
           <hr slMenuSeparator />
           <button slMenuItem tone="danger">
@@ -329,7 +338,8 @@ export const Tone: Story = {
 
 export const Placement: Story = {
   parameters: scenario('placement'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         <section class="slotted-demo-scene">
@@ -340,7 +350,7 @@ export const Placement: Story = {
           <div class="slotted-demo-stage" data-layout="block">
             <div class="slotted-demo-viewport" data-place="top" data-size="layer">
               <button slButton size="sm" variant="outline" [slMenuTriggerFor]="below">Actions</button>
-              <sl-menu #below [open]="true" [portal]="false" side="bottom" align="start">
+              <sl-menu #below [open]="pictured" [portal]="false" side="bottom" align="start">
                 <button slMenuItem>Rename…</button>
                 <button slMenuItem>Duplicate</button>
               </sl-menu>
@@ -355,7 +365,7 @@ export const Placement: Story = {
           <div class="slotted-demo-stage" data-layout="block">
             <div class="slotted-demo-viewport" data-place="top" data-size="layer">
               <button slButton size="sm" variant="outline" [slMenuTriggerFor]="beside">Actions</button>
-              <sl-menu #beside [open]="true" [portal]="false" side="inline-end" align="start">
+              <sl-menu #beside [open]="pictured" [portal]="false" side="inline-end" align="start">
                 <button slMenuItem>Rename…</button>
                 <button slMenuItem>Duplicate</button>
               </sl-menu>
@@ -369,12 +379,15 @@ export const Placement: Story = {
 
 export const Scrolling: Story = {
   parameters: scenario('scrolling'),
-  render: () => ({
-    props: { folders: ['Inbox', 'Archive', 'Drafts', 'Sent', 'Spam', 'Trash', 'Receipts'] },
+  render: (_args, context) => ({
+    props: {
+      pictured: isolated(context),
+      folders: ['Inbox', 'Archive', 'Drafts', 'Sent', 'Spam', 'Trash', 'Receipts'],
+    },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="tall">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Move to</button>
-        <sl-menu #menu [open]="true" [portal]="false" aria-label="Move to">
+        <sl-menu #menu [open]="pictured" [portal]="false" aria-label="Move to">
           @for (folder of folders; track folder) {
             <button slMenuItem>{{ folder }}</button>
           }
@@ -386,7 +399,8 @@ export const Scrolling: Story = {
 
 export const States: Story = {
   parameters: scenario('states'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         <section class="slotted-demo-scene">
@@ -397,11 +411,11 @@ export const States: Story = {
           <div class="slotted-demo-stage" data-layout="block">
             <div class="slotted-demo-viewport" data-place="top" data-size="tall">
               <button slButton size="sm" variant="outline" [slMenuTriggerFor]="states">Document</button>
-              <sl-menu #states [open]="true" [portal]="false">
+              <sl-menu #states [open]="pictured" [portal]="false">
                 <button slMenuItem [disabled]="true" shortcut="Mod+P">Publish</button>
                 <button slMenuCheckboxItem [checked]="true">Show comments</button>
                 <button slMenuItem [slMenuTriggerFor]="exportAs">Export as</button>
-                <sl-menu #exportAs [open]="true" [portal]="false">
+                <sl-menu #exportAs [open]="pictured" [portal]="false">
                   <button slMenuItem>PDF</button>
                 </sl-menu>
               </sl-menu>
@@ -416,7 +430,7 @@ export const States: Story = {
           <div class="slotted-demo-stage" data-layout="block">
             <div class="slotted-demo-viewport" data-place="top" data-size="layer">
               <button slButton size="sm" variant="outline" [slMenuTriggerFor]="labels">Labels</button>
-              <sl-menu #labels [open]="true" [portal]="false" [loading]="true" aria-label="Labels">
+              <sl-menu #labels [open]="pictured" [portal]="false" [loading]="true" aria-label="Labels">
                 <div slMenuEmpty>Loading labels…</div>
               </sl-menu>
             </div>
@@ -429,11 +443,12 @@ export const States: Story = {
 
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="tall">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Commands</button>
-        <sl-menu #menu [open]="true" [portal]="false">
+        <sl-menu #menu [open]="pictured" [portal]="false">
           <button slMenuItem shortcut="Mod+S">Save</button>
           <button slMenuItem shortcut="Shift+Mod+S">Save as…</button>
           <button slMenuItem>Settings…</button>
@@ -447,7 +462,8 @@ export const Keyboard: Story = {
 
 export const Composition: Story = {
   parameters: scenario('composition'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="tall">
         <button
@@ -459,7 +475,7 @@ export const Composition: Story = {
         >
           ⋯
         </button>
-        <sl-menu #rowActions [open]="true" [portal]="false" align="end" aria-label="Row actions">
+        <sl-menu #rowActions [open]="pictured" [portal]="false" align="end" aria-label="Row actions">
           <button slMenuItem>Open</button>
           <button slMenuItem shortcut="Mod+D">Duplicate</button>
           <hr slMenuSeparator />

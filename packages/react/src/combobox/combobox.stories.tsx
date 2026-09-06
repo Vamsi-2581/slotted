@@ -1,4 +1,4 @@
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
@@ -112,23 +112,23 @@ export const Playground: Story = {
     width: 'anchor',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
-  render: (args) => (
+  render: (args, context) => (
     <Viewport size="tall">
-      <Basic {...args} defaultInputValue="berr" defaultOpen />
+      <Basic {...args} defaultInputValue="berr" defaultOpen={isolated(context)} />
     </Viewport>
   ),
 };
 
 export const Filtering: Story = {
   parameters: scenario('filtering'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="The default comparison"
         note="Locale-sensitive: resume finds Resumé, and the mark shows the span the collator matched."
       >
         <Viewport>
-          <Combobox defaultInputValue="resume" defaultOpen portal={false}>
+          <Combobox defaultInputValue="resume" defaultOpen={isolated(context)} portal={false}>
             <ComboboxInput aria-label="Document" />
             <ComboboxContent aria-label="Document">
               <ComboboxItem value="resume">Resumé</ComboboxItem>
@@ -144,7 +144,7 @@ export const Filtering: Story = {
         <Viewport>
           <Basic
             defaultInputValue="berr"
-            defaultOpen
+            defaultOpen={isolated(context)}
             filter={(label, query) => label.toLowerCase().startsWith(query.toLowerCase())}
           />
         </Viewport>
@@ -155,16 +155,21 @@ export const Filtering: Story = {
 
 export const Autocomplete: Story = {
   parameters: scenario('autocomplete'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="3">
       <Scene label="none" note="The popup shows the same options whatever is typed into the field.">
         <Viewport>
-          <Basic autocomplete="none" defaultInputValue="berr" defaultOpen filter={null} />
+          <Basic
+            autocomplete="none"
+            defaultInputValue="berr"
+            defaultOpen={isolated(context)}
+            filter={null}
+          />
         </Viewport>
       </Scene>
       <Scene label="list" note="The default: the popup shows the options that match what is typed.">
         <Viewport>
-          <Basic autocomplete="list" defaultInputValue="berr" defaultOpen />
+          <Basic autocomplete="list" defaultInputValue="berr" defaultOpen={isolated(context)} />
         </Viewport>
       </Scene>
       <Scene
@@ -172,7 +177,7 @@ export const Autocomplete: Story = {
         note="As list, and the rest of the first match is written into the field as a selected range."
       >
         <Viewport>
-          <Basic autocomplete="both" defaultInputValue="blue" defaultOpen />
+          <Basic autocomplete="both" defaultInputValue="blue" defaultOpen={isolated(context)} />
         </Viewport>
       </Scene>
     </div>
@@ -181,14 +186,14 @@ export const Autocomplete: Story = {
 
 export const CustomValue: Story = {
   parameters: scenario('custom-value'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Refused"
         note="Enter — and leaving the field — put the text back to the committed option's label, which is the pattern's own reverts. `onInputReset` carries what was refused (CB7)."
       >
         <Viewport>
-          <Basic defaultInputValue="Durian" defaultOpen />
+          <Basic defaultInputValue="Durian" defaultOpen={isolated(context)} />
         </Viewport>
       </Scene>
       <Scene
@@ -196,7 +201,7 @@ export const CustomValue: Story = {
         note="Enter — and leaving the field — commit the typed text, and the request carries it as the value."
       >
         <Viewport>
-          <Basic allowsCustomValue defaultInputValue="Durian" defaultOpen />
+          <Basic allowsCustomValue defaultInputValue="Durian" defaultOpen={isolated(context)} />
         </Viewport>
       </Scene>
     </div>
@@ -238,14 +243,14 @@ function Creatable() {
 
 export const Creation: Story = {
   parameters: scenario('creation'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Offered"
         note="Nothing matched, so the last option offers to add what was typed. It is an option: ArrowDown reaches it and Enter takes it."
       >
         <Viewport>
-          <Basic defaultInputValue="Durian" defaultOpen onCreate={() => {}} />
+          <Basic defaultInputValue="Durian" defaultOpen={isolated(context)} onCreate={() => {}} />
         </Viewport>
       </Scene>
       <Scene
@@ -262,14 +267,14 @@ export const Creation: Story = {
 
 export const Async: Story = {
   parameters: scenario('async'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Travelling"
         note="The status row keeps the popup's measure, so nothing jumps when the results land."
       >
         <Viewport>
-          <Combobox defaultInputValue="mar" defaultOpen loading portal={false}>
+          <Combobox defaultInputValue="mar" defaultOpen={isolated(context)} loading portal={false}>
             <ComboboxInput aria-label="Reviewer" />
             <ComboboxContent aria-label="Reviewer" />
           </Combobox>
@@ -280,7 +285,7 @@ export const Async: Story = {
         note="The same row becomes the live region, and says how many options answered."
       >
         <Viewport>
-          <Combobox defaultInputValue="man" defaultOpen portal={false}>
+          <Combobox defaultInputValue="man" defaultOpen={isolated(context)} portal={false}>
             <ComboboxInput aria-label="Reviewer" />
             <ComboboxContent aria-label="Reviewer">
               <ComboboxItem value="amanda">Amanda Okoro</ComboboxItem>
@@ -296,9 +301,9 @@ export const Async: Story = {
 
 export const Groups: Story = {
   parameters: scenario('groups'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Combobox defaultInputValue="berry" defaultOpen portal={false}>
+      <Combobox defaultInputValue="berry" defaultOpen={isolated(context)} portal={false}>
         <ComboboxInput aria-label="Produce" />
         <ComboboxContent aria-label="Produce">
           <ComboboxGroup label="Berries">
@@ -371,18 +376,18 @@ export const States: Story = {
 
 export const Empty: Story = {
   parameters: scenario('empty'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport>
-      <Basic defaultInputValue="zzz" defaultOpen />
+      <Basic defaultInputValue="zzz" defaultOpen={isolated(context)} />
     </Viewport>
   ),
 };
 
 export const LongContent: Story = {
   parameters: scenario('long-content'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Combobox defaultInputValue="9f2c" defaultOpen portal={false}>
+      <Combobox defaultInputValue="9f2c" defaultOpen={isolated(context)} portal={false}>
         <ComboboxInput aria-label="Record" />
         <ComboboxContent aria-label="Record">
           <ComboboxItem value="urn">urn:acme:catalogue:9f2c41ab8de07c5511903fbe</ComboboxItem>
@@ -400,9 +405,9 @@ export const LongContent: Story = {
 
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Basic defaultInputValue="berr" defaultOpen />
+      <Basic defaultInputValue="berr" defaultOpen={isolated(context)} />
     </Viewport>
   ),
 };
@@ -434,7 +439,7 @@ export const InAForm: Story = {
 
 export const Composition: Story = {
   parameters: scenario('composition'),
-  render: () => (
+  render: (_args, context) => (
     <ComboboxDefaultsProvider
       countLabel="{count} pessoas"
       emptyLabel="Nada encontrado"
@@ -443,7 +448,7 @@ export const Composition: Story = {
       variant="subtle"
     >
       <Viewport size="tall">
-        <Basic defaultInputValue="zzz" defaultOpen />
+        <Basic defaultInputValue="zzz" defaultOpen={isolated(context)} />
       </Viewport>
     </ComboboxDefaultsProvider>
   ),

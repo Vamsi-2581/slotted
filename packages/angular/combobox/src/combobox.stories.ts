@@ -1,5 +1,5 @@
 import { SlField, SlFieldDescription, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
@@ -136,14 +136,14 @@ export const Playground: Story = {
     width: 'anchor',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
-  render: (args) => ({
-    props: args,
+  render: (args, context) => ({
+    props: { ...args, pictured: isolated(context) },
     template: viewport(`
       <sl-combobox
         aria-label="Fruit"
         placeholder="Search fruit"
         [inputValue]="'berr'"
-        [open]="true"
+        [open]="pictured"
         [portal]="false"
         [align]="align"
         [allowsCustomValue]="allowsCustomValue"
@@ -165,15 +165,15 @@ export const Playground: Story = {
 
 export const Filtering: Story = {
   parameters: scenario('filtering'),
-  render: () => ({
-    props: { startsWith },
+  render: (_args, context) => ({
+    props: { pictured: isolated(context), startsWith },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
           'The default comparison',
           'Locale-sensitive: resume finds Resumé, and the mark shows the span the collator matched.',
           viewport(`
-            <sl-combobox aria-label="Document" [inputValue]="'resume'" [open]="true" [portal]="false">
+            <sl-combobox aria-label="Document" [inputValue]="'resume'" [open]="pictured" [portal]="false">
               <sl-combobox-item value="resume" label="Resumé" />
               <sl-combobox-item value="report" label="Report" />
             </sl-combobox>
@@ -183,7 +183,7 @@ export const Filtering: Story = {
           "A comparison of the consumer's own",
           'startsWith rather than contains, so berr finds nothing and Blue finds one.',
           viewport(
-            `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [filter]="startsWith" [inputValue]="'berr'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [filter]="startsWith" [inputValue]="'berr'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
       </div>
@@ -193,28 +193,29 @@ export const Filtering: Story = {
 
 export const Autocomplete: Story = {
   parameters: scenario('autocomplete'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="3">
         ${scene(
           'none',
           'The popup shows the same options whatever is typed into the field.',
           viewport(
-            `<sl-combobox aria-label="Fruit" autocomplete="none" [filter]="null" [inputValue]="'berr'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" autocomplete="none" [filter]="null" [inputValue]="'berr'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
         ${scene(
           'list',
           'The default: the popup shows the options that match what is typed.',
           viewport(
-            `<sl-combobox aria-label="Fruit" autocomplete="list" [inputValue]="'berr'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" autocomplete="list" [inputValue]="'berr'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
         ${scene(
           'both',
           'As list, and the rest of the first match is written into the field as a selected range.',
           viewport(
-            `<sl-combobox aria-label="Fruit" autocomplete="both" [inputValue]="'blue'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" autocomplete="both" [inputValue]="'blue'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
       </div>
@@ -224,21 +225,22 @@ export const Autocomplete: Story = {
 
 export const CustomValue: Story = {
   parameters: scenario('custom-value'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
           'Refused',
           "Enter — and leaving the field — put the text back to the committed option's label, which is the pattern's own reverts. inputReset carries what was refused (CB7).",
           viewport(
-            `<sl-combobox aria-label="Fruit" [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" [inputValue]="'Durian'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
         ${scene(
           'Allowed',
           'Enter — and leaving the field — commit the typed text, and the request carries it as the value.',
           viewport(
-            `<sl-combobox aria-label="Fruit" allowsCustomValue [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" allowsCustomValue [inputValue]="'Durian'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
       </div>
@@ -256,21 +258,22 @@ export const CustomValue: Story = {
  */
 export const Creation: Story = {
   parameters: scenario('creation'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
           'Offered',
           'Nothing matched, so the last option offers to add what was typed. It is an option: ArrowDown reaches it and Enter takes it.',
           viewport(
-            `<sl-combobox aria-label="Fruit" creatable [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" creatable [inputValue]="'Durian'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
         ${scene(
           'Refused',
           "Without creatable the popup says nothing matched, and the text is the reader's to correct.",
           viewport(
-            `<sl-combobox aria-label="Fruit" [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+            `<sl-combobox aria-label="Fruit" [inputValue]="'Durian'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
       </div>
@@ -280,21 +283,22 @@ export const Creation: Story = {
 
 export const Async: Story = {
   parameters: scenario('async'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
           'Travelling',
           "The status row keeps the popup's measure, so nothing jumps when the results land.",
           viewport(
-            `<sl-combobox aria-label="Reviewer" loading [inputValue]="'mar'" [open]="true" [portal]="false"></sl-combobox>`,
+            `<sl-combobox aria-label="Reviewer" loading [inputValue]="'mar'" [open]="pictured" [portal]="false"></sl-combobox>`,
           ),
         )}
         ${scene(
           'Landed',
           'The same row becomes the live region, and says how many options answered.',
           viewport(`
-            <sl-combobox aria-label="Reviewer" [inputValue]="'man'" [open]="true" [portal]="false">
+            <sl-combobox aria-label="Reviewer" [inputValue]="'man'" [open]="pictured" [portal]="false">
               <sl-combobox-item value="amanda" label="Amanda Okoro" />
               <sl-combobox-item value="roman" label="Roman Petrov" />
               <sl-combobox-item value="norman" label="Norman Vaz" />
@@ -308,10 +312,11 @@ export const Async: Story = {
 
 export const Groups: Story = {
   parameters: scenario('groups'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
       `
-      <sl-combobox aria-label="Produce" [inputValue]="'berry'" [open]="true" [portal]="false">
+      <sl-combobox aria-label="Produce" [inputValue]="'berry'" [open]="pictured" [portal]="false">
         <sl-combobox-group label="Berries">
           <sl-combobox-item value="blueberry" label="Blueberry" />
           <sl-combobox-item value="raspberry" label="Raspberry" />
@@ -329,7 +334,8 @@ export const Groups: Story = {
 
 export const Clearable: Story = {
   parameters: scenario('clearable'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
@@ -349,7 +355,8 @@ export const Clearable: Story = {
 
 export const Sizes: Story = {
   parameters: scenario('sizes'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-stack">
         <sl-combobox aria-label="Small" size="sm" [inputValue]="'Blueberry'" [portal]="false">${FRUIT}</sl-combobox>
@@ -362,7 +369,8 @@ export const Sizes: Story = {
 
 export const Variants: Story = {
   parameters: scenario('variants'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-stack">
         <sl-combobox aria-label="Outline" variant="outline" [inputValue]="'Blueberry'" [portal]="false">${FRUIT}</sl-combobox>
@@ -375,7 +383,8 @@ export const Variants: Story = {
 
 export const States: Story = {
   parameters: scenario('states'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-stack">
         <sl-combobox aria-label="Required" placeholder="Required" [required]="true" [portal]="false">${FRUIT}</sl-combobox>
@@ -389,19 +398,21 @@ export const States: Story = {
 
 export const Empty: Story = {
   parameters: scenario('empty'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
-      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'zzz'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'zzz'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
     ),
   }),
 };
 
 export const LongContent: Story = {
   parameters: scenario('long-content'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
       `
-      <sl-combobox aria-label="Record" [inputValue]="'9f2c'" [open]="true" [portal]="false">
+      <sl-combobox aria-label="Record" [inputValue]="'9f2c'" [open]="pictured" [portal]="false">
         <sl-combobox-item value="urn" label="urn:acme:catalogue:9f2c41ab8de07c5511903fbe" />
         <sl-combobox-item
           value="fi"
@@ -417,9 +428,10 @@ export const LongContent: Story = {
 
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
-      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'berr'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'berr'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
       'tall',
     ),
   }),
@@ -427,8 +439,8 @@ export const Keyboard: Story = {
 
 export const InAForm: Story = {
   parameters: scenario('form'),
-  render: () => ({
-    props: { chosen: null as string | null },
+  render: (_args, context) => ({
+    props: { pictured: isolated(context), chosen: null as string | null },
     template: `
       <div class="slotted-demo-stack">
         <sl-field [required]="true">
@@ -461,9 +473,10 @@ export const Composition: Story = {
     }),
   ],
   parameters: scenario('composition'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
-      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'zzz'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+      `<sl-combobox aria-label="Fruit" placeholder="Search fruit" [inputValue]="'zzz'" [open]="pictured" [portal]="false">${FRUIT}</sl-combobox>`,
       'tall',
     ),
   }),

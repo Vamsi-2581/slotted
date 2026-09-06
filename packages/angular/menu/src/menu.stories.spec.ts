@@ -34,4 +34,31 @@ describe('Angular MENU stories', () => {
     ]);
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });
+  /**
+   * A story opens its layer for the picture, on its own page. Inside the
+   * reference page the same story is one demonstration among many, and a layer
+   * nobody asked for is open over the demonstration below it — which is what
+   * TT1 found for `tooltip` and G11 found here.
+   */
+  describe('a layer opened for the picture', () => {
+    type Pictured = { props?: Record<string, unknown>; template?: string };
+    const pictured = Object.values(menuStories)
+      .filter((story) => typeof story === 'object' && story !== null && 'render' in story)
+      .map((story) => (story as { render: (args: never, context: never) => Pictured }).render);
+
+    it('opens on a story of its own', () => {
+      for (const story of pictured) {
+        const rendered = story({} as never, { viewMode: 'story' } as never);
+        expect(rendered.props?.['pictured']).toBe(true);
+        expect(rendered.template).not.toContain('[open]="true"');
+      }
+    });
+
+    it('is closed on the reference page until the reader asks', () => {
+      for (const story of pictured) {
+        const rendered = story({} as never, { viewMode: 'docs' } as never);
+        expect(rendered.props?.['pictured']).toBe(false);
+      }
+    });
+  });
 });

@@ -1,5 +1,25 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  /**
+   * The preset, and nothing else.
+   *
+   * Eight configs extend this file — `react`, `core`, `storybook-workbench`,
+   * the Angular library and both Storybook apps, plus the two build configs —
+   * and every one of them is a different program over a different set of files.
+   * So this file may hold only what is true of all of them: how TypeScript
+   * judges code. Anything that says *which* code, or *where its state lives*,
+   * belongs to a project, and the whole-repository project is `tsconfig.json`
+   * beside this one.
+   *
+   * The rule exists because breaking it cost a run of the typecheck in every
+   * session for weeks. `tsBuildInfoFile` lived here, and a relative path in an
+   * extended config resolves against the config that declared it — so all nine
+   * programs wrote one incremental file at the repository root. A build left it
+   * describing a package's program; the next root typecheck read it, reported
+   * 814 circular errors across every `*.stories.tsx`, rewrote it, and passed on
+   * the second run with no file changed (G6). `scripts/verify-typecheck-projects.test.mjs`
+   * holds this file to options only so the next one cannot be added by hand.
+   */
   "compilerOptions": {
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -16,31 +36,6 @@
     },
     "skipLibCheck": true,
     "strict": true,
-    "tsBuildInfoFile": "./.turbo/tsconfig.base.tsbuildinfo",
     "useUnknownInCatchVariables": true
-  },
-  /**
-   * The root project has no `include`, so it takes every `.ts` and `.tsx` under
-   * the repository — which, once anything has been built, is every emitted
-   * `.d.ts` as well. 432 of them: 309 from `react`, 67 from `core`, 56 from
-   * `angular`. The program then held two declarations of the same type, the
-   * source and the build output, and a build made them differ for one run:
-   * `tsc` reported `Story circularly references itself` across every
-   * `*.stories.tsx` and the next run passed without a file changing (G6).
-   *
-   * A build output is not source. The packages that consume one another still
-   * resolve to it through `exports`, so the declarations are still checked —
-   * once, as the module they are, rather than twice as two root files.
-   *
-   * `node_modules` is restated because naming `exclude` at all replaces the
-   * default that held it.
-   */
-  "exclude": [
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/.turbo/**",
-    "**/coverage/**",
-    "**/storybook-static/**"
-  ],
-  "references": []
+  }
 }

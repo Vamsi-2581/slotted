@@ -20,10 +20,10 @@
     "generate:glyphs": "node scripts/generate-icon-glyphs.mjs",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",
-    "typecheck": "tsc --build tsconfig.base.json --pretty false",
+    "typecheck": "tsc --build tsconfig.json --pretty false",
     "test:contracts": "node --test specs/*.test.mjs specs/components/*/*.test.mjs",
     "test:package-layers": "node --test scripts/verify-package-layers.test.mjs && node scripts/verify-package-layers.mjs",
-    "test:docs": "node --test scripts/verify-docs-snippets.test.mjs scripts/verify-token-foundation.test.mjs",
+    "test:docs": "node --test scripts/verify-docs-snippets.test.mjs scripts/verify-token-foundation.test.mjs scripts/verify-typecheck-projects.test.mjs",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:contracts && pnpm test:package-layers && pnpm test:docs",
     "check:affected": "pnpm check && turbo run verify --affected",
     "check:full": "pnpm check && turbo run verify"

@@ -4,6 +4,8 @@
 !.env.example
 .angular/
 .turbo/
+# TypeScript writes one per config, beside the config (G6).
+*.tsbuildinfo
 .superpowers/
 .worktrees/
 coverage/

@@ -211,7 +211,26 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
           [attr.data-loading]="loading() ? '' : null"
         >
           <ng-content />
-          @if (!loading() && optionCount() === 0) {
+          <!--
+            The offer to add what was typed (CB8). It is an option, not a
+            button: ArrowDown reaches it, aria-activedescendant names it and
+            Enter takes it, through the machinery every other option uses. It
+            replaces the empty message rather than standing beside it.
+          -->
+          @if (!loading() && creating(); as query) {
+            <div
+              role="option"
+              data-part="item"
+              data-create
+              [attr.data-value]="query"
+              [id]="optionId(query)"
+              [attr.data-current]="highlightedValue() === query ? '' : null"
+              (click)="onCreateClick(query, $event)"
+              (pointerenter)="setHighlighted(query, 'pointer', $event)"
+            >
+              <span data-part="label">{{ resolvedCreateLabel().replace('{query}', query) }}</span>
+            </div>
+          } @else if (!loading() && optionCount() === 0) {
             <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
           }
           @if (loading()) {
@@ -269,6 +288,12 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   /** The text the field refused, and why (CB7). */
   readonly inputReset = output<{ rejected: string; reason: 'blur' }>();
 
+  /** The query the reader asked to add. The collection is the consumer's (CB8). */
+  readonly create = output<{ query: string; reason: ComboboxValueReason }>();
+
+  /** Whether the consumer will take a value the collection does not hold (CB8). */
+  readonly creatable = input(undefined, { transform: SlCombobox.flag });
+
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   readonly placeholder = input<string>('');
   readonly name = input<string | undefined>(undefined);
@@ -288,6 +313,7 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   readonly autocomplete = input<ComboboxAutocomplete | undefined>(undefined);
   readonly openOn = input<ComboboxOpenOn | undefined>(undefined);
   readonly clearLabel = input<string | undefined>(undefined);
+  readonly createLabel = input<string | undefined>(undefined);
   readonly emptyLabel = input<string | undefined>(undefined);
   readonly loadingLabel = input<string | undefined>(undefined);
   readonly triggerLabel = input<string | undefined>(undefined);
@@ -377,6 +403,18 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     () => this.highlightMatch() ?? this.defaults.highlightMatch,
   );
   readonly resolvedClearLabel = computed(() => this.clearLabel() ?? this.defaults.clearLabel);
+  readonly resolvedCreateLabel = computed(() => this.createLabel() ?? this.defaults.createLabel);
+  /**
+   * The offer to add what was typed (CB8): the query, while the consumer will
+   * take one, the reader typed something and nothing in the collection matched
+   * it. It is one expression, so the row and the commit cannot disagree about
+   * whether an offer is standing.
+   */
+  readonly creating = computed(() =>
+    (this.creatable() ?? false) && this.query() !== '' && this.optionCount() === 0
+      ? this.query()
+      : null,
+  );
   readonly resolvedEmptyLabel = computed(() => this.emptyLabel() ?? this.defaults.emptyLabel);
   readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
   readonly resolvedTriggerLabel = computed(() => this.triggerLabel() ?? this.defaults.triggerLabel);
@@ -496,7 +534,11 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   }
 
   recount() {
-    this.optionCount.set(this.options().length);
+    /* The offer to add what was typed is drawn *because* the count is nought,
+       so counting it would take it away, which would bring it back (CB8). */
+    this.optionCount.set(
+      this.options().filter((option) => option.dataset['create'] === undefined).length,
+    );
     this.applyCompletion();
     this.dropStaleHighlight();
   }
@@ -747,6 +789,10 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     }
 
     const held = this.highlightedValue();
+    if (held !== null && held === this.creating()) {
+      this.takeOffer(held, 'keyboard', event);
+      return;
+    }
     if (held !== null) {
       this.commitOption(held, 'keyboard', event);
       return;
@@ -757,6 +803,22 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
       const value = this.value();
       this.setInputValue(value === null ? '' : (this.labelFor(value) ?? ''), 'select', event);
     }
+    this.setOpen(false, 'select', event);
+  }
+
+  protected onCreateClick(query: string, event: MouseEvent) {
+    this.takeOffer(query, 'pointer', event);
+    this.focus();
+  }
+
+  /**
+   * Taking the offer reports the query and selects nothing: the collection does
+   * not hold the value yet, and a control naming an option that does not exist
+   * is a control whose value and picture disagree — the fault CB7 fixed at the
+   * other end. What the consumer does with it is the consumer's (CB8).
+   */
+  private takeOffer(query: string, reason: ComboboxValueReason, event: Event) {
+    this.create.emit({ query, reason });
     this.setOpen(false, 'select', event);
   }
 

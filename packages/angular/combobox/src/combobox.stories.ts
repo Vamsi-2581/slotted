@@ -46,6 +46,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     clearable: Clearable,
     composition: Composition,
     'custom-value': CustomValue,
+    creation: Creation,
     empty: Empty,
     filtering: Filtering,
     form: InAForm,
@@ -238,6 +239,38 @@ export const CustomValue: Story = {
           'Enter — and leaving the field — commit the typed text, and the request carries it as the value.',
           viewport(
             `<sl-combobox aria-label="Fruit" allowsCustomValue [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+          ),
+        )}
+      </div>
+    `,
+  }),
+};
+
+/**
+ * CB8. The family draws the offer and reports the query; adding the value is
+ * the consumer's, because only it knows which of its collections can grow.
+ *
+ * The item asks for a tag input here. This family declines `multiple` — its
+ * contract defers a collection of chosen values to `multi-select` — so the
+ * story shows creation on the one value a combobox holds.
+ */
+export const Creation: Story = {
+  parameters: scenario('creation'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-grid" data-columns="2">
+        ${scene(
+          'Offered',
+          'Nothing matched, so the last option offers to add what was typed. It is an option: ArrowDown reaches it and Enter takes it.',
+          viewport(
+            `<sl-combobox aria-label="Fruit" creatable [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
+          ),
+        )}
+        ${scene(
+          'Refused',
+          "Without creatable the popup says nothing matched, and the text is the reader's to correct.",
+          viewport(
+            `<sl-combobox aria-label="Fruit" [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
       </div>

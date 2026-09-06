@@ -67,6 +67,8 @@ export interface ComboboxDefaults {
   autoHighlight: boolean;
   clearable: boolean;
   clearLabel: string;
+  /** The offer to add what was typed. `{query}` is the text (CB8). */
+  createLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
@@ -119,6 +121,9 @@ export interface ComboboxProps {
   children?: ReactNode;
   clearable?: boolean;
   clearLabel?: string;
+  createLabel?: string;
+  /** Called with the query the reader asked to add. The collection is the consumer's. */
+  onCreate?: (query: string, details: { reason: ComboboxValueReason; source?: unknown }) => void;
   /** Called with the text the field refused when it settled, and why (CB7). */
   onInputReset?: (rejected: string, details: { reason: 'blur'; source?: unknown }) => void;
   closeOnEscape?: boolean;

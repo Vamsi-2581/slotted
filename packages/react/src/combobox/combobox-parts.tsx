@@ -99,6 +99,17 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
     }
 
     const value = combobox.highlighted;
+    /**
+     * The offer to add what was typed is an option like any other, so it is
+     * reached and taken like one — and it is told apart by the row itself
+     * rather than by a second copy of the rule, so the picture and the commit
+     * cannot disagree about whether one is standing (CB8).
+     */
+    if (value !== null && isCreateRow(combobox.contentNode, value)) {
+      combobox.create(value, 'keyboard', source);
+      combobox.setOpen(false, 'select', source);
+      return;
+    }
     if (value === null) {
       if (combobox.allowsCustomValue) {
         combobox.select(
@@ -353,6 +364,13 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
   return <div {...rootProps}>{inner}</div>;
 }
 
+/** Whether the option holding `value` is the offer to add it rather than a member. */
+function isCreateRow(content: HTMLElement | null, value: string) {
+  if (content === null) return false;
+  const option = content.querySelector(`[data-part='item'][data-value="${CSS.escape(value)}"]`);
+  return option?.hasAttribute('data-create') === true;
+}
+
 /**
  * The layer, the surface it paints, and the two rows that speak for it.
  *
@@ -499,8 +517,15 @@ export function ComboboxContent({
     layerNode,
   ]);
 
+  /**
+   * How many options the collection put on the surface. The offer to add what
+   * was typed is not one of them: it is drawn *because* the count is nought,
+   * so counting it would take it away, which would bring it back (CB8).
+   */
   useLayoutEffect(() => {
-    const measured = options(surfaceNode).length;
+    const measured = options(surfaceNode).filter(
+      (option) => option.dataset['create'] === undefined,
+    ).length;
     setCount((held) => (held === measured ? held : measured));
   });
 
@@ -607,7 +632,34 @@ export function ComboboxContent({
       >
         {children}
         <div ref={sentinel} />
-        {!combobox.loading && count === 0 ? (
+        {/*
+          The offer to add what was typed (CB8). It is an option, not a button:
+          the reader reaches it with ArrowDown, `aria-activedescendant` names
+          it and Enter takes it, all through the machinery every other option
+          already uses. It replaces the empty message rather than standing
+          beside it — "nothing matched" and "create it" are one sentence.
+        */}
+        {!combobox.loading && count === 0 && combobox.canCreate && combobox.query !== '' ? (
+          <div
+            data-create=""
+            data-part="item"
+            data-value={combobox.query}
+            id={combobox.optionId(combobox.query)}
+            onClick={(event) => {
+              combobox.create(combobox.query, 'pointer', event.nativeEvent);
+              combobox.setOpen(false, 'select', event.nativeEvent);
+              combobox.inputNode?.focus({ preventScroll: true });
+            }}
+            onPointerEnter={(event) =>
+              combobox.setHighlighted(combobox.query, 'pointer', event.nativeEvent)
+            }
+            role="option"
+            {...(combobox.highlighted === combobox.query ? { 'data-current': '' } : {})}
+          >
+            <span data-part="label">{combobox.createLabel.replace('{query}', combobox.query)}</span>
+          </div>
+        ) : null}
+        {!combobox.loading && count === 0 && !(combobox.canCreate && combobox.query !== '') ? (
           <div data-part="empty">{empty ?? combobox.emptyLabel}</div>
         ) : null}
         {combobox.loading ? (

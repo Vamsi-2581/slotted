@@ -288,6 +288,7 @@ test('declares a scenario for every capability a reference page has to prove', (
     'filtering',
     'autocomplete',
     'custom-value',
+    'creation',
     'async',
     'groups',
     'clearable',

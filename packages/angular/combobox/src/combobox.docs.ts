@@ -220,6 +220,17 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'creation',
+    title: 'Adding a value the list does not hold',
+    note: 'With creatable, the last option offers to add what was typed once nothing matched. It is an option — ArrowDown reaches it, Enter takes it — and taking it emits create with the query and selects nothing: the collection is the consumer’s.',
+    snippet: defineSnippet({
+      id: 'combobox-angular-creation',
+      language: 'angular',
+      label: 'Offering to add what was typed',
+      source: `<sl-combobox creatable (create)="add($event.query)">…</sl-combobox>`,
+    }),
+  },
+  {
     id: 'async',
     title: 'Asynchronous results',
     note: 'Debounce the fetch, not the family: a component that delayed its own request would delay a controlled consumer’s re-render and drop characters between them.',
@@ -633,6 +644,13 @@ const api = apiRows([
     'How close to the viewport edge the popup may come.',
   ],
   ['clearLabel', 'string', 'Clear', 'sl-combobox', 'The accessible name of the clear button.'],
+  [
+    'createLabel',
+    'string',
+    'Create \u201c{query}\u201d',
+    'sl-combobox',
+    'The offer to add what was typed. `{query}` is the text.',
+  ],
   [
     'emptyLabel',
     'string',

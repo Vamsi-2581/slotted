@@ -60,6 +60,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     clearable: Clearable,
     composition: Composition,
     'custom-value': CustomValue,
+    creation: Creation,
     empty: Empty,
     filtering: Filtering,
     form: InAForm,
@@ -196,6 +197,63 @@ export const CustomValue: Story = {
       >
         <Viewport>
           <Basic allowsCustomValue defaultInputValue="Durian" defaultOpen />
+        </Viewport>
+      </Scene>
+    </div>
+  ),
+};
+
+/**
+ * CB8. The family draws the offer and reports the query; adding the value is
+ * the consumer's, because only it knows which of its collections can grow.
+ *
+ * The item asks for a tag input here. This family declines `multiple` — its
+ * contract defers a collection of chosen values to `multi-select` — so the
+ * story shows creation on the one value a combobox holds.
+ */
+function Creatable() {
+  const [items, setItems] = useState<readonly string[]>(FRUIT);
+  const [value, setValue] = useState<string | null>(null);
+
+  return (
+    <Combobox
+      onCreate={(query) => {
+        setItems((held) => [...held, query]);
+        setValue(query);
+      }}
+      onValueChange={setValue}
+      value={value}
+    >
+      <ComboboxInput aria-label="Fruit" />
+      <ComboboxContent aria-label="Fruit">
+        {items.map((label) => (
+          <ComboboxItem key={label} value={label}>
+            {label}
+          </ComboboxItem>
+        ))}
+      </ComboboxContent>
+    </Combobox>
+  );
+}
+
+export const Creation: Story = {
+  parameters: scenario('creation'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="2">
+      <Scene
+        label="Offered"
+        note="Nothing matched, so the last option offers to add what was typed. It is an option: ArrowDown reaches it and Enter takes it."
+      >
+        <Viewport>
+          <Basic defaultInputValue="Durian" defaultOpen onCreate={() => {}} />
+        </Viewport>
+      </Scene>
+      <Scene
+        label="Taken"
+        note="Selecting it calls onCreate with the query and selects nothing; here the consumer adds the value to its own collection and then chooses it."
+      >
+        <Viewport>
+          <Creatable />
         </Viewport>
       </Scene>
     </div>

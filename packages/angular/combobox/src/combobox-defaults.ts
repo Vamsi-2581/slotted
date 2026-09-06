@@ -58,6 +58,8 @@ export interface ComboboxDefaults {
   autoHighlight: boolean;
   clearable: boolean;
   clearLabel: string;
+  /** The offer to add what was typed. `{query}` is the text (CB8). */
+  createLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
@@ -102,6 +104,7 @@ export const COMBOBOX_FALLBACK: ComboboxDefaults = {
   autoHighlight: false,
   clearable: true,
   clearLabel: 'Clear',
+  createLabel: 'Create \u201c{query}\u201d',
   closeOnEscape: true,
   closeOnOutsidePress: true,
   closeOnSelect: true,

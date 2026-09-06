@@ -78,6 +78,11 @@ export interface ComboboxContextValue {
   inputValue: string;
   invalid: boolean;
   labelFor: (value: ComboboxOptionValue) => string | undefined;
+  /** Whether the consumer will take a value the collection does not hold (CB8). */
+  canCreate: boolean;
+  createLabel: string;
+  /** Reports the query the reader asked to add. The collection is the consumer's. */
+  create: (query: string, reason: ComboboxValueReason, source?: unknown) => void;
   /** Settles the typed text against the collection, which `blur` is the moment for. */
   settleInput: (source?: unknown) => void;
   loading: boolean;
@@ -177,6 +182,8 @@ export function Combobox({
   closeOnSelect,
   collisionPadding,
   countLabel,
+  createLabel,
+  onCreate,
   defaultHighlightedValue = null,
   defaultInputValue = '',
   defaultOpen = false,
@@ -320,6 +327,7 @@ export function Combobox({
     inputValue,
     onHighlightedValueChange,
     onInputValueChange,
+    onCreate,
     onOpenChange,
     onValueChange,
     open,
@@ -335,6 +343,7 @@ export function Combobox({
     inputValue,
     onHighlightedValueChange,
     onInputValueChange,
+    onCreate,
     onOpenChange,
     onValueChange,
     open,
@@ -487,6 +496,17 @@ export function Combobox({
     state.onInputReset?.(text, { reason: 'blur', source });
   }, []);
 
+  /**
+   * Taking the offer reports the query and selects nothing. The collection does
+   * not hold the value yet, and a control naming an option that does not exist
+   * is a control whose value and picture disagree — the same fault CB7 fixed at
+   * the other end. What the consumer does with it, including whether the value
+   * is then chosen, is the consumer's.
+   */
+  const create = useCallback((text: string, reason: ComboboxValueReason, source?: unknown) => {
+    latest.current.onCreate?.(text, { reason, source });
+  }, []);
+
   const clear = useCallback(
     (reason: ComboboxValueReason, source?: unknown) => {
       select(null, reason, source);
@@ -529,6 +549,9 @@ export function Combobox({
     contentId,
     contentNode,
     countLabel: countLabel ?? defaults.countLabel,
+    canCreate: onCreate !== undefined,
+    create,
+    createLabel: createLabel ?? defaults.createLabel,
     disabled: resolvedDisabled,
     emptyLabel: emptyLabel ?? defaults.emptyLabel,
     entry,

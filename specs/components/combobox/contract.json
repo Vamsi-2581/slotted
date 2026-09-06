@@ -79,6 +79,18 @@
     "event": "onInputReset",
     "reason": "An editable combobox lets a reader type anything, and the pattern says nothing about what happens to text that matched no option. `Enter` already answered it — the family reverts, or commits the text where `allowsCustomValue` is on — and blur did not, so a control whose value was `apple` sat there reading `appl` after the reader clicked away (CB7). It is the same decision at a second moment, so it is the same prop: a second one spelled without the `s` would have been two names for one answer, and a field could then refuse on Enter and accept on blur."
   },
+  "creation": {
+    "prop": "onCreate",
+    "label": "createLabel",
+    "element": "an option of its own, marked data-create",
+    "appears": "while onCreate is given, the query is not empty, and nothing in the collection matched it",
+    "effect": "calls onCreate with the query and closes; the family selects nothing, because the collection does not hold the value yet",
+    "keyboard": "it is an option — `data-part='item'` like every other, told apart by `data-create` the way a chosen one is told apart by `data-selected` — so ArrowDown reaches it, aria-activedescendant names it and Enter takes it, through machinery that already exists. A part of its own would have been a row outside the collection, which the keyboard could not reach.",
+    "reason": "A reader who typed something the list does not hold has either mistyped or means to add it, and only the consumer knows which of its collections can grow. So the family draws the offer and reports it, and adding the value is the consumer's — which is also why nothing is selected here: selecting a value the collection does not hold would leave the control naming an option that does not exist (CB8). The row replaces the empty message rather than standing beside it: 'nothing matched' and 'create it' are the same sentence.",
+    "declined": {
+      "tags": "The item asks for a tag input with creation. This family declines `multiple` (see declined.multiple), so there is no set to add to and no tags to add into; a creatable tag input is `multi-select`, wave 6 item 5."
+    }
+  },
   "wiring": {
     "role": "combobox on the input, listbox on the content, option on each item",
     "aria-haspopup": "never written. Elements with role combobox have an implicit aria-haspopup of listbox, and the popup is one.",
@@ -408,7 +420,8 @@
       "emptyLabel",
       "loadingLabel",
       "triggerLabel",
-      "countLabel"
+      "countLabel",
+      "createLabel"
     ]
   },
   "stateAttributes": {
@@ -494,7 +507,8 @@
         "emptyLabel": "No matches",
         "loadingLabel": "Loading…",
         "triggerLabel": "Show options",
-        "countLabel": "{count} results"
+        "countLabel": "{count} results",
+        "createLabel": "Create \u201c{query}\u201d"
       },
       "capabilities": [
         "value",
@@ -557,6 +571,7 @@
       "filtering",
       "autocomplete",
       "custom-value",
+      "creation",
       "async",
       "groups",
       "clearable",

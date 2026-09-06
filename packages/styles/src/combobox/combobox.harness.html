@@ -411,6 +411,27 @@
         <div data-part="empty">No matches</div>
       </div>
     </div>
+    <!-- The offer to add what was typed, in place of the empty message (CB8). -->
+    <div
+      data-ui="combobox"
+      data-part="positioner"
+      data-side="bottom"
+      data-align="start"
+      data-size="md"
+      data-width="content"
+      data-open
+      style="
+        position: relative;
+        --slotted-positioner-anchor-width: 240px;
+        --slotted-positioner-available-width: 100%;
+      "
+    >
+      <div data-part="content" role="listbox" aria-label="Create">
+        <div data-part="item" data-create data-value="Durian" data-current role="option">
+          <span data-part="label">Create “Durian”</span>
+        </div>
+      </div>
+    </div>
     <div
       data-ui="combobox"
       data-part="positioner"

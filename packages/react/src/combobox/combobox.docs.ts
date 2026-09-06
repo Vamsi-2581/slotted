@@ -228,6 +228,17 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'creation',
+    title: 'Adding a value the list does not hold',
+    note: 'With onCreate, the last option offers to add what was typed once nothing matched. It is an option — ArrowDown reaches it, Enter takes it — and taking it reports the query and selects nothing: the collection is the consumer’s, and only it knows whether this one can grow.',
+    snippet: defineSnippet({
+      id: 'combobox-react-creation',
+      language: 'tsx',
+      label: 'Offering to add what was typed',
+      source: `<Combobox onCreate={(query) => add(query)}>…</Combobox>;`,
+    }),
+  },
+  {
     id: 'async',
     title: 'Asynchronous results',
     note: 'Debounce the fetch, not the family: a component that delayed its own request would delay a controlled consumer’s re-render and drop characters between them.',
@@ -663,6 +674,13 @@ const api = apiRows([
     'How close to the viewport edge the popup may come.',
   ],
   ['clearLabel', 'string', 'Clear', 'Combobox', 'The accessible name of the clear button.'],
+  [
+    'createLabel',
+    'string',
+    'Create \u201c{query}\u201d',
+    'Combobox',
+    'The offer to add what was typed. `{query}` is the text.',
+  ],
   ['emptyLabel', 'string', 'No matches', 'Combobox', 'What the popup says when nothing matched.'],
   [
     'loadingLabel',

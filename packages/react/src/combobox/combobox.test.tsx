@@ -372,6 +372,77 @@ describe('Combobox', () => {
     });
   });
 
+  /**
+   * CB8. A reader who typed something the list does not hold has either
+   * mistyped or means to add it, and only the consumer knows which of its
+   * collections can grow: the family draws the offer and reports it.
+   */
+  describe('creating a value the list does not hold', () => {
+    it('offers the query as a last option, in place of the empty message', async () => {
+      render(<Basic onCreate={vi.fn()} />);
+      input().focus();
+      type('durian');
+      await screen.findByRole('listbox');
+
+      expect(screen.queryByText('No matches')).toBeNull();
+      const create = screen.getByRole('option', { name: 'Create “durian”' });
+      expect(create).toHaveAttribute('data-part', 'item');
+      expect(listed()).toEqual(['Create “durian”']);
+    });
+
+    it('offers nothing while something matched, or while the field is empty', async () => {
+      render(<Basic onCreate={vi.fn()} />);
+      input().focus();
+      type('berr');
+      await screen.findByRole('listbox');
+      expect(screen.queryByRole('option', { name: /Create/ })).toBeNull();
+
+      type('');
+      expect(screen.queryByRole('option', { name: /Create/ })).toBeNull();
+    });
+
+    it('offers nothing at all when the field cannot create', async () => {
+      render(<Basic />);
+      input().focus();
+      type('durian');
+      await screen.findByRole('listbox');
+      expect(screen.queryByRole('option', { name: /Create/ })).toBeNull();
+      expect(screen.getByText('No matches')).toBeInTheDocument();
+    });
+
+    it('reports the query and selects nothing when the offer is taken by pointer', async () => {
+      const onCreate = vi.fn();
+      const onValueChange = vi.fn();
+      render(<Basic onCreate={onCreate} onValueChange={onValueChange} />);
+      input().focus();
+      type('durian');
+      await screen.findByRole('listbox');
+      fireEvent.click(screen.getByRole('option', { name: 'Create “durian”' }));
+
+      expect(onCreate).toHaveBeenCalledWith(
+        'durian',
+        expect.objectContaining({ reason: 'pointer' }),
+      );
+      expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('is an option the keyboard reaches and Enter takes', async () => {
+      const onCreate = vi.fn();
+      render(<Basic onCreate={onCreate} />);
+      input().focus();
+      type('durian');
+      await screen.findByRole('listbox');
+      press('ArrowDown');
+      expect(highlighted()).toBe(screen.getByRole('option', { name: 'Create “durian”' }).id);
+      press('Enter');
+
+      expect(onCreate).toHaveBeenCalledWith(
+        'durian',
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+    });
+  });
+
   it('hides a group whose every option was filtered away', async () => {
     render(
       <Basic>

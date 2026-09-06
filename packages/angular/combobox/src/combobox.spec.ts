@@ -67,6 +67,28 @@ class BoundHost {
   value: string | null = 'blueberry';
 }
 
+@Component({
+  standalone: true,
+  imports: [SlCombobox, SlComboboxItem],
+  template: `
+    <sl-combobox
+      aria-label="Fruit"
+      [portal]="false"
+      [open]="true"
+      [creatable]="creatable()"
+      (create)="created.set($event.query)"
+      (valueChangeRequest)="requested.set($event.value)"
+    >
+      <sl-combobox-item value="apple" label="Apple" />
+    </sl-combobox>
+  `,
+})
+class CreateHost {
+  readonly creatable = signal(true);
+  readonly created = signal<string | undefined>(undefined);
+  readonly requested = signal<string | null | undefined>(undefined);
+}
+
 const field = () =>
   document.querySelector<HTMLInputElement>("[data-part='input']") as HTMLInputElement;
 
@@ -107,6 +129,57 @@ describe('SlCombobox', () => {
    * to the committed value and says what it refused. `allowsCustomValue` takes
    * it as the value instead. React's binding states the reasoning.
    */
+  /**
+   * CB8. The offer to add what was typed is an option, so the keyboard reaches
+   * it and Enter takes it; taking it reports the query and selects nothing,
+   * because the collection does not hold the value yet.
+   */
+  describe('creating a value the list does not hold', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [CreateHost] }).compileComponents();
+    });
+
+    const typeInto = (fixture: ComponentFixture<CreateHost>, text: string) => {
+      field().value = text;
+      field().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+
+    it('offers the query as an option, in place of the empty message', () => {
+      const fixture = TestBed.createComponent(CreateHost);
+      fixture.detectChanges();
+      typeInto(fixture, 'durian');
+
+      const offer = document.querySelector("[data-part='item'][data-create]");
+      expect(offer?.textContent?.trim()).toBe('Create “durian”');
+      expect(document.querySelector("[data-part='empty']")).toBeNull();
+    });
+
+    it('offers nothing while something matched, or while the field cannot create', () => {
+      const fixture = TestBed.createComponent(CreateHost);
+      fixture.detectChanges();
+      typeInto(fixture, 'App');
+      expect(document.querySelector('[data-create]')).toBeNull();
+
+      fixture.componentInstance.creatable.set(false);
+      typeInto(fixture, 'durian');
+      expect(document.querySelector('[data-create]')).toBeNull();
+      expect(document.querySelector("[data-part='empty']")).not.toBeNull();
+    });
+
+    it('reports the query and selects nothing when the offer is taken', () => {
+      const fixture = TestBed.createComponent(CreateHost);
+      fixture.detectChanges();
+      typeInto(fixture, 'durian');
+
+      document.querySelector<HTMLElement>('[data-create]')?.click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.created()).toBe('durian');
+      expect(fixture.componentInstance.requested()).toBeUndefined();
+    });
+  });
+
   describe('text that matches no option', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({ imports: [SettleHost] }).compileComponents();

@@ -25,7 +25,6 @@
     --_solid-hover: var(--slotted-tone-accent-solid-hover);
     --_solid-active: var(--slotted-tone-accent-solid-active);
     --_on-solid: var(--slotted-tone-accent-on-solid);
-    --_subtle-hover: var(--slotted-tone-accent-subtle-hover);
     --_subtle-active: var(--slotted-tone-accent-subtle-active);
     --_text: var(--slotted-tone-accent-text);
     /**
@@ -140,7 +139,6 @@
     --_solid-hover: var(--slotted-tone-secondary-solid-hover);
     --_solid-active: var(--slotted-tone-secondary-solid-active);
     --_on-solid: var(--slotted-tone-secondary-on-solid);
-    --_subtle-hover: var(--slotted-tone-secondary-subtle-hover);
     --_subtle-active: var(--slotted-tone-secondary-subtle-active);
     --_text: var(--slotted-tone-secondary-text);
     /**
@@ -149,13 +147,15 @@
      * `dark` and 1.00:1 in `high-contrast`, where it is the page's own white. A
      * neutral control with no edge at all is a control that cannot be found.
      *
-     * The edge is the next step of the tone's own ramp — the hover fill, one
-     * shade darker than the resting one — and nothing stronger. The tone's
-     * `border` role was tried and is far too loud: a filled neutral button is a
-     * quiet control, and an edge that announces itself turns it into an outline
-     * button wearing a fill.
+     * The edge is the next darker step of the tone's own ramp — the active
+     * fill — and nothing stronger. It was the hover fill while a hover
+     * darkened; a hover now lightens (the rule is in the theme), and an edge
+     * lighter than what it encloses is no edge. The tone's `border` role was
+     * tried and is far too loud: a filled neutral button is a quiet control,
+     * and an edge that announces itself turns it into an outline button
+     * wearing a fill.
      */
-    --_edge: var(--_solid-hover);
+    --_edge: var(--_solid-active);
   }
 
   [data-ui='button'][data-tone='success'] {
@@ -163,7 +163,6 @@
     --_solid-hover: var(--slotted-tone-success-solid-hover);
     --_solid-active: var(--slotted-tone-success-solid-active);
     --_on-solid: var(--slotted-tone-success-on-solid);
-    --_subtle-hover: var(--slotted-tone-success-subtle-hover);
     --_subtle-active: var(--slotted-tone-success-subtle-active);
     --_text: var(--slotted-tone-success-text);
   }
@@ -173,7 +172,6 @@
     --_solid-hover: var(--slotted-tone-warning-solid-hover);
     --_solid-active: var(--slotted-tone-warning-solid-active);
     --_on-solid: var(--slotted-tone-warning-on-solid);
-    --_subtle-hover: var(--slotted-tone-warning-subtle-hover);
     --_subtle-active: var(--slotted-tone-warning-subtle-active);
     --_text: var(--slotted-tone-warning-text);
   }
@@ -183,7 +181,6 @@
     --_solid-hover: var(--slotted-tone-danger-solid-hover);
     --_solid-active: var(--slotted-tone-danger-solid-active);
     --_on-solid: var(--slotted-tone-danger-on-solid);
-    --_subtle-hover: var(--slotted-tone-danger-subtle-hover);
     --_subtle-active: var(--slotted-tone-danger-subtle-active);
     --_text: var(--slotted-tone-danger-text);
   }
@@ -296,7 +293,18 @@
     color: var(--_on-solid, ButtonText);
   }
 
-  /* ── Hover and active, held back for every stronger state ─────────────── */
+  /**
+   * ── Hover and active, held back for every stronger state ──────────────
+   *
+   * A hovered control changes one thing, its fill, in one step of the
+   * control's transition. A filled control lightens: `--slotted-tone-*-solid-
+   * hover` is the fill moved a share of the way toward white, and the theme
+   * derives it from the fill by one rule rather than choosing it beside it. A
+   * bare control takes the neutral hover ground whatever its tone, because a
+   * tinted ground under an outline or ghost action read as five different
+   * status chips before it read as five hovered buttons; the tone stays in
+   * the label, where it was.
+   */
 
   [data-ui='button'][data-variant='solid']:hover:not(:disabled):not([data-disabled]):not(
       [data-loading]
@@ -316,7 +324,7 @@
   [data-ui='button'][data-variant='ghost']:hover:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]) {
-    background: var(--_subtle-hover, ButtonFace);
+    background: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
   }
 
   [data-ui='button'][data-variant='outline']:active:not(:disabled):not([data-disabled]):not(

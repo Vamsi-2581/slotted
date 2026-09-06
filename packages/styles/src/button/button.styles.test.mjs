@@ -145,7 +145,7 @@ test('keeps an edge on every variant that is not bare', () => {
  */
 test('lets a fill be its own edge, except the one that is the page', () => {
   assert.ok(rule(ui).includes('--_edge:var(--_solid)'));
-  assert.ok(rule(`${ui}[data-tone='secondary']`).includes('--_edge:var(--_solid-hover)'));
+  assert.ok(rule(`${ui}[data-tone='secondary']`).includes('--_edge:var(--_solid-active)'));
 
   for (const tone of ['accent', 'success', 'warning', 'danger']) {
     assert.ok(!rule(`${ui}[data-tone='${tone}']`).includes('--_edge:'), `${tone} borrows an edge`);
@@ -229,6 +229,44 @@ test('changes no geometry when a state changes', () => {
   }
 
   assert.deepEqual(offenders, [], `a state moves the layout:\n  ${offenders.join('\n  ')}`);
+});
+
+/**
+ * A hovered control changes its fill and nothing else, in one step of the
+ * control's transition: 120ms on the theme's short duration, on the theme's
+ * standard curve. A filled control takes the tone's hover step, which the
+ * theme derives from the fill by lightening it; a bare control takes the
+ * neutral hover ground whatever its tone, so five outline actions in a row
+ * hover as five buttons and not as five status chips.
+ */
+test('hovers by lightening the fill, or by the one neutral ground under a bare control', () => {
+  const hovering = [...declarations.matchAll(/(?<=^|\})([^{}]+)\{([^{}]*)\}/g)]
+    .filter(([, selector]) => /:hover/.test(selector) && !/\[data-pressed\]:hover/.test(selector))
+    .map(([, selector, body]) => ({
+      selector: selector.replace(/\s+/g, ''),
+      body: body.replace(/\s+/g, ''),
+    }));
+  assert.ok(hovering.length >= 2, 'the family paints no hover');
+  for (const { selector, body } of hovering) {
+    assert.match(body, /^background:[^;]+;$/, `"${selector}" changes more than the fill on hover`);
+  }
+  const solid = hovering.find(({ selector }) => selector.includes("[data-variant='solid']"));
+  assert.equal(solid?.body, 'background:var(--_solid-hover,Highlight);');
+  const bare = hovering.find(({ selector }) => selector.includes("[data-variant='outline']"));
+  assert.ok(
+    bare?.selector.includes("[data-variant='ghost']"),
+    'outline and ghost hover as two rules',
+  );
+  assert.equal(bare?.body, 'background:var(--slotted-tone-secondary-subtle-hover,ButtonFace);');
+  assert.doesNotMatch(
+    declarations,
+    /--_subtle-hover/,
+    'a tone still carries a hover ground of its own',
+  );
+  assert.match(
+    rule(ui),
+    /background-color var\(--slotted-control-transition-duration\) var\(--slotted-control-transition-easing\)/,
+  );
 });
 
 test('holds hover and active back for every stronger state', () => {

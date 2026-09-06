@@ -22,7 +22,7 @@ const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-su
  * and its borders are held to the non-text ratio, because a border is what
  * separates two surfaces that no longer differ in fill.
  */
-const TEXT_RATIO = { light: 4.5, dark: 4.5, 'high-contrast': 7 };
+export const TEXT_RATIO = { light: 4.5, dark: 4.5, 'high-contrast': 7 };
 const NON_TEXT_RATIO = 3;
 
 /** The collapsed duration is short enough to read as instant, and never zero. */

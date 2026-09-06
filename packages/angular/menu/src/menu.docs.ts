@@ -228,6 +228,19 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'submenu-open',
+    title: 'Submenu open',
+    note: 'The submenu as it lands: its panel one gap out from the parent surface, not against the item, and its first item level with the item that opened it. Every other scene keeps its submenu closed until it is hovered or the inline-end arrow asks for it.',
+    snippet: defineSnippet({
+      id: 'menu-angular-submenu-open',
+      language: 'angular',
+      label: 'Open from the start, for a capture',
+      source: `<sl-menu #sendTo [open]="true">
+  <button slMenuItem>Slack</button>
+</sl-menu>`,
+    }),
+  },
+  {
     id: 'tone',
     title: 'Tone',
     note: 'A destructive command reads as destructive before it is read at all: the tone paints the label, the mark and the highlight together, in all three schemes.',
@@ -454,7 +467,7 @@ const api = apiRows([
   [
     'submenuOpenDelay',
     'number',
-    '100',
+    '150',
     'sl-menu',
     'How long a submenu waits before hover opens it.',
   ],

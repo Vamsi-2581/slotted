@@ -10,9 +10,9 @@ import type { MenuDefaults, MenuDefaultsProviderProps } from './menu.types';
  * where the button's text and the items' labels share one edge; `popover`
  * centres, because it points at something instead of hanging from it.
  *
- * `submenuOpenDelay` is Base UI's hundred milliseconds: short enough that a
- * deliberate hover is answered before the reader presses, long enough that a
- * pointer crossing three items on its way down opens none of them.
+ * `submenuOpenDelay` is a hundred and fifty milliseconds (M2): short enough
+ * that a deliberate hover is answered before the reader presses, long enough
+ * that a pointer crossing three items on its way down opens none of them.
  * `submenuCloseDelay` is the window the pointer has to reach the submenu once
  * it has stopped heading there, and it is spent by `pointer-intent`.
  *
@@ -40,7 +40,7 @@ export const MENU_FALLBACK: MenuDefaults = {
   size: 'md',
   strategy: 'absolute',
   submenuCloseDelay: 300,
-  submenuOpenDelay: 100,
+  submenuOpenDelay: 150,
   typeahead: true,
   typeaheadTimeout: 500,
 };

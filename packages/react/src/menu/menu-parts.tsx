@@ -2,7 +2,7 @@ import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createArrowNavigation, tabbables } from '@slotted/core/focus';
 import { createPointerIntent } from '@slotted/core/pointer-intent';
 import { createPortalRoot } from '@slotted/core/portal';
-import { createPositioner } from '@slotted/core/positioner';
+import { createPositioner, submenuOffsets } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
@@ -369,15 +369,28 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     if (layerNode === null || menu.triggerNode === null) return;
     let live = true;
 
+    /* A submenu is anchored to its item and placed from the parent's edge: the
+       parent surface's inset is added along the side, and the submenu's own
+       inset above its first item is taken off along the alignment, so the
+       first item lines up with the item that opened it (M2). */
+    const submenu =
+      menu.parent !== null && surfaceNode !== null
+        ? submenuOffsets({
+            parentSurface: menu.parent.node,
+            item: menu.triggerNode,
+            surface: surfaceNode,
+          })
+        : { sideOffset: 0, alignOffset: 0 };
+
     const handle = createPositioner(menu.triggerNode, layerNode, {
       align,
-      alignOffset,
+      alignOffset: alignOffset + submenu.alignOffset,
       boundaryPadding: collisionPadding,
       flip,
       hideWhenDetached,
       shift,
       side,
-      sideOffset,
+      sideOffset: sideOffset + submenu.sideOffset,
       strategy,
     });
 
@@ -397,11 +410,13 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     flip,
     hideWhenDetached,
     layerNode,
+    menu.parent,
     menu.triggerNode,
     shift,
     side,
     sideOffset,
     strategy,
+    surfaceNode,
   ]);
 
   /**

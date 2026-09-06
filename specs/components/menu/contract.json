@@ -374,7 +374,7 @@
         "sideOffset": 0,
         "alignOffset": 0,
         "collisionPadding": 8,
-        "submenuOpenDelay": 100,
+        "submenuOpenDelay": 150,
         "submenuCloseDelay": 300,
         "typeaheadTimeout": 500
       },
@@ -426,6 +426,7 @@
       "radio-items",
       "groups",
       "submenu",
+      "submenu-open",
       "tone",
       "placement",
       "scrolling",

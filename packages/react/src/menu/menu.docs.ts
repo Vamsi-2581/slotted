@@ -237,6 +237,22 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'submenu-open',
+    title: 'Submenu open',
+    note: 'The submenu as it lands: its panel one gap out from the parent surface, not against the item, and its first item level with the item that opened it. Every other scene keeps its submenu closed until it is hovered or the inline-end arrow asks for it.',
+    snippet: defineSnippet({
+      id: 'menu-react-submenu-open',
+      language: 'tsx',
+      label: 'Open from the start, for a capture',
+      source: `<Menu defaultOpen>
+  <MenuTrigger>Send to</MenuTrigger>
+  <MenuContent>
+    <MenuItem>Slack</MenuItem>
+  </MenuContent>
+</Menu>;`,
+    }),
+  },
+  {
     id: 'tone',
     title: 'Tone',
     note: 'A destructive command reads as destructive before it is read at all: the tone paints the label, the mark and the highlight together, in all three schemes.',
@@ -513,7 +529,7 @@ const api = apiRows([
   ],
   ['alignOffset', 'number', '0', 'Menu', 'Distance along the alignment axis.'],
   ['collisionPadding', 'number', '8', 'Menu', 'How close to the boundary the surface may come.'],
-  ['submenuOpenDelay', 'number', '100', 'Menu', 'How long a submenu waits before hover opens it.'],
+  ['submenuOpenDelay', 'number', '150', 'Menu', 'How long a submenu waits before hover opens it.'],
   [
     'submenuCloseDelay',
     'number',

@@ -76,7 +76,7 @@ const FALLBACK: MenuDefaults = {
   size: 'md',
   strategy: 'absolute',
   submenuCloseDelay: 300,
-  submenuOpenDelay: 100,
+  submenuOpenDelay: 150,
   typeahead: true,
   typeaheadTimeout: 500,
 };

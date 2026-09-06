@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SlMenu } from './menu';
 import {
@@ -268,6 +268,91 @@ describe('SlMenu', () => {
 
     expect(item('PDF')).toBeUndefined();
     expect(document.activeElement).toBe(item('Export as'));
+  });
+
+  /**
+   * Where a submenu lands (M2). A headless document lays nothing out, so the
+   * surfaces are given the boxes a browser would give them: the parent surface
+   * insets its items by five pixels (a border and a step of padding), and the
+   * submenu surface insets its first item by the same five. The positioner is
+   * real; only the measurements are stated.
+   */
+  it('lands one inset out from the parent edge, its first item level with the item that opened it', async () => {
+    const boxOf = (element: Element) => {
+      const text = element.textContent ?? '';
+      const role = element.getAttribute('role');
+      const part = element.getAttribute('data-part');
+      if (role === 'menu' && text.includes('Export as')) {
+        return { x: 100, y: 100, width: 200, height: 120 };
+      }
+      if (role === 'menuitem' && text.trim() === 'Export as') {
+        return { x: 105, y: 140, width: 190, height: 32 };
+      }
+      if (element.getAttribute('data-ui') === 'menu' && part === 'root' && text.includes('PDF')) {
+        return { x: 0, y: 0, width: 168, height: 90 };
+      }
+      if (role === 'menu' && text.includes('PDF')) return { x: 0, y: 0, width: 160, height: 90 };
+      if (role === 'menuitem' && text.trim() === 'PDF')
+        return { x: 5, y: 5, width: 150, height: 32 };
+      return { x: 0, y: 0, width: 0, height: 0 };
+    };
+    vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(1024);
+    vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(768);
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: Element,
+    ) {
+      const box = boxOf(this);
+      return {
+        ...box,
+        left: box.x,
+        top: box.y,
+        right: box.x + box.width,
+        bottom: box.y + box.height,
+        toJSON: () => ({}),
+      };
+    });
+    vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return boxOf(this).width;
+    });
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return boxOf(this).height;
+    });
+
+    await open();
+    item('Export as')?.focus();
+    press('ArrowRight');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const layer = item('PDF')?.closest<HTMLElement>("[data-ui='menu']") ?? null;
+    expect(layer).not.toBeNull();
+    await vi.waitFor(() => expect(layer?.hasAttribute('data-positioned')).toBe(true));
+    /* The item's right edge is at 295; the parent surface's inset of 5 puts
+       the layer at 300, and the submenu's inset of 5 lifts it from 140 to 135. */
+    expect(layer?.style.left).toBe('300px');
+    expect(layer?.style.top).toBe('135px');
+    vi.restoreAllMocks();
+  });
+
+  it('waits a hundred and fifty milliseconds before hover opens a submenu', async () => {
+    await open();
+    vi.useFakeTimers();
+    try {
+      item('Export as')?.dispatchEvent(new PointerEvent('pointerenter', { bubbles: false }));
+      await vi.advanceTimersByTimeAsync(100);
+      fixture.detectChanges();
+      expect(item('PDF')).toBeUndefined();
+
+      await vi.advanceTimersByTimeAsync(50);
+      fixture.detectChanges();
+      expect(item('PDF')).not.toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('takes the size an application set once', async () => {

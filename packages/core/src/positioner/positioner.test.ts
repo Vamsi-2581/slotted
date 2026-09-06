@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fromPlacement, oppositeSide, resolveSide, toPlacement, transformOrigin } from './geometry';
 import * as surface from './index';
 import { POSITIONER_PROPERTIES, createPositioner } from './positioner';
+import { submenuOffsets } from './submenu';
 
 const VIEWPORT = { width: 1024, height: 768 };
 
@@ -138,12 +139,54 @@ describe('the public surface', () => {
       'isVertical',
       'oppositeSide',
       'resolveSide',
+      'submenuOffsets',
       'toPlacement',
       'transformOrigin',
     ]);
     for (const exported of Object.keys(engine)) {
       expect(surface).not.toHaveProperty(exported);
     }
+  });
+});
+
+describe('submenuOffsets', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  function surfaces() {
+    document.body.innerHTML =
+      '<div id="parent"><button id="item"></button></div><div id="surface"><button data-part="item" id="first"></button></div>';
+    const parent = document.getElementById('parent') as HTMLElement;
+    const item = document.getElementById('item') as HTMLElement;
+    const surface = document.getElementById('surface') as HTMLElement;
+    const first = document.getElementById('first') as HTMLElement;
+    return { parent, item, surface, first };
+  }
+
+  it('moves the submenu out to the parent edge and its first item up to the item that opened it', () => {
+    const { parent, item, surface, first } = surfaces();
+    rect(parent, { x: 0, y: 0, width: 200, height: 120 });
+    rect(item, { x: 5, y: 40, width: 190, height: 32 });
+    rect(surface, { x: 0, y: 0, width: 160, height: 90 });
+    rect(first, { x: 5, y: 5, width: 150, height: 32 });
+
+    expect(submenuOffsets({ parentSurface: parent, item, surface })).toEqual({
+      sideOffset: 5,
+      alignOffset: -5,
+    });
+  });
+
+  it('adds nothing for a menu with no parent and a surface with no items', () => {
+    const { item, surface, first } = surfaces();
+    first.remove();
+    rect(item, { x: 5, y: 40, width: 190, height: 32 });
+    rect(surface, { x: 0, y: 0, width: 160, height: 90 });
+
+    expect(submenuOffsets({ parentSurface: null, item, surface })).toEqual({
+      sideOffset: 0,
+      alignOffset: 0,
+    });
   });
 });
 

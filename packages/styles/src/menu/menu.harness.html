@@ -352,9 +352,12 @@
       data-size="md"
       data-open
       style="
-        top: 46px;
-        inset-inline-start: 46%;
-        --slotted-positioner-available-width: 52%;
+        /* Where the positioner puts a submenu (M2): its layer at the parent
+           surface's edge, so the layer's own gap separates the two panels, and
+           one inset above the item that opened it, so the first items line up. */
+        top: 50px;
+        inset-inline-start: 132px;
+        --slotted-positioner-available-width: calc(100% - 132px);
         --slotted-positioner-transform-origin: left top;
       "
     >

@@ -15,6 +15,8 @@ export type {
   WritingDirection,
 } from './geometry';
 export { POSITIONER_PROPERTIES, createPositioner } from './positioner';
+export { submenuOffsets } from './submenu';
+export type { SubmenuGeometry, SubmenuOffsets } from './submenu';
 export type {
   PositionerAnchor,
   PositionerHandle,

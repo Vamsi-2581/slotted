@@ -4,7 +4,7 @@ import { createArrowNavigation, tabbables } from '@slotted/core/focus';
 import type { ArrowNavigationHandle } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
-import { createPositioner } from '@slotted/core/positioner';
+import { createPositioner, submenuOffsets } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle } from '@slotted/core/presence';
@@ -348,16 +348,29 @@ export class SlMenu {
     const anchor = this.trigger();
     if (anchor === null) return;
 
+    /* A submenu is anchored to its item and placed from the parent's edge: the
+       parent surface's inset is added along the side, and the submenu's own
+       inset above its first item is taken off along the alignment, so the
+       first item lines up with the item that opened it (M2). */
+    const submenu =
+      this.parent !== null && this.surfaceNode !== null
+        ? submenuOffsets({
+            parentSurface: this.parent.surface(),
+            item: anchor,
+            surface: this.surfaceNode,
+          })
+        : { sideOffset: 0, alignOffset: 0 };
+
     this.positioner?.destroy();
     this.positioner = createPositioner(anchor, this.layerNode, {
       align: this.resolvedAlign(),
-      alignOffset: this.alignOffset() ?? this.defaults.alignOffset,
+      alignOffset: (this.alignOffset() ?? this.defaults.alignOffset) + submenu.alignOffset,
       boundaryPadding: this.collisionPadding() ?? this.defaults.collisionPadding,
       flip: this.flip() ?? this.defaults.flip,
       hideWhenDetached: this.hideWhenDetached() ?? this.defaults.hideWhenDetached,
       shift: this.shift() ?? this.defaults.shift,
       side: this.resolvedSide(),
-      sideOffset: this.sideOffset() ?? this.defaults.sideOffset,
+      sideOffset: (this.sideOffset() ?? this.defaults.sideOffset) + submenu.sideOffset,
       strategy: this.strategy() ?? this.defaults.strategy,
     });
     void this.positioner.update();

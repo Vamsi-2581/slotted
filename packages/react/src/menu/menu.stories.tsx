@@ -85,6 +85,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     shortcuts: Shortcuts,
     states: States,
     submenu: Submenus,
+    'submenu-open': SubmenuOpen,
     tone: Tone,
   }) as never;
 
@@ -275,6 +276,30 @@ export const Groups: Story = {
 
 export const Submenus: Story = {
   parameters: scenario('submenu'),
+  render: () => (
+    <Viewport>
+      <Menu defaultOpen portal={false}>
+        <Trigger>Share</Trigger>
+        <MenuContent>
+          <MenuItem>Copy link</MenuItem>
+          <Menu portal={false}>
+            <MenuTrigger>Send to</MenuTrigger>
+            <MenuContent>
+              <MenuItem>Slack</MenuItem>
+              <MenuItem>Email</MenuItem>
+            </MenuContent>
+          </Menu>
+          <MenuItem>Embed…</MenuItem>
+        </MenuContent>
+      </Menu>
+    </Viewport>
+  ),
+};
+
+/* The submenu open from the start, for the picture: its panel one gap out
+   from the parent's edge, its first item level with the item that opened it. */
+export const SubmenuOpen: Story = {
+  parameters: scenario('submenu-open'),
   render: () => (
     <Viewport>
       <Menu defaultOpen portal={false}>

@@ -49,6 +49,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     shortcuts: Shortcuts,
     states: States,
     submenu: Submenus,
+    'submenu-open': SubmenuOpen,
     tone: Tone,
   }) as never;
 
@@ -267,6 +268,28 @@ export const Groups: Story = {
 
 export const Submenus: Story = {
   parameters: scenario('submenu'),
+  render: () => ({
+    template: `
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
+        <button slButton size="sm" variant="outline" [slMenuTriggerFor]="share">Share</button>
+        <sl-menu #share [open]="true" [portal]="false">
+          <button slMenuItem>Copy link</button>
+          <button slMenuItem [slMenuTriggerFor]="sendTo">Send to</button>
+          <sl-menu #sendTo [portal]="false">
+            <button slMenuItem>Slack</button>
+            <button slMenuItem>Email</button>
+          </sl-menu>
+          <button slMenuItem>Embed…</button>
+        </sl-menu>
+      </div>
+    `,
+  }),
+};
+
+/* The submenu open from the start, for the picture: its panel one gap out
+   from the parent's edge, its first item level with the item that opened it. */
+export const SubmenuOpen: Story = {
+  parameters: scenario('submenu-open'),
   render: () => ({
     template: `
       <div class="slotted-demo-viewport" data-place="top" data-size="tall">

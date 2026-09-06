@@ -253,6 +253,7 @@ test('declares a scenario for every capability a reference page has to prove', (
     'radio-items',
     'groups',
     'submenu',
+    'submenu-open',
     'tone',
     'placement',
     'scrolling',

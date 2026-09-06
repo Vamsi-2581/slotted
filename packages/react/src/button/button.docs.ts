@@ -204,6 +204,7 @@ export const REACT_BUTTON_DOCS = {
       'The accessible name is mandatory at the type level: one of aria-label or aria-labelledby must be present, and the development build throws when neither is.',
       'aria-pressed appears only once pressed or defaultPressed is passed. A plain icon button that announced itself as a toggle would be announcing a state it does not have.',
       'The name must not change with the pressed state. The APG is explicit that a toggle keeps its label and lets the state be announced beside it.',
+      'On is painted the way the foundation paints selected: the accent selection ground under accent text, inside the accent edge, whatever tone and variant the toggle was written as. A toggle that is on hovers on that ground’s own hover step, never on the neutral one a toggle that is off hovers with.',
       'The square control is the control height in both axes and never falls below the WCAG 2.2 minimum of 24 by 24 CSS pixels, at any density.',
       'Add a tooltip when the icon alone does not say what the action does. The name is not a substitute for a visible one.',
     ],

@@ -279,18 +279,29 @@
   /**
    * ── Pressed ───────────────────────────────────────────────────────────
    *
-   * A toggle that is on takes the tone's solid fill whatever its variant, so
-   * "on" is never one shade away from "hovered". It sits above hover and
-   * below loading and disabled, which is the order `STATE_PRECEDENCE` sets.
+   * A toggle that is on is a selected thing, and it is painted the way every
+   * selected thing in the foundation is (R1): the accent selection ground
+   * under the accent text, inside the accent edge — whatever tone and variant
+   * the toggle was written as, because "on" is one colour across the system
+   * and not a shade of each control's own. It took the tone's solid fill
+   * before this, which made a neutral toggle that was on the same rectangle
+   * as one being pressed (`#e2e8f0` for both in `light`) and made a toggle
+   * that was on look like a primary action.
+   *
+   * The ground is the tone's `subtle-active` step: the same value as its
+   * `surface` in `light` and `dark`, and in `high-contrast` the one tinted
+   * step the scheme keeps (`#d3e0fa`) where the surface is the page's white.
+   * It sits above hover and below loading and disabled, which is the order
+   * `STATE_PRECEDENCE` sets.
    */
   [data-ui='button'][data-pressed]:not(:disabled):not([data-disabled]) {
-    background: var(--_solid, ButtonFace);
-    border-color: var(--_edge, ButtonBorder);
+    background: var(--slotted-tone-accent-subtle-active, Highlight);
+    border-color: var(--slotted-tone-accent-border, Highlight);
     /* A ghost toggle that is on has taken a fill and an edge, so it is a framed
        control and carries what one carries. Without this the same toggle would
        be lifted or flat depending on the variant it was written as. */
     box-shadow: var(--slotted-control-shadow, none);
-    color: var(--_on-solid, ButtonText);
+    color: var(--slotted-tone-accent-text, HighlightText);
   }
 
   /**
@@ -336,13 +347,17 @@
     background: var(--_subtle-active, ButtonFace);
   }
 
-  /* A toggle that is already on still answers the pointer. */
+  /**
+   * A toggle that is already on still answers the pointer, on the accent
+   * ground's own hover step and never on the neutral one a toggle that is off
+   * hovers with — the two states share no surface in any of theirs.
+   */
   [data-ui='button'][data-pressed]:hover:not(:disabled):not([data-disabled]):not([data-loading]) {
-    background: var(--_solid-hover, Highlight);
+    background: var(--slotted-tone-accent-subtle-hover, Highlight);
   }
 
   [data-ui='button'][data-pressed]:active:not(:disabled):not([data-disabled]):not([data-loading]) {
-    background: var(--_solid-active, Highlight);
+    background: var(--slotted-tone-accent-subtle-active, Highlight);
   }
 
   /* ── Focus ────────────────────────────────────────────────────────────── */

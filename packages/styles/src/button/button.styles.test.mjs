@@ -195,16 +195,36 @@ test('draws an outline button with a neutral edge and a tone label', () => {
  * holding the moment the family had a second thing to draw: the waiting band
  * is a pseudo-element too, and it is not an edge and not on this state.
  */
-test('says pressed with a fill, and with one edge like every other control', () => {
+test('says pressed the way the foundation says selected, and with one edge like every other control', () => {
   const pressed = rule(`${ui}[data-pressed]:not(:disabled):not([data-disabled])`);
-  assert.ok(pressed.includes('background:var(--_solid'));
-  assert.ok(pressed.includes('border-color:var(--_edge'));
-  assert.ok(pressed.includes('color:var(--_on-solid'));
+  assert.ok(pressed.includes('background:var(--slotted-tone-accent-subtle-active'));
+  assert.ok(pressed.includes('border-color:var(--slotted-tone-accent-border'));
+  assert.ok(pressed.includes('color:var(--slotted-tone-accent-text'));
+  assert.ok(pressed.includes('box-shadow:var(--slotted-control-shadow'));
+  /* On is one colour across the system, not a shade of each tone's own. */
+  assert.doesNotMatch(pressed, /--_solid|--_on-solid|--_edge/);
 
   const drawn = selectors().filter(
     (selector) => selector.includes('[data-pressed]') && /::(after|before)/.test(selector),
   );
   assert.deepEqual(drawn, [], 'the family draws a second edge again');
+});
+
+/**
+ * A toggle that is on and a toggle that is off never hover on the same
+ * ground: off hovers on the neutral step, on hovers on the accent ground's
+ * own hover step. Measured in `light`, the two are `#f1f5f9` and `#eff6ff`.
+ */
+test('hovers a pressed toggle on the accent ground, never on the neutral one', () => {
+  const on = rule(
+    `${ui}[data-pressed]:hover:not(:disabled):not([data-disabled]):not([data-loading])`,
+  );
+  assert.equal(on, 'background:var(--slotted-tone-accent-subtle-hover,Highlight);');
+  const pressing = rule(
+    `${ui}[data-pressed]:active:not(:disabled):not([data-disabled]):not([data-loading])`,
+  );
+  assert.equal(pressing, 'background:var(--slotted-tone-accent-subtle-active,Highlight);');
+  assert.doesNotMatch(on, /secondary-subtle-hover/);
 });
 
 /**

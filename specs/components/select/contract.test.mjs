@@ -178,6 +178,7 @@ test('names every part, and no part it does not own', () => {
     'trigger',
     'value',
     'arrow',
+    'busy',
     'clear',
     'positioner',
     'content',
@@ -191,6 +192,7 @@ test('names every part, and no part it does not own', () => {
     'separator',
     'empty',
     'status',
+    'placeholder',
   ]);
   assert.deepEqual(member.states, [
     'default',

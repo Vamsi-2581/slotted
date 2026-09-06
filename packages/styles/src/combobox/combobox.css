@@ -237,6 +237,20 @@
     rotate: 180deg;
   }
 
+  /**
+   * The ring, where the chevron stands. `select`'s decision and `select`'s
+   * reasons (SL6/CB5): while an answer is travelling the control shows the
+   * ring rather than the chevron, and the arc is the one `spinner/spinner.css`
+   * draws for every family that waits, worn as `data-ui='spinner'` beside this
+   * family's own part.
+   */
+  [data-ui='combobox'] [data-part='busy'] {
+    --slotted-spinner-size: var(--_icon-size);
+
+    color: var(--slotted-combobox-arrow-color, var(--slotted-text-muted, GrayText));
+    flex: none;
+  }
+
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
   [data-ui='combobox'][data-part='root'][data-size='sm'] {
@@ -871,43 +885,50 @@
     display: none;
   }
 
-  [data-ui='combobox'] [data-part='status'][data-loading]::before {
-    animation: slotted-combobox-pulse var(--slotted-duration-loop) var(--slotted-easing-standard)
-      infinite;
-    background-color: currentcolor;
-    block-size: var(--_content-icon-size);
-    content: '';
-    display: inline-block;
-    inline-size: var(--_content-icon-size);
-    margin-inline-end: var(--slotted-space-2, 0.25rem);
-    mask-image: var(--slotted-combobox-loading-icon, var(--slotted-icon-dot));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-    /* Centred on the midpoint of the cap band and the x band, which is where
-       `docs/build-briefing.md` fixes a mark beside a line of text. */
-    vertical-align: calc(((1cap + 1ex) / 2 - var(--_content-icon-size)) / 2);
+  /**
+   * The wait, as the shape of the list that is coming. `select`'s decision and
+   * `select`'s reasons (SL6/CB5): three rows the height of an option rather
+   * than one sentence, so the surface a reader is looking at while the answer
+   * travels is the surface they will go on looking at. The bars are
+   * `skeleton/skeleton.css`'s — the family places them and states nothing
+   * about how a placeholder is painted — and they are hidden from assistive
+   * technology, because the `status` row beside them is the live region.
+   */
+  [data-ui='combobox'] [data-part='placeholder'] {
+    display: grid;
+    /* The surface is a grid of option columns; the rows span all of them, as
+       the status and empty rows do. */
+    grid-column: 1 / -1;
+    padding-block: var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--_item-inset);
   }
 
-  @keyframes slotted-combobox-pulse {
-    0%,
-    100% {
-      opacity: 0.35;
-      scale: 0.7;
-    }
-
-    50% {
-      opacity: 1;
-      scale: 1;
-    }
+  [data-ui='combobox'] [data-part='placeholder'] > * {
+    align-items: center;
+    display: flex;
+    min-block-size: var(--_item-height);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    [data-ui='combobox'] [data-part='status'][data-loading]::before {
-      animation: none;
-      opacity: 0.7;
-    }
+  [data-ui='combobox'] [data-part='placeholder'] > [data-ui='skeleton'] {
+    align-self: center;
   }
+
+  /* Three ragged widths: three identical bars read as a table, and a list of
+     labels is ragged. */
+  [data-ui='combobox'] [data-part='placeholder'] > :nth-child(2) [data-ui='skeleton'] {
+    inline-size: 78%;
+  }
+
+  [data-ui='combobox'] [data-part='placeholder'] > :nth-child(3) [data-ui='skeleton'] {
+    inline-size: 56%;
+  }
+
+  /**
+   * The status row while an answer is travelling. It no longer draws a pulsing
+   * dot of its own: the control carries the ring and the popup carries the
+   * three bars, and a third repeating motion beside them was one answer too
+   * many for one wait (SL6/CB5).
+   */
 
   [data-ui='combobox'] > [data-part='content'][data-loading] {
     cursor: progress;

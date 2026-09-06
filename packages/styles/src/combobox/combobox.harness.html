@@ -426,6 +426,17 @@
       "
     >
       <div data-part="content" role="listbox" aria-label="Loading" aria-busy="true" data-loading>
+        <div data-part="placeholder" aria-hidden="true">
+          <div>
+            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+          </div>
+          <div>
+            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+          </div>
+          <div>
+            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+          </div>
+        </div>
         <div data-part="status" role="status" data-loading>Loading…</div>
       </div>
     </div>
@@ -459,6 +470,22 @@
         <div data-part="status" role="status">2 results</div>
       </div>
     </div>
+  </div>
+</section>
+
+<section data-scene="loading">
+  <div
+    data-ui="combobox"
+    data-part="root"
+    data-size="md"
+    data-loading
+    data-full-width
+    style="inline-size: 240px"
+  >
+    <input data-part="input" role="combobox" aria-expanded="false" value="Carregando" />
+    <button data-part="trigger" type="button" tabindex="-1" aria-label="Abrir">
+      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+    </button>
   </div>
 </section>
 

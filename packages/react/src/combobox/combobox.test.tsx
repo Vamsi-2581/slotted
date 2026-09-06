@@ -280,6 +280,22 @@ describe('Combobox', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading…');
   });
 
+  /**
+   * SL6/CB5: the wait is drawn once, by the two sheets that own it. The control
+   * shows the ring `spinner` draws instead of the chevron, and the popup shows
+   * three rows the height of an option, drawn by `skeleton`.
+   */
+  it('shows the ring instead of the chevron, and three rows instead of a sentence, while an answer travels', async () => {
+    const { container } = render(<Basic loading>{[]}</Basic>);
+    expect(container.querySelector("[data-part='arrow']")).toBeNull();
+    expect(container.querySelector("[data-part='busy']")).toHaveAttribute('data-ui', 'spinner');
+
+    await openByArrow();
+    const placeholder = document.querySelector("[data-part='placeholder']");
+    expect(placeholder).toHaveAttribute('aria-hidden', 'true');
+    expect(placeholder?.querySelectorAll("[data-ui='skeleton']")).toHaveLength(3);
+  });
+
   it('hides a group whose every option was filtered away', async () => {
     render(
       <Basic>

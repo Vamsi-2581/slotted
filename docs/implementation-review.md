@@ -218,7 +218,7 @@ Localização: `packages/styles/src/select/select.css`, `packages/react/src/sele
 - [x] **SL3 — Ícones à direita (clear, chevron) pequenos em `compact` e `dense`.** Esperado: o glifo usa `--slotted-control-icon-size-<densidade>` com piso de 14px. Em `compact` o controle pode ter 24px de altura e o glifo 14px; nunca abaixo disso. Relacionado a R2 (o botão de clear é parte interna). (MAOC — `Combobox`, `TextField`, `NumberField`, `CurrencyField`)
 - [ ] **SL4 — Prévia de múltipla seleção "Apple +1".** Esperado: renderizar os valores selecionados como `Tag` compactas (altura igual a `--slotted-control-icon-size-<densidade>` + 4px) dentro do controle, com overflow calculado por `ResizeObserver`: as tags que não cabem colapsam em uma única tag `+N`. Cada tag tem botão interno de remoção (R2). Fallback textual "N selecionados" apenas quando o controle está abaixo de 120px de largura. (MAOC — `Combobox` múltiplo)
 - [x] **SL5 — Variante `plain` com sombra.** Localização: `select.css:359` (`[data-variant='plain']`). Esperado: `plain` sem `box-shadow`, sem borda, sem fundo em repouso; `hover` com superfície `secondary-subtle-hover`; `focus-visible` com anel R3. Verificar se `TextField`, `Combobox` e `NumberField` têm a mesma variante e aplicar a mesma regra. (MAOC)
-- [ ] **SL6 — Estado `loading`.** Decisão: não usar `Loader`/`LoaderScene` com superfície dentro do overlay. Esperado: spinner inline de B4 no lugar do chevron enquanto carrega; dentro do overlay, três linhas de `Skeleton` com a altura de uma opção. (MAOC — `Combobox`)
+- [x] **SL6 — Estado `loading`.** Decisão: não usar `Loader`/`LoaderScene` com superfície dentro do overlay. Esperado: spinner inline de B4 no lugar do chevron enquanto carrega; dentro do overlay, três linhas de `Skeleton` com a altura de uma opção. (MAOC — `Combobox`)
 - [x] **SL7 — Indicador desalinhado em opção de duas linhas.** Observado por `tools/harness/audit.mjs` durante SL1, sem alteração de CSS: na cena `long-content`, `[data-part='indicator']` fica 39.25px acima da linha que anota (centralizado no bloco de duas linhas mais descrição). Esperado: indicador alinhado à primeira linha do label, pela mesma regra de R5. (MAOC — `Combobox`)
 
 ---
@@ -231,7 +231,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
 - [x] **CB2 — `#Select:2`.**
 - [x] **CB3 — `#Select:3`.**
 - [ ] **CB4 — `#Select:4`.**
-- [ ] **CB5 — `#Select:6`.**
+- [x] **CB5 — `#Select:6`.**
 - [x] **CB6 — Destaque do match do filtro.** Localização: `combobox.css:665` (`[data-part='match']`): `font-weight: 600`, `padding-inline: 0.1em`, `border-radius: 2px`, fundo `accent-surface`. O peso e o padding alteram a métrica da palavra e o trecho destacado parece deslocado. Esperado, extraído para um componente compartilhado (`packages/styles/src/highlight/highlight.css`, parte `[data-ui='highlight']` ou `[data-part='match']` global), consumido por `Combobox`, `Select` com filtro, `Listbox` com filtro e `Menu` com busca (R6):
   - `font-weight: inherit`. `padding: 0`. `border-radius: 0`. `letter-spacing: inherit`.
   - `color: var(--slotted-tone-accent-text)`.

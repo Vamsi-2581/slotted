@@ -313,7 +313,12 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
         tabIndex={-1}
         type="button"
       >
-        <span data-part="arrow" />
+        {/* `select`'s decision and `select`'s reasons (SL6/CB5). */}
+        {combobox.loading ? (
+          <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+        ) : (
+          <span data-part="arrow" />
+        )}
       </button>
       {combobox.name === undefined ? null : (
         <input
@@ -601,6 +606,21 @@ export function ComboboxContent({
         <div ref={sentinel} />
         {!combobox.loading && count === 0 ? (
           <div data-part="empty">{empty ?? combobox.emptyLabel}</div>
+        ) : null}
+        {combobox.loading ? (
+          /*
+            The wait, as the shape of the list that is coming: three rows the
+            height of an option, drawn by `skeleton` (SL6/CB5). Hidden from
+            assistive technology — the status row below is the live region and
+            it already says what is happening.
+          */
+          <div aria-hidden="true" data-part="placeholder">
+            {[0, 1, 2].map((row) => (
+              <div key={row}>
+                <span data-part="root" data-shape="text" data-ui="skeleton" data-loading="" />
+              </div>
+            ))}
+          </div>
         ) : null}
         <div
           aria-live="polite"

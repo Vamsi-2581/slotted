@@ -168,7 +168,11 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
         (click)="onClear($event)"
       ></button>
     }
-    <span data-part="arrow"></span>
+    @if (loading()) {
+      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+    } @else {
+      <span data-part="arrow"></span>
+    }
 
     @if (name(); as submissionName) {
       <select
@@ -219,6 +223,20 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
           [attr.data-loading]="loading() ? '' : null"
         >
           <ng-content />
+          @if (loading()) {
+            <!--
+              The wait, as the shape of the list that is coming: three rows the
+              height of an option, drawn by the skeleton sheet (SL6/CB5). Hidden
+              assistive technology — the status row is the live region.
+            -->
+            <div data-part="placeholder" aria-hidden="true">
+              @for (row of [0, 1, 2]; track row) {
+                <div>
+                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+                </div>
+              }
+            </div>
+          }
           @if (loading()) {
             <div data-part="status" role="status" data-loading>{{ resolvedLoadingLabel() }}</div>
           } @else if (empty()) {

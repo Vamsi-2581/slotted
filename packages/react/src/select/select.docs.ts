@@ -58,6 +58,13 @@ const anatomy: AnatomyRow[] = [
       "The chevron, drawn as a mask from the glyph scale and turned over while the popup is open. It is placed against the frame's end and is inert: the trigger's own padding runs underneath it, so a press there still opens the popup.",
   },
   {
+    part: 'busy',
+    element: 'span',
+    required: false,
+    purpose:
+      "The ring, standing where the chevron stands while an answer is travelling: the chevron says the popup opens, and it does not open onto anything yet. The arc is the shared `spinner` sheet's, worn as `data-ui` beside this part, so the family says only where it stands and how big it is.",
+  },
+  {
     part: 'clear',
     element: 'button',
     required: false,
@@ -145,6 +152,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       "What the popup says while an answer is travelling. It keeps the popup's measure, so nothing jumps when the options land.",
+  },
+  {
+    part: 'placeholder',
+    element: 'div',
+    required: false,
+    purpose:
+      'Three rows the height of an option, drawn by the shared `skeleton` sheet while an answer is travelling, so the surface a reader is looking at is the shape of the list that is coming. Hidden from assistive technology: the status row beside it is the live region.',
   },
 ];
 

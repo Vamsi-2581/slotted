@@ -307,7 +307,17 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
       {showClear ? (
         <button aria-label={select.clearLabel} data-part="clear" onClick={clear} type="button" />
       ) : null}
-      <span data-part="arrow" />
+      {/*
+        While an answer is travelling the control shows the ring rather than the
+        chevron: the chevron says the popup opens, and it does not open onto
+        anything yet (SL6). The arc is `spinner`'s, worn as `data-ui` beside
+        this family's own part.
+      */}
+      {select.loading ? (
+        <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+      ) : (
+        <span data-part="arrow" />
+      )}
       <NativeSelect />
     </>
   );
@@ -629,6 +639,21 @@ export function SelectContent({
           something. The status row keeps the popup's measure while an answer is
           travelling, so nothing jumps when the options land.
         */}
+        {select.loading ? (
+          /*
+            The wait, as the shape of the list that is coming: three rows the
+            height of an option, drawn by `skeleton` (SL6). Hidden from
+            assistive technology — the status row below is the live region and
+            it already says what is happening.
+          */
+          <div aria-hidden="true" data-part="placeholder">
+            {[0, 1, 2].map((row) => (
+              <div key={row}>
+                <span data-part="root" data-shape="text" data-ui="skeleton" data-loading="" />
+              </div>
+            ))}
+          </div>
+        ) : null}
         {select.loading ? (
           <div data-loading="" data-part="status" role="status">
             {statusMessage ?? select.loadingLabel}

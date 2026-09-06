@@ -32,15 +32,24 @@
     --_gap: var(--slotted-control-gap-md, 8px);
     --_line-height: var(--slotted-checkbox-line-height, var(--slotted-line-height-md, 1.5));
     /**
-     * The mark inside its box: the fraction of the box between each of its
-     * edges and the edge of the glyph's own box, so the check occupies seven
-     * tenths of the square. A fraction of a box whose size is a whole number
-     * of pixels puts the same distance on both sides and the glyph's centre on
-     * the box's centre at every step, which is what a mask sized by arithmetic
-     * over `rem` did not.
+     * The mark inside its box: the clearance between the edge of the square
+     * and the edge of the glyph's own box, the same two pixels on all four
+     * sides at every step, so the mark keeps one distance from the edge rather
+     * than one ratio (CK6).
+     *
+     * It is a whole number of pixels and not a fraction of the box, because a
+     * fraction is what separated the two centres. Fifteen hundredths of a 16px
+     * box is an 11.19px mark offset by 2.39px, and a browser paints a box on
+     * the pixel grid: the mark was rasterised at 11px from 27px while the
+     * square stood at 25px, so the ink landed half a pixel to the start side,
+     * and moved when the row's line height moved the whole item onto another
+     * subpixel. The same `md` control drew a mark of 8.70 × 6.40px in one
+     * density and 10.20 × 7.50px in another. A whole clearance subtracted from
+     * a whole square is a whole mark whose offset is a whole number, so
+     * whichever way the pair is snapped, both are snapped together.
      */
-    --_mark-inset: var(--slotted-checkbox-mark-inset, 0.15);
-    --_mark-size: calc(var(--_size) * (1 - 2 * var(--_mark-inset)));
+    --_mark-inset: var(--slotted-checkbox-mark-inset, 2px);
+    --_mark-size: calc(var(--_size) - 2 * var(--_mark-inset));
     /**
      * The halo behind the box: the circle that answers the pointer and, being
      * part of the label, the target the box on its own is too small to be.
@@ -177,11 +186,11 @@
    * property pointed at a different token, so the swap between checked and
    * mixed is one declaration and the two states cannot drift apart.
    *
-   * The element is the glyph's own box: seven tenths of the square, set in
-   * the same grid cell as the box by the inset on each side, so the two are
-   * concentric by construction and `getBoundingClientRect()` on the mark is
-   * the mark. The mask fills that box, which is what keeps the artwork the
-   * same fraction of the square at every step.
+   * The element is the glyph's own box: the square less its clearance on each
+   * side, set in the same grid cell as the box, so the two are concentric by
+   * construction and `getBoundingClientRect()` on the mark is the mark. The
+   * mask fills that box, which is what keeps the artwork one distance from the
+   * edge at every step.
    */
 
   [data-ui='checkbox'] [data-part='indicator'] {
@@ -189,10 +198,28 @@
 
     background-color: var(--slotted-checkbox-mark-color, var(--slotted-tone-accent-on-solid));
     block-size: var(--_mark-size);
+    /**
+     * The mark arrives along its own stroke, not out of its middle (CK6). Both
+     * glyphs are drawn from the start side to the end side — the check from
+     * the short arm through the corner to the long one, the dash from one cap
+     * to the other — so the reveal is a clip that opens on the inline axis and
+     * the ink appears where the pen would have put it.
+     *
+     * It was `scale: 0.6` → `1` on the whole element, which grows the artwork
+     * out of the box's geometric centre: the two ends arrive at once, the
+     * stroke thickens as it goes, and every subpixel error in the mark's
+     * placement travels across the box while it runs. A clip moves no edge and
+     * changes no size, so no frame of it can put ink outside the square.
+     *
+     * The inset is physical rather than flow-relative on purpose: a check is
+     * not mirrored in a right-to-left row, so neither is the hand that draws
+     * it.
+     */
+    clip-path: inset(0% 100% 0% 0%);
     grid-area: 1 / 1;
     inline-size: var(--_mark-size);
-    margin-block-start: calc(var(--_lift) + var(--_size) * var(--_mark-inset));
-    margin-inline-start: calc(var(--_size) * var(--_mark-inset));
+    margin-block-start: calc(var(--_lift) + var(--_mark-inset));
+    margin-inline-start: var(--_mark-inset);
     mask-image: var(--_glyph);
     mask-position: center;
     mask-repeat: no-repeat;
@@ -200,22 +227,15 @@
     opacity: 0;
     /** Nothing here answers the pointer; the control underneath does. */
     pointer-events: none;
-    /**
-     * The mark grows into a box that was empty, which is a change the eye has
-     * to follow: it takes the medium step of the motion scale, one step above
-     * the ground and the edge, so the state is legible before the transition
-     * ends rather than because of it.
-     */
-    scale: 0.6;
     transition:
-      opacity var(--slotted-duration-medium) var(--slotted-control-transition-easing),
-      scale var(--slotted-duration-medium) var(--slotted-control-transition-easing);
+      clip-path var(--slotted-duration-medium) var(--slotted-control-transition-easing),
+      opacity var(--slotted-duration-medium) var(--slotted-control-transition-easing);
   }
 
   [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
   [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+    clip-path: inset(0% 0% 0% 0%);
     opacity: 1;
-    scale: 1;
   }
 
   /**
@@ -225,6 +245,20 @@
    */
   [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
     --_glyph: var(--slotted-checkbox-mixed-image, var(--slotted-icon-minus));
+  }
+
+  /**
+   * Reduced motion keeps the fade and drops the hand (R7). The clip is removed
+   * rather than shortened, so the mark is whole in every frame it is painted
+   * in and only its opacity moves.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='checkbox'] [data-part='indicator'],
+    [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
+    [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+      clip-path: none;
+      transition: opacity var(--slotted-duration-medium) var(--slotted-control-transition-easing);
+    }
   }
 
   /* ── The label, and the target ────────────────────────────────────────

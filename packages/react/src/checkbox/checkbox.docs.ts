@@ -445,7 +445,7 @@ export const REACT_CHECKBOX_DOCS = {
   --slotted-checkbox-size: 18px;
   --slotted-checkbox-radius: var(--slotted-radius-xs);
   --slotted-checkbox-checked-background: var(--slotted-tone-success-solid);
-  --slotted-checkbox-mark-inset: 0.8;
+  --slotted-checkbox-mark-inset: 3px;
 }`,
       }),
     ],

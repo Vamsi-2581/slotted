@@ -63,7 +63,7 @@
     }
   },
   "literals": {
-    "--slotted-checkbox-mark-inset": "The mark's box is inset by fifteen hundredths of the square on every side, so the check occupies seven tenths of it and clears a border of one and a half pixels at the smallest step. It is a fraction of the box token rather than a step on a scale, and no scale in docs/token-foundation.md holds the inset of a mark inside its own box."
+    "--slotted-checkbox-mark-inset": "The clearance between the edge of the square and the edge of the mark's own box, the same on all four sides: two pixels, which leaves a mark of 10, 12 and 14 pixels at the three steps and clears a border of one and a half pixels at the smallest. It is a length and not a fraction of the box, because a fraction of a whole square is a mark of fractional size at a fractional offset, and a browser snaps both to the pixel grid separately: at fifteen hundredths of a 16px box the ink landed half a pixel to the start side and changed size with the density (CK6). It is a length rather than a step on a scale because no scale in docs/token-foundation.md holds the clearance of a mark inside its own box."
   },
   "members": {
     "checkbox": {

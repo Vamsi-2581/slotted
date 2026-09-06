@@ -130,26 +130,29 @@ test('edges the box at the medium step, in the strong colour, with the smallest 
 });
 
 /**
- * The glyph is its own box at seven tenths of the square, inset by the same
- * fraction on every side, so its centre is the box's centre at every step and
- * every density — the measurement CK4 asks for (`getBoundingClientRect()` of
- * the mark against the box, centre difference ≤ 0.5px).
+ * The glyph is its own box, the square less a whole-pixel clearance on every
+ * side, so the two are concentric at every step and every density — the
+ * measurement CK4 asks for and CK6 takes off the picture rather than off the
+ * layout (the painted ink against the painted square, centre difference
+ * ≤ 0.5px).
+ *
+ * The clearance is a length and not a fraction of the square. A fraction gives
+ * a mark of fractional size at a fractional offset, and the two are snapped to
+ * the pixel grid apart from each other: fifteen hundredths of a 16px box put
+ * the ink half a pixel to the start side and drew the same `md` control at
+ * 8.70 × 6.40px in one density and 10.20 × 7.50px in another (CK6).
  */
-test('draws the glyph in a box that is a fraction of the square, inset equally on every side', () => {
-  assert.match(rule(root), /--_mark-inset:var\(--slotted-checkbox-mark-inset,0\.15\)/);
-  assert.match(
-    rule(root),
-    /--_mark-size:calc\(var\(--_size\) \* \(1 - 2 \* var\(--_mark-inset\)\)\)/,
-  );
+test('draws the glyph in a box the square clears by a whole pixel on every side', () => {
+  assert.match(rule(root), /--_mark-inset:var\(--slotted-checkbox-mark-inset,2px\)/);
+  assert.match(rule(root), /--_mark-size:calc\(var\(--_size\) - 2 \* var\(--_mark-inset\)\)/);
   const indicator = rule(part('indicator'));
   assert.match(indicator, /block-size:var\(--_mark-size\)/);
   assert.match(indicator, /inline-size:var\(--_mark-size\)/);
-  assert.match(
-    indicator,
-    /margin-block-start:calc\(var\(--_lift\) \+ var\(--_size\) \* var\(--_mark-inset\)\)/,
-  );
-  assert.match(indicator, /margin-inline-start:calc\(var\(--_size\) \* var\(--_mark-inset\)\)/);
+  assert.match(indicator, /margin-block-start:calc\(var\(--_lift\) \+ var\(--_mark-inset\)\)/);
+  assert.match(indicator, /margin-inline-start:var\(--_mark-inset\)/);
   assert.match(indicator, /mask-size:contain/);
+  /** A ratio of the box is what CK6 took out; it must not come back. */
+  assert.doesNotMatch(declarations, /--_mark-size:\s*calc\(var\(--_size\)\s*\*/);
 });
 
 /**
@@ -316,21 +319,53 @@ test('restates the pair forced colors would collapse', () => {
 
 /**
  * Every duration comes from the motion scale, so reduced motion collapses it.
- * The ground and the edge take the control step; the mark grows in at the
+ * The ground and the edge take the control step; the mark arrives at the
  * medium step, one above it (CK1).
+ *
+ * The mark arrives along its own stroke and not out of the middle of the box
+ * (CK6): a clip that opens on the inline axis, which moves no edge and changes
+ * no size, so no frame of the entrance can put ink outside the square. It was
+ * `scale: 0.6` → `1`, which grows the artwork out of the box's geometric
+ * centre and carries every subpixel error in the mark's placement across the
+ * box while it runs.
  */
-test('transitions the two changes the eye has to follow, from the scale', () => {
+test('draws the mark in along its own stroke, at the medium step of the scale', () => {
   const indicator = rule(part('indicator'));
-  assert.match(indicator, /scale:0\.6/);
+  assert.match(indicator, /clip-path:inset\(0% 100% 0% 0%\)/);
   assert.match(
     indicator,
-    /transition:opacity var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\),scale var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\)/,
+    /transition:clip-path var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\),opacity var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\)/,
   );
+  const shown = rule(
+    `${part('control')}:checked + [data-part='indicator'],${part('control')}:indeterminate + [data-part='indicator']`,
+  );
+  assert.match(shown, /clip-path:inset\(0% 0% 0% 0%\)/);
+  assert.match(shown, /opacity:1/);
+  /** The uniform scale CK1 asked for and CK6 revoked. */
+  assert.doesNotMatch(declarations, /(?<![\w-])scale:/);
   assert.match(
     rule(part('control')),
     /transition:background-color var\(--slotted-control-transition-duration\)/,
   );
   assert.doesNotMatch(declarations, /\d+m?s(?![\w-])/);
+});
+
+/**
+ * Reduced motion keeps the fade and drops the hand (R7). The clip is removed
+ * rather than shortened, so the mark is whole in every frame it is painted in.
+ */
+test('keeps only the fade when the reader asked for stillness', () => {
+  const reduced = declarations.slice(
+    declarations.indexOf('@media (prefers-reduced-motion: reduce)'),
+  );
+  assert.ok(
+    declarations.includes('@media (prefers-reduced-motion: reduce)'),
+    'the sheet never answers prefers-reduced-motion',
+  );
+  const body = reduced.slice(0, reduced.indexOf('\n  }\n'));
+  assert.match(body, /clip-path:\s*none/);
+  assert.match(body, /transition:\s*opacity var\(--slotted-duration-medium\)/);
+  assert.doesNotMatch(body, /clip-path:\s*inset/);
 });
 
 /**

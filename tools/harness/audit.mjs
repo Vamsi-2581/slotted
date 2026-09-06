@@ -14,6 +14,14 @@ import { launch } from './shoot.mjs';
  * shrank past its content, or because a column count halved the page twice
  * over. Naming the symptom is what makes the guard hold for the next cause
  * nobody predicted.
+ *
+ * ── What the page does, and what this file does ────────────────────────────
+ *
+ * The page measures and this file judges. Everything below `MEASURE` is a pure
+ * function over records, so every rule the audit applies can be tested without
+ * a browser — which is what three sessions of false findings cost before it
+ * was split this way (G5, G7, G10). A rule that only exists inside a string
+ * evaluated in Chrome is a rule nobody can put a case to.
  */
 
 /** Below this, an element is a sliver rather than a demonstration. */
@@ -42,6 +50,127 @@ const OVERFLOW_TOLERANCE = 2;
  */
 const AXIS_TOLERANCE = 1;
 
+/**
+ * Elements that never draw anything, whatever the stylesheet says about them.
+ *
+ * A harness fragment carries its own `script` and `style` where a scene needs
+ * them, and both are children of the stage. Measured as demonstrations they are
+ * nought pixels wide inside a 446-pixel stage, which is the shape of the worst
+ * defect the collapse rule exists to catch — so the audit reported ninety of
+ * them across the families and every one of them was the tool talking to itself
+ * (G5).
+ */
+export const UNRENDERED_TAGS = new Set([
+  'script',
+  'style',
+  'template',
+  'link',
+  'meta',
+  'title',
+  'noscript',
+]);
+
+/**
+ * The stage children that collapsed to a sliver.
+ *
+ * The walk is here rather than in the page because two of its three rules are
+ * about what an element *is* rather than about how wide it is, and both were
+ * got wrong while they lived in a string:
+ *
+ * **An element that draws nothing is not a demonstration.** `script` and
+ * `style` sit in a stage because the fragment put them there (G5).
+ *
+ * **An element with no box of its own is not a demonstration either — its
+ * children are.** `display: contents` makes an element a wrapper the layout
+ * does not see, so it measures nought however wide its content is, and the tag
+ * group measured 0px in every scheme while the capture plainly showed the tags
+ * (TG1). The walk descends through it and judges what it actually drew.
+ */
+export function collapsedElements(candidates, floor = COLLAPSE_FLOOR) {
+  const found = [];
+
+  const visit = (node) => {
+    if (UNRENDERED_TAGS.has(node.tag)) return;
+    if (node.boxes === 0) {
+      for (const child of node.children ?? []) visit(child);
+      return;
+    }
+    if (node.width < floor) {
+      found.push({
+        scene: node.scene,
+        element: node.element,
+        width: Math.round(node.width),
+        stage: Math.round(node.stage),
+      });
+    }
+  };
+
+  for (const candidate of candidates) visit(candidate);
+  return found;
+}
+
+/**
+ * The largest amount a square of `width` × `height` can gain on the inline axis
+ * by being turned about its centre: its diagonal, less the width it started at.
+ *
+ * A rotation moves no layout and changes no box, but the *bounding* box of a
+ * turned element is its diagonal, and scrollable overflow is measured from
+ * bounding boxes. So a fourteen-pixel ring inside a fourteen-pixel slot reports
+ * up to twenty pixels of content, and the audit called it overflow every time a
+ * button was photographed mid-spin (G10).
+ */
+export function turningExcess({ width, height }) {
+  return Math.sqrt(width * width + height * height) - width;
+}
+
+/**
+ * The elements whose content ran outside them.
+ *
+ * A finding is withdrawn when the whole of it fits inside what a turning
+ * descendant can add: the ring is the same size it was laid out at, and the
+ * pixels the audit is looking at belong to the corner of a square that is
+ * halfway round. Overflow larger than that is content, and is still reported —
+ * a slot holding both a spinner and something genuinely too wide keeps its
+ * finding.
+ */
+export function overflowingElements(candidates, tolerance = OVERFLOW_TOLERANCE) {
+  return candidates
+    .filter((node) => node.scrollWidth > node.clientWidth + tolerance)
+    .filter((node) => node.scrollWidth - node.clientWidth > (node.turning ?? 0))
+    .map((node) => ({
+      scene: node.scene,
+      element: node.element,
+      width: node.scrollWidth,
+      stage: node.clientWidth,
+    }));
+}
+
+/**
+ * Whether a mark stands beside the line it was paired with, rather than above
+ * or below it.
+ *
+ * A glyph on a row of its own — `result-state` puts one over its title by
+ * design — has no axis to miss: it is aligned to a block, and the question the
+ * audit asks about a mark is a question about a line. Two boxes that share no
+ * band of the page share no line, and that is the whole of the test (G7).
+ */
+export function annotatesTheLine({ markTop, markBottom, lineTop, lineBottom }) {
+  if (markTop === undefined || lineTop === undefined) return true;
+  return markTop < lineBottom && lineTop < markBottom;
+}
+
+/**
+ * The marks whose centre misses the centre of the line beside them. Kept out of
+ * the page so the judgement is testable without a browser: the page measures,
+ * this decides.
+ */
+export function offAxisMarks(marks, tolerance = AXIS_TOLERANCE) {
+  return marks
+    .filter((mark) => annotatesTheLine(mark))
+    .map((mark) => ({ ...mark, offset: +(mark.markCentre - mark.textCentre).toFixed(2) }))
+    .filter((mark) => Math.abs(mark.offset) > tolerance);
+}
+
 const MEASURE = `(() => {
   const stages = [...document.querySelectorAll('.slotted-demo-stage, .stage')];
   const label = (node) => {
@@ -54,29 +183,69 @@ const MEASURE = `(() => {
     (node.dataset.ui ? '[data-ui=' + node.dataset.ui + ']' : '') +
     (node.dataset.part ? '[data-part=' + node.dataset.part + ']' : '');
 
-  const collapsed = [];
-  const overflowing = [];
+  /**
+   * How much a turning descendant can add to this element's scrollable
+   * overflow. A rotation is read off the computed matrix — \`matrix(a,b,c,d,..)\`
+   * is axis-aligned only while \`b\` and \`c\` are nought — and off the \`rotate\`
+   * property, which a family may animate instead of \`transform\`.
+   */
+  const turningExcessOf = (node) => {
+    let most = 0;
+    for (const child of node.querySelectorAll('*')) {
+      const style = getComputedStyle(child);
+      const matrix = /matrix\\(([^)]*)\\)/.exec(style.transform ?? '');
+      const parts = matrix ? matrix[1].split(',').map(Number) : [];
+      const skewed = parts.length >= 4 && (Math.abs(parts[1]) > 1e-6 || Math.abs(parts[2]) > 1e-6);
+      const turned = (style.rotate ?? 'none') !== 'none' && !/^0(deg|rad|turn|grad)?$/.test(style.rotate.trim());
+      if (!skewed && !turned) continue;
+      const box = { width: child.offsetWidth, height: child.offsetHeight };
+      const excess = Math.sqrt(box.width * box.width + box.height * box.height) - box.width;
+      if (excess > most) most = excess;
+    }
+    return most;
+  };
+
+  /** A stage child, and the children it stands in for when it has no box. */
+  const candidateOf = (node, stageWidth) => ({
+    scene: label(node),
+    element: describe(node),
+    tag: node.tagName.toLowerCase(),
+    width: node.getBoundingClientRect().width,
+    stage: stageWidth,
+    boxes: node.getClientRects().length,
+    children: [...node.children].map((child) => candidateOf(child, stageWidth)),
+  });
+
+  const candidates = [];
+  const overflow = [];
 
   for (const stage of stages) {
     const stageWidth = stage.getBoundingClientRect().width;
     if (stageWidth < ${STAGE_MINIMUM}) continue;
 
-    for (const child of stage.children) {
-      const width = child.getBoundingClientRect().width;
-      if (width < ${COLLAPSE_FLOOR}) {
-        collapsed.push({ scene: label(child), element: describe(child), width: Math.round(width), stage: Math.round(stageWidth) });
-      }
-    }
+    for (const child of stage.children) candidates.push(candidateOf(child, stageWidth));
 
-    if (stage.scrollWidth > stage.clientWidth + ${OVERFLOW_TOLERANCE}) {
-      overflowing.push({ scene: label(stage), element: 'the stage itself', width: stage.scrollWidth, stage: Math.round(stageWidth) });
+    if (stage.scrollWidth > stage.clientWidth) {
+      overflow.push({
+        scene: label(stage),
+        element: 'the stage itself',
+        scrollWidth: stage.scrollWidth,
+        clientWidth: stage.clientWidth,
+        turning: turningExcessOf(stage),
+      });
     }
   }
 
   for (const node of document.querySelectorAll('.slotted-demo-stage *, .stage *')) {
-    if (node.scrollWidth <= node.clientWidth + ${OVERFLOW_TOLERANCE}) continue;
+    if (node.scrollWidth <= node.clientWidth) continue;
     if (getComputedStyle(node).overflowX !== 'visible') continue;
-    overflowing.push({ scene: label(node), element: describe(node), width: node.scrollWidth, stage: node.clientWidth });
+    overflow.push({
+      scene: label(node),
+      element: describe(node),
+      scrollWidth: node.scrollWidth,
+      clientWidth: node.clientWidth,
+      turning: turningExcessOf(node),
+    });
   }
 
   /**
@@ -95,9 +264,26 @@ const MEASURE = `(() => {
    * mark with no text beside it, which is a mark centred in a control of its
    * own and has no axis to miss.
    */
+  const firstTextNode = (node) => {
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
+      acceptNode: (text) =>
+        text.textContent.trim().length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+    });
+    return walker.nextNode();
+  };
+
+  /**
+   * A range over an *element* returns one rectangle per child box, so the first
+   * one is the whole of the title — 39 pixels when it wraps — and every glyph
+   * beside a title that wrapped was reported off its axis by half the second
+   * line (G7). A range over a text node returns one rectangle per line box, and
+   * the first of those is the line the mark actually sits on.
+   */
   const firstLineOf = (node) => {
+    const text = firstTextNode(node);
+    if (text === null) return null;
     const range = document.createRange();
-    range.selectNodeContents(node);
+    range.selectNodeContents(text);
     const rects = [...range.getClientRects()].filter((rect) => rect.height > 0);
     return rects[0] ?? null;
   };
@@ -132,28 +318,21 @@ const MEASURE = `(() => {
       element: describe(node),
       markCentre: +((box.top + box.bottom) / 2).toFixed(2),
       textCentre: +((line.top + line.bottom) / 2).toFixed(2),
+      markTop: +box.top.toFixed(2),
+      markBottom: +box.bottom.toFixed(2),
+      lineTop: +line.top.toFixed(2),
+      lineBottom: +line.bottom.toFixed(2),
     });
   }
 
   return {
     stages: stages.length,
     documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    collapsed,
-    overflowing,
+    candidates,
+    overflow,
     marks,
   };
 })()`;
-
-/**
- * The marks whose centre misses the centre of the line beside them. Kept out of
- * the page so the judgement is testable without a browser: the page measures,
- * this decides.
- */
-export function offAxisMarks(marks, tolerance = AXIS_TOLERANCE) {
-  return marks
-    .map((mark) => ({ ...mark, offset: +(mark.markCentre - mark.textCentre).toFixed(2) }))
-    .filter((mark) => Math.abs(mark.offset) > tolerance);
-}
 
 export async function audit({ url, width = 1280, density = 'comfortable' }) {
   const { devtools, close } = await launch();
@@ -208,7 +387,14 @@ export async function audit({ url, width = 1280, density = 'comfortable' }) {
     });
 
     devtools.close();
-    return { ...result.value, offAxis: offAxisMarks(result.value.marks ?? []) };
+    const measured = result.value;
+    return {
+      stages: measured.stages,
+      documentOverflow: measured.documentOverflow,
+      collapsed: collapsedElements(measured.candidates ?? []),
+      overflowing: overflowingElements(measured.overflow ?? []),
+      offAxis: offAxisMarks(measured.marks ?? []),
+    };
   } finally {
     await close();
   }

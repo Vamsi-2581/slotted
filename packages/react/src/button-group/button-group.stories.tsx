@@ -8,23 +8,20 @@ import { Button, IconButton, ToggleButton } from '../button';
 import { ButtonGroup } from './button-group';
 import { ButtonGroupSeparator } from './button-group-separator';
 import { REACT_BUTTON_GROUP_DOCS, REACT_BUTTON_GROUP_TOKENS } from './button-group.docs';
-import type {
-  ButtonGroupCollapse,
-  ButtonGroupGap,
-  ButtonGroupOrientation,
-} from './button-group.types';
+import type { ButtonGroupJustify, ButtonGroupOrientation } from './button-group.types';
 
 function Caption({ children }: { children: ReactNode }) {
   return <span style={{ color: 'var(--slotted-text-muted)', fontSize: '11px' }}>{children}</span>;
 }
 
-function Frame({ children }: { children: ReactNode }) {
+function Frame({ children, width }: { children: ReactNode; width?: string | undefined }) {
   return (
     <div
       style={{
         border: '1px dashed var(--slotted-border-strong)',
         borderRadius: 'var(--slotted-radius-md)',
-        inlineSize: '100%',
+        inlineSize: width ?? '100%',
+        maxInlineSize: '100%',
         padding: 'var(--slotted-space-3)',
       }}
     >
@@ -48,16 +45,14 @@ const column: CSSProperties = {
 const row: CSSProperties = { ...column, gap: 'var(--slotted-space-3)', justifyItems: 'start' };
 
 interface ButtonGroupStoryArgs {
-  attached: boolean;
-  collapse: ButtonGroupCollapse;
   fullWidth: boolean;
-  gap: ButtonGroupGap;
+  justify: ButtonGroupJustify | undefined;
   orientation: ButtonGroupOrientation;
 }
 
 const referenceStories: ReferencePageConfig['stories'] = () => ({
   essential: Playground as never,
-  matrix: Attachment as never,
+  matrix: Shape as never,
 });
 
 const meta = {
@@ -69,7 +64,7 @@ const meta = {
       page: createReferencePage({
         title: 'Button group',
         description:
-          'Related actions laid out as one unit: separated by the space scale, or joined into a single shape.',
+          'Related actions joined into one shape: shared edges, one border in each shared column, corners on the ends of the bar only.',
         framework: 'React',
         ...REACT_BUTTON_GROUP_DOCS.buttonGroup,
         tokens: REACT_BUTTON_GROUP_TOKENS,
@@ -84,72 +79,54 @@ type Story = StoryObj<ButtonGroupStoryArgs>;
 
 export const Playground: Story = {
   args: {
-    attached: false,
-    collapse: 'wrap',
     fullWidth: false,
-    gap: 4,
+    justify: undefined,
     orientation: 'horizontal',
   },
   argTypes: {
-    collapse: { control: 'inline-radio', options: ['wrap', 'nowrap', 'stack'] },
-    gap: { control: { type: 'range', min: 0, max: 12, step: 1 } },
+    justify: { control: 'inline-radio', options: [undefined, 'start', 'center', 'end', 'between'] },
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => (
     <div className="slotted-demo-stage" data-align="start">
-      <ButtonGroup {...args} aria-label="Record actions">
-        <Button tone="secondary" variant="outline">
-          Duplicate
-        </Button>
-        <Button tone="secondary" variant="outline">
-          Archive
-        </Button>
-        <Button tone="secondary" variant="outline">
-          Export
-        </Button>
+      <ButtonGroup {...args} aria-label="Record actions" tone="secondary" variant="outline">
+        <Button>Duplicate</Button>
+        <Button>Archive</Button>
+        <Button>Export</Button>
       </ButtonGroup>
     </div>
   ),
 };
 
-export const Attachment: Story = {
-  parameters: scenario('attachment'),
+export const Shape: Story = {
+  parameters: scenario('shape'),
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <section className="slotted-demo-scene">
         <header className="slotted-demo-scene__header">
-          <span className="slotted-demo-scene__label">Separated, and joined</span>
+          <span className="slotted-demo-scene__label">One shape</span>
           <span className="slotted-demo-scene__note">
-            A separated group keeps each control its own shape. A joined one shares the edges and
-            rounds only the ends. In a joined bar the edge belongs to the group, not to each
-            control: a filled control’s border is its own fill, so two of them overlapped would be
-            one uninterrupted rectangle, and the seam between them is the darkest step of the
-            control’s own tone.
+            The buttons share their edges and only the two ends of the bar are rounded. The edge
+            belongs to the group, not to each control: a filled control’s border is its own fill, so
+            two of them overlapped would be one uninterrupted rectangle, and the seam between them
+            is the darkest step of the control’s own tone. A group of buttons that stand apart is
+            not this family — it is an inline or a stack holding buttons.
           </span>
         </header>
         <div className="slotted-demo-stage" data-align="start">
           <div style={column}>
             <div style={row}>
-              <Caption>separated · the default</Caption>
-              <ButtonGroup aria-label="Save or cancel">
-                <Button tone="secondary" variant="outline">
-                  Cancel
-                </Button>
-                <Button>Save changes</Button>
-              </ButtonGroup>
-            </div>
-            <div style={row}>
-              <Caption>attached · outline</Caption>
-              <ButtonGroup aria-label="Range" attached tone="secondary" variant="outline">
+              <Caption>outline</Caption>
+              <ButtonGroup aria-label="Range" tone="secondary" variant="outline">
                 <Button>Day</Button>
                 <Button>Week</Button>
                 <Button>Month</Button>
               </ButtonGroup>
             </div>
             <div style={row}>
-              <Caption>attached · solid, with a split action at the end</Caption>
-              <ButtonGroup aria-label="Publish" attached>
+              <Caption>solid, with a split action at the end</Caption>
+              <ButtonGroup aria-label="Publish">
                 <Button>Publish</Button>
                 <Button>Schedule</Button>
                 <IconButton aria-label="More publish options" tone="accent" variant="solid">
@@ -158,8 +135,16 @@ export const Attachment: Story = {
               </ButtonGroup>
             </div>
             <div style={row}>
-              <Caption>attached · one action keeps all four corners</Caption>
-              <ButtonGroup aria-label="Only one" attached tone="secondary" variant="outline">
+              <Caption>ghost · an icon bar with no frame</Caption>
+              <ButtonGroup aria-label="Editor tools" tone="secondary" variant="ghost">
+                <IconButton aria-label="Undo">{UNDO}</IconButton>
+                <IconButton aria-label="Redo">{REDO}</IconButton>
+                <IconButton aria-label="Delete">{TRASH}</IconButton>
+              </ButtonGroup>
+            </div>
+            <div style={row}>
+              <Caption>one action keeps all four corners</Caption>
+              <ButtonGroup aria-label="Only one" tone="secondary" variant="outline">
                 <Button>Alone</Button>
               </ButtonGroup>
             </div>
@@ -179,45 +164,30 @@ export const Orientation: Story = {
           <span className="slotted-demo-scene__label">A row, and a column</span>
           <span className="slotted-demo-scene__note">
             A column stretches its controls to one width, because a column at their natural widths
-            is a ragged edge rather than a group. The joined corners turn with the axis, and they
-            are logical, so a right-to-left document is the same bar mirrored. A framed bar keeps
-            its destructive action off the frequent ones with a nested group, not with a rule: the
-            shared edges are already that colour and that width, so a rule laid among them is the
-            same line drawn twice.
+            is a ragged edge rather than a group. The corners turn with the axis, and they are
+            logical, so a right-to-left document is the same bar mirrored.
           </span>
         </header>
         <div className="slotted-demo-stage" data-align="start">
           <div style={column}>
             <div style={row}>
-              <Caption>vertical · separated</Caption>
-              <ButtonGroup aria-label="Reminder" orientation="vertical">
-                <Button tone="secondary" variant="outline">
-                  No, thanks
-                </Button>
-                <Button tone="secondary" variant="outline">
-                  Remind me later
-                </Button>
-                <Button>Rate now</Button>
+              <Caption>vertical · outline</Caption>
+              <ButtonGroup
+                aria-label="Sort order"
+                orientation="vertical"
+                tone="secondary"
+                variant="outline"
+              >
+                <Button>Newest first</Button>
+                <Button>Oldest first</Button>
+                <Button>Most edited</Button>
               </ButtonGroup>
             </div>
             <div style={row}>
-              <Caption>vertical · two joined runs, kept apart by distance</Caption>
-              <ButtonGroup aria-label="Row menu" orientation="vertical">
-                <ButtonGroup
-                  aria-label="Edit"
-                  attached
-                  orientation="vertical"
-                  tone="secondary"
-                  variant="outline"
-                >
-                  <Button>Duplicate</Button>
-                  <Button>Archive</Button>
-                </ButtonGroup>
-                <ButtonGroup aria-label="Destructive" orientation="vertical">
-                  <Button tone="danger" variant="outline">
-                    Delete
-                  </Button>
-                </ButtonGroup>
+              <Caption>vertical · solid, so the seam has to carry it</Caption>
+              <ButtonGroup aria-label="Export" orientation="vertical">
+                <Button>Export CSV</Button>
+                <Button>Export PDF</Button>
               </ButtonGroup>
             </div>
           </div>
@@ -227,49 +197,25 @@ export const Orientation: Story = {
   ),
 };
 
-export const Separation: Story = {
-  parameters: scenario('separation'),
+export const Separator: Story = {
+  parameters: scenario('separator'),
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <section className="slotted-demo-scene">
         <header className="slotted-demo-scene__header">
-          <span className="slotted-demo-scene__label">Gaps, clusters and rules</span>
+          <span className="slotted-demo-scene__label">Runs and rules</span>
           <span className="slotted-demo-scene__note">
-            Two ways to say that actions belong apart, and both produce the same boundary width. A
-            nested group stands half a gap further out on each side; a rule stands in the same
-            place. Inside a joined bar the rule takes no room of its own: the bar stays one shape,
-            and the boundary is painted in the column the shared edge already occupies, one step
-            stronger than the seams around it.
+            A rule takes no room of its own: the bar stays one shape, and the boundary is painted in
+            the column the shared edge already occupies, one step stronger than the seams around it.
+            A nested group is a run of the bar with a name of its own, which says what is on either
+            side of the boundary where a rule only says that one exists.
           </span>
         </header>
         <div className="slotted-demo-stage" data-align="start">
           <div style={column}>
-            {([2, 4, 8] as const).map((step) => (
-              <div key={step} style={row}>
-                <Caption>gap {step}</Caption>
-                <ButtonGroup aria-label={`Gap ${step}`} gap={step}>
-                  <Button tone="secondary" variant="outline">
-                    Cancel
-                  </Button>
-                  <Button>Save</Button>
-                </ButtonGroup>
-              </div>
-            ))}
             <div style={row}>
-              <Caption>clusters · a nested group is a boundary</Caption>
-              <ButtonGroup aria-label="Record">
-                <ButtonGroup aria-label="Edit" attached tone="secondary" variant="outline">
-                  <Button>Duplicate</Button>
-                  <Button>Archive</Button>
-                </ButtonGroup>
-                <ButtonGroup aria-label="Destructive">
-                  <Button tone="danger">Delete</Button>
-                </ButtonGroup>
-              </ButtonGroup>
-            </div>
-            <div style={row}>
-              <Caption>a rule inside a joined icon bar</Caption>
-              <ButtonGroup aria-label="Editor tools" attached>
+              <Caption>a rule inside an icon bar</Caption>
+              <ButtonGroup aria-label="Editor tools" tone="secondary" variant="ghost">
                 <IconButton aria-label="Undo">{UNDO}</IconButton>
                 <IconButton aria-label="Redo">{REDO}</IconButton>
                 <ButtonGroupSeparator />
@@ -280,11 +226,38 @@ export const Separation: Story = {
             </div>
             <div style={row}>
               <Caption>a rule inside a framed bar</Caption>
-              <ButtonGroup aria-label="View" attached tone="secondary" variant="outline">
+              <ButtonGroup aria-label="View" tone="secondary" variant="outline">
                 <Button>Day</Button>
                 <Button>Week</Button>
                 <ButtonGroupSeparator />
                 <Button>Today</Button>
+              </ButtonGroup>
+            </div>
+            <div style={row}>
+              <Caption>two named runs · the destructive action has a group of its own</Caption>
+              <ButtonGroup aria-label="Record">
+                <ButtonGroup aria-label="Edit" tone="secondary" variant="outline">
+                  <Button>Duplicate</Button>
+                  <Button>Archive</Button>
+                </ButtonGroup>
+                <ButtonGroupSeparator />
+                <ButtonGroup aria-label="Destructive" tone="danger" variant="outline">
+                  <Button>Delete</Button>
+                </ButtonGroup>
+              </ButtonGroup>
+            </div>
+            <div style={row}>
+              <Caption>vertical · a rule across the column</Caption>
+              <ButtonGroup
+                aria-label="Record actions"
+                orientation="vertical"
+                tone="secondary"
+                variant="outline"
+              >
+                <Button>Duplicate</Button>
+                <Button>Archive</Button>
+                <ButtonGroupSeparator />
+                <Button tone="danger">Delete</Button>
               </ButtonGroup>
             </div>
           </div>
@@ -294,54 +267,50 @@ export const Separation: Story = {
   ),
 };
 
-export const Collapse: Story = {
-  parameters: scenario('collapse'),
+export const Width: Story = {
+  parameters: scenario('width'),
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <section className="slotted-demo-scene">
         <header className="slotted-demo-scene__header">
-          <span className="slotted-demo-scene__label">When the row does not fit</span>
+          <span className="slotted-demo-scene__label">The line, and a narrow one</span>
           <span className="slotted-demo-scene__note">
-            Narrow the window. The first group wraps and its lines keep the same separation. The
-            second turns into a column below 360 pixels of its own inline size, decided by a
-            container query rather than by measuring after hydration — so it is already right in a
-            server render. A stacking group holds the line it measures, which is why justify places
-            its buttons on it.
+            A bar does not wrap and does not stack: its shape is the whole point of it. A label that
+            outgrows the bar wraps inside its own control, which is the button family’s rule. Asking
+            for justify or fullWidth makes the group hold the line; fullWidth shares it in equal
+            segments, whatever the labels weigh.
           </span>
         </header>
         <div className="slotted-demo-stage" data-align="start">
           <div style={column}>
             <div style={row}>
-              <Caption>wrap · the default</Caption>
+              <Caption>justify · the bar holds the line and sits at its end</Caption>
               <Frame>
-                <ButtonGroup aria-label="Filters" size="sm" tone="secondary" variant="outline">
-                  <Button>Overdue</Button>
-                  <Button>Awaiting review</Button>
-                  <Button>Paid in full</Button>
-                  <Button>Disputed</Button>
-                </ButtonGroup>
-              </Frame>
-            </div>
-            <div style={row}>
-              <Caption>stack · a row above 360px, a column below it</Caption>
-              <Frame>
-                <ButtonGroup aria-label="Dialog actions" collapse="stack" justify="end">
+                <ButtonGroup aria-label="Dialog actions" justify="end">
                   <Button tone="secondary" variant="outline">
                     Cancel
-                  </Button>
-                  <Button tone="secondary" variant="outline">
-                    Save as draft
                   </Button>
                   <Button>Publish now</Button>
                 </ButtonGroup>
               </Frame>
             </div>
             <div style={row}>
-              <Caption>fullWidth · equal segments, whatever the labels weigh</Caption>
+              <Caption>fullWidth · equal segments</Caption>
               <Frame>
                 <ButtonGroup aria-label="Range" fullWidth tone="secondary" variant="outline">
                   <Button>Day</Button>
                   <Button>This quarter</Button>
+                </ButtonGroup>
+              </Frame>
+            </div>
+            <div style={row}>
+              <Caption>240px · a long label wraps inside its control</Caption>
+              <Frame width="240px">
+                <ButtonGroup aria-label="Long">
+                  <Button tone="secondary" variant="outline">
+                    Zusammenarbeitseinstellungen
+                  </Button>
+                  <Button>Speichern</Button>
                 </ButtonGroup>
               </Frame>
             </div>
@@ -381,17 +350,17 @@ export const Composition: Story = {
             </div>
             <div style={row}>
               <Caption>a toggle that is on — at each of the three positions</Caption>
-              <ButtonGroup aria-label="View" attached tone="secondary" variant="outline">
+              <ButtonGroup aria-label="View" tone="secondary" variant="outline">
                 <ToggleButton defaultPressed>List</ToggleButton>
                 <ToggleButton defaultPressed={false}>Board</ToggleButton>
                 <ToggleButton defaultPressed={false}>Calendar</ToggleButton>
               </ButtonGroup>
-              <ButtonGroup aria-label="View" attached tone="secondary" variant="outline">
+              <ButtonGroup aria-label="View" tone="secondary" variant="outline">
                 <ToggleButton defaultPressed={false}>List</ToggleButton>
                 <ToggleButton defaultPressed>Board</ToggleButton>
                 <ToggleButton defaultPressed={false}>Calendar</ToggleButton>
               </ButtonGroup>
-              <ButtonGroup aria-label="View" attached tone="secondary" variant="outline">
+              <ButtonGroup aria-label="View" tone="secondary" variant="outline">
                 <ToggleButton defaultPressed={false}>List</ToggleButton>
                 <ToggleButton defaultPressed={false}>Board</ToggleButton>
                 <ToggleButton defaultPressed>Calendar</ToggleButton>
@@ -399,7 +368,7 @@ export const Composition: Story = {
             </div>
             <div style={row}>
               <Caption>two variants joined · the seam is the filled control’s own edge</Caption>
-              <ButtonGroup aria-label="Save or cancel" attached>
+              <ButtonGroup aria-label="Save or cancel">
                 <Button tone="secondary" variant="outline">
                   Cancel
                 </Button>
@@ -408,7 +377,7 @@ export const Composition: Story = {
             </div>
             <div style={row}>
               <Caption>one control waiting, one unavailable</Caption>
-              <ButtonGroup aria-label="Review" attached tone="secondary" variant="outline">
+              <ButtonGroup aria-label="Review" tone="secondary" variant="outline">
                 <Button>Approve</Button>
                 <Button loading loadingLabel="Reassigning">
                   Reassign
@@ -432,30 +401,30 @@ export const Accessibility: Story = {
           <span className="slotted-demo-scene__label">Several tab stops, and a name</span>
           <span className="slotted-demo-scene__note">
             Tab through the bar below. Every control is its own stop and its focus ring is painted
-            over its neighbours rather than under them, which is the whole reason a joined group
-            raises the control being touched. The arrow-key model — one tab stop, Left and Right
-            between controls — is the toolbar family, not this one.
+            over its neighbours rather than under them, which is the whole reason the group raises
+            the control being touched. The arrow-key model — one tab stop, Left and Right between
+            controls — is the toolbar family, not this one.
           </span>
         </header>
         <div className="slotted-demo-stage" data-align="start">
           <div style={column}>
             <div style={row}>
               <Caption>aria-label names the group</Caption>
-              <ButtonGroup aria-label="Text alignment" attached tone="secondary" variant="outline">
+              <ButtonGroup aria-label="Text alignment" tone="secondary" variant="outline">
                 <Button>Day</Button>
                 <Button>Week</Button>
                 <Button>Month</Button>
               </ButtonGroup>
             </div>
             <div style={row}>
-              <Caption>a named cluster says more than a rule can</Caption>
+              <Caption>a named run says more than a rule can</Caption>
               <ButtonGroup aria-label="Record">
-                <ButtonGroup aria-label="Edit" attached tone="secondary" variant="outline">
+                <ButtonGroup aria-label="Edit" tone="secondary" variant="outline">
                   <Button>Duplicate</Button>
                   <Button>Archive</Button>
                 </ButtonGroup>
-                <ButtonGroup aria-label="Destructive">
-                  <Button tone="danger">Delete</Button>
+                <ButtonGroup aria-label="Destructive" tone="danger" variant="outline">
+                  <Button>Delete</Button>
                 </ButtonGroup>
               </ButtonGroup>
             </div>

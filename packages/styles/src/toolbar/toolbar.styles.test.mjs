@@ -112,13 +112,14 @@ test('sizes the bar and never the controls in it', () => {
 
 /**
  * Three families arrange controls in a row, and each owns one question. This
- * one owns the keyboard, so it declares no gap, alignment or joining axis.
+ * one owns the keyboard, so it declares no gap, alignment or joining axis;
+ * `button-group` owns the joined bar and where it sits on the line.
  */
 test('leaves the shape of a run of actions to the family that owns it', () => {
   assert.doesNotMatch(declarations, /\[data-gap=/);
   assert.doesNotMatch(declarations, /\[data-justify=/);
   assert.doesNotMatch(declarations, /\[data-attached\]/);
-  assert.match(buttonGroupCss, /\[data-gap='4'\]/);
+  assert.match(buttonGroupCss, /\[data-justify='end'\]/);
 });
 
 test('answers every axis value the contract declares', () => {

@@ -5,12 +5,12 @@
   nothing to judge. The builder reads the families to load from the `data-ui`
   values written below.
 -->
-<section data-scene="attachment">
+<section data-scene="shape">
   <style>
     [data-demo-column] {
       display: grid;
-      /* A track that may shrink below its content, so a nowrap group does not
-         set the width of every example beside it. */
+      /* A track that may shrink below its content, so a bar does not set the
+         width of every example beside it. */
       grid-template-columns: minmax(0, 1fr);
       gap: var(--slotted-space-6);
     }
@@ -31,7 +31,7 @@
 
     /* A grid item is blockified, so a group left to stretch would fill the
        track and stop showing its own content width. The frame is the one
-       thing that must stretch: it is the container the collapse answers. */
+       thing that must stretch: it is the line a justified bar holds. */
     [data-demo-frame] {
       justify-self: stretch;
       border: 1px dashed var(--slotted-border-strong);
@@ -42,40 +42,8 @@
 
   <div data-demo-column>
     <div data-demo-row>
-      <span data-demo-label>separated · the default</span>
-      <div data-ui="button-group" data-part="root" role="group" aria-label="Record actions">
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Cancel</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="accent"
-          data-variant="solid"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Save changes</span>
-        </button>
-      </div>
-    </div>
-
-    <div data-demo-row>
       <span data-demo-label>joined · outline · one shared edge</span>
-      <div
-        data-ui="button-group"
-        data-part="root"
-        data-attached
-        role="group"
-        aria-label="Text alignment"
-      >
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Text alignment">
         <button
           data-ui="button"
           data-part="root"
@@ -110,8 +78,8 @@
     </div>
 
     <div data-demo-row>
-      <span data-demo-label>joined · solid · the seam is the page surface</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Publish">
+      <span data-demo-label>joined · solid · the seam is the darkest step of the tone</span>
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Publish">
         <button
           data-ui="button"
           data-part="root"
@@ -159,13 +127,7 @@
 
     <div data-demo-row>
       <span data-demo-label>joined · ghost · an icon bar with no frame</span>
-      <div
-        data-ui="button-group"
-        data-part="root"
-        data-attached
-        role="group"
-        aria-label="Formatting"
-      >
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Formatting">
         <button
           data-ui="button"
           data-part="root"
@@ -239,7 +201,7 @@
 
     <div data-demo-row>
       <span data-demo-label>joined · one action, and it is still a button</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Only one">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Only one">
         <button
           data-ui="button"
           data-part="root"
@@ -258,54 +220,11 @@
 <section data-scene="orientation">
   <div data-demo-column>
     <div data-demo-row>
-      <span data-demo-label>vertical · separated</span>
-      <div
-        data-ui="button-group"
-        data-part="root"
-        data-orientation="vertical"
-        role="group"
-        aria-label="Reminder"
-      >
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">No, thanks</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Remind me later</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="accent"
-          data-variant="solid"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Rate now</span>
-        </button>
-      </div>
-    </div>
-
-    <div data-demo-row>
       <span data-demo-label>vertical · joined · the corners turn with the axis</span>
       <div
         data-ui="button-group"
         data-part="root"
         data-orientation="vertical"
-        data-attached
         role="group"
         aria-label="Sort order"
       >
@@ -343,71 +262,11 @@
     </div>
 
     <div data-demo-row>
-      <span data-demo-label>vertical · two joined runs, kept apart by distance</span>
-      <div
-        data-ui="button-group"
-        data-part="root"
-        data-orientation="vertical"
-        role="group"
-        aria-label="Row menu"
-      >
-        <div
-          data-ui="button-group"
-          data-part="root"
-          data-orientation="vertical"
-          data-attached
-          role="group"
-          aria-label="Edit"
-        >
-          <button
-            data-ui="button"
-            data-part="root"
-            data-tone="secondary"
-            data-variant="outline"
-            data-size="md"
-            type="button"
-          >
-            <span data-part="label">Duplicate</span>
-          </button>
-          <button
-            data-ui="button"
-            data-part="root"
-            data-tone="secondary"
-            data-variant="outline"
-            data-size="md"
-            type="button"
-          >
-            <span data-part="label">Archive</span>
-          </button>
-        </div>
-        <div
-          data-ui="button-group"
-          data-part="root"
-          data-orientation="vertical"
-          role="group"
-          aria-label="Destructive"
-        >
-          <button
-            data-ui="button"
-            data-part="root"
-            data-tone="danger"
-            data-variant="outline"
-            data-size="md"
-            type="button"
-          >
-            <span data-part="label">Delete</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div data-demo-row>
       <span data-demo-label>vertical · joined · solid, so the seam has to carry it</span>
       <div
         data-ui="button-group"
         data-part="root"
         data-orientation="vertical"
-        data-attached
         role="group"
         aria-label="Export"
       >
@@ -436,64 +295,12 @@
   </div>
 </section>
 
-<section data-scene="separation">
+<section data-scene="runs">
   <div data-demo-column>
     <div data-demo-row>
-      <span data-demo-label>gap 2 · 0.25rem</span>
-      <div data-ui="button-group" data-part="root" data-gap="2" role="group" aria-label="Tight">
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Cancel</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="accent"
-          data-variant="solid"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Save</span>
-        </button>
-      </div>
-    </div>
-
-    <div data-demo-row>
-      <span data-demo-label>gap 4 · 0.5rem · the default</span>
-      <div data-ui="button-group" data-part="root" role="group" aria-label="Default">
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Cancel</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="accent"
-          data-variant="solid"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Save</span>
-        </button>
-      </div>
-    </div>
-
-    <div data-demo-row>
-      <span data-demo-label>clusters · the destructive action does not touch the frequent one</span>
+      <span data-demo-label>runs · two named groups in one bar, a rule between them</span>
       <div data-ui="button-group" data-part="root" role="group" aria-label="Record">
-        <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Edit">
+        <div data-ui="button-group" data-part="root" role="group" aria-label="Edit">
           <button
             data-ui="button"
             data-part="root"
@@ -515,12 +322,13 @@
             <span data-part="label">Archive</span>
           </button>
         </div>
+        <div data-part="separator" role="separator" aria-orientation="vertical"></div>
         <div data-ui="button-group" data-part="root" role="group" aria-label="Destructive">
           <button
             data-ui="button"
             data-part="root"
             data-tone="danger"
-            data-variant="solid"
+            data-variant="outline"
             data-size="md"
             type="button"
           >
@@ -532,13 +340,7 @@
 
     <div data-demo-row>
       <span data-demo-label>separator · a rule inside a joined bar replaces the shared edge</span>
-      <div
-        data-ui="button-group"
-        data-part="root"
-        data-attached
-        role="group"
-        aria-label="Editor tools"
-      >
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Editor tools">
         <button
           data-ui="button"
           data-part="root"
@@ -614,55 +416,17 @@
         </button>
       </div>
     </div>
-
-    <div data-demo-row>
-      <span data-demo-label>separator · in a separated group it stands in the gap</span>
-      <div data-ui="button-group" data-part="root" role="group" aria-label="Row actions">
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="ghost"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Approve</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="ghost"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Reassign</span>
-        </button>
-        <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="danger"
-          data-variant="ghost"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Reject</span>
-        </button>
-      </div>
-    </div>
   </div>
 </section>
 
-<section data-scene="collapse">
+<section data-scene="width">
   <div data-demo-column>
     <div data-demo-row>
-      <span data-demo-label>stack · one row above 360px, one column below it</span>
+      <span data-demo-label>justify · the bar holds the line and sits at its end</span>
       <div data-demo-frame>
         <div
           data-ui="button-group"
           data-part="root"
-          data-collapse="stack"
           data-justify="end"
           role="group"
           aria-label="Dialog actions"
@@ -680,70 +444,12 @@
           <button
             data-ui="button"
             data-part="root"
-            data-tone="secondary"
-            data-variant="outline"
-            data-size="md"
-            type="button"
-          >
-            <span data-part="label">Save as draft</span>
-          </button>
-          <button
-            data-ui="button"
-            data-part="root"
             data-tone="accent"
             data-variant="solid"
             data-size="md"
             type="button"
           >
             <span data-part="label">Publish now</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div data-demo-row>
-      <span data-demo-label>wrap · the default · lines keep the same separation</span>
-      <div data-demo-frame>
-        <div data-ui="button-group" data-part="root" role="group" aria-label="Filters">
-          <button
-            data-ui="button"
-            data-part="root"
-            data-tone="secondary"
-            data-variant="outline"
-            data-size="sm"
-            type="button"
-          >
-            <span data-part="label">Overdue</span>
-          </button>
-          <button
-            data-ui="button"
-            data-part="root"
-            data-tone="secondary"
-            data-variant="outline"
-            data-size="sm"
-            type="button"
-          >
-            <span data-part="label">Awaiting review</span>
-          </button>
-          <button
-            data-ui="button"
-            data-part="root"
-            data-tone="secondary"
-            data-variant="outline"
-            data-size="sm"
-            type="button"
-          >
-            <span data-part="label">Paid in full</span>
-          </button>
-          <button
-            data-ui="button"
-            data-part="root"
-            data-tone="secondary"
-            data-variant="outline"
-            data-size="sm"
-            type="button"
-          >
-            <span data-part="label">Disputed</span>
           </button>
         </div>
       </div>
@@ -789,7 +495,7 @@
   <div data-demo-column>
     <div data-demo-row>
       <span data-demo-label>joined · one control disabled, one waiting</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Review">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Review">
         <button
           data-ui="button"
           data-part="root"
@@ -830,7 +536,7 @@
 
     <div data-demo-row>
       <span data-demo-label>joined · a toggle that is on, between two that are not</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="View">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="View">
         <button
           data-ui="button"
           data-part="root"
@@ -875,7 +581,7 @@
     <div data-demo-row>
       <span data-demo-label>right to left · the same bar, mirrored</span>
       <div data-demo-frame lang="ar" dir="rtl">
-        <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="عرض">
+        <div data-ui="button-group" data-part="root" role="group" aria-label="عرض">
           <button
             data-ui="button"
             data-part="root"
@@ -913,7 +619,7 @@
     <div data-demo-row>
       <span data-demo-label>a label longer than the bar wraps inside its own control</span>
       <div data-demo-frame>
-        <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Long">
+        <div data-ui="button-group" data-part="root" role="group" aria-label="Long">
           <button
             data-ui="button"
             data-part="root"
@@ -940,7 +646,7 @@
 
     <div data-demo-row>
       <span data-demo-label>two sizes joined · one bar, one height</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Mixed">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Mixed">
         <button
           data-ui="button"
           data-part="root"
@@ -967,7 +673,7 @@
     <div data-demo-row>
       <span data-demo-label>a group that holds nothing takes no room: the two rules meet</span>
       <div data-demo-frame>
-        <div data-ui="button-group" data-part="root" data-gap="6" role="group" aria-label="Empty">
+        <div data-ui="button-group" data-part="root" role="group" aria-label="Empty">
           <div data-ui="button-group" data-part="root" role="group" aria-label="Nothing"></div>
         </div>
       </div>
@@ -979,7 +685,7 @@
   <div data-demo-column>
     <div data-demo-row>
       <span data-demo-label>solid + solid + icon (the split action)</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1022,7 +728,7 @@
     </div>
     <div data-demo-row>
       <span data-demo-label>outline then solid</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1046,7 +752,7 @@
     </div>
     <div data-demo-row>
       <span data-demo-label>solid then outline</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1070,7 +776,7 @@
     </div>
     <div data-demo-row>
       <span data-demo-label>ghost icon toolbar</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1133,7 +839,7 @@
     </div>
     <div data-demo-row>
       <span data-demo-label>toggle bar · middle pressed</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1168,7 +874,7 @@
     </div>
     <div data-demo-row>
       <span data-demo-label>toggle bar · first pressed</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1203,7 +909,7 @@
     </div>
     <div data-demo-row>
       <span data-demo-label>toggle bar · last pressed</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1238,7 +944,7 @@
     </div>
     <div data-demo-row>
       <span data-demo-label>outline bar · middle disabled</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="d">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="d">
         <button
           data-ui="button"
           data-part="root"
@@ -1276,7 +982,6 @@
       <div
         data-ui="button-group"
         data-part="root"
-        data-attached
         role="group"
         aria-label="d"
         data-orientation="vertical"
@@ -1318,7 +1023,6 @@
       <div
         data-ui="button-group"
         data-part="root"
-        data-attached
         role="group"
         aria-label="d"
         data-orientation="vertical"
@@ -1357,7 +1061,7 @@
   <div data-demo-column>
     <div data-demo-row>
       <span data-demo-label>joined · outline · rule between two runs</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="View">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="View">
         <button
           data-ui="button"
           data-part="root"
@@ -1394,7 +1098,7 @@
 
     <div data-demo-row>
       <span data-demo-label>joined · outline · icon run, then one action</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Editor">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Editor">
         <button
           data-ui="button"
           data-part="root"
@@ -1470,7 +1174,7 @@
 
     <div data-demo-row>
       <span data-demo-label>joined · solid · rule between two runs</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Publish">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Publish">
         <button
           data-ui="button"
           data-part="root"
@@ -1518,13 +1222,7 @@
 
     <div data-demo-row>
       <span data-demo-label>joined · ghost · rule in a frameless bar</span>
-      <div
-        data-ui="button-group"
-        data-part="root"
-        data-attached
-        role="group"
-        aria-label="Formatting"
-      >
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Formatting">
         <button
           data-ui="button"
           data-part="root"
@@ -1599,85 +1297,10 @@
     </div>
 
     <div data-demo-row>
-      <span data-demo-label>separated · outline · rule in the gap</span>
-      <div data-ui="button-group" data-part="root" role="group" aria-label="Row actions">
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Approve</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Reassign</span>
-        </button>
-        <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="danger"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Reject</span>
-        </button>
-      </div>
-    </div>
-
-    <div data-demo-row>
-      <span data-demo-label>separated · solid + outline · rule in the gap</span>
-      <div data-ui="button-group" data-part="root" role="group" aria-label="Record">
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="accent"
-          data-variant="solid"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Save</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="outline"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Cancel</span>
-        </button>
-        <div data-part="separator" role="separator" aria-orientation="vertical"></div>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="danger"
-          data-variant="ghost"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Delete</span>
-        </button>
-      </div>
-    </div>
-
-    <div data-demo-row>
       <span data-demo-label>vertical · joined · outline · rule across the column</span>
       <div
         data-ui="button-group"
         data-part="root"
-        data-attached
         data-orientation="vertical"
         role="group"
         aria-label="Record actions"
@@ -1717,51 +1340,8 @@
     </div>
 
     <div data-demo-row>
-      <span data-demo-label>vertical · separated · ghost · rule in the gap</span>
-      <div
-        data-ui="button-group"
-        data-part="root"
-        data-orientation="vertical"
-        role="group"
-        aria-label="Menu"
-      >
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="ghost"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Duplicate</span>
-        </button>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="secondary"
-          data-variant="ghost"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Archive</span>
-        </button>
-        <div data-part="separator" role="separator" aria-orientation="horizontal"></div>
-        <button
-          data-ui="button"
-          data-part="root"
-          data-tone="danger"
-          data-variant="ghost"
-          data-size="md"
-          type="button"
-        >
-          <span data-part="label">Delete</span>
-        </button>
-      </div>
-    </div>
-
-    <div data-demo-row>
       <span data-demo-label>joined · sm and lg · the rule keeps the bar's height</span>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Small">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Small">
         <button
           data-ui="button"
           data-part="root"
@@ -1784,7 +1364,7 @@
           <span data-part="label">Today</span>
         </button>
       </div>
-      <div data-ui="button-group" data-part="root" data-attached role="group" aria-label="Large">
+      <div data-ui="button-group" data-part="root" role="group" aria-label="Large">
         <button
           data-ui="button"
           data-part="root"

@@ -16,14 +16,11 @@ import type {
   ButtonVariant,
 } from '@slotted/angular/button';
 
-import {
-  injectButtonGroupDefaults,
-  type ButtonGroupAlign,
-  type ButtonGroupCollapse,
-  type ButtonGroupGap,
-  type ButtonGroupJustify,
-  type ButtonGroupOrientation,
-} from './button-group-defaults';
+import type {
+  ButtonGroupAlign,
+  ButtonGroupJustify,
+  ButtonGroupOrientation,
+} from './button-group.types';
 
 /**
  * The three axes the group hands down to the buttons inside it, through the
@@ -58,9 +55,14 @@ function provideGroupPaint() {
 }
 
 /**
- * A set of related actions laid out as one unit. The group arranges what the
+ * A set of related actions joined into one shape. The group arranges what the
  * consumer wrote and changes the semantics of nothing inside it: every button
  * keeps its own role, its own state and its own place in the tab sequence.
+ *
+ * One shape and no other: the buttons share their edges, one border is painted
+ * in each shared column, and only the two ends of the bar are rounded. There
+ * is no input that spaces the buttons apart and none that unjoins them — a
+ * spaced row of buttons is `slInline` or `slStack` holding buttons.
  *
  * It is `role="group"` and not `role="toolbar"`, and the difference is a
  * keyboard model rather than a name. A toolbar is one tab stop with arrow-key
@@ -86,17 +88,12 @@ function provideGroupPaint() {
     'data-part': 'root',
     '[attr.role]': 'role',
     '[attr.data-orientation]': 'orientation() ?? null',
-    '[attr.data-gap]': 'gap() ?? null',
     '[attr.data-align]': 'align() ?? null',
     '[attr.data-justify]': 'justify() ?? null',
-    '[attr.data-collapse]': 'collapse() ?? null',
-    '[attr.data-attached]': 'attached() ? "" : null',
     '[attr.data-full-width]': 'fullWidth() ? "" : null',
   },
 })
 export class SlButtonGroup {
-  private readonly provided = injectButtonGroupDefaults();
-
   /** Positions the buttons across the flow. */
   readonly align = input<ButtonGroupAlign>();
   /** Positions the buttons along the flow, which makes the group hold the line. */
@@ -105,34 +102,9 @@ export class SlButtonGroup {
   /** The group holds the line and its buttons share it in equal segments. */
   readonly fullWidth = input(false, { transform: booleanAttribute });
 
-  /**
-   * Joins the buttons into one shape: shared edges, outer corners only.
-   *
-   * Absence has to survive the transform, because `false` is a value: an unset
-   * input mapped to `false` would overrule an application that provided
-   * `attached` for every group under it.
-   */
-  protected readonly attachedInput = input<boolean | undefined, boolean | string | undefined>(
-    undefined,
-    {
-      alias: 'attached',
-      transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
-    },
-  );
-  /** Separation between buttons, as a step on the space scale. */
-  protected readonly gapInput = input<ButtonGroupGap | undefined>(undefined, { alias: 'gap' });
-  /** What happens when the container is narrower than the row. */
-  protected readonly collapseInput = input<ButtonGroupCollapse | undefined>(undefined, {
-    alias: 'collapse',
-  });
-
   readonly size = input<ButtonSize | undefined>(undefined);
   readonly tone = input<ButtonTone | undefined>(undefined);
   readonly variant = input<ButtonVariant | undefined>(undefined);
-
-  readonly attached = computed(() => this.attachedInput() ?? this.provided.attached ?? false);
-  readonly gap = computed(() => this.gapInput() ?? this.provided.gap);
-  readonly collapse = computed(() => this.collapseInput() ?? this.provided.collapse);
 
   /**
    * A static attribute the consumer wrote survives the host binding, which is
@@ -146,7 +118,6 @@ export class SlButtonGroup {
   private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
   protected readonly role = this.writtenRole === '' ? null : (this.writtenRole ?? 'group');
 
-  /** What the rule between two runs turns with, and whether it may state an axis. */
+  /** What the rule between two runs turns with. */
   readonly flow = computed(() => this.orientation() ?? 'horizontal');
-  readonly collapses = computed(() => this.collapse() === 'stack');
 }

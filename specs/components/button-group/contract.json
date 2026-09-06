@@ -5,9 +5,8 @@
   "role": "group",
   "rovingFocus": false,
   "rovingFocusOwner": "toolbar",
-  "collapseBreakpoint": "360px",
   "alignAuto": {
-    "horizontal": "center",
+    "horizontal": "stretch",
     "vertical": "stretch"
   },
   "seam": {
@@ -17,25 +16,19 @@
     "toneAttribute": "data-tone"
   },
   "provides": {
-    "buttonDefaults": ["tone", "variant", "size"],
-    "groupDefaults": ["gap", "attached", "collapse"]
+    "buttonDefaults": ["tone", "variant", "size"]
   },
   "axes": {
     "orientation": ["horizontal", "vertical"],
-    "gap": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
     "align": ["auto", "start", "center", "end", "stretch"],
-    "justify": ["start", "center", "end", "between"],
-    "collapse": ["wrap", "nowrap", "stack"]
+    "justify": ["start", "center", "end", "between"]
   },
   "members": {
     "buttonGroup": {
       "nativeElement": "div",
       "defaults": {
         "orientation": "horizontal",
-        "gap": "4",
         "align": "auto",
-        "collapse": "wrap",
-        "attached": false,
         "fullWidth": false,
         "decorative": false
       },
@@ -47,10 +40,10 @@
   "scenarios": {
     "buttonGroup": [
       "playground",
-      "attachment",
+      "shape",
       "orientation",
-      "separation",
-      "collapse",
+      "separator",
+      "width",
       "composition",
       "accessibility"
     ]

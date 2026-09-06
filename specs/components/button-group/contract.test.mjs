@@ -71,38 +71,24 @@ test('runs in two directions and defaults to the one a row of actions implies', 
 });
 
 /**
- * Separation is a step on the space scale, the same vocabulary `stack`,
- * `inline` and `grid` publish, so a group is retuned by the theme rather than
- * by a length a consumer wrote.
+ * One shape and no other. The group joined its controls when it was asked to
+ * and spaced them by a step on the space scale otherwise, which was two
+ * families under one name: a bar, and a `stack` of buttons. The second is what
+ * `inline` and `stack` already are, so the group keeps the one thing only it
+ * does — shared edges, one border in each shared column, corners on the ends
+ * of the bar and nowhere else — and states no distance between its controls.
  */
-test('separates by a step on the shared space scale', () => {
-  assert.deepEqual(contract.axes.gap, [
-    '0',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-    '11',
-    '12',
-  ]);
-  assert.equal(contract.members.buttonGroup.defaults.gap, '4');
+test('has one mode: joined, with no separation and no toggle for it', () => {
+  assert.ok(!('gap' in contract.axes), 'a separation axis is a second mode');
+  assert.ok(!('gap' in contract.members.buttonGroup.defaults));
+  assert.ok(!('attached' in contract.members.buttonGroup.defaults), 'joined is not a switch');
+  assert.ok(!('provides' in contract && 'groupDefaults' in contract.provides));
 });
 
-/**
- * `auto` is a value rather than an absent one: the axis a group is laid out on
- * decides what "across the flow" should mean, and a row of controls and a
- * column of them want opposite answers.
- */
 test('places the buttons across the flow, and knows what each axis needs', () => {
   assert.deepEqual(contract.axes.align, ['auto', 'start', 'center', 'end', 'stretch']);
   assert.equal(contract.members.buttonGroup.defaults.align, 'auto');
-  assert.deepEqual(contract.alignAuto, { horizontal: 'center', vertical: 'stretch' });
+  assert.deepEqual(contract.alignAuto, { horizontal: 'stretch', vertical: 'stretch' });
 });
 
 test('places the buttons along the flow only when it holds the line', () => {
@@ -111,18 +97,18 @@ test('places the buttons along the flow only when it holds the line', () => {
 });
 
 /**
- * Three answers to a container narrower than the row, and the third is the one
- * Spectrum and Carbon both reach a `ResizeObserver` for. A container query
- * decides it in CSS instead, so it is already right on the server.
+ * A joined bar does not wrap and does not stack. Its shape is the whole point
+ * of it, and no surveyed implementation flips that shape at a width the
+ * consumer cannot see coming. A label that outgrows the bar wraps inside its
+ * own control, which is `button`'s rule and not this family's.
  */
-test('answers a container narrower than the row', () => {
-  assert.deepEqual(contract.axes.collapse, ['wrap', 'nowrap', 'stack']);
-  assert.equal(contract.members.buttonGroup.defaults.collapse, 'wrap');
-  assert.equal(contract.collapseBreakpoint, '360px');
+test('answers a narrow container by wrapping labels, not by reflowing the bar', () => {
+  assert.ok(!('collapse' in contract.axes));
+  assert.ok(!('collapse' in contract.members.buttonGroup.defaults));
+  assert.ok(!('collapseBreakpoint' in contract));
 });
 
-test('joins the controls into one shape when it is asked to', () => {
-  assert.equal(contract.members.buttonGroup.defaults.attached, false);
+test('holds the line only when it is asked to', () => {
   assert.equal(contract.members.buttonGroup.defaults.fullWidth, false);
 });
 
@@ -174,31 +160,30 @@ test('takes the bar edge away from the controls that sit in it', () => {
 
 /**
  * How a group is laid out and how its buttons are painted are two questions,
- * so they travel through two providers. The paint reuses the button family's
+ * and only the second one belongs here. The paint reuses the button family's
  * own defaults mechanism, which is what keeps an explicit prop on a button
  * winning over the group.
  */
-test('provides the button axes it forwards, and no axis of its own twice', () => {
+test('provides the button axes it forwards, and nothing of its own', () => {
   assert.deepEqual(contract.provides.buttonDefaults, ['tone', 'variant', 'size']);
   for (const axis of contract.provides.buttonDefaults) {
     assert.ok(axis in buttonContract.axes, `button declares no ${axis} axis`);
     assert.ok(!(axis in contract.axes), `${axis} is button's axis and must not be restated`);
   }
-  assert.deepEqual(contract.provides.groupDefaults, ['gap', 'attached', 'collapse']);
 });
 
 test('announces the separator unless it is asked to be decoration', () => {
   assert.equal(contract.members.buttonGroup.defaults.decorative, false);
 });
 
-test('names one reference page, covering the shape, the axes and the reflow', () => {
+test('names one reference page, covering the shape, the axes and the width', () => {
   assert.deepEqual(Object.keys(contract.scenarios), ['buttonGroup']);
   for (const id of [
     'playground',
-    'attachment',
+    'shape',
     'orientation',
-    'separation',
-    'collapse',
+    'separator',
+    'width',
     'composition',
     'accessibility',
   ]) {

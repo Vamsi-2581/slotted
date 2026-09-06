@@ -6,24 +6,12 @@ import { describe, expect, it } from 'vitest';
 
 import { SlButtonGroup } from './button-group';
 import { SlButtonGroupSeparator } from './button-group-separator';
-import { provideButtonGroupDefaults } from './button-group-defaults';
-import type { ButtonGroupGap } from './button-group-defaults';
 
 @Component({
   imports: [SlButtonGroup, SlButtonGroupSeparator, SlButton],
   template: `
     <div slButtonGroup id="plain">actions</div>
-    <div
-      slButtonGroup
-      id="decided"
-      [gap]="gap()"
-      align="stretch"
-      justify="end"
-      orientation="vertical"
-      collapse="stack"
-      attached
-      fullWidth
-    >
+    <div slButtonGroup id="decided" align="stretch" justify="end" orientation="vertical" fullWidth>
       actions
     </div>
     <div slButtonGroup id="toolbar" role="toolbar">actions</div>
@@ -36,16 +24,12 @@ import type { ButtonGroupGap } from './button-group-defaults';
     <div slButtonGroup id="column" orientation="vertical">
       <div slButtonGroupSeparator id="column-rule"></div>
     </div>
-    <div slButtonGroup id="collapsing" collapse="stack">
-      <div slButtonGroupSeparator id="collapsing-rule"></div>
-    </div>
     <div slButtonGroup id="cosmetic">
       <div slButtonGroupSeparator id="cosmetic-rule" decorative></div>
     </div>
   `,
 })
 class ButtonGroupHost {
-  readonly gap = signal<ButtonGroupGap | undefined>(undefined);
   readonly tone = signal<ButtonTone | undefined>('danger');
 }
 
@@ -86,36 +70,30 @@ describe('SlButtonGroup', () => {
     expect(landmark.hasAttribute('role')).toBe(false);
   });
 
+  /**
+   * One shape and no other. The group used to join its controls when asked and
+   * space them by a step on the space scale otherwise, which was two families
+   * under one name; a spaced row of buttons is `slInline` or `slStack`. So
+   * there is nothing to switch on, nothing to space and nothing to reflow —
+   * the stylesheet's base rule is the bar, and the host says nothing about it.
+   */
   it('writes no axis the consumer did not decide, because the base rule holds the defaults', () => {
     const { element } = mount();
 
-    for (const axis of ['gap', 'align', 'justify', 'orientation', 'collapse', 'attached']) {
+    for (const axis of ['align', 'justify', 'orientation', 'attached', 'collapse', 'gap']) {
       expect(element('plain').hasAttribute(`data-${axis}`)).toBe(false);
     }
     expect(element('plain').hasAttribute('data-full-width')).toBe(false);
   });
 
   it('states each axis the consumer decided', () => {
-    const { element, fixture } = mount();
-    fixture.componentInstance.gap.set(2);
-    fixture.detectChanges();
+    const { element } = mount();
 
     const group = element('decided');
     expect(group.getAttribute('data-align')).toBe('stretch');
-    expect(group.getAttribute('data-attached')).toBe('');
-    expect(group.getAttribute('data-collapse')).toBe('stack');
     expect(group.getAttribute('data-full-width')).toBe('');
-    expect(group.getAttribute('data-gap')).toBe('2');
     expect(group.getAttribute('data-justify')).toBe('end');
     expect(group.getAttribute('data-orientation')).toBe('vertical');
-  });
-
-  it('treats no separation as a decision, not as an absent one', () => {
-    const { element, fixture } = mount();
-    fixture.componentInstance.gap.set(0);
-    fixture.detectChanges();
-
-    expect(element('decided').getAttribute('data-gap')).toBe('0');
   });
 
   it('keeps every button in the tab sequence, because a group is not a toolbar', () => {
@@ -167,27 +145,6 @@ describe('SlButtonGroup paint', () => {
   });
 });
 
-describe('provideButtonGroupDefaults', () => {
-  it('decides once how the groups under it are spaced and shaped', () => {
-    const { element } = mount([
-      provideButtonGroupDefaults({ attached: true, collapse: 'stack', gap: 6 }),
-    ]);
-
-    const group = element('plain');
-    expect(group.getAttribute('data-attached')).toBe('');
-    expect(group.getAttribute('data-collapse')).toBe('stack');
-    expect(group.getAttribute('data-gap')).toBe('6');
-  });
-
-  it('loses to a group that states the axis itself', () => {
-    const { element, fixture } = mount([provideButtonGroupDefaults({ gap: 6 })]);
-    fixture.componentInstance.gap.set(2);
-    fixture.detectChanges();
-
-    expect(element('decided').getAttribute('data-gap')).toBe('2');
-  });
-});
-
 describe('SlButtonGroupSeparator', () => {
   it('is a part of the group and not a family of its own', () => {
     const { element } = mount();
@@ -201,18 +158,6 @@ describe('SlButtonGroupSeparator', () => {
 
     expect(element('row-rule').getAttribute('aria-orientation')).toBe('vertical');
     expect(element('column-rule').getAttribute('aria-orientation')).toBe('horizontal');
-  });
-
-  /**
-   * Which way a collapsing group runs is decided by the width the page turns
-   * out to have. An attribute that is right above the breakpoint and wrong
-   * below it is worse than the one ARIA already defaults to.
-   */
-  it('states no axis inside a group whose axis the container decides', () => {
-    const { element } = mount();
-
-    expect(element('collapsing-rule').getAttribute('role')).toBe('separator');
-    expect(element('collapsing-rule').hasAttribute('aria-orientation')).toBe(false);
   });
 
   it('leaves the accessibility tree when the boundary is only cosmetic', () => {

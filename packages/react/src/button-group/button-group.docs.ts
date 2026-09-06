@@ -17,8 +17,6 @@ export const REACT_BUTTON_GROUP_TOKENS = buttonGroupTokens.map((name) => ({
   purpose: 'Foundation token the Button group reads',
 }));
 
-const GAP = '0 | 1 | … | 12';
-
 export const REACT_BUTTON_GROUP_DOCS = {
   buttonGroup: {
     api: apiRows([
@@ -29,13 +27,12 @@ export const REACT_BUTTON_GROUP_DOCS = {
         'ButtonGroup',
         'The axis the buttons run along',
       ],
-      ['gap', GAP, '4', 'ButtonGroup', 'Separation between buttons, as a step on the space scale'],
       [
         'align',
         "'auto' | 'start' | 'center' | 'end' | 'stretch'",
         'auto',
         'ButtonGroup',
-        'Positions the buttons across the flow; auto centres a row and stretches a column',
+        'Positions the buttons across the flow; auto stretches them to one block size on either axis',
       ],
       [
         'justify',
@@ -43,20 +40,6 @@ export const REACT_BUTTON_GROUP_DOCS = {
         '—',
         'ButtonGroup',
         'Positions the buttons along the flow, which makes the group hold the line',
-      ],
-      [
-        'attached',
-        'boolean',
-        'false',
-        'ButtonGroup',
-        'Joins the buttons into one shape: shared edges, outer corners only',
-      ],
-      [
-        'collapse',
-        "'wrap' | 'nowrap' | 'stack'",
-        'wrap',
-        'ButtonGroup',
-        'What happens when the container is narrower than the row; stack turns it into a column below 360px',
       ],
       [
         'fullWidth',
@@ -106,38 +89,31 @@ export const REACT_BUTTON_GROUP_DOCS = {
       'Name the group with aria-label or aria-labelledby. There is no label prop, because the element already accepts both and a second way to name one thing is a second thing to get wrong.',
       'A consumer who genuinely wants the toolbar role can write role="toolbar", and it survives: the family writes its own role first so an explicit one wins. Writing role={undefined} removes it altogether, which is how a substituted nav or section keeps the semantics it was chosen for.',
       'A boundary that carries meaning is better said by a nested group with a name of its own than by a rule: an announced separator says a boundary exists, while a named group says what is on either side of it.',
-      'The separator takes its axis from the group, mirrored: a rule across a row is vertical. Inside a group that collapses with its container it states no axis at all, because which way the group runs is decided by the width the page turns out to have.',
-      'Nothing here depends on hover. attached, collapse and gap change layout only, and the collapse decision is a container query, so it is correct before hydration and correct with JavaScript disabled.',
+      'The separator takes its axis from the group, mirrored: a rule across a row is vertical.',
+      'Nothing here depends on hover, and nothing is decided by script. The buttons are joined by the stylesheet alone, so the bar is the same shape before hydration and with JavaScript disabled.',
       'The buttons keep the accessible names, disabled behaviour and loading announcements the button family gives them. The group adds nothing to them and removes nothing from them.',
     ],
     snippets: [
       defineSnippet({
-        id: 'button-group-react-dialog',
+        id: 'button-group-react-split',
         language: 'tsx',
-        label: 'Dialog actions that become a column on a narrow screen',
+        label: 'A split action: the main action and its menu share one edge',
         source:
-          '<ButtonGroup aria-label="Dialog actions" collapse="stack" justify="end">\n  <Button variant="outline" tone="secondary">\n    Cancel\n  </Button>\n  <Button>Publish now</Button>\n</ButtonGroup>;',
+          '<ButtonGroup aria-label="Publish">\n  <Button onClick={publish}>Publish</Button>\n  <IconButton aria-label="More publish options" onClick={openMenu}>\n    <ChevronDown aria-hidden="true" />\n  </IconButton>\n</ButtonGroup>;',
       }),
       defineSnippet({
         id: 'button-group-react-segmented',
         language: 'tsx',
         label: 'A joined bar of related views',
         source:
-          "<ButtonGroup aria-label=\"Range\" attached tone=\"secondary\" variant=\"outline\">\n  <ToggleButton pressed={range === 'day'} onPressedChange={() => setRange('day')}>\n    Day\n  </ToggleButton>\n  <ToggleButton pressed={range === 'week'} onPressedChange={() => setRange('week')}>\n    Week\n  </ToggleButton>\n</ButtonGroup>;",
+          "<ButtonGroup aria-label=\"Range\" tone=\"secondary\" variant=\"outline\">\n  <ToggleButton pressed={range === 'day'} onPressedChange={() => setRange('day')}>\n    Day\n  </ToggleButton>\n  <ToggleButton pressed={range === 'week'} onPressedChange={() => setRange('week')}>\n    Week\n  </ToggleButton>\n</ButtonGroup>;",
       }),
       defineSnippet({
-        id: 'button-group-react-clusters',
+        id: 'button-group-react-runs',
         language: 'tsx',
-        label: 'A destructive action kept off the frequent ones',
+        label: 'Two named runs in one bar, and a rule between them',
         source:
-          '<ButtonGroup aria-label="Record">\n  <ButtonGroup aria-label="Edit" attached>\n    <Button variant="outline" tone="secondary">\n      Duplicate\n    </Button>\n    <Button variant="outline" tone="secondary">\n      Archive\n    </Button>\n  </ButtonGroup>\n  <ButtonGroup aria-label="Destructive">\n    <Button tone="danger">Delete</Button>\n  </ButtonGroup>\n</ButtonGroup>;',
-      }),
-      defineSnippet({
-        id: 'button-group-react-defaults',
-        language: 'tsx',
-        label: 'One decision for every group in the application',
-        source:
-          'import { ButtonGroupDefaultsProvider } from \'@slotted/react\';\n\n<ButtonGroupDefaultsProvider collapse="stack" gap={5}>\n  <App />\n</ButtonGroupDefaultsProvider>;',
+          '<ButtonGroup aria-label="Record">\n  <ButtonGroup aria-label="Edit" tone="secondary" variant="outline">\n    <Button>Duplicate</Button>\n    <Button>Archive</Button>\n  </ButtonGroup>\n  <ButtonGroupSeparator />\n  <ButtonGroup aria-label="Destructive" tone="danger" variant="outline">\n    <Button>Delete</Button>\n  </ButtonGroup>\n</ButtonGroup>;',
       }),
     ],
   },

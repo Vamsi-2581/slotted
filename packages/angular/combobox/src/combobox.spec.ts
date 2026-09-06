@@ -30,6 +30,33 @@ class Host {
   standalone: true,
   imports: [SlCombobox, SlComboboxItem],
   template: `
+    <sl-combobox
+      aria-label="Fruit"
+      [portal]="false"
+      [items]="items"
+      [allowsCustomValue]="allowsCustomValue()"
+      [defaultValue]="defaultValue()"
+      [inputValue]="inputText()"
+      (valueChangeRequest)="requested.set($event.value)"
+      (inputReset)="refused.set($event.rejected)"
+    >
+      <sl-combobox-item value="apple" label="Apple" />
+    </sl-combobox>
+  `,
+})
+class SettleHost {
+  readonly items = [{ value: 'apple', label: 'Apple' }];
+  readonly allowsCustomValue = signal(false);
+  readonly defaultValue = signal<string | null | undefined>(undefined);
+  readonly inputText = signal('');
+  readonly requested = signal<string | null | undefined>(undefined);
+  readonly refused = signal<string | undefined>(undefined);
+}
+
+@Component({
+  standalone: true,
+  imports: [SlCombobox, SlComboboxItem],
+  template: `
     <sl-combobox aria-label="Fruit" defaultValue="raspberry" [portal]="false" [(value)]="value">
       <sl-combobox-item value="blueberry" label="Blueberry" />
       <sl-combobox-item value="raspberry" label="Raspberry" />
@@ -72,6 +99,63 @@ describe('SlCombobox', () => {
         expect(mark.tagName).toBe('MARK');
         expect(mark.getAttribute('data-ui')).toBe('highlight');
       }
+    });
+  });
+
+  /**
+   * CB7. The default refuses text that matched no option: the field goes back
+   * to the committed value and says what it refused. `allowsCustomValue` takes
+   * it as the value instead. React's binding states the reasoning.
+   */
+  describe('text that matches no option', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [SettleHost] }).compileComponents();
+    });
+
+    it('puts the field back to the committed value, and says what it refused', () => {
+      const fixture = TestBed.createComponent(SettleHost);
+      fixture.componentInstance.defaultValue.set('apple');
+      fixture.componentInstance.inputText.set('Apple');
+      fixture.detectChanges();
+
+      field().value = 'appl';
+      field().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      field().dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+
+      expect(field().value).toBe('Apple');
+      expect(fixture.componentInstance.refused()).toBe('appl');
+    });
+
+    it('takes the text as the value when the field allows one of its own', () => {
+      const fixture = TestBed.createComponent(SettleHost);
+      fixture.componentInstance.allowsCustomValue.set(true);
+      fixture.detectChanges();
+
+      field().value = 'kumquat';
+      field().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      field().dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+
+      expect(field().value).toBe('kumquat');
+      expect(fixture.componentInstance.requested()).toBe('kumquat');
+      expect(fixture.componentInstance.refused()).toBeUndefined();
+    });
+
+    it('commits an option a reader typed in full rather than refusing it', () => {
+      const fixture = TestBed.createComponent(SettleHost);
+      fixture.detectChanges();
+
+      field().value = 'Apple';
+      field().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+      field().dispatchEvent(new FocusEvent('blur'));
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.requested()).toBe('apple');
+      expect(field().value).toBe('Apple');
     });
   });
 

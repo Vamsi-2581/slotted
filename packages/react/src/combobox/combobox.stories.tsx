@@ -184,7 +184,7 @@ export const CustomValue: Story = {
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Refused"
-        note="Enter puts the text back to the committed option's label, which is the pattern's own reverts."
+        note="Enter — and leaving the field — put the text back to the committed option's label, which is the pattern's own reverts. `onInputReset` carries what was refused (CB7)."
       >
         <Viewport>
           <Basic defaultInputValue="Durian" defaultOpen />
@@ -192,7 +192,7 @@ export const CustomValue: Story = {
       </Scene>
       <Scene
         label="Allowed"
-        note="Enter commits the typed text, and the request carries it as the value."
+        note="Enter — and leaving the field — commit the typed text, and the request carries it as the value."
       >
         <Viewport>
           <Basic allowsCustomValue defaultInputValue="Durian" defaultOpen />

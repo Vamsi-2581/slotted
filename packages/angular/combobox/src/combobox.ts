@@ -266,6 +266,9 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   /** The last option came into view; the consumer fetches the next page. */
   readonly loadMore = output<void>();
 
+  /** The text the field refused, and why (CB7). */
+  readonly inputReset = output<{ rejected: string; reason: 'blur' }>();
+
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   readonly placeholder = input<string>('');
   readonly name = input<string | undefined>(undefined);
@@ -602,7 +605,61 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     this.onTouched();
     const next = event.relatedTarget;
     if (next instanceof Node && this.surfaceNode?.contains(next) === true) return;
+    /* The last moment at which the reader is still choosing, which is where
+       text that matched no option is settled (CB7). */
+    this.settleInput(event);
     if (this.isOpen()) this.setOpen(false, 'blur', event);
+  }
+
+  /**
+   * The option whose label *is* the text, by the same collator the filter used:
+   * a reader who typed an option in full has chosen it, and comparing with
+   * `===` would refuse `resume` for `Resumé` on a page the filter had just
+   * matched.
+   */
+  private valueForLabel(text: string): ComboboxOptionValue | undefined {
+    if (text === '') return undefined;
+    const filter = this.fallbackFilter();
+    for (const [candidate, label] of this.declared()) {
+      if (filter.equals(label, text)) return candidate;
+    }
+    for (const [candidate, label] of this.registry()) {
+      if (filter.equals(label, text)) return candidate;
+    }
+    return undefined;
+  }
+
+  /**
+   * What becomes of text that matched no option, at the moment the reader
+   * leaves the field (CB7). `combobox`'s React binding states the reasoning;
+   * the three answers are the same, in the same order. Text that *is* an option
+   * is that option; text that is not, in a field that allows one of its own, is
+   * the value; text that is not, in a field that does not, is undone and the
+   * caller is told what was refused.
+   */
+  private settleInput(source?: Event) {
+    const text = this.inputValue();
+    const matched = this.valueForLabel(text);
+
+    if (matched !== undefined) {
+      if (matched !== this.value()) this.select(matched, 'blur', source);
+      this.setInputValue(this.labelFor(matched) ?? text, 'blur', source);
+      return;
+    }
+
+    if (text === '') {
+      if (this.value() !== null) this.select(null, 'blur', source);
+      return;
+    }
+
+    if (this.resolvedAllowsCustomValue()) {
+      if (text !== this.value()) this.select(text, 'blur', source);
+      return;
+    }
+
+    const held = this.value();
+    this.setInputValue(held === null ? '' : (this.labelFor(held) ?? ''), 'blur', source);
+    this.inputReset.emit({ rejected: text, reason: 'blur' });
   }
 
   protected onClear(event: MouseEvent) {

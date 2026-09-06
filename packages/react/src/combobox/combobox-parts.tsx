@@ -229,6 +229,9 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
   const onBlur = (event: { relatedTarget: EventTarget | null }) => {
     const next = event.relatedTarget;
     if (next instanceof Node && combobox.contentNode?.contains(next) === true) return;
+    /* The last moment at which the reader is still choosing, which is where
+       text that matched no option is settled (CB7). */
+    combobox.settleInput(event);
     if (!combobox.open) return;
     combobox.setOpen(false, 'blur');
   };

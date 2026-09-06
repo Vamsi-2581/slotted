@@ -119,6 +119,8 @@ export interface ComboboxProps {
   children?: ReactNode;
   clearable?: boolean;
   clearLabel?: string;
+  /** Called with the text the field refused when it settled, and why (CB7). */
+  onInputReset?: (rejected: string, details: { reason: 'blur'; source?: unknown }) => void;
   closeOnEscape?: boolean;
   closeOnOutsidePress?: boolean;
   closeOnSelect?: boolean;

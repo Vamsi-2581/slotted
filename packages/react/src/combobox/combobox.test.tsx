@@ -296,6 +296,82 @@ describe('Combobox', () => {
     expect(placeholder?.querySelectorAll("[data-ui='skeleton']")).toHaveLength(3);
   });
 
+  /**
+   * CB7. An editable combobox lets a reader type anything, and the pattern says
+   * nothing about text that matched no option. Which answer is right depends on
+   * the field, so it is a prop; the default refuses, because a field that keeps
+   * text nothing was chosen for is a field whose value and picture disagree.
+   */
+  describe('text that matches no option', () => {
+    it('puts the field back to the committed value when it leaves, and says what it refused', () => {
+      const onInputReset = vi.fn();
+      const onValueChange = vi.fn();
+      render(
+        <Basic
+          defaultInputValue="Apple"
+          defaultValue="apple"
+          items={[{ label: 'Apple', value: 'apple' }]}
+          onInputReset={onInputReset}
+          onValueChange={onValueChange}
+        />,
+      );
+      input().focus();
+      type('appl');
+      fireEvent.blur(input(), { relatedTarget: null });
+
+      expect(input()).toHaveValue('Apple');
+      expect(onInputReset).toHaveBeenCalledWith(
+        'appl',
+        expect.objectContaining({ reason: 'blur' }),
+      );
+      expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('empties the field when nothing was ever committed', () => {
+      render(<Basic />);
+      input().focus();
+      type('zzz');
+      fireEvent.blur(input(), { relatedTarget: null });
+
+      expect(input()).toHaveValue('');
+    });
+
+    it('takes the text as the value when the field allows one of its own', () => {
+      const onValueChange = vi.fn();
+      const onInputReset = vi.fn();
+      render(<Basic allowsCustomValue onInputReset={onInputReset} onValueChange={onValueChange} />);
+      input().focus();
+      type('kumquat');
+      fireEvent.blur(input(), { relatedTarget: null });
+
+      expect(input()).toHaveValue('kumquat');
+      expect(onValueChange).toHaveBeenCalledWith(
+        'kumquat',
+        expect.objectContaining({ reason: 'blur' }),
+      );
+      expect(onInputReset).not.toHaveBeenCalled();
+    });
+
+    it('commits an option a reader typed in full rather than refusing it', () => {
+      const onValueChange = vi.fn();
+      render(
+        <Basic
+          items={[{ label: 'Blueberry', value: 'blueberry' }]}
+          onValueChange={onValueChange}
+        />,
+      );
+      input().focus();
+      type('Blueberry');
+      fireEvent.blur(input(), { relatedTarget: null });
+
+      expect(onValueChange).toHaveBeenCalledWith(
+        'blueberry',
+        expect.objectContaining({ reason: 'blur' }),
+      );
+      expect(input()).toHaveValue('Blueberry');
+    });
+  });
+
   it('hides a group whose every option was filtered away', async () => {
     render(
       <Basic>

@@ -228,14 +228,14 @@ export const CustomValue: Story = {
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
           'Refused',
-          "Enter puts the text back to the committed option's label, which is the pattern's own reverts.",
+          "Enter — and leaving the field — put the text back to the committed option's label, which is the pattern's own reverts. inputReset carries what was refused (CB7).",
           viewport(
             `<sl-combobox aria-label="Fruit" [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
           ),
         )}
         ${scene(
           'Allowed',
-          'Enter commits the typed text, and the request carries it as the value.',
+          'Enter — and leaving the field — commit the typed text, and the request carries it as the value.',
           viewport(
             `<sl-combobox aria-label="Fruit" allowsCustomValue [inputValue]="'Durian'" [open]="true" [portal]="false">${FRUIT}</sl-combobox>`,
           ),

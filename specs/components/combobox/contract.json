@@ -69,6 +69,16 @@
       "reason": "The popup waits as three rows the height of an option rather than as one sentence, so the surface a reader is looking at is the shape of the list that is coming. It is hidden from assistive technology: the status row beside it is the live region and already says what is happening (SL6/CB5)."
     }
   },
+  "customValue": {
+    "prop": "allowsCustomValue",
+    "default": false,
+    "settlesOn": "blur",
+    "match": "an option whose label is the typed text, compared with the family's own collator at base sensitivity — the same comparison the filter made",
+    "accepted": "the text becomes the value, through onValueChange with reason 'blur'",
+    "rejected": "the field goes back to the label of the last committed value, or to nothing, and onInputReset is called with the text that was refused",
+    "event": "onInputReset",
+    "reason": "An editable combobox lets a reader type anything, and the pattern says nothing about what happens to text that matched no option. `Enter` already answered it — the family reverts, or commits the text where `allowsCustomValue` is on — and blur did not, so a control whose value was `apple` sat there reading `appl` after the reader clicked away (CB7). It is the same decision at a second moment, so it is the same prop: a second one spelled without the `s` would have been two names for one answer, and a field could then refuse on Enter and accept on blur."
+  },
   "wiring": {
     "role": "combobox on the input, listbox on the content, option on each item",
     "aria-haspopup": "never written. Elements with role combobox have an implicit aria-haspopup of listbox, and the popup is one.",

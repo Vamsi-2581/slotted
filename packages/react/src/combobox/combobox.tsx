@@ -78,6 +78,8 @@ export interface ComboboxContextValue {
   inputValue: string;
   invalid: boolean;
   labelFor: (value: ComboboxOptionValue) => string | undefined;
+  /** Settles the typed text against the collection, which `blur` is the moment for. */
+  settleInput: (source?: unknown) => void;
   loading: boolean;
   loadingLabel: string;
   locale: string | undefined;
@@ -199,6 +201,7 @@ export function Combobox({
   name,
   onHighlightedValueChange,
   onInputValueChange,
+  onInputReset,
   onLoadMore,
   onOpenChange,
   onValueChange,
@@ -370,6 +373,26 @@ export function Combobox({
     [],
   );
 
+  /**
+   * The option whose label *is* the text, by the same collator the filter used:
+   * a reader who typed an option in full has chosen it, and comparing with
+   * `===` would refuse `resume` for `Resumé` on a page the filter had just
+   * matched.
+   */
+  const valueForLabel = useCallback(
+    (text: string) => {
+      if (text === '') return undefined;
+      for (const [candidate, label] of declared) {
+        if (fallbackFilter.equals(label, text)) return candidate;
+      }
+      for (const [candidate, label] of registry.current) {
+        if (fallbackFilter.equals(label, text)) return candidate;
+      }
+      return undefined;
+    },
+    [declared, fallbackFilter, registered],
+  );
+
   const setInputValue = useCallback(
     (next: string, reason: ComboboxInputReason, source?: unknown) => {
       const state = latest.current;
@@ -402,6 +425,67 @@ export function Combobox({
     },
     [],
   );
+
+  /**
+   * What becomes of text that matched no option, at the moment the reader
+   * leaves the field (CB7).
+   *
+   * Blur is the moment because it is the last one at which the reader is still
+   * choosing: settling on every keystroke would fight the typing, and settling
+   * never leaves a control whose value is `apple` sitting there reading `appl`.
+   *
+   * Three answers, in order. Text that *is* an option is that option, however
+   * it was arrived at. Text that is not, in a field that allows one of its own,
+   * is the value. Text that is not, in a field that does not, is undone: the
+   * field goes back to the committed label — or to nothing — and the caller is
+   * told what was refused, so it can say so.
+   */
+  const settling = useRef({
+    allowsCustomValue: false,
+    currentInput,
+    currentValue,
+    labelFor,
+    onInputReset,
+    select,
+    setInputValue,
+    valueForLabel,
+  });
+  settling.current = {
+    allowsCustomValue: allowsCustomValue ?? defaults.allowsCustomValue,
+    currentInput,
+    currentValue,
+    labelFor,
+    onInputReset,
+    select,
+    setInputValue,
+    valueForLabel,
+  };
+
+  const settleInput = useCallback((source?: unknown) => {
+    const state = settling.current;
+    const text = state.currentInput;
+    const matched = state.valueForLabel(text);
+
+    if (matched !== undefined) {
+      if (matched !== state.currentValue) state.select(matched, 'blur', source);
+      state.setInputValue(state.labelFor(matched) ?? text, 'blur', source);
+      return;
+    }
+
+    if (text === '') {
+      if (state.currentValue !== null) state.select(null, 'blur', source);
+      return;
+    }
+
+    if (state.allowsCustomValue) {
+      if (text !== state.currentValue) state.select(text, 'blur', source);
+      return;
+    }
+
+    const committed = state.currentValue === null ? '' : (state.labelFor(state.currentValue) ?? '');
+    state.setInputValue(committed, 'blur', source);
+    state.onInputReset?.(text, { reason: 'blur', source });
+  }, []);
 
   const clear = useCallback(
     (reason: ComboboxValueReason, source?: unknown) => {
@@ -483,6 +567,7 @@ export function Combobox({
     setInputNode,
     setInputValue,
     setOpen,
+    settleInput,
     shift: shift ?? defaults.shift,
     side: side ?? defaults.side,
     sideOffset: sideOffset ?? defaults.sideOffset,

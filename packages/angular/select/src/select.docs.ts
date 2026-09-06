@@ -67,6 +67,20 @@ const anatomy: AnatomyRow[] = [
       "The ring, standing where the chevron stands while an answer is travelling: the chevron says the popup opens, and it does not open onto anything yet. The arc is the shared `spinner` sheet's, worn as `data-ui` beside this part, so the family says only where it stands and how big it is.",
   },
   {
+    part: 'tags',
+    element: 'span',
+    required: false,
+    purpose:
+      'The chosen values, as the chips they are, standing over the trigger rather than inside it — a remove control inside a button is a control inside a control. Each chip is a `tag`, and one more chip counts what did not fit, measured by `createCollapse`. Only a multiple selection draws it.',
+  },
+  {
+    part: 'summary',
+    element: 'span',
+    required: false,
+    purpose:
+      "What a control under 120px says instead of chips — '3 selected'. It lives inside the value, so the trigger is named by it whichever of the two is drawn, and it is taken out of sight rather than out of the tree while the chips are shown.",
+  },
+  {
     part: 'clear',
     element: 'button',
     required: false,
@@ -587,6 +601,20 @@ const api = apiRows([
     'Clear selection',
     'sl-select',
     'The accessible name of the clear button.',
+  ],
+  [
+    'removeLabel',
+    'string',
+    'Remove {label}',
+    'sl-select',
+    "The accessible name of a chip's remove control. `{label}` is the value's own label.",
+  ],
+  [
+    'summaryLabel',
+    'string',
+    '{count} selected',
+    'sl-select',
+    'What a control too narrow for chips says instead. `{count}` is how many are chosen.',
   ],
   [
     'emptyLabel',

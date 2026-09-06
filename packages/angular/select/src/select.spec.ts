@@ -157,7 +157,13 @@ describe('SlSelect', () => {
     expect(trigger().textContent?.trim()).toBe('Blueberry');
   });
 
-  it('summarises several values and keeps the popup open while they are taken', () => {
+  /**
+   * SL4: several values are the chips they are, and not a sentence about them.
+   * The sentence stays as the trigger's name — and as what a control too narrow
+   * for a chip shows — but the picture is one `tag` per value, each with the
+   * remove control a tag already has.
+   */
+  it('previews several values as chips, and keeps the popup open while they are taken', () => {
     fixture.componentInstance.multiple.set(true);
     fixture.detectChanges();
     open();
@@ -169,7 +175,42 @@ describe('SlSelect', () => {
     fixture.detectChanges();
 
     expect(listbox()).not.toBeNull();
-    expect(trigger().textContent?.trim()).toBe('Apple +1');
+    const chips = [
+      ...document.querySelectorAll("[data-part='tags'] > [data-ui='tag']:not([data-overflow])"),
+    ];
+    expect(chips.map((chip) => chip.querySelector("[data-part='label']")?.textContent)).toEqual([
+      'Apple',
+      'Cherry',
+    ]);
+    for (const chip of chips) {
+      expect(chip.querySelector("[data-part='remove']")).not.toBeNull();
+    }
+    expect(trigger().textContent?.trim()).toBe('2 selected');
+
+    /* The chip that counts what did not fit is rendered and hidden until the
+       collapse reveals it. */
+    const overflow = document.querySelector("[data-part='tags'] > [data-overflow]");
+    expect(overflow?.getAttribute('data-ui')).toBe('tag');
+    expect(overflow?.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('takes a value out of the selection from its own chip', () => {
+    fixture.componentInstance.multiple.set(true);
+    fixture.detectChanges();
+    open();
+    named('Apple').click();
+    fixture.detectChanges();
+    named('Cherry').click();
+    fixture.detectChanges();
+
+    const remove = document.querySelector<HTMLButtonElement>(
+      "[data-part='tags'] > [data-ui='tag']:not([data-overflow]) [data-part='remove']",
+    );
+    expect(remove?.getAttribute('aria-label')).toBe('Remove Apple');
+    remove?.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.value()).toEqual(['cherry']);
   });
 
   it('clears the selection, and says why', () => {

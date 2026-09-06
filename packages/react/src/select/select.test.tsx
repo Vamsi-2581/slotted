@@ -240,15 +240,52 @@ describe('Select', () => {
     expect(trigger().querySelector("[data-part='value']")).toHaveAttribute('data-unmatched');
   });
 
-  it('summarises several values and keeps the popup open while they are taken', async () => {
-    render(<Basic multiple />);
+  /**
+   * SL4: several values are the chips they are, and not a sentence about them.
+   * The sentence stays as the trigger's name — and as what a control too narrow
+   * for a chip shows — but the picture is one `tag` per value, each with the
+   * remove control a tag already has.
+   */
+  it('previews several values as chips, and keeps the popup open while they are taken', async () => {
+    const { container } = render(<Basic multiple />);
     const listbox = await open();
     expect(listbox).toHaveAttribute('aria-multiselectable', 'true');
 
     fireEvent.click(optionNamed('Apple'));
     fireEvent.click(optionNamed('Cherry'));
     expect(screen.getByRole('listbox')).toBeInTheDocument();
-    expect(trigger()).toHaveTextContent('Apple +1');
+
+    const chips = [
+      ...container.querySelectorAll("[data-part='tags'] > [data-ui='tag']:not([data-overflow])"),
+    ];
+    expect(chips.map((chip) => chip.querySelector("[data-part='label']")?.textContent)).toEqual([
+      'Apple',
+      'Cherry',
+    ]);
+    for (const chip of chips) expect(chip.querySelector("[data-part='remove']")).not.toBeNull();
+    expect(trigger()).toHaveTextContent('2 selected');
+
+    /* The chip that counts what did not fit is rendered and hidden until the
+       collapse reveals it: `createCollapse` measures it to know whether it
+       will fit before it draws it. */
+    const overflow = container.querySelector("[data-part='tags'] > [data-overflow]");
+    expect(overflow).toHaveAttribute('data-ui', 'tag');
+    expect(overflow).toHaveAttribute('hidden');
+  });
+
+  it('takes a value out of the selection from its own chip', async () => {
+    const onValueChange = vi.fn();
+    render(<Basic multiple onValueChange={onValueChange} />);
+    await open();
+    fireEvent.click(optionNamed('Apple'));
+    fireEvent.click(optionNamed('Cherry'));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Apple' }));
+
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      ['cherry'],
+      expect.objectContaining({ reason: 'select' }),
+    );
   });
 
   it('clears the selection, and says why', async () => {

@@ -1,5 +1,9 @@
 import { moveIndex } from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
+import { createWidthGate } from '@slotted/core/measure';
+import type { WidthGateHandle } from '@slotted/core/measure';
+import { createCollapse } from '@slotted/core/overflow';
+import type { CollapseHandle } from '@slotted/core/overflow';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -21,6 +25,7 @@ import {
   contentChild,
   DestroyRef,
   effect,
+  ElementRef,
   forwardRef,
   HostAttributeToken,
   inject,
@@ -42,6 +47,9 @@ import { NgTemplateOutlet } from '@angular/common';
 import { SlField } from '@slotted/angular/field';
 
 import { injectSelectDefaults } from './select-defaults';
+
+/** The width, in CSS pixels, under which a chip has no room for a word (SL4). */
+export const NARROW_WIDTH = 120;
 import type {
   SelectAlign,
   SelectHighlightReason,
@@ -103,6 +111,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
   styleUrls: [
     '../../../styles/src/select/select.css',
     '../../../styles/src/highlight/highlight.css',
+    '../../../styles/src/tag/tag.css',
   ],
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlSelect), multi: true },
@@ -121,6 +130,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
     '[attr.data-invalid]': "resolvedInvalid() ? '' : null",
     '[attr.data-required]': "resolvedRequired() ? '' : null",
     '[attr.data-loading]': "loading() ? '' : null",
+    '[attr.data-narrow]': "narrow() ? '' : null",
   },
   template: `
     <button
@@ -154,11 +164,51 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
             [ngTemplateOutlet]="template"
             [ngTemplateOutletContext]="{ $implicit: selection(), labels: labels() }"
           />
+        } @else if (resolvedMultiple() && selection().length > 1) {
+          <span data-part="summary">{{ summary() }}</span>
         } @else {
           {{ summary() }}
         }
       </span>
     </button>
+
+    <!--
+      The chips, over the trigger rather than inside it: the trigger is a
+      button, and a remove control inside one is a control inside a control
+      (SL4). The stylesheet places the row over the trigger's own content box
+      and lets every press it does not want through to the button underneath.
+    -->
+    @if (resolvedMultiple() && selection().length > 0) {
+      <span #tags data-part="tags">
+        @for (value of selection(); track value) {
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body">
+              <span data-part="label">{{ labelFor(value) ?? value }}</span>
+            </span>
+            <button
+              type="button"
+              data-part="remove"
+              [disabled]="resolvedDisabled() || resolvedReadOnly()"
+              [attr.aria-label]="removeLabelFor(value)"
+              (click)="onRemoveChip(value, $event)"
+            ></button>
+          </span>
+        }
+        <span
+          #chipOverflow
+          data-ui="tag"
+          data-part="root"
+          data-size="sm"
+          data-variant="soft"
+          data-overflow
+          hidden
+        >
+          <span data-part="body"
+            ><span data-part="label">+{{ collapsedCount() || 1 }}</span></span
+          >
+        </span>
+      </span>
+    }
 
     @if (showClear()) {
       <button
@@ -280,6 +330,8 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly mount = input<SelectMount | undefined>(undefined);
   readonly strategy = input<SelectStrategy | undefined>(undefined);
   readonly clearLabel = input<string | undefined>(undefined);
+  readonly removeLabel = input<string | undefined>(undefined);
+  readonly summaryLabel = input<string | undefined>(undefined);
   readonly emptyLabel = input<string | undefined>(undefined);
   readonly loadingLabel = input<string | undefined>(undefined);
 
@@ -357,6 +409,8 @@ export class SlSelect implements ControlValueAccessor, Validator {
   );
   readonly resolvedFullWidth = computed(() => this.fullWidth() ?? this.defaults.fullWidth);
   readonly resolvedClearLabel = computed(() => this.clearLabel() ?? this.defaults.clearLabel);
+  readonly resolvedRemoveLabel = computed(() => this.removeLabel() ?? this.defaults.removeLabel);
+  readonly resolvedSummaryLabel = computed(() => this.summaryLabel() ?? this.defaults.summaryLabel);
   readonly resolvedEmptyLabel = computed(() => this.emptyLabel() ?? this.defaults.emptyLabel);
   readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
 
@@ -401,7 +455,11 @@ export class SlSelect implements ControlValueAccessor, Validator {
     const held = this.selection();
     if (held.length === 0) return this.placeholder();
     const first = this.labelFor(held[0] as string) ?? held[0];
-    return held.length === 1 ? first : `${first} +${held.length - 1}`;
+    if (!this.resolvedMultiple() || held.length === 1) return first;
+    /* Several values are the chips beside this element, not a sentence here
+       (SL4). The sentence stays: it names the trigger, and it is what a control
+       too narrow for a chip shows instead. */
+    return this.resolvedSummaryLabel().replace('{count}', String(held.length));
   });
 
   readonly showClear = computed(
@@ -426,8 +484,69 @@ export class SlSelect implements ControlValueAccessor, Validator {
 
   readonly describedBy = computed(() => this.field?.describedBy() ?? null);
 
+  /**
+   * The chip row, and the two measurements it needs (SL4).
+   *
+   * `createCollapse` is the same ResizeObserver arithmetic `toolbar` collapses
+   * a bar with: it hides the chips that overrun and reveals the `+N` chip from
+   * the first one that does, so the count is what the collapse reports and
+   * cannot disagree with what is on screen. `createWidthGate` answers the other
+   * question — whether the frame has room for a chip at all — because under a
+   * hundred and twenty pixels a chip is a shape with no word in it.
+   */
+  private readonly tags = viewChild<ElementRef<HTMLElement>>('tags');
+  private readonly chipOverflow = viewChild<ElementRef<HTMLElement>>('chipOverflow');
+  protected readonly collapsedCount = signal(0);
+  protected readonly narrow = signal(false);
+  private collapse: CollapseHandle | null = null;
+  private widthGate: WidthGateHandle | null = null;
+
+  protected removeLabelFor(value: SelectOptionValue) {
+    return this.resolvedRemoveLabel().replace('{label}', String(this.labelFor(value) ?? value));
+  }
+
+  protected onRemoveChip(value: SelectOptionValue, event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggle(value, 'select', event);
+    /* A control that removes itself as it is pressed would leave focus on the
+       document; the reader lands back on the control they were on. */
+    this.triggerRef().nativeElement.focus({ preventScroll: true });
+  }
+
   constructor() {
     const destroyRef = inject(DestroyRef);
+    const host = inject(ElementRef<HTMLElement>);
+
+    effect(() => {
+      const row = this.tags()?.nativeElement ?? null;
+      const trigger = this.chipOverflow()?.nativeElement ?? null;
+      untracked(() => {
+        this.collapse?.destroy();
+        this.collapse = null;
+        if (row === null) {
+          this.collapsedCount.set(0);
+          return;
+        }
+        this.collapse = createCollapse(row, {
+          collapsible: () => true,
+          onChange: (units) => this.collapsedCount.set(units.length),
+          trigger: () => trigger,
+          units: () => [...row.querySelectorAll<HTMLElement>(':scope > *:not([data-overflow])')],
+        });
+      });
+    });
+
+    /* A value arriving or leaving changes what there is to fit. */
+    effect(() => {
+      this.selection();
+      untracked(() => this.collapse?.refresh());
+    });
+
+    this.widthGate = createWidthGate(host.nativeElement as HTMLElement, {
+      at: NARROW_WIDTH,
+      onChange: (narrow) => this.narrow.set(narrow),
+    });
 
     effect(() => {
       const open = this.isOpen();
@@ -438,7 +557,11 @@ export class SlSelect implements ControlValueAccessor, Validator {
       if (this.resolvedMount() === 'eager' && !this.isOpen()) this.build();
     });
 
-    destroyRef.onDestroy(() => this.teardown());
+    destroyRef.onDestroy(() => {
+      this.collapse?.destroy();
+      this.widthGate?.destroy();
+      this.teardown();
+    });
   }
 
   /** The element `aria-activedescendant` names, and the option carries. */

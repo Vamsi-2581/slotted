@@ -179,6 +179,8 @@ test('names every part, and no part it does not own', () => {
     'value',
     'arrow',
     'busy',
+    'tags',
+    'summary',
     'clear',
     'positioner',
     'content',

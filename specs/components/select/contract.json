@@ -63,6 +63,15 @@
       "reason": "The popup waits as three rows the height of an option rather than as one sentence, so the surface a reader is looking at is the shape of the list that is coming. It is hidden from assistive technology: the status row beside it is the live region and already says what is happening (SL6/CB5)."
     }
   },
+  "chips": {
+    "row": "tags",
+    "chip": { "ui": "tag", "stylesheet": "tag/tag.css" },
+    "overflowAttribute": "data-overflow",
+    "summary": "summary",
+    "collapse": "createCollapse from @slotted/core/overflow",
+    "narrowWidth": "120px",
+    "reason": "Several chosen values are the chips themselves rather than a sentence about them (SL4/CB4). Each chip is a `tag`, worn as `data-ui` beside the row this family owns, so the chip a reader removes here is the chip they know from everywhere else and its geometry is stated once. What does not fit collapses into one chip marked `data-overflow`, measured by `createCollapse` — the same ResizeObserver arithmetic `toolbar` collapses a bar with. Under 120px of control there is no room for a chip at all, and the summary sentence answers instead; the swap is a container query, so it costs no observer and no render."
+  },
   "wiring": {
     "role": "combobox on the trigger, listbox on the content, option on each item",
     "aria-haspopup": "listbox, on the trigger. Redundant for role=combobox, whose implicit value is listbox, and written anyway because the element is a button and role=combobox replaces button on it.",
@@ -345,7 +354,9 @@
       "typeaheadTimeout",
       "clearLabel",
       "emptyLabel",
-      "loadingLabel"
+      "loadingLabel",
+      "removeLabel",
+      "summaryLabel"
     ]
   },
   "stateAttributes": {
@@ -421,7 +432,9 @@
         "typeaheadTimeout": 500,
         "clearLabel": "Clear selection",
         "emptyLabel": "No options",
-        "loadingLabel": "Loading…"
+        "loadingLabel": "Loading…",
+        "removeLabel": "Remove {label}",
+        "summaryLabel": "{count} selected"
       },
       "capabilities": [
         "selection",
@@ -459,6 +472,8 @@
         "value",
         "arrow",
         "busy",
+        "tags",
+        "summary",
         "clear",
         "positioner",
         "content",

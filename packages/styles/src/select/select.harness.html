@@ -525,9 +525,47 @@
         aria-expanded="false"
         aria-label="Labels"
       >
-        <span data-part="value">Blueberry +2</span>
+        <span data-part="value"><span data-part="summary">3 selected</span></span>
       </button>
+      <span data-part="tags">
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+          <span data-part="body"><span data-part="label">Blueberry</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Blueberry"></button>
+        </span>
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft" data-overflow>
+          <span data-part="body"><span data-part="label">+2</span></span>
+        </span>
+      </span>
       <button data-part="clear" type="button" aria-label="Clear selection"></button>
+      <span data-part="arrow"></span>
+    </div>
+
+    <!-- A control too narrow for a chip: the sentence answers instead. -->
+    <div
+      data-ui="select"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-full-width
+      data-multiple
+      data-narrow
+      style="inline-size: 116px"
+    >
+      <button
+        data-part="trigger"
+        type="button"
+        role="combobox"
+        aria-expanded="false"
+        aria-label="Labels"
+      >
+        <span data-part="value"><span data-part="summary">3 selected</span></span>
+      </button>
+      <span data-part="tags">
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+          <span data-part="body"><span data-part="label">Blueberry</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Blueberry"></button>
+        </span>
+      </span>
       <span data-part="arrow"></span>
     </div>
     <div

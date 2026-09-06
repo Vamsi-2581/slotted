@@ -62,6 +62,10 @@ export interface SelectDefaults {
   alignOffset: number;
   clearable: boolean;
   clearLabel: string;
+  /** The accessible name of a chip's remove control. `{label}` is the value's own label. */
+  removeLabel: string;
+  /** What a control too narrow for chips says instead. `{count}` is how many are chosen. */
+  summaryLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
@@ -112,6 +116,8 @@ export interface SelectProps {
   children?: ReactNode;
   clearable?: boolean;
   clearLabel?: string;
+  removeLabel?: string;
+  summaryLabel?: string;
   closeOnEscape?: boolean;
   closeOnOutsidePress?: boolean;
   closeOnSelect?: boolean;

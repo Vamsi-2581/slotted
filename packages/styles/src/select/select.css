@@ -216,6 +216,97 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* ── Several chosen values, as the chips they are ────────────────────── */
+
+  /**
+   * The preview of a multiple selection (SL4). It was a sentence about the
+   * choice — "Apple +1" — and it is now the choice: one `tag` per value, each
+   * with the remove control a tag already has, and one more chip counting what
+   * did not fit.
+   *
+   * The chips are `tag`'s, worn as `data-ui` beside this row, so the chip a
+   * reader removes here is the chip they know from everywhere else and its
+   * geometry is stated once. Nothing about a chip is decided here: the row
+   * asks for the small step and the chip answers with its own arithmetic,
+   * floored at the target minimum because its remove control is a control.
+   *
+   * **The row stands over the trigger rather than inside it.** The trigger is
+   * a `button`, and a button cannot contain one: a remove control inside it
+   * would be a control inside a control, which no browser and no reader
+   * resolves the same way. So the row is a sibling placed over the trigger's
+   * own content box — the arrangement the chevron and the clear button already
+   * use, and for the same reason — and it lets every press it does not want
+   * through to the button underneath, so the frame still opens the popup
+   * everywhere a chip is not.
+   */
+  [data-ui='select'][data-part='root'] > [data-part='tags'] {
+    align-items: center;
+    display: flex;
+    gap: var(--slotted-space-2, 0.25rem);
+    inset-block-start: 50%;
+    inset-inline-end: calc(var(--_padding-inline) + var(--_icon-size) + var(--_gap));
+    inset-inline-start: var(--_padding-inline);
+    /* A chip that does not fit is hidden by the collapse, not clipped; this is
+       the guard for the frame between one measurement and the next. */
+    overflow: hidden;
+    /* The gaps between chips belong to the trigger underneath. */
+    pointer-events: none;
+    position: absolute;
+    translate: 0 -50%;
+  }
+
+  /* And the clear button's own box, as the trigger reserves it. */
+  [data-ui='select'][data-part='root']:has(> [data-part='clear']) > [data-part='tags'] {
+    inset-inline-end: calc(
+      var(--_padding-inline) + var(--_icon-size) + var(--_gap) + var(--_action-size) + var(--_gap)
+    );
+  }
+
+  [data-ui='select'] > [data-part='tags'] > * {
+    /* Each chip takes its own presses back. */
+    pointer-events: auto;
+  }
+
+  /**
+   * The chip that counts what did not fit. It is a chip and not a number
+   * beside them, so the row reads as one run of chips whose last one happens
+   * to be a count, and `createCollapse` can measure it the way it measures
+   * every other unit.
+   */
+  [data-ui='select'] > [data-part='tags'] > [data-overflow] {
+    flex: none;
+  }
+
+  /**
+   * The sentence, for a control too narrow for a chip. It lives inside the
+   * value, so the trigger is named by it whichever of the two is drawn, and it
+   * is taken out of sight rather than out of the tree while the chips are
+   * shown: a button whose accessible name disappeared when the frame grew is a
+   * button that changes what it is called when the window is resized.
+   */
+  [data-ui='select'] [data-part='summary'] {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Its own bidi run, ordered by its own content, so a Latin count in a
+       right-to-left row is clipped at its own end rather than at the page's —
+       the repair `status` and `empty` already make, and for the same reason. */
+    unicode-bidi: plaintext;
+    white-space: nowrap;
+  }
+
+  [data-ui='select'][data-part='root']:not([data-narrow]) [data-part='summary'] {
+    block-size: 1px;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  [data-ui='select'][data-part='root'][data-narrow] > [data-part='tags'] {
+    display: none;
+  }
+
   /**
    * The chevron. A mask from the glyph scale rather than a character, and it
    * turns over when the popup opens — the one movement in the control, and the
@@ -999,8 +1090,10 @@
     mask-image: none;
   }
 
-  /* Column two, and the only column that gives way. */
-  [data-ui='select'] [data-part='label'] {
+  /* Column two, and the only column that gives way. It is scoped to the option
+     rather than to the family: a chip in the control carries a `label` of its
+     own, and this rule would have put it in the popup's second column (SL4). */
+  [data-ui='select'] [data-part='item'] > [data-part='label'] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;

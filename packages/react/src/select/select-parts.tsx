@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 
 import { useField } from '../field';
 import { useSelect } from './select';
+import { ChipRow } from './select-tags';
 import {
   entryHighlight,
   moveHighlight,
@@ -69,6 +70,14 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
   const select = useSelect();
   const field = useField();
   const [node, setNode] = useState<HTMLButtonElement | null>(null);
+  /**
+   * The frame, and whether it is under the width a chip needs (SL4). The
+   * measurement is the frame's rather than the trigger's because the chips
+   * stand over the trigger and the sentence stands inside it, and the two have
+   * to answer the same width.
+   */
+  const [frame, setFrame] = useState<HTMLDivElement | null>(null);
+  const [narrow, setNarrow] = useState(false);
 
   const pending = useRef<string | null>(null);
   const typeahead = useRef<TypeaheadHandle | null>(null);
@@ -267,7 +276,31 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
     ...(select.invalid ? { 'data-invalid': '' } : {}),
     ...(select.required ? { 'data-required': '' } : {}),
     ...(select.loading ? { 'data-loading': '' } : {}),
+    ...(narrow ? { 'data-narrow': '' } : {}),
   };
+
+  /**
+   * The chips stand over the trigger rather than inside it: the trigger is a
+   * `button`, and a remove control inside one is a control inside a control
+   * (SL4). The row is a sibling, placed by the stylesheet over the trigger's
+   * own content box, and it lets every press it does not want through to the
+   * button underneath.
+   */
+  const chips =
+    select.multiple && select.selection.length > 0 ? (
+      <ChipRow
+        disabled={select.disabled || select.readOnly}
+        frame={frame}
+        labelFor={select.labelFor}
+        onNarrow={setNarrow}
+        onRemove={(value, event) => {
+          select.toggle(value, 'select', event.nativeEvent);
+          node?.focus({ preventScroll: true });
+        }}
+        removeLabel={select.removeLabel}
+        values={select.selection}
+      />
+    ) : null;
 
   const inner = (
     <>
@@ -313,6 +346,7 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
         anything yet (SL6). The arc is `spinner`'s, worn as `data-ui` beside
         this family's own part.
       */}
+      {chips}
       {select.loading ? (
         <span aria-hidden="true" data-part="busy" data-ui="spinner" />
       ) : (
@@ -323,7 +357,11 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
   );
 
   if (render !== undefined) return render({ ...rootProps, children: inner });
-  return <div {...rootProps}>{inner}</div>;
+  return (
+    <div {...rootProps} ref={setFrame}>
+      {inner}
+    </div>
+  );
 }
 
 /**
@@ -394,11 +432,20 @@ export function SelectValue({ children, placeholder, ...nativeProps }: SelectVal
   const summary = (() => {
     if (children !== undefined) return children(select.selection, resolved);
     if (select.selection.length === 0) return placeholder;
-    /* The first label, then how many more. `+2` rather than "3 selected",
-       because a reader scanning a form wants to see one of their own choices
-       and not a count of them. */
     const first = labels[0] ?? select.selection[0];
-    return select.selection.length === 1 ? first : `${first} +${select.selection.length - 1}`;
+    if (!select.multiple || select.selection.length === 1) return first;
+    /**
+     * Several values are the chips beside this element, not a sentence here
+     * (SL4). The sentence stays anyway, in its own part: it is the trigger's
+     * accessible name, and it is what a control too narrow for a chip shows
+     * instead. The stylesheet decides which of the two is seen; the name is
+     * the same either way.
+     */
+    return (
+      <span data-part="summary">
+        {select.summaryLabel.replace('{count}', String(select.selection.length))}
+      </span>
+    );
   })();
 
   return (

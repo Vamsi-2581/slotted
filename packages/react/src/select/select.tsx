@@ -44,6 +44,8 @@ export interface SelectContextValue {
   clear: (reason: SelectValueReason, source?: unknown) => void;
   clearable: boolean;
   clearLabel: string;
+  removeLabel: string;
+  summaryLabel: string;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;
@@ -157,6 +159,8 @@ export function Select({
   children,
   clearable,
   clearLabel,
+  removeLabel,
+  summaryLabel,
   closeOnEscape,
   closeOnOutsidePress,
   closeOnSelect,
@@ -423,6 +427,8 @@ export function Select({
     clear,
     clearable: clearable ?? defaults.clearable,
     clearLabel: clearLabel ?? defaults.clearLabel,
+    removeLabel: removeLabel ?? defaults.removeLabel,
+    summaryLabel: summaryLabel ?? defaults.summaryLabel,
     closeOnEscape: closeOnEscape ?? defaults.closeOnEscape,
     closeOnOutsidePress: closeOnOutsidePress ?? defaults.closeOnOutsidePress,
     closeOnSelect: closeOnSelect ?? defaults.closeOnSelect,

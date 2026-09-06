@@ -5,7 +5,7 @@
    *
    * The two boxes are `tooltip`'s and `popover`'s: the **layer** is what
    * `packages/core/src/positioner` writes `position`, `left` and `top` onto and
-   * what scales and fades, because the module leaves `transform` alone; the
+   * what slides and fades, because the module leaves `transform` alone; the
    * **content** is the painted surface and the only thing that takes the
    * pointer. The gap between the trigger and the surface is the layer's own
    * padding rather than the positioner's offset, so the pointer never crosses
@@ -120,11 +120,32 @@
     pointer-events: none;
 
     opacity: 0;
-    scale: 0.96;
-    transform-origin: var(--slotted-positioner-transform-origin, center);
+    /**
+     * R7: the layer arrives along the axis it opens on — from one space step
+     * above its place when it opens downward, from one step below when it
+     * opens upward — and never along the inline axis. A `scale` from the
+     * corner the positioner named as origin moved the far edge by four per
+     * cent of the width, which read as an entrance from the left.
+     */
+    --_enter-distance: var(--slotted-space-2, 0.25rem);
+    translate: 0 calc(-1 * var(--_enter-distance));
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      scale var(--slotted-duration-short) var(--slotted-easing-exit);
+      translate var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui='menu'][data-side='top'] {
+    translate: 0 var(--_enter-distance);
+  }
+
+  /* A submenu, or a menu placed beside its anchor, arrives along the inline
+     axis it opens on: from one step inside the parent's edge (M1). */
+  [data-ui='menu'][data-side='right'] {
+    translate: calc(-1 * var(--_enter-distance)) 0;
+  }
+
+  [data-ui='menu'][data-side='left'] {
+    translate: var(--_enter-distance) 0;
   }
 
   [data-ui='menu']:is([data-side='left'], [data-side='right']) {
@@ -132,12 +153,92 @@
     padding-inline: var(--_gap);
   }
 
+  /**
+   * The entrance is a keyframe animation and not a transition. A transition
+   * starts from the style the browser computed last, and the positioner
+   * writes `data-side` in the same style update as the family opens the
+   * layer, so a transition set out from the closed style of the side the
+   * layer had before it had one — the bottom's — whatever side it opens on.
+   * A keyframe states where it starts. The exit stays a transition: it
+   * leaves from wherever the layer is, on the closed rule's durations.
+   */
   [data-ui='menu'][data-open] {
     opacity: 1;
-    scale: 1;
-    transition:
-      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      scale var(--slotted-duration-medium) var(--slotted-easing-enter);
+    translate: 0 0;
+    transition: none;
+  }
+
+  /**
+   * Only a layer the positioner placed arrives: it writes `data-positioned`
+   * with the side, and a layer written open in static markup — the harness,
+   * a docs snippet — is simply there, and is photographed where it stands.
+   */
+  [data-ui='menu'][data-open][data-positioned] {
+    animation: slotted-menu-enter-down var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  [data-ui='menu'][data-open][data-positioned][data-side='top'] {
+    animation-name: slotted-menu-enter-up;
+  }
+
+  [data-ui='menu'][data-open][data-positioned][data-side='right'] {
+    animation-name: slotted-menu-enter-from-start;
+  }
+
+  [data-ui='menu'][data-open][data-positioned][data-side='left'] {
+    animation-name: slotted-menu-enter-from-end;
+  }
+
+  @keyframes slotted-menu-enter-down {
+    from {
+      opacity: 0;
+      translate: 0 calc(-1 * var(--_enter-distance));
+    }
+  }
+
+  @keyframes slotted-menu-enter-up {
+    from {
+      opacity: 0;
+      translate: 0 var(--_enter-distance);
+    }
+  }
+
+  @keyframes slotted-menu-enter-from-start {
+    from {
+      opacity: 0;
+      translate: calc(-1 * var(--_enter-distance)) 0;
+    }
+  }
+
+  @keyframes slotted-menu-enter-from-end {
+    from {
+      opacity: 0;
+      translate: var(--_enter-distance) 0;
+    }
+  }
+
+  @keyframes slotted-menu-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Stillness keeps the fade and drops the movement (R7). */
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='menu'],
+    [data-ui='menu'][data-side='top'],
+    [data-ui='menu'][data-side='left'],
+    [data-ui='menu'][data-side='right'] {
+      translate: 0 0;
+      transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+    }
+
+    [data-ui='menu'][data-open][data-positioned],
+    [data-ui='menu'][data-open][data-positioned][data-side='top'],
+    [data-ui='menu'][data-open][data-positioned][data-side='left'],
+    [data-ui='menu'][data-open][data-positioned][data-side='right'] {
+      animation-name: slotted-menu-fade;
+    }
   }
 
   /* The anchor scrolled out of its own clipper. The menu is still open and its

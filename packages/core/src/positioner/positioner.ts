@@ -111,6 +111,12 @@ export interface PositionerHandle {
 }
 
 const SIDE_ATTRIBUTE = 'data-side';
+/**
+ * Written once the layer has been placed. A stylesheet keys the entrance on it,
+ * so a layer written open in static markup — a harness page, a docs snippet —
+ * is simply there, and only a layer the module placed arrives.
+ */
+const POSITIONED_ATTRIBUTE = 'data-positioned';
 const ALIGN_ATTRIBUTE = 'data-align';
 const DETACHED_ATTRIBUTE = 'data-detached';
 
@@ -254,6 +260,7 @@ export function createPositioner(
     floating.style.top = `${result.y}px`;
     floating.setAttribute(SIDE_ATTRIBUTE, resolved.side);
     floating.setAttribute(ALIGN_ATTRIBUTE, resolved.align);
+    floating.setAttribute(POSITIONED_ATTRIBUTE, '');
     if (detached) floating.setAttribute(DETACHED_ATTRIBUTE, '');
     else floating.removeAttribute(DETACHED_ATTRIBUTE);
 

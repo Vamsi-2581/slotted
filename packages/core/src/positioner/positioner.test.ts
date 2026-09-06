@@ -171,6 +171,17 @@ describe('createPositioner', () => {
     positioner.destroy();
   });
 
+  it('marks the layer as positioned once it has been placed, and not before', async () => {
+    const { anchor, floating } = scene(ANCHOR);
+    const positioner = createPositioner(anchor, floating);
+    expect(floating.hasAttribute('data-positioned')).toBe(false);
+
+    await positioner.update();
+
+    expect(floating.hasAttribute('data-positioned')).toBe(true);
+    positioner.destroy();
+  });
+
   it('leaves the transform alone for the family that animates with it', async () => {
     const { anchor, floating } = scene(ANCHOR);
     const positioner = createPositioner(anchor, floating);

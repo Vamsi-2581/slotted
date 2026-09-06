@@ -153,12 +153,56 @@
    * as placed rather than thrown. Both durations are motion tokens, so the
    * theme's one reduced-motion query collapses them together.
    */
+  /**
+   * The entrance is a keyframe animation and not a transition. A transition
+   * starts from the style the browser computed last, and the positioner
+   * writes `data-side` in the same style update as the family opens the
+   * layer, so a transition set out from the closed style of the side the
+   * layer had before it had one — the bottom's — whatever side it opens on.
+   * A keyframe states where it starts. The exit stays a transition: it
+   * leaves from wherever the layer is, on the closed rule's durations.
+   */
   [data-ui='tooltip'][data-open] {
     opacity: 1;
     translate: 0 0;
-    transition:
-      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      translate var(--slotted-duration-medium) var(--slotted-easing-enter);
+    transition: none;
+  }
+
+  /**
+   * Only a layer the positioner placed arrives: it writes `data-positioned`
+   * with the side, and a layer written open in static markup — the harness,
+   * a docs snippet — is simply there, and is photographed where it stands.
+   */
+  [data-ui='tooltip'][data-open][data-positioned] {
+    animation: slotted-tooltip-enter-down var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
+  [data-ui='tooltip'][data-open][data-positioned][data-side='top'] {
+    animation-name: slotted-tooltip-enter-up;
+  }
+
+  [data-ui='tooltip'][data-open][data-positioned]:is([data-side='left'], [data-side='right']) {
+    animation-name: slotted-tooltip-fade;
+  }
+
+  @keyframes slotted-tooltip-enter-down {
+    from {
+      opacity: 0;
+      translate: 0 calc(-1 * var(--_enter-distance));
+    }
+  }
+
+  @keyframes slotted-tooltip-enter-up {
+    from {
+      opacity: 0;
+      translate: 0 var(--_enter-distance);
+    }
+  }
+
+  @keyframes slotted-tooltip-fade {
+    from {
+      opacity: 0;
+    }
   }
 
   /* Stillness keeps the fade and drops the movement (R7). */
@@ -171,8 +215,11 @@
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='tooltip'][data-open] {
-      transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+    [data-ui='tooltip'][data-open][data-positioned],
+    [data-ui='tooltip'][data-open][data-positioned][data-side='top'],
+    [data-ui='tooltip'][data-open][data-positioned][data-side='left'],
+    [data-ui='tooltip'][data-open][data-positioned][data-side='right'] {
+      animation-name: slotted-tooltip-fade;
     }
   }
 

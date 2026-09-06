@@ -405,6 +405,43 @@
   }
 
   /**
+   * ── Unavailable, and still reachable ──────────────────────────────────
+   *
+   * Being unavailable and being unreachable are two decisions, and the sheet
+   * painted them as one: a control that stays in the tab sequence carrying
+   * `aria-disabled` — because it holds a tooltip, an explanation, a place in a
+   * toolbar — wore the same grey as one the platform took out, and a disabled
+   * accent action was the same rectangle as a resting neutral one (the fill,
+   * the edge and the ground of `solid secondary` are the disabled tokens'
+   * values in `light`).
+   *
+   * A control a person can reach has to be read, so its label is muted text
+   * rather than disabled text: `--slotted-text-muted` on the neutral subtle
+   * ground is 4.97:1 in `light`, 6.91:1 in `dark` and 11.76:1 in
+   * `high-contrast`, where the disabled pair is held to 3:1 and sits at 3.86.
+   * The ground is the quiet neutral step and not the neutral fill, because the
+   * neutral fill is what a secondary action rests on; the edge is the subtle
+   * border, one step quieter than any control at rest; nothing is lifted and
+   * nothing answers the pointer. `:not(:disabled)` is the whole difference:
+   * a natively disabled control keeps the disabled tokens above, and a ghost
+   * stays flat and takes only the text.
+   */
+  [data-ui='button'][data-disabled]:not(:disabled) {
+    color: var(--slotted-text-muted, GrayText);
+  }
+
+  [data-ui='button'][data-variant='solid'][data-disabled]:not(:disabled),
+  [data-ui='button'][data-pressed][data-disabled]:not(:disabled) {
+    background: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
+    border-color: var(--slotted-border-subtle, GrayText);
+    color: var(--slotted-text-muted, GrayText);
+  }
+
+  [data-ui='button'][data-variant='outline'][data-disabled]:not(:disabled) {
+    border-color: var(--slotted-border-subtle, GrayText);
+  }
+
+  /**
    * ── Loading ───────────────────────────────────────────────────────────
    *
    * The ring is what the control falls back to, and the sweep below is what it

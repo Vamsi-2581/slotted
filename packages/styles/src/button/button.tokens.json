@@ -1,5 +1,6 @@
 [
   "--slotted-border-strong",
+  "--slotted-border-subtle",
   "--slotted-border-width-thin",
   "--slotted-control-border-width",
   "--slotted-control-font-family",
@@ -37,6 +38,7 @@
   "--slotted-radius-full",
   "--slotted-space-2",
   "--slotted-target-min",
+  "--slotted-text-muted",
   "--slotted-tone-accent-on-solid",
   "--slotted-tone-accent-solid",
   "--slotted-tone-accent-solid-active",

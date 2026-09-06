@@ -269,6 +269,38 @@ test('hovers by lightening the fill, or by the one neutral ground under a bare c
   );
 });
 
+/**
+ * Being unavailable and being unreachable are two decisions. A control that
+ * stays in the tab sequence with `aria-disabled` can be reached and has to be
+ * read, so it takes muted text on the neutral subtle ground under a subtle
+ * edge — measured at 4.97:1, 6.91:1 and 11.76:1 across the three schemes —
+ * where a natively disabled one keeps the disabled tokens, which the theme
+ * holds to 3:1 only. It was one grey before this, and a disabled accent
+ * action was the same rectangle as a resting neutral one.
+ */
+test('keeps an unavailable control legible, and leaves the disabled grey to :disabled', () => {
+  const reachable = rule(`${ui}[data-disabled]:not(:disabled)`);
+  assert.equal(reachable, 'color:var(--slotted-text-muted,GrayText);');
+  const filled = rule(
+    `${ui}[data-variant='solid'][data-disabled]:not(:disabled),${ui}[data-pressed][data-disabled]:not(:disabled)`,
+  );
+  assert.ok(filled.includes('background:var(--slotted-tone-secondary-subtle-hover'));
+  assert.ok(filled.includes('border-color:var(--slotted-border-subtle'));
+  assert.ok(
+    rule(`${ui}[data-variant='outline'][data-disabled]:not(:disabled)`).includes(
+      'border-color:var(--slotted-border-subtle',
+    ),
+  );
+  assert.ok(
+    !rule(`${ui}[data-variant='ghost'][data-disabled]:not(:disabled)`),
+    'a ghost that is unavailable took a fill or an edge',
+  );
+  /* The native state keeps its own tokens, which say "cannot be operated". */
+  assert.ok(
+    rule(`${ui}:disabled,${ui}[data-disabled]`).includes('color:var(--slotted-disabled-foreground'),
+  );
+});
+
 test('holds hover and active back for every stronger state', () => {
   const weak = selectors().filter((selector) => /:hover|:active(?![-\w])/.test(selector));
   assert.ok(weak.length > 0, 'the family paints no interactive state at all');

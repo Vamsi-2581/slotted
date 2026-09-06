@@ -77,7 +77,7 @@ export const ANGULAR_BUTTON_DOCS = {
       'While loading, the indicator is a named progress bar in the accessibility tree and the control announces aria-disabled while keeping focus — the shape React Aria’s pending button and Primer’s loading button both take. aria-busy is not used: it is not reliably announced on a button, and two mechanisms for one fact is one too many.',
       'A control with a projected start or end icon gives the indicator that box and keeps its label. One with neither renders the label at zero opacity: it stays in the accessibility tree, so the name survives the wait, and it stays in the flow, so the control never changes size.',
       'loading refuses activation on a capture-phase listener, before any handler the template attached, so a submit button cannot submit twice.',
-      'focusableWhenDisabled keeps an unavailable control reachable. Use it when the control carries a tooltip or an explanation a keyboard user would otherwise never reach, such as one inside a toolbar.',
+      'focusableWhenDisabled keeps an unavailable control reachable. Use it when the control carries a tooltip or an explanation a keyboard user would otherwise never reach, such as one inside a toolbar. A control that can be reached is painted to be read: muted text on the neutral subtle ground, at 4.5:1 or better, where a natively disabled control keeps the disabled grey.',
       'There is no render input, and none is needed: the component is a directive on the element the template wrote, so substituting the element is done by writing a different one.',
       'Project a start or end icon with aria-hidden so it does not repeat the label.',
     ],

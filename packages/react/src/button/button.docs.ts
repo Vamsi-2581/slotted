@@ -84,7 +84,7 @@ export const REACT_BUTTON_DOCS = {
       'While loading, the indicator is a named progress bar in the accessibility tree and the control announces aria-disabled while keeping focus — the shape React Aria’s pending button and Primer’s loading button both take. aria-busy is not used: it is not reliably announced on a button, and two mechanisms for one fact is one too many.',
       'A control with a start or end icon gives the indicator that box and keeps its label. One with neither renders the label at zero opacity: it stays in the accessibility tree, so the name survives the wait and combines with the indicator’s own, and it stays in the flow, so the control never changes size.',
       'loading refuses activation in the capture phase, before any handler the consumer attached, so a submit button cannot submit twice.',
-      'focusableWhenDisabled keeps an unavailable control reachable. Use it when the control carries a tooltip or an explanation a keyboard user would otherwise never reach, such as one inside a toolbar.',
+      'focusableWhenDisabled keeps an unavailable control reachable. Use it when the control carries a tooltip or an explanation a keyboard user would otherwise never reach, such as one inside a toolbar. A control that can be reached is painted to be read: muted text on the neutral subtle ground, at 4.5:1 or better, where a natively disabled control keeps the disabled grey.',
       'A start or end icon is decorative content the consumer supplies; give it aria-hidden so it does not repeat the label.',
       'type defaults to button. Use submit only for an intentional form submission.',
     ],

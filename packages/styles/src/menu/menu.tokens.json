@@ -46,6 +46,7 @@
   "--slotted-menu-measure",
   "--slotted-menu-measure-lg",
   "--slotted-menu-measure-sm",
+  "--slotted-menu-min-measure",
   "--slotted-menu-padding-block",
   "--slotted-menu-padding-inline",
   "--slotted-menu-radius",

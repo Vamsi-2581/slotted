@@ -91,6 +91,27 @@
      * narrow enough to hang off a button.
      */
     --_measure: var(--slotted-menu-measure, 16rem);
+    /**
+     * And the floor, which the family had and put on the wrong element (M3).
+     *
+     * A `max-content` surface is as wide as its longest command, so a menu of
+     * short words is a sliver: "Inbox, Archive, Drafts, Sent" measured 91px at
+     * `md`, 81px at `compact` and 77px at `dense`, against the 228px the *empty*
+     * menu stood at — because the empty row carried a `min-inline-size` of its
+     * own and the surface carried none. The surface therefore grew when the
+     * list was filtered away and shrank when the commands came back, which is
+     * the one thing a menu must not do under a pointer that is already moving
+     * toward it.
+     *
+     * The floor is the surface's now and the empty row inherits it, so the two
+     * cannot disagree. It is subordinate to the room the positioner reports:
+     * `min-inline-size` beats `max-inline-size`, so a floor stated flat would
+     * push a menu out of a column too narrow to hold it.
+     */
+    --_min-measure: min(
+      var(--slotted-menu-min-measure, 12rem),
+      var(--slotted-positioner-available-width, 100vw)
+    );
 
     /* Only the block inset: the positioner writes `left` and never `right`, and
        `inset-inline-start` would resolve to `right` in a right-to-left document
@@ -104,6 +125,7 @@
     box-sizing: border-box;
     inline-size: max-content;
     max-inline-size: min(var(--_measure), var(--slotted-positioner-available-width, 100vw));
+    min-inline-size: var(--_min-measure);
 
     /**
      * The gap sits on the axis that faces the anchor and on no other. A layer
@@ -599,11 +621,14 @@
    * them. Both keep the surface's measure rather than collapsing to a
    * two-pixel box, which is what a consumer sees flash when the state is not
    * painted at all.
+   *
+   * The measure they keep is the surface's own floor and no longer a second one
+   * stated here: a row that was wider than the menu around it made the menu
+   * grow when its list emptied (M3).
    */
   [data-ui='menu'] [data-part='empty'] {
     color: var(--_muted);
     grid-column: 1 / -1;
-    min-inline-size: 12rem;
     padding-block: var(--slotted-space-5, 0.75rem);
     padding-inline: var(--_item-inset);
     text-align: center;

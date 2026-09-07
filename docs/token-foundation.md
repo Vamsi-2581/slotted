@@ -519,6 +519,20 @@ token.
 6. A weaker state holds itself back for every stronger one, in the order
    `STATE_PRECEDENCE` declares. `packages/styles/src/states.test.mjs` rejects a
    hover or active rule that does not.
+7. `overflow-clip-margin` takes no token arithmetic, and does not contain what
+   hangs out of a box. Measured in Chrome 150.0.7871.181
+   (`tools/harness/out/review-loop/g8/probe.txt`):
+   `CSS.supports('overflow-clip-margin: calc(8px)')` is `false` — any `calc()`
+   is refused at parse time, and a `calc()` reached through a `var()` is not
+   refused but computes to `0px`, because a `var()` is substituted after the
+   property has been validated. A bare `var()` and a literal both compute. And
+   with either, a pseudo-element hanging eight pixels past a sixteen-pixel box
+   still reports 24 against a client width of 16: a clip margin widens the
+   region that is painted, never the region that scrolls. A family that needs a
+   halo or a hit area outside its control anchors it so it does not hang —
+   which is what `checkbox` and `radio-group` do, and what
+   `checkbox.styles.test.mjs` and `radio-group.styles.test.mjs` hold by
+   rejecting the property outright.
 
 ## Current boundary
 

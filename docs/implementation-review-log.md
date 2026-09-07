@@ -703,3 +703,24 @@ Measurement (depois): `status-indicator.html` fecha em **0 achados** nas três d
 Varredura final das 58 páginas (`sweep-comfortable.txt`, `sweep-compact.txt`): **52 das 58 famílias limpas** em `comfortable` (44 no início do lote) e 51 em `compact`; **387 achados**, todos `overflows` — `collapsed` e `off-axis` ficam em **zero em todas as famílias**. Restam `slider` 279 (SR2), `tabs` 54, `inline` 27, `container` 21, `drawer` 3, `card` 3, mais `avatar` 9 só em `compact`.
 Gates: `pnpm check` 0 (`si1/check-1.txt`); `pnpm exec turbo run verify --filter @slotted/harness` 0 (`si1/verify-1.txt`); `node --test tools/harness/audit.test.mjs` 31/31.
 Captures: nenhuma; o item fecha sem alterar folha nem pintura.
+
+START G8 2026-09-07T01:23:10Z
+
+## G8 — `overflow-clip-margin` não aceita `calc()` com `var()` no Chrome (2026-09-07T04:15:00Z)
+
+Files: docs/token-foundation.md
+Reprodução: sonda nova `tools/harness/out/review-loop/g8/probe.mjs`, que põe as duas afirmações do item ao browser com que o harness fotografa (`probe.txt`). Chrome **150.0.7871.181**:
+
+| Escrito                                 | `CSS.supports` | Computado | `scrollWidth`/`clientWidth` |
+| --------------------------------------- | -------------- | --------- | --------------------------- |
+| `8px`                                   | `true`         | `8px`     | 24/16                       |
+| `calc(8px)`                             | `false`        | —         | —                           |
+| `calc(8px + 8px)`                       | `false`        | —         | —                           |
+| `var(--x)`                              | `true`         | —         | —                           |
+| `calc((var(--halo) - var(--size)) / 2)` | —              | **`0px`** | 24/16                       |
+| `var(--halo)` (32px)                    | —              | `32px`    | 24/16                       |
+
+Measurement: as duas metades do item reproduzem. (1) Qualquer `calc()` é recusado na validação da propriedade; um `calc()` que chega por `var()` não é recusado — a substituição acontece depois da validação — e computa a `0px`, que é o silêncio que custou a tentativa de CK3. Um `var()` puro e um literal computam. (2) Com margem de 8px ou de 32px, um pseudo-elemento que pende 8px de uma caixa de 16px continua a reportar **24 contra 16**: a margem alarga a região que é pintada, nunca a que rola.
+Decision: **fecha sem código, com registo**, que é o que o item prevê. Nenhuma folha depende da propriedade — `grep` sobre `packages/styles/src/**/*.css` devolve 0 —, e `checkbox` e `radio-group` ancoram o alvo para não pender desde CK3, com `assert.doesNotMatch(declarations, /overflow-clip-margin/)` nos dois ficheiros de teste. O registo vai para `docs/token-foundation.md`, em "Rules for component tokens and containers", como **regra 7**: é onde vive a regra 4, que tem a mesma forma — uma propriedade do CSS que não aceita um token, escrita uma vez para a próxima família não a redescobrir. A alternativa que o item oferece (registar na folha que a reencontrar) põe o aviso onde só o lê quem já lá chegou.
+Gates: `pnpm check` 0 (`g8/check-1.txt`); `pnpm exec turbo run verify --filter @slotted/styles --filter @slotted/harness` 0 (`g8/verify-1.txt`).
+Captures: nenhuma; o item não altera pintura.

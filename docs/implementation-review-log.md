@@ -872,3 +872,17 @@ Measurement (`st3/probe.txt`, `st3/parts.txt`, capturas):
 - Nenhum ficheiro alterado; `pnpm check` e `pnpm exec turbo run verify` mantêm o verde de DR6.
   Decision: (1) O item fecha sem código porque a medição diz que não há defeito, e não porque não foi encontrado: os quatro números que ele cita foram reproduzidos um a um, e a causa de cada um é o conector. (2) A regra de `#Alert:2` que o item manda aplicar já está aplicada, e aplicá-la de novo não teria onde morder. (3) O mesmo caminho de CB4 nesta série — um item cuja premissa a medição desfaz fecha registado, não riscado.
   Captures: tools/harness/out/review-loop/st3/after/stepper-{content,statuses}-light-comfortable-ltr-240.png
+  START T2 2026-09-07T15:33:27Z
+
+## T2 — Painel transborda o palco a 240px (2026-09-07T21:35:00Z)
+
+Files: packages/styles/src/tabs/tabs.css
+Reproduction: `tools/harness/audit.mjs` sobre `tabs.html` nas três densidades (`t2/audit-before.txt`): **108 achados por densidade sobre 54 palcos**, seis caixas repetidas nos três esquemas e nas três larguras — `div[data-part='panel']` 599px em 222px e em 302px, `div[data-ui='tabs'][data-part='root']` o mesmo, o `p` do conteúdo, os dois invólucros da cena e o próprio palco a 620 em 444. A cena `content` do harness põe um digest de setenta caracteres sem ponto de quebra dentro de um contentor estreito, que é para o que ela existe.
+Fix: mesma regra de `#Alert:2`, o par que responde a uma cadeia hostil — `overflow-wrap: anywhere` junto ao `min-inline-size: 0` que o painel já tinha. O mínimo a zero dimensiona a caixa e não faz nada ao que está dentro dela; era essa a metade que faltava.
+Measurement (`t2/audit-before.txt`, `t2/audit-after.txt`):
+
+- **`audit.mjs` fecha `tabs.html` em 0 achados nas três densidades**, 54 palcos cada. Eram 108 por densidade, 324 ao todo.
+- O painel passa de 599px de conteúdo dentro de 222px para conteúdo igual à caixa; a captura a 240px mostra o digest em três linhas dentro do painel, e a aba com o mesmo digest continua a truncar na sua própria régua.
+- Testes de estilo que precisaram de valor esperado novo: **0**. `pnpm exec turbo run verify` sem filtro: 10/10 tarefas (`t2-verify-1.txt`); `pnpm check` 0 (`t2-check-1.txt`).
+  Decision: (1) A declaração fica no `[data-part='panel']` e não numa parte interna, porque um painel guarda o que o consumidor lá pôs e não há parte interna que alcançar — é a diferença para `alert` e `dialog`, que a escrevem no seu próprio título. (2) É `anywhere` e não `break-word`: só `anywhere` reduz o mínimo de conteúdo, e é o mínimo de conteúdo que estava a alargar a raiz. `break-word` quebraria a linha e deixaria a caixa larga. (3) O custo está registado no comentário da regra: a propriedade é herdada e alcança o conteúdo do consumidor; quem quiser um token inteiro escreve `overflow-wrap: normal` no seu próprio elemento, uma declaração contra um layout que de outro modo parte para todo leitor num ecrã estreito. (4) Storybook React (6006) responde; Angular (6007) não; verificação por harness e audit.
+  Captures: tools/harness/out/review-loop/t2/after/tabs-content-{light,dark,high-contrast}-comfortable-ltr-240.png, tabs-content-light-compact-ltr-240.png, tabs-content-light-comfortable-ltr-420.png

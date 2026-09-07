@@ -389,7 +389,7 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 
 ## Tabs
 
-- [ ] **T2 — Painel transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: na cena `content`, `[data-part='panel']` mede 599px em 222px nos três esquemas. Esperado: mesma regra de `#Alert:2`.
+- [x] **T2 — Painel transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: na cena `content`, `[data-part='panel']` mede 599px em 222px nos três esquemas. Esperado: mesma regra de `#Alert:2`.
 - [x] **T1 — `IconButton` de overflow/scroll desalinhado e grande.** Ver R2. Esperado: partes internas `[data-part='scroll-start']` e `[data-part='scroll-end']` com altura igual à altura da aba, largura de 24px a 28px, glifo `chevron-left`/`chevron-right` em `--slotted-control-icon-size-<densidade>`, sem borda, fundo com gradiente para a superfície da barra de abas (máscara de fade de 16px) e `hover` em `secondary-subtle-hover`. Visíveis apenas quando há overflow no respectivo lado, calculado por `scrollLeft` e `scrollWidth`.
 - [ ] **T3 — Trilho vazio do controle de paginação oculto.** Introduzido por T1: o controle de paginação de um lado sem overflow fica `visibility: hidden` e mantém a coluna de 24px, para a lista não se mover sob o ponteiro (mesma escolha do MUI `TabScrollButton`); na cena `dismissible` do harness a lista começa 24px mais o gap depois da borda enquanto está no início. Decidir entre manter o trilho ou colapsar a coluna (`display: none`) aceitando o deslocamento da lista na primeira rolagem.
 

@@ -726,10 +726,25 @@
     grid-row: 2;
   }
 
+  /**
+   * `overflow-wrap: anywhere` and a zero minimum are the pair that answer a
+   * hostile string, and the panel needs both. The zero minimum was already
+   * here and it sizes the box; it does nothing about what stands in the box,
+   * so a seventy-character digest measured 599px inside a 222px panel and
+   * carried the whole family out of its stage with it — the panel, the root
+   * and the frame around them, in every scheme.
+   *
+   * It is written here and not on a part the family owns, because a panel
+   * holds what the consumer put in it and there is no inner part to reach. A
+   * consumer who wants a token kept whole writes `overflow-wrap: normal` on
+   * their own element, which is one declaration against a layout that
+   * otherwise breaks for every reader on a narrow screen.
+   */
   [data-ui='tabs'] [data-part='panel'] {
     grid-column: 1 / -1;
     grid-row: 2;
     min-inline-size: 0;
+    overflow-wrap: anywhere;
   }
 
   [data-ui='tabs'][data-orientation='vertical'] [data-part='panel'] {

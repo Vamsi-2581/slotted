@@ -20,15 +20,39 @@
    * inline padding, `Blueberry` measured 70.03px marked against 63.17px plain,
    * and the run moved 6.86px as the query grew (CB6). Weight, spacing and
    * padding are therefore the label's own, and the mark is carried entirely by
-   * colour: the accent's text tone on the accent's ground, with a rule of the
-   * accent's border tone under it.
+   * colour: the accent's text tone over a band mixed from that same tone, with
+   * a rule of the accent's border tone under it.
    *
    * The rule is `text-decoration` rather than a shadow, so it follows the
    * letters across a line break and is drawn by the same machinery that draws
    * every other underline the reader has met.
+   *
+   * **The band is not a `*-surface` tone.** `accent-surface` is a ground, and
+   * a ground is calibrated to sit under text on the page rather than to
+   * separate from it: it measured 1.220 | 1.014 | 1.000:1 against the panel in
+   * `light` | `dark` | `high-contrast`, so in two schemes out of three the band
+   * did not exist and the mark was carried by its colour and its rule alone
+   * (CB10, the same fact CK7 found under the pointer halo). The band is mixed
+   * from `accent-text` instead — the one role every scheme keeps legible over
+   * the surface — so one share gives one gesture in all three: 1.120 | 1.165 |
+   * 1.140:1 against the panel, and 1.115 to 1.165 across every ground a marked
+   * label can land on.
+   *
+   * The share is 0.075 and not the halo's 0.12 because a band is read through
+   * and a halo is not. The mark's own text has to keep the ratio its scheme
+   * promises while sitting on the band, and in `high-contrast` — 7:1, over a
+   * highlighted row — that caps the share: 0.075 leaves 7.078:1, 0.08 leaves
+   * 7.001:1, and 0.12 leaves 6.540:1.
    */
   [data-ui='highlight'] {
-    background-color: var(--slotted-highlight-background, var(--slotted-tone-accent-surface));
+    background-color: var(
+      --slotted-highlight-background,
+      color-mix(
+        in oklab,
+        var(--slotted-tone-accent-text) calc(var(--slotted-highlight-tint-opacity, 0.075) * 100%),
+        transparent
+      )
+    );
     /**
      * A run that wraps is two boxes, and each of them carries the ground and
      * the rule: without this the tint runs to the end of the first line and

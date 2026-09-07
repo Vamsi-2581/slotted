@@ -21,7 +21,7 @@ convention.
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 80     |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 99     |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
 | `component` | One family adjusting a semantic value for itself.              | 5      |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -318,6 +318,21 @@ inside of.
 | `--slotted-selection-halo-size`    | `32px`        |
 | `--slotted-selection-halo-opacity` | `0.12`        |
 
+## Highlight
+
+This scale answers how strong the band behind a matched span is. The band is
+mixed from `--slotted-tone-accent-text` rather than taken from
+`--slotted-tone-accent-surface`, for the reason the halo above is: a tone's
+`surface` role is a ground and does not separate from the surface it sits on.
+Its share is smaller than the halo's because a band is read through and a halo
+is not — the marked word sits on the band, and the share is capped by the ratio
+each scheme promises that word. In `high-contrast`, over a highlighted row,
+7:1 caps it: 0.075 leaves 7.078:1 and 0.12 leaves 6.540:1.
+
+| Token                              | Default value |
+| ---------------------------------- | ------------- |
+| `--slotted-highlight-tint-opacity` | `0.075`       |
+
 ## Control typography
 
 These tokens answer what a control's text and frame look like before any family
@@ -415,7 +430,8 @@ one's, which no set of hexadecimals can reach.
 Where a state has no edge to pair with, the ground is not recalibrated either;
 it is mixed from the tone's `text` role at a fraction of opacity, which is the
 one role every scheme keeps legible over the surface. `--slotted-selection-halo-opacity`
-does this for the pointer halo (CK7).
+does this for the pointer halo (CK7) and `--slotted-highlight-tint-opacity`
+for the band behind a matched span (CB10).
 
 ## Shadow
 

@@ -180,6 +180,47 @@ test('derives every solid hover from its fill by the one rule', () => {
  * where the token is the page's own white — a gesture one scheme out of three
  * could see (CK7).
  */
+/**
+ * The band behind a span a query matched, held from both sides. It is mixed
+ * from the accent's text tone for the reason the halo is — a `*-surface` tone
+ * is a ground and does not separate from the surface it sits on, and in
+ * `high-contrast` it is the page's own white (CB10) — and its share is smaller
+ * than the halo's because a band is read through. The mark's own text sits on
+ * it, so the share the band may take is whatever leaves that text the ratio
+ * its scheme promises, on every ground a marked label can land on: the panel,
+ * a highlighted row and a chosen row.
+ */
+test('lights the filter match without dimming the word it marks', () => {
+  const alpha = Number(theme.base['--slotted-highlight-tint-opacity']);
+  const panels = [];
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const ink = values['--slotted-tone-accent-text'];
+    for (const [role, ground] of [
+      ['the panel', values['--slotted-surface-raised']],
+      ['a highlighted row', values['--slotted-tone-secondary-subtle-hover']],
+      ['a chosen row', values['--slotted-tone-accent-surface']],
+    ]) {
+      const band = over(ink, ground, alpha);
+      const separation = contrast(band, ground);
+      assert.ok(
+        separation >= 1.1,
+        `the match band reads ${separation.toFixed(3)}:1 against ${role} in ${scheme}`,
+      );
+      const legibility = contrast(ink, band);
+      assert.ok(
+        legibility >= TEXT_RATIO[scheme],
+        `the marked word reads ${legibility.toFixed(3)}:1 on its band over ${role} in ${scheme}`,
+      );
+      if (role === 'the panel') panels.push(separation);
+    }
+  }
+  /* The same gesture in all three, not three strengths of one. */
+  assert.ok(
+    Math.max(...panels) - Math.min(...panels) <= 0.1,
+    `the match band reads ${panels.map((ratio) => ratio.toFixed(3)).join(', ')} across the schemes`,
+  );
+});
+
 test('lights the selection halo where every scheme can see it', () => {
   const alpha = Number(theme.base['--slotted-selection-halo-opacity']);
   const reached = [];

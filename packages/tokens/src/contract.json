@@ -688,6 +688,13 @@
       "root": true
     },
     {
+      "name": "--slotted-highlight-tint-opacity",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "number",
+      "root": true
+    },
+    {
       "name": "--slotted-focus-ring-color",
       "layer": "semantic",
       "axis": "scheme",

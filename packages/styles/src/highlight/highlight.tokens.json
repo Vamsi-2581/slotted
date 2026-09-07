@@ -4,9 +4,9 @@
   "--slotted-highlight-color",
   "--slotted-highlight-disabled-background",
   "--slotted-highlight-rule-color",
+  "--slotted-highlight-tint-opacity",
   "--slotted-radius-none",
   "--slotted-space-1",
   "--slotted-tone-accent-border",
-  "--slotted-tone-accent-surface",
   "--slotted-tone-accent-text"
 ]

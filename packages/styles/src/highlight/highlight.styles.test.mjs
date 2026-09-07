@@ -64,7 +64,7 @@ test('carries the mark on colour, with a rule of the accent under it', () => {
   const mark = rule(ui);
   assert.match(
     mark,
-    /background-color:var\(--slotted-highlight-background,var\(--slotted-tone-accent-surface\)\)/,
+    /background-color:var\(--slotted-highlight-background,color-mix\(in oklab,var\(--slotted-tone-accent-text\) calc\(var\(--slotted-highlight-tint-opacity,0\.075\) \* 100%\),transparent\)\)/,
   );
   assert.match(mark, /color:var\(--slotted-highlight-color,var\(--slotted-tone-accent-text\)\)/);
   assert.match(mark, /text-decoration-line:underline/);
@@ -74,6 +74,21 @@ test('carries the mark on colour, with a rule of the accent under it', () => {
   );
   assert.match(mark, /text-decoration-thickness:var\(--slotted-border-width-thin,1px\)/);
   assert.match(mark, /text-underline-offset:var\(--slotted-space-1,0\.125rem\)/);
+});
+
+/**
+ * The band is mixed from the tone's `text` role, not taken from its `surface`
+ * role. A `*-surface` tone is a ground: `accent-surface` measured 1.220 |
+ * 1.014 | 1.000:1 against the panel in the three schemes, so the band existed
+ * in one of them (CB10). What the mix is worth is measured against the theme
+ * in `packages/themes/default/test/default-theme.test.mjs`; what is held here
+ * is that the sheet reaches for the tone that every scheme keeps legible.
+ */
+test('mixes the band from the tone that every scheme keeps legible', () => {
+  const mark = rule(ui);
+  assert.match(mark, /color-mix\(in oklab,var\(--slotted-tone-accent-text\)/);
+  assert.doesNotMatch(mark, /--slotted-tone-accent-surface/);
+  assert.doesNotMatch(css, /--slotted-tone-accent-surface/);
 });
 
 /** A run that wraps is two boxes, and each of them is marked. */

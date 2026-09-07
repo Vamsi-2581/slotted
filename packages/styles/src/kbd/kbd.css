@@ -11,12 +11,14 @@
    * `badge` proved with `anchor` — so it carries `data-ui` itself and the pair
    * is what tells a whole combination from one key of it.
    *
-   * There is no height token. The block size is the key's own line box plus a
-   * symmetric inset and its two edges, so a cap never disagrees with the type
-   * it contains and no density can leave it clipped. `--_block-size` restates
-   * that sum for the two places that need it as a number: the minimum that
-   * keeps `⌘` the height of `Esc`, and the minimum inline size that makes a
-   * one-letter cap square instead of a slot.
+   * There is no height token. The block size is derived — the key's own line
+   * box plus a symmetric inset and its two edges — so a cap never disagrees
+   * with the type it contains and no density can leave it clipped. It is a
+   * height and not a floor: as a floor it was the legend that decided, and a
+   * legend the keyboard font does not carry is drawn from a fallback whose
+   * ascent is its own, so `⌘` stood 27.92px beside an `Esc` of 25.19 (K1). The
+   * same sum is the minimum inline size, which is what makes a one-letter cap
+   * square instead of a slot.
    */
   [data-ui='kbd'] {
     /**
@@ -64,22 +66,43 @@
   }
 
   [data-ui='kbd'][data-part='root'] {
-    align-items: center;
     background-color: var(--_background);
+    /**
+     * The height the family states, not the height the legend asks for. A key
+     * is a cap of a fixed size with a symbol drawn on it, and a row of caps
+     * whose tops disagree by three pixels is a row of caps of different keys.
+     */
+    block-size: var(--_block-size);
     border: var(--_edge-width) solid var(--_border);
     border-block-end: var(--_base-width) solid var(--_base);
     border-radius: var(--slotted-kbd-radius, var(--slotted-radius-sm, 4px));
     box-sizing: border-box;
     color: var(--_color);
-    display: inline-flex;
+    /**
+     * One cell, and the legend centred in it on both axes. A grid of one cell
+     * centres what is inside it against the cell rather than against the line
+     * box the text opened, which is the half of the fix that keeps a symbol
+     * from sitting low once the box stops following it.
+     */
+    display: inline-grid;
     /* The keyboard's own face. A key legend is set in the type a terminal sets. */
     font-family: var(--slotted-kbd-font-family, var(--slotted-font-family-mono, monospace));
     font-size: var(--_font-size);
+    /* A shortcut that counts — `⌘1` to `⌘9` — must not jitter as the figure
+       changes, which is the rule `badge` applies to its own count. */
+    font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-kbd-font-weight, var(--slotted-font-weight-medium, 500));
-    justify-content: center;
-    line-height: var(--_line-height);
-    min-block-size: var(--_block-size);
+    /**
+     * The legend's own line box is the em box and nothing more. Leading is what
+     * a fallback font varies — the strut and the glyph's own box are aligned on
+     * the baseline and each carries half of its font's leading — so a line box
+     * that stops at 1 is a line box no substituted glyph can grow. The leading
+     * this drops is already in `--_block-size`, which is where it belongs: it
+     * is the cap's height and not the legend's.
+     */
+    line-height: 1;
     min-inline-size: var(--_block-size);
+    place-items: center;
     padding-block: var(--_inset-block);
     padding-inline: var(--_inset-inline);
     /**
@@ -110,14 +133,14 @@
    * The legend has a box of its own, as the words do in `button` and `badge`,
    * and that box is what makes the family's one typographic problem solvable.
    *
-   * A flex container centres the *line box*, and a line box is not symmetric
-   * around the letters inside it: the ascender reaches further above the cap
-   * than the descender reaches below the baseline. `text-box` trims the line to
+   * The cell centres the *line box*, and a line box is not symmetric around the
+   * letters inside it: the ascender reaches further above the cap than the
+   * descender reaches below the baseline. `text-box` trims the line to
    * the cap and the baseline, so what is centred is the ink rather than the
    * font's metrics, and `K`, `Esc` and `Página` all sit the same way.
    *
    * It is applied here rather than on the root because `text-box-trim` needs a
-   * block container and a flex container has none: its own text lives in an
+   * block container and a grid container has none: its own text lives in an
    * anonymous item no selector can reach.
    *
    * No clip region is involved, which is what makes this simpler than the same

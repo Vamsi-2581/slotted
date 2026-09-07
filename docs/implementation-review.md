@@ -322,7 +322,7 @@ Localização: `packages/styles/src/drawer/drawer.css`.
 
 ## Kbd
 
-- [ ] **K1 — Altura varia com o símbolo.** Causa: `line-height` derivado do glifo (símbolos como `⌘` e `⇧` têm ascendente diferente). Esperado: `block-size` fixa por densidade (`1.25rem` em `md`), `line-height: 1`, conteúdo centralizado por `display: inline-grid; place-items: center`, `font-variant-numeric: tabular-nums`. Testar com `⌘`, `⇧`, `Enter`, `A`, `↑` na mesma linha: todas as caixas com a mesma altura (diferença 0px).
+- [x] **K1 — Altura varia com o símbolo.** Causa: `line-height` derivado do glifo (símbolos como `⌘` e `⇧` têm ascendente diferente). Esperado: `block-size` fixa por densidade (`1.25rem` em `md`), `line-height: 1`, conteúdo centralizado por `display: inline-grid; place-items: center`, `font-variant-numeric: tabular-nums`. Testar com `⌘`, `⇧`, `Enter`, `A`, `↑` na mesma linha: todas as caixas com a mesma altura (diferença 0px).
 
 ---
 

@@ -61,9 +61,14 @@ test('names the family and the part together, so the combination is never a key'
 
 /**
  * The block size is the key's own line box plus a symmetric inset and its two
- * edges, so no density and no legend can leave a cap clipped, and `⌘` is the
- * height of `Esc`. The same sum is the minimum inline size, which is what makes
- * a one-letter cap square instead of a slot.
+ * edges, so no density and no legend can leave a cap clipped. The same sum is
+ * the minimum inline size, which is what makes a one-letter cap square instead
+ * of a slot.
+ *
+ * It is the height and not a floor. As a floor the legend decided: a symbol the
+ * keyboard face does not carry is drawn from a fallback whose ascent is its
+ * own, the line box grew to hold both fonts' leading, and `⌘` stood 27.92px
+ * beside an `Esc` of 25.19 on the same row (K1).
  */
 test('takes its height from the type it holds, and no height token', () => {
   assert.ok(!declarations.includes('--slotted-kbd-height'), 'the family invents a height scale');
@@ -74,14 +79,29 @@ test('takes its height from the type it holds, and no height token', () => {
   assert.ok(base.includes('var(--_edge-width) + var(--_base-width)'));
 
   const cap = rule(root);
-  assert.ok(cap.includes('min-block-size:var(--_block-size)'));
+  assert.ok(cap.includes('block-size:var(--_block-size)'), 'the height follows the legend');
+  assert.ok(!cap.includes('min-block-size:'), 'a floor is a height the tallest legend states');
   assert.ok(cap.includes('min-inline-size:var(--_block-size)'));
 });
 
 /**
- * A flex container centres the line box, and a line box is not symmetric around
- * the letters inside it. `text-box` centres the ink instead, and it needs a
- * block container — a flex container's text lives in an anonymous item no
+ * The other half of K1, which is what makes a stated height legible rather than
+ * merely fixed: the legend's line box stops at its own em box, so a substituted
+ * glyph cannot grow it, and the cell centres what is in it on both axes rather
+ * than leaving the legend sitting on the line box it opened.
+ */
+test('centres the legend in a cell instead of in the line box it opened', () => {
+  const cap = rule(root);
+  assert.ok(cap.includes('display:inline-grid'));
+  assert.ok(cap.includes('place-items:center'));
+  assert.ok(cap.includes('line-height:1;'), 'the legend still carries leading of its own');
+  assert.ok(cap.includes('font-variant-numeric:tabular-nums'));
+});
+
+/**
+ * A cap centres the line box, and a line box is not symmetric around the
+ * letters inside it. `text-box` centres the ink instead, and it needs a block
+ * container — the text of a grid container lives in an anonymous item no
  * selector can reach, which is why the `legend` part exists.
  *
  * Unlike `badge` there is no clip region to buy room for, because a key label

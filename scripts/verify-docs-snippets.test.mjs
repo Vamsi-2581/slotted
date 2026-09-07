@@ -76,12 +76,51 @@ function declaredSnippets(source) {
     .split('defineSnippet(')
     .slice(1)
     .map((chunk) => {
-      const head = chunk.split(/\bsource:/)[0];
+      const [head, ...rest] = chunk.split(/\bsource:/);
+      const body = rest.join('source:');
+      const opened = body.indexOf('`');
       return {
         id: /id:\s*'([a-z0-9-]+)'/.exec(head)?.[1],
         language: /language:\s*'([a-z]+)'/.exec(head)?.[1],
+        source: opened === -1 ? '' : body.slice(opened + 1, body.indexOf('`', opened + 1)),
       };
     });
+}
+
+/** The family a reference page belongs to, which is the file's own name. */
+function familyOf(path) {
+  return path.slice(path.lastIndexOf('/') + 1).replace('.docs.ts', '');
+}
+
+/**
+ * The custom properties a snippet *sets*, as opposed to the ones it reads,
+ * grouped by the family each block retunes. A theming snippet is a list of
+ * rules, and the `data-ui` in a rule's selector says whose tokens the rule is
+ * allowed to set: a family that renders a shared part retunes that part under
+ * the part's own identifier, which is where its tokens live.
+ */
+function assignedTokens(source, fallback) {
+  const blocks = [];
+  for (const [, selector, body] of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const family = /data-ui='([a-z0-9-]+)'/.exec(selector)?.[1] ?? fallback;
+    for (const [, token] of body.matchAll(/(--slotted-[a-z0-9-]+)\s*:/g)) {
+      blocks.push({ family, token });
+    }
+  }
+  return blocks;
+}
+
+/** What `<family>.tokens.json` declares, or nothing when there is no family. */
+function declaredTokens(family) {
+  try {
+    return new Set(
+      JSON.parse(
+        readFileSync(join(ROOT, 'packages/styles/src', family, `${family}.tokens.json`), 'utf8'),
+      ),
+    );
+  } catch {
+    return undefined;
+  }
 }
 
 test('reads the id and the language of every declared snippet', () => {
@@ -158,5 +197,54 @@ test('gives every snippet an id naming the framework it belongs to', () => {
     violations,
     [],
     `A snippet id carries its framework, so a copied page cannot collide:\n  ${violations.join('\n  ')}`,
+  );
+});
+
+/**
+ * A `*-theming` snippet is the list of decisions a consumer may take, and a
+ * reader copies it into their own stylesheet. A property the family's sheet
+ * does not read changes nothing there, and the reader has no way to find that
+ * out: `radio-group` showed `--slotted-radio-group-checked-background` and
+ * `--slotted-radio-group-mark-inset` for a whole rebuild after CK5 took both
+ * out of the sheet and the contract (CK8).
+ *
+ * `<family>.tokens.json` is the list the family's own test derives from its
+ * stylesheets, so it is the same fact the reference page prints beside the
+ * snippet. Only the properties the snippet *sets* are held: what it reads on
+ * the right of a colon is the theme's, and a consumer may reach for any of it.
+ *
+ * Each rule of the snippet is held against the family its own selector names,
+ * so a page may retune a shared part it renders — `combobox` retunes the mark
+ * under `[data-ui='highlight']`, which is where the mark has been painted since
+ * CB6 — without the page claiming the part's tokens as its own.
+ */
+test('cites only the custom properties the family it documents reads', () => {
+  const violations = [];
+  const checked = [];
+
+  for (const { roots } of FRAMEWORKS) {
+    for (const path of docsFiles(roots)) {
+      const page = familyOf(path);
+      if (declaredTokens(page) === undefined) continue;
+      for (const snippet of declaredSnippets(readFileSync(path, 'utf8'))) {
+        if (!snippet.id?.endsWith('-theming')) continue;
+        checked.push(`${page}:${snippet.id}`);
+        for (const { family, token } of assignedTokens(snippet.source, page)) {
+          const declared = declaredTokens(family);
+          if (declared === undefined) {
+            violations.push(`${path.slice(ROOT.length)}: ${snippet.id} retunes "${family}"`);
+          } else if (!declared.has(token)) {
+            violations.push(`${path.slice(ROOT.length)}: ${snippet.id} sets ${token} on ${family}`);
+          }
+        }
+      }
+    }
+  }
+
+  assert.ok(checked.length >= 20, `Only ${checked.length} theming snippets were read`);
+  assert.deepEqual(
+    violations,
+    [],
+    `A theming snippet must set properties its family's stylesheet reads:\n  ${violations.join('\n  ')}`,
   );
 });

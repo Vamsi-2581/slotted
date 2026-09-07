@@ -873,10 +873,15 @@ const theming = defineSnippet({
   label: 'What an application retunes',
   source: `[data-ui='combobox'] {
   --slotted-combobox-radius: var(--slotted-radius-md);
-  --slotted-combobox-match-background: var(--slotted-tone-warning-surface);
-  --slotted-combobox-match-color: var(--slotted-tone-warning-text);
   --slotted-combobox-highlight: var(--slotted-tone-accent-surface);
   --slotted-combobox-measure: 28rem;
+}
+
+/* The span a query matched is the shared mark, painted once for every
+   list a reader types into, and retuned under its own identifier. */
+[data-ui='highlight'] {
+  --slotted-highlight-background: var(--slotted-tone-warning-surface);
+  --slotted-highlight-color: var(--slotted-tone-warning-text);
 }`,
 });
 

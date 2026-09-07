@@ -468,8 +468,8 @@ export const REACT_RADIO_GROUP_DOCS = {
         source: `[data-ui='radio-group'] {
   --slotted-radio-group-size: 18px;
   --slotted-radio-group-gap: var(--slotted-space-5);
-  --slotted-radio-group-checked-background: var(--slotted-tone-success-solid);
-  --slotted-radio-group-mark-inset: 0.75;
+  --slotted-radio-group-checked-border-color: var(--slotted-tone-success-solid);
+  --slotted-radio-group-halo-color: var(--slotted-tone-success-text);
 }`,
       }),
     ],

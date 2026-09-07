@@ -70,6 +70,8 @@ describe('Stepper', () => {
     expect(trigger(2)).toHaveAttribute('aria-current', 'step');
     expect(item(2)).toHaveAttribute('data-current', '');
     expect(trigger(0)).not.toHaveAttribute('aria-current');
+    /* One step is current, so one element carries the mark. */
+    expect(root().querySelectorAll('[aria-current]')).toHaveLength(1);
   });
 
   /** A reader hears the position and the status, not the number in the circle. */
@@ -119,6 +121,30 @@ describe('Stepper', () => {
       expect(item(3)).toHaveAttribute('data-disabled', '');
     });
 
+    /**
+     * The five states a step is read in, in one flow: the step behind is
+     * complete, the step the reader is on is current, the step after it is
+     * upcoming and carries no mark at all, and the last two are the failed
+     * step and the closed one.
+     */
+    it('writes the five states, and nothing at all on an upcoming step', () => {
+      render(
+        <Checkout
+          defaultStep={1}
+          names={['Cart', 'Address', 'Payment', 'Review', 'Receipt']}
+          stepProps={{ 0: { complete: true }, 3: { invalid: true }, 4: { disabled: true } }}
+        />,
+      );
+
+      expect(item(0)).toHaveAttribute('data-complete', '');
+      expect(item(1)).toHaveAttribute('data-current', '');
+      for (const state of ['complete', 'current', 'invalid', 'loading', 'disabled']) {
+        expect(item(2)).not.toHaveAttribute(`data-${state}`);
+      }
+      expect(item(3)).toHaveAttribute('data-invalid', '');
+      expect(item(4)).toHaveAttribute('data-disabled', '');
+    });
+
     it('fills the connector for a step the reader walked past', () => {
       render(<Checkout defaultStep={2} />);
 
@@ -143,6 +169,56 @@ describe('Stepper', () => {
         expect.objectContaining({ previous: 0, reason: 'pointer' }),
       );
       expect(item(2)).toHaveAttribute('data-current', '');
+    });
+
+    /**
+     * Backwards through a linear flow: the step is complete, so it is reachable
+     * and its header answers, which is the whole point of marking it complete.
+     */
+    it('goes back when the header of a completed step is pressed', () => {
+      const onStepChange = vi.fn();
+      render(
+        <Checkout
+          defaultStep={2}
+          linear
+          onStepChange={onStepChange}
+          stepProps={{ 0: { complete: true }, 1: { complete: true } }}
+        />,
+      );
+
+      expect(item(1)).toHaveAttribute('data-complete', '');
+      expect(trigger(1)).not.toHaveAttribute('aria-disabled');
+
+      fireEvent.click(trigger(1));
+
+      expect(onStepChange).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ previous: 2, reason: 'pointer' }),
+      );
+      expect(item(1)).toHaveAttribute('data-current', '');
+      expect(trigger(1)).toHaveAttribute('aria-current', 'step');
+    });
+
+    /**
+     * The step behind is reached because it is behind, and not because
+     * anything about it is finished: `autoComplete` is off, so walking past a
+     * step leaves it pending, and a linear flow that only opened what is
+     * finished would trap the reader on the step they are on.
+     */
+    it('goes back to an earlier step a linear flow never marked complete', () => {
+      const onStepChange = vi.fn();
+      render(<Checkout defaultStep={2} linear onStepChange={onStepChange} />);
+
+      expect(item(1)).not.toHaveAttribute('data-complete');
+      expect(trigger(1)).not.toHaveAttribute('aria-disabled');
+
+      fireEvent.click(trigger(1));
+
+      expect(onStepChange).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ previous: 2, reason: 'pointer' }),
+      );
+      expect(item(1)).toHaveAttribute('data-current', '');
     });
 
     it('never moves state the consumer owns', () => {

@@ -20,7 +20,14 @@ import { provideStepperDefaults } from './stepper.constants';
   >
     <ol slStepperList>
       @for (name of names(); track name; let i = $index) {
-        <li slStepperStep [label]="name" [complete]="completed().includes(i) ? true : undefined">
+        <li
+          slStepperStep
+          [label]="name"
+          [complete]="completed().includes(i) ? true : undefined"
+          [disabled]="closed().includes(i) ? true : undefined"
+          [invalid]="failed().includes(i)"
+          [loading]="waiting().includes(i)"
+        >
           <div slStepperPanel>Body of {{ name }}</div>
         </li>
       }
@@ -31,6 +38,9 @@ import { provideStepperDefaults } from './stepper.constants';
 class TestHost {
   readonly names = signal(['Cart', 'Address', 'Payment', 'Review']);
   readonly completed = signal<number[]>([]);
+  readonly closed = signal<number[]>([]);
+  readonly failed = signal<number[]>([]);
+  readonly waiting = signal<number[]>([]);
   readonly step = signal<number | undefined>(undefined);
   readonly defaultStep = signal(0);
   readonly linear = signal(false);
@@ -79,12 +89,39 @@ describe('SlStepper', () => {
   });
 
   it('marks the current step with the value the specification names', () => {
-    const { host, item, trigger, settle } = setup();
+    const { host, item, root, trigger, settle } = setup();
     host.defaultStep.set(2);
     settle();
 
     expect(trigger(2).getAttribute('aria-current')).toBe('step');
     expect(item(2).getAttribute('data-current')).toBe('');
+    expect(trigger(0).hasAttribute('aria-current')).toBe(false);
+    /* One step is current, so one element carries the mark. */
+    expect(root.querySelectorAll('[aria-current]')).toHaveLength(1);
+  });
+
+  /**
+   * The five states a step is read in, in one flow: the step behind is
+   * complete, the step the reader is on is current, the step after it is
+   * upcoming and carries no mark at all, and the last two are the failed step
+   * and the closed one.
+   */
+  it('writes the five states, and nothing at all on an upcoming step', () => {
+    const { host, item, settle } = setup();
+    host.names.set(['Cart', 'Address', 'Payment', 'Review', 'Receipt']);
+    host.defaultStep.set(1);
+    host.completed.set([0]);
+    host.failed.set([3]);
+    host.closed.set([4]);
+    settle();
+
+    expect(item(0).getAttribute('data-complete')).toBe('');
+    expect(item(1).getAttribute('data-current')).toBe('');
+    for (const state of ['complete', 'current', 'invalid', 'loading', 'disabled']) {
+      expect(item(2).hasAttribute('data-' + state)).toBe(false);
+    }
+    expect(item(3).getAttribute('data-invalid')).toBe('');
+    expect(item(4).getAttribute('data-disabled')).toBe('');
   });
 
   it('says where each step is and what state it is in', () => {
@@ -134,6 +171,54 @@ describe('SlStepper', () => {
     expect(item(2).getAttribute('data-current')).toBe('');
   });
 
+  /**
+   * Backwards through a linear flow: the step is complete, so it is reachable
+   * and its header answers, which is the whole point of marking it complete.
+   */
+  it('goes back when the header of a completed step is pressed', () => {
+    const { host, item, trigger, settle } = setup();
+    host.linear.set(true);
+    host.defaultStep.set(2);
+    host.completed.set([0, 1]);
+    settle();
+
+    expect(item(1).getAttribute('data-complete')).toBe('');
+    expect(trigger(1).hasAttribute('aria-disabled')).toBe(false);
+
+    trigger(1).click();
+    settle();
+
+    expect(host.onStepChange).toHaveBeenCalledWith(
+      expect.objectContaining({ previous: 2, reason: 'pointer', value: 1 }),
+    );
+    expect(item(1).getAttribute('data-current')).toBe('');
+    expect(trigger(1).getAttribute('aria-current')).toBe('step');
+  });
+
+  /**
+   * The step behind is reached because it is behind, and not because anything
+   * about it is finished: `autoComplete` is off, so walking past a step leaves
+   * it pending, and a linear flow that only opened what is finished would trap
+   * the reader on the step they are on.
+   */
+  it('goes back to an earlier step a linear flow never marked complete', () => {
+    const { host, item, trigger, settle } = setup();
+    host.linear.set(true);
+    host.defaultStep.set(2);
+    settle();
+
+    expect(item(1).hasAttribute('data-complete')).toBe(false);
+    expect(trigger(1).hasAttribute('aria-disabled')).toBe(false);
+
+    trigger(1).click();
+    settle();
+
+    expect(host.onStepChange).toHaveBeenCalledWith(
+      expect.objectContaining({ previous: 2, reason: 'pointer', value: 1 }),
+    );
+    expect(item(1).getAttribute('data-current')).toBe('');
+  });
+
   it('never moves state the consumer owns', () => {
     const { host, item, trigger, settle } = setup();
     host.step.set(1);
@@ -168,6 +253,20 @@ describe('SlStepper', () => {
       expect(trigger(3).hasAttribute('disabled')).toBe(false);
       expect(trigger(3).getAttribute('aria-disabled')).toBe('true');
       expect(contract.unreachableAttribute).toBe('aria-disabled');
+    });
+
+    it('opens the next step once the one before it is complete', () => {
+      const { host, trigger, settle } = setup();
+      host.linear.set(true);
+      host.defaultStep.set(1);
+      host.completed.set([0]);
+      settle();
+      expect(trigger(2).getAttribute('aria-disabled')).toBe('true');
+
+      host.completed.set([0, 1]);
+      settle();
+      expect(trigger(2).hasAttribute('aria-disabled')).toBe(false);
+      expect(trigger(3).getAttribute('aria-disabled')).toBe('true');
     });
 
     it('refuses the move an unreachable header would make', () => {
@@ -215,11 +314,31 @@ describe('SlStepper', () => {
       arrow(trigger(1), 'End');
       expect(document.activeElement).toBe(trigger(3));
 
-      arrow(trigger(3), 'ArrowRight');
+      arrow(trigger(3), 'Home');
       expect(document.activeElement).toBe(trigger(0));
 
-      arrow(trigger(0), 'Home');
+      arrow(trigger(0), 'ArrowLeft');
+      expect(document.activeElement).toBe(trigger(3));
+
+      arrow(trigger(3), 'ArrowRight');
       expect(document.activeElement).toBe(trigger(0));
+    });
+
+    /**
+     * The arrows reach a header a linear flow has not opened, because Tab
+     * reaches it: they are on top of the tab sequence rather than in place of
+     * it, and a step a reader may not activate is still one they may find.
+     */
+    it('reaches every header, exactly where Tab does', () => {
+      const { host, trigger, settle } = setup();
+      host.linear.set(true);
+      settle();
+      trigger(0).focus();
+
+      arrow(trigger(0), 'ArrowRight');
+      expect(document.activeElement).toBe(trigger(1));
+      expect(trigger(1).getAttribute('aria-disabled')).toBe('true');
+      expect(trigger(1).hasAttribute('tabindex')).toBe(false);
     });
   });
 

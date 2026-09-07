@@ -85,17 +85,37 @@ test('paints the chip on the root and the inset on the body', () => {
 
 /**
  * `docs/token-foundation.md` names this family's remove control as the case a
- * theme cannot correct on the family's behalf. The control is as tall as the
- * chip, so flooring the chip at the WCAG minimum is what makes it hittable at
- * every size and every density. Its width is the inner control's (R2): the
- * glyph plus a step of air on each side, floored at the same minimum.
+ * theme cannot correct on the family's behalf, and says what corrects it: the
+ * family expands the hit area. Both axes are asked about here, which is what
+ * TG2 was — the width was floored at the minimum and the height was never
+ * measured, so the control was 24 wide and 22 tall, stretched inside a 24px
+ * border box between two 1px edges, and it failed SC 2.5.8 on the axis nobody
+ * had looked at.
+ *
+ * So the chip is its own line box and the target is the control's own: the
+ * width from the inner-control rule (R2), the glyph plus a step of air on each
+ * side floored at the minimum, and the rest from a transparent halo that grows
+ * the press area only where the box falls short. Flooring the chip is what the
+ * family did before and it is not enough: a floor on the outside cannot reach
+ * the content box inside it.
  */
-test('floors the chip and the remove control at the target minimum', () => {
-  assert.match(rule(root), /--_block-size:max\(var\(--slotted-target-min,24px\)/);
+test('gives the remove control its target on both axes', () => {
+  assert.ok(
+    !/--_block-size:max\(/.test(rule(root)),
+    'the chip carries its own line box; the target is the control’s',
+  );
+  assert.match(
+    rule(root),
+    /--_block-size:calc\(var\(--_font-size\) \* var\(--_line-height\) \+ 2 \* var\(--_inset-block\) \+ 2 \* var\(--_edge-width\)\)/,
+  );
   assert.match(
     rule(`${ui} [data-part='remove']`),
     /inline-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,
   );
+  assert.match(rule(`${ui} [data-part='remove']`), /position:relative/);
+  const halo = rule(`${ui} [data-part='remove']::after`);
+  assert.match(halo, /position:absolute/);
+  assert.match(halo, /inset:min\(0px,calc\(\(100% - var\(--slotted-target-min,24px\)\) \/ 2\)\)/);
 });
 
 test('draws the remove glyph and the selection mark from glyph tokens', () => {

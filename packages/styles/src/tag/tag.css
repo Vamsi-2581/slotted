@@ -71,17 +71,19 @@
      */
     --_inner-radius: max(0px, calc(var(--_radius) - var(--_edge-width)));
     /**
-     * The chip's own line box plus its inset, floored at the WCAG 2.2 2.5.8
-     * minimum. `docs/token-foundation.md` names this family's remove control
-     * as the case a theme cannot correct on the family's behalf: the control
-     * is as tall as the chip, so flooring the chip is what makes it hittable
-     * at every size and every density.
+     * The chip's own line box plus its inset, and nothing else. It carried a
+     * floor at the WCAG 2.2 2.5.8 minimum for a while, so that the remove
+     * control — which stretches to the chip — would be hittable; the floor
+     * bound on `sm` alone and it still did not deliver the target, because a
+     * control stretched inside a 24px border box is 22px of content between
+     * two edges (TG2). The target is the control's own now, taken from a
+     * transparent halo below, which is the answer
+     * `docs/token-foundation.md` names for a target short in one axis and the
+     * answer R2 gives for every inner control. A chip is the height of what it
+     * says.
      */
-    --_block-size: max(
-      var(--slotted-target-min, 24px),
-      calc(
-        var(--_font-size) * var(--_line-height) + 2 * var(--_inset-block) + 2 * var(--_edge-width)
-      )
+    --_block-size: calc(
+      var(--_font-size) * var(--_line-height) + 2 * var(--_inset-block) + 2 * var(--_edge-width)
     );
 
     align-items: stretch;
@@ -417,8 +419,24 @@
     );
     justify-content: center;
     padding: 0;
+    position: relative;
     transition: background-color var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
+  }
+
+  /**
+   * The halo that completes the target where the box is shorter than it. The
+   * control stretches to the chip's content box, which is the chip less its
+   * two edges, so on the shortest chip the box was 24 wide and 22 tall and the
+   * press area failed SC 2.5.8 on the axis nobody was measuring. The halo is
+   * transparent and it is `min(0px, …)`, so it grows the box only where the box
+   * falls short and is inert on the two larger sizes, where the chip is already
+   * taller than the minimum.
+   */
+  [data-ui='tag'] [data-part='remove']::after {
+    content: '';
+    inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
+    position: absolute;
   }
 
   /* A tag that is only a remove control is not a tag, but the rounding is one

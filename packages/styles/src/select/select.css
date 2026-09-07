@@ -246,6 +246,14 @@
     inset-block-start: 50%;
     inset-inline-end: calc(var(--_padding-inline) + var(--_icon-size) + var(--_gap));
     inset-inline-start: var(--_padding-inline);
+    /**
+     * The row is at least a target tall, because a chip's remove control takes
+     * the rest of its own target from a transparent halo that stands outside
+     * the chip (TG2), and the clip below would otherwise cut that halo off at
+     * the chip's edge — the press area measured 24 × 22.8 inside the trigger
+     * and 24 × 24 everywhere else. The chips stay centred in it.
+     */
+    min-block-size: var(--slotted-target-min, 24px);
     /* A chip that does not fit is hidden by the collapse, not clipped; this is
        the guard for the frame between one measurement and the next. */
     overflow: hidden;

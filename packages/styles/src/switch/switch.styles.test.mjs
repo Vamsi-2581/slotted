@@ -73,18 +73,43 @@ test('leaves the control invisible, operable and over the pill it answers', () =
  * WCAG 2.2 minimum is recovered on the box the control covers. Neither the
  * theme nor the track can do it: the theme does not know the family's
  * geometry, and the track is the paint.
+ *
+ * SW2: it is recovered there and nowhere else. The row and the label carried
+ * the same minimum as well, which made a one-line Switch row 28.5 pixels
+ * against the 19.5 of the Checkbox beside it in the same form — a target paid
+ * for three times over, and CK3 had already taken that model out of `checkbox`
+ * and `radio-group`. The control keeps it and gives its own overhang back
+ * through two negative margins, so what it presses is 24 and what it
+ * contributes to the row is the pill.
  */
-test('holds the target minimum, on the label and on the row without one', () => {
-  assert.match(rule(root), /min-block-size:var\(--slotted-target-min,24px\)/);
+test('holds the target minimum on the control alone', () => {
+  const control = rule(`${ui}>[data-part='control']`);
+  assert.match(control, /block-size:var\(--_target-block\)/);
   assert.match(
-    rule(`${ui}>[data-part='control']`),
-    /min-block-size:var\(--slotted-target-min,24px\)/,
+    rule(root),
+    /--_target-block:max\(var\(--_track-block\),var\(--slotted-target-min,24px\)\)/,
   );
   assert.match(
-    rule(`${ui}>[data-part='label']`),
-    /min-block-size:var\(--slotted-target-min,24px\)/,
+    control,
+    /margin-block-end:calc\(\(var\(--_track-block\) - var\(--_target-block\)\) \/ 2\)/,
   );
+  assert.match(
+    control,
+    /margin-block-start:calc\(var\(--_lift\) \+ \(var\(--_track-block\) - var\(--_target-block\)\) \/ 2\)/,
+  );
+  for (const part of [root, `${ui}>[data-part='label']`]) {
+    assert.doesNotMatch(
+      rule(part),
+      /min-block-size:var\(--slotted-target-min,24px\)/,
+      'the row is the pill and the label, never the target',
+    );
+  }
+  /* The label's padding is optical now: it centres the words on the pill. */
   assert.match(rule(`${ui}>[data-part='label']`), /padding-block:var\(--_label-slack\)/);
+  assert.match(
+    rule(root),
+    /--_label-slack:max\(0px,\(var\(--_track-block\) - var\(--_font-size\) \* var\(--_line-height\)\) \/ 2\)/,
+  );
 });
 
 /**
@@ -145,7 +170,8 @@ test('draws the mark as a mask from the glyph scale', () => {
 /**
  * The anatomy `checkbox` settled one item earlier in the same wave, down to
  * the numbers: two binary controls in one list have to line up, and the way to
- * guarantee that is to derive both from the same slack.
+ * guarantee that is to derive both from the same places — the grid, the column
+ * the label sits in, and the row the description takes under it.
  */
 test('lays the label beside the pill and the description under the label', () => {
   assert.match(rule(root), /grid-template-columns:auto minmax\(0,1fr\)/);

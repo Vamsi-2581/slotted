@@ -173,6 +173,16 @@
     block-size: var(--_marker);
     border: var(--_rule) solid var(--_pending-ring);
     border-radius: var(--slotted-radius-full, 9999px);
+    /**
+     * The marker measures `--_marker` including its ring, because every other
+     * rule in this sheet is written as though it does: the connector's centre,
+     * the panel's indent and the vertical track all read that one length. With
+     * the ring outside it the circle stood four pixels wider than the number
+     * the rest of the family was using, and the connector ran two pixels off
+     * every marker centre it was supposed to be on — in both orientations and
+     * at all three densities (ST2).
+     */
+    box-sizing: border-box;
     color: var(--_muted);
     display: flex;
     flex: none;
@@ -527,6 +537,15 @@
       align-items: center;
       flex-direction: row;
       inline-size: auto;
+      /**
+       * The column inset goes with the columns. It exists so two long names in
+       * adjacent columns do not meet, and a stepper that has turned into a
+       * column has no neighbour to keep away from — while the connector below
+       * is measured from the item's own edge, so six pixels of padding on the
+       * header moved the marker off the track and left the two joined by
+       * nothing (ST2).
+       */
+      padding-inline: 0;
       text-align: start;
     }
 

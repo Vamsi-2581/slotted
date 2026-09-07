@@ -137,14 +137,26 @@ test('clamps a long value without taking any of it out of the DOM', () => {
 
 /**
  * A component-owned mark is geometry from a glyph token; a character is never
- * an icon. The placeholder is the same rule applied to the absence of a value,
- * and only where the absence has no words of its own — `:empty` is what tells
- * the drawn form from the written one.
+ * an icon.
+ *
+ * The placeholder is the exception that proves which of the two it is. It was
+ * drawn as a rule of two pixels, which made the absence of a value an icon this
+ * family owned; it is an em dash now, and an em dash is a word — so it is
+ * content, both bindings write it, and the only thing left in the sheet is the
+ * ink it is drawn in (DL2). The rule against generated text above is what keeps
+ * it that way.
  */
-test('draws every mark it owns as geometry', () => {
+test('draws every mark it owns as geometry, and the missing value is not one', () => {
   assert.ok(normalized.includes('mask-image:var(--slotted-description-list-copy-icon'));
   assert.ok(normalized.includes('mask-image:var(--slotted-description-list-toggle-icon'));
-  assert.ok(normalized.includes("[data-part='placeholder']:empty{background-color:"));
+  assert.ok(
+    !normalized.includes("[data-part='placeholder']:empty"),
+    'the sheet draws a mark the bindings write',
+  );
+  assert.ok(
+    normalized.includes("[data-part='placeholder']{color:var(--_placeholder-ink)"),
+    'the missing value is not one step down from the value it stands in for',
+  );
 });
 
 /**

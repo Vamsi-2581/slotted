@@ -29,6 +29,7 @@ import {
   DESCRIPTION_LIST_DEFAULT_LABELS,
   DESCRIPTION_LIST_DEFAULT_LAYOUT,
   DESCRIPTION_LIST_DEFAULT_VARIANT,
+  DESCRIPTION_LIST_EMPTY_VALUE_MARK,
   injectDescriptionListDefaults,
   overflowsClamp,
   selectValue,
@@ -203,7 +204,7 @@ export class SlDescriptionListHint {}
         @if (placeholder()) {
           <span data-part="placeholder">{{ placeholder() }}</span>
         } @else {
-          <span aria-hidden="true" data-part="placeholder"></span>
+          <span aria-hidden="true" data-part="placeholder">{{ emptyMark }}</span>
           <span data-ui="visually-hidden">{{ placeholderText() }}</span>
         }
       }
@@ -246,6 +247,9 @@ export class SlDescriptionListHint {}
 })
 export class SlDescriptionListDescription {
   readonly list = inject(SlDescriptionList);
+
+  /** The character a row shows where it has no value. */
+  protected readonly emptyMark = DESCRIPTION_LIST_EMPTY_VALUE_MARK;
 
   /** Lines the value is held to before it is revealed. `0` never clamps. */
   readonly clamp = input(0, { transform: (value: number | string) => numberAttribute(value, 0) });

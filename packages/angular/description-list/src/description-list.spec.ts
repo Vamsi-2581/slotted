@@ -418,7 +418,8 @@ describe('copying, the missing value and the row action', () => {
     const mark = root.querySelector('[data-part="placeholder"]') as HTMLElement;
 
     expect(mark.getAttribute('aria-hidden')).toBe('true');
-    expect(mark.textContent).toBe('');
+    /* An em dash, never a hyphen: a hyphen is a word joiner (DL2). */
+    expect(mark.textContent).toBe('\u2014');
     expect(root.querySelector('[data-ui="visually-hidden"]')?.textContent).toBe('Not provided');
   });
 

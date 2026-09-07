@@ -328,15 +328,16 @@ describe('DescriptionListDescription', () => {
     expect(screen.getByText('Not provided')).toHaveAttribute('data-ui', 'visually-hidden');
     const mark = document.querySelector('[data-part="placeholder"]') as HTMLElement;
     expect(mark).toHaveAttribute('aria-hidden', 'true');
-    expect(mark.textContent).toBe('');
+    /* An em dash, never a hyphen: a hyphen is a word joiner (DL2). */
+    expect(mark.textContent).toBe('\u2014');
   });
 
   /**
    * Words a consumer states are meant to be seen. Without them the mark is
-   * drawn and the sentence is read instead, because a panel of twelve empty
+   * shown and the sentence is read instead, because a panel of twelve empty
    * rows saying "Not provided" twelve times is noise.
    */
-  it('shows the words it was given, and draws the mark when it was given none', () => {
+  it('shows the words it was given, and the mark when it was given none', () => {
     const { rerender } = render(
       <DescriptionList>
         <DescriptionListItem>
@@ -361,7 +362,7 @@ describe('DescriptionListDescription', () => {
     );
 
     const mark = document.querySelector('[data-part="placeholder"]') as HTMLElement;
-    expect(mark.textContent).toBe('');
+    expect(mark.textContent).toBe('\u2014');
     expect(mark).toHaveAttribute('aria-hidden', 'true');
     expect(screen.getByText('Not provided')).toHaveAttribute('data-ui', 'visually-hidden');
   });

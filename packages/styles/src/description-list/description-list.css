@@ -347,33 +347,24 @@
    * reader to see it, and a row that says what it is missing is worth more than
    * a mark that says only *something*.
    *
-   * Without them it is a drawn rule, and the accompanying sentence is read
-   * rather than shown — because a panel of twelve empty rows saying "Not
+   * Without them it is an em dash — `—`, U+2014 — and the accompanying sentence
+   * is read rather than shown, because a panel of twelve empty rows saying "Not
    * provided" twelve times is noise, and the mark is what a reader scans past.
-   * `:empty` tells the two apart, so no attribute has to.
    *
-   * The rule is geometry rather than an em dash: it holds its weight against
-   * the type at every density and needs no font to contain the character.
+   * The mark was a drawn rule of two pixels until DL2: geometry that answered
+   * to no font, sitting on a line of text as a bar the reader has no name for,
+   * where an em dash is what a table has used for a missing value since tables
+   * were set in lead. It is a character, so it is content and both bindings
+   * write it — the stylesheet generates no text, which
+   * `description-list.styles.test.mjs` holds for the whole family — and the
+   * only thing left here is the ink it is drawn in, one step down from the
+   * value it stands in for.
+   *
+   * `—` and never `-`: a hyphen is a word joiner, half the width, and it sits
+   * at a different height.
    */
   [data-ui='description-list'] [data-part='placeholder'] {
     color: var(--_placeholder-ink);
-  }
-
-  [data-ui='description-list'] [data-part='placeholder']:empty {
-    background-color: var(--_placeholder-ink);
-    block-size: var(
-      --slotted-description-list-placeholder-thickness,
-      var(--slotted-border-width-thick, 2px)
-    );
-    border-radius: var(--slotted-radius-full, 9999px);
-    display: inline-block;
-    inline-size: var(--slotted-description-list-placeholder-width, 0.875em);
-    /**
-     * The middle of a lower-case letter, not the middle of the line box. The
-     * two are a descender apart, and centring in the line box put the mark
-     * visibly below the text it stands in for on every row that had one.
-     */
-    vertical-align: var(--slotted-description-list-placeholder-offset, 0.3em);
   }
 
   /* ── The controls ──────────────────────────────────────────────────── */

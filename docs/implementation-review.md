@@ -275,7 +275,7 @@ Localização: `packages/core/src/number/number.ts`, `packages/react/src/currenc
 Localização: `packages/react/src/description-list/description-list.tsx` (labels `copy`, `copyBlocked`).
 
 - [ ] **DL1 — Botão de copiar apenas seleciona o texto.** Causa provável: `navigator.clipboard.writeText` rejeitado (iframe do Storybook sem permissão `clipboard-write`, ou contexto não seguro em `http://devserver.local`) e o fallback cai em seleção. Esperado: (1) tentar `navigator.clipboard.writeText`; (2) em falha, usar `document.execCommand('copy')` sobre uma seleção temporária e restaurar a seleção anterior; (3) só se ambos falharem, mostrar o estado `copyBlocked`. Após sucesso, o botão troca o glifo para `check` por 1500ms e anuncia "Copiado" via `aria-live`. Adicionar `allow="clipboard-write"` ao iframe de preview do Storybook (`apps/storybook-*/.storybook/preview-head.html` ou `manager`). O botão é parte interna (R2).
-- [ ] **DL2 — Placeholder `-` para valor vazio.** Esperado: usar `—` (em dash, U+2014) em `--slotted-text-muted`, com `aria-label` configurável (`labels.empty`, padrão "Sem valor"). Não usar hífen.
+- [x] **DL2 — Placeholder `-` para valor vazio.** Esperado: usar `—` (em dash, U+2014) em `--slotted-text-muted`, com `aria-label` configurável (`labels.empty`, padrão "Sem valor"). Não usar hífen.
 
 ---
 

@@ -85,7 +85,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span, drawn by the component',
     required: false,
     purpose:
-      'A value that is missing, in one of two forms: words a consumer stated, shown as they were written, or a rule drawn in CSS with the reason beside it in text a screen reader reads.',
+      'A value that is missing, in one of two forms: words a consumer stated, shown as they were written, or an em dash with the reason beside it in text a screen reader reads.',
   },
   {
     part: 'copy',

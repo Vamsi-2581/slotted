@@ -1,4 +1,5 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
+import { writeToClipboard } from '@slotted/core/clipboard';
 
 /** The term beside its value, or above it. */
 export type DescriptionListLayout = 'row' | 'stack';
@@ -85,7 +86,7 @@ export const DESCRIPTION_LIST_DEFAULT_LABELS: Required<DescriptionListLabels> = 
 };
 
 /** How long the copy control says it succeeded before returning to rest. */
-export const COPIED_FOR = 2000;
+export const COPIED_FOR = 1500;
 
 export const DESCRIPTION_LIST_DEFAULTS_TOKEN = new InjectionToken<DescriptionListDefaults>(
   'slotted description list defaults',
@@ -160,23 +161,17 @@ export function selectValue(node: HTMLElement | null | undefined): boolean {
 /**
  * Putting a value on the clipboard, and saying whether it got there.
  *
- * `navigator.clipboard.writeText` is the whole implementation. The
- * `document.execCommand('copy')` fallback is declined: it exists for insecure
- * contexts, and a details panel showing an account identifier over plain HTTP
- * has a larger problem than a copy button. Where the write is refused this
- * returns `false`, the control returns to rest, and the value is still
- * selectable text — which is what a reader had before the button existed.
+ * The two ways and the order they are tried in belong to `@slotted/core`, which
+ * is where behaviour the two bindings would otherwise get differently wrong
+ * lives: a temporary selection that is not taken back destroys the reader's
+ * own, and that is a bug a family would rediscover once per framework (DL1).
+ *
+ * What is left here is the family's own reading of the answer: the control says
+ * it copied whichever way the text went, and says it could not only when both
+ * ways were refused.
  */
 export async function copyToClipboard(value: string): Promise<boolean> {
-  const clipboard = globalThis.navigator?.clipboard;
-  if (clipboard === undefined || typeof clipboard.writeText !== 'function') return false;
-
-  try {
-    await clipboard.writeText(value);
-    return true;
-  } catch {
-    return false;
-  }
+  return (await writeToClipboard(value)) !== 'refused';
 }
 
 /**

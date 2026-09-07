@@ -9,6 +9,10 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./clipboard": {
+      "types": "./dist/types/clipboard/index.d.ts",
+      "import": "./dist/clipboard.js"
+    },
     "./collection": {
       "types": "./dist/types/collection/index.d.ts",
       "import": "./dist/collection.js"

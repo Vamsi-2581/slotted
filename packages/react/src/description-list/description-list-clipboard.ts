@@ -1,27 +1,18 @@
+import { writeToClipboard } from '@slotted/core/clipboard';
+
 /**
  * Putting a value on the clipboard, and saying whether it got there.
  *
- * `navigator.clipboard.writeText` is the whole implementation. The
- * `document.execCommand('copy')` fallback is declined: it exists for insecure
- * contexts, and a details panel showing an account identifier over plain HTTP
- * has a larger problem than a copy button. Where the write is refused — no
- * clipboard, a denied permission, a document without focus — this returns
- * `false`, the control returns to rest, and the value is still selectable
- * text, which is what a reader had before the button existed.
+ * The two ways and the order they are tried in belong to `@slotted/core`, which
+ * is where behaviour the two bindings would otherwise get differently wrong
+ * lives: a temporary selection that is not taken back destroys the reader's
+ * own, and that is a bug a family would rediscover once per framework (DL1).
  *
- * The Angular binding holds the same eight lines rather than importing them
- * through `@slotted/core`: a core module exists for behaviour two bindings
- * would otherwise get *differently* wrong, and there is one way to await one
- * promise. `description-list.spec.ts` asserts the same three outcomes.
+ * What is left here is the family's own reading of the answer: the control says
+ * it copied whichever way the text went, and says it could not only when both
+ * ways were refused. `description-list.spec.ts` asserts the same three outcomes
+ * for Angular.
  */
 export async function copyToClipboard(value: string): Promise<boolean> {
-  const clipboard = globalThis.navigator?.clipboard;
-  if (clipboard === undefined || typeof clipboard.writeText !== 'function') return false;
-
-  try {
-    await clipboard.writeText(value);
-    return true;
-  } catch {
-    return false;
-  }
+  return (await writeToClipboard(value)) !== 'refused';
 }

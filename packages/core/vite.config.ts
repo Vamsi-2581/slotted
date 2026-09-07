@@ -6,6 +6,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(import.meta.dirname, 'src/index.ts'),
+        clipboard: resolve(import.meta.dirname, 'src/clipboard/index.ts'),
         collection: resolve(import.meta.dirname, 'src/collection/index.ts'),
         count: resolve(import.meta.dirname, 'src/count/index.ts'),
         currency: resolve(import.meta.dirname, 'src/currency/index.ts'),

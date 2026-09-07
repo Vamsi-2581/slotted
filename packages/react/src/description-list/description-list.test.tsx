@@ -471,11 +471,11 @@ describe('copying', () => {
   });
 
   /**
-   * A browser refuses `writeText` where the document is not focused, and inside
-   * an iframe carrying no `clipboard-write` permission — which is where a
-   * Storybook page lives. Leaving the control at rest made a working button
-   * indistinguishable from a broken one, so the family does the part it still
-   * can: it selects the value and says so.
+   * Both ways refused. `document.execCommand` does not exist in this
+   * environment, so a rejected `writeText` reaches the end of the ladder, which
+   * is the case this test is about: leaving the control at rest made a working
+   * button indistinguishable from a broken one, so the family does the part it
+   * still can — it selects the value and says so.
    */
   it('selects the value where the clipboard is refused, so the reader can take it', async () => {
     writeText.mockRejectedValue(new Error('denied'));
@@ -492,6 +492,29 @@ describe('copying', () => {
   it('reports the same refusal where the platform offers no clipboard at all', async () => {
     Reflect.deleteProperty(globalThis.navigator, 'clipboard');
     await expect(copyToClipboard('value')).resolves.toBe(false);
+  });
+
+  /**
+   * The rung between the two. A browser refuses `writeText` outside a user
+   * gesture and while the document is not focused — both measured against the
+   * running Storybook (DL1) — and answers `document.execCommand('copy')` in
+   * exactly those cases. The control has copied, and says so.
+   */
+  it('copies through the command where the API refuses, and claims the success', async () => {
+    writeText.mockRejectedValue(new DOMException('not focused', 'NotAllowedError'));
+    const command = vi.fn().mockReturnValue(true);
+    const had = document.execCommand;
+    document.execCommand = command as unknown as typeof document.execCommand;
+    const onCopy = vi.fn();
+    render(<Copyable onCopy={onCopy} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy' }));
+
+    await waitFor(() => expect(onCopy).toHaveBeenCalled());
+    expect(command).toHaveBeenCalledWith('copy');
+    expect(onCopy.mock.calls[0]?.[0]).toMatchObject({ copied: true, selected: false });
+    expect(screen.getByRole('button', { name: 'Copy' })).toHaveAttribute('data-complete');
+    document.execCommand = had;
   });
 });
 

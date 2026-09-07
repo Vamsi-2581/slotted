@@ -1,3 +1,4 @@
+export * from './clipboard';
 export * from './collection';
 export * from './count';
 export * from './disclosure';

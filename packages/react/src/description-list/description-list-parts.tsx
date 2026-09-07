@@ -25,7 +25,7 @@ import type {
 } from './description-list.types';
 
 /** How long the copy control says it succeeded before returning to rest. */
-export const COPIED_FOR = 2000;
+export const COPIED_FOR = 1500;
 
 /**
  * The mark a row shows where it has no value: an em dash, which is what a table
@@ -280,12 +280,12 @@ export function DescriptionListDescription({
       getLiveAnnouncer().announce(list.labels.copied);
     } else {
       /**
-       * A refused write used to leave the control at rest and the reader with
-       * nothing — which is indistinguishable from a broken button, and is
-       * exactly what a browser does when the document is not focused or the
-       * page is in an iframe carrying no `clipboard-write` permission. So the
-       * family does the part it still can: it selects the value, which the
-       * reader can see and copy with the keyboard, and says so.
+       * Both ways were refused — the API and the command behind it — which is
+       * rarer than it was: the second one answers the two refusals DL1
+       * measured, a write with no user activation and a write from a document
+       * that has lost focus. What is left is the part the family can still do:
+       * it selects the value, which the reader can see and copy with the
+       * keyboard, and says so.
        */
       selected = selectValue(value.current);
       getLiveAnnouncer().announce(list.labels.copyBlocked);

@@ -409,6 +409,30 @@ describe('copying, the missing value and the row action', () => {
   });
 
   /**
+   * The rung between the two. A browser refuses `writeText` outside a user
+   * gesture and while the document is not focused — both measured against the
+   * running Storybook (DL1) — and answers `document.execCommand('copy')` in
+   * exactly those cases. The control has copied, and says so.
+   */
+  it('copies through the command where the API refuses, and claims the success', async () => {
+    writeText.mockRejectedValue(new DOMException('not focused', 'NotAllowedError'));
+    const command = vi.fn().mockReturnValue(true);
+    const had = document.execCommand;
+    document.execCommand = command as unknown as typeof document.execCommand;
+    const { fixture, root } = panels();
+    const control = root.querySelector('[data-part="copy"]') as HTMLButtonElement;
+
+    control.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(command).toHaveBeenCalledWith('copy');
+    expect(fixture.componentInstance.results[0]).toMatchObject({ copied: true, selected: false });
+    expect(control.getAttribute('data-complete')).toBe('');
+    document.execCommand = had;
+  });
+
+  /**
    * Words a consumer states are meant to be seen. Without them the mark is drawn
    * and the sentence is read instead, because a panel of twelve empty rows
    * saying "Not provided" twelve times is noise.
@@ -435,11 +459,11 @@ describe('copying, the missing value and the row action', () => {
   });
 
   /**
-   * A browser refuses `writeText` where the document is not focused, and inside
-   * an iframe carrying no `clipboard-write` permission — which is where a
-   * Storybook page lives. Leaving the control at rest made a working button
-   * indistinguishable from a broken one, so the family does the part it still
-   * can: it selects the value and says so.
+   * Both ways refused. `document.execCommand` does not exist in this
+   * environment, so a rejected `writeText` reaches the end of the ladder, which
+   * is the case this test is about: leaving the control at rest made a working
+   * button indistinguishable from a broken one, so the family does the part it
+   * still can — it selects the value and says so.
    */
   it('selects the value where the clipboard is refused, so the reader can take it', async () => {
     writeText.mockRejectedValue(new Error('denied'));

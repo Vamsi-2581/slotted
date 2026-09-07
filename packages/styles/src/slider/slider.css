@@ -161,6 +161,15 @@
    */
   [data-ui='slider'] [data-part='control'] {
     align-items: center;
+    /**
+     * The reserve for the two half thumbs comes out of the band rather than
+     * being added to it. Written as padding on a content box, a band told to
+     * fill its root measured a whole thumb wider than the root — 260px inside
+     * 240px — and the overflow travelled up through `stack` and `field` to the
+     * stage, which then scrolled. The band is what the root gives it; the
+     * scale inside is what is left after the reserve.
+     */
+    box-sizing: border-box;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -199,8 +208,15 @@
      * is a scale a reader can point at, and a consumer who wants another one
      * writes it on the root. The value is arithmetic over the thumb, not a
      * scale of its own.
+     *
+     * The token stays the scale. On a border box the reserve is inside the
+     * band, so the band is the scale plus the two half thumbs — which leaves
+     * the track measuring exactly what the consumer asked for, as it did
+     * before the box changed.
      */
-    block-size: var(--slotted-slider-length, calc(var(--_thumb-size) * 10));
+    block-size: calc(
+      var(--slotted-slider-length, calc(var(--_thumb-size) * 10)) + var(--_thumb-size)
+    );
     inline-size: var(--_control-size);
     padding-block: calc(var(--_thumb-size) / 2);
   }
@@ -319,6 +335,14 @@
     inline-size: max-content;
     line-height: var(--slotted-line-height-xs, 1.4);
     max-inline-size: var(--_mark-label-size);
+    /**
+     * The cap is three thumbs, and one word can be wider than three thumbs
+     * without a space to break at: `Reduzido` measured 55px inside 51px at
+     * `dense`, and those four pixels were read at the mark, which is one pixel
+     * wide and forgives only what the label's placement explains. A label
+     * breaks inside a word rather than standing outside its own box.
+     */
+    overflow-wrap: anywhere;
     position: absolute;
     text-align: center;
     unicode-bidi: plaintext;
@@ -442,6 +466,24 @@
     padding: 0;
     pointer-events: none;
     position: absolute;
+  }
+
+  /**
+   * The family draws its own thumb, so the browser's is not a second one on the
+   * screen — it goes with the input's `opacity` — but it keeps the intrinsic
+   * size the browser gives it, and that size is sixteen pixels while a thumb at
+   * `dense` is thirteen. `tools/harness/audit.mjs` read the difference as
+   * content that ran out of its box on every dense stage. The native parts are
+   * withdrawn to nothing, as `text-field` withdraws the search decorations.
+   */
+  [data-ui='slider'] [data-part='input']::-webkit-slider-thumb {
+    appearance: none;
+    block-size: 0;
+    inline-size: 0;
+  }
+
+  [data-ui='slider'] [data-part='input']::-webkit-slider-runnable-track {
+    block-size: 0;
   }
 
   /* ── The bubble ───────────────────────────────────────────────────────

@@ -391,6 +391,32 @@ each carry the same nine roles: `solid`, `solid-hover`, `solid-active`,
 Their values are not tabled here because the set is one hundred and thirty-five
 entries; the contract holds every name and the contrast test holds every ratio.
 
+A tone's `surface` role is a ground and not a separator. It is bracketed from
+both sides: far enough below the page to be seen, and far enough above the
+tone's own `text` to be read. On a light page the two brackets do not overlap.
+A ground at 1.5:1 under white sits at L ≤ 0.650, while `accent-text` needs
+L ≥ 0.655 to hold 4.5:1 over it — and `danger` needs 0.680, `success` 0.892,
+and every tone in `high-contrast` needs 0.671 to 0.756 against a 7:1 floor
+(G9, measured in `tools/harness/out/review-loop/g9/tones-before.txt`). The
+`high-contrast` scheme closes the question outright: it paints every tone
+ground the page's own white, so no ground in that scheme separates from
+anything.
+
+So a state that has to be seen is carried by a pair, and the ratio is measured
+across the pair rather than on the ground alone. The chosen row, card, option
+and toggle draw `--slotted-tone-accent-border` at the non-text ratio against
+the page _and_ against the ground it encloses — 5.17 | 7.29 | 21.00 and
+4.24 | 6.78 | 21.00 in the default theme — and `--slotted-tone-accent-surface`
+tints what that edge encloses, at 1.22 | 1.08 | 1.00. This replaces the
+threshold B6 asked for between a pressed toggle's ground and an unpressed
+one's, which no set of hexadecimals can reach.
+`packages/tokens/src/theme-conformance.mjs` holds the pair.
+
+Where a state has no edge to pair with, the ground is not recalibrated either;
+it is mixed from the tone's `text` role at a fraction of opacity, which is the
+one role every scheme keeps legible over the surface. `--slotted-selection-halo-opacity`
+does this for the pointer halo (CK7).
+
 ## Shadow
 
 This scale answers what elevation a surface needs in each colour scheme.

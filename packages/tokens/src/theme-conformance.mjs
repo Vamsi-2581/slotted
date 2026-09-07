@@ -328,6 +328,37 @@ function contrastCases(theme) {
       }
     });
 
+    /**
+     * What says a row, a card or a toggle is chosen. The `accent` ground alone
+     * cannot say it: a tinted ground is bracketed from both sides — it has to
+     * stay far enough below the page to be seen and far enough above its own
+     * text to be read — and on a light page the two brackets do not overlap.
+     * At 1.5:1 under white a ground sits at L ≤ 0.650, while `accent-text`
+     * needs L ≥ 0.655 to hold 4.5:1 over it, and `danger` and `success` need
+     * 0.680 and 0.892 (G9, `tools/harness/out/review-loop/g9/tones-before.txt`).
+     * So the pair is what carries the state: the edge separates the chosen
+     * item from the page and from the ground it encloses, at the non-text
+     * ratio, and the ground tints what the edge encloses. A theme that softens
+     * the accent edge loses the only half of the pair that is measurable in
+     * every scheme — `high-contrast` paints every tone ground the page's own
+     * white, and there the edge is the whole gesture.
+     */
+    test(`${label} ${scheme} says chosen with an edge, not with a ground alone`, () => {
+      const ground = values['--slotted-tone-accent-surface'];
+      const edge = values['--slotted-tone-accent-border'];
+      for (const [against, what] of [
+        [values['--slotted-surface'], 'the page'],
+        [ground, 'the ground it encloses'],
+      ]) {
+        assert.ok(
+          contrast(edge, against) >= NON_TEXT_RATIO,
+          `${scheme} the accent edge reads ${contrast(edge, against).toFixed(
+            3,
+          )}:1 against ${what}, below ${NON_TEXT_RATIO}:1`,
+        );
+      }
+    });
+
     test(`${label} ${scheme} keeps disabled text legible`, () => {
       assert.ok(
         contrast(

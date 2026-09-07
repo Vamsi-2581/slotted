@@ -196,6 +196,35 @@ test('gives the two glyph controls the target their glyphs are too small to be',
 });
 
 /**
+ * T3, the question T1 left open: a paging control at its own end keeps its
+ * track or gives it up.
+ *
+ * It keeps it. Both controls are drawn only while the list overflows, so the
+ * empty track exists exactly when the other control is live and a reader has a
+ * pointer on it — and giving the track up would slide the whole list twenty
+ * four pixels plus the gap under that pointer, on the first page and again on
+ * the last. The cost of keeping it is that a list at its start begins one
+ * track in from the edge; the cost of dropping it is a target moving out from
+ * under a finger mid-press. MUI's `TabScrollButton` reserves the same track
+ * for the same reason.
+ *
+ * Hidden rather than removed is what says it: `visibility: hidden` leaves the
+ * box in the grid and takes the control out of the picture and out of the
+ * pointer's way.
+ */
+test('keeps the track of a paging control that has reached its end', () => {
+  const disabled = rule(`${part('scroll')}:disabled`);
+  assert.match(disabled, /visibility:hidden/);
+  assert.ok(
+    !/display:none/.test(disabled),
+    'a collapsed track moves the list under the pointer using the other control',
+  );
+  /* The two tracks are `auto` columns, so they cost nothing while the family
+     is not overflowing and the bindings draw no control at all. */
+  assert.match(rule(ui), /grid-template-columns:auto minmax\(0,1fr\) auto auto/);
+});
+
+/**
  * The box overhangs the mark on every side, so a box set flush against the
  * label leaves a hole where the overhang is. Both margins take the overhang
  * back, which puts the mark one inner gap from the last letter and the tab's

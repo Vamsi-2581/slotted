@@ -230,17 +230,32 @@ test('counts in figures of one width', () => {
  * `translate` has no logical form, so the inline half of the overhang is
  * multiplied by the direction the frame is read in. Which corner and how far in
  * from it stay logical and mirror on their own.
+ *
+ * The page's own correction is inside the multiplied half rather than beside
+ * it: a badge nudged two pixels into its host has to stay two pixels into it in
+ * a mirrored document (BD1).
  */
 test('mirrors the frame instead of shipping a second stylesheet', () => {
   assert.ok(rule(`${anchor}:dir(rtl)`).includes('--_dir:-1'));
   assert.ok(
     rule(`${anchor} > ${root}`).includes(
-      'translate:calc(var(--_overhang-inline) * var(--_dir)) var(--_overhang-block)',
+      'translate:calc((var(--_overhang-inline) + var(--_offset-inline)) * var(--_dir))' +
+        ' calc(var(--_overhang-block) + var(--_offset-block))',
     ),
   );
   for (const physical of ['top:', 'right:', 'bottom:', 'left:']) {
     assert.ok(!normalized.includes(`;${physical}`), `the frame states ${physical}`);
   }
+});
+
+/**
+ * The two the page states, and the two the sheet reads. Both default to nought,
+ * so the frame that says nothing is the frame this family shipped before (BD1).
+ */
+test('takes the correction of the corner from a token on each axis', () => {
+  const frame = rule(anchor);
+  assert.ok(frame.includes('--_offset-inline:var(--slotted-badge-anchor-offset-x,0px)'));
+  assert.ok(frame.includes('--_offset-block:var(--slotted-badge-anchor-offset-y,0px)'));
 });
 
 /** A badge over a card, a toolbar or a coloured row is not on the page's ground. */

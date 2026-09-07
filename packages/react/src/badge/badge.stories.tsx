@@ -5,6 +5,7 @@ import { Bell, Check, ChevronDown } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { useId } from 'react';
 
+import { Avatar } from '../avatar';
 import { Button, IconButton } from '../button';
 import { Inline } from '../inline';
 import { Heading, Text } from '../typography';
@@ -337,6 +338,33 @@ export const Anchored: Story = {
                 AL
               </span>
               <Badge count={140} size="sm" tone="danger" variant="solid">
+                <VisuallyHidden>unread messages</VisuallyHidden>
+              </Badge>
+            </BadgeAnchor>
+          </div>
+        </div>
+      </section>
+      <section className="slotted-demo-scene">
+        <header className="slotted-demo-scene__header">
+          <span className="slotted-demo-scene__label">A corner the page corrects</span>
+          <span className="slotted-demo-scene__note">
+            <code>offset</code> moves the badge off the computed corner, in pixels. <code>x</code>{' '}
+            runs along the inline axis, so the correction mirrors with the document.
+          </span>
+        </header>
+        <div className="slotted-demo-stage">
+          <div className="slotted-demo-row" style={{ gap: 'var(--slotted-space-10)' }}>
+            <BadgeAnchor offset={{ x: -2, y: 2 }} overlap="circle">
+              <Avatar name="Ada Lovelace" size="lg" />
+              <Badge shape="dot" size="sm" tone="success" variant="solid">
+                <VisuallyHidden>Online</VisuallyHidden>
+              </Badge>
+            </BadgeAnchor>
+            <BadgeAnchor offset={{ x: 0, y: 0 }}>
+              <IconButton aria-label="Notifications" tone="secondary" variant="outline">
+                {BELL}
+              </IconButton>
+              <Badge count={4} size="sm" tone="danger" variant="solid">
                 <VisuallyHidden>unread messages</VisuallyHidden>
               </Badge>
             </BadgeAnchor>

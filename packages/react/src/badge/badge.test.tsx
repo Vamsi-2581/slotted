@@ -190,6 +190,25 @@ describe('Badge', () => {
       expect(screen.getByTestId('anchor')).toHaveAttribute('data-placement', 'bottom-start');
       expect(screen.getByTestId('anchor')).toHaveAttribute('data-overlap', 'circle');
     });
+
+    it('writes the correction of the corner as the two properties the sheet reads', () => {
+      render(<BadgeAnchor data-testid="anchor" offset={{ x: -2, y: 2 }} />);
+
+      const anchor = screen.getByTestId('anchor');
+      expect(anchor.style.getPropertyValue('--slotted-badge-anchor-offset-x')).toBe('-2px');
+      expect(anchor.style.getPropertyValue('--slotted-badge-anchor-offset-y')).toBe('2px');
+    });
+
+    /* An axis nobody stated is left to the sheet's own nought, and a style the
+       page wrote itself survives beside the correction. */
+    it('states only the axis it was given, and keeps the style it was handed', () => {
+      render(<BadgeAnchor data-testid="anchor" offset={{ y: 4 }} style={{ display: 'block' }} />);
+
+      const anchor = screen.getByTestId('anchor');
+      expect(anchor.style.getPropertyValue('--slotted-badge-anchor-offset-x')).toBe('');
+      expect(anchor.style.getPropertyValue('--slotted-badge-anchor-offset-y')).toBe('4px');
+      expect(anchor.style.display).toBe('block');
+    });
   });
 
   describe('the element', () => {

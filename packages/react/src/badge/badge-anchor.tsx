@@ -1,4 +1,19 @@
+import type { CSSProperties } from 'react';
+
 import type { BadgeAnchorProps, BadgeAnchorRootProps } from './badge.types';
+
+/**
+ * The correction, as the two custom properties the stylesheet reads. An axis
+ * the page did not state is left out rather than written as nought, so the
+ * frame's own default is what answers and a theme that moves it still wins.
+ */
+function offsetStyle(offset: BadgeAnchorProps['offset']): CSSProperties | undefined {
+  if (offset === undefined) return undefined;
+  const style: Record<string, string> = {};
+  if (offset.x !== undefined) style['--slotted-badge-anchor-offset-x'] = `${offset.x}px`;
+  if (offset.y !== undefined) style['--slotted-badge-anchor-offset-y'] = `${offset.y}px`;
+  return style as CSSProperties;
+}
 
 /**
  * The frame that places a badge on the corner of something else. It wraps the
@@ -14,17 +29,25 @@ import type { BadgeAnchorProps, BadgeAnchorRootProps } from './badge.types';
  * The badge is the anchor's last child, after the host it sits on.
  */
 export function BadgeAnchor({
+  offset,
   overlap = 'rectangle',
   placement = 'top-end',
   render,
+  style,
   ...nativeProps
 }: BadgeAnchorProps) {
+  const correction = offsetStyle(offset);
   const rootProps: BadgeAnchorRootProps = {
     ...nativeProps,
     'data-overlap': overlap,
     'data-part': 'anchor',
     'data-placement': placement,
     'data-ui': 'badge',
+    /* The consumer's own style is spread first: a page that writes the two
+       properties by hand keeps them, and `offset` is the named way to do it. */
+    ...(correction === undefined && style === undefined
+      ? {}
+      : { style: { ...style, ...correction } }),
   };
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);

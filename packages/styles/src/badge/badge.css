@@ -361,6 +361,21 @@
        corner itself; a circle's corner is empty, so the badge moves in far
        enough to meet the curve. */
     --_anchor-inset: 0%;
+    /**
+     * The correction the frame cannot compute. `overlap` has two values and
+     * hosts have many: how far a badge should sit into one depends on that
+     * host's own curve, shadow and optical weight, and the last pixel or two is
+     * the page's to state (BD1). Nought on both axes, so a frame that says
+     * nothing places the badge exactly where the overhang put it.
+     *
+     * The inline correction is multiplied by the direction below, with the
+     * overhang it corrects: a badge nudged two pixels into its host stays two
+     * pixels into it in a mirrored document, rather than jumping to the far
+     * side of the corner. The block correction has no such axis and is used as
+     * it is written.
+     */
+    --_offset-inline: var(--slotted-badge-anchor-offset-x, 0px);
+    --_offset-block: var(--slotted-badge-anchor-offset-y, 0px);
 
     display: inline-flex;
     position: relative;
@@ -397,7 +412,8 @@
        is the one badge with nothing to be clipped by. */
     max-inline-size: none;
     position: absolute;
-    translate: calc(var(--_overhang-inline) * var(--_dir)) var(--_overhang-block);
+    translate: calc((var(--_overhang-inline) + var(--_offset-inline)) * var(--_dir))
+      calc(var(--_overhang-block) + var(--_offset-block));
     z-index: 1;
   }
 

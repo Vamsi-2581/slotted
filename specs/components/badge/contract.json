@@ -22,6 +22,7 @@
         "live": "off",
         "placement": "top-end",
         "overlap": "rectangle",
+        "offset": "{ x: 0, y: 0 }",
         "max": 99,
         "showZero": false
       },

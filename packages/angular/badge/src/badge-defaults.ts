@@ -19,6 +19,19 @@ export type BadgePlacement = 'top-end' | 'top-start' | 'bottom-end' | 'bottom-st
 /** The shape of the host, which decides how far in from the corner to sit. */
 export type BadgeOverlap = 'rectangle' | 'circle';
 
+/**
+ * The page's own correction of the corner, in CSS pixels.
+ *
+ * `x` runs along the inline axis, from the leading edge towards the trailing
+ * one, so it mirrors with the document: a badge moved two pixels back along it
+ * keeps the same relation to its host in a right-to-left page. `y` runs down
+ * the block axis. Both default to nought.
+ */
+export interface BadgeOffset {
+  x?: number | undefined;
+  y?: number | undefined;
+}
+
 export interface BadgeDefaults {
   /** BCP 47. Absent, the runtime's own default writes the digits. */
   locale: string | undefined;

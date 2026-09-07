@@ -106,6 +106,13 @@ export const ANGULAR_BADGE_DOCS = {
         "The host's shape, which decides how far in from the corner the badge starts",
       ],
       [
+        'offset',
+        '{ x?: number; y?: number }',
+        '{ x: 0, y: 0 }',
+        'slBadgeAnchor',
+        'Moves the badge off the computed corner, in pixels. x runs along the inline axis and mirrors with the document',
+      ],
+      [
         'exportAs',
         'slBadge | slBadgeStart | slBadgeEnd | slBadgeAnchor',
         '—',

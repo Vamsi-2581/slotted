@@ -56,6 +56,18 @@ test('reserves the frame that places a badge on another element', () => {
   assert.equal(contract.members.badge.defaults.overlap, 'rectangle');
 });
 
+/**
+ * The corner is a decision the family takes and the last pixel or two is one it
+ * cannot: how far a badge sits into a host depends on the host's own curve,
+ * shadow and optical weight, and `overlap` has two values where hosts have
+ * many. The offset is the correction, in pixels, of the overhang the frame
+ * computes — nought on both axes, so a badge that states nothing is placed
+ * exactly where it was before (BD1).
+ */
+test('lets the page correct the corner it is placed on, by a stated number of pixels', () => {
+  assert.equal(contract.members.badge.defaults.offset, '{ x: 0, y: 0 }');
+});
+
 /** Phrasing content: a badge has to be legal inside a heading, a cell or a label. */
 test('renders the element that claims nothing and fits anywhere text fits', () => {
   assert.equal(contract.members.badge.nativeElement, 'span');

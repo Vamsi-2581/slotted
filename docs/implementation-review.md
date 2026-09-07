@@ -173,7 +173,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Badge
 
-- [ ] **BD1 — Offset configurável quando ancorado.** Esperado: tokens `--slotted-badge-anchor-offset-x` e `--slotted-badge-anchor-offset-y` (padrão `0`) aplicados via `translate` no modo ancorado. Expor como prop `offset` (`{ x, y }` em px) no contrato (`specs/components/badge/contract.json`) para React e Angular. Story demonstrando badge sobre `Avatar` circular com offset `{ x: -2, y: 2 }` e sobre `IconButton` quadrado com offset `0`.
+- [x] **BD1 — Offset configurável quando ancorado.** Esperado: tokens `--slotted-badge-anchor-offset-x` e `--slotted-badge-anchor-offset-y` (padrão `0`) aplicados via `translate` no modo ancorado. Expor como prop `offset` (`{ x, y }` em px) no contrato (`specs/components/badge/contract.json`) para React e Angular. Story demonstrando badge sobre `Avatar` circular com offset `{ x: -2, y: 2 }` e sobre `IconButton` quadrado com offset `0`.
 
 ---
 

@@ -5,6 +5,7 @@ export { BADGE_DEFAULTS, injectBadgeDefaults, provideBadgeDefaults } from './bad
 export type {
   BadgeDefaults,
   BadgeLive,
+  BadgeOffset,
   BadgeOverlap,
   BadgePlacement,
   BadgeShape,

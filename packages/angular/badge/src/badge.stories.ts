@@ -5,6 +5,7 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
+import { SlAvatar } from '../../avatar/src/avatar';
 import { SlButton } from '../../button/src/button';
 import { SlIconButton } from '../../button/src/icon-button';
 import { SlInline } from '../../inline/src/inline';
@@ -62,6 +63,7 @@ const scene = (label: string, note: string, body: string) => `
 
 const IMPORTS = [
   NgIcon,
+  SlAvatar,
   SlBadge,
   SlBadgeAnchor,
   SlBadgeEnd,
@@ -286,6 +288,22 @@ export const Anchored: Story = {
       <span slBadgeAnchor overlap="circle">
         <span aria-hidden="true" style="${AVATAR}">AL</span>
         <span slBadge tone="danger" variant="solid" size="sm" [count]="140"><span slVisuallyHidden>unread messages</span></span>
+      </span>
+    </div>`,
+  )}
+  ${scene(
+    'A corner the page corrects',
+    '<code>offset</code> moves the badge off the computed corner, in pixels. <code>x</code> runs along the inline axis, so the correction mirrors with the document.',
+    `<div class="slotted-demo-row" style="gap: var(--slotted-space-10)">
+      <span slBadgeAnchor overlap="circle" [offset]="{ x: -2, y: 2 }">
+        <span slAvatar name="Ada Lovelace" size="lg"></span>
+        <span slBadge tone="success" variant="solid" size="sm" shape="dot"><span slVisuallyHidden>Online</span></span>
+      </span>
+      <span slBadgeAnchor [offset]="{ x: 0, y: 0 }">
+        <button slIconButton type="button" tone="secondary" variant="outline" aria-label="Notifications">
+          <ng-icon name="lucideBell" aria-hidden="true"></ng-icon>
+        </button>
+        <span slBadge tone="danger" variant="solid" size="sm" [count]="4"><span slVisuallyHidden>unread messages</span></span>
       </span>
     </div>`,
   )}

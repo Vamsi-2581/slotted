@@ -1,4 +1,6 @@
 [
+  "--slotted-badge-anchor-offset-x",
+  "--slotted-badge-anchor-offset-y",
   "--slotted-badge-border-width",
   "--slotted-badge-dot-border-color",
   "--slotted-badge-font-family",

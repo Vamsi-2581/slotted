@@ -7,6 +7,7 @@ import { SlVisuallyHidden } from '@slotted/angular/visually-hidden';
 import { SlBadge } from './badge';
 import type { BadgeShape, BadgeTone } from './badge';
 import { SlBadgeAnchor } from './badge-anchor';
+import type { BadgeOffset } from './badge-defaults';
 import { SlBadgeEnd, SlBadgeStart } from './badge-content';
 import { provideBadgeDefaults } from './badge-defaults';
 
@@ -33,10 +34,16 @@ import { provideBadgeDefaults } from './badge-defaults';
       <span slBadge id="anchored" [count]="4"></span>
     </span>
 
+    <span slBadgeAnchor id="nudged" [offset]="offset()">
+      <button type="button">Inbox</button>
+      <span slBadge id="nudged-badge" [count]="4"></span>
+    </span>
+
     <a slBadge id="linked" href="#releases">v4.2.0</a>
   `,
 })
 class Host {
+  readonly offset = signal<BadgeOffset | undefined>({ x: -2, y: 2 });
   readonly tone = signal<BadgeTone | undefined>(undefined);
   readonly shape = signal<BadgeShape | undefined>(undefined);
   readonly count = signal<number | undefined>(8);
@@ -196,6 +203,24 @@ describe('SlBadge', () => {
       expect(byId('anchor').getAttribute('data-placement')).toBe('bottom-start');
       expect(byId('anchor').getAttribute('data-overlap')).toBe('circle');
       expect(byId('anchor').contains(byId('anchored'))).toBe(true);
+    });
+
+    it('writes the correction of the corner as the two properties the sheet reads', () => {
+      const { byId } = mount();
+
+      expect(byId('nudged').style.getPropertyValue('--slotted-badge-anchor-offset-x')).toBe('-2px');
+      expect(byId('nudged').style.getPropertyValue('--slotted-badge-anchor-offset-y')).toBe('2px');
+    });
+
+    /* An axis nobody stated is left to the sheet's own nought. */
+    it('states only the axis it was given', () => {
+      const { fixture, byId } = mount();
+
+      fixture.componentInstance.offset.set({ y: 4 });
+      fixture.detectChanges();
+
+      expect(byId('nudged').style.getPropertyValue('--slotted-badge-anchor-offset-x')).toBe('');
+      expect(byId('nudged').style.getPropertyValue('--slotted-badge-anchor-offset-y')).toBe('4px');
     });
   });
 });

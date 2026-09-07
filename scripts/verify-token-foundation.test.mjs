@@ -3,7 +3,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import { DEFAULT_STROKE_WIDTH, GLYPH_PREFIX, renderGlyph } from './generate-icon-glyphs.mjs';
+import {
+  DEFAULT_STROKE_WIDTH,
+  GLYPH_PREFIX,
+  lucideIcon,
+  renderGlyph,
+} from './generate-icon-glyphs.mjs';
+import { centringOffset, inkBox, VIEW_BOX } from './glyph-ink.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const contract = JSON.parse(readFileSync(join(ROOT, 'packages/tokens/src/contract.json'), 'utf8'));
@@ -155,6 +161,71 @@ test('draws every glyph from the Lucide icon its manifest names', () => {
       `${name} is not the Lucide "${glyphs[name].icon}" drawing; run node scripts/generate-icon-glyphs.mjs`,
     );
   }
+});
+
+/**
+ * The drawing is Lucide's; where it sits in the box is this repository's. A
+ * mask is centred on whatever consumes it, so a glyph framed for a set rather
+ * than for its own middle carries that framing into every family that draws
+ * it: `check` paints from y 4.5 to y 18.5 of its twenty-four units, half a
+ * unit above the middle, and the checkbox mark inherited 0.208 | 0.250 |
+ * 0.292px of it at the three size steps — the only thing CK6 could not take
+ * out of the sheet (CK9).
+ *
+ * The box is measured here rather than trusted from the generator, on two
+ * drawings whose ink is arithmetic anybody can repeat: a stroke of three
+ * around `M20 6 9 17l-5-5` with round caps, and a circle of radius ten under a
+ * stroke of two.
+ */
+test('measures the ink of a drawing, not the frame it was given', () => {
+  const check = inkBox(lucideIcon('check'), { paint: 'stroke', strokeWidth: 3 });
+  assert.deepEqual(
+    [check.minX, check.maxX, check.minY, check.maxY],
+    [2.5, 21.5, 4.5, 18.5],
+    'the check path runs (4, 6) to (20, 17) and the stroke grows it by 1.5',
+  );
+  const circle = inkBox(lucideIcon('circle'), { paint: 'stroke', strokeWidth: 2 });
+  assert.deepEqual([circle.minX, circle.maxX, circle.minY, circle.maxY], [1, 23, 1, 23]);
+});
+
+test('centres the ink of every glyph in the box the mask is drawn in', () => {
+  const declared = names((token) => token.name.startsWith(GLYPH_PREFIX));
+  const moved = [];
+  for (const name of declared) {
+    const entry = glyphs[name];
+    const node = lucideIcon(entry.icon);
+    const options = {
+      paint: entry.paint ?? 'stroke',
+      strokeWidth: entry['stroke-width'] ?? DEFAULT_STROKE_WIDTH,
+    };
+    const ink = inkBox(node, options);
+    const { dx, dy } = centringOffset(node, options);
+    for (const [axis, centre, offset] of [
+      ['x', (ink.minX + ink.maxX) / 2, dx],
+      ['y', (ink.minY + ink.maxY) / 2, dy],
+    ]) {
+      assert.ok(
+        Math.abs(centre + offset - VIEW_BOX / 2) <= 0.0005,
+        `${name} sits ${(centre + offset - VIEW_BOX / 2).toFixed(4)} off centre on ${axis}`,
+      );
+    }
+    /* A drawing already on the centre is emitted as Lucide wrote it. */
+    if (dx === 0 && dy === 0) {
+      assert.doesNotMatch(theme.base[name], /translate/, `${name} is moved by nothing`);
+    } else {
+      assert.match(
+        theme.base[name],
+        new RegExp(`transform='translate\\(${dx} ${dy}\\)'`),
+        `${name} does not carry the offset that centres it`,
+      );
+      moved.push(name);
+    }
+  }
+  assert.deepEqual(
+    moved,
+    ['--slotted-icon-check', '--slotted-icon-triangle-alert'],
+    'the glyphs Lucide did not frame on their own centre',
+  );
 });
 
 test('reads Lucide at the version the React stories draw with', () => {

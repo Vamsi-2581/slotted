@@ -22,6 +22,8 @@ import { pathToFileURL } from 'node:url';
 
 import { icons } from 'lucide';
 
+import { centringOffset } from './glyph-ink.mjs';
+
 export const GLYPH_PREFIX = '--slotted-icon-';
 export const DEFAULT_STROKE_WIDTH = 2;
 
@@ -68,6 +70,14 @@ function element(tag, attributes) {
  * One glyph as the theme states it. `paint` is `stroke` (Lucide's own
  * rendering, the default) or `fill`: the same geometry painted solid, for the
  * marks that stand in for a photograph or a dot rather than annotate a line.
+ *
+ * The drawing is Lucide's, and where it sits in the box is not. A mask is
+ * centred on whatever consumes it, so what has to be centred is the painted
+ * ink: Lucide frames each icon for the set, and `check` comes out half a unit
+ * above the middle of its own viewBox — 0.208 | 0.250 | 0.292px in a checkbox
+ * at the three size steps, which is the whole of what CK6 could not remove
+ * from the sheet (CK9). The children are therefore emitted unchanged, inside a
+ * group that moves them onto the centre when they are not already on it.
  */
 export function renderGlyph({
   icon,
@@ -89,9 +99,11 @@ export function renderGlyph({
           'stroke-linecap': 'round',
           'stroke-linejoin': 'round',
         };
-  const children = lucideIcon(icon)
-    .map(([tag, attributes]) => element(tag, attributes))
-    .join('');
+  const node = lucideIcon(icon);
+  const drawing = node.map(([tag, attributes]) => element(tag, attributes)).join('');
+  const { dx, dy } = centringOffset(node, { paint, strokeWidth });
+  const children =
+    dx === 0 && dy === 0 ? drawing : `<g transform='translate(${dx} ${dy})'>${drawing}</g>`;
   const svg = `<svg${Object.entries(root)
     .map(([key, value]) => ` ${key}='${value}'`)
     .join('')}>${children}</svg>`;

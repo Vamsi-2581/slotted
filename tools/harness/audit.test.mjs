@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   annotatesTheLine,
   collapsedElements,
+  explainedExcess,
   offAxisMarks,
   overflowingElements,
   turningExcess,
@@ -29,6 +30,7 @@ const child = (overrides) => ({
   tag: 'div',
   width: 420,
   stage: 446,
+  floor: null,
   boxes: 1,
   children: [],
   ...overrides,
@@ -105,6 +107,71 @@ test('judges what a box-less wrapper actually drew', () => {
   );
 });
 
+/**
+ * G12. A key of `kbd` stands between 23.8 and 37 pixels wide because a key is
+ * that wide — the whole of the `keys` scene is single caps — and the audit
+ * called every one of them a collapsed demonstration: 126 findings, the largest
+ * block left after G5, G7 and G10. The scene declares what it shows with
+ * `data-collapse-floor` on its `section` and the stage carries the number.
+ */
+test('believes a scene that declares how small its subject is', () => {
+  const key = child({
+    scene: 'keys · light · 420px · comfortable · ltr',
+    element: 'kbd[data-ui=kbd][data-part=root]',
+    tag: 'kbd',
+    width: 25.19,
+    floor: 20,
+  });
+  assert.deepEqual(collapsedElements([key]), []);
+});
+
+/**
+ * The declared floor is a floor and not an exemption: a key that lost its
+ * legend or its inset is a collapsed key, and the scene said where that is.
+ */
+test('still reports a subject that fell under the floor its scene declared', () => {
+  const crushed = child({
+    scene: 'keys · light · 420px · dense · ltr',
+    element: 'kbd[data-ui=kbd][data-part=root]',
+    tag: 'kbd',
+    width: 6,
+    floor: 20,
+  });
+  assert.deepEqual(
+    collapsedElements([crushed]).map((finding) => finding.width),
+    [6],
+  );
+});
+
+/**
+ * The floor the scene declared descends through a wrapper the layout does not
+ * see, because the wrapper is not the demonstration — its children are (TG1).
+ */
+test('carries the declared floor down to what the wrapper stood in for', () => {
+  const wrapper = child({
+    element: 'div[data-part=wrapper]',
+    width: 0,
+    boxes: 0,
+    floor: 20,
+    children: [child({ width: 25.19, element: 'kbd[data-ui=kbd][data-part=root]', floor: null })],
+  });
+  assert.deepEqual(collapsedElements([wrapper]), []);
+});
+
+/**
+ * A scene declaring nothing is judged by the floor the audit brought, which is
+ * what keeps the finding M3 was: a menu surface of eight commands standing
+ * 91px wide inside a 446px stage, in a family that declares no floor.
+ */
+test('keeps its own floor for a scene that declared none', () => {
+  const surface = child({
+    element: 'div[data-ui=menu][data-part=root]',
+    width: 91.33,
+    floor: null,
+  });
+  assert.equal(collapsedElements([surface]).length, 1);
+});
+
 test('takes a floor, for a page that has reason to want another one', () => {
   const small = child({ width: 91, element: 'div[data-ui=menu][data-part=root]' });
   assert.equal(collapsedElements([small]).length, 1);
@@ -126,6 +193,7 @@ const slot = (overrides) => ({
   scrollWidth: 17,
   clientWidth: 14,
   turning: 0,
+  placed: 0,
   ...overrides,
 });
 
@@ -184,6 +252,71 @@ test('keeps an overflow larger than the turn can account for', () => {
     overflowingElements([both]).map((finding) => finding.width),
     [40],
   );
+});
+
+/**
+ * G13. `[data-part='bubble']` is 39 pixels wide over a 16-pixel thumb because
+ * the thumb declared itself its containing block and hung the read-out there,
+ * and the same pixels were counted again at the track, the control, the root
+ * and the stack: 693 of the 894 findings that survived G10 were this one
+ * read-out. Placement is where the stylesheet said a box goes.
+ */
+test('withdraws an overflow that fits inside what a placed descendant hangs', () => {
+  const thumb = slot({
+    scene: 'origin · light · 420px · comfortable · ltr',
+    element: 'div[data-part=thumb]',
+    scrollWidth: 33,
+    clientWidth: 16,
+    placed: 16.68,
+  });
+  assert.deepEqual(overflowingElements([thumb]), []);
+});
+
+/**
+ * The withdrawal is the size of the placement, not the presence of one: a box
+ * holding both a read-out and something genuinely too wide keeps its finding.
+ */
+test('keeps an overflow larger than the placement can account for', () => {
+  const both = slot({
+    element: 'div[data-part=thumb]',
+    scrollWidth: 90,
+    clientWidth: 16,
+    placed: 16.68,
+  });
+  assert.deepEqual(
+    overflowingElements([both]).map((finding) => finding.width),
+    [90],
+  );
+});
+
+/**
+ * A box that placed nothing out of flow explains nothing. `[data-part='control']`
+ * of `slider` is `inline-size: 100%` with `box-sizing: content-box` and a
+ * thumb's worth of padding on each side, so it stands 260px wide inside a 240px
+ * root — in flow, past the end edge, in every scene and at every width — and
+ * that is the finding this rule exists to keep.
+ */
+test('keeps an overflow that no placement and no turn explains', () => {
+  const band = slot({
+    scene: 'default · light · 240px · comfortable · ltr',
+    element: 'div[data-part=control]',
+    scrollWidth: 260,
+    clientWidth: 240,
+  });
+  assert.deepEqual(
+    overflowingElements([band]).map((finding) => finding.width),
+    [260],
+  );
+});
+
+/**
+ * One explanation for one set of pixels: a box with a spinner in one corner and
+ * a read-out over the other forgives whichever is larger, and reports past it.
+ */
+test('forgives the larger of a turn and a placement, never their sum', () => {
+  assert.equal(explainedExcess({ turning: 5.8, placed: 16.68 }), 16.68);
+  assert.equal(explainedExcess({ turning: 5.8 }), 5.8);
+  assert.equal(explainedExcess({}), 0);
 });
 
 test('takes a tolerance for the overflow it forgives', () => {

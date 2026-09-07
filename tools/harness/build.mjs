@@ -23,6 +23,11 @@ const IDENTIFIER = /data-ui=['"]([a-z0-9-]+)['"]/g;
  *
  * A scene may declare `data-fixed`, which the stage carries. See the page
  * stylesheet below for what it is and why an overlay family needs it.
+ *
+ * A scene may also declare `data-collapse-floor`, which the stage carries for
+ * the audit to read. See `tools/harness/audit.mjs` for what the floor is; the
+ * short of it is that a key of `kbd` is thirty pixels wide because a key is
+ * thirty pixels wide, and only the scene knows that (G12).
  */
 export function parseScenes(fragment) {
   const scenes = [];
@@ -43,10 +48,13 @@ export function parseScenes(fragment) {
     }
 
     if (end === -1) throw new Error(`the scene "${open[1]}" is never closed`);
+    const attributes = open[2] ?? '';
+    const floor = /data-collapse-floor="(\d+(?:\.\d+)?)"/.exec(attributes);
     scenes.push({
       name: open[1],
       markup: fragment.slice(start, end),
-      fixed: (open[2] ?? '').includes('data-fixed'),
+      fixed: attributes.includes('data-fixed'),
+      floor: floor === null ? null : Number(floor[1]),
     });
     SCENE_OPEN.lastIndex = end;
   }
@@ -126,7 +134,7 @@ export function renderHarness({
    * scene at the same size in the three schemes — which is also the comparison
    * a reviewer actually makes.
    */
-  const cells = scenes.flatMap(({ name, markup, fixed }) =>
+  const cells = scenes.flatMap(({ name, markup, fixed, floor }) =>
     WIDTHS.flatMap(
       (width) =>
         SCHEMES.map(
@@ -136,7 +144,9 @@ export function renderHarness({
         <div
           class="stage"
           id="${name}-${scheme}-${width}"
-          data-scene="${name}"${fixed ? '\n          data-fixed' : ''}
+          data-scene="${name}"${fixed ? '\n          data-fixed' : ''}${
+            typeof floor === 'number' ? `\n          data-collapse-floor="${floor}"` : ''
+          }
           data-slotted-scheme="${scheme}"
           style="inline-size: ${width}px"
         >${scopeControlNames(markup, `${scheme}-${width}`)}</div>

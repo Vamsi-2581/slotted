@@ -24,7 +24,16 @@ import { launch } from './shoot.mjs';
  * evaluated in Chrome is a rule nobody can put a case to.
  */
 
-/** Below this, an element is a sliver rather than a demonstration. */
+/**
+ * Below this, an element is a sliver rather than a demonstration.
+ *
+ * The number is a guess about what a demonstration is for, and one family
+ * demonstrates something smaller: a key of `kbd` stands 23.8 to 37 pixels wide
+ * because a key is that wide, and the audit reported a hundred and twenty-six
+ * of them (G12). A scene that shows something small by design says so with
+ * `data-collapse-floor` on its `section`, and the stage carries the number
+ * here.
+ */
 const COLLAPSE_FLOOR = 96;
 
 /** A stage narrower than this has no room to collapse anything meaningfully. */
@@ -85,17 +94,23 @@ export const UNRENDERED_TAGS = new Set([
  * does not see, so it measures nought however wide its content is, and the tag
  * group measured 0px in every scheme while the capture plainly showed the tags
  * (TG1). The walk descends through it and judges what it actually drew.
+ *
+ * **A scene may know better than the floor.** `node.floor` is what the scene
+ * declared, and it wins over the argument for that branch of the walk: a key of
+ * `kbd` is a demonstration at thirty pixels, and nothing outside the fragment
+ * can know it (G12).
  */
 export function collapsedElements(candidates, floor = COLLAPSE_FLOOR) {
   const found = [];
 
-  const visit = (node) => {
+  const visit = (node, inherited) => {
     if (UNRENDERED_TAGS.has(node.tag)) return;
+    const declared = node.floor ?? inherited;
     if (node.boxes === 0) {
-      for (const child of node.children ?? []) visit(child);
+      for (const child of node.children ?? []) visit(child, declared);
       return;
     }
-    if (node.width < floor) {
+    if (node.width < declared) {
       found.push({
         scene: node.scene,
         element: node.element,
@@ -105,7 +120,7 @@ export function collapsedElements(candidates, floor = COLLAPSE_FLOOR) {
     }
   };
 
-  for (const candidate of candidates) visit(candidate);
+  for (const candidate of candidates) visit(candidate, floor);
   return found;
 }
 
@@ -124,6 +139,20 @@ export function turningExcess({ width, height }) {
 }
 
 /**
+ * How much of an element's overflow something other than content explains: the
+ * larger of what a turning descendant adds (G10) and what a descendant hung
+ * outside the box on purpose adds (G13).
+ *
+ * Both are the size of one descendant rather than a sum, because each is one
+ * explanation for the same pixels. A box with a spinner in one corner and a
+ * read-out over the other keeps whichever excuse is larger and reports anything
+ * past it.
+ */
+export function explainedExcess({ turning = 0, placed = 0 }) {
+  return Math.max(turning, placed);
+}
+
+/**
  * The elements whose content ran outside them.
  *
  * A finding is withdrawn when the whole of it fits inside what a turning
@@ -132,11 +161,24 @@ export function turningExcess({ width, height }) {
  * halfway round. Overflow larger than that is content, and is still reported —
  * a slot holding both a spinner and something genuinely too wide keeps its
  * finding.
+ *
+ * The same withdrawal covers a descendant placed out of flow against a box
+ * inside this one: `[data-part='bubble']` is 39 pixels wide over a 16-pixel
+ * thumb because the thumb declared itself its containing block and hung it
+ * there, and 693 of the 894 surviving findings were that one read-out counted
+ * again at the thumb, the track, the control, the root and the stack (G13).
+ * Placement is the stylesheet's answer to where a box goes; overflow is the
+ * question of what did not fit. A panel positioned against something *outside*
+ * this element is not placement by anything in it, and still reports.
+ *
+ * The tolerance applies to the explanation as well as to nought, because
+ * `scrollWidth` is an integer over fractional boxes: a read-out hanging 16.68px
+ * off a 16px thumb reports 33 against 16, and one pixel of rounding is the
+ * whole of the difference.
  */
 export function overflowingElements(candidates, tolerance = OVERFLOW_TOLERANCE) {
   return candidates
-    .filter((node) => node.scrollWidth > node.clientWidth + tolerance)
-    .filter((node) => node.scrollWidth - node.clientWidth > (node.turning ?? 0))
+    .filter((node) => node.scrollWidth - node.clientWidth > explainedExcess(node) + tolerance)
     .map((node) => ({
       scene: node.scene,
       element: node.element,
@@ -205,15 +247,66 @@ const MEASURE = `(() => {
     return most;
   };
 
+  /**
+   * Whether an element is the containing block an out-of-flow descendant was
+   * placed against. An absolutely positioned box resolves against the nearest
+   * positioned ancestor; a fixed one against the viewport, unless an ancestor
+   * paints in a way that captures it — which is exactly what the harness stage
+   * does with \`contain: layout paint\` for an overlay scene.
+   */
+  const capturesFixed = (style) =>
+    (style.transform ?? 'none') !== 'none' ||
+    (style.filter ?? 'none') !== 'none' ||
+    (style.perspective ?? 'none') !== 'none' ||
+    /paint|layout|strict|content/.test(style.contain ?? '') ||
+    (style.willChange ?? 'auto').includes('transform');
+
+  const containingBlockOf = (node, position) => {
+    for (let parent = node.parentElement; parent !== null; parent = parent.parentElement) {
+      const style = getComputedStyle(parent);
+      if (position === 'absolute' && style.position !== 'static') return parent;
+      if (capturesFixed(style)) return parent;
+    }
+    return null;
+  };
+
+  /**
+   * How far past this element's padding box a descendant hangs *by placement*:
+   * the largest overhang, on the inline axis, among out-of-flow descendants
+   * whose containing block lies inside this element. A read-out hung on a thumb
+   * overhangs the thumb, and the same pixels overhang every box the thumb
+   * stands in, which is why the box that placed it is not the only one that has
+   * to forgive it (G13).
+   */
+  const placedExcessOf = (node) => {
+    const box = node.getBoundingClientRect();
+    const style = getComputedStyle(node);
+    const padStart = box.left + parseFloat(style.borderLeftWidth || '0');
+    const padEnd = box.right - parseFloat(style.borderRightWidth || '0');
+
+    let most = 0;
+    for (const child of node.querySelectorAll('*')) {
+      const position = getComputedStyle(child).position;
+      if (position !== 'absolute' && position !== 'fixed') continue;
+      const against = containingBlockOf(child, position);
+      if (against === null || !node.contains(against)) continue;
+      const rect = child.getBoundingClientRect();
+      const over = Math.max(rect.right - padEnd, padStart - rect.left, 0);
+      if (over > most) most = over;
+    }
+    return most;
+  };
+
   /** A stage child, and the children it stands in for when it has no box. */
-  const candidateOf = (node, stageWidth) => ({
+  const candidateOf = (node, stageWidth, floor) => ({
     scene: label(node),
     element: describe(node),
     tag: node.tagName.toLowerCase(),
     width: node.getBoundingClientRect().width,
     stage: stageWidth,
+    floor,
     boxes: node.getClientRects().length,
-    children: [...node.children].map((child) => candidateOf(child, stageWidth)),
+    children: [...node.children].map((child) => candidateOf(child, stageWidth, floor)),
   });
 
   const candidates = [];
@@ -223,7 +316,12 @@ const MEASURE = `(() => {
     const stageWidth = stage.getBoundingClientRect().width;
     if (stageWidth < ${STAGE_MINIMUM}) continue;
 
-    for (const child of stage.children) candidates.push(candidateOf(child, stageWidth));
+    /* What the scene declared about how small its subject may legitimately be.
+       Absent, the audit's own floor decides (G12). */
+    const declared = (stage.dataset.collapseFloor ?? '').trim();
+    const floor = declared === '' || !Number.isFinite(Number(declared)) ? null : Number(declared);
+
+    for (const child of stage.children) candidates.push(candidateOf(child, stageWidth, floor));
 
     if (stage.scrollWidth > stage.clientWidth) {
       overflow.push({
@@ -232,6 +330,7 @@ const MEASURE = `(() => {
         scrollWidth: stage.scrollWidth,
         clientWidth: stage.clientWidth,
         turning: turningExcessOf(stage),
+        placed: placedExcessOf(stage),
       });
     }
   }
@@ -245,6 +344,7 @@ const MEASURE = `(() => {
       scrollWidth: node.scrollWidth,
       clientWidth: node.clientWidth,
       turning: turningExcessOf(node),
+      placed: placedExcessOf(node),
     });
   }
 

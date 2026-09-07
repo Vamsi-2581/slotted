@@ -366,6 +366,33 @@ test('leaves a scene that does not ask for containment untouched by it', () => {
   );
 });
 
+/**
+ * G12. The audit takes 96px for the width under which a stage child is a sliver
+ * rather than a demonstration, and one family demonstrates something smaller: a
+ * key of `kbd` is 23.8 to 37 pixels wide because a key is that wide, and 126
+ * findings said so. Only the scene knows, so the scene says it and the stage
+ * carries the number to the audit.
+ */
+test('carries the floor a scene declares for how small its subject may be', () => {
+  const html = renderHarness({
+    family: 'demo',
+    fragment: '<section data-scene="keys" data-collapse-floor="20"><b>K</b></section>',
+    familyCss: '',
+    themeCss: '',
+  });
+
+  assert.match(html, /data-scene="keys"\s+data-collapse-floor="20"/);
+  assert.equal(
+    parseScenes('<section data-scene="keys" data-collapse-floor="20"><b>x</b></section>')[0].floor,
+    20,
+  );
+});
+
+test('leaves a scene that declared no floor to the one the audit brought', () => {
+  assert.doesNotMatch(render(), /data-collapse-floor/);
+  assert.equal(parseScenes('<section data-scene="a"><b>x</b></section>')[0].floor, null);
+});
+
 test('photographs the page once, at the scale the emulation already set', () => {
   const clip = captureClip({ width: '420', contentHeight: 553 });
   assert.equal(clip.scale, 1, 'a second scale factor repeats the top of the page below the fold');

@@ -7,7 +7,15 @@
   one resolution, and the caps inside it are already resolved.
 -->
 
-<section data-scene="keys">
+<!--
+  A key stands on its own in the three scenes below, and a key is small: the
+  narrowest one this family draws measures 23.8px at `dense` and 25.19px at
+  `comfortable`, against the 96px the audit takes for the width under which a
+  stage child is a sliver rather than a demonstration. The floor these scenes
+  declare is 20px — under every key the family draws, over a cap that lost its
+  legend or its inset — so a key that actually collapsed still reports (G12).
+-->
+<section data-scene="keys" data-collapse-floor="20">
   <!-- One key at a time. `Esc` is a word, `⌘` is a symbol with a hidden word
        behind it, `K` is a letter that needs none, and `↑` is a glyph that does. -->
   <kbd data-ui="kbd" data-part="root" data-key="escape" data-size="md" data-variant="raised">
@@ -56,7 +64,7 @@
   </kbd>
 </section>
 
-<section data-scene="descender">
+<section data-scene="descender" data-collapse-floor="20">
   <!-- The reason `text-box` is here. `K` has neither an ascender below the cap
        nor a descender; `Página` has both a tall diacritic and a tail; `⌘` and
        `↑` sit outside a box trimmed to the cap and the baseline. All five have
@@ -229,7 +237,7 @@
   </div>
 </section>
 
-<section data-scene="sizes">
+<section data-scene="sizes" data-collapse-floor="20">
   <!-- Three absolute steps, and the relative one beside the type it belongs to. -->
   <kbd data-ui="kbd" data-part="root" data-key="escape" data-size="sm" data-variant="raised">
     <span data-part="legend" aria-hidden="true">Esc</span><span data-part="name">Escape</span>

@@ -1,4 +1,4 @@
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
@@ -117,7 +117,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   parameters: scenario('playground'),
-  render: () => (
+  render: (_args, context) => (
     <Grid>
       <Scene
         label="Press, and the panel takes the focus"
@@ -125,7 +125,7 @@ export const Playground: Story = {
       >
         <Viewport>
           <Panel
-            defaultOpen
+            defaultOpen={isolated(context)}
             body="Unpaid, overdue and disputed invoices issued in the last quarter."
             description="Applies to the current view only."
             footer={
@@ -148,7 +148,7 @@ export const Playground: Story = {
 
 export const Sizes: Story = {
   parameters: scenario('sizes'),
-  render: () => (
+  render: (_args, context) => (
     <Grid columns={2}>
       <Scene
         label="Small — sixteen rems"
@@ -156,7 +156,7 @@ export const Sizes: Story = {
       >
         <Viewport>
           <Panel
-            defaultOpen
+            defaultOpen={isolated(context)}
             body="The tighter inset and the medium type step."
             size="sm"
             title="Small"
@@ -170,7 +170,12 @@ export const Sizes: Story = {
         note="The step every popover starts at, and the one the provider changes when a product wants another."
       >
         <Viewport>
-          <Panel defaultOpen body="The step every popover starts at." size="md" title="Medium">
+          <Panel
+            defaultOpen={isolated(context)}
+            body="The step every popover starts at."
+            size="md"
+            title="Medium"
+          >
             Medium
           </Panel>
         </Viewport>
@@ -182,7 +187,7 @@ export const Sizes: Story = {
         <Viewport>
           <Panel
             body="For a panel that holds a form rather than a sentence."
-            defaultOpen
+            defaultOpen={isolated(context)}
             size="lg"
             title="Large"
           >
@@ -264,14 +269,14 @@ export const Placement: Story = {
 
 export const Anchor: Story = {
   parameters: scenario('anchor'),
-  render: () => (
+  render: (_args, context) => (
     <Grid>
       <Scene
         label="The panel hangs off the row, not off the button"
         note="The button only opens it; the anchor is what it points at and is measured for. Nothing at all is written on the anchor element."
       >
         <Viewport>
-          <Popover align="end" defaultOpen portal={false} side="bottom">
+          <Popover align="end" defaultOpen={isolated(context)} portal={false} side="bottom">
             <PopoverAnchor>
               <div className="slotted-demo-rows">
                 <span>Invoice 2026-014</span>
@@ -424,7 +429,7 @@ export const Dismissal: Story = {
 
 export const Scrolling: Story = {
   parameters: scenario('scrolling'),
-  render: () => (
+  render: (_args, context) => (
     <Grid>
       <Scene
         label="The body is the only part that scrolls"
@@ -432,7 +437,7 @@ export const Scrolling: Story = {
       >
         <Viewport>
           <Panel
-            defaultOpen
+            defaultOpen={isolated(context)}
             body={
               <>
                 <p>Send me an email when an invoice is issued.</p>
@@ -496,14 +501,14 @@ export const Composition: Story = {
 
 export const Nested: Story = {
   parameters: scenario('nested'),
-  render: () => (
+  render: (_args, context) => (
     <Grid>
       <Scene
         label="A tooltip on a control inside the panel"
         note="Two layers at once. The tooltip is created later, so it takes a greater depth in the single stack: it draws above the panel and Escape reaches it first, closing it and leaving the panel open."
       >
         <Viewport>
-          <Popover defaultOpen portal={false} side="bottom">
+          <Popover defaultOpen={isolated(context)} portal={false} side="bottom">
             <PopoverTrigger
               render={(props) => (
                 <Button {...props} tone="secondary" variant="outline">

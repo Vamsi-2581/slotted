@@ -1,4 +1,4 @@
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactNode } from 'react';
@@ -123,9 +123,9 @@ export const Playground: Story = {
     width: 'anchor',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
-  render: (args) => (
+  render: (args, context) => (
     <Viewport>
-      <Basic {...args} defaultOpen />
+      <Basic {...args} defaultOpen={isolated(context)} />
     </Viewport>
   ),
 };
@@ -172,9 +172,14 @@ export const Placeholder: Story = {
 
 export const Groups: Story = {
   parameters: scenario('groups'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Select defaultOpen defaultValue="raspberry" portal={false} width="content">
+      <Select
+        defaultOpen={isolated(context)}
+        defaultValue="raspberry"
+        portal={false}
+        width="content"
+      >
         <SelectTrigger aria-label="Produce">
           <SelectValue placeholder="Choose produce" />
         </SelectTrigger>
@@ -200,9 +205,15 @@ export const Groups: Story = {
 
 export const Multiple: Story = {
   parameters: scenario('multiple'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Select clearable defaultOpen defaultValue={['apple', 'cherry']} multiple portal={false}>
+      <Select
+        clearable
+        defaultOpen={isolated(context)}
+        defaultValue={['apple', 'cherry']}
+        multiple
+        portal={false}
+      >
         <SelectTrigger aria-label="Fruit">
           <SelectValue placeholder="Choose fruit" />
         </SelectTrigger>
@@ -270,14 +281,14 @@ export const States: Story = {
 
 export const LoadingAndEmpty: Story = {
   parameters: scenario('loading-and-empty'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="Loading"
         note="The row keeps the popup's measure, so nothing jumps when the options land."
       >
         <Viewport>
-          <Select defaultOpen loading portal={false}>
+          <Select defaultOpen={isolated(context)} loading portal={false}>
             <SelectTrigger aria-label="Teams">
               <SelectValue placeholder="Choose a team" />
             </SelectTrigger>
@@ -287,7 +298,7 @@ export const LoadingAndEmpty: Story = {
       </Scene>
       <Scene label="Empty" note="The popup opens onto a sentence rather than onto a two-pixel box.">
         <Viewport>
-          <Select defaultOpen portal={false}>
+          <Select defaultOpen={isolated(context)} portal={false}>
             <SelectTrigger aria-label="Teams">
               <SelectValue placeholder="Choose a team" />
             </SelectTrigger>
@@ -301,9 +312,9 @@ export const LoadingAndEmpty: Story = {
 
 export const LongContent: Story = {
   parameters: scenario('long-content'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Select clearable defaultOpen defaultValue="urn" portal={false}>
+      <Select clearable defaultOpen={isolated(context)} defaultValue="urn" portal={false}>
         <SelectTrigger aria-label="Record">
           <SelectValue placeholder="Choose a record" />
         </SelectTrigger>
@@ -326,14 +337,14 @@ export const LongContent: Story = {
 
 export const Placement: Story = {
   parameters: scenario('placement'),
-  render: () => (
+  render: (_args, context) => (
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="As wide as the control"
         note="The default: the value and the labels share one edge."
       >
         <Viewport>
-          <Basic defaultOpen defaultValue="apple" width="anchor" />
+          <Basic defaultOpen={isolated(context)} defaultValue="apple" width="anchor" />
         </Viewport>
       </Scene>
       <Scene
@@ -341,7 +352,7 @@ export const Placement: Story = {
         note='width="content", for a list with descriptions that a field is too narrow for.'
       >
         <Viewport>
-          <Select align="end" defaultOpen portal={false} width="content">
+          <Select align="end" defaultOpen={isolated(context)} portal={false} width="content">
             <SelectTrigger aria-label="Fruit">
               <SelectValue placeholder="Choose a fruit" />
             </SelectTrigger>
@@ -362,9 +373,9 @@ export const Placement: Story = {
 
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
-  render: () => (
+  render: (_args, context) => (
     <Viewport size="tall">
-      <Basic defaultOpen defaultValue="cherry" />
+      <Basic defaultOpen={isolated(context)} defaultValue="cherry" />
     </Viewport>
   ),
 };

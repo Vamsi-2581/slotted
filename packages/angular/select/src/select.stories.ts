@@ -1,5 +1,5 @@
 import { SlField, SlFieldError, SlFieldLabel } from '@slotted/angular/field';
-import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
+import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
@@ -123,13 +123,13 @@ export const Playground: Story = {
     width: 'anchor',
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
-  render: (args) => ({
-    props: args,
+  render: (args, context) => ({
+    props: { ...args, pictured: isolated(context) },
     template: viewport(`
       <sl-select
         aria-label="Fruit"
         placeholder="Choose a fruit"
-        [open]="true"
+        [open]="pictured"
         [portal]="false"
         [align]="align"
         [clearable]="clearable"
@@ -189,10 +189,11 @@ export const Placeholder: Story = {
 
 export const Groups: Story = {
   parameters: scenario('groups'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
       `
-      <sl-select aria-label="Produce" placeholder="Choose produce" width="content" [open]="true" [portal]="false" [value]="'raspberry'">
+      <sl-select aria-label="Produce" placeholder="Choose produce" width="content" [open]="pictured" [portal]="false" [value]="'raspberry'">
         <sl-select-group label="Berries">
           <sl-select-item value="blueberry">Blueberry</sl-select-item>
           <sl-select-item value="raspberry" description="In season until September">Raspberry</sl-select-item>
@@ -211,11 +212,11 @@ export const Groups: Story = {
 
 export const Multiple: Story = {
   parameters: scenario('multiple'),
-  render: () => ({
-    props: { fruit: ['apple', 'cherry'] },
+  render: (_args, context) => ({
+    props: { pictured: isolated(context), fruit: ['apple', 'cherry'] },
     template: viewport(
       `
-      <sl-select aria-label="Fruit" placeholder="Choose fruit" clearable multiple [open]="true" [portal]="false" [(value)]="fruit">
+      <sl-select aria-label="Fruit" placeholder="Choose fruit" clearable multiple [open]="pictured" [portal]="false" [(value)]="fruit">
         <ng-template slSelectValue let-values>{{ values.length }} chosen</ng-template>
         ${FRUIT}
       </sl-select>
@@ -287,21 +288,22 @@ export const States: Story = {
 
 export const LoadingAndEmpty: Story = {
   parameters: scenario('loading-and-empty'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
           'Loading',
           "The row keeps the popup's measure, so nothing jumps when the options finally land in it.",
           viewport(
-            `<sl-select aria-label="Teams" placeholder="Choose a team" loadingLabel="Fetching teams…" [loading]="true" [open]="true" [portal]="false"></sl-select>`,
+            `<sl-select aria-label="Teams" placeholder="Choose a team" loadingLabel="Fetching teams…" [loading]="true" [open]="pictured" [portal]="false"></sl-select>`,
           ),
         )}
         ${scene(
           'Empty',
           'The popup opens onto a sentence rather than onto a two-pixel box the reader cannot read.',
           viewport(
-            `<sl-select aria-label="Teams" placeholder="Choose a team" emptyLabel="No teams yet" [open]="true" [portal]="false"></sl-select>`,
+            `<sl-select aria-label="Teams" placeholder="Choose a team" emptyLabel="No teams yet" [open]="pictured" [portal]="false"></sl-select>`,
           ),
         )}
       </div>
@@ -311,10 +313,11 @@ export const LoadingAndEmpty: Story = {
 
 export const LongContent: Story = {
   parameters: scenario('long-content'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
       `
-      <sl-select aria-label="Record" placeholder="Choose a record" clearable [open]="true" [portal]="false" [value]="'urn'">
+      <sl-select aria-label="Record" placeholder="Choose a record" clearable [open]="pictured" [portal]="false" [value]="'urn'">
         <sl-select-item value="urn">urn:acme:catalogue:9f2c41ab8de07c5511903fbe</sl-select-item>
         <sl-select-item value="fi" description="An option long enough to need a second line, and it stops there">
           Rekisteröintitunnus, pitkä ja käännetty, ja vielä pidempi kuin ensimmäinen
@@ -329,21 +332,22 @@ export const LongContent: Story = {
 
 export const Placement: Story = {
   parameters: scenario('placement'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: `
       <div class="slotted-demo-grid" data-columns="2">
         ${scene(
           'As wide as the control',
           'The default: the value in the control and the labels in the list share one edge.',
           viewport(
-            `<sl-select aria-label="Fruit" width="anchor" [open]="true" [portal]="false" [value]="'apple'">${FRUIT}</sl-select>`,
+            `<sl-select aria-label="Fruit" width="anchor" [open]="pictured" [portal]="false" [value]="'apple'">${FRUIT}</sl-select>`,
           ),
         )}
         ${scene(
           'As wide as its options',
           'width="content", for a list with descriptions that the field it fills is too narrow for.',
           viewport(
-            `<sl-select aria-label="Fruit" align="end" width="content" [open]="true" [portal]="false">
+            `<sl-select aria-label="Fruit" align="end" width="content" [open]="pictured" [portal]="false">
               <sl-select-item value="blueberry" description="Picked this morning, sold by the punnet">Blueberry</sl-select-item>
               <sl-select-item value="cherry" description="Sold by weight">Cherry</sl-select-item>
             </sl-select>`,
@@ -356,9 +360,10 @@ export const Placement: Story = {
 
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
-  render: () => ({
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
     template: viewport(
-      `<sl-select aria-label="Fruit" [open]="true" [portal]="false" [value]="'cherry'">${FRUIT}</sl-select>`,
+      `<sl-select aria-label="Fruit" [open]="pictured" [portal]="false" [value]="'cherry'">${FRUIT}</sl-select>`,
       'tall',
     ),
   }),

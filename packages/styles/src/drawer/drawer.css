@@ -224,14 +224,30 @@
       var(--_reveal);
   }
 
+  /**
+   * The step is what the drawer asks for; the column is what it gets. An
+   * `sm` drawer is eighteen rems, and in a two-hundred-and-forty-pixel layout
+   * that is the whole of the room and thirty-two pixels more — the content
+   * beside it was left with a column narrower than one of its own words.
+   * `max-inline-size` is the same clamp the overlay panel already carries as
+   * `min(…, 100%)`; it resolves wherever the consumer's column has a size to
+   * resolve against, and is inert where the column is sized by the drawer
+   * itself.
+   *
+   * It is written on `[data-open]` alone. Closing, the root's own measure runs
+   * to nought, and a cap against a box on its way to nought is what would
+   * rewrap the panel on the way out.
+   */
   [data-ui='drawer'][data-mode='inline'][data-open][data-side='start'],
   [data-ui='drawer'][data-mode='inline'][data-open][data-side='end'] {
     inline-size: var(--_extent);
+    max-inline-size: 100%;
   }
 
   [data-ui='drawer'][data-mode='inline'][data-open][data-side='top'],
   [data-ui='drawer'][data-mode='inline'][data-open][data-side='bottom'] {
     block-size: var(--_extent);
+    max-block-size: 100%;
   }
 
   /**
@@ -473,6 +489,23 @@
   [data-ui='drawer'][data-mode='inline'][data-side='top'] > [data-part='panel'],
   [data-ui='drawer'][data-mode='inline'][data-side='bottom'] > [data-part='panel'] {
     block-size: var(--_extent);
+  }
+
+  /**
+   * Open, the root is a settled measure and the panel takes it rather than the
+   * step it asked for: a root the column clamped would otherwise clip a panel
+   * that is still drawing itself at the full step, and a panel cut in half is
+   * a worse picture than one that wrapped. The cap is on `[data-open]` for the
+   * reason the root's is.
+   */
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='start'] > [data-part='panel'],
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='end'] > [data-part='panel'] {
+    max-inline-size: 100%;
+  }
+
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='top'] > [data-part='panel'],
+  [data-ui='drawer'][data-mode='inline'][data-open][data-side='bottom'] > [data-part='panel'] {
+    max-block-size: 100%;
   }
 
   /* ── The separator the reader moves ───────────────────────────────────── */

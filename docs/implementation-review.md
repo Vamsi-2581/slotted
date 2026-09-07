@@ -304,7 +304,7 @@ Localização: `packages/styles/src/drawer/drawer.css`.
   - Limites `minSize`/`maxSize` em px ou `%`. Duplo clique na alça restaura o tamanho padrão.
   - Teclado: alça focável, setas ajustam em passos de 16px, `Shift+seta` em 64px, `Home`/`End` vão aos limites.
   - Critério de aceite: arraste contínuo mantém ≥ 55 fps no profiler do Chrome com painel contendo 200 itens de lista.
-- [ ] **DR6 — Modo `inline` transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante DG3, sem alteração de layout: na cena `inline-open`, o `main` mede 94px dentro de 32px disponíveis nos três esquemas. Esperado: em largura estreita o conteúdo ao lado do painel inline não fica abaixo de zero de largura; o painel cede (`min-inline-size: 0` no `main` ou colapso do painel) e nada transborda o palco.
+- [x] **DR6 — Modo `inline` transborda o palco a 240px.** Observado por `tools/harness/audit.mjs` durante DG3, sem alteração de layout: na cena `inline-open`, o `main` mede 94px dentro de 32px disponíveis nos três esquemas. Esperado: em largura estreita o conteúdo ao lado do painel inline não fica abaixo de zero de largura; o painel cede (`min-inline-size: 0` no `main` ou colapso do painel) e nada transborda o palco.
 
 ---
 

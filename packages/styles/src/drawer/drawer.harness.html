@@ -189,7 +189,10 @@
   <div
     style="
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
+      /* A sidebar layout: the drawer's column is capped at its own step and
+         the content beside it keeps a floor, so at 240px the drawer cedes
+         rather than leaving the page a column narrower than one word. */
+      grid-template-columns: minmax(0, 18rem) minmax(6rem, 1fr);
       block-size: 320px;
       border: 1px solid var(--slotted-border-subtle);
       border-radius: var(--slotted-radius-md);

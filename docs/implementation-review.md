@@ -365,7 +365,7 @@ Localização: `packages/styles/src/listbox/listbox.css`.
 
 ## Slider
 
-- [ ] **SR1 — Borda da trilha preenchida.** Esperado: a trilha vazia tem borda de 1px em `--slotted-border-strong` (borda de input); a trilha preenchida (`[data-part='range']`) tem fundo `accent-solid` e borda de 1px em `accent-solid` (ou `border: none` com a trilha preenchida sobrepondo a borda da vazia por 1px em cada lado via `inset: -1px`). O polegar (`thumb`) sobrepõe as duas. Verificar em `packages/styles/src/slider/slider.css`.
+- [x] **SR1 — Borda da trilha preenchida.** Esperado: a trilha vazia tem borda de 1px em `--slotted-border-strong` (borda de input); a trilha preenchida (`[data-part='range']`) tem fundo `accent-solid` e borda de 1px em `accent-solid` (ou `border: none` com a trilha preenchida sobrepondo a borda da vazia por 1px em cada lado via `inset: -1px`). O polegar (`thumb`) sobrepõe as duas. Verificar em `packages/styles/src/slider/slider.css`.
 - [x] **SR2 — A banda transborda 20px da raiz.** Descoberto ao fechar G13, sem alteração de folha: `[data-part='control']` é `inline-size: 100%` com `box-sizing: content-box` e `padding-inline: calc(var(--_thumb-size) / 2)`, logo mede 260px dentro de uma raiz de 240px — 262px em `lg` — nas três larguras e em todas as cenas horizontais (`tools/harness/out/review-loop/g13/control-probe.txt`). A sobra atravessa `[data-ui='stack']` e `[data-ui='field']` até o palco, que rola 8px. É a única causa dos 279 achados que restam em `slider` depois de G13, e o maior bloco que sobra na varredura. Esperado: a banda cabe na raiz — `box-sizing: border-box` no `control`, ou o recuo do polegar fora da largura — e `tools/harness/audit.mjs` fecha `slider.html` em 0 achados nas três densidades.
 
 ---

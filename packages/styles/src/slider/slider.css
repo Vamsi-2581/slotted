@@ -282,21 +282,37 @@
    * `--_end` are two percentages rather than a length and an offset, so a
    * range fills between its thumbs and a slider with a centred origin fills
    * outward from the middle with the same two declarations.
+   *
+   * On the cross axis it is laid against the track's *border* box and not its
+   * padding box, which is one negative inset and the whole of SR1. An
+   * absolutely positioned box is placed inside the padding of its containing
+   * block, so a fill left at nought stopped a pixel short of each edge and the
+   * channel's own neutral line ran across the accent: on a track of six pixels
+   * the fill was four, with the edge painted over the top and the bottom of it.
+   * A filled scale is one solid band, and the rim belongs to the part of the
+   * scale that is still empty.
+   *
+   * The main axis keeps the padding box, so the two ends of the channel keep
+   * their rim: the fill runs from a percentage of the scale, and a fill that
+   * overhung there would leave a pixel of accent past the value at one end and
+   * cover the cap at the other.
    */
   [data-ui='slider'] [data-part='indicator'] {
+    --_edge-overlap: calc(var(--slotted-control-border-width, 1px) * -1);
+
     background-color: var(--slotted-slider-indicator-color, var(--slotted-tone-accent-solid));
     border-radius: inherit;
     position: absolute;
   }
 
   [data-ui='slider'][data-orientation='horizontal'] [data-part='indicator'] {
-    inset-block: 0;
+    inset-block: var(--_edge-overlap);
     inset-inline-start: calc(var(--_start, 0) * 1%);
     inline-size: calc((var(--_end, 0) - var(--_start, 0)) * 1%);
   }
 
   [data-ui='slider'][data-orientation='vertical'] [data-part='indicator'] {
-    inset-inline: 0;
+    inset-inline: var(--_edge-overlap);
     inset-block-end: calc(var(--_start, 0) * 1%);
     block-size: calc((var(--_end, 0) - var(--_start, 0)) * 1%);
   }

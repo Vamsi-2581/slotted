@@ -853,6 +853,17 @@
       background-color: CanvasText;
       opacity: 1;
     }
+
+    /*
+     * A masked glyph is painted with a background, and forced colours replace
+     * a background that is not one of the system's own colours: the mark goes
+     * and the box it sat in stays. `forced-color-adjust: none` keeps
+     * `currentcolor`, which is the host's ink, already forced to the right
+     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
+     */
+    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']::before {
+      forced-color-adjust: none;
+    }
   }
 
   /* ── Reduced motion ───────────────────────────────────────────────────

@@ -141,6 +141,9 @@ test('holds hover and press back for a control the browser has disabled', () => 
   for (const state of [':hover', ':active']) {
     const selectors = [...normalized.matchAll(/([^{}]+)\{/g)]
       .map(([, selector]) => selector)
+      /* `@media (forced-colors:active)` is a prelude, not a selector, and the
+       * word it ends on is the same one this test looks for. */
+      .filter((selector) => !selector.trimStart().startsWith('@'))
       .filter((selector) => selector.includes(state));
     assert.ok(selectors.length > 0, `nothing paints ${state}`);
     for (const selector of selectors) {

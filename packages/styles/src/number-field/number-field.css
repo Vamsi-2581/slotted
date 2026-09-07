@@ -219,6 +219,18 @@
     [data-ui='number-field'][data-part='root'][data-variant='plain'] {
       border-color: ButtonBorder;
     }
+
+    /*
+     * A masked glyph is painted with a background, and forced colours replace
+     * a background that is not one of the system's own colours: the mark goes
+     * and the box it sat in stays. `forced-color-adjust: none` keeps
+     * `currentcolor`, which is the host's ink, already forced to the right
+     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
+     */
+    [data-ui='number-field'] [data-part='increment']::before,
+    [data-ui='number-field'] [data-part='decrement']::before {
+      forced-color-adjust: none;
+    }
   }
 
   /* ── Adornments ───────────────────────────────────────────────────────

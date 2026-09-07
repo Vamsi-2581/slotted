@@ -211,18 +211,54 @@ test('draws the person from a glyph token, and only when there is nothing to wri
 });
 
 /**
- * WCAG 2.2 2.5.8. The overlay is out of flow and centred by auto margins rather
- * than by a translation, which has no logical form and would need the
- * document's direction read back into the sheet.
+ * WCAG 2.2 2.5.8. The overlay is out of flow and stated from all four edges at
+ * once, which is the only form of it that stays centred.
+ *
+ * A size with `margin: auto` was the first form, and it centres a box that
+ * fits. A box wider than the space it is placed in is over-constrained, and the
+ * engine then keeps the start margin and puts the whole difference on the end
+ * one: the 24-pixel target sat against the leading edge of a 20-pixel avatar
+ * and hung four pixels off the trailing one. `tools/harness/out/review-loop/
+ * av1/target.mjs` read the target as 22 × 22 at `compact` and 20 × 20 at
+ * `dense` — the box, not the target — because the two corners on the leading
+ * side answered no press (AV1).
  */
 test('grows the hit area of an interactive avatar to the target minimum', () => {
   const hit = rule(`${root}:any-link::after`);
-  assert.ok(hit.includes('inline-size:max(100%,var(--slotted-target-min'));
-  assert.ok(hit.includes('block-size:max(100%,var(--slotted-target-min'));
+  assert.ok(hit.includes('inset:min(0px,calc((100% - var(--slotted-target-min'));
   assert.ok(hit.includes('position:absolute'));
-  assert.ok(hit.includes('margin:auto'));
+  assert.ok(!hit.includes('margin:auto'), 'an over-constrained box is not centred by auto margins');
   for (const selector of [`button${ui}[data-part='root']::after`, `${root}[tabindex]::after`]) {
     assert.ok(selects(selector), `${selector} does not grow its hit area`);
+  }
+});
+
+/**
+ * The other half of AV1. The target hangs outside the box by design, and a box
+ * that lets content out is a different claim: `audit.mjs` withdraws an overflow
+ * finding against a box that states its content is clipped, and reports one
+ * against every box that does not.
+ *
+ * The margin is what keeps the clip off the target. `calc()` is rejected by
+ * this property in Chrome and computes to nought, so the length is written
+ * plain.
+ */
+test('clips the interactive box rather than letting the target read as content', () => {
+  for (const selector of [
+    `${root}:any-link`,
+    `button${ui}[data-part='root']`,
+    `${root}[tabindex]`,
+  ]) {
+    const interactive = rule(selector);
+    assert.ok(interactive.includes('overflow:clip'), `${selector} does not clip its content`);
+    assert.ok(
+      interactive.includes('overflow-clip-margin:var(--slotted-target-min'),
+      `${selector} clips its own target`,
+    );
+    assert.ok(
+      !/overflow-clip-margin:calc/.test(interactive),
+      'calc() in overflow-clip-margin computes to nought',
+    );
   }
 });
 

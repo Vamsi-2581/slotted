@@ -161,7 +161,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Avatar
 
-- [ ] **AV1 — Avatar interativo transborda a própria caixa em 4px.** Observado por `tools/harness/audit.mjs` durante G15, sem alteração de folha (reproduz byte a byte no HEAD anterior): na cena `interactive`, `a[data-ui='avatar'][data-part='root']` mede 24px dentro de 20px em `compact`, nos três esquemas e nas três larguras — 9 achados. Esperado: o alvo de 24px do avatar interativo vem de um pseudo-elemento transparente (a regra de R2), não do crescimento da própria caixa, e a caixa mede o tamanho que a densidade pede.
+- [x] **AV1 — Avatar interativo transborda a própria caixa em 4px.** Observado por `tools/harness/audit.mjs` durante G15, sem alteração de folha (reproduz byte a byte no HEAD anterior): na cena `interactive`, `a[data-ui='avatar'][data-part='root']` mede 24px dentro de 20px em `compact`, nos três esquemas e nas três larguras — 9 achados. Esperado: o alvo de 24px do avatar interativo vem de um pseudo-elemento transparente (a regra de R2), não do crescimento da própria caixa, e a caixa mede o tamanho que a densidade pede.
 
 ---
 

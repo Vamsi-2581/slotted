@@ -402,6 +402,26 @@
   button[data-ui='avatar'][data-part='root'],
   [data-ui='avatar'][data-part='root'][tabindex] {
     cursor: pointer;
+    /**
+     * The target below hangs outside the box on purpose. A box whose content
+     * can leave it is a different statement, and it is the one an avatar never
+     * makes: a face is cropped by its own edge, and the only thing standing
+     * outside the disc is a hit area that draws nothing. `clip` says so, and
+     * saying so is what separates the two — `tools/harness/audit.mjs` read the
+     * hit area as content leaving the box nine times per density at `dense`
+     * (AV1), which is the reading `visible` invites.
+     *
+     * The margin keeps the target painted and pressed: the clip shape is the
+     * padding box grown by this length, corner radii grown with it, so a
+     * circular avatar is clipped to a larger circle rather than to a square,
+     * and the corners of the 24-pixel square still answer a press. One target's
+     * length is more than any centred target can reach past a box — half is the
+     * exact figure — and the property takes a plain length: Chrome rejects
+     * `calc()` here, and a rejected value computes to nought, which clips the
+     * target to the face.
+     */
+    overflow: clip;
+    overflow-clip-margin: var(--slotted-target-min, 24px);
   }
 
   [data-ui='avatar'][data-part='root']:any-link:not([data-disabled]):hover,
@@ -423,10 +443,20 @@
   /**
    * WCAG 2.2 2.5.8: an interactive target is at least 24 by 24 CSS pixels, and
    * `--slotted-avatar-size-xs` is twenty at the two tighter densities. The
-   * overlay grows the hit area without moving anything: it is out of flow, it
-   * is centred by the auto margins rather than by a translation — which has no
-   * logical form and would need the document's direction to be read — and it is
-   * never larger than the box it belongs to when the box already passes.
+   * overlay grows the hit area without moving anything: it is out of flow, and
+   * it is never larger than the box it belongs to when the box already passes.
+   *
+   * One negative inset on all four sides, and not a size with `margin: auto`.
+   * Auto margins centre a box that fits; a box wider than the space it is
+   * placed in is over-constrained, and the rule the engine applies then is to
+   * keep the start margin and put the whole difference on the end one. So the
+   * 24-pixel target sat against the leading edge of a 20-pixel avatar and hung
+   * four pixels off the trailing one: half the target was outside the face on
+   * one side and the other half was missing on the other, which is what AV1
+   * measured as four pixels of overflow. `inset` states the same target from
+   * both edges at once, so it cannot be resolved to one side, and `min(0px, …)`
+   * makes it inert on every box that already reaches the minimum. It is the
+   * idiom `tag` and `breadcrumb` use for the same requirement.
    *
    * Fluent ships a 16-pixel avatar and Atlassian a 16- and a 20-pixel one, and
    * both accept a click on it as it stands.
@@ -434,11 +464,8 @@
   [data-ui='avatar'][data-part='root']:any-link::after,
   button[data-ui='avatar'][data-part='root']::after,
   [data-ui='avatar'][data-part='root'][tabindex]::after {
-    block-size: max(100%, var(--slotted-target-min, 24px));
     content: '';
-    inline-size: max(100%, var(--slotted-target-min, 24px));
-    inset: 0;
-    margin: auto;
+    inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
   }
 

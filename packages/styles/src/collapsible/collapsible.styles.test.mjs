@@ -82,6 +82,28 @@ test('draws the indicator from a glyph token rather than a character', () => {
 });
 
 /**
+ * CL1, and R5's rule for a mark beside a line of words. Spanning both rows and
+ * centred, the chevron sat 9.25 to 10.25px under the line it annotates wherever
+ * a description was written and 32px under it where the title wrapped to three
+ * lines — 87 findings across `collapsible` and `accordion`, which draws no
+ * indicator of its own and inherits this one.
+ *
+ * `1lh` resolves against the element's own line box, so the mark has to inherit
+ * the trigger's font and line-height for the margin to be half of *the title's*
+ * line; it states neither, which is what makes the arithmetic hold.
+ */
+test('sits the mark on the first line of the title, not on the middle of the trigger', () => {
+  const indicator = rule(
+    `${ui}>[data-part='header']>[data-part='trigger']>[data-part='indicator']`,
+  );
+  assert.match(indicator, /align-self:start/);
+  assert.match(indicator, /grid-row:1(?!\s*\/)/);
+  assert.match(indicator, /margin-block-start:calc\(\(1lh - var\(--_icon-size\)\) \/ 2\)/);
+  assert.ok(!/font-size:/.test(indicator), 'the mark sets a type size the line does not have');
+  assert.ok(!/line-height:/.test(indicator), 'the mark sets a line the title does not set');
+});
+
+/**
  * The mark turns rather than pointing along the inline axis, so a right-to-left
  * document needs no mirrored artwork at all.
  */

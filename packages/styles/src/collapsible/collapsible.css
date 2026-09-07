@@ -241,13 +241,26 @@
    * rotates between down and up is the same mark in every direction.
    */
   [data-ui='collapsible'] > [data-part='header'] > [data-part='trigger'] > [data-part='indicator'] {
-    align-self: center;
+    /**
+     * On the first line of the title, by R5, and not on the middle of what the
+     * trigger holds. Centred over both rows the mark stood 9.25 to 10.25 pixels
+     * under the line it annotates wherever a description was written, and 32
+     * pixels under it where the title wrapped to three lines — the disclosure's
+     * own version of what AL1 fixed in `alert` and SL7 in `select` (CL1).
+     *
+     * `1lh` resolves against *this* element's line box, and this element
+     * inherits the trigger's font and line-height, so the line it measures is
+     * the line the title sets. The mark keeps its own row: spanning both put it
+     * in a box the description made taller, which is what centred it there.
+     */
+    align-self: start;
     background-color: var(--slotted-collapsible-indicator-color, currentColor);
     block-size: var(--_icon-size);
     flex: none;
     grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-row: 1;
     inline-size: var(--_icon-size);
+    margin-block-start: calc((1lh - var(--_icon-size)) / 2);
     mask-image: var(--slotted-icon-chevron-down);
     mask-position: center;
     mask-repeat: no-repeat;

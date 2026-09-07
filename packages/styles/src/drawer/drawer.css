@@ -320,14 +320,31 @@
 
     background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
     /**
-     * `--slotted-border-strong` and not `--slotted-border-subtle`. The
-     * foundation defines the strong step as the line between two surfaces and
-     * holds it to 3:1 against each of them; the subtle step is a line inside one
-     * surface, which is what the header and footer rules below are. A drawer's
-     * inner edge is the first kind: in the dark scheme the panel is `#1c1c20` on
-     * a scrim of black at 62% and every shadow token is black on black.
+     * `--slotted-border-subtle` and not `--slotted-border-strong`.
+     *
+     * The strong step is the line between two surfaces and the foundation holds
+     * it to 3:1 against each of them. Read as one, the panel's edge measured
+     * 3.51 against the panel in the dark scheme — a light grey stripe down a
+     * near-black surface, brighter than anything else the drawer paints, and
+     * the first thing the eye lands on when the panel arrives (DR4).
+     *
+     * The edge is not that line. What separates the panel from the page is the
+     * scrim in front of the page and the elevation the panel is lifted by; the
+     * edge is a detail inside the panel's own surface, which is the subtle step
+     * — 1.14 against the panel in `dark`, 1.24 in `light`, and the same black
+     * as every other line in `high-contrast`, where the query below thickens it
+     * to a system border anyway.
+     *
+     * The boundary that is left is measured rather than assumed: the panel
+     * stands 2.48 against the scrim in `dark` and 3.32 in `light`, which is the
+     * separation between two surfaces the foundation asks the strong step to
+     * carry — and here it is carried by the surfaces themselves. The elevation
+     * adds nothing in `dark`, where every shadow token is black on black over a
+     * scrim that is already black; it is the scrim, not the shadow, that darkens
+     * what lies behind. A theme that wants a heavier edge states
+     * `--slotted-drawer-border-color`.
      */
-    border-color: var(--slotted-drawer-border-color, var(--slotted-border-strong, ButtonBorder));
+    border-color: var(--slotted-drawer-border-color, var(--slotted-border-subtle, ButtonBorder));
     border-style: solid;
     border-width: 0;
     /* So the leading corners clip the row that scrolls under them. */

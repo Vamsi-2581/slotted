@@ -167,7 +167,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## AvatarGroup
 
-- [ ] **AG1 — Avatar em `hover` sem destaque.** Estado atual: apenas deslocamento vertical. Esperado: o avatar sob o ponteiro recebe `z-index` acima dos vizinhos, `outline` de 2px na cor `--slotted-surface` (anel de separação) mais `box-shadow` de elevação nível 1, e `transform: translateY(−2px) scale(1.06)`. Transição de 150ms `ease-out` em `transform` e `box-shadow`. Os vizinhos não se movem. Em `prefers-reduced-motion`, manter apenas `z-index` e `outline`.
+- [x] **AG1 — Avatar em `hover` sem destaque.** Estado atual: apenas deslocamento vertical. Esperado: o avatar sob o ponteiro recebe `z-index` acima dos vizinhos, `outline` de 2px na cor `--slotted-surface` (anel de separação) mais `box-shadow` de elevação nível 1, e `transform: translateY(−2px) scale(1.06)`. Transição de 150ms `ease-out` em `transform` e `box-shadow`. Os vizinhos não se movem. Em `prefers-reduced-motion`, manter apenas `z-index` e `outline`.
 
 ---
 

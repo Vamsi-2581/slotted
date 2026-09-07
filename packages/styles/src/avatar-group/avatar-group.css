@@ -36,6 +36,29 @@
      */
     --_size: var(--slotted-avatar-size, var(--slotted-avatar-size-md, 36px));
 
+    /**
+     * ── What a raised member is raised by ──────────────────────────────────
+     *
+     * Four values, stated on the group and read by the two rules below, so the
+     * raise is written once and the reduced-motion answer is a redefinition
+     * rather than a second copy of the rule.
+     *
+     * The lift and the scale are the motion: two pixels up and six per cent
+     * out, which is a face leaning towards the pointer rather than a face that
+     * changed size. The ring and the shadow are not motion — the ring is what
+     * separates the raised face from the ones it now covers, and the shadow is
+     * what says which of them is in front — so both survive a reader who asked
+     * for stillness.
+     *
+     * The scale is a ratio and a token, for the reason `--_overlap` is one: it
+     * is a proportion of the member rather than a step of any scale this
+     * library keeps.
+     */
+    --_raise-lift: calc(var(--slotted-space-1, 0.125rem) * -1);
+    --_raise-scale: var(--slotted-avatar-group-raise-scale, 1.06);
+    --_raise-ring: var(--slotted-border-width-thick, 2px);
+    --_raise-shadow: var(--slotted-shadow-sm);
+
     align-items: center;
     display: flex;
     list-style: none;
@@ -142,18 +165,64 @@
    * A weak state held back for the stronger one: a disabled member does not
    * rise, which is the rule `packages/styles/src/states.test.mjs` keeps.
    */
+  /**
+   * The member under the pointer, and the four things that raise it.
+   *
+   * Order of stacking first: the raise is only legible while the face is in
+   * front of the ones it overlaps, and `z-index` is what puts it there.
+   *
+   * Then the ring, which is the avatar's own — the one it keeps at nought until
+   * something it overlaps asks for it, in the surface colour it already
+   * defaults to. A stack draws every member over the trailing edge of the one
+   * before it, so a raised face has a neighbour's picture against its own edge
+   * on one side, and a ring of the surface is the gap that edge would have had
+   * if nothing were behind it. It is that token and not an `outline`: R3 gives
+   * the outline of every family to the focus ring, and a separation ring drawn
+   * as one would be a second thing painted where focus belongs. The ring is
+   * only asked for while the pointer is on the member, which is why the group's
+   * resting rule still states none (`avatar-group.styles.test.mjs`).
+   *
+   * Then the elevation, which is what separates a member that is in front from
+   * one that merely overlaps: two flat discs at different stacking orders read
+   * as a single shape, and a shadow under one of them reads as a face lifted
+   * off the row. It reaches the avatar as its own elevation token, so the two
+   * rings and the shadow are one `box-shadow` written by the family that owns
+   * the box rather than a second one overwriting it (AG1).
+   *
+   * Then the movement: two pixels towards the reader and six per cent out. The
+   * neighbours do not move, because neither a transform nor a shadow is layout
+   * — measured in `tools/harness/out/review-loop/ag1/raise.mjs`, both
+   * neighbours keep the box they had at rest, in three schemes and three
+   * densities.
+   */
   [data-ui='avatar-group'][data-layout='stack']
     [data-ui='avatar'][data-part='root']:not([data-disabled]):hover {
+    --slotted-avatar-ring-width: var(--_raise-ring);
+    --slotted-avatar-elevation: var(--_raise-shadow);
+
     z-index: 1;
-    transform: translateY(calc(var(--slotted-space-1, 0.125rem) * -1));
+    transform: translateY(var(--_raise-lift)) scale(var(--_raise-scale));
   }
 
   [data-ui='avatar-group'][data-layout='stack'] [data-ui='avatar'][data-part='root']:focus-visible {
     z-index: 1;
-    transform: translateY(calc(var(--slotted-space-1, 0.125rem) * -1));
+    transform: translateY(var(--_raise-lift)) scale(var(--_raise-scale));
   }
 
+  /**
+   * Stillness keeps the answer and drops the movement: the stacking order and
+   * the ring say which face the pointer is on without anything travelling, and
+   * they are the two the item names. The shadow goes with the movement — it is
+   * the depth the lift implies, and a shadow that appears under a face that did
+   * not move is a light source switching on.
+   */
   @media (prefers-reduced-motion: reduce) {
+    [data-ui='avatar-group'][data-part='root'][data-layout='stack'] {
+      --_raise-lift: 0px;
+      --_raise-scale: 1;
+      --_raise-shadow: 0 0 transparent;
+    }
+
     [data-ui='avatar-group'][data-layout='stack'] [data-ui='avatar'][data-part='root'] {
       transition: none;
     }

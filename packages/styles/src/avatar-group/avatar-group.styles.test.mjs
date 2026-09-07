@@ -146,6 +146,49 @@ test('raises the member under the pointer, and holds that back when it is disabl
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
+/**
+ * The stacking order alone is not the answer: a face in front of another face,
+ * both flat and both the same size, is one shape. The member the pointer is on
+ * carries a ring of the surface between it and what it covers, a shadow that
+ * says which of the two is in front, and a lean towards the reader (AG1).
+ *
+ * The ring is the avatar's own ring token and not an `outline`: R3 gives the
+ * outline of every family to the focus ring. The shadow reaches the avatar as
+ * its elevation token rather than as a second `box-shadow`, which would
+ * overwrite that ring.
+ */
+test('separates the raised member from the ones it covers', () => {
+  const hover = rule(`${ui}[data-layout='stack'] ${member}:not([data-disabled]):hover`);
+  assert.ok(hover.includes('--slotted-avatar-ring-width:var(--_raise-ring)'), 'no ring');
+  assert.ok(hover.includes('--slotted-avatar-elevation:var(--_raise-shadow)'), 'no elevation');
+  assert.ok(hover.includes('transform:translateY(var(--_raise-lift)) scale(var(--_raise-scale))'));
+  const group = rule(root);
+  assert.ok(
+    group.includes('--_raise-shadow:var(--slotted-shadow-'),
+    'the elevation is not a token',
+  );
+  assert.ok(group.includes('--_raise-ring:var(--slotted-border-width-'), 'the ring is not a token');
+});
+
+/**
+ * Stillness keeps the two that are not motion. The lift, the scale and the
+ * shadow the lift implies are redefined to nothing under the query, so the
+ * raise stays one rule and the reader who asked for stillness still sees which
+ * face the pointer is on.
+ */
+test('drops the movement under reduced motion and keeps the answer', () => {
+  const query = normalized.slice(normalized.indexOf('prefers-reduced-motion'));
+  const still = query.slice(query.indexOf(`${root}[data-layout='stack']{`)).split('}')[0];
+  assert.ok(still.includes('--_raise-lift:0px'), 'the member still travels');
+  assert.ok(still.includes('--_raise-scale:1'), 'the member still grows');
+  assert.ok(
+    still.includes('--_raise-shadow:0 0 transparent'),
+    'the member still lifts off the row',
+  );
+  assert.ok(!still.includes('z-index'), 'the stacking order must survive stillness');
+  assert.ok(!still.includes('--_raise-ring'), 'the ring must survive stillness');
+});
+
 /** Not a stacking context: a raised member has to rise past its whole row. */
 test('leaves the item positioned and unlayered', () => {
   const item = rule(`${ui} [data-part='item']`);

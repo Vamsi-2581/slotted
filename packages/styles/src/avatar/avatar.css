@@ -82,6 +82,15 @@
     --_ring-width: var(--slotted-avatar-ring-width, 0);
     --_ring-color: var(--slotted-avatar-ring-color, var(--slotted-surface, Canvas));
 
+    /**
+     * What the avatar is lifted off, and nothing at rest. A lone avatar sits on
+     * the page; a container that raises one of its members off the others says
+     * so here rather than restating the whole shadow — the ring below it is the
+     * avatar's own decision and a container has no business overwriting it,
+     * which is what a second `box-shadow` on the same box would do (AG1).
+     */
+    --_elevation: var(--slotted-avatar-elevation, 0 0 transparent);
+
     align-items: center;
     /**
      * `render` can make the root a `<button>`, and the browser draws two
@@ -116,7 +125,9 @@
        fall back to `medium` — three pixels — rather than to this one. */
     border-style: solid;
     border-width: var(--_edge-width);
-    box-shadow: 0 0 0 var(--_ring-width) var(--_ring-color);
+    box-shadow:
+      0 0 0 var(--_ring-width) var(--_ring-color),
+      var(--_elevation);
     box-sizing: border-box;
     display: inline-flex;
     /* A box that shrinks is not a box: an avatar keeps its size in a flex row. */

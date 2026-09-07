@@ -22,6 +22,7 @@
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",
   "--slotted-focus-ring-width",
+  "--slotted-icon-ellipsis",
   "--slotted-radius-md",
   "--slotted-space-1",
   "--slotted-space-2",
@@ -40,6 +41,7 @@
   "--slotted-toolbar-overflow-color",
   "--slotted-toolbar-overflow-hover-background",
   "--slotted-toolbar-overflow-hover-color",
+  "--slotted-toolbar-overflow-icon",
   "--slotted-toolbar-overflow-open-background",
   "--slotted-toolbar-separator-color"
 ]

@@ -129,9 +129,7 @@ function BreadcrumbEllipsis({ hidden, last }: { hidden: number; last: boolean })
           if (event.key === 'Enter' || event.key === ' ') trail.expand('keyboard', event);
         }}
         type="button"
-      >
-        {'…'}
-      </button>
+      />
       {last ? null : <Separator>{trail.separator}</Separator>}
     </li>
   );

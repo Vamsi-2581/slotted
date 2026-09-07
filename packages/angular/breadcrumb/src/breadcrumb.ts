@@ -226,9 +226,7 @@ export class SlBreadcrumbList {
         type="button"
         (click)="trail.expand('pointer', $event)"
         (keydown)="onEllipsisKeydown($event)"
-      >
-        &#8230;
-      </button>
+      ></button>
       <span aria-hidden="true" data-part="separator">
         <ng-container *ngTemplateOutlet="trail.separatorValue() ?? null"></ng-container>
       </span>

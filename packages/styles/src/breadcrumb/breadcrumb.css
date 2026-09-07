@@ -214,16 +214,22 @@
    * and the rest of that minimum in the block axis is a transparent halo
    * around the paint, so the target is whole without the box being tall.
    *
-   * The ellipsis inside it is the character U+2026 rendered as text, at the
-   * trail's own size. That is deliberate, and it is the one place in the
-   * library where a character is the right answer. Rule 3 of
-   * `docs/token-foundation.md` forbids drawing an *icon* from a character — a
-   * mark standing in for a concept, like an arrow or a check. U+2026 stands
-   * in for nothing: it is the typographic mark for omitted content, and
-   * omitted content is exactly what this control holds. Set in the trail's
-   * type, its dots sit on the crumbs' baseline, which is the alignment BC1
-   * asks for; text also survives `forced-colors`, where every painted
-   * decoration is replaced by the page's own background.
+   * The mark inside it is the Lucide `ellipsis`, drawn as a mask from the
+   * glyph scale at the control glyph size — the same way every other inner
+   * control in the library draws its mark, and what BC1 asks for. It was the
+   * character U+2026 set in the trail's own type, which was the one exception
+   * the library took to rule 3 of `docs/token-foundation.md`, on the grounds
+   * that U+2026 stands in for omitted content rather than for a concept. The
+   * exception cost more than it bought: a character carries the metrics of
+   * whatever font the page loads, so the three dots had to be re-sized and
+   * lifted off their own baseline by hand to sit where a glyph sits by
+   * construction — which is what `toolbar` was doing with a font step and a
+   * translate of half an x-height (BC2). The rule stands as written; this
+   * control stops being its exception.
+   *
+   * The box still keeps the trail's type, because `1lh` is the trail's line
+   * and that is the alignment BC1 asks for: the box is one line of the trail
+   * tall and the mark is centred in it.
    *
    * The button's accessible name says how many crumbs it hides, so what a
    * reader hears is a count rather than three dots.
@@ -250,8 +256,21 @@
     transition: background-color var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  /* The halo that completes the target where the line is shorter than it. */
+  /* The mark itself: the glyph scale's own size, painted in the trail's ink. */
   [data-ui='breadcrumb'] [data-part='ellipsis']::before {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
+    content: '';
+    display: block;
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-breadcrumb-ellipsis-icon, var(--slotted-icon-ellipsis));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  /* The halo that completes the target where the line is shorter than it. */
+  [data-ui='breadcrumb'] [data-part='ellipsis']::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -274,9 +293,12 @@
    * system takes the palette over. It is restated against a system colour so
    * the trail keeps its marks.
    *
-   * Nothing else needs a rule here. The ellipsis is text, and text is never
-   * removed; its hover fill is, which leaves a button whose own frame the
-   * system draws.
+   * The ellipsis mark is a second: a mask is painted with a background, and a
+   * background is what the system replaces, so the three dots would go with
+   * the hover fill. `forced-color-adjust: none` on the mark alone keeps the
+   * author's `currentcolor`, and `currentcolor` there is the button's own ink,
+   * which the system has already forced to its text colour — so the mark is
+   * drawn in the system's palette rather than against it.
    */
 
   @media (forced-colors: active) {
@@ -286,6 +308,10 @@
 
     [data-ui='breadcrumb'] [data-part='ellipsis'] {
       border: var(--slotted-border-width-thin, 1px) solid ButtonBorder;
+    }
+
+    [data-ui='breadcrumb'] [data-part='ellipsis']::before {
+      forced-color-adjust: none;
     }
   }
 }

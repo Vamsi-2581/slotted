@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 80     |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 81     |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
 | `component` | One family adjusting a semantic value for itself.              | 5      |
 
@@ -204,6 +204,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-plus`            | `plus`                 | stroke 3   |
 | `--slotted-icon-dot`             | `circle-small`         | fill       |
 | `--slotted-icon-x`               | `x`                    | stroke 2   |
+| `--slotted-icon-ellipsis`        | `ellipsis`             | stroke 2   |
 | `--slotted-icon-copy`            | `copy`                 | stroke 2   |
 | `--slotted-icon-eye`             | `eye`                  | stroke 2   |
 | `--slotted-icon-eye-off`         | `eye-off`              | stroke 2   |

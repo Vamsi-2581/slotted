@@ -88,7 +88,7 @@ export function ToolbarOverflow({
             ...props,
             ...nativeProps,
             'aria-label': nameFor(label, collapsed.length),
-            children: <span aria-hidden="true">{'…'}</span>,
+            children: <span aria-hidden="true" />,
             'data-part': 'overflow',
           };
 

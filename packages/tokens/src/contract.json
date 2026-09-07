@@ -430,6 +430,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-ellipsis",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-copy",
       "layer": "primitive",
       "axis": "base",

@@ -67,7 +67,7 @@ import type { ToolbarOverflowLabel } from './toolbar';
       [slMenuTriggerFor]="surface"
       [attr.aria-label]="name()"
     >
-      <span aria-hidden="true">…</span>
+      <span aria-hidden="true"></span>
     </button>
     <sl-menu #surface [align]="align()" [side]="side()" [size]="size()">
       @for (unit of toolbar.collapsedUnits(); track unit.id) {

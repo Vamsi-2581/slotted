@@ -35,12 +35,17 @@ test('reacts to every state the contract declares', () => {
  * accessibility tree, and rule 3 of `docs/token-foundation.md` forbids drawing
  * an icon from a character. A rotated rule is neither: it is geometry, it
  * carries no glyph token, and it stops being drawn the moment a consumer puts
- * their own mark inside the element.
+ * their own mark inside the element. The one glyph the trail does own is the
+ * ellipsis, which is the mark of a control and not the shape of a rule.
  */
 test('draws the separator as geometry and yields to the consumer content', () => {
   assert.ok(normalized.includes("[data-part='separator']:empty{"));
   assert.ok(normalized.includes('rotate:var(--slotted-breadcrumb-separator-skew,20deg)'));
-  assert.ok(!/mask-image/.test(declarations), 'the trail owns no glyph');
+  assert.deepEqual(
+    [...declarations.matchAll(/mask-image:[^;]+/g)].map(([match]) => match),
+    ['mask-image: var(--slotted-breadcrumb-ellipsis-icon, var(--slotted-icon-ellipsis))'],
+    'the trail owns one glyph, and it is the ellipsis',
+  );
 });
 
 test('mirrors the separator with the direction that applies to it', () => {
@@ -63,14 +68,16 @@ test('truncates against the trail rather than against a measure it chose', () =>
 });
 
 /**
- * The ellipsis is the character U+2026 rendered as text, so the family carries
- * no artwork for it and nothing to repaint when the system takes the palette.
- * The control is one line of the trail tall, so it sits on the crumbs' own
- * line (BC1), the control glyph plus a step of air wide (R2), and a real
+ * The mark is the Lucide `ellipsis` drawn as a mask at the control glyph size,
+ * so nothing about it depends on the metrics of the font the page loaded — the
+ * exception to rule 3 of `docs/token-foundation.md` that this control used to
+ * take is closed (BC2). The box still keeps the trail's own type, because
+ * `1lh` is the trail's line and that is what puts the control on the crumbs'
+ * line (BC1). It is the control glyph plus a step of air wide (R2), and a real
  * target in both axes — the halo around the paint completes the minimum where
  * the line is shorter than it.
  */
-test('sets the ellipsis on the crumbs’ line, with a whole target and no artwork', () => {
+test('sets the ellipsis on the crumbs’ line, with a whole target and a glyph', () => {
   const ellipsis = normalized.slice(normalized.indexOf("[data-part='ellipsis']{"));
   assert.ok(ellipsis.includes('block-size:1lh;'));
   assert.ok(
@@ -78,12 +85,19 @@ test('sets the ellipsis on the crumbs’ line, with a whole target and no artwor
       'inline-size:max(var(--slotted-target-min,24px),calc(var(--_icon-size)+2*var(--slotted-space-2,0.25rem)))',
     ),
   );
-  assert.ok(ellipsis.includes('font:inherit;'), 'the mark keeps the trail’s own type');
-  assert.ok(!ellipsis.includes('translate:'), 'nothing lifts the mark off the baseline');
+  assert.ok(ellipsis.includes('font:inherit;'), 'the box keeps the trail’s own line');
+  assert.ok(!ellipsis.includes('translate:'), 'nothing lifts the mark off its own centre');
   assert.ok(
     normalized.includes(
-      "[data-part='ellipsis']::before{content:'';inset:min(0px,calc((100%-var(--slotted-target-min,24px))/2));position:absolute",
+      "[data-part='ellipsis']::before{background-color:currentcolor;block-size:var(--_icon-size);content:'';display:block;inline-size:var(--_icon-size);mask-image:var(--slotted-breadcrumb-ellipsis-icon,var(--slotted-icon-ellipsis));mask-position:center;mask-repeat:no-repeat;mask-size:contain",
     ),
+    'the mark is the glyph, at the glyph scale’s own size',
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='ellipsis']::after{content:'';inset:min(0px,calc((100%-var(--slotted-target-min,24px))/2));position:absolute",
+    ),
+    'the target is completed behind the mark, not by it',
   );
 });
 

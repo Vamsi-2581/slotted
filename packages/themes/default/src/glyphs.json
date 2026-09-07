@@ -4,6 +4,7 @@
   "--slotted-icon-plus": { "icon": "plus", "stroke-width": 3 },
   "--slotted-icon-dot": { "icon": "circle-small", "paint": "fill" },
   "--slotted-icon-x": { "icon": "x" },
+  "--slotted-icon-ellipsis": { "icon": "ellipsis" },
   "--slotted-icon-copy": { "icon": "copy" },
   "--slotted-icon-eye": { "icon": "eye" },
   "--slotted-icon-eye-off": { "icon": "eye-off" },

@@ -201,13 +201,14 @@
    * this family's geometry: the bar's height, the minimum target in the other
    * axis, and the muted ink `tabs` gives the one control it draws itself.
    *
-   * The mark is U+2026 as text, which is the exception rule 3 of
-   * `docs/token-foundation.md` allows and which `breadcrumb` already takes: the
-   * rule forbids drawing an *icon* from a character, and U+2026 stands in for
-   * nothing — it is the typographic mark for omitted content, and omitted
-   * content is what the control holds. Text also survives `forced-colors`,
-   * where a painted mask is replaced by the page's own background, and it
-   * scales with the type where a fixed mask would not.
+   * The mark is the Lucide `ellipsis`, drawn as a mask from the glyph scale at
+   * the control glyph size, the same as `breadcrumb` draws it (BC2). It was
+   * U+2026 as text, on the exception `breadcrumb` took to rule 3 of
+   * `docs/token-foundation.md` — and the two quantities that exception needed
+   * here are what closed it: a type step of one and a half to stop three dots
+   * reading as specks, and a lift of half an x-height to get them off their own
+   * baseline and onto the middle of the control. A glyph is centred in its box
+   * by construction and sized by the same scale as every other mark on the bar.
    *
    * Its accessible name carries the count, so what a reader hears is a number
    * rather than three dots.
@@ -223,12 +224,6 @@
     display: inline-flex;
     flex: none;
     font-family: var(--slotted-control-font-family, inherit);
-    /**
-     * One step above the bar's own type. Three dots set at the size of a label
-     * are a row of specks; at the next step up they read as a control, and the
-     * quantity is still font-relative, so the three densities move it.
-     */
-    font-size: calc(var(--_font-size) * 1.5);
     justify-content: center;
     line-height: 1;
     min-block-size: var(--_height);
@@ -249,19 +244,20 @@
   }
 
   /**
-   * The three dots sit on the baseline, and a line box centred in the control
-   * puts its baseline about four fifths of the way down — so the mark lands a
-   * fifth of a line below the middle of the control and reads low against the
-   * labels beside it. Lifting it by half an x-height, less the height of the
-   * dots themselves, is what puts the row of ink on the optical middle.
-   *
-   * Every quantity is font-relative, which is the rule the briefing records for
-   * a mark beside text: the ratio judged at four times the type size is the
-   * ratio at thirteen pixels.
+   * The mark: the glyph scale's own size, painted in the control's ink and
+   * centred in its box. The element it is painted on is the span the trigger
+   * renders, which is what carries `aria-hidden` — the accessible name is on
+   * the button and says how many controls the menu holds.
    */
   [data-ui='toolbar'] [data-part='overflow'] > * {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
     display: block;
-    transform: translateY(calc(-0.5ex + 0.05em));
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-toolbar-overflow-icon, var(--slotted-icon-ellipsis));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
   }
 
   /* The ground moves under the pointer and nothing else does (R2). */
@@ -413,6 +409,13 @@
   @media (forced-colors: active) {
     [data-ui='toolbar'] [data-part='separator'] {
       background-color: CanvasText;
+      forced-color-adjust: none;
+    }
+
+    /* The mark is painted with a background too. `currentcolor` there is the
+       trigger's own ink, which the system has already forced to its text
+       colour, so keeping the paint keeps the mark in the system's palette. */
+    [data-ui='toolbar'] [data-part='overflow'] > * {
       forced-color-adjust: none;
     }
   }

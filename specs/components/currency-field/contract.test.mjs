@@ -159,7 +159,7 @@ test('states how each entry model treats the text, the caret and the digits', ()
     signKeys: ['-', '+'],
     pasteParsed: true,
     maxDigits: 15,
-    emptyValue: null,
+    emptyValue: 'allowEmpty',
   });
   assert.equal(contract.entryModel.natural.writesTextOn, 'commit');
   assert.equal(contract.entryModel.natural.separatorTyped, true);
@@ -174,6 +174,19 @@ test('states how each entry model treats the text, the caret and the digits', ()
  * the reader added or took away are read from the difference between the text
  * before the edit and the text after it, so both edits land at the right.
  */
+/**
+ * An amount is not an optional number by default. A total, a price and a
+ * balance are all nought when nothing is in them, and a field that emitted
+ * `null` for an emptied amount made every consumer write `value ?? 0` — which
+ * is the same decision taken once per consumer instead of once here. A form
+ * where the amount is genuinely absent asks for it with `allowEmpty`.
+ */
+test('settles an emptied amount on nought unless the consumer allows nothing', () => {
+  assert.equal(member.defaults.allowEmpty, false);
+  assert.equal(contract.entryModel.cents.emptyValue, 'allowEmpty');
+  assert.equal(contract.entryModel.natural.emptyValue, 'allowEmpty');
+});
+
 test('reads the amount from the digits that changed, not from where they landed', () => {
   assert.equal(contract.entryModel.cents.caretIgnored, true);
   assert.equal(contract.entryModel.cents.caret, 'after the last digit');

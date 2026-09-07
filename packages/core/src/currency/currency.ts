@@ -79,6 +79,15 @@ export interface AmountEditRequest {
   negative?: boolean | undefined;
   /** Whether a negative amount is admissible at all. */
   allowNegative?: boolean | undefined;
+  /**
+   * Whether an amount with no digits left in it is nothing, or nought.
+   *
+   * Off, because an amount is not an optional number: a total, a price and a
+   * balance are all nought when nothing is in them, and a field that answered
+   * `null` made every consumer write `value ?? 0`. A form where the amount is
+   * genuinely absent turns it on.
+   */
+  allowEmpty?: boolean | undefined;
 }
 
 export interface AmountEdit {
@@ -289,7 +298,14 @@ export function createCurrencyFormat({
       return base.isPartial(unwrapAccounting(text).text);
     },
 
-    editFromText({ text, previous, inputType, negative = false, allowNegative = true }) {
+    editFromText({
+      text,
+      previous,
+      inputType,
+      negative = false,
+      allowNegative = true,
+      allowEmpty = false,
+    }) {
       /**
        * The one case where the cash-register rule would lose the reader's data:
        * `R$ 1.480,00` copied from a bank statement is one thousand four hundred
@@ -309,7 +325,9 @@ export function createCurrencyFormat({
       const run =
         previous === undefined ? digitsOf(text) : shiftIntoRun(digitsOf(previous), digitsOf(text));
       const accumulated = run.slice(0, MAX_AMOUNT_DIGITS);
-      if (accumulated === '') return { value: null, minorUnits: null };
+      if (accumulated === '') {
+        return allowEmpty ? { value: null, minorUnits: null } : { value: 0, minorUnits: 0 };
+      }
 
       const magnitude = Number(accumulated);
       /* Nought has no sign: `-0` and `0` are one amount written two ways. */

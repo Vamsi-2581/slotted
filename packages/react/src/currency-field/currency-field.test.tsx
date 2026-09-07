@@ -161,18 +161,41 @@ describe('cents-first entry', () => {
     expect(plain(control().value)).toBe('KWD 1,234');
   });
 
-  /** Backspace shifts the digits right; the last one leaves nothing, not nought. */
-  it('empties to nothing rather than to nought', () => {
+  /**
+   * Backspace shifts the digits right, and the last one leaves nought rather
+   * than nothing: an amount is not an optional number.
+   */
+  it('empties to nought, and to nothing only when nothing is allowed', () => {
     const onValueChange = vi.fn();
-    render(<CurrencyField currency="BRL" locale="pt-BR" onValueChange={onValueChange} />);
+    const { unmount } = render(
+      <CurrencyField currency="BRL" locale="pt-BR" onValueChange={onValueChange} />,
+    );
 
     typeDigits('12');
     type('R$ 0,1');
     expect(plain(control().value)).toBe('R$ 0,01');
 
     type('');
+    expect(plain(control().value)).toBe('R$ 0,00');
+    expect(onValueChange).toHaveBeenLastCalledWith(0, expect.objectContaining({ value: 0 }));
+    unmount();
+
+    const allowed = vi.fn();
+    render(<CurrencyField allowEmpty currency="BRL" locale="pt-BR" onValueChange={allowed} />);
+    typeDigits('12');
+    type('');
     expect(control().value).toBe('');
-    expect(onValueChange).toHaveBeenLastCalledWith(null, expect.objectContaining({ value: null }));
+    expect(allowed).toHaveBeenLastCalledWith(null, expect.objectContaining({ value: null }));
+  });
+
+  /** An amount that holds nothing reads as nought before anything is typed. */
+  it('shows nought in a control nobody has touched, and nothing under allowEmpty', () => {
+    const { unmount } = render(<CurrencyField currency="BRL" locale="pt-BR" />);
+    expect(plain(control().value)).toBe('R$ 0,00');
+    unmount();
+
+    render(<CurrencyField allowEmpty currency="BRL" locale="pt-BR" />);
+    expect(control().value).toBe('');
   });
 
   /**
@@ -437,7 +460,7 @@ describe('the request an amount carries', () => {
     );
 
     typeDigits('1234');
-    expect(control().value).toBe('');
+    expect(plain(control().value)).toBe('R$ 0,00');
   });
 
   it('never asks for the value it already holds', () => {
@@ -656,6 +679,26 @@ describe('forms', () => {
       .querySelector('input[type="hidden"]') as HTMLInputElement;
     expect(hidden.value).toBe('1480.5');
     expect(hidden.name).toBe('total');
+  });
+
+  /** What is submitted is what the control reads, and never a blank beside a nought. */
+  it('submits the nought an untouched control shows, and nothing under allowEmpty', () => {
+    const { unmount } = render(
+      <form data-testid="form">
+        <CurrencyField currency="BRL" locale="pt-BR" name="total" />
+      </form>,
+    );
+    const hidden = () =>
+      screen.getByTestId('form').querySelector('input[type="hidden"]') as HTMLInputElement;
+    expect(hidden().value).toBe('0');
+    unmount();
+
+    render(
+      <form data-testid="form">
+        <CurrencyField allowEmpty currency="BRL" locale="pt-BR" name="total" />
+      </form>,
+    );
+    expect(hidden().value).toBe('');
   });
 
   it('goes back to where it started when the form resets', () => {

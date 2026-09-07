@@ -156,6 +156,14 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
    * a reader scrolling a form must not change a total by passing over it.
    */
   readonly wheel = input(false, { transform: booleanAttribute });
+  /**
+   * Whether an emptied control holds nothing, or nought.
+   *
+   * Off, because an amount is not an optional number: a total, a price and a
+   * balance are all nought when nothing is in them. Cleared, the control shows
+   * `0,00` and emits `0`. On, it can be left empty and emits `null`.
+   */
+  readonly allowEmpty = input(false, { transform: booleanAttribute });
 
   /** Unstated rather than `false`, so the control defers to the field. */
   readonly disabled = input<boolean | undefined, boolean | string | undefined>(undefined, {
@@ -250,7 +258,11 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
   private readonly controlled = computed(() => this.value() !== undefined);
   readonly numberValue = computed(() => {
     const bound = this.value();
-    return bound === undefined ? this.own() : bound;
+    const held = bound === undefined ? this.own() : bound;
+    /* The amount the family settles on when nothing is left in the control.
+       It governs what is emitted, what `aria-valuenow` reports and what the
+       hidden input submits alike, so the three never disagree. */
+    return this.allowEmpty() ? held : (held ?? 0);
   });
   readonly valueText = computed(() => {
     const shown = this.text();
@@ -352,7 +364,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
     const bound = this.value();
     const initial = bound === undefined ? this.defaultValue() : bound;
     if (bound === undefined) this.own.set(initial);
-    this.write(this.formatter().format(initial));
+    this.write(this.formatter().format(this.numberValue()));
   }
 
   /** The native element, for `focus()`, `select()` and `setSelectionRange()`. */
@@ -378,7 +390,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
 
   writeValue(value: number | null) {
     this.own.set(value ?? null);
-    this.write(this.formatter().format(value ?? null));
+    this.write(this.formatter().format(this.settledAmount(value ?? null)));
   }
 
   registerOnChange(fn: (value: number | null) => void) {
@@ -403,7 +415,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
          run the engine can no longer finish. */
       if (this.resolvedFormatOn() !== 'change' || native.isComposing) {
         this.text.set(next);
-        this.request(formatter.parse(next), 'keyboard', event);
+        this.request(this.settledAmount(formatter.parse(next)), 'keyboard', event);
         return;
       }
 
@@ -424,7 +436,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
       if (this.element.ownerDocument.activeElement === this.element) {
         this.element.setSelectionRange(shaped.caret, shaped.caret);
       }
-      this.request(formatter.parse(shaped.text), 'keyboard', event);
+      this.request(this.settledAmount(formatter.parse(shaped.text)), 'keyboard', event);
       return;
     }
 
@@ -437,6 +449,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
       previous: this.text(),
       negative: this.negativeNow(),
       allowNegative: this.allowNegative(),
+      allowEmpty: this.allowEmpty(),
       ...(inputType === undefined ? {} : { inputType }),
     });
     this.pendingNegative = edit.value !== null && edit.value < 0;
@@ -488,7 +501,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
       const wanted = inserted !== '+';
       this.pendingNegative = wanted;
       const current = this.numberValue();
-      if (current === null || current < 0 === wanted) return;
+      if (current === null || current === 0 || current < 0 === wanted) return;
       const flipped = -current;
       this.settle(
         flipped,
@@ -513,6 +526,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
       previous: this.element.value,
       negative: this.negativeNow(),
       allowNegative: this.allowNegative(),
+      allowEmpty: this.allowEmpty(),
     });
     if (edit.value === null) return;
     if ((min !== undefined && edit.value < min) || (max !== undefined && edit.value > max)) {
@@ -596,13 +610,18 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
   /** The sign at the moment of the edit, rather than at the last render. */
   private negativeNow() {
     const current = this.numberValue();
-    return current === null ? this.pendingNegative : current < 0;
+    /* Nought has no sign — `-0` and `0` are one amount — so a debit held
+       against an empty or nought amount can only come from the key. */
+    return current === null || current === 0 ? this.pendingNegative : current < 0;
   }
 
   /** Formats what the reader typed and puts the amount back in range. */
   private commit(reason: ChangeReason, source: Event | undefined) {
     const formatter = this.formatter();
     let next = formatter.parse(this.text());
+    /* The commit is where a half-typed amount stops being half typed, so it is
+       where an emptied one becomes the nought it means. */
+    if (next === null && !this.allowEmpty()) next = 0;
 
     if (next !== null && this.resolvedClamp() !== 'none') {
       next = clampNumber(
@@ -663,6 +682,11 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
     if (this.controlled()) return false;
     this.own.set(next);
     return true;
+  }
+
+  /** Nothing, or the nought it means. The one rule `allowEmpty` decides. */
+  private settledAmount(amount: number | null) {
+    return this.allowEmpty() ? amount : (amount ?? 0);
   }
 
   private settle(next: number | null, moved: boolean) {

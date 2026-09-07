@@ -470,6 +470,13 @@ export const REACT_CURRENCY_FIELD_DOCS = {
         'Where an amount outside the range goes, and when. blur returns it at the commit, strict refuses the keystroke that would leave the range, none keeps it and reports aria-invalid',
       ],
       [
+        'allowEmpty',
+        'boolean',
+        'false',
+        'CurrencyField',
+        'Lets the control hold nothing. Off by default, because an amount is not an optional number: cleared, the control shows 0,00 and emits 0, and every consumer is spared writing value ?? 0. On, an emptied control stays empty and emits null',
+      ],
+      [
         'wheel',
         'boolean',
         'false',

@@ -63,6 +63,7 @@ export function CurrencyField({
   'aria-invalid': ariaInvalid,
   'aria-required': ariaRequired,
   align,
+  allowEmpty = false,
   className,
   clamp,
   currency,
@@ -152,12 +153,23 @@ export function CurrencyField({
     [resolvedCurrency, resolvedDisplay, resolvedLocale, fractionDigits, formatKey, format],
   );
 
+  /**
+   * The amount the family settles on when nothing is left in the control.
+   * Under `allowEmpty` that is nothing; otherwise it is nought, which is what
+   * an amount with no digits in it means. It governs both what is emitted and
+   * what is shown, so the two never disagree.
+   */
+  const settled = useCallback(
+    (amount: number | null) => (allowEmpty ? amount : (amount ?? 0)),
+    [allowEmpty],
+  );
+
   /** What the family knows about the amount, which in controlled mode is not it. */
   const [own, setOwn] = useState<number | null>(defaultValue);
-  const current = value === undefined ? own : value;
+  const current = settled(value === undefined ? own : value);
 
   /** What the element is showing. Never a second copy of the amount. */
-  const [text, setText] = useState(() => formatter.format(current));
+  const [text, setText] = useState(() => formatter.format(settled(current)));
 
   const largeAmount = largeStep ?? step * 10;
   const smallAmount = smallStep ?? step / 10;
@@ -174,7 +186,10 @@ export function CurrencyField({
    * render would be the sign the reader had before pressing it.
    */
   const pendingNegative = useRef(false);
-  const negativeNow = () => (current === null ? pendingNegative.current : current < 0);
+  /* Nought has no sign — `-0` and `0` are one amount — so a debit held against
+     an empty or nought amount can only come from the key that was pressed. */
+  const negativeNow = () =>
+    current === null || current === 0 ? pendingNegative.current : current < 0;
 
   const register = field?.registerControl;
   useEffect(() => register?.(), [register]);
@@ -209,9 +224,9 @@ export function CurrencyField({
   /** What the element shows after a move that may not have been accepted. */
   const settle = useCallback(
     (next: number | null, moved: boolean) => {
-      setText(formatter.format(moved ? next : current));
+      setText(formatter.format(settled(moved ? next : current)));
     },
-    [current, formatter],
+    [current, formatter, settled],
   );
 
   /**
@@ -222,12 +237,15 @@ export function CurrencyField({
   const commit = useCallback(
     (reason: ChangeReason, source: unknown) => {
       let next = formatter.parse(text);
+      /* The commit is where a half-typed amount stops being half typed, so it
+         is where an emptied one becomes the nought it means. */
+      if (next === null && !allowEmpty) next = 0;
       if (next !== null && resolvedClamp !== 'none') {
         next = clampNumber(next, min ?? Number.NEGATIVE_INFINITY, max ?? Number.POSITIVE_INFINITY);
       }
       settle(next, request(next, reason, source));
     },
-    [formatter, max, min, request, resolvedClamp, settle, text],
+    [allowEmpty, formatter, max, min, request, resolvedClamp, settle, text],
   );
 
   const move = useCallback(
@@ -263,11 +281,11 @@ export function CurrencyField({
     if (owner === null || owner === undefined) return;
     const onReset = () => {
       setOwn(defaultValue);
-      setText(formatter.format(defaultValue));
+      setText(formatter.format(settled(defaultValue)));
     };
     owner.addEventListener('reset', onReset);
     return () => owner.removeEventListener('reset', onReset);
-  }, [defaultValue, formatter]);
+  }, [defaultValue, formatter, settled]);
 
   /**
    * A controlled amount the consumer moved is written back into the text — and
@@ -280,8 +298,8 @@ export function CurrencyField({
   useEffect(() => {
     if (value === undefined) return;
     if (Object.is(value, formatter.parse(shown.current))) return;
-    setText(formatter.format(value));
-  }, [formatter, value]);
+    setText(formatter.format(settled(value)));
+  }, [formatter, settled, value]);
 
   /**
    * The caret, under cents-first entry, put back where the next keystroke
@@ -368,7 +386,7 @@ export function CurrencyField({
         if (!allowNegative) return;
         const wanted = inserted === '+' ? false : true;
         pendingNegative.current = wanted;
-        if (current === null || current < 0 === wanted) return;
+        if (current === null || current === 0 || current < 0 === wanted) return;
         const next = -current;
         settle(next, request(next, 'keyboard', event, formatter.toMinorUnits(next)));
         restoreCaret.current = true;
@@ -391,6 +409,7 @@ export function CurrencyField({
         previous: element.value,
         negative: negativeNow(),
         allowNegative,
+        allowEmpty,
       });
       if (edit.value === null) return;
       if ((min !== undefined && edit.value < min) || (max !== undefined && edit.value > max)) {
@@ -400,7 +419,18 @@ export function CurrencyField({
 
     element.addEventListener('beforeinput', onBeforeInput);
     return () => element.removeEventListener('beforeinput', onBeforeInput);
-  }, [allowNegative, cents, current, formatter, max, min, request, resolvedClamp, settle]);
+  }, [
+    allowEmpty,
+    allowNegative,
+    cents,
+    current,
+    formatter,
+    max,
+    min,
+    request,
+    resolvedClamp,
+    settle,
+  ]);
 
   /**
    * The wheel, when it is asked for, and never otherwise. It is a native
@@ -567,7 +597,7 @@ export function CurrencyField({
              a run the engine can no longer finish. */
           if (resolvedFormatOn !== 'change' || native.isComposing) {
             setText(next);
-            request(formatter.parse(next), 'keyboard', event);
+            request(settled(formatter.parse(next)), 'keyboard', event);
             return;
           }
 
@@ -594,7 +624,7 @@ export function CurrencyField({
           }
           setText(shaped.text);
           naturalCaret.current = shaped.caret;
-          request(formatter.parse(shaped.text), 'keyboard', event);
+          request(settled(formatter.parse(shaped.text)), 'keyboard', event);
           return;
         }
 
@@ -607,6 +637,7 @@ export function CurrencyField({
           previous: text,
           negative: negativeNow(),
           allowNegative,
+          allowEmpty,
           ...(inputType === undefined ? {} : { inputType }),
         });
         if (edit.value === null) pendingNegative.current = false;
@@ -656,7 +687,9 @@ export function CurrencyField({
           form={form}
           name={name}
           type="hidden"
-          value={current === null ? '' : String(current)}
+          /* What the control reads, so a form never submits nothing while the
+             amount on screen says nought. */
+          value={settled(current) === null ? '' : String(settled(current))}
         />
       )}
     </>

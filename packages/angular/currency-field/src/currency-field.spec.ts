@@ -299,7 +299,11 @@ describe('cents-first entry', () => {
     expect(input(states).getAttribute('aria-valuenow')).toBe('1234.56');
   });
 
-  it('empties to nothing rather than to nought', () => {
+  /**
+   * Backspace shifts the digits right, and the last one leaves nought rather
+   * than nothing: an amount is not an optional number.
+   */
+  it('empties to nought, and to nothing only when nothing is allowed', () => {
     const fixture = renderTemplate(`
       <div slCurrencyField>
         <input slCurrencyFieldInput currency="BRL" locale="pt-BR" />
@@ -309,8 +313,36 @@ describe('cents-first entry', () => {
     type(input(fixture), '', 'deleteContentBackward');
     fixture.detectChanges();
 
-    expect(input(fixture).value).toBe('');
-    expect(input(fixture).hasAttribute('aria-valuenow')).toBe(false);
+    expect(plain(input(fixture).value)).toBe('R$ 0,00');
+    expect(input(fixture).getAttribute('aria-valuenow')).toBe('0');
+
+    const allowed = renderTemplate(`
+      <div slCurrencyField>
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" allowEmpty />
+      </div>`);
+    typeDigits(allowed, '12');
+    type(input(allowed), '', 'deleteContentBackward');
+    allowed.detectChanges();
+
+    expect(input(allowed).value).toBe('');
+    expect(input(allowed).hasAttribute('aria-valuenow')).toBe(false);
+  });
+
+  /** An amount that holds nothing reads as nought before anything is typed. */
+  it('shows nought in a control nobody has touched, and nothing under allowEmpty', () => {
+    const nought = renderTemplate(`
+      <div slCurrencyField>
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" name="total" />
+      </div>`);
+    expect(plain(input(nought).value)).toBe('R$ 0,00');
+    expect((query(nought, 'input[type="hidden"]') as unknown as HTMLInputElement).value).toBe('0');
+
+    const allowed = renderTemplate(`
+      <div slCurrencyField>
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" name="total" allowEmpty />
+      </div>`);
+    expect(input(allowed).value).toBe('');
+    expect((query(allowed, 'input[type="hidden"]') as unknown as HTMLInputElement).value).toBe('');
   });
 
   it('parses a paste instead of accumulating its digits', () => {
@@ -497,7 +529,7 @@ describe('the request an amount carries', () => {
       </div>`);
 
     typeDigits(fixture, '1234');
-    expect(input(fixture).value).toBe('');
+    expect(plain(input(fixture).value)).toBe('R$ 0,00');
   });
 });
 

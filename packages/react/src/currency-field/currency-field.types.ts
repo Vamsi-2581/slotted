@@ -135,6 +135,14 @@ export interface CurrencyFieldProps extends Omit<
 > {
   /** Which edge the amount is set against. Defaults to the provider, then `end`. */
   align?: CurrencyFieldAlign | undefined;
+  /**
+   * Whether an emptied control holds nothing, or nought.
+   *
+   * Off, because an amount is not an optional number: a total, a price and a
+   * balance are all nought when nothing is in them. Cleared, the control shows
+   * `0,00` and emits `0`. On, it can be left empty and emits `null`.
+   */
+  allowEmpty?: boolean | undefined;
   /** Where an amount outside the range goes, and when. Defaults to the provider, then `blur`. */
   clamp?: CurrencyFieldClamp | undefined;
   /**

@@ -193,9 +193,22 @@ describe('cents-first entry', () => {
     }
   });
 
-  it('empties to nothing rather than to nought', () => {
-    expect(brazil.editFromText({ text: '' })).toEqual({ value: null, minorUnits: null });
-    expect(brazil.editFromText({ text: 'R$ ' })).toEqual({ value: null, minorUnits: null });
+  /**
+   * An emptied amount is nought, because an amount is not an optional number.
+   * A form where it is genuinely absent asks for that with `allowEmpty`.
+   */
+  it('empties to nought, and to nothing only when nothing is allowed', () => {
+    expect(brazil.editFromText({ text: '' })).toEqual({ value: 0, minorUnits: 0 });
+    expect(brazil.editFromText({ text: 'R$ ' })).toEqual({ value: 0, minorUnits: 0 });
+
+    expect(brazil.editFromText({ text: '', allowEmpty: true })).toEqual({
+      value: null,
+      minorUnits: null,
+    });
+    expect(brazil.editFromText({ text: 'R$ ', allowEmpty: true })).toEqual({
+      value: null,
+      minorUnits: null,
+    });
   });
 
   it('keeps a nought a reader actually typed', () => {
@@ -245,6 +258,10 @@ describe('cents-first entry', () => {
 
     it('empties the run when the whole amount is deleted at once', () => {
       expect(brazil.editFromText({ previous: before, text: '' })).toEqual({
+        value: 0,
+        minorUnits: 0,
+      });
+      expect(brazil.editFromText({ previous: before, text: '', allowEmpty: true })).toEqual({
         value: null,
         minorUnits: null,
       });

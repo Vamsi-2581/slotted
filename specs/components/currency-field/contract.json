@@ -105,7 +105,7 @@
       "signKeys": ["-", "+"],
       "pasteParsed": true,
       "maxDigits": 15,
-      "emptyValue": null
+      "emptyValue": "allowEmpty"
     },
     "natural": {
       "digitsAre": "text until a commit",
@@ -116,7 +116,7 @@
       "signKeys": [],
       "pasteParsed": true,
       "maxDigits": null,
-      "emptyValue": null
+      "emptyValue": "allowEmpty"
     }
   },
   "range": {
@@ -217,7 +217,8 @@
         "clamp": "blur",
         "formatOn": "change",
         "currencyDisplay": "symbol",
-        "wheel": false
+        "wheel": false,
+        "allowEmpty": false
       },
       "capabilities": [
         "value",

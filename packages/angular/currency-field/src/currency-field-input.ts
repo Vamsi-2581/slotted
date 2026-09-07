@@ -431,6 +431,10 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
     const inputType = (event as InputEvent).inputType;
     const edit = formatter.editFromText({
       text: next,
+      /* What the element showed before this keystroke, which is what turns the
+         digits the reader added into digits at the right rather than digits
+         where the caret happened to be. */
+      previous: this.text(),
       negative: this.negativeNow(),
       allowNegative: this.allowNegative(),
       ...(inputType === undefined ? {} : { inputType }),
@@ -506,6 +510,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
     if (this.resolvedClamp() !== 'strict') return;
     const edit = formatter.editFromText({
       text: next,
+      previous: this.element.value,
       negative: this.negativeNow(),
       allowNegative: this.allowNegative(),
     });

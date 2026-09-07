@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createControllable } from '../state';
-import { createCurrencyFormat, MAX_AMOUNT_DIGITS, withAmount } from './index';
+import { createCurrencyFormat, MAX_AMOUNT_DIGITS, shiftIntoRun, withAmount } from './index';
 
 describe('createCurrencyFormat', () => {
   it('writes the symbol the currency names and the separators the locale writes', () => {
@@ -200,6 +200,92 @@ describe('cents-first entry', () => {
 
   it('keeps a nought a reader actually typed', () => {
     expect(brazil.editFromText({ text: '0' })).toEqual({ value: 0, minorUnits: 0 });
+  });
+
+  /**
+   * The caret, given the text before the edit as well as the text after it.
+   * Every case here is one the reader can produce from `R$ 12,34` without
+   * moving anything but the caret, and every one of them ends at the right.
+   */
+  describe('where the caret was', () => {
+    const before = 'R$ 12,34';
+
+    it('takes a digit typed against the first character at the right', () => {
+      expect(brazil.editFromText({ previous: before, text: 'R$ 912,34' })).toEqual({
+        value: 123.49,
+        minorUnits: 12349,
+      });
+    });
+
+    it('takes a digit typed into the middle at the right', () => {
+      expect(brazil.editFromText({ previous: before, text: 'R$ 12,934' })).toEqual({
+        value: 123.49,
+        minorUnits: 12349,
+      });
+    });
+
+    it('takes the digit at the right off, whatever the caret was against', () => {
+      expect(brazil.editFromText({ previous: before, text: 'R$ 1,34' })).toEqual({
+        value: 1.23,
+        minorUnits: 123,
+      });
+      expect(brazil.editFromText({ previous: before, text: 'R$ 12,4' })).toEqual({
+        value: 1.23,
+        minorUnits: 123,
+      });
+    });
+
+    it('replaces a selection at the right rather than where it stood', () => {
+      /* `5` typed over `2,3`: two digits went, one came. */
+      expect(brazil.editFromText({ previous: before, text: 'R$ 154' })).toEqual({
+        value: 1.25,
+        minorUnits: 125,
+      });
+    });
+
+    it('empties the run when the whole amount is deleted at once', () => {
+      expect(brazil.editFromText({ previous: before, text: '' })).toEqual({
+        value: null,
+        minorUnits: null,
+      });
+    });
+
+    it('reads the text alone when there is no text behind it', () => {
+      expect(brazil.editFromText({ text: 'R$ 912,34' })).toEqual({
+        value: 912.34,
+        minorUnits: 91234,
+      });
+    });
+  });
+
+  /**
+   * The rule itself, over runs rather than over amounts: what the two runs
+   * share at either end is what the edit did not touch, and the middle of each
+   * is what went and what came.
+   */
+  describe('shiftIntoRun', () => {
+    it('appends what came, wherever it appeared', () => {
+      expect(shiftIntoRun('000', '2000')).toBe('0002');
+      expect(shiftIntoRun('1234', '12934')).toBe('12349');
+      expect(shiftIntoRun('1234', '12345')).toBe('12345');
+      expect(shiftIntoRun('', '5')).toBe('5');
+    });
+
+    it('takes off what went, from the right', () => {
+      expect(shiftIntoRun('1234', '134')).toBe('123');
+      expect(shiftIntoRun('1234', '123')).toBe('123');
+      expect(shiftIntoRun('1234', '')).toBe('');
+    });
+
+    it('counts a replacement as both, in one keystroke', () => {
+      expect(shiftIntoRun('1234', '154')).toBe('125');
+      expect(shiftIntoRun('1234', '9')).toBe('9');
+    });
+
+    it('leaves a run nothing happened to alone', () => {
+      expect(shiftIntoRun('1234', '1234')).toBe('1234');
+      expect(shiftIntoRun('', '')).toBe('');
+    });
   });
 
   it('carries the sign the family holds rather than reading it from the text', () => {

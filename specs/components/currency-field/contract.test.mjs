@@ -154,6 +154,7 @@ test('states how each entry model treats the text, the caret and the digits', ()
     shiftBy: 'minorUnits',
     writesTextOn: 'input',
     caret: 'after the last digit',
+    caretIgnored: true,
     separatorTyped: false,
     signKeys: ['-', '+'],
     pasteParsed: true,
@@ -163,6 +164,20 @@ test('states how each entry model treats the text, the caret and the digits', ()
   assert.equal(contract.entryModel.natural.writesTextOn, 'commit');
   assert.equal(contract.entryModel.natural.separatorTyped, true);
   assert.deepEqual(contract.entryModel.natural.signKeys, []);
+});
+
+/**
+ * The one legal caret position is also the only one the amount is read from.
+ * A digit typed against the first character of `R$ 0,00` produced `R$ 20,00`
+ * while the digits were read out of the text the browser had already edited:
+ * the caret decided the amount, and a cash register has no caret. The digits
+ * the reader added or took away are read from the difference between the text
+ * before the edit and the text after it, so both edits land at the right.
+ */
+test('reads the amount from the digits that changed, not from where they landed', () => {
+  assert.equal(contract.entryModel.cents.caretIgnored, true);
+  assert.equal(contract.entryModel.cents.caret, 'after the last digit');
+  assert.equal(contract.entryModel.natural.caret, "the reader's");
 });
 
 /**

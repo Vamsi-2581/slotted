@@ -63,6 +63,16 @@ export interface CurrencyFormatRequest {
 export interface AmountEditRequest {
   /** What the element holds after the browser applied the edit. */
   text: string;
+  /**
+   * What it held before the browser applied it. Given both, the digits the
+   * reader added or took away are read from the difference between the two
+   * runs rather than from where the caret was, which is what makes the caret
+   * irrelevant to the amount.
+   *
+   * Left out, the digits of `text` are the run, which is what a text with no
+   * edit behind it means.
+   */
+  previous?: string | undefined;
   /** `InputEvent.inputType`, which is what says whether this was a paste. */
   inputType?: string | undefined;
   /** The sign the amount carried before the edit. */
@@ -129,6 +139,41 @@ export function withAmount(
 function minorUnitsOf(locale: string | undefined, currency: string) {
   const probe = new Intl.NumberFormat(locale, { style: 'currency', currency });
   return probe.resolvedOptions().maximumFractionDigits ?? 2;
+}
+
+/**
+ * The digit run a keystroke leaves behind, under the cash register's rule:
+ * whatever the reader took out comes off the right, and whatever they put in
+ * goes on the right, wherever the caret actually was.
+ *
+ * The two runs are compared from both ends. What they share at the front and
+ * at the back is what the edit did not touch; what is left in the middle of
+ * `before` is what went, and what is left in the middle of `after` is what
+ * came. A selection replaced by a digit is therefore a removal and an
+ * insertion in one keystroke, which is why the two are counted separately
+ * rather than from the change in length.
+ *
+ * `0,00` with the caret at the front and `2` pressed gives `2000` here and
+ * `0002` — two cents — as the run, because the `2` that appeared at the front
+ * is the middle of `after` and it is appended rather than left where it fell.
+ */
+export function shiftIntoRun(before: string, after: string): string {
+  const shortest = Math.min(before.length, after.length);
+
+  let head = 0;
+  while (head < shortest && before[head] === after[head]) head += 1;
+
+  let tail = 0;
+  while (
+    tail < shortest - head &&
+    before[before.length - 1 - tail] === after[after.length - 1 - tail]
+  ) {
+    tail += 1;
+  }
+
+  const removed = before.length - head - tail;
+  const inserted = after.slice(head, after.length - tail);
+  return before.slice(0, before.length - removed) + inserted;
 }
 
 /**
@@ -244,7 +289,7 @@ export function createCurrencyFormat({
       return base.isPartial(unwrapAccounting(text).text);
     },
 
-    editFromText({ text, inputType, negative = false, allowNegative = true }) {
+    editFromText({ text, previous, inputType, negative = false, allowNegative = true }) {
       /**
        * The one case where the cash-register rule would lose the reader's data:
        * `R$ 1.480,00` copied from a bank statement is one thousand four hundred
@@ -261,7 +306,9 @@ export function createCurrencyFormat({
         }
       }
 
-      const accumulated = digitsOf(text).slice(0, MAX_AMOUNT_DIGITS);
+      const run =
+        previous === undefined ? digitsOf(text) : shiftIntoRun(digitsOf(previous), digitsOf(text));
+      const accumulated = run.slice(0, MAX_AMOUNT_DIGITS);
       if (accumulated === '') return { value: null, minorUnits: null };
 
       const magnitude = Number(accumulated);

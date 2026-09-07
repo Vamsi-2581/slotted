@@ -265,7 +265,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
 
 Localização: `packages/core/src/number/number.ts`, `packages/react/src/currency-field/currency-field.tsx`, `packages/angular/currency-field/src`.
 
-- [ ] **CF1 — Digitação com cursor à esquerda produz `20,00` em vez de `0,02`.** Decisão: o campo opera em modo calculadora. Os dígitos entram sempre pela direita, deslocando o valor para a esquerda (`0,00` → digita `2` → `0,02` → digita `5` → `0,25`). A posição do cursor é ignorada para inserção; o cursor fica sempre no fim. `Backspace` remove o último dígito à direita. Colar substitui o valor inteiro após parse. Escrever testes em `number.test.ts` e `currency-field.test.tsx` cobrindo: cursor no início, cursor no meio, seleção parcial, colar `1.234,56` e `1234.56`.
+- [x] **CF1 — Digitação com cursor à esquerda produz `20,00` em vez de `0,02`.** Decisão: o campo opera em modo calculadora. Os dígitos entram sempre pela direita, deslocando o valor para a esquerda (`0,00` → digita `2` → `0,02` → digita `5` → `0,25`). A posição do cursor é ignorada para inserção; o cursor fica sempre no fim. `Backspace` remove o último dígito à direita. Colar substitui o valor inteiro após parse. Escrever testes em `number.test.ts` e `currency-field.test.tsx` cobrindo: cursor no início, cursor no meio, seleção parcial, colar `1.234,56` e `1234.56`.
 - [ ] **CF2 — Valor vazio.** Decisão: prop `allowEmpty` (padrão `false`). Com `false`, limpar o campo resulta em `0,00` e o valor emitido é `0`. Com `true`, o campo pode ficar vazio e o valor emitido é `null`. Documentar no contrato.
 
 ---

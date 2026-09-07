@@ -386,7 +386,12 @@ export function CurrencyField({
         return;
       }
       if (resolvedClamp !== 'strict') return;
-      const edit = formatter.editFromText({ text: next, negative: negativeNow(), allowNegative });
+      const edit = formatter.editFromText({
+        text: next,
+        previous: element.value,
+        negative: negativeNow(),
+        allowNegative,
+      });
       if (edit.value === null) return;
       if ((min !== undefined && edit.value < min) || (max !== undefined && edit.value > max)) {
         event.preventDefault();
@@ -596,6 +601,10 @@ export function CurrencyField({
         const inputType = (event.nativeEvent as InputEvent).inputType;
         const edit = formatter.editFromText({
           text: next,
+          /* What the element showed before this keystroke, which is what turns
+             the digits the reader added into digits at the right rather than
+             digits where the caret happened to be. */
+          previous: text,
           negative: negativeNow(),
           allowNegative,
           ...(inputType === undefined ? {} : { inputType }),

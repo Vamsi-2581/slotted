@@ -226,6 +226,79 @@ describe('cents-first entry', () => {
     expect(input(dinar).getAttribute('aria-valuenow')).toBe('1.234');
   });
 
+  /**
+   * The caret is not where a digit lands. A cash register takes the digit at
+   * the minor unit whatever the reader is pointing at, and this is the whole
+   * of `entry="cents"`.
+   */
+  it('takes every edit at the right, wherever the caret was', () => {
+    const fixture = renderTemplate(`
+      <div slCurrencyField>
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" />
+      </div>`);
+
+    typeDigits(fixture, '1234');
+
+    /* `9` typed against the first digit. */
+    type(input(fixture), 'R$\u00a0912,34');
+    fixture.detectChanges();
+    expect(plain(input(fixture).value)).toBe('R$ 123,49');
+
+    /* Backspace pressed against the second whole digit. */
+    type(input(fixture), 'R$\u00a012,49', 'deleteContentBackward');
+    fixture.detectChanges();
+    expect(plain(input(fixture).value)).toBe('R$ 12,34');
+
+    /* `5` typed over `2,3`. */
+    type(input(fixture), 'R$\u00a0154');
+    fixture.detectChanges();
+    expect(plain(input(fixture).value)).toBe('R$ 1,25');
+  });
+
+  it('puts the caret back after the last digit', () => {
+    const fixture = renderTemplate(`
+      <div slCurrencyField>
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" />
+      </div>`);
+
+    input(fixture).focus();
+    typeDigits(fixture, '1234');
+    input(fixture).setSelectionRange(3, 3);
+    type(input(fixture), 'R$\u00a0912,34');
+    fixture.detectChanges();
+
+    expect(plain(input(fixture).value)).toBe('R$ 123,49');
+    expect(input(fixture).selectionStart).toBe(input(fixture).value.length);
+  });
+
+  /**
+   * Both shapes the item names, each read by the locale it is pasted into. In
+   * a locale that groups with a full stop, `1234.56` is one hundred and
+   * twenty-three thousand — the group separator is what a full stop is there.
+   */
+  it('parses a pasted amount by the locale it is pasted into', () => {
+    const brazil = renderTemplate(`
+      <div slCurrencyField>
+        <input slCurrencyFieldInput currency="BRL" locale="pt-BR" />
+      </div>`);
+
+    type(input(brazil), '1.234,56', 'insertFromPaste');
+    brazil.detectChanges();
+    expect(input(brazil).getAttribute('aria-valuenow')).toBe('1234.56');
+
+    type(input(brazil), '1234.56', 'insertFromPaste');
+    brazil.detectChanges();
+    expect(input(brazil).getAttribute('aria-valuenow')).toBe('123456');
+
+    const states = renderTemplate(`
+      <div slCurrencyField>
+        <input slCurrencyFieldInput currency="USD" locale="en-US" />
+      </div>`);
+    type(input(states), '1234.56', 'insertFromPaste');
+    states.detectChanges();
+    expect(input(states).getAttribute('aria-valuenow')).toBe('1234.56');
+  });
+
   it('empties to nothing rather than to nought', () => {
     const fixture = renderTemplate(`
       <div slCurrencyField>

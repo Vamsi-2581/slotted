@@ -175,6 +175,67 @@ describe('cents-first entry', () => {
     expect(onValueChange).toHaveBeenLastCalledWith(null, expect.objectContaining({ value: null }));
   });
 
+  /**
+   * The caret is not where a digit lands. A cash register takes the digit at
+   * the minor unit whatever the reader is pointing at, and this is the whole
+   * of `entry="cents"`.
+   */
+  it('takes a digit typed against the first character at the right anyway', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+
+    typeDigits('0');
+    expect(plain(control().value)).toBe('R$ 0,00');
+
+    /* What the browser produces for `2` typed with the caret before the nought. */
+    type('R$\u00a020,00');
+    expect(plain(control().value)).toBe('R$ 0,02');
+  });
+
+  it('takes a digit typed into the middle of the amount at the right anyway', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+    typeDigits('1234');
+    expect(plain(control().value)).toBe('R$ 12,34');
+
+    /* `9` typed with the caret between the two whole digits. */
+    type('R$\u00a012,934');
+    expect(plain(control().value)).toBe('R$ 123,49');
+  });
+
+  /**
+   * A selection is not a place either. Two digits went and one came, so two
+   * come off the right and one goes on it.
+   */
+  it('replaces a selection at the right rather than where it stood', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+    typeDigits('1234');
+
+    /* `5` typed over `2,3`. */
+    type('R$\u00a0154');
+    expect(plain(control().value)).toBe('R$ 1,25');
+  });
+
+  it('takes the digit at the right off, whatever the caret was against', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+    typeDigits('1234');
+
+    /* Backspace pressed against the second whole digit. */
+    type('R$\u00a01,34');
+    expect(plain(control().value)).toBe('R$ 1,23');
+  });
+
+  /** The caret has one legal position, and every keystroke returns it there. */
+  it('puts the caret back after the last digit', () => {
+    render(<CurrencyField currency="BRL" locale="pt-BR" />);
+    control().focus();
+    typeDigits('1234');
+
+    control().setSelectionRange(3, 3);
+    /* `9` typed against the first digit. */
+    type('R$\u00a0912,34');
+    expect(plain(control().value)).toBe('R$ 123,49');
+    expect(control().selectionStart).toBe(control().value.length);
+  });
+
   it('keeps a nought a reader actually typed', () => {
     render(<CurrencyField currency="BRL" locale="pt-BR" />);
 
@@ -196,6 +257,35 @@ describe('cents-first entry', () => {
 
     expect(plain(control().value)).toBe('R$ 1.480,00');
     expect(control()).toHaveAttribute('aria-valuenow', '1480');
+  });
+
+  /**
+   * Both shapes the item names, each read by the locale it is pasted into. In
+   * a locale that groups with a full stop, `1234.56` is one hundred and
+   * twenty-three thousand — the group separator is what a full stop is there,
+   * and a field that guessed otherwise would read `1.234` as one and a bit.
+   */
+  it('parses a pasted amount by the locale it is pasted into', () => {
+    const { unmount } = render(<CurrencyField currency="BRL" locale="pt-BR" />);
+    fireEvent.input(control(), {
+      target: { value: '1.234,56' },
+      inputType: 'insertFromPaste',
+    });
+    expect(control()).toHaveAttribute('aria-valuenow', '1234.56');
+
+    fireEvent.input(control(), {
+      target: { value: '1234.56' },
+      inputType: 'insertFromPaste',
+    });
+    expect(control()).toHaveAttribute('aria-valuenow', '123456');
+    unmount();
+
+    render(<CurrencyField currency="USD" locale="en-US" />);
+    fireEvent.input(control(), {
+      target: { value: '1234.56' },
+      inputType: 'insertFromPaste',
+    });
+    expect(control()).toHaveAttribute('aria-valuenow', '1234.56');
   });
 
   it('reads an accounting negative back as a negative when it is pasted', () => {

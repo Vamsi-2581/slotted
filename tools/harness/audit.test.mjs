@@ -375,6 +375,33 @@ test('takes a tolerance, for a page that has reason to want a tighter one', () =
   assert.deepEqual(offAxisMarks([before], 4), []);
 });
 
+/**
+ * SI1. A status with no words of its own carries its name in a
+ * `visually-hidden` span — one pixel, absolutely positioned, clipped to
+ * nothing — and its text still returns a rectangle. The audit measured the dot
+ * against it 18 times, at 1.25px in `comfortable` and 1px in `compact` and
+ * `dense`, while the same dot beside every visible label of the family measured
+ * 0 to 0.5px. There is no line there to be off the axis of.
+ */
+test('does not measure a mark against words no reader can see', () => {
+  const announced = {
+    scene: 'bare · light · 240px · comfortable · ltr',
+    element: 'span[data-part=mark]',
+    markCentre: 5154.5,
+    textCentre: 5153.25,
+    markTop: 5150,
+    markBottom: 5159,
+    lineTop: 5145.75,
+    lineBottom: 5160.75,
+    hidden: true,
+  };
+  assert.deepEqual(offAxisMarks([announced]), []);
+  assert.deepEqual(
+    offAxisMarks([{ ...announced, hidden: false }]).map((finding) => finding.offset),
+    [1.25],
+  );
+});
+
 test('says nothing about a page with no marks on it', () => {
   assert.deepEqual(offAxisMarks([]), []);
 });

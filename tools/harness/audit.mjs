@@ -205,9 +205,16 @@ export function annotatesTheLine({ markTop, markBottom, lineTop, lineBottom }) {
  * The marks whose centre misses the centre of the line beside them. Kept out of
  * the page so the judgement is testable without a browser: the page measures,
  * this decides.
+ *
+ * A mark whose line is text no reader can see has no axis to miss either. A
+ * status with no words of its own carries its name in a `visually-hidden` span
+ * — a clipped box of one pixel — and the audit measured the dot against it,
+ * 1.25px, eighteen times, while the same dot beside every visible label of the
+ * family measured 0 to 0.5px (SI1).
  */
 export function offAxisMarks(marks, tolerance = AXIS_TOLERANCE) {
   return marks
+    .filter((mark) => mark.hidden !== true)
     .filter((mark) => annotatesTheLine(mark))
     .map((mark) => ({ ...mark, offset: +(mark.markCentre - mark.textCentre).toFixed(2) }))
     .filter((mark) => Math.abs(mark.offset) > tolerance);
@@ -385,7 +392,31 @@ const MEASURE = `(() => {
     const range = document.createRange();
     range.selectNodeContents(text);
     const rects = [...range.getClientRects()].filter((rect) => rect.height > 0);
-    return rects[0] ?? null;
+    if (rects[0] === undefined) return null;
+    return { rect: rects[0], hidden: hiddenFromReaders(text.parentElement, node) };
+  };
+
+  /**
+   * Whether the text is on the page for a reader or only for a screen reader.
+   *
+   * A status with no words of its own carries its name in a
+   * \`visually-hidden\` span, and the audit paired the dot with that name: a
+   * 1px box, absolutely positioned, clipped to nothing, whose text still
+   * returns a rectangle. Eighteen findings of 1.25px against a line no reader
+   * has ever seen (SI1). The test is the mechanism every implementation of
+   * that pattern uses — a clip, or a box of a pixel with its overflow cut —
+   * rather than a class name this library happens to write.
+   */
+  const hiddenFromReaders = (from, stopAt) => {
+    for (let node = from; node !== null; node = node.parentElement) {
+      const style = getComputedStyle(node);
+      const box = node.getBoundingClientRect();
+      if (style.visibility === 'hidden' || style.opacity === '0') return true;
+      if ((style.clipPath ?? 'none') !== 'none') return true;
+      if (style.overflow !== 'visible' && (box.width < 2 || box.height < 2)) return true;
+      if (node === stopAt) break;
+    }
+    return false;
   };
 
   const textBeside = (node) => {
@@ -406,8 +437,9 @@ const MEASURE = `(() => {
 
     const sibling = textBeside(node);
     if (!sibling) continue;
-    const line = firstLineOf(sibling);
-    if (!line) continue;
+    const found = firstLineOf(sibling);
+    if (!found) continue;
+    const line = found.rect;
 
     /* A mark twice the height of the line it sits beside is a picture rather
        than a glyph, and a picture is aligned to a block, not to an axis. */
@@ -422,6 +454,7 @@ const MEASURE = `(() => {
       markBottom: +box.bottom.toFixed(2),
       lineTop: +line.top.toFixed(2),
       lineBottom: +line.bottom.toFixed(2),
+      hidden: found.hidden,
     });
   }
 

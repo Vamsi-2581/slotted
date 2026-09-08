@@ -77,10 +77,6 @@
     --_footer-padding-block: var(--slotted-space-5, 0.75rem);
     --_gap: var(--slotted-space-5, 0.75rem);
     --_rule-size: var(--slotted-border-width-thin, 1px);
-    /* How far the panel arrives from: one step of the space scale, the step
-       every anchored layer arrives across (R7), so a theme retunes the two
-       together. */
-    --_enter-distance: var(--slotted-space-2, 0.25rem);
     /**
      * The title is on the type scale rather than on the control type scale.
      * A control's label is 12 to 14 pixels because it lives inside a button; a
@@ -195,9 +191,22 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
+  /**
+   * The arrival is the long step on the standard curve, and both halves of
+   * that are a correction (DG4). On the entrance curve the scrim was at
+   * 57.6 per cent of its ink by the second frame of the transition and at
+   * 83 per cent by the fourth — a curve written for something that travels
+   * and decelerates into place, spent on something that only changes ink —
+   * and it was reported as a scrim that simply appeared. The standard curve
+   * over the long step spends the frames where they can be seen: measured on
+   * the same page, 10.8 per cent at 25 milliseconds and 55 per cent at 100.
+   *
+   * The panel below arrives over the same duration and the same curve, so the
+   * two halves of one layer arrive together.
+   */
   [data-ui='dialog'][data-open] > [data-part='backdrop'] {
     opacity: 1;
-    transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
+    transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
 
   /* ── The box the panel sits in ────────────────────────────────────────── */
@@ -278,28 +287,32 @@
     overflow: hidden;
 
     /**
-     * The panel arrives from above by one step of the space scale, which is the
-     * distance and the grammar every anchored layer arrives with (R7) and the
-     * direction the panel placed at the block start already comes from — one
-     * movement in the family, seen at two distances.
+     * The panel arrives by changing its ink and by nothing else.
      *
-     * It grew into place for one iteration, from `0.98`, and that is what R7
-     * now refuses: a box with a title, a body and a row of buttons in it
-     * resamples every letter it holds while it is being scaled, and the
-     * composition reads as though it were sliding. Measured on the way in, the
+     * It grew into place for one iteration, from `0.98`, and R7 refuses that:
+     * a box with a title, a body and a row of buttons in it resamples every
+     * letter it holds while it is being scaled. Measured on the way in, the
      * title's own box was up to 6.82 pixels narrower than at rest and off the
      * pixel grid in thirteen frames of twenty-eight;
-     * `packages/styles/src/text-scale.test.mjs` holds the rule now.
+     * `packages/styles/src/text-scale.test.mjs` holds that rule.
+     *
+     * Then it travelled four pixels instead, and the same defect was reported
+     * again (DG4). A box the browser is moving is a composited layer, and a
+     * layer moved by a fraction of a pixel has its text resampled for every
+     * frame it is between two of them: measured, eleven of the twelve frames
+     * of the movement landed on a fractional position — 32.305, 32.973,
+     * 33.326 — and the reader sees the words lose their edges and get them
+     * back. A centred panel has nothing for the movement to be *from* either,
+     * which is what the first draft of this rule said before the travel was
+     * written into it.
+     *
+     * So the entrance is `opacity` alone, at the same duration and on the same
+     * curve as the scrim behind it. Nothing about the geometry changes while
+     * the panel arrives, and there is no frame in which the type is drawn at a
+     * position it does not keep.
      */
     opacity: 0;
-    translate: 0 calc(-1 * var(--_enter-distance));
-    transition:
-      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      translate var(--slotted-duration-short) var(--slotted-easing-exit);
-  }
-
-  [data-ui='dialog'][data-placement='top'] > [data-part='viewport'] > [data-part='content'] {
-    translate: 0 calc(-1 * var(--slotted-space-5, 0.75rem));
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
   /**
@@ -307,32 +320,24 @@
    * appearing is a state change the eye has to follow, because the page it
    * covers is still visible behind it; a reader who has decided to close is
    * waiting, so the exit is the short duration.
+   *
+   * The panel placed at the block start arrived by sliding twelve pixels from
+   * the edge it sits on, and it is on the same rule now for the same reason:
+   * the type inside it is what the slide was resampling (DG4).
    */
   [data-ui='dialog'][data-open] > [data-part='viewport'] > [data-part='content'] {
     opacity: 1;
-    translate: 0 0;
-    transition:
-      opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      translate var(--slotted-duration-medium) var(--slotted-easing-enter);
+    transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
 
   /**
-   * Reduced motion keeps the fade and drops the movement. A panel that
-   * appears from nothing is still a change the eye has to find, and the fade
-   * is what says where; the slide is what the preference refuses.
-   * `motion.test.mjs` holds the rule for every family.
+   * Reduced motion has nothing left to drop here: neither the panel nor the
+   * scrim moves, and a fade is what the preference keeps. The theme collapses
+   * every duration token under this query, so the arrival becomes instant
+   * without a rule of its own — `motion.test.mjs` holds that for every family.
+   * The rule the family did carry was the one that stopped the panel
+   * travelling, and there is no travel to stop (DG4).
    */
-  @media (prefers-reduced-motion: reduce) {
-    [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'],
-    [data-ui='dialog'][data-placement='top'] > [data-part='viewport'] > [data-part='content'] {
-      translate: 0 0;
-      transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
-    }
-
-    [data-ui='dialog'][data-open] > [data-part='viewport'] > [data-part='content'] {
-      transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
-    }
-  }
 
   [data-ui='dialog'][data-scroll='viewport'] > [data-part='viewport'] > [data-part='content'] {
     max-block-size: none;

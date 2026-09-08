@@ -80,6 +80,19 @@ export function ComboboxItem({
     combobox.setHighlighted(value, 'pointer', event.nativeEvent);
   };
 
+  /**
+   * The press is taken here as well, and only to stop the browser moving focus
+   * off the input: an option cannot hold focus, so a press on it would take
+   * focus to the body — and the settling of CB7 would run on the query the
+   * reader was in the middle of choosing from, before the click arrived (CB11).
+   * `listbox` refuses the press for the mirror of this reason.
+   */
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    nativeProps.onPointerDown?.(event);
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+  };
+
   const onClick = (event: MouseEvent<HTMLDivElement>) => {
     if (disabled) return;
     combobox.select(value, 'pointer', event.nativeEvent);
@@ -103,6 +116,7 @@ export function ComboboxItem({
       {...(current ? { 'data-current': '' } : {})}
       id={nativeProps.id ?? combobox.optionId(value)}
       onClick={onClick}
+      onPointerDown={onPointerDown}
       onPointerEnter={onPointerEnter}
       ref={(element: HTMLDivElement | null) => {
         setNode(element);

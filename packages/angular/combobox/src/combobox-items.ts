@@ -51,6 +51,7 @@ import type { ComboboxOptionValue } from './combobox-defaults';
     '[attr.data-selected]': "selected() ? '' : null",
     '[attr.data-current]': "current() ? '' : null",
     '(click)': 'onClick($event)',
+    '(pointerdown)': 'onPointerDown($event)',
     '(pointerenter)': 'onPointerEnter($event)',
   },
   template: `
@@ -124,6 +125,17 @@ export class SlComboboxItem {
   protected onPointerEnter(event: PointerEvent) {
     if (this.disabled()) return;
     this.combobox.setHighlighted(this.value(), 'pointer', event);
+  }
+
+  /**
+   * Only to stop the browser moving focus off the input: an option cannot hold
+   * focus, so a press on it would take focus to the body — and the settling of
+   * CB7 would run on the query the reader was in the middle of choosing from,
+   * before the click arrived (CB11).
+   */
+  protected onPointerDown(event: PointerEvent) {
+    if (event.defaultPrevented) return;
+    event.preventDefault();
   }
 
   protected onClick(event: MouseEvent) {

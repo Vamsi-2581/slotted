@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -35,6 +35,21 @@ const type = (value: string) => fireEvent.change(input(), { target: { value } })
 const optionNamed = (name: string) => screen.getByRole('option', { name });
 const highlighted = () => input().getAttribute('aria-activedescendant');
 const listed = () => screen.queryAllByRole('option').map((option) => option.textContent);
+
+/**
+ * What a browser does with a press on an option, in the order it does it. The
+ * focus move is the press's default action, so an option that refuses the press
+ * leaves focus where it was — and only a press that moved focus produces the
+ * `blur` that follows it. `click` is dispatched either way (CB11).
+ */
+const pressOption = (option: HTMLElement) => {
+  const focusMoves = fireEvent.pointerDown(option);
+  if (focusMoves) act(() => (document.activeElement as HTMLElement | null)?.blur());
+  /* And `inert` swallows it: a browser dispatches no click into a subtree the
+     layer has switched off, which jsdom does not model. */
+  if (option.closest('[inert]') !== null) return;
+  fireEvent.click(option);
+};
 
 const openByArrow = async () => {
   input().focus();
@@ -369,6 +384,55 @@ describe('Combobox', () => {
         expect.objectContaining({ reason: 'blur' }),
       );
       expect(input()).toHaveValue('Blueberry');
+    });
+  });
+
+  /**
+   * CB11. The pointer is the primary interaction of the family, and it crosses
+   * the one place the family gives up: a press on an option is a press on
+   * something that cannot hold focus, so the browser takes focus off the input
+   * and the settling of CB7 runs on text the reader was in the middle of using.
+   */
+  describe('choosing with the pointer', () => {
+    it('selects the option that was clicked, with a query in the field', async () => {
+      const onValueChange = vi.fn();
+      render(<Basic onValueChange={onValueChange} />);
+      input().focus();
+      type('berr');
+      await screen.findByRole('listbox');
+
+      pressOption(optionNamed('Raspberry'));
+
+      expect(onValueChange).toHaveBeenCalledWith(
+        'raspberry',
+        expect.objectContaining({ reason: 'pointer' }),
+      );
+      expect(input()).toHaveValue('Raspberry');
+    });
+
+    it('keeps DOM focus on the input across the press', async () => {
+      render(<Basic />);
+      input().focus();
+      type('berr');
+      await screen.findByRole('listbox');
+
+      pressOption(optionNamed('Raspberry'));
+
+      expect(document.activeElement).toBe(input());
+    });
+
+    it('does not settle the query as a value the press was about to replace', async () => {
+      const onInputReset = vi.fn();
+      render(<Basic onInputReset={onInputReset} />);
+      input().focus();
+      type('berr');
+      await screen.findByRole('listbox');
+
+      pressOption(optionNamed('Cloudberry'));
+
+      /* Disabled: the press changes nothing, and refuses nothing either. */
+      expect(onInputReset).not.toHaveBeenCalled();
+      expect(input()).toHaveValue('berr');
     });
   });
 

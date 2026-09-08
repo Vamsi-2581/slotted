@@ -99,6 +99,21 @@ describe('Listbox, identity and wiring', () => {
 });
 
 describe('Listbox, single selection', () => {
+  /**
+   * CB11 verified from this family's side: the root holds focus and
+   * `aria-activedescendant` names the option, so the option refuses the press
+   * that would take focus off it. The rule was already here; this is its guard.
+   */
+  it('refuses the press that would move focus off the root', () => {
+    render(<Regions defaultValue="africa" />);
+
+    const moved = fireEvent.pointerDown(byKey('europe'));
+
+    expect(moved).toBe(false);
+    fireEvent.click(byKey('europe'));
+    expect(byKey('europe')).toHaveAttribute('data-selected', '');
+  });
+
   it('replaces whatever was chosen', () => {
     render(<Regions defaultValue="africa" />);
 

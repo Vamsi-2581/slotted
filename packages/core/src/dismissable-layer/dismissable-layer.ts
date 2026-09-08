@@ -261,6 +261,27 @@ function applyInert(node: HTMLElement): () => void {
 }
 
 /**
+ * Where the pointer went down for the press still in flight, or `null` when
+ * none is. The stack already records it so that a layer deciding on the click
+ * does not read a press that began inside it as a press outside; the same
+ * question is asked by a control that loses focus mid-press.
+ *
+ * A press on a node that cannot hold focus takes focus off whatever had it, and
+ * the `blur` that follows carries `relatedTarget: null` — so a control cannot
+ * tell "the reader left" from "the reader pressed something of mine". This
+ * answers it, and answers it from the record the stack was already keeping
+ * rather than from a second document listener (CB11).
+ *
+ * Reads and never attaches: with no layer open there is no stack, and no press
+ * is being tracked.
+ */
+export function pressOrigin(doc?: Document): EventTarget | null {
+  const target = doc ?? (globalThis as { document?: Document }).document;
+  if (!target) return null;
+  return stacks.get(target)?.pressStart ?? null;
+}
+
+/**
  * One lock per document, counted, with the inline styles it found recorded at
  * the first lock and restored at the last. A counter without the recorded
  * originals leaves an `overflow: hidden` behind whenever two locks release out

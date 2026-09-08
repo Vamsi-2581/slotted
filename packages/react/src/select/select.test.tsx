@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -45,6 +45,17 @@ const open = async () => {
 
 const optionNamed = (name: string) => screen.getByRole('option', { name });
 const highlighted = () => trigger().getAttribute('aria-activedescendant');
+
+/**
+ * What a browser does with a press on an option, in the order it does it. The
+ * focus move is the press's default action, so an option that refuses the press
+ * leaves focus where it was; `click` is dispatched either way (CB11).
+ */
+const pressOption = (option: HTMLElement) => {
+  const focusMoves = fireEvent.pointerDown(option);
+  if (focusMoves) act(() => (document.activeElement as HTMLElement | null)?.blur());
+  fireEvent.click(option);
+};
 
 describe('Select', () => {
   it('is a combobox that opens a listbox, which is the pattern it cites', async () => {
@@ -271,6 +282,41 @@ describe('Select', () => {
     const overflow = container.querySelector("[data-part='tags'] > [data-overflow]");
     expect(overflow).toHaveAttribute('data-ui', 'tag');
     expect(overflow).toHaveAttribute('hidden');
+  });
+
+  /**
+   * CB11, from this family's side. The button holds focus and
+   * `aria-activedescendant` names the option; a press that moved focus to the
+   * body would leave the property pointing at something that is not the active
+   * element.
+   */
+  it('keeps DOM focus on the trigger across a press on an option', async () => {
+    const onValueChange = vi.fn();
+    render(<Basic onValueChange={onValueChange} />);
+    await open();
+
+    pressOption(optionNamed('Blueberry'));
+
+    expect(document.activeElement).toBe(trigger());
+    expect(onValueChange).toHaveBeenCalledWith(
+      'blueberry',
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('keeps it across every press of a multiple selection', async () => {
+    const onValueChange = vi.fn();
+    render(<Basic multiple onValueChange={onValueChange} />);
+    await open();
+
+    pressOption(optionNamed('Apple'));
+    pressOption(optionNamed('Cherry'));
+
+    expect(document.activeElement).toBe(trigger());
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      ['apple', 'cherry'],
+      expect.objectContaining({ reason: 'pointer' }),
+    );
   });
 
   it('takes a value out of the selection from its own chip', async () => {

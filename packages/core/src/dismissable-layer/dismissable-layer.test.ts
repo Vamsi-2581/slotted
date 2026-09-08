@@ -5,6 +5,7 @@ import {
   LAYER_DEPTH_PROPERTY,
   createDismissableLayer,
   createScrollLock,
+  pressOrigin,
 } from './dismissable-layer';
 
 function mount(markup: string) {
@@ -472,6 +473,52 @@ describe('createDismissableLayer', () => {
       expect(document.body.style.overflow).toBe('');
       handle.destroy();
     });
+  });
+});
+
+/**
+ * The same record read from the other side. A control that loses focus during a
+ * press gets `relatedTarget: null` and cannot tell the reader leaving from the
+ * reader pressing something of its own (CB11).
+ */
+describe('pressOrigin', () => {
+  beforeEach(() => {
+    mount('<div id="frame"><button id="inside"></button></div><button id="page"></button>');
+  });
+
+  it('reports nothing while no layer is open', () => {
+    press(element('inside'));
+    expect(pressOrigin(document)).toBeNull();
+  });
+
+  it('names where the press in flight went down, and forgets it at the click', () => {
+    const layer = recorder();
+    const handle = createDismissableLayer(element('frame'), { ...layer, outsidePress: false });
+
+    press(element('inside'), 'pointerdown');
+    expect(pressOrigin(document)).toBe(element('inside'));
+
+    press(element('inside'), 'click');
+    expect(pressOrigin(document)).toBeNull();
+    handle.destroy();
+  });
+
+  it('names a press that went down outside just as plainly', () => {
+    const layer = recorder();
+    const handle = createDismissableLayer(element('frame'), { ...layer, outsidePress: false });
+
+    press(element('page'), 'pointerdown');
+    expect(pressOrigin(document)).toBe(element('page'));
+    handle.destroy();
+  });
+
+  it('falls back to the ambient document', () => {
+    const layer = recorder();
+    const handle = createDismissableLayer(element('frame'), { ...layer, outsidePress: false });
+
+    press(element('inside'), 'pointerdown');
+    expect(pressOrigin()).toBe(element('inside'));
+    handle.destroy();
   });
 });
 

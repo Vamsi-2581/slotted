@@ -1,4 +1,4 @@
-import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -240,6 +240,12 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
   const onBlur = (event: { relatedTarget: EventTarget | null }) => {
     const next = event.relatedTarget;
     if (next instanceof Node && combobox.contentNode?.contains(next) === true) return;
+    /* A press on the popup's own surface — its padding, a group heading, its
+       scrollbar — takes focus off the input and reports `relatedTarget: null`,
+       which is indistinguishable from the reader leaving. The layer stack
+       already records where the press in flight went down, so ask it (CB11). */
+    const began = pressOrigin(node?.ownerDocument);
+    if (began instanceof Node && combobox.contentNode?.contains(began) === true) return;
     /* The last moment at which the reader is still choosing, which is where
        text that matched no option is settled (CB7). */
     combobox.settleInput(event);
@@ -649,6 +655,12 @@ export function ComboboxContent({
               combobox.create(combobox.query, 'pointer', event.nativeEvent);
               combobox.setOpen(false, 'select', event.nativeEvent);
               combobox.inputNode?.focus({ preventScroll: true });
+            }}
+            /* An option, so it refuses the press for the reason every option
+               refuses it (CB11). */
+            onPointerDown={(event) => {
+              if (event.defaultPrevented) return;
+              event.preventDefault();
             }}
             onPointerEnter={(event) =>
               combobox.setHighlighted(combobox.query, 'pointer', event.nativeEvent)

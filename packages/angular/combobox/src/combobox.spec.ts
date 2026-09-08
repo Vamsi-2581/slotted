@@ -94,6 +94,30 @@ const field = () =>
 
 const marks = () => [...document.querySelectorAll("[data-part='match']")];
 
+const option = (value: string) =>
+  document.querySelector<HTMLElement>(`[data-part='item'][data-value='${value}']`) as HTMLElement;
+
+/**
+ * What a browser does with a press on an option, in the order it does it. The
+ * focus move is the press's default action, so an option that refuses the press
+ * leaves focus where it was — and only a press that moved focus produces the
+ * `blur` that follows it. `inert` then swallows the click: a browser dispatches
+ * none into a subtree the layer has switched off, which jsdom does not model
+ * (CB11).
+ */
+const pressOption = (fixture: ComponentFixture<unknown>, target: HTMLElement) => {
+  const focusMoves = target.dispatchEvent(
+    new PointerEvent('pointerdown', { bubbles: true, cancelable: true }),
+  );
+  if (focusMoves) {
+    field().blur();
+    fixture.detectChanges();
+  }
+  if (target.closest('[inert]') !== null) return;
+  target.click();
+  fixture.detectChanges();
+};
+
 describe('SlCombobox', () => {
   /**
    * R6/CB6: the span the query found is the shared mark. It wears
@@ -177,6 +201,34 @@ describe('SlCombobox', () => {
 
       expect(fixture.componentInstance.created()).toBe('durian');
       expect(fixture.componentInstance.requested()).toBeUndefined();
+    });
+  });
+
+  /**
+   * CB11. The pointer is the primary interaction of the family, and it crosses
+   * the one place the family gave up: a press on an option is a press on
+   * something that cannot hold focus, so the browser took focus off the input
+   * and the settling of CB7 ran on text the reader was in the middle of using.
+   */
+  describe('choosing with the pointer', () => {
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [SettleHost] }).compileComponents();
+    });
+
+    it('selects the option that was pressed, with a query in the field', () => {
+      const fixture = TestBed.createComponent(SettleHost);
+      fixture.detectChanges();
+
+      field().focus();
+      field().value = 'App';
+      field().dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      pressOption(fixture, option('apple'));
+
+      expect(fixture.componentInstance.requested()).toBe('apple');
+      expect(document.activeElement).toBe(field());
+      expect(fixture.componentInstance.refused()).toBeUndefined();
     });
   });
 

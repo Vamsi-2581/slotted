@@ -1,6 +1,6 @@
 import { createFilter, moveIndex } from '@slotted/core/collection';
 import type { Filter, MoveIntent } from '@slotted/core/collection';
-import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
@@ -226,6 +226,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
               [id]="optionId(query)"
               [attr.data-current]="highlightedValue() === query ? '' : null"
               (click)="onCreateClick(query, $event)"
+              (pointerdown)="onOptionPointerDown($event)"
               (pointerenter)="setHighlighted(query, 'pointer', $event)"
             >
               <span data-part="label">{{ resolvedCreateLabel().replace('{query}', query) }}</span>
@@ -647,6 +648,12 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     this.onTouched();
     const next = event.relatedTarget;
     if (next instanceof Node && this.surfaceNode?.contains(next) === true) return;
+    /* A press on the popup's own surface — its padding, a group heading, its
+       scrollbar — takes focus off the input and reports `relatedTarget: null`,
+       which is indistinguishable from the reader leaving. The layer stack
+       already records where the press in flight went down, so ask it (CB11). */
+    const began = pressOrigin(this.controlRef().nativeElement.ownerDocument);
+    if (began instanceof Node && this.surfaceNode?.contains(began) === true) return;
     /* The last moment at which the reader is still choosing, which is where
        text that matched no option is settled (CB7). */
     this.settleInput(event);
@@ -804,6 +811,16 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
       this.setInputValue(value === null ? '' : (this.labelFor(value) ?? ''), 'select', event);
     }
     this.setOpen(false, 'select', event);
+  }
+
+  /**
+   * An option refuses the press, and this one is an option (CB11). The rule
+   * itself lives on `SlComboboxOption`; the offer is written by this template,
+   * so it repeats the one line rather than the reason.
+   */
+  protected onOptionPointerDown(event: PointerEvent) {
+    if (event.defaultPrevented) return;
+    event.preventDefault();
   }
 
   protected onCreateClick(query: string, event: MouseEvent) {

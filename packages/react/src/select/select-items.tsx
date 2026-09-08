@@ -57,6 +57,18 @@ export function SelectItem({
     select.setHighlighted(value, 'pointer', event.nativeEvent);
   };
 
+  /**
+   * The press is taken here as well, and only to stop the browser moving focus
+   * off the trigger: an option cannot hold focus, so a press on it would leave
+   * `aria-activedescendant` on a button that is no longer the active element
+   * (CB11). `listbox` and `combobox` refuse the press for the same reason.
+   */
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    nativeProps.onPointerDown?.(event);
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+  };
+
   const onClick = (event: MouseEvent<HTMLDivElement>) => {
     if (disabled) return;
     select.toggle(value, 'pointer', event.nativeEvent);
@@ -87,6 +99,7 @@ export function SelectItem({
       {...(selected ? { 'data-selected': '' } : {})}
       {...(current ? { 'data-current': '' } : {})}
       onClick={onClick}
+      onPointerDown={onPointerDown}
       onPointerEnter={onPointerEnter}
       ref={(element: HTMLDivElement | null) => {
         setNode(element);

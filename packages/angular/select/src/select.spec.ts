@@ -55,6 +55,23 @@ function press(key: string, init: KeyboardEventInit = {}) {
   trigger().dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key, ...init }));
 }
 
+/**
+ * What a browser does with a press on an option, in the order it does it. The
+ * focus move is the press's default action, so an option that refuses the press
+ * leaves focus where it was; the click is dispatched either way (CB11).
+ */
+function pressOption(fixture: ComponentFixture<Host>, option: HTMLElement) {
+  const focusMoves = option.dispatchEvent(
+    new PointerEvent('pointerdown', { bubbles: true, cancelable: true }),
+  );
+  if (focusMoves) {
+    trigger().blur();
+    fixture.detectChanges();
+  }
+  option.click();
+  fixture.detectChanges();
+}
+
 describe('SlSelect', () => {
   let fixture: ComponentFixture<Host>;
 
@@ -148,6 +165,34 @@ describe('SlSelect', () => {
     press('c');
     fixture.detectChanges();
     expect(highlighted()).toBe(named('Cherry').id);
+  });
+
+  /**
+   * CB11. The button holds focus and `aria-activedescendant` names the option;
+   * a press that moved focus to the body would leave the property pointing at
+   * something that is not the active element.
+   */
+  it('keeps DOM focus on the trigger across a press on an option', () => {
+    trigger().focus();
+    open();
+
+    pressOption(fixture, named('Blueberry'));
+
+    expect(document.activeElement).toBe(trigger());
+    expect(fixture.componentInstance.value()).toBe('blueberry');
+  });
+
+  it('keeps it across every press of a multiple selection', () => {
+    fixture.componentInstance.multiple.set(true);
+    fixture.detectChanges();
+    trigger().focus();
+    open();
+
+    pressOption(fixture, named('Apple'));
+    pressOption(fixture, named('Cherry'));
+
+    expect(document.activeElement).toBe(trigger());
+    expect(fixture.componentInstance.value()).toEqual(['apple', 'cherry']);
   });
 
   it('names the chosen option in the closed control', () => {

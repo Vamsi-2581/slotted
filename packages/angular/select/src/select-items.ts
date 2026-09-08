@@ -47,6 +47,7 @@ import type { SelectOptionValue } from './select-defaults';
     '[attr.data-selected]': "selected() ? '' : null",
     '[attr.data-current]': "current() ? '' : null",
     '(click)': 'onClick($event)',
+    '(pointerdown)': 'onPointerDown($event)',
     '(pointerenter)': 'onPointerEnter($event)',
   },
   template: `
@@ -101,6 +102,17 @@ export class SlSelectItem {
   protected onPointerEnter(event: PointerEvent) {
     if (this.disabled()) return;
     this.select.setHighlighted(this.value(), 'pointer', event);
+  }
+
+  /**
+   * Only to stop the browser moving focus off the trigger. Under
+   * `aria-activedescendant` the trigger is the focused element, and a press that
+   * took focus to the body would leave the property pointing at something that
+   * is no longer the active element (CB11).
+   */
+  protected onPointerDown(event: PointerEvent) {
+    if (event.defaultPrevented) return;
+    event.preventDefault();
   }
 
   protected onClick(event: MouseEvent) {

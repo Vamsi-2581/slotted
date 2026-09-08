@@ -167,6 +167,26 @@ describe('SlListbox, identity and wiring', () => {
 });
 
 describe('SlListbox, selection', () => {
+  /**
+   * CB11 verified from this family's side: the root holds focus and
+   * `aria-activedescendant` names the option, so the option refuses the press
+   * that would take focus off it. The rule was already here; this is its guard.
+   */
+  it('refuses the press that would move focus off the root', () => {
+    const fixture = renderTemplate(
+      `<div slListbox aria-label="Region" defaultValue="africa">${OPTIONS}</div>`,
+    );
+
+    const moved = byKey(fixture, 'europe').dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, cancelable: true }),
+    );
+
+    expect(moved).toBe(false);
+    press(byKey(fixture, 'europe'));
+    fixture.detectChanges();
+    expect(byKey(fixture, 'europe').hasAttribute('data-selected')).toBe(true);
+  });
+
   it('replaces whatever was chosen, in single selection', () => {
     const fixture = renderTemplate(
       `<div slListbox aria-label="Region" defaultValue="africa">${OPTIONS}</div>`,

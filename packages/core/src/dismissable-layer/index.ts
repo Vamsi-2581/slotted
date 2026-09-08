@@ -2,6 +2,7 @@ export {
   LAYER_DEPTH_PROPERTY,
   createDismissableLayer,
   createScrollLock,
+  pressOrigin,
 } from './dismissable-layer';
 export type {
   DismissReason,

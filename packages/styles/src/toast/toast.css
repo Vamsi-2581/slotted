@@ -60,12 +60,12 @@
 
     /**
      * How far a collapsed message behind the front one peeks out, and how much
-     * smaller each step back is drawn. The scale is a bare number rather than
-     * a length because it multiplies an index, and it is a token so a theme
-     * that wants a flatter stack has one name to set.
+     * of its ink each step back gives up. The fade is a bare number rather than
+     * a length because it multiplies an index, and both are tokens so a theme
+     * that wants a flatter stack has one name to set for each.
      */
     --_stack-step: var(--slotted-toast-stack-step, var(--slotted-space-3, 0.375rem));
-    --_stack-scale: var(--slotted-toast-stack-scale, 0.04);
+    --_stack-fade: var(--slotted-toast-stack-fade, 0.15);
 
     /**
      * Where a message comes from. It is the block axis in both directions: a
@@ -268,7 +268,6 @@
     translate: 0 var(--_enter-shift);
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      scale var(--slotted-duration-short) var(--slotted-easing-exit),
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
@@ -286,7 +285,6 @@
     translate: 0;
     transition:
       opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      scale var(--slotted-duration-medium) var(--slotted-easing-enter),
       translate var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
@@ -681,13 +679,21 @@
    * region or focus is inside it — the same two conditions that pause the
    * timer, because both mean the reader is reading.
    *
-   * Every message is positioned in both states and moves only by `translate`
-   * and `scale`, which is what lets one become the other rather than snap.
-   * The numbers it moves by are measured — `--slotted-toast-height` per
-   * message, `--slotted-toast-stack-offset` for the messages in front of it,
+   * Every message is positioned in both states and moves only by `translate`,
+   * which is what lets one become the other rather than snap. The numbers it
+   * moves by are measured — `--slotted-toast-height` per message,
+   * `--slotted-toast-stack-offset` for the messages in front of it,
    * `--slotted-toast-front-height` for the one at the edge — because the pile
    * has to be readable when it opens, and a pile of messages that are not all
    * the same height cannot be opened from arithmetic alone.
+   *
+   * Depth is said by the step back and by the ink, and it was said by a scale
+   * per index until R7: a message is a box of words, and drawing it at
+   * ninety-six per cent resamples every letter in it while the pile opens and
+   * closes. What replaced it is the one property that says *further away*
+   * without touching the type — each message behind the front one is held
+   * back in opacity, and the front one, which is the one being read, is at
+   * full strength.
    */
   [data-ui='toast'][data-stacking='stack'] > [data-part='list'] {
     display: block;
@@ -698,15 +704,25 @@
     block-size: var(--slotted-toast-front-height, auto);
     inset-inline: 0;
     position: absolute;
-    scale: calc(1 - var(--slotted-toast-index, 0) * var(--_stack-scale));
     /* Newest in front. The count is what lets the rule read the same at any
        depth without a rule per index. */
     z-index: calc(var(--slotted-toast-count, 1) - var(--slotted-toast-index, 0));
     transition:
       block-size var(--slotted-duration-medium) var(--slotted-easing-standard),
       opacity var(--slotted-duration-medium) var(--slotted-easing-standard),
-      scale var(--slotted-duration-medium) var(--slotted-easing-standard),
       translate var(--slotted-duration-medium) var(--slotted-easing-standard);
+  }
+
+  /**
+   * How far back a message is, said in ink. It is written on the open message
+   * rather than on every message, because the closed style is `opacity: 0` —
+   * the state a message arrives from and leaves into — and a rule that dimmed
+   * it there would be a message that never faded in. The third message and
+   * everything behind it share one strength: below that the pile is a stack of
+   * ghosts, and only the front two edges are showing anyway.
+   */
+  [data-ui='toast'][data-stacking='stack'] > [data-part='list'] > [data-part='item'][data-open] {
+    opacity: calc(1 - min(var(--slotted-toast-index, 0), 2) * var(--_stack-fade));
   }
 
   [data-ui='toast'][data-stacking='stack'][data-placement^='bottom']
@@ -732,7 +748,12 @@
     > [data-part='list']
     > [data-part='item'] {
     block-size: var(--slotted-toast-height, auto);
-    scale: 1;
+  }
+
+  [data-ui='toast'][data-stacking='stack'][data-expanded]
+    > [data-part='list']
+    > [data-part='item'][data-open] {
+    opacity: 1;
   }
 
   [data-ui='toast'][data-stacking='stack'][data-expanded][data-placement^='bottom']

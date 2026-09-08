@@ -1,6 +1,6 @@
 [
   "--slotted-avatar-group-overlap",
-  "--slotted-avatar-group-raise-scale",
+  "--slotted-avatar-group-raise-lift",
   "--slotted-avatar-size",
   "--slotted-avatar-size-lg",
   "--slotted-avatar-size-md",
@@ -11,6 +11,6 @@
   "--slotted-duration-short",
   "--slotted-easing-standard",
   "--slotted-shadow-sm",
-  "--slotted-space-1",
+  "--slotted-space-2",
   "--slotted-space-4"
 ]

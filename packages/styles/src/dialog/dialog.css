@@ -77,6 +77,10 @@
     --_footer-padding-block: var(--slotted-space-5, 0.75rem);
     --_gap: var(--slotted-space-5, 0.75rem);
     --_rule-size: var(--slotted-border-width-thin, 1px);
+    /* How far the panel arrives from: one step of the space scale, the step
+       every anchored layer arrives across (R7), so a theme retunes the two
+       together. */
+    --_enter-distance: var(--slotted-space-2, 0.25rem);
     /**
      * The title is on the type scale rather than on the control type scale.
      * A control's label is 12 to 14 pixels because it lives inside a button; a
@@ -274,18 +278,23 @@
     overflow: hidden;
 
     /**
-     * A centred panel grows into place and does not travel: there is nothing
-     * for eight pixels of movement to be *from*, and a direction chosen rather
-     * than derived is the kind of motion the rubric refuses. A panel placed at
-     * the start edge does have an edge to come from, and slides from it — see
-     * the rule below.
+     * The panel arrives from above by one step of the space scale, which is the
+     * distance and the grammar every anchored layer arrives with (R7) and the
+     * direction the panel placed at the block start already comes from — one
+     * movement in the family, seen at two distances.
+     *
+     * It grew into place for one iteration, from `0.98`, and that is what R7
+     * now refuses: a box with a title, a body and a row of buttons in it
+     * resamples every letter it holds while it is being scaled, and the
+     * composition reads as though it were sliding. Measured on the way in, the
+     * title's own box was up to 6.82 pixels narrower than at rest and off the
+     * pixel grid in thirteen frames of twenty-eight;
+     * `packages/styles/src/text-scale.test.mjs` holds the rule now.
      */
     opacity: 0;
-    scale: 0.98;
-    translate: 0 0;
+    translate: 0 calc(-1 * var(--_enter-distance));
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      scale var(--slotted-duration-short) var(--slotted-easing-exit),
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
@@ -301,24 +310,21 @@
    */
   [data-ui='dialog'][data-open] > [data-part='viewport'] > [data-part='content'] {
     opacity: 1;
-    scale: 1;
     translate: 0 0;
     transition:
       opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
-      scale var(--slotted-duration-medium) var(--slotted-easing-enter),
       translate var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
   /**
    * Reduced motion keeps the fade and drops the movement. A panel that
    * appears from nothing is still a change the eye has to find, and the fade
-   * is what says where; the growth and the slide are what the preference
-   * refuses. `motion.test.mjs` holds the rule for every family.
+   * is what says where; the slide is what the preference refuses.
+   * `motion.test.mjs` holds the rule for every family.
    */
   @media (prefers-reduced-motion: reduce) {
     [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'],
     [data-ui='dialog'][data-placement='top'] > [data-part='viewport'] > [data-part='content'] {
-      scale: 1;
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }

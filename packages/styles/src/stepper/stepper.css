@@ -35,6 +35,26 @@
       var(--slotted-tone-accent-solid, Highlight)
     );
 
+    /**
+     * The wash a press puts over the marker: the family's own strong ink at a
+     * low strength, over whatever ground the status gave the marker. It is the
+     * state layer `alert`, `toast` and `tag` answer a press with, at the same
+     * strength, and a theme retunes it by strength — which is what the
+     * component token is for.
+     *
+     * The ink is stated rather than taken from `currentcolor`, which is what
+     * those three take: a complete marker and an invalid one draw their number
+     * in `transparent`, because the check and the alert are painted over it, so
+     * a wash of `currentcolor` there would be a wash of nothing. The strong ink
+     * darkens a filled marker and greys an empty one, and it is near-white in
+     * the dark scheme, where it lightens both.
+     */
+    --_state-press: color-mix(
+      in oklab,
+      var(--_strong) var(--slotted-stepper-marker-press-strength, 14%),
+      transparent
+    );
+
     color: var(--_strong);
     container-name: slotted-stepper;
     container-type: inline-size;
@@ -198,8 +218,8 @@
         var(--slotted-control-transition-easing),
       border-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
-      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
-      scale var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+      box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
   /**
@@ -363,11 +383,25 @@
     text-underline-offset: var(--slotted-stepper-underline-offset, 0.2em);
   }
 
+  /**
+   * The press is said on the marker's own ground rather than by shrinking it.
+   * The marker grew smaller by six per cent for one iteration, and R7 refuses
+   * it: the marker carries the step's number, and a box of type drawn at
+   * ninety-four per cent resamples the number for the length of the press.
+   *
+   * A wash of the marker's own ink over whatever ground it has is what says
+   * *taken* instead — the state layer `alert`, `toast` and `tag` already
+   * answer a press with, at the same strength. It is written as an inset
+   * shadow rather than as a background because the ground underneath is the
+   * status: a complete marker is filled with the accent, an invalid one with
+   * the danger tone, and a press that replaced either would be a press that
+   * also changed what the step is.
+   */
   [data-ui='stepper']
     [data-part='item']:not([data-disabled], [data-loading])
     :is(button, a)[data-part='trigger']:active
     [data-part='marker'] {
-    scale: var(--slotted-stepper-marker-press-scale, 0.94);
+    box-shadow: inset 0 0 0 var(--_marker) var(--_state-press);
   }
 
   /* ── The connector ──────────────────────────────────────────────────────

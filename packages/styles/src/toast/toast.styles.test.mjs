@@ -105,10 +105,19 @@ test('answers every placement the contract declares', () => {
   assert.ok(!/inset-(?:left|right|top|bottom)/.test(normalized));
 });
 
-/** The stack reads its depth from the index, so one rule serves any depth. */
+/**
+ * The stack reads its depth from the index, so one rule serves any depth, and
+ * it says that depth in ink: a message is a box of words, and R7 keeps a scale
+ * off one. The dimming is written on the open message, because the closed
+ * style is the `opacity: 0` a message arrives from and leaves into.
+ */
 test('draws the pile from the index rather than from a rule per message', () => {
   const stacked = rule(`${ui}[data-stacking='stack']>[data-part='list']>[data-part='item']`);
-  assert.match(stacked, /scale:calc\(1 - var\(--slotted-toast-index/);
+  const open = rule(
+    `${ui}[data-stacking='stack']>[data-part='list']>[data-part='item'][data-open]`,
+  );
+  assert.ok(!/scale/.test(stacked), 'a box of words may not be scaled (R7)');
+  assert.match(open, /opacity:calc\(1 - min\(var\(--slotted-toast-index/);
   assert.match(stacked, /z-index:calc\(var\(--slotted-toast-count/);
   assert.ok(
     !/--slotted-toast-index:\s*\d/.test(normalized),

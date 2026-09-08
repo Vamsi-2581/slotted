@@ -55,7 +55,7 @@
   "--slotted-toast-radius",
   "--slotted-toast-row-gap",
   "--slotted-toast-shadow",
-  "--slotted-toast-stack-scale",
+  "--slotted-toast-stack-fade",
   "--slotted-toast-stack-step",
   "--slotted-toast-state-layer-active",
   "--slotted-toast-state-layer-hover",

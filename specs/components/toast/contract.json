@@ -151,7 +151,7 @@
     ],
     "expandsOn": ["hover", "focus"],
     "step": "--slotted-toast-stack-step",
-    "reason": "Closed, the messages share the one anchor `placement` already names and step back by a token distance and a scale computed from `--slotted-toast-index`. Open, each one returns to its own height and its own place in the column. Both states are positioned and differ only by a translate, a scale and a height, which is what lets one become the other rather than snap — and a pile of messages that are not all the same height cannot be opened from arithmetic alone. Three measurements are what the second half costs, and they are the same three Base UI takes.",
+    "reason": "Closed, the messages share the one anchor `placement` already names, step back by a token distance computed from `--slotted-toast-index` and are held back in opacity by the same index. Open, each one returns to its own height and its own place in the column. Both states are positioned and differ only by a translate, an opacity and a height, which is what lets one become the other rather than snap — and a pile of messages that are not all the same height cannot be opened from arithmetic alone. Three measurements are what the second half costs, and they are the same three Base UI takes.",
     "cost": "One ResizeObserver per region, and three runtime custom properties a static picture cannot produce on its own. The alternative was considered and rejected: with no measurement the closed pile is the same picture, and opening it is a snap rather than a movement — which is the whole of what the axis is for."
   },
   "swipe": {

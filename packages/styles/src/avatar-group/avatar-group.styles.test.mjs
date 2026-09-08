@@ -150,7 +150,9 @@ test('raises the member under the pointer, and holds that back when it is disabl
  * The stacking order alone is not the answer: a face in front of another face,
  * both flat and both the same size, is one shape. The member the pointer is on
  * carries a ring of the surface between it and what it covers, a shadow that
- * says which of the two is in front, and a lean towards the reader (AG1).
+ * says which of the two is in front, and a lean towards the reader (AG1). The
+ * lean is a lift and nothing else: an avatar holds its member's initials, and
+ * R7 keeps a scale off a box that holds type.
  *
  * The ring is the avatar's own ring token and not an `outline`: R3 gives the
  * outline of every family to the focus ring. The shadow reaches the avatar as
@@ -161,7 +163,8 @@ test('separates the raised member from the ones it covers', () => {
   const hover = rule(`${ui}[data-layout='stack'] ${member}:not([data-disabled]):hover`);
   assert.ok(hover.includes('--slotted-avatar-ring-width:var(--_raise-ring)'), 'no ring');
   assert.ok(hover.includes('--slotted-avatar-elevation:var(--_raise-shadow)'), 'no elevation');
-  assert.ok(hover.includes('transform:translateY(var(--_raise-lift)) scale(var(--_raise-scale))'));
+  assert.ok(hover.includes('transform:translateY(var(--_raise-lift))'));
+  assert.ok(!/scale/.test(hover), 'a face of letters may not be scaled (R7)');
   const group = rule(root);
   assert.ok(
     group.includes('--_raise-shadow:var(--slotted-shadow-'),
@@ -171,16 +174,15 @@ test('separates the raised member from the ones it covers', () => {
 });
 
 /**
- * Stillness keeps the two that are not motion. The lift, the scale and the
- * shadow the lift implies are redefined to nothing under the query, so the
- * raise stays one rule and the reader who asked for stillness still sees which
- * face the pointer is on.
+ * Stillness keeps the two that are not motion. The lift and the shadow the
+ * lift implies are redefined to nothing under the query, so the raise stays
+ * one rule and the reader who asked for stillness still sees which face the
+ * pointer is on.
  */
 test('drops the movement under reduced motion and keeps the answer', () => {
   const query = normalized.slice(normalized.indexOf('prefers-reduced-motion'));
   const still = query.slice(query.indexOf(`${root}[data-layout='stack']{`)).split('}')[0];
   assert.ok(still.includes('--_raise-lift:0px'), 'the member still travels');
-  assert.ok(still.includes('--_raise-scale:1'), 'the member still grows');
   assert.ok(
     still.includes('--_raise-shadow:0 0 transparent'),
     'the member still lifts off the row',

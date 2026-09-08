@@ -51,7 +51,7 @@
   "--slotted-stepper-marker-color-complete",
   "--slotted-stepper-marker-color-current",
   "--slotted-stepper-marker-color-invalid",
-  "--slotted-stepper-marker-press-scale",
+  "--slotted-stepper-marker-press-strength",
   "--slotted-stepper-marker-size",
   "--slotted-stepper-marker-surface",
   "--slotted-stepper-marker-surface-complete",

@@ -253,6 +253,26 @@
   }
 
   /**
+   * ── No mark at all ────────────────────────────────────────────────────
+   *
+   * `mark='none'` is the third value, and the one a form asks for. A
+   * silhouette per severity is right for a message that stands alone and
+   * wrong for a column of them: four fields in error draw four circled
+   * exclamations one under the other, and what was there to catch the eye
+   * becomes texture — the limit R5 draws, and the reason `field` and
+   * `field-group` default to this value. What says the tone there is the ink
+   * and the weight of the sentence, which is what F1 settled.
+   *
+   * The box is withdrawn for the reason help's is, and the same two
+   * exceptions hold: `:empty` leaves the page's own artwork alone, and
+   * `:not([data-loading])` keeps the ring, because a message with no mark can
+   * be waiting for something like any other.
+   */
+  [data-ui='inline-message'][data-mark='none']:not([data-loading]) > [data-part='icon']:empty {
+    display: none;
+  }
+
+  /**
    * A mark the page supplied instead of the tone's own. The box keeps its size
    * and its place on the first line; the mask goes, because a mask over an
    * element that now has content of its own would cut that content into the

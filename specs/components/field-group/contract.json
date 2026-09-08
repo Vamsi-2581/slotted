@@ -9,7 +9,7 @@
     "description": "secondary",
     "error": "danger"
   },
-  "messageMark": "glyph",
+  "messageMark": "none",
   "messagePlacement": "before",
   "identifiers": ["legend", "description", "error"],
   "describedBy": ["description", "error"],

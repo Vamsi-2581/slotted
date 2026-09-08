@@ -15,9 +15,12 @@ export type InlineMessageSize = 'sm' | 'md';
  * circled information, check, triangle and circled exclamation. `dot` is a
  * neutral bullet in the tone's ink, the same shape for every tone including
  * the help tone that draws no silhouette at all, so a column of messages under
- * one field starts on one left edge.
+ * one field starts on one left edge. `none` draws nothing, and the tone is
+ * then said by the ink and by the weight of the sentence: it is what `field`
+ * and `field-group` ask for, because a silhouette repeated under every control
+ * of a form is texture rather than a warning (F2).
  */
-export type InlineMessageMark = 'glyph' | 'dot';
+export type InlineMessageMark = 'glyph' | 'dot' | 'none';
 
 /**
  * Whether the message announces itself, and how loudly. `off` is the default,

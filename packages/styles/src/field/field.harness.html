@@ -16,7 +16,7 @@
     />
     <p
       data-ui="inline-message"
-      data-mark="glyph"
+      data-mark="none"
       data-part="root"
       data-tone="secondary"
       data-size="sm"
@@ -111,7 +111,7 @@
       />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="sm"
@@ -148,7 +148,7 @@
       <input data-part="control" id="size-sm" value="sm" aria-describedby="size-sm-description" />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="sm"
@@ -170,7 +170,7 @@
       <input data-part="control" id="size-md" value="md" aria-describedby="size-md-description" />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="sm"
@@ -192,7 +192,7 @@
       <input data-part="control" id="size-lg" value="lg" aria-describedby="size-lg-description" />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="md"
@@ -230,7 +230,7 @@
       />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="sm"
@@ -242,7 +242,7 @@
       </p>
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="danger"
         data-size="sm"
@@ -272,7 +272,7 @@
       />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="sm"
@@ -305,7 +305,7 @@
       />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="sm"
@@ -334,7 +334,7 @@
       />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="danger"
         data-size="sm"
@@ -384,7 +384,7 @@ Integramos folha, ponto e benefícios em um só lugar.</textarea>
 Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento contábil da competência em um só lugar.</textarea>
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="danger"
         data-size="sm"
@@ -431,7 +431,7 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="secondary"
         data-size="sm"
@@ -465,7 +465,7 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
       />
       <p
         data-ui="inline-message"
-        data-mark="glyph"
+        data-mark="none"
         data-part="root"
         data-tone="danger"
         data-size="sm"
@@ -477,6 +477,149 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
         <span data-part="prefix">خطأ:</span>
         <span aria-hidden="true" data-part="icon"></span>
         <span data-part="text">الرقم غير مكتمل.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section data-scene="form-errors">
+  <!-- The picture R5's limit is about: four fields of one form, every one of
+       them in error, one under the other. -->
+  <div data-ui="stack" data-part="root" data-gap="7">
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-required
+      data-invalid
+    >
+      <label data-part="label" for="form-error-name"
+        >Razão social<span aria-hidden="true" data-part="mark">*</span></label
+      >
+      <input
+        data-part="control"
+        id="form-error-name"
+        aria-invalid="true"
+        aria-required="true"
+        aria-describedby="form-error-name-error"
+        value="Sirius"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="none"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        id="form-error-name-error"
+      >
+        <span data-part="prefix">Error:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Informe a razão social completa.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-required
+      data-invalid
+    >
+      <label data-part="label" for="form-error-document"
+        >CNPJ<span aria-hidden="true" data-part="mark">*</span></label
+      >
+      <input
+        data-part="control"
+        id="form-error-document"
+        aria-invalid="true"
+        aria-required="true"
+        aria-describedby="form-error-document-error"
+        value="12.345.678"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="none"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        id="form-error-document-error"
+      >
+        <span data-part="prefix">Error:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Faltam seis dígitos.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-required
+      data-invalid
+    >
+      <label data-part="label" for="form-error-mail"
+        >E-mail de cobrança<span aria-hidden="true" data-part="mark">*</span></label
+      >
+      <input
+        data-part="control"
+        id="form-error-mail"
+        aria-invalid="true"
+        aria-required="true"
+        aria-describedby="form-error-mail-error"
+        value="cobranca@"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="none"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        id="form-error-mail-error"
+      >
+        <span data-part="prefix">Error:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">Endereço incompleto.</span>
+      </p>
+    </div>
+    <div
+      data-ui="field"
+      data-part="root"
+      data-size="md"
+      data-label-placement="top"
+      data-required-mark="mark"
+      data-required
+      data-invalid
+    >
+      <label data-part="label" for="form-error-code"
+        >Código do plano<span aria-hidden="true" data-part="mark">*</span></label
+      >
+      <input
+        data-part="control"
+        id="form-error-code"
+        aria-invalid="true"
+        aria-required="true"
+        aria-describedby="form-error-code-error"
+        value="PL-"
+      />
+      <p
+        data-ui="inline-message"
+        data-mark="none"
+        data-part="root"
+        data-tone="danger"
+        data-size="sm"
+        data-live="off"
+        id="form-error-code-error"
+      >
+        <span data-part="prefix">Error:</span>
+        <span aria-hidden="true" data-part="icon"></span>
+        <span data-part="text">O código tem seis caracteres.</span>
       </p>
     </div>
   </div>

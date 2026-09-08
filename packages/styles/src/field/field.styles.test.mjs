@@ -235,6 +235,6 @@ test('sets the type of what the field says: xs, and a weight up for an outcome',
   }
   const outcome = normalized.split(`${root}>[data-ui='inline-message'][data-tone='danger']`)[1];
   assert.match(outcome ?? '', /^,[^{]*\{font-weight:var\(--slotted-font-weight-medium,500\);\}/);
-  assert.equal(contract.messageMark, 'glyph', 'the field still asks for bullets');
-  assert.ok(!fragment.includes('data-mark="dot"'), 'the fragment still draws bullets');
+  assert.equal(contract.messageMark, 'none', 'the field asks for a mark again (F2)');
+  assert.ok(!/data-mark="(?:dot|glyph)"/.test(fragment), 'the fragment still draws a mark');
 });

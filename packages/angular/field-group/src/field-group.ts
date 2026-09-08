@@ -71,7 +71,7 @@ export interface FieldGroupIds {
       slInlineMessage
       [id]="ids().description"
       [size]="messageSize()"
-      [mark]="description()?.mark() ?? 'glyph'"
+      [mark]="description()?.mark() ?? 'none'"
       [tone]="description()?.tone() ?? 'secondary'"
       [live]="description()?.live() ?? 'off'"
       [hideIcon]="description()?.hideIcon() ?? false"
@@ -84,7 +84,7 @@ export interface FieldGroupIds {
       slInlineMessage
       [id]="ids().error"
       [size]="messageSize()"
-      [mark]="error()?.mark() ?? 'glyph'"
+      [mark]="error()?.mark() ?? 'none'"
       [tone]="error()?.tone() ?? 'danger'"
       [live]="error()?.live() ?? 'off'"
       [hideIcon]="error()?.hideIcon() ?? false"

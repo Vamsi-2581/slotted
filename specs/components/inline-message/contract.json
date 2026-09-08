@@ -5,7 +5,7 @@
   "axes": {
     "tone": ["accent", "secondary", "success", "warning", "danger"],
     "size": ["sm", "md"],
-    "mark": ["glyph", "dot"],
+    "mark": ["glyph", "dot", "none"],
     "live": ["off", "polite", "assertive"]
   },
   "toneGlyphs": {

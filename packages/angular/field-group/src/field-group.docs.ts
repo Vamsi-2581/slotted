@@ -244,10 +244,10 @@ export const ANGULAR_FIELD_GROUP_DOCS = {
       ],
       [
         'mark',
-        "'glyph' | 'dot'",
-        'glyph',
+        "'glyph' | 'dot' | 'none'",
+        'none',
         'slFieldGroupDescription, slFieldGroupError',
-        'Which mark the message draws. A group’s messages draw the tone’s own silhouette, the same as the fields inside it: help has none, an error draws the same mark as the alert about it; dot asks for one neutral bullet instead',
+        'Which mark the message draws. A group’s messages draw none, the same as the fields inside it: the tone is said by the ink and the weight of the sentence. glyph asks for the tone’s own silhouette and dot for one neutral bullet',
       ],
       [
         'live',

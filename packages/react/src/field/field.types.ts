@@ -187,8 +187,8 @@ export interface FieldControlProps extends ComponentPropsWithRef<'input'> {
  * `tone="warning"` on the same part rather than a member of its own.
  *
  * `mark` is the one the field answers rather than passes: a field's messages
- * draw the tone's own silhouette, so `glyph` is what they draw unless the page
- * asks for `dot`.
+ * draw no mark at all, so `none` is what they draw unless the page asks for
+ * `glyph` or `dot`.
  */
 export type FieldMessageProps = Omit<InlineMessageProps, 'disabled' | 'id' | 'size'>;
 

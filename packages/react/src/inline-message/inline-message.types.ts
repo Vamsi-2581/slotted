@@ -15,9 +15,12 @@ export type InlineMessageSize = 'sm' | 'md';
  * circled information, check, triangle and circled exclamation. `dot` is a
  * neutral bullet in the tone's ink, the same shape for every tone including
  * the help tone that draws no silhouette at all, so a column of messages under
- * one field starts on one left edge.
+ * one field starts on one left edge. `none` draws nothing, and the tone is
+ * then said by the ink and by the weight of the sentence: it is what `field`
+ * and `field-group` ask for, because a silhouette repeated under every control
+ * of a form is texture rather than a warning (F2).
  */
-export type InlineMessageMark = 'glyph' | 'dot';
+export type InlineMessageMark = 'glyph' | 'dot' | 'none';
 
 /**
  * Whether the message announces itself, and how loudly. `off` is the default,
@@ -71,8 +74,8 @@ export interface InlineMessageProps extends Omit<
   live?: InlineMessageLive | undefined;
   /**
    * Which mark is drawn. Defaults to the provider, then to `glyph`. `field` and
-   * `field-group` ask for `dot` instead, because a form reads a column of
-   * sentences rather than identifying a severity by its outline.
+   * `field-group` ask for `none` instead, because a form reads a column of
+   * sentences rather than a column of silhouettes.
    */
   mark?: InlineMessageMark | undefined;
   /**
@@ -81,7 +84,12 @@ export interface InlineMessageProps extends Omit<
    * whose sentence already names the severity.
    */
   prefix?: string | undefined;
-  /** Draws no mark at all, for a message that carries its own artwork. */
+  /**
+   * Removes the mark's box from the markup, for a message that carries its own
+   * artwork beside it. `mark='none'` is the other way to draw nothing: it is an
+   * axis a provider can set for every message under it, and it leaves the box
+   * in place for `reserve` to hold a line open with.
+   */
   hideIcon?: boolean | undefined;
   /** Replaces the tone's mark, keeping its box, its size and its place. */
   icon?: ReactNode | undefined;

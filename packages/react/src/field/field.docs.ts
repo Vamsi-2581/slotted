@@ -266,10 +266,10 @@ export const REACT_FIELD_DOCS = {
       ],
       [
         'mark',
-        "'glyph' | 'dot'",
-        'glyph',
+        "'glyph' | 'dot' | 'none'",
+        'none',
         'FieldDescription, FieldError',
-        'Which mark the message draws. A field’s messages draw the tone’s own silhouette at the type’s size: help has none, an error draws the same mark as the alert about it; dot asks for one neutral bullet instead',
+        'Which mark the message draws. A field’s messages draw none: a silhouette repeated under every control of a form is texture rather than a warning, and the tone is said by the ink and the weight of the sentence. glyph asks for the tone’s own silhouette at the type’s size and dot for one neutral bullet',
       ],
       [
         'live',

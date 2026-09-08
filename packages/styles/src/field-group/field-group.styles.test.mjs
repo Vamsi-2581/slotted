@@ -169,5 +169,5 @@ test('sets the type of what the group says the way the field does', () => {
     outcome ?? '',
     /^,[^{]*\[data-tone='success'\]\{font-weight:var\(--slotted-font-weight-medium,500\);\}/,
   );
-  assert.equal(contract.messageMark, 'glyph', 'the group still asks for bullets');
+  assert.equal(contract.messageMark, 'none', 'the group asks for a mark again (F2)');
 });

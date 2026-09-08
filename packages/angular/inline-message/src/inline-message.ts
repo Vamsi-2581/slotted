@@ -92,8 +92,8 @@ export class SlInlineMessage {
   readonly live = input<InlineMessageLive | undefined>(undefined);
   /**
    * Which mark is drawn. Defaults to the token, then to `glyph`. `slField` and
-   * `slFieldGroup` ask for `dot` instead, because a form reads a column of
-   * sentences rather than identifying a severity by its outline.
+   * `slFieldGroup` ask for `none` instead, because a form reads a column of
+   * sentences rather than a column of silhouettes.
    */
   readonly mark = input<InlineMessageMark | undefined>(undefined);
   /**
@@ -102,7 +102,12 @@ export class SlInlineMessage {
    * whose sentence already names the severity.
    */
   readonly prefix = input<string | undefined>(undefined);
-  /** Draws no mark at all, for a message that carries its own artwork. */
+  /**
+   * Removes the mark's box from the markup, for a message that carries its own
+   * artwork beside it. `mark='none'` is the other way to draw nothing: it is an
+   * axis a provider can set for every message under it, and it leaves the box
+   * in place for `reserve` to hold a line open with.
+   */
   readonly hideIcon = input(false, { transform: booleanAttribute });
   /** The message is waiting for something: the mark becomes a turning ring. */
   readonly loading = input(false, { transform: booleanAttribute });

@@ -211,10 +211,10 @@ export const ANGULAR_INLINE_MESSAGE_DOCS = {
       ],
       [
         'mark',
-        "'glyph' | 'dot'",
+        "'glyph' | 'dot' | 'none'",
         'glyph',
         'slInlineMessage',
-        'Which mark is drawn. glyph is the tone’s own silhouette; dot is one neutral bullet in the tone’s ink, the same shape for every tone including help. slField and slFieldGroup ask for dot, so a column of messages starts on one left edge',
+        'Which mark is drawn. glyph is the tone’s own silhouette; dot is one neutral bullet in the tone’s ink, the same shape for every tone including help; none draws nothing, and the tone is said by the ink and the weight of the sentence. slField and slFieldGroup ask for none, because a silhouette under every control of a form is texture rather than a warning',
       ],
       [
         'prefix',

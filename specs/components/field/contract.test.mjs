@@ -52,10 +52,11 @@ test('renders a div holding a native label and a native control', () => {
  * same thing speak the same word.
  *
  * The one value the field answers rather than passes is the mark, and the
- * answer is the tone's own silhouette (F1): help draws no mark, because its
- * tone has none, and an error draws the same mark as the alert about it, at the
- * type's own size. `mark='dot'` is still there for a page that wants a column
- * of bullets.
+ * answer is no mark at all (F2): a message under a control is a small box that
+ * repeats down a form, and ten of them in error are ten circled exclamations in
+ * a column — the limit R5 draws. The tone is said by the ink and by the weight
+ * of the sentence, which is what F1 settled. `mark='glyph'` and `mark='dot'`
+ * are still there for a page that asks for either.
  */
 test('speaks through the message family instead of drawing a message', () => {
   assert.equal(contract.messageFamily, 'inline-message');
@@ -65,7 +66,7 @@ test('speaks through the message family instead of drawing a message', () => {
     'the field claims a part it does not own',
   );
   assert.equal(contract.messagePlacement, 'after');
-  assert.equal(contract.messageMark, 'glyph');
+  assert.equal(contract.messageMark, 'none');
   assert.ok(
     message.axes.mark.includes(contract.messageMark),
     'the field asks for a mark inline-message does not draw',

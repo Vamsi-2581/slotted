@@ -79,20 +79,21 @@ test('gives every severity a mark, so colour is never the only signal', () => {
 });
 
 /**
- * The second mark, and the one a form asks for. A silhouette per severity is
+ * Three marks, and a form asks for the third. A silhouette per severity is
  * right for a message that stands alone — an alert, a status light — and wrong
- * for a column of them: four fields with a description and an error each draw
- * eight marks of four shapes, and the shapes say nothing the ink and the
- * clipped severity word have not already said. `dot` is one neutral bullet for
- * every tone, including the help tone that draws no silhouette at all, so the
- * messages under a field start on one left edge.
+ * for a column of them: four fields in error draw four circled exclamations one
+ * under the other, and what was there to catch the eye becomes texture (R5).
+ * `none` draws nothing at all, and the tone is then said by the ink and by the
+ * weight of the sentence, which is what F1 settled. `dot` is one neutral bullet
+ * for every tone, including the help tone that draws no silhouette at all, for
+ * a page that wants a column of sentences to start on one left edge.
  *
  * `glyph` stays the default: the family is not only a form's, and a message
  * standing on its own keeps the mark that distinguishes it in greyscale.
- * `field` and `field-group` are what state `dot`, in their own contracts.
+ * `field` and `field-group` are what state `none`, in their own contracts.
  */
-test('draws either the tone’s silhouette or one neutral bullet', () => {
-  assert.deepEqual(contract.axes.mark, ['glyph', 'dot']);
+test('draws the tone’s silhouette, one neutral bullet, or nothing', () => {
+  assert.deepEqual(contract.axes.mark, ['glyph', 'dot', 'none']);
   assert.equal(member.defaults.mark, 'glyph');
 });
 

@@ -121,7 +121,7 @@ test('withdraws the mark for the tone that has none', () => {
  * `:empty` leaves a supplied mark the full box it was measured for.
  */
 test('draws one neutral bullet for every tone when the mark is a dot', () => {
-  assert.deepEqual(contract.axes.mark, ['glyph', 'dot']);
+  assert.deepEqual(contract.axes.mark, ['glyph', 'dot', 'none']);
   const dot = rule(`${root}[data-mark='dot']`);
   assert.match(dot, /--_glyph:var\(--slotted-icon-dot\)/);
   assert.match(dot, /--_dot-size:calc\(var\(--_mark-size\) \/ 3\)/);
@@ -129,6 +129,21 @@ test('draws one neutral bullet for every tone when the mark is a dot', () => {
   const bullet = rule(`${ui}[data-mark='dot']>[data-part='icon']:empty`);
   assert.match(bullet, /inline-size:var\(--_dot-size\)/);
   assert.match(bullet, /mask-size:calc\(var\(--_dot-size\) \* 2\) calc\(var\(--_dot-size\) \* 2\)/);
+});
+
+/**
+ * The third mark, which is no mark: what a field asks for (F2). The box is
+ * withdrawn for every tone rather than for help alone, and the two exceptions
+ * help's rule keeps are kept — a mark the page supplied stays, and a message
+ * that is waiting keeps its ring.
+ */
+test('draws nothing at all when the mark is none', () => {
+  assert.ok(
+    normalized.includes(
+      `${ui}[data-mark='none']:not([data-loading])>[data-part='icon']:empty{display:none;}`,
+    ),
+    'a message asked for no mark still draws one',
+  );
 });
 
 /**

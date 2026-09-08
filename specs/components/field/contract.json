@@ -7,7 +7,7 @@
     "description": "secondary",
     "error": "danger"
   },
-  "messageMark": "glyph",
+  "messageMark": "none",
   "messagePlacement": "after",
   "identifiers": ["control", "label", "description", "error"],
   "describedBy": ["description", "error"],

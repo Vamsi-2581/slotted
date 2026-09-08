@@ -9,8 +9,11 @@ import {
   inject,
   input,
   numberAttribute,
+  signal,
   ViewEncapsulation,
 } from '@angular/core';
+
+import { splitByMatch } from '@slotted/core/collection';
 
 import { SlSelect } from './select';
 import type { SelectOptionValue } from './select-defaults';
@@ -37,8 +40,9 @@ import type { SelectOptionValue } from './select-defaults';
     'data-part': 'item',
     role: 'option',
     '[id]': 'optionId()',
+    '[hidden]': '!visible()',
     '[attr.data-value]': 'value()',
-    '[attr.data-text-value]': 'textValue() ?? null',
+    '[attr.data-text-value]': 'searchText() || null',
     '[attr.aria-selected]': 'selected()',
     '[attr.aria-disabled]': 'disabled() ? true : null',
     '[attr.aria-posinset]': 'position() ?? null',
@@ -54,7 +58,19 @@ import type { SelectOptionValue } from './select-defaults';
     @if (icon()) {
       <span data-part="icon">{{ icon() }}</span>
     }
-    <span data-part="label"><ng-content /></span>
+    <span data-part="label">
+      @if (label(); as text) {
+        @for (run of runs(text); track $index) {
+          @if (run.matched) {
+            <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
+          } @else {
+            <ng-container>{{ run.text }}</ng-container>
+          }
+        }
+      } @else {
+        <ng-content />
+      }
+    </span>
     @if (description()) {
       <span data-part="description">{{ description() }}</span>
     }
@@ -67,8 +83,22 @@ export class SlSelectItem {
   readonly description = input<string | undefined>(undefined);
   /** A glyph token name, drawn as a mask by the stylesheet's icon column. */
   readonly icon = input<string | undefined>(undefined);
-  /** What typeahead matches on, when the label is not plain text. */
+  /**
+   * What typeahead matches on, what the search filters on, and what the mark
+   * splits, when the label is not plain text.
+   */
   readonly textValue = input<string | undefined>(undefined);
+  /**
+   * The label as text, given rather than projected.
+   *
+   * It is the one place this binding differs from its React counterpart, and it
+   * is the difference `combobox` already records: a split needs the text before
+   * the view exists, and Angular cannot read projected content that has not
+   * been created. An option that projects its content instead is filtered on
+   * `textValue` or on what it rendered, and its matched span is not marked —
+   * there is nothing to split.
+   */
+  readonly label = input<string | undefined>(undefined);
   readonly position = input(undefined, {
     transform: (given: number | string | undefined) =>
       given === undefined ? undefined : numberAttribute(given),
@@ -81,6 +111,42 @@ export class SlSelectItem {
   readonly selected = computed(() => this.select.selection().includes(this.value()));
   readonly current = computed(() => this.select.highlightedValue() === this.value());
 
+  /** What was rendered, for an option that projected its content. */
+  private readonly rendered = signal('');
+
+  /**
+   * The text the filter judges: what the consumer said this option reads as,
+   * then what it actually rendered. An option the filter cannot judge — one
+   * whose content has not been created yet — is shown, which is what keeps a
+   * list whole on its first render.
+   */
+  readonly searchText = computed(() => this.label() ?? this.textValue() ?? this.rendered());
+
+  /**
+   * Each option decides whether it belongs in the results: the family holds the
+   * query and the comparison, and the option holds its own text. It hides
+   * rather than leaving, because Angular cannot decline to render a host
+   * component from inside it — and every reader of the collection takes the
+   * visible ones.
+   */
+  readonly visible = computed(() => {
+    const text = this.searchText();
+    return text === '' || this.select.matches(text);
+  });
+
+  /**
+   * The label split into the runs the query matched and the runs it did not,
+   * from the same collator the filter used. An `indexOf` beside a
+   * locale-sensitive filter marks nothing on the row it has just matched.
+   */
+  runs(text: string) {
+    const query = this.select.query();
+    if (!this.select.resolvedHighlightMatch() || query === '') {
+      return [{ text, matched: false }];
+    }
+    return splitByMatch(text, query, { locale: this.select.locale() });
+  }
+
   constructor() {
     /**
      * The label reaches the closed control from here, and the count from the
@@ -89,9 +155,14 @@ export class SlSelectItem {
      * answer either way.
      */
     afterRenderEffect(() => {
+      /* Read so that hiding or showing this option re-runs the count: the
+         popup's own answer to "how many are there" is what draws the empty row
+         and what the live region announces. */
+      this.visible();
       const element = this.host.nativeElement as HTMLElement;
-      const label =
-        this.textValue() ?? element.querySelector("[data-part='label']")?.textContent?.trim() ?? '';
+      const text = element.querySelector("[data-part='label']")?.textContent?.trim() ?? '';
+      if (text !== '') this.rendered.set(text);
+      const label = this.label() ?? this.textValue() ?? text;
       if (label !== '') this.select.registerLabel(this.value(), label);
       this.select.recount();
     });
@@ -122,7 +193,14 @@ export class SlSelectItem {
        options without reopening it twice. */
     if (this.select.resolvedCloseOnSelect() && !this.select.resolvedMultiple()) {
       this.select.setOpen(false, 'select', event);
+      this.select.focus();
+      return;
     }
+    /* The popup stayed open, so the query is emptied here rather than by the
+       close: a list still filtered to the row the reader has just taken is a
+       list that looks broken. */
+    this.select.setQuery('', 'select', event);
+    this.select.focusSearch();
   }
 }
 
@@ -141,6 +219,7 @@ export class SlSelectItem {
   host: {
     'data-part': 'group',
     role: 'group',
+    '[hidden]': 'empty()',
     '[attr.aria-labelledby]': 'labelId',
   },
   template: `
@@ -151,6 +230,21 @@ export class SlSelectItem {
 export class SlSelectGroup {
   readonly label = input.required<string>();
   readonly labelId = `sl-select-group-${Math.random().toString(36).slice(2, 8)}`;
+
+  private readonly select = inject(SlSelect);
+  private readonly host = inject(ElementRef<HTMLElement>);
+  protected readonly empty = signal(false);
+
+  constructor() {
+    /* A group whose every option was filtered away renders nothing at all: a
+       heading with no options under it says a category matched when none did.
+       The query is read so that a moving query re-measures the group. */
+    afterRenderEffect(() => {
+      this.select.query();
+      const element = this.host.nativeElement as HTMLElement;
+      this.empty.set(element.querySelector("[data-part='item']:not([hidden])") === null);
+    });
+  }
 }
 
 /**

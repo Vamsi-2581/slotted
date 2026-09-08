@@ -8,6 +8,7 @@ export {
 export type {
   SelectAlign,
   SelectDefaults,
+  SelectFilter,
   SelectHighlightReason,
   SelectItems,
   SelectMount,
@@ -15,6 +16,7 @@ export type {
   SelectOption,
   SelectOptionGroup,
   SelectOptionValue,
+  SelectSearchReason,
   SelectSelection,
   SelectSide,
   SelectSize,

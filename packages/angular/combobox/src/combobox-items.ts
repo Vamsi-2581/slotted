@@ -63,7 +63,7 @@ import type { ComboboxOptionValue } from './combobox-defaults';
         @if (run.matched) {
           <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
         } @else {
-          {{ run.text }}
+          <ng-container>{{ run.text }}</ng-container>
         }
       }
     </span>

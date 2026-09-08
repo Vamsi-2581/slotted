@@ -23,6 +23,20 @@ export type SelectOpenReason =
   | 'programmatic';
 
 export type SelectValueReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'programmatic';
+
+/**
+ * Why the query moved. `clear` covers both the reader emptying the field and
+ * the popup emptying it as it opens and closes — the field was emptied either
+ * way.
+ */
+export type SelectSearchReason = 'keyboard' | 'select' | 'clear' | 'programmatic';
+
+/**
+ * Whether an option answers a query. `null` turns filtering off, which is what
+ * a list a server has already filtered needs; a function replaces the
+ * comparison; unset asks for the library's own locale-sensitive `contains`.
+ */
+export type SelectFilter = ((label: string, query: string) => boolean) | null;
 export type SelectHighlightReason = 'pointer' | 'keyboard' | 'programmatic';
 
 /** Enough to name a value the popup has never rendered. */
@@ -44,6 +58,16 @@ export interface SelectDefaults {
   alignOffset: number;
   clearable: boolean;
   clearLabel: string;
+  /** The sentence the live region announces while searching. `{count}` becomes the number. */
+  countLabel: string;
+  /** Whether the span a query matched is marked inside the option's label. */
+  highlightMatch: boolean;
+  /** Whether the popup opens onto a field the reader filters the options with. */
+  search: boolean;
+  /** The accessible name of the search field, which has no visible label. */
+  searchLabel: string;
+  /** What the empty search field says. */
+  searchPlaceholder: string;
   /** The accessible name of a chip's remove control. `{label}` is the value's own label. */
   removeLabel: string;
   /** What a control too narrow for chips says instead. `{count}` is how many are chosen. */
@@ -88,6 +112,11 @@ export const SELECT_FALLBACK: SelectDefaults = {
   alignOffset: 0,
   clearable: false,
   clearLabel: 'Clear selection',
+  countLabel: '{count} results',
+  highlightMatch: true,
+  search: false,
+  searchLabel: 'Search options',
+  searchPlaceholder: 'Search…',
   removeLabel: 'Remove {label}',
   summaryLabel: '{count} selected',
   closeOnEscape: true,

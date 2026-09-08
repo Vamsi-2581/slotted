@@ -43,6 +43,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyboard: Keyboard,
     'loading-and-empty': LoadingAndEmpty,
     'long-content': LongContent,
+    search: Search,
     multiple: Multiple,
     placeholder: Placeholder,
     placement: Placement,
@@ -308,6 +309,84 @@ export const LoadingAndEmpty: Story = {
         )}
       </div>
     `,
+  }),
+};
+
+/**
+ * Twenty-eight labels rather than six: the scene is about a list too long to
+ * scan, and six would not make the point. Each option gives its label as an
+ * input, which is what lets the family split it and mark the span the query
+ * matched — Angular cannot read projected content that has not been created.
+ */
+const COUNTRIES = [
+  'Argentina',
+  'Australia',
+  'Austria',
+  'Belgium',
+  'Brazil',
+  'Canada',
+  'Chile',
+  'Denmark',
+  'Estonia',
+  'Finland',
+  'France',
+  'Germany',
+  'Greece',
+  'Iceland',
+  'Ireland',
+  'Italy',
+  'Japan',
+  'Nepal',
+  'Netherlands',
+  'New Zealand',
+  'Norway',
+  'Poland',
+  'Portugal',
+  'Spain',
+  'Sweden',
+  'Switzerland',
+  'Uruguay',
+  'Vietnam',
+];
+
+const countryOptions = (labels: readonly string[] = COUNTRIES) =>
+  labels
+    .map(
+      (label) =>
+        `<sl-select-item value="${label.toLowerCase().replaceAll(' ', '-')}" label="${label}" />`,
+    )
+    .join('\n      ');
+
+export const Search: Story = {
+  parameters: scenario('search'),
+  render: (_args, context) => ({
+    props: { pictured: isolated(context) },
+    template: [
+      scene(
+        'A field above the options',
+        'The query filters the list, the span it matched is marked, and the count is announced. Escape clears the query before it closes the popup; Tab commits and leaves the control.',
+        viewport(
+          `
+      <sl-select search aria-label="Country" placeholder="Choose a country" [open]="pictured" [portal]="false" searchPlaceholder="Filter countries">
+        ${countryOptions()}
+      </sl-select>
+    `,
+          'tall',
+        ),
+      ),
+      scene(
+        'A list the server already filtered',
+        'A null filter turns the family&#39;s own comparison off, so it renders exactly the window it was given and decides nothing. The mark is off with it: nothing here claims to know what matched.',
+        viewport(
+          `
+      <sl-select search aria-label="Remote" placeholder="Choose a country" [portal]="false" [filter]="null" [highlightMatch]="false" searchPlaceholder="Search the server">
+        ${countryOptions(COUNTRIES.slice(0, 4))}
+      </sl-select>
+    `,
+          'tall',
+        ),
+      ),
+    ].join(''),
   }),
 };
 

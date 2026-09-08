@@ -60,7 +60,7 @@ function press(key: string, init: KeyboardEventInit = {}) {
  * focus move is the press's default action, so an option that refuses the press
  * leaves focus where it was; the click is dispatched either way (CB11).
  */
-function pressOption(fixture: ComponentFixture<Host>, option: HTMLElement) {
+function pressOption(fixture: ComponentFixture<unknown>, option: HTMLElement) {
   const focusMoves = option.dispatchEvent(
     new PointerEvent('pointerdown', { bubbles: true, cancelable: true }),
   );
@@ -420,5 +420,246 @@ describe('SlSelect defaults', () => {
     const root = document.querySelector<HTMLElement>("[data-ui='select'][data-part='root']");
     expect(root?.getAttribute('data-size')).toBe('sm');
     expect(root?.getAttribute('data-variant')).toBe('subtle');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlSelect, SlSelectGroup, SlSelectItem],
+  template: `
+    <button type="button">before</button>
+    <sl-select
+      search
+      aria-label="Fruit"
+      placeholder="Choose a fruit"
+      [(value)]="value"
+      [(searchValue)]="query"
+      [multiple]="multiple()"
+      [filter]="filter()"
+      (searchValueChangeRequest)="searchReason.set($event.reason)"
+    >
+      <sl-select-item value="apple" label="Apple" />
+      <sl-select-item value="blueberry" label="Blueberry" />
+      <sl-select-item value="cherry" label="Cherry" />
+      <sl-select-item value="raspberry" label="Raspberry" />
+    </sl-select>
+    <button type="button">after</button>
+  `,
+})
+class SearchHost {
+  readonly value = signal<string | readonly string[] | null>(null);
+  readonly query = signal('');
+  readonly multiple = signal(false);
+  readonly filter = signal<((label: string, query: string) => boolean) | null | undefined>(
+    undefined,
+  );
+  readonly searchReason = signal<string | undefined>(undefined);
+}
+
+describe('SlSelect, searching', () => {
+  let fixture: ComponentFixture<SearchHost>;
+
+  const field = () =>
+    document.querySelector<HTMLInputElement>("[data-part='search-input']") as HTMLInputElement;
+  const visible = () => options().filter((option) => !option.hasAttribute('hidden'));
+  const outside = (label: string) =>
+    [...document.querySelectorAll<HTMLButtonElement>('button')].find(
+      (button) => button.textContent?.trim() === label,
+    ) as HTMLButtonElement;
+
+  const openSearch = () => {
+    trigger().focus();
+    trigger().click();
+    fixture.detectChanges();
+  };
+
+  const type = (value: string) => {
+    field().value = value;
+    field().dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+  };
+
+  const send = (key: string, init: KeyboardEventInit = {}) => {
+    field().dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key, ...init }));
+    fixture.detectChanges();
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [SearchHost] }).compileComponents();
+    fixture = TestBed.createComponent(SearchHost);
+    fixture.detectChanges();
+  });
+
+  /**
+   * The popup stops being a listbox and becomes a dialog holding one, which is
+   * the composition the combobox pattern names: a popup that is not a listbox
+   * is named by `aria-haspopup` on the control.
+   */
+  it('opens a dialog holding a listbox, and says so on the trigger', () => {
+    expect(trigger().getAttribute('aria-haspopup')).toBe('dialog');
+    openSearch();
+
+    const dialog = document.querySelector<HTMLElement>("[role='dialog']");
+    expect(dialog).not.toBeNull();
+    expect(trigger().getAttribute('aria-controls')).toBe(dialog?.id);
+    expect(field().getAttribute('aria-controls')).toBe(listbox()?.id);
+    expect(field().getAttribute('aria-autocomplete')).toBe('list');
+  });
+
+  /** The pattern: a dialog popup does not support aria-activedescendant. */
+  it('takes focus into the field however the popup was opened, and gives it back', () => {
+    openSearch();
+    expect(document.activeElement).toBe(field());
+    expect(trigger().getAttribute('aria-activedescendant')).toBeNull();
+
+    send('ArrowDown');
+    expect(field().getAttribute('aria-activedescendant')).not.toBeNull();
+
+    send('Escape');
+    expect(document.activeElement).toBe(trigger());
+  });
+
+  it('filters the options and marks the span the query matched', () => {
+    openSearch();
+    type('berr');
+
+    expect(visible().map((option) => option.textContent?.trim())).toEqual([
+      'Blueberry',
+      'Raspberry',
+    ]);
+    const marks = [...document.querySelectorAll("[data-part='match']")];
+    expect(marks).toHaveLength(2);
+    expect(marks.every((mark) => mark.getAttribute('data-ui') === 'highlight')).toBe(true);
+  });
+
+  it('moves the highlight onto the first surviving option as the query changes', () => {
+    openSearch();
+    type('rasp');
+    expect(field().getAttribute('aria-activedescendant')).toBe(named('Raspberry').id);
+
+    send('Enter');
+    expect(fixture.componentInstance.value()).toBe('raspberry');
+    expect(document.querySelector("[role='dialog']")).toBeNull();
+    expect(document.activeElement).toBe(trigger());
+  });
+
+  /** The query first, the popup second. */
+  it('clears the query on the first Escape and closes on the second', () => {
+    openSearch();
+    type('berr');
+    expect(visible()).toHaveLength(2);
+
+    send('Escape');
+    expect(visible()).toHaveLength(4);
+    expect(document.querySelector("[role='dialog']")).not.toBeNull();
+    expect(fixture.componentInstance.query()).toBe('');
+
+    send('Escape');
+    expect(document.querySelector("[role='dialog']")).toBeNull();
+  });
+
+  /**
+   * Tab keeps the effect the closed control's Tab has — commit, close, move on
+   * — and only the mechanism differs: the layer is portalled to the end of the
+   * document, so the browser's own next element is the end of the page.
+   */
+  it('commits on Tab and leaves the control for the element beside it', () => {
+    openSearch();
+    send('ArrowDown');
+    send('Tab');
+
+    expect(fixture.componentInstance.value()).toBe('blueberry');
+    expect(document.querySelector("[role='dialog']")).toBeNull();
+    expect(document.activeElement).toBe(outside('after'));
+  });
+
+  it('goes back the way it came under Shift', () => {
+    openSearch();
+    send('Tab', { shiftKey: true });
+    expect(document.activeElement).toBe(outside('before'));
+  });
+
+  /** A field the reader is typing into cannot spend the space bar on a commit. */
+  it('leaves the space bar, Home and End to the browser', () => {
+    openSearch();
+    send('ArrowDown');
+    const held = field().getAttribute('aria-activedescendant');
+
+    for (const key of [' ', 'Home', 'End']) {
+      const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key });
+      field().dispatchEvent(event);
+      fixture.detectChanges();
+      expect(event.defaultPrevented, `${key} was prevented`).toBe(false);
+    }
+    expect(field().getAttribute('aria-activedescendant')).toBe(held);
+    expect(document.querySelector("[role='dialog']")).not.toBeNull();
+  });
+
+  it('announces how many options survived the query', () => {
+    openSearch();
+    const status = () => document.querySelector<HTMLElement>("[data-part='status']");
+    expect(status()?.textContent?.trim()).toBe('4 results');
+
+    type('berr');
+    expect(status()?.textContent?.trim()).toBe('2 results');
+  });
+
+  it('renders the window it was given when the filter is null', () => {
+    fixture.componentInstance.filter.set(null);
+    fixture.detectChanges();
+    openSearch();
+    type('nothing matches this');
+    expect(visible()).toHaveLength(4);
+  });
+
+  it('replaces the comparison when a filter is given', () => {
+    fixture.componentInstance.filter.set((label, query) => label.startsWith(query));
+    fixture.detectChanges();
+    openSearch();
+    type('Ch');
+    expect(visible().map((option) => option.textContent?.trim())).toEqual(['Cherry']);
+  });
+
+  /** Two searches on one keystroke would move the highlight twice per character. */
+  it('turns typeahead off, so a printable key only types', () => {
+    trigger().focus();
+    press('c');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.query()).toBe('c');
+    expect(visible().map((option) => option.textContent?.trim())).toEqual(['Cherry']);
+  });
+
+  /** The query is a value the consumer can own, and it is not the selection. */
+  it('asks before the query moves, with a reason of its own', () => {
+    openSearch();
+    type('ch');
+    expect(fixture.componentInstance.searchReason()).toBe('keyboard');
+    expect(fixture.componentInstance.value()).toBeNull();
+  });
+
+  /** A list still filtered to the row the reader has just taken looks broken. */
+  it('empties the query when an option is taken and the popup stays open', () => {
+    fixture.componentInstance.multiple.set(true);
+    fixture.detectChanges();
+    openSearch();
+    type('berr');
+    expect(visible()).toHaveLength(2);
+
+    pressOption(fixture, named('Blueberry'));
+    expect(visible()).toHaveLength(4);
+    expect(document.querySelector("[role='dialog']")).not.toBeNull();
+    expect(fixture.componentInstance.searchReason()).toBe('select');
+  });
+
+  it('forgets the query when the popup closes', () => {
+    openSearch();
+    type('berr');
+    send('Escape');
+    send('Escape');
+    expect(document.querySelector("[role='dialog']")).toBeNull();
+
+    openSearch();
+    expect(field().value).toBe('');
+    expect(visible()).toHaveLength(4);
   });
 });

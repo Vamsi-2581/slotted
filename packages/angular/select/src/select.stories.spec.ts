@@ -12,7 +12,17 @@ describe('Angular SELECT stories', () => {
   });
 
   it('documents each public component API', () => {
-    expect(apiMetadataErrors(contract.members.select, ANGULAR_SELECT_DOCS.select.api)).toEqual([]);
+    /* The declared model rather than the workbench's fallback table, which
+       guesses that a family's text is called `value` — here it is the query,
+       and `value` is the selection. A two-way `model()` is checked as the one
+       row it is. */
+    expect(
+      apiMetadataErrors(
+        contract.members.select,
+        ANGULAR_SELECT_DOCS.select.api,
+        contract.stateModel,
+      ),
+    ).toEqual([]);
   });
 
   it('answers the reference-page contract', () => {

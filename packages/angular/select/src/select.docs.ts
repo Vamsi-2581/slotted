@@ -96,17 +96,52 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'content',
-    element: 'div with role="listbox"',
+    element: 'div with role="listbox", or role="dialog" under search',
     required: true,
     purpose:
-      'The painted surface. It owns the three columns every option passes through, is bounded by the height the positioner reports, and scrolls inside it.',
+      'The painted surface. It owns the three columns every option passes through, is bounded by the height the positioner reports, and scrolls inside it. Under search it becomes a dialog holding a field and a list, because a listbox holds options and groups and a text field is neither — the combobox pattern names dialog as one of the four roles a popup may carry.',
+  },
+  {
+    part: 'search',
+    element: 'div, drawn only under search',
+    required: false,
+    purpose:
+      'The row the query is typed into, at the top of the popup and fixed there: a field that scrolled away with its own results is a field a reader loses on the fourth row. The control itself never takes typed text, which is what keeps this family apart from combobox.',
+  },
+  {
+    part: 'search-icon',
+    element: 'span, aria-hidden',
+    required: false,
+    purpose:
+      'The magnifier, drawn as a mask from the glyph scale. It is what makes the row a field rather than a heading.',
+  },
+  {
+    part: 'search-input',
+    element: 'input with role="combobox"',
+    required: false,
+    purpose:
+      'The field. It carries aria-controls naming the list, aria-autocomplete="list" and aria-activedescendant, and it holds DOM focus for the whole time the popup is open — the pattern says a dialog popup does not support aria-activedescendant, so focus moves into it.',
+  },
+  {
+    part: 'list',
+    element: 'div with role="listbox", drawn only under search',
+    required: false,
+    purpose:
+      'The listbox, one element inside the dialog. It is the scroller under a field that stays, and it owns the three columns the surface owns when there is no field.',
   },
   {
     part: 'chosen',
     element: 'div, aria-hidden, drawn while several values are chosen',
     required: false,
     purpose:
-      'Everything that is chosen, at the top of the popup. The control holds one line, so twelve values are three chips and a count; the band holds all of them, wraps, and scrolls at two rows of its own. It is aria-hidden and holds no widget: focus never enters this layer, and a value is taken back from its option or from the focusable chips in the control.',
+      'Everything that is chosen, at the top of the popup. The control holds one line, so twelve values are three chips and a count; the band holds all of them, wraps, and scrolls at two rows of its own. It is aria-hidden and holds no widget, and the reason is keyboard reach: without search focus never enters this layer, and with it the layer spends its one Tab on leaving the control — so a remove control here would answer the pointer and nothing else. A value is taken back from its option or from the focusable chips in the control.',
+  },
+  {
+    part: 'match',
+    element: 'mark with data-ui="highlight"',
+    required: false,
+    purpose:
+      'The span of a label the query matched, found by the same collator the filter used. It is drawn only for an option given a label input: a split needs the text before the view exists, and Angular cannot read projected content that has not been created.',
   },
   {
     part: 'group',
@@ -328,6 +363,26 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'search',
+    title: 'Searching a long list',
+    note: 'search opens the popup onto a field. The query filters the options, the span it matched is marked, and the count is announced. It is transient: it never becomes a value, it is emptied when an option is taken, and the control goes on showing the chosen label. Escape clears the query before it closes the popup, and Tab commits and leaves the control.',
+    snippet: defineSnippet({
+      id: 'select-angular-search',
+      language: 'angular',
+      label: 'A field above the options, and what it filters',
+      source: `<sl-select search aria-label="Country" placeholder="Choose a country">
+  <sl-select-item value="nl" label="Netherlands" />
+  <sl-select-item value="nz" label="New Zealand" />
+</sl-select>
+
+<!-- The query is a value like any other, and it is not the selection. -->
+<sl-select search [(searchValue)]="query" (searchValueChangeRequest)="onQuery($event)" />
+
+<!-- A list a server has already filtered decides nothing here. -->
+<sl-select search [filter]="null" [loading]="pending()" />`,
+    }),
+  },
+  {
     id: 'placement',
     title: 'Placement and width',
     note: 'The popup hangs from the start edge of its control and is as wide as it. width="content" lets it size to its own options, for a list with descriptions.',
@@ -380,6 +435,63 @@ const scenes: ReferenceSceneMeta[] = [
 ];
 
 const api = apiRows([
+  [
+    'search',
+    'boolean',
+    'false',
+    'sl-select',
+    'Opens the popup onto a field the reader filters the options with. It changes the popup’s role to dialog, moves DOM focus into the layer, and turns typeahead off — a reader typing into a field cannot also be driving one.',
+  ],
+  [
+    'searchValue',
+    'model<string>',
+    "''",
+    'sl-select',
+    'The query. Two-way, and never the selection: no request carries both.',
+  ],
+  [
+    'filter',
+    '((label: string, query: string) => boolean) | null',
+    'createFilter',
+    'sl-select',
+    'Whether an option answers the query. Unset asks for the library’s locale-sensitive contains; null turns filtering off, which is what a list a server has already filtered needs; a function replaces the comparison.',
+  ],
+  [
+    'highlightMatch',
+    'boolean',
+    'true',
+    'sl-select',
+    'Whether the span a query matched is marked inside the label, by the same collator the filter used.',
+  ],
+  [
+    'locale',
+    'string',
+    '—',
+    'sl-select',
+    'BCP 47, for the comparison the default filter makes. Unset asks the runtime.',
+  ],
+  ['searchPlaceholder', 'string', 'Search…', 'sl-select', 'What the empty field says.'],
+  [
+    'searchLabel',
+    'string',
+    'Search options',
+    'sl-select',
+    'The accessible name of the field, which carries no visible label.',
+  ],
+  [
+    'countLabel',
+    'string',
+    '{count} results',
+    'sl-select',
+    'What the live region announces while searching. {count} becomes the number of options that survived the query.',
+  ],
+  [
+    'label',
+    'string',
+    '—',
+    'sl-select-item',
+    'The label as text rather than as projected content. It is what the filter compares and what the mark splits, and it is the one place this binding differs from React: Angular cannot read projected content that has not been created.',
+  ],
   [
     'value',
     'model<string | string[] | null>',
@@ -702,6 +814,16 @@ const events: EventRow[] = [
     name: 'openChangeRequest',
     payload: 'ChangeRequest<boolean>',
     when: 'Before the popup opens or closes. The reason separates a selection from a dismissal: select, escape, outsidePress, pointer, keyboard, dismiss, blur or programmatic.',
+  },
+  {
+    name: 'searchValueChange',
+    payload: 'string',
+    when: 'The two-way half of the query model.',
+  },
+  {
+    name: 'searchValueChangeRequest',
+    payload: 'ChangeRequest<string>',
+    when: 'Before the query moves. keyboard is the reader typing, select is an option being taken while the popup stays open, and clear covers both Escape and the emptying the popup does as it opens and closes.',
   },
   {
     name: 'highlightedValueChangeRequest',

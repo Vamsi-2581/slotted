@@ -1,5 +1,6 @@
-import { moveIndex } from '@slotted/core/collection';
+import { createFilter, moveIndex } from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
+import { tabbables } from '@slotted/core/focus';
 import { createWidthGate } from '@slotted/core/measure';
 import type { WidthGateHandle } from '@slotted/core/measure';
 import { createCollapse } from '@slotted/core/overflow';
@@ -18,6 +19,7 @@ import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
 import type { TypeaheadHandle } from '@slotted/core/typeahead';
 import {
   afterNextRender,
+  afterRenderEffect,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -52,6 +54,7 @@ import { injectSelectDefaults } from './select-defaults';
 export const NARROW_WIDTH = 120;
 import type {
   SelectAlign,
+  SelectFilter,
   SelectHighlightReason,
   SelectItems,
   SelectMount,
@@ -59,6 +62,7 @@ import type {
   SelectOption,
   SelectOptionGroup,
   SelectOptionValue,
+  SelectSearchReason,
   SelectSelection,
   SelectSide,
   SelectSize,
@@ -75,7 +79,11 @@ export { SlSelectValue } from './select-value';
 /** Where the highlight lands when the popup opens. */
 type Entry = 'selected' | 'first' | 'last' | 'none';
 
-const OPTION_SELECTOR = "[data-part='item']";
+/* A filtered-out option stays in the DOM and hides: Angular cannot decline to
+   render a host component from inside it. Every reader of the collection —
+   the movement keys, the count, the entry highlight — takes the visible ones,
+   which is the selector `combobox` already writes for the same reason. */
+const OPTION_SELECTOR = "[data-part='item']:not([hidden])";
 
 const isGroup = (entry: SelectItems[number]): entry is SelectOptionGroup => 'options' in entry;
 
@@ -138,12 +146,12 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
       type="button"
       role="combobox"
       data-part="trigger"
-      aria-haspopup="listbox"
       [id]="triggerId"
+      [attr.aria-haspopup]="resolvedSearch() ? 'dialog' : 'listbox'"
       [disabled]="resolvedDisabled()"
       [attr.aria-expanded]="isOpen()"
       [attr.aria-controls]="isOpen() ? contentId : null"
-      [attr.aria-activedescendant]="activeDescendant()"
+      [attr.aria-activedescendant]="triggerActiveDescendant()"
       [attr.aria-label]="ariaLabel() ?? null"
       [attr.aria-labelledby]="labelledBy()"
       [attr.aria-describedby]="describedBy()"
@@ -251,6 +259,74 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
       </select>
     }
 
+    <!--
+      The rows the popup holds, stamped into the listbox wherever the listbox
+      is: the surface itself without a search field, and the list part one
+      element in with one. They are a template rather than markup written twice
+      because ng-content may be projected into exactly one place, and the
+      options are that one place.
+    -->
+    <ng-template #rows>
+      <!--
+            Everything that is chosen, at the top of the popup (SL10). The
+            control holds one line, so twelve values are three chips and a
+            count; here they are all of them, and the band scrolls at about two
+            rows of its own rather than growing the surface.
+
+            It is aria-hidden, and carries no remove control. The reason is
+            keyboard reach: without a search field focus never enters this
+            layer at all, and with one the layer spends its single Tab on
+            commiting and leaving the control — so a widget in the band would
+            answer the pointer and nothing else. What it says is already said,
+            by the trigger's own name and by each option's aria-selected.
+          -->
+      @if (resolvedMultiple() && selection().length > 0) {
+        <div data-part="chosen" aria-hidden="true">
+          @for (value of selection(); track value) {
+            <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+              <span data-part="body">
+                <span data-part="label">{{ labelFor(value) ?? value }}</span>
+              </span>
+            </span>
+          }
+        </div>
+      }
+      <ng-content />
+      @if (loading()) {
+        <!--
+              The wait, as the shape of the list that is coming: three rows the
+              height of an option, drawn by the skeleton sheet (SL6/CB5). Hidden
+              assistive technology — the status row is the live region.
+            -->
+        <div data-part="placeholder" aria-hidden="true">
+          @for (row of [0, 1, 2]; track row) {
+            <div>
+              <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+            </div>
+          }
+        </div>
+      }
+      @if (!loading() && empty()) {
+        <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+      }
+      @if (loading() || resolvedSearch()) {
+        <!--
+              The live region. While an answer is travelling it says so; while
+              the reader is searching it says how many options survived the
+              query, which is what docs/component-features.md §6 asks of a
+              filtered collection. An empty row draws nothing.
+            -->
+        <div
+          data-part="status"
+          role="status"
+          aria-live="polite"
+          [attr.data-loading]="loading() ? '' : null"
+        >
+          {{ statusMessage() }}
+        </div>
+      }
+    </ng-template>
+
     <ng-template #layer>
       <div
         data-ui="select"
@@ -264,56 +340,57 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
         <div
           #surface
           data-part="content"
-          role="listbox"
+          [attr.role]="resolvedSearch() ? 'dialog' : 'listbox'"
+          [attr.data-search]="resolvedSearch() ? '' : null"
           [id]="contentId"
           [attr.aria-labelledby]="ariaLabel() === undefined ? triggerId : null"
           [attr.aria-label]="ariaLabel() ?? null"
-          [attr.aria-multiselectable]="resolvedMultiple() ? true : null"
-          [attr.aria-busy]="loading() ? true : null"
+          [attr.aria-multiselectable]="resolvedSearch() || !resolvedMultiple() ? null : true"
+          [attr.aria-busy]="resolvedSearch() || !loading() ? null : true"
           [attr.data-loading]="loading() ? '' : null"
         >
           <!--
-            Everything that is chosen, at the top of the popup (SL10). The
-            control holds one line, so twelve values are three chips and a
-            count; here they are all of them, and the band scrolls at about two
-            rows of its own rather than growing the surface.
-
-            It is aria-hidden, and carries no remove control: focus never enters
-            this layer, so a widget in it would be a tab stop the pattern
-            excludes and a control no keyboard could reach. What it says is
-            already said — by the trigger's own name and by each option's
-            aria-selected.
+            The field the reader filters with, and the listbox one element in.
+            The combobox pattern lists the four roles a popup may carry and a
+            popup holding a text field is a dialog, so the listbox moves inside
+            it: a listbox holds options and groups, and a text field is neither.
           -->
-          @if (resolvedMultiple() && selection().length > 0) {
-            <div data-part="chosen" aria-hidden="true">
-              @for (value of selection(); track value) {
-                <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
-                  <span data-part="body">
-                    <span data-part="label">{{ labelFor(value) ?? value }}</span>
-                  </span>
-                </span>
-              }
+          @if (resolvedSearch()) {
+            <div data-part="search">
+              <span data-part="search-icon" aria-hidden="true"></span>
+              <input
+                #search
+                type="text"
+                role="combobox"
+                data-part="search-input"
+                autocomplete="off"
+                spellcheck="false"
+                aria-expanded="true"
+                aria-autocomplete="list"
+                [id]="searchId"
+                [attr.aria-controls]="listId"
+                [attr.aria-activedescendant]="activeDescendant()"
+                [attr.aria-label]="resolvedSearchLabel()"
+                [placeholder]="resolvedSearchPlaceholder()"
+                [value]="query()"
+                (input)="onSearchInput($event)"
+                (keydown)="onSearchKeyDown($event)"
+              />
             </div>
           }
-          <ng-content />
-          @if (loading()) {
-            <!--
-              The wait, as the shape of the list that is coming: three rows the
-              height of an option, drawn by the skeleton sheet (SL6/CB5). Hidden
-              assistive technology — the status row is the live region.
-            -->
-            <div data-part="placeholder" aria-hidden="true">
-              @for (row of [0, 1, 2]; track row) {
-                <div>
-                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
-                </div>
-              }
+          @if (resolvedSearch()) {
+            <div
+              data-part="list"
+              role="listbox"
+              [id]="listId"
+              [attr.aria-labelledby]="triggerId"
+              [attr.aria-multiselectable]="resolvedMultiple() ? true : null"
+              [attr.aria-busy]="loading() ? true : null"
+            >
+              <ng-container [ngTemplateOutlet]="rows" />
             </div>
-          }
-          @if (loading()) {
-            <div data-part="status" role="status" data-loading>{{ resolvedLoadingLabel() }}</div>
-          } @else if (empty()) {
-            <div data-part="empty">{{ resolvedEmptyLabel() }}</div>
+          } @else {
+            <ng-container [ngTemplateOutlet]="rows" />
           }
         </div>
       </div>
@@ -337,6 +414,13 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly highlightedValue = model<SelectOptionValue | null>(null);
   readonly highlightedValueChangeRequest = output<ChangeRequest<SelectOptionValue | null>>();
 
+  /**
+   * What the reader has typed into the search field. It is a value the consumer
+   * can own and it is **not** the selection: no request ever carries both.
+   */
+  readonly searchValue = model<string>('');
+  readonly searchValueChangeRequest = output<ChangeRequest<string>>();
+
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   readonly placeholder = input<string>('');
   readonly name = input<string | undefined>(undefined);
@@ -357,6 +441,13 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly summaryLabel = input<string | undefined>(undefined);
   readonly emptyLabel = input<string | undefined>(undefined);
   readonly loadingLabel = input<string | undefined>(undefined);
+  readonly countLabel = input<string | undefined>(undefined);
+  readonly searchLabel = input<string | undefined>(undefined);
+  readonly searchPlaceholder = input<string | undefined>(undefined);
+  /** Whether an option answers the query. `null` turns filtering off. */
+  readonly filter = input<SelectFilter | undefined>(undefined);
+  /** BCP 47, for the comparison the default filter makes. */
+  readonly locale = input<string | undefined>(undefined);
 
   readonly sideOffset = input(undefined, { transform: SlSelect.count });
   readonly alignOffset = input(undefined, { transform: SlSelect.count });
@@ -366,6 +457,8 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly multiple = input(undefined, { transform: SlSelect.flag });
   readonly clearable = input(undefined, { transform: SlSelect.flag });
   readonly loop = input(undefined, { transform: SlSelect.flag });
+  readonly search = input(undefined, { transform: SlSelect.flag });
+  readonly highlightMatch = input(undefined, { transform: SlSelect.flag });
   readonly typeahead = input(undefined, { transform: SlSelect.flag });
   readonly closeOnSelect = input(undefined, { transform: SlSelect.flag });
   readonly closeOnEscape = input(undefined, { transform: SlSelect.flag });
@@ -393,12 +486,20 @@ export class SlSelect implements ControlValueAccessor, Validator {
 
   private readonly identifier = Math.random().toString(36).slice(2, 8);
   readonly contentId = `sl-select-${this.identifier}`;
+  /**
+   * The listbox's own identifier. Without a search field the surface is the
+   * listbox and `contentId` names it; with one the surface is a dialog and the
+   * listbox is one element in, so the two need separate names.
+   */
+  readonly listId = `sl-select-list-${this.identifier}`;
+  readonly searchId = `sl-select-search-${this.identifier}`;
   readonly triggerId = `sl-select-trigger-${this.identifier}`;
 
   private readonly registry = signal(new Map<SelectOptionValue, string>());
   private readonly optionCount = signal(0);
   private entry: Entry = 'selected';
   private pending: string | null = null;
+  private lastQuery = '';
   private disabledByForm = signal<boolean | undefined>(undefined);
 
   private view: EmbeddedViewRef<unknown> | null = null;
@@ -426,7 +527,15 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly resolvedMultiple = computed(() => this.multiple() ?? this.defaults.multiple);
   readonly resolvedClearable = computed(() => this.clearable() ?? this.defaults.clearable);
   readonly resolvedLoop = computed(() => this.loop() ?? this.defaults.loop);
-  readonly resolvedTypeahead = computed(() => this.typeahead() ?? this.defaults.typeahead);
+  readonly resolvedSearch = computed(() => this.search() ?? this.defaults.search);
+  readonly resolvedHighlightMatch = computed(
+    () => this.highlightMatch() ?? this.defaults.highlightMatch,
+  );
+  /* A reader typing into a field cannot also be driving a typeahead on the
+     same keys: two searches on one keystroke move the highlight twice. */
+  readonly resolvedTypeahead = computed(() =>
+    this.resolvedSearch() ? false : (this.typeahead() ?? this.defaults.typeahead),
+  );
   readonly resolvedCloseOnSelect = computed(
     () => this.closeOnSelect() ?? this.defaults.closeOnSelect,
   );
@@ -436,6 +545,37 @@ export class SlSelect implements ControlValueAccessor, Validator {
   readonly resolvedSummaryLabel = computed(() => this.summaryLabel() ?? this.defaults.summaryLabel);
   readonly resolvedEmptyLabel = computed(() => this.emptyLabel() ?? this.defaults.emptyLabel);
   readonly resolvedLoadingLabel = computed(() => this.loadingLabel() ?? this.defaults.loadingLabel);
+  readonly resolvedCountLabel = computed(() => this.countLabel() ?? this.defaults.countLabel);
+  readonly resolvedSearchLabel = computed(() => this.searchLabel() ?? this.defaults.searchLabel);
+  readonly resolvedSearchPlaceholder = computed(
+    () => this.searchPlaceholder() ?? this.defaults.searchPlaceholder,
+  );
+
+  /** The query, which only exists while there is a field holding it. */
+  readonly query = computed(() => (this.resolvedSearch() ? this.searchValue() : ''));
+
+  private readonly fallbackFilter = computed(() => createFilter({ locale: this.locale() }));
+
+  /**
+   * Three answers, and `undefined` is not one of them. Not giving `filter` asks
+   * for the library's own locale-sensitive `contains`; giving `null` turns
+   * filtering off, which is what a list a server has already filtered needs;
+   * giving a function replaces the comparison.
+   */
+  matches(label: string): boolean {
+    const query = this.query();
+    const given = this.filter();
+    if (query === '' || given === null) return true;
+    if (given !== undefined) return given(label, query);
+    return this.fallbackFilter().contains(label, query);
+  }
+
+  /** What the live region carries: the wait, or how many options survived. */
+  readonly statusMessage = computed(() => {
+    if (this.loading()) return this.resolvedLoadingLabel();
+    if (!this.resolvedSearch() || this.optionCount() === 0) return '';
+    return this.resolvedCountLabel().replace('{count}', String(this.optionCount()));
+  });
 
   /** Unset asks the field; a field that says nothing leaves the default. */
   readonly resolvedDisabled = computed(
@@ -499,6 +639,16 @@ export class SlSelect implements ControlValueAccessor, Validator {
     const held = this.highlightedValue();
     return this.isOpen() && held !== null ? this.optionId(held) : null;
   });
+
+  /**
+   * The trigger names the highlighted option only while it is the focused
+   * element. With a search field the field holds focus and names it instead;
+   * two elements naming one option would put the announcement on the element
+   * nobody is operating.
+   */
+  readonly triggerActiveDescendant = computed(() =>
+    this.resolvedSearch() ? null : this.activeDescendant(),
+  );
 
   readonly labelledBy = computed(() => {
     if (this.ariaLabel() !== undefined) return null;
@@ -576,6 +726,24 @@ export class SlSelect implements ControlValueAccessor, Validator {
       untracked(() => (open ? this.show() : this.hide()));
     });
 
+    /**
+     * The highlight follows the query. A reader who types four characters and
+     * presses `Enter` means the first row they can see, and a highlight left on
+     * a row the filter has just removed answers with nothing at all. It is read
+     * after render because the options decide their own visibility, so the
+     * surviving set does not exist until the view has answered.
+     */
+    afterRenderEffect(() => {
+      const query = this.query();
+      untracked(() => {
+        if (!this.isOpen() || !this.resolvedSearch()) return;
+        if (this.lastQuery === query) return;
+        this.lastQuery = query;
+        this.recount();
+        this.move('first', new Event('input'));
+      });
+    });
+
     afterNextRender(() => {
       if (this.resolvedMount() === 'eager' && !this.isOpen()) this.build();
     });
@@ -635,7 +803,35 @@ export class SlSelect implements ControlValueAccessor, Validator {
     if (!next) {
       this.highlightedValue.set(null);
       this.entry = 'selected';
+      /* A popup that closes takes the query with it: the field is built with
+         the popup, and a select that reopened onto four characters nobody had
+         typed this time would filter a list the reader thought was whole. */
+      this.setQuery('', 'clear', source);
     }
+  }
+
+  /**
+   * The query. The reset the popup performs as it opens and as it closes
+   * carries `clear`, which is what happened to the field.
+   */
+  setQuery(next: string, reason: SelectSearchReason, source?: Event) {
+    if (next === this.query()) return;
+
+    const state = createControllable<string>({
+      initial: this.query(),
+      onRequest: (request) => this.searchValueChangeRequest.emit(request),
+    });
+    if (state.request(next, reason, source)) this.searchValue.set(next);
+  }
+
+  /** The field inside the popup, which lives in an embedded view. */
+  private searchNode(): HTMLInputElement | null {
+    return this.layerNode?.querySelector<HTMLInputElement>("[data-part='search-input']") ?? null;
+  }
+
+  /** Focuses the field when there is one, and the control otherwise. */
+  focusSearch() {
+    (this.searchNode() ?? this.triggerRef().nativeElement).focus({ preventScroll: true });
   }
 
   setHighlighted(next: SelectOptionValue | null, reason: SelectHighlightReason, source?: Event) {
@@ -730,11 +926,20 @@ export class SlSelect implements ControlValueAccessor, Validator {
         default:
           break;
       }
-      if (this.resolvedTypeahead() && !event.ctrlKey && !event.metaKey && !alt) {
-        if (!isPrintable(event.key)) return;
-        event.preventDefault();
-        this.pending = event.key;
-        this.openWith('none', event);
+      if (!event.ctrlKey && !event.metaKey && !alt && isPrintable(event.key)) {
+        /* With a field the character opens the popup and becomes the first
+           character of the query; without one it seeds the typeahead. The
+           pattern asks the same of both, and only the search it feeds differs. */
+        if (this.resolvedSearch()) {
+          event.preventDefault();
+          this.setQuery(event.key, 'keyboard', event);
+          return this.openWith('first', event);
+        }
+        if (this.resolvedTypeahead()) {
+          event.preventDefault();
+          this.pending = event.key;
+          this.openWith('none', event);
+        }
       }
       return;
     }
@@ -786,7 +991,75 @@ export class SlSelect implements ControlValueAccessor, Validator {
     if (!isPrintable(event.key, handle.query.length > 0)) return;
 
     event.preventDefault();
-    this.search(event.key, handle);
+    this.typeaheadMatch(event.key, handle);
+  }
+
+  protected onSearchInput(event: Event) {
+    const field = event.target as HTMLInputElement;
+    this.setQuery(field.value, 'keyboard', event);
+  }
+
+  /**
+   * The keys the field takes, and the three the closed control spends that this
+   * one cannot: `Home`, `End` and the space bar all belong to the caret while
+   * the reader is typing, and the pattern's editable branch returns them there.
+   */
+  protected onSearchKeyDown(event: KeyboardEvent) {
+    const alt = event.altKey;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        return this.move('next', event);
+      case 'ArrowUp':
+        event.preventDefault();
+        return alt ? this.commitHighlighted(event, true) : this.move('previous', event);
+      case 'PageDown':
+        event.preventDefault();
+        return this.move('pageDown', event);
+      case 'PageUp':
+        event.preventDefault();
+        return this.move('pageUp', event);
+      case 'Enter':
+        event.preventDefault();
+        return this.commitHighlighted(
+          event,
+          this.resolvedMultiple() ? false : this.resolvedCloseOnSelect(),
+        );
+      case 'Escape':
+        event.preventDefault();
+        /* The layer saw this key first, in the capture phase, and its dismiss
+           handler holds the two steps. This branch is what answers when the
+           layer was told to ignore Escape entirely: the query still empties,
+           and the popup a consumer said to keep open stays open. */
+        if (this.query() !== '') this.setQuery('', 'clear', event);
+        return;
+      case 'Tab': {
+        event.preventDefault();
+        const layer = this.layerNode;
+        this.commitHighlighted(event, true);
+        return this.moveTabFrom(layer, event.shiftKey);
+      }
+      default:
+        return;
+    }
+  }
+
+  /**
+   * Where `Tab` goes from inside the popup. The layer is portalled to the end
+   * of the document, so the browser's own next element is the end of the page
+   * rather than the element after the control: the document's tab order is read
+   * with the layer taken out of it, the trigger is found in what remains, and
+   * focus goes to the entry beside it.
+   */
+  private moveTabFrom(layer: HTMLElement | null, backwards: boolean) {
+    const trigger = this.triggerRef().nativeElement;
+    const order = tabbables(document.body).filter(
+      (node) => layer === null || !layer.contains(node),
+    );
+    const index = order.indexOf(trigger);
+    const next = index === -1 ? undefined : order[index + (backwards ? -1 : 1)];
+    (next ?? trigger).focus({ preventScroll: true });
   }
 
   private openWith(entry: Entry, event: Event) {
@@ -810,7 +1083,20 @@ export class SlSelect implements ControlValueAccessor, Validator {
   private commitHighlighted(event: Event, close: boolean) {
     const held = this.highlightedValue();
     if (held !== null) this.toggle(held, 'keyboard', event);
-    if (close) this.setOpen(false, 'select', event);
+    if (close) {
+      this.setOpen(false, 'select', event);
+      /* The trigger takes focus back wherever the popup is closed by a key.
+         It does not on an outside press: the reader has just put focus
+         somewhere themselves. Without a field focus never left, and the call
+         costs nothing. */
+      const leaving = event instanceof KeyboardEvent && event.key === 'Tab';
+      if (!leaving) this.focus();
+      return;
+    }
+    /* The popup stayed open, so the query is emptied here rather than by the
+       close: a list still filtered to the row the reader has just taken is a
+       list that looks broken. */
+    if (held !== null) this.setQuery('', 'select', event);
   }
 
   /**
@@ -818,7 +1104,7 @@ export class SlSelect implements ControlValueAccessor, Validator {
    * over a disabled option, so a typeahead that landed on one would let a
    * reader reach by typing a row the family then refuses to commit.
    */
-  private search(character: string, handle: TypeaheadHandle) {
+  private typeaheadMatch(character: string, handle: TypeaheadHandle) {
     const list = this.options().filter((option) => option.dataset['disabled'] === undefined);
     const labels = list.map(
       (option) =>
@@ -912,11 +1198,24 @@ export class SlSelect implements ControlValueAccessor, Validator {
       outsidePress: this.closeOnOutsidePress() ?? this.defaults.closeOnOutsidePress,
       scrollLock: false,
       onDismiss: (request) => {
-        this.setOpen(
-          false,
-          request.reason === 'escape' ? 'escape' : 'outsidePress',
-          request.source as Event | undefined,
-        );
+        const source = request.source as Event | undefined;
+        /**
+         * The query first, the popup second — and the decision lives here
+         * rather than in the field's own handler because the layer listens in
+         * the **capture** phase: it sees Escape before anything inside it does,
+         * so a field that tried to spend the key first would already have lost
+         * the surface. A reader four characters into a search wants the whole
+         * list back more often than they want the popup gone, and the pattern
+         * names this branch and makes it optional.
+         */
+        if (request.reason === 'escape' && this.resolvedSearch() && this.query() !== '') {
+          this.setQuery('', 'clear', source);
+          return;
+        }
+        this.setOpen(false, request.reason === 'escape' ? 'escape' : 'outsidePress', source);
+        /* Focus goes back to the control on a key and stays where the reader
+           put it on a press outside. */
+        if (request.reason === 'escape') this.focus();
       },
     });
 
@@ -927,16 +1226,25 @@ export class SlSelect implements ControlValueAccessor, Validator {
     }
   }
 
-  /** Where the highlight lands as the popup opens. Nothing takes focus. */
+  /**
+   * Where the highlight lands as the popup opens, and where focus goes.
+   *
+   * Without a search field nothing moves: the trigger keeps focus for the whole
+   * interaction. With one, focus enters the layer — the combobox pattern's own
+   * note says a dialog popup does not support `aria-activedescendant`, so DOM
+   * focus moves into the dialog — and the field takes it however the popup was
+   * opened, a press on the trigger included.
+   */
   private enter() {
     this.recount();
+    if (this.resolvedSearch()) this.searchNode()?.focus({ preventScroll: true });
     const list = this.options();
     if (list.length === 0) return;
 
     const character = this.pending;
     this.pending = null;
     if (character !== null && this.typeaheadHandle !== null) {
-      this.search(character, this.typeaheadHandle);
+      this.typeaheadMatch(character, this.typeaheadHandle);
       return;
     }
 

@@ -171,6 +171,16 @@ other families stand on. Justify it at the gate before writing it.
   centre their marks in the line box: they predate the measurement, and none of
   them is this session's to edit. Each takes the rule when it is next opened.
 
+- **A dismissable layer takes `Escape` in the capture phase, and refusing it is
+  how a family stages the key.** `packages/core/src/dismissable-layer` registers
+  its document listeners with `capture: true`, so a handler on the layer's own
+  content runs after the layer has already asked to close, and
+  `stopPropagation` from inside is too late. `onDismiss` is an ask: a family
+  that wants `Escape` to do something else first — `select`'s search clears its
+  query before it closes the popup — decides it there and simply does not call
+  `setOpen`. Handling the key on the element that holds focus emptied the query
+  _and_ closed the surface, on one press.
+
 - **A family that renders another family's part composes its ref, not only its
   props.** `menu`'s trigger hands `render` a `ref` alongside the wiring, and it
   is the anchor the positioner measures against. `toolbar`'s overflow control

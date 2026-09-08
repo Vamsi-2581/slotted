@@ -4655,3 +4655,43 @@ entry-point directories once. Restarting either interrupts the other session in
 this worktree. It is the one step of the skill left open, and
 `docs/superpowers/specs/2026-09-04-listbox-self-assessment.md` §12 says so in
 those words.
+
+## Select and Combobox, second pass — 2026-09-08
+
+**Three defects with a lesson, all three in code that shipped green.** The pass
+that found them was adding an opt-in search to `select`; two of the three were
+already live in `combobox`, and none of the three was visible to a test until a
+test was written to look for it.
+
+**A dismissable layer sees `Escape` in the capture phase, so nothing inside it
+can spend the key first.** `packages/core/src/dismissable-layer` registers its
+document listeners with `capture: true`, which is what makes a layer close
+before any content handler runs. A family that wants `Escape` to do something
+else first — clear a query, cancel an edit, step back a level — cannot get there
+by handling the key on its own element, and `stopPropagation` from inside the
+layer is too late. The decision belongs in the layer's own `onDismiss`, which is
+an **ask**: not calling `setOpen` is how a family refuses. The first version put
+the two-step in the field's `keydown`, and one press both emptied the query and
+took the surface with it. Any family with a modal or anchored layer that wants a
+staged `Escape` meets this.
+
+**Angular's `@else { {{ text }} }` puts a space on each side of the text.**
+`preserveWhitespaces` removes whitespace-only text nodes, and the block's
+content is not whitespace-only — so a label split into marked and unmarked runs
+rendered as `Blue berr y`. It shipped in `combobox`'s Angular binding and was
+found only when a spec asserted the label's `textContent`. The fix is
+`} @else {<ng-container>{{ run.text }}</ng-container>}` on one line. Every
+family that renders a collection of text runs — a mark, a diff, a token
+highlighter — writes this branch.
+
+**React bails out of re-rendering a child whose props are the same element, so
+its measuring effect never runs again.** Both families' `Group` counted the
+options that survived a filter in an effect with no dependency array, which
+reads as "after every render" and is in fact "after every render of _this_
+component". The group does not consume the family's context, and the consumer's
+JSX is the same element object on both sides of a keystroke, so React skipped it
+entirely: a category emptied by a query typed _after_ the popup was already open
+stayed on the surface with nothing under it. `combobox`'s own test passed
+because its popup mounts after the first keystroke, so the group measured the
+filtered list once and never had to measure again. A component that measures the
+DOM of children it does not own has to read something that changes.

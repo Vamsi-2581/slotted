@@ -362,7 +362,8 @@ Estas capacidades sustentam componentes públicos e devem possuir testes própri
 
 - Escolha entre opções conhecidas; simples/múltipla, clearable, placeholder, groups, disabledKeys, loading e empty.
 - Trigger abre listbox, exibe seleção e mantém nome acessível. Typeahead busca labels; seleção múltipla define resumo/chips e remoção por teclado.
-- Não inclui entrada de texto livre. Grande volume ou busca explícita usa Combobox.
+- Busca opcional dentro do popup: campo no topo da superfície, filtro por adapter, marca do trecho encontrado e contagem anunciada. O popup passa a `dialog` e a listbox desce um elemento, como o padrão Combobox exige de um popup que não é listbox.
+- Não inclui entrada de texto livre: o controle nunca recebe texto, e a consulta é transitória — filtra, é esvaziada ao escolher e nunca vira valor. Texto digitado como valor é Combobox.
 
 ### Combobox / Autocomplete `[Core]`
 

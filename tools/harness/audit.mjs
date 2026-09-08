@@ -140,16 +140,23 @@ export function turningExcess({ width, height }) {
 
 /**
  * How much of an element's overflow something other than content explains: the
- * larger of what a turning descendant adds (G10) and what a descendant hung
- * outside the box on purpose adds (G13).
+ * largest of what a turning descendant adds (G10), what a descendant hung
+ * outside the box on purpose adds (G13), and what a pointer reach hung outside
+ * it on purpose adds (DR5).
  *
- * Both are the size of one descendant rather than a sum, because each is one
+ * Each is the size of one thing rather than a sum, because each is one
  * explanation for the same pixels. A box with a spinner in one corner and a
  * read-out over the other keeps whichever excuse is larger and reports anything
  * past it.
+ *
+ * The third exists because R2's own prescribed construction produced it: a
+ * control whose picture is thinner than the WCAG 2.2 target reaches the floor
+ * with a transparent pseudo-element around it, and a four-pixel separator with
+ * a twenty-four-pixel reach therefore reports ten pixels of overflow on a side.
+ * `placed` cannot see it — it walks elements, and a pseudo-element is not one.
  */
-export function explainedExcess({ turning = 0, placed = 0 }) {
-  return Math.max(turning, placed);
+export function explainedExcess({ turning = 0, placed = 0, reach = 0 }) {
+  return Math.max(turning, placed, reach);
 }
 
 /**
@@ -285,6 +292,31 @@ const MEASURE = `(() => {
    * stands in, which is why the box that placed it is not the only one that has
    * to forgive it (G13).
    */
+  /**
+   * How far past this element a transparent pointer reach hangs, read from the
+   * negative inline insets of an absolutely positioned pseudo-element on the
+   * element itself or on a child of it.
+   *
+   * A pseudo-element has no node to walk to, so its geometry is read from the
+   * declaration that placed it: an inset of minus ten pixels is ten pixels of
+   * deliberate overhang, which is the construction R2 names for a target
+   * thinner than the WCAG floor.
+   */
+  const reachExcessOf = (node) => {
+    let most = 0;
+    for (const element of [node, ...node.children]) {
+      for (const which of ['::before', '::after']) {
+        const style = getComputedStyle(element, which);
+        if (style.content === 'none' || style.position !== 'absolute') continue;
+        for (const side of ['left', 'right']) {
+          const value = Number.parseFloat(style[side]);
+          if (Number.isFinite(value) && value < 0 && -value > most) most = -value;
+        }
+      }
+    }
+    return most;
+  };
+
   const placedExcessOf = (node) => {
     const box = node.getBoundingClientRect();
     const style = getComputedStyle(node);
@@ -338,6 +370,7 @@ const MEASURE = `(() => {
         clientWidth: stage.clientWidth,
         turning: turningExcessOf(stage),
         placed: placedExcessOf(stage),
+        reach: reachExcessOf(stage),
       });
     }
   }
@@ -352,6 +385,7 @@ const MEASURE = `(() => {
       clientWidth: node.clientWidth,
       turning: turningExcessOf(node),
       placed: placedExcessOf(node),
+      reach: reachExcessOf(node),
     });
   }
 

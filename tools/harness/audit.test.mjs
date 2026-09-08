@@ -319,6 +319,31 @@ test('forgives the larger of a turn and a placement, never their sum', () => {
   assert.equal(explainedExcess({}), 0);
 });
 
+/**
+ * A pointer reach is the third explanation, and R2's own construction is what
+ * produced it: a control whose picture is thinner than the WCAG 2.2 target
+ * reaches the floor with a transparent pseudo-element around it. `drawer`'s
+ * separator is four pixels wide with a twenty-four-pixel reach, which reports
+ * ten pixels of overflow on the end side and is none.
+ */
+test('forgives a transparent pointer reach hung outside a thin control', () => {
+  const separator = {
+    scene: 'side-start · light · 420px',
+    element: 'div[data-part=resizer]',
+    scrollWidth: 14,
+    clientWidth: 4,
+    reach: 10,
+  };
+  assert.deepEqual(overflowingElements([separator]), []);
+
+  /* Past the reach it is content again, and still reported. */
+  assert.deepEqual(
+    overflowingElements([{ ...separator, scrollWidth: 40 }]).map((finding) => finding.width),
+    [40],
+  );
+  assert.equal(explainedExcess({ turning: 5.8, placed: 2, reach: 10 }), 10);
+});
+
 test('takes a tolerance for the overflow it forgives', () => {
   const narrow = slot({ scrollWidth: 243, clientWidth: 240 });
   assert.equal(overflowingElements([narrow]).length, 1);

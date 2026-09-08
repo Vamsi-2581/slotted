@@ -252,7 +252,7 @@ export const Side: Story = {
       </Scene>
       <Scene
         label="bottom — a sheet"
-        note="The sheet keeps the two corners the reader can see and puts the grip above the header, which is where a hand looks for it. A side drawer keeps no corners at all: it reads as a wall rather than as a card."
+        note="The sheet keeps the two corners the reader can see and puts the separator above the header, which is where a hand looks for it. A side drawer keeps no corners at all: it reads as a wall rather than as a card."
       >
         <Layer>
           {(container) => (
@@ -301,7 +301,7 @@ export const Resize: Story = {
     <Grid columns={1}>
       <Scene
         label="A separator, not a prop"
-        note="Tab to the edge and press the arrows: the panel grows and shrinks, Home and End reach the limits, and Enter collapses it and puts it back. Ant’s resizer and Vaul’s snap dragging are both pointer-only."
+        note="The edge itself is the control: four pixels of nothing until a hand is near it, then a line. Tab to it and press the arrows — sixteen pixels a press, sixty-four with Shift — Home and End reach the limits, Enter collapses it and puts it back, and a double click restores the measure the size step gives it. Ant’s resizer and Vaul’s snap dragging are both pointer-only."
       >
         <Shell>
           <Drawer defaultExtent={0.32} defaultOpen minExtent={0.18} mode="inline" side="start">
@@ -331,7 +331,7 @@ export const SnapPoints: Story = {
     <Grid columns={1}>
       <Scene
         label="Three heights, all reachable by keyboard"
-        note="A snap point is a stop of the same separator, so an arrow moves between them and Home and End reach the first and last. Dragging the grip below the first stop asks to close, carrying pointer."
+        note="A snap point is a stop of the same separator, so an arrow moves between them and Home and End reach the first and last. Dragging the edge below the first stop asks to close, carrying pointer."
       >
         <Layer>
           {(container) => (
@@ -339,7 +339,7 @@ export const SnapPoints: Story = {
               actions={false}
               body={
                 <Text size="sm">
-                  Arraste o punho, ou use as setas: as paradas são 30%, 60% e 95% da camada.
+                  Arraste a borda, ou use as setas: as paradas são 30%, 60% e 95% da camada.
                 </Text>
               }
               container={container}

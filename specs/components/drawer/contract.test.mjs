@@ -135,7 +135,51 @@ test('declares a state model for both values a consumer can own', () => {
     uncontrolled: 'defaultExtent',
     request: 'onExtentChange',
     reasons: ['pointer', 'keyboard', 'programmatic'],
+    valueType:
+      'number | undefined, where undefined is the panel on the measure its size step gives it',
   });
+});
+
+/**
+ * A separator is a gutter and not a handle. Four pixels of nothing at rest, a
+ * two-pixel line under the hand, and a reach that holds the WCAG 2.2 floor
+ * without the eye being told where it is: the picture is the edge, and the
+ * edge is already there. SAP's Splitter — the behaviour this item names — VS
+ * Code's sash and every desktop pane divider read the same way.
+ */
+test('draws the separator as a gutter, with a reach wider than its picture', () => {
+  assert.match(contract.anatomy.resizer, /four-pixel gutter/);
+  assert.match(contract.anatomy.resizer, /--slotted-target-min/);
+  assert.match(contract.anatomy.resizer, /centred on it/);
+  assert.match(contract.anatomy.resizer, /Invisible at rest/);
+  assert.match(contract.anatomy.resizer, /no grip, no dots and no mark/);
+});
+
+/**
+ * A distance and not a proportion. Five per cent of a twelve-hundred-pixel
+ * layer is sixty pixels — a jump, not an adjustment — and a reader placing an
+ * edge against the content beside it needs the adjustment.
+ */
+test('moves the separator by a distance the reader can predict', () => {
+  assert.match(contract.extent.step, /16px per arrow press and 64px with Shift/);
+  assert.match(contract.extent.step, /A distance and not a proportion/);
+  assert.match(contract.extent.restore, /double click/);
+  assert.match(contract.extent.restore, /the size step decides/);
+});
+
+/**
+ * The drag animates nothing. R7 forbids a layout property in a transition, and
+ * the width under the reader's hand is not in one: it is the value being held,
+ * written once per `pointermove`, with `will-change` on the axis for the life
+ * of the gesture and no transition on it at any time.
+ */
+test('states what the drag does to the document, and what it does not animate', () => {
+  assert.match(contract.extent.gesture, /pointer capture/);
+  assert.match(contract.extent.gesture, /col-resize or row-resize/);
+  assert.match(contract.extent.gesture, /selection is suspended/);
+  assert.match(contract.extent.gesture, /will-change/);
+  assert.match(contract.extent.gesture, /no transition on that axis at all/);
+  assert.match(contract.extent.gesture, /R7 forbids animating a layout property/);
 });
 
 /** Five ways to close, one request, one guard. */

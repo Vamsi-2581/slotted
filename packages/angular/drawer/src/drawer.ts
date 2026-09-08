@@ -21,6 +21,7 @@ import {
   inject,
   input,
   model,
+  OnInit,
   output,
   signal,
   viewChild,
@@ -111,7 +112,7 @@ const NO_SNAP_POINTS: readonly number[] = [];
   /* The host is the origin the layer inherits its theme from, and nothing else. */
   host: { '[style.display]': "'contents'" },
 })
-export class SlDrawer {
+export class SlDrawer implements OnInit {
   /** Whether the drawer is open. Two-way, so a template may bind it directly. */
   readonly open = model<boolean>(false);
 
@@ -273,6 +274,19 @@ export class SlDrawer {
   private portal: PortalRootHandle | null = null;
   private layer: DismissableLayerHandle | null = null;
   private scope: FocusScopeHandle | null = null;
+
+  /**
+   * What the consumer's own binding said before the reader moved anything.
+   *
+   * Read in `ngOnInit` and not in the field initializer: Angular creates every
+   * directive in a template before it binds any input, so a measure read at
+   * construction is always the model's own default and never the consumer's.
+   */
+  private initialExtent: number | undefined = undefined;
+
+  ngOnInit() {
+    this.initialExtent = this.extent();
+  }
 
   constructor() {
     effect(() => {
@@ -455,12 +469,14 @@ export class SlDrawer {
    * the separator decides on release whether that means a smaller panel or a
    * closed one.
    */
-  requestExtent(next: number, reason: DrawerExtentReason, source: unknown) {
-    const wanted = clamp(next, 0, this.bounds().max);
+  requestExtent(next: number | undefined, reason: DrawerExtentReason, source: unknown) {
+    /* `undefined` travels whole: it is the panel back on its size step, and a
+       clamp of it would be a clamp of a value that is not a fraction. */
+    const wanted = next === undefined ? undefined : clamp(next, 0, this.bounds().max);
     if (wanted === this.extent()) return;
 
     let cancelled = false;
-    const state = createControllable<number>({
+    const state = createControllable<number | undefined>({
       initial: this.extent() ?? this.bounds().min,
       onRequest: (raw) => {
         cancelled = raw.cancelled;
@@ -479,6 +495,16 @@ export class SlDrawer {
 
     if (!state.request(wanted, reason, source) || cancelled) return;
     this.extent.set(wanted);
+  }
+
+  /**
+   * Back to the measure the size step gives it, which is where the panel
+   * started. Angular has one model rather than a controlled and an
+   * uncontrolled input, so the measure to restore is the one the model held
+   * before anything moved it, read once.
+   */
+  restoreExtent(reason: DrawerExtentReason, source: unknown) {
+    this.requestExtent(this.initialExtent, reason, source);
   }
 
   /** Opens the drawer from code, carrying `programmatic`. */

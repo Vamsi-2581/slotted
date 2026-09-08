@@ -238,12 +238,14 @@ export function Drawer({
    * or a closed one.
    */
   const requestExtent = useCallback(
-    (next: number, reason: DrawerExtentReason, source: unknown) => {
-      const wanted = clamp(next, 0, bounds.max);
+    (next: number | undefined, reason: DrawerExtentReason, source: unknown) => {
+      /* `undefined` travels whole: it is the panel back on its size step, and
+         a clamp of it would be a clamp of a value that is not a fraction. */
+      const wanted = next === undefined ? undefined : clamp(next, 0, bounds.max);
       if (wanted === currentExtent) return;
 
       let cancelled = false;
-      const state = createControllable<number>({
+      const state = createControllable<number | undefined>({
         controlled: extent,
         initial: currentExtent ?? bounds.min,
         onRequest: (raw) => {
@@ -293,6 +295,7 @@ export function Drawer({
       finalFocus,
       initialFocus: initialFocus ?? 'first',
       loading: loading === true,
+      defaultExtent,
       maxExtent: bounds.max,
       minExtent: bounds.min,
       modal: resolvedModal,
@@ -322,6 +325,7 @@ export function Drawer({
       bounds.min,
       container,
       currentExtent,
+      defaultExtent,
       currentOpen,
       descriptionRendered,
       dragging,

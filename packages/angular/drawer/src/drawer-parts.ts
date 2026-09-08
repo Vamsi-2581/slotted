@@ -3,6 +3,10 @@ import {
   extentAtPoint,
   isInlineSide,
   nearestSnap,
+  EXTENT_LARGE_STEP_PX,
+  EXTENT_STEP_PX,
+  holdResizeGesture,
+  stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
 import { clamp } from '@slotted/core/measure';
@@ -219,11 +223,19 @@ export class SlDrawerClose {
     '(pointerup)': 'endDrag($event)',
     '(lostpointercapture)': 'endDrag($event)',
     '(keydown)': 'keyDown($event)',
+    '(dblclick)': 'restore($event)',
   },
 })
 export class SlDrawerResizer {
-  /** How much of the box one arrow press moves, when there are no snap points. */
-  readonly step = input(0.05);
+  /**
+   * How far one arrow press moves the separator, **in pixels**, when there are
+   * no snap points. A distance and not a proportion: a reader adjusting a pane
+   * is placing an edge against the content beside it, and a proportion of a
+   * wide layer is a jump.
+   */
+  readonly step = input(EXTENT_STEP_PX);
+  /** How far `Shift` and an arrow move it, in pixels. */
+  readonly largeStep = input(EXTENT_LARGE_STEP_PX);
 
   protected readonly drawer = inject(SlDrawer);
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
@@ -231,7 +243,9 @@ export class SlDrawerResizer {
   /** Where the pointer last was, which is what decides a dismissal on release. */
   private dragged: number | null = null;
   /** What `Enter` restores to once it has collapsed the panel. */
-  private restore: number | null = null;
+  private collapsed: number | null = null;
+  /** What the document looked like before the drag, and how to put it back. */
+  private gesture: (() => void) | null = null;
 
   protected readonly orientation = computed(() =>
     isInlineSide(this.drawer.resolvedSide()) ? 'vertical' : 'horizontal',
@@ -275,6 +289,14 @@ export class SlDrawerResizer {
     event.preventDefault();
     this.native.setPointerCapture(event.pointerId);
     this.native.focus();
+    /* The cursor has to survive the pointer leaving the separator, and a drag
+       across the page must not select the text under it. Both are the
+       document's and neither is reachable from the family's own stylesheet. */
+    this.gesture?.();
+    this.gesture = holdResizeGesture(
+      this.native.ownerDocument,
+      isInlineSide(this.drawer.resolvedSide()) ? 'col-resize' : 'row-resize',
+    );
     this.drawer.dragging.set(true);
     this.dragged = fraction;
     this.drawer.requestExtent(fraction, 'pointer', event);
@@ -300,6 +322,8 @@ export class SlDrawerResizer {
     if (this.native.hasPointerCapture(event.pointerId)) {
       this.native.releasePointerCapture(event.pointerId);
     }
+    this.gesture?.();
+    this.gesture = null;
     this.drawer.dragging.set(false);
 
     const bounds = this.drawer.bounds();
@@ -318,6 +342,18 @@ export class SlDrawerResizer {
     );
   }
 
+  /**
+   * Back to the measure the size step gives it, which is what `undefined`
+   * means for this state. It is the one gesture in the family that restores
+   * rather than moves, and every desktop pane divider answers a double click
+   * with it.
+   */
+  protected restore(event: MouseEvent) {
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+    this.drawer.restoreExtent('pointer', event);
+  }
+
   protected keyDown(event: KeyboardEvent) {
     if (event.defaultPrevented) return;
 
@@ -328,11 +364,27 @@ export class SlDrawerResizer {
     const towardFirstEdge = inline ? 'ArrowLeft' : 'ArrowUp';
     const towardLastEdge = inline ? 'ArrowRight' : 'ArrowDown';
 
+    /**
+     * A distance and not a proportion. Five per cent of a twelve-hundred-pixel
+     * layer is sixty pixels, which is a jump rather than an adjustment; the
+     * fraction is still what the family stores, and the pixels are converted
+     * against the layer measured at the moment of the press.
+     */
+    const box = this.drawer.measuringBox();
+    const amount =
+      box === null
+        ? 0
+        : stepAmountFromPixels({
+            pixels: event.shiftKey ? this.largeStep() : this.step(),
+            rect: box.getBoundingClientRect(),
+            side,
+          });
+
     const by = (direction: 1 | -1) => {
       event.preventDefault();
       this.drawer.requestExtent(
         stepExtent({
-          amount: this.step(),
+          amount,
           direction,
           fraction: this.current(),
           max: bounds.max,
@@ -364,10 +416,10 @@ export class SlDrawerResizer {
       case 'Enter': {
         event.preventDefault();
         if (this.current() > bounds.min) {
-          this.restore = this.current();
+          this.collapsed = this.current();
           return this.drawer.requestExtent(bounds.min, 'keyboard', event);
         }
-        return this.drawer.requestExtent(this.restore ?? bounds.max, 'keyboard', event);
+        return this.drawer.requestExtent(this.collapsed ?? bounds.max, 'keyboard', event);
       }
       default:
         return;

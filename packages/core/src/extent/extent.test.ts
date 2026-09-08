@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   anchorsAtStart,
+  EXTENT_LARGE_STEP_PX,
+  EXTENT_STEP_PX,
+  holdResizeGesture,
+  stepAmountFromPixels,
   extentBounds,
   extentAtPoint,
   isInlineSide,
@@ -184,5 +188,66 @@ describe('extentBounds', () => {
 
   it('holds a limit inside the layer', () => {
     expect(extentBounds([], -1, 4)).toEqual({ min: 0, max: 1 });
+  });
+});
+
+describe('stepAmountFromPixels', () => {
+  const rect = { x: 0, y: 0, width: 1200, height: 800 };
+
+  it('reads a keyboard step as a distance and not as a proportion', () => {
+    expect(stepAmountFromPixels({ pixels: EXTENT_STEP_PX, rect, side: 'end' })).toBeCloseTo(
+      16 / 1200,
+    );
+    expect(stepAmountFromPixels({ pixels: EXTENT_LARGE_STEP_PX, rect, side: 'end' })).toBeCloseTo(
+      64 / 1200,
+    );
+  });
+
+  it('measures a block side against the block axis', () => {
+    expect(stepAmountFromPixels({ pixels: EXTENT_STEP_PX, rect, side: 'bottom' })).toBeCloseTo(
+      16 / 800,
+    );
+  });
+
+  /** Sixteen pixels and sixty-four, which is what the two presses move. */
+  it('states the two distances the pattern moves by', () => {
+    expect(EXTENT_STEP_PX).toBe(16);
+    expect(EXTENT_LARGE_STEP_PX).toBe(64);
+  });
+
+  it('answers nought for a layer with no size to measure against', () => {
+    expect(stepAmountFromPixels({ pixels: 16, rect: { ...rect, width: 0 }, side: 'end' })).toBe(0);
+  });
+});
+
+describe('holdResizeGesture', () => {
+  /**
+   * The cursor has to survive the pointer leaving the separator, and a drag
+   * across text must not select it. Both are the document's, not the family's.
+   */
+  it('holds the cursor and suspends selection, and puts back what was there', () => {
+    document.body.style.cursor = 'progress';
+    const release = holdResizeGesture(document, 'col-resize');
+
+    expect(document.body.style.cursor).toBe('col-resize');
+    expect(document.documentElement.style.userSelect).toBe('none');
+
+    release();
+    expect(document.body.style.cursor).toBe('progress');
+    expect(document.documentElement.style.userSelect).toBe('');
+    document.body.style.cursor = '';
+  });
+
+  it('releases once, however many times it is asked', () => {
+    const release = holdResizeGesture(document, 'row-resize');
+    release();
+    document.body.style.cursor = 'progress';
+    release();
+    expect(document.body.style.cursor).toBe('progress');
+    document.body.style.cursor = '';
+  });
+
+  it('answers a document it has not got with a release that does nothing', () => {
+    expect(() => holdResizeGesture(undefined, 'col-resize')()).not.toThrow();
   });
 });

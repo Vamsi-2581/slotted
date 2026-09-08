@@ -62,7 +62,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div with role="separator"',
     required: false,
     purpose:
-      'The edge the reader moves. Rendering it is the resize capability — there is no resizable prop — and it answers the Window Splitter pattern: aria-valuenow, aria-valuemin and aria-valuemax as percentages, aria-orientation, aria-controls the panel and aria-labelledby the title. It is --slotted-target-min thick, a row of the panel’s grid on a block side and an overlay on the inner edge on an inline one.',
+      'The edge the reader moves. Rendering it is the resize capability — there is no resizable prop — and it answers the Window Splitter pattern: aria-valuenow, aria-valuemin and aria-valuemax as percentages, aria-orientation, aria-controls the panel and aria-labelledby the title. It is a four-pixel gutter whose pointer reach is --slotted-target-min, invisible at rest and a two-pixel line under the hand, and it is a row of the panel’s grid on a block side and an overlay on the inner edge on an inline one.',
   },
   {
     part: 'header',
@@ -187,7 +187,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'resize',
     title: 'An edge the reader can move — with a keyboard',
-    note: 'Rendering the separator is the capability; there is no resizable prop. Arrow keys move it, Home and End reach the limits, and Enter collapses and restores — which is the Window Splitter pattern, and which no surveyed drawer answers.',
+    note: 'Rendering the separator is the capability; there is no resizable prop. Arrow keys move it sixteen pixels at a time and sixty-four with Shift, Home and End reach the limits, Enter collapses and restores, and a double click puts the panel back on the measure its size step gives it — which is the Window Splitter pattern, and which no surveyed drawer answers.',
     snippet: defineSnippet({
       id: 'drawer-react-resize',
       language: 'tsx',
@@ -493,7 +493,7 @@ const snippets = [
   --slotted-drawer-extent-md: 26rem;
   --slotted-drawer-scrim: rgb(12 20 40 / 0.6);
   --slotted-drawer-border-color: var(--slotted-border-subtle);
-  --slotted-drawer-grip-color: var(--slotted-border-strong);
+  --slotted-drawer-resizer-line-color: var(--slotted-tone-accent-border);
   --slotted-drawer-footer-surface: transparent;
 }`,
   }),
@@ -627,9 +627,16 @@ export const REACT_DRAWER_DOCS = {
     [
       'step',
       'number',
-      '0.05',
+      '16',
       'DrawerResizer',
-      'How much of the box one arrow press moves, when there are no snap points. With them the arrows move to the adjacent stop and this is not read',
+      'How far one arrow press moves the separator, in pixels, when there are no snap points. A distance and not a proportion: five per cent of a wide layer is a jump rather than an adjustment. With snap points the arrows move to the adjacent stop and this is not read',
+    ],
+    [
+      'largeStep',
+      'number',
+      '64',
+      'DrawerResizer',
+      'How far Shift and an arrow move it, in pixels. With snap points it is not read',
     ],
     [
       'value',

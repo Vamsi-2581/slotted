@@ -62,7 +62,12 @@ export interface DrawerChangeRequest extends Request<boolean, DrawerOpenReason> 
 }
 
 /** The request the separator emits before the measure moves. */
-export type DrawerExtentRequest = Request<number, DrawerExtentReason>;
+/**
+ * `undefined` is a value of this state and not the absence of one: it is the
+ * panel back on the measure its size step gives it, which is where it starts
+ * and where a double click on the separator puts it again.
+ */
+export type DrawerExtentRequest = Request<number | undefined, DrawerExtentReason>;
 
 export interface DrawerDefaults {
   escape: DrawerDismissPolicy;

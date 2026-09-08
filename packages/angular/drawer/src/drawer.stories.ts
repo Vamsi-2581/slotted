@@ -252,7 +252,7 @@ export const Side: Story = {
       ) +
         scene(
           'bottom — a sheet',
-          'The sheet keeps the two corners the reader can see and puts the grip above the header, which is where a hand looks for it. A side drawer keeps no corners at all: it reads as a wall rather than as a card.',
+          'The sheet keeps the two corners the reader can see and puts the separator above the header, which is where a hand looks for it. A side drawer keeps no corners at all: it reads as a wall rather than as a card.',
           panel('side="bottom" size="sm"', {
             description: '',
             resizer: '<div slDrawerResizer></div>',
@@ -289,7 +289,7 @@ export const Resize: Story = {
       1,
       scene(
         'A separator, not an input',
-        'Tab to the edge and press the arrows: the panel grows and shrinks, Home and End reach the limits, and Enter collapses it and puts it back. Ant’s resizer and Vaul’s snap dragging are both pointer-only.',
+        'The edge itself is the control: four pixels of nothing until a hand is near it, then a line. Tab to it and press the arrows — sixteen pixels a press, sixty-four with Shift — Home and End reach the limits, Enter collapses it and puts it back, and a double click restores the measure the size step gives it. Ant’s resizer and Vaul’s snap dragging are both pointer-only.',
         shell(
           `<sl-drawer mode="inline" side="start" [open]="true" [extent]="0.32" [minExtent]="0.18">
             <header slDrawerHeader><h2 slDrawerTitle>Coleções</h2></header>
@@ -312,9 +312,9 @@ export const SnapPoints: Story = {
       1,
       scene(
         'Three heights, all reachable by keyboard',
-        'A snap point is a stop of the same separator, so an arrow moves between them and Home and End reach the first and last. Dragging the grip below the first stop asks to close, carrying pointer.',
+        'A snap point is a stop of the same separator, so an arrow moves between them and Home and End reach the first and last. Dragging the edge below the first stop asks to close, carrying pointer.',
         panel('side="bottom" [extent]="0.3" [snapPoints]="[0.3, 0.6, 0.95]"', {
-          body: '<p slText size="sm">Arraste o punho, ou use as setas: as paradas são 30%, 60% e 95%.</p>',
+          body: '<p slText size="sm">Arraste a borda, ou use as setas: as paradas são 30%, 60% e 95%.</p>',
           description: '',
           footer: '',
           resizer: '<div slDrawerResizer></div>',

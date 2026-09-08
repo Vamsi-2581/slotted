@@ -25,9 +25,10 @@
    * pinned to an edge and bounded to the layer by construction, so `backdrop`
    * and `panel` are two cells of one one-cell grid and nothing is positioned.
    *
-   * The resizer is `--slotted-target-min` thick, which is the WCAG 2.2 floor,
-   * and it is a row of the panel's grid on a block side and an overlay on its
-   * inner edge on an inline side. The section that draws it says why the two
+   * The resizer is a four-pixel gutter whose pointer reach is
+   * `--slotted-target-min`, the WCAG 2.2 floor, drawn by a transparent
+   * pseudo-element centred on it; it is a row of the panel's grid on a block
+   * side and an overlay on its inner edge on an inline side. The section that draws it says why the two
    * differ; in one sentence, every rule in this panel runs across the inline
    * axis, and a column would cut all of them.
    *
@@ -75,12 +76,18 @@
       var(--slotted-target-min, 24px),
       calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
     );
-    /** The reader's hand, and the WCAG 2.2 floor in the axis it is thin in. */
-    --_resizer-thickness: var(--slotted-target-min, 24px);
-    --_grip-thickness: var(--slotted-border-width-thick, 2px);
-    --_grip-length: var(--slotted-space-10, 2.5rem);
-    /** The same mark, once a hand is on it. */
-    --_grip-reach: var(--slotted-space-11, 3rem);
+    /**
+     * The separator is a gutter, not a handle with a grip on it: four pixels
+     * of nothing at rest, a two-pixel line under the hand, and a reach the
+     * pointer finds without the eye being told where it is.
+     *
+     * `--_resizer-reach` is the WCAG 2.2 floor and it is centred on the
+     * gutter, so it takes ten pixels from each side rather than twenty from
+     * the panel — which is what keeps it off the header of a sheet.
+     */
+    --_resizer-thickness: var(--slotted-space-2, 0.25rem);
+    --_resizer-reach: var(--slotted-target-min, 24px);
+    --_resizer-line: var(--slotted-border-width-thick, 2px);
     --_radius: var(--slotted-radius-lg, 8px);
 
     /**
@@ -376,6 +383,37 @@
   }
 
   /**
+   * While the pointer is down the measure is not eased at all — and *not
+   * eased* rather than eased for nought milliseconds, which is still a
+   * transition the engine starts and still an animation `getAnimations()`
+   * reports. The value under the hand is the reader's own: it is written once
+   * per `pointermove` and it animates nothing.
+   *
+   * R7 forbids a transition on a layout property, and this obeys it rather
+   * than excepting itself from it. What R7 governs is an *entrance* — a box
+   * that arrives by growing costs a layout on every frame of an animation
+   * nobody asked for, and `transform` and `opacity` say the same thing for
+   * free. A drag is the other case: the width is the value the reader is
+   * holding, there is no keyframe between two of their positions, and a
+   * transition here would put the panel behind the hand by the whole duration.
+   * The slide stays, because a panel released mid-gesture still has an exit.
+   */
+  [data-ui='drawer'][data-dragging] > [data-part='panel'] {
+    transition: none;
+  }
+
+  [data-ui='drawer'][data-dragging][data-mode='overlay'] > [data-part='panel'] {
+    transition: translate var(--_slide);
+  }
+
+  [data-ui='drawer'][data-dragging][data-mode='inline'][data-side='start'],
+  [data-ui='drawer'][data-dragging][data-mode='inline'][data-side='end'],
+  [data-ui='drawer'][data-dragging][data-mode='inline'][data-side='top'],
+  [data-ui='drawer'][data-dragging][data-mode='inline'][data-side='bottom'] {
+    transition: var(--_reveal);
+  }
+
+  /**
    * Reduced motion drops the slide and keeps the scrim's fade: the panel is
    * simply there, behind a scrim that still says something opened. The
    * closed panel sits at rest because the layer hides it whole, above.
@@ -533,15 +571,28 @@
    * are both pointer-only; this one is a target a keyboard can reach, which is
    * what `docs/component-features.md` §2.8 asks of every resize.
    *
+   * **It is a gutter and not a handle.** Four pixels of nothing at rest, a
+   * two-pixel line in the accent border under the hand or under the drag, and
+   * nothing else: no grip, no dots, no mark. A separator that draws something
+   * at rest is a decoration on an edge nobody is touching, and the edge is
+   * already there — SAP's Splitter, VS Code's and every desktop pane divider
+   * read this way.
+   *
+   * **The pointer reach is not the line.** `::before` is a transparent box of
+   * `--slotted-target-min`, centred on the gutter, so the target holds at the
+   * WCAG 2.2 floor while the picture stays four pixels wide. Centred rather
+   * than run inward: inward it would take twenty pixels of the panel and, on a
+   * sheet, sit over the header.
+   *
    * **It is a row on a block side and an overlay on an inline side**, and the
    * asymmetry has one cause: every rule in this panel runs across the inline
    * axis. A resizer row above the header or below the footer crosses none of
    * them, while a resizer *column* would cut all of them — the first capture
-   * showed exactly that, a rule under the header stopping twenty-four pixels
-   * short of the panel's own edge, which reads as an unfinished line rather
-   * than as a track. A line cannot cross an opaque box, so on an inline side
-   * the separator lies over the panel instead and the rows keep clear of it
-   * with `--_row-padding-inline-*`.
+   * showed exactly that, a rule under the header stopping short of the panel's
+   * own edge, which reads as an unfinished line rather than as a track. A line
+   * cannot cross an opaque box, so on an inline side the separator lies over
+   * the panel instead and the rows keep clear of it with
+   * `--_row-padding-inline-*`.
    *
    * The cost is written rather than hidden: on `side="start"` the separator
    * sits at the panel's inline-end edge, which is where a left-to-right
@@ -556,9 +607,28 @@
     place-items: center;
     background: transparent;
     touch-action: none;
-    transition: background-color
-      var(--slotted-control-transition-duration, var(--slotted-duration-short))
-      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  /**
+   * The reach. Transparent, centred on the gutter and above the panel's own
+   * rows, which is what makes a four-pixel picture a twenty-four-pixel target.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']::before {
+    content: '';
+    position: absolute;
+    --_reach-overhang: calc((var(--_resizer-reach) - var(--_resizer-thickness)) / -2);
+  }
+
+  [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer']::before,
+  [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer']::before {
+    inset-block: 0;
+    inset-inline: var(--_reach-overhang);
+  }
+
+  [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer']::before,
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer']::before {
+    inset-inline: 0;
+    inset-block: var(--_reach-overhang);
   }
 
   [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer'],
@@ -569,126 +639,61 @@
     cursor: col-resize;
   }
 
-  /**
-   * On an inline side the grip sits *on* the edge it moves, not floating a
-   * dozen pixels inside it: the first capture had a bar hanging in the panel's
-   * white with nothing to say what it was attached to. Flush against the
-   * border it reads as a thickened, gripped segment of the edge, which is what
-   * a resizable edge is. The twenty-four pixels of hit area still run inward
-   * from it, where they cost nothing.
-   *
-   * A sheet's grip stays centred in its own row instead, because there the
-   * gesture is a pull rather than a slide and every bottom sheet in the field
-   * draws it that way.
-   */
   [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer'] {
     inset-inline-end: 0;
-    justify-items: end;
   }
 
   [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer'] {
     inset-inline-start: 0;
-    justify-items: start;
   }
 
   [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer'],
   [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer'] {
+    position: relative;
     block-size: var(--_resizer-thickness);
     cursor: row-resize;
   }
 
-  /**
-   * The row takes the panel's own leading corners, so the focus ring follows
-   * them instead of drawing two square corners inside two round ones.
-   */
   [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer'] {
     grid-row: 1;
-    border-start-start-radius: inherit;
-    border-start-end-radius: inherit;
   }
 
   [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer'] {
     grid-row: 4;
-    border-end-start-radius: inherit;
-    border-end-end-radius: inherit;
   }
 
   /**
-   * The grip. Real geometry rather than a character, and the one mark in the
-   * family: a short bar across the axis the panel moves in, which is what a
-   * hand reads as *pull me*. It is the same mark in both orientations, and it
-   * takes a foundation colour rather than a system one so that an unthemed
-   * decoration disappears instead of shouting.
+   * The line. It runs the whole length of the gutter rather than a segment of
+   * it, because a segment is a grip and a grip is what this separator does not
+   * have. Only `opacity` moves, so nothing about the reader's hand costs a
+   * layout frame while the panel beside it is being resized.
    */
   [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']::after {
     content: '';
-    border-radius: var(--slotted-radius-full, 9999px);
-    background: var(--slotted-drawer-grip-color, var(--slotted-border-strong));
-    /**
-     * The mark grows toward the hand. A separator is a target with no edges of
-     * its own — twenty-four invisible pixels and a two-pixel bar — so hover has
-     * nothing to fill and only the bar can answer. Growing it says *this is the
-     * thing you have hold of* in the one dimension the bar has.
-     */
-    transition:
-      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
-        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
-      inline-size var(--slotted-duration-short) var(--slotted-easing-standard),
-      block-size var(--slotted-duration-short) var(--slotted-easing-standard);
+    background: var(--slotted-drawer-resizer-line-color, var(--slotted-tone-accent-border));
+    opacity: 0;
+    transition: opacity var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
   [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer']::after,
   [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer']::after {
-    inline-size: var(--_grip-thickness);
-    block-size: var(--_grip-length);
+    inline-size: var(--_resizer-line);
+    block-size: 100%;
   }
 
   [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer']::after,
   [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer']::after {
-    inline-size: var(--_grip-length);
-    block-size: var(--_grip-thickness);
+    inline-size: 100%;
+    block-size: var(--_resizer-line);
   }
 
-  [data-ui='drawer'][data-side='start']
+  [data-ui='drawer']
     > [data-part='panel']
     > [data-part='resizer']:not([data-disabled]):hover::after,
-  [data-ui='drawer'][data-side='start']
-    > [data-part='panel']
-    > [data-part='resizer']:focus-visible::after,
-  [data-ui='drawer'][data-side='end']
-    > [data-part='panel']
-    > [data-part='resizer']:not([data-disabled]):hover::after,
-  [data-ui='drawer'][data-side='end']
-    > [data-part='panel']
-    > [data-part='resizer']:focus-visible::after,
-  [data-ui='drawer'][data-dragging][data-side='start']
-    > [data-part='panel']
-    > [data-part='resizer']::after,
-  [data-ui='drawer'][data-dragging][data-side='end']
-    > [data-part='panel']
-    > [data-part='resizer']::after {
-    block-size: var(--_grip-reach);
-  }
-
-  [data-ui='drawer'][data-side='top']
-    > [data-part='panel']
-    > [data-part='resizer']:not([data-disabled]):hover::after,
-  [data-ui='drawer'][data-side='top']
-    > [data-part='panel']
-    > [data-part='resizer']:focus-visible::after,
-  [data-ui='drawer'][data-side='bottom']
-    > [data-part='panel']
-    > [data-part='resizer']:not([data-disabled]):hover::after,
-  [data-ui='drawer'][data-side='bottom']
-    > [data-part='panel']
-    > [data-part='resizer']:focus-visible::after,
-  [data-ui='drawer'][data-dragging][data-side='top']
-    > [data-part='panel']
-    > [data-part='resizer']::after,
-  [data-ui='drawer'][data-dragging][data-side='bottom']
-    > [data-part='panel']
-    > [data-part='resizer']::after {
-    inline-size: var(--_grip-reach);
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:focus-visible::after,
+  [data-ui='drawer'][data-dragging] > [data-part='panel'] > [data-part='resizer']::after {
+    opacity: 1;
   }
 
   /**
@@ -697,30 +702,36 @@
    * `packages/styles/src/states.test.mjs`, and it is written here so that a
    * disabled resize, if one ever arrives, cannot ship without it.
    */
-  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:not([data-disabled]):hover {
-    background: var(--slotted-drawer-resizer-hover-background, var(--slotted-surface-sunken));
-  }
-
-  [data-ui='drawer']
-    > [data-part='panel']
-    > [data-part='resizer']:not([data-disabled]):hover::after {
-    background: var(--slotted-drawer-grip-hover-color, var(--slotted-text-muted));
-  }
-
+  /**
+   * The ring stays on the gutter and it fills it: a two-pixel ring inset into
+   * a four-pixel box leaves nothing between the two edges, so a focused
+   * separator is a four-pixel bar and a hovered one is the two-pixel line down
+   * its middle. The two pictures differ, which is all the ring has to do here.
+   *
+   * It cannot be drawn on the reach instead. `packages/styles/src/fallbacks.test.mjs`
+   * forbids a system colour inside `::before` or `::after`, and the ring's own
+   * last resort is `Highlight`.
+   */
   [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
 
   /**
-   * The mark says the reader has hold of it, and the ring says where they are.
-   * Focus colours the mark as well: on an inline side the mark sits flush with
-   * the edge and the inset ring lands on top of it, so a ring alone reads as a
-   * grip that vanished the moment it was reached.
+   * The one place this family asks the compositor for anything, and only while
+   * the pointer is down. `will-change` on a box that is not moving costs a
+   * layer for nothing; on the box the hand is dragging it is the difference
+   * between a resize the engine prepares for and one it discovers each frame.
+   * It is written on the panel because the panel is what changes size.
    */
-  [data-ui='drawer'][data-dragging] > [data-part='panel'] > [data-part='resizer']::after,
-  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:focus-visible::after {
-    background: var(--slotted-drawer-grip-active-color, var(--slotted-focus-ring-color));
+  [data-ui='drawer'][data-dragging][data-side='start'] > [data-part='panel'],
+  [data-ui='drawer'][data-dragging][data-side='end'] > [data-part='panel'] {
+    will-change: inline-size;
+  }
+
+  [data-ui='drawer'][data-dragging][data-side='top'] > [data-part='panel'],
+  [data-ui='drawer'][data-dragging][data-side='bottom'] > [data-part='panel'] {
+    will-change: block-size;
   }
 
   /* ── The header ───────────────────────────────────────────────────────── */

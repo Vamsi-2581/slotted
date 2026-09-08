@@ -52,6 +52,38 @@ export interface ExtentStepRequest {
   readonly snapPoints?: readonly number[];
 }
 
+/**
+ * What one arrow press and one `Shift`+arrow press move, in pixels.
+ *
+ * They are lengths and not fractions because a reader adjusting a pane is
+ * placing an edge against the content beside it, and five per cent of a
+ * twelve-hundred-pixel layer is sixty pixels — a jump, not an adjustment. SAP's
+ * Splitter, VS Code's sash and the Window Splitter pattern's own examples all
+ * move a fixed distance. The fraction is still what the family stores; this is
+ * converted against the measured layer at the moment of the press.
+ */
+export const EXTENT_STEP_PX = 16;
+export const EXTENT_LARGE_STEP_PX = 64;
+
+/**
+ * A distance in pixels as a fraction of the layer along the panel's own axis.
+ *
+ * A layer with no extent along that axis answers nought rather than infinity,
+ * which is what a press against an unmeasured or collapsed layer has to do.
+ */
+export function stepAmountFromPixels({
+  pixels,
+  rect,
+  side,
+}: {
+  readonly pixels: number;
+  readonly rect: ExtentRect;
+  readonly side: ExtentSide;
+}): number {
+  const span = isInlineSide(side) ? rect.width : rect.height;
+  return span > 0 ? pixels / span : 0;
+}
+
 /** Whether the panel's extent grows along the inline axis. */
 export function isInlineSide(side: ExtentSide): boolean {
   return side === 'start' || side === 'end';

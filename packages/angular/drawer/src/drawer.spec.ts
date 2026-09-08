@@ -117,9 +117,9 @@ describe('SlDrawer', () => {
     node.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     fixture.detectChanges();
   };
-  const key = (node: Element, value: string) => {
+  const key = (node: Element, value: string, init: KeyboardEventInit = {}) => {
     node.dispatchEvent(
-      new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: value }),
+      new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: value, ...init }),
     );
     fixture.detectChanges();
   };
@@ -356,20 +356,119 @@ describe('SlDrawer', () => {
    * two panels on opposite edges therefore move in opposite directions.
    */
   it('moves the separator by the screen rather than by the anchor', () => {
+    measureAs(1600, 800);
     host.open.set(true);
     host.extent.set(0.4);
     host.side.set('end');
     fixture.detectChanges();
 
     key(separator() as HTMLElement, 'ArrowLeft');
-    expect(host.extent()).toBeCloseTo(0.45, 5);
+    expect(host.extent()).toBeCloseTo(0.4 + 16 / 1600, 5);
     expect(host.extents.at(-1)?.reason).toBe('keyboard');
 
     host.extent.set(0.4);
     host.side.set('start');
     fixture.detectChanges();
     key(separator() as HTMLElement, 'ArrowLeft');
-    expect(host.extent()).toBeCloseTo(0.35, 5);
+    expect(host.extent()).toBeCloseTo(0.4 - 16 / 1600, 5);
+  });
+
+  /**
+   * A distance and not a proportion. Sixteen pixels is an adjustment at every
+   * layer width; five per cent of a sixteen-hundred-pixel layer is eighty, and
+   * a reader placing an edge against the words beside it cannot use eighty.
+   */
+  it('moves by sixteen pixels, and by sixty-four with Shift', () => {
+    measureAs(1600, 800);
+    host.open.set(true);
+    host.extent.set(0.5);
+    host.side.set('end');
+    fixture.detectChanges();
+
+    key(separator() as HTMLElement, 'ArrowLeft');
+    expect(host.extent()).toBeCloseTo(0.5 + 16 / 1600, 5);
+
+    host.extent.set(0.5);
+    fixture.detectChanges();
+    key(separator() as HTMLElement, 'ArrowLeft', { shiftKey: true });
+    expect(host.extent()).toBeCloseTo(0.5 + 64 / 1600, 5);
+
+    /* A block side measures against the block axis, so the same press is a
+       different fraction of a layer that is not square. */
+    host.extent.set(0.5);
+    host.side.set('bottom');
+    fixture.detectChanges();
+    key(separator() as HTMLElement, 'ArrowUp');
+    expect(host.extent()).toBeCloseTo(0.5 + 16 / 800, 5);
+  });
+
+  /**
+   * Back to the measure the size step gives it, which is what `undefined`
+   * means for this state and what every desktop pane divider answers a double
+   * click with.
+   */
+  it('restores the measure it started from on a double click', () => {
+    measureAs(1600, 800);
+    /* The measure a double click restores is the one the consumer's binding
+       said before anything moved, so it has to be bound before the drawer
+       initialises rather than set after it. Angular holds one model where
+       React holds a controlled input and an uncontrolled default. */
+    fixture = TestBed.createComponent(DrawerHost);
+    host = fixture.componentInstance;
+    host.extent.set(0.5);
+    host.open.set(true);
+    fixture.detectChanges();
+
+    key(separator() as HTMLElement, 'End');
+    expect(host.extent()).toBe(1);
+
+    (separator() as HTMLElement).dispatchEvent(
+      new MouseEvent('dblclick', { bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(host.extent()).toBe(0.5);
+    expect(host.extents.at(-1)?.reason).toBe('pointer');
+  });
+
+  it('restores to the size step itself when the consumer named no measure', () => {
+    measureAs(1600, 800);
+    host.open.set(true);
+    fixture.detectChanges();
+
+    key(separator() as HTMLElement, 'End');
+    expect(host.extent()).toBe(1);
+
+    (separator() as HTMLElement).dispatchEvent(
+      new MouseEvent('dblclick', { bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    expect(host.extent()).toBeUndefined();
+  });
+
+  /**
+   * The cursor has to survive the pointer leaving the separator — capture
+   * keeps the events coming and the cursor is decided by what is under the
+   * pointer — and a drag across the page must not select the text under it.
+   */
+  it('holds the cursor and suspends selection for the life of a drag', () => {
+    measureAs(1000, 800);
+    host.open.set(true);
+    host.side.set('end');
+    fixture.detectChanges();
+
+    (separator() as HTMLElement).dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: 600, pointerId: 1 }),
+    );
+    fixture.detectChanges();
+    expect(document.body.style.cursor).toBe('col-resize');
+    expect(document.documentElement.style.userSelect).toBe('none');
+
+    (separator() as HTMLElement).dispatchEvent(
+      new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }),
+    );
+    fixture.detectChanges();
+    expect(document.body.style.cursor).toBe('');
+    expect(document.documentElement.style.userSelect).toBe('');
   });
 
   it('takes Home and End to the ends of the range', () => {

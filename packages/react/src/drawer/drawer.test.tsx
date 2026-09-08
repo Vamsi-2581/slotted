@@ -355,6 +355,7 @@ describe('Drawer', () => {
    * the panels are on opposite edges.
    */
   it('moves the separator by the screen rather than by the anchor', () => {
+    measureLayerAs(1600, 800);
     const onExtentChange = vi.fn();
     /* Controlled and never moved, so each press is measured from the same
        place rather than from wherever the one before it landed. */
@@ -364,16 +365,104 @@ describe('Drawer', () => {
 
     fireEvent.keyDown(separator(), { key: 'ArrowLeft' });
     expect(onExtentChange).toHaveBeenLastCalledWith(
-      expect.closeTo(0.45, 5),
+      expect.closeTo(0.4 + 16 / 1600, 5),
       expect.objectContaining({ reason: 'keyboard' }),
     );
 
     rerender(<Basic defaultOpen extent={0.4} onExtentChange={onExtentChange} side="start" />);
     fireEvent.keyDown(separator(), { key: 'ArrowLeft' });
     expect(onExtentChange).toHaveBeenLastCalledWith(
-      expect.closeTo(0.35, 5),
+      expect.closeTo(0.4 - 16 / 1600, 5),
       expect.objectContaining({ reason: 'keyboard' }),
     );
+  });
+
+  /**
+   * A distance and not a proportion. Sixteen pixels is an adjustment at every
+   * layer width; five per cent of a sixteen-hundred-pixel layer is eighty, and
+   * a reader placing an edge against the words beside it cannot use eighty.
+   */
+  it('moves by sixteen pixels, and by sixty-four with Shift', () => {
+    measureLayerAs(1600, 800);
+    const onExtentChange = vi.fn();
+    const { rerender } = render(
+      <Basic defaultOpen extent={0.5} onExtentChange={onExtentChange} side="end" />,
+    );
+
+    fireEvent.keyDown(separator(), { key: 'ArrowLeft' });
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      expect.closeTo(0.5 + 16 / 1600, 5),
+      expect.anything(),
+    );
+
+    fireEvent.keyDown(separator(), { key: 'ArrowLeft', shiftKey: true });
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      expect.closeTo(0.5 + 64 / 1600, 5),
+      expect.anything(),
+    );
+
+    /* A block side measures against the block axis, so the same press is a
+       different fraction of a layer that is not square. */
+    rerender(<Basic defaultOpen extent={0.5} onExtentChange={onExtentChange} side="bottom" />);
+    fireEvent.keyDown(separator(), { key: 'ArrowUp' });
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      expect.closeTo(0.5 + 16 / 800, 5),
+      expect.anything(),
+    );
+  });
+
+  /**
+   * Back to the measure the size step gives it, which is what `undefined`
+   * means for this state and what every desktop pane divider answers a double
+   * click with.
+   */
+  it('restores the default measure on a double click', () => {
+    measureLayerAs(1600, 800);
+    const onExtentChange = vi.fn();
+    render(<Basic defaultExtent={0.5} defaultOpen onExtentChange={onExtentChange} />);
+
+    fireEvent.keyDown(separator(), { key: 'End' });
+    expect(separator().getAttribute('aria-valuenow')).toBe('100');
+
+    fireEvent.doubleClick(separator());
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      0.5,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+    expect(separator().getAttribute('aria-valuenow')).toBe('50');
+  });
+
+  it('restores to the size step itself when the consumer named no measure', () => {
+    measureLayerAs(1600, 800);
+    const onExtentChange = vi.fn();
+    render(<Basic defaultOpen onExtentChange={onExtentChange} />);
+
+    fireEvent.keyDown(separator(), { key: 'End' });
+    expect(separator().getAttribute('aria-valuenow')).toBe('100');
+
+    fireEvent.doubleClick(separator());
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      undefined,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  /**
+   * The cursor has to survive the pointer leaving the separator — capture
+   * keeps the events coming and the cursor is decided by what is under the
+   * pointer — and a drag across the page must not select the text under it.
+   */
+  it('holds the cursor and suspends selection for the life of a drag', () => {
+    measureLayerAs(1000, 800);
+    render(<Basic defaultOpen side="end" />);
+
+    fireEvent.pointerDown(separator(), { button: 0, clientX: 600, pointerId: 1 });
+    expect(document.body.style.cursor).toBe('col-resize');
+    expect(document.documentElement.style.userSelect).toBe('none');
+
+    fireEvent.pointerUp(separator(), { pointerId: 1 });
+    expect(document.body.style.cursor).toBe('');
+    expect(document.documentElement.style.userSelect).toBe('');
   });
 
   it('takes Home and End to the ends of the range', () => {
@@ -394,7 +483,7 @@ describe('Drawer', () => {
    */
   it('collapses and restores on Enter without closing', () => {
     function Controlled() {
-      const [extent, setExtent] = useState(0.6);
+      const [extent, setExtent] = useState<number | undefined>(0.6);
       return <Basic defaultOpen extent={extent} onExtentChange={setExtent} />;
     }
 

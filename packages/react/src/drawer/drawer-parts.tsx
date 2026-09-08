@@ -1,9 +1,13 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import {
   anchorsAtStart,
+  EXTENT_LARGE_STEP_PX,
+  EXTENT_STEP_PX,
   extentAtPoint,
+  holdResizeGesture,
   isInlineSide,
   nearestSnap,
+  stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
@@ -361,11 +365,13 @@ export function DrawerPanel({
  */
 export function DrawerResizer({
   className,
+  largeStep = EXTENT_LARGE_STEP_PX,
+  onDoubleClick,
   onKeyDown,
   onPointerDown,
   ref,
   render,
-  step = 0.05,
+  step = EXTENT_STEP_PX,
   style,
   ...rest
 }: DrawerResizerProps) {
@@ -375,6 +381,8 @@ export function DrawerResizer({
   const dragged = useRef<number | null>(null);
   /** What `Enter` restores to once it has collapsed the panel. */
   const restore = useRef<number | null>(null);
+  /** What the document looked like before the drag, and how to put it back. */
+  const gesture = useRef<(() => void) | null>(null);
 
   const inline = isInlineSide(drawer.side);
   const current = drawer.extent ?? drawer.minExtent;
@@ -400,6 +408,14 @@ export function DrawerResizer({
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     event.currentTarget.focus();
+    /* The cursor has to survive the pointer leaving the separator, and a drag
+       across the page must not select the text under it. Both are the
+       document's and neither is reachable from the family's own stylesheet. */
+    gesture.current?.();
+    gesture.current = holdResizeGesture(
+      node.current?.ownerDocument,
+      inline ? 'col-resize' : 'row-resize',
+    );
     drawer.setDragging(true);
     move(
       extentAtPoint({
@@ -439,6 +455,8 @@ export function DrawerResizer({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    gesture.current?.();
+    gesture.current = null;
     drawer.setDragging(false);
 
     const last = dragged.current ?? current;
@@ -464,11 +482,26 @@ export function DrawerResizer({
     const towardFirstEdge = inline ? 'ArrowLeft' : 'ArrowUp';
     const towardLastEdge = inline ? 'ArrowRight' : 'ArrowDown';
 
+    /**
+     * A distance and not a proportion. Five per cent of a twelve-hundred-pixel
+     * layer is sixty pixels, which is a jump rather than an adjustment; the
+     * fraction is still what the family stores, and the pixels are converted
+     * against the layer measured at the moment of the press.
+     */
     const by = (direction: 1 | -1) => {
       event.preventDefault();
+      const rect = layerRect();
+      const amount =
+        rect === null
+          ? 0
+          : stepAmountFromPixels({
+              pixels: event.shiftKey ? largeStep : step,
+              rect,
+              side: drawer.side,
+            });
       drawer.requestExtent(
         stepExtent({
-          amount: step,
+          amount,
           direction,
           fraction: current,
           max: drawer.maxExtent,
@@ -510,6 +543,19 @@ export function DrawerResizer({
     }
   };
 
+  /**
+   * Back to the measure the size step gives it, which is what `undefined`
+   * means for this state. It is the one gesture in the family that restores
+   * rather than moves, and every desktop pane divider answers a double click
+   * with it.
+   */
+  const doubleClick = (event: MouseEvent<HTMLDivElement>) => {
+    onDoubleClick?.(event);
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+    drawer.requestExtent(drawer.defaultExtent, 'pointer', event);
+  };
+
   const rootProps = {
     'aria-controls': drawer.panelId,
     ...(drawer.titleId === '' ? {} : { 'aria-labelledby': drawer.titleId }),
@@ -520,6 +566,7 @@ export function DrawerResizer({
     ...rest,
     className,
     'data-part': 'resizer' as const,
+    onDoubleClick: doubleClick,
     onKeyDown: keyDown,
     onLostPointerCapture: endDrag,
     onPointerDown: pointerDown,

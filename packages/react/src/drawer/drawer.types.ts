@@ -69,7 +69,13 @@ export interface DrawerChangeRequest extends ChangeRequest<boolean> {
 }
 
 /** The request the separator emits before the measure moves. */
-export interface DrawerExtentRequest extends ChangeRequest<number> {
+/**
+ * `undefined` is a value of this state and not the absence of one: it is the
+ * panel back on the measure its size step gives it, which is where it starts
+ * and where a double click on the separator puts it again. Every other value
+ * is a fraction of the layer.
+ */
+export interface DrawerExtentRequest extends ChangeRequest<number | undefined> {
   readonly reason: DrawerExtentReason;
 }
 
@@ -119,6 +125,8 @@ export interface DrawerContextValue {
   loading: boolean;
   maxExtent: number;
   minExtent: number;
+  /** The measure the panel goes back to, which a double click restores. */
+  defaultExtent: number | undefined;
   modal: boolean;
   mode: DrawerMode;
   /** Whether the panel belongs in the document at all. */
@@ -148,7 +156,7 @@ export interface DrawerContextValue {
   outsidePress: DrawerDismissPolicy;
   panelId: string;
   /** Asks to move the measure, carrying the reason and the event. */
-  requestExtent: (extent: number, reason: DrawerExtentReason, source: unknown) => void;
+  requestExtent: (extent: number | undefined, reason: DrawerExtentReason, source: unknown) => void;
   /** Records whether the reader has hold of the separator. */
   setDragging: (dragging: boolean) => void;
   side: DrawerSide;
@@ -178,7 +186,7 @@ export interface DrawerProps {
    */
   extent?: number | undefined;
   defaultExtent?: number | undefined;
-  onExtentChange?: ((extent: number, request: DrawerExtentRequest) => void) | undefined;
+  onExtentChange?: ((extent: number | undefined, request: DrawerExtentRequest) => void) | undefined;
   /** The smallest the reader may make it. A drag released below it asks to close. */
   minExtent?: number | undefined;
   maxExtent?: number | undefined;
@@ -264,6 +272,13 @@ export interface DrawerCloseProps
  */
 export interface DrawerResizerProps
   extends ComponentPropsWithRef<'div'>, WithRender<PartProps<HTMLDivElement>> {
-  /** How much of the box one arrow press moves, when there are no snap points. */
+  /**
+   * How far one arrow press moves the separator, **in pixels**, when there are
+   * no snap points. A distance and not a proportion: a reader adjusting a pane
+   * is placing an edge against the content beside it, and a proportion of a
+   * wide layer is a jump.
+   */
   step?: number | undefined;
+  /** How far `Shift` and an arrow move it, in pixels. */
+  largeStep?: number | undefined;
 }

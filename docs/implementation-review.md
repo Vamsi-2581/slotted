@@ -297,7 +297,7 @@ Localização: `packages/styles/src/drawer/drawer.css`.
 - [x] **DR2 — `#Dialog:3`.** Mesma causa em `presence`.
 - [x] **DR3 — Backdrop e painel aparecem sem transição.** Coberto por DR2 e R7: painel entra com `translateX(100%)→0` (lado `end`), `translateX(−100%)→0` (lado `start`), `translateY(100%)→0` (lado `bottom`).
 - [x] **DR4 — Borda lateral clara demais em `dark`.** Esperado: a borda do painel usa `--slotted-border-subtle` do esquema `dark`, não um valor fixo. Verificar em `drawer.css` se a borda usa token de esquema ou literal. Em `dark`, a separação entre painel e backdrop deve vir da sombra de elevação nível 3, com borda de 1px em `--slotted-border-subtle` a no máximo 12% de contraste sobre a superfície do painel.
-- [ ] **DR5 — Redimensionamento sem desempenho e visualmente inadequado.** Referência de comportamento: SAP Fundamental Styles Splitter (https://sap.github.io/fundamental-styles/?path=/docs/sap-design-btp-splitter--docs). Esperado:
+- [x] **DR5 — Redimensionamento sem desempenho e visualmente inadequado.** Referência de comportamento: SAP Fundamental Styles Splitter (https://sap.github.io/fundamental-styles/?path=/docs/sap-design-btp-splitter--docs). Esperado:
   - Alça de 4px (`[data-part='resizer']`) na borda interna, com área de captura de 12px via `::before`. Em repouso, a alça é invisível; em `hover` ou durante o arraste, mostra linha de 2px em `accent-border`. Sem cabo, sem pontos, sem ícone.
   - Durante o arraste, o painel atualiza `inline-size` (ou `block-size`) via `style` direto a cada `pointermove`, sem transição CSS ativa e com `will-change: inline-size` aplicado apenas durante o arraste. Sem `transition` em `inline-size` fora do arraste.
   - `pointer-capture` na alça, `cursor: col-resize`/`row-resize` no `body` durante o arraste, `user-select: none` no documento durante o arraste.
@@ -433,3 +433,16 @@ Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/spec
 9. `CK1`–`CK5` — checkbox e radio; depois `C1` e `LI2`.
 10. `R6`/`CB6` — componente de destaque.
 11. Demais itens por componente.
+
+---
+
+## FIM
+
+Todos os itens deste documento estão `[x]`. Nenhum ficou `[!]`.
+
+O que a revisão registrou ao longo das suas sessões e continua aberto — nada disto é um item, e nada disto é resolvível por esta máquina:
+
+- **O Storybook Angular (porta 6007) não respondeu em nenhuma sessão.** Toda a verificação Angular da revisão veio de spec, contrato e `turbo run verify`; nenhuma página Angular foi vista. Registrado em 48 entradas de `docs/implementation-review-log.md`.
+- **O servidor do Storybook React (porta 6006) serve uma transformação em cache de `packages/styles`.** Medido em DL1 e outra vez em DR5: `?direct` devolve o texto em disco e o módulo que a página importa devolve o anterior. Enquanto o servidor não for reiniciado, a página de referência mostra a folha antiga; as imagens novas da revisão foram verificadas no harness, que é construído a partir do ficheiro. Reiniciar é do revisor.
+- **Os dois Storybooks precisam de reinício para ver o que esta revisão acrescentou:** dois glifos novos em `packages/themes/default` (`--slotted-icon-maximize`, `--slotted-icon-minimize`), a parte `[data-part='fullscreen']` de `Dialog` e a folha nova de `Drawer`.
+- **Nada foi verificado com leitor de ecrã, com um ecrã real ou com um dispositivo de toque.** Os nomes acessíveis, a ordem de foco e os alvos de ponteiro estão medidos por teste e por geometria; nenhum deles está ouvido.

@@ -1,4 +1,14 @@
-import { computed, Directive, ElementRef, inject, input, OnDestroy, OnInit } from '@angular/core';
+import {
+  computed,
+  Directive,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+} from '@angular/core';
 
 import { SlDialogBase } from './dialog';
 import type { DialogOpenReason } from './dialog-defaults';
@@ -65,13 +75,82 @@ export class SlDialogTrigger implements OnInit, OnDestroy {
   }
 }
 
+/**
+ * The header, and the one part of it the family renders rather than the
+ * consumer: the full-screen toggle, when the layer was asked for one.
+ *
+ * It is written in the DOM after whatever the consumer projected. The title
+ * and the description come first for a reader moving through the header, and
+ * the two corner controls are adjacent peers whose order carries no meaning —
+ * a toggle written first would be announced ahead of the name of the dialog it
+ * belongs to. The stylesheet puts it in the column before the close, which is
+ * where a window's controls put it.
+ *
+ * The element is created rather than declared, because the directive is on the
+ * consumer's own `<header>` and a `ViewContainerRef` taken from it inserts a
+ * sibling of that element rather than a child of it. React reaches the same
+ * DOM by rendering the part, and the two have to land together.
+ */
 @Directive({
   selector: '[slDialogHeader]',
   standalone: true,
   exportAs: 'slDialogHeader',
   host: { 'data-part': 'header' },
 })
-export class SlDialogHeader {}
+export class SlDialogHeader implements OnDestroy {
+  private readonly dialog = inject(SlDialogBase);
+  private readonly host: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly renderer = inject(Renderer2);
+
+  private control: HTMLButtonElement | undefined;
+  private release: (() => void) | undefined;
+
+  constructor() {
+    effect(() => {
+      const wanted = this.dialog.resolvedFullscreenToggle();
+      if (wanted && this.control === undefined) this.mount();
+      if (!wanted && this.control !== undefined) this.unmount();
+      if (this.control !== undefined) {
+        /* `aria-pressed` says which way it is set, so the name stays one word
+           in every state: a label that changed with the state would be read as
+           a second control. */
+        this.renderer.setAttribute(
+          this.control,
+          'aria-pressed',
+          String(this.dialog.resolvedFullscreen()),
+        );
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.unmount();
+  }
+
+  private mount() {
+    const control: HTMLButtonElement = this.renderer.createElement('button');
+    this.renderer.setAttribute(control, 'type', 'button');
+    this.renderer.setAttribute(control, 'data-part', 'fullscreen');
+    this.renderer.setAttribute(control, 'aria-label', 'Full screen');
+    this.release = this.renderer.listen(control, 'click', (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+      this.dialog.requestFullscreen(
+        !this.dialog.resolvedFullscreen(),
+        activationReason(event) === 'keyboard' ? 'keyboard' : 'pointer',
+        event,
+      );
+    });
+    this.renderer.appendChild(this.host, control);
+    this.control = control;
+  }
+
+  private unmount() {
+    this.release?.();
+    this.release = undefined;
+    if (this.control !== undefined) this.renderer.removeChild(this.host, this.control);
+    this.control = undefined;
+  }
+}
 
 /** The visible name, which `aria-labelledby` points at. */
 @Directive({

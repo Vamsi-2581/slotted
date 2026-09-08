@@ -33,6 +33,8 @@ import type {
   DialogDismissPolicy,
   DialogFinalFocus,
   DialogFullScreen,
+  DialogFullscreenReason,
+  DialogFullscreenRequest,
   DialogInitialFocus,
   DialogMount,
   DialogOpenReason,
@@ -74,6 +76,15 @@ export abstract class SlDialogBase {
   readonly surface = input<DialogSurface | undefined>(undefined);
   readonly mount = input<DialogMount | undefined>(undefined);
   readonly fullScreen = input<DialogFullScreen | undefined>(undefined);
+  /**
+   * Whether the header renders the control that hands the layer to the panel.
+   * Off, because a dialog holds one task and most tasks are the size the
+   * consumer chose. `fullScreen` is the other question — the responsive rule
+   * set in advance — and this is the reader's own.
+   */
+  readonly fullscreenToggle = input(false, { transform: booleanAttribute });
+  /** Whether the reader has taken the layer. Two-way, as `open` is. */
+  readonly fullscreen = model<boolean>(false);
   readonly escape = input<DialogDismissPolicy | undefined>(undefined);
   /** Whether the layer's content is still on its way. */
   readonly loading = input(false, { transform: booleanAttribute });
@@ -89,6 +100,8 @@ export abstract class SlDialogBase {
    * layer has actually closed, with the result the close carried.
    */
   readonly closed = output<string | undefined>();
+  /** One output for one transition of the state the toggle sets. */
+  readonly fullscreenChangeRequest = output<DialogFullscreenRequest>();
 
   protected readonly defaults = injectDialogDefaults();
   protected readonly host: HTMLElement = inject(ElementRef).nativeElement;
@@ -153,6 +166,12 @@ export abstract class SlDialogBase {
     () => this.fullScreen() ?? (this.isAlert() ? 'never' : this.defaults.fullScreen),
   );
   readonly resolvedEscape = computed(() => this.escape() ?? this.defaults.escape);
+  /**
+   * A confirmation has no corner controls at all, for the reason it has no
+   * close button, so neither the state nor the control that sets it is its.
+   */
+  readonly resolvedFullscreen = computed(() => !this.isAlert() && this.fullscreen());
+  readonly resolvedFullscreenToggle = computed(() => !this.isAlert() && this.fullscreenToggle());
   readonly resolvedInitialFocus = computed<DialogInitialFocus>(
     () => this.initialFocus() ?? (this.isAlert() ? 'cancel' : 'first'),
   );
@@ -324,6 +343,32 @@ export abstract class SlDialogBase {
     this.open.set(next);
   }
 
+  /** Asks to take the layer or give it back, carrying the reason and the event. */
+  requestFullscreen(next: boolean, reason: DialogFullscreenReason, source: unknown) {
+    if (next === this.resolvedFullscreen()) return;
+
+    let cancelled = false;
+    const state = createControllable<boolean>({
+      initial: this.fullscreen(),
+      onRequest: (raw) => {
+        cancelled = raw.cancelled;
+        this.fullscreenChangeRequest.emit({
+          cancel: () => raw.cancel(),
+          get cancelled() {
+            return raw.cancelled;
+          },
+          previous: raw.previous,
+          reason,
+          source: raw.source,
+          value: raw.value,
+        });
+      },
+    });
+
+    if (!state.request(next, reason, source) || cancelled) return;
+    this.fullscreen.set(next);
+  }
+
   /** Opens the layer from code, carrying `programmatic`. */
   openDialog() {
     this.request(true, 'programmatic', undefined, undefined);
@@ -358,6 +403,7 @@ const LAYER_TEMPLATE = `
       [attr.data-surface]="resolvedSurface()"
       [attr.data-mount]="resolvedMount()"
       [attr.data-full-screen]="resolvedFullScreen()"
+      [attr.data-fullscreen]="resolvedFullscreen() ? '' : null"
       [attr.data-outside-press]="resolvedOutsidePress()"
       [attr.data-tone]="resolvedTone()"
       [attr.data-modal]="resolvedModal() ? '' : null"

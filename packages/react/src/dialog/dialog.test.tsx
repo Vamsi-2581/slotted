@@ -70,7 +70,7 @@ const escape = () =>
 
 describe('Dialog', () => {
   it('renders the anatomy the contract declares', () => {
-    render(<Basic defaultOpen />);
+    render(<Basic defaultOpen fullscreenToggle />);
 
     const parts = [...document.querySelectorAll('[data-part]')].map((node) =>
       node.getAttribute('data-part'),
@@ -79,6 +79,96 @@ describe('Dialog', () => {
       expect(parts, `${part} is declared and never rendered`).toContain(part);
     }
     expect(layer()?.dataset['ui']).toBe('dialog');
+  });
+
+  /**
+   * The reader's own control for taking the layer. `fullScreen` is the other
+   * question — the responsive rule the consumer set in advance — and the two
+   * are one hyphen apart in the DOM on purpose: `data-full-screen` carries the
+   * axis, `data-fullscreen` carries what was pressed.
+   */
+  describe('the full-screen toggle', () => {
+    const toggle = () => document.querySelector('[data-part="fullscreen"]') as HTMLButtonElement;
+
+    it('is withdrawn until the layer asks for one', () => {
+      render(<Basic defaultOpen />);
+      expect(toggle()).toBeNull();
+      expect(contract.members.dialog.defaults.fullscreenToggle).toBe(false);
+    });
+
+    it('takes the layer on a press and gives it back on the next one', () => {
+      render(<Basic defaultOpen fullscreenToggle />);
+
+      expect(toggle()).toHaveAttribute('aria-pressed', 'false');
+      expect(layer()).not.toHaveAttribute('data-fullscreen');
+
+      press(toggle());
+      expect(layer()).toHaveAttribute('data-fullscreen', '');
+      expect(toggle()).toHaveAttribute('aria-pressed', 'true');
+      /* The axis is untouched: the reader pressed a control, not a prop. */
+      expect(layer()).toHaveAttribute('data-full-screen', 'narrow');
+
+      press(toggle());
+      expect(layer()).not.toHaveAttribute('data-fullscreen');
+    });
+
+    it('stands in the corner beside the close, and not in place of it', () => {
+      render(<Basic defaultOpen fullscreenToggle />);
+
+      const header = document.querySelector('[data-part="header"]') as HTMLElement;
+      const corner = [...header.children].map((node) => node.getAttribute('data-part'));
+      expect(corner).toContain('close');
+      expect(corner).toContain('fullscreen');
+      expect(toggle().tagName).toBe('BUTTON');
+      expect(toggle()).toHaveAccessibleName('Full screen');
+    });
+
+    it('carries the reason, and the keyboard says so', () => {
+      const onFullscreenChange = vi.fn();
+      render(<Basic defaultOpen fullscreenToggle onFullscreenChange={onFullscreenChange} />);
+
+      activateByKey(toggle());
+      expect(onFullscreenChange).toHaveBeenCalledWith(
+        true,
+        expect.objectContaining({ previous: false, reason: 'keyboard', value: true }),
+      );
+    });
+
+    it('never moves state the consumer owns', () => {
+      const onFullscreenChange = vi.fn();
+      render(
+        <Basic
+          defaultOpen
+          fullscreen={false}
+          fullscreenToggle
+          onFullscreenChange={onFullscreenChange}
+        />,
+      );
+
+      press(toggle());
+      expect(onFullscreenChange).toHaveBeenCalledOnce();
+      expect(layer()).not.toHaveAttribute('data-fullscreen');
+    });
+
+    it('is refused by cancelling the request', () => {
+      render(
+        <Basic
+          defaultOpen
+          fullscreenToggle
+          onFullscreenChange={(_fullscreen, request) => request.cancel()}
+        />,
+      );
+
+      press(toggle());
+      expect(layer()).not.toHaveAttribute('data-fullscreen');
+    });
+
+    /** A confirmation has no corner controls at all, for the reason it has no ✕. */
+    it('is never rendered by an alert dialog', () => {
+      render(<Confirm defaultOpen />);
+      expect(toggle()).toBeNull();
+      expect(contract.members.alertDialog.parts).not.toContain('fullscreen');
+    });
   });
 
   it('writes every axis the contract declares as an attribute a consumer can style', () => {

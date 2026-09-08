@@ -335,9 +335,11 @@
   /* ── The header ───────────────────────────────────────────────────────── */
 
   /**
-   * Three columns: the mark, the words, and the close button. The mark and the
-   * button each keep a column of their own, so a title that wraps to two lines
-   * grows the row instead of pushing either off the line.
+   * Four columns: the mark, the words, the full-screen toggle and the close
+   * button. Each mark and each control keeps a column of its own, so a title
+   * that wraps to two lines grows the row instead of pushing any of them off
+   * the line. The toggle's track is empty and therefore nought wide unless the
+   * layer renders it, which is why the column gap is nought.
    *
    * The header draws no rule of its own. Every rule in the panel belongs to the
    * row *below* it, which is what makes the count right for every combination a
@@ -355,7 +357,7 @@
    */
   [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='header'] {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: start;
     /* The distance from the mark to the words belongs to the mark, and the
        distance from the words to the close button to the button: a column gap
@@ -386,13 +388,14 @@
       [data-part='icon'],
       [data-part='title'],
       [data-part='description'],
+      [data-part='fullscreen'],
       [data-part='close']
     ) {
     grid-column: 2;
     /**
      * `start`, not the grid's own `stretch`. A badge stretched across the words
      * column paints its ground the full width and centres its label in it,
-     * which is what the first capture showed. The four placed parts are excluded
+     * which is what the first capture showed. The five placed parts are excluded
      * by name rather than by `:not([data-part])`, because what a consumer puts
      * here is usually another family and that carries a `data-part` of its own.
      */
@@ -510,7 +513,7 @@
     > [data-part='content']
     > [data-part='header']
     > [data-part='close'] {
-    grid-column: 3;
+    grid-column: 4;
     grid-row: 1 / span 2;
     align-self: start;
     display: inline-grid;
@@ -578,6 +581,119 @@
     > [data-part='content']
     > [data-part='header']
     > [data-part='close']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
+  }
+
+  /* ── The full-screen toggle ───────────────────────────────────────────── */
+
+  /**
+   * The reader's own control for taking the layer, and the same inner control
+   * the close is (R2): the box is the glyph plus a step of air on each side,
+   * floored at the WCAG 2.2 minimum, and the glyph is centred in it. The
+   * geometry is not chosen here — it is `--_close-size`, the one formula this
+   * family already states, so the two controls in the corner are one row of
+   * one size.
+   *
+   * It sits in the column before the close, which is where a window's controls
+   * put it, and it carries no end overhang: the overhang belongs to whichever
+   * control stands against the panel's inset, and that is the close.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='fullscreen'] {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: start;
+    display: inline-grid;
+    place-items: center;
+    block-size: var(--_close-size);
+    inline-size: var(--_close-size);
+    margin-inline-start: var(--_gap);
+    padding: 0;
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--slotted-control-radius, var(--slotted-radius-sm, 4px));
+    color: var(--slotted-dialog-close-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    transition:
+      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  /**
+   * The two controls in the corner are neighbours, so the air between them is
+   * their own: each box already carries half the difference between it and its
+   * glyph on every side, and a second gap between them would set them further
+   * apart than either is from the words.
+   */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='fullscreen']
+    + [data-part='close'] {
+    margin-inline-start: 0;
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='fullscreen']::after {
+    content: '';
+    background: currentcolor;
+    block-size: var(--_icon-size);
+    inline-size: var(--_icon-size);
+    /* The mark says what the press does next, which is why it is the opposite
+       of the state the panel is in. */
+    mask-image: var(--slotted-icon-maximize);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  [data-ui='dialog'][data-fullscreen]
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='fullscreen']::after {
+    mask-image: var(--slotted-icon-minimize);
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='fullscreen']:not(:disabled):hover {
+    /* The ground moves under the pointer and nothing else does (R2). */
+    background-color: var(
+      --slotted-dialog-close-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='fullscreen']:not(:disabled):active {
+    background-color: var(
+      --slotted-dialog-close-active-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+  }
+
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > [data-part='header']
+    > [data-part='fullscreen']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -730,12 +846,22 @@
     }
   }
 
-  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'] {
+  /**
+   * The axis and the reader's own state produce one picture, so they are one
+   * rule. `data-full-screen='always'` is what a consumer chose in advance;
+   * `data-fullscreen` is what the reader pressed. Nothing here transitions:
+   * R7 admits `transform` and `opacity` alone, and the layer's entry already
+   * owns both — a panel that animated its own box would animate `inset`,
+   * `inline-size` and `block-size`, which is the rule R7 exists to state.
+   */
+  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'],
+  [data-ui='dialog'][data-fullscreen] > [data-part='viewport'] {
     align-content: stretch;
     padding: 0;
   }
 
-  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'] > [data-part='content'] {
+  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'] > [data-part='content'],
+  [data-ui='dialog'][data-fullscreen] > [data-part='viewport'] > [data-part='content'] {
     max-inline-size: none;
     block-size: 100%;
     border-radius: 0;
@@ -774,7 +900,12 @@
       > [data-part='viewport']
       > [data-part='content']
       > [data-part='header']
-      > [data-part='close']::after {
+      > [data-part='close']::after,
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
+      > [data-part='header']
+      > [data-part='fullscreen']::after {
       forced-color-adjust: none;
     }
   }

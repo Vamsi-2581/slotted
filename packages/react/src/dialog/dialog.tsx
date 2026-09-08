@@ -19,6 +19,7 @@ import { useDialogDefaults } from './dialog-defaults';
 import type {
   AlertDialogProps,
   DialogContextValue,
+  DialogFullscreenReason,
   DialogHandle,
   DialogMember,
   DialogOpenReason,
@@ -58,15 +59,19 @@ interface FamilyProps extends DialogProps {
 function DialogFamily({
   children,
   container,
+  defaultFullscreen,
   defaultOpen,
   escape,
   finalFocus,
+  fullscreen,
   fullScreen,
+  fullscreenToggle,
   initialFocus,
   loading,
   member,
   modal,
   mount,
+  onFullscreenChange,
   onOpenChange,
   open,
   outsidePress,
@@ -84,6 +89,15 @@ function DialogFamily({
   const current = open ?? own;
 
   const isAlert = member === 'alertDialog';
+
+  /**
+   * The reader's own state, and a confirmation never holds it: an alert dialog
+   * has no corner controls at all, for the reason it has no close button.
+   */
+  const [ownFullscreen, setOwnFullscreen] = useState<boolean>(defaultFullscreen ?? false);
+  const currentFullscreen = !isAlert && (fullscreen ?? ownFullscreen);
+  const resolvedFullscreenToggle = !isAlert && fullscreenToggle === true;
+
   const resolvedModal = isAlert ? true : (modal ?? defaults.modal);
   const resolvedOutsidePress = isAlert ? 'none' : (outsidePress ?? defaults.outsidePress);
   const resolvedMount = mount ?? defaults.mount;
@@ -188,6 +202,32 @@ function DialogFamily({
     [current, onOpenChange, open],
   );
 
+  const setFullscreen = useCallback(
+    (next: boolean, reason: DialogFullscreenReason, source: unknown) => {
+      if (next === currentFullscreen) return;
+
+      const state = createControllable<boolean>({
+        controlled: fullscreen,
+        initial: currentFullscreen,
+        onRequest: (raw) => {
+          onFullscreenChange?.(raw.value, {
+            get cancelled() {
+              return raw.cancelled;
+            },
+            cancel: () => raw.cancel(),
+            previous: raw.previous,
+            reason,
+            source: raw.source,
+            value: raw.value,
+          });
+        },
+      });
+
+      if (state.request(next, reason, source)) setOwnFullscreen(next);
+    },
+    [currentFullscreen, fullscreen, onFullscreenChange],
+  );
+
   useImperativeHandle<DialogHandle, DialogHandle>(
     ref,
     () => ({
@@ -210,7 +250,10 @@ function DialogFamily({
       escape: resolvedEscape,
       finalFocus,
       fullScreen: resolvedFullScreen,
+      fullscreen: currentFullscreen,
+      fullscreenToggle: resolvedFullscreenToggle,
       initialFocus: resolvedInitialFocus,
+      setFullscreen,
       loading: loading === true,
       member,
       modal: resolvedModal,
@@ -242,6 +285,7 @@ function DialogFamily({
       baseId,
       container,
       current,
+      currentFullscreen,
       descriptionRendered,
       finalFocus,
       isAlert,
@@ -251,6 +295,7 @@ function DialogFamily({
       request,
       resolvedEscape,
       resolvedFullScreen,
+      resolvedFullscreenToggle,
       resolvedInitialFocus,
       resolvedModal,
       resolvedMount,
@@ -258,6 +303,7 @@ function DialogFamily({
       resolvedPlacement,
       resolvedScroll,
       resolvedSize,
+      setFullscreen,
       resolvedSurface,
       status,
       titleRendered,

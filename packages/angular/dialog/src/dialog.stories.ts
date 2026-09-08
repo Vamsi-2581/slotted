@@ -313,6 +313,11 @@ export const FullScreen: Story = {
           'always',
           'Edge to edge: no margins, no radius and no border, because a panel that covers the layer hides the scrim and the edge would separate it from nothing.',
           panel('fullScreen="always"'),
+        ) +
+        scene(
+          "fullscreenToggle — the reader's own word",
+          'Press the mark beside the ✕: the panel takes the layer and the mark becomes its opposite, because a mark on a control says what the next press does. The axis above is what the consumer chose in advance; this is what the reader chose while reading.',
+          panel('fullScreen="never" fullscreenToggle'),
         ),
     ),
   }),

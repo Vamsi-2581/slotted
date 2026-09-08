@@ -37,6 +37,8 @@
   "--slotted-icon-circle-alert",
   "--slotted-icon-circle-check",
   "--slotted-icon-circle-info",
+  "--slotted-icon-maximize",
+  "--slotted-icon-minimize",
   "--slotted-icon-triangle-alert",
   "--slotted-icon-x",
   "--slotted-line-height-md",

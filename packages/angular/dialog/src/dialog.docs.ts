@@ -121,6 +121,13 @@ const anatomy: AnatomyRow[] = [
     purpose:
       'The ✕. An icon-only control the size of a medium control rather than of its mark, so the target clears the WCAG minimum in both axes. It closes with reason dismiss and carries whatever value it names as the result.',
   },
+  {
+    part: 'fullscreen',
+    element: 'button',
+    required: false,
+    purpose:
+      'The control that hands the layer to the panel and takes it back, appended to the header by slDialogHeader when fullscreenToggle is set. The same inner control the close is, in the column before it, with aria-pressed for which way it is set and a mark that says what the next press does.',
+  },
 ];
 
 const alertAnatomy: AnatomyRow[] = [
@@ -495,6 +502,16 @@ const events: EventRow[] = [
     when: 'After the value moved, from the model() signal, so a template may write [(open)] and nothing else. It says what the state is and not why it got there; the reason is on the request above.',
   },
   {
+    name: '(fullscreenChangeRequest)',
+    payload: 'DialogFullscreenRequest',
+    when: 'Before the panel takes the layer or gives it back. It carries the new value, the value it replaces, reason — pointer, keyboard or programmatic — the originating event, and cancel(), which refuses the move before anything commits.',
+  },
+  {
+    name: '(fullscreenChange)',
+    payload: 'boolean',
+    when: 'After the state moved, from the model() signal, so a template may write [(fullscreen)] and nothing else.',
+  },
+  {
     name: '(closed)',
     payload: 'string | undefined',
     when: 'Once the layer has actually closed, with the result the close carried. It is afterClosed() from Angular Material, as an output rather than as an observable a service hands back.',
@@ -732,6 +749,27 @@ export const ANGULAR_DIALOG_DOCS = {
         'narrow',
         'sl-dialog, provideDialogDefaults',
         'When the panel spends the whole layer, losing its radius, its margins and its measure. narrow is a container query on the layer’s own inline size, at a literal breakpoint, because a container condition cannot hold a custom property',
+      ],
+      [
+        'fullscreenToggle',
+        'boolean',
+        'false',
+        'sl-dialog',
+        'Whether slDialogHeader appends the control that hands the layer to the panel. Off: a dialog holds one task and most tasks are the size the consumer chose. It is the reader’s question, where fullScreen is the consumer’s',
+      ],
+      [
+        'fullscreen',
+        'boolean',
+        'false',
+        'sl-dialog',
+        'The state the control sets. Two-way, as open is, so a template writes [(fullscreen)] and the consumer owns it as soon as they bind it',
+      ],
+      [
+        'defaultFullscreen',
+        'boolean',
+        'false',
+        'sl-dialog',
+        'The state an uncontrolled layer opens in. In Angular it is the initial value of [(fullscreen)]: one model rather than a pair, the shape open already has',
       ],
     ]),
     composition,

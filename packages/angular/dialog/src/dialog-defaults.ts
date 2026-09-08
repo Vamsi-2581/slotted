@@ -81,6 +81,18 @@ export interface DialogChangeRequest {
   cancel(): void;
 }
 
+/** Why the panel took the layer, or gave it back. */
+export type DialogFullscreenReason = 'pointer' | 'keyboard' | 'programmatic';
+
+export interface DialogFullscreenRequest {
+  readonly value: boolean;
+  readonly previous: boolean;
+  readonly reason: DialogFullscreenReason;
+  readonly source?: unknown;
+  readonly cancelled: boolean;
+  cancel(): void;
+}
+
 export interface DialogDefaults {
   escape: DialogDismissPolicy;
   fullScreen: DialogFullScreen;

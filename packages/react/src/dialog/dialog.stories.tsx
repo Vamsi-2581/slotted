@@ -312,6 +312,14 @@ export const FullScreen: Story = {
       >
         <Layer>{(container) => <Panel container={container} fullScreen="always" />}</Layer>
       </Scene>
+      <Scene
+        label="fullscreenToggle — the reader's own word"
+        note="Press the mark beside the ✕: the panel takes the layer and the mark becomes its opposite, because a mark on a control says what the next press does. The axis above is what the consumer chose in advance; this is what the reader chose while reading."
+      >
+        <Layer>
+          {(container) => <Panel container={container} fullScreen="never" fullscreenToggle />}
+        </Layer>
+      </Scene>
     </Grid>
   ),
 };

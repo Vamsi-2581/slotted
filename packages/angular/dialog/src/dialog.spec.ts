@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import contract from '../../../../specs/components/dialog/contract.json';
 import { SlAlertDialog, SlDialog } from './dialog';
 import { provideDialogDefaults } from './dialog-defaults';
-import type { DialogChangeRequest } from './dialog-defaults';
+import type { DialogChangeRequest, DialogFullscreenRequest } from './dialog-defaults';
 import {
   SlAlertDialogAction,
   SlAlertDialogCancel,
@@ -43,7 +43,10 @@ import {
       [outsidePress]="outsidePress()"
       [mount]="mount()"
       [loading]="loading()"
+      [fullscreenToggle]="fullscreenToggle()"
+      [(fullscreen)]="fullscreen"
       (openChangeRequest)="requests.push($event)"
+      (fullscreenChangeRequest)="onFullscreenRequest($event)"
       (closed)="results.push($event)"
     >
       <header slDialogHeader>
@@ -67,7 +70,16 @@ class DialogHost {
   readonly mount = signal<'active' | 'lazy' | 'eager' | undefined>(undefined);
   readonly loading = signal(false);
   readonly described = signal(true);
+  readonly fullscreenToggle = signal(false);
+  readonly fullscreen = signal(false);
   readonly requests: DialogChangeRequest[] = [];
+  readonly fullscreenRequests: DialogFullscreenRequest[] = [];
+  readonly refuseFullscreen = signal(false);
+
+  onFullscreenRequest(request: DialogFullscreenRequest) {
+    this.fullscreenRequests.push(request);
+    if (this.refuseFullscreen()) request.cancel();
+  }
   readonly results: (string | undefined)[] = [];
 }
 
@@ -133,6 +145,7 @@ describe('SlDialog', () => {
 
   it('renders the anatomy the contract declares', () => {
     fixture.componentInstance.open.set(true);
+    fixture.componentInstance.fullscreenToggle.set(true);
     fixture.detectChanges();
 
     const parts = [...document.querySelectorAll('[data-part]')].map((node) =>
@@ -149,6 +162,76 @@ describe('SlDialog', () => {
    * that moves, which is what lets `mount="active"` remove the layer outright
    * and what makes the host the portal's origin.
    */
+  /**
+   * The reader's own control for taking the layer. `fullScreen` is the other
+   * question — the responsive rule the consumer set in advance — and the two
+   * are one hyphen apart in the DOM on purpose: `data-full-screen` carries the
+   * axis, `data-fullscreen` carries what was pressed.
+   */
+  describe('the full-screen toggle', () => {
+    const toggle = () => part('fullscreen') as HTMLButtonElement | null;
+
+    function open(withToggle = true) {
+      fixture.componentInstance.open.set(true);
+      fixture.componentInstance.fullscreenToggle.set(withToggle);
+      fixture.detectChanges();
+    }
+
+    it('is withdrawn until the layer asks for one', () => {
+      open(false);
+      expect(toggle()).toBeNull();
+      expect(contract.members.dialog.defaults.fullscreenToggle).toBe(false);
+    });
+
+    it('takes the layer on a press and gives it back on the next one', () => {
+      open();
+      expect(toggle()?.getAttribute('aria-pressed')).toBe('false');
+      expect(layer()?.hasAttribute('data-fullscreen')).toBe(false);
+
+      press(toggle() as Element);
+      fixture.detectChanges();
+      expect(layer()?.getAttribute('data-fullscreen')).toBe('');
+      expect(toggle()?.getAttribute('aria-pressed')).toBe('true');
+      /* The axis is untouched: the reader pressed a control, not an input. */
+      expect(layer()?.getAttribute('data-full-screen')).toBe('narrow');
+
+      press(toggle() as Element);
+      fixture.detectChanges();
+      expect(layer()?.hasAttribute('data-fullscreen')).toBe(false);
+    });
+
+    it('stands in the corner beside the close, and not in place of it', () => {
+      open();
+      const corner = [...part('header').children].map((node) => node.getAttribute('data-part'));
+      expect(corner).toContain('close');
+      expect(corner).toContain('fullscreen');
+      expect(toggle()?.tagName).toBe('BUTTON');
+      expect(toggle()?.getAttribute('aria-label')).toBe('Full screen');
+    });
+
+    it('carries the reason, and the keyboard says so', () => {
+      open();
+      press(toggle() as Element, 0);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.fullscreenRequests.at(-1)).toMatchObject({
+        previous: false,
+        reason: 'keyboard',
+        value: true,
+      });
+    });
+
+    it('is refused by cancelling the request', () => {
+      open();
+      fixture.componentInstance.refuseFullscreen.set(true);
+
+      press(toggle() as Element);
+      fixture.detectChanges();
+      expect(layer()?.hasAttribute('data-fullscreen')).toBe(false);
+      expect(fixture.componentInstance.fullscreenRequests).toHaveLength(1);
+    });
+  });
+
   it('leaves the layer out of the document entirely while it is closed', () => {
     expect(layer()).toBeNull();
     expect(document.querySelector('sl-dialog')).not.toBeNull();

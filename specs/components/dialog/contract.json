@@ -72,7 +72,7 @@
     "content": "the body scrolls; the header and the footer stay",
     "viewport": "the whole panel scrolls inside the layer, for content that is a document rather than a task",
     "default": "content",
-    "reason": "The content part is a three-row grid, auto minmax(0, 1fr) auto, inside a bounded block size. Radix and React Aria ship no layout at all, so a long body pushes the footer past the fold and the reader cannot reach Save — which is what the default exists to prevent"
+    "reason": "The content part is a three-row grid, auto minmax(0, 1fr) auto, inside a bounded block size. Radix and React Aria ship no layout at all, so a long body pushes the footer past the fold and the reader cannot reach Save \u2014 which is what the default exists to prevent"
   },
   "mount": {
     "active": "the layer exists only while it is open, and @slotted/core/presence holds it through its own exit",
@@ -90,7 +90,8 @@
   },
   "stateAttributes": {
     "open": "data-open",
-    "loading": "data-loading"
+    "loading": "data-loading",
+    "fullscreen": "data-fullscreen"
   },
   "stateModel": {
     "open": {
@@ -107,6 +108,12 @@
         "programmatic"
       ],
       "result": "the value of the close, cancel or action part that was pressed"
+    },
+    "fullscreen": {
+      "controlled": "fullscreen",
+      "uncontrolled": "defaultFullscreen",
+      "request": "onFullscreenChange",
+      "reasons": ["pointer", "keyboard", "programmatic"]
     }
   },
   "axes": {
@@ -163,7 +170,7 @@
       "reason": "Angular Material offers block, reposition, close and noop. A dialog is anchored to the viewport rather than to an element, so reposition describes nothing; closing on scroll is a tooltip and popover policy; noop is modal=false, which is already an axis. block is the only one that applies, and it is what the scroll lock does"
     },
     "scrollCue": {
-      "reason": "A rule under the header drawn only while the body is actually scrolled needs scroll-state() container queries, which are limited availability — the same ground on which collapsible declined interpolate-size. The header and footer rules are drawn unconditionally instead, and the cost is a rule under a header that has nothing above it to separate"
+      "reason": "A rule under the header drawn only while the body is actually scrolled needs scroll-state() container queries, which are limited availability \u2014 the same ground on which collapsible declined interpolate-size. The header and footer rules are drawn unconditionally instead, and the cost is a rule under a header that has nothing above it to separate"
     },
     "dragAndResize": {
       "deferTo": "floating-window",
@@ -195,11 +202,20 @@
         "escape": "close",
         "outsidePress": "close",
         "initialFocus": "first",
-        "loading": false
+        "loading": false,
+        "fullscreenToggle": false
       },
       "fixed": {},
-      "capabilities": ["open", "size", "appearance", "placement", "loading", "wiring"],
-      "states": ["default", "hover", "active", "focus-visible", "open", "loading"],
+      "capabilities": [
+        "open",
+        "size",
+        "appearance",
+        "placement",
+        "loading",
+        "wiring",
+        "fullscreen"
+      ],
+      "states": ["default", "hover", "active", "focus-visible", "open", "loading", "fullscreen"],
       "parts": [
         "root",
         "trigger",
@@ -211,7 +227,8 @@
         "description",
         "body",
         "footer",
-        "close"
+        "close",
+        "fullscreen"
       ]
     },
     "alertDialog": {
@@ -284,15 +301,15 @@
     ]
   },
   "header": {
-    "parts": ["icon", "title", "description", "close"],
+    "parts": ["icon", "title", "description", "close", "fullscreen"],
     "free": "the words column, under the description",
-    "reason": "The header is a three-column grid and the family places four parts in it. Anything else a consumer writes there — a badge beside the title, a breadcrumb, a second line — used to auto-place into whichever cell was free, which is column one when no icon is rendered. Every unplaced child now lands in the words column instead, under the description, so where it goes is a rule rather than an accident of the grid."
+    "reason": "The header is a three-column grid and the family places four parts in it. Anything else a consumer writes there \u2014 a badge beside the title, a breadcrumb, a second line \u2014 used to auto-place into whichever cell was free, which is column one when no icon is rendered. Every unplaced child now lands in the words column instead, under the description, so where it goes is a rule rather than an accident of the grid."
   },
   "surface": {
     "panel": "the family paints the panel: surface, border, radius, shadow, and the three rows that keep the footer on screen",
-    "plain": "the family paints nothing at all — no background, no border, no radius, no shadow, no rows and no padding — and the consumer supplies the box",
+    "plain": "the family paints nothing at all \u2014 no background, no border, no radius, no shadow, no rows and no padding \u2014 and the consumer supplies the box",
     "keeps": "plain keeps the whole mechanism: the portal, the scrim, presence, focus containment and restoration, the dismissal policy and the single z-index stack",
     "default": "panel",
-    "reason": "render substitutes the element the panel is drawn on and not the drawing, so a consumer who wanted the layer without the picture — a media viewer, an image at its own aspect ratio, a card of their own — had no way to say so. It is an axis rather than a second family because everything but the paint is identical, and it is the one place this library differs from a headless one: Radix and Base UI ship no panel at all, so plain is what their Content already is."
+    "reason": "render substitutes the element the panel is drawn on and not the drawing, so a consumer who wanted the layer without the picture \u2014 a media viewer, an image at its own aspect ratio, a card of their own \u2014 had no way to say so. It is an axis rather than a second family because everything but the paint is identical, and it is the one place this library differs from a headless one: Radix and Base UI ship no panel at all, so plain is what their Content already is."
   }
 }

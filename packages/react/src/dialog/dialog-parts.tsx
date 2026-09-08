@@ -224,6 +224,7 @@ export function DialogContent({
 
   const rootProps = {
     'data-full-screen': dialog.fullScreen,
+    ...(dialog.fullscreen ? { 'data-fullscreen': '' } : {}),
     ...(dialog.loading ? { 'data-loading': '' } : {}),
     ...(dialog.modal ? { 'data-modal': '' } : {}),
     'data-mount': dialog.mount,
@@ -277,6 +278,17 @@ export function DialogContent({
   );
 }
 
+/**
+ * The header, and the one part of it the family renders rather than the
+ * consumer: the full-screen toggle, when the layer was asked for one.
+ *
+ * It is written after the consumer's children on purpose. The title and the
+ * description come first for a reader moving through the header, and the two
+ * corner controls are adjacent peers whose order carries no meaning — where
+ * the toggle went first in the DOM it would be announced ahead of the name of
+ * the dialog it belongs to. The stylesheet puts it in the column before the
+ * close, which is where a window's controls put it.
+ */
 export function DialogHeader({
   children,
   className,
@@ -285,9 +297,49 @@ export function DialogHeader({
   style,
   ...rest
 }: DialogHeaderProps) {
-  const rootProps = { ...rest, children, className, 'data-part': 'header' as const, style };
+  const dialog = useDialog();
+  const rootProps = {
+    ...rest,
+    children: (
+      <>
+        {children}
+        {dialog.fullscreenToggle ? <DialogFullscreen /> : null}
+      </>
+    ),
+    className,
+    'data-part': 'header' as const,
+    style,
+  };
   if (render !== undefined) return render(rootProps);
   return <header {...rootProps} ref={ref} />;
+}
+
+/**
+ * The control that hands the layer to the panel and takes it back.
+ *
+ * `aria-pressed` is what says which way it is set, so the name stays one word
+ * in every state — a label that changed with the state would be read as a
+ * second control. The mark is the opposite of the state, because a mark on a
+ * control says what pressing it does.
+ */
+function DialogFullscreen() {
+  const dialog = useDialog();
+  return (
+    <button
+      aria-label="Full screen"
+      aria-pressed={dialog.fullscreen}
+      data-part="fullscreen"
+      onClick={(event) => {
+        if (event.defaultPrevented) return;
+        dialog.setFullscreen(
+          !dialog.fullscreen,
+          event.detail === 0 ? 'keyboard' : 'pointer',
+          event,
+        );
+      }}
+      type="button"
+    />
+  );
 }
 
 /** The visible name, which `aria-labelledby` points at. */

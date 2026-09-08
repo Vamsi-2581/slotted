@@ -84,6 +84,13 @@ export interface DialogChangeRequest extends ChangeRequest<boolean> {
   readonly result?: string | undefined;
 }
 
+/** Why the panel took the layer, or gave it back. */
+export type DialogFullscreenReason = 'pointer' | 'keyboard' | 'programmatic';
+
+export interface DialogFullscreenRequest extends ChangeRequest<boolean> {
+  readonly reason: DialogFullscreenReason;
+}
+
 /** The imperative actions a consumer cannot express declaratively. */
 export interface DialogHandle {
   /** Opens the layer, carrying `programmatic`. */
@@ -128,6 +135,12 @@ export interface DialogContextValue {
   escape: DialogDismissPolicy;
   finalFocus: DialogFinalFocus | undefined;
   fullScreen: DialogFullScreen;
+  /** Whether the reader has taken the layer, which the stylesheet keys on. */
+  fullscreen: boolean;
+  /** Whether the header renders the control that takes it. */
+  fullscreenToggle: boolean;
+  /** Asks to take the layer or give it back, carrying the reason. */
+  setFullscreen: (next: boolean, reason: DialogFullscreenReason, source: unknown) => void;
   initialFocus: DialogInitialFocus;
   loading: boolean;
   member: DialogMember;
@@ -202,6 +215,21 @@ export interface DialogProps extends DialogOwnProps {
    */
   modal?: boolean | undefined;
   outsidePress?: DialogDismissPolicy | undefined;
+  /**
+   * Whether the header renders the control that takes the layer. Off, because
+   * a dialog holds one task and most tasks are the size the consumer chose:
+   * the control is for the panel a reader wants the whole screen for.
+   *
+   * `fullScreen` is the other question and stays separate — it is the
+   * responsive rule the consumer set in advance, and this is the reader's own.
+   */
+  fullscreenToggle?: boolean | undefined;
+  /** The consumer's value. Present at all puts the state in controlled mode. */
+  fullscreen?: boolean | undefined;
+  /** The value an uncontrolled layer starts from, read once. */
+  defaultFullscreen?: boolean | undefined;
+  onFullscreenChange?:
+    ((fullscreen: boolean, request: DialogFullscreenRequest) => void) | undefined;
 }
 
 /**

@@ -115,6 +115,13 @@ const anatomy: AnatomyRow[] = [
     purpose:
       'The ✕. An icon-only control the size of a medium control rather than of its mark, so the target clears the WCAG minimum in both axes. It closes with reason dismiss and carries whatever value it names as the result.',
   },
+  {
+    part: 'fullscreen',
+    element: 'button',
+    required: false,
+    purpose:
+      'The control that hands the layer to the panel and takes it back, rendered by the header when fullscreenToggle is set. The same inner control the close is, in the column before it, with aria-pressed for which way it is set and a mark that says what the next press does.',
+  },
 ];
 
 const alertAnatomy: AnatomyRow[] = [
@@ -549,6 +556,11 @@ const events: EventRow[] = [
     when: 'Before the layer moves, for all six ways it can. The request carries the new value, the value it replaces, reason — pointer, keyboard, dismiss, escape, outsidePress, submit or programmatic — result, the originating event, and cancel(), which refuses the move before anything commits. One guard therefore covers Escape, an outside press, the close button and the handle together.',
   },
   {
+    name: 'onFullscreenChange',
+    payload: '(fullscreen: boolean, request: DialogFullscreenRequest)',
+    when: 'Before the panel takes the layer or gives it back. The request carries the new value, the value it replaces, reason — pointer, keyboard or programmatic — the originating event, and cancel(), which refuses the move before anything commits.',
+  },
+  {
     name: 'onClick, onKeyDown, on every control',
     payload: 'the element’s own events',
     when: 'Whenever the element fires them. The family composes with a consumer’s handler rather than replacing it: the consumer’s runs first, and preventDefault() refuses the family’s own behaviour as well.',
@@ -790,6 +802,27 @@ export const REACT_DIALOG_DOCS = {
         'narrow',
         'Dialog, DialogDefaultsProvider',
         'When the panel spends the whole layer, losing its radius, its margins and its measure. narrow is a container query on the layer’s own inline size, at a literal breakpoint, because a container condition cannot hold a custom property',
+      ],
+      [
+        'fullscreenToggle',
+        'boolean',
+        'false',
+        'Dialog',
+        'Whether the header renders the control that hands the layer to the panel. Off: a dialog holds one task and most tasks are the size the consumer chose. It is the reader’s question, where fullScreen is the consumer’s',
+      ],
+      [
+        'fullscreen',
+        'boolean',
+        '—',
+        'Dialog',
+        'The state the control sets. Present at all puts it in controlled mode, and the layer then shows what the consumer says rather than what was pressed',
+      ],
+      [
+        'defaultFullscreen',
+        'boolean',
+        'false',
+        'Dialog',
+        'The state an uncontrolled layer opens in, read once',
       ],
     ]),
     composition,

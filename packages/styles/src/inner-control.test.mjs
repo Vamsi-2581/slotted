@@ -52,6 +52,7 @@ const PARTS = [
   { family: 'tabs', part: 'scroll' },
   { family: 'toolbar', part: 'overflow' },
   { family: 'dialog', part: 'close' },
+  { family: 'dialog', part: 'fullscreen' },
   { family: 'drawer', part: 'close' },
 ];
 

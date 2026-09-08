@@ -55,6 +55,15 @@ export const STATE_ATTRIBUTES = {
    * its full length in the place it already occupied.
    */
   revealed: 'data-revealed',
+  /**
+   * A layer the reader has told to take the whole of the space it is shown in.
+   *
+   * It is not `expanded` and not `open`: those are content appearing, while
+   * this is one already-visible surface growing to its container's edges on the
+   * reader's own word. `dialog` states it apart from its `fullScreen` axis,
+   * which is the responsive rule the consumer chose in advance.
+   */
+  fullscreen: 'data-fullscreen',
   'drop-target': 'data-drop-target',
 };
 
@@ -207,6 +216,17 @@ export const KNOWN_CAPABILITIES = [
   /** A hidden value shown in the clear, which is a password field's own bit. */
   'revealed',
   /**
+   * A surface already on screen taking the whole of the space it is shown in,
+   * on the reader's own word. It is mutable and a consumer can own it: a
+   * product that remembers how a reader left a dialog sets it back.
+   *
+   * It is not `open` and not `expanded`. `dialog` put the word in this
+   * vocabulary; its `fullScreen` axis is the responsive rule chosen in advance
+   * and stays an axis, because a consumer decides that one and a reader
+   * decides this one.
+   */
+  'fullscreen',
+  /**
    * The errors a form holds, keyed by the name of the control each one is
    * about. It is mutable and a consumer can own it: a server sends the map
    * back, and the family also builds one from `checkValidity()`.
@@ -250,6 +270,7 @@ export const KNOWN_CAPABILITIES = [
 /** Capabilities that hold state a consumer can own, and therefore need a model. */
 export const MUTABLE_CAPABILITIES = [
   'open',
+  'fullscreen',
   'checked',
   'pressed',
   'selection',

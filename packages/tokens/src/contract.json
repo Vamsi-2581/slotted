@@ -577,6 +577,20 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-maximize",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-minimize",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-control-font-family",
       "layer": "semantic",
       "axis": "base",

@@ -50,6 +50,12 @@
           <p data-part="description" id="d1-description">
             Names are visible to everyone in the workspace.
           </p>
+          <button
+            data-part="fullscreen"
+            type="button"
+            aria-label="Full screen"
+            aria-pressed="false"
+          ></button>
           <button data-part="close" type="button" aria-label="Close"></button>
         </header>
         <div data-part="body">
@@ -295,6 +301,57 @@
             type="button"
           >
             <span data-part="label">Create</span>
+          </button>
+        </footer>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="fullscreen-toggle" data-fixed>
+  <p style="margin: 0; color: var(--slotted-text-muted)">
+    The reader’s own control, and the state it writes.
+  </p>
+
+  <div
+    data-ui="dialog"
+    data-part="root"
+    data-open
+    data-fullscreen
+    data-size="md"
+    data-full-screen="never"
+    data-scroll="content"
+  >
+    <div data-part="backdrop"></div>
+    <div data-part="viewport">
+      <div data-part="content" role="dialog" aria-modal="true" aria-labelledby="d12-title">
+        <header data-part="header">
+          <h2 data-part="title" id="d12-title">Reconciliation</h2>
+          <p data-part="description">Pressed, so the panel has the layer.</p>
+          <button
+            data-part="fullscreen"
+            type="button"
+            aria-label="Full screen"
+            aria-pressed="true"
+          ></button>
+          <button data-part="close" type="button" aria-label="Close"></button>
+        </header>
+        <div data-part="body">
+          <p style="margin: 0">
+            The mark says what the next press does, so it is the opposite of the state the panel is
+            in.
+          </p>
+        </div>
+        <footer data-part="footer">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="md"
+            type="button"
+          >
+            <span data-part="label">Done</span>
           </button>
         </footer>
       </div>

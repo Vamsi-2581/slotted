@@ -120,7 +120,7 @@ test('says what a close button means in the vocabulary that already exists', () 
 /** The result is what the platform calls `returnValue`, on the request. */
 test('carries the result out on the request rather than as a second state', () => {
   assert.ok('result' in contract.stateModel.open);
-  assert.deepEqual(Object.keys(contract.stateModel), ['open']);
+  assert.deepEqual(Object.keys(contract.stateModel), ['open', 'fullscreen']);
   assert.ok(contract.result.parts.every((part) => dialog.parts.concat(alert.parts).includes(part)));
 });
 
@@ -137,6 +137,7 @@ test('declares the anatomy each member renders', () => {
     'body',
     'footer',
     'close',
+    'fullscreen',
   ]);
   assert.deepEqual(alert.parts, [
     'root',
@@ -281,6 +282,36 @@ test('keeps the footer on screen by bounding the row that scrolls', () => {
  * happened to be free — column one when no icon was rendered — so where a
  * consumer's own element landed was an accident of the grid rather than a rule.
  */
+/**
+ * The panel takes the layer on the reader's own word, and the word is a
+ * control in the header rather than a size the consumer chose in advance.
+ * `fullScreen` is the responsive rule — what a narrow container does — and it
+ * is not this: a reader who wants the whole layer for a table says so while
+ * they are reading it, and says it again to go back.
+ *
+ * The two are one hyphen apart on purpose. `data-full-screen` is the axis and
+ * carries `never`, `narrow` or `always`; `data-fullscreen` is the reader's own
+ * state and is present or absent. The geometry they produce is the same rule,
+ * written once.
+ */
+test('lets the reader take the layer, and says so apart from the responsive rule', () => {
+  assert.equal(dialog.defaults.fullscreenToggle, false);
+  assert.ok(dialog.parts.includes('fullscreen'));
+  assert.ok(contract.header.parts.includes('fullscreen'));
+  assert.equal(contract.stateAttributes.fullscreen, 'data-fullscreen');
+  assert.ok(dialog.states.includes('fullscreen'));
+  assert.ok(!alert.states.includes('fullscreen'));
+  assert.deepEqual(contract.stateModel.fullscreen, {
+    controlled: 'fullscreen',
+    uncontrolled: 'defaultFullscreen',
+    request: 'onFullscreenChange',
+    reasons: ['pointer', 'keyboard', 'programmatic'],
+  });
+  /* The confirmation has no corner controls at all: no close, no toggle. */
+  assert.ok(!alert.parts.includes('fullscreen'));
+  assert.equal(alert.defaults.fullscreenToggle, undefined);
+});
+
 test('gives a consumer’s own header content a column of its own to land in', () => {
   assert.equal(contract.header.free, 'the words column, under the description');
   assert.match(contract.header.reason, /auto-plac/i);

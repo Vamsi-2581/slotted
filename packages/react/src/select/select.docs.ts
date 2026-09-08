@@ -100,6 +100,13 @@ const anatomy: AnatomyRow[] = [
       'The painted surface. It owns the three columns every option passes through, is bounded by the height the positioner reports, and scrolls inside it.',
   },
   {
+    part: 'chosen',
+    element: 'div, aria-hidden, drawn while several values are chosen',
+    required: false,
+    purpose:
+      'Everything that is chosen, at the top of the popup. The control holds one line, so twelve values are three chips and a count; the band holds all of them, wraps, and scrolls at two rows of its own. It is aria-hidden and holds no widget: focus never enters this layer, and a value is taken back from its option or from the focusable chips in the control.',
+  },
+  {
     part: 'group',
     element: 'div with role="group"',
     required: false,

@@ -539,7 +539,14 @@ export function SelectContent({
     if (layerNode === null || select.triggerNode === null) return;
     let live = true;
 
-    const handle = createPositioner(select.triggerNode, layerNode, {
+    /* The anchor is the frame rather than the button inside it, so the popup is
+       as wide as the control the reader sees: the trigger is the frame less its
+       two borders, and `matchWidth` writes whatever it is given (SL10).
+       `combobox` anchors to its own frame for the same reason. */
+    const anchor =
+      select.triggerNode.closest<HTMLElement>("[data-part='root']") ?? select.triggerNode;
+
+    const handle = createPositioner(anchor, layerNode, {
       align,
       alignOffset,
       boundaryPadding: collisionPadding,
@@ -677,6 +684,34 @@ export function SelectContent({
         ref={setSurfaceNode}
         role="listbox"
       >
+        {/*
+          Everything that is chosen, at the top of the popup (SL10). The control
+          holds one line, so twelve values are three chips and a count; here
+          they are all of them, and the band scrolls at about two rows of its
+          own rather than growing the surface.
+
+          It is `aria-hidden`, and carries no remove control: focus never enters
+          this layer, so a widget in it would be a tab stop the pattern excludes
+          and a control no keyboard could reach. What it says is already said —
+          by the trigger's own name and by each option's `aria-selected`.
+        */}
+        {select.multiple && select.selection.length > 0 ? (
+          <div aria-hidden="true" data-part="chosen">
+            {select.selection.map((value) => (
+              <span
+                data-part="root"
+                data-size="sm"
+                data-ui="tag"
+                data-variant="soft"
+                key={String(value)}
+              >
+                <span data-part="body">
+                  <span data-part="label">{select.labelFor(value) ?? String(value)}</span>
+                </span>
+              </span>
+            ))}
+          </div>
+        ) : null}
         {children}
         {/*
           The two rows a consumer configures rather than places. A popup that

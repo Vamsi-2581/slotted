@@ -172,6 +172,22 @@ test('declares that the identifier is written on two elements, and why', () => {
   assert.ok(member.parts.includes('positioner'));
 });
 
+/**
+ * SL10. The control holds one line, so twelve chosen values are three chips and
+ * a count; the band at the top of the popup holds all of them and scrolls at
+ * about two rows of its own. It carries no remove control, because focus never
+ * enters this layer and a widget in there would be a tab stop the pattern
+ * excludes — a value is taken back from the option's own row, or from the
+ * focusable chips in the control.
+ */
+test('holds every chosen value in a band of the popup, and puts no widget in it', () => {
+  assert.equal(contract.chips.band, 'chosen');
+  assert.equal(contract.chips.bandRows, 2);
+  assert.equal(contract.chips.bandInteractive, false);
+  assert.match(contract.chips.bandReason, /focus never enters this layer/i);
+  assert.ok(member.parts.includes('chosen'));
+});
+
 test('names every part, and no part it does not own', () => {
   assert.deepEqual(member.parts, [
     'root',
@@ -184,6 +200,7 @@ test('names every part, and no part it does not own', () => {
     'clear',
     'positioner',
     'content',
+    'chosen',
     'group',
     'group-label',
     'item',

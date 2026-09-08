@@ -68,9 +68,13 @@
     "chip": { "ui": "tag", "stylesheet": "tag/tag.css" },
     "overflowAttribute": "data-overflow",
     "summary": "summary",
+    "band": "chosen",
+    "bandRows": 2,
+    "bandInteractive": false,
     "collapse": "createCollapse from @slotted/core/overflow",
     "narrowWidth": "120px",
-    "reason": "Several chosen values are the chips themselves rather than a sentence about them (SL4/CB4). Each chip is a `tag`, worn as `data-ui` beside the row this family owns, so the chip a reader removes here is the chip they know from everywhere else and its geometry is stated once. What does not fit collapses into one chip marked `data-overflow`, measured by `createCollapse` — the same ResizeObserver arithmetic `toolbar` collapses a bar with. Under 120px of control there is no room for a chip at all, and the summary sentence answers instead; the swap is a container query, so it costs no observer and no render."
+    "reason": "Several chosen values are the chips themselves rather than a sentence about them (SL4/CB4). Each chip is a `tag`, worn as `data-ui` beside the row this family owns, so the chip a reader removes here is the chip they know from everywhere else and its geometry is stated once. What does not fit collapses into one chip marked `data-overflow`, measured by `createCollapse` — the same ResizeObserver arithmetic `toolbar` collapses a bar with. Under 120px of control there is no room for a chip at all, and the summary sentence answers instead; the swap is a container query, so it costs no observer and no render.",
+    "bandReason": "The control holds one line, so a reader who chose twelve values sees three chips and a count. The band at the top of the popup holds all of them, wraps, and scrolls at about two rows of its own — so what is chosen stays legible without the control growing and without a `+N` standing in front of it (SL10). It is drawn only while something is chosen. Its chips carry no remove control: focus never enters this layer — the contract says so under `focus.guards` — and a widget in there would be a tab stop the pattern excludes and a control nothing can reach by keyboard. Taking a value back is the option's own row, which the list has open beside it, and the chips in the control, which are focusable."
   },
   "wiring": {
     "role": "combobox on the trigger, listbox on the content, option on each item",
@@ -477,6 +481,7 @@
         "clear",
         "positioner",
         "content",
+        "chosen",
         "group",
         "group-label",
         "item",

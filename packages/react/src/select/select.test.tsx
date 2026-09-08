@@ -319,6 +319,50 @@ describe('Select', () => {
     );
   });
 
+  /**
+   * SL10. The control holds one line, so twelve chosen values are three chips
+   * and a count. The band at the top of the popup holds all of them, and holds
+   * no widget: focus never enters this layer, so a remove control in there
+   * would be a tab stop the pattern excludes and a control no keyboard reaches.
+   */
+  describe('the band of chosen values', () => {
+    const band = () => document.querySelector("[data-part='chosen']");
+
+    it('holds every chosen value, whatever the control had room for', async () => {
+      render(<Basic multiple />);
+      await open();
+      fireEvent.click(optionNamed('Apple'));
+      fireEvent.click(optionNamed('Blueberry'));
+      fireEvent.click(optionNamed('Cherry'));
+
+      const labels = [...(band()?.querySelectorAll("[data-part='label']") ?? [])].map(
+        (label) => label.textContent,
+      );
+      expect(labels).toEqual(['Apple', 'Blueberry', 'Cherry']);
+    });
+
+    it('is drawn inside the surface and out of the accessibility tree', async () => {
+      render(<Basic multiple defaultValue={['apple']} />);
+      const listbox = await open();
+
+      expect(listbox.contains(band())).toBe(true);
+      expect(band()).toHaveAttribute('aria-hidden', 'true');
+      expect(band()?.querySelector("[data-part='remove']")).toBeNull();
+      expect(band()?.querySelector('button')).toBeNull();
+    });
+
+    it('is not drawn at all while nothing is chosen, or in single selection', async () => {
+      const { unmount } = render(<Basic multiple />);
+      await open();
+      expect(band()).toBeNull();
+      unmount();
+
+      render(<Basic defaultValue="apple" />);
+      await open();
+      expect(band()).toBeNull();
+    });
+  });
+
   it('takes a value out of the selection from its own chip', async () => {
     const onValueChange = vi.fn();
     render(<Basic multiple onValueChange={onValueChange} />);

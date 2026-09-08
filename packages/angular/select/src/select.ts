@@ -272,6 +272,29 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
           [attr.aria-busy]="loading() ? true : null"
           [attr.data-loading]="loading() ? '' : null"
         >
+          <!--
+            Everything that is chosen, at the top of the popup (SL10). The
+            control holds one line, so twelve values are three chips and a
+            count; here they are all of them, and the band scrolls at about two
+            rows of its own rather than growing the surface.
+
+            It is aria-hidden, and carries no remove control: focus never enters
+            this layer, so a widget in it would be a tab stop the pattern
+            excludes and a control no keyboard could reach. What it says is
+            already said — by the trigger's own name and by each option's
+            aria-selected.
+          -->
+          @if (resolvedMultiple() && selection().length > 0) {
+            <div data-part="chosen" aria-hidden="true">
+              @for (value of selection(); track value) {
+                <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+                  <span data-part="body">
+                    <span data-part="label">{{ labelFor(value) ?? value }}</span>
+                  </span>
+                </span>
+              }
+            </div>
+          }
           <ng-content />
           @if (loading()) {
             <!--
@@ -851,8 +874,12 @@ export class SlSelect implements ControlValueAccessor, Validator {
   private position() {
     if (this.layerNode === null) return;
     this.positioner?.destroy();
+    /* The anchor is the frame rather than the button inside it, so the popup is
+       as wide as the control the reader sees: the trigger is the frame less its
+       two borders, and `matchWidth` writes whatever it is given (SL10). */
+    const trigger = this.triggerRef().nativeElement;
     this.positioner = createPositioner(
-      this.triggerRef().nativeElement.parentElement ?? this.triggerRef().nativeElement,
+      trigger.closest<HTMLElement>("[data-part='root']") ?? trigger,
       this.layerNode,
       {
         align: this.resolvedAlign(),

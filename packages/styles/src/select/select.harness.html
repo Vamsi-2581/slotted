@@ -640,9 +640,54 @@
         position: relative;
         --slotted-positioner-anchor-width: 100%;
         --slotted-positioner-available-width: 100%;
+        --slotted-positioner-available-height: 232px;
       "
     >
       <div data-part="content" role="listbox" aria-label="Labels" aria-multiselectable="true">
+        <!--
+          Everything that is chosen, at the top of the popup (SL10). Twelve
+          values: the band wraps, takes about two rows of its own and scrolls,
+          and the list under it keeps its own scroll. No remove control in it —
+          focus never enters this layer.
+        -->
+        <div data-part="chosen" aria-hidden="true">
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Blueberry</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Raspberry</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Grapefruit</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Pomelo</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Cloudberry</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Quince</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Fig</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Plum</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Pear</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Date</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Lime</span></span>
+          </span>
+          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+            <span data-part="body"><span data-part="label">Kiwi</span></span>
+          </span>
+        </div>
         <div data-part="item" role="option" aria-selected="true" data-selected>
           <span data-part="label">Blueberry</span>
           <span data-part="indicator"></span>
@@ -657,6 +702,38 @@
         </div>
         <div data-part="item" role="option" aria-selected="false">
           <span data-part="label">Pomelo</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Cloudberry</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Quince</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Fig</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Plum</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Pear</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Date</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Lime</span>
+          <span data-part="indicator"></span>
+        </div>
+        <div data-part="item" role="option" aria-selected="false">
+          <span data-part="label">Kiwi</span>
           <span data-part="indicator"></span>
         </div>
       </div>

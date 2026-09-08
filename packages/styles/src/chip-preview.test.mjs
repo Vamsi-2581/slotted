@@ -117,6 +117,29 @@ test('keeps the row on one line and no taller than the control', () => {
 });
 
 /**
+ * SL10. Everything that is chosen, at the top of the popup. The band is stuck
+ * to the top of the scrollport rather than laid above it — the surface is the
+ * scroller as well as the box — and it scrolls itself, so the list under it
+ * keeps its own scroll. It is separated from the list by a rule from the border
+ * scale and never by a shadow, and it is capped at two whole rows of chips.
+ */
+test('holds the chosen values in a band that scrolls itself', () => {
+  const css = sheet('select');
+  const band = rule(css, "[data-ui='select'] [data-part='chosen']");
+  assert.notEqual(band, '', 'select draws no band of chosen values');
+  assert.match(band, /position:sticky/);
+  assert.match(band, /overflow-y:auto/);
+  assert.match(band, /overscroll-behavior:contain/);
+  assert.match(band, /flex-wrap:wrap/);
+  assert.match(band, /max-block-size:calc\(2 \* var\(--slotted-target-min/);
+  assert.match(band, /border-block-end:var\(--_border-width\) solid var\(--_border-color\)/);
+  assert.doesNotMatch(band, /box-shadow/, 'the band is separated by a shadow instead of a rule');
+  assert.doesNotMatch(band, /transition|animation/, 'the band animates its own box (R7)');
+  /* The list keeps its own scroll, which is what makes the two independent. */
+  assert.match(rule(css, "[data-ui='select'] > [data-part='content']"), /overflow-y:auto/);
+});
+
+/**
  * The sentence a control too narrow for a chip shows instead. It is taken out
  * of sight rather than out of the tree while the chips are shown: it is the
  * trigger's accessible name, and a button that changes what it is called when

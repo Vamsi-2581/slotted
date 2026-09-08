@@ -195,6 +195,57 @@ describe('SlSelect', () => {
     expect(fixture.componentInstance.value()).toEqual(['apple', 'cherry']);
   });
 
+  /**
+   * SL10. The control holds one line, so twelve chosen values are three chips
+   * and a count. The band at the top of the popup holds all of them, and holds
+   * no widget: focus never enters this layer, so a remove control in there
+   * would be a tab stop the pattern excludes and a control no keyboard reaches.
+   */
+  describe('the band of chosen values', () => {
+    const band = () => document.querySelector("[data-part='chosen']");
+
+    it('holds every chosen value, whatever the control had room for', () => {
+      fixture.componentInstance.multiple.set(true);
+      fixture.detectChanges();
+      open();
+      named('Apple').click();
+      fixture.detectChanges();
+      named('Blueberry').click();
+      fixture.detectChanges();
+      named('Cherry').click();
+      fixture.detectChanges();
+
+      const labels = [...(band()?.querySelectorAll("[data-part='label']") ?? [])].map(
+        (label) => label.textContent,
+      );
+      expect(labels).toEqual(['Apple', 'Blueberry', 'Cherry']);
+    });
+
+    it('is drawn inside the surface and out of the accessibility tree', () => {
+      fixture.componentInstance.multiple.set(true);
+      fixture.componentInstance.value.set(['apple']);
+      fixture.detectChanges();
+      open();
+
+      expect(listbox()?.contains(band())).toBe(true);
+      expect(band()?.getAttribute('aria-hidden')).toBe('true');
+      expect(band()?.querySelector("[data-part='remove']")).toBeNull();
+      expect(band()?.querySelector('button')).toBeNull();
+    });
+
+    it('is not drawn at all while nothing is chosen, or in single selection', () => {
+      fixture.componentInstance.multiple.set(true);
+      fixture.detectChanges();
+      open();
+      expect(band()).toBeNull();
+
+      fixture.componentInstance.multiple.set(false);
+      fixture.componentInstance.value.set('apple');
+      fixture.detectChanges();
+      expect(band()).toBeNull();
+    });
+  });
+
   it('names the chosen option in the closed control', () => {
     open();
     named('Blueberry').click();

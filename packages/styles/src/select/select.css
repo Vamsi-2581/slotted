@@ -892,6 +892,54 @@
   }
 
   /**
+   * Everything that is chosen, at the top of the popup (SL10).
+   *
+   * The control holds one line, so twelve chosen values are three chips and a
+   * count; here they are all of them. The band wraps and takes about two rows
+   * of its own before it scrolls, and it scrolls **itself** — the list under it
+   * keeps its own scroll, and `overscroll-behavior` stops one from carrying the
+   * other once it reaches its end.
+   *
+   * It is stuck to the top of the scrollport rather than laid above it: the
+   * surface is the scroller as well as the box, so a band that merely came
+   * first would scroll away with the options. The negative insets take it out
+   * to the surface's own edges, which is where the rule between it and the list
+   * has to end — a rule from the border scale, not a shadow.
+   */
+  [data-ui='select'] [data-part='chosen'] {
+    background: var(--_surface);
+    border-block-end: var(--_border-width) solid var(--_border-color);
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slotted-space-2, 0.25rem);
+    grid-column: 1 / -1;
+    /* Its own padding stands where the surface's would, so nothing shows above
+       it as the list scrolls under. */
+    inset-block-start: calc(-1 * var(--_inset-block));
+    margin-block: calc(-1 * var(--_inset-block)) var(--_inset-block);
+    margin-inline: calc(-1 * var(--_inset-inline));
+    /**
+     * Two rows of chips, the gap between them, and the air above the first.
+     * Two *whole* rows: a chip drawn to half its height is not an affordance,
+     * it is a chip that looks broken. What says there is more is the scrollbar
+     * and the rule under it. The row is the target minimum, which is the floor
+     * a chip's own remove control puts under it everywhere else (TG2/SL8), so
+     * a chip at the small step never overruns the cap.
+     */
+    max-block-size: calc(
+      2 * var(--slotted-target-min, 24px) + var(--slotted-space-2, 0.25rem) + var(--_inset-block)
+    );
+    min-inline-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--_inset-block);
+    padding-inline: var(--_inset-inline);
+    position: sticky;
+    z-index: 1;
+  }
+
+  /**
    * The surface never takes a ring. Focus stays on the control for the whole
    * interaction — the highlight is `aria-activedescendant`, not focus — so a
    * ring here would draw a box around something nobody is operating.

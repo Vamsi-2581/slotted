@@ -135,8 +135,19 @@ test('holds the chosen values in a band that scrolls itself', () => {
   assert.match(band, /border-block-end:var\(--_border-width\) solid var\(--_border-color\)/);
   assert.doesNotMatch(band, /box-shadow/, 'the band is separated by a shadow instead of a rule');
   assert.doesNotMatch(band, /transition|animation/, 'the band animates its own box (R7)');
-  /* The list keeps its own scroll, which is what makes the two independent. */
-  assert.match(rule(css, "[data-ui='select'] > [data-part='content']"), /overflow-y:auto/);
+  /*
+   * The list keeps its own scroll, which is what makes the two independent.
+   * Which element is the list depends on `search`: without it the surface is
+   * the scroller, and with it the surface is a column of a field and a list and
+   * the list scrolls under a field that stays (SL11).
+   */
+  const scroller = rule(
+    css,
+    "[data-ui='select'] > [data-part='content']:not([data-search])," +
+      "[data-ui='select'] [data-part='list']",
+  );
+  assert.match(scroller, /overflow-y:auto/);
+  assert.match(scroller, /overscroll-behavior:contain/);
 });
 
 /**

@@ -26,6 +26,19 @@
    *   │  └────────────────────────────────────────────────────┘    │
    *   └────────────────────────────────────────────────────────────┘
    *
+   * Under `search` the popup gains one row and the list moves one element in,
+   * because a text field is not an option and a listbox holds nothing else:
+   *
+   *   ┌─ content ─ role="dialog" ─ data-search ────────────┐
+   *   │  search ▸ search-icon │ search-input               │
+   *   │  ┌─ list ─ role="listbox" ─ scrolls ───────────┐   │
+   *   │  │ item ▸ icon │ label ▸ match │ indicator      │   │
+   *   │  └──────────────────────────────────────────────┘   │
+   *   └────────────────────────────────────────────────────┘
+   *
+   * Every part above `list` exists only under `search`, so a consumer who does
+   * not ask for it renders the DOM they rendered before it existed.
+   *
    * ── Why the frame is `text-field`'s frame ────────────────────────────
    *
    * The border, the radius, the resting shadow, the focus ring, the invalid
@@ -176,7 +189,15 @@
     border: 0;
     box-sizing: border-box;
     color: inherit;
-    cursor: default;
+    /**
+     * The hand, as `button/button.css` draws it on every button in the
+     * library. This drew an arrow until SL11, and the arrow came from the
+     * native `select` — the element this family refused, on the grounds that
+     * the operating system draws its popup and a web surface is not what it
+     * gets. Keeping the native cursor after refusing the native element left
+     * the one control in a form that says nothing happens when it is pressed.
+     */
+    cursor: pointer;
     display: flex;
     font: inherit;
     gap: var(--_gap);
@@ -876,19 +897,132 @@
     box-shadow: var(--_shadow);
     box-sizing: border-box;
     color: var(--_text);
-    display: grid;
     font-family: var(--slotted-font-family-sans);
     font-size: var(--_content-font-size);
-    grid-template-columns: auto minmax(0, 1fr) auto;
     max-block-size: calc(
       var(--slotted-positioner-available-height, 100vh) - var(--slotted-space-5, 0.75rem)
     );
     outline: none;
+    pointer-events: auto;
+  }
+
+  /**
+   * The three columns and the scroll, on whichever element holds the options.
+   *
+   * Without a search field that element is the surface itself, which is where
+   * it has always been. With one the surface becomes a column of two — the
+   * field, then the list — and the list is what scrolls: a field that scrolled
+   * away with its own results is a field a reader loses on the fourth row, and
+   * every implementation surveyed on 2026-09-08 that puts the field in the
+   * popup keeps it still.
+   *
+   * `overscroll-behavior` keeps the page still once the scroller has reached
+   * its end.
+   */
+  [data-ui='select'] > [data-part='content']:not([data-search]),
+  [data-ui='select'] [data-part='list'] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-block: var(--_inset-block);
     padding-inline: var(--_inset-inline);
-    pointer-events: auto;
+  }
+
+  [data-ui='select'] > [data-part='content'][data-search] {
+    display: flex;
+    flex-direction: column;
+    /* The field draws to the surface's own edges and the list keeps the inset,
+       so each of the two states its own padding rather than sharing one. */
+    padding: 0;
+  }
+
+  /* `auto` as the flex basis measures the whole list and refuses to shrink;
+     the surface is what holds the height, and the list is what gives. */
+  [data-ui='select'] [data-part='list'] {
+    flex: 1 1 auto;
+    min-block-size: 0;
+  }
+
+  /* ── The search field ─────────────────────────────────────────────────── */
+
+  /**
+   * The row the query is typed into, at the top of the popup and only under
+   * `search`.
+   *
+   * It is in the popup rather than in the control, and that is the whole of
+   * what keeps this family apart from `combobox`: a combobox's typed text is a
+   * value it commits, and this query is transient — it filters, it is emptied
+   * when an option is taken, and the control goes on showing the chosen label
+   * the entire time. `docs/component-features.md` §6 says the control takes no
+   * typed text, and it still does not.
+   *
+   * A row the height of an option, so the field and the first result keep one
+   * rhythm, with the rule under it drawn from the border scale rather than
+   * from a shadow — the same rule the `chosen` band draws above the list.
+   */
+  [data-ui='select'] [data-part='search'] {
+    align-items: center;
+    border-block-end: var(--_border-width) solid var(--_border-color);
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--_column-gap);
+    min-block-size: var(--_item-height);
+    padding-block: var(--slotted-space-2, 0.25rem);
+    /* The list is inset from the surface and each option is inset again inside
+       it, so a row that took only the option's inset put its glyph four pixels
+       to the start of every label under it. The two insets are added here, and
+       the magnifier opens the same column the labels do. */
+    padding-inline: calc(var(--_inset-inline) + var(--_item-inset));
+  }
+
+  /**
+   * The magnifier. It is what makes the row a field rather than a heading: a
+   * bare line of placeholder text at the top of a panel reads as a title, and
+   * a reader does not type into a title.
+   */
+  [data-ui='select'] [data-part='search-icon'] {
+    background-color: currentcolor;
+    block-size: var(--_content-icon-size);
+    color: var(--slotted-select-search-icon-color, var(--_muted));
+    flex: 0 0 auto;
+    inline-size: var(--_content-icon-size);
+    mask-image: var(--slotted-select-search-icon, var(--slotted-icon-search));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    pointer-events: none;
+  }
+
+  /**
+   * The field itself, which gives up every frame of its own: the surface is
+   * already a bordered panel, and a second border a step inside it would draw
+   * a box inside a box for one line of text.
+   *
+   * **No focus ring.** The field takes focus as the popup opens and holds it
+   * until the popup closes — there is no state in which this layer is open and
+   * this element is not focused — so a ring here would be a permanent border
+   * rather than a state, and the one thing on the surface that never changes
+   * would be the loudest. What says where focus is, is the caret.
+   */
+  [data-ui='select'] [data-part='search-input'] {
+    background-color: transparent;
+    border: 0;
+    color: inherit;
+    flex: 1 1 auto;
+    font: inherit;
+    /* The intrinsic width of an `input` is about twenty characters, and a flex
+       item refuses to shrink below it without this. */
+    min-inline-size: 0;
+    outline: none;
+    padding: 0;
+    text-overflow: ellipsis;
+  }
+
+  [data-ui='select'] [data-part='search-input']::placeholder {
+    color: var(--slotted-select-placeholder-color, var(--_muted));
+    text-overflow: ellipsis;
   }
 
   /**
@@ -987,7 +1121,15 @@
     align-content: center;
     border-radius: var(--_item-radius);
     box-sizing: border-box;
-    cursor: default;
+    /**
+     * The hand (SL11). Nine of the twelve implementations surveyed draw it;
+     * the three that draw an arrow are the three that follow the native
+     * `select`, whose popup the operating system paints. A row that commits a
+     * value and closes the surface is a press, and `menu` keeps the arrow
+     * because a menu item is a command in a surface that follows the
+     * platform's own menus.
+     */
+    cursor: pointer;
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
@@ -1271,6 +1413,17 @@
   }
 
   /**
+   * Under `search` the status row is also the live region that announces how
+   * many options survived the query, so it is present on every open popup and
+   * empty on most of them. A row with no text takes no space; a row with text
+   * takes the same space as the empty message beside it. `combobox` draws the
+   * count the same way, in the same place, for the same reason.
+   */
+  [data-ui='select'] [data-part='status']:empty {
+    display: none;
+  }
+
+  /**
    * The wait, as the shape of the list that is coming. Three rows the height of
    * an option rather than one sentence, so the surface a reader is looking at
    * while the answer travels is the surface they will go on looking at
@@ -1361,6 +1514,7 @@
      */
     [data-ui='select'] > [data-part='arrow'],
     [data-ui='select'] > [data-part='clear']::before,
+    [data-ui='select'] [data-part='search-icon'],
     [data-ui='select'] [data-part='icon']:empty {
       forced-color-adjust: none;
     }

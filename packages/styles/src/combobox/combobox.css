@@ -651,7 +651,12 @@
     align-content: center;
     border-radius: var(--_item-radius);
     box-sizing: border-box;
-    cursor: default;
+    /**
+     * The hand (CB12). A row that commits a value and closes the surface is a
+     * press, and this popup is not a platform menu: `select` draws the same
+     * cursor on the same row, and the pair says one thing about one gesture.
+     */
+    cursor: pointer;
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;

@@ -99,6 +99,17 @@ test('paints the chip on the root and the inset on the body', () => {
  * family did before and it is not enough: a floor on the outside cannot reach
  * the content box inside it.
  */
+/**
+ * SL9. A host that collapses a row of chips writes `hidden` on the ones that
+ * ran over, and `display: inline-flex` on the root beats the user agent's own
+ * `[hidden] { display: none }` — author styles win over the user agent sheet.
+ * Without this rule the collapse hid nothing: six chosen values drew six chips
+ * and two of them ran under the controls that end a select.
+ */
+test('lets a host take a chip out of the picture with hidden', () => {
+  assert.match(rule(`${root}[hidden]`), /display:none/);
+});
+
 test('gives the remove control its target on both axes', () => {
   assert.ok(
     !/--_block-size:max\(/.test(rule(root)),

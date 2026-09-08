@@ -509,7 +509,67 @@
 </section>
 
 <section data-scene="multiple">
+  <div style="display: grid; gap: 12px">
+    <!--
+      Six chosen values, in the state the collapse leaves them at the narrowest
+      stage: the chips that fit stand, the rest carry `hidden` and the count
+      stands in their place. The lane the chips take ends where the lane of the
+      final controls begins, so no chip is ever under one of them, and the frame
+      is the height of a select that chose one thing (SL9).
+    -->
+    <div
+      data-ui="select"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-full-width
+      data-multiple
+    >
+      <button
+        data-part="trigger"
+        type="button"
+        role="combobox"
+        aria-expanded="false"
+        aria-label="Fruit"
+      >
+        <span data-part="value"><span data-part="summary">6 selected</span></span>
+      </button>
+      <span data-part="tags">
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+          <span data-part="body"><span data-part="label">Fig</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Fig"></button>
+        </span>
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
+          <span data-part="body"><span data-part="label">Plum</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Plum"></button>
+        </span>
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft" hidden>
+          <span data-part="body"><span data-part="label">Pear</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Pear"></button>
+        </span>
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft" hidden>
+          <span data-part="body"><span data-part="label">Date</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Date"></button>
+        </span>
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft" hidden>
+          <span data-part="body"><span data-part="label">Lime</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Lime"></button>
+        </span>
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft" hidden>
+          <span data-part="body"><span data-part="label">Kiwi</span></span>
+          <button data-part="remove" type="button" aria-label="Remove Kiwi"></button>
+        </span>
+        <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft" data-overflow>
+          <span data-part="body"><span data-part="label">+4</span></span>
+        </span>
+      </span>
+      <button data-part="clear" type="button" aria-label="Clear selection"></button>
+      <span data-part="arrow"></span>
+    </div>
+  </div>
   <div style="display: grid; gap: 12px; max-inline-size: 300px">
+    <!-- What the collapse leaves when they do not all fit: the ones that ran
+         over carry `hidden`, and the count stands in their place. -->
     <div
       data-ui="select"
       data-part="root"

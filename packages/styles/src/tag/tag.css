@@ -109,6 +109,21 @@
     white-space: nowrap;
   }
 
+  /**
+   * A tag a collapse is hiding. The rule exists because `display: inline-flex`
+   * above beats the user agent's own `[hidden] { display: none }` — author
+   * styles win over the user agent sheet — so without it every hidden chip
+   * rendered and the collapse did nothing at all: six chosen values drew six
+   * chips, which ran out of the lane the control gives them and under the
+   * controls that end it (SL9). `breadcrumb`, `toolbar`, `tabs`, `alert` and
+   * `progress-indicator` each write this rule for the same reason; `tag` is
+   * the sheet that was missing it, and the two hosts that collapse a row of
+   * chips both write the attribute and neither could have known.
+   */
+  [data-ui='tag'][data-part='root'][hidden] {
+    display: none;
+  }
+
   /* ── Tone: which of the five semantic colours the tag speaks in ────────── */
 
   /**

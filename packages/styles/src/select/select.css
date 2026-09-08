@@ -100,9 +100,23 @@
     box-shadow: var(--slotted-select-shadow, var(--slotted-control-shadow, none));
     box-sizing: border-box;
     color: var(--slotted-select-color, var(--slotted-text, CanvasText));
-    display: flex;
+    column-gap: var(--_gap);
+    /**
+     * Two lanes on one row: what the control holds, and what ends it (SL9).
+     *
+     * The chips used to be a row hanging over the trigger's content box, with
+     * its inline end written as the same arithmetic the chevron and the clear
+     * button are placed by. A row that hangs reserves no space, so the lane it
+     * may use was a number kept in step by hand, and six chosen values ran
+     * under the two controls that end the control. Here the lane *is* a track:
+     * it ends where the next track begins, and no arithmetic can be out of
+     * date. The trigger spans both, so it is still the ground every press that
+     * is not a chip or the clear button lands on.
+     */
+    display: grid;
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
+    grid-template-columns: minmax(0, 1fr) auto;
     inline-size: 100%;
     /* A control in a grid track narrower than its intrinsic width would
        otherwise refuse to shrink and take the row's edge with it. */
@@ -119,6 +133,11 @@
       border-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
       box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+  }
+
+  /* And the clear button's own lane, before the chevron's, when there is one. */
+  [data-ui='select'][data-part='root']:has(> [data-part='clear']) {
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
   /**
@@ -144,11 +163,11 @@
    * trigger can only ever be drawn *before* the clear button, and the first
    * capture of this family showed exactly that: `Blueberry ⌄ ✕`.
    *
-   * So the chevron and the clear button are both taken out of flow and placed
-   * against the frame's inline end, and the trigger reserves their width as its
-   * own end padding. Padding is part of the trigger's box, so a press on the
-   * chevron still lands on the button that opens the popup — which is why the
-   * chevron can be inert and the arrangement costs nothing.
+   * So the chevron and the clear button stand in their own lane at the frame's
+   * inline end, and the trigger spans every lane and reserves their width as
+   * its own end padding. Padding is part of the trigger's box, so a press on
+   * the chevron still lands on the button that opens the popup — which is why
+   * the chevron can be inert and the arrangement costs nothing.
    */
   [data-ui='select'] > [data-part='trigger'] {
     align-items: center;
@@ -159,9 +178,11 @@
     color: inherit;
     cursor: default;
     display: flex;
-    flex: 1 1 auto;
     font: inherit;
     gap: var(--_gap);
+    /* The ground: every lane on the one row, so nothing the reader presses
+       between the chips and the border falls past the button. */
+    grid-area: 1 / 1 / 2 / -1;
     min-block-size: calc(var(--_height) - var(--slotted-control-border-width, 1px) * 2);
     /* An `auto` minimum refuses to shrink below the longest label, which is how
        a select in a narrow column pushes its own field off the row. */
@@ -230,49 +251,49 @@
    * asks for the small step and the chip answers with its own arithmetic,
    * floored at the target minimum because its remove control is a control.
    *
-   * **The row stands over the trigger rather than inside it.** The trigger is
-   * a `button`, and a button cannot contain one: a remove control inside it
-   * would be a control inside a control, which no browser and no reader
-   * resolves the same way. So the row is a sibling placed over the trigger's
-   * own content box — the arrangement the chevron and the clear button already
-   * use, and for the same reason — and it lets every press it does not want
-   * through to the button underneath, so the frame still opens the popup
-   * everywhere a chip is not.
+   * **The row is a sibling of the trigger, and a lane of the control** (SL9).
+   * The trigger is a `button`, and a button cannot contain a remove control:
+   * that is a control inside a control, which no browser and no reader resolves
+   * the same way. So the row is written beside the button rather than in it —
+   * and it takes the first track of the frame's row, so the space it needs is
+   * space the control gives it and the chips end where the lane of the final
+   * controls begins. It lets every press it does not want through to the
+   * trigger spanning underneath, so the frame still opens the popup everywhere
+   * a chip is not.
    */
   [data-ui='select'][data-part='root'] > [data-part='tags'] {
     align-items: center;
     display: flex;
     gap: var(--slotted-space-2, 0.25rem);
-    inset-block-start: 50%;
-    inset-inline-end: calc(var(--_padding-inline) + var(--_icon-size) + var(--_gap));
-    inset-inline-start: var(--_padding-inline);
+    /* The content lane: the chips share it with the trigger's own text. */
+    grid-area: 1 / 1 / 2 / 2;
+    /* The gutter the value begins from, so a chip starts where a label would. */
+    margin-inline-start: var(--_padding-inline);
     /**
      * The row is at least a target tall, because a chip's remove control takes
      * the rest of its own target from a transparent halo that stands outside
      * the chip (TG2), and the clip below would otherwise cut that halo off at
      * the chip's edge — the press area measured 24 × 22.8 inside the trigger
-     * and 24 × 24 everywhere else. The chips stay centred in it.
+     * and 24 × 24 everywhere else. The chips stay centred in it. It is never
+     * taller than the control's own inner box, so the height of the frame is
+     * the height of a select that chose one thing.
      */
     min-block-size: var(--slotted-target-min, 24px);
+    /* A lane a chip cannot widen: the track is `minmax(0, 1fr)` and this is
+       what makes a chip shrink against it rather than push it. */
+    min-inline-size: 0;
     /* A chip that does not fit is hidden by the collapse, not clipped; this is
        the guard for the frame between one measurement and the next. */
     overflow: hidden;
     /* The gaps between chips belong to the trigger underneath. */
     pointer-events: none;
-    position: absolute;
-    translate: 0 -50%;
-  }
-
-  /* And the clear button's own box, as the trigger reserves it. */
-  [data-ui='select'][data-part='root']:has(> [data-part='clear']) > [data-part='tags'] {
-    inset-inline-end: calc(
-      var(--_padding-inline) + var(--_icon-size) + var(--_gap) + var(--_action-size) + var(--_gap)
-    );
   }
 
   [data-ui='select'] > [data-part='tags'] > * {
-    /* Each chip takes its own presses back. */
+    /* Each chip takes its own presses back, and stands above the trigger that
+       spans the lane underneath it. */
     pointer-events: auto;
+    position: relative;
   }
 
   /**
@@ -324,18 +345,17 @@
     background-color: currentcolor;
     block-size: var(--_icon-size);
     color: var(--slotted-select-arrow-color, var(--slotted-text-muted, GrayText));
+    /* The last lane, whichever of the two arrangements is in force. */
+    grid-area: 1 / -2 / 2 / -1;
     inline-size: var(--_icon-size);
-    inset-block-start: 50%;
-    inset-inline-end: var(--_padding-inline);
+    margin-inline-end: var(--_padding-inline);
     mask-image: var(--slotted-select-arrow-icon, var(--slotted-icon-chevron-down));
     mask-position: center;
     mask-repeat: no-repeat;
     mask-size: contain;
-    /* Inert on purpose: the trigger's own end padding runs underneath it, so a
-       press here opens the popup rather than landing on a decorative span. */
+    /* Inert on purpose: the trigger spans this lane underneath it, so a press
+       here opens the popup rather than landing on a decorative span. */
     pointer-events: none;
-    position: absolute;
-    translate: 0 -50%;
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
@@ -359,19 +379,20 @@
     --slotted-spinner-size: var(--_icon-size);
 
     color: var(--slotted-select-arrow-color, var(--slotted-text-muted, GrayText));
-    inset-block-start: 50%;
-    inset-inline-end: var(--_padding-inline);
-    /* Inert on purpose, as the chevron is: the trigger's own end padding runs
+    /* The chevron's lane, because it stands where the chevron stood. */
+    grid-area: 1 / -2 / 2 / -1;
+    margin-inline-end: var(--_padding-inline);
+    /* Inert on purpose, as the chevron is: the trigger spans this lane
        underneath it, so a press here opens the popup. */
     pointer-events: none;
-    position: absolute;
-    translate: 0 -50%;
   }
 
   /**
-   * The clear button, inset by its own gutter less than the value is, so the
-   * *glyph* — not the button's box — ends the same distance from the border as
-   * the value begins from it. `text-field`'s arithmetic, unchanged.
+   * The clear button, in the lane before the chevron's. Its box is wider than
+   * its glyph by the target it recovers, and that overhang is taken back on
+   * both sides — so every gap in the lane is measured between glyphs and the
+   * *glyph* keeps the rhythm the value begins with. `text-field`'s arithmetic,
+   * stated in the terms a track states it.
    */
   [data-ui='select'] > [data-part='clear'] {
     align-items: center;
@@ -383,24 +404,17 @@
     color: var(--slotted-select-action-color, var(--slotted-text-muted, GrayText));
     cursor: pointer;
     display: inline-flex;
+    grid-area: 1 / 2 / 2 / 3;
     inline-size: var(--_action-size);
-    inset-block-start: 50%;
-    /* Placed against the chevron rather than against the border: the inset, the
-       chevron, the gap between them, and then the button's own gutter taken
-       back so its *glyph* — not its box — keeps the rhythm. */
-    inset-inline-end: calc(
-      var(--_padding-inline) + var(--_icon-size) + var(--_gap) -
-        (var(--_action-size) - var(--_icon-size)) / 2
-    );
     justify-content: center;
+    margin-inline: calc((var(--_icon-size) - var(--_action-size)) / 2);
     /* The user agent pads a button, and inside a box sized to its glyph that
        padding squeezed the glyph to twelve pixels. */
     padding: 0;
-    /* Out of flow, and after the trigger in document order, so it takes its own
-       presses back from the button running underneath it. */
-    position: absolute;
+    /* Over the trigger that spans this lane, so it takes its own presses back
+       from the button running underneath it. */
+    position: relative;
     touch-action: manipulation;
-    translate: 0 -50%;
     transition:
       background-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),

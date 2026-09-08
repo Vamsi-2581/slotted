@@ -56,22 +56,64 @@ test('lays the chips out and paints none of them', () => {
 });
 
 /**
- * The row stands over the trigger, not inside it: the trigger is a `button`,
- * and a remove control inside one is a control inside a control. The chips
- * take their own presses back and the gaps between them belong to the button
- * underneath, which is what keeps the frame opening the popup everywhere a
- * chip is not.
+ * SL9. The row is a lane of the control's own row, not a row hanging over the
+ * trigger. A row that hangs reserves no space, so the space it may use was an
+ * arithmetic inset kept in step with the chevron and the clear button by hand —
+ * and six chosen values ran under both of them. A track ends where the next
+ * track begins, and no arithmetic can be out of date.
+ *
+ * The trigger is still a `button`, so the chips are still written beside it and
+ * not in it: a remove control inside a button is a control inside a control.
+ * It spans every lane, so the gaps between chips still belong to it and the
+ * frame still opens the popup everywhere a chip is not.
  */
-test('stands the row over the trigger and lets the gaps through to it', () => {
+test('gives the chips a lane of the control and the final controls their own', () => {
   const css = sheet('select');
+  const frame = rule(css, "[data-ui='select'][data-part='root']");
+  assert.match(frame, /display:grid/);
+  assert.match(frame, /grid-template-columns:minmax\(0,1fr\) auto/);
+  assert.match(
+    rule(css, "[data-ui='select'][data-part='root']:has(> [data-part='clear'])"),
+    /grid-template-columns:minmax\(0,1fr\) auto auto/,
+    'the clear button has no lane of its own',
+  );
+
   const row = rule(css, "[data-ui='select'][data-part='root'] > [data-part='tags']");
-  assert.match(row, /position:absolute/);
+  assert.match(row, /grid-area:1 \/ 1 \/ 2 \/ 2/, 'the chips are not in the content lane');
+  assert.doesNotMatch(row, /position:absolute/, 'the row still hangs over the trigger');
   assert.match(row, /pointer-events:none/);
+  assert.match(
+    rule(css, "[data-ui='select'] > [data-part='trigger']"),
+    /grid-area:1 \/ 1 \/ 2 \/ -1/,
+    'the trigger is not the ground under every lane',
+  );
+  for (const part of ['arrow', 'busy']) {
+    assert.match(
+      rule(css, `[data-ui='select'] > [data-part='${part}']`),
+      /grid-area:1 \/ -2 \/ 2 \/ -1/,
+      `${part} is not in the last lane`,
+    );
+  }
   assert.match(
     rule(css, "[data-ui='select'] > [data-part='tags'] > *"),
     /pointer-events:auto/,
     'the chips do not take their own presses back',
   );
+});
+
+/**
+ * The height of the control does not answer the number of chosen values: one
+ * line, and a row no taller than the inner box of a select that chose one
+ * thing. The chips that do not fit are taken out by the collapse, which is why
+ * `tag` has to honour `hidden` — the rule its own sheet is guarded for.
+ */
+test('keeps the row on one line and no taller than the control', () => {
+  const css = sheet('select');
+  const row = rule(css, "[data-ui='select'][data-part='root'] > [data-part='tags']");
+  assert.match(row, /display:flex/);
+  assert.doesNotMatch(row, /flex-wrap:wrap/, 'the chips wrap onto a second line');
+  assert.match(row, /min-inline-size:0/, 'a chip can widen the lane it is in');
+  assert.match(row, /overflow:hidden/);
 });
 
 /**

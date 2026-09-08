@@ -52,6 +52,45 @@ describe('workbench scenario metadata', () => {
   });
 
   /**
+   * `docs/state-and-events.md` names a pair and React ships both halves;
+   * Angular's `model()` is both halves in one input, and a page asked for the
+   * second would have to invent a prop the component does not have. Every
+   * Angular page escaped this by passing no state model at all, which turned
+   * the check off for that framework rather than adapting it.
+   */
+  it('asks a two-way binding for one row and a controlled pair for two', () => {
+    const member = { capabilities: ['value'], defaults: {} };
+    const model = { controlled: 'searchValue', uncontrolled: 'defaultSearchValue' };
+
+    expect(
+      apiMetadataErrors(
+        member,
+        [{ name: 'searchValue', type: 'model<string>', defaultValue: "''" }],
+        {
+          value: model,
+        },
+      ),
+    ).toEqual([]);
+
+    expect(
+      apiMetadataErrors(member, [{ name: 'searchValue', type: 'string', defaultValue: '—' }], {
+        value: model,
+      }),
+    ).toEqual(['missing API defaultSearchValue']);
+
+    expect(
+      apiMetadataErrors(
+        member,
+        [
+          { name: 'searchValue', type: 'string', defaultValue: '—' },
+          { name: 'defaultSearchValue', type: 'string', defaultValue: "''" },
+        ],
+        { value: model },
+      ),
+    ).toEqual([]);
+  });
+
+  /**
    * A form holds one mutable value and it is not text. The pair
    * `docs/state-and-events.md` names for it is `errors` and `defaultErrors`,
    * and a page that documented neither would leave a reader unable to hand a

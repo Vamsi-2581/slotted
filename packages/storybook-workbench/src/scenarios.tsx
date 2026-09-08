@@ -223,9 +223,26 @@ interface StateModelEntry {
  * authority, and the table stays the fallback for a capability the model does
  * not name and for a family that declares no model at all.
  */
+/**
+ * Whether the page documents this value as a two-way binding, in which case the
+ * controlled and uncontrolled halves are one row rather than two.
+ *
+ * `docs/state-and-events.md` names a pair — `value` and `defaultValue` — and
+ * React ships both. Angular's `model()` **is** both: it is read, it is written,
+ * and it has no `default` twin to document, so an Angular page asked for one
+ * would have to invent a prop the component does not have. Every Angular page
+ * escaped this by declining to pass a state model at all, which turned the
+ * whole check off for that framework rather than adapting it; a page that
+ * passes one and names the type is now checked on the half it actually has.
+ */
+function twoWay(rows: readonly { name: string; type?: string }[], controlled: string): boolean {
+  const row = rows.find((candidate) => candidate.name === controlled);
+  return row?.type?.startsWith('model<') === true;
+}
+
 export function apiMetadataErrors(
   member: ContractMember,
-  rows: readonly { appliesTo?: string; name: string; defaultValue: string }[],
+  rows: readonly { appliesTo?: string; name: string; type?: string; defaultValue: string }[],
   stateModel?: Readonly<Record<string, StateModelEntry>> | undefined,
 ) {
   const errors: string[] = [];
@@ -251,7 +268,7 @@ export function apiMetadataErrors(
   for (const capability of member.capabilities) {
     const declared = stateModel?.[capability];
     const required = declared
-      ? [declared.controlled, declared.uncontrolled]
+      ? [declared.controlled, ...(twoWay(rows, declared.controlled) ? [] : [declared.uncontrolled])]
       : (capabilityApi[capability as keyof typeof capabilityApi] ?? []);
     for (const name of required) {
       if (!names.includes(name)) errors.push(`missing API ${name}`);

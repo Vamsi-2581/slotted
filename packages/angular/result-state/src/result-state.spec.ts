@@ -176,14 +176,15 @@ describe('SlResultState', () => {
     expect(media?.querySelector('img')).not.toBeNull();
   });
 
-  it('draws no mark at all when the page says so', () => {
+  it('leaves the picture box empty when the page supplies no illustration', () => {
     const region = root(
-      renderTemplate(
-        `<section slResultState hideMedia><div slResultStateContent>Vazio.</div></section>`,
-      ),
+      renderTemplate(`<section slResultState><div slResultStateContent>Vazio.</div></section>`),
     );
 
-    expect(parts(region)).toEqual(['content']);
+    const media = region.querySelector("[data-part='media']");
+    expect(media).not.toBeNull();
+    expect(media?.children.length).toBe(0);
+    expect(media?.textContent?.trim()).toBe('');
   });
 
   /**

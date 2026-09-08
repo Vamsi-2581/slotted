@@ -1,5 +1,4 @@
 import {
-  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -52,11 +51,13 @@ export type {
   selector: '[slResultState]',
   standalone: true,
   exportAs: 'slResultState',
-  template: `@if (!hideMedia()) {
-      <div aria-hidden="true" data-part="media">
-        <ng-content select="[slResultStateMedia]" />
-      </div>
-    }
+  /* The picture box is always in the markup and empty until the page fills
+     it: the stylesheet withdraws an empty box, so a region with no
+     illustration is a title, a description and an action with nothing
+     standing above them (RS1). */
+  template: `<div aria-hidden="true" data-part="media">
+      <ng-content select="[slResultStateMedia]" />
+    </div>
     <ng-content />`,
   styleUrl: '../../../styles/src/result-state/result-state.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,9 +82,6 @@ export class SlResultState {
   readonly align = input<ResultStateAlign | undefined>(undefined);
   /** Defaults to the provider, then to `polite`. */
   readonly live = input<ResultStateLive | undefined>(undefined);
-  /** Draws no mark at all, for a region whose title is the whole of it. */
-  readonly hideMedia = input(false, { transform: booleanAttribute });
-
   private readonly defaults = injectResultStateDefaults();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   /** An explicit tab index the consumer wrote is never replaced by the family's. */

@@ -8,23 +8,9 @@
     "align": ["center", "start"],
     "live": ["off", "polite", "assertive"]
   },
-  "statusTones": {
-    "empty": "secondary",
-    "no-results": "secondary",
-    "not-found": "secondary",
-    "error": "danger",
-    "forbidden": "warning",
-    "offline": "warning",
-    "success": "success"
-  },
-  "statusGlyphs": {
-    "empty": "--slotted-icon-inbox",
-    "no-results": "--slotted-icon-search-x",
-    "not-found": "--slotted-icon-circle-question",
-    "error": "--slotted-icon-circle-alert",
-    "forbidden": "--slotted-icon-lock",
-    "offline": "--slotted-icon-cloud-off",
-    "success": "--slotted-icon-circle-check"
+  "statusPaints": {
+    "what": "nothing",
+    "reason": "A tone glyph standing on an empty surface above a title, with no geometric relation to anything, is the pattern R5 exists to refuse, and RS1 removed it: the region reports what happened in its title, its description and its action, and `status` is the name of the situation rather than a colour or a shape. What a page wants a picture for is its own illustration, which reaches the family through the `media` part."
   },
   "liveRoles": {
     "off": null,
@@ -38,8 +24,7 @@
         "status": "empty",
         "reach": "section",
         "align": "center",
-        "live": "polite",
-        "hideMedia": false
+        "live": "polite"
       },
       "capabilities": ["appearance", "arrangement", "status", "live"],
       "states": ["default", "focus-visible"],

@@ -95,13 +95,14 @@ export interface ResultStateProps extends Omit<ComponentPropsWithRef<'section'>,
   align?: ResultStateAlign | undefined;
   /** Defaults to the provider, then to `polite`. */
   live?: ResultStateLive | undefined;
-  /** Draws no mark at all, for a region whose title is the whole of it. */
-  hideMedia?: boolean | undefined;
   /**
-   * Artwork the page supplies instead of the status's own mark. It is
-   * projected into the box the family draws, so it keeps the height the reach
-   * gives it — which is what stops an illustration that has not loaded from
-   * moving the title and the actions when it arrives.
+   * The page's own illustration. It is projected into the box the family
+   * draws, so it keeps the height the reach gives it — which is what stops an
+   * illustration that has not loaded from moving the title and the actions
+   * when it arrives. Unstated, the box is withdrawn by the stylesheet and the
+   * region is a title, a description and an action (RS1): the family draws no
+   * picture of its own, because a tone glyph alone above a title is the
+   * pattern R5 refuses.
    */
   media?: ReactNode | undefined;
   /**

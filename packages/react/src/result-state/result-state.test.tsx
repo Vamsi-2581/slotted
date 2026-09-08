@@ -164,14 +164,17 @@ describe('ResultState', () => {
     expect(media?.querySelector('img')).not.toBeNull();
   });
 
-  it('draws no mark at all when the page says so', () => {
+  it('leaves the picture box empty when the page supplies no illustration', () => {
     render(
-      <ResultState data-testid="region" hideMedia>
+      <ResultState data-testid="region">
         <ResultStateContent>Vazio.</ResultStateContent>
       </ResultState>,
     );
 
-    expect(parts(screen.getByTestId('region'))).toEqual(['content']);
+    const media = screen.getByTestId('region').querySelector("[data-part='media']");
+    expect(media).not.toBeNull();
+    expect(media?.children).toHaveLength(0);
+    expect(media?.textContent).toBe('');
   });
 
   /**

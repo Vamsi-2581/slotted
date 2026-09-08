@@ -57,14 +57,6 @@ const MARKS = [
     gap: '--_column-gap',
   },
   {
-    family: 'result-state',
-    part: 'media',
-    rest: /:empty/,
-    size: /^var\(--_mark-size\)$/,
-    sizeValue: /^1em$/,
-    gap: '--_column-gap',
-  },
-  {
     family: 'dialog',
     part: 'icon',
     size: /^var\(--_status-size\)$/,

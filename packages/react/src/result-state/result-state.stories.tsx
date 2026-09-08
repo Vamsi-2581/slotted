@@ -97,7 +97,6 @@ type Story = StoryObj<typeof meta>;
 export const Playground: Story = {
   args: {
     align: 'center',
-    hideMedia: false,
     live: 'polite',
     reach: 'section',
     status: 'empty',
@@ -293,13 +292,13 @@ export const Media: Story = {
         </Panel>
       </Scene>
       <Scene
-        label="No mark at all"
-        note="hideMedia, for a region whose title is the whole of it — a cell that has room for one line, or a panel that carries its own artwork above the region."
+        label="A region with no illustration"
+        note="Which is every region the page draws no picture for: the family draws none of its own, so the title is where the region starts (RS1)."
       >
         <Panel>
-          <ResultState hideMedia live="off" status="empty">
+          <ResultState live="off" status="empty">
             <ResultStateContent>
-              <ResultStateTitle>Sem marca</ResultStateTitle>
+              <ResultStateTitle>Sem ilustração</ResultStateTitle>
               <ResultStateDescription>
                 A região começa no título e mantém o mesmo ritmo.
               </ResultStateDescription>
@@ -394,7 +393,7 @@ export const Live: Story = {
           </ResultStateActions>
           <Panel>
             {query === 'idle' ? (
-              <ResultState hideMedia live="off" reach="inline">
+              <ResultState live="off" reach="inline">
                 <ResultStateContent>
                   <ResultStateDescription>
                     Quatro relatórios listados. Filtre para ver a região aparecer.

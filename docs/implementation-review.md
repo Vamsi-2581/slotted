@@ -377,7 +377,7 @@ Localização: `packages/styles/src/listbox/listbox.css`.
 
 ## ResultState
 
-- [ ] **RS1 — `ResultState` deixa de desenhar o glifo de tom.** Ver R5, terceira faixa do limite de alcance. `packages/styles/src/result-state/result-state.css` mapeia um glifo por estado (`inbox`, `search-x`, `circle-question`, `circle-alert`, `lock`, `cloud-off`, `circle-check`), pintado por `mask-image`. Tirar o glifo e reconstruir o estado como título, descrição e ação, com o espaço vertical redistribuído — não deixar o buraco onde o ícone estava. A prop de mídia que a folha já expõe (`--slotted-result-state-media`) continua a ser o caminho de quem quiser pôr uma ilustração própria; documentar isso como o substituto. Critério de aceite: capturas dos três esquemas com zero glifos de tom e nenhuma faixa de espaço vazio deixada pela remoção.
+- [x] **RS1 — `ResultState` deixa de desenhar o glifo de tom.** Ver R5, terceira faixa do limite de alcance. `packages/styles/src/result-state/result-state.css` mapeia um glifo por estado (`inbox`, `search-x`, `circle-question`, `circle-alert`, `lock`, `cloud-off`, `circle-check`), pintado por `mask-image`. Tirar o glifo e reconstruir o estado como título, descrição e ação, com o espaço vertical redistribuído — não deixar o buraco onde o ícone estava. A prop de mídia que a folha já expõe (`--slotted-result-state-media`) continua a ser o caminho de quem quiser pôr uma ilustração própria; documentar isso como o substituto. Critério de aceite: capturas dos três esquemas com zero glifos de tom e nenhuma faixa de espaço vazio deixada pela remoção.
 
 ---
 

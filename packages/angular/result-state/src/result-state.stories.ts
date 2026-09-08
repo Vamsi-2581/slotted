@@ -28,7 +28,6 @@ import { ANGULAR_RESULT_STATE_DOCS, ANGULAR_RESULT_STATE_TOKENS } from './result
 
 interface ResultStateStoryArgs {
   align: ResultStateAlign;
-  hideMedia: boolean;
   live: ResultStateLive;
   reach: ResultStateReach;
   status: ResultStateStatus;
@@ -139,7 +138,6 @@ const STATUSES: readonly [ResultStateStatus, string, string][] = [
 export const Playground: Story = {
   args: {
     align: 'center',
-    hideMedia: false,
     live: 'polite',
     reach: 'section',
     status: 'empty',
@@ -156,7 +154,6 @@ export const Playground: Story = {
             [reach]="reach"
             [align]="align"
             [live]="live"
-            [hideMedia]="hideMedia"
           >
             <div slResultStateContent>
               <div slResultStateTitle>Nenhum projeto ainda</div>
@@ -325,12 +322,12 @@ export const Media: Story = {
            </section>`),
       ) +
         scene(
-          'No mark at all',
-          'hideMedia, for a region whose title is the whole of it — a cell that has room for one line, or a panel that carries its own artwork above the region.',
+          'A region with no illustration',
+          'Which is every region the page draws no picture for: the family draws none of its own, so the title is where the region starts (RS1).',
           panel(
             region(
-              'hideMedia live="off" status="empty"',
-              'Sem marca',
+              'live="off" status="empty"',
+              'Sem ilustração',
               'A região começa no título e mantém o mesmo ritmo.',
             ),
           ),
@@ -404,7 +401,7 @@ export const Live: Story = {
                  </div>
                </section>
              } @else {
-               <section slResultState hideMedia live="off" reach="inline">
+               <section slResultState live="off" reach="inline">
                  <div slResultStateContent>
                    <p slResultStateDescription>
                      Quatro relatórios listados. Filtre para ver a região aparecer.

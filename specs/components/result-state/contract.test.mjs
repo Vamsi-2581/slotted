@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-import { assertContractShape, MUTABLE_CAPABILITIES, TONES } from '../../contract.schema.mjs';
+import { assertContractShape, MUTABLE_CAPABILITIES } from '../../contract.schema.mjs';
 
 const contract = JSON.parse(await readFile(new URL('./contract.json', import.meta.url), 'utf8'));
 
@@ -107,56 +107,29 @@ test('holds the seven things a region can be reporting', () => {
 });
 
 /**
- * `status` is not `tone`. The five tones are how the library paints; the seven
- * statuses are what the region is reporting, and two pairs of them share a
- * tone — `empty` with `no-results` and `not-found`, `forbidden` with `offline`.
- * Naming the axis `tone` would have made `forbidden` and `offline` one value.
- */
-test('maps every status onto a tone the theme already measures', () => {
-  assert.deepEqual(contract.statusTones, {
-    empty: 'secondary',
-    'no-results': 'secondary',
-    'not-found': 'secondary',
-    error: 'danger',
-    forbidden: 'warning',
-    offline: 'warning',
-    success: 'success',
-  });
-  for (const [status, tone] of Object.entries(contract.statusTones)) {
-    assert.ok(contract.axes.status.includes(status), `${status} is not an axis value`);
-    assert.ok(TONES.includes(tone), `${status} claims the tone ${tone}`);
-  }
-  assert.ok(!('tone' in contract.axes), 'tone is a consequence of status, not a second axis');
-});
-
-/**
- * A silhouette per status, so the seven are distinguishable in greyscale and
- * under `forced-colors`, where every tone ground becomes one system colour and
- * the shape is all that is left. WCAG 2.2 SC 1.4.1.
+ * `status` is a name and not a picture (RS1).
  *
- * Three of the marks already exist and are the ones `alert`, `inline-message`
- * and `status-indicator` draw for the same meanings, so a status light and a
- * result state about the same thing draw the same mark. Four do not exist:
- * without them five of the seven statuses would draw the same circle, and the
- * axis would fail the reading it exists to pass. The addition and its cost are
- * in `docs/superpowers/specs/2026-09-03-result-state-capability-inventory.md`.
+ * It was a tone and a silhouette per value: a circled exclamation, a tray, a
+ * lock, drawn at the title's size above the title. R5's limit is what removed
+ * it — a tone glyph alone on an empty surface, with no geometric relation to
+ * anything, is the pattern the rule exists to refuse — and what is left is
+ * what an empty state is: a title, a description and an action.
+ *
+ * Nothing about the axis is lost by not painting it. Colour was never the only
+ * signal, because the words are the signal; and `status` still reaches the
+ * page as an attribute, which is what a page keys its own illustration on.
  */
-test('gives every status a mark, so colour is never the only signal', () => {
-  assert.deepEqual(contract.statusGlyphs, {
-    empty: '--slotted-icon-inbox',
-    'no-results': '--slotted-icon-search-x',
-    'not-found': '--slotted-icon-circle-question',
-    error: '--slotted-icon-circle-alert',
-    forbidden: '--slotted-icon-lock',
-    offline: '--slotted-icon-cloud-off',
-    success: '--slotted-icon-circle-check',
-  });
-  assert.equal(
-    new Set(Object.values(contract.statusGlyphs)).size,
-    contract.axes.status.length,
-    'two statuses drawing one mark are one status',
+test('paints nothing for the status, and says so', () => {
+  assert.equal(contract.statusPaints.what, 'nothing');
+  assert.ok(
+    !('statusGlyphs' in contract) && !('statusTones' in contract),
+    'the family claims a mark or a tone per status again',
   );
-  assert.equal(contract.members.resultState.defaults.hideMedia, false);
+  assert.ok(!('tone' in contract.axes), 'tone is not an axis of this family');
+  assert.ok(
+    !('hideMedia' in contract.members.resultState.defaults),
+    'hideMedia hid the mark, and there is no mark to hide',
+  );
 });
 
 /**

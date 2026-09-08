@@ -3,8 +3,8 @@
   Angular, and it can drift from both. Every part the contract declares appears
   in the first scene, every value of every axis appears below it, and the two
   structural facts the family is built on are visible rather than described:
-  the live role is on `content` and nowhere else, and the mark, the actions and
-  the footer are that region's siblings.
+  the live role is on `content` and nowhere else, and the picture, the actions
+  and the footer are that region's siblings.
 
   The buttons and the links are real `button` and `link` markup rather than
   boxes, because how a message and the way out of it sit together is one of the
@@ -88,7 +88,9 @@
       </div>
     </section>
 
-    <!-- No mark at all, for a region carrying its own artwork above it or none. -->
+    <!-- The picture box left empty, which is every region the page draws no
+         illustration for: the stylesheet withdraws it, and the region starts at
+         its title (RS1). -->
     <section
       data-ui="result-state"
       data-part="root"
@@ -407,8 +409,8 @@
 
 <section data-scene="media">
   <div style="display: grid; gap: var(--slotted-space-9)">
-    <!-- Artwork the page supplied. The box keeps its height, so the title and
-         the actions stand exactly where the status mark would have left them. -->
+    <!-- Artwork the page supplied. The box keeps the height the reach gives it,
+         so an illustration that has not loaded moves nothing when it arrives. -->
     <section
       data-ui="result-state"
       data-part="root"

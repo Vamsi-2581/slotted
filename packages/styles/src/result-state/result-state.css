@@ -23,22 +23,6 @@
    */
   [data-ui='result-state'][data-part='root'] {
     /**
-     * The status's two roles, defaulted to `empty` so a region with no stated
-     * status is an absent collection rather than a failure. Each status below
-     * restates both.
-     *
-     * `--_tone-text` is the tone's own `text` role, which is the one pair
-     * `packages/themes/default/test/contrast.test.mjs` measures against the
-     * three neutral surfaces this family is placed on. The three statuses that
-     * report an absence resolve it to the secondary role, which is the muted
-     * grey the field draws an empty state in; the four that report an outcome
-     * take their own colour, which is the whole reason `error` and `success`
-     * are not the same picture.
-     */
-    --_tone-text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-inbox);
-
-    /**
      * Prose sizes come from the type scale, which does not vary by density,
      * and the mark comes from the control scales, which do. That is where
      * density reaches this family: the mark and the consumer's own buttons
@@ -65,17 +49,6 @@
       --slotted-result-state-description-font-size,
       var(--slotted-font-size-md, 0.875rem)
     );
-
-    /**
-     * The status's own mark is the title's size (R5): `1em` resolves against
-     * the root, whose font size is the title's, so the mark steps with the
-     * reach and the density through the type. A thirty-four-pixel glyph over an
-     * eighteen-pixel headline — fifty-seven over twenty-four at `page` — was a
-     * picture standing on its own above the words, and R5 names that picture
-     * as the thing to remove. The glyph stays because the seven statuses are
-     * told apart by it under forced colours; what goes is its size.
-     */
-    --_mark-size: 1em;
 
     /**
      * The box artwork the page supplies takes, and the geometry a raster
@@ -152,51 +125,17 @@
 
   /* ── Status: what the region is reporting ─────────────────────────────
    *
-   * Seven values, and the map is `specs/components/result-state/contract.json`
-   * rather than a decision taken here: the stylesheet, both bindings and the
-   * contract test read one table.
+   * Seven values, and the stylesheet draws none of them (RS1).
    *
-   * Two pairs share a tone, which is why the axis is `status` and not `tone`.
-   * The mark is what satisfies WCAG 2.2 1.4.1: under forced colours every tone
-   * collapses to one system colour and the seven regions are identical, and the
-   * tray, the struck magnifier, the question, the lock, the struck cloud, the
-   * crossed circle and the tick are what is left.
+   * Each one used to set a tone and a silhouette — a tray, a struck magnifier,
+   * a lock — painted as a mask above the title. R5's limit is what removed it:
+   * a tone glyph alone on an empty surface, at no distance from anything and
+   * in relation to nothing, is the pattern the rule exists to refuse, and an
+   * empty state is a title, a description and an action. Nothing is lost by not
+   * painting it, because what the region is reporting is in the words; the
+   * attribute is still on the root, which is what a page keys its own
+   * illustration on.
    */
-
-  [data-ui='result-state'][data-part='root'][data-status='empty'] {
-    --_tone-text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-inbox);
-  }
-
-  [data-ui='result-state'][data-part='root'][data-status='no-results'] {
-    --_tone-text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-search-x);
-  }
-
-  [data-ui='result-state'][data-part='root'][data-status='not-found'] {
-    --_tone-text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-circle-question);
-  }
-
-  [data-ui='result-state'][data-part='root'][data-status='error'] {
-    --_tone-text: var(--slotted-tone-danger-text);
-    --_glyph: var(--slotted-icon-circle-alert);
-  }
-
-  [data-ui='result-state'][data-part='root'][data-status='forbidden'] {
-    --_tone-text: var(--slotted-tone-warning-text);
-    --_glyph: var(--slotted-icon-lock);
-  }
-
-  [data-ui='result-state'][data-part='root'][data-status='offline'] {
-    --_tone-text: var(--slotted-tone-warning-text);
-    --_glyph: var(--slotted-icon-cloud-off);
-  }
-
-  [data-ui='result-state'][data-part='root'][data-status='success'] {
-    --_tone-text: var(--slotted-tone-success-text);
-    --_glyph: var(--slotted-icon-circle-check);
-  }
 
   /* ── Reach: which scope the message applies to ────────────────────────
    *
@@ -300,45 +239,43 @@
     justify-items: stretch;
   }
 
-  /* ── The mark ─────────────────────────────────────────────────────────
+  /* ── The picture, when there is one ───────────────────────────────────
    *
-   * A mask from a glyph token, painted in the status's own text role.
+   * The box holds artwork the page supplies, and nothing else. It held a mask
+   * per status until RS1 — a tray, a lock, a circled exclamation, drawn at the
+   * title's size above the title — and R5's limit is what removed it.
    *
-   * `--slotted-result-state-media` is the escape hatch for an application with
-   * its own icon set: one declaration, and the status, the size and the place
-   * are kept.
-   */
-  [data-ui='result-state'] > [data-part='media'] {
-    background-color: var(--_tone-text);
-    mask-image: var(--slotted-result-state-media, var(--_glyph));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
-
-  /**
-   * The status's own mark: a square the title's size (R5), with nothing behind
-   * it. At `section` and `page` it stands over the title, and it belongs to the
-   * title's block rather than to the region's rhythm: the row gap is the
-   * distance between the blocks — words, controls, footer — and the mark closes
-   * it down to the distance the title keeps from its own description, so the
-   * two read as one block with a mark rather than as a mark and a block.
+   * With nothing in it the box is withdrawn rather than left standing at zero:
+   * a box of no height is still an item in the grid, and the region's row gap
+   * would keep a band of empty space above the title exactly where the glyph
+   * used to be. Withdrawn, the region is the title, the description and the
+   * action, with one gap between them.
+   *
+   * `--slotted-result-state-media` is the way to put a picture there without
+   * projecting a node: the page names its own illustration and shows the box in
+   * the same rule, which is one snippet in the family's documentation. It is
+   * painted as an image rather than as a mask, because what goes there now is a
+   * drawing in its own colours and not a silhouette in a tone; and when nothing
+   * names it, the declaration is invalid at computed-value time and the box
+   * paints nothing at all.
    */
   [data-ui='result-state'] > [data-part='media']:empty {
-    block-size: var(--_mark-size);
-    inline-size: var(--_mark-size);
-    margin-block-end: calc(var(--_text-gap) - var(--_row-gap));
+    background: var(--slotted-result-state-media) center / contain no-repeat;
+    block-size: var(--_media-size);
+    display: none;
+    inline-size: var(--_media-size);
   }
 
   /**
-   * Artwork the page supplied instead of the status's own mark. The mask goes,
-   * because a mask over an element that now has content of its own would cut
-   * that content into the shape of a tray.
+   * Artwork the page projected into the box.
    *
    * The block size is the illustration's box and the inline size is released:
    * the height is what reserves the space, and an illustration is rarely
    * square. Anything inside is held to the box's height and keeps its own
    * ratio, so a wide drawing and a square one both land on the same baseline.
+   * Because the box is sized before its content arrives, an image that has not
+   * loaded reserves the room it will take and nothing below it moves when it
+   * does.
    */
   [data-ui='result-state'] > [data-part='media']:not(:empty) {
     align-items: center;
@@ -347,7 +284,6 @@
     display: flex;
     inline-size: auto;
     justify-content: center;
-    mask-image: none;
     min-inline-size: var(--_media-size);
   }
 
@@ -355,24 +291,6 @@
     block-size: 100%;
     inline-size: auto;
     max-inline-size: 100%;
-  }
-
-  /**
-   * On the message's first line rather than on the middle of the row, and the
-   * rule `alert` draws its mark with: pushed down from the start of the row by
-   * half the difference between one line and the mark. `1lh` and `1em` both
-   * resolve against the root, whose type is the title's, so the mark's centre
-   * is the first line's centre at every density without arithmetic — and it
-   * stays on the first line when the description runs to three, which centring
-   * on the whole block would not. The distance to the words is the mark's own.
-   */
-  [data-ui='result-state'][data-reach='inline'] > [data-part='media']:empty {
-    align-self: start;
-    grid-column: 1;
-    grid-row: 1;
-    margin-block-end: 0;
-    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
-    margin-inline-end: var(--_column-gap);
   }
 
   /** Supplied artwork on the same line, centred on the same axis by its own size. */
@@ -564,19 +482,10 @@
 
   /* ── Forced colours ───────────────────────────────────────────────────
    *
-   * The operating system replaces every author colour, so all seven statuses
-   * become one region. The theme already remaps `--slotted-text` and
-   * `--slotted-text-muted`, and the tone text roles with them, so the words
-   * need nothing here.
-   *
-   * The mark does: a mask painted with a custom property that the system has
-   * remapped to a tone colour is a mask painted in a colour the system did not
-   * choose. `CanvasText` is what a silhouette is drawn in, and the silhouette
-   * is the whole reason a glyph is drawn per status.
+   * Nothing. The operating system replaces every author colour, and the theme
+   * already remaps `--slotted-text` and `--slotted-text-muted`, so the words
+   * carry the region as they do everywhere else. The one rule that lived here
+   * forced the status mask back to `CanvasText`, and RS1 removed the mask
+   * (R5); artwork a page supplies is the page's to answer for.
    */
-  @media (forced-colors: active) {
-    [data-ui='result-state'] > [data-part='media'] {
-      background-color: CanvasText;
-    }
-  }
 }

@@ -8,8 +8,9 @@ import type { ResultStateProps, ResultStateRootProps } from './result-state.type
 
 /**
  * The region that stands in for content that is not there, and says what to do
- * next: a mark, a title, a description, the controls that get the reader out,
- * and a line of documentation under them.
+ * next: a title, a description, the controls that get the reader out, and a
+ * line of documentation under them. The page's own illustration goes above
+ * them where there is one; the family draws none of its own (RS1).
  *
  * It is not `alert`. An alert sits beside the content it is about; this
  * replaces it. `inline-message` is a line of text under one control.
@@ -37,7 +38,6 @@ import type { ResultStateProps, ResultStateRootProps } from './result-state.type
 export function ResultState({
   align,
   children,
-  hideMedia = false,
   live,
   media,
   reach,
@@ -64,11 +64,13 @@ export function ResultState({
     ...nativeProps,
     children: (
       <ResultStateProvider value={context}>
-        {hideMedia ? null : (
-          <div aria-hidden="true" data-part="media">
-            {media}
-          </div>
-        )}
+        {/* Always drawn and empty until the page fills it: the stylesheet
+            withdraws an empty box, so a region with no illustration is a
+            title, a description and an action with nothing standing above
+            them (RS1). */}
+        <div aria-hidden="true" data-part="media">
+          {media}
+        </div>
         {children}
       </ResultStateProvider>
     ),

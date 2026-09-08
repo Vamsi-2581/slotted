@@ -13,13 +13,6 @@
   "--slotted-font-size-xl",
   "--slotted-font-size-xs",
   "--slotted-font-weight-semibold",
-  "--slotted-icon-circle-alert",
-  "--slotted-icon-circle-check",
-  "--slotted-icon-circle-question",
-  "--slotted-icon-cloud-off",
-  "--slotted-icon-inbox",
-  "--slotted-icon-lock",
-  "--slotted-icon-search-x",
   "--slotted-line-height-3xl",
   "--slotted-line-height-md",
   "--slotted-line-height-sm",
@@ -43,9 +36,5 @@
   "--slotted-space-8",
   "--slotted-space-9",
   "--slotted-text",
-  "--slotted-text-muted",
-  "--slotted-tone-danger-text",
-  "--slotted-tone-secondary-text",
-  "--slotted-tone-success-text",
-  "--slotted-tone-warning-text"
+  "--slotted-text-muted"
 ]

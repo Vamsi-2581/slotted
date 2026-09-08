@@ -62,44 +62,42 @@ test('places the mark, the actions and the footer outside the region that announ
 });
 
 /**
- * The mark is a mask from a glyph token, per status, which is what makes the
- * seven distinguishable in greyscale and under forced colours. A character is
- * never an icon, and `content` here would be one.
+ * The status paints nothing (RS1). It set a tone and a silhouette per value —
+ * a tray, a struck magnifier, a lock — drawn at the title's size above the
+ * title, and R5's limit is what removed it: a tone glyph alone on an empty
+ * surface, in relation to nothing, is the pattern the rule refuses. What the
+ * region is reporting is in its words.
+ *
+ * The attribute stays on the root, because it is what a page keys its own
+ * illustration on, and the stylesheet may not key a colour or a mask on it
+ * again.
  */
-test('draws every status as a mask from the glyph the contract names', () => {
-  for (const [status, glyph] of Object.entries(contract.statusGlyphs)) {
-    const selector = `${root}[data-status='${status}']`;
-    assert.ok(normalized.includes(`${selector}{`), `${status} has no rule`);
-    assert.ok(rule(selector).includes(glyph), `${status} does not reach ${glyph}`);
-  }
-  assert.match(rule(`${ui}>[data-part='media']`), /mask-image:var\(--slotted-result-state-media/);
-});
-
-/**
- * Every status paints in the tone role the contract maps it to, and in nothing
- * else. The tone's `text` role is the pair
- * `packages/themes/default/test/contrast.test.mjs` measures against the three
- * neutral surfaces this family is placed on, so the family never invents a
- * colour and never mixes a ground the theme holds with a foreground it does
- * not.
- */
-test('paints every status in a tone role the theme already measures', () => {
-  for (const [status, tone] of Object.entries(contract.statusTones)) {
+test('paints no status, in no tone and with no mask', () => {
+  for (const status of contract.axes.status) {
     assert.ok(
-      rule(`${root}[data-status='${status}']`).includes(`--slotted-tone-${tone}-text`),
-      `${status} does not paint with the ${tone} tone`,
+      !normalized.includes(`[data-status='${status}']`),
+      `${status} is painted by a rule again`,
     );
   }
+  assert.ok(!/mask-image|mask-size|mask-position/.test(normalized), 'the family draws a mask');
+  assert.ok(!/--slotted-tone-/.test(normalized), 'the family paints a tone');
 });
 
 /**
- * A silhouette repeated is a status that cannot be told from another one when
- * the colour is gone, which is the whole reading `forced-colors` and WCAG 2.2
- * SC 1.4.1 ask for.
+ * With nothing in it the box is withdrawn rather than left standing at zero: a
+ * box of no height is still an item in the grid, and the row gap would keep a
+ * band of empty space above the title exactly where the glyph used to be.
+ *
+ * `--slotted-result-state-media` is the way to put a picture there without
+ * projecting a node, and it is painted as an image: the drawing is the page's
+ * own, in its own colours. Unset, the declaration is invalid at computed-value
+ * time and the box paints nothing.
  */
-test('gives no two statuses the same mark', () => {
-  const glyphs = Object.values(contract.statusGlyphs);
-  assert.equal(new Set(glyphs).size, glyphs.length);
+test('withdraws the picture box when there is no picture', () => {
+  const empty = rule(`${ui}>[data-part='media']:empty`);
+  assert.match(empty, /display:none/);
+  assert.match(empty, /background:var\(--slotted-result-state-media\) center \/ contain no-repeat/);
+  assert.match(empty, /block-size:var\(--_media-size\)/);
 });
 
 /**
@@ -132,19 +130,10 @@ test('owns a named container and states its own width', () => {
  * the control, because the row is allowed to wrap and a wrapping flex container
  * aligns its lines.
  */
-test('puts the mark, the words and the controls on one line at inline reach', () => {
+test('puts the words and the controls on one line at inline reach', () => {
   const base = rule(root);
   assert.match(base, /font-size:var\(--_title-font-size\)/);
   assert.match(base, /line-height:var\(--_title-line-height\)/);
-
-  assert.match(base, /--_mark-size:1em/);
-  const mark = rule(`${ui}>[data-part='media']:empty`);
-  assert.match(mark, /block-size:var\(--_mark-size\)/);
-  assert.match(mark, /inline-size:var\(--_mark-size\)/);
-
-  const media = rule(`${ui}[data-reach='inline']>[data-part='media']:empty`);
-  assert.match(media, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
-  assert.match(media, /align-self:start/);
 
   const actions = rule(`${ui}[data-reach='inline']>[data-part='actions']`);
   assert.match(actions, /block-size:1lh/);

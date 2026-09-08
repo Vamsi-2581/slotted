@@ -42,7 +42,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div, rendered by the directive',
     required: false,
     purpose:
-      'The status’s own mark, drawn as a mask from the foundation’s glyph set and hidden from assistive technology. An element carrying slResultStateMedia is projected into it and keeps the height the reach gives it, so an illustration that has not loaded moves nothing when it arrives. Absent when hideMedia.',
+      'The page’s own illustration, hidden from assistive technology. An element carrying slResultStateMedia is projected into it and keeps the height the reach gives it, so an illustration that has not loaded moves nothing when it arrives. Empty, the stylesheet withdraws it: the family draws no mark of its own, because a tone glyph alone above a title is the pattern R5 refuses.',
   },
   {
     part: 'content',
@@ -132,14 +132,14 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'media',
-    title: 'The mark, and the artwork that replaces it',
+    title: 'The page’s own illustration',
     note: 'The box is sized before anything is in it, so an illustration that has not loaded reserves the space it will occupy and the title below it never moves. Atlassian spends four props on that and Polaris a skeleton with an effect.',
     snippet: defineSnippet({
       id: 'result-state-angular-media',
       language: 'angular',
-      label: 'The status’s mark, the page’s artwork, and neither',
+      label: 'A region with an illustration, and one without',
       source:
-        '<!-- The status draws its own mark. -->\n<section slResultState status="offline"></section>\n\n<!-- The page draws its own, in the box the family keeps. -->\n<section slResultState>\n  <img slResultStateMedia alt="" src="/illustrations/boards.svg" />\n</section>\n\n<!-- No mark at all, for a region whose title is the whole of it. -->\n<section slResultState hideMedia></section>',
+        '<!-- A title, a description and an action: the family draws no picture. -->\n<section slResultState status="offline"></section>\n\n<!-- The page draws its own, in the box the family keeps. -->\n<section slResultState>\n  <img slResultStateMedia alt="" src="/illustrations/boards.svg" />\n</section>\n\n<!-- Or named in CSS, for a page that skins its states in the theme:\n     [data-ui="result-state"][data-status="offline"] > [data-part="media"] {\n       display: block;\n       --slotted-result-state-media: url("/illustrations/offline.svg");\n     } -->',
     }),
   },
   {
@@ -237,13 +237,6 @@ export const ANGULAR_RESULT_STATE_DOCS = {
         'polite',
         'slResultState',
         'Whether the text announces itself. polite writes role="status" on the content part and assertive writes role="alert"; both imply aria-live and aria-atomic, and neither is written on the box',
-      ],
-      [
-        'hideMedia',
-        'boolean',
-        'false',
-        'slResultState',
-        'Draws no mark at all, for a region whose title is the whole of it',
       ],
       [
         'slResultStateMedia',

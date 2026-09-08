@@ -34,11 +34,109 @@ test('cites all three pages of the pattern it answers', () => {
   assert.deepEqual(contract.roles, {
     trigger: 'combobox',
     content: 'listbox',
+    'search-input': 'combobox',
+    list: 'listbox',
     item: 'option',
     group: 'group',
     separator: 'separator',
     status: 'status',
   });
+});
+
+/**
+ * The fourth page, and only for the opt-in. The combobox pattern lists the four
+ * roles a popup may carry and says a popup that is not a listbox is named by
+ * `aria-haspopup`; a popup holding a text field and a list is a dialog, and the
+ * date-picker example is the pattern's own instance of that composition. A
+ * select that did not search kept the listbox it has always had, so the second
+ * shape is recorded beside the first rather than replacing it.
+ */
+test('cites the page that answers the popup it opens while searching', () => {
+  assert.equal(
+    contract.searchRoles.source,
+    'https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-datepicker/',
+  );
+  assert.equal(contract.searchRoles.content, 'dialog');
+  assert.equal(contract.roles.content, 'listbox');
+  assert.match(contract.wiring['aria-haspopup'], /dialog/);
+  assert.match(contract.wiring['aria-activedescendant'], /search input/);
+});
+
+/**
+ * The query is a value the reader owns and never a value the form holds. It is
+ * filed under `value` because that is the word `combobox` files `inputValue`
+ * under, and the two are the same kind of thing: text a control carries that is
+ * not the key it commits.
+ */
+test('declares a state model for the query, and keeps it apart from the selection', () => {
+  assert.deepEqual(contract.stateModel.value, {
+    controlled: 'searchValue',
+    uncontrolled: 'defaultSearchValue',
+    request: 'onSearchValueChange',
+    reasons: ['keyboard', 'select', 'clear', 'programmatic'],
+  });
+  assert.ok(member.capabilities.includes('value'));
+  assert.match(contract.search.query, /never becomes a value/);
+  assert.equal(contract.search.default, false);
+  assert.equal(member.defaults.search, false);
+});
+
+/**
+ * Focus enters the layer for the first time in this family, and only here. The
+ * pattern's own note is the reason, and the contract carries it rather than the
+ * implementation alone.
+ */
+test('says where focus goes while searching, and why the layer still needs no guard', () => {
+  assert.match(contract.focus.onOpenSearching, /aria-activedescendant/);
+  assert.match(contract.focus.onOpenSearching, /dialog/);
+  assert.equal(contract.focus.guards, false);
+  assert.match(contract.focus.guardsReason, /one focusable element/i);
+});
+
+/**
+ * Two keys behave differently while the reader is typing, and each is a key the
+ * closed control spends on something else. A departure with no written cost is
+ * the failure `patterns.md` names.
+ */
+test('records every key the search field takes back from the key table', () => {
+  const searchKeys = contract.searchKeyboard.map((entry) => entry.key);
+  assert.deepEqual(searchKeys, [
+    'ArrowDown',
+    'ArrowUp',
+    'PageDown',
+    'PageUp',
+    'Home',
+    'End',
+    'Enter',
+    'Space',
+    'Escape',
+    'Tab',
+    'Printable character',
+  ]);
+  for (const entry of contract.searchKeyboard) {
+    assert.ok(entry.effect.length > 0, `${entry.key} does not say what it does`);
+    assert.ok(entry.focus.length > 0, `${entry.key} does not say where focus lands`);
+    assert.ok(['platform', 'pattern', 'family'].includes(entry.source), `${entry.key} source`);
+  }
+  for (const key of ['Space', 'Home', 'End']) {
+    const entry = contract.searchKeyboard.find((row) => row.key === key);
+    assert.equal(entry.source, 'platform', `${key} is bound where the platform should hold it`);
+    assert.match(entry.effect, /Not bound/);
+  }
+  /*
+   * Tab keeps the effect the closed control's Tab has — commit, close, move on
+   * — and only the mechanism differs, because the browser's own next element
+   * from inside a portalled layer is the end of the document. Returning focus
+   * to the trigger and stopping there was the first answer, and it cost the
+   * reader a second Tab to leave a control they had finished with.
+   */
+  const tab = contract.searchKeyboard.find((entry) => entry.key === 'Tab');
+  assert.equal(tab.source, 'pattern');
+  assert.match(tab.effect, /moves on/);
+  assert.match(tab.effect, /tabbables\(\)/);
+  assert.match(contract.search.tabOrder, /@slotted\/core\/focus/);
+  assert.match(contract.focus.restoreSearching, /outside press/);
+  assert.match(contract.typeahead.disabledBy, /^search,/);
 });
 
 /**
@@ -184,7 +282,13 @@ test('holds every chosen value in a band of the popup, and puts no widget in it'
   assert.equal(contract.chips.band, 'chosen');
   assert.equal(contract.chips.bandRows, 2);
   assert.equal(contract.chips.bandInteractive, false);
-  assert.match(contract.chips.bandReason, /focus never enters this layer/i);
+  /*
+   * The reason is keyboard reach, and `search` narrows it without breaking it:
+   * focus does enter the layer there, and the layer's one Tab is spent leaving
+   * the control, so a remove control in the band would be pointer-only (SL11).
+   */
+  assert.match(contract.chips.bandReason, /keyboard reach/i);
+  assert.match(contract.chips.bandReason, /pointer and by nothing else/i);
   assert.ok(member.parts.includes('chosen'));
 });
 
@@ -200,6 +304,10 @@ test('names every part, and no part it does not own', () => {
     'clear',
     'positioner',
     'content',
+    'search',
+    'search-icon',
+    'search-input',
+    'list',
     'chosen',
     'group',
     'group-label',
@@ -207,6 +315,7 @@ test('names every part, and no part it does not own', () => {
     'indicator',
     'icon',
     'label',
+    'match',
     'description',
     'separator',
     'empty',
@@ -314,6 +423,7 @@ test('declares a scenario for every capability a reference page has to prove', (
     'states',
     'loading-and-empty',
     'long-content',
+    'search',
     'placement',
     'keyboard',
     'form',

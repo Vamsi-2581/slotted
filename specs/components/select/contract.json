@@ -9,10 +9,17 @@
   "roles": {
     "trigger": "combobox",
     "content": "listbox",
+    "search-input": "combobox",
+    "list": "listbox",
     "item": "option",
     "group": "group",
     "separator": "separator",
     "status": "status"
+  },
+  "searchRoles": {
+    "content": "dialog",
+    "reason": "The combobox pattern lists the four roles a popup may carry — listbox, tree, grid, dialog — and says that a popup with any role but listbox is named by aria-haspopup on the control. A popup holding a text field and a list is a dialog, so with search the content carries role=dialog, the trigger writes aria-haspopup=\"dialog\", and the listbox moves one element in onto the list part. Without search nothing moves and the content is the listbox it has always been.",
+    "source": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-datepicker/"
   },
   "nativeElement": {
     "considered": "select",
@@ -74,14 +81,15 @@
     "collapse": "createCollapse from @slotted/core/overflow",
     "narrowWidth": "120px",
     "reason": "Several chosen values are the chips themselves rather than a sentence about them (SL4/CB4). Each chip is a `tag`, worn as `data-ui` beside the row this family owns, so the chip a reader removes here is the chip they know from everywhere else and its geometry is stated once. What does not fit collapses into one chip marked `data-overflow`, measured by `createCollapse` — the same ResizeObserver arithmetic `toolbar` collapses a bar with. Under 120px of control there is no room for a chip at all, and the summary sentence answers instead; the swap is a container query, so it costs no observer and no render.",
-    "bandReason": "The control holds one line, so a reader who chose twelve values sees three chips and a count. The band at the top of the popup holds all of them, wraps, and scrolls at about two rows of its own — so what is chosen stays legible without the control growing and without a `+N` standing in front of it (SL10). It is drawn only while something is chosen. Its chips carry no remove control: focus never enters this layer — the contract says so under `focus.guards` — and a widget in there would be a tab stop the pattern excludes and a control nothing can reach by keyboard. Taking a value back is the option's own row, which the list has open beside it, and the chips in the control, which are focusable."
+    "bandReason": "The control holds one line, so a reader who chose twelve values sees three chips and a count. The band at the top of the popup holds all of them, wraps, and scrolls at about two rows of its own — so what is chosen stays legible without the control growing and without a `+N` standing in front of it (SL10). It is drawn only while something is chosen. Its chips carry no remove control, and the reason is keyboard reach rather than tidiness. Without `search` focus never enters this layer at all, so a widget in there would be a tab stop the pattern excludes and a control nothing could reach. With `search` focus does enter it — and the layer's one `Tab` is spent commiting and leaving the control, so a remove control in the band would be reachable by pointer and by nothing else, which is the parity failure the first reason was protecting against. Restated rather than dropped (SL11). Taking a value back is the option's own row, which the list has open beside it and which a query can hide until `Escape` clears it, and the chips in the control, which are focusable."
   },
   "wiring": {
     "role": "combobox on the trigger, listbox on the content, option on each item",
-    "aria-haspopup": "listbox, on the trigger. Redundant for role=combobox, whose implicit value is listbox, and written anyway because the element is a button and role=combobox replaces button on it.",
+    "aria-haspopup": "listbox, on the trigger. Redundant for role=combobox, whose implicit value is listbox, and written anyway because the element is a button and role=combobox replaces button on it. With search it is dialog, which the pattern requires of a popup that is not a listbox.",
+    "aria-autocomplete": "list, on the search input. The list under it is filtered by what was typed, which is what the value names.",
     "aria-expanded": "true while the popup is open, false while it is closed, always written",
     "aria-controls": "the trigger names the content while the popup is open",
-    "aria-activedescendant": "the trigger names the highlighted option, and nothing while there is none",
+    "aria-activedescendant": "the trigger names the highlighted option, and nothing while there is none. With search it is the search input that names it, because that is the element holding focus.",
     "aria-selected": "true on every committed option, false on every other selectable one, which is what the listbox pattern requires",
     "aria-multiselectable": "true on the content when multiple is set",
     "aria-labelledby": "the trigger takes the field's label, because a button is not reliably reached by a label element",
@@ -175,14 +183,84 @@
       "source": "pattern"
     }
   ],
+  "searchKeyboard": [
+    {
+      "key": "ArrowDown",
+      "effect": "moves the highlight to the next option, wrapping only when loop is true",
+      "focus": "the search input",
+      "source": "pattern"
+    },
+    {
+      "key": "ArrowUp",
+      "effect": "moves the highlight to the previous option",
+      "focus": "the search input",
+      "source": "pattern"
+    },
+    {
+      "key": "PageDown",
+      "effect": "moves the highlight ten options on, or to the last",
+      "focus": "the search input",
+      "source": "pattern"
+    },
+    {
+      "key": "PageUp",
+      "effect": "moves the highlight ten options back, or to the first",
+      "focus": "the search input",
+      "source": "pattern"
+    },
+    {
+      "key": "Home",
+      "effect": "the browser's caret movement. Not bound, where the closed control binds it to the first option: the pattern's editable branch returns Home to the caret, and combobox answers the same way.",
+      "focus": "the search input",
+      "source": "platform"
+    },
+    {
+      "key": "End",
+      "effect": "the browser's caret movement. Not bound, for the reason Home is not.",
+      "focus": "the search input",
+      "source": "platform"
+    },
+    {
+      "key": "Enter",
+      "effect": "commits the highlighted option, and closes unless multiple keeps the popup open",
+      "focus": "the trigger after closing, the search input otherwise",
+      "source": "pattern"
+    },
+    {
+      "key": "Space",
+      "effect": "types a space into the query. Not bound, where the closed control binds it to a commit: a field the reader is typing into cannot spend the space bar.",
+      "focus": "the search input",
+      "source": "platform"
+    },
+    {
+      "key": "Escape",
+      "effect": "a non-empty query is cleared and the popup stays; an empty query closes the popup. The pattern names the clearing branch and makes it optional.",
+      "focus": "the search input, then the trigger once the popup closes",
+      "source": "pattern"
+    },
+    {
+      "key": "Tab",
+      "effect": "commits the highlighted option, closes, and moves on — the same effect the closed control's Tab has. Focus is inside a portalled layer at the end of the document, so the browser's own next element is not the element after the control; the family reads the document's tab order with tabbables() from @slotted/core/focus, finds the trigger in it and moves to the entry beside it. Shift+Tab moves to the entry before it.",
+      "focus": "the element after the control, or the element before it under Shift",
+      "source": "pattern"
+    },
+    {
+      "key": "Printable character",
+      "effect": "typed into the query. Never intercepted, and typeahead is off while search is on.",
+      "focus": "the search input",
+      "source": "platform"
+    }
+  ],
   "focus": {
     "onOpen": "nothing moves; the trigger keeps focus and the highlight goes to the selected option, or to the first",
+    "onOpenSearching": "the search input takes focus, however the popup was opened — a press on the trigger included. The combobox pattern's own note says a dialog popup does not support aria-activedescendant and that DOM focus moves into the dialog.",
+    "restoreSearching": "the trigger takes focus back when the popup closes by escape, by a commit or by any key. It does not on an outside press or a blur: the reader has just put focus somewhere themselves, and a control that took it back would undo the gesture that closed it.",
     "roving": false,
     "contained": false,
     "restore": "never leaves the trigger, so there is nothing to restore",
     "disabledItems": "A disabled option is announced with aria-disabled, carries data-disabled, keeps its place in the collection and is skipped by every movement key. It cannot be committed.",
     "guards": false,
-    "guardsReason": "popover needs two focus guards because Tab inside a non-modal portalled layer has nowhere to go. Focus never enters this layer, so there is nothing inside it for Tab to reach.",
+    "guardsReason": "popover needs two focus guards because Tab inside a non-modal portalled layer has nowhere to go. Focus never enters this layer, so there is nothing inside it for Tab to reach. With search there is exactly one focusable element in it and Tab is bound to commit, close and place focus beside the trigger in the document's own tab order, so a guard would have nothing to catch.",
     "removal": "The option holding the highlight cannot be removed while it holds focus, because it never holds focus. When the collection loses the highlighted option the highlight falls back to the selected option, then to the first, then to nothing."
   },
   "typeahead": {
@@ -190,7 +268,21 @@
     "timeout": 500,
     "label": "the item's textValue, or its label part's text",
     "locale": "Intl.Collator at base sensitivity, so Ä matches a",
-    "reason": "The listbox pattern recommends it for every listbox and especially above seven options, and the select-only example ships it. menu recorded listbox as the module's next consumer; this family is the one that arrived first."
+    "reason": "The listbox pattern recommends it for every listbox and especially above seven options, and the select-only example ships it. menu recorded listbox as the module's next consumer; this family is the one that arrived first.",
+    "disabledBy": "search, because a reader typing into a field cannot also be driving a typeahead on the same keys"
+  },
+  "search": {
+    "axis": "search",
+    "default": false,
+    "field": "search",
+    "input": "search-input",
+    "list": "list",
+    "filter": "createFilter from @slotted/core/collection, replaced by the filter prop and turned off by filter={null}",
+    "highlight": "splitByMatch, drawn as the match part, which is the mark element combobox already uses",
+    "focus": "moves to the search input as the popup opens and returns to the trigger as it closes, because the combobox pattern says a dialog popup does not support aria-activedescendant and DOM focus moves into it",
+    "tabOrder": "tabbables() from @slotted/core/focus, read over the document with the layer's own subtree excluded, so Tab leaves the control for the element beside it rather than for the end of the document",
+    "query": "transient. It is emptied when an option is committed and when the popup closes, it never becomes a value, and no request carries both it and the selection.",
+    "reason": "Seven of the twelve implementations surveyed on 2026-09-08 ship a search on the select itself, and the five that decline each publish a combobox and route the reader there. This library publishes that combobox too, and it is the family whose typed text is a contract: inputValue, allowsCustomValue and aria-autocomplete. A reader choosing one of two hundred known offices is not authoring a value. Putting the field inside the popup is what keeps docs/component-features.md §6's promise that the control takes no typed text, and what keeps the two families distinguishable at a glance."
   },
   "overflow": {
     "part": "content",
@@ -285,6 +377,8 @@
     "multiple": [true, false],
     "clearable": [true, false],
     "loop": [true, false],
+    "search": [true, false],
+    "highlightMatch": [true, false],
     "typeahead": [true, false],
     "closeOnSelect": [true, false],
     "closeOnEscape": [true, false],
@@ -311,6 +405,8 @@
     "multiple": ["prop", "defaults", false],
     "clearable": ["prop", "defaults", false],
     "loop": ["prop", "defaults", false],
+    "search": ["prop", "defaults", false],
+    "highlightMatch": ["prop", "defaults", true],
     "typeahead": ["prop", "defaults", true],
     "closeOnSelect": ["prop", "defaults", true],
     "closeOnEscape": ["prop", "defaults", true],
@@ -338,6 +434,8 @@
       "multiple",
       "clearable",
       "loop",
+      "search",
+      "highlightMatch",
       "typeahead",
       "closeOnSelect",
       "closeOnEscape",
@@ -357,7 +455,10 @@
       "collisionPadding",
       "typeaheadTimeout",
       "clearLabel",
+      "countLabel",
       "emptyLabel",
+      "searchLabel",
+      "searchPlaceholder",
       "loadingLabel",
       "removeLabel",
       "summaryLabel"
@@ -374,6 +475,12 @@
     "current": "data-current"
   },
   "stateModel": {
+    "value": {
+      "controlled": "searchValue",
+      "uncontrolled": "defaultSearchValue",
+      "request": "onSearchValueChange",
+      "reasons": ["keyboard", "select", "clear", "programmatic"]
+    },
     "selection": {
       "controlled": "value",
       "uncontrolled": "defaultValue",
@@ -416,6 +523,8 @@
         "multiple": false,
         "clearable": false,
         "loop": false,
+        "search": false,
+        "highlightMatch": true,
         "typeahead": true,
         "closeOnSelect": true,
         "closeOnEscape": true,
@@ -435,13 +544,17 @@
         "collisionPadding": 8,
         "typeaheadTimeout": 500,
         "clearLabel": "Clear selection",
+        "countLabel": "{count} results",
         "emptyLabel": "No options",
+        "searchLabel": "Search options",
+        "searchPlaceholder": "Search\u2026",
         "loadingLabel": "Loading…",
         "removeLabel": "Remove {label}",
         "summaryLabel": "{count} selected"
       },
       "capabilities": [
         "selection",
+        "value",
         "open",
         "current",
         "size",
@@ -481,6 +594,10 @@
         "clear",
         "positioner",
         "content",
+        "search",
+        "search-icon",
+        "search-input",
+        "list",
         "chosen",
         "group",
         "group-label",
@@ -488,6 +605,7 @@
         "indicator",
         "icon",
         "label",
+        "match",
         "description",
         "separator",
         "empty",
@@ -509,6 +627,7 @@
       "states",
       "loading-and-empty",
       "long-content",
+      "search",
       "placement",
       "keyboard",
       "form",

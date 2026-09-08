@@ -21,6 +21,7 @@
   "--slotted-icon-circle-x": { "icon": "circle-x" },
   "--slotted-icon-circle-question": { "icon": "circle-question-mark" },
   "--slotted-icon-inbox": { "icon": "inbox" },
+  "--slotted-icon-search": { "icon": "search" },
   "--slotted-icon-search-x": { "icon": "search-x" },
   "--slotted-icon-lock": { "icon": "lock" },
   "--slotted-icon-cloud-off": { "icon": "cloud-off" },

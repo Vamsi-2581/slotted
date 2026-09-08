@@ -549,6 +549,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-search",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-search-x",
       "layer": "primitive",
       "axis": "base",

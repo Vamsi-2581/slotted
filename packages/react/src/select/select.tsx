@@ -1,6 +1,7 @@
 import '@slotted/styles/select/select.css';
 import '@slotted/styles/highlight/highlight.css';
 
+import { createFilter } from '@slotted/core/collection';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -26,6 +27,7 @@ import type {
   SelectOptionGroup,
   SelectOptionValue,
   SelectProps,
+  SelectSearchReason,
   SelectSelection,
   SelectSide,
   SelectSize,
@@ -52,6 +54,7 @@ export interface SelectContextValue {
   collisionPadding: number;
   contentId: string;
   contentNode: HTMLElement | null;
+  countLabel: string;
   disabled: boolean;
   emptyLabel: string;
   entry: MutableRefObject<SelectEntry>;
@@ -60,20 +63,32 @@ export interface SelectContextValue {
   fullWidth: boolean;
   hideWhenDetached: boolean;
   highlighted: SelectOptionValue | null;
+  highlightMatch: boolean;
   invalid: boolean;
   labelFor: (value: SelectOptionValue) => string | undefined;
+  listId: string;
   loading: boolean;
   loadingLabel: string;
+  locale: string | undefined;
   loop: boolean;
+  /** Whether an option's label answers the query. Always true while it is empty. */
+  matches: (label: string) => boolean;
   mount: SelectMount;
   multiple: boolean;
   name: string | undefined;
   open: boolean;
   optionId: (value: SelectOptionValue) => string;
   portal: boolean;
+  /** What the reader has typed into the search field. Empty when there is none. */
+  query: string;
   readOnly: boolean;
   registerLabel: (value: SelectOptionValue, label: string) => void;
   required: boolean;
+  search: boolean;
+  searchId: string;
+  searchLabel: string;
+  searchNode: HTMLInputElement | null;
+  searchPlaceholder: string;
   seen: boolean;
   selection: readonly SelectOptionValue[];
   setContentNode: (node: HTMLElement | null) => void;
@@ -83,6 +98,8 @@ export interface SelectContextValue {
     source?: unknown,
   ) => void;
   setOpen: (next: boolean, reason: SelectOpenReason, source?: unknown) => void;
+  setQuery: (next: string, reason: SelectSearchReason, source?: unknown) => void;
+  setSearchNode: (node: HTMLInputElement | null) => void;
   setTriggerNode: (node: HTMLElement | null) => void;
   shift: boolean;
   side: SelectSide;
@@ -165,32 +182,42 @@ export function Select({
   closeOnOutsidePress,
   closeOnSelect,
   collisionPadding,
+  countLabel,
   defaultHighlightedValue = null,
   defaultOpen = false,
+  defaultSearchValue = '',
   defaultValue,
   disabled,
   emptyLabel,
+  filter,
   flip,
   form,
   fullWidth,
   hideWhenDetached,
   highlightedValue,
+  highlightMatch,
   invalid,
   items,
   loading,
   loadingLabel,
+  locale,
   loop,
   mount,
   multiple,
   name,
   onHighlightedValueChange,
   onOpenChange,
+  onSearchValueChange,
   onValueChange,
   open,
   portal,
   readOnly,
   ref,
   required,
+  search,
+  searchLabel,
+  searchPlaceholder,
+  searchValue,
   shift,
   side,
   sideOffset,
@@ -208,6 +235,14 @@ export function Select({
 
   const generated = useId();
   const contentId = `${generated}listbox`;
+  /**
+   * The listbox's own identifier, which is the content's while there is no
+   * search field and the inner list's while there is: `aria-controls` on the
+   * trigger names the popup, and with a search field the popup is a dialog and
+   * the listbox is one element in.
+   */
+  const listId = `${generated}list`;
+  const searchId = `${generated}search`;
   const triggerId = `${generated}trigger`;
 
   const [ownOpen, setOwnOpen] = useState(defaultOpen);
@@ -217,8 +252,10 @@ export function Select({
   const [ownHighlighted, setOwnHighlighted] = useState<SelectOptionValue | null>(
     defaultHighlightedValue,
   );
+  const [ownQuery, setOwnQuery] = useState(defaultSearchValue);
   const [triggerNode, setTriggerNode] = useState<HTMLElement | null>(null);
   const [contentNode, setContentNode] = useState<HTMLElement | null>(null);
+  const [searchNode, setSearchNode] = useState<HTMLInputElement | null>(null);
 
   const resolvedMultiple = multiple ?? defaults.multiple;
   const resolvedDisabled = disabled ?? field?.disabled ?? defaults.disabled;
@@ -227,6 +264,10 @@ export function Select({
   const currentOpen = (open ?? ownOpen) && !resolvedDisabled;
   const currentSelection = value === undefined ? ownSelection : normalize(value);
   const currentHighlighted = highlightedValue === undefined ? ownHighlighted : highlightedValue;
+  const resolvedSearch = search ?? defaults.search;
+  /* A query only exists while there is a field holding it, so a select whose
+     consumer turned `search` off never filters, whatever `searchValue` says. */
+  const currentQuery = resolvedSearch ? (searchValue === undefined ? ownQuery : searchValue) : '';
 
   const seen = useRef(currentOpen);
   if (currentOpen) seen.current = true;
@@ -277,63 +318,103 @@ export function Select({
     [declared, registered],
   );
 
+  const fallbackFilter = useMemo(() => createFilter({ locale }), [locale]);
+
+  /**
+   * Three answers, and `undefined` is not one of them. Not giving `filter` asks
+   * for the library's own locale-sensitive `contains`; giving `null` turns
+   * filtering off, which is what a list a server has already filtered needs;
+   * giving a function replaces the comparison. `combobox` draws the same three
+   * lines, and reading an absent prop as "off" is the mistake that made its
+   * first version show every option however much was typed.
+   */
+  const matches = useCallback(
+    (label: string) => {
+      if (currentQuery === '' || filter === null) return true;
+      if (filter !== undefined) return filter(label, currentQuery);
+      return fallbackFilter.contains(label, currentQuery);
+    },
+    [currentQuery, fallbackFilter, filter],
+  );
+
   const optionId = useCallback(
     (optionValue: SelectOptionValue) => `${generated}option-${encodeURIComponent(optionValue)}`,
     [generated],
   );
 
-  const latest = useRef({
+  const state = {
     currentHighlighted,
     currentOpen,
+    currentQuery,
     currentSelection,
     highlightedValue,
     onHighlightedValueChange,
     onOpenChange,
+    onSearchValueChange,
     onValueChange,
     open,
     resolvedMultiple,
-    triggerNode,
-    value,
-  });
-  latest.current = {
-    currentHighlighted,
-    currentOpen,
-    currentSelection,
-    highlightedValue,
-    onHighlightedValueChange,
-    onOpenChange,
-    onValueChange,
-    open,
-    resolvedMultiple,
+    resolvedSearch,
+    searchNode,
+    searchValue,
     triggerNode,
     value,
   };
+  const latest = useRef(state);
+  latest.current = state;
+
+  /**
+   * What the reader has typed into the search field.
+   *
+   * It is a value the consumer can own and it is **not** the selection: no
+   * request ever carries both, and committing an option emits one of each. The
+   * reset the popup performs as it opens and as it closes carries `clear`,
+   * which is what happened to the field.
+   */
+  const setQuery = useCallback((next: string, reason: SelectSearchReason, source?: unknown) => {
+    const current = latest.current;
+    if (next === current.currentQuery) return;
+
+    const controllable = createControllable<string>({
+      controlled: current.searchValue,
+      initial: current.currentQuery,
+      onRequest: (request) => current.onSearchValueChange?.(request.value, request),
+    });
+    if (controllable.request(next, reason, source)) setOwnQuery(next);
+  }, []);
 
   /**
    * `createControllable` returns `false` in controlled mode and after a
    * cancellation, so one call answers both questions: whether the component may
    * move its own copy, and whether anything moved at all.
    */
-  const setOpen = useCallback((next: boolean, reason: SelectOpenReason, source?: unknown) => {
-    const state = latest.current;
-    if (next === state.currentOpen) return;
+  const setOpen = useCallback(
+    (next: boolean, reason: SelectOpenReason, source?: unknown) => {
+      const state = latest.current;
+      if (next === state.currentOpen) return;
 
-    const controllable = createControllable<boolean>({
-      controlled: state.open,
-      initial: state.currentOpen,
-      onRequest: (request) => state.onOpenChange?.(request.value, request),
-    });
-    if (!controllable.request(next, reason, source)) return;
-    setOwnOpen(next);
-    /* A popup that closes takes its highlight with it, and gives the next open
+      const controllable = createControllable<boolean>({
+        controlled: state.open,
+        initial: state.currentOpen,
+        onRequest: (request) => state.onOpenChange?.(request.value, request),
+      });
+      if (!controllable.request(next, reason, source)) return;
+      setOwnOpen(next);
+      /* A popup that closes takes its highlight with it, and gives the next open
        back its default entry. Both are put back here rather than when the popup
        opens, because a layout effect runs twice per mount under StrictMode and
        anything consumed there is consumed once too often. */
-    if (!next) {
-      setOwnHighlighted(null);
-      entry.current = 'selected';
-    }
-  }, []);
+      if (!next) {
+        setOwnHighlighted(null);
+        entry.current = 'selected';
+        /* A popup that closes takes the query with it as well: the field is built
+         with the popup, and a select that reopened onto four characters nobody
+         had typed this time would filter a list the reader thought was whole. */
+        setQuery('', 'clear', source);
+      }
+    },
+    [setQuery],
+  );
 
   const setHighlighted = useCallback(
     (next: SelectOptionValue | null, reason: SelectHighlightReason, source?: unknown) => {
@@ -410,6 +491,14 @@ export function Select({
     () => ({
       close: () => setOpen(false, 'programmatic'),
       focus: () => latest.current.triggerNode?.focus({ preventScroll: true }),
+      /* The field when there is one and the popup is open, and the control
+         otherwise: a handle that focused nothing would be a handle a consumer
+         has to guard before calling. */
+      focusSearch: () => {
+        const current = latest.current;
+        const target = current.searchNode ?? current.triggerNode;
+        target?.focus({ preventScroll: true });
+      },
       open: () => setOpen(true, 'programmatic'),
       scrollToKey: (optionValue) => {
         const option = contentNode?.querySelector<HTMLElement>(
@@ -435,6 +524,7 @@ export function Select({
     collisionPadding: collisionPadding ?? defaults.collisionPadding,
     contentId,
     contentNode,
+    countLabel: countLabel ?? defaults.countLabel,
     disabled: resolvedDisabled,
     emptyLabel: emptyLabel ?? defaults.emptyLabel,
     entry,
@@ -443,25 +533,37 @@ export function Select({
     fullWidth: fullWidth ?? defaults.fullWidth,
     hideWhenDetached: hideWhenDetached ?? defaults.hideWhenDetached,
     highlighted: currentHighlighted,
+    highlightMatch: highlightMatch ?? defaults.highlightMatch,
     invalid: invalid ?? field?.invalid ?? defaults.invalid,
     labelFor,
+    listId,
     loading: loading ?? defaults.loading,
     loadingLabel: loadingLabel ?? defaults.loadingLabel,
+    locale,
     loop: loop ?? defaults.loop,
+    matches,
     mount: mount ?? defaults.mount,
     multiple: resolvedMultiple,
     name,
     open: currentOpen,
     optionId,
     portal: portal ?? defaults.portal,
+    query: currentQuery,
     readOnly: resolvedReadOnly,
     registerLabel,
     required: required ?? field?.required ?? defaults.required,
+    search: resolvedSearch,
+    searchId,
+    searchLabel: searchLabel ?? defaults.searchLabel,
+    searchNode,
+    searchPlaceholder: searchPlaceholder ?? defaults.searchPlaceholder,
     seen: seen.current,
     selection: currentSelection,
     setContentNode,
     setHighlighted,
     setOpen,
+    setQuery,
+    setSearchNode,
     setTriggerNode,
     shift: shift ?? defaults.shift,
     side: side ?? defaults.side,
@@ -472,7 +574,9 @@ export function Select({
     total,
     triggerId,
     triggerNode,
-    typeahead: typeahead ?? defaults.typeahead,
+    /* A reader typing into a field cannot also be driving a typeahead on the
+       same keys: two searches on one keystroke move the highlight twice. */
+    typeahead: resolvedSearch ? false : (typeahead ?? defaults.typeahead),
     typeaheadTimeout: typeaheadTimeout ?? defaults.typeaheadTimeout,
     variant: variant ?? defaults.variant,
     width: width ?? defaults.width,

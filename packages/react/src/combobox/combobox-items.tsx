@@ -142,13 +142,26 @@ export function ComboboxItem({
  */
 export function ComboboxGroup({ children, label, ...nativeProps }: ComboboxGroupProps) {
   const labelId = `${useId()}group`;
+  /**
+   * The query, read only so that a moving query re-renders this group.
+   * Nothing here uses it otherwise: the options decide for themselves whether
+   * they match, and the group only counts what survived.
+   *
+   * Without the read, React bails out of re-rendering a group whose props are
+   * identical between renders — which is every group, because the consumer's
+   * JSX is the same element on both sides of a keystroke — and the effect below
+   * never runs again. The measurement then stands from the moment the popup
+   * opened: a group emptied by a query typed *after* the popup was already open
+   * stayed on the surface with nothing under it.
+   */
+  const { query } = useCombobox();
   const [node, setNode] = useState<HTMLDivElement | null>(null);
   const [empty, setEmpty] = useState(false);
 
   useEffect(() => {
     if (node === null) return;
     setEmpty(node.querySelector("[data-part='item']") === null);
-  });
+  }, [node, query]);
 
   return (
     <div

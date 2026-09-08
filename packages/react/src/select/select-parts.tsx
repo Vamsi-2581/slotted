@@ -1,4 +1,5 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
+import { tabbables } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
@@ -24,6 +25,8 @@ import type {
   SelectContentProps,
   SelectOptionValue,
   SelectPositionerProps,
+  SelectSearchProps,
+  SelectSearchRootProps,
   SelectTriggerProps,
   SelectTriggerRootProps,
   SelectValueProps,
@@ -42,6 +45,25 @@ function compose<E extends { defaultPrevented: boolean }>(
     theirs?.(event);
     if (!event.defaultPrevented) ours(event);
   };
+}
+
+/**
+ * Where `Tab` goes from inside the popup.
+ *
+ * The layer is portalled to the end of the document, so the browser's own next
+ * element is the end of the page rather than the element after the control.
+ * The document's tab order is read with the layer's own subtree taken out of
+ * it, the trigger is found in what remains, and focus goes to the entry beside
+ * it — before it under `Shift`. Returning focus to the trigger and stopping
+ * there was the first answer, and it cost a second `Tab` to leave a control the
+ * reader had finished with.
+ */
+function moveTabFrom(trigger: HTMLElement | null, layer: HTMLElement | null, backwards: boolean) {
+  if (trigger === null) return;
+  const order = tabbables(document.body).filter((node) => layer === null || !layer.contains(node));
+  const index = order.indexOf(trigger);
+  const next = index === -1 ? undefined : order[index + (backwards ? -1 : 1)];
+  (next ?? trigger).focus({ preventScroll: true });
 }
 
 function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
@@ -165,10 +187,23 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
         default:
           break;
       }
-      if (select.typeahead && !event.ctrlKey && !event.metaKey && !alt && isPrintable(event.key)) {
-        event.preventDefault();
-        pending.current = event.key;
-        openWith('none', event.nativeEvent);
+      if (!event.ctrlKey && !event.metaKey && !alt && isPrintable(event.key)) {
+        /* With a search field the character opens the popup and becomes the
+           first character of the query; without one it opens the popup and
+           seeds the typeahead. The pattern asks the same thing of both — a
+           printable key opens and moves the highlight — and only the search
+           the key feeds differs. */
+        if (select.search) {
+          event.preventDefault();
+          select.setQuery(event.key, 'keyboard', event.nativeEvent);
+          openWith('first', event.nativeEvent);
+          return;
+        }
+        if (select.typeahead) {
+          event.preventDefault();
+          pending.current = event.key;
+          openWith('none', event.nativeEvent);
+        }
       }
       return;
     }
@@ -306,18 +341,26 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
     <>
       <button
         {...nativeProps}
+        /* The search field holds focus while the popup is open, so it is the
+           field that names the highlighted option. Two elements naming one
+           option would put the same announcement on the element nobody is
+           operating. */
         aria-activedescendant={
-          select.open && select.highlighted !== null
+          select.open && !select.search && select.highlighted !== null
             ? select.optionId(select.highlighted)
             : undefined
         }
         aria-controls={select.open ? select.contentId : undefined}
         aria-describedby={describedBy === '' ? undefined : describedBy}
         aria-expanded={select.open}
-        /* Redundant for role="combobox", whose implicit value is listbox, and
-           written anyway because the element is a button and the role replaces
-           `button` on it. */
-        aria-haspopup="listbox"
+        /*
+         * `listbox` is redundant for role="combobox", whose implicit value is
+         * listbox, and written anyway because the element is a button and the
+         * role replaces `button` on it. `dialog` is not redundant: the pattern
+         * requires it of a popup that is not a listbox, and a popup holding a
+         * text field and a list is a dialog.
+         */
+        aria-haspopup={select.search ? 'dialog' : 'listbox'}
         aria-invalid={select.invalid ? true : undefined}
         aria-labelledby={
           nativeProps['aria-label'] === undefined && nativeProps['aria-labelledby'] === undefined
@@ -461,6 +504,133 @@ export function SelectValue({ children, placeholder, ...nativeProps }: SelectVal
 }
 
 /**
+ * The field the reader filters the options with, at the top of the popup.
+ *
+ * It is `role="combobox"` over the `list` below it, and it holds DOM focus for
+ * the whole time the popup is open — which is what the combobox pattern
+ * requires of a dialog popup: "dialogs do not support `aria-activedescendant`
+ * so DOM focus moves into the dialog from the combobox". The trigger becomes
+ * the outer combobox, over the dialog; this is the inner one, over the listbox.
+ *
+ * It is rendered by `SelectContent` rather than placed by the consumer, because
+ * the two elements it sits between — the dialog and the listbox — are wiring
+ * the family owns. `searchProps` on `SelectContent` reaches every native
+ * attribute of it, its glyph and its `render`.
+ */
+export function SelectSearch({ icon, ref, render, ...nativeProps }: SelectSearchProps) {
+  const select = useSelect();
+
+  const move = (intent: Parameters<typeof moveHighlight>[2], source: unknown) => {
+    const next = moveHighlight(select.contentNode, select.highlighted, intent, select.loop);
+    if (next !== null) select.setHighlighted(next, 'keyboard', source);
+  };
+
+  /** Takes the highlighted option, and says what happens to the popup after. */
+  const commit = (source: unknown, close: boolean) => {
+    if (select.highlighted !== null) select.toggle(select.highlighted, 'keyboard', source);
+    if (close) {
+      select.setOpen(false, 'select', source);
+      select.triggerNode?.focus({ preventScroll: true });
+      return;
+    }
+    /* The popup stayed open, so the query is emptied here rather than by the
+       close, for the reason an option's own press empties it. */
+    if (select.highlighted !== null) select.setQuery('', 'select', source);
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    const alt = event.altKey;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        move('next', event.nativeEvent);
+        return;
+      case 'ArrowUp':
+        event.preventDefault();
+        if (alt) commit(event.nativeEvent, true);
+        else move('previous', event.nativeEvent);
+        return;
+      case 'PageDown':
+        event.preventDefault();
+        move('pageDown', event.nativeEvent);
+        return;
+      case 'PageUp':
+        event.preventDefault();
+        move('pageUp', event.nativeEvent);
+        return;
+      case 'Enter':
+        event.preventDefault();
+        commit(event.nativeEvent, select.closeOnSelect && !select.multiple);
+        return;
+      case 'Escape':
+        event.preventDefault();
+        /* The layer saw this key first, in the capture phase, and its dismiss
+           handler holds the two steps. This branch is what answers when the
+           layer was told to ignore Escape entirely: the query still empties,
+           and the popup a consumer said to keep open stays open. */
+        if (select.query !== '') select.setQuery('', 'clear', event.nativeEvent);
+        return;
+      case 'Tab':
+        event.preventDefault();
+        commit(event.nativeEvent, true);
+        moveTabFrom(
+          select.triggerNode,
+          event.currentTarget.closest("[data-part='positioner']"),
+          event.shiftKey,
+        );
+        return;
+      default:
+        /*
+         * Everything else is the browser's: the caret, the selection, the text
+         * editing, and `Home`, `End` and the space bar with them. The closed
+         * control spends all three on the list; a field the reader is typing
+         * into cannot spend any of them, and the pattern's editable branch
+         * returns `Home` and `End` to the caret for the same reason.
+         */
+        break;
+    }
+  };
+
+  const rootProps: SelectSearchRootProps = { 'data-part': 'search' };
+
+  const field = (
+    <>
+      {icon === null ? null : (icon ?? <span aria-hidden="true" data-part="search-icon" />)}
+      <input
+        {...nativeProps}
+        aria-activedescendant={
+          select.highlighted === null ? undefined : select.optionId(select.highlighted)
+        }
+        aria-autocomplete="list"
+        aria-controls={select.listId}
+        aria-expanded={true}
+        aria-label={nativeProps['aria-label'] ?? select.searchLabel}
+        autoComplete="off"
+        data-part="search-input"
+        id={nativeProps.id ?? select.searchId}
+        onChange={compose(nativeProps.onChange, (event) =>
+          select.setQuery(event.target.value, 'keyboard', event.nativeEvent),
+        )}
+        onKeyDown={compose(nativeProps.onKeyDown, onKeyDown)}
+        placeholder={nativeProps.placeholder ?? select.searchPlaceholder}
+        ref={(element: HTMLInputElement | null) => {
+          select.setSearchNode(element);
+          attach(element, ref);
+        }}
+        role="combobox"
+        spellCheck={false}
+        type="text"
+        value={select.query}
+      />
+    </>
+  );
+
+  if (render !== undefined) return render({ ...rootProps, children: field });
+  return <div {...rootProps}>{field}</div>;
+}
+
+/**
  * The layer and the surface it paints.
  *
  * The layer is what the positioner writes `left` and `top` onto and what scales
@@ -473,6 +643,7 @@ export function SelectContent({
   empty,
   ref,
   render,
+  searchProps,
   status: statusMessage,
   ...nativeProps
 }: SelectContentProps) {
@@ -602,11 +773,28 @@ export function SelectContent({
       outsidePress: select.closeOnOutsidePress,
       scrollLock: false,
       onDismiss: (request) => {
-        latest.current.setOpen(
+        const select = latest.current;
+        /**
+         * The query first, the popup second — and the decision lives here
+         * rather than in the field's own handler because the layer listens in
+         * the **capture** phase: it sees Escape before anything inside it does,
+         * so a field that tried to spend the key first would already have lost
+         * the surface. A reader four characters into a search wants the whole
+         * list back more often than they want the popup gone, and the pattern
+         * names this branch and makes it optional.
+         */
+        if (request.reason === 'escape' && select.search && select.query !== '') {
+          select.setQuery('', 'clear', request.source);
+          return;
+        }
+        select.setOpen(
           false,
           request.reason === 'escape' ? 'escape' : 'outsidePress',
           request.source,
         );
+        /* Focus goes back to the control on a key and stays where the reader
+           put it on a press outside. */
+        if (request.reason === 'escape') select.triggerNode?.focus({ preventScroll: true });
       },
     });
     return () => layer.destroy();
@@ -653,6 +841,39 @@ export function SelectContent({
     revealOption(surfaceNode, select.highlighted);
   }, [select.highlighted, surfaceNode]);
 
+  /**
+   * The field takes focus as the popup opens, however it was opened — a press
+   * on the trigger included. The combobox pattern's note is the reason: a
+   * dialog popup does not support `aria-activedescendant`, so DOM focus moves
+   * into the dialog. A select with a search field exists to be typed into, and
+   * a reader who had to press `Tab` first would be one key from the capability
+   * they asked for.
+   *
+   * The trigger takes focus back where the popup is closed — by `Escape`, by a
+   * commit, by `Tab` — and each of those does it where the close happens. It is
+   * deliberately not done here, on the popup unmounting: an outside press has
+   * already put focus where the reader wanted it, and taking it back would undo
+   * the gesture that closed the popup.
+   */
+  const searchNode = select.searchNode;
+  useEffect(() => {
+    if (!select.open || !select.search || searchNode === null) return;
+    searchNode.focus({ preventScroll: true });
+  }, [searchNode, select.open, select.search]);
+
+  /**
+   * The highlight follows the query. A reader who types four characters and
+   * presses `Enter` means the first row they can see, and a highlight left on
+   * a row the filter has just removed answers with nothing at all.
+   */
+  const lastQuery = useRef(select.query);
+  useEffect(() => {
+    if (!select.open || !select.search || surfaceNode === null) return;
+    if (lastQuery.current === select.query) return;
+    lastQuery.current = select.query;
+    latest.current.setHighlighted(moveHighlight(surfaceNode, null, 'first', false), 'keyboard');
+  }, [count, select.open, select.query, select.search, surfaceNode]);
+
   if (!mounted) return null;
 
   const rootProps: SelectPositionerProps = {
@@ -665,6 +886,108 @@ export function SelectContent({
     'data-width': select.width,
   };
 
+  /**
+   * The sentence the live region carries. While an answer is travelling it is
+   * the loading message; while the reader is searching it is how many options
+   * survived the query, which is what `docs/component-features.md` §6 asks of
+   * a filtered collection — "leitores de tela recebem contagem e item ativo".
+   * `combobox` announces the same count, in the same place, in the same words.
+   */
+  const message = (() => {
+    if (statusMessage !== undefined) return statusMessage;
+    if (select.loading) return select.loadingLabel;
+    if (!select.search || count === 0) return null;
+    return select.countLabel.replace('{count}', String(count));
+  })();
+
+  /*
+   * Everything that is chosen, at the top of the popup (SL10). The control
+   * holds one line, so twelve values are three chips and a count; here they are
+   * all of them, and the band scrolls at about two rows of its own rather than
+   * growing the surface.
+   *
+   * It is `aria-hidden`, and carries no remove control. The reason is keyboard
+   * reach: without `search` focus never enters this layer at all, and with it
+   * the layer's one `Tab` is spent commiting and leaving the control — so a
+   * widget in the band would be reachable by pointer and by nothing else.
+   * Taking a value back is the option's own row, which the list has open
+   * beside it, and the chips in the control, which are focusable.
+   */
+  const chosen =
+    select.multiple && select.selection.length > 0 ? (
+      <div aria-hidden="true" data-part="chosen">
+        {select.selection.map((value) => (
+          <span
+            data-part="root"
+            data-size="sm"
+            data-ui="tag"
+            data-variant="soft"
+            key={String(value)}
+          >
+            <span data-part="body">
+              <span data-part="label">{select.labelFor(value) ?? String(value)}</span>
+            </span>
+          </span>
+        ))}
+      </div>
+    ) : null;
+
+  /*
+   * The two rows a consumer configures rather than places. A popup that opens
+   * onto nothing is what React Aria refuses to open at all and what Radix
+   * paints as an empty box; here it opens onto a sentence, and the sentence has
+   * a default so a family that says nothing still says something. The status
+   * row keeps the popup's measure while an answer is travelling, so nothing
+   * jumps when the options land.
+   */
+  const rows = (
+    <>
+      {chosen}
+      {children}
+      {select.loading ? (
+        /*
+          The wait, as the shape of the list that is coming: three rows the
+          height of an option, drawn by `skeleton` (SL6). Hidden from assistive
+          technology — the status row below is the live region and it already
+          says what is happening.
+        */
+        <div aria-hidden="true" data-part="placeholder">
+          {[0, 1, 2].map((row) => (
+            <div key={row}>
+              <span data-part="root" data-shape="text" data-ui="skeleton" data-loading="" />
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {!select.loading && count === 0 ? (
+        <div data-part="empty">{empty ?? select.emptyLabel}</div>
+      ) : null}
+      {select.search || select.loading ? (
+        <div
+          aria-live="polite"
+          data-part="status"
+          {...(select.loading ? { 'data-loading': '' } : {})}
+          role="status"
+        >
+          {message}
+        </div>
+      ) : null}
+    </>
+  );
+
+  /**
+   * One element or two, and the pattern decides which.
+   *
+   * Without a search field the surface *is* the listbox, as it has always been.
+   * With one the surface is a dialog — "the popup is an element that has role
+   * `listbox`, `tree`, `grid`, or `dialog`" — and the listbox moves one element
+   * in, because a listbox holds options and groups and a text field is neither.
+   */
+  const listWiring = {
+    'aria-busy': select.loading ? true : undefined,
+    'aria-multiselectable': select.multiple ? true : undefined,
+  } as const;
+
   const element = (
     <div
       {...rootProps}
@@ -675,75 +998,31 @@ export function SelectContent({
     >
       <div
         {...nativeProps}
-        aria-busy={select.loading ? true : undefined}
+        {...(select.search ? {} : listWiring)}
         aria-labelledby={nativeProps['aria-label'] === undefined ? select.triggerId : undefined}
-        aria-multiselectable={select.multiple ? true : undefined}
         data-loading={select.loading ? '' : undefined}
         data-part="content"
+        {...(select.search ? { 'data-search': '' } : {})}
         id={select.contentId}
         ref={setSurfaceNode}
-        role="listbox"
+        role={select.search ? 'dialog' : 'listbox'}
       >
-        {/*
-          Everything that is chosen, at the top of the popup (SL10). The control
-          holds one line, so twelve values are three chips and a count; here
-          they are all of them, and the band scrolls at about two rows of its
-          own rather than growing the surface.
-
-          It is `aria-hidden`, and carries no remove control: focus never enters
-          this layer, so a widget in it would be a tab stop the pattern excludes
-          and a control no keyboard could reach. What it says is already said —
-          by the trigger's own name and by each option's `aria-selected`.
-        */}
-        {select.multiple && select.selection.length > 0 ? (
-          <div aria-hidden="true" data-part="chosen">
-            {select.selection.map((value) => (
-              <span
-                data-part="root"
-                data-size="sm"
-                data-ui="tag"
-                data-variant="soft"
-                key={String(value)}
-              >
-                <span data-part="body">
-                  <span data-part="label">{select.labelFor(value) ?? String(value)}</span>
-                </span>
-              </span>
-            ))}
-          </div>
-        ) : null}
-        {children}
-        {/*
-          The two rows a consumer configures rather than places. A popup that
-          opens onto nothing is what React Aria refuses to open at all and what
-          Radix paints as an empty box; here it opens onto a sentence, and the
-          sentence has a default so a family that says nothing still says
-          something. The status row keeps the popup's measure while an answer is
-          travelling, so nothing jumps when the options land.
-        */}
-        {select.loading ? (
-          /*
-            The wait, as the shape of the list that is coming: three rows the
-            height of an option, drawn by `skeleton` (SL6). Hidden from
-            assistive technology — the status row below is the live region and
-            it already says what is happening.
-          */
-          <div aria-hidden="true" data-part="placeholder">
-            {[0, 1, 2].map((row) => (
-              <div key={row}>
-                <span data-part="root" data-shape="text" data-ui="skeleton" data-loading="" />
-              </div>
-            ))}
-          </div>
-        ) : null}
-        {select.loading ? (
-          <div data-loading="" data-part="status" role="status">
-            {statusMessage ?? select.loadingLabel}
-          </div>
-        ) : null}
-        {!select.loading && count === 0 ? (
-          <div data-part="empty">{empty ?? select.emptyLabel}</div>
-        ) : null}
+        {select.search ? (
+          <>
+            <SelectSearch {...searchProps} />
+            <div
+              {...listWiring}
+              aria-labelledby={select.triggerId}
+              data-part="list"
+              id={select.listId}
+              role="listbox"
+            >
+              {rows}
+            </div>
+          </>
+        ) : (
+          rows
+        )}
       </div>
     </div>
   );

@@ -1,13 +1,14 @@
 export { Select, useSelect } from './select';
 export type { SelectContextValue, SelectEntry } from './select';
 export { SELECT_FALLBACK, SelectDefaultsProvider, useSelectDefaults } from './select-defaults';
-export { SelectContent, SelectTrigger, SelectValue } from './select-parts';
+export { SelectContent, SelectSearch, SelectTrigger, SelectValue } from './select-parts';
 export { SelectGroup, SelectItem, SelectSeparator } from './select-items';
 export type {
   SelectAlign,
   SelectContentProps,
   SelectDefaults,
   SelectDefaultsProviderProps,
+  SelectFilter,
   SelectGroupProps,
   SelectHandle,
   SelectHighlightReason,
@@ -20,6 +21,9 @@ export type {
   SelectOptionValue,
   SelectPositionerProps,
   SelectProps,
+  SelectSearchProps,
+  SelectSearchReason,
+  SelectSearchRootProps,
   SelectSelection,
   SelectSide,
   SelectSize,

@@ -76,6 +76,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     keyboard: Keyboard,
     'loading-and-empty': LoadingAndEmpty,
     'long-content': LongContent,
+    search: Search,
     multiple: Multiple,
     placeholder: Placeholder,
     placement: Placement,
@@ -308,6 +309,119 @@ export const LoadingAndEmpty: Story = {
       </Scene>
     </div>
   ),
+};
+
+/**
+ * The countries are a plain list rather than a fixture module: the scene is
+ * about a list too long to scan, and twenty-eight labels is what makes the
+ * point that six would not.
+ */
+const COUNTRIES = [
+  'Argentina',
+  'Australia',
+  'Austria',
+  'Belgium',
+  'Brazil',
+  'Canada',
+  'Chile',
+  'Denmark',
+  'Estonia',
+  'Finland',
+  'France',
+  'Germany',
+  'Greece',
+  'Iceland',
+  'Ireland',
+  'Italy',
+  'Japan',
+  'Nepal',
+  'Netherlands',
+  'New Zealand',
+  'Norway',
+  'Poland',
+  'Portugal',
+  'Spain',
+  'Sweden',
+  'Switzerland',
+  'Uruguay',
+  'Vietnam',
+];
+
+const countryValue = (label: string) => label.toLowerCase().replaceAll(' ', '-');
+
+export const Search: Story = {
+  parameters: scenario('search'),
+  render: (_args, context) => {
+    const [query, setQuery] = useState('');
+
+    return (
+      <>
+        <Scene
+          label="A field above the options"
+          note="The query filters the list, the span it matched is marked, and the count is announced. Escape clears the query before it closes the popup; Tab commits and leaves the control."
+        >
+          <Viewport size="tall">
+            <Select defaultOpen={isolated(context)} portal={false} search>
+              <SelectTrigger aria-label="Country">
+                <SelectValue placeholder="Choose a country" />
+              </SelectTrigger>
+              <SelectContent searchProps={{ placeholder: 'Filter countries' }}>
+                {COUNTRIES.map((label) => (
+                  <SelectItem key={label} value={countryValue(label)}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Viewport>
+        </Scene>
+        <Scene
+          label="The query is a value the page can own"
+          note={`It is never the selection: no request carries both. Here the page holds it — currently ${query === '' ? 'empty' : `"${query}"`} — and the family goes on showing the chosen label in the control.`}
+        >
+          <Viewport size="tall">
+            <Select
+              defaultValue="japan"
+              onSearchValueChange={(next) => setQuery(next)}
+              portal={false}
+              search
+              searchValue={query}
+            >
+              <SelectTrigger aria-label="Owned query">
+                <SelectValue placeholder="Choose a country" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((label) => (
+                  <SelectItem key={label} value={countryValue(label)}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Viewport>
+        </Scene>
+        <Scene
+          label="A list the server already filtered"
+          note="filter={null} turns the family's own comparison off, so it renders exactly the window it was given and decides nothing. highlightMatch is off with it: nothing here claims to know what matched."
+        >
+          <Viewport size="tall">
+            <Select highlightMatch={false} filter={null} portal={false} search>
+              <SelectTrigger aria-label="Remote">
+                <SelectValue placeholder="Choose a country" />
+              </SelectTrigger>
+              <SelectContent searchProps={{ placeholder: 'Search the server' }}>
+                {COUNTRIES.slice(0, 4).map((label) => (
+                  <SelectItem key={label} value={countryValue(label)}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Viewport>
+        </Scene>
+      </>
+    );
+  },
 };
 
 export const LongContent: Story = {

@@ -516,4 +516,290 @@ describe('Select', () => {
     await open();
     expect(optionNamed('Apple')).toHaveAttribute('data-selected');
   });
+
+  describe('search', () => {
+    function Searchable({ children, ...props }: Partial<SelectProps>) {
+      return (
+        <Select search {...props}>
+          <SelectTrigger aria-label="Fruit">
+            <SelectValue placeholder="Choose a fruit" />
+          </SelectTrigger>
+          <SelectContent>
+            {children ?? (
+              <>
+                <SelectItem value="apple">Apple</SelectItem>
+                <SelectItem value="blueberry">Blueberry</SelectItem>
+                <SelectItem value="cherry">Cherry</SelectItem>
+                <SelectItem value="raspberry">Raspberry</SelectItem>
+              </>
+            )}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    const field = () => screen.getByRole('combobox', { name: 'Search options' });
+    const openSearch = async () => {
+      trigger().focus();
+      fireEvent.click(trigger());
+      const input = await screen.findByRole('combobox', { name: 'Search options' });
+      await waitFor(() => expect(input).toHaveFocus());
+      return input;
+    };
+    const type = (value: string) => fireEvent.change(field(), { target: { value } });
+    const labels = () => screen.getAllByRole('option').map((option) => option.textContent);
+
+    /**
+     * The popup stops being a listbox and becomes a dialog holding one, which
+     * is the composition the combobox pattern names: "the popup is an element
+     * that has role listbox, tree, grid, or dialog", and a popup that is not a
+     * listbox is named by `aria-haspopup` on the control.
+     */
+    it('opens a dialog holding a listbox, and says so on the trigger', async () => {
+      render(<Searchable />);
+      expect(trigger()).toHaveAttribute('aria-haspopup', 'dialog');
+
+      const input = await openSearch();
+      const dialog = screen.getByRole('dialog');
+      expect(trigger()).toHaveAttribute('aria-controls', dialog.id);
+      expect(input).toHaveAttribute('aria-controls', screen.getByRole('listbox').id);
+      expect(input).toHaveAttribute('aria-autocomplete', 'list');
+      expect(contract.searchRoles.content).toBe('dialog');
+    });
+
+    /** The pattern: a dialog popup does not support aria-activedescendant, so focus moves in. */
+    it('takes focus into the field however the popup was opened, and gives it back', async () => {
+      render(<Searchable />);
+      const input = await openSearch();
+      expect(trigger()).not.toHaveAttribute('aria-activedescendant');
+
+      press('ArrowDown');
+      expect(input).toHaveAttribute('aria-activedescendant');
+
+      press('Escape');
+      await waitFor(() => expect(trigger()).toHaveFocus());
+    });
+
+    it('filters the options and marks the span the query matched', async () => {
+      render(<Searchable />);
+      await openSearch();
+      type('berr');
+
+      await waitFor(() => expect(labels()).toEqual(['Blueberry', 'Raspberry']));
+      const marks = screen.getAllByText('berr');
+      expect(marks).toHaveLength(2);
+      for (const mark of marks) expect(mark).toHaveAttribute('data-ui', 'highlight');
+    });
+
+    /** The reader typed four characters and pressed Enter; they mean the first row they can see. */
+    it('moves the highlight onto the first surviving option as the query changes', async () => {
+      render(<Searchable />);
+      const input = await openSearch();
+      type('rasp');
+
+      await waitFor(() =>
+        expect(input.getAttribute('aria-activedescendant')).toBe(
+          screen.getByRole('option', { name: 'Raspberry' }).id,
+        ),
+      );
+
+      press('Enter');
+      await waitFor(() => expect(trigger()).toHaveTextContent('Raspberry'));
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      expect(trigger()).toHaveFocus();
+    });
+
+    /**
+     * The query first, the popup second. A reader four characters into a search
+     * wants the whole list back more often than they want the popup gone.
+     */
+    it('clears the query on the first Escape and closes on the second', async () => {
+      render(<Searchable />);
+      await openSearch();
+      type('berr');
+      await waitFor(() => expect(labels()).toHaveLength(2));
+
+      press('Escape');
+      await waitFor(() => expect(labels()).toHaveLength(4));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(field()).toHaveValue('');
+
+      press('Escape');
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    });
+
+    /**
+     * Tab keeps the effect the closed control's Tab has — commit, close, move
+     * on — and only the mechanism differs: focus is inside a portalled layer at
+     * the end of the document, so the browser's own next element is the end of
+     * the page rather than the element after the control.
+     */
+    it('commits on Tab and leaves the control for the element beside it', async () => {
+      render(
+        <>
+          <button type="button">before</button>
+          <Searchable />
+          <button type="button">after</button>
+        </>,
+      );
+
+      await openSearch();
+      press('ArrowDown');
+      press('Tab');
+
+      await waitFor(() => expect(screen.getByRole('button', { name: 'after' })).toHaveFocus());
+      /* ArrowDown moved the highlight off the entry option, and Tab took what
+         the highlight was on rather than what the popup opened onto. */
+      expect(trigger()).toHaveTextContent('Blueberry');
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    });
+
+    it('goes back the way it came under Shift', async () => {
+      render(
+        <>
+          <button type="button">before</button>
+          <Searchable />
+          <button type="button">after</button>
+        </>,
+      );
+
+      await openSearch();
+      press('Tab', { shiftKey: true });
+      await waitFor(() => expect(screen.getByRole('button', { name: 'before' })).toHaveFocus());
+    });
+
+    /** Space types a space; the closed control spends it on a commit and this one cannot. */
+    it('leaves the space bar, Home and End to the browser', async () => {
+      render(<Searchable />);
+      const input = await openSearch();
+      press('ArrowDown');
+      const held = input.getAttribute('aria-activedescendant');
+
+      for (const key of [' ', 'Home', 'End']) {
+        const event = fireEvent.keyDown(input, { key });
+        expect(event, `${key} was prevented`).toBe(true);
+      }
+      expect(input.getAttribute('aria-activedescendant')).toBe(held);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('announces how many options survived the query', async () => {
+      render(<Searchable />);
+      await openSearch();
+      expect(screen.getByRole('status')).toHaveTextContent('4 results');
+
+      type('berr');
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('2 results'));
+    });
+
+    /** A server-filtered list decides nothing here, and the family must not filter it twice. */
+    it('renders the window it was given when filter is null', async () => {
+      render(<Searchable filter={null} />);
+      await openSearch();
+      type('nothing matches this');
+      await waitFor(() => expect(labels()).toHaveLength(4));
+    });
+
+    it('replaces the comparison when a filter is given', async () => {
+      const filter = vi.fn((label: string, query: string) => label.startsWith(query));
+      render(<Searchable filter={filter} />);
+      await openSearch();
+      type('Ch');
+      await waitFor(() => expect(labels()).toEqual(['Cherry']));
+      expect(filter).toHaveBeenCalledWith('Apple', 'Ch');
+    });
+
+    /** Two searches on one keystroke would move the highlight twice per character. */
+    it('turns typeahead off, so a printable key only types', async () => {
+      render(<Searchable typeahead />);
+      trigger().focus();
+      fireEvent.keyDown(trigger(), { key: 'c' });
+
+      const input = await screen.findByRole('combobox', { name: 'Search options' });
+      await waitFor(() => expect(input).toHaveValue('c'));
+      await waitFor(() => expect(labels()).toEqual(['Cherry']));
+    });
+
+    /**
+     * The query is a value the consumer can own, and it is not the selection:
+     * one request each, and neither carries the other.
+     */
+    it('asks before the query moves, with a reason that is not the selection’s', async () => {
+      const onSearchValueChange = vi.fn();
+      const onValueChange = vi.fn();
+      render(
+        <Searchable onSearchValueChange={onSearchValueChange} onValueChange={onValueChange} />,
+      );
+
+      await openSearch();
+      type('ch');
+      expect(onSearchValueChange).toHaveBeenLastCalledWith(
+        'ch',
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+      expect(onValueChange).not.toHaveBeenCalled();
+      expect(contract.stateModel.value.request).toBe('onSearchValueChange');
+    });
+
+    /** A list still filtered to the row the reader has just taken looks broken. */
+    it('empties the query when an option is taken and the popup stays open', async () => {
+      const onSearchValueChange = vi.fn();
+      render(<Searchable multiple onSearchValueChange={onSearchValueChange} />);
+      await openSearch();
+      type('berr');
+      await waitFor(() => expect(labels()).toHaveLength(2));
+
+      pressOption(optionNamed('Blueberry'));
+      await waitFor(() => expect(labels()).toHaveLength(4));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(onSearchValueChange).toHaveBeenLastCalledWith(
+        '',
+        expect.objectContaining({ reason: 'select' }),
+      );
+    });
+
+    /** A heading with no options under it says a category matched when none did. */
+    it('hides a group whose every option was filtered away', async () => {
+      render(
+        <Searchable>
+          <SelectGroup label="Berries">
+            <SelectItem value="blueberry">Blueberry</SelectItem>
+          </SelectGroup>
+          <SelectGroup label="Citrus">
+            <SelectItem value="lime">Lime</SelectItem>
+          </SelectGroup>
+        </Searchable>,
+      );
+
+      await openSearch();
+      type('berr');
+      await waitFor(() => expect(screen.getAllByRole('group')).toHaveLength(1));
+      expect(screen.getAllByRole('group', { hidden: true })).toHaveLength(2);
+      expect(screen.getByRole('group')).toHaveAttribute('aria-labelledby');
+      expect(screen.getByText('Citrus').closest("[data-part='group']")).toHaveAttribute('hidden');
+    });
+
+    it('opens onto a sentence when the query matches nothing', async () => {
+      render(<Searchable />);
+      await openSearch();
+      type('zzz');
+      await waitFor(() => expect(screen.getByText('No options')).toBeInTheDocument());
+      expect(screen.queryAllByRole('option')).toHaveLength(0);
+    });
+
+    /* The field is built with the popup, so a reopened select never filters on
+       characters nobody typed this time. */
+    it('forgets the query when the popup closes', async () => {
+      render(<Searchable />);
+      await openSearch();
+      type('berr');
+      press('Escape');
+      press('Escape');
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+
+      await openSearch();
+      expect(field()).toHaveValue('');
+      expect(labels()).toHaveLength(4);
+    });
+  });
 });

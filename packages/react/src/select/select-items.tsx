@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import type { MouseEvent, PointerEvent, Ref } from 'react';
+import { splitByMatch } from '@slotted/core/collection';
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
+import type { MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 
 import { useSelect } from './select';
 import type { SelectGroupProps, SelectItemProps } from './select.types';
@@ -19,6 +20,14 @@ import type { SelectGroupProps, SelectItemProps } from './select.types';
  * reader announces is the state the eye sees. `data-highlighted` in Radix and
  * Ark exists to paper over the case where those two disagree; there is no such
  * case here.
+ *
+ * **Under `search`, each option decides whether it belongs in the results.**
+ * The family holds the query and the comparison; the option holds its own
+ * label, which is the only place the two meet without the consumer handing the
+ * whole collection over twice. An option that does not match renders nothing,
+ * so the popup's DOM *is* the result set — which is what makes the count, the
+ * keyboard and the empty row read one answer. `combobox` filters itself the
+ * same way, in the same place.
  */
 export function SelectItem({
   children,
@@ -49,6 +58,39 @@ export function SelectItem({
     select.registerLabel(value, label);
   }, [node, select, textValue, value]);
 
+  const text = textValue ?? (typeof children === 'string' ? children : undefined);
+
+  /**
+   * The label, split into the runs the query matched and the runs it did not,
+   * by the same collator the filter used. An `indexOf` beside a
+   * locale-sensitive filter marks nothing on the row it has just matched, and
+   * the reader is left asking why an option with no visible match is in the
+   * list. The mark itself is `highlight/highlight.css`'s, worn as `data-ui`
+   * beside this family's own part, so every list a reader types into says the
+   * same thing about the same span.
+   */
+  const marked = useMemo((): ReactNode => {
+    if (!select.search || !select.highlightMatch) return children;
+    if (select.query === '' || text === undefined) return children;
+    const runs = splitByMatch(text, select.query, { locale: select.locale });
+    /* `some(matched)` rather than a length check: a query matching the whole
+       label returns exactly one run, and reading "one run" as "no match" left
+       the option a reader had typed in full as the only one with no mark. */
+    if (!runs.some((run) => run.matched)) return children;
+    return runs.map((run, index) =>
+      run.matched ? (
+        <mark data-part="match" data-ui="highlight" key={index}>
+          {run.text}
+        </mark>
+      ) : (
+        <Fragment key={index}>{run.text}</Fragment>
+      ),
+    );
+  }, [children, select.highlightMatch, select.locale, select.query, select.search, text]);
+
+  /* The filter cannot judge an option whose label is not text, so it keeps it. */
+  if (text !== undefined && !select.matches(text)) return null;
+
   const selected = select.selection.includes(value);
   const current = select.highlighted === value;
 
@@ -77,7 +119,14 @@ export function SelectItem({
        model, and what `closeOnSelect` lets an application overrule. */
     if (select.closeOnSelect && !select.multiple) {
       select.setOpen(false, 'select', event.nativeEvent);
+      return;
     }
+    /* The popup stayed open, so the query is emptied here rather than by the
+       close: a list still filtered to the one row the reader has just taken is
+       a list that looks broken. Closing clears it too, under `clear`, and the
+       two paths never both run. */
+    select.setQuery('', 'select', event.nativeEvent);
+    select.searchNode?.focus({ preventScroll: true });
   };
 
   return (
@@ -94,7 +143,7 @@ export function SelectItem({
          it is not rendering — the trigger writes the attribute, and the option
          is in another subtree at the end of the document. */
       id={nativeProps.id ?? select.optionId(value)}
-      {...(textValue === undefined ? {} : { 'data-text-value': textValue })}
+      {...(text === undefined ? {} : { 'data-text-value': text })}
       {...(disabled ? { 'data-disabled': '' } : {})}
       {...(selected ? { 'data-selected': '' } : {})}
       {...(current ? { 'data-current': '' } : {})}
@@ -109,7 +158,7 @@ export function SelectItem({
       role="option"
     >
       {icon === undefined ? null : <span data-part="icon">{icon}</span>}
-      <span data-part="label">{children}</span>
+      <span data-part="label">{marked}</span>
       {description === undefined ? null : <span data-part="description">{description}</span>}
       <span data-part="indicator" />
     </div>
@@ -128,9 +177,39 @@ export function SelectGroup({ children, label, ...nativeProps }: SelectGroupProp
   /* `useId` rather than a counter: a counter increments differently on the
      server and on the client, and the two ids then disagree at hydration. */
   const labelId = `${useId()}group`;
+  /**
+   * The query, read only so that a moving query re-renders this group.
+   * Nothing here uses it otherwise: the options decide for themselves whether
+   * they match, and the group only counts what survived.
+   *
+   * Without the read, React bails out of re-rendering a group whose props are
+   * identical between renders — which is every group, because the consumer's
+   * JSX is the same element on both sides of a keystroke — and the effect below
+   * never runs again. The measurement then stands from the moment the popup
+   * opened: a group emptied by a query typed *after* the popup was already open
+   * stayed on the surface with nothing under it.
+   */
+  const { query } = useSelect();
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  const [empty, setEmpty] = useState(false);
+
+  /* A group whose every option was filtered away renders nothing at all: a
+     heading with no options under it says a category matched when none did.
+     `combobox` hides its groups the same way, from the same measurement. */
+  useEffect(() => {
+    if (node === null) return;
+    setEmpty(node.querySelector("[data-part='item']") === null);
+  }, [node, query]);
 
   return (
-    <div {...nativeProps} aria-labelledby={labelId} data-part="group" role="group">
+    <div
+      {...nativeProps}
+      aria-labelledby={labelId}
+      data-part="group"
+      hidden={empty}
+      ref={setNode}
+      role="group"
+    >
       <div data-part="group-label" id={labelId}>
         {label}
       </div>

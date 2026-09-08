@@ -39,6 +39,27 @@ export type SelectValueReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'p
 export type SelectHighlightReason = 'pointer' | 'keyboard' | 'programmatic';
 
 /**
+ * Why the query moved. `clear` covers both the reader emptying the field and
+ * the popup emptying it as it opens and closes — the field was emptied either
+ * way, and a fifth word only this family would emit is not what the shared
+ * vocabulary is for.
+ */
+export type SelectSearchReason = 'keyboard' | 'select' | 'clear' | 'programmatic';
+
+/**
+ * Whether an option answers a query.
+ *
+ * `null` turns filtering off entirely, which is what a list a consumer has
+ * already filtered on a server needs: the family renders exactly the window it
+ * was given and decides nothing. The default is `createFilter` from
+ * `@slotted/core/collection`, which is an adapter like any other —
+ * `docs/component-features.md` §6 refuses a family that assumes `contains` and
+ * English normalisation, and `combobox` takes the same prop with the same
+ * default for the same reason.
+ */
+export type SelectFilter = ((label: string, query: string) => boolean) | null;
+
+/**
  * What the family needs to know about an option before the popup has ever been
  * built: enough to draw the closed control. It is not how options are rendered
  * — that is `SelectItem` — and it never has to be given.
@@ -62,6 +83,16 @@ export interface SelectDefaults {
   alignOffset: number;
   clearable: boolean;
   clearLabel: string;
+  /** The sentence the live region announces while searching. `{count}` becomes the number. */
+  countLabel: string;
+  /** Whether the span a query matched is marked inside the option's label. */
+  highlightMatch: boolean;
+  /** Whether the popup opens onto a field the reader filters the options with. */
+  search: boolean;
+  /** The accessible name of the search field, which has no visible label. */
+  searchLabel: string;
+  /** What the empty search field says. */
+  searchPlaceholder: string;
   /** The accessible name of a chip's remove control. `{label}` is the value's own label. */
   removeLabel: string;
   /** What a control too narrow for chips says instead. `{count}` is how many are chosen. */
@@ -106,6 +137,8 @@ export interface SelectHandle {
   close: () => void;
   focus: () => void;
   open: () => void;
+  /** Focuses the search field, when there is one. Otherwise the trigger. */
+  focusSearch: () => void;
   /** Brings an option into view, for a list the consumer has just replaced. */
   scrollToKey: (value: SelectOptionValue) => void;
 }
@@ -122,22 +155,28 @@ export interface SelectProps {
   closeOnOutsidePress?: boolean;
   closeOnSelect?: boolean;
   collisionPadding?: number;
+  countLabel?: string;
   defaultHighlightedValue?: SelectOptionValue | null;
   defaultOpen?: boolean;
+  defaultSearchValue?: string;
   defaultValue?: SelectSelection;
   disabled?: boolean;
   emptyLabel?: string;
+  filter?: SelectFilter;
   flip?: boolean;
   /** The form this control submits with, when it is not the enclosing one. */
   form?: string;
   fullWidth?: boolean;
   hideWhenDetached?: boolean;
   highlightedValue?: SelectOptionValue | null;
+  highlightMatch?: boolean;
   invalid?: boolean;
   /** Labels for values, so a closed control can name a value it never rendered. */
   items?: SelectItems;
   loading?: boolean;
   loadingLabel?: string;
+  /** BCP 47, for the comparison the default filter makes. */
+  locale?: string;
   loop?: boolean;
   mount?: SelectMount;
   multiple?: boolean;
@@ -148,12 +187,17 @@ export interface SelectProps {
     request: ChangeRequest<SelectOptionValue | null>,
   ) => void;
   onOpenChange?: (open: boolean, request: ChangeRequest<boolean>) => void;
+  onSearchValueChange?: (value: string, request: ChangeRequest<string>) => void;
   onValueChange?: (value: SelectSelection, request: ChangeRequest<SelectSelection>) => void;
   open?: boolean;
   portal?: boolean;
   readOnly?: boolean;
   ref?: Ref<SelectHandle>;
   required?: boolean;
+  search?: boolean;
+  searchLabel?: string;
+  searchPlaceholder?: string;
+  searchValue?: string;
   shift?: boolean;
   side?: SelectSide;
   sideOffset?: number;
@@ -215,11 +259,36 @@ export interface SelectPositionerProps extends HTMLAttributes<HTMLElement> {
   ref?: Ref<HTMLDivElement> | undefined;
 }
 
+/** What `render` receives for the search field, so a consumer can replace it. */
+export interface SelectSearchRootProps extends HTMLAttributes<HTMLElement> {
+  children?: ReactNode;
+  'data-part': string;
+  ref?: Ref<HTMLDivElement> | undefined;
+}
+
+export interface SelectSearchProps extends Omit<
+  ComponentPropsWithRef<'input'>,
+  'value' | 'defaultValue'
+> {
+  /** The magnifier. `null` draws no glyph; anything else replaces the default. */
+  icon?: ReactNode;
+  ref?: Ref<HTMLInputElement>;
+  /** Replaces the row around the field, not the field itself. */
+  render?: (props: SelectSearchRootProps) => ReactNode;
+}
+
 export interface SelectContentProps extends ComponentPropsWithRef<'div'> {
   /** What the popup says when it holds no options. Replaces `emptyLabel`. */
   empty?: ReactNode;
   ref?: Ref<HTMLDivElement>;
   render?: (props: SelectPositionerProps) => ReactNode;
+  /**
+   * The search field, when `search` is on. It is rendered by the popup rather
+   * than placed by the consumer, because the two elements it sits between — the
+   * dialog and the listbox — are wiring the family owns; this reaches its
+   * glyph, its `render` and every native attribute of the input.
+   */
+  searchProps?: SelectSearchProps;
   /** What the popup says while an answer is travelling. Replaces `loadingLabel`. */
   status?: ReactNode;
 }
@@ -237,7 +306,10 @@ export interface SelectItemProps extends Omit<ComponentPropsWithRef<'div'>, 'chi
    * asks for when the DOM does not hold every option.
    */
   position?: number;
-  /** What typeahead matches on, when the label is not plain text. */
+  /**
+   * What typeahead matches on, and what the search filters on, when the label
+   * is not plain text. An option the filter cannot judge is always shown.
+   */
   textValue?: string;
   value: SelectOptionValue;
 }

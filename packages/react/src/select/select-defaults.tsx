@@ -25,12 +25,24 @@ import type { SelectDefaults, SelectDefaultsProviderProps } from './select.types
  *
  * `width` is `anchor` because a select's popup is a list of the values its
  * control shows, so the control's width is the honest one.
+ *
+ * `search` is `false`. It is the one capability here that changes the popup's
+ * role, moves DOM focus into the layer and takes three keys back from the key
+ * table, and a select of six options is worse for having a field above them.
+ * `highlightMatch` is `true` beside it: a reader who asked for a search asked
+ * to be shown what matched, and `combobox` marks by default for the same
+ * reason.
  */
 export const SELECT_FALLBACK: SelectDefaults = {
   align: 'start',
   alignOffset: 0,
   clearable: false,
   clearLabel: 'Clear selection',
+  countLabel: '{count} results',
+  highlightMatch: true,
+  search: false,
+  searchLabel: 'Search options',
+  searchPlaceholder: 'Search…',
   removeLabel: 'Remove {label}',
   summaryLabel: '{count} selected',
   closeOnEscape: true,
@@ -92,6 +104,11 @@ export function SelectDefaultsProvider({
     alignOffset: overrides.alignOffset ?? inherited.alignOffset,
     clearable: overrides.clearable ?? inherited.clearable,
     clearLabel: overrides.clearLabel ?? inherited.clearLabel,
+    countLabel: overrides.countLabel ?? inherited.countLabel,
+    highlightMatch: overrides.highlightMatch ?? inherited.highlightMatch,
+    search: overrides.search ?? inherited.search,
+    searchLabel: overrides.searchLabel ?? inherited.searchLabel,
+    searchPlaceholder: overrides.searchPlaceholder ?? inherited.searchPlaceholder,
     removeLabel: overrides.removeLabel ?? inherited.removeLabel,
     summaryLabel: overrides.summaryLabel ?? inherited.summaryLabel,
     closeOnEscape: overrides.closeOnEscape ?? inherited.closeOnEscape,

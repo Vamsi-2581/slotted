@@ -94,17 +94,52 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'content',
-    element: 'div with role="listbox"',
+    element: 'div with role="listbox", or role="dialog" under search',
     required: true,
     purpose:
-      'The painted surface. It owns the three columns every option passes through, is bounded by the height the positioner reports, and scrolls inside it.',
+      'The painted surface. It owns the three columns every option passes through, is bounded by the height the positioner reports, and scrolls inside it. Under search it becomes a dialog holding a field and a list, because a listbox holds options and groups and a text field is neither — the combobox pattern names dialog as one of the four roles a popup may carry.',
+  },
+  {
+    part: 'search',
+    element: 'div, drawn only under search',
+    required: false,
+    purpose:
+      'The row the query is typed into, at the top of the popup and fixed there: a field that scrolled away with its own results is a field a reader loses on the fourth row. The control itself never takes typed text, which is what keeps this family apart from combobox.',
+  },
+  {
+    part: 'search-icon',
+    element: 'span, aria-hidden',
+    required: false,
+    purpose:
+      'The magnifier, drawn as a mask from the glyph scale. It is what makes the row a field rather than a heading, and searchProps.icon replaces it or removes it.',
+  },
+  {
+    part: 'search-input',
+    element: 'input with role="combobox"',
+    required: false,
+    purpose:
+      'The field. It carries aria-controls naming the list, aria-autocomplete="list" and aria-activedescendant, and it holds DOM focus for the whole time the popup is open — the pattern says a dialog popup does not support aria-activedescendant, so focus moves into it.',
+  },
+  {
+    part: 'list',
+    element: 'div with role="listbox", drawn only under search',
+    required: false,
+    purpose:
+      'The listbox, one element inside the dialog. It is the scroller under a field that stays, and it owns the three columns the surface owns when there is no field.',
   },
   {
     part: 'chosen',
     element: 'div, aria-hidden, drawn while several values are chosen',
     required: false,
     purpose:
-      'Everything that is chosen, at the top of the popup. The control holds one line, so twelve values are three chips and a count; the band holds all of them, wraps, and scrolls at two rows of its own. It is aria-hidden and holds no widget: focus never enters this layer, and a value is taken back from its option or from the focusable chips in the control.',
+      'Everything that is chosen, at the top of the popup. The control holds one line, so twelve values are three chips and a count; the band holds all of them, wraps, and scrolls at two rows of its own. It is aria-hidden and holds no widget, and the reason is keyboard reach: without search focus never enters this layer, and with it the layer spends its one Tab on leaving the control — so a remove control here would answer the pointer and nothing else. A value is taken back from its option or from the focusable chips in the control.',
+  },
+  {
+    part: 'match',
+    element: 'mark with data-ui="highlight"',
+    required: false,
+    purpose:
+      'The span of a label the query matched, found by the same collator the filter used — an indexOf beside a locale-sensitive filter marks nothing on the row it has just matched. The mark is the shared highlight sheet\u2019s, so every list a reader types into says the same thing about the same span, and it changes no metric of the text around it.',
   },
   {
     part: 'group',
@@ -353,6 +388,35 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'search',
+    title: 'Searching a long list',
+    note: 'search opens the popup onto a field. The query filters the options, the span it matched is marked, and the count is announced. It is transient: it never becomes a value, it is emptied when an option is taken, and the control goes on showing the chosen label. Escape clears the query before it closes the popup, and Tab commits and leaves the control.',
+    snippet: defineSnippet({
+      id: 'select-react-search',
+      language: 'tsx',
+      label: 'A field above the options, and what it filters',
+      source: `<Select search>
+  <SelectTrigger aria-label="Country">
+    <SelectValue placeholder="Choose a country" />
+  </SelectTrigger>
+  <SelectContent searchProps={{ placeholder: 'Filter countries' }}>
+    <SelectItem value="nl">Netherlands</SelectItem>
+    <SelectItem value="nz">New Zealand</SelectItem>
+  </SelectContent>
+</Select>;
+
+// The query is a value like any other, and it is not the selection.
+<Select
+  search
+  searchValue={query}
+  onSearchValueChange={(next, request) => setQuery(next, request.reason)}
+/>;
+
+// A list a server has already filtered decides nothing here.
+<Select search filter={null} loading={pending} />;`,
+    }),
+  },
+  {
     id: 'placement',
     title: 'Placement and width',
     note: 'The popup hangs from the start edge of its control and is as wide as it. width="content" lets it size to its own options, for a list with descriptions.',
@@ -419,6 +483,76 @@ const scenes: ReferenceSceneMeta[] = [
 ];
 
 const api = apiRows([
+  [
+    'search',
+    'boolean',
+    'false',
+    'Select',
+    'Opens the popup onto a field the reader filters the options with. It changes the popup\u2019s role to dialog, moves DOM focus into the layer, and turns typeahead off — a reader typing into a field cannot also be driving one.',
+  ],
+  [
+    'searchValue',
+    'string',
+    '—',
+    'Select',
+    'The query. Present means the consumer owns it. It is never the selection, and no request carries both.',
+  ],
+  [
+    'defaultSearchValue',
+    'string',
+    "''",
+    'Select',
+    'What an uncontrolled query starts from, read once.',
+  ],
+  [
+    'filter',
+    '((label: string, query: string) => boolean) | null',
+    'createFilter',
+    'Select',
+    'Whether an option answers the query. Unset asks for the library\u2019s locale-sensitive contains; null turns filtering off, which is what a list a server has already filtered needs; a function replaces the comparison.',
+  ],
+  [
+    'highlightMatch',
+    'boolean',
+    'true',
+    'Select',
+    'Whether the span a query matched is marked inside the label, by the same collator the filter used.',
+  ],
+  [
+    'locale',
+    'string',
+    '—',
+    'Select',
+    'BCP 47, for the comparison the default filter makes. Unset asks the runtime.',
+  ],
+  [
+    'searchPlaceholder',
+    'string',
+    'Search…',
+    'Select',
+    'What the empty field says. searchProps.placeholder overrules it on one select.',
+  ],
+  [
+    'searchLabel',
+    'string',
+    'Search options',
+    'Select',
+    'The accessible name of the field, which carries no visible label.',
+  ],
+  [
+    'countLabel',
+    'string',
+    '{count} results',
+    'Select',
+    'What the live region announces while searching. {count} becomes the number of options that survived the query.',
+  ],
+  [
+    'searchProps',
+    'SelectSearchProps',
+    '—',
+    'SelectContent',
+    'The field\u2019s own props: every native attribute of the input, its icon, and a render that replaces the row around it.',
+  ],
   [
     'value',
     'string | string[] | null',
@@ -724,6 +858,11 @@ const events: EventRow[] = [
     name: 'onHighlightedValueChange',
     payload: '(value: string | null, request: ChangeRequest)',
     when: 'Before the highlight moves, whether the pointer or a key moved it. The reason is pointer, keyboard or programmatic.',
+  },
+  {
+    name: 'onSearchValueChange',
+    payload: '(value: string, request: ChangeRequest)',
+    when: 'Before the query moves. keyboard is the reader typing, select is an option being taken while the popup stays open, and clear covers both Escape and the emptying the popup does as it opens and closes.',
   },
 ];
 

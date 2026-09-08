@@ -524,6 +524,36 @@ describe('Combobox', () => {
     await waitFor(() => expect(screen.getAllByRole('group', { hidden: false })).toHaveLength(1));
   });
 
+  /**
+   * CB13. The group above measured itself on the render that built the popup,
+   * and never again: its props are the same element on both sides of a
+   * keystroke, so React bailed out of re-rendering it and the effect that
+   * counts the surviving options did not run. A category emptied by a query
+   * typed after the popup was already open stayed on the surface with nothing
+   * under it. The group now reads the query, which is what makes it re-render.
+   */
+  it('hides a group emptied by a query typed after the popup was open', async () => {
+    render(
+      <Basic>
+        <ComboboxGroup label="Berries">
+          <ComboboxItem value="blueberry">Blueberry</ComboboxItem>
+        </ComboboxGroup>
+        <ComboboxGroup label="Citrus">
+          <ComboboxItem value="pomelo">Pomelo</ComboboxItem>
+        </ComboboxGroup>
+      </Basic>,
+    );
+    input().focus();
+    /* A letter both labels hold, so the popup opens with both groups standing
+       and the second query is what empties one of them. */
+    type('e');
+    await screen.findByRole('listbox');
+    await waitFor(() => expect(screen.getAllByRole('group', { hidden: false })).toHaveLength(2));
+
+    type('berry');
+    await waitFor(() => expect(screen.getAllByRole('group', { hidden: false })).toHaveLength(1));
+  });
+
   it('clears both contracts, and says why', async () => {
     const onValueChange = vi.fn();
     const onInputValueChange = vi.fn();

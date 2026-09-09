@@ -28,3 +28,12 @@ export type {
   SelectionRequest,
   SelectionResult,
 } from './selection';
+export { cascadeSelection, createTreeCollection, indeterminateKeys } from './tree';
+export type {
+  CascadeAction,
+  CascadeInput,
+  CascadeResult,
+  TreeCollection,
+  TreeCollectionOptions,
+  TreeNode,
+} from './tree';

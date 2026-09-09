@@ -35,6 +35,7 @@ export default defineConfig({
         select: resolve(import.meta.dirname, 'src/select/index.ts'),
         skeleton: resolve(import.meta.dirname, 'src/skeleton/index.ts'),
         stack: resolve(import.meta.dirname, 'src/stack/index.ts'),
+        table: resolve(import.meta.dirname, 'src/table/index.ts'),
         tag: resolve(import.meta.dirname, 'src/tag/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         tooltip: resolve(import.meta.dirname, 'src/tooltip/index.ts'),

@@ -156,6 +156,10 @@
       "types": "./dist/types/switch/index.d.ts",
       "import": "./dist/switch.js"
     },
+    "./table": {
+      "types": "./dist/types/table/index.d.ts",
+      "import": "./dist/table.js"
+    },
     "./tabs": {
       "types": "./dist/types/tabs/index.d.ts",
       "import": "./dist/tabs.js"
@@ -207,6 +211,10 @@
     "./tooltip": {
       "types": "./dist/types/tooltip/index.d.ts",
       "import": "./dist/tooltip.js"
+    },
+    "./tree": {
+      "types": "./dist/types/tree/index.d.ts",
+      "import": "./dist/tree.js"
     }
   },
   "scripts": {

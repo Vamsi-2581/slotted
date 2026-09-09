@@ -1,3 +1,4 @@
+import { SlIconButton } from '@slotted/angular/button';
 import { SlLink } from '@slotted/angular/link';
 import {
   SlPagination,
@@ -10,7 +11,7 @@ import {
   SlResultStateContent,
   SlResultStateTitle,
 } from '@slotted/angular/result-state';
-import { SlTag } from '@slotted/angular/tag';
+import { SlTag, SlTagBody } from '@slotted/angular/tag';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -67,7 +68,9 @@ const meta: Meta<TableStoryArgs> = {
         SlResultState,
         SlResultStateContent,
         SlResultStateTitle,
+        SlIconButton,
         SlTag,
+        SlTagBody,
       ],
     }),
   ],
@@ -347,7 +350,7 @@ export const Expansion: Story = {
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'A record with more to say',
-    'The expander sits in a gutter of its own, so every identifier stands in one column whether or not its record has a detail. Your own @if keeps a closed detail out of the DOM entirely.',
+    'The expander sits in a gutter of its own, so every identifier stands in one column whether or not its record has a detail. Control flow in the template keeps a closed detail out of the DOM entirely.',
     `
   <div slTable [columns]="5" variant="framed" [expanded]="['INV-1043']">
     <div slTableContent>
@@ -632,7 +635,7 @@ export const Content: Story = {
           <tr slTableRow [value]="invoice.id">
             <th slTableRowHeader><a slLink [href]="'#' + invoice.id">{{ invoice.id }}</a></th>
             <td slTableCell>{{ invoice.client }}</td>
-            <td slTableCell><span slTag [tone]="invoice.tone">{{ invoice.status }}</span></td>
+            <td slTableCell><span slTag [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span></td>
             <td slTableCell numeric>{{ invoice.amount }}</td>
           </tr>
         }
@@ -676,10 +679,10 @@ export const Listing: Story = {
             <td slTableSelect></td>
             <th slTableRowHeader sticky="start" text="nowrap">{{ invoice.id }}</th>
             <td slTableCell text="nowrap">{{ invoice.client }}</td>
-            <td slTableCell><span slTag [tone]="invoice.tone">{{ invoice.status }}</span></td>
+            <td slTableCell><span slTag [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span></td>
             <td slTableCell numeric>{{ invoice.amount }}</td>
             <td slTableCell sticky="end" align="center">
-              <button type="button" [attr.aria-label]="'Actions for ' + invoice.id">
+              <button slIconButton variant="ghost" tone="secondary" size="sm" type="button" [attr.aria-label]="'Actions for ' + invoice.id">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
                 </svg>

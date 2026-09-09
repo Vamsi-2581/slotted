@@ -145,7 +145,7 @@ const anatomy: AnatomyRow[] = [
     element: 'tr[slTableDetail]',
     required: false,
     purpose:
-      'The open row detail, one cell spanning every column. Your own @if keeps a closed one out of the DOM, which a host element cannot do for itself.',
+      'The open row detail, one cell spanning every column. Control flow in the template keeps a closed one out of the DOM, which a host element cannot do for itself.',
   },
   {
     part: 'empty',
@@ -238,7 +238,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'expansion',
     title: 'A record with more to say',
-    note: 'The expander is the Disclosure pattern: a button carrying aria-expanded and naming the row it opens. Your own @if keeps a closed detail out of the DOM, which is the one asymmetry with React and belongs to the frameworks rather than the family.',
+    note: 'The expander is the Disclosure pattern: a button carrying aria-expanded and naming the row it opens. Control flow in the template keeps a closed detail out of the DOM, which is the one asymmetry with React and belongs to the frameworks rather than the family.',
     snippet: defineSnippet({
       id: 'table-angular-expansion',
       language: 'angular',

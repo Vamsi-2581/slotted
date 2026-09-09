@@ -132,7 +132,21 @@ const TONE = { Draft: 'secondary', Overdue: 'danger', Paid: 'success' } as const
  * mark: the family sizes what stands in its slot and draws none of it.
  */
 function Funnel() {
-  return <Funnel />;
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="16"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      width="16"
+    >
+      <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+    </svg>
+  );
 }
 
 function Ellipsis() {

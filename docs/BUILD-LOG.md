@@ -4695,3 +4695,21 @@ stayed on the surface with nothing under it. `combobox`'s own test passed
 because its popup mounts after the first keystroke, so the group measured the
 filtered list once and never had to measure again. A component that measures the
 DOM of children it does not own has to read something that changes.
+
+**A scripted edit rewrote a component into itself, and only the page said so.**
+`table`'s React stories drew the same filter mark in four places, and the four
+copies were folded into a `Funnel` component by a regular expression run over
+the file. The pattern matched the component's own body as well as its four call
+sites, so `Funnel` was left returning `<Funnel />`: infinite recursion the
+moment the story mounted. Every test stayed green — the story module compiles,
+type-checks and lints, the contract and behaviour suites never render that
+story, and `referencePageErrors` reads the docs metadata rather than the
+rendering. The reference page froze the tab, and the audit tool reported four
+stages on a page that declares nineteen scenes without ever calling it a
+failure.
+
+Two things follow. A scripted rewrite over a file that contains both a
+definition and its uses has to exclude the definition, or be done by hand. And a
+story is not verified until it has been opened: a family whose stories all
+compile can still have one that hangs, and the only instrument that says so is
+the page.

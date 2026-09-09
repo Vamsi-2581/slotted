@@ -439,7 +439,9 @@
    * the family already give it: a scrollbar, a column visibly cut mid-word at
    * the edge, and a tab stop that scrolls with the arrow keys.
    */
-  [data-ui='table'] [data-part='scroll'][data-overflowing]:not([data-at-start]) [data-sticky='start'] {
+  [data-ui='table']
+    [data-part='scroll'][data-overflowing]:not([data-at-start])
+    [data-sticky='start'] {
     border-inline-end-color: var(--_rule-strong);
   }
 
@@ -471,12 +473,30 @@
    * The slot holds the control and none of its state. What a filter means and
    * what it leaves is the consumer's query, and `filter-bar` owns the rules.
    */
+  /**
+   * One rule rather than three. The reservation was written twice — once on the
+   * sort control and once on a cell selected by
+   * `:has(> actions):not(:has(> sort))` — and reserving on the cell says it once
+   * for both: the sort control fills the cell's content box, so room taken from
+   * the cell is room the control never had.
+   *
+   * The slot is positioned against the cell, and the cell stays a table cell.
+   * `display: flex` on a `th` takes it out of the table's own formatting context
+   * and the browser wraps it in an anonymous cell: read on an earlier capture,
+   * two headers laid out as flex boxes stacked into one column and took the
+   * table's geometry with them.
+   *
+   * The room is stated rather than measured. The controls in it are the
+   * consumer's own, so their width is not a fact this family holds, and
+   * measuring it would mean reading the layout during render.
+   */
   [data-ui='table'] [data-part='column-header']:has(> [data-part='column-actions']) {
-    /* The slot is positioned against the cell, and the cell stays a table cell.
-       `display: flex` on a `th` takes it out of the table's own formatting
-       context and the browser wraps it in an anonymous cell: read on the first
-       capture, two headers laid out as flex boxes stacked into one column and
-       took the table's own geometry with them. */
+    --_actions-room: var(
+      --slotted-table-column-actions-size,
+      calc(var(--slotted-target-min, 24px) + var(--_gap))
+    );
+
+    padding-inline-end: var(--_actions-room);
     position: relative;
   }
 
@@ -487,36 +507,6 @@
     inset-block: 0;
     inset-inline-end: var(--_pad-inline);
     position: absolute;
-  }
-
-  /**
-   * The room the slot is given, stated rather than measured. The controls in it
-   * are the consumer's own — a filter trigger, a column menu — so their width is
-   * not a fact this family holds, and measuring it would mean reading the layout
-   * during render. One target at the WCAG minimum is the default, and a column
-   * carrying two controls states the width it needs.
-   *
-   * The reservation is on whichever box holds the name: the sort control when
-   * the column sorts, the cell itself when it does not.
-   */
-  [data-ui='table'] [data-part='column-header']:has(> [data-part='column-actions']) {
-    --_actions-room: var(
-      --slotted-table-column-actions-size,
-      calc(var(--slotted-target-min, 24px) + var(--_gap))
-    );
-  }
-
-  [data-ui='table']
-    [data-part='column-header']:has(> [data-part='column-actions'])
-    > [data-part='sort'] {
-    padding-inline-end: calc(var(--_pad-inline) + var(--_actions-room));
-  }
-
-  [data-ui='table']
-    [data-part='column-header']:has(> [data-part='column-actions']):not(
-      :has(> [data-part='sort'])
-    ) {
-    padding-inline-end: calc(var(--_pad-inline) + var(--_actions-room));
   }
 
   [data-ui='table'] [data-part='sort'] {

@@ -671,6 +671,87 @@
 }
 
 /**
+ * The scrolling box read as a **page**: a column with the padding and the
+ * rhythm a screen has, so what is above and below a demonstration scrolls past
+ * it the way it would in an application.
+ *
+ * Added when `table`'s `stickyTo="page"` had nothing to stick against. A
+ * scrolling box holding only the table shows a header that never leaves, which
+ * is the same picture the family's own scroller draws — the behaviour is only
+ * legible when a heading and a paragraph scroll away above the table while the
+ * header stays. A story may not reach for an inline style, so the page it needs
+ * is a primitive rather than a `style` attribute.
+ */
+.slotted-demo-viewport[data-layout='page'] {
+  display: block;
+  /**
+   * The box that scrolls carries no padding of its own. A sticky element
+   * resolves against the scrollport **inset by the scroll container's own
+   * padding**, so a padded scroller holds a sticky header that far from the
+   * top — a gap nobody asked for and no token explains. The padding goes on
+   * the content instead, which is where a page shell puts it.
+   */
+  padding: 0;
+}
+
+/* The content of that page: the column an application lays its screen out in. */
+.slotted-demo-page {
+  display: grid;
+  gap: var(--slotted-space-5, 12px);
+  padding: var(--slotted-space-6, 1rem);
+}
+
+/* The page's own prose, with the browser's margins off: the grid already owns
+   the rhythm, and two spacings on one gap read as neither. */
+.slotted-demo-page > :is(h1, h2, h3, h4, h5, p) {
+  margin: 0;
+}
+
+/**
+ * A bar across the top of that page, held there while the page scrolls. It is
+ * what an application shell is, and it is the reason a table states where its
+ * own header stops: two sticky things at the same edge need the second to know
+ * how tall the first is.
+ */
+/**
+ * The shell owns the bar, so the shell states where a sticky header stops.
+ * `--slotted-table-sticky-offset` is set once here and every table under it
+ * stops below the bar rather than under it — which is the whole of how that
+ * token is meant to be used, and what a page with no bar leaves at nought.
+ */
+.slotted-demo-page:has(> .slotted-demo-page__bar) {
+  --slotted-table-sticky-offset: 2.5rem;
+}
+
+.slotted-demo-page__bar {
+  align-items: center;
+  background: var(--slotted-surface);
+  border-block-end: 1px solid var(--slotted-border-subtle);
+  display: flex;
+  font-weight: 600;
+  inset-block-start: 0;
+  justify-content: space-between;
+  margin-inline: calc(var(--slotted-space-6, 1rem) * -1);
+  min-block-size: 2.5rem;
+  padding-inline: var(--slotted-space-6, 1rem);
+  position: sticky;
+  z-index: 2;
+}
+
+/**
+ * A height for a demonstration that has to overflow. A story may not write one
+ * inline — an inline length answers no density and no scheme — and a scroller
+ * with no height has nothing to scroll, so the two demands meet in a primitive.
+ */
+.slotted-demo-bound {
+  max-block-size: 13rem;
+}
+
+.slotted-demo-bound--tall {
+  max-block-size: 22rem;
+}
+
+/**
  * The step between the two. Four rems holds a bar across the top of a page and
  * twenty-two holds a dialog; a layer anchored beside its own trigger needs
  * neither, and `tooltip`'s first rendered page showed why — a 34-pixel button

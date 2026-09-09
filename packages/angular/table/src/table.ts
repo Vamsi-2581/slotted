@@ -91,6 +91,7 @@ export const TABLE_ROW_SELECTOR = '[data-part="body"] > [data-part="row"][data-v
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-striped]': "resolvedStriped() ? '' : null",
     '[attr.data-sticky-header]': "resolvedStickyHeader() ? '' : null",
+    '[attr.data-sticky-footer]': "resolvedStickyFooter() ? '' : null",
     '[attr.data-sticky-to]': 'resolvedStickyTo()',
     '[attr.data-loading]': "loading() ? '' : null",
   },
@@ -110,6 +111,15 @@ export class SlTable implements ControlValueAccessor {
     transform: (state) => (state === undefined ? undefined : booleanAttribute(state)),
   });
   readonly stickyHeader = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    transform: (state) => (state === undefined ? undefined : booleanAttribute(state)),
+  });
+  /**
+   * Holds the summary rows against the bottom of the same box the header is
+   * held against the top of, so a total does not scroll out of the view that
+   * exists to show it. It pins the `tfoot` and not the footer bar, which is
+   * outside the scroller and never leaves.
+   */
+  readonly stickyFooter = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (state) => (state === undefined ? undefined : booleanAttribute(state)),
   });
   /**
@@ -149,6 +159,7 @@ export class SlTable implements ControlValueAccessor {
   readonly resolvedMode = computed(() => this.selectionMode() ?? this.defaults.selectionMode);
   readonly resolvedStriped = computed(() => this.striped() ?? this.defaults.striped);
   readonly resolvedStickyHeader = computed(() => this.stickyHeader() ?? this.defaults.stickyHeader);
+  readonly resolvedStickyFooter = computed(() => this.stickyFooter() ?? this.defaults.stickyFooter);
   readonly resolvedStickyTo = computed(() => this.stickyTo() ?? this.defaults.stickyTo);
   readonly resolvedColumns = computed(() => this.columns() ?? this.defaults.columns);
   readonly resolvedLabels = computed<TableLabels>(() => ({

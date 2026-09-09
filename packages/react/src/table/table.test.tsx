@@ -100,6 +100,65 @@ describe('the structure', () => {
   });
 });
 
+describe('pinning', () => {
+  /**
+   * The two ends of the same box. `stickyHeader` holds the head against the top
+   * and `stickyFooter` holds the summary against the bottom, and a table that
+   * asks for neither pays for neither.
+   */
+  it('marks each end the table asks to hold, and no other', () => {
+    const { rerender } = render(<Invoices stickyHeader />);
+
+    const root = screen.getByRole('table').closest('[data-ui="table"]');
+    expect(root).toHaveAttribute('data-sticky-header', '');
+    expect(root).not.toHaveAttribute('data-sticky-footer');
+
+    rerender(<Invoices stickyFooter stickyHeader />);
+    expect(root).toHaveAttribute('data-sticky-footer', '');
+  });
+
+  /**
+   * A selection column pins like any other, and the column beside it needs to
+   * know where the first one stops: two columns pinned to the same edge both
+   * resolve against the scroller, so the second is drawn over the first unless
+   * the offset is stated.
+   */
+  it('pins a selection column, and states where the next one starts', () => {
+    render(
+      <Table columns={2}>
+        <TableContent>
+          <TableHead>
+            <TableRow>
+              <TableSelectAll sticky="start" />
+              <TableColumnHeader sticky="start" stickyOffset="3rem">
+                Invoice
+              </TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow value="INV-1042">
+              <TableSelect sticky="start" />
+              <TableRowHeader sticky="start" stickyOffset="3rem">
+                INV-1042
+              </TableRowHeader>
+            </TableRow>
+          </TableBody>
+        </TableContent>
+      </Table>,
+    );
+
+    const chooser = screen.getByRole('columnheader', { name: /Select all/ });
+    expect(chooser).toHaveAttribute('data-sticky', 'start');
+    expect(chooser).not.toHaveAttribute('style');
+
+    const header = screen.getByRole('columnheader', { name: 'Invoice' });
+    expect(header.style.getPropertyValue('--slotted-table-sticky-inset')).toBe('3rem');
+    expect(
+      screen.getByText('INV-1042').style.getPropertyValue('--slotted-table-sticky-inset'),
+    ).toBe('3rem');
+  });
+});
+
 describe('sorting', () => {
   it('cycles ascending, descending, then none', () => {
     const onSortChange = vi.fn();

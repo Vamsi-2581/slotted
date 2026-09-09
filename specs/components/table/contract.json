@@ -52,11 +52,13 @@
   },
   "sticky": {
     "header": "head",
+    "footer": "summary. The totals row is the header of the other end: a listing whose sum, count or unit scrolls out of view makes the reader scroll back for the number they came for, and every surveyed implementation that draws a summary at all pins it — Ant, AG Grid and Material each hold the summary against the bottom of the same box the header is held against the top of. It is the tfoot that is pinned and not the footer bar: the bar is already outside the scroller and never leaves.",
     "to": {
       "scroll": "The default. The header sticks to the family's own scroller, which is what keeps it correct inside a drawer, a dialog or a split pane — the box the reader is scrolling is the box the header stays in. It needs the scroller to have a height; without one there is nothing to scroll past and nothing to stick to.",
       "page": "The header sticks to the nearest scrolling ancestor outside the family: the page, an app shell, a scroll area. The family gives up its own scroll container to do it, because a box that scrolls one axis scrolls both — CSS computes a visible axis to auto the moment the other is auto — so a table cannot both scroll sideways inside its frame and let its header stick to the page. What a wide table does in this mode is push the page sideways, or state layout fixed and truncate.",
       "offset": "--slotted-table-sticky-offset, which is where the header stops. An application with a bar of its own sets it once and every table under it stops below the bar rather than under it.",
-      "reason": "Carbon and Ant stick to the page and Material sticks to its own container; each is right for one screen and wrong for the other. The axis names the two rather than choosing, and the cost of the second is written where the choice is made."
+      "reason": "Carbon and Ant stick to the page and Material sticks to its own container; each is right for one screen and wrong for the other. The axis names the two rather than choosing, and the cost of the second is written where the choice is made.",
+      "offsetEnd": "--slotted-table-sticky-offset-end, which is where the summary stops. It answers stickyTo page the way the offset answers it at the top: a page with a bar of its own across the bottom sets it once, and every summary under it stops above the bar."
     },
     "columns": "a cell whose sticky axis names start or end, resolved through inset-inline-start and inset-inline-end so a right-to-left document mirrors it",
     "corner": "A column header that is also a sticky column is both at once: it takes both offsets and the highest stacking step, stated once. With one step the header slides under the pinned column or the pinned column over the header.",
@@ -313,6 +315,7 @@
     "variant": ["plain", "ruled", "framed"],
     "striped": [true, false],
     "stickyHeader": [true, false],
+    "stickyFooter": [true, false],
     "stickyTo": ["scroll", "page"],
     "layout": ["auto", "fixed"],
     "selectionMode": ["none", "single", "multiple"],
@@ -325,6 +328,7 @@
     "variant": ["prop", "defaults", "ruled"],
     "striped": ["prop", "defaults", false],
     "stickyHeader": ["prop", "defaults", false],
+    "stickyFooter": ["prop", "defaults", false],
     "stickyTo": ["prop", "defaults", "scroll"],
     "layout": ["prop", "defaults", "auto"],
     "selectionMode": ["prop", "defaults", "none"],

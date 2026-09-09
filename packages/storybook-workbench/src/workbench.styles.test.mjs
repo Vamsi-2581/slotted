@@ -541,3 +541,41 @@ test('offers a viewport that scrolls, for a family whose behaviour is about scro
      scrolling one has to give it up or the scrollbar never appears. */
   assert.match(rule, /contain:\s*none/);
 });
+
+/**
+ * The scrolling box has to read as a page, or the demonstration inside it is
+ * still a stage. `table`'s page-mode header sticks to what scrolls outside the
+ * family, and a box holding nothing but the table draws the same picture the
+ * family's own scroller draws: the behaviour is only visible when a heading and
+ * a paragraph scroll away above the table while the header stays.
+ */
+test('offers a viewport laid out as a page, so content can scroll past a demonstration', () => {
+  const rule =
+    /\.slotted-demo-viewport\[data-layout='page'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  /* A sticky element resolves against the scrollport inset by the scroll
+     container's own padding, so the box that scrolls carries none: the padding
+     is the content's, or a page-mode header stops a padding short of the top. */
+  assert.match(rule, /padding:\s*0/);
+  const page = /\.slotted-demo-page\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(page, /display:\s*grid/);
+  assert.match(page, /gap:\s*var\(--slotted-space-/);
+  assert.match(page, /padding:\s*var\(--slotted-space-/);
+  /* The grid owns the rhythm, so the browser's own margins on the prose come
+     off — two spacings on one gap read as neither. */
+  assert.match(css, /\.slotted-demo-page > :is\(h1, h2, h3, h4, h5, p\)/);
+  /* A page with a bar of its own says where a sticky header stops, which is
+     what the offset token is for. A page without one leaves it at nought. */
+  const shell = /:has\(> \.slotted-demo-page__bar\)\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(shell, /--slotted-table-sticky-offset:/);
+});
+
+/**
+ * A scroller with no height has nothing to scroll, and a story may not write
+ * one inline: an inline length answers no density and no scheme. The two
+ * demands meet in a primitive rather than in a `style` attribute.
+ */
+test('offers a bounded height, so a demonstration can be made to overflow', () => {
+  const rule = /\.slotted-demo-bound\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(rule, /max-block-size:/);
+  assert.match(css, /\.slotted-demo-bound--tall/);
+});

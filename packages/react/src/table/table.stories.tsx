@@ -3,13 +3,20 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useMemo, useState } from 'react';
 
+import { Avatar } from '../avatar';
 import { IconButton } from '../button';
 import { Checkbox } from '../checkbox';
 import { Link } from '../link';
+import { NumberField } from '../number-field';
+import { ProgressBar } from '../progress-indicator';
+import { StatusIndicator } from '../status-indicator';
+import { Switch } from '../switch';
+import { TextField } from '../text-field';
 import { Pagination, PaginationItems, PaginationNext, PaginationPrevious } from '../pagination';
 import { Popover, PopoverBody, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
 import { ResultState, ResultStateContent, ResultStateTitle } from '../result-state';
 import { Tag } from '../tag';
+import { VisuallyHidden } from '../visually-hidden';
 import { Table } from './table';
 import { TableContent } from './table-content';
 import { TableDefaultsProvider } from './table-defaults';
@@ -83,9 +90,17 @@ type Story = StoryObj<typeof meta>;
 interface Invoice {
   amount: number;
   client: string;
+  /** What the reader sees. */
+  due: string;
+  /** What the sort answers, because '11 Sep' orders alphabetically and a date does not. */
+  dueAt: string;
   id: string;
   issued: string;
   owner: string;
+  paid: number;
+  region: 'EU' | 'US' | 'APAC';
+  seats: number;
+  service: 'operational' | 'degraded' | 'down';
   status: 'Paid' | 'Overdue' | 'Draft';
 }
 
@@ -93,40 +108,178 @@ const INVOICES: Invoice[] = [
   {
     amount: 1240,
     client: 'Northwind Trading',
+    due: '11 Sep',
+    dueAt: '2026-09-11',
     id: 'INV-1042',
     issued: '12 Aug',
-    owner: 'A. Marchetti',
+    owner: 'Alina Marchetti',
+    paid: 100,
+    region: 'EU',
+    seats: 24,
+    service: 'operational',
     status: 'Paid',
   },
   {
     amount: 18.5,
     client: 'Cascade Logistics',
+    due: '18 Sep',
+    dueAt: '2026-09-18',
     id: 'INV-1043',
     issued: '19 Aug',
-    owner: 'P. Okonkwo',
+    owner: 'Paul Okonkwo',
+    paid: 0,
+    region: 'US',
+    seats: 3,
+    service: 'degraded',
     status: 'Overdue',
   },
   {
     amount: 9802.75,
-    client: 'Bright Harbor',
+    client: 'Bright Harbor Media',
+    due: '27 Sep',
+    dueAt: '2026-09-27',
     id: 'INV-1044',
     issued: '28 Aug',
-    owner: 'L. Ferreira',
+    owner: 'Luiza Ferreira',
+    paid: 45,
+    region: 'APAC',
+    seats: 180,
+    service: 'operational',
     status: 'Draft',
   },
   {
     amount: 430,
     client: 'Halcyon Press',
+    due: '3 Oct',
+    dueAt: '2026-10-03',
     id: 'INV-1045',
     issued: '3 Sep',
-    owner: 'S. Nakamura',
+    owner: 'Sora Nakamura',
+    paid: 100,
+    region: 'EU',
+    seats: 12,
+    service: 'operational',
     status: 'Paid',
+  },
+  {
+    amount: 2015.4,
+    client: 'Orchard Foods',
+    due: '6 Oct',
+    dueAt: '2026-10-06',
+    id: 'INV-1046',
+    issued: '6 Sep',
+    owner: 'Marie Dubois',
+    paid: 60,
+    region: 'EU',
+    seats: 46,
+    service: 'down',
+    status: 'Overdue',
+  },
+  {
+    amount: 77.9,
+    client: 'Lantern Health',
+    due: '9 Oct',
+    dueAt: '2026-10-09',
+    id: 'INV-1047',
+    issued: '9 Sep',
+    owner: 'Ravi Chandra',
+    paid: 100,
+    region: 'APAC',
+    seats: 8,
+    service: 'operational',
+    status: 'Paid',
+  },
+  {
+    amount: 15400,
+    client: 'Vireo Industrial',
+    due: '12 Oct',
+    dueAt: '2026-10-12',
+    id: 'INV-1048',
+    issued: '12 Sep',
+    owner: 'Ines Almeida',
+    paid: 20,
+    region: 'US',
+    seats: 640,
+    service: 'degraded',
+    status: 'Draft',
+  },
+  {
+    amount: 320.15,
+    client: 'Pallas Analytics',
+    due: '15 Oct',
+    dueAt: '2026-10-15',
+    id: 'INV-1049',
+    issued: '15 Sep',
+    owner: 'Tomas Novak',
+    paid: 100,
+    region: 'EU',
+    seats: 19,
+    service: 'operational',
+    status: 'Paid',
+  },
+  {
+    amount: 6410,
+    client: 'Meridian Freight',
+    due: '18 Oct',
+    dueAt: '2026-10-18',
+    id: 'INV-1050',
+    issued: '18 Sep',
+    owner: 'Grace Mensah',
+    paid: 0,
+    region: 'US',
+    seats: 205,
+    service: 'operational',
+    status: 'Overdue',
+  },
+  {
+    amount: 89.99,
+    client: 'Blue Ridge Studio',
+    due: '21 Oct',
+    dueAt: '2026-10-21',
+    id: 'INV-1051',
+    issued: '21 Sep',
+    owner: 'Jonas Weber',
+    paid: 100,
+    region: 'EU',
+    seats: 4,
+    service: 'operational',
+    status: 'Paid',
+  },
+  {
+    amount: 1180.5,
+    client: 'Cobalt Robotics',
+    due: '24 Oct',
+    dueAt: '2026-10-24',
+    id: 'INV-1052',
+    issued: '24 Sep',
+    owner: 'Yuki Tanaka',
+    paid: 75,
+    region: 'APAC',
+    seats: 58,
+    service: 'degraded',
+    status: 'Draft',
+  },
+  {
+    amount: 44300,
+    client: 'Sable Energy Group',
+    due: '27 Oct',
+    dueAt: '2026-10-27',
+    id: 'INV-1053',
+    issued: '27 Sep',
+    owner: 'Hannah Olsen',
+    paid: 30,
+    region: 'US',
+    seats: 1240,
+    service: 'operational',
+    status: 'Overdue',
   },
 ];
 
 const MONEY = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 2 });
 
 const TONE = { Draft: 'secondary', Overdue: 'danger', Paid: 'success' } as const;
+
+const SERVICE = { degraded: 'warning', down: 'danger', operational: 'success' } as const;
 
 /**
  * The artwork the demonstrations put in a trigger. It is authored here rather
@@ -197,13 +350,20 @@ function Scene({
   );
 }
 
-/** The descriptor applied to your own array, which is the whole of client sorting. */
+/**
+ * The descriptor applied to your own array, which is the whole of client
+ * sorting. The date column orders by the value behind it rather than the one on
+ * screen, because `11 Sep` sorts alphabetically and a date does not.
+ */
+const SORT_KEY: Record<string, keyof Invoice> = { due: 'dueAt' };
+
 function sortRows(rows: readonly Invoice[], sort: TableSortDescriptor | null): readonly Invoice[] {
   if (sort === null) return rows;
   const direction = sort.direction === 'ascending' ? 1 : -1;
+  const key = SORT_KEY[sort.column] ?? (sort.column as keyof Invoice);
   return [...rows].sort((left, right) => {
-    const a = left[sort.column as keyof Invoice];
-    const b = right[sort.column as keyof Invoice];
+    const a = left[key];
+    const b = right[key];
     if (typeof a === 'number' && typeof b === 'number') return (a - b) * direction;
     return String(a).localeCompare(String(b)) * direction;
   });
@@ -558,7 +718,7 @@ export const Expansion: Story = {
 function Wide({ children, ...props }: React.ComponentProps<typeof Table>) {
   return (
     <Table columns={5} variant="framed" {...props}>
-      <TableContent scrollProps={{ style: { maxBlockSize: '12rem' } }}>
+      <TableContent scrollProps={{ className: 'slotted-demo-bound' }}>
         <TableHead>
           <TableRow>
             <TableColumnHeader sticky="start" text="nowrap">
@@ -591,14 +751,28 @@ function Wide({ children, ...props }: React.ComponentProps<typeof Table>) {
   );
 }
 
-/** Sixteen records, so a bounded box always has more table than room. */
-const LONG = [...INVOICES, ...INVOICES, ...INVOICES, ...INVOICES];
+/** Forty-eight records, so a bounded box always has far more table than room. */
+const LONG = Array.from({ length: 4 }, () => INVOICES).flat();
 
-function Ledger({ stickyTo }: { stickyTo?: 'scroll' | 'page' }) {
+function Ledger({
+  stickyFooter,
+  stickyTo,
+}: {
+  stickyFooter?: boolean;
+  stickyTo?: 'scroll' | 'page';
+}) {
+  const total = LONG.reduce((sum, invoice) => sum + invoice.amount, 0);
+
   return (
-    <Table columns={4} stickyHeader variant="framed" {...(stickyTo ? { stickyTo } : {})}>
+    <Table
+      columns={5}
+      stickyHeader
+      variant="framed"
+      {...(stickyFooter ? { stickyFooter } : {})}
+      {...(stickyTo ? { stickyTo } : {})}
+    >
       <TableContent
-        {...(stickyTo === 'page' ? {} : { scrollProps: { style: { maxBlockSize: '11rem' } } })}
+        {...(stickyTo === 'page' ? {} : { scrollProps: { className: 'slotted-demo-bound' } })}
       >
         <TableHead>
           <TableRow>
@@ -607,6 +781,7 @@ function Ledger({ stickyTo }: { stickyTo?: 'scroll' | 'page' }) {
             </TableColumnHeader>
             <TableColumnHeader text="nowrap">Client</TableColumnHeader>
             <TableColumnHeader text="nowrap">Owner</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Due</TableColumnHeader>
             <TableColumnHeader numeric text="nowrap">
               Amount
             </TableColumnHeader>
@@ -620,10 +795,19 @@ function Ledger({ stickyTo }: { stickyTo?: 'scroll' | 'page' }) {
               </TableRowHeader>
               <TableCell text="nowrap">{invoice.client}</TableCell>
               <TableCell text="nowrap">{invoice.owner}</TableCell>
+              <TableCell text="nowrap">{invoice.due}</TableCell>
               <TableCell numeric>{MONEY.format(invoice.amount)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
+        <TableSummary>
+          <TableRow>
+            <TableCell colSpan={4} sticky="start" text="nowrap">
+              {LONG.length} invoices
+            </TableCell>
+            <TableCell numeric>{MONEY.format(total)}</TableCell>
+          </TableRow>
+        </TableSummary>
       </TableContent>
     </Table>
   );
@@ -635,16 +819,48 @@ export const Sticky: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label='stickyTo="scroll" — a panel with a height of its own'
-        note="Scroll inside the box: the header stays against the table's own scroller, which is what keeps it right in a drawer, a dialog or a split pane. The pinned first column darkens its edge while something is hidden under it."
+        note="Scroll inside the box: the header stays against the table's own scroller, which is what keeps it right in a drawer, a dialog or a split pane. The pinned first column darkens its edge while something is hidden under it, and the summary here scrolls away with the rows."
       >
         <Ledger />
       </Scene>
       <Scene
-        label='stickyTo="page" — the header stays while the page moves'
-        note="Scroll the dashed box, which stands in for the page: the table has no scroller of its own here, so the header sticks to what scrolls outside it. The cost is that a wide table now pushes that scroller sideways instead of scrolling inside its frame."
+        label="stickyFooter — the total stays where the header does"
+        note="The same box with both ends held: the tfoot is pinned to the bottom the way the thead is pinned to the top, so the number the reader came for is on screen at row one and at row forty-eight. It pins the summary and not the footer bar, which never scrolls in the first place."
       >
-        <div className="slotted-demo-viewport" data-scroll data-size="tall">
-          <Ledger stickyTo="page" />
+        <Ledger stickyFooter />
+      </Scene>
+      <Scene
+        label='stickyTo="page" — the header stays while the page moves'
+        note="A page, not a stage: scroll the dashed box and the heading and the paragraphs above the table leave while the header stays. The table owns no scroller here, so it sticks to what scrolls outside it. Where it stops is --slotted-table-sticky-offset: nought against a bare page, and here the shell sets it to the height of its own bar, so the header stops under the bar rather than behind it."
+      >
+        <div className="slotted-demo-viewport" data-layout="page" data-scroll data-size="tall">
+          <div className="slotted-demo-page">
+            <div className="slotted-demo-page__bar">
+              <span>Acme Billing</span>
+              <span>September</span>
+            </div>
+            <h3>Billing — September</h3>
+            <p>
+              Every invoice raised this month, newest first. Amounts are gross and the collection
+              figures come from the payment provider rather than from the ledger, so a settled
+              invoice can lag a day behind the bank.
+            </p>
+            <p>
+              The finance team reconciles on the fifth working day. Anything still overdue after
+              that goes to the escalation list, and the owner named on the row is the person who
+              takes it.
+            </p>
+            <Ledger stickyTo="page" />
+            <p>
+              Rows are exported as CSV with the same columns and the same order. The export follows
+              the filter, not the page: filtering to one region and exporting gives that region in
+              full rather than the twelve rows on screen.
+            </p>
+            <p>
+              Questions about a specific invoice go to the owner first, then to billing operations.
+              Credit notes are raised against the original invoice and never by editing it.
+            </p>
+          </div>
         </div>
       </Scene>
     </div>
@@ -859,37 +1075,164 @@ export const Density: Story = {
   ),
 };
 
+function EditableRow({ invoice }: { invoice: Invoice }) {
+  const [seats, setSeats] = useState(invoice.seats);
+  const [note, setNote] = useState('');
+  const [active, setActive] = useState(invoice.status !== 'Draft');
+
+  return (
+    <TableRow value={invoice.id}>
+      <TableRowHeader text="nowrap">
+        <Link href={`#${invoice.id}`}>{invoice.id}</Link>
+      </TableRowHeader>
+      <TableCell text="nowrap">{invoice.client}</TableCell>
+      <TableCell>
+        <NumberField
+          aria-label={`Seats on ${invoice.id}`}
+          min={1}
+          onValueChange={(value) => setSeats(value ?? 1)}
+          size="sm"
+          value={seats}
+        />
+      </TableCell>
+      <TableCell>
+        <TextField
+          aria-label={`Note on ${invoice.id}`}
+          onChange={(event) => setNote(event.target.value)}
+          placeholder="Add a note"
+          size="sm"
+          value={note}
+        />
+      </TableCell>
+      <TableCell align="center">
+        <Switch
+          aria-label={`Auto-renew ${invoice.id}`}
+          checked={active}
+          onCheckedChange={setActive}
+          size="sm"
+        />
+      </TableCell>
+      <TableCell numeric>{MONEY.format(invoice.amount * seats)}</TableCell>
+    </TableRow>
+  );
+}
+
 export const Content: Story = {
   parameters: scenario('content'),
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
-        label="A cell is not a string"
-        note="The record name is a Link, the status is a Tag, and a translated header is twice as long as its English. The table is a grid of your own content, so every part holds what a record needs."
+        label="A cell is a slot, not a string"
+        note="A link and a tag on the identifier, an avatar beside the owner, a status indicator on the service, a bar for what has been collected, and an amount in tabular figures. Every one of them is another family standing in a cell this one lays out."
       >
-        <Table columns={4} variant="framed">
+        <Table columns={5} variant="framed">
           <TableContent>
             <TableHead>
               <TableRow>
-                <TableColumnHeader>Rechnungsnummer</TableColumnHeader>
-                <TableColumnHeader>Auftraggeber</TableColumnHeader>
-                <TableColumnHeader>Zahlungsstatus</TableColumnHeader>
-                <TableColumnHeader numeric>Betrag</TableColumnHeader>
+                <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
+                <TableColumnHeader text="nowrap">Owner</TableColumnHeader>
+                <TableColumnHeader text="nowrap">Service</TableColumnHeader>
+                <TableColumnHeader text="nowrap">Collected</TableColumnHeader>
+                <TableColumnHeader numeric text="nowrap">
+                  Amount
+                </TableColumnHeader>
               </TableRow>
             </TableHead>
             <TableBody>
-              {INVOICES.map((invoice) => (
+              {INVOICES.slice(0, 6).map((invoice) => (
                 <TableRow key={invoice.id} value={invoice.id}>
-                  <TableRowHeader>
+                  <TableRowHeader text="nowrap">
                     <Link href={`#${invoice.id}`}>{invoice.id}</Link>
+                    <br />
+                    <Tag size="sm" tone={TONE[invoice.status]}>
+                      {invoice.status}
+                    </Tag>
                   </TableRowHeader>
-                  <TableCell>{invoice.client}</TableCell>
+                  <TableCell text="nowrap">
+                    <span className="slotted-demo-row">
+                      <Avatar name={invoice.owner} size="sm" />
+                      {invoice.owner}
+                    </span>
+                  </TableCell>
+                  <TableCell text="nowrap">
+                    <StatusIndicator status={SERVICE[invoice.service]}>
+                      {invoice.region}
+                    </StatusIndicator>
+                  </TableCell>
                   <TableCell>
-                    <Tag tone={TONE[invoice.status]}>{invoice.status}</Tag>
+                    <ProgressBar
+                      hideLabel
+                      label={`Collected on ${invoice.id}`}
+                      showValue
+                      size="sm"
+                      value={invoice.paid}
+                    />
                   </TableCell>
                   <TableCell numeric>{MONEY.format(invoice.amount)}</TableCell>
                 </TableRow>
               ))}
+            </TableBody>
+          </TableContent>
+        </Table>
+      </Scene>
+      <Scene
+        label="Controls inside the cells"
+        note="A row a reader edits in place: a number field for seats, a text field for a note, a switch for auto-renew, and a total that answers them. Each control is its own tab stop, which is what the table role means — and what a grid would take away."
+      >
+        <Table columns={6} variant="framed">
+          <TableContent>
+            <TableHead>
+              <TableRow>
+                <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
+                <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+                <TableColumnHeader text="nowrap">Seats</TableColumnHeader>
+                <TableColumnHeader text="nowrap">Note</TableColumnHeader>
+                <TableColumnHeader align="center" text="nowrap">
+                  Auto-renew
+                </TableColumnHeader>
+                <TableColumnHeader numeric text="nowrap">
+                  Total
+                </TableColumnHeader>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {INVOICES.slice(0, 4).map((invoice) => (
+                <EditableRow invoice={invoice} key={invoice.id} />
+              ))}
+            </TableBody>
+          </TableContent>
+        </Table>
+      </Scene>
+      <Scene
+        label="Content the table did not choose"
+        note="A translated header twice as long as its English, a forty-character hash that breaks inside its column, and a note that truncates with every character still in the DOM. The three treatments are the family's answer to content it does not control."
+      >
+        <Table columns={3} layout="fixed" variant="framed">
+          <TableContent>
+            <TableHead>
+              <TableRow>
+                <TableColumnHeader>Rechnungsnummer</TableColumnHeader>
+                <TableColumnHeader>Prüfsumme</TableColumnHeader>
+                <TableColumnHeader>Bemerkung</TableColumnHeader>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow value="INV-1044">
+                <TableRowHeader>INV-1044</TableRowHeader>
+                <TableCell text="wrap">9f2c1ab84de07615c3b9a0d5e8471fca2b6d09e3</TableCell>
+                <TableCell text="truncate">
+                  Quarterly reconciliation for the Bright Harbor Media account, prepared by the
+                  finance team and approved on the fourteenth.
+                </TableCell>
+              </TableRow>
+              <TableRow value="INV-1053">
+                <TableRowHeader>INV-1053</TableRowHeader>
+                <TableCell text="wrap">Rechnungsprufungsausschusssitzung</TableCell>
+                <TableCell text="nowrap">
+                  One line, whatever it costs: the column widens and the table scrolls rather than
+                  the words breaking.
+                </TableCell>
+              </TableRow>
             </TableBody>
           </TableContent>
         </Table>
@@ -900,73 +1243,148 @@ export const Content: Story = {
 
 function ListingDemo() {
   const [chosen, setChosen] = useState<readonly string[]>([]);
-  const [sort, setSort] = useState<TableSortDescriptor | null>(null);
-  const rows = useMemo(() => sortRows(INVOICES, sort), [sort]);
+  const [sort, setSort] = useState<TableSortDescriptor | null>({
+    column: 'due',
+    direction: 'ascending',
+  });
+  const [statuses, setStatuses] = useState<readonly string[]>([]);
+
+  const rows = useMemo(() => {
+    const filtered =
+      statuses.length === 0
+        ? INVOICES
+        : INVOICES.filter((invoice) => statuses.includes(invoice.status));
+    return sortRows(filtered, sort);
+  }, [sort, statuses]);
 
   return (
     <Table
-      columns={6}
+      columns={10}
       onSortChange={setSort}
       onValueChange={setChosen}
       selectionMode="multiple"
       sort={sort}
+      stickyFooter
       stickyHeader
       value={chosen}
       variant="framed"
     >
-      <TableContent totalRowCount={128}>
+      <TableContent
+        scrollProps={{ className: 'slotted-demo-bound slotted-demo-bound--tall' }}
+        totalRowCount={412}
+      >
         <TableHead>
           <TableRow>
-            <TableSelectAll />
-            <TableColumnHeader column="id" sticky="start" text="nowrap">
+            <TableSelectAll sticky="start" />
+            <TableColumnHeader column="id" sticky="start" stickyOffset="3rem" text="nowrap">
               <TableSort>Invoice</TableSort>
             </TableColumnHeader>
-            <TableColumnHeader column="client">
+            <TableColumnHeader column="client" text="nowrap">
               <TableSort>Client</TableSort>
+            </TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Status
               <TableColumnActions>
-                <button aria-label="Filter by client" type="button">
-                  <Funnel />
-                </button>
+                <StatusFilter chosen={statuses} onChange={setStatuses} />
               </TableColumnActions>
             </TableColumnHeader>
-            <TableColumnHeader>Status</TableColumnHeader>
-            <TableColumnHeader column="amount" numeric>
+            <TableColumnHeader text="nowrap">Owner</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Service</TableColumnHeader>
+            <TableColumnHeader column="due" text="nowrap">
+              <TableSort>Due</TableSort>
+            </TableColumnHeader>
+            <TableColumnHeader text="nowrap">Collected</TableColumnHeader>
+            <TableColumnHeader column="amount" numeric text="nowrap">
               <TableSort>Amount</TableSort>
             </TableColumnHeader>
             <TableColumnHeader align="center" sticky="end">
-              <span data-ui="visually-hidden">Actions</span>
+              <VisuallyHidden>Actions</VisuallyHidden>
             </TableColumnHeader>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((invoice, index) => (
-            <TableRow key={invoice.id} rowIndex={index + 1} value={invoice.id}>
-              <TableSelect />
-              <TableRowHeader sticky="start" text="nowrap">
-                {invoice.id}
-              </TableRowHeader>
-              <TableCell text="nowrap">{invoice.client}</TableCell>
-              <TableCell>
-                <Tag tone={TONE[invoice.status]}>{invoice.status}</Tag>
-              </TableCell>
-              <TableCell numeric>{MONEY.format(invoice.amount)}</TableCell>
-              <TableCell align="center" sticky="end">
-                <IconButton
-                  aria-label={`Actions for ${invoice.id}`}
-                  size="sm"
-                  tone="secondary"
-                  variant="ghost"
-                >
-                  <Ellipsis />
-                </IconButton>
-              </TableCell>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableEmpty>
+                <ResultState status="no-results">
+                  <ResultStateContent>
+                    <ResultStateTitle>No invoices match this filter</ResultStateTitle>
+                  </ResultStateContent>
+                </ResultState>
+              </TableEmpty>
             </TableRow>
-          ))}
+          ) : (
+            rows.map((invoice, index) => (
+              <TableRow
+                disabled={invoice.status === 'Draft'}
+                key={invoice.id}
+                rowIndex={index + 1}
+                value={invoice.id}
+              >
+                <TableSelect sticky="start" />
+                <TableRowHeader sticky="start" stickyOffset="3rem" text="nowrap">
+                  <Link href={`#${invoice.id}`}>{invoice.id}</Link>
+                </TableRowHeader>
+                <TableCell text="nowrap">{invoice.client}</TableCell>
+                <TableCell text="nowrap">
+                  <Tag tone={TONE[invoice.status]}>{invoice.status}</Tag>
+                </TableCell>
+                <TableCell text="nowrap">
+                  <span className="slotted-demo-row">
+                    <Avatar name={invoice.owner} size="sm" />
+                    {invoice.owner}
+                  </span>
+                </TableCell>
+                <TableCell text="nowrap">
+                  <StatusIndicator status={SERVICE[invoice.service]}>
+                    {invoice.region}
+                  </StatusIndicator>
+                </TableCell>
+                <TableCell text="nowrap">{invoice.due}</TableCell>
+                <TableCell>
+                  <ProgressBar
+                    hideLabel
+                    label={`Collected on ${invoice.id}`}
+                    showValue
+                    size="sm"
+                    value={invoice.paid}
+                  />
+                </TableCell>
+                <TableCell numeric>{MONEY.format(invoice.amount)}</TableCell>
+                <TableCell align="center" sticky="end">
+                  <IconButton
+                    aria-label={`Actions for ${invoice.id}`}
+                    size="sm"
+                    tone="secondary"
+                    variant="ghost"
+                  >
+                    <Ellipsis />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
+        <TableSummary>
+          <TableRow>
+            <TableCell colSpan={2} sticky="start" text="nowrap">
+              This page
+            </TableCell>
+            <TableCell colSpan={6}>{rows.length} invoices</TableCell>
+            <TableCell numeric>
+              {MONEY.format(rows.reduce((total, invoice) => total + invoice.amount, 0))}
+            </TableCell>
+            <TableCell sticky="end" />
+          </TableRow>
+        </TableSummary>
       </TableContent>
       <TableFooter>
-        <span>{chosen.length === 0 ? '4 of 128 invoices' : `${chosen.length} chosen`}</span>
-        <Pagination count={128} defaultPage={1} pageSize={4}>
+        <span>
+          {chosen.length === 0
+            ? `${rows.length} of 412 invoices`
+            : `${chosen.length} chosen — export, send a reminder, or write one off`}
+        </span>
+        <Pagination count={412} defaultPage={1} pageSize={12}>
           <PaginationPrevious />
           <PaginationItems />
           <PaginationNext />
@@ -981,8 +1399,8 @@ export const Listing: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
-        label="Everything at once"
-        note="Sorting, selection, a filter in a header, the identifier pinned at the start and the actions at the end, and a paging control in the footer. Every piece beside the table is another family, composed rather than built in."
+        label="A billing screen, whole"
+        note="Ten columns and twelve of four hundred and twelve records: sorting by due date, a status filter in the status header, the checkbox and the identifier pinned together at the start, actions pinned at the end, a total in the tfoot, and paging in the footer. Draft records cannot be chosen, so the header checkbox covers nine and says so."
       >
         <ListingDemo />
       </Scene>

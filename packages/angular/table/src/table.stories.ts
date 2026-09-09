@@ -1,5 +1,8 @@
+import { SlAvatar } from '@slotted/angular/avatar';
 import { SlIconButton } from '@slotted/angular/button';
+import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlLink } from '@slotted/angular/link';
+import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
 import {
   SlPagination,
   SlPaginationItems,
@@ -7,17 +10,29 @@ import {
   SlPaginationPrevious,
 } from '@slotted/angular/pagination';
 import {
+  SlPopover,
+  SlPopoverBody,
+  SlPopoverContent,
+  SlPopoverLayer,
+  SlPopoverTrigger,
+} from '@slotted/angular/popover';
+import { SlProgressBar } from '@slotted/angular/progress-indicator';
+import {
   SlResultState,
   SlResultStateContent,
   SlResultStateTitle,
 } from '@slotted/angular/result-state';
+import { SlStatusIndicator } from '@slotted/angular/status-indicator';
+import { SlSwitch } from '@slotted/angular/switch';
 import { SlTag, SlTagBody } from '@slotted/angular/tag';
+import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
 
 import { SlTable } from './table';
+import type { TableSortDescriptor } from './table-defaults';
 import { SlTableContent } from './table-content';
 import { SL_TABLE_PARTS } from './table-parts';
 import { ANGULAR_TABLE_DOCS, ANGULAR_TABLE_TOKENS } from './table.docs';
@@ -71,6 +86,20 @@ const meta: Meta<TableStoryArgs> = {
         SlIconButton,
         SlTag,
         SlTagBody,
+        SlAvatar,
+        SlCheckbox,
+        SlPopover,
+        SlPopoverBody,
+        SlPopoverContent,
+        SlPopoverLayer,
+        SlPopoverTrigger,
+        SlProgressBar,
+        SlStatusIndicator,
+        SlSwitch,
+        SlNumberField,
+        SlNumberFieldInput,
+        SlTextField,
+        SlTextFieldInput,
       ],
     }),
   ],
@@ -112,38 +141,182 @@ const INVOICES = [
   {
     amount: '1,240.00',
     client: 'Northwind Trading',
+    due: '11 Sep',
+    dueAt: '2026-09-11',
     id: 'INV-1042',
     issued: '12 Aug',
-    owner: 'A. Marchetti',
+    owner: 'Alina Marchetti',
+    paid: 100,
+    region: 'EU',
+    seats: 24,
+    service: 'success',
     status: 'Paid',
     tone: 'success',
   },
   {
     amount: '18.50',
     client: 'Cascade Logistics',
+    due: '18 Sep',
+    dueAt: '2026-09-18',
     id: 'INV-1043',
     issued: '19 Aug',
-    owner: 'P. Okonkwo',
+    owner: 'Paul Okonkwo',
+    paid: 0,
+    region: 'US',
+    seats: 3,
+    service: 'warning',
     status: 'Overdue',
     tone: 'danger',
   },
   {
     amount: '9,802.75',
-    client: 'Bright Harbor',
+    client: 'Bright Harbor Media',
+    due: '27 Sep',
+    dueAt: '2026-09-27',
     id: 'INV-1044',
     issued: '28 Aug',
-    owner: 'L. Ferreira',
+    owner: 'Luiza Ferreira',
+    paid: 45,
+    region: 'APAC',
+    seats: 180,
+    service: 'success',
     status: 'Draft',
     tone: 'secondary',
   },
   {
     amount: '430.00',
     client: 'Halcyon Press',
+    due: '3 Oct',
+    dueAt: '2026-10-03',
     id: 'INV-1045',
     issued: '3 Sep',
-    owner: 'S. Nakamura',
+    owner: 'Sora Nakamura',
+    paid: 100,
+    region: 'EU',
+    seats: 12,
+    service: 'success',
     status: 'Paid',
     tone: 'success',
+  },
+  {
+    amount: '2,015.40',
+    client: 'Orchard Foods',
+    due: '6 Oct',
+    dueAt: '2026-10-06',
+    id: 'INV-1046',
+    issued: '6 Sep',
+    owner: 'Marie Dubois',
+    paid: 60,
+    region: 'EU',
+    seats: 46,
+    service: 'danger',
+    status: 'Overdue',
+    tone: 'danger',
+  },
+  {
+    amount: '77.90',
+    client: 'Lantern Health',
+    due: '9 Oct',
+    dueAt: '2026-10-09',
+    id: 'INV-1047',
+    issued: '9 Sep',
+    owner: 'Ravi Chandra',
+    paid: 100,
+    region: 'APAC',
+    seats: 8,
+    service: 'success',
+    status: 'Paid',
+    tone: 'success',
+  },
+  {
+    amount: '15,400.00',
+    client: 'Vireo Industrial',
+    due: '12 Oct',
+    dueAt: '2026-10-12',
+    id: 'INV-1048',
+    issued: '12 Sep',
+    owner: 'Ines Almeida',
+    paid: 20,
+    region: 'US',
+    seats: 640,
+    service: 'warning',
+    status: 'Draft',
+    tone: 'secondary',
+  },
+  {
+    amount: '320.15',
+    client: 'Pallas Analytics',
+    due: '15 Oct',
+    dueAt: '2026-10-15',
+    id: 'INV-1049',
+    issued: '15 Sep',
+    owner: 'Tomas Novak',
+    paid: 100,
+    region: 'EU',
+    seats: 19,
+    service: 'success',
+    status: 'Paid',
+    tone: 'success',
+  },
+  {
+    amount: '6,410.00',
+    client: 'Meridian Freight',
+    due: '18 Oct',
+    dueAt: '2026-10-18',
+    id: 'INV-1050',
+    issued: '18 Sep',
+    owner: 'Grace Mensah',
+    paid: 0,
+    region: 'US',
+    seats: 205,
+    service: 'success',
+    status: 'Overdue',
+    tone: 'danger',
+  },
+  {
+    amount: '89.99',
+    client: 'Blue Ridge Studio',
+    due: '21 Oct',
+    dueAt: '2026-10-21',
+    id: 'INV-1051',
+    issued: '21 Sep',
+    owner: 'Jonas Weber',
+    paid: 100,
+    region: 'EU',
+    seats: 4,
+    service: 'success',
+    status: 'Paid',
+    tone: 'success',
+  },
+  {
+    amount: '1,180.50',
+    client: 'Cobalt Robotics',
+    due: '24 Oct',
+    dueAt: '2026-10-24',
+    id: 'INV-1052',
+    issued: '24 Sep',
+    owner: 'Yuki Tanaka',
+    paid: 75,
+    region: 'APAC',
+    seats: 58,
+    service: 'warning',
+    status: 'Draft',
+    tone: 'secondary',
+  },
+  {
+    amount: '44,300.00',
+    client: 'Sable Energy Group',
+    due: '27 Oct',
+    dueAt: '2026-10-27',
+    id: 'INV-1053',
+    issued: '27 Sep',
+    owner: 'Hannah Olsen',
+    paid: 30,
+    region: 'US',
+    seats: 1240,
+    service: 'success',
+    status: 'Overdue',
+    tone: 'danger',
   },
 ];
 
@@ -174,14 +347,96 @@ const table = (attributes: string, inner = HEAD + BODY) => `
     <div slTableContent>${inner}</div>
   </div>`;
 
+/**
+ * The trigger the family sizes and the panel it does not draw. The slot holds a
+ * button; what the filter keeps and drops is the consumer's own query, which is
+ * why the checkboxes below write to a signal the rows are read through.
+ */
 const FILTER = `
   <span slTableColumnActions>
-    <button type="button" aria-label="Filter by client">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-      </svg>
-    </button>
+    <ng-container slPopover [portal]="false">
+      <button slPopoverTrigger type="button" aria-label="Filter by status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+        </svg>
+      </button>
+      <ng-template slPopoverLayer>
+        <div slPopoverContent aria-label="Filter by status">
+          <div slPopoverBody>
+            @for (status of statuses; track status) {
+              <div slCheckbox [checked]="kept.includes(status)" (checkedChange)="toggle(status)">
+                {{ status }}
+              </div>
+            }
+          </div>
+        </div>
+      </ng-template>
+    </ng-container>
   </span>`;
+
+/** The one formatter the demonstrations share, so a total reads like a total. */
+const MONEY = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 2 });
+
+/** The three states the filter offers, and the state it writes. */
+const STATUSES = ['Paid', 'Overdue', 'Draft'];
+
+interface Invoice {
+  amount: string;
+  client: string;
+  /** What the reader sees. */
+  due: string;
+  /** What the sort answers, because '11 Sep' orders alphabetically and a date does not. */
+  dueAt: string;
+  id: string;
+  issued: string;
+  owner: string;
+  paid: number;
+  region: string;
+  seats: number;
+  service: string;
+  status: string;
+  tone: string;
+}
+
+/**
+ * The filter's own state, kept beside the story rather than inside the family:
+ * a table holds no filter, and what a header's trigger does to the rows is the
+ * consumer's query. `kept` is read by the checkboxes and by the rows alike.
+ */
+/**
+ * The descriptor applied to your own array, which is the whole of client
+ * sorting. The date column orders by the value behind it rather than the one on
+ * screen, because '11 Sep' sorts alphabetically and a date does not.
+ */
+const SORT_KEY: Record<string, keyof Invoice> = { due: 'dueAt' };
+
+function sortRows(rows: readonly Invoice[], sort: TableSortDescriptor | null) {
+  if (sort === null) return rows;
+  const direction = sort.direction === 'ascending' ? 1 : -1;
+  const key = SORT_KEY[sort.column] ?? (sort.column as keyof Invoice);
+  return [...rows].sort(
+    (left, right) => String(left[key]).localeCompare(String(right[key])) * direction,
+  );
+}
+
+function filterProps(source: readonly Invoice[]) {
+  const state = { kept: [] as string[] };
+  return {
+    kept: state.kept,
+    sort: null as TableSortDescriptor | null,
+    statuses: STATUSES,
+    toggle(status: string) {
+      const at = state.kept.indexOf(status);
+      if (at === -1) state.kept.push(status);
+      else state.kept.splice(at, 1);
+    },
+    visible(this: { sort: TableSortDescriptor | null }) {
+      const kept =
+        state.kept.length === 0 ? source : source.filter((row) => state.kept.includes(row.status));
+      return sortRows(kept, this.sort);
+    },
+  };
+}
 
 export const Playground: Story = {
   args: { layout: 'auto', striped: false, variant: 'ruled' },
@@ -274,25 +529,43 @@ export const Sorting: Story = {
 export const ColumnControls: Story = {
   parameters: scenario('column-controls'),
   render: () => ({
-    props: { invoices: INVOICES.slice(0, 3) },
+    props: filterProps(INVOICES),
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
-    'A column that sorts and filters',
-    'Both controls stand on the column boundary, so the header row reads as one line of triggers. The slot holds the trigger; what the filter keeps and drops is your own query.',
+    'A column that sorts, and a column that filters',
+    'Press the funnel: the trigger opens a popover, the checkboxes are your own state, and the rows below answer them. The header that sorts answers the pointer with a ground; the one that only carries a filter does not, because it is not a target.',
     `
   <div slTable [columns]="4" variant="framed">
     <div slTableContent>
       <thead slTableHead>
         <tr slTableRow>
           <th slTableColumnHeader column="id"><button slTableSort>Invoice</button></th>
-          <th slTableColumnHeader column="client">
-            <button slTableSort>Client</button>${FILTER}
-          </th>
+          <th slTableColumnHeader column="client"><button slTableSort>Client</button></th>
           <th slTableColumnHeader>Status${FILTER}</th>
           <th slTableColumnHeader numeric>Amount</th>
         </tr>
-      </thead>${BODY}
+      </thead>
+      <tbody slTableBody>
+        @for (invoice of visible(); track invoice.id) {
+          <tr slTableRow [value]="invoice.id">
+            <th slTableRowHeader>{{ invoice.id }}</th>
+            <td slTableCell>{{ invoice.client }}</td>
+            <td slTableCell><span slTag [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span></td>
+            <td slTableCell numeric>{{ invoice.amount }}</td>
+          </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>No invoices match this filter</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
+        }
+      </tbody>
     </div>
   </div>`,
   )}
@@ -412,45 +685,93 @@ const WIDE = `
     </div>
   </div>`;
 
-const LEDGER = (stickyTo?: 'page') => `
-  <div slTable [columns]="4" variant="framed" stickyHeader ${stickyTo ? `stickyTo="${stickyTo}"` : ''}>
-    <div slTableContent ${stickyTo === 'page' ? '' : 'style="max-block-size: 11rem"'}>
+const LEDGER = (options: { stickyFooter?: boolean; stickyTo?: 'page' } = {}) => `
+  <div slTable [columns]="5" variant="framed" stickyHeader ${options.stickyFooter ? 'stickyFooter' : ''} ${options.stickyTo ? `stickyTo="${options.stickyTo}"` : ''}>
+    <div slTableContent ${options.stickyTo === 'page' ? '' : 'class="slotted-demo-bound"'}>
       <thead slTableHead>
         <tr slTableRow>
           <th slTableColumnHeader sticky="start" text="nowrap">Invoice</th>
           <th slTableColumnHeader text="nowrap">Client</th>
           <th slTableColumnHeader text="nowrap">Owner</th>
+          <th slTableColumnHeader text="nowrap">Due</th>
           <th slTableColumnHeader numeric text="nowrap">Amount</th>
         </tr>
       </thead>
       <tbody slTableBody>
-        @for (invoice of invoices; track $index) {
+        @for (invoice of ledger; track $index) {
           <tr slTableRow [value]="invoice.id + $index">
             <th slTableRowHeader sticky="start" text="nowrap">{{ invoice.id }}</th>
             <td slTableCell text="nowrap">{{ invoice.client }}</td>
             <td slTableCell text="nowrap">{{ invoice.owner }}</td>
+            <td slTableCell text="nowrap">{{ invoice.due }}</td>
             <td slTableCell numeric>{{ invoice.amount }}</td>
           </tr>
         }
       </tbody>
+      <tfoot slTableSummary>
+        <tr slTableRow>
+          <td slTableCell [colSpan]="4" sticky="start" text="nowrap">{{ ledger.length }} invoices</td>
+          <td slTableCell numeric>{{ ledgerTotal }}</td>
+        </tr>
+      </tfoot>
     </div>
   </div>`;
+
+/** Forty-eight records, so a bounded box always has far more table than room. */
+const LEDGER_ROWS = [INVOICES, INVOICES, INVOICES, INVOICES].flat();
+
+const LEDGER_TOTAL = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 2 }).format(
+  LEDGER_ROWS.reduce((sum, invoice) => sum + Number(invoice.amount.replace(/,/g, '')), 0),
+);
 
 export const Sticky: Story = {
   parameters: scenario('sticky'),
   render: () => ({
-    props: { invoices: [...INVOICES, ...INVOICES, ...INVOICES, ...INVOICES] },
+    props: { ledger: LEDGER_ROWS, ledgerTotal: LEDGER_TOTAL },
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'stickyTo="scroll" — a panel with a height of its own',
-    "Scroll inside the box: the header stays against the table's own scroller, which is what keeps it right in a drawer, a dialog or a split pane. The pinned first column darkens its edge while something is hidden under it.",
-    LEDGER(undefined),
+    "Scroll inside the box: the header stays against the table's own scroller, which is what keeps it right in a drawer, a dialog or a split pane. The pinned first column darkens its edge while something is hidden under it, and the summary here scrolls away with the rows.",
+    LEDGER(),
+  )}
+  ${scene(
+    'stickyFooter — the total stays where the header does',
+    'The same box with both ends held: the tfoot is pinned to the bottom the way the thead is pinned to the top, so the number the reader came for is on screen at row one and at row forty-eight. It pins the summary and not the footer bar, which never scrolls in the first place.',
+    LEDGER({ stickyFooter: true }),
   )}
   ${scene(
     'stickyTo="page" — the header stays while the page moves',
-    'Scroll the dashed box, which stands in for the page: the table has no scroller of its own here, so the header sticks to what scrolls outside it. The cost is that a wide table now pushes that scroller sideways instead of scrolling inside its frame.',
-    `<div class="slotted-demo-viewport" data-scroll data-size="tall">${LEDGER('page')}</div>`,
+    'A page, not a stage: scroll the dashed box and the heading and the paragraphs above the table leave while the header stays. The table owns no scroller here, so it sticks to what scrolls outside it. Where it stops is --slotted-table-sticky-offset: nought against a bare page, and here the shell sets it to the height of its own bar, so the header stops under the bar rather than behind it.',
+    `
+  <div class="slotted-demo-viewport" data-layout="page" data-scroll data-size="tall">
+    <div class="slotted-demo-page">
+      <div class="slotted-demo-page__bar">
+        <span>Acme Billing</span>
+        <span>September</span>
+      </div>
+      <h3>Billing — September</h3>
+      <p>
+        Every invoice raised this month, newest first. Amounts are gross and the collection figures
+        come from the payment provider rather than from the ledger, so a settled invoice can lag a
+        day behind the bank.
+      </p>
+      <p>
+        The finance team reconciles on the fifth working day. Anything still overdue after that
+        goes to the escalation list, and the owner named on the row is the person who takes it.
+      </p>
+      ${LEDGER({ stickyTo: 'page' })}
+      <p>
+        Rows are exported as CSV with the same columns and the same order. The export follows the
+        filter, not the page: filtering to one region and exporting gives that region in full
+        rather than the twelve rows on screen.
+      </p>
+      <p>
+        Questions about a specific invoice go to the owner first, then to billing operations.
+        Credit notes are raised against the original invoice and never by editing it.
+      </p>
+    </div>
+  </div>`,
   )}
 </div>`,
   }),
@@ -642,32 +963,135 @@ export const Density: Story = {
 export const Content: Story = {
   parameters: scenario('content'),
   render: () => ({
-    props: { invoices: INVOICES },
+    props: {
+      invoices: INVOICES.slice(0, 6),
+      editable: INVOICES.slice(0, 4).map((invoice) => ({ ...invoice, note: '', renew: true })),
+      total: (invoice: Invoice & { seats: number }) =>
+        MONEY.format(Number(invoice.amount.replace(/,/g, '')) * invoice.seats),
+      seatsOf: (invoice: Invoice, event: Event) => {
+        invoice.seats = Number((event.target as HTMLInputElement).value) || 1;
+      },
+      noteOf: (invoice: Invoice & { note: string }, event: Event) => {
+        invoice.note = (event.target as HTMLInputElement).value;
+      },
+    },
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
-    'A cell is not a string',
-    'The record name is a link, the status is a tag, and a translated header is twice as long as its English. The table is a grid of your own content, so every part holds what a record needs.',
+    'A cell is a slot, not a string',
+    'A link and a tag on the identifier, an avatar beside the owner, a status indicator on the service, a bar for what has been collected, and an amount in tabular figures. Every one of them is another family standing in a cell this one lays out.',
     `
-  <div slTable [columns]="4" variant="framed">
+  <div slTable [columns]="5" variant="framed">
     <div slTableContent>
       <thead slTableHead>
         <tr slTableRow>
-          <th slTableColumnHeader>Rechnungsnummer</th>
-          <th slTableColumnHeader>Auftraggeber</th>
-          <th slTableColumnHeader>Zahlungsstatus</th>
-          <th slTableColumnHeader numeric>Betrag</th>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Owner</th>
+          <th slTableColumnHeader text="nowrap">Service</th>
+          <th slTableColumnHeader text="nowrap">Collected</th>
+          <th slTableColumnHeader numeric text="nowrap">Amount</th>
         </tr>
       </thead>
       <tbody slTableBody>
         @for (invoice of invoices; track invoice.id) {
           <tr slTableRow [value]="invoice.id">
-            <th slTableRowHeader><a slLink [href]="'#' + invoice.id">{{ invoice.id }}</a></th>
-            <td slTableCell>{{ invoice.client }}</td>
-            <td slTableCell><span slTag [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span></td>
+            <th slTableRowHeader text="nowrap">
+              <a slLink [href]="'#' + invoice.id">{{ invoice.id }}</a>
+              <br />
+              <span slTag size="sm" [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span>
+            </th>
+            <td slTableCell text="nowrap">
+              <span class="slotted-demo-row">
+                <span slAvatar size="sm" [name]="invoice.owner"></span>
+                {{ invoice.owner }}
+              </span>
+            </td>
+            <td slTableCell text="nowrap">
+              <span slStatusIndicator [status]="invoice.service">{{ invoice.region }}</span>
+            </td>
+            <td slTableCell>
+              <div slProgressBar size="sm" showValue hideLabel [label]="'Collected on ' + invoice.id" [value]="invoice.paid"></div>
+            </td>
             <td slTableCell numeric>{{ invoice.amount }}</td>
           </tr>
         }
+      </tbody>
+    </div>
+  </div>`,
+  )}
+  ${scene(
+    'Controls inside the cells',
+    'A row a reader edits in place: a number field for seats, a text field for a note, a switch for auto-renew, and a total that answers them. Each control is its own tab stop, which is what the table role means — and what a grid would take away.',
+    `
+  <div slTable [columns]="6" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader text="nowrap">Seats</th>
+          <th slTableColumnHeader text="nowrap">Note</th>
+          <th slTableColumnHeader align="center" text="nowrap">Auto-renew</th>
+          <th slTableColumnHeader numeric text="nowrap">Total</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (invoice of editable; track invoice.id) {
+          <tr slTableRow [value]="invoice.id">
+            <th slTableRowHeader text="nowrap">
+              <a slLink [href]="'#' + invoice.id">{{ invoice.id }}</a>
+            </th>
+            <td slTableCell text="nowrap">{{ invoice.client }}</td>
+            <td slTableCell>
+              <div slNumberField size="sm">
+                <input slNumberFieldInput min="1" [value]="invoice.seats" [attr.aria-label]="'Seats on ' + invoice.id" (input)="seatsOf(invoice, $event)" />
+              </div>
+            </td>
+            <td slTableCell>
+              <div slTextField size="sm">
+                <input slTextFieldInput placeholder="Add a note" [value]="invoice.note" [attr.aria-label]="'Note on ' + invoice.id" (input)="noteOf(invoice, $event)" />
+              </div>
+            </td>
+            <td slTableCell align="center">
+              <span slSwitch size="sm" [checked]="invoice.renew" [attr.aria-label]="'Auto-renew ' + invoice.id"></span>
+            </td>
+            <td slTableCell numeric>{{ total(invoice) }}</td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`,
+  )}
+  ${scene(
+    'Content the table did not choose',
+    'A translated header twice as long as its English, a forty-character hash that breaks inside its column, and a note that truncates with every character still in the DOM. The three treatments are the answer to content the family does not control.',
+    `
+  <div slTable [columns]="3" layout="fixed" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader>Rechnungsnummer</th>
+          <th slTableColumnHeader>Prufsumme</th>
+          <th slTableColumnHeader>Bemerkung</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        <tr slTableRow value="INV-1044">
+          <th slTableRowHeader>INV-1044</th>
+          <td slTableCell text="wrap">9f2c1ab84de07615c3b9a0d5e8471fca2b6d09e3</td>
+          <td slTableCell text="truncate">
+            Quarterly reconciliation for the Bright Harbor Media account, prepared by the finance
+            team and approved on the fourteenth.
+          </td>
+        </tr>
+        <tr slTableRow value="INV-1053">
+          <th slTableRowHeader>INV-1053</th>
+          <td slTableCell text="wrap">Rechnungsprufungsausschusssitzung</td>
+          <td slTableCell text="nowrap">
+            One line, whatever it costs: the column widens and the table scrolls rather than the
+            words breaking.
+          </td>
+        </tr>
       </tbody>
     </div>
   </div>`,
@@ -679,51 +1103,95 @@ export const Content: Story = {
 export const Listing: Story = {
   parameters: scenario('listing'),
   render: () => ({
-    props: { chosen: [], invoices: INVOICES, sort: null },
+    props: {
+      ...filterProps(INVOICES),
+      chosen: [] as string[],
+      sort: { column: 'due', direction: 'ascending' } as TableSortDescriptor | null,
+      pageTotal: MONEY.format(
+        INVOICES.reduce((sum, invoice) => sum + Number(invoice.amount.replace(/,/g, '')), 0),
+      ),
+    },
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
-    'Everything at once',
-    'Sorting, selection, a filter in a header, the identifier pinned at the start and the actions at the end, and a paging control in the footer. Every piece beside the table is another family, composed rather than built in.',
+    'A billing screen, whole',
+    'Ten columns and twelve of four hundred and twelve records: sorting by due date, a status filter in the status header, the checkbox and the identifier pinned together at the start, actions pinned at the end, a total in the tfoot, and paging in the footer. Draft records cannot be chosen, so the header checkbox covers nine and says so.',
     `
-  <div slTable [columns]="6" variant="framed" stickyHeader selectionMode="multiple" [(value)]="chosen" [(sort)]="sort">
-    <div slTableContent [totalRowCount]="128">
+  <div slTable [columns]="10" variant="framed" stickyHeader stickyFooter selectionMode="multiple" [(value)]="chosen" [(sort)]="sort">
+    <div slTableContent [totalRowCount]="412" class="slotted-demo-bound slotted-demo-bound--tall">
       <thead slTableHead>
         <tr slTableRow>
-          <th slTableSelectAll></th>
-          <th slTableColumnHeader column="id" sticky="start" text="nowrap"><button slTableSort>Invoice</button></th>
-          <th slTableColumnHeader column="client">
-            <button slTableSort>Client</button>${FILTER}
-          </th>
-          <th slTableColumnHeader>Status</th>
-          <th slTableColumnHeader column="amount" numeric><button slTableSort>Amount</button></th>
+          <th slTableSelectAll sticky="start"></th>
+          <th slTableColumnHeader column="id" sticky="start" stickyOffset="3rem" text="nowrap"><button slTableSort>Invoice</button></th>
+          <th slTableColumnHeader column="client" text="nowrap"><button slTableSort>Client</button></th>
+          <th slTableColumnHeader text="nowrap">Status${FILTER}</th>
+          <th slTableColumnHeader text="nowrap">Owner</th>
+          <th slTableColumnHeader text="nowrap">Service</th>
+          <th slTableColumnHeader column="due" text="nowrap"><button slTableSort>Due</button></th>
+          <th slTableColumnHeader text="nowrap">Collected</th>
+          <th slTableColumnHeader column="amount" numeric text="nowrap"><button slTableSort>Amount</button></th>
           <th slTableColumnHeader sticky="end" align="center">
             <span data-ui="visually-hidden" data-part="root">Actions</span>
           </th>
         </tr>
       </thead>
       <tbody slTableBody>
-        @for (invoice of invoices; track invoice.id; let index = $index) {
-          <tr slTableRow [value]="invoice.id" [rowIndex]="index + 1">
-            <td slTableSelect></td>
-            <th slTableRowHeader sticky="start" text="nowrap">{{ invoice.id }}</th>
+        @for (invoice of visible(); track invoice.id; let index = $index) {
+          <tr slTableRow [value]="invoice.id" [rowIndex]="index + 1" [disabled]="invoice.status === 'Draft'">
+            <td slTableSelect sticky="start"></td>
+            <th slTableRowHeader sticky="start" stickyOffset="3rem" text="nowrap">
+              <a slLink [href]="'#' + invoice.id">{{ invoice.id }}</a>
+            </th>
             <td slTableCell text="nowrap">{{ invoice.client }}</td>
-            <td slTableCell><span slTag [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span></td>
+            <td slTableCell text="nowrap">
+              <span slTag [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span>
+            </td>
+            <td slTableCell text="nowrap">
+              <span class="slotted-demo-row">
+                <span slAvatar size="sm" [name]="invoice.owner"></span>
+                {{ invoice.owner }}
+              </span>
+            </td>
+            <td slTableCell text="nowrap">
+              <span slStatusIndicator [status]="invoice.service">{{ invoice.region }}</span>
+            </td>
+            <td slTableCell text="nowrap">{{ invoice.due }}</td>
+            <td slTableCell>
+              <div slProgressBar size="sm" showValue hideLabel [label]="'Collected on ' + invoice.id" [value]="invoice.paid"></div>
+            </td>
             <td slTableCell numeric>{{ invoice.amount }}</td>
             <td slTableCell sticky="end" align="center">
               <button slIconButton variant="ghost" tone="secondary" size="sm" type="button" [attr.aria-label]="'Actions for ' + invoice.id">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
                 </svg>
               </button>
             </td>
           </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>No invoices match this filter</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
         }
       </tbody>
+      <tfoot slTableSummary>
+        <tr slTableRow>
+          <td slTableCell [colSpan]="2" sticky="start" text="nowrap">This page</td>
+          <td slTableCell [colSpan]="6">{{ visible().length }} invoices</td>
+          <td slTableCell numeric>{{ pageTotal }}</td>
+          <td slTableCell sticky="end"></td>
+        </tr>
+      </tfoot>
     </div>
     <div slTableFooter>
-      <span>{{ chosen.length === 0 ? '4 of 128 invoices' : chosen.length + ' chosen' }}</span>
-      <nav slPagination [count]="128" [pageSize]="4">
+      <span>{{ chosen.length === 0 ? visible().length + ' of 412 invoices' : chosen.length + ' chosen — export, send a reminder, or write one off' }}</span>
+      <nav slPagination [count]="412" [pageSize]="12">
         <button slPaginationPrevious type="button"></button>
         <sl-pagination-items></sl-pagination-items>
         <button slPaginationNext type="button"></button>

@@ -16,9 +16,9 @@ import { SlTable } from './table';
 import type { TableAlign, TableSticky, TableText } from './table-defaults';
 
 /**
- * The four axes every cell answers, written once. `numeric` and `align` are two
- * facts rather than one axis: a number is set in tabular figures whichever way
- * it is aligned, and a right-aligned label is not a number.
+ * The axes every cell answers, written once. `numeric` and `align` are two facts
+ * rather than one axis: a number is set in tabular figures whichever way it is
+ * aligned, and a right-aligned label is not a number.
  */
 @Directive({
   standalone: true,
@@ -27,6 +27,7 @@ import type { TableAlign, TableSticky, TableText } from './table-defaults';
     '[attr.data-numeric]': "numeric() ? '' : null",
     '[attr.data-text]': 'text() ?? null',
     '[attr.data-sticky]': 'sticky() ?? null',
+    '[style.--slotted-table-sticky-inset]': 'stickyOffset() ?? null',
   },
 })
 export class SlTableCellAxes {
@@ -34,6 +35,13 @@ export class SlTableCellAxes {
   readonly numeric = input(false, { transform: booleanAttribute });
   readonly text = input<TableText | undefined>(undefined);
   readonly sticky = input<TableSticky | undefined>(undefined);
+  /**
+   * Where a pinned column stops, as a CSS length. Nought unless stated: two
+   * columns pinned to the same edge need the second to know how wide the first
+   * is, and the family states that rather than measuring it — measuring would
+   * mean reading the layout during change detection.
+   */
+  readonly stickyOffset = input<string | undefined>(undefined);
 }
 
 /**
@@ -148,7 +156,9 @@ export class SlTableRow {
   selector: 'th[slTableColumnHeader]',
   standalone: true,
   exportAs: 'slTableColumnHeader',
-  hostDirectives: [{ directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky'] }],
+  hostDirectives: [
+    { directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'] },
+  ],
   host: {
     'data-part': 'column-header',
     '[attr.scope]': "scope() ?? 'col'",
@@ -177,7 +187,9 @@ export class SlTableColumnHeader {
   selector: 'th[slTableRowHeader]',
   standalone: true,
   exportAs: 'slTableRowHeader',
-  hostDirectives: [{ directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky'] }],
+  hostDirectives: [
+    { directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'] },
+  ],
   host: { 'data-part': 'row-header', '[attr.scope]': "scope() ?? 'row'" },
 })
 export class SlTableRowHeader {
@@ -188,7 +200,9 @@ export class SlTableRowHeader {
   selector: 'td[slTableCell]',
   standalone: true,
   exportAs: 'slTableCell',
-  hostDirectives: [{ directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky'] }],
+  hostDirectives: [
+    { directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'] },
+  ],
   host: { 'data-part': 'cell' },
 })
 export class SlTableCell {}
@@ -261,6 +275,12 @@ export class SlTableColumnActions {}
   </span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  hostDirectives: [
+    {
+      directive: SlTableCellAxes,
+      inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'],
+    },
+  ],
   host: { 'data-part': 'selection' },
 })
 export class SlTableSelect {
@@ -308,6 +328,12 @@ export class SlTableSelect {
   </span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  hostDirectives: [
+    {
+      directive: SlTableCellAxes,
+      inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'],
+    },
+  ],
   host: { 'data-part': 'selection', scope: 'col' },
 })
 export class SlTableSelectAll {

@@ -126,6 +126,18 @@
     box-sizing: border-box;
     color: var(--_text);
     display: block;
+    /**
+     * Every step the sticky parts take is taken inside this box.
+     *
+     * A pinned column stands at `--slotted-z-index-sticky` and the header a
+     * step above it, and those steps are measured against each other — not
+     * against the page. Without a stacking context of its own the table hands
+     * them to whatever stacks outside it, and under `stickyTo="page"` a pinned
+     * column scrolling past an application's own bar painted straight over it.
+     * `isolation` contains the steps and creates no containing block, so
+     * nothing sticky changes what it resolves against.
+     */
+    isolation: isolate;
     font-family: var(--slotted-table-font-family, var(--slotted-control-font-family));
     font-size: var(--_font-size);
     line-height: var(--slotted-line-height-md, 1.5);
@@ -135,9 +147,19 @@
   [data-ui='table'][data-variant='framed'] {
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--_radius);
-    /* The frame clips what the scroller inside it paints into the corners; a
-       row's own ground is square and would otherwise fill the radius. */
-    overflow: hidden;
+    /**
+     * `clip` and not `hidden`, and the difference is the whole of `stickyTo`.
+     *
+     * Both clip what the scroller paints into the corners — a row's ground is
+     * square and would otherwise fill the radius — but `hidden` makes the box a
+     * **scroll container**, and a sticky element resolves against the nearest
+     * one of those. A framed table asking its header to stick to the page got a
+     * header that stuck to the frame instead, and a frame with no height holds
+     * nothing: the header simply left with the rows. `clip` clips without
+     * scrolling, so the nearest scroll container stays whatever the consumer
+     * meant it to be.
+     */
+    overflow: clip;
   }
 
   /**
@@ -219,6 +241,12 @@
     font-weight: var(--slotted-font-weight-semibold, 600);
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
+    /* Positioned here and not beside the slot that needs it. The actions slot is
+       absolute inside the header, so the header has to be a containing block —
+       and a `position` written later, next to that slot, would land after the
+       sticky rules and quietly turn a sticky header back into a static one.
+       That is exactly what happened to the one header carrying a filter. */
+    position: relative;
     text-align: start;
     /* A header wraps rather than truncating: it is two or three words, and the
        one thing a reader cannot recover is the name of the column they are
@@ -242,7 +270,15 @@
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
     text-align: start;
-    vertical-align: top;
+    /**
+     * The top, because a row is as tall as its tallest cell and the rest of the
+     * row is one line: a middle-aligned line beside a three-line cell floats in
+     * the middle of nothing. A table whose rows are all one line reads the same
+     * either way, and an application that wants the other answer states it once
+     * — the token is the whole of the axis, because it is one declaration and a
+     * prop on every cell would be four.
+     */
+    vertical-align: var(--slotted-table-cell-align, top);
   }
 
   /* A row header names the record, so it carries the weight one step above the
@@ -405,7 +441,11 @@
    * sets `--slotted-table-sticky-offset` once, and every table under it stops
    * below the bar rather than under it.
    */
-  [data-ui='table'][data-sticky-header] [data-part='column-header'] {
+  [data-ui='table'][data-sticky-header] [data-part='column-header'],
+  /* The chooser's own header is a `selection` cell and not a `column-header`,
+     and a rule naming only the second left the select-all scrolling away while
+     every column beside it stayed. */
+  [data-ui='table'][data-sticky-header] [data-part='head'] [data-part='selection'] {
     inset-block-start: var(--slotted-table-sticky-offset, 0);
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
@@ -415,24 +455,56 @@
     overflow: visible;
   }
 
+  /**
+   * The summary, pinned to the other end of the same box.
+   *
+   * A listing whose total scrolls out of view makes the reader scroll back for
+   * the number they came for, so the `tfoot` is held against the bottom the way
+   * the `thead` is held against the top — and it answers `stickyTo` the same
+   * way, through an offset of its own for a page with a bar across the bottom.
+   *
+   * It is the `tfoot` that is pinned and not the footer bar: the bar is a
+   * sibling of the scroller and never leaves it in the first place.
+   */
+  [data-ui='table'][data-sticky-footer] [data-part='summary'] > [data-part='row'] > * {
+    inset-block-end: var(--slotted-table-sticky-offset-end, 0);
+    position: sticky;
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
+  }
+
+  /* The corner again, at the bottom: a summary cell that is also a pinned
+     column takes both insets and the step above both. */
+  [data-ui='table'][data-sticky-footer] [data-part='summary'] [data-sticky] {
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
+  }
+
   [data-ui='table'] [data-sticky='start'] {
     /* The ground the row is painted with, whatever state it is in: `inherit`
        takes the row's own computed value, so a hovered, striped or selected row
        keeps one colour across the seam. */
     background-color: inherit;
-    inset-inline-start: 0;
+    /**
+     * Where the column stops, and it is stated rather than measured. Two
+     * columns pinned to the same edge both resolve against the scroller, so
+     * without the offset the second is drawn over the first — a checkbox column
+     * and the identifier beside it landed on the same pixel. The consumer
+     * states how wide the first one is, because measuring it would mean reading
+     * the layout during render.
+     */
+    inset-inline-start: var(--slotted-table-sticky-inset, 0);
     position: sticky;
     z-index: var(--slotted-z-index-sticky, 100);
   }
 
   [data-ui='table'] [data-sticky='end'] {
     background-color: inherit;
-    inset-inline-end: 0;
+    inset-inline-end: var(--slotted-table-sticky-inset, 0);
     position: sticky;
     z-index: var(--slotted-z-index-sticky, 100);
   }
 
-  [data-ui='table'][data-sticky-header] [data-part='column-header'][data-sticky] {
+  [data-ui='table'][data-sticky-header] [data-part='column-header'][data-sticky],
+  [data-ui='table'][data-sticky-header] [data-part='head'] [data-part='selection'][data-sticky] {
     background-color: var(--_head-surface);
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
@@ -450,18 +522,26 @@
    *
    * As a pseudo-element the line simply crosses the rule, which is what a
    * spreadsheet does and what the eye reads as one continuous column boundary.
-   * It is stretched past the cell's own bottom border, so the line is unbroken
+   * It is stretched past the cell's own **top** border, so the line is unbroken
    * down the body instead of stopping a pixel short at every row.
+   *
+   * Past the top and not past the bottom, and the difference is a pixel the
+   * reader can see. Overflow beyond the block-end edge is scrollable overflow,
+   * so a line hanging a pixel below the last row made the scroller one pixel
+   * taller than its table — and at the end of the scroll a pinned summary sat
+   * that pixel above the bottom, which reads as a row that shifts as it lands.
+   * Overflow beyond the block-start edge is not scrollable, so the same line
+   * drawn upwards bridges every row boundary and adds nothing to scroll.
    */
-  [data-ui='table'] [data-sticky] {
-    position: relative;
-  }
-
+  /* No `position` here. A pinned cell is already `position: sticky`, which is a
+     positioned box, so the line below resolves against it — and a `relative`
+     written at this point in the file would land after the sticky rules and
+     unpin every pinned column. */
   [data-ui='table'] [data-sticky]::after {
     background-color: var(--slotted-table-border-color, var(--slotted-border-subtle));
     content: '';
     inline-size: var(--_rule-width);
-    inset-block: 0 calc(var(--_rule-width) * -1);
+    inset-block: calc(var(--_rule-width) * -1) 0;
     position: absolute;
     z-index: 1;
   }
@@ -545,7 +625,6 @@
     );
 
     padding-inline-end: var(--_actions-room);
-    position: relative;
   }
 
   [data-ui='table'] [data-part='column-actions'] {
@@ -978,6 +1057,8 @@
     }
 
     [data-ui='table'][data-sticky-header] [data-part='column-header'],
+    [data-ui='table'][data-sticky-header] [data-part='head'] [data-part='selection'],
+    [data-ui='table'][data-sticky-footer] [data-part='summary'] > [data-part='row'] > *,
     [data-ui='table'] [data-sticky] {
       position: static;
     }

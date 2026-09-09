@@ -4713,3 +4713,31 @@ definition and its uses has to exclude the definition, or be done by hand. And a
 story is not verified until it has been opened: a family whose stories all
 compile can still have one that hangs, and the only instrument that says so is
 the page.
+
+## `table` — three pixels, three lessons
+
+A pinned column's edge line was drawn as an `::after` hanging one pixel **below**
+each cell, so the line would be unbroken down the body. Overflow past the
+block-end edge is scrollable overflow: the scroller became one pixel taller than
+its table, and at the end of the scroll a pinned summary landed a pixel above the
+bottom. Drawn upwards instead it bridges the same rule and adds nothing to
+scroll, because overflow past the block-start edge is not scrollable.
+
+`position: relative`, written next to the thing that needed it, landed after the
+sticky rules and quietly unpinned them: every pinned column, and the one header
+that carried a filter. A family with `position: sticky` in it has to write every
+other `position` **before** the sticky section, or state it in the base rule for
+the part. The failure is silent — the cell still looks right until something
+scrolls.
+
+A sticky family owns a stacking context. The steps a table takes — a pinned
+column at `--slotted-z-index-sticky`, the header a step above — are measured
+against each other, and without `isolation: isolate` on the root they are handed
+to the page: under `stickyTo="page"` a pinned column painted straight over the
+application's own bar.
+
+And one about the harness rather than the family: `.angular/cache` served a
+`table.ts` without a host binding added minutes earlier, so a correct component
+looked broken in Storybook and in a spec alike. When an Angular attribute is
+present in the DOM and the attribute it should produce is not, clear that cache
+before reading the code again.

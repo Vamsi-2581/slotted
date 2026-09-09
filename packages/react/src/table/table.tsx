@@ -73,6 +73,7 @@ export function Table({
   render,
   selectionMode,
   sort,
+  stickyFooter,
   stickyHeader,
   stickyTo,
   striped,
@@ -99,6 +100,7 @@ export function Table({
   const resolvedLayout = layout ?? defaults.layout ?? 'auto';
   const resolvedMode = selectionMode ?? defaults.selectionMode ?? 'none';
   const resolvedSticky = (stickyHeader ?? defaults.stickyHeader ?? false) === true;
+  const resolvedStickyFooter = (stickyFooter ?? defaults.stickyFooter ?? false) === true;
   const resolvedStickyTo = stickyTo ?? defaults.stickyTo ?? 'scroll';
   const resolvedStriped = (striped ?? defaults.striped ?? false) === true;
   const resolvedVariant = variant ?? defaults.variant ?? 'ruled';
@@ -248,6 +250,7 @@ export function Table({
     ...(loading === true ? { 'data-loading': '' } : {}),
     'data-part': 'root',
     ...(resolvedSticky ? { 'data-sticky-header': '' } : {}),
+    ...(resolvedStickyFooter ? { 'data-sticky-footer': '' } : {}),
     'data-sticky-to': resolvedStickyTo,
     ...(resolvedStriped ? { 'data-striped': '' } : {}),
     'data-ui': 'table',

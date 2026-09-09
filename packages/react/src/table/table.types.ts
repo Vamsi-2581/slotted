@@ -92,6 +92,7 @@ export interface TableDefaults {
   labels?: TableLabels | undefined;
   layout?: TableLayout | undefined;
   selectionMode?: TableSelectionMode | undefined;
+  stickyFooter?: boolean | undefined;
   stickyHeader?: boolean | undefined;
   stickyTo?: TableStickyTo | undefined;
   striped?: boolean | undefined;
@@ -109,6 +110,7 @@ export interface TableRootProps extends HTMLAttributes<HTMLElement> {
   'data-layout': TableLayout;
   'data-loading'?: '' | undefined;
   'data-part': string;
+  'data-sticky-footer'?: '' | undefined;
   'data-sticky-header'?: '' | undefined;
   'data-sticky-to'?: TableStickyTo | undefined;
   'data-striped'?: '' | undefined;
@@ -144,6 +146,13 @@ export interface TableProps extends Omit<ComponentPropsWithRef<'div'>, 'onChange
   render?: ((props: TableRootProps) => ReactNode) | undefined;
   selectionMode?: TableSelectionMode | undefined;
   sort?: TableSortDescriptor | null | undefined;
+  /**
+   * Holds the summary rows against the bottom of the same box the header is
+   * held against the top of, so a total does not scroll out of the view that
+   * exists to show it. It pins the `tfoot` and not the footer bar, which is
+   * outside the scroller and never leaves.
+   */
+  stickyFooter?: boolean | undefined;
   stickyHeader?: boolean | undefined;
   /**
    * What the sticky header stays inside. `page` releases the family's own
@@ -229,6 +238,13 @@ export interface TableCellAxes {
   align?: TableAlign | undefined;
   numeric?: boolean | undefined;
   sticky?: TableSticky | undefined;
+  /**
+   * Where a pinned column stops, as a CSS length. Nought unless stated: two
+   * columns pinned to the same edge need the second to know how wide the first
+   * is, and the family states that rather than measuring it — measuring would
+   * mean reading the layout during render.
+   */
+  stickyOffset?: string | undefined;
   text?: TableText | undefined;
 }
 
@@ -251,12 +267,14 @@ export interface TableSortProps extends ComponentPropsWithRef<'button'> {
 
 export type TableColumnActionsProps = ComponentPropsWithRef<'span'>;
 
-export interface TableSelectProps extends Omit<ComponentPropsWithRef<'td'>, 'children'> {
+export interface TableSelectProps
+  extends Omit<ComponentPropsWithRef<'td'>, 'align' | 'children'>, TableCellAxes {
   /** The row this checkbox chooses. Read from the row when it is not stated. */
   value?: string | undefined;
 }
 
-export type TableSelectAllProps = Omit<ComponentPropsWithRef<'th'>, 'children'>;
+export interface TableSelectAllProps
+  extends Omit<ComponentPropsWithRef<'th'>, 'align' | 'children'>, TableCellAxes {}
 
 export interface TableExpanderProps extends Omit<ComponentPropsWithRef<'button'>, 'children'> {
   value?: string | undefined;

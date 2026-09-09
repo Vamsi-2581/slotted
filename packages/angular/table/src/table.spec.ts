@@ -22,6 +22,7 @@ import {
   SlTableSelect,
   SlTableSelectAll,
   SlTableSort,
+  SlTableSummary,
 } from './table-parts';
 
 const ROWS = [
@@ -267,6 +268,90 @@ describe('an application setting the family once', () => {
     fixture.componentInstance.variant.set('framed');
     fixture.detectChanges();
     expect(query(fixture, '[data-ui="table"]').getAttribute('data-variant')).toBe('framed');
+  });
+});
+
+/**
+ * Both ends of the same box, and a selection column pinned beside the column
+ * that names the record. Two columns pinned to the same edge both resolve
+ * against the scroller, so the second is drawn over the first unless the offset
+ * is stated — which the family states rather than measures.
+ */
+@Component({
+  standalone: true,
+  imports: [
+    SlTable,
+    SlTableBody,
+    SlTableCell,
+    SlTableColumnHeader,
+    SlTableContent,
+    SlTableHead,
+    SlTableRow,
+    SlTableRowHeader,
+    SlTableSelect,
+    SlTableSelectAll,
+    SlTableSummary,
+  ],
+  template: `<div
+    slTable
+    [columns]="2"
+    stickyHeader
+    [stickyFooter]="pinned()"
+    selectionMode="multiple"
+  >
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableSelectAll sticky="start"></th>
+          <th slTableColumnHeader sticky="start" stickyOffset="3rem">Invoice</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        <tr slTableRow value="INV-1042">
+          <td slTableSelect sticky="start"></td>
+          <th slTableRowHeader sticky="start" stickyOffset="3rem">INV-1042</th>
+        </tr>
+      </tbody>
+      <tfoot slTableSummary>
+        <tr slTableRow>
+          <td slTableCell [colSpan]="2">One invoice</td>
+        </tr>
+      </tfoot>
+    </div>
+  </div>`,
+})
+class PinnedHost {
+  readonly pinned = signal(false);
+}
+
+describe('pinning', () => {
+  it('marks each end the table asks to hold, and pins a selection column beside a header', async () => {
+    await TestBed.configureTestingModule({ imports: [PinnedHost] }).compileComponents();
+    const fixture = TestBed.createComponent(PinnedHost);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('[data-ui="table"]') as HTMLElement;
+    /* Both written as bare attributes, because that is the form a template
+       writes and the one that breaks first: an input exercised only through a
+       binding passes a spec and leaves the attribute on a table doing nothing. */
+    /* The head is held by a bare attribute, which is the form a template
+       writes and the one that breaks first; the summary is held by a binding,
+       so the two paths into the same axis are both exercised. */
+    expect(root.getAttribute('data-sticky-header')).toBe('');
+    expect(root.hasAttribute('data-sticky-footer')).toBe(false);
+
+    fixture.componentInstance.pinned.set(true);
+    fixture.detectChanges();
+    expect(root.getAttribute('data-sticky-footer')).toBe('');
+
+    const chooser = fixture.nativeElement.querySelector('[data-part="selection"]') as HTMLElement;
+    expect(chooser.getAttribute('data-sticky')).toBe('start');
+    expect(chooser.style.getPropertyValue('--slotted-table-sticky-inset')).toBe('');
+
+    const header = fixture.nativeElement.querySelector(
+      '[data-part="column-header"]',
+    ) as HTMLElement;
+    expect(header.style.getPropertyValue('--slotted-table-sticky-inset')).toBe('3rem');
   });
 });
 

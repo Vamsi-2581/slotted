@@ -249,14 +249,14 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'sticky',
-    title: 'A header and a column that stay',
-    note: 'The header sticks to the scroller rather than to the page, which is what keeps it correct inside a drawer. A pinned column darkens its edge exactly while something is hidden under it, and both mirror in a right-to-left document.',
+    title: 'A header, a summary and a column that stay',
+    note: 'stickyHeader holds the head against the top of the scroller and stickyFooter holds the summary against the bottom of it, so the total is on screen at the first row and the last. stickyTo says which box that is: this table own scroller, or whatever scrolls outside it. A pinned column darkens its edge exactly while something is hidden under it, and all of it mirrors in a right-to-left document.',
     snippet: defineSnippet({
       id: 'table-angular-sticky',
       language: 'angular',
-      label: 'Pinned at both ends',
+      label: 'Pinned at four edges',
       source:
-        '<div slTable stickyHeader>\n  <div slTableContent>\n    <thead slTableHead>\n      <tr slTableRow>\n        <th slTableColumnHeader sticky="start">Invoice</th>\n        <th slTableColumnHeader sticky="end"></th>\n      </tr>\n    </thead>\n  </div>\n</div>',
+        '<div slTable stickyHeader stickyFooter stickyTo="page">\n  <div slTableContent>\n    <thead slTableHead>\n      <tr slTableRow>\n        <th slTableColumnHeader sticky="start">Invoice</th>\n        <th slTableColumnHeader sticky="end"></th>\n      </tr>\n    </thead>\n    <tfoot slTableSummary>\n      <tr slTableRow>\n        <td slTableCell colSpan="4" sticky="start">48 invoices</td>\n        <td slTableCell numeric>{{ total() }}</td>\n      </tr>\n    </tfoot>\n  </div>\n</div>',
     }),
   },
   {
@@ -489,6 +489,13 @@ export const ANGULAR_TABLE_DOCS = {
         'Whether the header stays while the body scrolls',
       ],
       [
+        'stickyFooter',
+        'boolean',
+        'false',
+        'slTable',
+        'Whether the summary rows stay while the body scrolls. It pins the tfoot and not the footer bar, which never scrolls.',
+      ],
+      [
         'stickyTo',
         "'scroll' | 'page'",
         'scroll',
@@ -599,8 +606,15 @@ export const ANGULAR_TABLE_DOCS = {
         'sticky',
         "'start' | 'end'",
         'start',
-        'the three cell parts',
+        'the three cell parts and both selection cells',
         'Which edge the column is pinned to while the table scrolls past it',
+      ],
+      [
+        'stickyOffset',
+        'string',
+        '0',
+        'the three cell parts and both selection cells',
+        'Where the pinned column stops, as a CSS length. Two columns pinned to the same edge need the second to state how wide the first is.',
       ],
       [
         'colSpan',

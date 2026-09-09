@@ -1,4 +1,10 @@
-import { createContext, useContext, type MouseEvent, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 
 import { Checkbox } from '../checkbox';
 import { Skeleton } from '../skeleton';
@@ -42,12 +48,25 @@ export function useTableRow(): TableRowContextValue {
  * facts rather than one axis: a number is set in tabular figures whichever way
  * it is aligned, and a right-aligned label is not a number.
  */
-function cellAttributes({ align, numeric, sticky, text }: TableCellAxes) {
+function cellAttributes(
+  { align, numeric, sticky, stickyOffset, text }: TableCellAxes,
+  style?: CSSProperties | undefined,
+) {
   return {
     ...(align === undefined ? {} : { 'data-align': align }),
     ...(numeric === true ? { 'data-numeric': '' } : {}),
     ...(sticky === undefined ? {} : { 'data-sticky': sticky }),
     ...(text === undefined ? {} : { 'data-text': text }),
+    /* The offset joins the consumer's own style rather than replacing it: a
+       pinned cell is still a cell somebody may have given a width. */
+    ...(stickyOffset === undefined && style === undefined
+      ? {}
+      : {
+          style: {
+            ...style,
+            ...(stickyOffset === undefined ? {} : { '--slotted-table-sticky-inset': stickyOffset }),
+          } as CSSProperties,
+        }),
   };
 }
 
@@ -147,6 +166,8 @@ export function TableColumnHeader({
   ref,
   scope,
   sticky,
+  stickyOffset,
+  style,
   text,
   ...nativeProps
 }: TableColumnHeaderProps) {
@@ -157,7 +178,7 @@ export function TableColumnHeader({
     <TableColumnContext.Provider value={column}>
       <th
         {...nativeProps}
-        {...cellAttributes({ align, numeric, sticky, text })}
+        {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
         {...(sorted ? { 'aria-sort': table.sort?.direction } : {})}
         data-part="column-header"
         ref={ref}
@@ -180,13 +201,15 @@ export function TableRowHeader({
   ref,
   scope,
   sticky,
+  stickyOffset,
+  style,
   text,
   ...nativeProps
 }: TableRowHeaderProps) {
   return (
     <th
       {...nativeProps}
-      {...cellAttributes({ align, numeric, sticky, text })}
+      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
       data-part="row-header"
       ref={ref}
       scope={scope ?? 'row'}
@@ -194,11 +217,20 @@ export function TableRowHeader({
   );
 }
 
-export function TableCell({ align, numeric, ref, sticky, text, ...nativeProps }: TableCellProps) {
+export function TableCell({
+  align,
+  numeric,
+  ref,
+  sticky,
+  stickyOffset,
+  style,
+  text,
+  ...nativeProps
+}: TableCellProps) {
   return (
     <td
       {...nativeProps}
-      {...cellAttributes({ align, numeric, sticky, text })}
+      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
       data-part="cell"
       ref={ref}
     />
@@ -260,13 +292,28 @@ export function TableColumnActions({ ref, ...props }: TableColumnActionsProps) {
  * pointer and with `Space` alike — the gesture a file list, a mail client and
  * React Aria's own table all use.
  */
-export function TableSelect({ ref, value, ...nativeProps }: TableSelectProps) {
+export function TableSelect({
+  align,
+  numeric,
+  ref,
+  sticky,
+  stickyOffset,
+  style,
+  text,
+  value,
+  ...nativeProps
+}: TableSelectProps) {
   const table = useTable();
   const row = useTableRow();
   const key = value ?? row.value;
 
   return (
-    <td {...nativeProps} data-part="selection" ref={ref}>
+    <td
+      {...nativeProps}
+      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
+      data-part="selection"
+      ref={ref}
+    >
       <Checkbox
         aria-label={`${table.labels.selectRow}${key === undefined ? '' : ` ${key}`}`}
         checked={key !== undefined && table.isSelected(key)}
@@ -287,12 +334,27 @@ export function TableSelect({ ref, value, ...nativeProps }: TableSelectProps) {
  * selection over a whole result set is a decision only the consumer's query can
  * make.
  */
-export function TableSelectAll({ ref, ...nativeProps }: TableSelectAllProps) {
+export function TableSelectAll({
+  align,
+  numeric,
+  ref,
+  sticky,
+  stickyOffset,
+  style,
+  text,
+  ...nativeProps
+}: TableSelectAllProps) {
   const table = useTable();
   const selected = table.value.length;
 
   return (
-    <th {...nativeProps} data-part="selection" ref={ref} scope="col">
+    <th
+      {...nativeProps}
+      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
+      data-part="selection"
+      ref={ref}
+      scope="col"
+    >
       <Checkbox
         aria-label={`${table.labels.selectAll}${selected === 0 ? '' : ` (${selected} selected)`}`}
         checked={selected > 0 && selected === table.rows().length}

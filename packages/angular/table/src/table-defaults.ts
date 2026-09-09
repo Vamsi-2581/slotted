@@ -64,6 +64,7 @@ export interface TableDefaults {
   labels: TableLabels;
   layout: TableLayout;
   selectionMode: TableSelectionMode;
+  stickyFooter: boolean;
   stickyHeader: boolean;
   stickyTo: TableStickyTo;
   striped: boolean;
@@ -91,6 +92,7 @@ const FALLBACK: TableDefaults = {
   labels: TABLE_LABELS,
   layout: 'auto',
   selectionMode: 'none',
+  stickyFooter: false,
   stickyHeader: false,
   stickyTo: 'scroll',
   striped: false,

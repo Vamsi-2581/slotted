@@ -63,6 +63,7 @@ export function TableDefaultsProvider({ children, ...defaults }: TableDefaultsPr
         labels: resolveLabels(inherited.labels, defaults.labels),
         layout: defaults.layout ?? inherited.layout,
         selectionMode: defaults.selectionMode ?? inherited.selectionMode,
+        stickyFooter: defaults.stickyFooter ?? inherited.stickyFooter,
         stickyHeader: defaults.stickyHeader ?? inherited.stickyHeader,
         stickyTo: defaults.stickyTo ?? inherited.stickyTo,
         striped: defaults.striped ?? inherited.striped,

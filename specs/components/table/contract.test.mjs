@@ -293,6 +293,21 @@ test('says what a sticky header sticks to, and what the second answer costs', ()
 });
 
 /**
+ * The summary is the header of the other end. A listing whose total scrolls out
+ * of view makes the reader scroll back for the number they came for, so the
+ * family pins the `tfoot` the same way it pins the `thead` — and the axis is
+ * separate, because a table with a sticky header and no summary would otherwise
+ * pay for a rule it never draws.
+ */
+test('pins the summary as well as the head, and says which one the axis moves', () => {
+  assert.deepEqual(contract.axes.stickyFooter, [true, false]);
+  assert.equal(contract.resolution.stickyFooter[2], false);
+  assert.match(contract.sticky.footer, /^summary/);
+  assert.match(contract.sticky.footer, /not the footer bar/);
+  assert.match(contract.sticky.to.offsetEnd, /--slotted-table-sticky-offset-end/);
+});
+
+/**
  * A paged listing puts its control under the table and inside its frame. Every
  * surveyed implementation that pages draws it attached; a control floating
  * under a framed box reads as a defect. The family supplies the place, and

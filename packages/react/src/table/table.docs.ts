@@ -246,14 +246,14 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'sticky',
-    title: 'A header and a column that stay',
-    note: 'The header sticks to the scroller rather than to the page, which is what keeps it correct inside a drawer. A pinned column darkens its edge exactly while something is hidden under it, and both mirror in a right-to-left document.',
+    title: 'A header, a summary and a column that stay',
+    note: 'stickyHeader holds the head against the top of the scroller and stickyFooter holds the summary against the bottom of it, so the total is on screen at the first row and the last. stickyTo says which box that is: this table own scroller, or whatever scrolls outside it. A pinned column darkens its edge exactly while something is hidden under it, and all of it mirrors in a right-to-left document.',
     snippet: defineSnippet({
       id: 'table-react-sticky',
       language: 'tsx',
-      label: 'Pinned at both ends',
+      label: 'Pinned at four edges',
       source:
-        '<Table stickyHeader>\n  <TableContent>\n    <TableHead>\n      <TableRow>\n        <TableColumnHeader sticky="start">Invoice</TableColumnHeader>\n        <TableColumnHeader sticky="end" />\n      </TableRow>\n    </TableHead>\n  </TableContent>\n</Table>;',
+        '<Table stickyFooter stickyHeader stickyTo="page">\n  <TableContent>\n    <TableHead>\n      <TableRow>\n        <TableColumnHeader sticky="start">Invoice</TableColumnHeader>\n        <TableColumnHeader sticky="end" />\n      </TableRow>\n    </TableHead>\n    <TableSummary>\n      <TableRow>\n        <TableCell colSpan={4} sticky="start">\n          48 invoices\n        </TableCell>\n        <TableCell numeric>{total}</TableCell>\n      </TableRow>\n    </TableSummary>\n  </TableContent>\n</Table>;',
     }),
   },
   {
@@ -471,6 +471,13 @@ export const REACT_TABLE_DOCS = {
         'Whether the header stays while the body scrolls',
       ],
       [
+        'stickyFooter',
+        'boolean',
+        'false',
+        'Table',
+        'Whether the summary rows stay while the body scrolls. It pins the tfoot and not the footer bar, which never scrolls.',
+      ],
+      [
         'stickyTo',
         "'scroll' | 'page'",
         'scroll',
@@ -575,8 +582,15 @@ export const REACT_TABLE_DOCS = {
         'sticky',
         "'start' | 'end'",
         'start',
-        'the three cell parts',
+        'the three cell parts and both selection cells',
         'Which edge the column is pinned to while the table scrolls past it',
+      ],
+      [
+        'stickyOffset',
+        'string',
+        '0',
+        'the three cell parts and both selection cells',
+        'Where the pinned column stops, as a CSS length. Two columns pinned to the same edge need the second to state how wide the first is.',
       ],
       [
         'colSpan',
@@ -611,7 +625,7 @@ export const REACT_TABLE_DOCS = {
       ],
       [
         'TableDefaultsProvider',
-        'variant | striped | stickyHeader | layout | selectionMode | columns | labels',
+        'variant | striped | stickyHeader | stickyFooter | stickyTo | layout | selectionMode | columns | labels',
         '—',
         'Application',
         'Sets those once for everything below it; a prop on the table still wins',

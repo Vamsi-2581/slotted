@@ -8,6 +8,7 @@ import {
   Directive,
   effect,
   ElementRef,
+  forwardRef,
   HostAttributeToken,
   inject,
   input,
@@ -207,7 +208,10 @@ export class SlStepper {
 })
 export class SlStepperList {
   private readonly stepper = inject(SlStepper);
-  private readonly items = contentChildren(SlStepperStep);
+  /* The step is declared below this class, and the dev-server transform puts
+     the query predicate in a static initializer — a direct reference would read
+     the binding before it exists. `forwardRef` defers the read to the query. */
+  private readonly items = contentChildren<SlStepperStep>(forwardRef(() => SlStepperStep));
   private readonly element = inject(ElementRef<HTMLElement>).nativeElement;
   private readonly ownLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
 

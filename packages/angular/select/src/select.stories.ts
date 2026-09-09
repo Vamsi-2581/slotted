@@ -453,15 +453,15 @@ export const InAForm: Story = {
   render: () => ({
     template: `
       <div class="slotted-demo-stack">
-        <sl-field [required]="true">
+        <div slField [required]="true">
           <label slFieldLabel>Fruit</label>
           <sl-select aria-label="Fruit" name="fruit" placeholder="Choose a fruit">${FRUIT}</sl-select>
-        </sl-field>
-        <sl-field [required]="true" [invalid]="true">
+        </div>
+        <div slField [required]="true" [invalid]="true">
           <label slFieldLabel>Delivery day</label>
           <sl-select aria-label="Delivery day" name="day" placeholder="Choose a day">${FRUIT}</sl-select>
           <span slFieldError>Choose a day.</span>
-        </sl-field>
+        </div>
       </div>
     `,
   }),

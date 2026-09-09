@@ -412,13 +412,13 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'select-angular-form',
       language: 'angular',
       label: 'A control a form owns',
-      source: `<sl-field required>
+      source: `<div slField required>
   <label slFieldLabel>Fruit</label>
   <sl-select [formControl]="fruit" required aria-label="Fruit">
     <sl-select-item value="apple">Apple</sl-select-item>
   </sl-select>
   <span slFieldError>Choose one.</span>
-</sl-field>`,
+</div>`,
     }),
   },
   {

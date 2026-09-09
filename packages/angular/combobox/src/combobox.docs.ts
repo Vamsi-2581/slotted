@@ -357,12 +357,12 @@ const scenes: ReferenceSceneMeta[] = [
       id: 'combobox-angular-form',
       language: 'angular',
       label: 'A control a form owns',
-      source: `<sl-field [required]="true">
+      source: `<div slField [required]="true">
   <label slFieldLabel>Reviewer</label>
   <sl-combobox [formControl]="reviewer" [required]="true" aria-label="Reviewer">
     <sl-combobox-item value="amanda" label="Amanda Okoro" />
   </sl-combobox>
-</sl-field>`,
+</div>`,
     }),
   },
   {

@@ -443,16 +443,16 @@ export const InAForm: Story = {
     props: { pictured: isolated(context), chosen: null as string | null },
     template: `
       <div class="slotted-demo-stack">
-        <sl-field [required]="true">
+        <div slField [required]="true">
           <label slFieldLabel>Reviewer</label>
           <sl-combobox aria-label="Reviewer" name="reviewer" placeholder="Search reviewers" [portal]="false" (valueChange)="chosen = $event">${FRUIT}</sl-combobox>
           <span slFieldDescription>{{ chosen === null ? 'The hidden input submits the key, not the text.' : 'Submitting ' + chosen + '.' }}</span>
-        </sl-field>
-        <sl-field [required]="true" [invalid]="true">
+        </div>
+        <div slField [required]="true" [invalid]="true">
           <label slFieldLabel>Second reviewer</label>
           <sl-combobox aria-label="Second reviewer" name="second" placeholder="Search reviewers" [portal]="false">${FRUIT}</sl-combobox>
           <span slFieldError>Choose someone from the list.</span>
-        </sl-field>
+        </div>
       </div>
     `,
   }),

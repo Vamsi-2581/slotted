@@ -29,7 +29,7 @@ const config: StorybookConfig = {
     name: '@storybook/angular-vite',
     options: {
       compodoc: true,
-      tsconfig: '../../packages/angular/tsconfig.lib.json',
+      tsconfig: '../../packages/angular/tsconfig.storybook.json',
     },
   },
   stories: ['../../../packages/angular/*/src/**/*.stories.ts'],

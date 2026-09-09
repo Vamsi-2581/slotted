@@ -3,7 +3,7 @@ import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlTab, SlTabActions, SlTabList, SlTabPanel, SlTabs } from '@slotted/angular/tabs';
-import { SlTextField, SlTextFieldControl } from '@slotted/angular/text-field';
+import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { moduleMetadata } from '@storybook/angular-vite';
@@ -64,7 +64,7 @@ const meta: Meta<ToolbarStoryArgs> = {
         SlButton,
         SlCheckbox,
         SlTextField,
-        SlTextFieldControl,
+        SlTextFieldInput,
         SlTabs,
         SlTabList,
         SlTab,
@@ -270,7 +270,7 @@ export const KeyOwners: Story = {
           <div slToolbarSeparator></div>
           <div slToolbarSpacer></div>
           <span slTextField size="sm">
-            <input slTextFieldControl type="search" placeholder="Buscar" aria-label="Buscar" />
+            <input slTextFieldInput type="search" placeholder="Buscar" aria-label="Buscar" />
           </span>
         </div>`,
       ),

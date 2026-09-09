@@ -8,6 +8,7 @@ import {
   Directive,
   effect,
   ElementRef,
+  forwardRef,
   HostAttributeToken,
   inject,
   Injector,
@@ -174,7 +175,10 @@ export class SlBreadcrumb {
 })
 export class SlBreadcrumbList {
   private readonly trail = inject(SlBreadcrumb);
-  private readonly items = contentChildren(SlBreadcrumbItem);
+  /* The crumb is declared below this class, and the dev-server transform puts
+     the query predicate in a static initializer — a direct reference would read
+     the binding before it exists. `forwardRef` defers the read to the query. */
+  private readonly items = contentChildren<SlBreadcrumbItem>(forwardRef(() => SlBreadcrumbItem));
 
   constructor() {
     effect(() => {

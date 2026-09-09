@@ -341,7 +341,9 @@ export const Modal: Story = {
           </sl-dialog>`),
       ) +
         scene(
-          'modal={false} — and no aria-modal',
+          /* A raw brace in template text opens an ICU expansion, so the
+             attribute is written with the entity and reads as `{`. */
+          'modal=&#123;false&#125; — and no aria-modal',
           'Nothing is inert, nothing is locked and focus is not contained, so the panel writes no aria-modal. The APG warns that marking a dialog modal without all of that is worse for a screen-reader reader than not marking it at all — and it is why every still demonstration on this page is this one.',
           panel('fullScreen="never"', { title: 'Detalhes' }),
         ),

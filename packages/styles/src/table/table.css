@@ -1,0 +1,935 @@
+@layer slotted.components {
+  /**
+   * ── The frame ──────────────────────────────────────────────────────────
+   *
+   * The root is the frame and the scroller is one element in. Both boxes are
+   * needed and each answers a different question: `position: sticky` resolves
+   * against the nearest scrolling ancestor, which is the scroller either way,
+   * while what the root holds is everything that must **not** move when the
+   * table is scrolled sideways — the border, the radius, the clip, and the
+   * footer where a paged listing puts its control. Read the other way round,
+   * with the root scrolling, a framed table and its pagination were two boxes
+   * with a seam between them.
+   *
+   * `prose` makes the same division for the same reason, and every token below
+   * is declared here so both boxes and every cell read one set.
+   */
+  [data-ui='table'][data-part='root'] {
+    /* Geometry. Every value is the control scale's, because a row is a
+       control-sized thing: one theme decision retunes the rows, the buttons and
+       the fields together, and `@media (pointer: coarse)` grows all three at
+       once without this family writing a rule. `list-item` took the same
+       decision for the same reason, and `PROJECT-PRD.md` §13.1 names
+       `table.row.height` as a density-derived value — which this is. */
+    --_row-min-block: var(
+      --slotted-table-row-min-block-size,
+      var(--slotted-control-height-md, 34px)
+    );
+    --_font-size: var(--slotted-table-font-size, var(--slotted-control-font-size-md, 13px));
+    --_icon-size: var(--slotted-table-icon-size, var(--slotted-control-icon-size-md, 16px));
+    --_gap: var(--slotted-table-gap, var(--slotted-control-gap-md, 8px));
+    --_pad-inline: var(
+      --slotted-table-cell-padding-inline,
+      var(--slotted-control-padding-inline-md, 13px)
+    );
+    /**
+     * What is left of the row's height around one line of text, so a one-line
+     * row is exactly the control height at every density and a row of two lines
+     * grows by its second line and nothing else. A floor of one space step keeps
+     * a row whose text is taller than the control from losing its inset.
+     */
+    --_pad-block: var(
+      --slotted-table-cell-padding-block,
+      max(
+        var(--slotted-space-2, 0.25rem),
+        calc((var(--_row-min-block) - var(--_font-size) * var(--slotted-line-height-md, 1.5)) / 2)
+      )
+    );
+    /* One line of the table's own text, which is what a mark beside a value is
+       aligned against — the row is taller than one line whenever a value wraps,
+       and a control centred in the cell would then float away from the line it
+       belongs to. */
+    --_line: calc(var(--_font-size) * var(--slotted-line-height-md, 1.5));
+    --_radius: var(--slotted-table-radius, var(--slotted-radius-md, 6px));
+    --_rule: var(--slotted-table-border-color, var(--slotted-border-subtle, ButtonBorder));
+    --_rule-strong: var(
+      --slotted-table-border-color-strong,
+      var(--slotted-border-strong, ButtonBorder)
+    );
+    --_rule-width: var(--slotted-table-border-width, var(--slotted-border-width-thin, 1px));
+
+    /* Ink and ground. The row's ground is stated rather than left transparent,
+       because a sticky cell inherits it to cover the rows sliding under it —
+       and a transparent sticky cell shows the table through itself. */
+    --_text: var(--slotted-table-color, var(--slotted-text, CanvasText));
+    --_muted: var(--slotted-table-color-muted, var(--slotted-text-muted, GrayText));
+    --_surface: var(--slotted-table-surface, var(--slotted-surface, Canvas));
+    /**
+     * The header band, mixed from the ink rather than taken from a tone. Read
+     * in light, `--slotted-tone-secondary-surface` was both too blue and too
+     * dark for a band that runs the width of the page: the tone is calibrated
+     * to enclose a chip, and a chip is a few characters wide.
+     *
+     * Mixing keeps the band neutral, keeps its direction right in every scheme —
+     * darker than the page in light, lighter in dark — and puts it one step
+     * above the stripe, which is mixed the same way at a smaller share. The
+     * stripe and the band are then one idea at two strengths instead of two
+     * values from two scales that happen to differ.
+     */
+    --_head-surface: var(
+      --slotted-table-header-surface,
+      color-mix(in oklab, var(--slotted-text, CanvasText) 8%, var(--_surface))
+    );
+    /**
+     * The stripe, and it is mixed rather than taken from a scale. Read at 420
+     * and at 720 in both schemes, `--slotted-surface-sunken` was invisible under
+     * a row of text — a zebra stripe exists to carry the eye across a wide row,
+     * and one that cannot be seen at a glance is a rule the family pays for and
+     * nobody reads. The foundation's own answer where no token holds a ground is
+     * to mix one from an ink at a small share, which is what
+     * `--slotted-highlight-tint-opacity` and the selection halo do.
+     *
+     * It is mixed into the surface rather than into transparency, because a
+     * sticky cell copies the row's own ground with `background-color: inherit`
+     * and a translucent one would show the scrolled rows through the column
+     * that exists to cover them.
+     */
+    --_stripe: var(
+      --slotted-table-row-surface-stripe,
+      color-mix(in oklab, var(--slotted-text, CanvasText) 5%, var(--_surface))
+    );
+    /* `PROJECT-PRD.md` §8 names `table.row.hover.background` as a decision an
+       application retunes on its own. It is one token, over the tone step every
+       neutral row in the library hovers with. */
+    --_hover: var(
+      --slotted-table-row-surface-hover,
+      var(--slotted-tone-secondary-subtle-hover, ButtonFace)
+    );
+    --_selected: var(
+      --slotted-table-row-surface-selected,
+      var(--slotted-tone-accent-surface, Canvas)
+    );
+    --_selected-hover: var(
+      --slotted-table-row-surface-selected-hover,
+      var(--slotted-tone-accent-subtle-hover, ButtonFace)
+    );
+    /* The ink of a selected row. A ground alone is a state `high-contrast`
+       cannot show — every tone ground is the page's own white there — and R1
+       forbids the rail two families reached for instead, so the pair that says
+       it is the ground and the ink, with the checkbox as the mark. */
+    --_selected-text: var(
+      --slotted-table-row-color-selected,
+      var(--slotted-tone-accent-text, CanvasText)
+    );
+
+    background-color: var(--_surface);
+    box-sizing: border-box;
+    color: var(--_text);
+    display: block;
+    font-family: var(--slotted-table-font-family, var(--slotted-control-font-family));
+    font-size: var(--_font-size);
+    line-height: var(--slotted-line-height-md, 1.5);
+    max-inline-size: 100%;
+  }
+
+  [data-ui='table'][data-variant='framed'] {
+    border: var(--_rule-width) solid var(--_rule);
+    border-radius: var(--_radius);
+    /* The frame clips what the scroller inside it paints into the corners; a
+       row's own ground is square and would otherwise fill the radius. */
+    overflow: hidden;
+  }
+
+  /**
+   * ── The scroller ───────────────────────────────────────────────────────
+   *
+   * The region wiring — `role="region"`, `tabindex="0"` and a name — is written
+   * by the binding and only while the content overflows, measured by
+   * `@slotted/core/overflow`. A tab stop on a table that fits makes a reader
+   * press Tab for nothing, and a wide table with no tab stop is unreachable
+   * without a pointer.
+   */
+  [data-ui='table'] [data-part='scroll'] {
+    /* `overscroll-behavior-inline: contain` keeps a sideways flick inside the
+       table instead of walking the page back a step, which is the gesture a
+       wide table on a trackpad produces constantly. */
+    overflow: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  /* The ring is drawn inside, because a scroller flush against the frame would
+     otherwise draw half its ring outside it. */
+  [data-ui='table'] [data-part='scroll']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
+  }
+
+  /**
+   * ── The table ──────────────────────────────────────────────────────────
+   *
+   * `border-collapse: separate` rather than `collapse`, and the two reasons are
+   * the two features above: a collapsed border is drawn on the table's own box
+   * and a sticky cell leaves its borders behind, and a collapsed table refuses
+   * a border radius. The rules are therefore drawn as one edge on each cell,
+   * never as a border on the row.
+   */
+  [data-ui='table'] [data-part='table'] {
+    border-collapse: separate;
+    border-spacing: 0;
+    /* The table fills the scroller and grows past it when its columns need
+       more; `min-inline-size: 100%` is what makes both true at once. */
+    inline-size: max-content;
+    min-inline-size: 100%;
+    text-align: start;
+  }
+
+  [data-ui='table'][data-layout='fixed'] [data-part='table'] {
+    inline-size: 100%;
+    table-layout: fixed;
+  }
+
+  /**
+   * ── The caption ────────────────────────────────────────────────────────
+   *
+   * The table's name, and the element the platform already associates with it.
+   * A caption is the accessible name whether it is read or hidden, so a
+   * consumer who hides it with `visually-hidden` loses the picture and keeps
+   * the name.
+   */
+  [data-ui='table'] [data-part='caption'] {
+    caption-side: block-start;
+    color: var(--_muted);
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+    text-align: start;
+  }
+
+  /**
+   * ── The header ─────────────────────────────────────────────────────────
+   *
+   * A column header is what a screen reader repeats for every cell under it, so
+   * it is set in the page's own ink rather than in the muted step: a header a
+   * reader has to look for twice is a header that has stopped naming anything.
+   */
+  [data-ui='table'] [data-part='column-header'] {
+    background-color: var(--_head-surface);
+    border-block-end: var(--_rule-width) solid var(--_rule-strong);
+    color: var(--_text);
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+    text-align: start;
+    /* A header wraps rather than truncating: it is two or three words, and the
+       one thing a reader cannot recover is the name of the column they are
+       reading. */
+    vertical-align: bottom;
+  }
+
+  [data-ui='table'][data-variant='plain'] [data-part='column-header'] {
+    background-color: transparent;
+  }
+
+  /**
+   * ── Rows and cells ─────────────────────────────────────────────────────
+   */
+  [data-ui='table'] [data-part='row'] {
+    background-color: var(--_surface);
+  }
+
+  [data-ui='table'] [data-part='cell'],
+  [data-ui='table'] [data-part='row-header'] {
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  /* A row header names the record, so it carries the weight one step above the
+     values beside it and nothing else. It states no colour of its own: read
+     against the row's ink, a selected record's name stayed the page's black
+     while every value beside it turned accent, and a disabled row's name stayed
+     at full strength — the two states the row paints and this cell refused. */
+  [data-ui='table'] [data-part='row-header'] {
+    font-weight: var(--slotted-font-weight-medium, 500);
+  }
+
+  /* The rule between two rows, drawn on the cells because the row cannot carry
+     it under `border-collapse: separate`. The last row of the body gives its
+     rule up unless a footer follows, so a `ruled` table does not end in a line
+     with nothing under it. */
+  [data-ui='table']:is([data-variant='ruled'], [data-variant='framed'])
+    [data-part='body']
+    > [data-part='row']
+    > * {
+    border-block-end: var(--_rule-width) solid var(--_rule);
+  }
+
+  [data-ui='table']:is([data-variant='ruled'], [data-variant='framed'])
+    [data-part='body']
+    > [data-part='row']:last-child
+    > * {
+    border-block-end-color: transparent;
+  }
+
+  /* The stripe is the weakest ground the family paints and is declared before
+     every state, so a selected or hovered stripe reads as selected or hovered.
+     `nth-child(even)` counts rows the family renders; a detail row is a row of
+     the same body, so the stripe follows the record it belongs to rather than
+     alternating around it — see the detail rule below. */
+  [data-ui='table'][data-striped] [data-part='body'] > [data-part='row']:nth-child(even) {
+    background-color: var(--_stripe);
+  }
+
+  /**
+   * ── The states of a row ────────────────────────────────────────────────
+   *
+   * In the order `STATE_PRECEDENCE` declares them, weakest last, so a row that
+   * is two things at once shows the stronger one. `disabled` is the guard on
+   * every pointer state rather than a rule of its own: a row a consumer has
+   * disabled does not answer the pointer at all.
+   */
+  [data-ui='table'] [data-part='body'] > [data-part='row']:not([data-disabled]):hover {
+    background-color: var(--_hover);
+  }
+
+  /**
+   * A selected row is the accent ground with the accent ink, and it carries no
+   * rail: R1 is a decision of this repository — a band of a few pixels on the
+   * start edge may not say `selected`, and the state is said by the ground, the
+   * ink and the checkbox that owns it. `list-item` and `listbox` each drew one
+   * and each gave it up.
+   *
+   * The ink is what carries the state where the ground cannot: every tone
+   * ground is the page's own white in `high-contrast`, and the checkbox's mark
+   * is what survives forced colours, which is where WCAG 2.2 SC 1.4.1 puts the
+   * requirement anyway.
+   */
+  [data-ui='table'] [data-part='body'] > [data-part='row'][data-selected] {
+    background-color: var(--_selected);
+    color: var(--_selected-text);
+  }
+
+  [data-ui='table']
+    [data-part='body']
+    > [data-part='row'][data-selected]:not([data-disabled]):hover {
+    background-color: var(--_selected-hover);
+  }
+
+  [data-ui='table'] [data-part='row'][data-disabled] {
+    color: var(--slotted-disabled-foreground, GrayText);
+  }
+
+  /**
+   * ── Alignment and numerals ─────────────────────────────────────────────
+   *
+   * Two facts rather than one axis: a number is set in tabular figures
+   * whichever way it is aligned, and a right-aligned label is not a number.
+   * `start` and `end` are the logical values, so a column aligned to the end is
+   * on the right in English and on the left in Arabic.
+   */
+  [data-ui='table'] [data-align='start'] {
+    text-align: start;
+  }
+
+  [data-ui='table'] [data-align='center'] {
+    text-align: center;
+  }
+
+  [data-ui='table'] [data-align='end'] {
+    text-align: end;
+  }
+
+  /* A ten under a nine is only a column if the digits are the same width. The
+     alignment is inferred once, and only where the consumer stated none. */
+  [data-ui='table'] [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-ui='table'] [data-numeric]:not([data-align]) {
+    text-align: end;
+  }
+
+  /**
+   * ── What a long value does ─────────────────────────────────────────────
+   *
+   * Three treatments, and none of them removes the value: the briefing's
+   * decision is that a truncated string stays readable to assistive technology
+   * and reachable in full.
+   */
+  [data-ui='table'] [data-text='wrap'] {
+    /* An identifier, a hash or a URL is one unbroken token, and every surveyed
+       table lets it set the column's width and push the rest of the table
+       sideways. */
+    overflow-wrap: anywhere;
+  }
+
+  [data-ui='table'] [data-text='nowrap'] {
+    white-space: nowrap;
+  }
+
+  [data-ui='table'] [data-text='truncate'] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /**
+   * ── Sticky ─────────────────────────────────────────────────────────────
+   *
+   * The header sticks to the root, which is the scroller. Each sticky cell
+   * carries its own ground, because what slides under it is the rest of the
+   * table: a transparent sticky cell shows the rows through itself.
+   *
+   * The three stacking steps are one decision. A header cell that is also a
+   * sticky column is both at once, and with a single step the header slides
+   * under the pinned column or the pinned column over the header — the corner
+   * is where this always goes wrong.
+   */
+  [data-ui='table'][data-sticky-header] [data-part='column-header'] {
+    inset-block-start: 0;
+    position: sticky;
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
+  }
+
+  [data-ui='table'] [data-sticky='start'] {
+    /* The ground the row is painted with, whatever state it is in: `inherit`
+       takes the row's own computed value, so a hovered, striped or selected row
+       keeps one colour across the seam. */
+    background-color: inherit;
+    inset-inline-start: 0;
+    position: sticky;
+    z-index: var(--slotted-z-index-sticky, 100);
+  }
+
+  [data-ui='table'] [data-sticky='end'] {
+    background-color: inherit;
+    inset-inline-end: 0;
+    position: sticky;
+    z-index: var(--slotted-z-index-sticky, 100);
+  }
+
+  [data-ui='table'][data-sticky-header] [data-part='column-header'][data-sticky] {
+    background-color: var(--_head-surface);
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
+  }
+
+  /* The edge that says a column is pinned rather than merely first. It is drawn
+     on the cell's own trailing side for a start-pinned column and on its
+     leading side for an end-pinned one, both logical, so the mirror is the
+     browser's work. */
+  [data-ui='table'] [data-sticky='start'] {
+    border-inline-end: var(--_rule-width) solid var(--_rule);
+  }
+
+  [data-ui='table'] [data-sticky='end'] {
+    border-inline-start: var(--_rule-width) solid var(--_rule);
+  }
+
+  /**
+   * The affordance, and it is the pinned column's own edge rather than a fade
+   * over the whole scroller. A gradient at the trailing edge would fade the
+   * pinned column with everything else, which is the one thing that must stay
+   * crisp; a shadow needs an ink no scale holds. The edge darkens exactly while
+   * something is hidden under it — `data-overflowing` and the two end
+   * attributes come from `@slotted/core/overflow`, which is the same
+   * measurement the region wiring is written from.
+   *
+   * A table with no pinned column keeps the three affordances the platform and
+   * the family already give it: a scrollbar, a column visibly cut mid-word at
+   * the edge, and a tab stop that scrolls with the arrow keys.
+   */
+  [data-ui='table'] [data-part='scroll'][data-overflowing]:not([data-at-start]) [data-sticky='start'] {
+    border-inline-end-color: var(--_rule-strong);
+  }
+
+  [data-ui='table'] [data-part='scroll'][data-overflowing]:not([data-at-end]) [data-sticky='end'] {
+    border-inline-start-color: var(--_rule-strong);
+  }
+
+  /**
+   * ── The sort control ───────────────────────────────────────────────────
+   *
+   * The APG's own sortable example wraps the header's text in a `button`, and
+   * so does this: the header cell gives up its inset and the control takes it,
+   * so the whole header is the target rather than the words inside it.
+   */
+  [data-ui='table'] [data-part='column-header']:has(> [data-part='sort']) {
+    padding: 0;
+  }
+
+  /**
+   * ── The controls a column carries ──────────────────────────────────────
+   *
+   * A listing screen puts a filter or a column menu in the header, and the
+   * control has to sit inside a cell this family lays out. With the sort
+   * control filling the header there was nowhere for a second target to go, so
+   * the header becomes a row: the sort control takes the space that is left and
+   * the slot holds its controls against the trailing edge. Two targets, never
+   * overlapping, and neither of them steals the other's press.
+   *
+   * The slot holds the control and none of its state. What a filter means and
+   * what it leaves is the consumer's query, and `filter-bar` owns the rules.
+   */
+  [data-ui='table'] [data-part='column-header']:has(> [data-part='column-actions']) {
+    /* The slot is positioned against the cell, and the cell stays a table cell.
+       `display: flex` on a `th` takes it out of the table's own formatting
+       context and the browser wraps it in an anonymous cell: read on the first
+       capture, two headers laid out as flex boxes stacked into one column and
+       took the table's own geometry with them. */
+    position: relative;
+  }
+
+  [data-ui='table'] [data-part='column-actions'] {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--_gap);
+    inset-block: 0;
+    inset-inline-end: var(--_pad-inline);
+    position: absolute;
+  }
+
+  /**
+   * The room the slot is given, stated rather than measured. The controls in it
+   * are the consumer's own — a filter trigger, a column menu — so their width is
+   * not a fact this family holds, and measuring it would mean reading the layout
+   * during render. One target at the WCAG minimum is the default, and a column
+   * carrying two controls states the width it needs.
+   *
+   * The reservation is on whichever box holds the name: the sort control when
+   * the column sorts, the cell itself when it does not.
+   */
+  [data-ui='table'] [data-part='column-header']:has(> [data-part='column-actions']) {
+    --_actions-room: var(
+      --slotted-table-column-actions-size,
+      calc(var(--slotted-target-min, 24px) + var(--_gap))
+    );
+  }
+
+  [data-ui='table']
+    [data-part='column-header']:has(> [data-part='column-actions'])
+    > [data-part='sort'] {
+    padding-inline-end: calc(var(--_pad-inline) + var(--_actions-room));
+  }
+
+  [data-ui='table']
+    [data-part='column-header']:has(> [data-part='column-actions']):not(
+      :has(> [data-part='sort'])
+    ) {
+    padding-inline-end: calc(var(--_pad-inline) + var(--_actions-room));
+  }
+
+  [data-ui='table'] [data-part='sort'] {
+    /* The mark is centred on the text rather than dropped at the top of the
+       line: with the default `stretch` resolving to `flex-start` under a stated
+       block size, the chevron sat two pixels above the capitals and read as a
+       mark nobody had placed. */
+    align-items: center;
+    background-color: transparent;
+    border: 0;
+    color: inherit;
+    /* The hand, because the header is a control. `select` restored it to its
+       own trigger and its options for the same reason: a target that does not
+       say it is one is a target a pointer reader finds by accident. */
+    cursor: pointer;
+    /* The control fills the header cell, so a reader aiming at a column name
+       hits the button and not the two pixels beside it — less the room the
+       controls slot reserves, which is the rule above. */
+    display: flex;
+    font: inherit;
+    gap: var(--_gap);
+    inline-size: 100%;
+    /* The name at the leading edge and the mark at the trailing one, so every
+       column's controls stand in one line down the header row. With the mark
+       set immediately after the name it landed at a different distance in every
+       column — beside a short name, halfway across a wide one — and beside a
+       filter trigger pinned to the edge the pair read as two unrelated marks. */
+    justify-content: space-between;
+    min-block-size: var(--slotted-target-min, 24px);
+    min-inline-size: 0;
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+    text-align: inherit;
+    transition: background-color
+      var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  /* An aligned column keeps its name over its values, and the mark follows the
+     name rather than the cell: a centred column reads as a centred pair, and a
+     numeric column's name and mark both stand at the edge its digits end on. */
+  [data-ui='table'] [data-align='center'] > [data-part='sort'] {
+    justify-content: center;
+  }
+
+  [data-ui='table'] :is([data-align='end'], [data-numeric]:not([data-align])) > [data-part='sort'] {
+    justify-content: end;
+  }
+
+  /**
+   * Hover on the header band goes **darker**, not lighter. The band is already
+   * a tinted ground, and the step every neutral row hovers with is lighter than
+   * it — read on the first capture, a hovered header was a pale hole in the
+   * band rather than a control answering the pointer. It is mixed from the ink
+   * for the reason the stripe is: no scale holds a ground one step under this
+   * one, and mixing keeps the direction right in every scheme.
+   */
+  [data-ui='table'] [data-part='sort']:not(:disabled):hover {
+    background-color: var(
+      --slotted-table-header-surface-hover,
+      color-mix(in oklab, var(--slotted-text, CanvasText) 7%, var(--_head-surface))
+    );
+  }
+
+  [data-ui='table'] [data-part='sort']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
+  }
+
+  /**
+   * The direction mark. One glyph rather than two: `chevron-down` turned a half
+   * turn is `chevron-up`, and a family that added an arrow pair to the
+   * foundation would be adding it for itself.
+   *
+   * An unsorted sortable column draws the mark muted and only under the
+   * pointer or under focus, so the column says it can be sorted without twelve
+   * marks competing with twelve names. The sorted column keeps its mark drawn.
+   */
+  [data-ui='table'] [data-part='sort']::after {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
+    content: '';
+    flex: none;
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-icon-chevron-down);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: var(--_icon-size) var(--_icon-size);
+    opacity: 0;
+    transition:
+      opacity var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      rotate var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='table'] [data-part='sort']:not(:disabled):hover::after,
+  [data-ui='table'] [data-part='sort']:focus-visible::after {
+    opacity: 0.55;
+  }
+
+  [data-ui='table'] [aria-sort] > [data-part='sort']::after {
+    opacity: 1;
+  }
+
+  /* Ascending is the same mark turned over. The rotation is animated because it
+     is the one movement in this family a reader has to follow: the column did
+     not change, its direction did. */
+  [data-ui='table'] [aria-sort='ascending'] > [data-part='sort']::after {
+    rotate: 180deg;
+  }
+
+  /**
+   * ── The selection column ───────────────────────────────────────────────
+   *
+   * The cell is the family's and the control is not: `checkbox` owns the square,
+   * the check and the indeterminate bar, and a chooser drawn here would be a
+   * second answer to a question that family answers. The cell holds it to the
+   * width of the control and centres it on the row's first line.
+   */
+  [data-ui='table'] [data-part='selection'] {
+    inline-size: 1%;
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+    text-align: center;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  /* The control sits on the row's first line rather than in the middle of a
+     cell that may be three lines tall, so a two-line row does not float its
+     checkbox between them. */
+  [data-ui='table'] [data-part='selection'] > [data-ui='checkbox'] {
+    block-size: var(--_line);
+  }
+
+  /**
+   * A cell holding nothing but the expander is a gutter rather than a column:
+   * it takes the control's width and every row keeps it, so a set where three
+   * records in twenty have a detail does not indent those three and leave the
+   * other seventeen a step to the start of them. Read on the first capture, the
+   * expander inside the row header moved one identifier and left the column
+   * ragged.
+   */
+  [data-ui='table'] [data-part='cell']:has(> [data-part='expander']) {
+    inline-size: 1%;
+    padding-inline-end: 0;
+    white-space: nowrap;
+  }
+
+  /**
+   * ── The expander ───────────────────────────────────────────────────────
+   *
+   * The Disclosure pattern, borrowed whole: a `button` carrying `aria-expanded`
+   * and naming the row it opens. The mark is `chevron-right`, turned a quarter
+   * turn when the detail is open — and mirrored in a right-to-left document,
+   * where a closed disclosure points the other way.
+   */
+  [data-ui='table'] [data-part='expander'],
+  [data-ui='table'] [data-part='column-actions'] > button,
+  [data-ui='table'] button[data-part='column-actions'] {
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--slotted-table-control-radius, var(--slotted-radius-sm, 4px));
+    color: var(--_muted);
+    cursor: pointer;
+    display: inline-flex;
+    /* An icon-only control is smaller than the WCAG 2.2 minimum in both axes
+       unless the family says otherwise, which is the family's job rather than
+       the theme's. */
+    block-size: var(--slotted-target-min, 24px);
+    inline-size: var(--slotted-target-min, 24px);
+    /**
+     * The target is taller than the line it stands beside, so the box is pulled
+     * back onto that line: without this the row grew by the difference and the
+     * chevron sat two pixels under the identifier it opens. The margin is
+     * negative by exactly the overshoot, the cell's own inset absorbs it, and
+     * the row is still measured by its text.
+     */
+    margin-block: calc((var(--_line) - var(--slotted-target-min, 24px)) / 2);
+    padding: 0;
+    /* Both axes, stated separately, because `place-content` is not the property
+       that centres a single item: `align-content` aligns lines and a single-line
+       flex container has one, so the mark fell back to `align-items: stretch`,
+       which a stated block size resolves to `flex-start`. Read on the capture,
+       the chevron sat against the top edge of its own 24-pixel box. */
+    align-items: center;
+    justify-content: center;
+    transition: background-color
+      var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='table'] [data-part='expander']:not(:disabled):hover {
+    background-color: var(--_hover);
+    color: var(--_text);
+  }
+
+  /* On the band the hover darkens, for the reason the sort control's does: the
+     step a row hovers with is lighter than the band and reads as a hole in it. */
+  [data-ui='table'] [data-part='column-actions'] > button:not(:disabled):hover,
+  [data-ui='table'] button[data-part='column-actions']:not(:disabled):hover {
+    background-color: var(
+      --slotted-table-header-surface-hover,
+      color-mix(in oklab, var(--slotted-text, CanvasText) 7%, var(--_head-surface))
+    );
+    color: var(--_text);
+  }
+
+  /* The ring is flush with the control rather than drawn inside it. The two
+     larger targets — the region and the sort button — draw theirs inward,
+     because both stand against an edge the ring would otherwise cross; these
+     are 24-pixel boxes inside a cell's own inset, and read at that size an
+     inward ring closed on the chevron. */
+  [data-ui='table'] [data-part='expander']:focus-visible,
+  [data-ui='table'] [data-part='column-actions'] > button:focus-visible,
+  [data-ui='table'] button[data-part='column-actions']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: 0;
+  }
+
+  /**
+   * The artwork a consumer puts in the header trigger is drawn at the family's
+   * own glyph size, so a filter mark and the sort mark beside it read as one
+   * pair rather than as a control and a mark. Read at the gate, a `button` from
+   * the library at its smallest step stood thirty pixels tall against a line of
+   * nineteen and a half — the control scale is right for a control in a form
+   * and wrong for a mark in a header.
+   */
+  [data-ui='table'] [data-part='column-actions'] :is(svg, img) {
+    block-size: var(--_icon-size);
+    inline-size: var(--_icon-size);
+  }
+
+  [data-ui='table'] [data-part='expander']::before {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
+    content: '';
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-icon-chevron-right);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: var(--_icon-size) var(--_icon-size);
+    rotate: 0deg;
+    transition: rotate var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='table'] [data-part='expander'][aria-expanded='true']::before {
+    rotate: 90deg;
+  }
+
+  /* A chevron is direction-sensitive artwork, so it is mirrored rather than
+     reused: a closed row in Arabic points to the start of the line, which is
+     the right-hand side. */
+  [data-ui='table']:dir(rtl) [data-part='expander']::before {
+    scale: -1 1;
+  }
+
+  [data-ui='table']:dir(rtl) [data-part='expander'][aria-expanded='true']::before {
+    rotate: -90deg;
+  }
+
+  /**
+   * ── The detail ─────────────────────────────────────────────────────────
+   *
+   * One row holding one cell that spans the table. It is not rendered while it
+   * is closed, so nothing is in the DOM that a reader is told about and cannot
+   * reach, and it takes the sunken ground so the record it belongs to still
+   * reads as one thing.
+   */
+  [data-ui='table'] [data-part='detail'] {
+    background-color: var(--_stripe);
+  }
+
+  [data-ui='table'] [data-part='detail'] > [data-part='cell'] {
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+  }
+
+  /* A detail row is not a record, so it takes no stripe of its own and never
+     shifts the alternation of the rows around it. */
+  [data-ui='table'][data-striped] [data-part='body'] > [data-part='detail'] {
+    background-color: var(--_stripe);
+  }
+
+  /**
+   * ── Empty and loading ──────────────────────────────────────────────────
+   */
+  [data-ui='table'] [data-part='empty'] {
+    color: var(--_muted);
+    padding-block: var(--slotted-space-9, 2rem);
+    padding-inline: var(--_pad-inline);
+    text-align: center;
+  }
+
+  /* The skeleton rows of a first load. The shapes are `skeleton`'s own; what
+     this family supplies is the row that holds them, so the table's shape is
+     visible before its content arrives. */
+  [data-ui='table'] [data-part='loader'] > [data-part='row'] > * {
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+  }
+
+  /**
+   * A refresh over rows a reader is already looking at is not a first load. The
+   * body dims and nothing moves: the column widths are the table's, the scroll
+   * position is the reader's, and swapping rows for skeletons would take both.
+   */
+  [data-ui='table'][data-loading] [data-part='body'] {
+    opacity: 0.55;
+    transition: opacity var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  /**
+   * ── The summary rows ───────────────────────────────────────────────────
+   *
+   * The `tfoot`, which the HTML Standard calls the column summaries of the
+   * table: a total, a count, a unit. It carries the header's rule on its
+   * leading edge rather than the body's, because what it separates is the same
+   * kind of boundary — and it is not the `footer`, which is a bar outside the
+   * table holding the consumer's own controls.
+   */
+  [data-ui='table'] [data-part='summary'] > [data-part='row'] > * {
+    background-color: var(--_head-surface);
+    border-block-start: var(--_rule-width) solid var(--_rule-strong);
+    font-weight: var(--slotted-font-weight-medium, 500);
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+  }
+
+  [data-ui='table'][data-variant='plain'] [data-part='summary'] > [data-part='row'] > * {
+    background-color: transparent;
+  }
+
+  /**
+   * ── The footer bar ─────────────────────────────────────────────────────
+   *
+   * Under the table and inside the frame, where a paged listing puts its
+   * control. It is a sibling of the scroller rather than a child, so a table
+   * scrolled sideways does not take its pagination with it — which is the whole
+   * reason the frame and the scroller are two boxes.
+   *
+   * What stands in it is the consumer's own: `pagination`, a page-size select,
+   * a count, a bulk-action bar. The family draws the rule above it and the
+   * inset around it, and nothing else.
+   */
+  [data-ui='table'] [data-part='footer'] {
+    align-items: center;
+    border-block-start: var(--_rule-width) solid var(--_rule);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--_gap);
+    padding-block: var(--_pad-block);
+    padding-inline: var(--_pad-inline);
+  }
+
+  /**
+   * The last thing in the bar takes the room that is left, and that is not a
+   * preference: `pagination` answers its own inline size, and an element with
+   * `container-type: inline-size` contributes no intrinsic width — dropped into
+   * a bar that shrink-wrapped its children it resolved to nothing, hid its own
+   * page list under its 22rem query and left two chevrons in an empty row. The
+   * same is true of every family that answers its own width, which
+   * `references/stories.md` records for the story stages.
+   *
+   * So the bar states the room instead of asking for it, and a control that
+   * wants to sit at the trailing edge justifies itself there.
+   */
+  [data-ui='table'] [data-part='footer'] > :last-child {
+    flex: 1 1 auto;
+    /* And it aligns its own content to the trailing edge, which is where a
+       listing screen puts its paging control. The rule is structural rather
+       than a reach into another family: it names the last thing in the bar, not
+       what that thing is. */
+    justify-content: end;
+  }
+
+  /**
+   * ── Print ──────────────────────────────────────────────────────────────
+   *
+   * A scroller, a fixed height and a sticky offset are all wrong on paper. Once
+   * the family stops holding them, the platform's own rule applies: a `thead`
+   * repeats at the top of every printed page.
+   */
+  @media print {
+    [data-ui='table'] [data-part='scroll'] {
+      max-block-size: none;
+      overflow: visible;
+    }
+
+    [data-ui='table'][data-sticky-header] [data-part='column-header'],
+    [data-ui='table'] [data-sticky] {
+      position: static;
+    }
+  }
+
+  /**
+   * ── Forced colours ─────────────────────────────────────────────────────
+   *
+   * The theme remaps every token this family reads, so the grounds, the rules
+   * and the ring arrive already answered. What the system does not answer is a
+   * mask: a glyph painted from `currentcolor` is a painted background, and the
+   * system replaces every one of those — the mark goes and the box it sat in
+   * stays. `forced-color-adjust: none` keeps the author's `currentcolor`, which
+   * there is the ink the system has already forced, so both marks follow every
+   * state instead of naming a colour per state.
+   */
+  @media (forced-colors: active) {
+    [data-ui='table'] [data-part='sort']::after,
+    [data-ui='table'] [data-part='expander']::before {
+      forced-color-adjust: none;
+    }
+  }
+}

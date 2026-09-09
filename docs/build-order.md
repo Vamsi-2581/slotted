@@ -932,7 +932,28 @@ avaliação em
 4. `combobox`
 5. `multi-select`
 6. `tree`
-7. `table`
+7. `table` — a fronteira com `data-grid` é o papel ARIA, não a contagem de
+   features. O padrão diz que uma tabela "is not an interactive widget. Thus,
+   its cells are not focusable or selectable": cada controlo dentro dela é a sua
+   própria paragem de tabulação e a família não declara tecla nenhuma. As quatro
+   capacidades que exigem o padrão `grid` — redimensionar coluna, virtualização,
+   ordenação por várias chaves e ativação de linha — ficam para a onda 8.
+   Dezanove partes, das quais duas são fatias do consumidor: `column-actions`,
+   ao lado do nome da coluna, e `footer`, a barra sob a tabela e dentro da
+   moldura onde a paginação assenta. A raiz é a moldura e o scroller está um
+   elemento dentro, porque o cabeçalho fixo resolve contra o scroller e a barra
+   de paginação não pode rolar de lado com a tabela.
+   Três valores mutáveis: `sort`, `selection` e `open`. O primeiro trouxe a
+   palavra `sort` para `specs/contract.schema.mjs`, em commit próprio, e a
+   família guarda o descritor sem reordenar nada — as linhas são filhas do
+   consumidor, e reordená-las seria possuir os dados. A seleção usa
+   `nextSelection` do motor de coleções e é anunciada pela `checkbox` que a
+   possui, porque uma linha não é selecionável sob este papel.
+   `aria-rowcount` e `aria-rowindex` são escritos exatamente quando o DOM não
+   tem o conjunto inteiro, que é o que a prática exige e o que nenhuma das seis
+   implementações pesquisadas faz. Inventário em
+   `docs/superpowers/specs/2026-09-09-table-capability-inventory.md`, decisões em
+   `docs/superpowers/specs/2026-09-09-table-design.md`.
 
 ## Onda 7 — Data, arquivo e o restante do Core
 

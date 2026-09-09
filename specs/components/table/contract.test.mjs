@@ -277,6 +277,22 @@ test('keeps the frame outside the scroller, and says why', () => {
 });
 
 /**
+ * Where the header stops is a second question, and the two answers are right on
+ * different screens: a table in a drawer wants its own scroller, a listing that
+ * fills a page wants the page. The axis names both, and the cost of the second
+ * is written beside it — a box that scrolls one axis scrolls both, so a table
+ * cannot scroll sideways and let its header stick to the page at once.
+ */
+test('says what a sticky header sticks to, and what the second answer costs', () => {
+  assert.deepEqual(contract.axes.stickyTo, ['scroll', 'page']);
+  assert.equal(contract.resolution.stickyTo[2], 'scroll');
+  assert.match(contract.sticky.to.page, /scrolls one axis scrolls both/);
+  assert.match(contract.sticky.to.offset, /--slotted-table-sticky-offset/);
+  assert.match(contract.scroll.model, /sideways and never up/);
+  assert.match(contract.scroll.condition, /never under stickyTo page/);
+});
+
+/**
  * A paged listing puts its control under the table and inside its frame. Every
  * surveyed implementation that pages draws it attached; a control floating
  * under a framed box reads as a defect. The family supplies the place, and

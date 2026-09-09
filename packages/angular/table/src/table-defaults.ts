@@ -12,6 +12,12 @@ export type TableLayout = 'auto' | 'fixed';
 
 export type TableSelectionMode = 'none' | 'single' | 'multiple';
 
+/**
+ * What a sticky header stays inside: the family's own scroller, or whatever
+ * scrolls outside it — the page, an app shell, a scroll area.
+ */
+export type TableStickyTo = 'scroll' | 'page';
+
 /** Which edge a cell's content stands on, resolved logically. */
 export type TableAlign = 'start' | 'center' | 'end';
 
@@ -59,6 +65,7 @@ export interface TableDefaults {
   layout: TableLayout;
   selectionMode: TableSelectionMode;
   stickyHeader: boolean;
+  stickyTo: TableStickyTo;
   striped: boolean;
   variant: TableVariant;
 }
@@ -85,6 +92,7 @@ const FALLBACK: TableDefaults = {
   layout: 'auto',
   selectionMode: 'none',
   stickyHeader: false,
+  stickyTo: 'scroll',
   striped: false,
   variant: 'ruled',
 };

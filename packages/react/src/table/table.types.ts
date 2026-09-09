@@ -25,6 +25,12 @@ export type TableAlign = 'start' | 'center' | 'end';
 /** What a value longer than its column does. None of the three removes it. */
 export type TableText = 'wrap' | 'truncate' | 'nowrap';
 
+/**
+ * What a sticky header stays inside: the family's own scroller, or whatever
+ * scrolls outside it — the page, an app shell, a scroll area.
+ */
+export type TableStickyTo = 'scroll' | 'page';
+
 /** Which edge a column is pinned to while the table scrolls past it. */
 export type TableSticky = 'start' | 'end';
 
@@ -87,6 +93,7 @@ export interface TableDefaults {
   layout?: TableLayout | undefined;
   selectionMode?: TableSelectionMode | undefined;
   stickyHeader?: boolean | undefined;
+  stickyTo?: TableStickyTo | undefined;
   striped?: boolean | undefined;
   variant?: TableVariant | undefined;
 }
@@ -103,6 +110,7 @@ export interface TableRootProps extends HTMLAttributes<HTMLElement> {
   'data-loading'?: '' | undefined;
   'data-part': string;
   'data-sticky-header'?: '' | undefined;
+  'data-sticky-to'?: TableStickyTo | undefined;
   'data-striped'?: '' | undefined;
   'data-ui': string;
   'data-variant': TableVariant;
@@ -137,6 +145,11 @@ export interface TableProps extends Omit<ComponentPropsWithRef<'div'>, 'onChange
   selectionMode?: TableSelectionMode | undefined;
   sort?: TableSortDescriptor | null | undefined;
   stickyHeader?: boolean | undefined;
+  /**
+   * What the sticky header stays inside. `page` releases the family's own
+   * scroll container, so the table can no longer scroll sideways in its frame.
+   */
+  stickyTo?: TableStickyTo | undefined;
   striped?: boolean | undefined;
   value?: readonly string[] | undefined;
   variant?: TableVariant | undefined;
@@ -154,6 +167,8 @@ export interface TableHandle {
 
 export interface TableContextValue {
   columns: number;
+  /** `page` means the family owns no scroller, so nothing is measured. */
+  stickyTo: TableStickyTo;
   expanded: readonly string[];
   id: string;
   isExpanded: (value: string) => boolean;

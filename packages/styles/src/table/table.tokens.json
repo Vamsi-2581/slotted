@@ -49,6 +49,7 @@
   "--slotted-table-row-surface-selected",
   "--slotted-table-row-surface-selected-hover",
   "--slotted-table-row-surface-stripe",
+  "--slotted-table-sticky-offset",
   "--slotted-table-surface",
   "--slotted-target-min",
   "--slotted-text",

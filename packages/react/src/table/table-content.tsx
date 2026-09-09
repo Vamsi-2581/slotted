@@ -54,8 +54,13 @@ export function TableContent({
     [consumerScrollRef],
   );
 
+  /**
+   * Nothing is measured under `stickyTo="page"`: the family has released its own
+   * scroll container so the header can stick to what scrolls outside it, and a
+   * box that does not scroll has no overflow to answer and no tab stop to earn.
+   */
   useEffect(() => {
-    if (element === null) return undefined;
+    if (element === null || table.stickyTo === 'page') return undefined;
 
     const handle = createScrollAffordance(element, { onChange: setState });
     affordance.current = handle;
@@ -65,7 +70,7 @@ export function TableContent({
       handle.destroy();
       affordance.current = null;
     };
-  }, [element]);
+  }, [element, table.stickyTo]);
 
   useImperativeHandle<TableHandle, TableHandle>(
     handleRef,

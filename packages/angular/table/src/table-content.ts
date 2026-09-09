@@ -87,6 +87,14 @@ export class SlTableContent {
 
   constructor() {
     afterNextRender(() => {
+      /**
+       * Nothing is measured under `stickyTo="page"`: the family has released its
+       * own scroll container so the header can stick to what scrolls outside it,
+       * and a box that does not scroll has no overflow to answer and no tab stop
+       * to earn.
+       */
+      if (this.table.resolvedStickyTo() === 'page') return;
+
       const handle = createScrollAffordance(this.host.nativeElement, {
         onChange: (next) => this.state.set(next),
       });

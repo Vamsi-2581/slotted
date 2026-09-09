@@ -489,6 +489,13 @@ export const ANGULAR_TABLE_DOCS = {
         'Whether the header stays while the body scrolls',
       ],
       [
+        'stickyTo',
+        "'scroll' | 'page'",
+        'scroll',
+        'slTable',
+        'What the header stays inside: this table own scroller, or whatever scrolls outside it. page releases the scroller, so the table stops scrolling sideways in its frame.',
+      ],
+      [
         'layout',
         "'auto' | 'fixed'",
         'auto',

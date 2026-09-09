@@ -29,6 +29,7 @@ import {
   type TableSelectionMode,
   type TableSelectionReason,
   type TableSortDescriptor,
+  type TableStickyTo,
   type TableVariant,
 } from './table-defaults';
 
@@ -44,6 +45,7 @@ export type {
   TableSortDirection,
   TableSortReason,
   TableSticky,
+  TableStickyTo,
   TableText,
   TableVariant,
 } from './table-defaults';
@@ -89,6 +91,7 @@ export const TABLE_ROW_SELECTOR = '[data-part="body"] > [data-part="row"][data-v
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-striped]': "resolvedStriped() ? '' : null",
     '[attr.data-sticky-header]': "resolvedStickyHeader() ? '' : null",
+    '[attr.data-sticky-to]': 'resolvedStickyTo()',
     '[attr.data-loading]': "loading() ? '' : null",
   },
 })
@@ -109,6 +112,11 @@ export class SlTable implements ControlValueAccessor {
   readonly stickyHeader = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (state) => (state === undefined ? undefined : booleanAttribute(state)),
   });
+  /**
+   * What the sticky header stays inside. `page` releases the family's own
+   * scroll container, so the table can no longer scroll sideways in its frame.
+   */
+  readonly stickyTo = input<TableStickyTo | undefined>(undefined);
   /**
    * How many columns the table renders. The spanning parts — the detail row,
    * the empty cell, the skeleton rows — need the number, and reading it from
@@ -141,6 +149,7 @@ export class SlTable implements ControlValueAccessor {
   readonly resolvedMode = computed(() => this.selectionMode() ?? this.defaults.selectionMode);
   readonly resolvedStriped = computed(() => this.striped() ?? this.defaults.striped);
   readonly resolvedStickyHeader = computed(() => this.stickyHeader() ?? this.defaults.stickyHeader);
+  readonly resolvedStickyTo = computed(() => this.stickyTo() ?? this.defaults.stickyTo);
   readonly resolvedColumns = computed(() => this.columns() ?? this.defaults.columns);
   readonly resolvedLabels = computed<TableLabels>(() => ({
     ...TABLE_LABELS,

@@ -591,15 +591,61 @@ function Wide({ children, ...props }: React.ComponentProps<typeof Table>) {
   );
 }
 
+/** Sixteen records, so a bounded box always has more table than room. */
+const LONG = [...INVOICES, ...INVOICES, ...INVOICES, ...INVOICES];
+
+function Ledger({ stickyTo }: { stickyTo?: 'scroll' | 'page' }) {
+  return (
+    <Table columns={4} stickyHeader variant="framed" {...(stickyTo ? { stickyTo } : {})}>
+      <TableContent
+        {...(stickyTo === 'page' ? {} : { scrollProps: { style: { maxBlockSize: '11rem' } } })}
+      >
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader sticky="start" text="nowrap">
+              Invoice
+            </TableColumnHeader>
+            <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Owner</TableColumnHeader>
+            <TableColumnHeader numeric text="nowrap">
+              Amount
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {LONG.map((invoice, index) => (
+            <TableRow key={`${invoice.id}-${index}`} value={`${invoice.id}-${index}`}>
+              <TableRowHeader sticky="start" text="nowrap">
+                {invoice.id}
+              </TableRowHeader>
+              <TableCell text="nowrap">{invoice.client}</TableCell>
+              <TableCell text="nowrap">{invoice.owner}</TableCell>
+              <TableCell numeric>{MONEY.format(invoice.amount)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
 export const Sticky: Story = {
   parameters: scenario('sticky'),
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
-        label="stickyHeader, and a column pinned at the start"
-        note="Scroll down and the header stays against the scroller rather than against the page. Scroll sideways and the pinned column darkens its edge, which is the affordance that appears exactly while something is hidden under it."
+        label='stickyTo="scroll" — a panel with a height of its own'
+        note="Scroll inside the box: the header stays against the table's own scroller, which is what keeps it right in a drawer, a dialog or a split pane. The pinned first column darkens its edge while something is hidden under it."
       >
-        <Wide stickyHeader />
+        <Ledger />
+      </Scene>
+      <Scene
+        label='stickyTo="page" — the header stays while the page moves'
+        note="Scroll the dashed box, which stands in for the page: the table has no scroller of its own here, so the header sticks to what scrolls outside it. The cost is that a wide table now pushes that scroller sideways instead of scrolling inside its frame."
+      >
+        <div className="slotted-demo-viewport" data-scroll data-size="tall">
+          <Ledger stickyTo="page" />
+        </div>
       </Scene>
     </div>
   ),

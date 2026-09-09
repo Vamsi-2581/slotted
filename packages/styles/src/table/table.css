@@ -386,10 +386,33 @@
    * under the pinned column or the pinned column over the header — the corner
    * is where this always goes wrong.
    */
+  /**
+   * Where the header stops, and what it stops inside.
+   *
+   * `scroll` is the default: the header sticks to the family's own scroller,
+   * which is what keeps it right inside a drawer, a dialog or a split pane —
+   * the box the reader scrolls is the box the header stays in.
+   *
+   * `page` gives that box up. A sticky element resolves against its nearest
+   * scrolling ancestor, so for the header to stay while the *page* scrolls, the
+   * family must not be a scrolling ancestor at all — and a box that scrolls one
+   * axis scrolls both, because CSS computes a visible axis to `auto` the moment
+   * the other is `auto`. So the scroller releases its overflow, and the cost is
+   * written where the choice is made: a table wider than the page pushes the
+   * page sideways instead of scrolling inside its frame.
+   *
+   * The offset is where the header stops. An application with a bar of its own
+   * sets `--slotted-table-sticky-offset` once, and every table under it stops
+   * below the bar rather than under it.
+   */
   [data-ui='table'][data-sticky-header] [data-part='column-header'] {
-    inset-block-start: 0;
+    inset-block-start: var(--slotted-table-sticky-offset, 0);
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
+  }
+
+  [data-ui='table'][data-sticky-to='page'] [data-part='scroll'] {
+    overflow: visible;
   }
 
   [data-ui='table'] [data-sticky='start'] {
@@ -414,16 +437,41 @@
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
 
-  /* The edge that says a column is pinned rather than merely first. It is drawn
-     on the cell's own trailing side for a start-pinned column and on its
-     leading side for an end-pinned one, both logical, so the mirror is the
-     browser's work. */
-  [data-ui='table'] [data-sticky='start'] {
-    border-inline-end: var(--_rule-width) solid var(--_rule);
+  /**
+   * The edge that says a column is pinned rather than merely first, drawn as a
+   * line of its own rather than as a border on the cell.
+   *
+   * A border would be right if a cell had only one. This one has two — the
+   * pinned edge and, in the header, the rule under the band — and where two
+   * borders of a box meet the browser mitres them: the corner is split
+   * diagonally between the two, which left a visible notch in the header's
+   * horizontal rule exactly where the pinned column crossed it. Read at 420
+   * pixels on the scrolled scene.
+   *
+   * As a pseudo-element the line simply crosses the rule, which is what a
+   * spreadsheet does and what the eye reads as one continuous column boundary.
+   * It is stretched past the cell's own bottom border, so the line is unbroken
+   * down the body instead of stopping a pixel short at every row.
+   */
+  [data-ui='table'] [data-sticky] {
+    position: relative;
   }
 
-  [data-ui='table'] [data-sticky='end'] {
-    border-inline-start: var(--_rule-width) solid var(--_rule);
+  [data-ui='table'] [data-sticky]::after {
+    background-color: var(--slotted-table-border-color, var(--slotted-border-subtle));
+    content: '';
+    inline-size: var(--_rule-width);
+    inset-block: 0 calc(var(--_rule-width) * -1);
+    position: absolute;
+    z-index: 1;
+  }
+
+  [data-ui='table'] [data-sticky='start']::after {
+    inset-inline-end: 0;
+  }
+
+  [data-ui='table'] [data-sticky='end']::after {
+    inset-inline-start: 0;
   }
 
   /**
@@ -441,8 +489,8 @@
    */
   [data-ui='table']
     [data-part='scroll'][data-overflowing]:not([data-at-start])
-    [data-sticky='start'] {
-    border-inline-end-color: var(--_rule-strong);
+    [data-sticky='start']::after {
+    background-color: var(--slotted-table-border-color-strong, var(--slotted-border-strong));
   }
 
   [data-ui='table'] [data-part='scroll'][data-overflowing]:not([data-at-end]) [data-sticky='end'] {

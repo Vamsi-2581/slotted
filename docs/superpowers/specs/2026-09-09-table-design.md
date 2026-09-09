@@ -182,6 +182,34 @@ holds `head` for the `thead`, and `head` beside `header` is the pair a reader
 mistypes. If `action-bar` in wave 7 finds the seam is real, the slot is added
 there and the name is decided once.
 
+### 3.2 The scroll model, stated once
+
+The family **scrolls sideways and never up**. Vertical scrolling belongs to
+whatever the consumer gives a height to: the `scroll` part when they set one on
+it, and the page when they do not.
+
+That is why `stickyHeader` is off by default — a header fixed inside a box with
+no height fixes nothing — and why where it sticks is a second axis rather than a
+second meaning of the first.
+
+| `stickyTo` | The header stays inside | What it costs |
+| ---------- | ----------------------- | ------------- |
+| `scroll` (default) | The family's own scroller | The consumer has to give that scroller a height, or nothing scrolls past the header |
+| `page` | Whatever scrolls outside the family: the page, an app shell, a scroll area | The family gives up its own scroll container, so a wide table pushes that scroller sideways instead of scrolling inside its frame |
+
+The second is not a preference, it is a constraint of the platform: a sticky
+element resolves against its nearest scrolling ancestor, and a box that scrolls
+one axis scrolls both — CSS computes a `visible` axis to `auto` the moment the
+other is `auto`. A table cannot both scroll sideways inside its frame and let
+its header stick to the page. Carbon and Ant chose the page, Material chose its
+own container; the axis names both and writes the cost where the choice is made.
+
+Two consequences the bindings hold. Under `page` nothing is measured and the
+region wiring is never raised: the family owns no scroll container there, so
+there is no overflow to answer and no tab stop to earn. And the header stops at
+`--slotted-table-sticky-offset`, so an application with a bar of its own sets it
+once and every table under it stops below the bar rather than under it.
+
 ## 4. State
 
 Three mutable values, three models. Each is controlled or uncontrolled, decided

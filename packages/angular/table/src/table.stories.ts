@@ -412,16 +412,45 @@ const WIDE = `
     </div>
   </div>`;
 
+const LEDGER = (stickyTo?: 'page') => `
+  <div slTable [columns]="4" variant="framed" stickyHeader ${stickyTo ? `stickyTo="${stickyTo}"` : ''}>
+    <div slTableContent ${stickyTo === 'page' ? '' : 'style="max-block-size: 11rem"'}>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader sticky="start" text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader text="nowrap">Owner</th>
+          <th slTableColumnHeader numeric text="nowrap">Amount</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (invoice of invoices; track $index) {
+          <tr slTableRow [value]="invoice.id + $index">
+            <th slTableRowHeader sticky="start" text="nowrap">{{ invoice.id }}</th>
+            <td slTableCell text="nowrap">{{ invoice.client }}</td>
+            <td slTableCell text="nowrap">{{ invoice.owner }}</td>
+            <td slTableCell numeric>{{ invoice.amount }}</td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
 export const Sticky: Story = {
   parameters: scenario('sticky'),
   render: () => ({
-    props: { invoices: [...INVOICES, ...INVOICES], sticky: true },
+    props: { invoices: [...INVOICES, ...INVOICES, ...INVOICES, ...INVOICES] },
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
-    'stickyHeader, and a column pinned at the start',
-    'Scroll down and the header stays against the scroller rather than against the page. Scroll sideways and the pinned column darkens its edge, which is the affordance that appears exactly while something is hidden under it.',
-    WIDE,
+    'stickyTo="scroll" — a panel with a height of its own',
+    "Scroll inside the box: the header stays against the table's own scroller, which is what keeps it right in a drawer, a dialog or a split pane. The pinned first column darkens its edge while something is hidden under it.",
+    LEDGER(undefined),
+  )}
+  ${scene(
+    'stickyTo="page" — the header stays while the page moves',
+    'Scroll the dashed box, which stands in for the page: the table has no scroller of its own here, so the header sticks to what scrolls outside it. The cost is that a wide table now pushes that scroller sideways instead of scrolling inside its frame.',
+    `<div class="slotted-demo-viewport" data-scroll data-size="tall">${LEDGER('page')}</div>`,
   )}
 </div>`,
   }),

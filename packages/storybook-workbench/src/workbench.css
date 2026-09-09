@@ -52,6 +52,28 @@
 }
 
 /**
+ * The box a story is mounted in, whatever the renderer calls it.
+ *
+ * Storybook's Angular renderer mounts each story in a custom element named
+ * after the story id, and an unknown element is `display: inline` until
+ * something says otherwise. An inline box establishes no width of its own, so
+ * the intrinsic width of what is inside travels up instead: a `table` whose
+ * columns want 3823 pixels made the story canvas 3901 pixels wide inside a
+ * 1265-pixel page, and every scene on the reference page was drawn past the
+ * right edge and clipped. The same story rendered by React was 1265, because
+ * React mounts into a `div`.
+ *
+ * It is written as "the element that holds the preview" rather than as a list
+ * of renderer element names, so a renderer that invents another wrapper is
+ * covered by the same rule. Measured on `components-table--reference` at 1280
+ * pixels on 2026-09-09.
+ */
+:has(> .slotted-workbench-preview) {
+  display: block;
+  max-inline-size: 100%;
+}
+
+/**
  * A story inside a reference page still needs a margin. Zero was the correction
  * for a story that filled the viewport, and it overshot: the demonstration then
  * started on the canvas border, and every scene header and every stage edge sat
@@ -190,6 +212,31 @@
 
 .slotted-reference-page li + li {
   margin-block-start: 7px;
+}
+
+/**
+ * The two rules above are for the page's own prose lists — the accessibility
+ * notes and the composition surface — and they were reaching into every
+ * demonstration as well: a `ul` a family renders took eighteen pixels of inset
+ * *per level*, and every `li` after the first took seven pixels of margin.
+ *
+ * `tree` is where it became visible, because its guide line spans one row: a
+ * margin between rows broke the line into segments, and an inset per level
+ * walked every line inward as the tree got deeper. It was not a tree defect —
+ * `list`, `list-item` and `breadcrumb` had been carrying the same two numbers
+ * on their own reference pages, and nothing in either family said so.
+ *
+ * `revert-layer` rather than `0`, for the reason the block above uses it: it
+ * rolls the property back to `slotted.components`, so a family that does state
+ * an inset for its own list — `prose` states several — keeps the one it
+ * declares instead of being flattened to nothing.
+ */
+.slotted-reference-page :is([data-ui] :is(ul, ol), ul[data-ui], ol[data-ui]) {
+  padding-inline-start: revert-layer;
+}
+
+.slotted-reference-page [data-ui] li + li {
+  margin-block-start: revert-layer;
 }
 
 .slotted-reference-page__title-row {

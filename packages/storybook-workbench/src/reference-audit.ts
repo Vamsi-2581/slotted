@@ -121,6 +121,20 @@ export function referencePageErrors({
     if (scene.note.trim().length < NOTE_MINIMUM) {
       errors.push(`scene ${scene.id} needs a caption saying what to look at`);
     }
+    /**
+     * An Angular story writes its scene into a template, and a template reads
+     * `@` as the start of a control-flow block. A caption that mentioned `@if`
+     * in prose left the compiler looking for a block that never closed, and the
+     * scene rendered as `Incomplete block "if keeps a closed detail out of the
+     * DOM entirely"` instead of as a demonstration — a defect a screenshot
+     * shows and no type or lint can. The escape the compiler itself suggests is
+     * `&#64;`, and it is what a caption that has to name the syntax writes.
+     */
+    if (framework === 'Angular' && /@(?!#?\w+;)/.test(`${scene.title} ${scene.note}`)) {
+      errors.push(
+        `scene ${scene.id} writes a bare @ in prose, which an Angular template reads as a block`,
+      );
+    }
   }
 
   if (docs.accessibility.length < 3) {

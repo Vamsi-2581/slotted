@@ -478,3 +478,51 @@ test('offers a viewport that puts what it holds in the middle, at any size', () 
   assert.match(rule, /align-items:\s*center/);
   assert.match(rule, /justify-items:\s*center/);
 });
+
+/**
+ * The page states its accessibility notes and its composition surface as lists,
+ * and the two rules that give those lists their typography reached into every
+ * demonstration as well: a `ul` a family renders took eighteen pixels of inset
+ * per level, and every `li` after the first took seven of margin.
+ *
+ * `tree` is where it became visible — its guide line spans one row, so a margin
+ * between rows broke the line and an inset per level walked it inward — but
+ * `list`, `list-item` and `breadcrumb` had been carrying the same two numbers
+ * on their own pages.
+ */
+test('keeps the page typography out of the lists a family renders', () => {
+  const inset =
+    /\.slotted-reference-page :is\(\[data-ui\] :is\(ul, ol\), ul\[data-ui\], ol\[data-ui\]\)\s*\{([\s\S]*?)\}/.exec(
+      css,
+    )?.[1] ?? '';
+  assert.match(inset, /padding-inline-start:\s*revert-layer/);
+
+  const between =
+    /\.slotted-reference-page \[data-ui\] li \+ li\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(between, /margin-block-start:\s*revert-layer/);
+
+  /* Both have to come after the rules they answer, because they match with the
+     same weight the cascade breaks by order. */
+  assert.ok(
+    css.indexOf('[data-ui] li + li') > css.indexOf('.slotted-reference-page li + li'),
+    'the guard is written before the rule it answers',
+  );
+});
+
+/**
+ * Storybook's Angular renderer mounts each story in a custom element named
+ * after the story id, and an unknown element is `display: inline`. An inline
+ * box establishes no width, so the intrinsic width of what is inside travels
+ * up: `table`'s reference page was drawn 3901 pixels wide inside a 1265-pixel
+ * page and every scene was clipped at the right edge, while the same stories in
+ * React — mounted into a `div` — measured 1265.
+ *
+ * The rule names the element that holds the preview rather than the renderer's
+ * own element names, so the next renderer to invent a wrapper is covered
+ * without another rule.
+ */
+test('gives a story a block box that cannot outgrow the page', () => {
+  const rule = /:has\(> \.slotted-workbench-preview\)\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(rule, /display:\s*block/);
+  assert.match(rule, /max-inline-size:\s*100%/);
+});

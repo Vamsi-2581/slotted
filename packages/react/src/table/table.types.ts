@@ -260,7 +260,7 @@ export interface TableEmptyProps extends ComponentPropsWithRef<'td'> {
 
 export interface TableLoaderProps extends Omit<ComponentPropsWithRef<'tbody'>, 'children'> {
   /** How many skeleton rows a first load draws. */
-  rows?: number | undefined;
+  skeletonRows?: number | undefined;
   children?: ReactNode | undefined;
 }
 

@@ -371,13 +371,13 @@ export function TableEmpty({ colSpan, ref, ...nativeProps }: TableEmptyProps) {
  * refresh over rows already read is the other state and is not this one —
  * `loading` on the table dims the body and moves nothing.
  */
-export function TableLoader({ children, ref, rows, ...nativeProps }: TableLoaderProps) {
+export function TableLoader({ children, ref, skeletonRows, ...nativeProps }: TableLoaderProps) {
   const table = useTable();
 
   return (
     <tbody {...nativeProps} aria-hidden data-part="loader" ref={ref}>
       {children ??
-        Array.from({ length: rows ?? 5 }, (_unused, row) => (
+        Array.from({ length: skeletonRows ?? 5 }, (_unused, row) => (
           <tr data-part="row" key={row}>
             {Array.from({ length: table.columns }, (_cell, column) => (
               <td data-part="cell" key={column}>

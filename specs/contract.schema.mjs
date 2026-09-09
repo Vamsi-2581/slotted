@@ -184,6 +184,22 @@ export const KNOWN_CAPABILITIES = [
   'activation',
   'selection',
   /**
+   * Which column a set of rows is ordered by, and which way. It is mutable and
+   * a consumer can own it: a server sorts, a query string carries the
+   * descriptor back, and a saved view restores it.
+   *
+   * The vocabulary had four words that look like this one and are not.
+   * `selection` is the reader's own choice of records; `current` is where the
+   * reader is; `value` is the text a control holds; `measurement` is a quantity
+   * the consumer states and the family only draws. None of them says "these
+   * rows are ordered by that column, ascending".
+   *
+   * `table` found the gap. `data-grid`, `tree-grid` and `pivot-grid` each hold
+   * the same value later, and a word invented per family would have been three
+   * families disagreeing about the shape of one descriptor.
+   */
+  'sort',
+  /**
    * Asking to be taken out of the collection that holds it. It is deliberately
    * not mutable: the family emits a request carrying a reason, and the
    * consumer's own collection decides. A component that removed itself would
@@ -274,6 +290,7 @@ export const MUTABLE_CAPABILITIES = [
   'checked',
   'pressed',
   'selection',
+  'sort',
   'activation',
   'files',
   'current',

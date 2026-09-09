@@ -106,6 +106,17 @@ test('holds copying as a capability and not as state', () => {
   assert.ok(!MUTABLE_CAPABILITIES.includes('copyable'));
 });
 
+/**
+ * The order a set of rows is in is a value a consumer owns: a server sorts, a
+ * query string carries the descriptor, and a saved view restores it. So it is
+ * mutable, and a family that sorts declares the model rather than emitting a
+ * callback with no controlled form.
+ */
+test('holds the order of a set of rows as state a consumer can own', () => {
+  assert.ok(KNOWN_CAPABILITIES.includes('sort'));
+  assert.ok(MUTABLE_CAPABILITIES.includes('sort'));
+});
+
 /* ------------------------------------------------------------- identity - */
 
 test('rejects a family that does not name its public identifier', () => {

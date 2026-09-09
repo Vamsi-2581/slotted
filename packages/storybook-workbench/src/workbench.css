@@ -655,6 +655,22 @@
 }
 
 /**
+ * A box that **scrolls** rather than one that clips, for a family whose
+ * behaviour is about what happens while the reader scrolls past it.
+ *
+ * The plain viewport hides its overflow, which is right for a layer that must
+ * not escape and wrong for a demonstration of stickiness: `table`'s header can
+ * stay inside its own scroller or inside whatever scrolls outside it, and the
+ * second has no demonstration at all unless the story can stand a table inside
+ * something that scrolls. A story may not reach for an inline style, so the
+ * ground it needs is a primitive rather than a `style` attribute.
+ */
+.slotted-demo-viewport[data-scroll] {
+  contain: none;
+  overflow: auto;
+}
+
+/**
  * The step between the two. Four rems holds a bar across the top of a page and
  * twenty-two holds a dialog; a layer anchored beside its own trigger needs
  * neither, and `tooltip`'s first rendered page showed why — a 34-pixel button

@@ -526,3 +526,18 @@ test('gives a story a block box that cannot outgrow the page', () => {
   assert.match(rule, /display:\s*block/);
   assert.match(rule, /max-inline-size:\s*100%/);
 });
+
+/**
+ * A demonstration of stickiness needs a box that scrolls, not one that clips.
+ * `table`'s header can stay inside its own scroller or inside whatever scrolls
+ * outside it, and the second has no picture unless a story can stand a table in
+ * something that scrolls — which a story cannot write for itself, because a
+ * story that reaches for an inline style is refused.
+ */
+test('offers a viewport that scrolls, for a family whose behaviour is about scrolling', () => {
+  const rule = /\.slotted-demo-viewport\[data-scroll\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(rule, /overflow:\s*auto/);
+  /* `contain: paint` on the plain viewport clips instead of scrolling, so the
+     scrolling one has to give it up or the scrollbar never appears. */
+  assert.match(rule, /contain:\s*none/);
+});

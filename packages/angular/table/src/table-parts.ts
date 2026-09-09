@@ -10,6 +10,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlCheckbox } from '@slotted/angular/checkbox';
+import { SlSkeleton } from '@slotted/angular/skeleton';
 
 import { SlTable } from './table';
 import type { TableAlign, TableSticky, TableText } from './table-defaults';
@@ -430,11 +431,12 @@ export class SlTableEmpty {
   selector: 'tbody[slTableLoader]',
   standalone: true,
   exportAs: 'slTableLoader',
+  imports: [SlSkeleton],
   template: `@for (row of skeleton(); track row) {
     <tr data-part="row">
       @for (cell of cells(); track cell) {
         <td data-part="cell">
-          <span data-ui="skeleton" data-part="root" data-shape="text" data-loading=""></span>
+          <span slSkeleton loading inlineSize="100%"></span>
         </td>
       }
     </tr>

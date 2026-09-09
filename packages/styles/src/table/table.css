@@ -540,9 +540,6 @@
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
     text-align: inherit;
-    transition: background-color
-      var(--slotted-control-transition-duration, var(--slotted-duration-short))
-      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
   /* An aligned column keeps its name over its values, and the mark follows the
@@ -557,18 +554,32 @@
   }
 
   /**
-   * Hover on the header band goes **darker**, not lighter. The band is already
-   * a tinted ground, and the step every neutral row hovers with is lighter than
-   * it — read on the first capture, a hovered header was a pale hole in the
-   * band rather than a control answering the pointer. It is mixed from the ink
-   * for the reason the stripe is: no scale holds a ground one step under this
-   * one, and mixing keeps the direction right in every scheme.
+   * Hover is painted on the **cell**, and only on a cell that sorts.
+   *
+   * Two things were wrong when the control painted it. The control's box stops
+   * where the controls slot begins — that is the room the cell reserves — so
+   * the fill ended in the middle of the header with the filter trigger sitting
+   * outside it, on the band. And a header that does not sort answered the
+   * pointer with a ground anyway, which offers an interaction it does not have.
+   *
+   * The ground goes **darker**, not lighter: the band is already a tinted
+   * ground, and the step every neutral row hovers with is lighter than it, so a
+   * hovered header was a pale hole in the band rather than a control answering
+   * the pointer. It is mixed from the ink for the reason the stripe is — no
+   * scale holds a ground one step under this one, and mixing keeps the
+   * direction right in every scheme.
    */
-  [data-ui='table'] [data-part='sort']:not(:disabled):hover {
+  [data-ui='table'] [data-part='column-header']:has(> [data-part='sort']:not(:disabled)):hover {
     background-color: var(
       --slotted-table-header-surface-hover,
       color-mix(in oklab, var(--slotted-text, CanvasText) 7%, var(--_head-surface))
     );
+  }
+
+  [data-ui='table'] [data-part='column-header'] {
+    transition: background-color
+      var(--slotted-control-transition-duration, var(--slotted-duration-short))
+      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
   [data-ui='table'] [data-part='sort']:focus-visible {
@@ -641,6 +652,25 @@
      checkbox between them. */
   [data-ui='table'] [data-part='selection'] > [data-ui='checkbox'] {
     block-size: var(--_line);
+  }
+
+  /**
+   * The chooser keeps its box and gives up its halo.
+   *
+   * A checkbox standing on its own answers the pointer with a circle behind the
+   * box, which is what tells a reader the target is larger than the square. In
+   * a table the row is already answering the pointer with a ground the width of
+   * the page, and a second circle inside it read as a mark on the row rather
+   * than as a state of the control.
+   *
+   * It is turned off by the token the halo is painted at rather than by a rule
+   * that reaches into `checkbox`: a custom property set on this family's own
+   * cell is composition, where a selector naming another family's parts would
+   * be this stylesheet deciding how that one looks. The target is unaffected —
+   * it is a separate pseudo-element, and it stays at the WCAG minimum.
+   */
+  [data-ui='table'] [data-part='selection'] {
+    --slotted-selection-halo-opacity: 0;
   }
 
   /**

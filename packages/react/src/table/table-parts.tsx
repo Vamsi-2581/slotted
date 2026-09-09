@@ -1,6 +1,7 @@
 import { createContext, useContext, type MouseEvent, type ReactNode } from 'react';
 
 import { Checkbox } from '../checkbox';
+import { Skeleton } from '../skeleton';
 import { useTable } from './table';
 import type {
   TableBodyProps,
@@ -381,7 +382,7 @@ export function TableLoader({ children, ref, skeletonRows, ...nativeProps }: Tab
           <tr data-part="row" key={row}>
             {Array.from({ length: table.columns }, (_cell, column) => (
               <td data-part="cell" key={column}>
-                <span data-loading="" data-part="root" data-shape="text" data-ui="skeleton" />
+                <Skeleton inlineSize="100%" loading />
               </td>
             ))}
           </tr>

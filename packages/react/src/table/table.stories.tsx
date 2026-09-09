@@ -4,8 +4,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useMemo, useState } from 'react';
 
 import { IconButton } from '../button';
+import { Checkbox } from '../checkbox';
 import { Link } from '../link';
 import { Pagination, PaginationItems, PaginationNext, PaginationPrevious } from '../pagination';
+import { Popover, PopoverBody, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
 import { ResultState, ResultStateContent, ResultStateTitle } from '../result-state';
 import { Tag } from '../tag';
 import { Table } from './table';
@@ -347,50 +349,107 @@ export const Sorting: Story = {
   ),
 };
 
+/**
+ * The trigger, the surface it opens and the rules it applies are three
+ * different owners. This family holds the place; `popover` holds the layer, its
+ * dismissal and its focus; and the rules are the consumer's own state — which
+ * is what makes the demonstration a demonstration rather than a dead button.
+ */
+function StatusFilter({
+  chosen,
+  onChange,
+}: {
+  chosen: readonly string[];
+  onChange: (next: readonly string[]) => void;
+}) {
+  return (
+    <Popover portal={false}>
+      <PopoverTrigger
+        render={(triggerProps) => (
+          <button {...triggerProps} aria-label="Filter by status" type="button">
+            <Funnel />
+          </button>
+        )}
+      />
+      <PopoverLayer>
+        <PopoverContent aria-label="Filter by status">
+          <PopoverBody>
+            {(['Paid', 'Overdue', 'Draft'] as const).map((status) => (
+              <Checkbox
+                checked={chosen.includes(status)}
+                key={status}
+                onCheckedChange={(checked) =>
+                  onChange(checked ? [...chosen, status] : chosen.filter((held) => held !== status))
+                }
+              >
+                {status}
+              </Checkbox>
+            ))}
+          </PopoverBody>
+        </PopoverContent>
+      </PopoverLayer>
+    </Popover>
+  );
+}
+
+function ColumnControlsDemo() {
+  const [statuses, setStatuses] = useState<readonly string[]>([]);
+  const rows = useMemo(
+    () =>
+      statuses.length === 0
+        ? INVOICES
+        : INVOICES.filter((invoice) => statuses.includes(invoice.status)),
+    [statuses],
+  );
+
+  return (
+    <Table columns={3} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader column="id">
+              <TableSort>Invoice</TableSort>
+            </TableColumnHeader>
+            <TableColumnHeader>Client</TableColumnHeader>
+            <TableColumnHeader>
+              Status
+              <TableColumnActions>
+                <StatusFilter chosen={statuses} onChange={setStatuses} />
+              </TableColumnActions>
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableEmpty>No invoices match this filter</TableEmpty>
+            </TableRow>
+          ) : (
+            rows.map((invoice) => (
+              <TableRow key={invoice.id} value={invoice.id}>
+                <TableRowHeader>{invoice.id}</TableRowHeader>
+                <TableCell>{invoice.client}</TableCell>
+                <TableCell>
+                  <Tag tone={TONE[invoice.status]}>{invoice.status}</Tag>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
 export const ColumnControls: Story = {
   parameters: scenario('column-controls'),
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
-        label="A column that sorts and filters"
-        note="Both controls stand on the column boundary, so the header row reads as one line of triggers. The slot holds the trigger; what the filter keeps and drops is your own query."
+        label="A column that sorts, and a column that filters"
+        note="Press the funnel: the trigger opens a Popover, the checkboxes are your own state, and the rows below answer them. The header that sorts answers the pointer with a ground; the one that only carries a filter does not, because it is not a target."
       >
-        <Table columns={3} variant="framed">
-          <TableContent>
-            <TableHead>
-              <TableRow>
-                <TableColumnHeader column="id">
-                  <TableSort>Invoice</TableSort>
-                </TableColumnHeader>
-                <TableColumnHeader column="client">
-                  <TableSort>Client</TableSort>
-                  <TableColumnActions>
-                    <button aria-label="Filter by client" type="button">
-                      <Funnel />
-                    </button>
-                  </TableColumnActions>
-                </TableColumnHeader>
-                <TableColumnHeader>
-                  Status
-                  <TableColumnActions>
-                    <button aria-label="Filter by status" type="button">
-                      <Funnel />
-                    </button>
-                  </TableColumnActions>
-                </TableColumnHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {INVOICES.slice(0, 3).map((invoice) => (
-                <TableRow key={invoice.id} value={invoice.id}>
-                  <TableRowHeader>{invoice.id}</TableRowHeader>
-                  <TableCell>{invoice.client}</TableCell>
-                  <TableCell>{invoice.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </TableContent>
-        </Table>
+        <ColumnControlsDemo />
       </Scene>
     </div>
   ),

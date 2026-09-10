@@ -61,4 +61,5 @@ export * from './toolbar';
 export * from './tooltip';
 export * from './tree';
 export * from './typography';
+export * from './upload';
 export * from './visually-hidden';

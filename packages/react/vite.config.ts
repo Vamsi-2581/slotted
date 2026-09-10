@@ -46,6 +46,7 @@ export default defineConfig({
         'time-picker': resolve(import.meta.dirname, 'src/time-picker/index.ts'),
         tooltip: resolve(import.meta.dirname, 'src/tooltip/index.ts'),
         typography: resolve(import.meta.dirname, 'src/typography/index.ts'),
+        upload: resolve(import.meta.dirname, 'src/upload/index.ts'),
         'visually-hidden': resolve(import.meta.dirname, 'src/visually-hidden/index.ts'),
       },
       formats: ['es'],

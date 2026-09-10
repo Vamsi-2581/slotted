@@ -243,6 +243,10 @@
     "./tree": {
       "types": "./dist/types/tree/index.d.ts",
       "import": "./dist/tree.js"
+    },
+    "./upload": {
+      "types": "./dist/types/upload/index.d.ts",
+      "import": "./dist/upload.js"
     }
   },
   "scripts": {

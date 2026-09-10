@@ -612,6 +612,104 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-upload",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-trash",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-play",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-pause",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-rotate-ccw",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file-image",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file-text",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file-spreadsheet",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file-audio",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file-video",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file-archive",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-file-type",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-presentation",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-control-font-family",
       "layer": "semantic",
       "axis": "base",
@@ -1367,6 +1465,86 @@
       "axis": "density",
       "type": "length",
       "root": true
+    },
+    {
+      "name": "--slotted-upload-kind-pdf",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-document",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-spreadsheet",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-presentation",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-image",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-video",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-audio",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-archive",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-other",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-upload-kind-foreground",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonText"
     },
     {
       "name": "--slotted-avatar-size-xs",

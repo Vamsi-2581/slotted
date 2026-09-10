@@ -437,8 +437,19 @@ export class SlCalendar implements OnInit {
     const focused = this.focused();
     const first = this.format().firstDayOfWeek;
 
-    const move = (next: PlainDate) => {
+    /**
+     * A key the grid acted on is the grid's, and nothing above it sees it.
+     * An application that binds a bare key guards it with "is the target an
+     * editable element", and a `td` is not one — so the arrows a reader walks
+     * a month with would fire every shortcut on the page.
+     */
+    const consume = () => {
       event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const move = (next: PlainDate) => {
+      consume();
       this.requestFocused(next, 'keyboard', event);
     };
 
@@ -461,15 +472,17 @@ export class SlCalendar implements OnInit {
         return move(event.shiftKey ? stepYear(focused, 1).date : stepMonth(focused, 1).date);
       case 'Enter':
       case ' ':
-        event.preventDefault();
+        consume();
         this.select(focused, 'keyboard', event);
         return;
       case 'Escape':
         /* The view closes before the surface does, which is the staging
            `dismissable-layer` asks a family to do: the key is simply not
            passed on, and no layer is asked to close. */
+        /* In the day view the key is left alone, so a surface above the
+           calendar may still close on it. */
         if (this.currentView() === 'day') return;
-        event.preventDefault();
+        consume();
         this.setView(this.currentView() === 'year' ? 'month' : 'day');
         return;
       default:

@@ -51,6 +51,8 @@
     "digitsAre": "one segment at a time",
     "runEndsWhen": "the segment is full, or one more digit could not fit under its maximum",
     "requestEmittedOn": "the end of a run, never inside one",
+    "keysAreConsumed": "a key the field acts on is stopped, not only defaulted",
+    "whyKeysAreConsumed": "Every application that binds a bare key guards it with \"is the target an editable element\", and that guard tests for input, textarea and contenteditable. A div with role=spinbutton is none of the three, so a reader typing a date fires every single-key shortcut on the page. In Storybook, pressing 1 moved focus out of the story and into the sidebar. preventDefault does not help: a shortcut handler reads the key, not the default.",
     "whyRequestWaits": "Typing 2026 into a year passes through 2, 20 and 202, and the arithmetic accepts every one of them as a date. A request per digit would ask a consumer's server about the year 2. The segments move on every keystroke and the value moves when the run ends: on the digit that fills the field, on the key that leaves it, or on blur, where a short year resolves through the pivot.",
     "wraps": "inside the segment, never carrying into the next",
     "emptySegmentStepsTo": "the reference date's own value",

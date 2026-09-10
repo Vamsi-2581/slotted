@@ -284,6 +284,24 @@ export function DateField({
 
   const editable = resolvedDisabled !== true && resolvedReadOnly !== true;
 
+  /**
+   * A key the field acted on is the field's, and nothing above it sees it.
+   *
+   * Every application that binds a bare key guards it with "is the target an
+   * editable element", and that guard tests for `input`, `textarea` and
+   * `contenteditable`. A `div` with `role="spinbutton"` is none of the three,
+   * so a reader typing a date into this control fires every single-key
+   * shortcut on the page: in Storybook, pressing `1` moved focus out of the
+   * story and into the sidebar, and the date could not be typed at all.
+   *
+   * `preventDefault` alone does not help — a shortcut handler reads the key,
+   * not the default. The event has to stop.
+   */
+  const consume = (event: KeyboardEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
   const onSegmentKeyDown = (name: DateFieldName) => (event: KeyboardEvent<HTMLDivElement>) => {
     /* The reader's own handler first, and it always runs: the family composes
        with it rather than replacing it. */
@@ -298,12 +316,12 @@ export function DateField({
     const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
 
     if (event.key === forward) {
-      event.preventDefault();
+      consume(event);
       moveBy(name, 1);
       return;
     }
     if (event.key === backward) {
-      event.preventDefault();
+      consume(event);
       moveBy(name, -1);
       return;
     }
@@ -320,32 +338,32 @@ export function DateField({
 
     switch (event.key) {
       case 'ArrowUp':
-        event.preventDefault();
+        consume(event);
         commit(stepSegment(read(), name, 1, reference), 'keyboard', event);
         return;
       case 'ArrowDown':
-        event.preventDefault();
+        consume(event);
         commit(stepSegment(read(), name, -1, reference), 'keyboard', event);
         return;
       case 'PageUp':
-        event.preventDefault();
+        consume(event);
         commit(stepSegment(read(), name, PAGE_STEP[name], reference), 'keyboard', event);
         return;
       case 'PageDown':
-        event.preventDefault();
+        consume(event);
         commit(stepSegment(read(), name, -PAGE_STEP[name], reference), 'keyboard', event);
         return;
       case 'Home':
-        event.preventDefault();
+        consume(event);
         commit(boundSegment(read(), name, 'min', reference), 'keyboard', event);
         return;
       case 'Backspace':
       case 'Delete':
-        event.preventDefault();
+        consume(event);
         commit(clearSegment(read(), name), 'clear', event);
         return;
       case 'End':
-        event.preventDefault();
+        consume(event);
         commit(boundSegment(read(), name, 'max', reference), 'keyboard', event);
         return;
       default:
@@ -353,7 +371,7 @@ export function DateField({
     }
 
     if (/^\d$/.test(event.key)) {
-      event.preventDefault();
+      consume(event);
       const typed = typeDigit(read(), name, Number(event.key), format, reference);
       commit(typed.segments, 'keyboard', event);
       if (typed.advance) moveBy(name, 1);

@@ -131,7 +131,6 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
             (mousedown)="onSegmentMouseDown($event)"
             (focus)="activeField.set(part.type)"
             (blur)="onBlur()"
-            (keydown)="onKeyDown(part.type, $event)"
           >
             {{ textOf(part.type) }}
           </div>
@@ -160,6 +159,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
     'data-ui': 'date-field',
     'data-part': 'root',
     '(mousedown)': 'onRootMouseDown($event)',
+    '(keydown)': 'onKeyDown($event)',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-calendar]': 'resolvedCalendar()',
@@ -472,7 +472,37 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
 
   /* ── The keyboard ────────────────────────────────────────────────────── */
 
-  protected onKeyDown(name: DateFieldName, event: KeyboardEvent) {
+  /**
+   * A key the field acted on is the field's, and nothing above it sees it.
+   *
+   * Every application that binds a bare key guards it with "is the target an
+   * editable element", and that guard tests for `input`, `textarea` and
+   * `contenteditable`. A `div` with `role="spinbutton"` is none of the three,
+   * so a reader typing a date into this control fires every single-key
+   * shortcut on the page: in Storybook, pressing `1` moved focus out of the
+   * story and into the sidebar, and the date could not be typed at all.
+   *
+   * `preventDefault` alone does not help — a shortcut handler reads the key,
+   * not the default. The event has to stop.
+   */
+  private consume(event: KeyboardEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
+   * The keys are handled on the host rather than on each segment, so a
+   * consumer's own `(keydown)` on the same element still runs before the
+   * family stops the event — which is the composition React gets by calling
+   * the consumer's handler first.
+   */
+  protected onKeyDown(event: KeyboardEvent) {
+    const segment = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+      '[data-part="segment"]',
+    );
+    const name = segment?.dataset['field'] as DateFieldName | undefined;
+    if (name === undefined) return;
+
     /* An inline direction is a physical pair of keys and a logical order, so
        the arrow that walks forward is the one pointing along the writing
        direction rather than the one pointing right. */
@@ -481,48 +511,56 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
 
     if (event.key === forward) {
-      event.preventDefault();
+      this.consume(event);
       this.moveBy(name, 1);
       return;
     }
     if (event.key === backward) {
-      event.preventDefault();
+      this.consume(event);
       this.moveBy(name, -1);
       return;
     }
 
     if (!this.editable()) return;
+
+    /**
+     * `Alt` with an arrow is not this control's chord. `date-picker` opens its
+     * calendar with `Alt`+`ArrowDown`, and a segment that stepped on it would
+     * eat the only shortcut the surface has.
+     */
+    if (event.altKey) return;
+
     const held = this.segments();
     const reference = this.reference();
 
     switch (event.key) {
       case 'ArrowUp':
-        event.preventDefault();
+        this.consume(event);
         this.commit(stepSegment(held, name, 1, reference), 'keyboard', event);
         return;
       case 'ArrowDown':
-        event.preventDefault();
+        this.consume(event);
         this.commit(stepSegment(held, name, -1, reference), 'keyboard', event);
         return;
       case 'PageUp':
-        event.preventDefault();
+        this.consume(event);
         this.commit(stepSegment(held, name, PAGE_STEP[name], reference), 'keyboard', event);
         return;
       case 'PageDown':
-        event.preventDefault();
+        this.consume(event);
         this.commit(stepSegment(held, name, -PAGE_STEP[name], reference), 'keyboard', event);
         return;
       case 'Home':
-        event.preventDefault();
+        this.consume(event);
         this.commit(boundSegment(held, name, 'min', reference), 'keyboard', event);
         return;
       case 'End':
-        event.preventDefault();
+        this.consume(event);
         this.commit(boundSegment(held, name, 'max', reference), 'keyboard', event);
         return;
       case 'Backspace':
       case 'Delete':
-        event.preventDefault();
+        this.consume(event);
         this.commit(clearSegment(held, name), 'clear', event);
         return;
       default:
@@ -530,7 +568,7 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     }
 
     if (/^\d$/.test(event.key)) {
-      event.preventDefault();
+      this.consume(event);
       const typed = typeDigit(held, name, Number(event.key), this.format(), reference);
       this.commit(typed.segments, 'keyboard', event);
       if (typed.advance) this.moveBy(name, 1);

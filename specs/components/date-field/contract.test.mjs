@@ -133,6 +133,19 @@ test('moves the display on every digit and the value only when a run ends', () =
 });
 
 /**
+ * A control that takes typed digits and is not an `input` is invisible to
+ * every "is the target editable" guard an application writes, so the keys it
+ * acts on have to stop rather than only lose their default.
+ */
+test('stops the keys it acts on rather than only defaulting them', () => {
+  assert.equal(
+    contract.entryModel.keysAreConsumed,
+    'a key the field acts on is stopped, not only defaulted',
+  );
+  assert.match(contract.entryModel.whyKeysAreConsumed, /role=spinbutton/);
+});
+
+/**
  * The placeholder is the reader's own language, not `mm/dd/yyyy` shown to
  * everybody: `Intl.DisplayNames` says `dia`, `mês` and `ano`.
  */

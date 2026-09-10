@@ -65,6 +65,21 @@ export const STATE_ATTRIBUTES = {
    */
   fullscreen: 'data-fullscreen',
   'drop-target': 'data-drop-target',
+  /**
+   * A drag the region has already decided it will refuse.
+   *
+   * It is not `drop-target`, which says the drag is over this region and it
+   * will be taken, and it is not `invalid`, which is a state of the value the
+   * control holds rather than of something still hanging over it.
+   * `docs/component-features.md` §2.5 names the drag-and-drop set as
+   * `dragging`, `drop-target` and `drop-invalid`; the first two were here and
+   * `upload` is the family that found the third missing.
+   *
+   * `DataTransfer.items` exposes each item's `kind` and `type` during the drag
+   * and neither its name nor its size, so the verdict is only paintable for
+   * the rules those two answer. What cannot be known is not judged.
+   */
+  'drop-invalid': 'data-drop-invalid',
 };
 
 export const ATTRIBUTE_STATES = Object.keys(STATE_ATTRIBUTES);

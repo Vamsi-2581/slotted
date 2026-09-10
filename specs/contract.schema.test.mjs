@@ -325,3 +325,14 @@ test('requires a model for the error map a form holds', () => {
   };
   assert.doesNotThrow(() => assertContractShape(contract));
 });
+
+/**
+ * A drag carrying something the region will refuse is not the same as a drag it
+ * will take, and the difference has to be paintable before the reader lets go.
+ * `docs/component-features.md` section 2.5 names the drag-and-drop set as
+ * `dragging`, `drop-target` and `drop-invalid`; the vocabulary held the first
+ * two, and `upload` is the family that found the third missing.
+ */
+test('carries the refused-drop state a drop region introduces', () => {
+  assert.equal(STATE_ATTRIBUTES['drop-invalid'], 'data-drop-invalid');
+});

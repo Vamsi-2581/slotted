@@ -17,7 +17,15 @@ const source = new URL('.', import.meta.url).pathname;
  * text field beside a `plain` select that is lifted by its resting shadow is
  * a form that looks unfinished.
  */
-const FAMILIES = ['select', 'combobox', 'text-field', 'textarea', 'number-field', 'currency-field'];
+const FAMILIES = [
+  'select',
+  'combobox',
+  'multi-select',
+  'text-field',
+  'textarea',
+  'number-field',
+  'currency-field',
+];
 
 /** Every innermost `selector { declarations }` pair outside a media query. */
 function rules(css) {

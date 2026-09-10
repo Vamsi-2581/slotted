@@ -16,6 +16,7 @@ const source = new URL('.', import.meta.url).pathname;
 const HOSTS = [
   { family: 'select', busy: "[data-ui='select'] > [data-part='busy']" },
   { family: 'combobox', busy: "[data-ui='combobox'] [data-part='busy']" },
+  { family: 'multi-select', busy: "[data-ui='multi-select'] [data-part='busy']" },
 ];
 
 /** A repeating animation, which is what drawing a wait of one's own looks like. */

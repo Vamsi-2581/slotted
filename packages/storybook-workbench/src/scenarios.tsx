@@ -59,7 +59,22 @@ export function scenarioCoverageErrors(
 
 interface ContractMember {
   capabilities: readonly string[];
-  defaults: Record<string, boolean | number | string>;
+  /**
+   * A default is whatever the contract declares, and two shapes the first
+   * version of this type refused are both honest.
+   *
+   * `null` is the default for a value whose absence is the behaviour:
+   * `multi-select` has no limit until a consumer sets `max`, and writing `0` or
+   * `Infinity` there would be inventing a number to avoid saying so.
+   *
+   * A **list** is the default for a setting that is plural: the same family's
+   * `delimiters` is the comma alone today and two characters tomorrow, and a
+   * string holding `","` would be one value pretending not to be a list.
+   *
+   * Both reach the table through `String(value)`, which is what the page prints
+   * and what the check below compares against.
+   */
+  defaults: Record<string, boolean | number | string | null | readonly (number | string)[]>;
 }
 
 /**

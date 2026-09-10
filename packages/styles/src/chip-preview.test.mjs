@@ -18,8 +18,16 @@ const source = new URL('.', import.meta.url).pathname;
  * `combobox` is not here on purpose: its own contract declines `multiple` and
  * defers a collection of values to `multi-select`, so it has no several to
  * preview (CB4).
+ *
+ * Each host names the row it owns, because the two arrangements are different
+ * and the rule is the same. `select`'s row is a lane of the control, beside a
+ * `button` that cannot contain a remove control; `multi-select`'s is inside the
+ * control, beside the caret, because its control holds a real `input`.
  */
-const HOSTS = ['select'];
+const HOSTS = [
+  { family: 'select', row: "[data-ui='select'][data-part='root'] > [data-part='tags']" },
+  { family: 'multi-select', row: "[data-ui='multi-select'] [data-part='chips']" },
+];
 
 function sheet(family) {
   return readFileSync(`${source}${family}/${family}.css`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -34,13 +42,32 @@ function rule(css, selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
 }
 
+/**
+ * The value a declaration ends up with, following one step of a family's own
+ * private alias. A family may name the gap between its chips once and read that
+ * name from both the row and the arithmetic that caps it; the rule being
+ * checked is where the number comes from, not how many hops it takes.
+ */
+function resolve(css, value) {
+  const alias = /^var\((--_[a-z0-9-]+)\)$/.exec(value.trim());
+  if (alias === null) return value;
+  const declared = new RegExp(`${alias[1]}:([^;]+);`).exec(css.replace(/\s+/g, ' '));
+  return declared === null ? value : declared[1];
+}
+
 test('lays the chips out and paints none of them', () => {
-  for (const family of HOSTS) {
+  for (const { family, row: selector } of HOSTS) {
     const css = sheet(family);
-    const row = rule(css, `[data-ui='${family}'][data-part='root'] > [data-part='tags']`);
+    const row = rule(css, selector);
     assert.notEqual(row, '', `${family} lays out no chip row`);
     assert.match(row, /display:flex/);
-    assert.match(row, /gap:var\(--slotted-space-2/);
+    const gap = /(?:^|;)(?:column-)?gap:([^;]+)/.exec(row);
+    assert.ok(gap, `${family} puts no gap between its chips`);
+    assert.match(
+      resolve(css, gap[1]),
+      /var\(--slotted-space-2/,
+      `${family} spaces its chips by a number rather than by the space scale`,
+    );
     /* Nothing about a chip: no ground, no edge, no corner, no type. */
     assert.doesNotMatch(
       row,
@@ -124,17 +151,21 @@ test('keeps the row on one line and no taller than the control', () => {
  * scale and never by a shadow, and it is capped at two whole rows of chips.
  */
 test('holds the chosen values in a band that scrolls itself', () => {
+  for (const { family } of HOSTS) {
+    const css = sheet(family);
+    const band = rule(css, `[data-ui='${family}'] [data-part='chosen']`);
+    assert.notEqual(band, '', `${family} draws no band of chosen values`);
+    assert.match(band, /position:sticky/);
+    assert.match(band, /overflow-y:auto/);
+    assert.match(band, /overscroll-behavior:contain/);
+    assert.match(band, /flex-wrap:wrap/);
+    assert.match(band, /max-block-size:calc\(2 \* var\(--slotted-target-min/);
+    assert.match(band, /border-block-end:var\(--_border-width\) solid var\(--_border-color\)/);
+    assert.doesNotMatch(band, /box-shadow/, 'the band is separated by a shadow instead of a rule');
+    assert.doesNotMatch(band, /transition|animation/, 'the band animates its own box (R7)');
+  }
+
   const css = sheet('select');
-  const band = rule(css, "[data-ui='select'] [data-part='chosen']");
-  assert.notEqual(band, '', 'select draws no band of chosen values');
-  assert.match(band, /position:sticky/);
-  assert.match(band, /overflow-y:auto/);
-  assert.match(band, /overscroll-behavior:contain/);
-  assert.match(band, /flex-wrap:wrap/);
-  assert.match(band, /max-block-size:calc\(2 \* var\(--slotted-target-min/);
-  assert.match(band, /border-block-end:var\(--_border-width\) solid var\(--_border-color\)/);
-  assert.doesNotMatch(band, /box-shadow/, 'the band is separated by a shadow instead of a rule');
-  assert.doesNotMatch(band, /transition|animation/, 'the band animates its own box (R7)');
   /*
    * The list keeps its own scroll, which is what makes the two independent.
    * Which element is the list depends on `search`: without it the surface is
@@ -178,7 +209,7 @@ test('keeps the sentence in the tree while the chips are shown', () => {
  * rule is scoped to the option wherever a chip can stand beside it (SL4).
  */
 test('scopes the option label to the option', () => {
-  for (const family of HOSTS) {
+  for (const { family } of HOSTS) {
     const css = sheet(family);
     assert.doesNotMatch(
       css.replace(/\s+/g, ' '),

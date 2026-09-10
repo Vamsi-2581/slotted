@@ -10,8 +10,8 @@ function mount(markup: string) {
   return { container, items: [...container.querySelectorAll('button')] };
 }
 
-const press = (element: Element, key: string) =>
-  element.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key }));
+const press = (element: Element, key: string, modifiers: KeyboardEventInit = {}) =>
+  element.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key, ...modifiers }));
 
 describe('createArrowNavigation', () => {
   beforeEach(() => {
@@ -217,6 +217,28 @@ describe('createArrowNavigation and an item that cannot be focused', () => {
     items[0]!.focus();
     press(items[0]!, 'End');
 
+    expect(document.activeElement).toBe(items[1]);
+    handle.destroy();
+  });
+
+  /**
+   * An arrow held with a modifier is a chord, and a chord belongs to whoever
+   * bound it. The APG names the ring no modified key, and `multi-select` binds
+   * `Alt` with an arrow to move a chip one place along its row — a press the
+   * ring was consuming to move focus instead.
+   */
+  it('leaves a modified arrow to whoever bound it', () => {
+    const { container, items } = mount('<button>1</button><button>2</button>');
+    const handle = createArrowNavigation(container, { itemSelector: 'button' });
+
+    items[0]!.focus();
+    for (const modifier of ['altKey', 'ctrlKey', 'metaKey'] as const) {
+      const taken = !press(items[0]!, 'ArrowRight', { [modifier]: true });
+      expect(taken, modifier).toBe(false);
+      expect(document.activeElement, modifier).toBe(items[0]);
+    }
+
+    press(items[0]!, 'ArrowRight');
     expect(document.activeElement).toBe(items[1]);
     handle.destroy();
   });

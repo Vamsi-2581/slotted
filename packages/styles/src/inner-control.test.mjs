@@ -41,6 +41,7 @@ const PARTS = [
   { family: 'text-field', part: 'reveal' },
   { family: 'select', part: 'clear' },
   { family: 'combobox', part: 'clear' },
+  { family: 'multi-select', part: 'clear' },
   { family: 'number-field', part: 'increment' },
   { family: 'number-field', part: 'decrement' },
   { family: 'currency-field', part: 'increment' },
@@ -70,7 +71,14 @@ const PARTS = [
 ];
 
 /** Families whose glyph is floored at 14px (SL3, with CB3 and TF1). */
-const FLOORED = ['text-field', 'select', 'combobox', 'number-field', 'currency-field'];
+const FLOORED = [
+  'text-field',
+  'select',
+  'combobox',
+  'multi-select',
+  'number-field',
+  'currency-field',
+];
 
 const STATE = /:(?:hover|active|focus|disabled)\b|::/;
 const PSEUDO = /::(?:before|after)\b/;

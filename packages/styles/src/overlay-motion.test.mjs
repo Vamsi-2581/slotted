@@ -28,6 +28,11 @@ const source = new URL('.', import.meta.url).pathname;
 const LAYERS = [
   { family: 'select', layer: "[data-ui='select'][data-part='positioner']", lateral: 'fade' },
   { family: 'combobox', layer: "[data-ui='combobox'][data-part='positioner']", lateral: 'fade' },
+  {
+    family: 'multi-select',
+    layer: "[data-ui='multi-select'][data-part='positioner']",
+    lateral: 'fade',
+  },
   { family: 'menu', layer: "[data-ui='menu']", lateral: 'slide' },
   { family: 'popover', layer: "[data-ui='popover']", lateral: 'fade' },
   { family: 'tooltip', layer: "[data-ui='tooltip']", lateral: 'fade' },

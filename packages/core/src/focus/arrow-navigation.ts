@@ -225,6 +225,20 @@ export function createArrowNavigation(
     const item = from === -1 ? undefined : items[from];
     if (item !== undefined && ownedKeys(item).includes(event.key)) return;
 
+    /**
+     * An arrow held with a modifier is a chord, and a chord belongs to whoever
+     * bound it. The APG assigns the ring no modified key — `Control + Home` and
+     * `Control + End` are the only two it names for a grid, both optional, and
+     * neither is implemented here — so a ring that answered one would be taking
+     * a key it was never given.
+     *
+     * `multi-select` found it: `Alt` with an arrow moves a chip one place along
+     * its row, and the ring was consuming the press and moving focus instead.
+     * Nothing failed loudly — the reader simply watched focus travel where a
+     * value should have.
+     */
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+
     if (event.key === keys.next || (crossAxis && event.key === cross.next)) {
       moveTo(step(origin, 1), origin);
     } else if (event.key === keys.previous || (crossAxis && event.key === cross.previous)) {

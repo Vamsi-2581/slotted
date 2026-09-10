@@ -32,6 +32,17 @@ const OPTIONS = [
     mark: "[data-ui='combobox'] [data-part='indicator']",
     line: "[data-ui='combobox'] :is([data-part='indicator'], [data-part='icon'])",
   },
+  /*
+   * `multi-select` scopes every option part to the option itself, because a
+   * chip in its control carries a `label` of its own and the rule that lays out
+   * an option's label would otherwise have reached it.
+   */
+  {
+    family: 'multi-select',
+    item: "[data-ui='multi-select'] [data-part='item']",
+    mark: "[data-ui='multi-select'] [data-part='item'] > [data-part='indicator']",
+    line: "[data-ui='multi-select'] [data-part='item'] > :is([data-part='indicator'], [data-part='icon'])",
+  },
 ];
 
 /** Every innermost `selector { declarations }` pair. */

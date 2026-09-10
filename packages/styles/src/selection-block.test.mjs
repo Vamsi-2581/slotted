@@ -20,6 +20,7 @@ const FAMILIES = [
   { family: 'listbox', part: 'option' },
   { family: 'select', part: 'item' },
   { family: 'combobox', part: 'item' },
+  { family: 'multi-select', part: 'item' },
 ];
 
 function stylesheet(family) {

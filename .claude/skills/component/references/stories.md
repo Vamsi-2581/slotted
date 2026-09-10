@@ -69,6 +69,46 @@ contract declares, the family in a real context rather than in isolation,
 content the family did not choose (long, translated, right-to-left, unbroken),
 composition with the families it is meant to sit beside, and the keyboard.
 
+### The page shows everything the family does, not a sample of it
+
+The reviewer's standing complaint about these pages, in their own words: the
+screens are extremely basic, few capabilities are chosen to be shown, and the
+whole point of a story is to see exhaustively what the component offers.
+
+So the bar is coverage, not illustration. Read the capability inventory from
+step 3 and the contract side by side, and count: every axis value, every state,
+every part a consumer may replace, every prop that changes what is drawn, every
+capability the inventory listed as a differentiator. A capability with no
+demonstration is a capability nobody can find, and the family may as well not
+have shipped it. `date-field` holds the day a short month could not take, and a
+page that never shows 31 → 28 → 31 has hidden the one behaviour no surveyed
+implementation has.
+
+Two demonstrations of the same thing under different names is padding, and
+padding is not coverage. The question for each is: which line of the inventory
+does this one answer.
+
+### A demonstration is a real screen, not a specimen
+
+Three fields called "Field 1", "Field 2" and "Field 3" prove that a form lays
+out. They prove nothing about whether anyone would want to use it. The reviewer
+asks for demonstrations faithful to reality — a real form with real labels, a
+real table with plausible rows, a real page with a real title and real actions —
+because a component's defects only appear against real content: a label that is
+two words in the mock and nine in the product, a number column that is right-
+aligned everywhere except in the one row that holds a dash, an action bar with
+one button in the demo and seven in the application.
+
+Write the content a product would have. Real names, real quantities, real dates,
+real currency, real states — including the awkward ones, because the awkward
+ones are where the family either holds or does not. Pick one domain per family
+and stay in it, so the page reads as one product rather than as a bag of
+fragments.
+
+This is not decoration and it is not extra scope: it is the difference between
+a page that demonstrates the family and a page that demonstrates that the family
+renders.
+
 ## Spacing, and why stories may not style themselves
 
 Every demonstration is laid out with the workbench primitives. A story that
@@ -97,6 +137,28 @@ answers its own width takes one column, which is the default.
 More room than the consumer will give is a mild inaccuracy. Less room breaks the
 component in the picture, and the correction is then made against a constraint
 nobody imposes.
+
+**Height is the same decision, and it is the one that gets forgotten.** The
+stage is 88 pixels tall at rest and grows to its contents, which is right for a
+control and wrong for anything that owns a screen. `.slotted-demo-viewport`
+carries the scale:
+
+| Size                 | Height             | For                                                       |
+| -------------------- | ------------------ | --------------------------------------------------------- |
+| unset                | `4rem`             | A bar across the top of something.                        |
+| `data-size="tall"`   | `22rem`            | A panel with room around it: a dialog, a drawer, a sheet. |
+| `data-size="screen"` | `min(80vh, 46rem)` | A family that owns a whole screen.                        |
+
+A page, a page header that snaps on scroll, an application shell, a split view,
+a side navigation, a data grid: each is a screen's worth of decisions, and in a
+box the height of a card it becomes a picture of a different component. The
+reviewer's words: a page header in four hundred by five hundred and twenty is
+horrible, and what it shows is not the family. Take `screen` and let the
+demonstration be the size the thing actually is.
+
+Add `data-scroll` when the behaviour is about what happens while the reader
+scrolls past it, and `data-layout="page"` when what scrolls has to read as a
+page rather than as a box.
 
 ### Measure the page, do not only look at it
 

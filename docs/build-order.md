@@ -983,8 +983,48 @@ Independentes entre si, exceto a cadeia de data.
   um valor hoje para que a chegada não quebre contrato. Inventário em
   `docs/superpowers/specs/2026-09-09-date-capability-inventory.md`, decisões em
   `docs/superpowers/specs/2026-09-09-date-design.md`.
+- `time-field` → `time-picker` → `datetime-field` → `datetime-picker` — a
+  segunda metade da mesma cadeia, e Core pela mesma razão que `date-field` é:
+  um formulário que sabe dizer _quando_ precisa da hora, e uma biblioteca que
+  entrega o campo de data e não o de hora deixa o consumidor escrever o seu
+  contra o motor que ela própria publicou. Estava em Extended por
+  `docs/component-features.md` §Time e DateTime Picker; a linha mudou, com a
+  razão registada lá. Nada aqui é motor novo: `packages/core/src/date/segments.ts`
+  percorre um número dentro de um intervalo, dá-lhe a volta, aceita algarismos e
+  termina a sequência quando mais nenhum cabe, sem saber o que o campo
+  significa. `fieldRange` é o único sítio onde os três campos de data são
+  nomeados, e `DateFieldName` tem três palavras porque a onda 7 tinha três
+  campos, não porque o motor tenha; hora, minuto e segundo são uma união mais
+  larga e três linhas nessa função. `time-field` é o mesmo controlo segmentado
+  com esses três campos. `time-picker` não é um calendário: o painel atrás dele
+  é uma lista de horas ao passo que o consumidor definiu, o que é `listbox` e
+  não `grid`, portanto compõe a maquinaria de `select`. `datetime-field` põe
+  `date-field` e `time-field` numa moldura, num `group` e num valor.
+  `datetime-picker` é a única família que segura as duas superfícies, e a
+  decisão que deve é qual delas abre primeiro. Três valores, e não um quarto:
+  `PlainTime` é `{ hour, minute, second }`, `PlainDateTime` é um `PlainDate` ao
+  lado de um `PlainTime`, e um instante com fuso não é nenhum deles — a razão
+  está em _Decisions already taken_ no briefing. Decisões em
+  `docs/superpowers/specs/2026-09-09-date-design.md` §11 e §12.
 - `upload` — consolida `file-upload`, `dropzone` e `file-input` (guia 17)
-- `page page-header section`
+- `page page-header section` — a família que o revisor acompanha de perto, e a
+  referência é a **Dynamic Page do SAP Fiori**. Não é um cabeçalho com um
+  título: é uma casca de ecrã com uma mecânica própria. O que a referência tem,
+  e o que esta família deve ter mais robusto e mais refinado: uma área de título
+  sempre visível, com migalhas, título, subtítulo, marcas de estado e as ações
+  da página; uma área de cabeçalho por baixo dela que **encolhe ao rolar** e
+  volta a abrir, com o conteúdo que só faz sentido em repouso — indicadores,
+  atributos, imagem; um **fixador**, para o leitor que quer o cabeçalho aberto
+  enquanto rola; um título encolhido que não é o mesmo título expandido, porque
+  o que cabe numa barra não é o que cabe num cabeçalho; ações de navegação entre
+  registos; uma barra inferior flutuante para as ações que fecham a tarefa, que
+  não rola com o conteúdo. `section` é a unidade de conteúdo dentro da página,
+  e a decisão que deve é se a navegação por âncoras entre secções é dela, de
+  `page` ou de `side-navigation`. O revisor tem uma implementação própria disto
+  noutro repositório: **peça-a antes de inventariar**, porque a inventariação
+  parte dela e do Fiori, e não do que se consegue lembrar de um cabeçalho.
+  Nenhuma demonstração desta família cabe num palco de painel — leia _How much
+  room a demonstration gets_ em `references/stories.md`.
 - `app-shell`
 - `action-bar`
 
@@ -992,32 +1032,18 @@ Independentes entre si, exceto a cadeia de data.
 
 Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
 `command-palette`, `segmented-control`, `toggle-group`, `scroll-area`,
-`filter-bar`, `data-grid`, `time-field`, `time-picker`, `datetime-field`,
-`datetime-picker`, `date-range-picker`, `tags-input`, `timeline`, `code-block`.
+`filter-bar`, `data-grid`, `date-range-picker`, `tags-input`, `timeline`,
+`code-block`.
 
-- As seis famílias de hora e de intervalo formam uma cadeia, decidida na onda 7
-  e registada em `docs/superpowers/specs/2026-09-09-date-design.md` §11. Nada
-  aqui é motor novo: `packages/core/src/date/segments.ts` percorre um número
-  dentro de um intervalo, dá-lhe a volta, aceita algarismos e termina a
-  sequência quando mais nenhum cabe, sem saber o que o campo significa.
-  `fieldRange` é o único sítio onde os três campos de data são nomeados, e
-  `DateFieldName` tem três palavras porque a onda 7 tem três campos, não porque
-  o motor tenha. Hora, minuto e segundo são uma união mais larga e três linhas
-  nessa função. `time-field` é o mesmo controlo segmentado com esses três
-  campos; `datetime-field` põe `date-field` e `time-field` numa moldura, num
-  `group` e num valor; `datetime-picker` é o único que segura as duas
-  superfícies, e a decisão que deve é qual delas abre primeiro.
-  `date-range-picker` são dois campos e o modo `range` que `calendar` já tem.
-- `time-picker` não é um calendário. O painel atrás dele é uma lista de horas ao
-  passo que o consumidor definiu, o que é `listbox` e não `grid`, portanto
-  compõe a maquinaria de `select` e não a desta cadeia.
-- Três valores, e não um quarto. `PlainTime` é `{ hour, minute, second }` e
-  `PlainDateTime` é um `PlainDate` ao lado de um `PlainTime`. Um instante com
-  fuso não é nenhum deles, pela razão registada no briefing.
-- O revisor pediu, no gate visual da onda 7, que estas famílias fossem mais
-  inventivas do que o campo pesquisado. As três aberturas que a onda 7
-  encontrou e não tomou estão em `2026-09-09-date-design.md` §12: uma hora
-  escrita como duração a partir de agora, um intervalo que diz o seu
+- `date-range-picker` são dois campos e o modo `range` que `calendar` já tem,
+  atrás de um gatilho. Fica em Extended, e a cadeia de hora não: um intervalo de
+  datas é uma composição especializada de um valor que a onda 7 já tem, enquanto
+  uma hora é um valor que o Core não sabia dizer. `docs/component-features.md`
+  já separava as duas linhas.
+- O revisor pediu, no gate visual da onda 7, que as famílias de data, hora e
+  datetime fossem mais inventivas do que o campo pesquisado. As três aberturas
+  que a onda 7 encontrou e não tomou estão em `2026-09-09-date-design.md` §12:
+  uma hora escrita como duração a partir de agora, um intervalo que diz o seu
   comprimento enquanto está a ser desenhado, e uma célula de dia que carrega uma
   marca de densidade. `calendar` já expõe o gancho `data-*` da terceira e não
   desenha nada.

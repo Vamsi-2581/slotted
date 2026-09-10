@@ -394,10 +394,12 @@ Estas capacidades sustentam componentes públicos e devem possuir testes própri
 - `start`/`end`, limite de duração, datas indisponíveis, ranges predefinidos e meses visíveis.
 - Estados de início, fim e intervalo são distinguíveis; hover preview não é necessário para touch/teclado. Impede range inválido ou explica ajuste.
 
-### Time e DateTime Picker `[Extended]`
+### Time e DateTime Picker `[Core]`
 
-- Valor temporal normalizado, granularidade, step, formato 12/24 h, timezone explícito para datetime e limites.
+- Valor temporal normalizado, granularidade, step, formato 12/24 h e limites.
 - Campo segmentado funciona sem abrir painel; painel de hora complementa, não bloqueia digitação. DST e horários inexistentes/ambíguos têm política documentada.
+- Era `[Extended]` até 2026-09-10. Passou a `[Core]` porque um formulário que sabe dizer _quando_ precisa da hora: uma biblioteca que entrega o campo de data e não o de hora deixa o consumidor escrever o seu contra o motor de segmentos que ela própria publicou, e nenhuma das bibliotecas pesquisadas separa os dois em níveis diferentes. O custo de adiar era o argumento de Extended — "pode ser entregue depois do núcleo" — e o custo aqui é uma união mais larga e três linhas em `fieldRange`, o que não sustenta a linha. `Date Range Picker` continua `[Extended]`: é uma composição especializada de um valor que o Core já tem, e não um valor que o Core não sabe dizer.
+- O timezone explícito saiu deste contrato: o que a biblioteca guarda é o valor de relógio de parede que o leitor escreveu, e converter para um instante é da aplicação, contra o fuso que ela conhece. A razão está em _Decisions already taken_ em `docs/build-briefing.md`.
 
 ### PIN / OTP Input `[Extended]`
 

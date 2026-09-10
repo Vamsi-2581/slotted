@@ -20,34 +20,35 @@ código é uma sessão limpa: cole exatamente o que está nele.
   compartilham uma decisão e separá-las significaria decidi-la duas vezes.
 - Rodada com um bloco só é sequencial por dependência, não por precaução.
 
+- **A barra das páginas de referência subiu.** Demos fiéis à realidade e não
+  espécimes, cobertura exaustiva do que a família faz e não uma amostra, e
+  palco do tamanho do que a família é. Está em _Demonstrations_ e em _How much
+  room a demonstration gets_, em `.claude/skills/component/references/stories.md`,
+  que o passo 11 da skill lê. Uma família que ocupa uma tela inteira usa
+  `.slotted-demo-viewport` com `data-size="screen"`.
+
 Quando uma rodada tem mais de um bloco, cada prompt carrega o aviso de
 concorrência. Ele não é decoração: sem ele a sessão roda `pnpm format` ou
 `git add -A` e leva junto o trabalho da outra.
 
-## Antes de abrir qualquer rodada
+## Onde estamos — 2026-09-10
 
-Um teste está vermelho: `packages/styles/src/tokens.test.mjs` acusa
-`button-group/tokens.json` em desacordo com o stylesheet. Nenhuma rodada
-paralela começa sobre uma árvore vermelha — o próximo `check:full` de cada
-sessão acusaria o mesmo defeito e cada uma tentaria consertar o que não é seu.
+Rodadas 1 a 7 passaram. Da rodada 8 passou uma sessão de quatro,
+`date-field calendar date-picker`. A árvore está verde.
 
-```
-Corrija o único teste vermelho do repositório: packages/styles/src/tokens.test.mjs
-acusa que button-group/tokens.json discorda dos custom properties que o
-stylesheet lê. Ajuste o tokens.json, rode pnpm check:full e commite só esse
-arquivo. Não toque em nenhuma outra família.
-```
+**Uma família ficou para trás de uma barreira que já foi ultrapassada:**
+`loading-overlay`, da rodada 5. Nunca foi construída e as rodadas 6, 7 e 8
+seguiram sem ela. Não depende de nada que falte, e está realojada na rodada 8,
+que é a rodada corrente.
 
-Opcional, e paga rápido em trabalho paralelo:
+`alert-dialog` não está em falta: foi entregue dentro de `dialog`, como uma
+família com dois papéis, e por isso não tem `specs/components/alert-dialog/`.
 
-```
-Em packages/styles/package.json, troque as listas explícitas dos scripts test e
-typecheck por globs: `node --test "src/**/*.test.mjs"` e
-`find src -name '*.test.mjs' -print0 | xargs -0 -n1 node --check`. Verifiquei que
-o glob roda o mesmo conjunto de testes. Isso apaga o arquivo que mais conflita
-entre sessões paralelas e um passo manual por família. Rode pnpm check:full e
-commite só esse arquivo.
-```
+Falta ainda ver, e não é uma sessão de família: as páginas de referência já
+entregues foram escritas antes da barra de _Demonstrations_ em
+`references/stories.md` — demos fiéis à realidade, cobertura exaustiva das
+capacidades, e palco do tamanho do que a família é. Uma passagem de revisão
+sobre elas é trabalho a agendar, não um defeito de nenhuma família.
 
 ## Rodada 1 — o que falta da onda 4 · 3 sessões
 
@@ -132,7 +133,7 @@ beside another session" em docs/build-briefing.md.
 `tooltip popover` é uma sessão só: são o mesmo posicionamento com políticas de
 dismissal diferentes, e decidir isso duas vezes produz duas respostas.
 
-## Rodada 5 — o que depende dos overlays · 2 sessões
+## Rodada 5 — o que depende dos overlays · 1 sessão
 
 ```
 /component drawer
@@ -141,14 +142,10 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-```
-/component loading-overlay
+`loading-overlay` era a segunda sessão desta rodada e não foi executada. Está
+realojada na rodada 8; ver _Onde estamos_.
 
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-E, quando as duas passarem, o refino que estava esperando `menu`:
+E, quando `drawer` passar, o refino que estava esperando `menu`:
 
 ```
 /component toolbar
@@ -193,7 +190,9 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 8 — o resto do Core · 4 sessões
+## Rodada 8 — o resto do Core · 5 sessões
+
+`date-field calendar date-picker` já passou; as outras quatro continuam abertas.
 
 ```
 /component date-field calendar date-picker
@@ -218,6 +217,22 @@ beside another session" em docs/build-briefing.md.
 ```
 /component page page-header section
 
+A referência é a Dynamic Page do SAP Fiori, e a ideia é a mesma com mais
+robustez e mais refino. Não é um cabeçalho com um título: é uma casca de tela
+com mecânica própria — área de título sempre visível, área de cabeçalho que
+encolhe ao rolar e reabre, fixador para quem quer o cabeçalho aberto enquanto
+rola, título encolhido diferente do expandido, ações de navegação entre
+registros, e barra inferior flutuante para as ações que fecham a tarefa.
+
+Peça ao revisor, antes de inventariar, a implementação de page-header que ele
+tem em outro repositório. O inventário parte dela e do Fiori. Sem ela, pare e
+pergunte: essa é a única pergunta bloqueante desta sessão.
+
+Nenhuma demo desta família cabe em um palco de painel. Use
+.slotted-demo-viewport com data-size="screen" e leia "How much room a
+demonstration gets" em references/stories.md antes de escrever a primeira
+story.
+
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
@@ -225,13 +240,59 @@ beside another session" em docs/build-briefing.md.
 ```
 /component multi-select
 
+`select` entrega multiple com um resumo no gatilho, e o contrato dele diz por
+escrito que as fichas removíveis, a criação, os limites, os duplicados, a
+reordenação e a colagem são desta família. Enquanto ela não existir, essas seis
+capacidades não existem em lugar nenhum da biblioteca.
+
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 9 — composições · 2 sessões
+```
+/component loading-overlay
 
-Dependem de `page` e das coleções.
+Atrasada: é da onda 5 e as rodadas 6, 7 e 8 seguiram sem ela. Consome a infra de
+overlay da rodada 3, que já existe. A fronteira a decidir é com skeleton e com
+progress-indicator: um scrim sobre uma região que já tem conteúdo não é o mesmo
+que um esqueleto no lugar de conteúdo que ainda não chegou, e a família precisa
+dizer qual das duas é.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+## Rodada 9 — hora e composições · 3 sessões
+
+As duas composições dependem de `page` e das coleções. A cadeia de hora depende
+do motor de segmentos da rodada 8, e de mais nada.
+
+```
+/component time-field time-picker
+
+Uma sessão só, e nesta ordem: o picker compõe o campo. Core, não Extended — um
+formulário que sabe dizer quando precisa da hora, e entregar o campo de data sem
+o de hora deixa o consumidor escrever o dele contra o motor que esta biblioteca
+publicou.
+
+Não há motor novo aqui: packages/core/src/date/segments.ts percorre um número
+dentro de um intervalo, dá a volta, aceita algarismos e termina a sequência
+quando mais nenhum cabe, sem saber o que o campo significa. fieldRange é o único
+lugar onde os campos são nomeados. Hora, minuto e segundo são uma união mais
+larga e três linhas ali.
+
+O painel de horas é uma lista no passo que o consumidor definiu, o que é listbox
+e não grid: compõe select, não calendar. O valor é PlainTime, nunca um instante
+com fuso — a razão está em "Decisions already taken" no briefing.
+
+O revisor pediu que esta cadeia seja mais inventiva que o campo pesquisado. A
+abertura que a onda 7 encontrou e não tomou: uma hora escrita como duração a
+partir de agora, resolvida à vista antes de ser aceita. Está em
+docs/superpowers/specs/2026-09-09-date-design.md §12.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
 
 ```
 /component app-shell
@@ -247,9 +308,28 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
+## Rodada 10 — datetime · 1 sessão
+
+```
+/component datetime-field datetime-picker
+
+Depois de time-field e time-picker, que estas duas compõem junto com date-field
+e calendar. Sozinhas numa rodada porque compõem quatro famílias e não porque
+sejam grandes.
+
+datetime-field é uma moldura, um group e um valor só: PlainDateTime, que é um
+PlainDate ao lado de um PlainTime. datetime-picker é a única família da
+biblioteca que segura duas superfícies, e a decisão que ela deve é qual delas
+abre primeiro — e o que acontece com a outra quando o leitor termina na
+primeira.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
 Com isto o Core está inteiro.
 
-## Rodada 10 — Extended, primeira leva · 4 sessões
+## Rodada 11 — Extended, primeira leva · 4 sessões
 
 ```
 /component scroll-area splitter
@@ -282,9 +362,9 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 11 — Extended, segunda leva · 7 sessões
+## Rodada 12 — Extended, segunda leva · 5 sessões
 
-Cada uma depende de algo da rodada 10 ou das coleções.
+Cada uma depende de algo da rodada 11, das coleções ou da cadeia de data.
 
 ```
 /component command-palette
@@ -301,39 +381,11 @@ beside another session" em docs/build-briefing.md.
 ```
 
 ```
-/component time-field time-picker
-
-Uma sessão só, e nesta ordem: o picker compõe o campo. O motor de segmentos já
-existe em packages/core/src/date/segments.ts e não sabe o que um campo
-significa — hora, minuto e segundo são uma união mais larga em DateFieldName e
-três linhas em fieldRange. O painel de horas é uma lista ao passo que o
-consumidor definiu, portanto listbox e não grid: compõe select, não calendar.
-O valor é PlainTime, nunca um instante com fuso; a razão está em "Decisions
-already taken" no briefing.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component datetime-field datetime-picker
-
-Depois de time-field e time-picker, que estas duas compõem junto com date-field
-e calendar. datetime-field é uma moldura, um group e um valor só —
-PlainDateTime, que é um PlainDate ao lado de um PlainTime. datetime-picker é a
-única família que segura as duas superfícies, e a decisão que deve é qual delas
-abre primeiro.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
 /component date-range-picker
 
-Dois campos e o modo range que calendar já tem, atrás de um trigger. Não
-depende da cadeia de hora. O revisor pediu que o comprimento do intervalo seja
-dito enquanto ele está sendo desenhado; a razão está em
+Dois campos e o modo range que calendar já tem, atrás de um gatilho. Não depende
+da cadeia de hora. O revisor pediu que o comprimento do intervalo seja dito
+enquanto ele está sendo desenhado, e não só as duas pontas; a razão está em
 docs/superpowers/specs/2026-09-09-date-design.md §12.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working

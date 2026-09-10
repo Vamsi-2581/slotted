@@ -15,9 +15,21 @@
 
 import { daysInMonth, parseISODate, plainDate } from './plain-date';
 import type { PlainDate } from './plain-date';
+import { hourCycleRange } from './time-format';
+import type { HourCycle, TimeFieldName } from './time-format';
 
-/** The three fields a date has. Time fields belong to `time-field`, in wave 8. */
+/** The three fields a date has. The four a time has are in `time-format.ts`. */
 export type DateFieldName = 'year' | 'month' | 'day';
+
+/**
+ * Every field one segmented control can hold.
+ *
+ * The engine in `segments.ts` steps a number inside a range and knows nothing
+ * about what a field means, so the union is wider than any one family draws:
+ * `date-field` draws three of these, `time-field` four, and `datetime-field`
+ * all seven.
+ */
+export type SegmentFieldName = DateFieldName | TimeFieldName;
 
 export interface DatePatternPart {
   readonly type: DateFieldName | 'literal';
@@ -266,12 +278,43 @@ export function createDateFormat(options: DateFormatOptions = {}): DateFormat {
   return format;
 }
 
-/** The lowest and highest a field can hold, given the rest of the date. */
+/**
+ * What a field's range depends on. A day needs the month it is in, and an hour
+ * needs the cycle it is drawn in; every other field's range is fixed.
+ */
+export interface FieldContext {
+  readonly year?: number | undefined;
+  readonly month?: number | undefined;
+  readonly hourCycle?: HourCycle | undefined;
+}
+
+/**
+ * The lowest and highest a field can hold, given what is known around it.
+ *
+ * This is the only place in the library where a segment field is named, which
+ * is why adding a time to the chain is four rows here rather than a second
+ * engine. A day asked for without a year and a month answers 31: the longest
+ * month, stated rather than derived from a month that is not there.
+ */
 export function fieldRange(
-  field: DateFieldName,
-  date: Pick<PlainDate, 'year' | 'month'>,
+  field: SegmentFieldName,
+  context: FieldContext = {},
 ): { min: number; max: number } {
-  if (field === 'year') return { min: 1, max: 9999 };
-  if (field === 'month') return { min: 1, max: 12 };
-  return { min: 1, max: daysInMonth(date.year, date.month) };
+  switch (field) {
+    case 'year':
+      return { min: 1, max: 9999 };
+    case 'month':
+      return { min: 1, max: 12 };
+    case 'day':
+      return context.year === undefined || context.month === undefined
+        ? { min: 1, max: 31 }
+        : { min: 1, max: daysInMonth(context.year, context.month) };
+    case 'hour':
+      return hourCycleRange(context.hourCycle ?? 'h23');
+    case 'minute':
+    case 'second':
+      return { min: 0, max: 59 };
+    default:
+      return { min: 0, max: 1 };
+  }
 }

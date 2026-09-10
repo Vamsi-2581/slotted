@@ -10,6 +10,7 @@ import { createControllable } from '@slotted/core/state';
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -141,9 +142,23 @@ export abstract class SlDialogBase {
    * transition no closed style to start from.
    */
   private readonly status = signal<PresenceStatus>('unmounted');
+  /**
+   * The status is a signal and the template reads it, and that is not enough on
+   * its own. `presence` answers `sync` from inside the effect that watches
+   * `open`, which runs as part of this view's own change detection and after its
+   * bindings have been written: the write marked no consumer, no further pass
+   * followed, and the layer stayed in the document with `inert` and the closed
+   * attribute of a dialog that reported itself open. It was measured on a layer
+   * opened from a bound state rather than from a trigger — the family's own
+   * stories all open from a trigger, which is why it stood for nine rounds.
+   */
+  private readonly changes = inject(ChangeDetectorRef);
   private readonly presence: PresenceHandle = createPresence({
     present: false,
-    onStatusChange: (next) => this.status.set(next),
+    onStatusChange: (next) => {
+      this.status.set(next);
+      this.changes.markForCheck();
+    },
   });
 
   /** Whether this layer has ever been open, which is what `lazy` reads. */

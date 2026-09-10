@@ -1,3 +1,5 @@
+import { createFilterPredicate, createRowPredicate, setFilter } from '@slotted/core/filter';
+import type { FilterDescriptor, NumberFilter, SetFilter } from '@slotted/core/filter';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -16,7 +18,13 @@ import { ResultState, ResultStateContent, ResultStateTitle } from '../result-sta
 import { Tag } from '../tag';
 import { VisuallyHidden } from '../visually-hidden';
 import { Table } from './table';
-import { TableFilter } from './table-filter';
+import {
+  TableBooleanFilter,
+  TableDateFilter,
+  TableNumberFilter,
+  TableSetFilter,
+  TableTextFilter,
+} from './table-filter';
 import { TableContent } from './table-content';
 import { TableDefaultsProvider } from './table-defaults';
 import {
@@ -38,7 +46,12 @@ import {
   TableSort,
   TableSummary,
 } from './table-parts';
-import type { TableFilterOption, TableSortDescriptor } from './table.types';
+import type {
+  TableFilterOption,
+  TableFilterRequest,
+  TableSetFilterProps,
+  TableSortDescriptor,
+} from './table.types';
 import { REACT_TABLE_DOCS, REACT_TABLE_TOKENS } from './table.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -49,6 +62,8 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     sorting: Sorting,
     'column-controls': ColumnControls,
     filter: Filter,
+    'filter-types': FilterTypes,
+    'filter-conditions': FilterConditions,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -505,17 +520,15 @@ const CLIENTS: readonly TableFilterOption[] = INVOICES.map((invoice) => ({
 }));
 
 function ColumnControlsDemo() {
-  const [statuses, setStatuses] = useState<readonly string[]>([]);
-  const [clients, setClients] = useState<readonly string[]>([]);
-  const rows = useMemo(
-    () =>
-      INVOICES.filter(
-        (invoice) =>
-          (statuses.length === 0 || statuses.includes(invoice.status)) &&
-          (clients.length === 0 || clients.includes(invoice.client)),
-      ),
-    [clients, statuses],
-  );
+  const [status, setStatus] = useState<SetFilter | null>(null);
+  const [client, setClient] = useState<SetFilter | null>(null);
+  const rows = useMemo(() => {
+    const keep = createRowPredicate<Invoice>(
+      { client, status },
+      (invoice, column) => invoice[column as 'client' | 'status'],
+    );
+    return INVOICES.filter(keep);
+  }, [client, status]);
 
   return (
     <Table columns={3} variant="framed">
@@ -528,43 +541,37 @@ function ColumnControlsDemo() {
             <TableColumnHeader>
               Client
               <TableColumnActions>
-                <TableFilter
+                <TableSetFilter
                   columnLabel="client"
-                  onValueChange={setClients}
+                  onValueChange={setClient}
                   options={CLIENTS}
-                  value={clients}
+                  value={client}
                 />
               </TableColumnActions>
             </TableColumnHeader>
             <TableColumnHeader>
               Status
               <TableColumnActions>
-                <TableFilter
+                <TableSetFilter
                   columnLabel="status"
-                  onValueChange={setStatuses}
+                  onValueChange={setStatus}
                   options={STATUSES}
-                  value={statuses}
+                  value={status}
                 />
               </TableColumnActions>
             </TableColumnHeader>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.length === 0 ? (
-            <TableRow>
-              <TableEmpty>No invoices match this filter</TableEmpty>
+          {rows.slice(0, 4).map((invoice) => (
+            <TableRow key={invoice.id} value={invoice.id}>
+              <TableRowHeader text="nowrap">{invoice.id}</TableRowHeader>
+              <TableCell text="nowrap">{invoice.client}</TableCell>
+              <TableCell>
+                <Tag tone={TONE[invoice.status]}>{invoice.status}</Tag>
+              </TableCell>
             </TableRow>
-          ) : (
-            rows.map((invoice) => (
-              <TableRow key={invoice.id} value={invoice.id}>
-                <TableRowHeader>{invoice.id}</TableRowHeader>
-                <TableCell>{invoice.client}</TableCell>
-                <TableCell>
-                  <Tag tone={TONE[invoice.status]}>{invoice.status}</Tag>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
+          ))}
         </TableBody>
       </TableContent>
     </Table>
@@ -586,25 +593,38 @@ export const ColumnControls: Story = {
 };
 
 /**
- * One table per panel, so each scene is one thing to look at: the same
- * component with a short list, with a long one, already filtered, and with two
- * filters answering one query.
+ * One table per panel, so each scene is one thing to look at. The set filter is
+ * the only kind whose operand is a list, and it is the kind a listing reaches
+ * for first.
  */
-function FilterDemo({
+function SetFilterDemo({
   heading,
   options,
   value,
   onValueChange,
   ...filterProps
-}: React.ComponentProps<typeof TableFilter> & {
+}: Omit<TableSetFilterProps, 'value' | 'onValueChange'> & {
   heading: string;
-  value?: readonly string[];
+  onValueChange?: (value: SetFilter | null, request: TableFilterRequest) => void;
+  value?: SetFilter | null;
 }) {
-  const [own, setOwn] = useState<readonly string[]>(value ?? []);
-  const kept =
-    own.length === 0
-      ? INVOICES
-      : INVOICES.filter((invoice) => own.includes(invoice.status) || own.includes(invoice.client));
+  const [own, setOwn] = useState<SetFilter | null>(value ?? null);
+  const keep = useMemo(() => createFilterPredicate(own), [own]);
+  const kept = INVOICES.filter((invoice) =>
+    keep(heading === 'Client' ? invoice.client : invoice.status),
+  );
+
+  const filter = (
+    <TableSetFilter
+      {...filterProps}
+      onValueChange={(next, request) => {
+        setOwn(next);
+        onValueChange?.(next, request);
+      }}
+      options={options}
+      value={own}
+    />
+  );
 
   return (
     <Table columns={3} variant="framed">
@@ -612,20 +632,16 @@ function FilterDemo({
         <TableHead>
           <TableRow>
             <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
-            <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+            {/* The filter stands in the header of the column it filters, which
+                is the whole of what the slot is for: a panel over the client
+                values above a Status column demonstrates the wrong thing. */}
             <TableColumnHeader text="nowrap">
-              {heading}
-              <TableColumnActions>
-                <TableFilter
-                  {...filterProps}
-                  onValueChange={(next, request) => {
-                    setOwn(next);
-                    onValueChange?.(next, request);
-                  }}
-                  options={options}
-                  value={own}
-                />
-              </TableColumnActions>
+              Client
+              {heading === 'Client' ? <TableColumnActions>{filter}</TableColumnActions> : null}
+            </TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Status
+              {heading === 'Status' ? <TableColumnActions>{filter}</TableColumnActions> : null}
             </TableColumnHeader>
           </TableRow>
         </TableHead>
@@ -651,27 +667,182 @@ export const Filter: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label="Three values, and no search"
-        note="Press the funnel. A short list opens as a list: the checkbox above the rule covers the three under it, the counts are yours to supply, and Apply is the only thing that reaches your query — tick two and one query runs."
+        note="Press the funnel. A short list opens as a list: the chooser above it offers is any of and is none of, the checkbox over the rule covers the three under it, the counts are yours to supply, and Apply is the only thing that reaches your query — tick two and one query runs."
       >
-        <FilterDemo columnLabel="status" heading="Status" options={STATUSES} />
+        <SetFilterDemo columnLabel="status" heading="Status" options={STATUSES} />
       </Scene>
       <Scene
         label="Twelve values, and a search"
-        note="Past searchThreshold — eight unless you say otherwise — the panel brings a field. It folds case and diacritics, so 'regiao' finds 'Região', and the covering checkbox then answers for exactly what the search left rather than for the twelve behind it."
+        note="Past searchThreshold — eight unless you say otherwise — the panel brings a field. It compares through the locale collator, so 'regiao' finds 'Região' and 'strasse' finds 'Straße', and the covering checkbox then answers for exactly what the search left rather than for the twelve behind it."
       >
-        <FilterDemo columnLabel="client" heading="Client" options={CLIENTS} />
+        <SetFilterDemo columnLabel="client" heading="Client" options={CLIENTS} />
       </Scene>
       <Scene
         label="A column already filtered"
-        note="The trigger marks itself and states the count in its own accessible name, so a filter a reader set and forgot is still visible. Clear empties it and closes; a reader who wants their set back opens the panel again, because Clear is a decision and not a slip."
+        note="The trigger marks itself and states what is applied in its own accessible name — 'Filter status: is any of Overdue' — so a filter a reader set and forgot is still readable. Clear empties it and closes; a reader who wants their set back opens the panel again, because Clear is a decision and not a slip."
       >
-        <FilterDemo columnLabel="status" heading="Status" options={STATUSES} value={['Overdue']} />
+        <SetFilterDemo
+          columnLabel="status"
+          heading="Status"
+          options={STATUSES}
+          value={setFilter(['Overdue'])}
+        />
       </Scene>
       <Scene
         label="A search you asked for, over three values"
         note="searchable states it outright, under the threshold or over it. Type something no value carries and the panel says so rather than showing an empty box — and the two actions stay, because Clear still empties a set the search cannot see."
       >
-        <FilterDemo columnLabel="status" heading="Status" options={STATUSES} searchable />
+        <SetFilterDemo columnLabel="status" heading="Status" options={STATUSES} searchable />
+      </Scene>
+    </div>
+  ),
+};
+
+/**
+ * Four columns of four kinds, filtered by one predicate and no switch. The
+ * boolean column is derived here rather than held in the data, because what a
+ * listing filters on is often a fact about the row rather than a field of it.
+ */
+const TYPED_ROWS = INVOICES.map((invoice) => ({
+  ...invoice,
+  overdue: invoice.status === 'Overdue',
+}));
+
+function TypedFilterDemo() {
+  const [filters, setFilters] = useState<Record<string, FilterDescriptor | null>>({});
+  const set = (column: string) => (value: FilterDescriptor | null) =>
+    setFilters((held) => ({ ...held, [column]: value }));
+
+  const rows = useMemo(() => {
+    const keep = createRowPredicate<(typeof TYPED_ROWS)[number]>(
+      filters,
+      (invoice, column) => invoice[column as keyof (typeof TYPED_ROWS)[number]],
+    );
+    return TYPED_ROWS.filter(keep);
+  }, [filters]);
+
+  return (
+    <Table columns={4} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader text="nowrap">
+              Client
+              <TableColumnActions>
+                <TableTextFilter columnLabel="client" onValueChange={set('client')} />
+              </TableColumnActions>
+            </TableColumnHeader>
+            <TableColumnHeader numeric text="nowrap">
+              Amount
+              <TableColumnActions>
+                <TableNumberFilter columnLabel="amount" onValueChange={set('amount')} />
+              </TableColumnActions>
+            </TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Due
+              <TableColumnActions>
+                <TableDateFilter columnLabel="due" onValueChange={set('dueAt')} />
+              </TableColumnActions>
+            </TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Overdue
+              <TableColumnActions>
+                <TableBooleanFilter columnLabel="overdue" onValueChange={set('overdue')} />
+              </TableColumnActions>
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableEmpty>
+                <ResultState status="no-results" title="No invoices match this filter" />
+              </TableEmpty>
+            </TableRow>
+          ) : (
+            rows.slice(0, 5).map((invoice) => (
+              <TableRow key={invoice.id} value={invoice.id}>
+                <TableRowHeader text="nowrap">{invoice.client}</TableRowHeader>
+                <TableCell numeric>{invoice.amount.toFixed(2)}</TableCell>
+                <TableCell text="nowrap">{invoice.due}</TableCell>
+                <TableCell>{invoice.overdue ? 'Yes' : 'No'}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+export const FilterTypes: Story = {
+  parameters: scenario('filter-types'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="Text, number, date and boolean, filtered together"
+        note="Each column takes the component its type names, and each one is typed as itself: a TableTextFilter value is a TextFilter, never a union to unwrap. createRowPredicate joins the four into one call, so the screen filters four kinds without writing a switch of its own."
+      >
+        <TypedFilterDemo />
+      </Scene>
+    </div>
+  ),
+};
+
+/** The two operators that change the panel's shape, and the join. */
+function ConditionsDemo() {
+  const [amount, setAmount] = useState<NumberFilter | null>({
+    conditions: [{ end: 2500, operator: 'between', value: 100 }, { operator: 'empty' }],
+    join: 'or',
+    kind: 'number',
+  });
+  const keep = useMemo(() => createFilterPredicate(amount), [amount]);
+  const rows = INVOICES.filter((invoice) => keep(invoice.amount));
+
+  return (
+    <Table columns={3} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+            <TableColumnHeader numeric text="nowrap">
+              Amount
+              <TableColumnActions>
+                <TableNumberFilter columnLabel="amount" onValueChange={setAmount} value={amount} />
+              </TableColumnActions>
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.slice(0, 4).map((invoice) => (
+            <TableRow key={invoice.id} value={invoice.id}>
+              <TableRowHeader text="nowrap">{invoice.id}</TableRowHeader>
+              <TableCell text="nowrap">{invoice.client}</TableCell>
+              <TableCell numeric>{invoice.amount.toFixed(2)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+export const FilterConditions: Story = {
+  parameters: scenario('filter-conditions'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="Between, is empty, and the join between two conditions"
+        note="Between takes two operands and is empty takes none, so the panel grows a field or loses both — and announces the change, because a form that changes shape under a reader who cannot see it says nothing otherwise. The second condition appears once the first is complete; And and Or are the same two words the range reads between its ends."
+      >
+        <ConditionsDemo />
+      </Scene>
+      <Scene
+        label="One condition only"
+        note="conditions={1} is AG Grid's maxNumConditions, and it removes the join and the reveal together. Past two conditions a rule set needs an expression tree and an editor for it, which is Filter Bar in wave 8."
+      >
+        <SetFilterDemo columnLabel="status" heading="Status" options={STATUSES} />
       </Scene>
     </div>
   ),
@@ -1309,15 +1480,15 @@ function ListingDemo() {
     column: 'due',
     direction: 'ascending',
   });
-  const [statuses, setStatuses] = useState<readonly string[]>([]);
+  const [status, setStatus] = useState<SetFilter | null>(null);
 
   const rows = useMemo(() => {
-    const filtered =
-      statuses.length === 0
-        ? INVOICES
-        : INVOICES.filter((invoice) => statuses.includes(invoice.status));
-    return sortRows(filtered, sort);
-  }, [sort, statuses]);
+    const keep = createFilterPredicate(status);
+    return sortRows(
+      INVOICES.filter((invoice) => keep(invoice.status)),
+      sort,
+    );
+  }, [sort, status]);
 
   return (
     <Table
@@ -1347,11 +1518,11 @@ function ListingDemo() {
             <TableColumnHeader text="nowrap">
               Status
               <TableColumnActions>
-                <TableFilter
+                <TableSetFilter
                   columnLabel="status"
-                  onValueChange={setStatuses}
+                  onValueChange={setStatus}
                   options={STATUSES}
-                  value={statuses}
+                  value={status}
                 />
               </TableColumnActions>
             </TableColumnHeader>

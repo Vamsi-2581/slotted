@@ -128,24 +128,52 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'filter',
-    element: 'button[slTableFilter]',
+    element: 'button, inside span[slTableSetFilter] and its four siblings',
     required: false,
     purpose:
-      'The trigger the family draws in that slot, and everything behind it. It marks itself while the column is filtered and states the count in its own name.',
+      'The trigger the family draws in that slot, and everything behind it. It marks itself while the column is filtered and states what is applied in its own name.',
   },
   {
     part: 'filter-panel',
     element: 'div',
     required: false,
     purpose:
-      'The surface the trigger opens: a search, the values, and the two actions. It edits a draft — nothing reaches you until Apply.',
+      'The surface the trigger opens: the conditions, the join between them and the two actions. It edits a draft — nothing reaches you until Apply.',
+  },
+  {
+    part: 'filter-condition',
+    element: 'div',
+    required: false,
+    purpose:
+      'One condition: an operator and the operands that operator takes. Two of them at most, and the second appears once the first is complete.',
+  },
+  {
+    part: 'filter-operator',
+    element: 'div',
+    required: false,
+    purpose:
+      'The chooser, which is sl-select. What it offers is the kind own list, narrowed by operators.',
+  },
+  {
+    part: 'filter-operand',
+    element: 'div',
+    required: false,
+    purpose:
+      'The field the operator asks for: none for is empty, one for a comparison, two for between. The kind own ng-template draws it, once per condition.',
+  },
+  {
+    part: 'filter-join',
+    element: 'div',
+    required: false,
+    purpose:
+      'And or Or between two conditions, which is also the word between the ends of a range.',
   },
   {
     part: 'filter-search',
     element: 'div',
     required: false,
     purpose:
-      'The field that narrows the values, on a fold that ignores case and diacritics. It appears once there are searchThreshold values.',
+      'The field that narrows a set filter values, through the same locale collator Combobox filters with. It appears once there are searchThreshold values.',
   },
   {
     part: 'filter-list',
@@ -267,19 +295,43 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A column that sorts and filters',
       source:
-        '<th slTableColumnHeader column="client">\n  <button slTableSort>Client</button>\n  <span slTableColumnActions>\n    <span slTableFilter columnLabel="client" [options]="clients" [(value)]="chosen"></span>\n  </span>\n</th>',
+        '<th slTableColumnHeader column="client">\n  <button slTableSort>Client</button>\n  <span slTableColumnActions>\n    <span slTableTextFilter columnLabel="client" [(value)]="client"></span>\n  </span>\n</th>',
     }),
   },
   {
     id: 'filter',
-    title: 'The filter, in full',
-    note: 'Four panels, one component. A short list opens as a list; a long one brings a search that folds case and diacritics, and the checkbox above it covers exactly what the search left. Counts are yours to supply. Nothing reaches you until Apply — Escape and a press outside put back the set the panel opened with — and a column that is filtered says so in the trigger and in its own name.',
+    title: 'A column filtered to the values you named',
+    note: 'The set filter: a list, a search past eight values through the same locale collator Combobox uses, and a checkbox that covers exactly what the search left. Counts are yours to supply. Nothing reaches you until Apply — Escape and a press outside put back the descriptor the panel opened with — and a filtered column says what is applied in the trigger own name.',
     snippet: defineSnippet({
       id: 'table-angular-filter',
       language: 'angular',
-      label: 'A filter, and the query that answers it',
+      label: 'A set filter, and the query that answers it',
       source:
-        '<th slTableColumnHeader>\n  Status\n  <span slTableColumnActions>\n    <span slTableFilter columnLabel="status" [options]="statusOptions" [(value)]="statuses"></span>\n  </span>\n</th>',
+        '<th slTableColumnHeader>\n  Status\n  <span slTableColumnActions>\n    <span slTableSetFilter columnLabel="status" [options]="statusOptions" [(value)]="status"></span>\n  </span>\n</th>',
+    }),
+  },
+  {
+    id: 'filter-types',
+    title: 'Four columns, four kinds, one predicate',
+    note: 'Text, number, date and boolean, each with the operators its type has and each typed as itself — a slTableTextFilter value is a TextFilter model, and you never unwrap a union to read it. createRowPredicate joins the four, so the screen filters without a switch of its own.',
+    snippet: defineSnippet({
+      id: 'table-angular-filter-types',
+      language: 'angular',
+      label: 'A listing that filters four kinds',
+      source:
+        '<span slTableTextFilter columnLabel="client" [(value)]="client"></span>\n<span slTableNumberFilter columnLabel="amount" [(value)]="total"></span>\n<span slTableDateFilter columnLabel="due" [(value)]="dueAt"></span>\n<span slTableBooleanFilter columnLabel="overdue" [(value)]="overdue"></span>',
+    }),
+  },
+  {
+    id: 'filter-conditions',
+    title: 'Two conditions, and the shapes an operator makes',
+    note: 'Between takes two operands and is empty takes none, so the panel grows a field or loses both — and says so, because a form that changes shape under a reader who cannot see it says nothing otherwise. The second condition appears once the first is complete, joined by And or Or; past two, a rule set is Filter Bar work.',
+    snippet: defineSnippet({
+      id: 'table-angular-filter-conditions',
+      language: 'angular',
+      label: 'A range, a blank test, and one condition only',
+      source:
+        '<span slTableNumberFilter columnLabel="amount" [(value)]="amount"></span>\n<span slTableTextFilter columnLabel="client" [conditions]="1" [(value)]="client"></span>',
     }),
   },
   {
@@ -565,21 +617,35 @@ export const ANGULAR_TABLE_DOCS = {
         'options',
         'readonly TableFilterOption[]',
         '—',
-        'slTableFilter',
+        'slTableSetFilter',
         'The values the column can be filtered to, each with an optional count of its own',
       ],
       [
         'value',
+        'TextFilter | NumberFilter | DateFilter | BooleanFilter | SetFilter | null',
+        'null',
+        'slTable*Filter',
+        'The descriptor the column is filtered by, typed as its own kind. Two-way through [(value)], and valueChangeRequest carries the reason; both fire once, on Apply.',
+      ],
+      [
+        'operators',
         'readonly string[]',
-        '[]',
-        'slTableFilter',
-        'The set the column is filtered to. Two-way through [(value)], and valueChange fires once, on Apply.',
+        'the kind own list',
+        'slTable*Filter',
+        'Narrows what the chooser offers, in the order given. defaultOperator picks the one the panel opens on.',
+      ],
+      [
+        'conditions',
+        'number',
+        '2',
+        'slTable*Filter',
+        'How many conditions the panel offers. The second appears once the first is complete.',
       ],
       [
         'searchThreshold',
         'number',
         '8',
-        'slTableFilter',
+        'slTableSetFilter',
         'How many values bring a search with them. searchable states it outright.',
       ],
       [

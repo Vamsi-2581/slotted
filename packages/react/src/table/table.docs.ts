@@ -129,21 +129,49 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'The trigger the family draws in that slot, and everything behind it. It marks itself while the column is filtered and states the count in its own name.',
+      'The trigger the family draws in that slot, and everything behind it. It marks itself while the column is filtered and states what is applied in its own name.',
   },
   {
     part: 'filter-panel',
     element: 'div',
     required: false,
     purpose:
-      'The surface the trigger opens: a search, the values, and the two actions. It edits a draft — nothing reaches you until Apply.',
+      'The surface the trigger opens: the conditions, the join between them and the two actions. It edits a draft — nothing reaches you until Apply.',
+  },
+  {
+    part: 'filter-condition',
+    element: 'div',
+    required: false,
+    purpose:
+      'One condition: an operator and the operands that operator takes. Two of them at most, and the second appears once the first is complete.',
+  },
+  {
+    part: 'filter-operator',
+    element: 'div',
+    required: false,
+    purpose:
+      'The chooser, which is the Select family. What it offers is the kind own list, narrowed by operators.',
+  },
+  {
+    part: 'filter-operand',
+    element: 'div',
+    required: false,
+    purpose:
+      'The field the operator asks for: none for is empty, one for a comparison, two for between. renderOperand replaces it and keeps everything else.',
+  },
+  {
+    part: 'filter-join',
+    element: 'div',
+    required: false,
+    purpose:
+      'And or Or between two conditions, which is also the word between the ends of a range.',
   },
   {
     part: 'filter-search',
     element: 'div',
     required: false,
     purpose:
-      'The field that narrows the values, on a fold that ignores case and diacritics. It appears once there are searchThreshold values.',
+      'The field that narrows a set filter values, through the same locale collator Combobox filters with. It appears once there are searchThreshold values.',
   },
   {
     part: 'filter-list',
@@ -264,19 +292,43 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'A column that sorts and filters',
       source:
-        '<TableColumnHeader column="client">\n  <TableSort>Client</TableSort>\n  <TableColumnActions>\n    <TableFilter columnLabel="client" onValueChange={setClients} options={clients} value={chosen} />\n  </TableColumnActions>\n</TableColumnHeader>;\n\n// The set is yours to apply, and the query is where it belongs.\nconst rows = chosen.length === 0 ? invoices : invoices.filter((row) => chosen.includes(row.client));',
+        '<TableColumnHeader column="client">\n  <TableSort>Client</TableSort>\n  <TableColumnActions>\n    <TableTextFilter columnLabel="client" onValueChange={setClient} value={client} />\n  </TableColumnActions>\n</TableColumnHeader>;\n\n// The descriptor is yours to apply, and the query is where it belongs.\nconst keep = createFilterPredicate(client);\nconst rows = invoices.filter((row) => keep(row.client));',
     }),
   },
   {
     id: 'filter',
-    title: 'The filter, in full',
-    note: 'Four panels, one component. A short list opens as a list; a long one brings a search that folds case and diacritics, and the checkbox above it covers exactly what the search left. Counts are yours to supply. Nothing reaches you until Apply — Escape and a press outside put back the set the panel opened with — and a column that is filtered says so in the trigger and in its own name.',
+    title: 'A column filtered to the values you named',
+    note: 'The set filter: a list, a search past eight values through the same locale collator Combobox uses, and a checkbox that covers exactly what the search left. Counts are yours to supply. Nothing reaches you until Apply — Escape and a press outside put back the descriptor the panel opened with — and a filtered column says what is applied in the trigger own name.',
     snippet: defineSnippet({
       id: 'table-react-filter',
       language: 'tsx',
-      label: 'A filter, and the query that answers it',
+      label: 'A set filter, and the query that answers it',
       source:
-        "<TableColumnHeader>\n  Status\n  <TableColumnActions>\n    <TableFilter\n      columnLabel=\"status\"\n      onValueChange={setStatuses}\n      options={[\n        { count: 5, value: 'Paid' },\n        { count: 4, value: 'Overdue' },\n        { count: 3, value: 'Draft' },\n      ]}\n      value={statuses}\n    />\n  </TableColumnActions>\n</TableColumnHeader>;",
+        "const [status, setStatus] = useState<SetFilter | null>(null);\nconst keep = useMemo(() => createFilterPredicate(status), [status]);\nconst rows = useMemo(() => invoices.filter((row) => keep(row.status)), [invoices, keep]);\n\n<TableColumnHeader>\n  Status\n  <TableColumnActions>\n    <TableSetFilter\n      columnLabel=\"status\"\n      onValueChange={setStatus}\n      options={[\n        { count: 5, value: 'Paid' },\n        { count: 4, value: 'Overdue' },\n        { count: 3, value: 'Draft' },\n      ]}\n      value={status}\n    />\n  </TableColumnActions>\n</TableColumnHeader>;",
+    }),
+  },
+  {
+    id: 'filter-types',
+    title: 'Four columns, four kinds, one predicate',
+    note: 'Text, number, date and boolean, each with the operators its type has and each typed as itself — a text filter value is a TextFilter, in React types and in Angular signals alike, and you never unwrap a union to read it. createRowPredicate joins the four, so the screen filters without a switch of its own.',
+    snippet: defineSnippet({
+      id: 'table-react-filter-types',
+      language: 'tsx',
+      label: 'A listing that filters four kinds',
+      source:
+        'const [filters, setFilters] = useState<Record<string, FilterDescriptor | null>>({});\nconst set = (column: string) => (value: FilterDescriptor | null) =>\n  setFilters((held) => ({ ...held, [column]: value }));\n\nconst keep = useMemo(\n  () => createRowPredicate(filters, (row, column) => row[column as keyof Invoice]),\n  [filters],\n);\nconst rows = useMemo(() => invoices.filter(keep), [invoices, keep]);\n\n<TableTextFilter columnLabel="client" onValueChange={set(\'client\')} />;\n<TableNumberFilter columnLabel="amount" onValueChange={set(\'amount\')} />;\n<TableDateFilter columnLabel="due" onValueChange={set(\'due\')} />;\n<TableBooleanFilter columnLabel="paid" onValueChange={set(\'paid\')} />;',
+    }),
+  },
+  {
+    id: 'filter-conditions',
+    title: 'Two conditions, and the shapes an operator makes',
+    note: 'Between takes two operands and is empty takes none, so the panel grows a field or loses both — and says so, because a form that changes shape under a reader who cannot see it says nothing otherwise. The second condition appears once the first is complete, joined by And or Or; past two, a rule set is Filter Bar work.',
+    snippet: defineSnippet({
+      id: 'table-react-filter-conditions',
+      language: 'tsx',
+      label: 'A range, a blank test, and two conditions',
+      source:
+        "// between 100 and 2500, or nothing recorded at all\nconst amount: NumberFilter = {\n  conditions: [{ end: 2500, operator: 'between', value: 100 }, { operator: 'empty' }],\n  join: 'or',\n  kind: 'number',\n};\n\n<TableNumberFilter columnLabel=\"amount\" onValueChange={setAmount} value={amount} />;\n\n// One condition only, which is AG Grid maxNumConditions\n<TableTextFilter columnLabel=\"client\" conditions={1} onValueChange={setClient} />;",
     }),
   },
   {
@@ -547,21 +599,42 @@ export const REACT_TABLE_DOCS = {
         'options',
         'readonly TableFilterOption[]',
         '—',
-        'TableFilter',
+        'TableSetFilter',
         'The values the column can be filtered to, each with an optional count of its own',
       ],
       [
         'value',
-        'readonly string[]',
-        '[]',
-        'TableFilter',
-        'The set the column is filtered to. Controlled when stated; defaultValue is the uncontrolled form, and onValueChange fires once, on Apply.',
+        'TextFilter | NumberFilter | DateFilter | BooleanFilter | SetFilter | null',
+        'null',
+        'Table*Filter',
+        'The descriptor the column is filtered by, typed as its own kind. Controlled when stated; defaultValue is the uncontrolled form, and onValueChange fires once, on Apply.',
+      ],
+      [
+        'operators',
+        'readonly FilterOperator[]',
+        'the kind own list',
+        'Table*Filter',
+        'Narrows what the chooser offers, in the order given. defaultOperator picks the one the panel opens on.',
+      ],
+      [
+        'conditions',
+        '1 | 2',
+        '2',
+        'Table*Filter',
+        'How many conditions the panel offers. The second appears once the first is complete.',
+      ],
+      [
+        'renderOperand',
+        '(props: TableFilterOperandProps) => ReactNode',
+        '—',
+        'Table*Filter',
+        'Replaces the field the family would have drawn, and keeps the draft, the chooser, the join, the actions and the announcements.',
       ],
       [
         'searchThreshold',
         'number',
         '8',
-        'TableFilter',
+        'TableSetFilter',
         'How many values bring a search with them. searchable states it outright.',
       ],
       [

@@ -1,3 +1,11 @@
+import { createFilterPredicate, createRowPredicate, setFilter } from '@slotted/core/filter';
+import type {
+  BooleanFilter,
+  DateFilter,
+  NumberFilter,
+  SetFilter,
+  TextFilter,
+} from '@slotted/core/filter';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlIconButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
@@ -34,7 +42,13 @@ import { moduleMetadata } from '@storybook/angular-vite';
 import { SlTable } from './table';
 import type { TableSortDescriptor } from './table-defaults';
 import { SlTableContent } from './table-content';
-import { SlTableFilter } from './table-filter';
+import {
+  SlTableBooleanFilter,
+  SlTableDateFilter,
+  SlTableNumberFilter,
+  SlTableSetFilter,
+  SlTableTextFilter,
+} from './table-filter';
 import { SL_TABLE_PARTS } from './table-parts';
 import { ANGULAR_TABLE_DOCS, ANGULAR_TABLE_TOKENS } from './table.docs';
 
@@ -52,6 +66,8 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     sorting: Sorting,
     'column-controls': ColumnControls,
     filter: Filter,
+    'filter-types': FilterTypes,
+    'filter-conditions': FilterConditions,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -77,7 +93,11 @@ const meta: Meta<TableStoryArgs> = {
         SlTable,
         SlTableContent,
         ...SL_TABLE_PARTS,
-        SlTableFilter,
+        SlTableBooleanFilter,
+        SlTableDateFilter,
+        SlTableNumberFilter,
+        SlTableSetFilter,
+        SlTableTextFilter,
         SlLink,
         SlPagination,
         SlPaginationItems,
@@ -357,7 +377,7 @@ const table = (attributes: string, inner = HEAD + BODY) => `
  */
 const FILTER = (column: string, options: string, value: string) => `
   <span slTableColumnActions>
-    <span slTableFilter columnLabel="${column}" [options]="${options}" [(value)]="${value}"></span>
+    <span slTableSetFilter columnLabel="${column}" [options]="${options}" [(value)]="${value}"></span>
   </span>`;
 
 interface Invoice {
@@ -411,18 +431,23 @@ function sortRows(rows: readonly Invoice[], sort: TableSortDescriptor | null) {
  */
 function filterProps(source: readonly Invoice[]) {
   return {
-    clients: [] as string[],
-    statuses: [] as string[],
+    clients: null as SetFilter | null,
+    statuses: null as SetFilter | null,
     clientOptions: CLIENTS,
     statusOptions: STATUSES,
     sort: null as TableSortDescriptor | null,
-    visible(this: { clients: string[]; statuses: string[]; sort: TableSortDescriptor | null }) {
-      const kept = source.filter(
-        (row) =>
-          (this.statuses.length === 0 || this.statuses.includes(row.status)) &&
-          (this.clients.length === 0 || this.clients.includes(row.client)),
+    visible(this: {
+      clients: SetFilter | null;
+      statuses: SetFilter | null;
+      sort: TableSortDescriptor | null;
+    }) {
+      /* One predicate over both columns, which is what the engine is for: the
+         story writes no comparison and no switch of its own. */
+      const keep = createRowPredicate<Invoice>(
+        { client: this.clients, status: this.statuses },
+        (row, column) => row[column as 'client' | 'status'],
       );
-      return sortRows(kept, this.sort);
+      return sortRows(source.filter(keep), this.sort);
     },
   };
 }
@@ -570,24 +595,32 @@ export const ColumnControls: Story = {
  * search that matches nothing. Each panel reads its own state, which is why the
  * scope is written into every binding.
  */
-const FILTERED = (scope: string, column: string, options: string, extra = '') => `
+const FILTERED = (scope: string, column: string, options: string, extra = '') => {
+  const filter = `
+              <span slTableColumnActions>
+                <span
+                  slTableSetFilter
+                  columnLabel="${column}"
+                  ${extra}
+                  [options]="${scope}.${options}"
+                  [(value)]="${scope}.${column === 'status' ? 'statuses' : 'clients'}"
+                ></span>
+              </span>`;
+
+  /* The filter stands in the header of the column it filters, which is the
+     whole of what the slot is for: a panel over the client values above a
+     Status column would be a demonstration of the wrong thing. */
+  return `
   <div slTable [columns]="3" variant="framed">
     <div slTableContent>
       <thead slTableHead>
         <tr slTableRow>
           <th slTableColumnHeader text="nowrap">Invoice</th>
-          <th slTableColumnHeader text="nowrap">Client</th>
           <th slTableColumnHeader text="nowrap">
-            ${column === 'status' ? 'Status' : 'Client'}
-            <span slTableColumnActions>
-              <span
-                slTableFilter
-                columnLabel="${column}"
-                ${extra}
-                [options]="${scope}.${options}"
-                [(value)]="${scope}.${column === 'status' ? 'statuses' : 'clients'}"
-              ></span>
-            </span>
+            Client${column === 'client' ? filter : ''}
+          </th>
+          <th slTableColumnHeader text="nowrap">
+            Status${column === 'status' ? filter : ''}
           </th>
         </tr>
       </thead>
@@ -604,6 +637,7 @@ const FILTERED = (scope: string, column: string, options: string, extra = '') =>
       </tbody>
     </div>
   </div>`;
+};
 
 export const Filter: Story = {
   parameters: scenario('filter'),
@@ -611,30 +645,214 @@ export const Filter: Story = {
     props: {
       short: filterProps(INVOICES),
       long: filterProps(INVOICES),
-      already: Object.assign(filterProps(INVOICES), { statuses: ['Overdue'] }),
+      already: Object.assign(filterProps(INVOICES), { statuses: setFilter(['Overdue']) }),
       blank: filterProps(INVOICES),
     },
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'Three values, and no search',
-    'Press the funnel. A short list opens as a list: the checkbox above the rule covers the three under it, the counts are yours to supply, and Apply is the only thing that reaches your query — tick two and one query runs.',
+    'Press the funnel. A short list opens as a list: the chooser above it offers is any of and is none of, the checkbox over the rule covers the three under it, the counts are yours to supply, and Apply is the only thing that reaches your query — tick two and one query runs.',
     FILTERED('short', 'status', 'statusOptions'),
   )}
   ${scene(
     'Twelve values, and a search',
-    'Past searchThreshold — eight unless you say otherwise — the panel brings a field. It folds case and diacritics, so regiao finds Região, and the covering checkbox then answers for exactly what the search left rather than for the twelve behind it.',
+    'Past searchThreshold — eight unless you say otherwise — the panel brings a field. It compares through the locale collator, so regiao finds Região and strasse finds Straße, and the covering checkbox then answers for exactly what the search left rather than for the twelve behind it.',
     FILTERED('long', 'client', 'clientOptions'),
   )}
   ${scene(
     'A column already filtered',
-    'The trigger marks itself and states the count in its own accessible name, so a filter a reader set and forgot is still visible. Clear empties it and closes; a reader who wants their set back opens the panel again, because Clear is a decision and not a slip.',
+    'The trigger marks itself and states what is applied in its own accessible name — Filter status: is any of Overdue — so a filter a reader set and forgot is still readable. Clear empties it and closes; a reader who wants their set back opens the panel again, because Clear is a decision and not a slip.',
     FILTERED('already', 'status', 'statusOptions'),
   )}
   ${scene(
     'A search you asked for, over three values',
     'searchable states it outright, under the threshold or over it. Type something no value carries and the panel says so rather than showing an empty box — and the two actions stay, because Clear still empties a set the search cannot see.',
     FILTERED('blank', 'status', 'statusOptions', 'searchable'),
+  )}
+</div>`,
+  }),
+};
+
+/** Four columns of four kinds, filtered by one predicate and no switch. */
+const TYPED_ROWS = INVOICES.map((invoice) => ({
+  ...invoice,
+  overdue: invoice.status === 'Overdue',
+  total: Number(invoice.amount.replace(/,/g, '')),
+}));
+
+function typedProps() {
+  return {
+    client: null as TextFilter | null,
+    total: null as NumberFilter | null,
+    dueAt: null as DateFilter | null,
+    overdue: null as BooleanFilter | null,
+    visible(this: {
+      client: TextFilter | null;
+      total: NumberFilter | null;
+      dueAt: DateFilter | null;
+      overdue: BooleanFilter | null;
+    }) {
+      const keep = createRowPredicate<(typeof TYPED_ROWS)[number]>(
+        { client: this.client, dueAt: this.dueAt, overdue: this.overdue, total: this.total },
+        (row, column) => row[column as keyof (typeof TYPED_ROWS)[number]],
+      );
+      return TYPED_ROWS.filter(keep).slice(0, 5);
+    },
+  };
+}
+
+const TYPED = `
+  <div slTable [columns]="4" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">
+            Client
+            <span slTableColumnActions>
+              <span slTableTextFilter columnLabel="client" [(value)]="client"></span>
+            </span>
+          </th>
+          <th slTableColumnHeader numeric text="nowrap">
+            Amount
+            <span slTableColumnActions>
+              <span slTableNumberFilter columnLabel="amount" [(value)]="total"></span>
+            </span>
+          </th>
+          <th slTableColumnHeader text="nowrap">
+            Due
+            <span slTableColumnActions>
+              <span slTableDateFilter columnLabel="due" [(value)]="dueAt"></span>
+            </span>
+          </th>
+          <th slTableColumnHeader text="nowrap">
+            Overdue
+            <span slTableColumnActions>
+              <span slTableBooleanFilter columnLabel="overdue" [(value)]="overdue"></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (invoice of visible(); track invoice.id) {
+          <tr slTableRow [value]="invoice.id">
+            <th slTableRowHeader text="nowrap">{{ invoice.client }}</th>
+            <td slTableCell numeric>{{ invoice.amount }}</td>
+            <td slTableCell text="nowrap">{{ invoice.due }}</td>
+            <td slTableCell>{{ invoice.overdue ? 'Yes' : 'No' }}</td>
+          </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>No invoices match this filter</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+export const FilterTypes: Story = {
+  parameters: scenario('filter-types'),
+  render: () => ({
+    props: typedProps(),
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'Text, number, date and boolean, filtered together',
+    'Each column takes the component its type names, and each one is typed as itself: a slTableTextFilter value is a TextFilter signal, never a union to unwrap. createRowPredicate joins the four into one call, so the screen filters four kinds without writing a switch of its own.',
+    TYPED,
+  )}
+</div>`,
+  }),
+};
+
+function conditionProps() {
+  return {
+    amount: {
+      conditions: [{ end: 2500, operator: 'between', value: 100 }, { operator: 'empty' }],
+      join: 'or',
+      kind: 'number',
+    } as NumberFilter,
+    client: null as TextFilter | null,
+    visible(this: { amount: NumberFilter | null }) {
+      const keep = createFilterPredicate(this.amount);
+      return TYPED_ROWS.filter((row) => keep(row.total)).slice(0, 4);
+    },
+  };
+}
+
+const CONDITIONS = `
+  <div slTable [columns]="3" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader numeric text="nowrap">
+            Amount
+            <span slTableColumnActions>
+              <span slTableNumberFilter columnLabel="amount" [(value)]="amount"></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (invoice of visible(); track invoice.id) {
+          <tr slTableRow [value]="invoice.id">
+            <th slTableRowHeader text="nowrap">{{ invoice.id }}</th>
+            <td slTableCell text="nowrap">{{ invoice.client }}</td>
+            <td slTableCell numeric>{{ invoice.amount }}</td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+const ONE_CONDITION = `
+  <div slTable [columns]="2" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">
+            Client
+            <span slTableColumnActions>
+              <span slTableTextFilter columnLabel="client" [conditions]="1" [(value)]="client"></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (invoice of invoices.slice(0, 3); track invoice.id) {
+          <tr slTableRow [value]="invoice.id">
+            <th slTableRowHeader text="nowrap">{{ invoice.id }}</th>
+            <td slTableCell text="nowrap">{{ invoice.client }}</td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+export const FilterConditions: Story = {
+  parameters: scenario('filter-conditions'),
+  render: () => ({
+    props: { ...conditionProps(), invoices: INVOICES },
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'Between, is empty, and the join between two conditions',
+    'Between takes two operands and is empty takes none, so the panel grows a field or loses both — and announces the change, because a form that changes shape under a reader who cannot see it says nothing otherwise. The second condition appears once the first is complete; And and Or are the same two words the range reads between its ends.',
+    CONDITIONS,
+  )}
+  ${scene(
+    'One condition only',
+    'conditions of 1 is AG Grid maxNumConditions, and it removes the join and the reveal together. Past two conditions a rule set needs an expression tree and an editor for it, which is Filter Bar in wave 8.',
+    ONE_CONDITION,
   )}
 </div>`,
   }),

@@ -579,3 +579,25 @@ test('offers a bounded height, so a demonstration can be made to overflow', () =
   assert.match(rule, /max-block-size:/);
   assert.match(css, /\.slotted-demo-bound--tall/);
 });
+
+/**
+ * The scale had a panel size and nothing above it. A family that owns a whole
+ * screen — a page, a page header that snaps, a shell, a split view — drawn in
+ * a box the height of a card is a picture of a different component, and the
+ * correction made against that box is a correction against a constraint no
+ * application imposes.
+ */
+test('offers a box the size of a screen, for a family that owns one', () => {
+  const rule =
+    /\.slotted-demo-viewport\[data-size='screen'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  /* Not the whole window: the caption above and the snippet below are part of
+     the demonstration, and a box that fills the viewport hides both. */
+  assert.match(rule, /block-size:\s*min\(80vh, 46rem\)/);
+
+  /* And a floor, or a short window collapses the picture the size exists for. */
+  assert.match(rule, /min-block-size:\s*32rem/);
+
+  const tall = /\.slotted-demo-viewport\[data-size='tall'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(tall, /block-size:\s*22rem/, 'the panel size is still the step below it');
+});

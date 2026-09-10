@@ -655,6 +655,27 @@
 }
 
 /**
+ * A box the size of a screen, for a family that **owns** one.
+ *
+ * Twenty-two rems is a panel with room around it. It is not a page: a page
+ * header that snaps on scroll, a shell with a rail and a content column, a
+ * split view — each of these is a whole screen's worth of decisions, and drawn
+ * in a box the height of a card it becomes a picture of something else. The
+ * reviewer's words for the version without this: a page header in four hundred
+ * by five hundred and twenty is horrible, and what it shows is not the family.
+ *
+ * The height is `80vh` rather than `100vh` because the box stands inside a
+ * documentation page that has a caption above it and a snippet below, and a
+ * demonstration that fills the window leaves no sign that either exists. The
+ * floor holds it up in a short window, where `vh` would collapse the same
+ * picture the size exists to give room to.
+ */
+.slotted-demo-viewport[data-size='screen'] {
+  block-size: min(80vh, 46rem);
+  min-block-size: 32rem;
+}
+
+/**
  * A box that **scrolls** rather than one that clips, for a family whose
  * behaviour is about what happens while the reader scrolls past it.
  *

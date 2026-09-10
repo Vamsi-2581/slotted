@@ -89,6 +89,7 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-toast-stack-offset',
     '--slotted-toast-swipe-x',
     '--slotted-toast-swipe-y',
+    '--slotted-upload-visible-rows',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
   assert.equal(isRuntimeProperty('--slotted-space-4'), false);

@@ -54,6 +54,19 @@ const PARTS = [
   { family: 'dialog', part: 'close' },
   { family: 'dialog', part: 'fullscreen' },
   { family: 'drawer', part: 'close' },
+  /**
+   * A file's five controls. They are inner controls for the reason the rest of
+   * this list is: each is a glyph on a row twenty-six pixels tall, and a
+   * `Button` there would bring a height, a padding, a frame, a shadow and a
+   * radius that do not fit inside it.
+   */
+  { family: 'upload', part: 'viewerExternal' },
+  { family: 'upload', part: 'viewerClose' },
+  { family: 'upload', part: 'start' },
+  { family: 'upload', part: 'pause' },
+  { family: 'upload', part: 'retry' },
+  { family: 'upload', part: 'cancel' },
+  { family: 'upload', part: 'remove' },
 ];
 
 /** Families whose glyph is floored at 14px (SL3, with CB3 and TF1). */

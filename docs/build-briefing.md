@@ -121,6 +121,14 @@ other families stand on. Justify it at the gate before writing it.
   family.** `presence`, `portal`, `positioner`, `dismissable-layer`, `focus` and
   `live-announcer` each own one question and none imports another. An overlay
   family takes the ones it needs and no more.
+- **What this library holds is the wall-clock value the reader typed, never a
+  zoned instant.** `PlainDate`, `PlainTime` and `PlainDateTime` are the three
+  types the date chain has, and there is no fourth. An instant is what every
+  surveyed implementation gets wrong at a daylight boundary, and holding one
+  would owe an answer for the hour that happens twice and the hour that never
+  happens. Converting to an instant is the application's, against the zone the
+  application knows. Decided in wave 7; it binds `time-field`,
+  `datetime-field` and both pickers in wave 8.
 - **`@floating-ui/dom` is the positioning engine, and it is invisible.** It is
   the only runtime dependency of `@slotted/core`, imported by `src/positioner`
   alone and marked external in the build. No type or option name of it appears

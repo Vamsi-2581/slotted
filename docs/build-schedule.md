@@ -282,7 +282,7 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 11 — Extended, segunda leva · 5 sessões
+## Rodada 11 — Extended, segunda leva · 7 sessões
 
 Cada uma depende de algo da rodada 10 ou das coleções.
 
@@ -301,7 +301,40 @@ beside another session" em docs/build-briefing.md.
 ```
 
 ```
-/component date-range-picker time-picker
+/component time-field time-picker
+
+Uma sessão só, e nesta ordem: o picker compõe o campo. O motor de segmentos já
+existe em packages/core/src/date/segments.ts e não sabe o que um campo
+significa — hora, minuto e segundo são uma união mais larga em DateFieldName e
+três linhas em fieldRange. O painel de horas é uma lista ao passo que o
+consumidor definiu, portanto listbox e não grid: compõe select, não calendar.
+O valor é PlainTime, nunca um instante com fuso; a razão está em "Decisions
+already taken" no briefing.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component datetime-field datetime-picker
+
+Depois de time-field e time-picker, que estas duas compõem junto com date-field
+e calendar. datetime-field é uma moldura, um group e um valor só —
+PlainDateTime, que é um PlainDate ao lado de um PlainTime. datetime-picker é a
+única família que segura as duas superfícies, e a decisão que deve é qual delas
+abre primeiro.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component date-range-picker
+
+Dois campos e o modo range que calendar já tem, atrás de um trigger. Não
+depende da cadeia de hora. O revisor pediu que o comprimento do intervalo seja
+dito enquanto ele está sendo desenhado; a razão está em
+docs/superpowers/specs/2026-09-09-date-design.md §12.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.

@@ -992,8 +992,35 @@ Independentes entre si, exceto a cadeia de data.
 
 Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
 `command-palette`, `segmented-control`, `toggle-group`, `scroll-area`,
-`filter-bar`, `data-grid`, `date-range-picker`, `time-picker`, `tags-input`,
-`timeline`, `code-block`.
+`filter-bar`, `data-grid`, `time-field`, `time-picker`, `datetime-field`,
+`datetime-picker`, `date-range-picker`, `tags-input`, `timeline`, `code-block`.
+
+- As seis famílias de hora e de intervalo formam uma cadeia, decidida na onda 7
+  e registada em `docs/superpowers/specs/2026-09-09-date-design.md` §11. Nada
+  aqui é motor novo: `packages/core/src/date/segments.ts` percorre um número
+  dentro de um intervalo, dá-lhe a volta, aceita algarismos e termina a
+  sequência quando mais nenhum cabe, sem saber o que o campo significa.
+  `fieldRange` é o único sítio onde os três campos de data são nomeados, e
+  `DateFieldName` tem três palavras porque a onda 7 tem três campos, não porque
+  o motor tenha. Hora, minuto e segundo são uma união mais larga e três linhas
+  nessa função. `time-field` é o mesmo controlo segmentado com esses três
+  campos; `datetime-field` põe `date-field` e `time-field` numa moldura, num
+  `group` e num valor; `datetime-picker` é o único que segura as duas
+  superfícies, e a decisão que deve é qual delas abre primeiro.
+  `date-range-picker` são dois campos e o modo `range` que `calendar` já tem.
+- `time-picker` não é um calendário. O painel atrás dele é uma lista de horas ao
+  passo que o consumidor definiu, o que é `listbox` e não `grid`, portanto
+  compõe a maquinaria de `select` e não a desta cadeia.
+- Três valores, e não um quarto. `PlainTime` é `{ hour, minute, second }` e
+  `PlainDateTime` é um `PlainDate` ao lado de um `PlainTime`. Um instante com
+  fuso não é nenhum deles, pela razão registada no briefing.
+- O revisor pediu, no gate visual da onda 7, que estas famílias fossem mais
+  inventivas do que o campo pesquisado. As três aberturas que a onda 7
+  encontrou e não tomou estão em `2026-09-09-date-design.md` §12: uma hora
+  escrita como duração a partir de agora, um intervalo que diz o seu
+  comprimento enquanto está a ser desenhado, e uma célula de dia que carrega uma
+  marca de densidade. `calendar` já expõe o gancho `data-*` da terceira e não
+  desenha nada.
 
 ## Destino das 29 famílias atuais
 

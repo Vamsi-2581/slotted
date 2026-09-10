@@ -15,6 +15,7 @@ export default defineConfig({
         'dismissable-layer': resolve(import.meta.dirname, 'src/dismissable-layer/index.ts'),
         extent: resolve(import.meta.dirname, 'src/extent/index.ts'),
         files: resolve(import.meta.dirname, 'src/files/index.ts'),
+        filter: resolve(import.meta.dirname, 'src/filter/index.ts'),
         form: resolve(import.meta.dirname, 'src/form/index.ts'),
         focus: resolve(import.meta.dirname, 'src/focus/index.ts'),
         identity: resolve(import.meta.dirname, 'src/identity/index.ts'),

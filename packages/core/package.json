@@ -45,6 +45,10 @@
       "types": "./dist/types/files/index.d.ts",
       "import": "./dist/files.js"
     },
+    "./filter": {
+      "types": "./dist/types/filter/index.d.ts",
+      "import": "./dist/filter.js"
+    },
     "./form": {
       "types": "./dist/types/form/index.d.ts",
       "import": "./dist/form.js"

@@ -50,6 +50,7 @@
   "--slotted-table-row-surface-selected",
   "--slotted-table-row-surface-selected-hover",
   "--slotted-table-row-surface-stripe",
+  "--slotted-table-selection-size",
   "--slotted-table-sticky-inset",
   "--slotted-table-sticky-offset",
   "--slotted-table-sticky-offset-end",

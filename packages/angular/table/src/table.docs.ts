@@ -614,7 +614,7 @@ export const ANGULAR_TABLE_DOCS = {
         'string',
         '0',
         'the three cell parts and both selection cells',
-        'Where the pinned column stops, as a CSS length. Two columns pinned to the same edge need the second to state how wide the first is.',
+        'Where the pinned column stops, as a CSS length. Two columns pinned to the same edge need the second to state how wide the first is — beside a selection column that is --slotted-table-selection-size, which is 3rem.',
       ],
       [
         'colSpan',

@@ -308,6 +308,17 @@ test('pins the summary as well as the head, and says which one the axis moves', 
 });
 
 /**
+ * A column pinned beside the chooser needs a length, and a shrink-wrapped
+ * column has none to give: the identifier pinned to the nearest round number
+ * landed six pixels past the checkbox and over the column behind it. The width
+ * is stated, and the same name answers the offset.
+ */
+test('states the width of the selection column, because something is pinned beside it', () => {
+  assert.match(contract.selection.columnWidth, /--slotted-table-selection-size/);
+  assert.match(contract.selection.columnWidth, /stated rather than shrink-wrapped/);
+});
+
+/**
  * A paged listing puts its control under the table and inside its frame. Every
  * surveyed implementation that pages draws it attached; a control floating
  * under a framed box reads as a defect. The family supplies the place, and

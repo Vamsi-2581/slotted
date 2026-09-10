@@ -764,9 +764,17 @@
    * the check and the indeterminate bar, and a chooser drawn here would be a
    * second answer to a question that family answers. The cell holds it to the
    * width of the control and centres it on the row's first line.
+   *
+   * The width is **stated** rather than shrink-wrapped, and that is the whole
+   * reason it is a token. A listing pins the chooser and the identifier beside
+   * it, and the second one has to say where the first stops: shrink-wrapped, the
+   * answer was 42 pixels — a number nothing names and nobody can state — so a
+   * consumer stating the nearest round length pinned the identifier six pixels
+   * past the chooser and over the column behind it. Now one name answers both
+   * places: this width, and the `stickyOffset` beside it.
    */
   [data-ui='table'] [data-part='selection'] {
-    inline-size: 1%;
+    inline-size: var(--slotted-table-selection-size, 3rem);
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
     text-align: center;

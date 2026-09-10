@@ -88,6 +88,7 @@
     "module": "packages/core/src/collection",
     "function": "nextSelection",
     "control": "checkbox",
+    "columnWidth": "--slotted-table-selection-size, and it is stated rather than shrink-wrapped so a column pinned beside the chooser has a length to state. Shrink-wrapped the answer was forty-two pixels: a number nothing names, so a consumer stating the nearest round one pinned the identifier past the chooser and over the column behind it.",
     "key": "the row's own value, required whenever the selection or the expansion is on",
     "range": "Shift while pressing a row's checkbox selects every row from the anchor to that one; the anchor is the last plain press.",
     "selectAll": "The header checkbox covers the rows in the DOM, is indeterminate while some of them are selected, and states the count it covers in its own accessible name. A selection over a whole result set is a decision only the consumer's query can make.",

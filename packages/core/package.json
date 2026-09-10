@@ -25,6 +25,10 @@
       "types": "./dist/types/currency/index.d.ts",
       "import": "./dist/currency.js"
     },
+    "./date": {
+      "types": "./dist/types/date/index.d.ts",
+      "import": "./dist/date.js"
+    },
     "./disclosure": {
       "types": "./dist/types/disclosure/index.d.ts",
       "import": "./dist/disclosure.js"

@@ -10,6 +10,7 @@ export default defineConfig({
         collection: resolve(import.meta.dirname, 'src/collection/index.ts'),
         count: resolve(import.meta.dirname, 'src/count/index.ts'),
         currency: resolve(import.meta.dirname, 'src/currency/index.ts'),
+        date: resolve(import.meta.dirname, 'src/date/index.ts'),
         disclosure: resolve(import.meta.dirname, 'src/disclosure/index.ts'),
         'dismissable-layer': resolve(import.meta.dirname, 'src/dismissable-layer/index.ts'),
         extent: resolve(import.meta.dirname, 'src/extent/index.ts'),

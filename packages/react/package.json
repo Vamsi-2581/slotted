@@ -132,6 +132,14 @@
       "types": "./dist/types/listbox/index.d.ts",
       "import": "./dist/listbox.js"
     },
+    "./loading-overlay": {
+      "types": "./dist/types/loading-overlay/index.d.ts",
+      "import": "./dist/loading-overlay.js"
+    },
+    "./multi-select": {
+      "types": "./dist/types/multi-select/index.d.ts",
+      "import": "./dist/multi-select.js"
+    },
     "./pagination": {
       "types": "./dist/types/pagination/index.d.ts",
       "import": "./dist/pagination.js"

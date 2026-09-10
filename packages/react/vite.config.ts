@@ -28,6 +28,7 @@ export default defineConfig({
         inline: resolve(import.meta.dirname, 'src/inline/index.ts'),
         'inline-message': resolve(import.meta.dirname, 'src/inline-message/index.ts'),
         link: resolve(import.meta.dirname, 'src/link/index.ts'),
+        'loading-overlay': resolve(import.meta.dirname, 'src/loading-overlay/index.ts'),
         menu: resolve(import.meta.dirname, 'src/menu/index.ts'),
         menubar: resolve(import.meta.dirname, 'src/menubar/index.ts'),
         list: resolve(import.meta.dirname, 'src/list/index.ts'),

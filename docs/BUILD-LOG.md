@@ -4782,6 +4782,55 @@ stage to appear, and the rule is `hasSettled`, a pure function with cases in
 asked for: a rule that only exists inside a string evaluated in Chrome is a rule
 nobody can put a case to.
 
+## A layer that opened and painted nothing — 2026-09-10
+
+`upload`'s viewer is a full-screen preview, and it met a reader as a broken
+overlay in both bindings. Three separate defects wore the same face, and all
+three bind any family that opens a layer.
+
+**The stylesheet did not follow the layer.** Every viewer rule was written as a
+descendant of the root — `[data-ui='upload'] [data-part='viewer']` — and a layer
+is portalled to the end of the document, where that selector matches nothing. It
+cannot be portalled into the root either: the root declares
+`container-type: inline-size`, which makes it the containing block for a fixed
+descendant. A layer therefore carries its family's own identifier and axes on
+itself, and the private properties it reads are declared in a rule the root and
+the layer share.
+
+**React's `Dialog` takes its origin from the trigger.** A layer opened from code
+has none, so it landed at the end of the document with no `data-slotted-theme`,
+`-scheme` or `-density`: every token resolved to nothing, and the panel rendered
+with no surface and its masked glyphs as solid black squares. The fix belongs to
+whoever opens the layer — create the portal root with an origin written in
+place, and hand the container to the dialog. Angular has this right already: an
+`<sl-dialog>`'s host is written where the consumer put it.
+
+**The Angular dialog reported itself open with nothing on screen.**
+`SlDialogBase` answers `open` inside a view effect and writes the presence status
+from there. The write marked no consumer, no further pass followed, and the layer
+stayed in the document with `inert` and without `data-open` — which the
+stylesheet answers with `content-visibility: hidden`. Every one of the family's
+own stories opens from a trigger, where the write lands outside that pass, which
+is why it stood for nine rounds. `onStatusChange` now marks the view for check.
+A machine that writes a signal from inside a component's own change detection
+must say so.
+
+## A PDF cannot be previewed in a sandboxed frame — 2026-09-10
+
+An object URL inherits the creating document's origin, so `upload` framed every
+preview with `sandbox` and neither `allow-scripts` nor `allow-same-origin`. That
+is right for a `text/html` file the reader dropped and it silently broke every
+PDF: Chrome's PDF viewer is blocked in a sandboxed frame — measured against a
+one-page document with `sandbox=""` and with `sandbox="allow-scripts"`, both a
+grey box.
+
+The exception is safe because of the type rather than the sandbox: the object URL
+carries the file's own media type, Chrome dispatches `application/pdf` to the PDF
+viewer by that type, and an HTML document served as `application/pdf` in an
+unsandboxed frame was measured running no script. A PDF frame carries no
+`sandbox`; a text frame keeps it. Any family framing a document the reader
+supplied inherits both halves of that rule.
+
 ## Two sessions share one index — 2026-09-10
 
 `docs/build-briefing.md` tells a session working beside another to stage

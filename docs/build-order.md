@@ -1055,7 +1055,22 @@ Independentes entre si, exceto a cadeia de data.
   piso no passo. Avaliação nas onze dimensões em
   `docs/superpowers/specs/2026-09-10-time-self-assessment.md`.
 
-- `upload` — consolida `file-upload`, `dropzone` e `file-input` (guia 17)
+- `upload` — consolida `file-upload`, `dropzone` e `file-input` (guia 17). A
+  linha era esta e só esta; o que a família entrega está inventariado em
+  `docs/superpowers/specs/2026-09-10-upload-capability-inventory.md` §6, e o que
+  ela acrescenta ao parágrafo é: **a transferência**, com adaptador, fila,
+  concorrência, nova tentativa limitada, cancelamento, pausa onde o adaptador a
+  honra, e início automático ou manual; **`@slotted/core/upload`** como entrada
+  nova fora do barril, pelas duas razões que puseram `filter` fora dele — os dois
+  bindings têm de dar a mesma resposta ao carácter, e quem importa um botão não
+  deve puxar um motor de transferência; **`drop-invalid`** no vocabulário de
+  estados de `specs/contract.schema.mjs`, que `docs/component-features.md` §2.5 já
+  nomeava e o esquema não tinha; **oito glifos** e a escala **File kind** — nove
+  cores e um primeiro plano, por esquema, na camada de componente, porque os
+  cinco tons não têm um segundo azul nem indigo; **as três formas** que a
+  consolidação nomeia como um eixo e não como três famílias; e **a regra do
+  formulário**: uma transferência a decorrer torna o controlo inválido, que
+  nenhuma das nove implementações pesquisadas responde.
 - `page page-header section` — a família que o revisor acompanha de perto, e a
   referência é a **Dynamic Page do SAP Fiori**. Não é um cabeçalho com um
   título: é uma casca de ecrã com uma mecânica própria. O que a referência tem,

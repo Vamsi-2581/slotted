@@ -35,6 +35,7 @@ export default defineConfig({
         steps: resolve(import.meta.dirname, 'src/steps/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         typeahead: resolve(import.meta.dirname, 'src/typeahead/index.ts'),
+        upload: resolve(import.meta.dirname, 'src/upload/index.ts'),
       },
       formats: ['es'],
     },

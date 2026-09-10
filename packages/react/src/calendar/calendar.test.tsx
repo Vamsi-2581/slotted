@@ -319,6 +319,44 @@ describe('how much of it is drawn', () => {
     expect(captions).toEqual(['setembro de 2026', 'outubro de 2026']);
   });
 
+  /**
+   * Drawing the pair from the focused date meant that choosing a day in the
+   * second month scrolled the pair: a reader looking at June and July who
+   * chose 9 June was shown July and August, with half of what they had just
+   * chosen off screen.
+   */
+  it('does not move the pair when a day in the second month is chosen', () => {
+    render(<Calendar defaultFocusedDate={plainDate(2026, 6, 1)} locale="pt-BR" months={2} />);
+
+    const captions = () =>
+      [...document.querySelectorAll('[data-part="grid-caption"]')].map(
+        (element) => element.textContent,
+      );
+    expect(captions()).toEqual(['junho de 2026', 'julho de 2026']);
+
+    /* The ninth of July, which is in the second month on screen. */
+    const july = document.querySelectorAll('[data-part="grid"]')[1] as HTMLElement;
+    const ninth = [...july.querySelectorAll('[data-part="day"]')].find(
+      (element) =>
+        element.textContent === '9' &&
+        element.closest('[data-part="cell"]')?.hasAttribute('data-outside-month') === false,
+    ) as HTMLElement;
+    fireEvent.click(ninth);
+
+    expect(captions()).toEqual(['junho de 2026', 'julho de 2026']);
+  });
+
+  it('moves the pair by a whole page when the reader steps past its edge', () => {
+    render(<Calendar defaultFocusedDate={plainDate(2026, 6, 1)} locale="pt-BR" months={2} />);
+
+    /* Back one day from the first of June leaves the page at its start edge. */
+    press('ArrowLeft');
+    const captions = [...document.querySelectorAll('[data-part="grid-caption"]')].map(
+      (element) => element.textContent,
+    );
+    expect(captions).toEqual(['abril de 2026', 'maio de 2026']);
+  });
+
   it('draws six rows on request, so a popup does not resize under the pointer', () => {
     const { container } = render(
       <Calendar defaultFocusedDate={plainDate(2026, 2, 1)} fixedWeeks locale="pt-BR" />,

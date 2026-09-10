@@ -22,6 +22,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   input,
@@ -77,7 +78,7 @@ let sequence = 0;
         type="button"
         [attr.aria-label]="resolvedPreviousLabel()"
         [disabled]="!editable()"
-        (click)="page(-1, $event)"
+        (click)="turnPage(-1, $event)"
       ></button>
       <!--
         The heading is a live region: paging with a key changes nothing that
@@ -98,7 +99,7 @@ let sequence = 0;
         type="button"
         [attr.aria-label]="resolvedNextLabel()"
         [disabled]="!editable()"
-        (click)="page(1, $event)"
+        (click)="turnPage(1, $event)"
       ></button>
     </div>
 
@@ -274,6 +275,15 @@ export class SlCalendar implements OnInit {
   private readonly ownValue = signal<CalendarValue>(null);
   private readonly ownFocused = signal<PlainDate>(plainDate(2026, 1, 1));
   private readonly ownView = signal<CalendarView>('day');
+  /**
+   * The first month on screen, which is **not** the month the reader is on.
+   *
+   * Drawing two months from the focused date meant that choosing a day in the
+   * second one scrolled the pair: a reader looking at June and July who chose
+   * 9 June was shown July and August, with half of what they had just chosen
+   * off screen. The page moves only when the reader leaves it.
+   */
+  private readonly page = signal<{ year: number; month: number }>({ year: 2026, month: 1 });
   private readonly today = signal<PlainDate | null>(null);
   /** Focus is only moved into the DOM after a key, never on a render. */
   private restoreFocus = false;
@@ -318,27 +328,52 @@ export class SlCalendar implements OnInit {
   protected readonly monthNames = computed(() => this.format().monthNames('short'));
   protected readonly years = computed(() => yearPage(this.focused().year, YEAR_PAGE));
   protected readonly shownMonths = computed(() =>
-    visibleMonths(this.focused(), this.resolvedMonths()),
+    visibleMonths(this.page(), this.resolvedMonths()),
   );
 
   protected readonly heading = computed(() => {
     const focused = this.focused();
     const format = this.format();
     if (this.currentView() === 'year') {
-      const page = this.years();
-      return `${String(page[0] ?? focused.year)} – ${String(page.at(-1) ?? focused.year)}`;
+      const years = this.years();
+      return `${String(years[0] ?? focused.year)} – ${String(years.at(-1) ?? focused.year)}`;
     }
     if (this.currentView() === 'month') return String(focused.year);
-    if (this.resolvedMonths() === 1) return format.monthYear(focused);
-    const last = stepMonth(focused, this.resolvedMonths() - 1).date;
-    return `${format.monthYear(focused, 'short')} – ${format.monthYear(last, 'short')}`;
+
+    const page = this.page();
+    const start = plainDate(page.year, page.month, 1);
+    if (this.resolvedMonths() === 1) return format.monthYear(start);
+    const last = stepMonth(start, this.resolvedMonths() - 1).date;
+    return `${format.monthYear(start, 'short')} – ${format.monthYear(last, 'short')}`;
   });
+
+  constructor() {
+    /**
+     * The page follows the reader, and only when the reader has left it.
+     * Written as an effect rather than inside the request, so a consumer who
+     * owns `focusedDate` and moves it from outside is followed too.
+     */
+    effect(() => {
+      const focused = this.focused();
+      const held = this.page();
+      const span = this.resolvedMonths();
+      const start = held.year * 12 + (held.month - 1);
+      const wanted = focused.year * 12 + (focused.month - 1);
+      if (wanted >= start && wanted < start + span) return;
+      /* Outside the span: the page moves by whole pages, so a reader stepping
+         past the edge lands where the arrows would have taken them. */
+      const moved = start + Math.floor((wanted - start) / span) * span;
+      this.page.set({ year: Math.floor(moved / 12), month: (moved % 12) + 1 });
+    });
+  }
 
   ngOnInit() {
     this.ownValue.set(this.defaultValue() ?? null);
     this.ownView.set(this.defaultView() ?? 'day');
     this.today.set(todayIn(this.timeZone() ?? this.defaults.timeZone));
-    this.ownFocused.set(this.startingDate());
+    const start = this.startingDate();
+    this.ownFocused.set(start);
+    this.page.set({ year: start.year, month: start.month });
   }
 
   /** Puts focus on the cell holding the roving tab stop. */
@@ -402,7 +437,8 @@ export class SlCalendar implements OnInit {
     this.requestFocused(date, reason, source);
   }
 
-  protected page(direction: 1 | -1, source: Event) {
+  /** The reader moves with the page rather than staying behind it. */
+  protected turnPage(direction: 1 | -1, source: Event) {
     const focused = this.focused();
     if (this.currentView() === 'day') {
       this.requestFocused(

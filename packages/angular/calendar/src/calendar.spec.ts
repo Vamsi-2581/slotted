@@ -21,6 +21,7 @@ class Host {
   readonly ninth = NINTH;
   readonly january = plainDate(2026, 1, 31);
   readonly february = plainDate(2026, 2, 1);
+  readonly june = plainDate(2026, 6, 1);
   readonly seventeenth = plainDate(2026, 9, 17);
   readonly fifteenth = plainDate(2026, 9, 15);
   readonly run: DateRange = { start: plainDate(2026, 9, 7), end: plainDate(2026, 9, 11) };
@@ -368,6 +369,45 @@ describe('how much of it is drawn', () => {
       (element: Element) => (element.textContent ?? '').trim(),
     );
     expect(captions).toEqual(['setembro de 2026', 'outubro de 2026']);
+  });
+
+  /**
+   * Drawing the pair from the focused date meant that choosing a day in the
+   * second month scrolled the pair: a reader looking at June and July who
+   * chose 9 June was shown July and August, with half of what they had just
+   * chosen off screen.
+   */
+  it('does not move the pair when a day in the second month is chosen', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [months]="2" [defaultFocusedDate]="june"></div>`,
+    );
+    const captions = () =>
+      [...fixture.nativeElement.querySelectorAll('[data-part="grid-caption"]')].map(
+        (element: Element) => (element.textContent ?? '').trim(),
+      );
+    expect(captions()).toEqual(['junho de 2026', 'julho de 2026']);
+
+    const july = fixture.nativeElement.querySelectorAll('[data-part="grid"]')[1] as HTMLElement;
+    const ninth = [...july.querySelectorAll('[data-part="day"]')].find(
+      (element: Element) =>
+        ((element as HTMLElement).textContent ?? '').trim() === '9' &&
+        element.closest('[data-part="cell"]')?.hasAttribute('data-outside-month') === false,
+    ) as HTMLElement;
+    click(fixture, ninth);
+
+    expect(captions()).toEqual(['junho de 2026', 'julho de 2026']);
+  });
+
+  it('moves the pair by a whole page when the reader steps past its edge', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [months]="2" [defaultFocusedDate]="june"></div>`,
+    );
+
+    press(fixture, 'ArrowLeft');
+    const captions = [...fixture.nativeElement.querySelectorAll('[data-part="grid-caption"]')].map(
+      (element: Element) => (element.textContent ?? '').trim(),
+    );
+    expect(captions).toEqual(['abril de 2026', 'maio de 2026']);
   });
 
   it('draws six rows on request, so a popup does not resize under the pointer', () => {

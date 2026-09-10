@@ -361,6 +361,190 @@
   </div>
 </section>
 
+<section data-scene="multiple">
+  <div data-ui="calendar" data-part="root">
+    <div data-part="header">
+      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
+      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
+      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+    </div>
+    <div data-part="grids">
+      <table data-part="grid" role="grid" aria-label="setembro de 2026">
+        <caption data-part="grid-caption">
+          setembro de 2026
+        </caption>
+        <thead>
+          <tr data-part="week-headers">
+            <th data-part="week-header" scope="col" abbr="domingo">D</th>
+            <th data-part="week-header" scope="col" abbr="segunda-feira">S</th>
+            <th data-part="week-header" scope="col" abbr="terça-feira">T</th>
+            <th data-part="week-header" scope="col" abbr="quarta-feira">Q</th>
+            <th data-part="week-header" scope="col" abbr="quinta-feira">Q</th>
+            <th data-part="week-header" scope="col" abbr="sexta-feira">S</th>
+            <th data-part="week-header" scope="col" abbr="sábado">S</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-part="week">
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">30</span>
+            </td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">31</span>
+            </td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">1</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">2</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">3</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">4</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">5</span></td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell"><span data-part="day" tabindex="-1">6</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">7</span></td>
+            <td data-part="cell" data-selected>
+              <span data-part="day" aria-selected="true" tabindex="-1">8</span>
+            </td>
+            <td data-part="cell" data-today data-selected>
+              <span data-part="day" aria-selected="true" data-today tabindex="0">9</span>
+            </td>
+            <td data-part="cell" data-selected>
+              <span data-part="day" aria-selected="true" tabindex="-1">10</span>
+            </td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">11</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">12</span></td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell"><span data-part="day" tabindex="-1">13</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">14</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">15</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">16</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">17</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">18</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">19</span></td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell"><span data-part="day" tabindex="-1">20</span></td>
+            <td data-part="cell" data-selected>
+              <span data-part="day" aria-selected="true" tabindex="-1">21</span>
+            </td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">22</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">23</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">24</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">25</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">26</span></td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell"><span data-part="day" tabindex="-1">27</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">28</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">29</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">30</span></td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">1</span>
+            </td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">2</span>
+            </td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">3</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section data-scene="range-wrapping">
+  <div data-ui="calendar" data-part="root">
+    <div data-part="header">
+      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
+      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
+      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+    </div>
+    <div data-part="grids">
+      <table data-part="grid" role="grid" aria-label="setembro de 2026">
+        <caption data-part="grid-caption">
+          setembro de 2026
+        </caption>
+        <thead>
+          <tr data-part="week-headers">
+            <th data-part="week-header" scope="col" abbr="domingo">D</th>
+            <th data-part="week-header" scope="col" abbr="segunda-feira">S</th>
+            <th data-part="week-header" scope="col" abbr="terça-feira">T</th>
+            <th data-part="week-header" scope="col" abbr="quarta-feira">Q</th>
+            <th data-part="week-header" scope="col" abbr="quinta-feira">Q</th>
+            <th data-part="week-header" scope="col" abbr="sexta-feira">S</th>
+            <th data-part="week-header" scope="col" abbr="sábado">S</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-part="week">
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">30</span>
+            </td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">31</span>
+            </td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">1</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">2</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">3</span></td>
+            <td data-part="cell" data-range-start data-selected>
+              <span data-part="day" aria-selected="true" tabindex="-1">4</span>
+            </td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">5</span></td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">6</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">7</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">8</span></td>
+            <td data-part="cell" data-in-range data-today>
+              <span data-part="day" data-today tabindex="0">9</span>
+            </td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">10</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">11</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">12</span></td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">13</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">14</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">15</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">16</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">17</span></td>
+            <td data-part="cell" data-in-range><span data-part="day" tabindex="-1">18</span></td>
+            <td data-part="cell" data-range-end data-selected>
+              <span data-part="day" aria-selected="true" tabindex="-1">19</span>
+            </td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell"><span data-part="day" tabindex="-1">20</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">21</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">22</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">23</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">24</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">25</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">26</span></td>
+          </tr>
+          <tr data-part="week">
+            <td data-part="cell"><span data-part="day" tabindex="-1">27</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">28</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">29</span></td>
+            <td data-part="cell"><span data-part="day" tabindex="-1">30</span></td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">1</span>
+            </td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">2</span>
+            </td>
+            <td data-part="cell" data-outside-month>
+              <span data-part="day" tabindex="-1">3</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <section data-scene="unavailable">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">

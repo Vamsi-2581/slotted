@@ -134,6 +134,7 @@ export function Calendar({
 
   const anchor =
     defaultFocusedDate ??
+    focusedDate ??
     (defaultValue !== undefined && defaultValue !== null && !Array.isArray(defaultValue)
       ? 'start' in defaultValue
         ? (defaultValue.start ?? plainDate(2026, 1, 1))
@@ -147,6 +148,35 @@ export function Calendar({
 
   const [ownView, setOwnView] = useState<CalendarView>(defaultView ?? 'day');
   const currentView = view ?? ownView;
+
+  /**
+   * The first month on screen, which is **not** the month the reader is on.
+   *
+   * Drawing two months from the focused date meant that choosing a day in the
+   * second one scrolled the pair: a reader looking at June and July who chose
+   * 9 June was shown July and August, with half of what they had just chosen
+   * off screen. The page moves only when the reader leaves it — which is what
+   * every surveyed implementation does and what `pageBehavior` is named for.
+   */
+  const [page, setPage] = useState<{ year: number; month: number }>(() => ({
+    year: anchor.year,
+    month: anchor.month,
+  }));
+
+  const pageFor = useCallback(
+    (date: PlainDate, from: { year: number; month: number }) => {
+      const held = from.year * 12 + (from.month - 1);
+      const wanted = date.year * 12 + (date.month - 1);
+      if (wanted >= held && wanted < held + resolvedMonths) return from;
+      /* Outside the span: the page moves to hold the date, and it moves by
+         whole pages so a reader stepping past the edge lands where the arrows
+         would have taken them. */
+      const steps = Math.floor((wanted - held) / resolvedMonths);
+      const start = held + steps * resolvedMonths;
+      return { year: Math.floor(start / 12), month: (start % 12) + 1 };
+    },
+    [resolvedMonths],
+  );
 
   /* The reader's first calendar opens on today rather than on an arbitrary
      month, and only while nobody has said otherwise. */
@@ -186,6 +216,15 @@ export function Calendar({
     },
     [focused, focusedDate, max, min, onFocusedDateChange],
   );
+
+  /**
+   * The page follows the reader, and only when the reader has left it. Written
+   * here rather than inside the request, so a consumer who owns `focusedDate`
+   * and moves it from outside is followed too.
+   */
+  useEffect(() => {
+    setPage((held) => pageFor(focused, held));
+  }, [focused, pageFor]);
 
   const changeView = useCallback(
     (next: CalendarView) => {
@@ -290,8 +329,10 @@ export function Calendar({
     }
   };
 
-  const page = (direction: 1 | -1) => (event: MouseEvent<HTMLButtonElement>) => {
+  const turnPage = (direction: 1 | -1) => (event: MouseEvent<HTMLButtonElement>) => {
     if (currentView === 'day') {
+      /* The reader moves with the page rather than staying behind it, so the
+         cell holding the tab stop is always one they can see. */
       requestFocused(stepMonth(focused, direction * resolvedMonths).date, 'pointer', event);
       return;
     }
@@ -304,11 +345,12 @@ export function Calendar({
     );
   };
 
+  const pageStart = plainDate(page.year, page.month, 1);
   const heading =
     currentView === 'day'
       ? resolvedMonths === 1
-        ? format.monthYear(focused)
-        : `${format.monthYear(focused, 'short')} – ${format.monthYear(stepMonth(focused, resolvedMonths - 1).date, 'short')}`
+        ? format.monthYear(pageStart)
+        : `${format.monthYear(pageStart, 'short')} – ${format.monthYear(stepMonth(pageStart, resolvedMonths - 1).date, 'short')}`
       : currentView === 'month'
         ? String(focused.year)
         : `${String(yearPage(focused.year, YEAR_PAGE)[0] ?? focused.year)} – ${String(yearPage(focused.year, YEAR_PAGE).at(-1) ?? focused.year)}`;
@@ -316,7 +358,7 @@ export function Calendar({
   const grids: ReactNode =
     currentView === 'day' ? (
       <div data-part="grids">
-        {visibleMonths(focused, resolvedMonths).map((month) => (
+        {visibleMonths(page, resolvedMonths).map((month) => (
           <MonthTable
             editable={editable}
             firstDayOfWeek={format.firstDayOfWeek}
@@ -378,7 +420,7 @@ export function Calendar({
           aria-label={resolvedPrevious}
           data-part="previous"
           disabled={!editable}
-          onClick={page(-1)}
+          onClick={turnPage(-1)}
           type="button"
         />
         {/* The heading is a live region: paging with a key changes nothing
@@ -397,7 +439,7 @@ export function Calendar({
           aria-label={resolvedNext}
           data-part="next"
           disabled={!editable}
-          onClick={page(1)}
+          onClick={turnPage(1)}
           type="button"
         />
       </div>

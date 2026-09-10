@@ -18,7 +18,7 @@ const FALLBACK: CalendarDefaults = {
   locale: undefined,
   months: 1,
   nextLabel: CALENDAR_NEXT_LABEL,
-  outsideDays: 'shown',
+  outsideDays: undefined,
   previousLabel: CALENDAR_PREVIOUS_LABEL,
   timeZone: undefined,
   weekNumbers: false,

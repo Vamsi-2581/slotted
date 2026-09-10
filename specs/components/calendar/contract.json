@@ -78,7 +78,7 @@
     "view": ["prop", "defaults", "day"],
     "weekNumbers": ["prop", "defaults", "off"],
     "fixedWeeks": ["prop", "defaults", "off"],
-    "outsideDays": ["prop", "defaults", "shown"],
+    "outsideDays": ["prop", "defaults", "shown with one month, hidden with more"],
     "locale": ["prop", "defaults", "runtime"],
     "timeZone": ["prop", "defaults", "runtime"],
     "firstDayOfWeek": ["prop", "defaults", "locale"],

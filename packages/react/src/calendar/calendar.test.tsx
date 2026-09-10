@@ -170,6 +170,31 @@ describe('what a cell says', () => {
     expect(container.querySelector('[data-part="cell"][data-outside-month]')).toBeInTheDocument();
   });
 
+  /**
+   * September's grid ends with the first days of October and October's begins
+   * with the last days of September, so a pair that draws both writes the same
+   * six dates twice — and a range across the boundary was painted twice on the
+   * reference page.
+   */
+  it('draws no day of a neighbouring month when more than one month is shown', () => {
+    const { container } = render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" months={2} />);
+    const outside = [...container.querySelectorAll('[data-part="cell"][data-outside-month]')];
+    expect(outside.length).toBeGreaterThan(0);
+    for (const cell of outside) {
+      expect(cell.querySelector('[data-part="day"]')).toBeNull();
+    }
+
+    /* Sixty-one days across the two grids, each written once. */
+    expect(container.querySelectorAll('[data-part="day"]')).toHaveLength(61);
+  });
+
+  it('draws them again in a pair when the consumer asks for them', () => {
+    const { container } = render(
+      <Calendar defaultFocusedDate={NINTH} locale="pt-BR" months={2} outsideDays="shown" />,
+    );
+    expect(container.querySelector('[data-part="cell"][data-outside-month]')).toBeInTheDocument();
+  });
+
   it('refuses a date outside the bounds', () => {
     const onValueChange = vi.fn();
     render(

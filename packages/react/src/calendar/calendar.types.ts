@@ -45,7 +45,12 @@ export interface CalendarDefaults {
   locale: string | undefined;
   months: number;
   nextLabel: string;
-  outsideDays: CalendarOutsideDays;
+  /**
+   * Unset is not `shown`: a calendar showing one month draws the days either
+   * side of it, and a calendar showing two would draw the same six days in
+   * both grids. See the resolution in `calendar.tsx`.
+   */
+  outsideDays: CalendarOutsideDays | undefined;
   previousLabel: string;
   /** Which zone answers "what is today". Unset means the runtime's own. */
   timeZone: string | undefined;

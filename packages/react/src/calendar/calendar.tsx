@@ -110,7 +110,18 @@ export function Calendar({
   const resolvedMonths = Math.max(1, months ?? defaults.months);
   const resolvedWeekNumbers = weekNumbers ?? defaults.weekNumbers;
   const resolvedFixedWeeks = fixedWeeks ?? defaults.fixedWeeks;
-  const resolvedOutsideDays = outsideDays ?? defaults.outsideDays;
+  /**
+   * One month draws the days either side of it, because a week that starts on
+   * the 30th of the month before has to say what that cell is. Two months
+   * cannot: September's grid ends with the first three days of October and
+   * October's begins with the last four of September, so a range across the
+   * boundary is painted twice and a reader sees an interval twice as long as
+   * the one chosen. Every surveyed multi-month calendar hides them, and so
+   * does this one — until the consumer says otherwise, on the instance or on
+   * the provider.
+   */
+  const resolvedOutsideDays =
+    outsideDays ?? defaults.outsideDays ?? (resolvedMonths > 1 ? 'hidden' : 'shown');
   const resolvedCalendar = calendar ?? defaults.calendar;
   const resolvedPrevious = previousLabel ?? defaults.previousLabel;
   const resolvedNext = nextLabel ?? defaults.nextLabel;
@@ -541,15 +552,18 @@ function MonthTable({
               const roving = isSameDate(day.date, focused);
 
               return (
+                /* A hidden day is an empty cell and nothing else. It carried
+                   the marks of the date it stood for, so a range across a
+                   month boundary painted a band with no digits under it. */
                 <td
                   data-part="cell"
                   key={`${String(day.date.month)}-${String(day.date.day)}`}
                   {...(outside ? { 'data-outside-month': '' } : {})}
-                  {...(unavailable(day.date) ? { 'data-unavailable': '' } : {})}
-                  {...(chosen ? { 'data-selected': '' } : {})}
-                  {...(run === 'start' ? { 'data-range-start': '' } : {})}
-                  {...(run === 'end' ? { 'data-range-end': '' } : {})}
-                  {...(run === 'inside' ? { 'data-in-range': '' } : {})}
+                  {...(!hidden && unavailable(day.date) ? { 'data-unavailable': '' } : {})}
+                  {...(!hidden && chosen ? { 'data-selected': '' } : {})}
+                  {...(!hidden && run === 'start' ? { 'data-range-start': '' } : {})}
+                  {...(!hidden && run === 'end' ? { 'data-range-end': '' } : {})}
+                  {...(!hidden && run === 'inside' ? { 'data-in-range': '' } : {})}
                 >
                   {hidden ? null : (
                     <span

@@ -231,6 +231,37 @@ describe('what a cell says', () => {
       fixture.nativeElement.querySelector('[data-part="cell"][data-outside-month]'),
     ).not.toBeNull();
   });
+
+  /**
+   * September's grid ends with the first days of October and October's begins
+   * with the last days of September, so a pair that draws both writes the same
+   * six dates twice — and a range across the boundary was painted twice on the
+   * reference page.
+   */
+  it('draws no day of a neighbouring month when more than one month is shown', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [months]="2" [defaultFocusedDate]="ninth"></div>`,
+    );
+    const outside = [
+      ...fixture.nativeElement.querySelectorAll('[data-part="cell"][data-outside-month]'),
+    ] as Element[];
+    expect(outside.length).toBeGreaterThan(0);
+    for (const cell of outside) {
+      expect(cell.querySelector('[data-part="day"]')).toBeNull();
+    }
+
+    /* Sixty-one days across the two grids, each written once. */
+    expect(fixture.nativeElement.querySelectorAll('[data-part="day"]')).toHaveLength(61);
+  });
+
+  it('draws them again in a pair when the consumer asks for them', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [months]="2" outsideDays="shown" [defaultFocusedDate]="ninth"></div>`,
+    );
+    expect(
+      fixture.nativeElement.querySelector('[data-part="cell"][data-outside-month]'),
+    ).not.toBeNull();
+  });
 });
 
 describe('the three selection modes', () => {

@@ -45,7 +45,12 @@ export interface CalendarDefaults {
   locale: string | undefined;
   months: number;
   nextLabel: string;
-  outsideDays: CalendarOutsideDays;
+  /**
+   * Unset is not `shown`: a calendar showing one month draws the days either
+   * side of it, and a calendar showing two would draw the same six days in
+   * both grids. See the resolution in `calendar.ts`.
+   */
+  outsideDays: CalendarOutsideDays | undefined;
   previousLabel: string;
   timeZone: string | undefined;
   weekNumbers: boolean;
@@ -58,7 +63,7 @@ const FALLBACK: CalendarDefaults = {
   locale: undefined,
   months: 1,
   nextLabel: CALENDAR_NEXT_LABEL,
-  outsideDays: 'shown',
+  outsideDays: undefined,
   previousLabel: CALENDAR_PREVIOUS_LABEL,
   timeZone: undefined,
   weekNumbers: false,

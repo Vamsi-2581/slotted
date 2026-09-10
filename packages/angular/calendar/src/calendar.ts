@@ -14,7 +14,7 @@ import {
   visibleMonths,
   yearPage,
 } from '@slotted/core/date';
-import type { CalendarWeek, PlainDate } from '@slotted/core/date';
+import type { CalendarDay, CalendarWeek, PlainDate } from '@slotted/core/date';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 import {
@@ -135,24 +135,36 @@ let sequence = 0;
                       day of week.days;
                       track day.date.year * 400 + day.date.month * 32 + day.date.day
                     ) {
+                      <!-- A hidden day is an empty cell and nothing else. It
+                           carried the marks of the date it stood for, so a
+                           range across a month boundary painted a band with no
+                           digits under it. -->
                       <td
                         data-part="cell"
                         [attr.data-outside-month]="day.outsideMonth ? '' : null"
-                        [attr.data-unavailable]="unavailable(day.date) ? '' : null"
-                        [attr.data-selected]="chosen(day.date) ? '' : null"
-                        [attr.data-range-start]="rangeState(day.date) === 'start' ? '' : null"
-                        [attr.data-range-end]="rangeState(day.date) === 'end' ? '' : null"
-                        [attr.data-in-range]="rangeState(day.date) === 'inside' ? '' : null"
+                        [attr.data-unavailable]="
+                          !drawn(day) ? null : unavailable(day.date) ? '' : null
+                        "
+                        [attr.data-selected]="!drawn(day) ? null : chosen(day.date) ? '' : null"
+                        [attr.data-range-start]="
+                          drawn(day) && rangeState(day.date) === 'start' ? '' : null
+                        "
+                        [attr.data-range-end]="
+                          drawn(day) && rangeState(day.date) === 'end' ? '' : null
+                        "
+                        [attr.data-in-range]="
+                          drawn(day) && rangeState(day.date) === 'inside' ? '' : null
+                        "
                       >
-                        @if (!(day.outsideMonth && resolvedOutsideDays() === 'hidden')) {
+                        @if (drawn(day)) {
                           <span
                             data-part="day"
                             role="button"
                             [attr.data-today]="isToday(day.date) ? '' : null"
                             [attr.aria-selected]="chosen(day.date) ? 'true' : null"
-                            [attr.aria-disabled]="refused(day.date) ? 'true' : null"
+                            [attr.aria-disabled]="refused(day) ? 'true' : null"
                             [tabindex]="tabIndexOf(day.date)"
-                            (click)="select(day.date, 'pointer', $event)"
+                            (click)="!refused(day) && select(day.date, 'pointer', $event)"
                           >
                             {{ day.date.day }}
                           </span>
@@ -302,8 +314,21 @@ export class SlCalendar implements OnInit {
   protected readonly resolvedFixedWeeks = computed(
     () => this.fixedWeeks() ?? this.defaults.fixedWeeks,
   );
+  /**
+   * One month draws the days either side of it, because a week that starts on
+   * the 30th of the month before has to say what that cell is. Two months
+   * cannot: September's grid ends with the first three days of October and
+   * October's begins with the last four of September, so a range across the
+   * boundary is painted twice and a reader sees an interval twice as long as
+   * the one chosen. Every surveyed multi-month calendar hides them, and so
+   * does this one — until the consumer says otherwise, on the instance or on
+   * the provider.
+   */
   protected readonly resolvedOutsideDays = computed(
-    () => this.outsideDays() ?? this.defaults.outsideDays,
+    () =>
+      this.outsideDays() ??
+      this.defaults.outsideDays ??
+      (this.resolvedMonths() > 1 ? 'hidden' : 'shown'),
   );
   protected readonly resolvedCalendar = computed(() => this.calendar() ?? this.defaults.calendar);
   protected readonly resolvedPreviousLabel = computed(
@@ -407,11 +432,18 @@ export class SlCalendar implements OnInit {
   }
 
   /** Unavailable, or an outside day the axis says may not be chosen. */
-  protected refused(date: PlainDate): boolean {
-    if (this.unavailable(date)) return true;
-    const shown = this.shownMonths()[0];
-    const outside = shown !== undefined && (date.year !== shown.year || date.month !== shown.month);
-    return outside && this.resolvedOutsideDays() === 'shown';
+  /** Whether the cell carries a day at all, or stands empty to fill the row. */
+  protected drawn(day: CalendarDay): boolean {
+    return !(day.outsideMonth && this.resolvedOutsideDays() === 'hidden');
+  }
+
+  /**
+   * The grid already knows which month a day belongs to, and asking the first
+   * shown month instead refused every day of the second one in a pair.
+   */
+  protected refused(day: CalendarDay): boolean {
+    if (this.unavailable(day.date)) return true;
+    return day.outsideMonth && this.resolvedOutsideDays() === 'shown';
   }
 
   protected chosen(date: PlainDate): boolean {

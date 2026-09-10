@@ -34,6 +34,7 @@ export default defineConfig({
         list: resolve(import.meta.dirname, 'src/list/index.ts'),
         'list-item': resolve(import.meta.dirname, 'src/list-item/index.ts'),
         listbox: resolve(import.meta.dirname, 'src/listbox/index.ts'),
+        'multi-select': resolve(import.meta.dirname, 'src/multi-select/index.ts'),
         popover: resolve(import.meta.dirname, 'src/popover/index.ts'),
         prose: resolve(import.meta.dirname, 'src/prose/index.ts'),
         select: resolve(import.meta.dirname, 'src/select/index.ts'),

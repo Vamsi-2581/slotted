@@ -35,6 +35,7 @@ export * from './listbox';
 export * from './loading-overlay';
 export * from './menu';
 export * from './menubar';
+export * from './multi-select';
 export * from './number-field';
 export * from './pagination';
 export * from './popover';

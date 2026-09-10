@@ -481,9 +481,10 @@
   and filters at once, a column that only filters, an actions column pinned to
   the trailing edge, and the identifier pinned to the leading one.
 
-  The filter trigger and the row menu are the consumer's own controls — `button`
-  with its own DOM — standing in the slot this family lays out. What the filter
-  holds is the consumer's query; `filter-bar` owns the rules in wave 8.
+  The filter trigger is the family's own part standing in that slot; the row menu
+  beside it is the consumer's, which is what the slot is for. `data-filtered` is
+  written on the trigger and on the header that holds it, so a column filtered
+  from anywhere on the screen still reads as filtered.
 -->
 <section data-scene="listing">
   <div
@@ -509,7 +510,7 @@
             <th data-part="column-header" scope="col">
               <button data-part="sort" type="button">Client</button>
               <span data-part="column-actions">
-                <button type="button" aria-label="Filter by client">
+                <button data-part="filter" type="button" aria-label="Filter Client">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -524,10 +525,15 @@
                 </button>
               </span>
             </th>
-            <th data-part="column-header" scope="col">
+            <th data-part="column-header" scope="col" data-filtered>
               Status
               <span data-part="column-actions">
-                <button type="button" aria-label="Filter by status">
+                <button
+                  data-part="filter"
+                  data-filtered
+                  type="button"
+                  aria-label="Filter Status: is any of Paid, Refunded"
+                >
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -821,6 +827,795 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</section>
+
+<!--
+  The filter panel, in the four arrangements the kinds produce. It is drawn in a
+  box of its own rather than hanging from a header, because `popover` places it
+  and the fragment runs no script: what these scenes are about is the panel's own
+  rhythm, not where the engine puts it.
+
+  Two of them are photographed rather than faked:
+
+    shoot.mjs table --focus "[data-scene='filter-set'] [data-part='filter-search'] input"
+    shoot.mjs table --focus "[data-scene='filter-conditions'] [data-part='filter-operator'] button"
+
+  Every control inside the panel belongs to another family and carries its own
+  `data-ui`: `select` for the operator, `radio-group` for the join, `text-field`,
+  `number-field`, `date-picker` and `checkbox` for the operands, `button` for the
+  two actions. This family holds the place, the draft and the wiring.
+
+  Each layer carries what `packages/core/src/positioner` would have written on
+  it, because the fragment runs no script: a definite inline size, so the
+  panel's own floor resolves against a box that has one, and
+  `--slotted-positioner-available-width` as a percentage rather than the
+  engine's pixels — it resolves against the stage, so one value holds at all
+  three capture widths. Without both, the panel measured 217 pixels against a
+  floor of 272 and the harness reproduced the defect it exists to catch.
+-->
+<section data-scene="filter-set">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Status">
+      <div data-ui="table" data-part="filter-panel" data-kind="set">
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Is any of</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="set">
+            <div data-part="filter-search">
+              <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
+                <input data-part="input" aria-label="Search Status" placeholder="Search" />
+              </div>
+            </div>
+            <div data-part="filter-list">
+              <div data-part="filter-option" data-covering>
+                <span
+                  data-ui="checkbox"
+                  data-part="root"
+                  data-size="md"
+                  data-label-placement="end"
+                  data-indeterminate
+                >
+                  <input data-part="control" type="checkbox" id="table-filter-all" />
+                  <span data-part="indicator"></span>
+                  <label data-part="label" for="table-filter-all">Select all</label>
+                </span>
+                <span data-count>5</span>
+              </div>
+              <div data-part="filter-option">
+                <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
+                  <input data-part="control" type="checkbox" id="table-filter-paid" checked />
+                  <span data-part="indicator"></span>
+                  <label data-part="label" for="table-filter-paid">Paid</label>
+                </span>
+                <span data-count>128</span>
+              </div>
+              <div data-part="filter-option">
+                <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
+                  <input data-part="control" type="checkbox" id="table-filter-open" />
+                  <span data-part="indicator"></span>
+                  <label data-part="label" for="table-filter-open">Open</label>
+                </span>
+                <span data-count>34</span>
+              </div>
+              <div data-part="filter-option">
+                <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
+                  <input data-part="control" type="checkbox" id="table-filter-overdue" />
+                  <span data-part="indicator"></span>
+                  <label data-part="label" for="table-filter-overdue">Overdue</label>
+                </span>
+                <span data-count>9</span>
+              </div>
+              <div data-part="filter-option">
+                <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
+                  <input data-part="control" type="checkbox" id="table-filter-refunded" checked />
+                  <span data-part="indicator"></span>
+                  <label data-part="label" for="table-filter-refunded">Refunded</label>
+                </span>
+                <span data-count>2</span>
+              </div>
+              <div data-part="filter-option">
+                <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
+                  <input data-part="control" type="checkbox" id="table-filter-cancelled" />
+                  <span data-part="indicator"></span>
+                  <label data-part="label" for="table-filter-cancelled"
+                    >Cancelled by the client</label
+                  >
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Status">
+      <div data-ui="table" data-part="filter-panel" data-kind="set">
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Is none of</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="set">
+            <div data-part="filter-search">
+              <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
+                <input data-part="input" aria-label="Search Status" value="zz" />
+              </div>
+            </div>
+            <p data-part="filter-empty">No values match</p>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+            disabled
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
+  Two conditions and the join between them. The second appears once the first is
+  active, so a panel that shows one is the ordinary case and this is what the
+  reader gets after typing.
+-->
+<section data-scene="filter-conditions">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Status">
+      <div data-ui="table" data-part="filter-panel" data-kind="text">
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Contains</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="text">
+            <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
+              <input data-part="input" aria-label="Value" value="ana" />
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-join">
+          <span data-label>Match</span>
+          <div
+            data-ui="radio-group"
+            data-part="root"
+            data-size="sm"
+            data-orientation="horizontal"
+            data-label-placement="end"
+            role="radiogroup"
+            aria-label="Match"
+          >
+            <div data-part="item">
+              <input
+                data-part="control"
+                type="radio"
+                name="table-filter-join"
+                id="table-join-and"
+              />
+              <span data-part="indicator"></span>
+              <label data-part="label" for="table-join-and">And</label>
+            </div>
+            <div data-part="item">
+              <input
+                data-part="control"
+                type="radio"
+                name="table-filter-join"
+                id="table-join-or"
+                checked
+              />
+              <span data-part="indicator"></span>
+              <label data-part="label" for="table-join-or">Or</label>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Begins with</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="text">
+            <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
+              <input data-part="input" aria-label="Value" value="B" />
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
+  The three shapes an operator can give a condition: two operands, one, and none
+  at all. The boolean panel is the fourth kind, and its operand is a pair of
+  radios rather than a field.
+-->
+<section data-scene="filter-shapes">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Status">
+      <div data-ui="table" data-part="filter-panel" data-kind="number">
+        <div data-part="filter-condition" data-operands="2">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Between</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="number">
+            <div
+              data-ui="number-field"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-stepper="stacked"
+            >
+              <input
+                data-part="input"
+                type="text"
+                role="spinbutton"
+                aria-label="From"
+                value="100"
+                aria-valuenow="100"
+              />
+              <span data-part="stepper">
+                <button
+                  data-part="increment"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="Increase"
+                ></button>
+                <button
+                  data-part="decrement"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="Decrease"
+                ></button>
+              </span>
+            </div>
+            <div
+              data-ui="number-field"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-stepper="stacked"
+            >
+              <input
+                data-part="input"
+                type="text"
+                role="spinbutton"
+                aria-label="To"
+                value="2500"
+                aria-valuenow="2500"
+              />
+              <span data-part="stepper">
+                <button
+                  data-part="increment"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="Increase"
+                ></button>
+                <button
+                  data-part="decrement"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="Decrease"
+                ></button>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Status">
+      <div data-ui="table" data-part="filter-panel" data-kind="date">
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Before</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="date">
+            <div data-ui="date-picker" data-part="root" data-size="sm">
+              <div data-part="control">
+                <div data-ui="date-field" data-part="root" data-size="sm" data-variant="outline">
+                  <div data-part="segments" role="group" aria-label="Value, 10 September 2026">
+                    <div
+                      data-part="segment"
+                      data-field="day"
+                      role="spinbutton"
+                      tabindex="0"
+                      aria-label="day"
+                      aria-valuenow="10"
+                      aria-valuemin="1"
+                      aria-valuemax="30"
+                      aria-valuetext="10"
+                    >
+                      10
+                    </div>
+                    <span data-part="separator">/</span>
+                    <div
+                      data-part="segment"
+                      data-field="month"
+                      role="spinbutton"
+                      tabindex="0"
+                      aria-label="month"
+                      aria-valuenow="9"
+                      aria-valuemin="1"
+                      aria-valuemax="12"
+                      aria-valuetext="9"
+                    >
+                      09
+                    </div>
+                    <span data-part="separator">/</span>
+                    <div
+                      data-part="segment"
+                      data-field="year"
+                      role="spinbutton"
+                      tabindex="0"
+                      aria-label="year"
+                      aria-valuenow="2026"
+                      aria-valuemin="1"
+                      aria-valuemax="9999"
+                      aria-valuetext="2026"
+                    >
+                      2026
+                    </div>
+                  </div>
+                  <span data-part="end"
+                    ><button
+                      data-part="trigger"
+                      type="button"
+                      aria-haspopup="dialog"
+                      aria-label="Change date, 10 September 2026"
+                    ></button
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Status">
+      <div data-ui="table" data-part="filter-panel" data-kind="text">
+        <div data-part="filter-condition" data-operands="0">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Is not empty</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Status">
+      <div data-ui="table" data-part="filter-panel" data-kind="boolean">
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Is</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="boolean">
+            <div
+              data-ui="radio-group"
+              data-part="root"
+              data-size="sm"
+              data-orientation="horizontal"
+              data-label-placement="end"
+              role="radiogroup"
+              aria-label="Value"
+            >
+              <div data-part="item">
+                <input
+                  data-part="control"
+                  type="radio"
+                  name="table-filter-paid-value"
+                  id="table-paid-true"
+                  checked
+                />
+                <span data-part="indicator"></span>
+                <label data-part="label" for="table-paid-true">Yes</label>
+              </div>
+              <div data-part="item">
+                <input
+                  data-part="control"
+                  type="radio"
+                  name="table-filter-paid-value"
+                  id="table-paid-false"
+                />
+                <span data-part="indicator"></span>
+                <label data-part="label" for="table-paid-false">No</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </section>

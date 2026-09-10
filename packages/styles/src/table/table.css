@@ -659,9 +659,17 @@
    * measuring it would mean reading the layout during render.
    */
   [data-ui='table'] [data-part='column-header']:has(> [data-part='column-actions']) {
+    /**
+     * The room is what the slot actually occupies plus one gap: the slot stands
+     * `--_pad-inline` in from the cell's edge and its control is one target
+     * wide, so a reservation of the target alone is five pixels short of where
+     * the control starts. Read on a Status column whose name is nearly as wide
+     * as its values, the funnel sat three pixels from the last letter — the two
+     * numbers were describing different things and only the wide columns hid it.
+     */
     --_actions-room: var(
       --slotted-table-column-actions-size,
-      calc(var(--slotted-target-min, 24px) + var(--_gap))
+      calc(var(--_pad-inline) + var(--slotted-target-min, 24px) + var(--_gap))
     );
 
     padding-inline-end: var(--_actions-room);
@@ -873,6 +881,20 @@
    * where a closed disclosure points the other way.
    */
   [data-ui='table'] [data-part='expander'],
+  /**
+   * The element a binding wraps its trigger in is not a box.
+   *
+   * React renders the trigger straight into the slot; Angular reaches its
+   * templates through elements, so the filter is a `span` holding a `span`
+   * holding the button. Left alone, the flex item is the outer wrapper and the
+   * geometry below lands on a button that is no longer the thing being laid
+   * out. `display: contents` removes both wrappers from layout and leaves the
+   * button as the slot's own child, which is the box tree React already has.
+   */
+  [data-ui='table'] [data-part='column-actions'] *:has([data-part='filter']) {
+    display: contents;
+  }
+
   [data-ui='table'] [data-part='column-actions'] > button,
   [data-ui='table'] button[data-part='column-actions'],
   [data-ui='table'] [data-part='filter'] {
@@ -969,8 +991,38 @@
    * portalled to the end of the document. So it carries the family's identity
    * on itself rather than reading it from an ancestor: a rule that reached for
    * `[data-ui='table']` above would style the panel in one of the two.
+   *
+   * And it declares the values it uses rather than reading them from the root,
+   * for the same reason. Every `--_` above is declared on `[data-part='root']`;
+   * portalled to the end of the document the panel is not inside it, and a
+   * custom property that resolves to nothing takes its whole declaration with
+   * it — `gap: var(--_gap)` became no gap at all, silently, in the one
+   * arrangement `popover` uses by default. The eight below are the panel's own,
+   * from the same theme tokens the root reads.
    */
   [data-ui='table'][data-part='filter-panel'] {
+    --_gap: var(--slotted-table-gap, var(--slotted-control-gap-md, 8px));
+    --_font-size: var(--slotted-table-font-size, var(--slotted-control-font-size-md, 13px));
+    --_line: calc(var(--_font-size) * var(--slotted-line-height-md, 1.5));
+    --_pad-block: var(--slotted-space-2, 4px);
+    --_text: var(--slotted-table-color, var(--slotted-text, CanvasText));
+    --_muted: var(--slotted-table-color-muted, var(--slotted-text-muted, GrayText));
+    --_rule: var(--slotted-table-border-color, var(--slotted-border-subtle, ButtonBorder));
+    --_rule-width: var(--slotted-table-border-width, var(--slotted-border-width-thin, 1px));
+    --_hover: var(
+      --slotted-table-row-surface-hover,
+      var(--slotted-tone-secondary-subtle-hover, ButtonFace)
+    );
+
+    /**
+     * The inset counts inside the width, and that is not a preference.
+     * `min-inline-size` beats `max-inline-size`, and under the default
+     * `content-box` both resolve against the content: `min(15rem, 100%)` gave
+     * the panel the whole of the layer's width and then added twenty-four
+     * pixels of padding to it, so a panel measured 229 pixels inside a
+     * 205-pixel surface — the audit's number, on the first scene it read.
+     */
+    box-sizing: border-box;
     display: grid;
     gap: var(--_gap);
     /* The panel is a surface of its own, so it states its type rather than
@@ -978,20 +1030,95 @@
        header is set in semibold: every value in the list came out bold, which
        reads as a set of headings rather than a set of values. */
     color: var(--_text);
+    font-size: var(--_font-size);
     font-weight: var(--slotted-font-weight-regular, 400);
+    line-height: var(--slotted-line-height-md, 1.5);
     /* The panel brings its own inset. `popover` puts the inset on its body and
        its footer, and this family draws neither: the whole surface is one part
-       of its own, which is what keeps the search, the values and the two
+       of its own, which is what keeps the condition, the values and the two
        actions on one rhythm. */
     padding: var(--slotted-space-5, 12px);
-    /* Wide enough for a value and its count, and no wider: a filter panel that
-       matches the column would be a different width per column. */
-    inline-size: 15rem;
+    /**
+     * A floor rather than a fixed width. A set filter needs room for a value and
+     * its count; a typed one needs room for an operator name, and "Does not
+     * contain" and "Ist nicht leer" are wider than the panel a checkbox list
+     * fits in. The chooser truncates its own button, so the floor holds the
+     * common case and a wider panel is the consumer's to ask for.
+     *
+     * The floor gives way to the room there is, and the room is the positioner's
+     * own number rather than a percentage. Two readings got this wrong before
+     * it was measured: a bare `15rem` won against `max-inline-size: 100%` — a
+     * minimum always does — and stood eight pixels outside the layer at a
+     * 240-pixel viewport; `min(15rem, 100%)` then resolved its percentage
+     * against a containing block that is itself shrink-to-fit, and the panel
+     * came out at 217 pixels, twenty-three under the floor it was supposed to
+     * hold. `--slotted-positioner-available-width` is the space the engine
+     * measured, which is what "the room there is" actually means.
+     *
+     * Seventeen rem rather than fifteen, and the number is measured too: the
+     * widest operator name is 146 pixels of text, the chooser adds its own
+     * inset and chevron, and a range wants two seven-rem fields on one row.
+     * Fifteen left 193 pixels of content and both a squeezed chooser and a
+     * stacked range; seventeen leaves 248 and neither.
+     */
+    min-inline-size: min(17rem, var(--slotted-positioner-available-width, 100%));
     max-inline-size: 100%;
   }
 
+  /**
+   * One condition: the operator above the operands it takes. They are stacked
+   * rather than set on a row, because an operator name is the widest thing in
+   * the panel and a row would give the value what was left of 15rem.
+   */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-condition'] {
+    display: grid;
+    gap: calc(var(--_gap) / 2);
+  }
+
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operator'],
   [data-ui='table'][data-part='filter-panel'] [data-part='filter-search'] {
     display: block;
+  }
+
+  /**
+   * The operands, and the only place in the family where the number of controls
+   * is not fixed: none for `is empty`, one for a comparison, two for a range.
+   *
+   * `auto-fit` answers all three without a query and without a second element.
+   * Two fields need fourteen and a half rem between them and the panel's floor
+   * leaves thirteen and a half, so a range stacks at the default width and sits
+   * on one row the moment a consumer gives the panel more — which is the right
+   * way round: two number fields side by side in a 15rem panel are two fields
+   * nobody can read.
+   */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'] {
+    display: grid;
+    gap: calc(var(--_gap) / 2);
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  }
+
+  /* A set's operand is a search and a list, which own their own stacking. */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-kind='set'] {
+    grid-template-columns: 1fr;
+    gap: var(--_gap);
+  }
+
+  /**
+   * The join between two conditions. It is a rule with a word on it: the two
+   * conditions are separate boxes and the reader has to see where the first ends
+   * before being asked how the second joins it.
+   */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-join'] {
+    align-items: center;
+    border-block-start: var(--_rule-width) solid var(--_rule);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--_gap);
+    padding-block-start: var(--_gap);
+  }
+
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-join'] > [data-label] {
+    color: var(--_muted);
   }
 
   /**

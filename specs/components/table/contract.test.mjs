@@ -22,7 +22,7 @@ test('declares one member, because every part reads one table', () => {
   assert.deepEqual(Object.keys(contract.members), ['table']);
 });
 
-test('names the twenty-six parts a table is made of', () => {
+test('names the thirty parts a table is made of', () => {
   assert.deepEqual(table.parts, [
     'root',
     'scroll',
@@ -39,6 +39,10 @@ test('names the twenty-six parts a table is made of', () => {
     'column-actions',
     'filter',
     'filter-panel',
+    'filter-condition',
+    'filter-operator',
+    'filter-operand',
+    'filter-join',
     'filter-search',
     'filter-list',
     'filter-option',
@@ -57,9 +61,9 @@ test('names the twenty-six parts a table is made of', () => {
  * A listing screen puts a filter or a column menu in the header, which Ant,
  * PatternFly and Carbon all do. The slot is the family's because the control
  * has to sit inside a cell the family lays out — the sort control filled the
- * header and left no room for a second target. What the filter holds is not:
- * a typed rule set is `filter-bar`'s, and a table that owned one would own the
- * query.
+ * header and left no room for a second target. What the filter holds is the
+ * descriptor and nothing else: the vocabulary is the engine's and the query is
+ * the consumer's.
  */
 test('gives a column a place for its own controls and none of their state', () => {
   assert.ok(table.parts.includes('column-actions'));
@@ -67,20 +71,24 @@ test('gives a column a place for its own controls and none of their state', () =
   assert.match(contract.columnControls.state, /^none\b/);
   assert.match(contract.columnControls.layout, /never overlap/);
   assert.match(contract.columnControls.control, /not taken from button/);
-  assert.equal(contract.declined.typedFilterRules.deferTo, 'filter-bar');
+  assert.equal(contract.columnControls.state.includes('filter-bar'), false);
 });
 
 /**
  * The first version of this family shipped the slot and left the panel to the
- * consumer. What a consumer writes in an afternoon is a checkbox list with no
- * draft, no search, no covering checkbox and no announcement — so the family
- * ships the panel and still applies nothing: the set is reported and the
- * consumer's own query keeps or drops the rows.
+ * consumer. The second shipped a list of checkboxes and no typed condition,
+ * which is the defect this contract records as fixed: four of the six surveyed
+ * implementations ship an operator per column type, and the vocabulary belongs
+ * to the engine three families read rather than to any one of them.
  */
 test('ships the filter itself, and still leaves the query to the consumer', () => {
   for (const part of [
     'filter',
     'filter-panel',
+    'filter-condition',
+    'filter-operator',
+    'filter-operand',
+    'filter-join',
     'filter-search',
     'filter-option',
     'filter-actions',
@@ -93,6 +101,89 @@ test('ships the filter itself, and still leaves the query to the consumer', () =
   assert.match(contract.filter.search, /searchThreshold/);
   assert.match(contract.filter.marks, /data-filtered/);
   assert.equal(contract.stateModel.filter.request, 'onValueChange');
+});
+
+/**
+ * Five kinds, one shape. The operator vocabulary is `@slotted/core/filter`'s
+ * because `data-grid` and `filter-bar` hold the same descriptor later, and a
+ * word invented per family would be three families disagreeing about one
+ * object — the argument that put `sort` in the shared schema.
+ */
+test('names five kinds, their operators and the component each one ships as', () => {
+  assert.equal(contract.filter.engine, '@slotted/core/filter');
+  assert.deepEqual(Object.keys(contract.filter.kinds), [
+    'text',
+    'number',
+    'date',
+    'boolean',
+    'set',
+  ]);
+
+  const expected = {
+    text: [
+      'contains',
+      'notContains',
+      'equals',
+      'notEquals',
+      'startsWith',
+      'endsWith',
+      'empty',
+      'notEmpty',
+    ],
+    number: [
+      'equals',
+      'notEquals',
+      'greaterThan',
+      'greaterThanOrEqual',
+      'lessThan',
+      'lessThanOrEqual',
+      'between',
+      'empty',
+      'notEmpty',
+    ],
+    date: ['is', 'isNot', 'before', 'after', 'between', 'empty', 'notEmpty'],
+    boolean: ['is', 'empty', 'notEmpty'],
+    set: ['anyOf', 'noneOf'],
+  };
+
+  for (const [kind, operators] of Object.entries(expected)) {
+    const declared = contract.filter.kinds[kind];
+    assert.deepEqual(declared.operators, operators, `${kind} operators`);
+    assert.ok(operators.includes(declared.default), `${kind} default is not one of its operators`);
+    assert.match(declared.react, /^Table[A-Z]/, `${kind} names no React component`);
+    assert.match(declared.angular, /^slTable[A-Z]/, `${kind} names no Angular selector`);
+  }
+});
+
+/**
+ * Two operators change the panel's shape rather than its comparison, and both
+ * are shipped by two or more of the surveyed implementations. A panel that grows
+ * or shrinks under a reader who cannot see it says nothing otherwise, so the
+ * change is announced.
+ */
+test('states the two conditions, the join between them and what the shape says', () => {
+  assert.equal(contract.filter.conditions.max, 2);
+  assert.deepEqual(contract.filter.conditions.joins, ['and', 'or']);
+  assert.match(contract.filter.conditions.reveal, /active/);
+  assert.equal(contract.filter.kinds.set.conditions, 1);
+  assert.deepEqual(contract.filter.operands, { none: ['empty', 'notEmpty'], two: ['between'] });
+  assert.match(contract.filter.announces, /operand/);
+  assert.match(contract.filter.emptyCondition, /matches every/);
+});
+
+/**
+ * §18.12 asks for a migration strategy whenever a contract breaks. `value` held
+ * an array of chosen values and now holds a descriptor, which is the shape the
+ * engine evaluates and a query string carries.
+ */
+test('records the break in the filter value and the way a consumer moves', () => {
+  assert.match(contract.filter.value, /descriptor/);
+  assert.match(contract.filter.break.from, /string\[\]/);
+  assert.match(contract.filter.break.to, /SetFilter/);
+  assert.match(contract.filter.break.migration, /setFilter\(/);
+  assert.equal(contract.declined.filterGroups.deferTo, 'filter-bar');
+  assert.equal(contract.declined.quickFilter.deferTo, 'filter-bar');
+  assert.equal('typedFilterRules' in contract.declined, false);
 });
 
 /**
@@ -121,6 +212,10 @@ test('takes the whole structure from the platform and writes no role', () => {
     'column-actions': 'span',
     filter: 'button',
     'filter-panel': 'div',
+    'filter-condition': 'div',
+    'filter-operator': 'div',
+    'filter-operand': 'div',
+    'filter-join': 'div',
     'filter-search': 'div',
     'filter-list': 'div',
     'filter-option': 'div',
@@ -160,9 +255,14 @@ test('owns no key of its own, and says which one it borrows', () => {
   const departures = contract.keyboard.filter((entry) => entry.source === 'departure');
   assert.deepEqual(
     departures.map((entry) => entry.key),
-    ['Shift+Space'],
+    ['Shift+Space', 'Enter'],
   );
-  assert.ok(contract.departures['Shift+Space'].cost.length > 40);
+  for (const entry of departures) {
+    assert.ok(contract.departures[entry.key].cost.length > 40, `${entry.key} states no cost`);
+  }
+  const applies = departures.find((entry) => entry.key === 'Enter');
+  assert.match(applies.where, /operand/);
+  assert.match(applies.effect, /applies/);
 });
 
 /**
@@ -476,6 +576,25 @@ test('holds the words it says apart from the values it defaults', () => {
   assert.deepEqual(Object.keys(contract.labels).sort(), [
     'collapse',
     'expand',
+    'filter',
+    'filterApply',
+    'filterClear',
+    'filterCleared',
+    'filterConditionAdded',
+    'filterEmpty',
+    'filterFrom',
+    'filterJoin',
+    'filterJoins',
+    'filterMatches',
+    'filterOperandsNone',
+    'filterOperandsOne',
+    'filterOperandsTwo',
+    'filterOperator',
+    'filterOperators',
+    'filterSearch',
+    'filterSelectAll',
+    'filterTo',
+    'filterValue',
     'scroll',
     'selectAll',
     'selectRow',
@@ -484,9 +603,26 @@ test('holds the words it says apart from the values it defaults', () => {
     'sortedDescending',
   ]);
   for (const [key, word] of Object.entries(contract.labels)) {
-    assert.ok(word.length > 0, `${key} says nothing`);
+    /* Two of them are maps: the joins, and the operator names keyed by the
+       engine's own operator. Everything under them is a word like the rest. */
+    const words = typeof word === 'string' ? { [key]: word } : word;
+    for (const [name, said] of Object.entries(words)) {
+      assert.equal(typeof said, 'string', `${key}.${name} is not a word`);
+      assert.ok(said.length > 0, `${key}.${name} says nothing`);
+    }
     assert.ok(!(key in table.defaults), `${key} is a word, not a default`);
   }
+});
+
+/**
+ * The operator names are keyed by the engine's operator, so an application that
+ * translates them once covers every kind — and `filter-bar` reads the same map
+ * for the same operators in wave 8.
+ */
+test('says every operator the five kinds offer, and nothing they do not', () => {
+  const offered = new Set(Object.values(contract.filter.kinds).flatMap((kind) => kind.operators));
+  assert.deepEqual(Object.keys(contract.labels.filterOperators).sort(), [...offered].sort());
+  assert.deepEqual(Object.keys(contract.labels.filterJoins), contract.filter.conditions.joins);
 });
 
 test('lets an application set the whole family once', () => {

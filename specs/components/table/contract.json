@@ -27,6 +27,10 @@
     "column-actions": "span",
     "filter": "button",
     "filter-panel": "div",
+    "filter-condition": "div",
+    "filter-operator": "div",
+    "filter-operand": "div",
+    "filter-join": "div",
     "filter-search": "div",
     "filter-list": "div",
     "filter-option": "div",
@@ -88,29 +92,114 @@
     "holds": "the controls a column carries beside its name: a filter trigger, a column menu, a help hint, a unit switch",
     "layout": "the name sits at the leading edge of the header and every control at the trailing one, so the header row is one line of triggers on the column boundaries — a column that both sorts and filters has two targets that never overlap",
     "control": "drawn by this family, not taken from button: a library button at its smallest step is thirty pixels tall against a line of nineteen and a half, and its ghost hover is lighter than the band it stands on. The slot's button takes the expander's geometry, the header's own darker hover and the family's glyph size; the consumer keeps the behaviour.",
-    "state": "none. The family owns the place and the geometry; what a filter means, what it holds and what it leaves is the consumer's query, and filter-bar in wave 8 owns the typed rules.",
+    "state": "none. The family owns the place and the geometry; a filter that stands in the slot owns its own descriptor, and the vocabulary that descriptor is written in belongs to @slotted/core/filter rather than to the slot.",
     "reason": "Ant, PatternFly and Carbon all put a filter or a menu in the column header, and a listing screen is where every one of them is used. Declining the slot would have sent a consumer past the family for a button that has to sit inside a cell the family lays out: the sort control filled the header, and there was no room left for a second target. Found at the visual gate, on the question a listing screen asks first."
   },
   "filter": {
+    "engine": "@slotted/core/filter",
     "parts": [
       "filter",
       "filter-panel",
+      "filter-condition",
+      "filter-operator",
+      "filter-operand",
+      "filter-join",
       "filter-search",
       "filter-list",
       "filter-option",
       "filter-empty",
       "filter-actions"
     ],
-    "shape": "a trigger in the column-actions slot and a panel it opens: a search field, a checkbox that covers what the search left, the values with their counts, and a footer holding Clear and Apply.",
-    "draft": "The panel edits a draft. Nothing reaches the consumer until Apply, Escape and a press outside restore the set the panel opened with, and Clear empties the draft rather than the value. It is what Ant, AG Grid and Excel each do, and it is the difference between a filter and a list of checkboxes: a reader ticking four values fires one query, not four.",
-    "search": "shown once there are searchThreshold values or more, and it narrows on a fold that ignores case and diacritics. The covering checkbox then covers exactly what the search left, which is the behaviour a reader who searched then pressed it expects.",
-    "counts": "optional, and the consumer's own: how many records carry a value is a fact about the query, not about the column.",
-    "applies": "nothing. The filter reports the set the reader chose and the consumer's own query keeps or drops the rows — the same division sort already records, and the line this family holds against data-grid.",
-    "marks": "data-filtered on the trigger and on the column header that holds it, so a column filtered elsewhere on the screen still reads as filtered, and the trigger states the count in its own accessible name.",
-    "announces": "the count the panel is left with after a search, through the live announcer, because a list that shortens under a reader who cannot see it says nothing otherwise.",
+    "shape": "a trigger in the column-actions slot and a panel it opens: one condition made of an operator chooser and the operands that operator takes, a second condition and the join between them once the first is complete, and a footer holding Clear and Apply.",
+    "kinds": {
+      "text": {
+        "operators": [
+          "contains",
+          "notContains",
+          "equals",
+          "notEquals",
+          "startsWith",
+          "endsWith",
+          "empty",
+          "notEmpty"
+        ],
+        "default": "contains",
+        "operand": "text-field",
+        "react": "TableTextFilter",
+        "angular": "slTableTextFilter"
+      },
+      "number": {
+        "operators": [
+          "equals",
+          "notEquals",
+          "greaterThan",
+          "greaterThanOrEqual",
+          "lessThan",
+          "lessThanOrEqual",
+          "between",
+          "empty",
+          "notEmpty"
+        ],
+        "default": "equals",
+        "operand": "number-field, which parses in the reader's locale rather than through parseFloat",
+        "react": "TableNumberFilter",
+        "angular": "slTableNumberFilter"
+      },
+      "date": {
+        "operators": ["is", "isNot", "before", "after", "between", "empty", "notEmpty"],
+        "default": "is",
+        "operand": "date-picker — the segmented field and the calendar behind it, because a reader who has to type a date they could have pointed at is what a date filter exists to spare them. The descriptor holds the ISO day it produces.",
+        "react": "TableDateFilter",
+        "angular": "slTableDateFilter"
+      },
+      "boolean": {
+        "operators": ["is", "empty", "notEmpty"],
+        "default": "is",
+        "operand": "radio-group of two, because a boolean filter has three answers and the third is not being filtered at all",
+        "react": "TableBooleanFilter",
+        "angular": "slTableBooleanFilter"
+      },
+      "set": {
+        "operators": ["anyOf", "noneOf"],
+        "default": "anyOf",
+        "operand": "the search, the covering checkbox and the values with their counts",
+        "conditions": 1,
+        "conditionsReason": "Two set conditions say nothing new: anyOf A and anyOf B is anyOf (A intersect B), and or is the union. Every pair collapses to one list, which is why AG Grid's own set filter has no conditions either.",
+        "react": "TableSetFilter",
+        "angular": "slTableSetFilter"
+      }
+    },
+    "conditions": {
+      "max": 2,
+      "joins": ["and", "or"],
+      "reveal": "The second condition and the join above it appear once the first is active, which is AG Grid's own behaviour. A button would be one more word to translate before the common case and an empty second row would be noise in every panel that never needs it; the cost is that the panel grows under the reader, which is why the growth is announced.",
+      "control": "radio-group of two. Excel's Custom AutoFilter uses radios for the same pair, and two options are what radios are for.",
+      "beyond": "Nesting, groups and presets are filter-bar's. Two conditions is where AG Grid's per-column panel stops, and past it a rule set needs an expression tree and an editor for it."
+    },
+    "operands": {
+      "none": ["empty", "notEmpty"],
+      "two": ["between"]
+    },
+    "emptyCondition": "A condition missing an operand its operator needs is inactive, an inactive condition is dropped before the join, and a filter with no active condition matches every value. The third clause is the one that has to be written down: under or, an always-true condition would make the whole filter match everything, so an unfinished condition is not a condition at all.",
+    "value": "the descriptor the engine evaluates: { kind, join, conditions }, where a condition is { operator, value, end }. Every field is JSON, so a query string carries it and a server reads it.",
+    "break": {
+      "from": "value: readonly string[] on TableFilter",
+      "to": "value: SetFilter | null on TableSetFilter",
+      "migration": "setFilter(values) in @slotted/core/filter builds the descriptor from a saved array, and createFilterPredicate(value) replaces the includes() a consumer wrote by hand. The old name is removed rather than deprecated: two names for one control, one of them holding a shape the engine cannot evaluate, is the ambiguity the rebuild exists to remove.",
+      "recorded": "docs/superpowers/specs/2026-09-10-table-filter-design.md section 9, under section 18.12 of docs/component-features.md"
+    },
+    "draft": "The panel edits a draft. Nothing reaches the consumer until Apply, Escape and a press outside restore the descriptor the panel opened with, and Clear empties the draft rather than the value. It is what Ant, AG Grid and Excel each do, and it is the difference between a filter and a form: a reader composing two conditions fires one query, not four.",
+    "search": "shown once there are searchThreshold values or more, and it narrows through the locale collator @slotted/core/collection already builds for combobox rather than through a fold that strips combining marks. The covering checkbox then covers exactly what the search left, which is what a reader who searched and then pressed it expects.",
+    "counts": "optional, and the consumer's own: how many records carry a value is a fact about the query, not about the column. None of the six surveyed implementations shows it.",
+    "applies": "nothing. The filter reports the descriptor and the consumer's own query keeps or drops the rows — the same division sort already records, and the line this family holds against data-grid. What the family does ship is the predicate: createFilterPredicate is pure, and applying it to a client-side listing is one call.",
+    "marks": "data-filtered on the trigger and on the column header that holds it, so a column filtered elsewhere on the screen still reads as filtered, and the trigger states what is applied in its own accessible name — 'Filter Status: contains ana', which is the form Excel's own tooltip on a filtered header takes.",
+    "announces": "the count the set list is left with after a search; the operator and the number of operand fields whenever that number changes; the second condition when it appears; the readable summary on Apply; and the removal on Clear. Each exists because a panel that changes shape under a reader who cannot see it says nothing otherwise.",
+    "summary": "describeFilter in the engine composes the operator names and operands the family gives it into one sentence — 'contains ana or starts with b'. Section 12 asks a filter builder for a readable text expression, and writing it in the engine means filter-bar's chips and this family's announcement say the same sentence.",
+    "serialization": "serializeFilter and parseFilter round-trip a filter through a query string, and toFilterParams and fromFilterParams do it for a whole listing. Parsing is total: an unknown kind, an unknown operator or a malformed operand gives null, so a bookmark written by an older version of an application degrades to no filter rather than to an error on first paint. None of the six surveyed implementations ships one.",
     "empty": "a word when the search matches nothing, so the panel is never a blank box.",
-    "composition": "popover holds the surface, checkbox holds every square, text-field holds the search and button holds the two actions. This family holds the place, the draft and the wiring.",
-    "reason": "A listing screen filters, and every surveyed implementation that ships a table for one ships this: Ant renders the value list with Reset and OK, AG Grid the set filter with a search and select-all, PatternFly and Carbon put the control in the header. The first version of this family shipped the slot and left the panel to the consumer, and what a consumer writes in an afternoon is a checkbox list with no draft, no search, no covering checkbox and no announcement. The place was not the hard part."
+    "composition": "popover holds the surface, select holds the operator chooser, radio-group holds the join, text-field, number-field, date-picker and checkbox hold the operands, and button holds the two actions. This family holds the place, the draft, the announcements and the wiring; the engine holds the vocabulary.",
+    "replaceable": "the operand area, and only it. A column whose values need a control the library does not have — a currency, a duration, a tag picker — takes a render prop in React and a projected template in Angular, and keeps the draft, the operator chooser, the join, the actions and the announcements. It is why Ant has filterDropdown and AG Grid a custom filter component.",
+    "reason": "Four of the six surveyed implementations ship an operator per column type, two conditions and a join: AG Grid, MUI X, PrimeReact and Excel. The version of this family that shipped a checkbox list and nothing else was a set filter calling itself a filter. The vocabulary is the engine's rather than this family's because data-grid and filter-bar hold the same descriptor in wave 8."
   },
   "selection": {
     "module": "packages/core/src/collection",
@@ -250,6 +339,13 @@
       "effect": "scrolls the region to its end",
       "focus": "stays on the region",
       "source": "platform"
+    },
+    {
+      "key": "Enter",
+      "where": "in a filter operand",
+      "effect": "applies the draft and closes the panel, which is what a reader who has just typed a value expects and what AG Grid does",
+      "focus": "returns to the filter trigger, which popover restores it to",
+      "source": "departure"
     }
   ],
   "keyboardReason": "The pattern defines no keyboard interaction, and that is the finding rather than an omission: a table is not a composite widget, so each control inside it is its own tab stop and every key above is the platform's. The one departure is the range gesture, which belongs to the checkbox the reader is already on.",
@@ -257,6 +353,10 @@
     "Shift+Space": {
       "reason": "A multi-row selection with no range is one press per row, which is what makes a reader select forty rows one at a time. Shift while pressing the checkbox — by pointer or with Space — is the gesture a file list, a mail client and React Aria's own table all use.",
       "cost": "Shift+Space is the browser's own page-up in a scrolling region, so a reader whose focus is on a checkbox loses that shortcut for as long as it is. The scroll region keeps PageUp, which is the same movement under a key nothing else claims."
+    },
+    "Enter": {
+      "reason": "A reader who has typed a value into a one-field form expects Enter to submit it, and every surveyed panel that has an Apply button accepts the key as well. Without it the reader types, then reaches for the pointer or tabs past the join and the second condition to find the button.",
+      "cost": "Enter inside the panel no longer reaches whatever a consumer put in a replaced operand area, so a projected control that wants the key handles it and stops the event; the family composes rather than replaces, and applies only when nothing else defaulted it."
     }
   },
   "declined": {
@@ -327,9 +427,18 @@
       "composition": "const rows = useMemo(() => sortRows(data, sort), [data, sort]) — the descriptor applied to the consumer's own array",
       "reason": "Ant's sorter per column and Material's MatTableDataSource both sort data the component owns. This family owns no data: its rows are children, and a family that reordered them would be reordering the consumer's JSX."
     },
-    "typedFilterRules": {
+    "filterGroups": {
       "deferTo": "filter-bar",
-      "reason": "The values of one column are this family’s; a rule set across columns is not. Operators, their serialisation, their validation and the bar that shows the rules together are filter-bar’s in wave 8, and a table that owned them would own the query — which is the line between this family and data-grid. A consumer who needs contains or between today puts their own control in the same panel: the parts are exported."
+      "reason": "Nesting beyond two conditions, AND/OR groups, presets and a rule set across several columns are section 12's Filter Builder. They need an expression tree and an editor for it, and two conditions is where AG Grid's own per-column panel stops. The descriptor they edit is the same one this family reports."
+    },
+    "quickFilter": {
+      "deferTo": "filter-bar",
+      "reason": "One field searching every column belongs to no column, so no column header can hold it. AG Grid and MUI X both ship it above the grid, and it is a text condition evaluated against every column's value — the same engine, a different place."
+    },
+    "floatingFilter": {
+      "deferTo": "nothing",
+      "composition": "a filter-bar above the table, reading and writing the same descriptor",
+      "reason": "AG Grid's floating filter row is a second permanently visible presentation of the same condition, and it costs a row of the table's own geometry. A consumer who wants filters always on screen puts them above the table, where they stand on the page's own ground."
     }
   },
   "literals": {},
@@ -341,9 +450,51 @@
     "sortedAscending": "sorted ascending",
     "sortedDescending": "sorted descending",
     "sortCleared": "sorting removed",
-    "scroll": "Table, scrollable"
+    "scroll": "Table, scrollable",
+    "filter": "Filter",
+    "filterSearch": "Search",
+    "filterMatches": "matches",
+    "filterSelectAll": "Select all",
+    "filterEmpty": "No values match",
+    "filterClear": "Clear",
+    "filterApply": "Apply",
+    "filterCleared": "filter removed",
+    "filterOperator": "Condition",
+    "filterValue": "Value",
+    "filterFrom": "From",
+    "filterTo": "To",
+    "filterJoin": "Match",
+    "filterConditionAdded": "second condition added",
+    "filterOperandsNone": "no value needed",
+    "filterOperandsOne": "one value",
+    "filterOperandsTwo": "two values",
+    "filterJoins": {
+      "and": "And",
+      "or": "Or"
+    },
+    "filterOperators": {
+      "contains": "Contains",
+      "notContains": "Does not contain",
+      "equals": "Equals",
+      "notEquals": "Does not equal",
+      "startsWith": "Begins with",
+      "endsWith": "Ends with",
+      "greaterThan": "Greater than",
+      "greaterThanOrEqual": "Greater than or equal to",
+      "lessThan": "Less than",
+      "lessThanOrEqual": "Less than or equal to",
+      "between": "Between",
+      "is": "Is",
+      "isNot": "Is not",
+      "before": "Before",
+      "after": "After",
+      "anyOf": "Is any of",
+      "noneOf": "Is none of",
+      "empty": "Is empty",
+      "notEmpty": "Is not empty"
+    }
   },
-  "labelsReason": "The eight words the family says, in one input rather than eight props: an application translates them once, and a family that spread them across the root would make seven of the eight a prop nobody sets. description-list and stepper group their own the same way, and none of them is a declared default — a default is a value a consumer overrides one at a time.",
+  "labelsReason": "Every word the family says, in one input rather than one prop each: an application translates them once. The operator names are a map of their own inside it, keyed by the engine's operator, because nineteen of them flattened beside eight other words would be a labels object nobody can read — and because filter-bar reads the same map for the same operators in wave 8. description-list and stepper group their own words the same way, and none of them is a declared default: a default is a value a consumer overrides one at a time.",
   "axes": {
     "variant": ["plain", "ruled", "framed"],
     "striped": [true, false],
@@ -482,6 +633,10 @@
         "column-actions",
         "filter",
         "filter-panel",
+        "filter-condition",
+        "filter-operator",
+        "filter-operand",
+        "filter-join",
         "filter-search",
         "filter-list",
         "filter-option",
@@ -504,6 +659,8 @@
       "sorting",
       "column-controls",
       "filter",
+      "filter-types",
+      "filter-conditions",
       "selection",
       "expansion",
       "sticky",

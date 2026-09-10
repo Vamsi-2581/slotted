@@ -215,16 +215,22 @@ export const KNOWN_CAPABILITIES = [
    */
   'sort',
   /**
-   * Which values of a column a reader has chosen to keep. It is mutable and a
-   * consumer can own it: a server filters, a query string carries the chosen
-   * set back, and a saved view restores it.
+   * The condition a reader has put on a column: which values to keep, or which
+   * comparison a value has to answer. It is mutable and a consumer can own it: a
+   * server filters, a query string carries the condition back, and a saved view
+   * restores it.
    *
    * It is not `selection`, which is the reader's choice of *records* — a table
    * holds both at once and they mean opposite things, one naming rows to act on
    * and the other naming rows to see. It is not `value`, which is the text a
-   * control holds: the set here is a choice among values the consumer supplied,
-   * not text the reader typed. `table` found the gap; `data-grid`, `filter-bar`
-   * and `pivot-grid` each hold the same value later.
+   * control holds: what is held here is a descriptor over values the consumer
+   * supplied, not text the reader typed.
+   *
+   * `table` found the gap and first held a chosen set alone; the word covers a
+   * typed condition too, because `@slotted/core/filter` gave the five kinds one
+   * descriptor and `data-grid`, `filter-bar` and `pivot-grid` each hold that
+   * same descriptor later. A second capability for "the typed one" would have
+   * been two words for one value.
    */
   'filter',
   /**

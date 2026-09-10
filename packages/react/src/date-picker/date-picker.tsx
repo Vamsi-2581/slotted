@@ -1,7 +1,6 @@
 import '@slotted/styles/date-picker/date-picker.css';
 
 import { createDateFormat, isDateInRange } from '@slotted/core/date';
-import type { PlainDate } from '@slotted/core/date';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -177,8 +176,7 @@ export function DatePicker({
       handle.destroy();
       presence.current = null;
     };
-    /* Created once; the value below keeps it in step. */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    /* Created once; the effect below keeps it in step with the state. */
   }, []);
   useEffect(() => presence.current?.sync(isOpen), [isOpen]);
   useEffect(() => presence.current?.setNode(layerNode), [layerNode]);

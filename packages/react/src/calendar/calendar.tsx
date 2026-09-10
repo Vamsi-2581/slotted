@@ -32,7 +32,6 @@ import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { useCalendarDefaults } from './calendar-defaults';
 import { isSameValue, isSelected, nextValue, rangeStateOf } from './calendar-selection';
 import type {
-  CalendarHandle,
   CalendarProps,
   CalendarRootProps,
   CalendarValue,
@@ -156,8 +155,8 @@ export function Calendar({
     setOwnFocused((previous) =>
       isSameDate(previous, anchor) ? clampDate(today, min, max) : previous,
     );
-    /* Only on the first resolution of today. */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    /* Only on the first resolution of today: the anchor and the bounds are
+       read once, and a later change to either is the consumer's to apply. */
   }, [today]);
 
   const requestValue = useCallback(

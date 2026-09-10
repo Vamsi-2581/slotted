@@ -87,6 +87,29 @@ all four corners, so a run read as three separate marks rather than one. The
 inner corners are square now, with the guard for a one-day range, which is both
 ends at once.
 
+### What the reviewer found afterwards, in the browser
+
+Six more defects, none of which a capture of the harness had shown, because
+four were behaviour and two were in scenes the harness did not have.
+
+| What was reported                                                    | What it was                                                                                                                                |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| A press on the field gave no feedback, and the cursor stayed default | `:focus-visible` never matches a `div` focused by a pointer; the frame and the segment answer `:focus` now                                    |
+| The day lost focus while the day was being typed                     | `withDayHeld` clamped against a month halfway through a run, and `daysInMonth` answers `0` for month `0`                                      |
+| Pressing `1` anywhere in the field left the field                    | A `div[role=spinbutton]` is invisible to every "is the target editable" guard, so Storybook's own `focusNav: 1` fired; both families stop the propagation of every key they consume |
+| Today's dot sat against the digit                                    | No gap between the two; `--slotted-space-1` between them                                                                                      |
+| Two chosen days side by side touched at their rounded corners        | The day filled the cell edge to edge; it recedes by a hairline, and by none inside a run                                                      |
+| The range's ends showed half a border outside the run                | The band was half a cell wide with a border of its own; it is the whole cell now, tinted from the accent's `text` role, with no edge          |
+| Choosing a day in the second month of a pair moved the pair          | The page followed the focused date; it is a value of its own, re-anchored by whole pages only when focus leaves the span                      |
+
+Two more the rendered reference pages showed, and neither test nor capture
+could:
+
+| What the page showed                                              | What it was                                                                                                            |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| A range across a month boundary painted twice in a pair of months | September's grid ends in October and October's begins in September; `outsideDays` resolves to `hidden` above one month now |
+| A white diamond loose below the picker's surface                  | The `arrow` part was absolutely positioned and never given a side; the part is gone, as no surface anchored to a field has one |
+
 ## 5. Tokens
 
 Every value a theme may retune is a token. Three `tokens.json` files, derived

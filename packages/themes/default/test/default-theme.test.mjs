@@ -236,3 +236,66 @@ test('lights the selection halo where every scheme can see it', () => {
     `the halo reads ${reached.map((ratio) => ratio.toFixed(3)).join(', ')} across the schemes`,
   );
 });
+
+/**
+ * The file-kind palette is the second scale in the component layer, and the
+ * whole of its argument is that it is a palette the five tones cannot give. A
+ * palette a family invented is a palette nobody measured, so both questions the
+ * pair raises are measured here: the tile against the page it sits on, and the
+ * mark knocked out of it against the tile.
+ *
+ * Both are non-text elements carrying meaning, so 3:1 is the floor. The scale
+ * clears it by a wide margin on purpose — a tile at the floor is a tile a
+ * reader has to look for.
+ */
+test('keeps every file-kind tile legible against the page and against its own mark', () => {
+  const kinds = contract.tokens
+    .filter((token) => token.name.startsWith('--slotted-upload-kind-'))
+    .map((token) => token.name)
+    .filter((name) => name !== '--slotted-upload-kind-foreground');
+
+  assert.equal(kinds.length, 9, 'the palette changed size without this test noticing');
+
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const foreground = values['--slotted-upload-kind-foreground'];
+    for (const kind of kinds) {
+      const tile = values[kind];
+      assert.ok(tile, `${scheme} ${kind} is missing`);
+      assert.ok(
+        contrast(tile, values['--slotted-surface']) >= 3,
+        `${scheme} ${kind} is ${contrast(tile, values['--slotted-surface']).toFixed(2)}:1 against the surface`,
+      );
+      assert.ok(
+        contrast(tile, foreground) >= 3,
+        `${scheme} ${kind} is ${contrast(tile, foreground).toFixed(2)}:1 against its own mark`,
+      );
+      /*
+       * And against a failed row's ground, because the tile keeps its own
+       * colour there: a refused archive that turned red would stop answering
+       * the question its own message raises.
+       */
+      assert.ok(
+        contrast(tile, values['--slotted-tone-danger-surface']) >= 3,
+        `${scheme} ${kind} is ${contrast(tile, values['--slotted-tone-danger-surface']).toFixed(2)}:1 against a failed row`,
+      );
+    }
+  }
+});
+
+/**
+ * Nine hues, and the reader tells them apart at thirty-two pixels. Two kinds
+ * painted the same colour would be one kind drawn twice, which is what
+ * `document` and `pdf` were before they were split.
+ */
+test('gives every file kind a colour of its own in every scheme', () => {
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const painted = contract.tokens
+      .filter(
+        (token) =>
+          token.name.startsWith('--slotted-upload-kind-') &&
+          token.name !== '--slotted-upload-kind-foreground',
+      )
+      .map((token) => values[token.name]);
+    assert.equal(new Set(painted).size, painted.length, `${scheme} paints two kinds alike`);
+  }
+});

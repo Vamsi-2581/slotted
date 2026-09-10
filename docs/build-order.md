@@ -976,6 +976,19 @@ avaliação em
    implementações pesquisadas faz. Inventário em
    `docs/superpowers/specs/2026-09-09-table-capability-inventory.md`, decisões em
    `docs/superpowers/specs/2026-09-09-table-design.md`.
+   A filtragem por coluna foi refeita a 10 de setembro como base da biblioteca
+   inteira: o vocabulário de operadores, o descritor, o predicado, o codec de
+   query string e o resumo legível vivem em `@slotted/core/filter`, e a família
+   traz cinco componentes tipados por espécie — texto, número, data, booleano e
+   conjunto — com duas condições unidas por E/OU. Quatro partes novas
+   (`filter-condition`, `filter-operator`, `filter-operand`, `filter-join`), a
+   quebra de `value` registada em `filter.break` no contrato, e
+   `declined.typedFilterRules` retirado: o que fica adiado para `filter-bar` é o
+   aninhamento, os presets e a busca global, não o vocabulário. Inventário em
+   `docs/superpowers/specs/2026-09-10-table-filter-capability-inventory.md`,
+   decisões em `docs/superpowers/specs/2026-09-10-table-filter-design.md`,
+   avaliação em
+   `docs/superpowers/specs/2026-09-10-table-filter-self-assessment.md`.
 
 ## Onda 7 — Data, arquivo e o restante do Core
 
@@ -1106,6 +1119,13 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   já separava as duas linhas.
 - `time-range-picker` é o mesmo argumento do outro lado da cadeia: dois
   `time-picker` com o `max` de um ligado ao `min` do outro, atrás de um gatilho.
+- `date-range-picker` dá à espécie `date` do motor de filtragem um operando só
+  para `between`, onde hoje `table` desenha dois `date-picker` lado a lado. O
+  descritor não muda — continua `{ operator: 'between', value, end }` — e o que
+  muda é o controlo dentro de `filter-operand`, que é a parte que a família já
+  deixa substituir. `tags-input` faz o mesmo pelo filtro de conjunto quando a
+  lista de valores é grande demais para caixas de seleção. Ambos são passagens
+  de `/component table` posteriores, uma por família.
   O inventário de `time-picker` adiou-o por escrito — Ant e MUI ambos o
   entregam, e o que os dois entregam é uma composição de um valor que o Core
   passa a ter, não um valor que ele não sabia dizer. Entra na onda 8 ao lado de
@@ -1124,6 +1144,18 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
 | ------------------------------------------------------------------------------------------- | ----------------------------------- | ---- |
 | `visually-hidden`, `divider`, `card`                                                        | refazer                             | 1    |
 | `button`, `link`, `badge`, `tag`, `avatar`, `kbd`, `skeleton`, `alert`                      | refazer                             | 2    |
+- `filter-bar` compõe sobre `@slotted/core/filter` e não inventa vocabulário
+  nenhum. O que lhe pertence, e que `table` recusou por escrito: condições sobre
+  várias colunas ao mesmo tempo, grupos E/OU aninhados para além de duas
+  condições, presets, e um campo único que procura em todas as colunas — que é
+  uma condição de texto avaliada contra o valor de cada coluna. As fichas
+  legíveis saem de `describeFilter`, e os nomes dos operadores saem do mesmo
+  mapa que `table` já traduz.
+- `data-grid` usa o mesmo descritor sem alterações e é a família que o
+  **aplica**: onde `table` reporta e o consumidor filtra, a grelha possui o
+  modelo de dados e chama `createFilterPredicate` ela própria. Herda também as
+  quatro capacidades que `table` adiou pelo papel ARIA: redimensionar coluna,
+  virtualização, ordenação por várias chaves e ativação de linha.
 | `spinner`, `progress-bar`, `loading-bar`                                                    | consolidar em `progress-indicator`  | 2    |
 | `field`, `fieldset`                                                                         | consolidado em `field field-group`  | 3 ✓  |
 | `input`                                                                                     | renomear para `text-field`          | 3    |

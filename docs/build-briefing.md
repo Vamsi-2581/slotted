@@ -214,6 +214,25 @@ other families stand on. Justify it at the gate before writing it.
   change detection — the erasing expression is a constant, so nothing writes
   over it again — and say in a comment which directive erased it.
 
+- **The filter vocabulary is `@slotted/core/filter`, and no family writes its
+  own.** The operators per kind, the descriptor `{ kind, join, conditions }`, the
+  predicate, the query-string codec and the readable summary live there;
+  `table` edits one column's condition in its header, `filter-bar` edits the same
+  descriptor in a bar above the table, and `data-grid` carries it in a query. A
+  family-local vocabulary would be three families disagreeing about one object,
+  which is the argument that put `sort` in the shared contract schema. The module
+  is outside `packages/core/src/index.ts` for two reasons: `collection` already
+  exports a `Filter` type and a `createFilter`, and a family that imports a
+  button should not pull a filter engine.
+
+  Two rules of it bind every consumer. A condition missing an operand its
+  operator needs is **inactive**, an inactive condition is dropped before the
+  join under `and` and `or` alike, and a filter with no active condition matches
+  everything — an unfinished condition is not an always-true condition.
+  `parseFilter` is **total**: an unknown kind, an unknown operator or a
+  malformed operand gives `null`, so a bookmark written by an older version of
+  an application degrades to no filter rather than to an error on first paint.
+
 ## Working beside another session
 
 Another session may be building a different family in this same worktree at the

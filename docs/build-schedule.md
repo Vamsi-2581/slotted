@@ -50,6 +50,12 @@ entregues foram escritas antes da barra de _Demonstrations_ em
 capacidades, e palco do tamanho do que a família é. Uma passagem de revisão
 sobre elas é trabalho a agendar, não um defeito de nenhuma família.
 
+A rodada 12 é a única que volta a uma família entregue. O filtro por coluna do
+`table` está construído sobre `@slotted/core/filter`, e três famílias que ainda
+não existem trazem operandos que o motor ainda não sabe dizer — a cadeia de
+hora, `date-range-picker` e `tags-input`. Está agendada e não é dívida: o que
+está entregue não muda de forma.
+
 ## Rodada 1 — o que falta da onda 4 · 3 sessões
 
 Nenhuma das três depende da outra.

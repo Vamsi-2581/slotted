@@ -4742,6 +4742,34 @@ looked broken in Storybook and in a spec alike. When an Angular attribute is
 present in the DOM and the attribute it should produce is not, clear that cache
 before reading the code again.
 
+## Table's filter — 2026-09-10
+
+Two defects, one lesson each, and both were found by reading the rendered page
+rather than by a test.
+
+A part drawn in a portal is not inside the family's root, and every `--_` the
+family declares there resolves to nothing for it. `gap: var(--_gap)` on the
+filter panel became no gap at all — silently, in the arrangement `popover` uses
+by default, because a custom property that resolves to nothing takes its whole
+declaration with it rather than falling back. A portalled part declares the
+values it uses on itself, from the same theme tokens the root reads.
+
+`min-inline-size` beats `max-inline-size`, and under the default `content-box`
+both resolve against the content: `min-inline-size: min(15rem, 100%)` beside
+`padding: 12px` gave the panel the whole of the layer's width and then added
+twenty-four pixels to it. A part that states a floor states `box-sizing:
+border-box` with it. `tools/harness/audit.mjs` found this one and named the two
+numbers; no offline test could have.
+
+And one about the two bindings rather than the family. React renders a trigger
+straight into the slot it belongs in; Angular reaches its templates through
+elements, so the same trigger arrives wrapped in one element per component in
+the chain. Left alone the flex item is the outer wrapper and every rule written
+for the trigger lands on a box that is no longer the one being laid out —
+`display: contents` on whatever holds the trigger is what makes the two box
+trees the same. Any family whose Angular binding wraps a control the CSS
+positions inherits this.
+
 ## The time chain — 2026-09-10
 
 One defect, and it is not this family's alone.

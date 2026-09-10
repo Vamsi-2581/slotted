@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 85     |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 86     |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
 | `component` | One family adjusting a semantic value for itself.              | 5      |
 
@@ -213,6 +213,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-chevrons-right`  | `chevrons-right`       | stroke 2   |
 | `--slotted-icon-external`        | `arrow-up-right`       | stroke 2   |
 | `--slotted-icon-calendar`        | `calendar`             | stroke 2   |
+| `--slotted-icon-clock`           | `clock`                | stroke 2   |
 | `--slotted-icon-person`          | `user-round`           | fill       |
 | `--slotted-icon-circle`          | `circle`               | stroke 2   |
 | `--slotted-icon-circle-info`     | `info`                 | stroke 2   |
@@ -254,8 +255,16 @@ chevron `select` uses — which says "a list opens here" and is the wrong promis
 what opens is a month, and a reader who has learnt the chevron from every other
 control on the form learns the wrong thing from it. All seven implementations
 surveyed for that family draw a calendar there, and none of them draws a
-chevron. `time-picker` and `date-range-picker` in wave 8 take the same mark and
-a clock beside it.
+chevron. `date-range-picker` in wave 8 takes the same mark.
+
+`--slotted-icon-clock` is the same argument for the other half of the chain, and
+it was added for `time-picker`. What opens behind that trigger is a list, so the
+chevron `select` uses would not be a wrong promise here the way it is on a date
+picker — it would be a _silent_ one: a form holding a name, a date and a time
+would show a calendar on one control and the same chevron on the other two, and
+the mark would have stopped naming anything. All eight implementations surveyed
+for `time-picker` draw a clock. `datetime-picker` in wave 8 draws both marks,
+one per surface, and takes no third glyph.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph

@@ -13,6 +13,7 @@
   "--slotted-icon-chevrons-right": { "icon": "chevrons-right" },
   "--slotted-icon-external": { "icon": "arrow-up-right" },
   "--slotted-icon-calendar": { "icon": "calendar" },
+  "--slotted-icon-clock": { "icon": "clock" },
   "--slotted-icon-person": { "icon": "user-round", "paint": "fill" },
   "--slotted-icon-circle": { "icon": "circle" },
   "--slotted-icon-circle-info": { "icon": "info" },

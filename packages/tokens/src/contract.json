@@ -486,6 +486,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-clock",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-external",
       "layer": "primitive",
       "axis": "base",

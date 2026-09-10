@@ -149,6 +149,54 @@ describe('stepping a segment', () => {
     expect(dateOf(segments)).toEqual(plainDate(2026, 3, 31));
   });
 
+  /**
+   * A month halfway through being typed is not a month. Clamping the day
+   * against the first digit of `03` asked for the length of month zero and got
+   * a nought, so a day the reader had already finished became `00` and then
+   * came back on the next keystroke — a real browser showed it and a jsdom
+   * spec did not.
+   */
+  it('leaves a finished day alone while a month is being typed', () => {
+    let segments = segmentsOf(plainDate(2026, 9, 15));
+
+    segments = typeDigit(segments, 'month', 0, format, REFERENCE).segments;
+    expect(segments.day).toBe(15);
+    expect(segments.month).toBe(0);
+
+    segments = typeDigit(segments, 'month', 3, format, REFERENCE).segments;
+    expect(dateOf(segments)).toEqual(plainDate(2026, 3, 15));
+  });
+
+  it('clamps the day when the typed month turns out to be a short one', () => {
+    let segments = segmentsOf(plainDate(2026, 1, 31));
+
+    segments = typeDigit(segments, 'month', 0, format, REFERENCE).segments;
+    segments = typeDigit(segments, 'month', 2, format, REFERENCE).segments;
+    expect(dateOf(segments)).toEqual(plainDate(2026, 2, 28));
+
+    /* And the day the reader asked for comes back in a month that holds it. */
+    segments = typeDigit(segments, 'month', 0, format, REFERENCE).segments;
+    segments = typeDigit(segments, 'month', 3, format, REFERENCE).segments;
+    expect(dateOf(segments)).toEqual(plainDate(2026, 3, 31));
+  });
+
+  /**
+   * The other end of the same rule. A month cannot leave a run open and be
+   * short — `2` can only be February and ends its run at once — so the case
+   * that reaches `commitTyping` is a year: 29 February typed into a year that
+   * turns out not to be a leap one.
+   */
+  it('clamps the day when a run ends by leaving the field', () => {
+    let segments = segmentsOf(plainDate(2024, 2, 29));
+
+    segments = type(segments, 'year', '202');
+    expect(segments.typing).not.toBe(null);
+    expect(segments.day).toBe(29);
+
+    segments = commitTyping(segments, format, REFERENCE);
+    expect(dateOf(segments)).toEqual(plainDate(202, 2, 28));
+  });
+
   it('forgets the held day once the reader states one', () => {
     let segments = segmentsOf(plainDate(2026, 1, 31));
     segments = stepSegment(segments, 'month', 1, REFERENCE);

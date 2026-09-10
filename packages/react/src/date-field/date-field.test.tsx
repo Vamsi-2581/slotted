@@ -161,8 +161,27 @@ describe('the keyboard the pattern lists', () => {
 
     focusOn('day');
     typeDigits('3');
-    expect(segmentFor('day').textContent).toBe('03');
+    /* One digit typed, so one digit shown: a run is not padded until it ends,
+       because a year on its way to 2026 read `0002` when it was. */
+    expect(segmentFor('day').textContent).toBe('3');
     expect(segmentFor('day')).toHaveFocus();
+
+    /* `30` fits the month the empty field is measured against; `31` would not,
+       and would start a new run — which is the same arithmetic, one day over. */
+    typeDigits('0');
+    expect(segmentFor('day').textContent).toBe('30');
+  });
+
+  it('pads a field once its run has ended', () => {
+    render(<DateField aria-label="Data" locale="pt-BR" />);
+
+    focusOn('day');
+    typeDigits('3');
+    expect(segmentFor('day').textContent).toBe('3');
+
+    /* Leaving the field ends the run, and the column takes its place back. */
+    focusOn('month');
+    expect(segmentFor('day').textContent).toBe('03');
   });
 
   it('takes two digits when the first one leaves room', () => {

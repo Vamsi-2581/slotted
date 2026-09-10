@@ -556,7 +556,7 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     this.onTouchedFn();
     const held = this.segments();
     if (held.typing === null) return;
-    this.commit(commitTyping(held, this.format()), 'blur', undefined);
+    this.commit(commitTyping(held, this.format(), this.reference()), 'blur', undefined);
   }
 
   /* ── What the template reads ─────────────────────────────────────────── */
@@ -582,12 +582,28 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     return this.format().monthNames('long')[raw - 1] ?? String(raw);
   }
 
+  /**
+   * What one field shows.
+   *
+   * A finished value is padded to the field's width, so the three columns hold
+   * their place: `9` and `09` occupy the same box and the separators never step
+   * sideways. A value still being typed is **not** padded — it is the digits
+   * the reader has put in, in the order they put them. Padded, a year on its
+   * way to 2026 read `0002`, then `0020`, then `0202`, which is three numbers
+   * nobody typed.
+   */
   protected textOf(field: DateFieldName): string {
     const held = this.segments();
     const raw = held[field];
     if (raw === null) {
       return this.format().pattern.find((part) => part.type === field)?.value ?? '';
     }
+
+    const typing = held.typing;
+    if (typing !== null && typing.field === field) {
+      return String(raw).padStart(typing.digits, '0');
+    }
+
     const reference = this.reference();
     return this.format().formatField(
       {

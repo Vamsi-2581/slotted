@@ -129,7 +129,13 @@ function withDayHeld(
   if (changed === 'day') return { ...segments, intendedDay: segments.day };
   const wanted = segments.intendedDay ?? segments.day;
   if (wanted === null || segments.day === null) return segments;
-  const length = daysInMonth(segments.year ?? reference.year, segments.month ?? reference.month);
+
+  const month = segments.month ?? reference.month;
+  /* A month outside the year has no length, and clamping against the nought
+     `daysInMonth` would answer with is how a finished day became `00`. */
+  if (month < 1 || month > 12) return segments;
+
+  const length = daysInMonth(segments.year ?? reference.year, month);
   return { ...segments, day: Math.min(wanted, length), intendedDay: wanted };
 }
 
@@ -173,7 +179,17 @@ export function typeDigit(
     typing: advance ? null : { field, digits },
   } as SegmentState;
 
-  return { segments: withDayHeld(typed, field, reference), advance };
+  /**
+   * The held day is applied when the run ends, never inside it.
+   *
+   * A month halfway through being typed is not a month: the first digit of
+   * `03` is `0`, and clamping the day against it asked `daysInMonth` for the
+   * length of month zero. Typing `03` over a day of 15 turned the day into
+   * `00` and then back into `15` — the reader watched a field they had already
+   * finished collapse under them, which is what a real browser showed and a
+   * jsdom spec did not.
+   */
+  return { segments: advance ? withDayHeld(typed, field, reference) : typed, advance };
 }
 
 /**
@@ -181,13 +197,22 @@ export function typeDigit(
  * through the format's own pivot, so `26` becomes 2026 by a rule the contract
  * states rather than by a guess made twice in two bindings.
  */
-export function commitTyping(segments: SegmentState, format: DateFormat): SegmentState {
+export function commitTyping(
+  segments: SegmentState,
+  format: DateFormat,
+  reference?: PlainDate,
+): SegmentState {
   const typing = segments.typing;
   if (typing === null) return segments;
-  if (typing.field !== 'year' || segments.year === null || typing.digits > 2) {
-    return { ...segments, typing: null };
-  }
-  return { ...segments, year: format.resolveYear(segments.year), typing: null };
+
+  const resolved =
+    typing.field === 'year' && segments.year !== null && typing.digits <= 2
+      ? { ...segments, year: format.resolveYear(segments.year), typing: null }
+      : { ...segments, typing: null };
+
+  /* The run has ended, so the held day is applied now — this is the other half
+     of the rule `typeDigit` defers. */
+  return reference === undefined ? resolved : withDayHeld(resolved, typing.field, reference);
 }
 
 /** Empties one segment back to its placeholder. */

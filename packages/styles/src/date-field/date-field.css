@@ -363,15 +363,23 @@
    * So the segment takes the accent solid and its own ink. Under forced
    * colours the accent tone maps to `Highlight` and `HighlightText`, which is
    * the one pair the operating system guarantees legible together.
+   *
+   * Both are `:focus` and not `:focus-visible`, and that is the whole reason a
+   * reader could press this control and see nothing happen. A browser matches
+   * `:focus-visible` on a text input for a pointer press as well as for a Tab —
+   * the caret has to show either way — but it refuses it for a `div` that a
+   * pointer focused, and every part of this control is a `div`. Painted on
+   * `:focus-visible`, a clicked field answered a keystroke and looked exactly
+   * as it had before the press.
    */
-  [data-ui='date-field'][data-part='root']:has([data-part='segment']:focus-visible) {
+  [data-ui='date-field'][data-part='root']:has([data-part='segment']:focus) {
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='date-field'] [data-part='segment']:focus-visible {
+  [data-ui='date-field'] [data-part='segment']:focus {
     background-color: var(
       --slotted-date-field-segment-focus-background,
       var(--slotted-tone-accent-solid)

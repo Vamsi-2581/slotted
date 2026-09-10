@@ -379,7 +379,7 @@ export function DateField({
     setActiveField(undefined);
     const held = read();
     if (held.typing === null) return;
-    commit(commitTyping(held, format), 'blur', undefined);
+    commit(commitTyping(held, format, reference), 'blur', undefined);
   };
 
   /**
@@ -520,6 +520,45 @@ export function DateField({
 }
 
 /**
+ * What one field shows.
+ *
+ * A finished value is padded to the field's width, so the three columns hold
+ * their place: `9` and `09` occupy the same box and the separators never step
+ * sideways. A value still being typed is **not** padded — it is the digits the
+ * reader has put in, in the order they put them. Padded, a year on its way to
+ * 2026 read `0002`, then `0020`, then `0202`, which is three numbers nobody
+ * typed and a reader watching their own year turn into something else.
+ */
+function segmentText({
+  field,
+  format,
+  reference,
+  segments,
+}: {
+  field: DateFieldName;
+  format: ReturnType<typeof createDateFormat>;
+  reference: PlainDate;
+  segments: SegmentState;
+}) {
+  const raw = segments[field];
+  if (raw === null) return format.pattern.find((part) => part.type === field)?.value ?? '';
+
+  const typing = segments.typing;
+  if (typing !== null && typing.field === field) {
+    return String(raw).padStart(typing.digits, '0');
+  }
+
+  return format.formatField(
+    {
+      year: segments.year ?? reference.year,
+      month: segments.month ?? reference.month,
+      day: segments.day ?? reference.day,
+    },
+    field,
+  );
+}
+
+/**
  * One field of the date, as the spin button the APG's example makes it.
  *
  * `aria-valuetext` is what the reader hears instead of the number: a month
@@ -588,16 +627,7 @@ function Segment({
       role="spinbutton"
       tabIndex={disabled ? -1 : tabIndex}
     >
-      {raw === null
-        ? placeholder
-        : format.formatField(
-            {
-              year: segments.year ?? reference.year,
-              month: segments.month ?? reference.month,
-              day: segments.day ?? reference.day,
-            },
-            field,
-          )}
+      {segmentText({ field, format, reference, segments })}
     </div>
   );
 }

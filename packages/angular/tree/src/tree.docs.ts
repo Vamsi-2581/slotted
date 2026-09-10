@@ -740,7 +740,7 @@ export const ANGULAR_TREE_DOCS = {
 </div>`,
       }),
       defineSnippet({
-        id: 'tree-angular-icon-by-state',
+        id: 'tree-icon-by-state',
         language: 'css',
         label: 'Swapping an icon by state, with no input for it',
         source: `[data-ui='tree'] [data-part='icon'] {

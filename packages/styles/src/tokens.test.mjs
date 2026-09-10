@@ -89,6 +89,8 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-toast-stack-offset',
     '--slotted-toast-swipe-x',
     '--slotted-toast-swipe-y',
+    '--slotted-tree-depth',
+    '--slotted-tree-row-offset',
     '--slotted-upload-visible-rows',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
@@ -96,4 +98,6 @@ test('names every runtime prefix once, where a family can find the reason', () =
   assert.equal(isRuntimeProperty('--slotted-toast-play-state'), true);
   /* The family owns theme tokens under the same prefix, and they are not this. */
   assert.equal(isRuntimeProperty('--slotted-toast-gap'), false);
+  assert.equal(isRuntimeProperty('--slotted-tree-depth'), true);
+  assert.equal(isRuntimeProperty('--slotted-tree-indent'), false);
 });

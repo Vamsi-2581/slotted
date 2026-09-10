@@ -772,7 +772,7 @@ export const REACT_TREE_DOCS = {
 </Tree>;`,
       }),
       defineSnippet({
-        id: 'tree-react-icon-by-state',
+        id: 'tree-icon-by-state',
         language: 'css',
         label: 'Swapping an icon by state, with no prop for it',
         source: `[data-ui='tree'] [data-part='icon'] {

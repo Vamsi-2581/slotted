@@ -94,3 +94,46 @@ test('finds the rings it guards', () => {
   );
   assert.ok(rings.length >= 40, `Expected the families' rings, found ${rings.length}`);
 });
+
+/**
+ * A family that draws its ring somewhere other than the element holding focus
+ * has to suppress the ring on the element holding focus.
+ *
+ * The user agent draws one there whether or not the family wants it — Chrome's
+ * is a white line inside a dark one — so a family that moves the ring and
+ * forgets this paints two at once, in two different colours, one of them not
+ * the theme's. `checkbox`, `switch` and `radio-group` each move the ring off
+ * the native control and each suppress it; `tree` moved it off the `treeitem`
+ * and did not, and a focused branch drew the browser's ring around its whole
+ * subtree with the family's inside it around the row.
+ *
+ * `forced-colors` is exempt for the reason it is above: there the user agent
+ * owns every colour and an outline is what survives.
+ */
+test('a family that moves its ring suppresses the one the browser would draw', () => {
+  const offenders = [];
+  for (const { path, css } of stylesheets()) {
+    const flat = withoutForcedColors(stripComments(css)).replace(/\s+/g, ' ');
+    /* A selector whose `:focus-visible` is not on its last compound: the ring
+       lands on a descendant of the focused element rather than on it. */
+    const moved = /([^{}]*?:focus-visible[^{},]*?)\s+([^{},]+?)\s*\{([^{}]*?)\}/g;
+    for (const [, focused, , body] of flat.matchAll(moved)) {
+      if (!/outline\s*:\s*(?!none|0)/.test(body)) continue;
+      /* `:has(> [data-part='control']:focus-visible)` leaves a closing paren on
+         the compound; the element it names is the same one either way. */
+      const holder = (focused.trim().split(' ').pop() ?? '')
+        .replace(':focus-visible', '')
+        .replace(/\)+$/, '');
+      if (!holder.startsWith('[')) continue;
+      const escaped = holder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const suppressed = new RegExp(`${escaped}[^{,]*\\{[^}]*outline: ?none`).test(flat);
+      if (!suppressed)
+        offenders.push(`${path}: ${holder} holds focus and draws no ring of its own`);
+    }
+  }
+  assert.deepEqual(
+    [...new Set(offenders)],
+    [],
+    `A focused element the browser will ring as well:\n  ${offenders.join('\n  ')}`,
+  );
+});

@@ -52,6 +52,27 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-toast-swipe-x',
   '--slotted-toast-swipe-y',
   /**
+   * `tree` — how deep in the hierarchy one node sits. The stylesheet multiplies
+   * it by the indent step to inset the row, and no theme can know it: it is a
+   * fact about the consumer's data, stated per node, in the same category as
+   * the measured values above rather than in the category of a value a theme
+   * retunes. The step itself is `--slotted-tree-indent`, which is a token and
+   * is in the contract.
+   *
+   * It is named on its own rather than by a `--slotted-tree-` prefix, because
+   * the family owns fifteen theme tokens under that prefix and a prefix would
+   * file every one of them as unreachable by a theme.
+   */
+  '--slotted-tree-depth',
+  /**
+   * `tree` — where one row sits on a windowed canvas, in pixels. It is written
+   * only on a row the window does not cover and the family renders anyway: the
+   * active node, and the anchor a range is measured from. The number is the
+   * product of a measured viewport and a scroll position, so no theme can hold
+   * it, and a row without it is a row in flow that does not read it.
+   */
+  '--slotted-tree-row-offset',
+  /**
    * `upload` — how many rows of the file list are shown before the rest is
    * scrolled to. It is `maxRows`, stated per instance, and no theme can hold
    * it: a form that takes one avatar and a page that takes a folder of four

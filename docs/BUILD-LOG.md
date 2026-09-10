@@ -4741,3 +4741,43 @@ And one about the harness rather than the family: `.angular/cache` served a
 looked broken in Storybook and in a spec alike. When an Angular attribute is
 present in the DOM and the attribute it should produce is not, clear that cache
 before reading the code again.
+
+## The time chain — 2026-09-10
+
+One defect, and it is not this family's alone.
+
+A row of segments laid out with `display: flex` takes the paragraph's direction,
+and a clock time is not a paragraph. In the right-to-left capture the field read
+`30:14`: `Intl.DateTimeFormat` hands the parts back hour-first for every locale
+it knows — `ar-EG` writes `٠٢:٣٠ م` with the hour leftmost — and the flex row
+reversed them. The bidirectional algorithm renders a numeric run left to right
+inside a right-to-left paragraph precisely so this does not happen, and a flex
+container is what steps outside it.
+
+So a segmented value declares `direction: ltr` with `unicode-bidi: isolate` on
+the row that holds it, and `:dir(rtl)` puts that row's contents at the reading
+edge — the internal order and the placement are two different questions, and
+only the second one belongs to the document.
+
+`date-field` has the same defect, found while comparing the two captures: its
+Brazilian `dd/mm/aaaa` renders `aaaa/mm/dd` in a right-to-left document, and
+`ar-EG`'s own day-first pattern would render year-first. It is not this
+session's file to edit. `datetime-field` in wave 8 opens both families and takes
+the rule with it.
+
+## The audit measured too early — 2026-09-10
+
+`tools/harness/audit.mjs` waited for the first demonstration stage to exist and
+then measured. A Storybook docs page mounts its blocks one at a time, so a page
+holding twenty-five stages was measured with two of them on screen — and the
+audit exited 0, which reads exactly like a clean page.
+
+It had been reporting on a fraction of every reference page since it was
+written. The first run after the wait was corrected found four real findings on
+pages that had passed minutes earlier.
+
+The wait is now for the stage count to stop growing rather than for the first
+stage to appear, and the rule is `hasSettled`, a pure function with cases in
+`tools/harness/audit.test.mjs` — which is what the file's own comment already
+asked for: a rule that only exists inside a string evaluated in Chrome is a rule
+nobody can put a case to.

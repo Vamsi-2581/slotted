@@ -1006,6 +1006,33 @@ Independentes entre si, exceto a cadeia de data.
   lado de um `PlainTime`, e um instante com fuso não é nenhum deles — a razão
   está em _Decisions already taken_ no briefing. Decisões em
   `docs/superpowers/specs/2026-09-09-date-design.md` §11 e §12.
+
+  O inventário de `time-field` e `time-picker`, sobre oito implementações,
+  acrescentou a este parágrafo o que ele não nomeava e que é entregue na mesma
+  sessão: a expressão relativa e a sua pré-visualização resolvida — a abertura
+  que a onda 7 registou e não tomou —, com a travessia da meia-noite dita em
+  voz alta; os **quatro** ciclos de hora que `Intl` resolve, e não um booleano
+  de doze ou vinte e quatro, porque `ja-JP` escreve a meia-noite como hora zero
+  em `h11`; `granularity`, `step`, `min`, `max`, `isTimeUnavailable` e
+  `unavailableOptions`; `options` para o conjunto de horas que um passo não
+  descreve, incluindo os segundos, com `maxOptions` a guardar a lista; e o
+  estado vazio para quando nenhuma hora está disponível. Inventário em
+  `docs/superpowers/specs/2026-09-10-time-capability-inventory.md`, decisões em
+  `docs/superpowers/specs/2026-09-10-time-design.md`.
+
+  `--slotted-icon-clock` entra na escala de glifos com a razão em
+  `docs/token-foundation.md`, ao lado da que `--slotted-icon-calendar` já
+  carrega. `datetime-picker` desenha as duas marcas, uma por superfície, e não
+  pede uma terceira.
+
+  O painel é **uma lista só**, em qualquer passo: nem colunas por unidade nem
+  cabeçalho por hora. As duas foram desenhadas, lidas e retiradas na porta
+  visual — o campo já escreve cada segundo, e `options` declara qualquer
+  conjunto que um passo não descreve, incluindo segundos. A guarda contra uma
+  lista impossível é `maxOptions` (1440, um dia ao passo de um minuto) e não um
+  piso no passo. Avaliação nas onze dimensões em
+  `docs/superpowers/specs/2026-09-10-time-self-assessment.md`.
+
 - `upload` — consolida `file-upload`, `dropzone` e `file-input` (guia 17)
 - `page page-header section` — a família que o revisor acompanha de perto, e a
   referência é a **Dynamic Page do SAP Fiori**. Não é um cabeçalho com um
@@ -1032,14 +1059,20 @@ Independentes entre si, exceto a cadeia de data.
 
 Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
 `command-palette`, `segmented-control`, `toggle-group`, `scroll-area`,
-`filter-bar`, `data-grid`, `date-range-picker`, `tags-input`, `timeline`,
-`code-block`.
+`filter-bar`, `data-grid`, `date-range-picker`, `time-range-picker`,
+`tags-input`, `timeline`, `code-block`.
 
 - `date-range-picker` são dois campos e o modo `range` que `calendar` já tem,
   atrás de um gatilho. Fica em Extended, e a cadeia de hora não: um intervalo de
   datas é uma composição especializada de um valor que a onda 7 já tem, enquanto
   uma hora é um valor que o Core não sabia dizer. `docs/component-features.md`
   já separava as duas linhas.
+- `time-range-picker` é o mesmo argumento do outro lado da cadeia: dois
+  `time-picker` com o `max` de um ligado ao `min` do outro, atrás de um gatilho.
+  O inventário de `time-picker` adiou-o por escrito — Ant e MUI ambos o
+  entregam, e o que os dois entregam é uma composição de um valor que o Core
+  passa a ter, não um valor que ele não sabia dizer. Entra na onda 8 ao lado de
+  `date-range-picker`, e a lista de Extended acima ganha-o.
 - O revisor pediu, no gate visual da onda 7, que as famílias de data, hora e
   datetime fossem mais inventivas do que o campo pesquisado. As três aberturas
   que a onda 7 encontrou e não tomou estão em `2026-09-09-date-design.md` §12:

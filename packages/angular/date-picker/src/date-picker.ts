@@ -142,7 +142,6 @@ let sequence = 0;
           ></div>
           <ng-content select="[slDatePickerFooter]" />
         </div>
-        <span data-part="arrow" aria-hidden="true"></span>
       </div>
     }`,
   styleUrl: '../../../styles/src/date-picker/date-picker.css',

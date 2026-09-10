@@ -346,7 +346,6 @@ export function DatePicker({
         />
         {footer === undefined ? null : <div data-part="footer">{footer}</div>}
       </div>
-      <span aria-hidden="true" data-part="arrow" />
     </div>
   ) : null;
 

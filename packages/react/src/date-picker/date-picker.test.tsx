@@ -50,7 +50,7 @@ describe('what it is made of', () => {
     const present = [...document.querySelectorAll('[data-ui="date-picker"] [data-part]')].map(
       (element) => (element as HTMLElement).dataset['part'],
     );
-    for (const part of ['control', 'trigger', 'content', 'presets', 'footer', 'arrow']) {
+    for (const part of ['control', 'trigger', 'content', 'presets', 'footer']) {
       expect(present).toContain(part);
     }
   });

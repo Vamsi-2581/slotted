@@ -76,12 +76,6 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose: 'The consumer’s own actions, under whatever the surface is holding.',
   },
-  {
-    part: 'arrow',
-    element: 'span',
-    required: false,
-    purpose: 'The mark that points the surface back at its anchor.',
-  },
 ];
 
 const scenes: ReferenceSceneMeta[] = [

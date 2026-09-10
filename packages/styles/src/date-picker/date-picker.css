@@ -360,16 +360,6 @@
     padding-block-start: var(--slotted-space-4, 0.5rem);
   }
 
-  [data-ui='date-picker'] [data-part='arrow'] {
-    background-color: var(--slotted-date-picker-surface, var(--slotted-surface-raised, Canvas));
-    border: var(--slotted-border-width-thin, 1px) solid
-      var(--slotted-date-picker-content-border-color, var(--slotted-border-subtle, ButtonBorder));
-    block-size: var(--slotted-date-picker-arrow-size, 0.5rem);
-    inline-size: var(--slotted-date-picker-arrow-size, 0.5rem);
-    position: absolute;
-    rotate: 45deg;
-  }
-
   /* ── Narrow, on a finger ──────────────────────────────────────────────
    *
    * §2.7 of `docs/component-features.md` asks for it by name: a popover on the

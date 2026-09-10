@@ -100,7 +100,6 @@ describe('what it is made of', () => {
       'content',
       'presets',
       'footer',
-      'arrow',
     ]) {
       expect(present).toContain(part);
     }

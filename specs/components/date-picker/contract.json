@@ -146,7 +146,7 @@
         "required",
         "open"
       ],
-      "parts": ["root", "control", "trigger", "positioner", "content", "presets", "footer", "arrow"]
+      "parts": ["root", "control", "trigger", "positioner", "content", "presets", "footer"]
     }
   },
   "scenarios": {

@@ -25,7 +25,7 @@ import { DateField } from '../date-field';
 import type { DateFieldHandle } from '../date-field';
 import { useField } from '../field';
 import { useDatePickerDefaults } from './date-picker-defaults';
-import type { DatePickerHandle, DatePickerProps, DatePickerRootProps } from './date-picker.types';
+import type { DatePickerProps, DatePickerRootProps } from './date-picker.types';
 
 /**
  * Below this width, on a finger, the surface is a sheet rather than a popover.

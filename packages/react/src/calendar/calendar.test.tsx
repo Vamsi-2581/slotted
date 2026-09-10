@@ -144,7 +144,7 @@ describe('what a cell says', () => {
 
   it('keeps a refused date reachable and refuses to select it', () => {
     const onValueChange = vi.fn();
-    const { container } = render(
+    render(
       <Calendar
         defaultFocusedDate={NINTH}
         isDateUnavailable={(date) => date.day === 10}

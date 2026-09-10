@@ -51,6 +51,24 @@ export type TableExpandedReason = 'pointer' | 'keyboard' | 'programmatic';
 export interface TableLabels {
   collapse: string;
   expand: string;
+  /** The verb the filter trigger is named with, joined to the column's name. */
+  filter: string;
+  /** The action that commits the draft. */
+  filterApply: string;
+  /** The word after the count in a filtered trigger's name. */
+  filterChosen: string;
+  /** The action that empties the filter. */
+  filterClear: string;
+  /** What is announced when the filter is emptied. */
+  filterCleared: string;
+  /** The word shown when a search matches nothing. */
+  filterEmpty: string;
+  /** The word after the count announced when a search narrows the list. */
+  filterMatches: string;
+  /** The search field's name and its placeholder. */
+  filterSearch: string;
+  /** The covering checkbox, which answers for what the search left. */
+  filterSelectAll: string;
   scroll: string;
   selectAll: string;
   selectRow: string;
@@ -60,6 +78,7 @@ export interface TableLabels {
 }
 
 export interface TableDefaults {
+  cellAlign: TableAlign;
   columns: number;
   labels: TableLabels;
   layout: TableLayout;
@@ -79,6 +98,16 @@ export interface TableDefaults {
 export const TABLE_LABELS: TableLabels = {
   collapse: 'Hide details',
   expand: 'Show details',
+  filter: 'Filter',
+  filterApply: 'Apply',
+  filterChosen: 'chosen',
+  filterCleared: 'filter removed',
+  filterClear: 'Clear',
+  filterEmpty: 'No values match',
+  filterMatches: 'values match',
+  filterSearch: 'Search values',
+  filterSelectAll: 'All',
+
   scroll: 'Table, scrollable',
   selectAll: 'Select all rows',
   selectRow: 'Select row',
@@ -88,6 +117,7 @@ export const TABLE_LABELS: TableLabels = {
 };
 
 const FALLBACK: TableDefaults = {
+  cellAlign: 'center',
   columns: 1,
   labels: TABLE_LABELS,
   layout: 'auto',

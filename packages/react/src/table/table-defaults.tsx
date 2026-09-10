@@ -19,6 +19,16 @@ import type {
 export const DEFAULT_TABLE_LABELS: TableResolvedLabels = {
   collapse: 'Hide details',
   expand: 'Show details',
+  filter: 'Filter',
+  filterApply: 'Apply',
+  filterChosen: 'chosen',
+  filterCleared: 'filter removed',
+  filterClear: 'Clear',
+  filterEmpty: 'No values match',
+  filterMatches: 'values match',
+  filterSearch: 'Search values',
+  filterSelectAll: 'All',
+
   scroll: 'Table, scrollable',
   selectAll: 'Select all rows',
   selectRow: 'Select row',
@@ -59,6 +69,7 @@ export function TableDefaultsProvider({ children, ...defaults }: TableDefaultsPr
   return (
     <TableDefaultsContext.Provider
       value={{
+        cellAlign: defaults.cellAlign ?? inherited.cellAlign,
         columns: defaults.columns ?? inherited.columns,
         labels: resolveLabels(inherited.labels, defaults.labels),
         layout: defaults.layout ?? inherited.layout,

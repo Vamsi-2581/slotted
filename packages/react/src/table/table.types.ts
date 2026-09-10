@@ -1,4 +1,5 @@
 import type { ChangeRequest } from '@slotted/core/state';
+import type { PopoverProps } from '../popover/popover.types';
 import type {
   ComponentPropsWithRef,
   HTMLAttributes,
@@ -82,12 +83,94 @@ export interface TableLabels {
   sortCleared?: string;
   /** The name of the scrolling region, raised only while the table overflows. */
   scroll?: string;
+  /** The verb the filter trigger is named with, joined to the column's name. */
+  filter?: string;
+  /** The word after the count in a filtered trigger's name. */
+  filterChosen?: string;
+  /** The search field's name and its placeholder. */
+  filterSearch?: string;
+  /** The word after the count announced when a search narrows the list. */
+  filterMatches?: string;
+  /** The covering checkbox, which answers for what the search left. */
+  filterSelectAll?: string;
+  /** The word shown when a search matches nothing. */
+  filterEmpty?: string;
+  /** The action that empties the filter. */
+  filterClear?: string;
+  /** The action that commits the draft. */
+  filterApply?: string;
+  /** What is announced when the filter is emptied. */
+  filterCleared?: string;
+}
+
+/** One value a column can be filtered to. */
+export interface TableFilterOption {
+  /** The value the consumer's query matches. It is what the state holds. */
+  value: string;
+  /** What the reader sees, when it is not the value itself. */
+  label?: string | undefined;
+  /**
+   * How many records carry it. Optional and the consumer's own: how many rows a
+   * value has is a fact about the query, not about the column.
+   */
+  count?: number | undefined;
+}
+
+export type TableFilterReason = Extract<
+  ChangeRequest<readonly string[]>['reason'],
+  'pointer' | 'keyboard' | 'clear' | 'programmatic'
+>;
+
+export type TableFilterRequest = ChangeRequest<readonly string[]>;
+
+/**
+ * A column's filter. Every label falls back to the table's own, so an
+ * application translates the panel once rather than per column.
+ */
+export interface TableFilterProps extends Pick<
+  PopoverProps,
+  'align' | 'collisionPadding' | 'mount' | 'portal' | 'side' | 'sideOffset'
+> {
+  /** The action that commits the draft. Defaults to the table's label. */
+  applyLabel?: string | undefined;
+  /** The action that empties the filter. Defaults to the table's label. */
+  clearLabel?: string | undefined;
+  /**
+   * The column's name in the trigger's own name. Read from the column header
+   * around it when it is not stated, and stated when the header's text is not a
+   * name a reader would recognise on its own.
+   */
+  columnLabel?: string | undefined;
+  /** The set an uncontrolled filter starts from, read once. */
+  defaultValue?: readonly string[] | undefined;
+  /** The word shown when the search matches nothing. */
+  emptyLabel?: string | undefined;
+  /** The trigger's whole accessible name, replacing the one built from labels. */
+  label?: string | undefined;
+  onValueChange?: (value: readonly string[], request: TableFilterRequest) => void;
+  /** The values this column can be filtered to, and optionally their counts. */
+  options: readonly TableFilterOption[];
+  /** The search field's name and placeholder. */
+  searchLabel?: string | undefined;
+  /**
+   * Whether the panel carries a search. Unstated, it appears once there are
+   * `searchThreshold` values: a search over four values is a control a reader
+   * has to skip, and a list of forty without one is a scroll.
+   */
+  searchable?: boolean | undefined;
+  /** How many values bring the search with them. Eight unless stated. */
+  searchThreshold?: number | undefined;
+  /** The covering checkbox's label. */
+  selectAllLabel?: string | undefined;
+  /** The set the column is filtered to. Controlled when stated. */
+  value?: readonly string[] | undefined;
 }
 
 export type TableResolvedLabels = Required<TableLabels>;
 
 /** What an application sets once for every table under it. */
 export interface TableDefaults {
+  cellAlign?: TableAlign | undefined;
   columns?: number | undefined;
   labels?: TableLabels | undefined;
   layout?: TableLayout | undefined;
@@ -107,6 +190,7 @@ export interface TableDefaultsProviderProps extends Omit<TableDefaults, 'labels'
 /** What `render` receives for the root, so it can be spread onto any element. */
 export interface TableRootProps extends HTMLAttributes<HTMLElement> {
   children?: ReactNode | undefined;
+  'data-cell-align'?: TableAlign | undefined;
   'data-layout': TableLayout;
   'data-loading'?: '' | undefined;
   'data-part': string;
@@ -126,6 +210,11 @@ export interface TableRootProps extends HTMLAttributes<HTMLElement> {
 }
 
 export interface TableProps extends Omit<ComponentPropsWithRef<'div'>, 'onChange'> {
+  /**
+   * Where every cell's content sits in a row as tall as its tallest cell. A
+   * cell states `blockAlign` to answer differently.
+   */
+  cellAlign?: TableAlign | undefined;
   /**
    * How many columns the table renders. The spanning parts — the detail row,
    * the empty cell, the skeleton rows — need the number, and reading it from
@@ -236,6 +325,12 @@ export interface TableRowProps extends ComponentPropsWithRef<'tr'> {
 /** Every axis a cell answers, shared by the three cell parts. */
 export interface TableCellAxes {
   align?: TableAlign | undefined;
+  /**
+   * Where this cell's content sits in a row as tall as its tallest cell. The
+   * table states it once through `cellAlign`; this overrides it for the one
+   * cell that wants the other answer.
+   */
+  blockAlign?: TableAlign | undefined;
   numeric?: boolean | undefined;
   sticky?: TableSticky | undefined;
   /**

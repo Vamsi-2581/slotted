@@ -24,6 +24,7 @@ import type { TableAlign, TableSticky, TableText } from './table-defaults';
   standalone: true,
   host: {
     '[attr.data-align]': 'align() ?? null',
+    '[attr.data-block-align]': 'blockAlign() ?? null',
     '[attr.data-numeric]': "numeric() ? '' : null",
     '[attr.data-text]': 'text() ?? null',
     '[attr.data-sticky]': 'sticky() ?? null',
@@ -32,6 +33,12 @@ import type { TableAlign, TableSticky, TableText } from './table-defaults';
 })
 export class SlTableCellAxes {
   readonly align = input<TableAlign | undefined>(undefined);
+  /**
+   * Where this cell's content sits in a row as tall as its tallest cell. The
+   * table states it once through `cellAlign`; this overrides it for the one
+   * cell that wants the other answer.
+   */
+  readonly blockAlign = input<TableAlign | undefined>(undefined);
   readonly numeric = input(false, { transform: booleanAttribute });
   readonly text = input<TableText | undefined>(undefined);
   readonly sticky = input<TableSticky | undefined>(undefined);
@@ -157,7 +164,10 @@ export class SlTableRow {
   standalone: true,
   exportAs: 'slTableColumnHeader',
   hostDirectives: [
-    { directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'] },
+    {
+      directive: SlTableCellAxes,
+      inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
+    },
   ],
   host: {
     'data-part': 'column-header',
@@ -188,7 +198,10 @@ export class SlTableColumnHeader {
   standalone: true,
   exportAs: 'slTableRowHeader',
   hostDirectives: [
-    { directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'] },
+    {
+      directive: SlTableCellAxes,
+      inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
+    },
   ],
   host: { 'data-part': 'row-header', '[attr.scope]': "scope() ?? 'row'" },
 })
@@ -201,7 +214,10 @@ export class SlTableRowHeader {
   standalone: true,
   exportAs: 'slTableCell',
   hostDirectives: [
-    { directive: SlTableCellAxes, inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'] },
+    {
+      directive: SlTableCellAxes,
+      inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
+    },
   ],
   host: { 'data-part': 'cell' },
 })
@@ -278,7 +294,7 @@ export class SlTableColumnActions {}
   hostDirectives: [
     {
       directive: SlTableCellAxes,
-      inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'],
+      inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
     },
   ],
   host: { 'data-part': 'selection' },
@@ -331,7 +347,7 @@ export class SlTableSelect {
   hostDirectives: [
     {
       directive: SlTableCellAxes,
-      inputs: ['align', 'numeric', 'text', 'sticky', 'stickyOffset'],
+      inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
     },
   ],
   host: { 'data-part': 'selection', scope: 'col' },

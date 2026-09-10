@@ -34,6 +34,11 @@ import type {
 const TableRowContext = createContext<TableRowContextValue | undefined>(undefined);
 const TableColumnContext = createContext<string | undefined>(undefined);
 
+/** Which column this part is inside, for the parts that name one. */
+export function useTableColumn(): string | undefined {
+  return useContext(TableColumnContext);
+}
+
 /** What the row around this part is, for the parts that belong to one. */
 export function useTableRow(): TableRowContextValue {
   const context = useContext(TableRowContext);
@@ -49,11 +54,12 @@ export function useTableRow(): TableRowContextValue {
  * it is aligned, and a right-aligned label is not a number.
  */
 function cellAttributes(
-  { align, numeric, sticky, stickyOffset, text }: TableCellAxes,
+  { align, blockAlign, numeric, sticky, stickyOffset, text }: TableCellAxes,
   style?: CSSProperties | undefined,
 ) {
   return {
     ...(align === undefined ? {} : { 'data-align': align }),
+    ...(blockAlign === undefined ? {} : { 'data-block-align': blockAlign }),
     ...(numeric === true ? { 'data-numeric': '' } : {}),
     ...(sticky === undefined ? {} : { 'data-sticky': sticky }),
     ...(text === undefined ? {} : { 'data-text': text }),
@@ -160,6 +166,7 @@ export function TableRow({
  */
 export function TableColumnHeader({
   align,
+  blockAlign,
   children,
   column,
   numeric,
@@ -178,7 +185,7 @@ export function TableColumnHeader({
     <TableColumnContext.Provider value={column}>
       <th
         {...nativeProps}
-        {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
+        {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
         {...(sorted ? { 'aria-sort': table.sort?.direction } : {})}
         data-part="column-header"
         ref={ref}
@@ -197,6 +204,7 @@ export function TableColumnHeader({
  */
 export function TableRowHeader({
   align,
+  blockAlign,
   numeric,
   ref,
   scope,
@@ -209,7 +217,7 @@ export function TableRowHeader({
   return (
     <th
       {...nativeProps}
-      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
+      {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="row-header"
       ref={ref}
       scope={scope ?? 'row'}
@@ -219,6 +227,7 @@ export function TableRowHeader({
 
 export function TableCell({
   align,
+  blockAlign,
   numeric,
   ref,
   sticky,
@@ -230,7 +239,7 @@ export function TableCell({
   return (
     <td
       {...nativeProps}
-      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
+      {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="cell"
       ref={ref}
     />
@@ -294,6 +303,7 @@ export function TableColumnActions({ ref, ...props }: TableColumnActionsProps) {
  */
 export function TableSelect({
   align,
+  blockAlign,
   numeric,
   ref,
   sticky,
@@ -310,7 +320,7 @@ export function TableSelect({
   return (
     <td
       {...nativeProps}
-      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
+      {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="selection"
       ref={ref}
     >
@@ -336,6 +346,7 @@ export function TableSelect({
  */
 export function TableSelectAll({
   align,
+  blockAlign,
   numeric,
   ref,
   sticky,
@@ -350,7 +361,7 @@ export function TableSelectAll({
   return (
     <th
       {...nativeProps}
-      {...cellAttributes({ align, numeric, sticky, stickyOffset, text }, style)}
+      {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="selection"
       ref={ref}
       scope="col"

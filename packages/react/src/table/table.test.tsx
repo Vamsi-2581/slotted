@@ -5,10 +5,12 @@ import contract from '../../../../specs/components/table/contract.json';
 import { Table } from './table';
 import { TableContent } from './table-content';
 import { TableDefaultsProvider } from './table-defaults';
+import { TableFilter } from './table-filter';
 import {
   TableBody,
   TableCaption,
   TableCell,
+  TableColumnActions,
   TableColumnHeader,
   TableDetail,
   TableExpander,
@@ -246,6 +248,159 @@ describe('sorting', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Client' }));
     expect(onSortChange).not.toHaveBeenCalled();
+  });
+});
+
+describe('where a cell sits in its row', () => {
+  /**
+   * A row is as tall as its tallest cell, so the axis is a decision rather than
+   * a leftover: the table states it once and the one cell that wants the other
+   * answer overrides it.
+   */
+  it('centres by default, and lets a table and a cell each say otherwise', () => {
+    const { rerender } = render(<Invoices />);
+
+    const root = screen.getByRole('table').closest('[data-ui="table"]');
+    expect(root).toHaveAttribute('data-cell-align', 'center');
+
+    rerender(<Invoices cellAlign="start" />);
+    expect(root).toHaveAttribute('data-cell-align', 'start');
+    expect(screen.getByText('Northwind Trading')).not.toHaveAttribute('data-block-align');
+
+    render(
+      <Table columns={1}>
+        <TableContent>
+          <TableBody>
+            <TableRow value="INV-1042">
+              <TableCell blockAlign="end">Bottom</TableCell>
+            </TableRow>
+          </TableBody>
+        </TableContent>
+      </Table>,
+    );
+    expect(screen.getByText('Bottom')).toHaveAttribute('data-block-align', 'end');
+  });
+});
+
+describe('the column filter', () => {
+  const OPTIONS = [{ count: 2, value: 'Paid' }, { count: 1, value: 'Overdue' }, { value: 'Draft' }];
+
+  function Filtered({ onValueChange }: { onValueChange?: (value: readonly string[]) => void }) {
+    return (
+      <Table columns={1}>
+        <TableContent>
+          <TableHead>
+            <TableRow>
+              <TableColumnHeader column="status">
+                Status
+                <TableColumnActions>
+                  <TableFilter
+                    columnLabel="status"
+                    {...(onValueChange ? { onValueChange } : {})}
+                    options={OPTIONS}
+                  />
+                </TableColumnActions>
+              </TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody />
+        </TableContent>
+      </Table>
+    );
+  }
+
+  /**
+   * The whole point of a filter over a list of checkboxes: a reader ticking
+   * four values fires one query, not four, and a reader who ticked the wrong
+   * one has somewhere to go back to.
+   */
+  it('reports nothing until Apply, and puts the draft back when it closes', async () => {
+    const onValueChange = vi.fn();
+    render(<Filtered onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter status' }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Paid' }));
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+    expect(onValueChange).toHaveBeenCalledWith(
+      ['Paid'],
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('cancels the draft when the panel is dismissed', async () => {
+    const onValueChange = vi.fn();
+    render(<Filtered onValueChange={onValueChange} />);
+
+    const trigger = screen.getByRole('button', { name: 'Filter status' });
+    fireEvent.click(trigger);
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Overdue' }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => expect(screen.queryByRole('checkbox', { name: 'Overdue' })).toBeNull());
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    fireEvent.click(trigger);
+    expect(await screen.findByRole('checkbox', { name: 'Overdue' })).not.toBeChecked();
+  });
+
+  /**
+   * The covering checkbox answers for what the search left, not for the whole
+   * set: a reader who searched and then pressed it expects the four rows they
+   * can see, not the forty they cannot.
+   */
+  it('covers what the search left, and marks the column while it is filtered', async () => {
+    render(<Filtered />);
+
+    const trigger = screen.getByRole('button', { name: 'Filter status' });
+    fireEvent.click(trigger);
+
+    /* Three values is under the threshold, so no search is drawn. */
+    expect(screen.queryByRole('textbox')).toBeNull();
+
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'All' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Filter status/ })).toHaveAttribute(
+        'data-filtered',
+        '',
+      ),
+    );
+    expect(screen.getByRole('button', { name: 'Filter status (3 chosen)' })).toBeInTheDocument();
+  });
+
+  it('draws a search once there are enough values, and narrows on a fold', async () => {
+    const many = Array.from({ length: 9 }, (_, index) => ({ value: `Região ${index}` }));
+    render(
+      <Table columns={1}>
+        <TableContent>
+          <TableHead>
+            <TableRow>
+              <TableColumnHeader column="region">
+                Region
+                <TableColumnActions>
+                  <TableFilter columnLabel="region" options={many} />
+                </TableColumnActions>
+              </TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody />
+        </TableContent>
+      </Table>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter region' }));
+    const search = await screen.findByRole('textbox');
+
+    /* Without the fold, `regiao` matches nothing at all. */
+    fireEvent.change(search, { target: { value: 'regiao 3' } });
+    expect(screen.getByRole('checkbox', { name: 'Região 3' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Região 4' })).toBeNull();
+
+    fireEvent.change(search, { target: { value: 'nothing here' } });
+    expect(screen.getByText('No values match')).toBeInTheDocument();
   });
 });
 

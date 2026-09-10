@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react';
 
 import { Avatar } from '../avatar';
 import { IconButton } from '../button';
-import { Checkbox } from '../checkbox';
 import { Link } from '../link';
 import { NumberField } from '../number-field';
 import { ProgressBar } from '../progress-indicator';
@@ -13,11 +12,11 @@ import { StatusIndicator } from '../status-indicator';
 import { Switch } from '../switch';
 import { TextField } from '../text-field';
 import { Pagination, PaginationItems, PaginationNext, PaginationPrevious } from '../pagination';
-import { Popover, PopoverBody, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
 import { ResultState, ResultStateContent, ResultStateTitle } from '../result-state';
 import { Tag } from '../tag';
 import { VisuallyHidden } from '../visually-hidden';
 import { Table } from './table';
+import { TableFilter } from './table-filter';
 import { TableContent } from './table-content';
 import { TableDefaultsProvider } from './table-defaults';
 import {
@@ -39,7 +38,7 @@ import {
   TableSort,
   TableSummary,
 } from './table-parts';
-import type { TableSortDescriptor } from './table.types';
+import type { TableFilterOption, TableSortDescriptor } from './table.types';
 import { REACT_TABLE_DOCS, REACT_TABLE_TOKENS } from './table.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
@@ -281,29 +280,6 @@ const TONE = { Draft: 'secondary', Overdue: 'danger', Paid: 'success' } as const
 
 const SERVICE = { degraded: 'warning', down: 'danger', operational: 'success' } as const;
 
-/**
- * The artwork the demonstrations put in a trigger. It is authored here rather
- * than imported, because a story is the one place a consumer supplies their own
- * mark: the family sizes what stands in its slot and draws none of it.
- */
-function Funnel() {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height="16"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      viewBox="0 0 24 24"
-      width="16"
-    >
-      <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-    </svg>
-  );
-}
-
 function Ellipsis() {
   return (
     <svg
@@ -515,51 +491,29 @@ export const Sorting: Story = {
  * dismissal and its focus; and the rules are the consumer's own state — which
  * is what makes the demonstration a demonstration rather than a dead button.
  */
-function StatusFilter({
-  chosen,
-  onChange,
-}: {
-  chosen: readonly string[];
-  onChange: (next: readonly string[]) => void;
-}) {
-  return (
-    <Popover portal={false}>
-      <PopoverTrigger
-        render={(triggerProps) => (
-          <button {...triggerProps} aria-label="Filter by status" type="button">
-            <Funnel />
-          </button>
-        )}
-      />
-      <PopoverLayer>
-        <PopoverContent aria-label="Filter by status">
-          <PopoverBody>
-            {(['Paid', 'Overdue', 'Draft'] as const).map((status) => (
-              <Checkbox
-                checked={chosen.includes(status)}
-                key={status}
-                onCheckedChange={(checked) =>
-                  onChange(checked ? [...chosen, status] : chosen.filter((held) => held !== status))
-                }
-              >
-                {status}
-              </Checkbox>
-            ))}
-          </PopoverBody>
-        </PopoverContent>
-      </PopoverLayer>
-    </Popover>
-  );
-}
+/** The values the status column can be filtered to, and how many carry each. */
+const STATUSES: readonly TableFilterOption[] = [
+  { count: INVOICES.filter((invoice) => invoice.status === 'Paid').length, value: 'Paid' },
+  { count: INVOICES.filter((invoice) => invoice.status === 'Overdue').length, value: 'Overdue' },
+  { count: INVOICES.filter((invoice) => invoice.status === 'Draft').length, value: 'Draft' },
+];
+
+/** Every client on the page, so the filter has enough values to earn a search. */
+const CLIENTS: readonly TableFilterOption[] = INVOICES.map((invoice) => ({
+  value: invoice.client,
+}));
 
 function ColumnControlsDemo() {
   const [statuses, setStatuses] = useState<readonly string[]>([]);
+  const [clients, setClients] = useState<readonly string[]>([]);
   const rows = useMemo(
     () =>
-      statuses.length === 0
-        ? INVOICES
-        : INVOICES.filter((invoice) => statuses.includes(invoice.status)),
-    [statuses],
+      INVOICES.filter(
+        (invoice) =>
+          (statuses.length === 0 || statuses.includes(invoice.status)) &&
+          (clients.length === 0 || clients.includes(invoice.client)),
+      ),
+    [clients, statuses],
   );
 
   return (
@@ -570,11 +524,26 @@ function ColumnControlsDemo() {
             <TableColumnHeader column="id">
               <TableSort>Invoice</TableSort>
             </TableColumnHeader>
-            <TableColumnHeader>Client</TableColumnHeader>
+            <TableColumnHeader>
+              Client
+              <TableColumnActions>
+                <TableFilter
+                  columnLabel="client"
+                  onValueChange={setClients}
+                  options={CLIENTS}
+                  value={clients}
+                />
+              </TableColumnActions>
+            </TableColumnHeader>
             <TableColumnHeader>
               Status
               <TableColumnActions>
-                <StatusFilter chosen={statuses} onChange={setStatuses} />
+                <TableFilter
+                  columnLabel="status"
+                  onValueChange={setStatuses}
+                  options={STATUSES}
+                  value={statuses}
+                />
               </TableColumnActions>
             </TableColumnHeader>
           </TableRow>
@@ -607,7 +576,7 @@ export const ColumnControls: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label="A column that sorts, and a column that filters"
-        note="Press the funnel: the trigger opens a Popover, the checkboxes are your own state, and the rows below answer them. The header that sorts answers the pointer with a ground; the one that only carries a filter does not, because it is not a target."
+        note="Two filters and a sort. Both panels edit a draft: tick four values and one query runs, on Apply — Escape and a press outside put back the set you opened with. Twelve clients bring a search with them and three statuses do not, and the checkbox at the top covers exactly what the search left. The counts are the consumer's own fact about their query."
       >
         <ColumnControlsDemo />
       </Scene>
@@ -1285,7 +1254,12 @@ function ListingDemo() {
             <TableColumnHeader text="nowrap">
               Status
               <TableColumnActions>
-                <StatusFilter chosen={statuses} onChange={setStatuses} />
+                <TableFilter
+                  columnLabel="status"
+                  onValueChange={setStatuses}
+                  options={STATUSES}
+                  value={statuses}
+                />
               </TableColumnActions>
             </TableColumnHeader>
             <TableColumnHeader text="nowrap">Owner</TableColumnHeader>

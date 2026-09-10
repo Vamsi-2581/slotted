@@ -9,10 +9,12 @@ import { SlTable } from './table';
 import { SlTableContent } from './table-content';
 import { provideTableDefaults } from './table-defaults';
 import type { TableSortDescriptor } from './table-defaults';
+import { SlTableFilter } from './table-filter';
 import {
   SlTableBody,
   SlTableCaption,
   SlTableCell,
+  SlTableColumnActions,
   SlTableColumnHeader,
   SlTableDetail,
   SlTableExpander,
@@ -57,6 +59,7 @@ const ROWS = [
     [(value)]="value"
     [(expanded)]="expanded"
     [variant]="variant()"
+    [cellAlign]="cellAlign()"
     (sortChangeRequest)="sortRequests.push($event)"
     (valueChangeRequest)="valueRequests.push($event)"
   >
@@ -100,6 +103,7 @@ class Host {
   readonly expanded = signal<readonly string[]>([]);
   readonly selectionMode = signal<'none' | 'single' | 'multiple'>('multiple');
   readonly variant = signal<'plain' | 'ruled' | 'framed' | undefined>(undefined);
+  readonly cellAlign = signal<'start' | 'center' | 'end' | undefined>(undefined);
   readonly disabledRow = signal<string | undefined>(undefined);
   readonly totalRowCount = signal<number | undefined>(undefined);
   readonly sortRequests: ChangeRequest<TableSortDescriptor | null>[] = [];
@@ -352,6 +356,104 @@ describe('pinning', () => {
       '[data-part="column-header"]',
     ) as HTMLElement;
     expect(header.style.getPropertyValue('--slotted-table-sticky-inset')).toBe('3rem');
+  });
+});
+
+/**
+ * The filter, and the thing that makes it one: the panel edits a draft and
+ * nothing reaches the consumer until Apply.
+ */
+@Component({
+  standalone: true,
+  imports: [
+    SlTable,
+    SlTableBody,
+    SlTableColumnActions,
+    SlTableColumnHeader,
+    SlTableContent,
+    SlTableFilter,
+    SlTableHead,
+    SlTableRow,
+  ],
+  template: `<div slTable [columns]="1">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader column="status">
+            Status
+            <span slTableColumnActions>
+              <span
+                slTableFilter
+                columnLabel="status"
+                [options]="options"
+                [(value)]="chosen"
+              ></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody></tbody>
+    </div>
+  </div>`,
+})
+class FilterHost {
+  readonly options = [
+    { count: 2, value: 'Paid' },
+    { count: 1, value: 'Overdue' },
+    { value: 'Draft' },
+  ];
+  readonly chosen = signal<readonly string[]>([]);
+}
+
+describe('where a cell sits in its row', () => {
+  it('centres by default, and lets a table and a cell each say otherwise', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement.querySelector('[data-ui="table"]') as HTMLElement;
+    expect(root.getAttribute('data-cell-align')).toBe('center');
+
+    fixture.componentInstance.cellAlign.set('start');
+    fixture.detectChanges();
+    expect(root.getAttribute('data-cell-align')).toBe('start');
+  });
+});
+
+describe('the column filter', () => {
+  it('reports nothing until Apply, and marks the column once it has', async () => {
+    await TestBed.configureTestingModule({ imports: [FilterHost] }).compileComponents();
+    const fixture = TestBed.createComponent(FilterHost);
+    fixture.detectChanges();
+
+    const trigger = fixture.nativeElement.querySelector('[data-part="filter"]') as HTMLElement;
+    expect(trigger.getAttribute('aria-label')).toBe('Filter status');
+    expect(trigger.hasAttribute('data-filtered')).toBe(false);
+
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const boxes = [
+      ...document.querySelectorAll('[data-part="filter-option"] input[type="checkbox"]'),
+    ] as HTMLInputElement[];
+    /* The covering checkbox, then one per value: three values draw no search. */
+    expect(boxes.length).toBe(4);
+    expect(document.querySelector('[data-part="filter-search"]')).toBeNull();
+
+    boxes[1]?.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.chosen()).toEqual([]);
+
+    const apply = [...document.querySelectorAll('[data-part="filter-actions"] button')].find(
+      (button) => (button.textContent ?? '').trim() === 'Apply',
+    ) as HTMLElement;
+    apply.click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.chosen()).toEqual(['Paid']);
+    expect(trigger.getAttribute('data-filtered')).toBe('');
+    expect(trigger.getAttribute('aria-label')).toBe('Filter status (1 chosen)');
   });
 });
 

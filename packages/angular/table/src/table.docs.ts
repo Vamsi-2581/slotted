@@ -127,6 +127,53 @@ const anatomy: AnatomyRow[] = [
       'The slot beside a column name for the controls it carries: a filter trigger, a column menu, a help hint. The family holds the place; the query is yours.',
   },
   {
+    part: 'filter',
+    element: 'button[slTableFilter]',
+    required: false,
+    purpose:
+      'The trigger the family draws in that slot, and everything behind it. It marks itself while the column is filtered and states the count in its own name.',
+  },
+  {
+    part: 'filter-panel',
+    element: 'div',
+    required: false,
+    purpose:
+      'The surface the trigger opens: a search, the values, and the two actions. It edits a draft — nothing reaches you until Apply.',
+  },
+  {
+    part: 'filter-search',
+    element: 'div',
+    required: false,
+    purpose:
+      'The field that narrows the values, on a fold that ignores case and diacritics. It appears once there are searchThreshold values.',
+  },
+  {
+    part: 'filter-list',
+    element: 'div',
+    required: false,
+    purpose:
+      'The values, scrolling inside the panel rather than making the panel taller than the screen.',
+  },
+  {
+    part: 'filter-option',
+    element: 'div',
+    required: false,
+    purpose:
+      'One value, its checkbox and its count. The first is the covering checkbox, which answers for exactly what the search left.',
+  },
+  {
+    part: 'filter-empty',
+    element: 'p',
+    required: false,
+    purpose: 'The word shown when the search matches nothing, so the panel is never a blank box.',
+  },
+  {
+    part: 'filter-actions',
+    element: 'div',
+    required: false,
+    purpose: 'The footer: Clear at the leading edge and Apply at the trailing one.',
+  },
+  {
     part: 'selection',
     element: 'td[slTableSelect] and th[slTableSelectAll]',
     required: false,
@@ -214,13 +261,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'column-controls',
     title: 'A filter, beside the name it filters',
-    note: 'The slot holds the trigger and none of its state: what the filter means, what it keeps and what it drops is your query. Every control sits on the column boundary, so the header row reads as one line of triggers rather than as marks at random distances.',
+    note: 'The family draws the filter: a trigger on the column boundary and a panel that searches, covers what the search left, counts what you counted, and edits a draft. Nothing reaches you until Apply — Escape and a press outside put back the set the panel opened with. What the set means is still your query.',
     snippet: defineSnippet({
       id: 'table-angular-column-controls',
       language: 'angular',
       label: 'A column that sorts and filters',
       source:
-        '<th slTableColumnHeader column="client">\n  <button slTableSort>Client</button>\n  <span slTableColumnActions>\n    <button type="button" aria-label="Filter by client" (click)="openFilter()">\n      <svg viewBox="0 0 24 24" aria-hidden="true"></svg>\n    </button>\n  </span>\n</th>',
+        '<th slTableColumnHeader column="client">\n  <button slTableSort>Client</button>\n  <span slTableColumnActions>\n    <span slTableFilter columnLabel="client" [options]="clients" [(value)]="chosen"></span>\n  </span>\n</th>',
     }),
   },
   {
@@ -503,6 +550,34 @@ export const ANGULAR_TABLE_DOCS = {
         'What the header stays inside: this table own scroller, or whatever scrolls outside it. page releases the scroller, so the table stops scrolling sideways in its frame.',
       ],
       [
+        'options',
+        'readonly TableFilterOption[]',
+        '—',
+        'slTableFilter',
+        'The values the column can be filtered to, each with an optional count of its own',
+      ],
+      [
+        'value',
+        'readonly string[]',
+        '[]',
+        'slTableFilter',
+        'The set the column is filtered to. Two-way through [(value)], and valueChange fires once, on Apply.',
+      ],
+      [
+        'searchThreshold',
+        'number',
+        '8',
+        'slTableFilter',
+        'How many values bring a search with them. searchable states it outright.',
+      ],
+      [
+        'cellAlign',
+        "'start' | 'center' | 'end'",
+        'center',
+        'slTable',
+        'Where every cell content sits in a row as tall as its tallest cell. A cell states blockAlign to answer differently.',
+      ],
+      [
         'layout',
         "'auto' | 'fixed'",
         'auto',
@@ -594,6 +669,13 @@ export const ANGULAR_TABLE_DOCS = {
         'false',
         'the three cell parts',
         'Tabular figures, and the end edge unless align says otherwise',
+      ],
+      [
+        'blockAlign',
+        "'start' | 'center' | 'end'",
+        'center',
+        'the three cell parts and both selection cells',
+        'Where this cell content sits in its row, overriding the table own cellAlign',
       ],
       [
         'text',

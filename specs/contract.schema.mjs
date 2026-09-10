@@ -200,6 +200,19 @@ export const KNOWN_CAPABILITIES = [
    */
   'sort',
   /**
+   * Which values of a column a reader has chosen to keep. It is mutable and a
+   * consumer can own it: a server filters, a query string carries the chosen
+   * set back, and a saved view restores it.
+   *
+   * It is not `selection`, which is the reader's choice of *records* — a table
+   * holds both at once and they mean opposite things, one naming rows to act on
+   * and the other naming rows to see. It is not `value`, which is the text a
+   * control holds: the set here is a choice among values the consumer supplied,
+   * not text the reader typed. `table` found the gap; `data-grid`, `filter-bar`
+   * and `pivot-grid` each hold the same value later.
+   */
+  'filter',
+  /**
    * Asking to be taken out of the collection that holds it. It is deliberately
    * not mutable: the family emits a request carrying a reason, and the
    * consumer's own collection decides. A component that removed itself would
@@ -291,6 +304,7 @@ export const MUTABLE_CAPABILITIES = [
   'pressed',
   'selection',
   'sort',
+  'filter',
   'activation',
   'files',
   'current',

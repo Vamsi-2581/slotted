@@ -265,20 +265,52 @@
     background-color: var(--_surface);
   }
 
+  /**
+   * ── Where a cell's content sits in its row ─────────────────────────────
+   *
+   * The middle, because a row is as tall as its tallest cell: a one-line value
+   * beside a three-line one reads as belonging to the same record when both are
+   * centred, and reads as hanging from the ceiling when both are not. It is the
+   * answer Carbon, AG Grid and Material each arrive at, and the answer a table
+   * of one-line rows cannot tell apart.
+   *
+   * The other two are real, so the axis names all three rather than a token
+   * naming one. `start` is what a table of paragraphs wants — a cell of prose
+   * beside a date wants the date on the first line, not floating beside the
+   * middle of the paragraph. A table states it once and a cell overrides it,
+   * because the cell that wants the other answer is usually one: the actions
+   * pinned at the end of a tall row.
+   */
+  [data-ui='table'] {
+    --_cell-align: middle;
+  }
+
+  [data-ui='table'][data-cell-align='start'] {
+    --_cell-align: top;
+  }
+
+  [data-ui='table'][data-cell-align='end'] {
+    --_cell-align: bottom;
+  }
+
   [data-ui='table'] [data-part='cell'],
   [data-ui='table'] [data-part='row-header'] {
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
     text-align: start;
-    /**
-     * The top, because a row is as tall as its tallest cell and the rest of the
-     * row is one line: a middle-aligned line beside a three-line cell floats in
-     * the middle of nothing. A table whose rows are all one line reads the same
-     * either way, and an application that wants the other answer states it once
-     * — the token is the whole of the axis, because it is one declaration and a
-     * prop on every cell would be four.
-     */
-    vertical-align: var(--slotted-table-cell-align, top);
+    vertical-align: var(--_cell-align);
+  }
+
+  [data-ui='table'] [data-block-align='start'] {
+    vertical-align: top;
+  }
+
+  [data-ui='table'] [data-block-align='center'] {
+    vertical-align: middle;
+  }
+
+  [data-ui='table'] [data-block-align='end'] {
+    vertical-align: bottom;
   }
 
   /* A row header names the record, so it carries the weight one step above the
@@ -778,13 +810,15 @@
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
     text-align: center;
-    vertical-align: top;
+    /* The chooser follows the table's own answer: a table that centres its
+       values and hangs its checkboxes from the top is two decisions where the
+       reader sees one row. */
+    vertical-align: var(--_cell-align);
     white-space: nowrap;
   }
 
-  /* The control sits on the row's first line rather than in the middle of a
-     cell that may be three lines tall, so a two-line row does not float its
-     checkbox between them. */
+  /* The control is one line tall whatever the row is, so it sits on the line
+     the axis puts it on rather than stretching down a three-line cell. */
   [data-ui='table'] [data-part='selection'] > [data-ui='checkbox'] {
     block-size: var(--_line);
   }
@@ -832,7 +866,8 @@
    */
   [data-ui='table'] [data-part='expander'],
   [data-ui='table'] [data-part='column-actions'] > button,
-  [data-ui='table'] button[data-part='column-actions'] {
+  [data-ui='table'] button[data-part='column-actions'],
+  [data-ui='table'] [data-part='filter'] {
     background-color: transparent;
     border: 0;
     border-radius: var(--slotted-table-control-radius, var(--slotted-radius-sm, 4px));
@@ -873,7 +908,8 @@
   /* On the band the hover darkens, for the reason the sort control's does: the
      step a row hovers with is lighter than the band and reads as a hole in it. */
   [data-ui='table'] [data-part='column-actions'] > button:not(:disabled):hover,
-  [data-ui='table'] button[data-part='column-actions']:not(:disabled):hover {
+  [data-ui='table'] button[data-part='column-actions']:not(:disabled):hover,
+  [data-ui='table'] [data-part='filter']:not(:disabled):hover {
     background-color: var(
       --slotted-table-header-surface-hover,
       color-mix(in oklab, var(--slotted-text, CanvasText) 7%, var(--_head-surface))
@@ -888,7 +924,8 @@
      inward ring closed on the chevron. */
   [data-ui='table'] [data-part='expander']:focus-visible,
   [data-ui='table'] [data-part='column-actions'] > button:focus-visible,
-  [data-ui='table'] button[data-part='column-actions']:focus-visible {
+  [data-ui='table'] button[data-part='column-actions']:focus-visible,
+  [data-ui='table'] [data-part='filter']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: 0;
   }
@@ -901,9 +938,103 @@
    * nineteen and a half — the control scale is right for a control in a form
    * and wrong for a mark in a header.
    */
-  [data-ui='table'] [data-part='column-actions'] :is(svg, img) {
+  [data-ui='table'] :is([data-part='column-actions'], [data-part='filter']) :is(svg, img) {
     block-size: var(--_icon-size);
     inline-size: var(--_icon-size);
+  }
+
+  /**
+   * ── The filter ─────────────────────────────────────────────────────────
+   *
+   * The trigger takes the slot's geometry above; what is left is the one thing
+   * it must say on its own — that the column is filtered. The mark turns to the
+   * accent ink and holds it whether the pointer is on it or not, because a
+   * filter a reader forgot they set is the defect this state exists to prevent.
+   */
+  [data-ui='table'] [data-part='filter'][data-filtered],
+  [data-ui='table'] [data-part='filter'][data-filtered]:not(:disabled):hover {
+    color: var(--slotted-tone-accent-text, LinkText);
+  }
+
+  /**
+   * The panel, which is drawn wherever `popover` puts it — inside the header or
+   * portalled to the end of the document. So it carries the family's identity
+   * on itself rather than reading it from an ancestor: a rule that reached for
+   * `[data-ui='table']` above would style the panel in one of the two.
+   */
+  [data-ui='table'][data-part='filter-panel'] {
+    display: grid;
+    gap: var(--_gap);
+    /* The panel is a surface of its own, so it states its type rather than
+       inheriting it. Unportalled it is drawn inside the header cell, and a
+       header is set in semibold: every value in the list came out bold, which
+       reads as a set of headings rather than a set of values. */
+    color: var(--_text);
+    font-weight: var(--slotted-font-weight-regular, 400);
+    /* The panel brings its own inset. `popover` puts the inset on its body and
+       its footer, and this family draws neither: the whole surface is one part
+       of its own, which is what keeps the search, the values and the two
+       actions on one rhythm. */
+    padding: var(--slotted-space-5, 12px);
+    /* Wide enough for a value and its count, and no wider: a filter panel that
+       matches the column would be a different width per column. */
+    inline-size: 15rem;
+    max-inline-size: 100%;
+  }
+
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-search'] {
+    display: block;
+  }
+
+  /**
+   * The values, scrolling inside the panel rather than making the panel taller
+   * than the screen. Eight rows is the height a set filter opens at in AG Grid
+   * and about the height Excel's opens at; past that the reader searches.
+   */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-list'] {
+    display: grid;
+    gap: var(--_gap);
+    max-block-size: calc(var(--_line) * 9);
+    overflow-y: auto;
+    /* The scrollbar sits outside the rows rather than over them. */
+    padding-inline-end: var(--_gap);
+  }
+
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-option'] {
+    align-items: center;
+    display: flex;
+    gap: var(--_gap);
+    justify-content: space-between;
+  }
+
+  /* The count is the consumer's fact about their own query, so it is set apart
+     from the value rather than beside it as a second label. */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-option'] > [data-count] {
+    color: var(--_muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The covering checkbox is a row of the same list and a boundary at once: it
+     answers for everything under it, so the rule says where "everything" ends. */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-option'][data-covering] {
+    border-block-end: var(--_rule-width) solid var(--_rule);
+    padding-block-end: var(--_gap);
+  }
+
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-empty'] {
+    color: var(--_muted);
+    padding-block: var(--_pad-block);
+    text-align: center;
+  }
+
+  /* Clear at the leading edge and Apply at the trailing one: the destructive
+     answer is farthest from the one a reader presses without reading. */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-actions'] {
+    border-block-start: var(--_rule-width) solid var(--_rule);
+    display: flex;
+    gap: var(--_gap);
+    justify-content: space-between;
+    padding-block-start: var(--_gap);
   }
 
   [data-ui='table'] [data-part='expander']::before {

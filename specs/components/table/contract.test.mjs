@@ -22,7 +22,7 @@ test('declares one member, because every part reads one table', () => {
   assert.deepEqual(Object.keys(contract.members), ['table']);
 });
 
-test('names the nineteen parts a table is made of', () => {
+test('names the twenty-six parts a table is made of', () => {
   assert.deepEqual(table.parts, [
     'root',
     'scroll',
@@ -37,6 +37,13 @@ test('names the nineteen parts a table is made of', () => {
     'cell',
     'sort',
     'column-actions',
+    'filter',
+    'filter-panel',
+    'filter-search',
+    'filter-list',
+    'filter-option',
+    'filter-empty',
+    'filter-actions',
     'selection',
     'expander',
     'detail',
@@ -60,8 +67,32 @@ test('gives a column a place for its own controls and none of their state', () =
   assert.match(contract.columnControls.state, /^none\b/);
   assert.match(contract.columnControls.layout, /never overlap/);
   assert.match(contract.columnControls.control, /not taken from button/);
-  assert.equal(contract.declined.filterState.deferTo, 'filter-bar');
-  assert.match(contract.declined.filterState.composition, /column-actions/);
+  assert.equal(contract.declined.typedFilterRules.deferTo, 'filter-bar');
+});
+
+/**
+ * The first version of this family shipped the slot and left the panel to the
+ * consumer. What a consumer writes in an afternoon is a checkbox list with no
+ * draft, no search, no covering checkbox and no announcement — so the family
+ * ships the panel and still applies nothing: the set is reported and the
+ * consumer's own query keeps or drops the rows.
+ */
+test('ships the filter itself, and still leaves the query to the consumer', () => {
+  for (const part of [
+    'filter',
+    'filter-panel',
+    'filter-search',
+    'filter-option',
+    'filter-actions',
+  ]) {
+    assert.ok(table.parts.includes(part), `${part} is not a part`);
+  }
+  assert.ok(table.capabilities.includes('filter'));
+  assert.match(contract.filter.applies, /^nothing\b/);
+  assert.match(contract.filter.draft, /Nothing reaches the consumer until Apply/);
+  assert.match(contract.filter.search, /searchThreshold/);
+  assert.match(contract.filter.marks, /data-filtered/);
+  assert.equal(contract.stateModel.filter.request, 'onValueChange');
 });
 
 /**
@@ -88,6 +119,13 @@ test('takes the whole structure from the platform and writes no role', () => {
     cell: 'td',
     sort: 'button',
     'column-actions': 'span',
+    filter: 'button',
+    'filter-panel': 'div',
+    'filter-search': 'div',
+    'filter-list': 'div',
+    'filter-option': 'div',
+    'filter-empty': 'p',
+    'filter-actions': 'div',
     selection: 'th|td',
     expander: 'button',
     detail: 'tr',
@@ -133,7 +171,12 @@ test('owns no key of its own, and says which one it borrows', () => {
  * are ordered by that column".
  */
 test('gives every mutable value a model with reasons the vocabulary holds', () => {
-  assert.deepEqual(Object.keys(contract.stateModel).sort(), ['open', 'selection', 'sort']);
+  assert.deepEqual(Object.keys(contract.stateModel).sort(), [
+    'filter',
+    'open',
+    'selection',
+    'sort',
+  ]);
   for (const [capability, model] of Object.entries(contract.stateModel)) {
     assert.ok(MUTABLE_CAPABILITIES.includes(capability), `${capability} is not mutable`);
     assert.ok(table.capabilities.includes(capability), `${capability} is modelled and not held`);
@@ -290,6 +333,20 @@ test('says what a sticky header sticks to, and what the second answer costs', ()
   assert.match(contract.sticky.to.offset, /--slotted-table-sticky-offset/);
   assert.match(contract.scroll.model, /sideways and never up/);
   assert.match(contract.scroll.condition, /never under stickyTo page/);
+});
+
+/**
+ * Where a cell's content sits in its row is a decision, not a leftover. A row is
+ * as tall as its tallest cell, and the axis names all three answers rather than
+ * shipping one and a token: the table states it once, the one cell that wants
+ * the other answer overrides it.
+ */
+test('names where a cell sits in its row, on the table and on the cell', () => {
+  assert.deepEqual(contract.axes.cellAlign, ['start', 'center', 'end']);
+  assert.deepEqual(contract.axes.blockAlign, ['start', 'center', 'end']);
+  assert.equal(contract.resolution.cellAlign[2], 'center');
+  assert.equal(contract.blockAlignment.default, 'center');
+  assert.match(contract.blockAlignment.reason, /as tall as its tallest cell/);
 });
 
 /**

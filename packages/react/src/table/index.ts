@@ -1,5 +1,6 @@
 export { Table, TABLE_ROW_SELECTOR, useOptionalTable, useTable } from './table';
 export { TableContent } from './table-content';
+export { TableFilter } from './table-filter';
 export { DEFAULT_TABLE_LABELS, TableDefaultsProvider, useTableDefaults } from './table-defaults';
 export {
   TableBody,
@@ -19,6 +20,7 @@ export {
   TableSelectAll,
   TableSort,
   TableSummary,
+  useTableColumn,
   useTableRow,
 } from './table-parts';
 export type {
@@ -37,6 +39,10 @@ export type {
   TableEmptyProps,
   TableExpandedReason,
   TableExpandedRequest,
+  TableFilterOption,
+  TableFilterProps,
+  TableFilterReason,
+  TableFilterRequest,
   TableExpanderProps,
   TableFooterProps,
   TableHandle,

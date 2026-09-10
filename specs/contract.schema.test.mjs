@@ -117,6 +117,18 @@ test('holds the order of a set of rows as state a consumer can own', () => {
   assert.ok(MUTABLE_CAPABILITIES.includes('sort'));
 });
 
+/**
+ * Which values of a column a reader keeps is a second value a consumer owns,
+ * and it is not the first: a table holds a selection of records and a filter of
+ * values at once, and the two mean opposite things — one names rows to act on,
+ * the other names rows to see.
+ */
+test('holds the values a column is filtered to, apart from the records chosen', () => {
+  assert.ok(KNOWN_CAPABILITIES.includes('filter'));
+  assert.ok(MUTABLE_CAPABILITIES.includes('filter'));
+  assert.ok(KNOWN_CAPABILITIES.includes('selection'));
+});
+
 /* ------------------------------------------------------------- identity - */
 
 test('rejects a family that does not name its public identifier', () => {

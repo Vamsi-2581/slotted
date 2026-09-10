@@ -34,6 +34,7 @@ import { moduleMetadata } from '@storybook/angular-vite';
 import { SlTable } from './table';
 import type { TableSortDescriptor } from './table-defaults';
 import { SlTableContent } from './table-content';
+import { SlTableFilter } from './table-filter';
 import { SL_TABLE_PARTS } from './table-parts';
 import { ANGULAR_TABLE_DOCS, ANGULAR_TABLE_TOKENS } from './table.docs';
 
@@ -75,6 +76,7 @@ const meta: Meta<TableStoryArgs> = {
         SlTable,
         SlTableContent,
         ...SL_TABLE_PARTS,
+        SlTableFilter,
         SlLink,
         SlPagination,
         SlPaginationItems,
@@ -348,44 +350,19 @@ const table = (attributes: string, inner = HEAD + BODY) => `
   </div>`;
 
 /**
- * The trigger the family sizes and the panel it does not draw. The slot holds a
- * button; what the filter keeps and drops is the consumer's own query, which is
- * why the checkboxes below write to a signal the rows are read through.
+ * The family's own filter: a trigger in the column-actions slot and the panel
+ * behind it. The panel edits a draft and nothing reaches the story until Apply,
+ * which is why the rows below only change once.
  */
-const FILTER = `
+const FILTER = (column: string, options: string, value: string) => `
   <span slTableColumnActions>
-    <ng-container slPopover [portal]="false">
-      <button slPopoverTrigger type="button" aria-label="Filter by status">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-        </svg>
-      </button>
-      <ng-template slPopoverLayer>
-        <div slPopoverContent aria-label="Filter by status">
-          <div slPopoverBody>
-            @for (status of statuses; track status) {
-              <div slCheckbox [checked]="kept.includes(status)" (checkedChange)="toggle(status)">
-                {{ status }}
-              </div>
-            }
-          </div>
-        </div>
-      </ng-template>
-    </ng-container>
+    <span slTableFilter columnLabel="${column}" [options]="${options}" [(value)]="${value}"></span>
   </span>`;
-
-/** The one formatter the demonstrations share, so a total reads like a total. */
-const MONEY = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 2 });
-
-/** The three states the filter offers, and the state it writes. */
-const STATUSES = ['Paid', 'Overdue', 'Draft'];
 
 interface Invoice {
   amount: string;
   client: string;
-  /** What the reader sees. */
   due: string;
-  /** What the sort answers, because '11 Sep' orders alphabetically and a date does not. */
   dueAt: string;
   id: string;
   issued: string;
@@ -398,11 +375,18 @@ interface Invoice {
   tone: string;
 }
 
-/**
- * The filter's own state, kept beside the story rather than inside the family:
- * a table holds no filter, and what a header's trigger does to the rows is the
- * consumer's query. `kept` is read by the checkboxes and by the rows alike.
- */
+/** The one formatter the demonstrations share, so a total reads like a total. */
+const MONEY = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 2 });
+
+/** Three statuses and their counts, which are the story's own fact. */
+const STATUSES = ['Paid', 'Overdue', 'Draft'].map((status) => ({
+  count: INVOICES.filter((invoice) => invoice.status === status).length,
+  value: status,
+}));
+
+/** Every client on the page, so the filter has enough values to earn a search. */
+const CLIENTS = INVOICES.map((invoice) => ({ value: invoice.client }));
+
 /**
  * The descriptor applied to your own array, which is the whole of client
  * sorting. The date column orders by the value behind it rather than the one on
@@ -419,20 +403,24 @@ function sortRows(rows: readonly Invoice[], sort: TableSortDescriptor | null) {
   );
 }
 
+/**
+ * The filter's own state, kept beside the story rather than inside the family:
+ * a table holds no filter, and what a header's trigger does to the rows is the
+ * consumer's query.
+ */
 function filterProps(source: readonly Invoice[]) {
-  const state = { kept: [] as string[] };
   return {
-    kept: state.kept,
+    clients: [] as string[],
+    statuses: [] as string[],
+    clientOptions: CLIENTS,
+    statusOptions: STATUSES,
     sort: null as TableSortDescriptor | null,
-    statuses: STATUSES,
-    toggle(status: string) {
-      const at = state.kept.indexOf(status);
-      if (at === -1) state.kept.push(status);
-      else state.kept.splice(at, 1);
-    },
-    visible(this: { sort: TableSortDescriptor | null }) {
-      const kept =
-        state.kept.length === 0 ? source : source.filter((row) => state.kept.includes(row.status));
+    visible(this: { clients: string[]; statuses: string[]; sort: TableSortDescriptor | null }) {
+      const kept = source.filter(
+        (row) =>
+          (this.statuses.length === 0 || this.statuses.includes(row.status)) &&
+          (this.clients.length === 0 || this.clients.includes(row.client)),
+      );
       return sortRows(kept, this.sort);
     },
   };
@@ -534,15 +522,17 @@ export const ColumnControls: Story = {
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'A column that sorts, and a column that filters',
-    'Press the funnel: the trigger opens a popover, the checkboxes are your own state, and the rows below answer them. The header that sorts answers the pointer with a ground; the one that only carries a filter does not, because it is not a target.',
+    'Two filters and a sort. Both panels edit a draft: tick four values and one query runs, on Apply — Escape and a press outside put back the set you opened with. Twelve clients bring a search with them and three statuses do not, and the checkbox at the top covers exactly what the search left.',
     `
   <div slTable [columns]="4" variant="framed">
     <div slTableContent>
       <thead slTableHead>
         <tr slTableRow>
           <th slTableColumnHeader column="id"><button slTableSort>Invoice</button></th>
-          <th slTableColumnHeader column="client"><button slTableSort>Client</button></th>
-          <th slTableColumnHeader>Status${FILTER}</th>
+          <th slTableColumnHeader column="client">
+            <button slTableSort>Client</button>${FILTER('client', 'clientOptions', 'clients')}
+          </th>
+          <th slTableColumnHeader>Status${FILTER('status', 'statusOptions', 'statuses')}</th>
           <th slTableColumnHeader numeric>Amount</th>
         </tr>
       </thead>
@@ -1124,7 +1114,7 @@ export const Listing: Story = {
           <th slTableSelectAll sticky="start"></th>
           <th slTableColumnHeader column="id" sticky="start" stickyOffset="3rem" text="nowrap"><button slTableSort>Invoice</button></th>
           <th slTableColumnHeader column="client" text="nowrap"><button slTableSort>Client</button></th>
-          <th slTableColumnHeader text="nowrap">Status${FILTER}</th>
+          <th slTableColumnHeader text="nowrap">Status${FILTER('status', 'statusOptions', 'statuses')}</th>
           <th slTableColumnHeader text="nowrap">Owner</th>
           <th slTableColumnHeader text="nowrap">Service</th>
           <th slTableColumnHeader column="due" text="nowrap"><button slTableSort>Due</button></th>

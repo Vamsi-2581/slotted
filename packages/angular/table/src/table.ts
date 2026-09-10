@@ -24,6 +24,7 @@ import {
   injectTableDefaults,
   SlTableIdFactory,
   TABLE_LABELS,
+  type TableAlign,
   type TableLabels,
   type TableLayout,
   type TableSelectionMode,
@@ -89,6 +90,7 @@ export const TABLE_ROW_SELECTOR = '[data-part="body"] > [data-part="row"][data-v
     'data-part': 'root',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-layout]': 'resolvedLayout()',
+    '[attr.data-cell-align]': 'resolvedCellAlign()',
     '[attr.data-striped]': "resolvedStriped() ? '' : null",
     '[attr.data-sticky-header]': "resolvedStickyHeader() ? '' : null",
     '[attr.data-sticky-footer]': "resolvedStickyFooter() ? '' : null",
@@ -107,6 +109,11 @@ export class SlTable implements ControlValueAccessor {
   readonly variant = input<TableVariant | undefined>(undefined);
   readonly layout = input<TableLayout | undefined>(undefined);
   readonly selectionMode = input<TableSelectionMode | undefined>(undefined);
+  /**
+   * Where every cell's content sits in a row as tall as its tallest cell. A
+   * cell states `blockAlign` to answer differently.
+   */
+  readonly cellAlign = input<TableAlign | undefined>(undefined);
   readonly striped = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (state) => (state === undefined ? undefined : booleanAttribute(state)),
   });
@@ -156,6 +163,7 @@ export class SlTable implements ControlValueAccessor {
 
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   readonly resolvedLayout = computed(() => this.layout() ?? this.defaults.layout);
+  readonly resolvedCellAlign = computed(() => this.cellAlign() ?? this.defaults.cellAlign);
   readonly resolvedMode = computed(() => this.selectionMode() ?? this.defaults.selectionMode);
   readonly resolvedStriped = computed(() => this.striped() ?? this.defaults.striped);
   readonly resolvedStickyHeader = computed(() => this.stickyHeader() ?? this.defaults.stickyHeader);

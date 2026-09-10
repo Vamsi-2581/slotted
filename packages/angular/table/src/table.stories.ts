@@ -51,6 +51,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     striped: Striped,
     sorting: Sorting,
     'column-controls': ColumnControls,
+    filter: Filter,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -558,6 +559,82 @@ export const ColumnControls: Story = {
       </tbody>
     </div>
   </div>`,
+  )}
+</div>`,
+  }),
+};
+
+/**
+ * One table per panel, so each scene is one thing to look at: the same
+ * component with a short list, with a long one, already filtered, and with a
+ * search that matches nothing. Each panel reads its own state, which is why the
+ * scope is written into every binding.
+ */
+const FILTERED = (scope: string, column: string, options: string, extra = '') => `
+  <div slTable [columns]="3" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader text="nowrap">
+            ${column === 'status' ? 'Status' : 'Client'}
+            <span slTableColumnActions>
+              <span
+                slTableFilter
+                columnLabel="${column}"
+                ${extra}
+                [options]="${scope}.${options}"
+                [(value)]="${scope}.${column === 'status' ? 'statuses' : 'clients'}"
+              ></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (invoice of ${scope}.visible().slice(0, 4); track invoice.id) {
+          <tr slTableRow [value]="invoice.id">
+            <th slTableRowHeader text="nowrap">{{ invoice.id }}</th>
+            <td slTableCell text="nowrap">{{ invoice.client }}</td>
+            <td slTableCell>
+              <span slTag [tone]="invoice.tone"><span slTagBody>{{ invoice.status }}</span></span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+export const Filter: Story = {
+  parameters: scenario('filter'),
+  render: () => ({
+    props: {
+      short: filterProps(INVOICES),
+      long: filterProps(INVOICES),
+      already: Object.assign(filterProps(INVOICES), { statuses: ['Overdue'] }),
+      blank: filterProps(INVOICES),
+    },
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'Three values, and no search',
+    'Press the funnel. A short list opens as a list: the checkbox above the rule covers the three under it, the counts are yours to supply, and Apply is the only thing that reaches your query — tick two and one query runs.',
+    FILTERED('short', 'status', 'statusOptions'),
+  )}
+  ${scene(
+    'Twelve values, and a search',
+    'Past searchThreshold — eight unless you say otherwise — the panel brings a field. It folds case and diacritics, so regiao finds Região, and the covering checkbox then answers for exactly what the search left rather than for the twelve behind it.',
+    FILTERED('long', 'client', 'clientOptions'),
+  )}
+  ${scene(
+    'A column already filtered',
+    'The trigger marks itself and states the count in its own accessible name, so a filter a reader set and forgot is still visible. Clear empties it and closes; a reader who wants their set back opens the panel again, because Clear is a decision and not a slip.',
+    FILTERED('already', 'status', 'statusOptions'),
+  )}
+  ${scene(
+    'A search you asked for, over three values',
+    'searchable states it outright, under the threshold or over it. Type something no value carries and the panel says so rather than showing an empty box — and the two actions stay, because Clear still empties a set the search cannot see.',
+    FILTERED('blank', 'status', 'statusOptions', 'searchable'),
   )}
 </div>`,
   }),

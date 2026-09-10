@@ -271,6 +271,18 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'filter',
+    title: 'The filter, in full',
+    note: 'Four panels, one component. A short list opens as a list; a long one brings a search that folds case and diacritics, and the checkbox above it covers exactly what the search left. Counts are yours to supply. Nothing reaches you until Apply — Escape and a press outside put back the set the panel opened with — and a column that is filtered says so in the trigger and in its own name.',
+    snippet: defineSnippet({
+      id: 'table-angular-filter',
+      language: 'angular',
+      label: 'A filter, and the query that answers it',
+      source:
+        '<th slTableColumnHeader>\n  Status\n  <span slTableColumnActions>\n    <span slTableFilter columnLabel="status" [options]="statusOptions" [(value)]="statuses"></span>\n  </span>\n</th>',
+    }),
+  },
+  {
     id: 'selection',
     title: 'Choosing records, and what all means',
     note: 'Hold Shift and press a second checkbox to take everything between. The header checkbox covers the rows in the DOM and says how many in its own name — a selection over a whole result set is a decision only your query can make.',

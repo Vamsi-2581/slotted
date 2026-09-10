@@ -48,6 +48,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     striped: Striped,
     sorting: Sorting,
     'column-controls': ColumnControls,
+    filter: Filter,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -579,6 +580,98 @@ export const ColumnControls: Story = {
         note="Two filters and a sort. Both panels edit a draft: tick four values and one query runs, on Apply — Escape and a press outside put back the set you opened with. Twelve clients bring a search with them and three statuses do not, and the checkbox at the top covers exactly what the search left. The counts are the consumer's own fact about their query."
       >
         <ColumnControlsDemo />
+      </Scene>
+    </div>
+  ),
+};
+
+/**
+ * One table per panel, so each scene is one thing to look at: the same
+ * component with a short list, with a long one, already filtered, and with two
+ * filters answering one query.
+ */
+function FilterDemo({
+  heading,
+  options,
+  value,
+  onValueChange,
+  ...filterProps
+}: React.ComponentProps<typeof TableFilter> & {
+  heading: string;
+  value?: readonly string[];
+}) {
+  const [own, setOwn] = useState<readonly string[]>(value ?? []);
+  const kept =
+    own.length === 0
+      ? INVOICES
+      : INVOICES.filter((invoice) => own.includes(invoice.status) || own.includes(invoice.client));
+
+  return (
+    <Table columns={3} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              {heading}
+              <TableColumnActions>
+                <TableFilter
+                  {...filterProps}
+                  onValueChange={(next, request) => {
+                    setOwn(next);
+                    onValueChange?.(next, request);
+                  }}
+                  options={options}
+                  value={own}
+                />
+              </TableColumnActions>
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {kept.slice(0, 4).map((invoice) => (
+            <TableRow key={invoice.id} value={invoice.id}>
+              <TableRowHeader text="nowrap">{invoice.id}</TableRowHeader>
+              <TableCell text="nowrap">{invoice.client}</TableCell>
+              <TableCell>
+                <Tag tone={TONE[invoice.status]}>{invoice.status}</Tag>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+export const Filter: Story = {
+  parameters: scenario('filter'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="Three values, and no search"
+        note="Press the funnel. A short list opens as a list: the checkbox above the rule covers the three under it, the counts are yours to supply, and Apply is the only thing that reaches your query — tick two and one query runs."
+      >
+        <FilterDemo columnLabel="status" heading="Status" options={STATUSES} />
+      </Scene>
+      <Scene
+        label="Twelve values, and a search"
+        note="Past searchThreshold — eight unless you say otherwise — the panel brings a field. It folds case and diacritics, so 'regiao' finds 'Região', and the covering checkbox then answers for exactly what the search left rather than for the twelve behind it."
+      >
+        <FilterDemo columnLabel="client" heading="Client" options={CLIENTS} />
+      </Scene>
+      <Scene
+        label="A column already filtered"
+        note="The trigger marks itself and states the count in its own accessible name, so a filter a reader set and forgot is still visible. Clear empties it and closes; a reader who wants their set back opens the panel again, because Clear is a decision and not a slip."
+      >
+        <FilterDemo columnLabel="status" heading="Status" options={STATUSES} value={['Overdue']} />
+      </Scene>
+      <Scene
+        label="A search you asked for, over three values"
+        note="searchable states it outright, under the threshold or over it. Type something no value carries and the panel says so rather than showing an empty box — and the two actions stay, because Clear still empties a set the search cannot see."
+      >
+        <FilterDemo columnLabel="status" heading="Status" options={STATUSES} searchable />
       </Scene>
     </div>
   ),

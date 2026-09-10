@@ -54,7 +54,7 @@
     "condition": "only while the content overflows the scroll part along the inline axis, remeasured by a ResizeObserver, and never under stickyTo page — there the family owns no scroll container, so there is nothing to give a tab stop to",
     "model": "The family scrolls sideways and never up. Vertical scrolling belongs to whatever the consumer gives a height to: the scroll part when they set one on it, and the page when they do not. That is why stickyHeader is off by default — a header fixed inside a box with no height fixes nothing — and why the two axes are separate: stickyHeader says whether the header stays, stickyTo says what it stays inside.",
     "attributes": ["data-overflowing", "data-at-start", "data-at-end"],
-    "affordance": "The pinned column's own edge, which darkens exactly while something is hidden under it. A gradient over the trailing edge of the scroller would fade the pinned column with everything else, and a shadow needs an ink no scale holds. A table with no pinned column keeps the three the platform and the family already give it: a scrollbar, a column visibly cut at the edge, and a tab stop that scrolls with the arrow keys.",
+    "affordance": "the scrollbar, a column visibly cut mid-word at the trailing edge, and a named scrolling region with a tab stop the arrow keys move. A pinned column draws one ordinary rule and no more. It carried a darker line while something was hidden under it — what a spreadsheet does — and read on a real listing that was wrong twice: a table pinning a chooser and the identifier beside it has two seams and only one is a boundary, so the reader was told twice; and the boundary line at the weight the affordance needed read as a wall through a table whose other columns are separated by a hairline. The measurement stays — data-at-start and data-at-end are still written, and a consumer who wants the darker edge has the attributes to draw it.",
     "reason": "The rule prose set, and the one §12 asks for by name: none of the six surveyed implementations leaves a wide table reachable without a pointer, and a tab stop on a table that fits makes the reader press Tab for nothing."
   },
   "sticky": {
@@ -503,6 +503,7 @@
       "striped",
       "sorting",
       "column-controls",
+      "filter",
       "selection",
       "expansion",
       "sticky",

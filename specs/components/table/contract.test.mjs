@@ -284,10 +284,14 @@ test('makes the scroller a region only while it overflows', () => {
 });
 
 /**
- * §12 asks for scroll with an affordance. The one the family draws is the
- * pinned column's edge, because it is the only place a fade or a shadow can go
- * without covering the column that must stay crisp — and it appears exactly
- * while something is hidden under it.
+ * §12 asks for scroll with an affordance, and the family draws none of its own.
+ * The pinned column's edge carried a darker line while something was hidden
+ * under it; read on a listing that pins two columns it told the reader twice,
+ * and at the weight it needed it read as a wall through a table separated by
+ * hairlines. What is left is what the platform and the family already give.
+ *
+ * The measurement stays, so a consumer who wants that edge can draw it: the
+ * three attributes are still written.
  */
 test('says where the scroll affordance is drawn, and what it is', () => {
   assert.deepEqual(contract.scroll.attributes, [
@@ -295,8 +299,9 @@ test('says where the scroll affordance is drawn, and what it is', () => {
     'data-at-start',
     'data-at-end',
   ]);
-  assert.match(contract.scroll.affordance, /pinned column/);
   assert.match(contract.scroll.affordance, /scrollbar/);
+  assert.match(contract.scroll.affordance, /one ordinary rule and no more/);
+  assert.match(contract.scroll.affordance, /tab stop/);
 });
 
 /**

@@ -234,7 +234,10 @@
    * it is set in the page's own ink rather than in the muted step: a header a
    * reader has to look for twice is a header that has stopped naming anything.
    */
-  [data-ui='table'] [data-part='column-header'] {
+  /* The chooser's header is a `selection` cell and not a `column-header`, so
+     every rule naming only the second stopped at it: the band's own line under
+     the head broke exactly over the checkbox. */
+  [data-ui='table'] :is([data-part='column-header'], [data-part='head'] [data-part='selection']) {
     background-color: var(--_head-surface);
     border-block-end: var(--_rule-width) solid var(--_rule-strong);
     color: var(--_text);
@@ -599,15 +602,20 @@
    * the family already give it: a scrollbar, a column visibly cut mid-word at
    * the edge, and a tab stop that scrolls with the arrow keys.
    */
-  [data-ui='table']
-    [data-part='scroll'][data-overflowing]:not([data-at-start])
-    [data-sticky='start']::after {
-    background-color: var(--slotted-table-border-color-strong, var(--slotted-border-strong));
-  }
-
-  [data-ui='table'] [data-part='scroll'][data-overflowing]:not([data-at-end]) [data-sticky='end'] {
-    border-inline-start-color: var(--_rule-strong);
-  }
+  /**
+   * The pinned column draws **one ordinary rule** and no more.
+   *
+   * It carried a darker line while something was hidden under it, which is what
+   * a spreadsheet does — and read on a real listing it was wrong twice. A table
+   * that pins a chooser and the identifier beside it has two seams and only one
+   * of them is a boundary, so the reader was told twice; and the boundary line
+   * itself, at the weight the affordance needed, read as a wall through a table
+   * whose other columns are separated by a hairline.
+   *
+   * The affordances the reader keeps are the ones the platform and the family
+   * already give: a scrollbar, a column visibly cut mid-word at the edge, and a
+   * named scrolling region with a tab stop that the arrow keys move.
+   */
 
   /**
    * ── The sort control ───────────────────────────────────────────────────
@@ -1000,11 +1008,32 @@
     padding-inline-end: var(--_gap);
   }
 
+  /**
+   * One value, and the whole row is its target.
+   *
+   * The chooser gives up its halo here for the reason the selection column
+   * gives up its own, and for a second: the list scrolls, so the circle drawn
+   * outside the square was clipped against the panel's own edge — a mark that
+   * only appears cut. The row answers the pointer with a ground instead, which
+   * is what a value list in Ant, AG Grid and Excel does, and the ground is
+   * pulled out to the panel's inset so it reads as a row rather than as a box
+   * around the words.
+   */
   [data-ui='table'][data-part='filter-panel'] [data-part='filter-option'] {
+    --slotted-selection-halo-opacity: 0;
+
     align-items: center;
+    border-radius: var(--slotted-table-control-radius, var(--slotted-radius-sm, 4px));
     display: flex;
     gap: var(--_gap);
     justify-content: space-between;
+    margin-inline: calc(var(--_gap) * -1);
+    padding-inline: var(--_gap);
+  }
+
+  [data-ui='table'][data-part='filter-panel']
+    [data-part='filter-option']:not([data-disabled]):hover {
+    background-color: var(--_hover);
   }
 
   /* The count is the consumer's fact about their own query, so it is set apart

@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 83     |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 85     |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
 | `component` | One family adjusting a semantic value for itself.              | 5      |
 
@@ -212,6 +212,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-chevron-down`    | `chevron-down`         | stroke 2   |
 | `--slotted-icon-chevrons-right`  | `chevrons-right`       | stroke 2   |
 | `--slotted-icon-external`        | `arrow-up-right`       | stroke 2   |
+| `--slotted-icon-calendar`        | `calendar`             | stroke 2   |
 | `--slotted-icon-person`          | `user-round`           | fill       |
 | `--slotted-icon-circle`          | `circle`               | stroke 2   |
 | `--slotted-icon-circle-info`     | `info`                 | stroke 2   |
@@ -221,6 +222,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-circle-x`        | `circle-x`             | stroke 2   |
 | `--slotted-icon-circle-question` | `circle-question-mark` | stroke 2   |
 | `--slotted-icon-inbox`           | `inbox`                | stroke 2   |
+| `--slotted-icon-search`          | `search`               | stroke 2   |
 | `--slotted-icon-search-x`        | `search-x`             | stroke 2   |
 | `--slotted-icon-lock`            | `lock`                 | stroke 2   |
 | `--slotted-icon-cloud-off`       | `cloud-off`            | stroke 2   |
@@ -244,6 +246,16 @@ brackets or a page: the mark has to be read at sixteen pixels beside a value, an
 the overlap is what says _duplicate_ at that size. It was added for
 `description-list`, whose long values are reachable by copying rather than by
 truncation, and `code-block` in wave 7 needs the same mark.
+
+`--slotted-icon-calendar` is the mark on a date picker's trigger, and it is the
+one glyph in the scale that names a _kind of value_ rather than an action or a
+status. It was added for `date-picker`, whose trigger had been drawing the
+chevron `select` uses — which says "a list opens here" and is the wrong promise:
+what opens is a month, and a reader who has learnt the chevron from every other
+control on the form learns the wrong thing from it. All seven implementations
+surveyed for that family draw a calendar there, and none of them draws a
+chevron. `time-picker` and `date-range-picker` in wave 8 take the same mark and
+a clock beside it.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph

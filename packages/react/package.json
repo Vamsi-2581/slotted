@@ -36,6 +36,10 @@
       "import": "./dist/button.js"
     },
     "./styles.css": "./dist/styles.css",
+    "./calendar": {
+      "types": "./dist/types/calendar/index.d.ts",
+      "import": "./dist/calendar.js"
+    },
     "./card": {
       "types": "./dist/types/card/index.d.ts",
       "import": "./dist/card.js"
@@ -51,6 +55,14 @@
     "./container": {
       "types": "./dist/types/container/index.d.ts",
       "import": "./dist/container.js"
+    },
+    "./date-field": {
+      "types": "./dist/types/date-field/index.d.ts",
+      "import": "./dist/date-field.js"
+    },
+    "./date-picker": {
+      "types": "./dist/types/date-picker/index.d.ts",
+      "import": "./dist/date-picker.js"
     },
     "./description-list": {
       "types": "./dist/types/description-list/index.d.ts",

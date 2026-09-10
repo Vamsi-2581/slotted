@@ -83,6 +83,13 @@
    */
   [data-ui='date-field'] [data-part='segments'] {
     align-items: center;
+    /**
+     * It says what it is before it is pressed. A date is typed, so the pointer
+     * over it is a caret — and the row rather than only the segments, because
+     * the gap between two fields and the air at either end are part of the
+     * control the reader is aiming at.
+     */
+    cursor: text;
     display: flex;
     flex: 1 1 auto;
     min-inline-size: 0;
@@ -104,6 +111,7 @@
     --_digits: 2;
 
     background-color: transparent;
+    cursor: text;
     border-radius: var(--slotted-date-field-segment-radius, var(--slotted-radius-xs, 2px));
     box-sizing: content-box;
     color: inherit;
@@ -393,12 +401,17 @@
    * mistakable for disabled: the value is still real and still submitted. The
    * ground says "not yours to change" and the ink says nothing at all.
    */
+  [data-ui='date-field'][data-part='root'][data-readonly],
+  [data-ui='date-field'][data-part='root'][data-readonly] [data-part='segments'],
+  [data-ui='date-field'][data-part='root'][data-readonly] [data-part='segment'] {
+    cursor: default;
+  }
+
   [data-ui='date-field'][data-part='root'][data-readonly] {
     background-color: var(
       --slotted-date-field-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
-    cursor: default;
   }
 
   /**
@@ -415,6 +428,11 @@
     /* Nothing a person cannot reach is lifted off the page. */
     box-shadow: none;
     color: var(--slotted-date-field-disabled-color, var(--slotted-disabled-foreground));
+    cursor: not-allowed;
+  }
+
+  [data-ui='date-field'][data-part='root'][data-disabled] [data-part='segments'],
+  [data-ui='date-field'][data-part='root'][data-disabled] [data-part='segment'] {
     cursor: not-allowed;
   }
 

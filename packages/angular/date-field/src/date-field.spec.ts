@@ -344,6 +344,52 @@ describe('the form it belongs in', () => {
   });
 });
 
+describe('the pointer', () => {
+  const press = (fixture: Fixture, element: HTMLElement) => {
+    element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+  };
+
+  /**
+   * A press that landed on the frame's own padding did nothing at all, and the
+   * pointer over it was an arrow — the reader saw a control that looked like a
+   * text field and answered like a picture.
+   */
+  it('takes a press on the frame to the first field still waiting', () => {
+    const fixture = renderTemplate(`<div slDateField locale="pt-BR" aria-label="Data"></div>`);
+
+    press(fixture, root(fixture));
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(segmentFor(fixture, 'day'));
+  });
+
+  it('takes it to the first empty field when the others are filled', () => {
+    const fixture = renderTemplate(`<div slDateField locale="pt-BR" aria-label="Data"></div>`);
+
+    segmentFor(fixture, 'day').focus();
+    typeDigits(fixture, '0909');
+    press(fixture, fixture.nativeElement.querySelector('[data-part="segments"]') as HTMLElement);
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(segmentFor(fixture, 'year'));
+  });
+
+  it('leaves a press on the clear button to the clear button', () => {
+    const fixture = renderTemplate(
+      `<div slDateField clearable locale="pt-BR" aria-label="Data" [defaultValue]="{ year: 2026, month: 9, day: 9 }"></div>`,
+    );
+
+    press(fixture, fixture.nativeElement.querySelector('[data-part="clear"]') as HTMLElement);
+    expect(fixture.nativeElement.ownerDocument.activeElement).not.toBe(segmentFor(fixture, 'day'));
+  });
+
+  it('takes a press on one field to that field', () => {
+    const fixture = renderTemplate(
+      `<div slDateField locale="pt-BR" aria-label="Data" [defaultValue]="{ year: 2026, month: 9, day: 9 }"></div>`,
+    );
+
+    press(fixture, segmentFor(fixture, 'year'));
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(segmentFor(fixture, 'year'));
+  });
+});
+
 describe('what the field around it says', () => {
   it('takes disabled, invalid and required from the field', () => {
     const fixture = renderTemplate(

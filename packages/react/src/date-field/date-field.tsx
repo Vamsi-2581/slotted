@@ -241,6 +241,23 @@ export function DateField({
       ?.focus();
   }, []);
 
+  /**
+   * Where a press on the frame puts the reader: the first field still waiting
+   * for a value, and the first field of the date when none is.
+   *
+   * A press that landed on the frame's own padding, on the gap between two
+   * fields or on an adornment did nothing at all — the reader saw a control
+   * that looked like a text field and answered like a picture. Every text
+   * control on the page answers a press anywhere inside its border, and this
+   * one has to as well.
+   */
+  const focusEntry = useCallback(() => {
+    const held = read();
+    const empty = fields.find((name) => held[name] === null);
+    const target = empty ?? fields[0];
+    if (target !== undefined) focusField(target);
+  }, [fields, focusField]);
+
   const moveBy = useCallback(
     (name: DateFieldName, step: number) => {
       const index = fields.indexOf(name) + step;
@@ -365,6 +382,20 @@ export function DateField({
     commit(commitTyping(held, format), 'blur', undefined);
   };
 
+  /**
+   * A press inside the frame that landed on nothing of its own. The default is
+   * prevented so the press does not immediately blur the field it just gave
+   * focus to, which is what a `mousedown` on a non-focusable box would do.
+   */
+  const onRootMouseDown = (event: MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('[data-part="segment"], button, a, input, select, textarea') != null) {
+      return;
+    }
+    event.preventDefault();
+    focusEntry();
+  };
+
   const clear = (event: MouseEvent<HTMLButtonElement>) => {
     commit(EMPTY_SEGMENTS, 'clear', event);
     const first = fields[0];
@@ -477,6 +508,7 @@ export function DateField({
     'data-size': resolvedSize,
     'data-ui': 'date-field',
     'data-variant': resolvedVariant,
+    onMouseDown: onRootMouseDown,
     ref: rootRef,
   };
 
@@ -547,6 +579,12 @@ function Segment({
       onBlur={onBlur}
       onFocus={onFocus}
       onKeyDown={onKeyDown}
+      /* Safari does not focus a `div` on a press even when it carries a
+         `tabindex`, so the press says so itself rather than relying on it. */
+      onMouseDown={(event) => {
+        event.preventDefault();
+        event.currentTarget.focus();
+      }}
       role="spinbutton"
       tabIndex={disabled ? -1 : tabIndex}
     >

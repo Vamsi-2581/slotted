@@ -295,6 +295,54 @@ describe('the value the segments make', () => {
   });
 });
 
+describe('the pointer', () => {
+  /**
+   * A press that landed on the frame's own padding did nothing at all, and the
+   * pointer over it was an arrow — the reader saw a control that looked like a
+   * text field and answered like a picture.
+   */
+  it('takes a press on the frame to the first field still waiting', () => {
+    const { container } = render(<DateField aria-label="Data" locale="pt-BR" />);
+    const root = container.querySelector('[data-ui="date-field"]') as HTMLElement;
+
+    fireEvent.mouseDown(root);
+    expect(segmentFor('day')).toHaveFocus();
+  });
+
+  it('takes it to the first empty field when the others are filled', () => {
+    render(<DateField aria-label="Data" locale="pt-BR" />);
+
+    focusOn('day');
+    typeDigits('0909');
+    /* The day and the month are filled; the year is the one still waiting. */
+    fireEvent.mouseDown(screen.getByRole('group'));
+    expect(segmentFor('year')).toHaveFocus();
+  });
+
+  it('leaves a press on the clear button to the clear button', () => {
+    render(
+      <DateField
+        aria-label="Data"
+        clearable
+        clearLabel="Limpar"
+        defaultValue={NINTH}
+        locale="pt-BR"
+      />,
+    );
+
+    const button = screen.getByRole('button', { name: 'Limpar' });
+    fireEvent.mouseDown(button);
+    expect(segmentFor('day')).not.toHaveFocus();
+  });
+
+  it('takes a press on one field to that field', () => {
+    render(<DateField aria-label="Data" defaultValue={NINTH} locale="pt-BR" />);
+
+    fireEvent.mouseDown(segmentFor('year'));
+    expect(segmentFor('year')).toHaveFocus();
+  });
+});
+
 describe('what the field around it says', () => {
   it('takes disabled, readonly, invalid and required from the field', () => {
     const { container } = render(

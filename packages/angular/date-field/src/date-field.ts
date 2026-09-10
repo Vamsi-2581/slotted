@@ -128,6 +128,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
             [attr.aria-disabled]="ariaDisabled()"
             [attr.aria-readonly]="ariaReadonly()"
             [tabindex]="tabIndexOf(part.type)"
+            (mousedown)="onSegmentMouseDown($event)"
             (focus)="activeField.set(part.type)"
             (blur)="onBlur()"
             (keydown)="onKeyDown(part.type, $event)"
@@ -158,6 +159,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
   host: {
     'data-ui': 'date-field',
     'data-part': 'root',
+    '(mousedown)': 'onRootMouseDown($event)',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-calendar]': 'resolvedCalendar()',
@@ -420,6 +422,46 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
   focus() {
     const first = this.fields()[0];
     if (first !== undefined) this.focusField(first);
+  }
+
+  /**
+   * Where a press on the frame puts the reader: the first field still waiting
+   * for a value, and the first field of the date when none is.
+   *
+   * A press that landed on the frame's own padding, on the gap between two
+   * fields or on an adornment did nothing at all — the reader saw a control
+   * that looked like a text field and answered like a picture. Every text
+   * control on the page answers a press anywhere inside its border, and this
+   * one has to as well.
+   */
+  focusEntry() {
+    const held = this.segments();
+    const empty = this.fields().find((name) => held[name] === null);
+    const target = empty ?? this.fields()[0];
+    if (target !== undefined) this.focusField(target);
+  }
+
+  /**
+   * A press inside the frame that landed on nothing of its own. The default is
+   * prevented so the press does not immediately blur the field it just gave
+   * focus to, which is what a `mousedown` on a non-focusable box would do.
+   */
+  protected onRootMouseDown(event: MouseEvent) {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('[data-part="segment"], button, a, input, select, textarea') != null) {
+      return;
+    }
+    event.preventDefault();
+    this.focusEntry();
+  }
+
+  /**
+   * Safari does not focus a `div` on a press even when it carries a
+   * `tabindex`, so the press says so itself rather than relying on it.
+   */
+  protected onSegmentMouseDown(event: MouseEvent) {
+    event.preventDefault();
+    (event.currentTarget as HTMLElement).focus();
   }
 
   /** Empties every segment, with the `clear` reason. */

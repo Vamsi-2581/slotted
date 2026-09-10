@@ -20,9 +20,9 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 100    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 86     |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
-| `component` | One family adjusting a semantic value for itself.              | 15     |
+| `component` | One family adjusting a semantic value for itself.              | 5      |
 
 A token is a **scale root** when it states a value rather than composing one: a
 primitive, a colour a scheme paints, or the geometry a density defines. Every
@@ -36,15 +36,14 @@ both describe the same thing: the absence of a value a scale could hold — no
 tracking, and a line box that is the control's own height. A third described
 the absence of elevation until `--slotted-control-shadow` was given one.
 
-The component layer holds two scales, and holds each for the reason the layer
-exists: a family met a value a semantic token cannot be retuned to give. Button
+The component layer holds one scale, and holds it for the reason the layer
+exists: a family met a size a semantic token cannot be retuned to give. Button
 emptied the layer by reading `--slotted-control-*` directly instead of aliasing
 it, which is what lets a theme retune every control once; Avatar refilled it,
 because control geometry names a control and an avatar is not one. The bar for
 adding to this layer is the one Avatar cleared, written out under **Avatar
 size** below: a family may not alias a semantic token here, and it may not
-restate a scale that already exists. **File kind** cleared it a second time, for
-a palette rather than for a size.
+restate a scale that already exists.
 
 Every token varies on one axis: `base` is stated once, `scheme` is restated by
 each colour scheme, and `density` by each density. The axis decides which CSS
@@ -198,53 +197,39 @@ the black becomes the mask's alpha when it is used with `mask-image`.
 rendering with round caps and joins, at width 2 unless the manifest says
 otherwise; `fill` is the same geometry painted solid, with no stroke.
 
-| Token                             | Lucide icon            | Paint      |
-| --------------------------------- | ---------------------- | ---------- |
-| `--slotted-icon-check`            | `check`                | stroke 3   |
-| `--slotted-icon-minus`            | `minus`                | stroke 3   |
-| `--slotted-icon-plus`             | `plus`                 | stroke 3   |
-| `--slotted-icon-dot`              | `circle-small`         | fill       |
-| `--slotted-icon-x`                | `x`                    | stroke 2   |
-| `--slotted-icon-ellipsis`         | `ellipsis`             | stroke 2   |
-| `--slotted-icon-copy`             | `copy`                 | stroke 2   |
-| `--slotted-icon-eye`              | `eye`                  | stroke 2   |
-| `--slotted-icon-eye-off`          | `eye-off`              | stroke 2   |
-| `--slotted-icon-chevron-right`    | `chevron-right`        | stroke 2   |
-| `--slotted-icon-chevron-down`     | `chevron-down`         | stroke 2   |
-| `--slotted-icon-chevrons-right`   | `chevrons-right`       | stroke 2   |
-| `--slotted-icon-external`         | `arrow-up-right`       | stroke 2   |
-| `--slotted-icon-calendar`         | `calendar`             | stroke 2   |
-| `--slotted-icon-clock`            | `clock`                | stroke 2   |
-| `--slotted-icon-person`           | `user-round`           | fill       |
-| `--slotted-icon-circle`           | `circle`               | stroke 2   |
-| `--slotted-icon-circle-info`      | `info`                 | stroke 2   |
-| `--slotted-icon-circle-check`     | `circle-check`         | stroke 2   |
-| `--slotted-icon-triangle-alert`   | `triangle-alert`       | stroke 2   |
-| `--slotted-icon-circle-alert`     | `circle-alert`         | stroke 2   |
-| `--slotted-icon-circle-x`         | `circle-x`             | stroke 2   |
-| `--slotted-icon-circle-question`  | `circle-question-mark` | stroke 2   |
-| `--slotted-icon-inbox`            | `inbox`                | stroke 2   |
-| `--slotted-icon-search`           | `search`               | stroke 2   |
-| `--slotted-icon-search-x`         | `search-x`             | stroke 2   |
-| `--slotted-icon-lock`             | `lock`                 | stroke 2   |
-| `--slotted-icon-cloud-off`        | `cloud-off`            | stroke 2   |
-| `--slotted-icon-loader-circle`    | `loader-circle`        | stroke 3.5 |
-| `--slotted-icon-maximize`         | `maximize`             | stroke 2   |
-| `--slotted-icon-minimize`         | `minimize`             | stroke 2   |
-| `--slotted-icon-upload`           | `upload`               | stroke 2   |
-| `--slotted-icon-file`             | `file`                 | stroke 2   |
-| `--slotted-icon-trash`            | `trash-2`              | stroke 2   |
-| `--slotted-icon-play`             | `play`                 | stroke 2   |
-| `--slotted-icon-pause`            | `pause`                | stroke 2   |
-| `--slotted-icon-rotate-ccw`       | `rotate-ccw`           | stroke 2   |
-| `--slotted-icon-file-image`       | `file-image`           | stroke 2   |
-| `--slotted-icon-file-text`        | `file-text`            | stroke 2   |
-| `--slotted-icon-file-spreadsheet` | `file-spreadsheet`     | stroke 2   |
-| `--slotted-icon-file-audio`       | `file-audio`           | stroke 2   |
-| `--slotted-icon-file-video`       | `file-video`           | stroke 2   |
-| `--slotted-icon-file-archive`     | `file-archive`         | stroke 2   |
-| `--slotted-icon-file-type`        | `file-type`            | stroke 2   |
-| `--slotted-icon-presentation`     | `presentation`         | stroke 2   |
+| Token                            | Lucide icon            | Paint      |
+| -------------------------------- | ---------------------- | ---------- |
+| `--slotted-icon-check`           | `check`                | stroke 3   |
+| `--slotted-icon-minus`           | `minus`                | stroke 3   |
+| `--slotted-icon-plus`            | `plus`                 | stroke 3   |
+| `--slotted-icon-dot`             | `circle-small`         | fill       |
+| `--slotted-icon-x`               | `x`                    | stroke 2   |
+| `--slotted-icon-ellipsis`        | `ellipsis`             | stroke 2   |
+| `--slotted-icon-copy`            | `copy`                 | stroke 2   |
+| `--slotted-icon-eye`             | `eye`                  | stroke 2   |
+| `--slotted-icon-eye-off`         | `eye-off`              | stroke 2   |
+| `--slotted-icon-chevron-right`   | `chevron-right`        | stroke 2   |
+| `--slotted-icon-chevron-down`    | `chevron-down`         | stroke 2   |
+| `--slotted-icon-chevrons-right`  | `chevrons-right`       | stroke 2   |
+| `--slotted-icon-external`        | `arrow-up-right`       | stroke 2   |
+| `--slotted-icon-calendar`        | `calendar`             | stroke 2   |
+| `--slotted-icon-clock`           | `clock`                | stroke 2   |
+| `--slotted-icon-person`          | `user-round`           | fill       |
+| `--slotted-icon-circle`          | `circle`               | stroke 2   |
+| `--slotted-icon-circle-info`     | `info`                 | stroke 2   |
+| `--slotted-icon-circle-check`    | `circle-check`         | stroke 2   |
+| `--slotted-icon-triangle-alert`  | `triangle-alert`       | stroke 2   |
+| `--slotted-icon-circle-alert`    | `circle-alert`         | stroke 2   |
+| `--slotted-icon-circle-x`        | `circle-x`             | stroke 2   |
+| `--slotted-icon-circle-question` | `circle-question-mark` | stroke 2   |
+| `--slotted-icon-inbox`           | `inbox`                | stroke 2   |
+| `--slotted-icon-search`          | `search`               | stroke 2   |
+| `--slotted-icon-search-x`        | `search-x`             | stroke 2   |
+| `--slotted-icon-lock`            | `lock`                 | stroke 2   |
+| `--slotted-icon-cloud-off`       | `cloud-off`            | stroke 2   |
+| `--slotted-icon-loader-circle`   | `loader-circle`        | stroke 3.5 |
+| `--slotted-icon-maximize`        | `maximize`             | stroke 2   |
+| `--slotted-icon-minimize`        | `minimize`             | stroke 2   |
 
 A component-owned icon is a mask from a glyph token; a character is never an
 icon.
@@ -280,43 +265,6 @@ would show a calendar on one control and the same chevron on the other two, and
 the mark would have stopped naming anything. All eight implementations surveyed
 for `time-picker` draw a clock. `datetime-picker` in wave 8 draws both marks,
 one per surface, and takes no third glyph.
-
-The last six were added for `upload`, and they are the first glyphs in the scale
-that name a _transfer_ rather than a value, a status or a piece of text. Each one
-is a mark the family draws on a control the reader presses, and none of the marks
-already in the scale stands in for any of them.
-
-`--slotted-icon-upload` is the mark on the drop region, and it is the one every
-surveyed implementation of that region draws. `--slotted-icon-file` is the
-preview a row falls back to when there is no thumbnail to show; a sheet of paper
-is not `copy`'s two sheets, which mean _duplicate_, and not `inbox`'s tray, which
-means _received_.
-
-`--slotted-icon-file` and the eight marks beside it are one set:
-the same page, with a different mark inside it. They say what a file is at
-thirty-two pixels, where the name is truncated and the extension is three
-characters — a reader picking one attachment out of nine reads the silhouette
-before the words. Eight kinds cover what an upload actually meets, and `--slotted-icon-file` is
-what everything else falls back to. A PDF and a word-processed document are two
-kinds rather than one, because they are the pair a reader most often has to tell
-apart and the world has already given them different colours: `file-text` is the
-page of lines a PDF is, and `file-type` the page of set type a document is.
-Slides take `presentation` — the one mark in the set that is not a page, and the
-one mark anybody recognises for a deck.
-
-The marks carry no colour of their own. The colour is the tile they are knocked
-out of, and that is a scale of its own: see **File kind** below.
-
-The four control marks are one set and are chosen against each other, because
-they appear together on one row. `--slotted-icon-play` sends a file that is
-waiting and resumes one that is paused; `--slotted-icon-pause` suspends it;
-`--slotted-icon-rotate-ccw` sends it again after a failure; and
-`--slotted-icon-trash` takes it out of the list. The fifth control on that row —
-cancel — draws `--slotted-icon-x`, which the scale already held: stopping a
-transfer and removing a file are two different actions and the row has to say
-which is which, so a cross that means _stop this_ stands beside a bin that means
-_take it away_. Reusing the cross for both was the alternative, and it makes the
-two controls one control drawn twice.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph
@@ -557,16 +505,6 @@ that reads a semantic token keeps working without writing a rule of its own.
 | `--slotted-control-border-color`     | `ButtonBorder` |
 | `--slotted-control-shadow`           | `none`         |
 | `--slotted-scrim`                    | `Canvas`       |
-| `--slotted-upload-kind-pdf`          | `ButtonFace`   |
-| `--slotted-upload-kind-document`     | `ButtonFace`   |
-| `--slotted-upload-kind-spreadsheet`  | `ButtonFace`   |
-| `--slotted-upload-kind-presentation` | `ButtonFace`   |
-| `--slotted-upload-kind-image`        | `ButtonFace`   |
-| `--slotted-upload-kind-video`        | `ButtonFace`   |
-| `--slotted-upload-kind-audio`        | `ButtonFace`   |
-| `--slotted-upload-kind-archive`      | `ButtonFace`   |
-| `--slotted-upload-kind-other`        | `ButtonFace`   |
-| `--slotted-upload-kind-foreground`   | `ButtonText`   |
 
 Every tone maps by rule rather than by row: `accent` is the selected tone and
 takes `Highlight` and `HighlightText`; the other four take `ButtonFace` and
@@ -627,59 +565,6 @@ Everything else Avatar scales is a proportion of this box rather than a sixth
 scale: the initials' type size, the glyph, the square corner radius, and the
 overlap in a group. A proportion of a box is geometry, and geometry is not a
 token.
-
-## File kind
-
-This scale answers what colour a file of a given kind is drawn in. It is the
-second scale in the component layer, and it is there for the reason the first one
-is: a family met a value no semantic token can be retuned to give.
-
-| Token                                | Light     | Dark      | High contrast |
-| ------------------------------------ | --------- | --------- | ------------- |
-| `--slotted-upload-kind-pdf`          | `#c62828` | `#f87171` | `#991b1b`     |
-| `--slotted-upload-kind-document`     | `#1d4ed8` | `#60a5fa` | `#1e3a8a`     |
-| `--slotted-upload-kind-spreadsheet`  | `#15803d` | `#4ade80` | `#14532d`     |
-| `--slotted-upload-kind-presentation` | `#c2410c` | `#fb923c` | `#7c2d12`     |
-| `--slotted-upload-kind-image`        | `#0e7490` | `#22d3ee` | `#164e63`     |
-| `--slotted-upload-kind-video`        | `#4338ca` | `#a5b4fc` | `#312e81`     |
-| `--slotted-upload-kind-audio`        | `#a21caf` | `#f0abfc` | `#701a75`     |
-| `--slotted-upload-kind-archive`      | `#a16207` | `#fbbf24` | `#713f12`     |
-| `--slotted-upload-kind-other`        | `#475569` | `#cbd5e1` | `#1e293b`     |
-| `--slotted-upload-kind-foreground`   | `#ffffff` | `#ffffff` | `#ffffff`     |
-
-The five tones cannot give this scale, and that is the whole of the argument for
-it. A reader has learnt from every product they use that a PDF is red, a
-word-processed document is blue, a spreadsheet is green and a deck is orange; the
-theme holds `accent`, `secondary`, `success`, `warning` and `danger`, which has
-no second blue, no indigo and no magenta — and reaching for `danger` to paint a
-PDF would make one tone mean two things, the file's kind and the row's failure,
-in a family that draws both at once. Avatar cleared the same bar for a size,
-written out under **Avatar size**: a family may not alias a semantic token here,
-and may not restate a scale that already exists. This does neither.
-
-The tile is painted solid and the mark is knocked out of it in
-`--slotted-upload-kind-foreground`, which is white in all three schemes. The
-scheme moves the tile, not the mark: `dark` takes the mid step of each hue so the
-tile separates from a near-black page, and `high-contrast` takes the deepest so
-the pair clears the AAA floor the scheme promises. `--slotted-upload-kind-foreground`
-still varies by scheme, because a theme may need to move it and because forced
-colours must be able to replace it.
-
-The first `dark` palette did the opposite — bright tiles with a near-black mark —
-and it was rejected on sight: a black mark on a saturated red or green is a
-contrast ratio, not a design. Every value below is chosen so that the mark stays
-white, which is what makes the three schemes one idea rather than three.
-
-Three ratios are measured for every value: the tile against the page, the white
-mark against the tile, and the tile against the ground of a failed row, which is
-the one place a tile keeps its own colour over a tinted surface. The lowest in
-the whole scale is 3.30 : 1, and the floor for a non-text element is 3 : 1.
-`packages/themes/default/test/default-theme.test.mjs` measures all of them.
-
-Under forced colours the whole scale goes, by the rule the theme applies to
-every tone that is not `accent` — the rows are in **Forced colours** below. The
-system owns the palette there, and a file's kind is then said by its shape
-alone.
 
 ## Rules for component tokens and containers
 

@@ -29,19 +29,5 @@
   "--slotted-icon-cloud-off": { "icon": "cloud-off" },
   "--slotted-icon-loader-circle": { "icon": "loader-circle", "stroke-width": 3.5 },
   "--slotted-icon-maximize": { "icon": "maximize" },
-  "--slotted-icon-minimize": { "icon": "minimize" },
-  "--slotted-icon-upload": { "icon": "upload" },
-  "--slotted-icon-file": { "icon": "file" },
-  "--slotted-icon-trash": { "icon": "trash-2" },
-  "--slotted-icon-play": { "icon": "play" },
-  "--slotted-icon-pause": { "icon": "pause" },
-  "--slotted-icon-rotate-ccw": { "icon": "rotate-ccw" },
-  "--slotted-icon-file-image": { "icon": "file-image" },
-  "--slotted-icon-file-text": { "icon": "file-text" },
-  "--slotted-icon-file-spreadsheet": { "icon": "file-spreadsheet" },
-  "--slotted-icon-file-audio": { "icon": "file-audio" },
-  "--slotted-icon-file-video": { "icon": "file-video" },
-  "--slotted-icon-file-archive": { "icon": "file-archive" },
-  "--slotted-icon-file-type": { "icon": "file-type" },
-  "--slotted-icon-presentation": { "icon": "presentation" }
+  "--slotted-icon-minimize": { "icon": "minimize" }
 }

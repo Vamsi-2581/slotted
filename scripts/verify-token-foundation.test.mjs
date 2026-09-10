@@ -223,12 +223,7 @@ test('centres the ink of every glyph in the box the mask is drawn in', () => {
   }
   assert.deepEqual(
     moved,
-    [
-      '--slotted-icon-check',
-      '--slotted-icon-triangle-alert',
-      '--slotted-icon-play',
-      '--slotted-icon-file-audio',
-    ],
+    ['--slotted-icon-check', '--slotted-icon-triangle-alert'],
     'the glyphs Lucide did not frame on their own centre',
   );
 });
@@ -284,19 +279,9 @@ test('documents the control typography every family shares', () => {
 
 test('documents each scheme colour in all three schemes', () => {
   assertSchemeTable('Shadow', (token) => token.type === 'shadow');
-  /*
-   * The component layer is excluded because it documents itself. `upload`'s
-   * file-kind palette varies by scheme and is not a semantic colour: it has its
-   * own table under **File kind**, for the reason Avatar's sizes have their own
-   * under **Avatar size**, and listing it here would say a family's palette is
-   * something every family may read.
-   */
   assertSchemeTable(
     'Semantic colour',
-    (token) =>
-      token.type !== 'shadow' &&
-      token.layer !== 'component' &&
-      !token.name.startsWith('--slotted-tone-'),
+    (token) => token.type !== 'shadow' && !token.name.startsWith('--slotted-tone-'),
   );
 });
 

@@ -880,7 +880,29 @@ Depois, nesta ordem:
    `docs/superpowers/specs/2026-09-04-toast-capability-inventory.md`, decisões
    em `docs/superpowers/specs/2026-09-04-toast-design.md`, avaliação em
    `docs/superpowers/specs/2026-09-04-toast-self-assessment.md`.
-7. `loading-overlay`
+7. `loading-overlay` — cobre conteúdo que já está na página e não pode ser
+   tocado, preservando a geometria da região. Nove partes — `root`,
+   `announcement`, `content`, `scrim`, `panel`, `indicator`, `label`,
+   `description` e `cancel` — e os eixos `scope` (`region`/`page`), `veil`
+   (`wash`/`blur`/`none`), `size` e `live`. `loading` é fato do consumidor e não
+   tem modelo de estado: a família nunca o move, pela mesma razão que
+   `removable` não é mutável. O que está coberto fica `inert` num `content` de
+   `display: contents`, porque `inert` desce por toda a árvore e no `root`
+   calaria o anúncio; em escopo `page` a camada compõe
+   `@slotted/core/dismissable-layer` em modo modal, que já escreve `inert` nos
+   irmãos do `body` e trava a rolagem. O foco é lido antes de a região ficar
+   inerte e devolvido quando a espera termina — o defeito que Mantine e Quasar
+   documentam e não resolvem. O contêiner de consulta é o `scrim` e não o
+   `root`, com `container-type: size`, e o painel tem três arranjos que a região
+   escolhe: coluna, barra e só a marca. `delay` e `minDuration` vêm de
+   `@slotted/core/loading`; o anúncio é um único `role="status"` com a regra do
+   `skeleton`. `cancel` é opcional e, quando existe, `Escape` pede o
+   cancelamento; a família emite a requisição e não se esconde sozinha.
+   Inventário em
+   `docs/superpowers/specs/2026-09-10-loading-overlay-capability-inventory.md`,
+   decisões em `docs/superpowers/specs/2026-09-10-loading-overlay-design.md`,
+   avaliação em
+   `docs/superpowers/specs/2026-09-10-loading-overlay-self-assessment.md`.
 
 Refino de `toolbar` com overflow — entregue em 2026-09-04. `overflow` ganha o
 valor `menu` ao lado de `wrap` e `scroll`, e a família ganha duas partes:

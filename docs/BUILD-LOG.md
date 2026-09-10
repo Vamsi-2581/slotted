@@ -4781,3 +4781,19 @@ stage to appear, and the rule is `hasSettled`, a pure function with cases in
 `tools/harness/audit.test.mjs` — which is what the file's own comment already
 asked for: a rule that only exists inside a string evaluated in Chrome is a rule
 nobody can put a case to.
+
+## Two sessions share one index — 2026-09-10
+
+`docs/build-briefing.md` tells a session working beside another to stage
+explicit paths and never `git add -A`. That is necessary and it is not
+sufficient: the index itself is one file in `.git`, shared by both sessions, and
+`git commit` writes whatever is in it.
+
+Four files staged here and not yet committed were carried off by the other
+lane's `git commit` and landed inside a commit about `dialog`. Nothing was lost
+— the other session amended them back out — but for a few minutes this family's
+contract was history that belonged to another family.
+
+So `git add` and `git commit` are one operation, in one shell invocation, and
+the window between them is the whole risk. Anything staged and left is a file
+the other lane may commit for you.

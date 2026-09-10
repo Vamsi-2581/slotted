@@ -133,7 +133,7 @@ beside another session" em docs/build-briefing.md.
 `tooltip popover` é uma sessão só: são o mesmo posicionamento com políticas de
 dismissal diferentes, e decidir isso duas vezes produz duas respostas.
 
-## Rodada 5 — o que depende dos overlays · 1 sessão
+## Rodada 5 — o que depende dos overlays · 1 sessão, mais um refino em seguida
 
 ```
 /component drawer
@@ -190,9 +190,9 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 8 — o resto do Core · 5 sessões
+## Rodada 8 — o resto do Core · 6 sessões
 
-`date-field calendar date-picker` já passou; as outras quatro continuam abertas.
+`date-field calendar date-picker` já passou; as outras cinco continuam abertas.
 
 ```
 /component date-field calendar date-picker
@@ -200,6 +200,39 @@ beside another session" em docs/build-briefing.md.
 Uma sessão só: os três compartilham a aritmética de data e o formato por locale.
 Decida onde essa aritmética vive — ao lado de core/collection ou em entrada
 própria — antes de escrever a primeira.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component time-field time-picker
+
+Logo depois de date-field calendar date-picker, que já passou e que deixou o
+motor pronto. Uma sessão só, e nesta ordem: o picker compõe o campo.
+
+Core, não Extended: um formulário que sabe dizer quando precisa da hora, e
+entregar o campo de data sem o de hora deixa o consumidor escrever o dele contra
+o motor que esta biblioteca publicou.
+
+Não há motor novo aqui: packages/core/src/date/segments.ts percorre um número
+dentro de um intervalo, dá a volta, aceita algarismos e termina a sequência
+quando mais nenhum cabe, sem saber o que o campo significa. fieldRange é o único
+lugar onde os campos são nomeados. Hora, minuto e segundo são uma união mais
+larga e três linhas ali.
+
+O painel de horas é uma lista no passo que o consumidor definiu, o que é listbox
+e não grid: compõe select, não calendar. O valor é PlainTime, nunca um instante
+com fuso — a razão está em "Decisions already taken" no briefing.
+
+O revisor pediu que esta cadeia seja mais inventiva que o campo pesquisado. A
+abertura que a onda 7 encontrou e não tomou: uma hora escrita como duração a
+partir de agora, resolvida à vista antes de ser aceita. Está em
+docs/superpowers/specs/2026-09-09-date-design.md §12.
+
+De todas as sessões desta rodada é a que menos toca em arquivo compartilhado:
+@slotted/core/date já é uma entrada, então nem package.json nem vite.config.ts
+de core mudam.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
@@ -262,33 +295,24 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 9 — hora e composições · 3 sessões
+## Rodada 9 — datetime e composições · 3 sessões
 
-As duas composições dependem de `page` e das coleções. A cadeia de hora depende
-do motor de segmentos da rodada 8, e de mais nada.
+As duas composições dependem de `page` e das coleções. `datetime-field` e
+`datetime-picker` dependem da cadeia de hora, que é a razão de estarem aqui e
+não uma rodada acima.
 
 ```
-/component time-field time-picker
+/component datetime-field datetime-picker
 
-Uma sessão só, e nesta ordem: o picker compõe o campo. Core, não Extended — um
-formulário que sabe dizer quando precisa da hora, e entregar o campo de data sem
-o de hora deixa o consumidor escrever o dele contra o motor que esta biblioteca
-publicou.
+Depois de time-field e time-picker, que estas duas compõem junto com date-field
+e calendar. É a razão de estarem nesta rodada e não na anterior, ao lado da
+cadeia de hora: compõem o que ela entrega.
 
-Não há motor novo aqui: packages/core/src/date/segments.ts percorre um número
-dentro de um intervalo, dá a volta, aceita algarismos e termina a sequência
-quando mais nenhum cabe, sem saber o que o campo significa. fieldRange é o único
-lugar onde os campos são nomeados. Hora, minuto e segundo são uma união mais
-larga e três linhas ali.
-
-O painel de horas é uma lista no passo que o consumidor definiu, o que é listbox
-e não grid: compõe select, não calendar. O valor é PlainTime, nunca um instante
-com fuso — a razão está em "Decisions already taken" no briefing.
-
-O revisor pediu que esta cadeia seja mais inventiva que o campo pesquisado. A
-abertura que a onda 7 encontrou e não tomou: uma hora escrita como duração a
-partir de agora, resolvida à vista antes de ser aceita. Está em
-docs/superpowers/specs/2026-09-09-date-design.md §12.
+datetime-field é uma moldura, um group e um valor só: PlainDateTime, que é um
+PlainDate ao lado de um PlainTime. datetime-picker é a única família da
+biblioteca que segura duas superfícies, e a decisão que ela deve é qual delas
+abre primeiro — e o que acontece com a outra quando o leitor termina na
+primeira.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
@@ -308,28 +332,9 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 10 — datetime · 1 sessão
-
-```
-/component datetime-field datetime-picker
-
-Depois de time-field e time-picker, que estas duas compõem junto com date-field
-e calendar. Sozinhas numa rodada porque compõem quatro famílias e não porque
-sejam grandes.
-
-datetime-field é uma moldura, um group e um valor só: PlainDateTime, que é um
-PlainDate ao lado de um PlainTime. datetime-picker é a única família da
-biblioteca que segura duas superfícies, e a decisão que ela deve é qual delas
-abre primeiro — e o que acontece com a outra quando o leitor termina na
-primeira.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
 Com isto o Core está inteiro.
 
-## Rodada 11 — Extended, primeira leva · 4 sessões
+## Rodada 10 — Extended, primeira leva · 4 sessões
 
 ```
 /component scroll-area splitter
@@ -362,9 +367,9 @@ Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 12 — Extended, segunda leva · 5 sessões
+## Rodada 11 — Extended, segunda leva · 5 sessões
 
-Cada uma depende de algo da rodada 11, das coleções ou da cadeia de data.
+Cada uma depende de algo da rodada 10, das coleções ou da cadeia de data.
 
 ```
 /component command-palette

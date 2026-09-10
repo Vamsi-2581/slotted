@@ -63,7 +63,7 @@ test('reads the per-node depth where it is used, never through an alias', () => 
  * pixels, and only the harness said so.
  */
 test('retunes the indent on the canvas, because the root is not its own descendant', () => {
-  const queries = [...declarations.matchAll(/@container[^{]*\{([\s\S]*?)\n  \}/g)].map(
+  const queries = [...declarations.matchAll(/@container[^{]*\{([\s\S]*?)\n {2}\}/g)].map(
     ([, body]) => body,
   );
   assert.ok(queries.length >= 2, 'the family declares no container query');
@@ -286,7 +286,7 @@ test('states the indent from the glyph, so one distance holds at every size', ()
       `${step} restates the indent, which is what parted the step from the glyph`,
     );
   }
-  const queries = [...declarations.matchAll(/@container[^{]*\{([\s\S]*?)\n  \}/g)].map(
+  const queries = [...declarations.matchAll(/@container[^{]*\{([\s\S]*?)\n {2}\}/g)].map(
     ([, body]) => body,
   );
   for (const body of queries) {

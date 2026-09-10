@@ -128,7 +128,7 @@ const nodesOf = (entries: readonly Entry[]): ReactNode =>
       {...(entry.note === undefined ? {} : { description: entry.note })}
       {...(entry.count === undefined ? {} : { meta: entry.count })}
       {...(entry.locked === true ? { disabled: true } : {})}
-      {...(entry.more === undefined ? {} : { hasChildren: true, childrenCount: entry.more })}
+      {...(entry.more === undefined ? {} : { hasChildren: true })}
     >
       {entry.entries === undefined ? undefined : nodesOf(entry.entries)}
     </TreeNode>

@@ -357,15 +357,6 @@ export function Tree<T = unknown>({
     return held;
   };
 
-  const descendantsOf = useCallback(
-    (key: string, rows: readonly Row[]) => {
-      if (collection !== undefined) return collection.descendantsOf(key);
-      const index = rows.findIndex((row) => row.key === key);
-      return index === -1 ? [] : renderedDescendants(rows, index);
-    },
-    [collection],
-  );
-
   /* ── The filter ─────────────────────────────────────────────────────── */
 
   const filtered = useMemo(() => {
@@ -951,7 +942,6 @@ export function Tree<T = unknown>({
           label={renderNode ? renderNode(node.item, key) : marked(label(node.item))}
           {...(node.disabled ? { disabled: true } : {})}
           {...(node.hasChildren ? { hasChildren: true } : {})}
-          {...(node.childrenCount === undefined ? {} : { childrenCount: node.childrenCount })}
           {...(isNodeLoading?.(node.item) === true ? { loading: true } : {})}
           {...(filtered === undefined
             ? {}
@@ -981,7 +971,6 @@ export function Tree<T = unknown>({
       label={renderNode ? renderNode(node.item, node.key) : marked(label(node.item))}
       {...(node.disabled ? { disabled: true } : {})}
       {...(node.hasChildren ? { hasChildren: true } : {})}
-      {...(node.childrenCount === undefined ? {} : { childrenCount: node.childrenCount })}
       {...(isNodeLoading?.(node.item) === true ? { loading: true } : {})}
       {...(pinned ? { pinned: true, offset: visible.indexOf(node) * resolved.itemSize } : {})}
       textValue={label(node.item)}

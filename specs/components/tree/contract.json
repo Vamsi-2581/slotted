@@ -71,7 +71,7 @@
   },
   "lazy": {
     "owner": "the consumer",
-    "inputs": ["hasChildren", "childrenCount", "loading", "invalid"],
+    "inputs": ["hasChildren", "getChildrenCount", "loading", "invalid"],
     "part": "loader",
     "announce": "one polite announcement per branch, naming it and the number of children, through @slotted/core/live-announcer",
     "reason": "Zag takes a loadChildren promise and mutates its own collection. This family holds no collection of its own, so it emits the expansion request, paints the loader, writes aria-busy on the group and announces the arrival. The data then has one owner, which is what docs/state-and-events.md asks of every family.",
@@ -154,7 +154,7 @@
     "aria-checked": "the same, under the checkbox indicator, and never beside aria-selected",
     "aria-labelledby": "on every node, naming its own label part. A treeitem contains the group holding its children, so a name computed from its contents is the whole subtree read aloud.",
     "aria-level": "written only in the flat structure; the nesting is what the browser computes it from otherwise",
-    "aria-setsize": "written with aria-level, and also on the children of a branch whose childrenCount exceeds what has arrived",
+    "aria-setsize": "written with aria-level, and also on the children of a branch whose getChildrenCount exceeds what has arrived",
     "aria-posinset": "written wherever aria-setsize is",
     "aria-busy": "true on the group of a branch whose children are still on their way",
     "aria-activedescendant": "on the canvas, under that focus model, naming the active node's id",

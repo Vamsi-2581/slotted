@@ -641,7 +641,6 @@ const api: ApiRow[] = apiRows([
     'TreeNode',
     'What typeahead matches, when the label is not plain text',
   ],
-  ['childrenCount', 'number', '—', 'TreeNode', 'How many children will arrive'],
   [
     'match',
     "'hit' | 'ancestor'",

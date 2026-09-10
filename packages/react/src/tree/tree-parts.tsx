@@ -26,7 +26,6 @@ export const NODE_SELECTOR = "[data-part='node']";
 export function TreeNode({
   actions,
   children,
-  childrenCount,
   depth: statedDepth,
   description,
   disabled,

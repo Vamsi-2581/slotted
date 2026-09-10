@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 import ts from 'typescript';
@@ -53,14 +53,23 @@ function readConfig(path) {
 function configsExtending(name) {
   const found = [];
   const walk = (directory) => {
-    for (const entry of readdirSync(directory)) {
-      if (entry === 'node_modules' || entry === 'dist' || entry.startsWith('.')) continue;
-      const path = join(directory, entry);
-      if (statSync(path).isDirectory()) {
+    /* The entries answer what they are themselves, rather than being stat'd by
+       path. `statSync` follows a symlink, and a headless Chrome that dies
+       mid-capture leaves its profile behind under `tools/harness/out` with a
+       `SingletonCookie` pointing at a socket that is gone — a dangling link
+       this walk then threw ENOENT on. A `Dirent` for a symlink is not a
+       directory and does not name a tsconfig, so it is simply passed over. */
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const { name: entryName } = entry;
+      if (entryName === 'node_modules' || entryName === 'dist' || entryName.startsWith('.'))
+        continue;
+      const path = join(directory, entryName);
+      if (entry.isDirectory()) {
         walk(path);
         continue;
       }
-      if (!entry.startsWith('tsconfig') || !entry.endsWith('.json')) continue;
+      if (!entry.isFile() || !entryName.startsWith('tsconfig') || !entryName.endsWith('.json'))
+        continue;
       const config = readConfig(path);
       if (typeof config.extends === 'string' && config.extends.includes(name)) found.push(path);
     }

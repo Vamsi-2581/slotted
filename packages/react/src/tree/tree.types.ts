@@ -240,8 +240,6 @@ export interface TreeNodeProps extends Omit<ComponentPropsWithRef<'li'>, 'childr
    * says so before it can prove it, which is what makes lazy loading possible.
    */
   hasChildren?: boolean | undefined;
-  /** How many children will arrive, which draws the placeholder. */
-  childrenCount?: number | undefined;
   /**
    * How deep the node sits, stated only by the flat shape. Everywhere else the
    * markup says it: each node raises the depth by one for the nodes inside it,

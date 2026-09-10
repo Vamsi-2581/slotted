@@ -959,7 +959,30 @@ avaliação em
 
 Independentes entre si, exceto a cadeia de data.
 
-- `date-field` → `calendar` → `date-picker`
+- `date-field` → `calendar` → `date-picker` — a cadeia partilha uma aritmética e
+  um formato por locale, e ambos vivem em `packages/core/src/date`, entrada
+  `@slotted/core/date`. Segue `currency`: entrada de build e subpath, fora do
+  barril `src/index.ts`, para que importar um botão não puxe um calendário
+  (PRD §23.1). Sem dependência nova: `@internationalized/date` custa 25 kB por
+  um problema de 250 linhas em calendário gregoriano, e o briefing fixa
+  `@floating-ui/dom` como única dependência de runtime de `@slotted/core`.
+  `date-field` é um campo segmentado — um `spinbutton` por campo dentro de um
+  `group`, ordem e separadores vindos de `Intl.DateTimeFormat.formatToParts`,
+  placeholder vindo de `Intl.DisplayNames` na língua do leitor. Guarda os
+  segmentos e não o valor: uma data com dia e mês e sem ano existe, e nenhuma
+  das sete implementações pesquisadas sabe dizê-la. Guarda também o dia que o
+  leitor pediu quando um mês curto não o comporta, de modo que 31 → 28 → 31.
+  `calendar` é o padrão `grid` do APG sobre uma `table` real, com foco rotativo,
+  três vistas (`day`, `month`, `year`), até três meses, números de semana e os
+  três modos de seleção. Reflui por proporção e não por degrau: a célula é
+  `100cqi` dividido pelas colunas, limitada acima pela altura de controlo e
+  abaixo por `--slotted-target-min`. Um mês que deixa de caber quebra linha; não
+  se retira nada. `date-picker` compõe os dois atrás de um `trigger` e de uma
+  camada de `packages/core`, e não redesenha nem o campo nem a grelha.
+  Calendário não-gregoriano é a única capacidade adiada, com eixo `calendar` de
+  um valor hoje para que a chegada não quebre contrato. Inventário em
+  `docs/superpowers/specs/2026-09-09-date-capability-inventory.md`, decisões em
+  `docs/superpowers/specs/2026-09-09-date-design.md`.
 - `upload` — consolida `file-upload`, `dropzone` e `file-input` (guia 17)
 - `page page-header section`
 - `app-shell`

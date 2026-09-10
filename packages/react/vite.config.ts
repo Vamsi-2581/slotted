@@ -41,6 +41,8 @@ export default defineConfig({
         table: resolve(import.meta.dirname, 'src/table/index.ts'),
         tag: resolve(import.meta.dirname, 'src/tag/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
+        'time-field': resolve(import.meta.dirname, 'src/time-field/index.ts'),
+        'time-picker': resolve(import.meta.dirname, 'src/time-picker/index.ts'),
         tooltip: resolve(import.meta.dirname, 'src/tooltip/index.ts'),
         typography: resolve(import.meta.dirname, 'src/typography/index.ts'),
         'visually-hidden': resolve(import.meta.dirname, 'src/visually-hidden/index.ts'),

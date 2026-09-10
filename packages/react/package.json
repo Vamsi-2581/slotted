@@ -184,6 +184,14 @@
       "types": "./dist/types/textarea/index.d.ts",
       "import": "./dist/textarea.js"
     },
+    "./time-field": {
+      "types": "./dist/types/time-field/index.d.ts",
+      "import": "./dist/time-field.js"
+    },
+    "./time-picker": {
+      "types": "./dist/types/time-picker/index.d.ts",
+      "import": "./dist/time-picker.js"
+    },
     "./toast": {
       "types": "./dist/types/toast/index.d.ts",
       "import": "./dist/toast.js"

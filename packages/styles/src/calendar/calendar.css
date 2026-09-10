@@ -1,0 +1,748 @@
+@layer slotted.components {
+  /**
+   * ── The month grid ─────────────────────────────────────────────────────
+   *
+   * Seven columns of two-digit numbers, which makes this the densest grid the
+   * library draws and the one place where `dense` either holds or collapses.
+   * Everything below is sized from the control scales, so the cell shrinks
+   * with the type rather than independently of it, and the touch target is
+   * recovered outside the paint where the scale falls under the minimum.
+   *
+   * The grid is a real `table` with the `grid` role on it. The APG's own note
+   * is why nothing here writes `row`, `columnheader` or `gridcell`: those are
+   * implied by `tr`, `th` and `td`, and writing them again would be the
+   * duplication `patterns.md` refuses.
+   */
+  [data-ui='calendar'][data-part='root'] {
+    /**
+     * The reflow container. It is on the root and the grids are one element
+     * in, because `container-type: inline-size` makes an element a query
+     * container for its descendants and not for itself — the rule the briefing
+     * records, and the reason `stepper` and `description-list` have the same
+     * split.
+     */
+    container-type: inline-size;
+    container-name: slotted-calendar;
+
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_gap: var(--slotted-control-gap-md, 8px);
+    --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    /**
+     * A cell is square, and its side is the control height rather than a scale
+     * of its own: a calendar cell is a control the reader presses, and one
+     * drawn to a different rhythm from the buttons above it reads as a second
+     * component. `dense` takes it to 26 pixels, above the WCAG minimum, and
+     * the coarse-pointer block the theme emits takes it to 44 on touch.
+     */
+    --_cell-size: var(--slotted-calendar-cell-size, var(--slotted-control-height-md, 34px));
+    /** Seven days, four months, four years: the shape of the three views. */
+    --_columns: 7;
+    --_months: 1;
+    --_month-gap: var(--slotted-space-6, 1rem);
+    /** The week number is a column of its own when a product asks for one. */
+    --_week-number-columns: 0;
+    --_grid-size: calc(var(--_cell-size) * (var(--_columns) + var(--_week-number-columns)));
+
+    background-color: var(--slotted-calendar-background, transparent);
+    box-sizing: border-box;
+    color: var(--slotted-calendar-color, var(--slotted-text, CanvasText));
+    display: flex;
+    flex-direction: column;
+    font-family: var(--slotted-control-font-family, system-ui, sans-serif);
+    font-size: var(--_font-size);
+    gap: var(--_gap);
+    /**
+     * The width is stated from the scales rather than measured from the grid
+     * inside, and it has to be: `container-type: inline-size` applies
+     * `contain: inline-size`, so the contents no longer contribute anything to
+     * the element's own width. Written `fit-content`, the root resolved to
+     * almost nothing and the heading was clipped to one character while the
+     * table overflowed it — a picture that looked like a calendar and was a
+     * collapsed box, which is the defect `references/stories.md` records for
+     * `pagination` and the audit exists to catch.
+     *
+     * A stated width also survives the flex container inside a popover, where
+     * a contained element contributing nothing would collapse the surface.
+     */
+    inline-size: calc(
+      var(--_grid-size) * var(--_months) + var(--_month-gap) * (var(--_months) - 1)
+    );
+    max-inline-size: 100%;
+  }
+
+  [data-ui='calendar'][data-part='root'][data-week-numbers] {
+    --_week-number-columns: 0.75;
+  }
+
+  [data-ui='calendar'][data-part='root'][data-months='2'] {
+    --_months: 2;
+  }
+
+  [data-ui='calendar'][data-part='root'][data-months='3'] {
+    --_months: 3;
+  }
+
+  /**
+   * ── Where the reflow happens ──────────────────────────────────────────
+   *
+   * The cell is not stepped at a breakpoint; it is the room there is, divided
+   * by the columns there are, bounded above by the control height and below by
+   * the WCAG 2.2 minimum. `100cqi` is the root's own inline size, and these
+   * two elements are the first that may read it — a container query, and a
+   * container query unit, resolve against an **ancestor** container, so the
+   * root setting its own cell size from its own width did nothing at all. The
+   * first 240-pixel capture of this family showed a calendar at full size
+   * overflowing its stage, with a rule in the sheet that looked like it
+   * should have prevented exactly that.
+   *
+   * Continuous rather than stepped, because a literal threshold cannot be
+   * right at three densities: seven comfortable columns are 238 pixels and
+   * seven dense ones are 182, so any number that fits one shrinks the other
+   * while it still had room. CSS forbids a custom property in a container
+   * condition, which is what makes `clamp()` the answer here rather than a
+   * query.
+   */
+  [data-ui='calendar'] [data-part='header'],
+  [data-ui='calendar'] [data-part='grids'],
+  [data-ui='calendar'] [data-part='months'],
+  [data-ui='calendar'] [data-part='years'] {
+    --_cell-size: clamp(
+      var(--slotted-target-min, 24px),
+      calc(100cqi / (var(--_columns) + var(--_week-number-columns)) / var(--_months)),
+      var(--slotted-calendar-cell-size, var(--slotted-control-height-md, 34px))
+    );
+  }
+
+  /* ── The heading row ──────────────────────────────────────────────────
+   *
+   * The month, and the two triggers that page it. The heading sits between
+   * them rather than beside them, because it is the thing being changed and a
+   * label at one end would make the pair read as two unrelated buttons.
+   */
+  [data-ui='calendar'] [data-part='header'] {
+    align-items: center;
+    display: flex;
+    gap: var(--slotted-space-2, 0.25rem);
+    /* The row is as wide as the grid under it, so the two triggers sit over
+       the first and last columns rather than floating above the middle. */
+    inline-size: 100%;
+    justify-content: space-between;
+  }
+
+  /**
+   * The month and year, and the way up to the month and year views. It is a
+   * button because pressing it does something; it looks like a heading because
+   * that is what it says. The live region is on it: paging with a key changes
+   * nothing that focus lands on, so without this nothing announces the month.
+   */
+  [data-ui='calendar'] [data-part='heading'] {
+    appearance: none;
+    background-color: transparent;
+    border: 0;
+    border-radius: var(--slotted-calendar-radius, var(--slotted-control-radius, 4px));
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--slotted-space-2, 0.25rem);
+    font: inherit;
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    /**
+     * It takes the room between the two triggers, and gives it back only when
+     * there is not enough — `setembro de 2026` and two triggers are 239 pixels
+     * against a seven-column grid of 238, so without this the trigger at the
+     * end fell to a second line.
+     *
+     * The first capture of this family showed the opposite failure, and it is
+     * worth naming because the two look like the same rule: the heading read
+     * `d`, one character, with the grid overflowing under it. That was the
+     * root's `inline-size: fit-content` under `contain: inline-size`, not this
+     * — a contained root has no contents to be sized by, so it collapsed and
+     * took the heading with it. With the root's width stated, shrinking here
+     * is bounded by the grid and stops long before a character.
+     */
+    flex: 1 1 auto;
+    justify-content: center;
+    min-inline-size: 0;
+    padding-block: var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--slotted-space-2, 0.25rem);
+    /* One line, whatever the locale writes: a month name that wrapped would
+       take the grid down with it. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background-color var(--slotted-control-transition-duration)
+      var(--slotted-control-transition-easing);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  [data-ui='calendar'] [data-part='heading']::after {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
+    content: '';
+    flex: 0 0 auto;
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-calendar-heading-icon, var(--slotted-icon-chevron-down));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  /* The way up is closed at the top: a year view has nowhere further to go,
+     so the mark that offered it goes rather than being shown disabled. */
+
+  [data-ui='calendar'][data-part='root'][data-view='year'] [data-part='heading']::after {
+    display: none;
+  }
+
+  /* ── The two page triggers ────────────────────────────────────────────
+   *
+   * The chevrons are mirrored by the family that draws them, which is how one
+   * pair of glyph tokens serves both document directions.
+   */
+  [data-ui='calendar'] [data-part='previous'],
+  [data-ui='calendar'] [data-part='next'] {
+    align-items: center;
+    appearance: none;
+    background-color: transparent;
+    block-size: var(--_cell-size);
+    border: 0;
+    border-radius: var(--slotted-calendar-radius, var(--slotted-control-radius, 4px));
+    color: var(--slotted-calendar-trigger-color, var(--slotted-text-muted, GrayText));
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    inline-size: var(--_cell-size);
+    justify-content: center;
+    padding: 0;
+    touch-action: manipulation;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  [data-ui='calendar'] [data-part='previous']::before,
+  [data-ui='calendar'] [data-part='next']::before {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
+    content: '';
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-calendar-page-icon, var(--slotted-icon-chevron-right));
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+
+  /**
+   * One glyph, turned. The chevron points along the writing direction, so the
+   * "previous" trigger is the "next" artwork rotated a half turn and both
+   * follow `dir` without a second token — the rule `pagination` set.
+   */
+  [data-ui='calendar'] [data-part='previous']::before {
+    rotate: 180deg;
+  }
+
+  [data-ui='calendar']:dir(rtl) [data-part='previous']::before {
+    rotate: 0deg;
+  }
+
+  [data-ui='calendar']:dir(rtl) [data-part='next']::before {
+    rotate: 180deg;
+  }
+
+  /* ── The grids ────────────────────────────────────────────────────────
+   *
+   * One month, or two, or three. They wrap rather than scroll: a calendar
+   * narrower than its months is a calendar with fewer months, and a sideways
+   * scrollbar under a grid is a control nobody finds.
+   */
+  [data-ui='calendar'] [data-part='grids'] {
+    display: flex;
+    /**
+     * A second month that does not fit goes under the first rather than being
+     * withdrawn. Hiding it needs a literal breakpoint — CSS forbids a custom
+     * property in a container condition — and one literal cannot be right at
+     * three densities: two months are 492 pixels at `comfortable` and 380 at
+     * `dense`, so any threshold that fits one hides a month that fits in the
+     * other. Wrapping is answered by the same arithmetic at every density, and
+     * it never takes away a month the consumer asked for.
+     */
+    flex-wrap: wrap;
+    gap: var(--_month-gap);
+    justify-content: center;
+  }
+
+  [data-ui='calendar'] [data-part='grid'] {
+    border-collapse: collapse;
+    /* A table sizes itself from its content and would give a 31-day column one
+       pixel more than a 30-day one. Fixed layout hands every column the same
+       width, which is what makes the seven read as a week. */
+    table-layout: fixed;
+  }
+
+  /**
+   * The month's own name. With one month it is out of the picture and not out
+   * of the document — the heading above already shows it, and a screen reader
+   * reaching the grid still needs it.
+   */
+  [data-ui='calendar'] [data-part='grid-caption'] {
+    block-size: 1px;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+  }
+
+  /**
+   * With more than one month it is shown, because the heading then names the
+   * span rather than a month and nothing else would say which grid is which.
+   * A reader looking at two grids and one title has to count columns to find
+   * out where October starts.
+   */
+  [data-ui='calendar'][data-part='root']:is([data-months='2'], [data-months='3'])
+    [data-part='grid-caption'] {
+    block-size: auto;
+    clip-path: none;
+    color: var(--slotted-calendar-weekday-color, var(--slotted-text-muted, GrayText));
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    inline-size: auto;
+    overflow: visible;
+    padding-block-end: var(--slotted-space-2, 0.25rem);
+    position: static;
+  }
+
+  /**
+   * The weekday. Two characters is what a column can hold; the full name
+   * reaches assistive technology through `abbr`, which is the APG's own
+   * answer and the difference between hearing "Mo" and hearing "Monday".
+   */
+  [data-ui='calendar'] [data-part='week-header'] {
+    block-size: var(--_cell-size);
+    color: var(--slotted-calendar-weekday-color, var(--slotted-text-muted, GrayText));
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    font-weight: var(--slotted-font-weight-medium, 500);
+    inline-size: var(--_cell-size);
+    padding: 0;
+    /* Never truncated. A weekday cut to one character is not a weekday, and
+       the locale already chose how short its own narrow form is. */
+    text-overflow: clip;
+  }
+
+  [data-ui='calendar'] [data-part='week-number'] {
+    color: var(--slotted-calendar-week-number-color, var(--slotted-text-muted, GrayText));
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--slotted-font-weight-regular, 400);
+    /* Narrower than a day: it annotates the row rather than belonging to it,
+       and a column as wide as a day would read as an eighth day. */
+    inline-size: calc(var(--_cell-size) * 0.75);
+    padding: 0;
+    /* The line that says the numbers are not part of the week. */
+    border-inline-end: var(--slotted-border-width-thin, 1px) solid
+      var(--slotted-calendar-week-number-border-color, var(--slotted-border-subtle, ButtonBorder));
+  }
+
+  [data-ui='calendar'] [data-part='cell'] {
+    padding: 0;
+    /* The containing block of the range band below. */
+    position: relative;
+  }
+
+  /**
+   * The day the reader presses.
+   *
+   * It is the `td`'s child rather than the `td` itself, because the range band
+   * has to run edge to edge across a cell while the day itself stays a circle
+   * inside it — two shapes, and one element cannot be both.
+   */
+  [data-ui='calendar'] [data-part='day'] {
+    align-items: center;
+    /**
+     * One rule short of the cell, top and bottom, in every cell — not only in
+     * a range. That gutter is where the band's two rules are drawn, and
+     * without it the day's own ground covered them: a pointer crossing the
+     * middle of a range rubbed the run out under it, one cell at a time, which
+     * is what the reviewer saw. Taken in every cell rather than only in a
+     * ranged one, so no day is a different size from the day beside it.
+     */
+    block-size: calc(var(--_cell-size) - var(--slotted-border-width-thin, 1px) * 2);
+    margin-block: var(--slotted-border-width-thin, 1px);
+    border-radius: var(--slotted-calendar-day-radius, var(--slotted-radius-sm, 4px));
+    box-sizing: border-box;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font-variant-numeric: tabular-nums;
+    /**
+     * A column, and the second row is today's dot — reserved in every cell,
+     * painted in one. Left to today alone the mark either overlapped the digit
+     * or moved it, and a month whose ninth sits two pixels higher than its
+     * tenth is a month with a dent in it.
+     */
+    flex-direction: column;
+    inline-size: var(--_cell-size);
+    justify-content: center;
+    /* The digit's own box, and nothing more: the leading a paragraph needs is
+       air the cell has to give to the dot instead. */
+    line-height: 1;
+    /* Above the range band, which is painted on the cell behind it. */
+    position: relative;
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /**
+   * The hit area, recovered outside the paint. At `dense` the cell is 26
+   * pixels and the WCAG 2.2 minimum is 24, so nothing is needed there; a theme
+   * whose control scale is smaller gets the target back without the family
+   * having to know which theme it is under.
+   */
+  [data-ui='calendar'] [data-part='day']::after {
+    content: '';
+    inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
+    position: absolute;
+  }
+
+  /* ── The month and year views ─────────────────────────────────────────
+   *
+   * Four columns rather than seven, and a cell wide enough for a month's short
+   * name. A reader entering a birth date must not press "previous month" four
+   * hundred times, which is what these two exist to prevent.
+   */
+  [data-ui='calendar'] [data-part='months'],
+  [data-ui='calendar'] [data-part='years'] {
+    display: grid;
+    gap: var(--slotted-space-2, 0.25rem);
+    grid-template-columns: repeat(4, 1fr);
+    /* The same box the day grid occupies, so switching view does not resize
+       the surface the reader is looking at. */
+    inline-size: calc(var(--_cell-size) * var(--_columns));
+  }
+
+  [data-ui='calendar'] [data-part='period'] {
+    align-items: center;
+    appearance: none;
+    background-color: transparent;
+    block-size: var(--_cell-size);
+    border: 0;
+    border-radius: var(--slotted-calendar-day-radius, var(--slotted-radius-sm, 4px));
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    justify-content: center;
+    padding-inline: var(--slotted-space-2, 0.25rem);
+    transition:
+      background-color var(--slotted-control-transition-duration)
+        var(--slotted-control-transition-easing),
+      color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── What a cell can say ──────────────────────────────────────────────
+   *
+   * Seven facts, and every one of them paired with a shape rather than carried
+   * by colour alone. Under `forced-colors` a palette becomes four system
+   * colours, and every surveyed calendar loses six of these seven there.
+   */
+
+  /**
+   * Today. Marked apart from the selection, as §6 of the feature guide asks in
+   * those words: a reader who has chosen today must still see both facts.
+   *
+   * A dot rather than a ring, and the reason is in the first focus capture of
+   * this family: today was drawn as a ring and focus is drawn as a ring, so a
+   * reader arrowing onto today saw one box and could not tell which of the two
+   * it was. Two facts need two shapes. The dot is `currentcolor`, so it takes
+   * the ink of whatever state the day is in — the accent text at rest, the
+   * fill's own ink when the day is chosen, the disabled grey when nothing is
+   * operable — and it survives `forced-colors`, where `currentcolor` is
+   * already the system's ink.
+   */
+  [data-ui='calendar'] [data-part='day'][data-today] {
+    color: var(--slotted-calendar-today-color, var(--slotted-tone-accent-text));
+    font-weight: var(--slotted-font-weight-semibold, 600);
+  }
+
+  [data-ui='calendar'] [data-part='day']::before {
+    /* Reserved in every cell and painted in one, so the row keeps its line. */
+    background-color: transparent;
+    block-size: var(--slotted-space-2, 0.25rem);
+    border-radius: var(--slotted-radius-full, 9999px);
+    content: '';
+    flex: 0 0 auto;
+    inline-size: var(--slotted-space-2, 0.25rem);
+    /* After the digit: a `::before` is the first flex item until it is told
+       otherwise, and the mark belongs under the number. */
+    order: 1;
+  }
+
+  [data-ui='calendar'] [data-part='day'][data-today]::before {
+    background-color: currentcolor;
+  }
+
+  /**
+   * A day of the month either side. Quiet enough to read as context and legible
+   * enough to press, because a reader who wants 1 October while looking at
+   * September should be able to.
+   */
+  [data-ui='calendar'] [data-part='cell'][data-outside-month] [data-part='day'] {
+    color: var(--slotted-calendar-outside-color, var(--slotted-text-muted, GrayText));
+  }
+
+  /**
+   * Refused by the predicate. It stays focusable — `aria-disabled`, never
+   * `disabled` — so a reader can arrow onto it and be told why, and the strike
+   * is what says so without colour.
+   */
+  [data-ui='calendar'] [data-part='cell'][data-unavailable] [data-part='day'] {
+    color: var(--slotted-calendar-unavailable-color, var(--slotted-disabled-foreground));
+    cursor: not-allowed;
+    text-decoration: line-through;
+    text-decoration-thickness: var(--slotted-border-width-thin, 1px);
+  }
+
+  /**
+   * The band behind a range. It is painted on the cell so it runs edge to edge
+   * and the days keep their own shape on top of it; the two ends are square on
+   * the inside and round on the outside, which is what makes a range read as
+   * one run rather than as a row of separate marks.
+   */
+  [data-ui='calendar'] [data-part='cell'][data-in-range]::before,
+  [data-ui='calendar'] [data-part='cell'][data-range-start]::before,
+  [data-ui='calendar'] [data-part='cell'][data-range-end]::before {
+    background-color: var(--slotted-calendar-range-background, var(--slotted-tone-accent-surface));
+    /**
+     * The pair the token foundation requires, and not a decoration.
+     *
+     * A tone's `surface` role is a ground rather than a separator, and in
+     * `high-contrast` it is the page's own white — so a band drawn with the
+     * ground alone vanished there and the run read as two unrelated days, which
+     * is what the first high-contrast capture of this family showed. The two
+     * rules are the accent border, which the foundation measures at the
+     * non-text ratio against the page and against the ground it encloses, and
+     * which `forced-colors` remaps rather than removes.
+     */
+    border-block: var(--slotted-border-width-thin, 1px) solid
+      var(--slotted-calendar-range-border-color, var(--slotted-tone-accent-border));
+    content: '';
+    inset: 0;
+    position: absolute;
+  }
+
+  /**
+   * The band starts at the middle of the first cell and stops at the middle of
+   * the last, so it runs out from under the two solid ends rather than
+   * beginning beside them.
+   */
+  [data-ui='calendar'] [data-part='cell'][data-range-start]::before {
+    inset-inline-start: 50%;
+  }
+
+  [data-ui='calendar'] [data-part='cell'][data-range-end]::before {
+    inset-inline-end: 50%;
+  }
+
+  /**
+   * A run has two outer corners and no inner ones. The end that faces into the
+   * range is square, so the solid meets the band edge to edge; the end that
+   * faces out keeps the day's own radius. A range of one day is both ends at
+   * once and stays round on both sides, which is why each rule excludes the
+   * other.
+   */
+  [data-ui='calendar']
+    [data-part='cell'][data-range-start]:not([data-range-end])
+    [data-part='day'] {
+    border-end-end-radius: 0;
+    border-start-end-radius: 0;
+  }
+
+  [data-ui='calendar']
+    [data-part='cell'][data-range-end]:not([data-range-start])
+    [data-part='day'] {
+    border-end-start-radius: 0;
+    border-start-start-radius: 0;
+  }
+
+  /**
+   * The band alone is a tone surface, and a tone surface is a ground rather
+   * than a separator — `docs/token-foundation.md` states it. So the run is
+   * bracketed by its two ends, which are solid, and the edge that encloses it
+   * is the accent border the foundation measures against both the page and the
+   * ground it tints.
+   */
+  [data-ui='calendar'] [data-part='cell'][data-in-range] [data-part='day'] {
+    border-radius: 0;
+  }
+
+  /* ── States ───────────────────────────────────────────────────────────
+   *
+   * Written strongest last, and each weaker one guarded against every stronger
+   * one it can meet, which is the order `STATE_PRECEDENCE` sets.
+   */
+
+  [data-ui='calendar'] [data-part='day']:hover:not([data-disabled]),
+  [data-ui='calendar'] [data-part='period']:hover:not(:disabled):not([data-disabled]),
+  [data-ui='calendar'] [data-part='heading']:hover:not(:disabled):not([data-disabled]),
+  [data-ui='calendar'] [data-part='previous']:hover:not(:disabled):not([data-disabled]),
+  [data-ui='calendar'] [data-part='next']:hover:not(:disabled):not([data-disabled]) {
+    background-color: var(
+      --slotted-calendar-hover-background,
+      var(--slotted-tone-secondary-subtle-hover)
+    );
+  }
+
+  [data-ui='calendar'] [data-part='day']:active:not([data-disabled]),
+  [data-ui='calendar'] [data-part='period']:active:not(:disabled):not([data-disabled]),
+  [data-ui='calendar'] [data-part='previous']:active:not(:disabled):not([data-disabled]),
+  [data-ui='calendar'] [data-part='next']:active:not(:disabled):not([data-disabled]) {
+    background-color: var(
+      --slotted-calendar-active-background,
+      var(--slotted-tone-secondary-subtle-active)
+    );
+  }
+
+  /**
+   * Inside a run the pointer takes the accent one step up rather than the
+   * neutral hover every other day takes. A grey wash over a blue band read as
+   * a hole in the run, and the reader's own selection is what the band is
+   * about — the pointer should deepen it, not neutralise it.
+   */
+  [data-ui='calendar']
+    [data-part='cell'][data-in-range]
+    [data-part='day']:hover:not([data-disabled]) {
+    background-color: var(
+      --slotted-calendar-range-hover-background,
+      var(--slotted-tone-accent-subtle-hover)
+    );
+  }
+
+  [data-ui='calendar']
+    [data-part='cell'][data-in-range]
+    [data-part='day']:active:not([data-disabled]) {
+    background-color: var(
+      --slotted-calendar-range-active-background,
+      var(--slotted-tone-accent-subtle-active)
+    );
+  }
+
+  /**
+   * A date the predicate refused answers neither the pointer nor the press,
+   * and it is written after the two rules above for that reason: the guards
+   * they carry are for `data-disabled`, and this state is the family's own.
+   */
+  [data-ui='calendar']
+    [data-part='cell'][data-unavailable]
+    [data-part='day']:hover:not([data-disabled]),
+  [data-ui='calendar']
+    [data-part='cell'][data-unavailable]
+    [data-part='day']:active:not([data-disabled]) {
+    background-color: transparent;
+  }
+
+  /**
+   * The chosen date. A fill rather than a ring, so it and today can be true at
+   * once and still read as two facts.
+   */
+  [data-ui='calendar'] [data-part='cell'][data-selected] [data-part='day'],
+  [data-ui='calendar'] [data-part='period'][data-selected] {
+    background-color: var(--slotted-calendar-selected-background, var(--slotted-tone-accent-solid));
+    color: var(--slotted-calendar-selected-color, var(--slotted-tone-accent-on-solid));
+    font-weight: var(--slotted-font-weight-semibold, 600);
+  }
+
+  [data-ui='calendar'] [data-part='day']:focus-visible,
+  [data-ui='calendar'] [data-part='period']:focus-visible,
+  [data-ui='calendar'] [data-part='heading']:focus-visible,
+  [data-ui='calendar'] [data-part='previous']:focus-visible,
+  [data-ui='calendar'] [data-part='next']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    /* Inside the cell rather than outside it: an offset ring on a grid of
+       touching cells would overlap the four neighbours and read as a smear. */
+    outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
+  }
+
+  [data-ui='calendar'][data-part='root'][data-invalid] {
+    --slotted-focus-ring-color: var(
+      --slotted-calendar-invalid-focus-ring-color,
+      var(--slotted-focus-ring-color-invalid, Highlight)
+    );
+  }
+
+  /* A calendar the reader may read and not change: the days stop offering
+     themselves, and nothing is faded, because the value is still real. */
+  [data-ui='calendar'][data-part='root'][data-readonly] [data-part='day'],
+  [data-ui='calendar'][data-part='root'][data-readonly] [data-part='period'] {
+    cursor: default;
+  }
+
+  [data-ui='calendar'][data-part='root'][data-disabled] {
+    color: var(--slotted-calendar-disabled-color, var(--slotted-disabled-foreground));
+  }
+
+  /* Nothing a person cannot reach is painted in the tone that says "act on
+     me": today keeps its dot, in the ink a disabled control is allowed. */
+  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='day'][data-today] {
+    color: var(--slotted-disabled-foreground);
+  }
+
+  [data-ui='calendar'][data-part='root'][data-disabled]
+    [data-part='cell'][data-selected]
+    [data-part='day'] {
+    background-color: var(--slotted-disabled-background);
+    color: var(--slotted-disabled-foreground);
+  }
+
+  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='day'],
+  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='period'],
+  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='previous'],
+  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='next'],
+  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='heading'] {
+    cursor: not-allowed;
+  }
+
+  [data-ui='calendar'] [data-part='previous']:disabled,
+  [data-ui='calendar'] [data-part='next']:disabled {
+    color: var(--slotted-disabled-foreground);
+    cursor: not-allowed;
+  }
+
+  /* ── Reflow ───────────────────────────────────────────────────────────
+   *
+   * The component answers its own inline size, not the viewport's: a calendar
+   * in a 320-pixel drawer and the same calendar on a 1400-pixel page are the
+   * same width problem, and only a container query sees both.
+   *
+   * The breakpoints are literal because CSS forbids a custom property in a
+   * container condition, which `docs/token-foundation.md` records.
+   */
+  /**
+   * The months close up once there is no room to keep them a full step apart.
+   * It is the one query left in the sheet, and it is on a descendant rather
+   * than on the root because a container cannot query itself.
+   */
+  @container slotted-calendar (max-width: 320px) {
+    [data-ui='calendar'] [data-part='grids'] {
+      --_month-gap: var(--slotted-space-4, 0.5rem);
+    }
+  }
+
+  @media (forced-colors: active) {
+    /* A masked glyph is painted with a background, and forced colours replace
+       a background that is not one of the system's own: the mark would go and
+       the box it sat in would stay. */
+    [data-ui='calendar'] [data-part='previous']::before,
+    [data-ui='calendar'] [data-part='next']::before,
+    [data-ui='calendar'] [data-part='heading']::after {
+      forced-color-adjust: none;
+    }
+  }
+}

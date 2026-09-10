@@ -1,6 +1,12 @@
 export { Table, TABLE_ROW_SELECTOR, useOptionalTable, useTable } from './table';
 export { TableContent } from './table-content';
-export { TableFilter } from './table-filter';
+export {
+  TableBooleanFilter,
+  TableDateFilter,
+  TableNumberFilter,
+  TableSetFilter,
+  TableTextFilter,
+} from './table-filter';
 export { DEFAULT_TABLE_LABELS, TableDefaultsProvider, useTableDefaults } from './table-defaults';
 export {
   TableBody,
@@ -40,7 +46,14 @@ export type {
   TableExpandedReason,
   TableExpandedRequest,
   TableFilterOption,
-  TableFilterProps,
+  TableBooleanFilterProps,
+  TableConditionFilterProps,
+  TableDateFilterProps,
+  TableFilterOperandProps,
+  TableFilterSharedProps,
+  TableNumberFilterProps,
+  TableSetFilterProps,
+  TableTextFilterProps,
   TableFilterReason,
   TableFilterRequest,
   TableExpanderProps,

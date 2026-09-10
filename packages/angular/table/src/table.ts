@@ -170,11 +170,22 @@ export class SlTable implements ControlValueAccessor {
   readonly resolvedStickyFooter = computed(() => this.stickyFooter() ?? this.defaults.stickyFooter);
   readonly resolvedStickyTo = computed(() => this.stickyTo() ?? this.defaults.stickyTo);
   readonly resolvedColumns = computed(() => this.columns() ?? this.defaults.columns);
-  readonly resolvedLabels = computed<TableLabels>(() => ({
-    ...TABLE_LABELS,
-    ...this.defaults.labels,
-    ...(this.labels() ?? {}),
-  }));
+  /**
+   * Two of the words are maps — the joins and the operator names — so they are
+   * merged rather than replaced: an application that renames one operator keeps
+   * the other eighteen. A spread alone would leave a panel with one translated
+   * word and a column of raw operator keys beside it.
+   */
+  readonly resolvedLabels = computed<TableLabels>(() => {
+    const sources = [TABLE_LABELS, this.defaults.labels, this.labels() ?? {}];
+    return {
+      ...TABLE_LABELS,
+      ...this.defaults.labels,
+      ...(this.labels() ?? {}),
+      filterJoins: Object.assign({}, ...sources.map((source) => source.filterJoins ?? {})),
+      filterOperators: Object.assign({}, ...sources.map((source) => source.filterOperators ?? {})),
+    };
+  });
 
   isSelected(key: string) {
     return this.value().includes(key);

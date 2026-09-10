@@ -4,12 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { operatorsFor, setFilter } from '@slotted/core/filter';
+import type { NumberFilter, SetFilter, TextFilter } from '@slotted/core/filter';
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlTable } from './table';
 import { SlTableContent } from './table-content';
-import { provideTableDefaults } from './table-defaults';
+import { provideTableDefaults, TABLE_LABELS } from './table-defaults';
 import type { TableSortDescriptor } from './table-defaults';
-import { SlTableFilter } from './table-filter';
+import { SlTableNumberFilter, SlTableSetFilter, SlTableTextFilter } from './table-filter';
 import {
   SlTableBody,
   SlTableCaption,
@@ -371,7 +373,7 @@ describe('pinning', () => {
     SlTableColumnActions,
     SlTableColumnHeader,
     SlTableContent,
-    SlTableFilter,
+    SlTableSetFilter,
     SlTableHead,
     SlTableRow,
   ],
@@ -383,7 +385,7 @@ describe('pinning', () => {
             Status
             <span slTableColumnActions>
               <span
-                slTableFilter
+                slTableSetFilter
                 columnLabel="status"
                 [options]="options"
                 [(value)]="chosen"
@@ -402,7 +404,50 @@ class FilterHost {
     { count: 1, value: 'Overdue' },
     { value: 'Draft' },
   ];
-  readonly chosen = signal<readonly string[]>([]);
+  readonly chosen = signal<SetFilter | null>(null);
+}
+
+/**
+ * A typed column, and the two operators that change the panel's shape rather
+ * than its comparison.
+ */
+@Component({
+  standalone: true,
+  imports: [
+    SlTable,
+    SlTableBody,
+    SlTableColumnActions,
+    SlTableColumnHeader,
+    SlTableContent,
+    SlTableHead,
+    SlTableNumberFilter,
+    SlTableRow,
+    SlTableTextFilter,
+  ],
+  template: `<div slTable [columns]="1">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader column="amount">
+            Amount
+            <span slTableColumnActions>
+              @if (kind() === 'text') {
+                <span slTableTextFilter columnLabel="amount" [(value)]="text"></span>
+              } @else {
+                <span slTableNumberFilter columnLabel="amount" [(value)]="amount"></span>
+              }
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody></tbody>
+    </div>
+  </div>`,
+})
+class TypedFilterHost {
+  readonly kind = signal<'number' | 'text'>('text');
+  readonly text = signal<TextFilter | null>(null);
+  readonly amount = signal<NumberFilter | null>(null);
 }
 
 describe('where a cell sits in its row', () => {
@@ -421,7 +466,12 @@ describe('where a cell sits in its row', () => {
 });
 
 describe('the column filter', () => {
-  it('reports nothing until Apply, and marks the column once it has', async () => {
+  const panelButton = (label: string) =>
+    [...document.querySelectorAll('[data-part="filter-actions"] button')].find(
+      (button) => (button.textContent ?? '').trim() === label,
+    ) as HTMLElement;
+
+  it('reports nothing until Apply, and reports the descriptor the engine reads', async () => {
     await TestBed.configureTestingModule({ imports: [FilterHost] }).compileComponents();
     const fixture = TestBed.createComponent(FilterHost);
     fixture.detectChanges();
@@ -443,17 +493,142 @@ describe('the column filter', () => {
 
     boxes[1]?.click();
     fixture.detectChanges();
-    expect(fixture.componentInstance.chosen()).toEqual([]);
+    expect(fixture.componentInstance.chosen()).toBeNull();
 
-    const apply = [...document.querySelectorAll('[data-part="filter-actions"] button')].find(
-      (button) => (button.textContent ?? '').trim() === 'Apply',
-    ) as HTMLElement;
-    apply.click();
+    panelButton('Apply').click();
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.chosen()).toEqual(['Paid']);
+    expect(fixture.componentInstance.chosen()).toEqual(setFilter(['Paid']));
     expect(trigger.getAttribute('data-filtered')).toBe('');
-    expect(trigger.getAttribute('aria-label')).toBe('Filter status (1 chosen)');
+    expect(trigger.getAttribute('aria-label')).toBe('Filter status: Is any of Paid');
+  });
+
+  /**
+   * The vocabulary is the engine's, and the panel offers exactly what the kind
+   * holds. A list written here instead would be a second definition of what a
+   * text column can be asked.
+   */
+  it('offers every operator its kind holds, and no other', async () => {
+    await TestBed.configureTestingModule({ imports: [TypedFilterHost] }).compileComponents();
+    const fixture = TestBed.createComponent(TypedFilterHost);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('[data-part="filter"]') as HTMLElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    (
+      document.querySelector('[data-part="filter-operator"] [role="combobox"]') as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const offered = [...document.querySelectorAll('[role="option"]')].map((option) =>
+      (option.textContent ?? '').trim(),
+    );
+    expect(offered).toEqual(
+      operatorsFor('text').map((operator) => TABLE_LABELS.filterOperators[operator]),
+    );
+  });
+
+  it('takes two operands for a range and none for a blank test', async () => {
+    await TestBed.configureTestingModule({ imports: [TypedFilterHost] }).compileComponents();
+    const fixture = TestBed.createComponent(TypedFilterHost);
+    fixture.componentInstance.kind.set('number');
+    fixture.componentInstance.amount.set({
+      conditions: [{ end: 20, operator: 'between', value: 10 }],
+      join: 'and',
+      kind: 'number',
+    });
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('[data-part="filter"]') as HTMLElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const condition = document.querySelector('[data-part="filter-condition"]') as HTMLElement;
+    expect(condition.getAttribute('data-operands')).toBe('2');
+    expect(condition.querySelectorAll('[data-part="filter-operand"] input').length).toBe(2);
+    /* The range is complete, so the second condition stands beside it with one
+       operand of its own — which is the reveal, not a third end of the range. */
+    expect(document.querySelectorAll('[data-part="filter-condition"]').length).toBe(2);
+  });
+
+  /**
+   * AG Grid's own reveal, and the join that comes with it. The common case is
+   * one condition, so the panel never opens as a form.
+   */
+  it('reveals the second condition and its join once the first is complete', async () => {
+    await TestBed.configureTestingModule({ imports: [TypedFilterHost] }).compileComponents();
+    const fixture = TestBed.createComponent(TypedFilterHost);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('[data-part="filter"]') as HTMLElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.querySelector('[data-part="filter-join"]')).toBeNull();
+
+    const operand = document.querySelector(
+      '[data-part="filter-operand"] input',
+    ) as HTMLInputElement;
+    operand.value = 'ana';
+    operand.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(document.querySelector('[data-part="filter-join"]')).not.toBeNull();
+    expect(document.querySelectorAll('[data-part="filter-condition"]').length).toBe(2);
+
+    panelButton('Apply').click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.text()).toEqual({
+      conditions: [{ operator: 'contains', value: 'ana' }],
+      join: 'and',
+      kind: 'text',
+    });
+  });
+
+  /** The one key the family takes, and the reason it is a recorded departure. */
+  it('applies on Enter in an operand', async () => {
+    await TestBed.configureTestingModule({ imports: [TypedFilterHost] }).compileComponents();
+    const fixture = TestBed.createComponent(TypedFilterHost);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('[data-part="filter"]') as HTMLElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const operand = document.querySelector(
+      '[data-part="filter-operand"] input',
+    ) as HTMLInputElement;
+    operand.value = 'ana';
+    operand.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    operand.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.text()).toEqual({
+      conditions: [{ operator: 'contains', value: 'ana' }],
+      join: 'and',
+      kind: 'text',
+    });
+  });
+
+  it('empties the filter on Clear', async () => {
+    await TestBed.configureTestingModule({ imports: [FilterHost] }).compileComponents();
+    const fixture = TestBed.createComponent(FilterHost);
+    fixture.componentInstance.chosen.set(setFilter(['Paid']));
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('[data-part="filter"]') as HTMLElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    panelButton('Clear').click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.chosen()).toBeNull();
   });
 });
 

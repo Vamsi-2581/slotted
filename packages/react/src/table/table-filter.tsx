@@ -1,14 +1,53 @@
+import {
+  defaultOperator as kindDefaultOperator,
+  describeFilter,
+  emptyFilter,
+  isConditionActive,
+  isFilterActive,
+  normalizeFilter,
+  operandCount,
+  operatorsFor,
+  serializeFilter,
+  withCondition,
+  withJoin,
+} from '@slotted/core/filter';
+import type {
+  FilterCondition,
+  FilterDescriptor,
+  FilterJoin,
+  FilterKind,
+  FilterOperator,
+} from '@slotted/core/filter';
+import { createFilter } from '@slotted/core/collection';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
+import { isPlainDate, parseISODate, toISODate } from '@slotted/core/date';
+import type { PlainDate } from '@slotted/core/date';
 import { createControllable } from '@slotted/core/state';
-import { useId, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { Button } from '../button';
 import { Checkbox } from '../checkbox';
+import { DatePicker } from '../date-picker';
+import { NumberField } from '../number-field';
 import { Popover, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
+import { Radio, RadioGroup } from '../radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { TextField } from '../text-field';
 import { useTable } from './table';
 import { useTableColumn } from './table-parts';
-import type { TableFilterOption, TableFilterProps, TableFilterReason } from './table.types';
+import type {
+  TableBooleanFilterProps,
+  TableConditionFilterProps,
+  TableDateFilterProps,
+  TableFilterOperandProps,
+  TableFilterOption,
+  TableFilterReason,
+  TableNumberFilterProps,
+  TableResolvedLabels,
+  TableSetFilterProps,
+  TableTextFilterProps,
+} from './table.types';
 
 /**
  * The mark the trigger carries. It is authored here rather than taken from an
@@ -32,114 +71,266 @@ function Funnel() {
   );
 }
 
+type Condition = FilterCondition<string, unknown>;
+
+/** What the kind's own operand body is handed. */
+interface BodyProps {
+  announce: (message: string) => void;
+  apply: () => void;
+  condition: Condition;
+  labels: TableResolvedLabels;
+  /** Writes one operand back into the draft. `slot` is `value` or `end`. */
+  setOperand: (slot: 0 | 1, value: unknown) => void;
+}
+
+interface ShellProps {
+  body: (props: BodyProps) => ReactNode;
+  conditions?: 1 | 2 | undefined;
+  kind: FilterKind;
+  operators: readonly string[];
+  props: TableConditionFilterProps<FilterDescriptor, string, unknown>;
+  /** The set filter offers one condition and draws no join — see the design, §3.2. */
+  singleCondition?: boolean;
+}
+
+/** Two descriptors are the same filter when they serialise the same. */
+function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
+  return serializeFilter(a) === serializeFilter(b);
+}
+
 /**
- * Folds a value down to what a search should match: case and diacritics are
- * how a reader types, not what they mean. `Ãgua` and `agua` are the same query
- * to everyone but a comparison that skips this.
- */
-function fold(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLocaleLowerCase();
-}
-
-/** The options a query leaves. One rule, so the list and the count agree. */
-function matching(options: readonly TableFilterOption[], query: string) {
-  if (query === '') return options;
-  return options.filter((option) => fold(option.label ?? option.value).includes(fold(query)));
-}
-
-function sameSet(a: readonly string[], b: readonly string[]) {
-  return a.length === b.length && a.every((value, index) => value === b[index]);
-}
-
-/**
- * A column's filter: the trigger in the header and the panel it opens.
+ * The panel every kind shares: the trigger, the draft, the conditions, the join
+ * between them, the announcements and the two actions. What changes per kind is
+ * the operator list and the control inside `filter-operand`.
  *
  * The panel edits a **draft**. Nothing reaches the consumer until Apply, and
- * Escape or a press outside restores the set the panel opened with — which is
- * the difference between a filter and a list of checkboxes. A reader ticking
- * four values fires one query, not four, and a reader who ticked the wrong one
- * has somewhere to go back to. Ant, AG Grid and Excel each work this way.
+ * Escape or a press outside restores the descriptor the panel opened with. A
+ * reader composing two conditions fires one query, not four; Ant, AG Grid and
+ * Excel each work this way.
  *
- * The family applies nothing. It reports the set the reader chose and the
- * consumer's own query keeps or drops the rows — the same division `sort`
- * records, and the line this family holds against `data-grid`.
+ * The family applies nothing. It reports the descriptor, and
+ * `createFilterPredicate` in `@slotted/core/filter` is what a consumer applies
+ * to its own rows — the same division `sort` records.
  */
-export function TableFilter({
-  applyLabel,
-  clearLabel,
-  columnLabel,
-  defaultValue,
-  emptyLabel,
-  label,
-  onValueChange,
-  options,
-  searchLabel,
-  searchThreshold = 8,
-  searchable,
-  selectAllLabel,
-  value,
-  ...popoverProps
-}: TableFilterProps) {
+function TableFilterShell({ body, kind, operators, props, singleCondition }: ShellProps) {
+  const {
+    align,
+    applyLabel,
+    clearLabel,
+    collisionPadding,
+    columnLabel,
+    conditions: maxConditions = 2,
+    defaultOpen,
+    defaultOperator,
+    defaultValue,
+    label,
+    mount,
+    onOpenChange,
+    onValueChange,
+    open: openProp,
+    operatorLabel,
+    portal,
+    renderOperand,
+    side,
+    sideOffset,
+    value,
+  } = props;
+
   const table = useTable();
   const column = useTableColumn();
   const base = useId();
 
-  const [own, setOwn] = useState<readonly string[]>(defaultValue ?? []);
-  const committed = value ?? own;
+  const [own, setOwn] = useState<FilterDescriptor | null>(defaultValue ?? null);
+  const committed = value === undefined ? own : value;
 
-  const [draft, setDraft] = useState<readonly string[]>(committed);
-  const [query, setQuery] = useState('');
-  const [open, setOpen] = useState(false);
+  const start = defaultOperator ?? kindDefaultOperator(kind);
+  const blank = () => emptyFilter(kind, start as never) as FilterDescriptor;
+
+  const [draft, setDraft] = useState<FilterDescriptor>(committed ?? blank());
+  const [ownOpen, setOwnOpen] = useState(false);
+  const open = openProp ?? ownOpen;
   const panel = useRef<HTMLDivElement | null>(null);
 
+  const labels = table.labels;
   const name = columnLabel ?? column ?? '';
-  const filtered = committed.length > 0;
-
-  /** What the search left. The covering checkbox answers for exactly this. */
-  const shown = matching(options, query);
-
-  const covered = shown.filter((option) => draft.includes(option.value));
-  const searching = searchable ?? options.length >= searchThreshold;
-
-  function request(next: readonly string[], reason: TableFilterReason, source: unknown) {
-    const state = createControllable<readonly string[]>({
-      controlled: value,
-      initial: committed,
-      equals: sameSet,
-      onRequest: (change) => onValueChange?.(change.value, change),
-    });
-    if (state.request(next, reason, source)) setOwn(next);
-  }
-
-  function toggle(next: boolean) {
-    setOpen(next);
-    if (next) {
-      /* The draft starts from what is committed, every time: a panel that kept
-         the last draft would show a reader a set they cancelled. */
-      setDraft(committed);
-      setQuery('');
-      return;
-    }
-    /* Closing is cancelling. Apply closes the panel itself, after committing. */
-    setDraft(committed);
-  }
+  const filtered = isFilterActive(committed);
+  const allowed = singleCondition ? 1 : maxConditions;
 
   function announce(message: string) {
     getLiveAnnouncer(panel.current?.ownerDocument).announce(message);
   }
 
-  const labels = table.labels;
+  const format = {
+    join: (join: FilterJoin) => labels.filterJoins[join] ?? join,
+    operator: (operator: FilterOperator) => labels.filterOperators[operator] ?? operator,
+  };
+
+  function request(next: FilterDescriptor | null, reason: TableFilterReason, source: unknown) {
+    const state = createControllable<FilterDescriptor | null>({
+      controlled: value,
+      initial: committed,
+      equals: sameFilter,
+      onRequest: (change) => onValueChange?.(change.value, change),
+    });
+    if (state.request(next, reason, source)) setOwn(next);
+  }
+
+  function toggle(next: boolean, source?: unknown) {
+    if (openProp === undefined) setOwnOpen(next);
+    onOpenChange?.(next, source as never);
+    /* The draft starts from what is committed, every time: a panel that kept
+       the last draft would show a reader a set they cancelled. Closing is
+       cancelling — Apply closes the panel itself, after committing. */
+    setDraft(committed ?? blank());
+  }
+
+  const conditionAt = (index: number): Condition =>
+    draft.conditions[index] ?? { operator: start as FilterOperator };
+
+  const first = conditionAt(0);
+  /* AG Grid's own reveal: the second condition appears once the first is
+     complete. A button would be one more word to translate before the common
+     case, and an empty second row is noise in every panel that never needs it. */
+  const showsSecond = allowed === 2 && isConditionActive(kind, first);
+
+  function operandsWord(count: 0 | 1 | 2) {
+    if (count === 0) return labels.filterOperandsNone;
+    return count === 1 ? labels.filterOperandsOne : labels.filterOperandsTwo;
+  }
+
+  function setOperator(index: number, operator: string) {
+    const condition = conditionAt(index);
+    const before = operandCount(condition.operator as FilterOperator);
+    const after = operandCount(operator as FilterOperator);
+
+    /* An operand the new operator still takes survives the change: a reader who
+       typed a value and then chose a different comparison meant to keep it. */
+    const next: Condition = {
+      operator,
+      ...(after >= 1 && before >= 1 ? { value: condition.value } : {}),
+      ...(after === 2 && before === 2 ? { end: condition.end } : {}),
+    };
+
+    setDraft(withCondition(draft, index, next as never));
+    /* The panel grows a field or loses two. Announced, because a form that
+       changes shape under a reader who cannot see it says nothing otherwise. */
+    if (after !== before)
+      announce(`${format.operator(operator as FilterOperator)}, ${operandsWord(after)}`);
+  }
+
+  function setOperand(index: number, slot: 0 | 1, operand: unknown) {
+    const condition = conditionAt(index);
+    const wasActive = isConditionActive(kind, condition);
+    const next: Condition =
+      slot === 0 ? { ...condition, value: operand } : { ...condition, end: operand };
+
+    setDraft(withCondition(draft, index, next as never));
+    if (index === 0 && allowed === 2 && !wasActive && isConditionActive(kind, next)) {
+      announce(labels.filterConditionAdded);
+    }
+  }
+
+  function apply(source: unknown, reason: TableFilterReason) {
+    const next = normalizeFilter(draft);
+    request(next, reason, source);
+    announce(
+      next
+        ? `${labels.filter} ${name}: ${describeFilter(next, format)}`.trim()
+        : `${labels.filter} ${name}, ${labels.filterCleared}`.trim(),
+    );
+    if (openProp === undefined) setOwnOpen(false);
+    onOpenChange?.(false, source as never);
+  }
+
+  function clear(source: unknown) {
+    setDraft(blank());
+    announce(`${labels.filter} ${name}, ${labels.filterCleared}`.trim());
+    request(null, 'clear', source);
+    if (openProp === undefined) setOwnOpen(false);
+    onOpenChange?.(false, source as never);
+  }
+
   const triggerName =
     label ??
     (filtered
-      ? `${labels.filter} ${name} (${committed.length} ${labels.filterChosen})`.replace('  ', ' ')
+      ? `${labels.filter} ${name}: ${describeFilter(committed, format)}`.replace('  ', ' ').trim()
       : `${labels.filter} ${name}`.trim());
 
+  function renderCondition(index: 0 | 1) {
+    const condition = conditionAt(index);
+    const operands = operandCount(condition.operator as FilterOperator);
+
+    const operandProps = (slot: 0 | 1): TableFilterOperandProps<unknown> => ({
+      apply: () => apply(null, 'keyboard'),
+      index: slot,
+      label:
+        operands === 2 ? (slot === 0 ? labels.filterFrom : labels.filterTo) : labels.filterValue,
+      onValueChange: (operand) => setOperand(index, slot, operand),
+      operator: condition.operator as FilterOperator,
+      value: (slot === 0 ? condition.value : condition.end) ?? null,
+    });
+
+    return (
+      <div data-operands={operands} data-part="filter-condition" key={index}>
+        <div data-part="filter-operator">
+          {/* `items` names every operator for the closed control. Without it the
+              trigger falls back to the value itself and a reader sees the raw
+              `between` and `empty` the engine speaks, which is what the
+              rendered page showed. */}
+          <Select
+            fullWidth
+            items={operators.map((operator) => ({
+              label: format.operator(operator as FilterOperator),
+              value: operator,
+            }))}
+            onValueChange={(next) => setOperator(index, next as string)}
+            size="sm"
+            value={condition.operator}
+          >
+            <SelectTrigger aria-label={operatorLabel ?? labels.filterOperator}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {operators.map((operator) => (
+                <SelectItem key={operator} value={operator}>
+                  {format.operator(operator as FilterOperator)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {operands === 0 ? null : (
+          <div data-kind={kind} data-part="filter-operand">
+            {renderOperand
+              ? Array.from({ length: operands }, (_, slot) =>
+                  renderOperand(operandProps(slot as 0 | 1)),
+                )
+              : body({
+                  announce,
+                  apply: () => apply(null, 'keyboard'),
+                  condition,
+                  labels,
+                  setOperand: (slot, operand) => setOperand(index, slot, operand),
+                })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <Popover onOpenChange={(next) => toggle(next)} open={open} {...popoverProps}>
+    <Popover
+      onOpenChange={(next, source) => toggle(next, source)}
+      open={open}
+      {...(align === undefined ? {} : { align })}
+      {...(collisionPadding === undefined ? {} : { collisionPadding })}
+      {...(defaultOpen === undefined ? {} : { defaultOpen })}
+      {...(mount === undefined ? {} : { mount })}
+      {...(portal === undefined ? {} : { portal })}
+      {...(side === undefined ? {} : { side })}
+      {...(sideOffset === undefined ? {} : { sideOffset })}
+    >
       <PopoverTrigger
         render={(triggerProps) => (
           <button
@@ -158,90 +349,39 @@ export function TableFilter({
           {/* The parts are on this family's own element rather than on the
               popover's: `PopoverContent` names its own part, and a second
               `data-part` on the same element is one of them lost. */}
-          <div data-part="filter-panel" data-ui="table" ref={panel}>
-            {searching ? (
-              <div data-part="filter-search">
-                <TextField
-                  aria-controls={`${base}-list`}
-                  aria-label={searchLabel ?? `${labels.filterSearch} ${name}`}
-                  clearable
-                  onChange={(event) => {
-                    const next = event.target.value;
-                    setQuery(next);
-                    /* A list that shortens under a reader who cannot see it
-                       says nothing otherwise. */
-                    announce(`${matching(options, next).length} ${labels.filterMatches}`);
-                  }}
-                  placeholder={searchLabel ?? labels.filterSearch}
-                  size="sm"
-                  value={query}
-                />
-              </div>
+          <div data-kind={kind} data-part="filter-panel" data-ui="table" id={base} ref={panel}>
+            {renderCondition(0)}
+
+            {showsSecond ? (
+              <>
+                <div data-part="filter-join">
+                  <span data-label="">{labels.filterJoin}</span>
+                  <RadioGroup
+                    aria-label={labels.filterJoin}
+                    onValueChange={(join) => setDraft(withJoin(draft, join as FilterJoin))}
+                    orientation="horizontal"
+                    size="sm"
+                    value={draft.join}
+                  >
+                    <Radio value="and">{format.join('and')}</Radio>
+                    <Radio value="or">{format.join('or')}</Radio>
+                  </RadioGroup>
+                </div>
+                {renderCondition(1)}
+              </>
             ) : null}
 
-            {shown.length === 0 ? (
-              <p data-part="filter-empty">{emptyLabel ?? labels.filterEmpty}</p>
-            ) : (
-              <div data-part="filter-list" id={`${base}-list`}>
-                <div data-covering="" data-part="filter-option">
-                  <Checkbox
-                    checked={covered.length > 0 && covered.length === shown.length}
-                    indeterminate={covered.length > 0 && covered.length < shown.length}
-                    onCheckedChange={(checked) => {
-                      const visible = shown.map((option) => option.value);
-                      setDraft(
-                        checked
-                          ? [...new Set([...draft, ...visible])]
-                          : draft.filter((held) => !visible.includes(held)),
-                      );
-                    }}
-                  >
-                    {selectAllLabel ?? labels.filterSelectAll}
-                  </Checkbox>
-                  <span data-count="">{shown.length}</span>
-                </div>
-
-                {shown.map((option) => (
-                  <div data-part="filter-option" key={option.value}>
-                    <Checkbox
-                      checked={draft.includes(option.value)}
-                      onCheckedChange={(checked) =>
-                        setDraft(
-                          checked
-                            ? [...draft, option.value]
-                            : draft.filter((held) => held !== option.value),
-                        )
-                      }
-                    >
-                      {option.label ?? option.value}
-                    </Checkbox>
-                    {option.count === undefined ? null : <span data-count="">{option.count}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
             <div data-part="filter-actions">
               <Button
-                disabled={draft.length === 0}
-                onClick={(event) => {
-                  setDraft([]);
-                  announce(`${labels.filter} ${name}, ${labels.filterCleared}`);
-                  request([], 'clear', event);
-                  setOpen(false);
-                }}
+                disabled={!isFilterActive(draft)}
+                onClick={(event) => clear(event)}
                 size="sm"
                 tone="secondary"
                 variant="ghost"
               >
                 {clearLabel ?? labels.filterClear}
               </Button>
-              <Button
-                onClick={(event) => {
-                  request(draft, 'pointer', event);
-                  setOpen(false);
-                }}
-                size="sm"
-              >
+              <Button onClick={(event) => apply(event, 'pointer')} size="sm">
                 {applyLabel ?? labels.filterApply}
               </Button>
             </div>
@@ -249,5 +389,323 @@ export function TableFilter({
         </PopoverContent>
       </PopoverLayer>
     </Popover>
+  );
+}
+
+/** `Enter` in an operand applies, which is what AG Grid does and what a reader
+    who has just typed a value expects. The consumer's own handler runs first. */
+function applyOnEnter(apply: () => void) {
+  return (event: { defaultPrevented: boolean; key: string }) => {
+    if (event.key === 'Enter' && !event.defaultPrevented) apply();
+  };
+}
+
+function narrowed<Operator extends string>(
+  kind: FilterKind,
+  operators: readonly Operator[] | undefined,
+): readonly string[] {
+  return operators ?? (operatorsFor(kind) as readonly string[]);
+}
+
+/** A column of words. Its comparisons are the collator's, never a fold. */
+export function TableTextFilter(props: TableTextFilterProps) {
+  return (
+    <TableFilterShell
+      body={({ apply, condition, labels, setOperand }) => (
+        <TextField
+          aria-label={labels.filterValue}
+          onChange={(event) => setOperand(0, event.target.value)}
+          onKeyDown={applyOnEnter(apply)}
+          placeholder={labels.filterValue}
+          size="sm"
+          value={(condition.value as string | null) ?? ''}
+        />
+      )}
+      kind="text"
+      operators={narrowed('text', props.operators)}
+      props={props as never}
+      {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
+    />
+  );
+}
+
+/** A column of quantities. The operand parses in the reader's own locale. */
+export function TableNumberFilter(props: TableNumberFilterProps) {
+  const { format, locale, step } = props;
+
+  return (
+    <TableFilterShell
+      body={({ apply, condition, labels, setOperand }) => (
+        <>
+          {([0, 1] as const)
+            .slice(0, operandCount(condition.operator as FilterOperator))
+            .map((slot) => (
+              <NumberField
+                aria-label={
+                  operandCount(condition.operator as FilterOperator) === 2
+                    ? slot === 0
+                      ? labels.filterFrom
+                      : labels.filterTo
+                    : labels.filterValue
+                }
+                key={slot}
+                onKeyDown={applyOnEnter(apply)}
+                onValueChange={(next) => setOperand(slot, next)}
+                placeholder={
+                  operandCount(condition.operator as FilterOperator) === 2
+                    ? slot === 0
+                      ? labels.filterFrom
+                      : labels.filterTo
+                    : labels.filterValue
+                }
+                size="sm"
+                value={((slot === 0 ? condition.value : condition.end) as number | null) ?? null}
+                {...(format === undefined ? {} : { format })}
+                {...(locale === undefined ? {} : { locale })}
+                {...(step === undefined ? {} : { step })}
+              />
+            ))}
+        </>
+      )}
+      kind="number"
+      operators={narrowed('number', props.operators)}
+      props={props as never}
+      {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
+    />
+  );
+}
+
+/**
+ * A column of days. The operand is the whole `date-picker` — the segmented field
+ * and the calendar behind it — rather than the field alone: every surveyed
+ * implementation that filters a date column offers a grid to point at, and a
+ * reader who has to type a date they could have pointed at is the one thing a
+ * date filter exists to spare them. The calendar opens a layer inside the
+ * panel's layer, which `dismissable-layer` already stacks for the operator
+ * chooser beside it.
+ *
+ * The descriptor holds the ISO day the picker produces, never a `Date`.
+ */
+export function TableDateFilter(props: TableDateFilterProps) {
+  const { locale, max, min } = props;
+  const day = (value: unknown) => (value ? parseISODate(String(value)) : null);
+
+  return (
+    <TableFilterShell
+      body={({ apply, condition, labels, setOperand }) => (
+        <>
+          {([0, 1] as const)
+            .slice(0, operandCount(condition.operator as FilterOperator))
+            .map((slot) => (
+              <DatePicker
+                aria-label={
+                  operandCount(condition.operator as FilterOperator) === 2
+                    ? slot === 0
+                      ? labels.filterFrom
+                      : labels.filterTo
+                    : labels.filterValue
+                }
+                key={slot}
+                onKeyDown={applyOnEnter(apply)}
+                onValueChange={(next) =>
+                  setOperand(slot, isPlainDate(next) ? toISODate(next) : null)
+                }
+                size="sm"
+                value={day(slot === 0 ? condition.value : condition.end)}
+                {...(locale === undefined ? {} : { locale })}
+                {...(day(min) ? { min: day(min) as PlainDate } : {})}
+                {...(day(max) ? { max: day(max) as PlainDate } : {})}
+              />
+            ))}
+        </>
+      )}
+      kind="date"
+      operators={narrowed('date', props.operators)}
+      props={props as never}
+      {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
+    />
+  );
+}
+
+/**
+ * A column of yes and no. Three answers rather than two: the third is not being
+ * filtered at all, which is what Clear leaves and what an empty draft is.
+ */
+export function TableBooleanFilter(props: TableBooleanFilterProps) {
+  const { falseLabel = 'No', trueLabel = 'Yes' } = props;
+
+  return (
+    <TableFilterShell
+      body={({ condition, labels, setOperand }) => (
+        <RadioGroup
+          aria-label={labels.filterValue}
+          onValueChange={(next) => setOperand(0, next === 'true')}
+          orientation="horizontal"
+          size="sm"
+          value={
+            condition.value === undefined || condition.value === null ? '' : String(condition.value)
+          }
+        >
+          <Radio value="true">{trueLabel}</Radio>
+          <Radio value="false">{falseLabel}</Radio>
+        </RadioGroup>
+      )}
+      kind="boolean"
+      operators={narrowed('boolean', props.operators)}
+      props={props as never}
+      {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
+    />
+  );
+}
+
+/**
+ * A column filtered to values the consumer named: the list, its search and the
+ * checkbox that covers what the search left.
+ *
+ * One condition, and the design says why: `anyOf A and anyOf B` is
+ * `anyOf (A ∩ B)`, so every pair of set conditions collapses to a single list.
+ */
+export function TableSetFilter(props: TableSetFilterProps) {
+  const {
+    emptyLabel,
+    options,
+    searchLabel,
+    searchThreshold = 8,
+    searchable,
+    selectAllLabel,
+  } = props;
+
+  return (
+    <TableFilterShell
+      body={({ announce, condition, labels, setOperand }) => (
+        <SetOperand
+          announce={announce}
+          chosen={(condition.value as readonly string[] | null) ?? []}
+          labels={labels}
+          onChange={(next) => setOperand(0, next)}
+          options={options}
+          searchThreshold={searchThreshold}
+          {...(emptyLabel === undefined ? {} : { emptyLabel })}
+          {...(searchLabel === undefined ? {} : { searchLabel })}
+          {...(searchable === undefined ? {} : { searchable })}
+          {...(selectAllLabel === undefined ? {} : { selectAllLabel })}
+        />
+      )}
+      kind="set"
+      operators={narrowed('set', props.operators)}
+      props={props as never}
+      singleCondition
+    />
+  );
+}
+
+interface SetOperandProps {
+  announce: (message: string) => void;
+  chosen: readonly string[];
+  emptyLabel?: string | undefined;
+  labels: TableResolvedLabels;
+  onChange: (values: readonly string[]) => void;
+  options: readonly TableFilterOption[];
+  searchLabel?: string | undefined;
+  searchThreshold: number;
+  searchable?: boolean | undefined;
+  selectAllLabel?: string | undefined;
+}
+
+function SetOperand({
+  announce,
+  chosen,
+  emptyLabel,
+  labels,
+  onChange,
+  options,
+  searchLabel,
+  searchThreshold,
+  searchable,
+  selectAllLabel,
+}: SetOperandProps) {
+  const base = useId();
+  const [query, setQuery] = useState('');
+
+  /**
+   * The collator `combobox` filters its own options with, rather than a fold
+   * that strips combining marks: `normalize('NFD')` is an English answer
+   * wearing a Unicode one — it turns `ø` into `ø` and leaves `ß` alone.
+   */
+  const compare = useMemo(() => createFilter({ sensitivity: 'base' }), []);
+  /** The options a query leaves. One rule, so the list and the count agree. */
+  const matching = (text: string) =>
+    text === ''
+      ? options
+      : options.filter((option) => compare.contains(option.label ?? option.value, text));
+
+  const shown = matching(query);
+  const covered = shown.filter((option) => chosen.includes(option.value));
+  const searching = searchable ?? options.length >= searchThreshold;
+
+  return (
+    <>
+      {searching ? (
+        <div data-part="filter-search">
+          <TextField
+            aria-controls={`${base}-list`}
+            aria-label={searchLabel ?? labels.filterSearch}
+            clearable
+            onChange={(event) => {
+              const next = event.target.value;
+              setQuery(next);
+              /* A list that shortens under a reader who cannot see it says
+                 nothing otherwise. */
+              announce(`${matching(next).length} ${labels.filterMatches}`);
+            }}
+            placeholder={searchLabel ?? labels.filterSearch}
+            size="sm"
+            value={query}
+          />
+        </div>
+      ) : null}
+
+      {shown.length === 0 ? (
+        <p data-part="filter-empty">{emptyLabel ?? labels.filterEmpty}</p>
+      ) : (
+        <div data-part="filter-list" id={`${base}-list`}>
+          <div data-covering="" data-part="filter-option">
+            <Checkbox
+              checked={covered.length > 0 && covered.length === shown.length}
+              indeterminate={covered.length > 0 && covered.length < shown.length}
+              onCheckedChange={(checked) => {
+                const visible = shown.map((option) => option.value);
+                onChange(
+                  checked
+                    ? [...new Set([...chosen, ...visible])]
+                    : chosen.filter((held) => !visible.includes(held)),
+                );
+              }}
+            >
+              {selectAllLabel ?? labels.filterSelectAll}
+            </Checkbox>
+            <span data-count="">{shown.length}</span>
+          </div>
+
+          {shown.map((option) => (
+            <div data-part="filter-option" key={option.value}>
+              <Checkbox
+                checked={chosen.includes(option.value)}
+                onCheckedChange={(checked) =>
+                  onChange(
+                    checked
+                      ? [...chosen, option.value]
+                      : chosen.filter((held) => held !== option.value),
+                  )
+                }
+              >
+                {option.label ?? option.value}
+              </Checkbox>
+              {option.count === undefined ? null : <span data-count="">{option.count}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }

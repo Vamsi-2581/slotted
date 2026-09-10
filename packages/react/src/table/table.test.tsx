@@ -1,11 +1,19 @@
+import { operatorsFor, setFilter } from '@slotted/core/filter';
+import type { FilterDescriptor, SetFilter } from '@slotted/core/filter';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/table/contract.json';
 import { Table } from './table';
 import { TableContent } from './table-content';
-import { TableDefaultsProvider } from './table-defaults';
-import { TableFilter } from './table-filter';
+import { DEFAULT_TABLE_LABELS, TableDefaultsProvider } from './table-defaults';
+import {
+  TableBooleanFilter,
+  TableDateFilter,
+  TableNumberFilter,
+  TableSetFilter,
+  TableTextFilter,
+} from './table-filter';
 import {
   TableBody,
   TableCaption,
@@ -285,7 +293,7 @@ describe('where a cell sits in its row', () => {
 describe('the column filter', () => {
   const OPTIONS = [{ count: 2, value: 'Paid' }, { count: 1, value: 'Overdue' }, { value: 'Draft' }];
 
-  function Filtered({ onValueChange }: { onValueChange?: (value: readonly string[]) => void }) {
+  function Filtered({ onValueChange }: { onValueChange?: (value: SetFilter | null) => void }) {
     return (
       <Table columns={1}>
         <TableContent>
@@ -294,11 +302,45 @@ describe('the column filter', () => {
               <TableColumnHeader column="status">
                 Status
                 <TableColumnActions>
-                  <TableFilter
+                  <TableSetFilter
                     columnLabel="status"
                     {...(onValueChange ? { onValueChange } : {})}
                     options={OPTIONS}
                   />
+                </TableColumnActions>
+              </TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody />
+        </TableContent>
+      </Table>
+    );
+  }
+
+  function Typed({
+    kind,
+    onValueChange,
+  }: {
+    kind: 'boolean' | 'date' | 'number' | 'text';
+    onValueChange?: (value: FilterDescriptor | null) => void;
+  }) {
+    const props = {
+      columnLabel: 'amount',
+      ...(onValueChange ? { onValueChange: onValueChange as never } : {}),
+    };
+
+    return (
+      <Table columns={1}>
+        <TableContent>
+          <TableHead>
+            <TableRow>
+              <TableColumnHeader column="amount">
+                Amount
+                <TableColumnActions>
+                  {kind === 'text' ? <TableTextFilter {...props} /> : null}
+                  {kind === 'number' ? <TableNumberFilter {...props} /> : null}
+                  {kind === 'date' ? <TableDateFilter {...props} /> : null}
+                  {kind === 'boolean' ? <TableBooleanFilter {...props} /> : null}
                 </TableColumnActions>
               </TableColumnHeader>
             </TableRow>
@@ -314,7 +356,7 @@ describe('the column filter', () => {
    * four values fires one query, not four, and a reader who ticked the wrong
    * one has somewhere to go back to.
    */
-  it('reports nothing until Apply, and puts the draft back when it closes', async () => {
+  it('reports nothing until Apply, and reports the descriptor the engine reads', async () => {
     const onValueChange = vi.fn();
     render(<Filtered onValueChange={onValueChange} />);
 
@@ -324,7 +366,7 @@ describe('the column filter', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
     expect(onValueChange).toHaveBeenCalledWith(
-      ['Paid'],
+      setFilter(['Paid']),
       expect.objectContaining({ reason: 'pointer' }),
     );
   });
@@ -350,14 +392,14 @@ describe('the column filter', () => {
    * set: a reader who searched and then pressed it expects the four rows they
    * can see, not the forty they cannot.
    */
-  it('covers what the search left, and marks the column while it is filtered', async () => {
+  it('covers what the search left, and says what is applied in the trigger name', async () => {
     render(<Filtered />);
 
     const trigger = screen.getByRole('button', { name: 'Filter status' });
     fireEvent.click(trigger);
 
     /* Three values is under the threshold, so no search is drawn. */
-    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('searchbox')).toBeNull();
 
     fireEvent.click(await screen.findByRole('checkbox', { name: 'All' }));
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
@@ -368,10 +410,12 @@ describe('the column filter', () => {
         '',
       ),
     );
-    expect(screen.getByRole('button', { name: 'Filter status (3 chosen)' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Filter status: Is any of Paid, Overdue, Draft' }),
+    ).toBeInTheDocument();
   });
 
-  it('draws a search once there are enough values, and narrows on a fold', async () => {
+  it('draws a search once there are enough values, and narrows on the collator', async () => {
     const many = Array.from({ length: 9 }, (_, index) => ({ value: `Região ${index}` }));
     render(
       <Table columns={1}>
@@ -381,7 +425,7 @@ describe('the column filter', () => {
               <TableColumnHeader column="region">
                 Region
                 <TableColumnActions>
-                  <TableFilter columnLabel="region" options={many} />
+                  <TableSetFilter columnLabel="region" options={many} />
                 </TableColumnActions>
               </TableColumnHeader>
             </TableRow>
@@ -392,15 +436,196 @@ describe('the column filter', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Filter region' }));
-    const search = await screen.findByRole('textbox');
+    const search = await screen.findByLabelText('Search values');
 
-    /* Without the fold, `regiao` matches nothing at all. */
+    /* Without a locale-sensitive comparison, `regiao` matches nothing at all. */
     fireEvent.change(search, { target: { value: 'regiao 3' } });
     expect(screen.getByRole('checkbox', { name: 'Região 3' })).toBeInTheDocument();
     expect(screen.queryByRole('checkbox', { name: 'Região 4' })).toBeNull();
 
     fireEvent.change(search, { target: { value: 'nothing here' } });
     expect(screen.getByText('No values match')).toBeInTheDocument();
+  });
+
+  /**
+   * The vocabulary is the engine's, and the panel offers exactly what the kind
+   * holds. A list written here instead would be a second definition of what a
+   * text column can be asked.
+   */
+  it('offers every operator its kind holds, and no other', async () => {
+    render(<Typed kind="text" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter amount' }));
+    fireEvent.click(await screen.findByRole('combobox', { name: 'Condition' }));
+
+    const offered = (await screen.findAllByRole('option')).map((option) => option.textContent);
+    expect(offered).toEqual(
+      operatorsFor('text').map((operator) => DEFAULT_TABLE_LABELS.filterOperators[operator]),
+    );
+  });
+
+  it('takes two operands for a range and none for a blank test', async () => {
+    render(<Typed kind="number" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter amount' }));
+    expect(await screen.findByLabelText('Value')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Condition' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'Between' }));
+
+    await waitFor(() => expect(screen.getByLabelText('From')).toBeInTheDocument());
+    expect(screen.getByLabelText('To')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('combobox', { name: 'Condition' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'Is empty' }));
+
+    await waitFor(() => expect(screen.queryByLabelText('From')).toBeNull());
+    /* The first condition draws no operand at all. The second appears beside
+       it, because an operator that takes nothing is complete on its own. */
+    const conditions = document.querySelectorAll('[data-part="filter-condition"]');
+    expect(conditions[0]).toHaveAttribute('data-operands', '0');
+    expect(conditions[0]?.querySelector('[data-part="filter-operand"]')).toBeNull();
+  });
+
+  /**
+   * AG Grid's own reveal. The second condition is not drawn until the first is
+   * complete, so the common case is one condition and the panel never opens as
+   * a form.
+   */
+  it('reveals the second condition and its join once the first is complete', async () => {
+    const onValueChange = vi.fn();
+    render(<Typed kind="text" onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter amount' }));
+    expect(screen.queryByRole('radiogroup', { name: 'Match' })).toBeNull();
+
+    fireEvent.change(await screen.findByLabelText('Value'), { target: { value: 'ana' } });
+    const join = await screen.findByRole('radiogroup', { name: 'Match' });
+    expect(join).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Or' }));
+    const operands = screen.getAllByLabelText('Value');
+    fireEvent.change(operands[1] as HTMLElement, { target: { value: 'bruno' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(onValueChange).toHaveBeenCalledWith(
+      {
+        conditions: [
+          { operator: 'contains', value: 'ana' },
+          { operator: 'contains', value: 'bruno' },
+        ],
+        join: 'or',
+        kind: 'text',
+      },
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('offers one condition and no join when the consumer says so', async () => {
+    render(
+      <Table columns={1}>
+        <TableContent>
+          <TableHead>
+            <TableRow>
+              <TableColumnHeader column="client">
+                Client
+                <TableColumnActions>
+                  <TableTextFilter columnLabel="client" conditions={1} />
+                </TableColumnActions>
+              </TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody />
+        </TableContent>
+      </Table>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter client' }));
+    fireEvent.change(await screen.findByLabelText('Value'), { target: { value: 'ana' } });
+
+    expect(screen.queryByRole('radiogroup', { name: 'Match' })).toBeNull();
+    expect(screen.getAllByLabelText('Value')).toHaveLength(1);
+  });
+
+  /** An operator that takes no operand is complete on its own. */
+  it('applies a blank test with no operand at all', async () => {
+    const onValueChange = vi.fn();
+    render(<Typed kind="text" onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter amount' }));
+    fireEvent.click(await screen.findByRole('combobox', { name: 'Condition' }));
+    fireEvent.click(await screen.findByRole('option', { name: 'Is empty' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(onValueChange).toHaveBeenCalledWith(
+      { conditions: [{ operator: 'empty' }], join: 'and', kind: 'text' },
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  /**
+   * An unfinished condition is not a condition, so applying one changes
+   * nothing — and a request that changes nothing is never made.
+   */
+  it('reports nothing at all rather than an unfinished condition', async () => {
+    const onValueChange = vi.fn();
+    render(<Typed kind="text" onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter amount' }));
+    await screen.findByLabelText('Value');
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(onValueChange).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByLabelText('Value')).toBeNull());
+  });
+
+  /** The one key the family takes, and the reason it is a recorded departure. */
+  it('applies on Enter in an operand', async () => {
+    const onValueChange = vi.fn();
+    render(<Typed kind="text" onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter amount' }));
+    const operand = await screen.findByLabelText('Value');
+    fireEvent.change(operand, { target: { value: 'ana' } });
+    fireEvent.keyDown(operand, { key: 'Enter' });
+
+    expect(onValueChange).toHaveBeenCalledWith(
+      { conditions: [{ operator: 'contains', value: 'ana' }], join: 'and', kind: 'text' },
+      expect.objectContaining({ reason: 'keyboard' }),
+    );
+  });
+
+  it('empties the filter on Clear, and says so', async () => {
+    const onValueChange = vi.fn();
+    render(<Filtered onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter status' }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Paid' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+    onValueChange.mockClear();
+
+    fireEvent.click(screen.getByRole('button', { name: /Filter status/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Clear' }));
+
+    expect(onValueChange).toHaveBeenCalledWith(null, expect.objectContaining({ reason: 'clear' }));
+  });
+
+  /**
+   * A boolean column has three answers and the third is not being filtered at
+   * all, which is what an empty draft already is.
+   */
+  it('holds false as an answer rather than as nothing', async () => {
+    const onValueChange = vi.fn();
+    render(<Typed kind="boolean" onValueChange={onValueChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter amount' }));
+    fireEvent.click(await screen.findByRole('radio', { name: 'No' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(onValueChange).toHaveBeenCalledWith(
+      { conditions: [{ operator: 'is', value: false }], join: 'and', kind: 'boolean' },
+      expect.objectContaining({ reason: 'pointer' }),
+    );
   });
 });
 

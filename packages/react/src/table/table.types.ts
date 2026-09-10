@@ -1,5 +1,20 @@
+import type {
+  BooleanFilter,
+  BooleanOperator,
+  DateFilter,
+  DateOperator,
+  FilterDescriptor,
+  FilterJoin,
+  FilterOperator,
+  NumberFilter,
+  NumberOperator,
+  SetFilter,
+  SetOperator,
+  TextFilter,
+  TextOperator,
+} from '@slotted/core/filter';
 import type { ChangeRequest } from '@slotted/core/state';
-import type { PopoverProps } from '../popover/popover.types';
+import type { PopoverChangeRequest, PopoverProps } from '../popover/popover.types';
 import type {
   ComponentPropsWithRef,
   HTMLAttributes,
@@ -85,8 +100,6 @@ export interface TableLabels {
   scroll?: string;
   /** The verb the filter trigger is named with, joined to the column's name. */
   filter?: string;
-  /** The word after the count in a filtered trigger's name. */
-  filterChosen?: string;
   /** The search field's name and its placeholder. */
   filterSearch?: string;
   /** The word after the count announced when a search narrows the list. */
@@ -101,6 +114,36 @@ export interface TableLabels {
   filterApply?: string;
   /** What is announced when the filter is emptied. */
   filterCleared?: string;
+  /** The operator chooser's own name. */
+  filterOperator?: string;
+  /** The name of the field an operator that takes one operand draws. */
+  filterValue?: string;
+  /** The first end of a range, as a name and as a placeholder. */
+  filterFrom?: string;
+  /** The second end. */
+  filterTo?: string;
+  /** The name of the control that joins two conditions. */
+  filterJoin?: string;
+  /** What is announced when the second condition appears. */
+  filterConditionAdded?: string;
+  /** Announced after an operator that takes no operand at all. */
+  filterOperandsNone?: string;
+  /** Announced after an operator that takes one. */
+  filterOperandsOne?: string;
+  /** Announced after `between`. */
+  filterOperandsTwo?: string;
+  /**
+   * The two words a pair of conditions is joined with. They are also the word
+   * between the two ends of a range, which is why they are a map rather than
+   * two props: "between 10 and 20" reads the same word as "contains a and
+   * begins with b".
+   */
+  filterJoins?: Partial<Record<FilterJoin, string>>;
+  /**
+   * Every operator's name, keyed by the engine's own operator. One map rather
+   * than nineteen props, and `filter-bar` reads the same one in wave 8.
+   */
+  filterOperators?: Partial<Record<FilterOperator, string>>;
 }
 
 /** One value a column can be filtered to. */
@@ -117,17 +160,35 @@ export interface TableFilterOption {
 }
 
 export type TableFilterReason = Extract<
-  ChangeRequest<readonly string[]>['reason'],
+  ChangeRequest<FilterDescriptor | null>['reason'],
   'pointer' | 'keyboard' | 'clear' | 'programmatic'
 >;
 
-export type TableFilterRequest = ChangeRequest<readonly string[]>;
+export type TableFilterRequest = ChangeRequest<FilterDescriptor | null>;
+
+/** What a replaced operand area is handed, and everything it needs. */
+export interface TableFilterOperandProps<Value> {
+  /** Which of the operator's operands this is: the first, or a range's second. */
+  index: 0 | 1;
+  /** The operand as the draft holds it. */
+  value: Value | null;
+  /** Writes the operand back into the draft. */
+  onValueChange: (value: Value | null) => void;
+  /** The condition's operator, for a control whose shape depends on it. */
+  operator: FilterOperator;
+  /** The accessible name the family would have given the field. */
+  label: string;
+  /** Applies the draft, which is what `Enter` in the family's own field does. */
+  apply: () => void;
+}
 
 /**
- * A column's filter. Every label falls back to the table's own, so an
- * application translates the panel once rather than per column.
+ * What every kind's filter takes. The typed value and the kind-specific props
+ * are added by each of the five components; everything here is shared, and
+ * every label falls back to the table's own so an application translates the
+ * panel once rather than per column.
  */
-export interface TableFilterProps extends Pick<
+export interface TableFilterSharedProps extends Pick<
   PopoverProps,
   'align' | 'collisionPadding' | 'mount' | 'portal' | 'side' | 'sideOffset'
 > {
@@ -141,13 +202,89 @@ export interface TableFilterProps extends Pick<
    * name a reader would recognise on its own.
    */
   columnLabel?: string | undefined;
-  /** The set an uncontrolled filter starts from, read once. */
-  defaultValue?: readonly string[] | undefined;
-  /** The word shown when the search matches nothing. */
-  emptyLabel?: string | undefined;
+  /**
+   * How many conditions the panel offers. Two unless stated, which is AG Grid's
+   * own `maxNumConditions`; the second appears once the first is complete.
+   */
+  conditions?: 1 | 2 | undefined;
+  /** Whether the panel opens. Controlled when stated. */
+  open?: boolean | undefined;
+  /** The panel's starting state when nobody owns it. */
+  defaultOpen?: boolean | undefined;
+  onOpenChange?: ((open: boolean, request: PopoverChangeRequest) => void) | undefined;
   /** The trigger's whole accessible name, replacing the one built from labels. */
   label?: string | undefined;
-  onValueChange?: (value: readonly string[], request: TableFilterRequest) => void;
+  /** The operator's chooser label. Defaults to the table's label. */
+  operatorLabel?: string | undefined;
+}
+
+/** The props every condition-shaped filter takes, over its own operator type. */
+export interface TableConditionFilterProps<
+  Filter,
+  Operator extends string,
+  Value,
+> extends TableFilterSharedProps {
+  /** The filter an uncontrolled column starts from, read once. */
+  defaultValue?: Filter | null | undefined;
+  /** The filter the column holds. Controlled when stated. */
+  value?: Filter | null | undefined;
+  onValueChange?: ((value: Filter | null, request: TableFilterRequest) => void) | undefined;
+  /**
+   * The operators this column offers, narrowing the kind's own list. It is AG
+   * Grid's `filterOptions`, and the order given is the order shown.
+   */
+  operators?: readonly Operator[] | undefined;
+  /** Which one the panel opens on. The kind's own default unless stated. */
+  defaultOperator?: Operator | undefined;
+  /** Replaces the field the family would have drawn, and keeps everything else. */
+  renderOperand?: ((props: TableFilterOperandProps<Value>) => ReactNode) | undefined;
+}
+
+export type TableTextFilterProps = TableConditionFilterProps<TextFilter, TextOperator, string>;
+
+export interface TableNumberFilterProps extends TableConditionFilterProps<
+  NumberFilter,
+  NumberOperator,
+  number
+> {
+  /** How the operand is written and read back, through `Intl.NumberFormat`. */
+  format?: Intl.NumberFormatOptions | undefined;
+  /** BCP 47, for the operand's own parsing. Defaults to the runtime's. */
+  locale?: string | undefined;
+  /** The amount the operand's steppers move by. */
+  step?: number | undefined;
+}
+
+export interface TableDateFilterProps extends TableConditionFilterProps<
+  DateFilter,
+  DateOperator,
+  string
+> {
+  /** BCP 47. Decides the operand's field order and separators. */
+  locale?: string | undefined;
+  /** The earliest day the operand accepts, as an ISO day. */
+  min?: string | undefined;
+  /** The latest, as an ISO day. */
+  max?: string | undefined;
+}
+
+export interface TableBooleanFilterProps extends TableConditionFilterProps<
+  BooleanFilter,
+  BooleanOperator,
+  boolean
+> {
+  /** What the two answers are called. Defaults to Yes and No. */
+  trueLabel?: string | undefined;
+  falseLabel?: string | undefined;
+}
+
+export interface TableSetFilterProps extends TableConditionFilterProps<
+  SetFilter,
+  SetOperator,
+  readonly string[]
+> {
+  /** The word shown when the search matches nothing. */
+  emptyLabel?: string | undefined;
   /** The values this column can be filtered to, and optionally their counts. */
   options: readonly TableFilterOption[];
   /** The search field's name and placeholder. */
@@ -162,8 +299,6 @@ export interface TableFilterProps extends Pick<
   searchThreshold?: number | undefined;
   /** The covering checkbox's label. */
   selectAllLabel?: string | undefined;
-  /** The set the column is filtered to. Controlled when stated. */
-  value?: readonly string[] | undefined;
 }
 
 export type TableResolvedLabels = Required<TableLabels>;

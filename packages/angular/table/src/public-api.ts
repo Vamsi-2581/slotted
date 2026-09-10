@@ -22,7 +22,16 @@ export type {
 } from './table-defaults';
 export { SlTable, TABLE_ROW_SELECTOR } from './table';
 export { SlTableContent } from './table-content';
-export { SlTableFilter } from './table-filter';
+export {
+  SlTableBooleanFilter,
+  SlTableDateFilter,
+  SlTableFilterBase,
+  SlTableFilterShell,
+  SlTableNumberFilter,
+  SlTableSetFilter,
+  SlTableTextFilter,
+} from './table-filter';
+export type { TableFilterOperandContext } from './table-filter';
 export type { TableFilterOption, TableFilterReason } from './table-filter';
 export {
   SL_TABLE_PARTS,

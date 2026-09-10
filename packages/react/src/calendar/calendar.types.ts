@@ -1,0 +1,125 @@
+import type { PlainDate } from '@slotted/core/date';
+import type { ChangeRequest } from '@slotted/core/state';
+import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
+
+/** A run of days, either end of which may still be open while it is drawn. */
+export interface DateRange {
+  readonly start: PlainDate | null;
+  readonly end: PlainDate | null;
+}
+
+/**
+ * What the calendar holds, which depends on what it was asked to collect: one
+ * date, a run of them, or a set.
+ */
+export type CalendarValue = PlainDate | DateRange | PlainDate[] | null;
+
+/** How many dates the reader may choose. */
+export type CalendarSelectionMode = 'single' | 'range' | 'multiple';
+
+/** Which grid the calendar is showing. The heading walks up; Escape walks down. */
+export type CalendarView = 'day' | 'month' | 'year';
+
+/** What happens to a day belonging to the month either side. */
+export type CalendarOutsideDays = 'shown' | 'selectable' | 'hidden';
+
+/**
+ * The calendar system the value is written in. One value today, and an axis
+ * rather than a silence: a second calendar system is a second arithmetic, and
+ * declaring the axis now is what keeps its arrival from being a contract break.
+ */
+export type CalendarCalendar = 'gregory';
+
+export type CalendarValueReason = Extract<
+  ChangeRequest<CalendarValue>['reason'],
+  'pointer' | 'keyboard' | 'clear' | 'programmatic'
+>;
+
+/** What an application sets once for every calendar under it. */
+export interface CalendarDefaults {
+  calendar: CalendarCalendar;
+  /** `0` is Sunday. Unset means the locale decides. */
+  firstDayOfWeek: number | undefined;
+  /** Always six rows, so paging does not change the surface's height. */
+  fixedWeeks: boolean;
+  locale: string | undefined;
+  months: number;
+  nextLabel: string;
+  outsideDays: CalendarOutsideDays;
+  previousLabel: string;
+  /** Which zone answers "what is today". Unset means the runtime's own. */
+  timeZone: string | undefined;
+  weekNumbers: boolean;
+}
+
+export interface CalendarDefaultsProviderProps extends Partial<CalendarDefaults> {
+  children?: ReactNode | undefined;
+}
+
+export interface CalendarRootProps extends HTMLAttributes<HTMLElement> {
+  'data-calendar': CalendarCalendar;
+  'data-disabled'?: '' | undefined;
+  'data-invalid'?: '' | undefined;
+  'data-months'?: string | undefined;
+  'data-part': string;
+  'data-readonly'?: '' | undefined;
+  'data-ui': string;
+  'data-view': CalendarView;
+  'data-week-numbers'?: '' | undefined;
+  ref?: Ref<HTMLElement> | undefined;
+}
+
+/** The imperative actions a consumer cannot express declaratively. */
+export interface CalendarHandle {
+  /** Puts focus on the cell holding the roving tab stop. */
+  focus(): void;
+  /** Moves the reader to a date, paging the grid to reach it. */
+  focusDate(date: PlainDate): void;
+}
+
+export interface CalendarProps extends Omit<
+  ComponentPropsWithRef<'div'>,
+  'defaultValue' | 'onChange' | 'ref'
+> {
+  /** Present means the consumer owns the value. */
+  value?: CalendarValue | undefined;
+  defaultValue?: CalendarValue | undefined;
+  onValueChange?:
+    ((value: CalendarValue, request: ChangeRequest<CalendarValue>) => void) | undefined;
+
+  /** The date the reader is on. Present means the consumer owns it. */
+  focusedDate?: PlainDate | undefined;
+  defaultFocusedDate?: PlainDate | undefined;
+  onFocusedDateChange?: ((date: PlainDate, request: ChangeRequest<PlainDate>) => void) | undefined;
+
+  min?: PlainDate | undefined;
+  max?: PlainDate | undefined;
+  /** Refuses particular dates. A refused date stays focusable and is not selectable. */
+  isDateUnavailable?: ((date: PlainDate) => boolean) | undefined;
+
+  selectionMode?: CalendarSelectionMode | undefined;
+  /** How many months are drawn side by side. They wrap when they do not fit. */
+  months?: number | undefined;
+  view?: CalendarView | undefined;
+  defaultView?: CalendarView | undefined;
+  onViewChange?: ((view: CalendarView) => void) | undefined;
+
+  weekNumbers?: boolean | undefined;
+  fixedWeeks?: boolean | undefined;
+  outsideDays?: CalendarOutsideDays | undefined;
+
+  locale?: string | undefined;
+  timeZone?: string | undefined;
+  firstDayOfWeek?: number | undefined;
+  calendar?: CalendarCalendar | undefined;
+
+  disabled?: boolean | undefined;
+  readOnly?: boolean | undefined;
+  invalid?: boolean | undefined;
+
+  previousLabel?: string | undefined;
+  nextLabel?: string | undefined;
+
+  render?: ((props: CalendarRootProps) => ReactNode) | undefined;
+  ref?: Ref<CalendarHandle> | undefined;
+}

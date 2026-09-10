@@ -1,0 +1,458 @@
+import { Component } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { plainDate } from '@slotted/core/date';
+import type { PlainDate } from '@slotted/core/date';
+import type { ChangeRequest } from '@slotted/core/state';
+import { describe, expect, it, vi } from 'vitest';
+
+import contract from '../../../../specs/components/calendar/contract.json';
+import { SlCalendar } from './calendar';
+import { provideCalendarDefaults } from './calendar-defaults';
+import type { CalendarValue, DateRange } from './calendar-defaults';
+
+const NINTH = plainDate(2026, 9, 9);
+
+@Component({
+  standalone: true,
+  imports: [SlCalendar],
+  template: `<div slCalendar></div>`,
+})
+class Host {
+  readonly ninth = NINTH;
+  readonly january = plainDate(2026, 1, 31);
+  readonly february = plainDate(2026, 2, 1);
+  readonly seventeenth = plainDate(2026, 9, 17);
+  readonly fifteenth = plainDate(2026, 9, 15);
+  readonly run: DateRange = { start: plainDate(2026, 9, 7), end: plainDate(2026, 9, 11) };
+  readonly refuseTenth = (date: PlainDate) => date.day === 10;
+  readonly values: CalendarValue[] = [];
+  readonly focusRequests: ChangeRequest<PlainDate>[] = [];
+  readonly onValue = vi.fn((request: ChangeRequest<CalendarValue>) => {
+    this.values.push(request.value);
+  });
+  readonly onFocused = vi.fn((request: ChangeRequest<PlainDate>) => {
+    this.focusRequests.push(request);
+  });
+}
+
+function renderTemplate(template: string, providers: unknown[] = []) {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({ providers: providers as never[] });
+  TestBed.overrideComponent(Host, { set: { template } });
+  const fixture = TestBed.createComponent(Host);
+  fixture.detectChanges();
+  return fixture;
+}
+
+type Fixture = ReturnType<typeof renderTemplate>;
+
+const root = (fixture: Fixture) =>
+  fixture.nativeElement.querySelector('[data-ui="calendar"]') as HTMLElement;
+const days = (fixture: Fixture) =>
+  [...fixture.nativeElement.querySelectorAll('[data-part="day"]')] as HTMLElement[];
+const dayFor = (fixture: Fixture, number: number) =>
+  days(fixture).find(
+    (element) =>
+      (element.textContent ?? '').trim() === String(number) &&
+      element.closest('[data-part="cell"]')?.hasAttribute('data-outside-month') === false,
+  ) as HTMLElement;
+const roving = (fixture: Fixture) =>
+  days(fixture).find((element) => element.tabIndex === 0) as HTMLElement;
+const headingText = (fixture: Fixture) =>
+  (fixture.nativeElement.querySelector('[data-part="heading"]').textContent ?? '').trim();
+
+const press = (fixture: Fixture, key: string, init: KeyboardEventInit = {}) => {
+  root(fixture).dispatchEvent(
+    new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }),
+  );
+  fixture.detectChanges();
+};
+
+const click = (fixture: Fixture, element: HTMLElement) => {
+  element.click();
+  fixture.detectChanges();
+};
+
+describe('the shape the pattern asks for', () => {
+  it('is selected in public by the family identifier and its parts', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" weekNumbers [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    const present = [...fixture.nativeElement.querySelectorAll('[data-part]')].map(
+      (element: Element) => (element as HTMLElement).dataset['part'],
+    );
+    expect(root(fixture).getAttribute('data-ui')).toBe(contract.ui);
+    for (const part of ['root', 'header', 'previous', 'next', 'heading', 'grids', 'grid']) {
+      expect(present).toContain(part);
+    }
+  });
+
+  it('puts the grid role on a real table and writes none of the implied ones', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    expect(fixture.nativeElement.querySelector('[data-part="grid"]').tagName).toBe('TABLE');
+    expect(fixture.nativeElement.querySelector('tr[role]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('td[role]')).toBeNull();
+  });
+
+  it('gives the column header the full weekday name a reader hears', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+    const headers = [...fixture.nativeElement.querySelectorAll('[data-part="week-header"]')];
+    expect(headers).toHaveLength(7);
+    expect((headers[0] as HTMLElement).getAttribute('abbr')).toBe('domingo');
+  });
+
+  it('keeps exactly one cell in the tab sequence', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+    expect(days(fixture).filter((element) => element.tabIndex === 0)).toHaveLength(1);
+    expect((roving(fixture).textContent ?? '').trim()).toBe('9');
+  });
+
+  it('names the month in a live region, because a key changes nothing else', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+    expect(
+      fixture.nativeElement.querySelector('[data-part="heading"]').getAttribute('aria-live'),
+    ).toBe('polite');
+    expect(headingText(fixture)).toBe('setembro de 2026');
+  });
+});
+
+describe('the keyboard the grid pattern lists', () => {
+  it('moves by a day and by a week', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    press(fixture, 'ArrowRight');
+    expect((roving(fixture).textContent ?? '').trim()).toBe('10');
+
+    press(fixture, 'ArrowDown');
+    expect((roving(fixture).textContent ?? '').trim()).toBe('17');
+
+    press(fixture, 'ArrowUp');
+    expect((roving(fixture).textContent ?? '').trim()).toBe('10');
+  });
+
+  it('goes to the ends of the displayed week', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    press(fixture, 'Home');
+    expect((roving(fixture).textContent ?? '').trim()).toBe('6');
+
+    press(fixture, 'End');
+    expect((roving(fixture).textContent ?? '').trim()).toBe('12');
+  });
+
+  /** The APG clamps to the last day a short month has. */
+  it('pages a month and clamps the day the next one cannot hold', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="january"></div>`,
+    );
+
+    press(fixture, 'PageDown');
+    expect(headingText(fixture)).toBe('fevereiro de 2026');
+    expect((roving(fixture).textContent ?? '').trim()).toBe('28');
+  });
+
+  it('pages a year with Shift', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    press(fixture, 'PageDown', { shiftKey: true });
+    expect(headingText(fixture)).toBe('setembro de 2027');
+  });
+
+  it('selects with Enter', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth" (valueChange)="onValue($event)"></div>`,
+    );
+
+    press(fixture, 'Enter');
+    expect(fixture.componentInstance.values.at(-1)).toEqual(NINTH);
+  });
+});
+
+describe('what a cell says', () => {
+  it('keeps a refused date reachable and refuses to select it', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         [defaultFocusedDate]="ninth"
+         [isDateUnavailable]="refuseTenth"
+         (valueChange)="onValue($event)"
+       ></div>`,
+    );
+
+    const tenth = dayFor(fixture, 10);
+    expect(tenth.getAttribute('aria-disabled')).toBe('true');
+    expect(tenth.closest('[data-part="cell"]')?.hasAttribute('data-unavailable')).toBe(true);
+
+    click(fixture, tenth);
+    expect(fixture.componentInstance.values).toHaveLength(0);
+
+    press(fixture, 'ArrowRight');
+    expect((roving(fixture).textContent ?? '').trim()).toBe('10');
+  });
+
+  it('refuses a date outside the bounds', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         [defaultFocusedDate]="ninth"
+         [min]="fifteenth"
+         (valueChange)="onValue($event)"
+       ></div>`,
+    );
+
+    click(fixture, dayFor(fixture, 10));
+    expect(fixture.componentInstance.values).toHaveLength(0);
+  });
+
+  it('marks a day of the month either side', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+    expect(
+      fixture.nativeElement.querySelector('[data-part="cell"][data-outside-month]'),
+    ).not.toBeNull();
+  });
+});
+
+describe('the three selection modes', () => {
+  it('takes one date', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth" (valueChange)="onValue($event)"></div>`,
+    );
+
+    click(fixture, dayFor(fixture, 10));
+    expect(fixture.componentInstance.values.at(-1)).toEqual(plainDate(2026, 9, 10));
+  });
+
+  /**
+   * A reader who chooses the 11th and then the 7th means the 7th to the 11th,
+   * not a range that runs backwards.
+   */
+  it('orders a range whichever end is chosen first', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         selectionMode="range"
+         [defaultFocusedDate]="ninth"
+         (valueChange)="onValue($event)"
+       ></div>`,
+    );
+
+    click(fixture, dayFor(fixture, 11));
+    click(fixture, dayFor(fixture, 7));
+
+    const value = fixture.componentInstance.values.at(-1) as DateRange;
+    expect(value.start).toEqual(plainDate(2026, 9, 7));
+    expect(value.end).toEqual(plainDate(2026, 9, 11));
+  });
+
+  it('draws the two ends and the run between them', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         selectionMode="range"
+         [defaultFocusedDate]="ninth"
+         [defaultValue]="run"
+       ></div>`,
+    );
+
+    expect(
+      (
+        fixture.nativeElement.querySelector('[data-range-start] [data-part="day"]')?.textContent ??
+        ''
+      ).trim(),
+    ).toBe('7');
+    expect(fixture.nativeElement.querySelectorAll('[data-in-range]')).toHaveLength(3);
+  });
+
+  it('adds to a set and takes a date back out of it', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         selectionMode="multiple"
+         [defaultFocusedDate]="ninth"
+         (valueChange)="onValue($event)"
+       ></div>`,
+    );
+
+    click(fixture, dayFor(fixture, 7));
+    click(fixture, dayFor(fixture, 11));
+    expect(fixture.componentInstance.values.at(-1)).toHaveLength(2);
+
+    click(fixture, dayFor(fixture, 7));
+    expect(fixture.componentInstance.values.at(-1)).toHaveLength(1);
+  });
+});
+
+describe('the three views', () => {
+  it('walks up from the day view and back down', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    click(fixture, fixture.nativeElement.querySelector('[data-part="heading"]') as HTMLElement);
+    expect(root(fixture).getAttribute('data-view')).toBe('month');
+
+    click(fixture, fixture.nativeElement.querySelector('[data-part="heading"]') as HTMLElement);
+    expect(root(fixture).getAttribute('data-view')).toBe('year');
+  });
+
+  /**
+   * `Escape` inside a month or year view goes down a view rather than out of
+   * the component, which is the staging `dismissable-layer` asks for.
+   */
+  it('takes Escape down a view rather than out of the component', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" defaultView="year" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    press(fixture, 'Escape');
+    expect(root(fixture).getAttribute('data-view')).toBe('month');
+
+    press(fixture, 'Escape');
+    expect(root(fixture).getAttribute('data-view')).toBe('day');
+  });
+
+  it('leaves Escape alone in the day view, so a surface above it may close', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    press(fixture, 'Escape');
+    expect(root(fixture).getAttribute('data-view')).toBe('day');
+  });
+
+  it('picks a month from the month view and returns to the days', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" defaultView="month" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    const january = fixture.nativeElement.querySelectorAll(
+      '[data-part="period"]',
+    )[0] as HTMLElement;
+    click(fixture, january);
+    expect(root(fixture).getAttribute('data-view')).toBe('day');
+    expect(headingText(fixture)).toBe('janeiro de 2026');
+  });
+});
+
+describe('how much of it is drawn', () => {
+  it('draws more than one month, and names each one', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [months]="2" [defaultFocusedDate]="ninth"></div>`,
+    );
+
+    expect(fixture.nativeElement.querySelectorAll('[data-part="grid"]')).toHaveLength(2);
+    const captions = [...fixture.nativeElement.querySelectorAll('[data-part="grid-caption"]')].map(
+      (element: Element) => (element.textContent ?? '').trim(),
+    );
+    expect(captions).toEqual(['setembro de 2026', 'outubro de 2026']);
+  });
+
+  it('draws six rows on request, so a popup does not resize under the pointer', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" fixedWeeks [defaultFocusedDate]="february"></div>`,
+    );
+    expect(fixture.nativeElement.querySelectorAll('[data-part="week"]')).toHaveLength(6);
+  });
+
+  it('draws a week number column on request', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" weekNumbers [defaultFocusedDate]="ninth"></div>`,
+    );
+    expect(root(fixture).hasAttribute('data-week-numbers')).toBe(true);
+    expect(
+      fixture.nativeElement.querySelectorAll('th[data-part="week-number"]').length,
+    ).toBeGreaterThan(1);
+  });
+});
+
+describe('what an application sets once', () => {
+  it('takes the locale and the shape from a provider', () => {
+    const fixture = renderTemplate(`<div slCalendar [defaultFocusedDate]="ninth"></div>`, [
+      provideCalendarDefaults({ fixedWeeks: true, locale: 'de-DE' }),
+    ]);
+
+    expect(headingText(fixture)).toBe('September 2026');
+    expect(fixture.nativeElement.querySelectorAll('[data-part="week"]')).toHaveLength(6);
+  });
+
+  it('lets one calendar outrank the provider', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" [defaultFocusedDate]="ninth"></div>`,
+      [provideCalendarDefaults({ locale: 'de-DE' })],
+    );
+    expect(headingText(fixture)).toBe('setembro de 2026');
+  });
+});
+
+describe('the composition surface', () => {
+  it('separates the date chosen from the date the reader is on', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         [defaultFocusedDate]="ninth"
+         (focusedDateChange)="onFocused($event)"
+       ></div>`,
+    );
+
+    press(fixture, 'ArrowRight');
+    const request = fixture.componentInstance.focusRequests.at(-1);
+    expect(request?.value).toEqual(plainDate(2026, 9, 10));
+    expect(request?.reason).toBe('keyboard');
+  });
+
+  it('hands a template the instance and its imperative actions', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar #cal="slCalendar" locale="pt-BR" [defaultFocusedDate]="ninth"></div>
+       <button type="button" (click)="cal.focusDate(seventeenth)">ir</button>`,
+    );
+
+    click(fixture, fixture.nativeElement.querySelector('button:not([data-part])') as HTMLElement);
+    expect((roving(fixture).textContent ?? '').trim()).toBe('17');
+  });
+
+  it('answers no press while it is read-only', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         readOnly
+         [defaultFocusedDate]="ninth"
+         (valueChange)="onValue($event)"
+       ></div>`,
+    );
+
+    click(fixture, dayFor(fixture, 10));
+    expect(fixture.componentInstance.values).toHaveLength(0);
+  });
+
+  it('takes every cell out of the tab sequence when it is disabled', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="pt-BR" disabled [defaultFocusedDate]="ninth"></div>`,
+    );
+    expect(days(fixture).filter((element) => element.tabIndex === 0)).toHaveLength(0);
+  });
+});

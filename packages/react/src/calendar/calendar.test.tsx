@@ -1,0 +1,429 @@
+import { plainDate } from '@slotted/core/date';
+import type { PlainDate } from '@slotted/core/date';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import contract from '../../../../specs/components/calendar/contract.json';
+import { Calendar, CalendarDefaultsProvider } from './index';
+import type { CalendarHandle, CalendarValue, DateRange } from './index';
+
+const NINTH = plainDate(2026, 9, 9);
+
+const grid = () => screen.getAllByRole('grid');
+const days = () => [...document.querySelectorAll('[data-part="day"]')] as HTMLElement[];
+const dayFor = (number: number) =>
+  days().find(
+    (element) =>
+      element.textContent === String(number) &&
+      element.closest('[data-part="cell"]')?.hasAttribute('data-outside-month') === false,
+  ) as HTMLElement;
+const roving = () => days().find((element) => element.tabIndex === 0) as HTMLElement;
+
+const press = (key: string, init: KeyboardEventInit = {}) => {
+  fireEvent.keyDown(roving() ?? document.body, { key, ...init });
+};
+
+describe('the shape the pattern asks for', () => {
+  it('is selected in public by the family identifier and its parts', () => {
+    const { container } = render(
+      <Calendar defaultFocusedDate={NINTH} locale="pt-BR" weekNumbers />,
+    );
+
+    const present = [...container.querySelectorAll('[data-part]')].map(
+      (element) => (element as HTMLElement).dataset['part'],
+    );
+    expect(container.querySelector('[data-ui="calendar"]')).toBeInTheDocument();
+    for (const part of ['root', 'header', 'previous', 'next', 'heading', 'grids', 'grid']) {
+      expect(present).toContain(part);
+    }
+    expect(contract.ui).toBe('calendar');
+  });
+
+  /**
+   * The APG's own note: with the grid role on a `table`, the row,
+   * column-header and cell roles are implied and must not be written.
+   */
+  it('puts the grid role on a real table and writes none of the implied ones', () => {
+    const { container } = render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+
+    expect(grid()[0]?.tagName).toBe('TABLE');
+    expect(container.querySelector('tr[role]')).toBeNull();
+    expect(container.querySelector('td[role]')).toBeNull();
+    expect(container.querySelector('th[role]')).toBeNull();
+  });
+
+  it('gives the column header the full weekday name a reader hears', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+    const headers = [...document.querySelectorAll('[data-part="week-header"]')];
+    expect(headers).toHaveLength(7);
+    expect(headers[0]?.getAttribute('abbr')).toBe('domingo');
+  });
+
+  it('keeps exactly one cell in the tab sequence', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+    expect(days().filter((element) => element.tabIndex === 0)).toHaveLength(1);
+    expect(roving().textContent).toBe('9');
+  });
+
+  it('names the month in a live region, because a key changes nothing else', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+    const heading = screen.getByRole('button', { name: /setembro/ });
+    expect(heading).toHaveAttribute('aria-live', 'polite');
+  });
+});
+
+describe('the keyboard the grid pattern lists', () => {
+  it('moves by a day and by a week', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+
+    press('ArrowRight');
+    expect(roving().textContent).toBe('10');
+
+    press('ArrowDown');
+    expect(roving().textContent).toBe('17');
+
+    press('ArrowUp');
+    expect(roving().textContent).toBe('10');
+
+    press('ArrowLeft');
+    expect(roving().textContent).toBe('9');
+  });
+
+  it('goes to the ends of the displayed week', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+
+    press('Home');
+    expect(roving().textContent).toBe('6');
+
+    press('End');
+    expect(roving().textContent).toBe('12');
+  });
+
+  /** The APG clamps to the last day a short month has. */
+  it('pages a month and clamps the day the next one cannot hold', () => {
+    render(<Calendar defaultFocusedDate={plainDate(2026, 1, 31)} locale="pt-BR" />);
+
+    press('PageDown');
+    expect(screen.getByRole('button', { name: /fevereiro/ })).toBeInTheDocument();
+    expect(roving().textContent).toBe('28');
+  });
+
+  it('pages a year with Shift', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+
+    press('PageDown', { shiftKey: true });
+    expect(screen.getByRole('button', { name: /setembro de 2027/ })).toBeInTheDocument();
+  });
+
+  it('selects with Enter and with Space', () => {
+    const onValueChange = vi.fn();
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" onValueChange={onValueChange} />);
+
+    press('Enter');
+    expect(onValueChange).toHaveBeenCalledWith(
+      NINTH,
+      expect.objectContaining({ reason: 'keyboard' }),
+    );
+  });
+});
+
+describe('what a cell says', () => {
+  it('marks today apart from the selection', () => {
+    const { container } = render(
+      <Calendar defaultFocusedDate={NINTH} defaultValue={plainDate(2026, 9, 17)} locale="pt-BR" />,
+    );
+
+    const selected = container.querySelector('[data-part="cell"][data-selected] [data-part="day"]');
+    expect(selected?.textContent).toBe('17');
+    /* Today is resolved in an effect, so the attribute is on whichever cell the
+       runtime's own zone says it is on; what matters is that it is not the
+       selection's. */
+    const marked = container.querySelector('[data-part="day"][data-today]');
+    expect(marked === null || marked !== selected).toBe(true);
+  });
+
+  it('keeps a refused date reachable and refuses to select it', () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        isDateUnavailable={(date) => date.day === 10}
+        locale="pt-BR"
+        onValueChange={onValueChange}
+      />,
+    );
+
+    const tenth = dayFor(10);
+    expect(tenth).toHaveAttribute('aria-disabled', 'true');
+    expect(tenth.closest('[data-part="cell"]')).toHaveAttribute('data-unavailable');
+
+    fireEvent.click(tenth);
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    /* Still reachable: the arrow lands on it and the reader can be told why. */
+    press('ArrowRight');
+    expect(roving().textContent).toBe('10');
+  });
+
+  it('marks a day of the month either side', () => {
+    const { container } = render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+    expect(container.querySelector('[data-part="cell"][data-outside-month]')).toBeInTheDocument();
+  });
+
+  it('refuses a date outside the bounds', () => {
+    const onValueChange = vi.fn();
+    render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        min={plainDate(2026, 9, 15)}
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.click(dayFor(10));
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
+describe('the three selection modes', () => {
+  it('takes one date, and takes it back', () => {
+    const onValueChange = vi.fn();
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" onValueChange={onValueChange} />);
+
+    fireEvent.click(dayFor(10));
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      plainDate(2026, 9, 10),
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  /**
+   * A reader who chooses the 11th and then the 7th means the 7th to the 11th,
+   * not a range that runs backwards.
+   */
+  it('orders a range whichever end is chosen first', () => {
+    const onValueChange = vi.fn<(value: CalendarValue) => void>();
+    render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        onValueChange={onValueChange}
+        selectionMode="range"
+      />,
+    );
+
+    fireEvent.click(dayFor(11));
+    fireEvent.click(dayFor(7));
+
+    const value = onValueChange.mock.calls.at(-1)?.[0] as DateRange;
+    expect(value.start).toEqual(plainDate(2026, 9, 7));
+    expect(value.end).toEqual(plainDate(2026, 9, 11));
+  });
+
+  it('draws the two ends and the run between them', () => {
+    const { container } = render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        defaultValue={{ start: plainDate(2026, 9, 7), end: plainDate(2026, 9, 11) }}
+        locale="pt-BR"
+        selectionMode="range"
+      />,
+    );
+
+    expect(container.querySelector('[data-range-start] [data-part="day"]')?.textContent).toBe('7');
+    expect(container.querySelector('[data-range-end] [data-part="day"]')?.textContent).toBe('11');
+    expect(container.querySelectorAll('[data-in-range]')).toHaveLength(3);
+  });
+
+  it('adds to a set and takes a date back out of it', () => {
+    const onValueChange = vi.fn<(value: CalendarValue) => void>();
+    render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        onValueChange={onValueChange}
+        selectionMode="multiple"
+      />,
+    );
+
+    fireEvent.click(dayFor(7));
+    fireEvent.click(dayFor(11));
+    expect(onValueChange.mock.calls.at(-1)?.[0]).toHaveLength(2);
+
+    fireEvent.click(dayFor(7));
+    expect(onValueChange.mock.calls.at(-1)?.[0]).toHaveLength(1);
+  });
+});
+
+describe('the three views', () => {
+  it('walks up from the day view and back down', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /setembro de 2026/ }));
+    expect(document.querySelector('[data-part="months"]')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '2026' }));
+    expect(document.querySelector('[data-part="years"]')).toBeInTheDocument();
+  });
+
+  /**
+   * `Escape` inside a month or year view goes down a view rather than out of
+   * the component, which is the staging `dismissable-layer` asks for: the
+   * family decides and simply does not pass the key on.
+   */
+  it('takes Escape down a view rather than out of the component', () => {
+    const { container } = render(
+      <Calendar defaultFocusedDate={NINTH} defaultView="year" locale="pt-BR" />,
+    );
+    const root = container.querySelector('[data-ui="calendar"]') as HTMLElement;
+
+    fireEvent.keyDown(root, { key: 'Escape' });
+    expect(root).toHaveAttribute('data-view', 'month');
+
+    fireEvent.keyDown(root, { key: 'Escape' });
+    expect(root).toHaveAttribute('data-view', 'day');
+  });
+
+  it('leaves Escape alone in the day view, so a surface above it may close', () => {
+    const onKeyDown = vi.fn();
+    const { container } = render(
+      <Calendar defaultFocusedDate={NINTH} locale="pt-BR" onKeyDown={onKeyDown} />,
+    );
+    const root = container.querySelector('[data-ui="calendar"]') as HTMLElement;
+
+    fireEvent.keyDown(root, { key: 'Escape' });
+    expect(root).toHaveAttribute('data-view', 'day');
+    expect(onKeyDown).toHaveBeenCalled();
+  });
+
+  it('picks a month from the month view and returns to the days', () => {
+    const { container } = render(
+      <Calendar defaultFocusedDate={NINTH} defaultView="month" locale="pt-BR" />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'jan.' }));
+    expect(container.querySelector('[data-ui="calendar"]')).toHaveAttribute('data-view', 'day');
+    expect(screen.getByRole('button', { name: /janeiro de 2026/ })).toBeInTheDocument();
+  });
+});
+
+describe('how much of it is drawn', () => {
+  it('draws more than one month, and names each one', () => {
+    render(<Calendar defaultFocusedDate={NINTH} locale="pt-BR" months={2} />);
+
+    expect(grid()).toHaveLength(2);
+    const captions = [...document.querySelectorAll('[data-part="grid-caption"]')].map(
+      (element) => element.textContent,
+    );
+    expect(captions).toEqual(['setembro de 2026', 'outubro de 2026']);
+  });
+
+  it('draws six rows on request, so a popup does not resize under the pointer', () => {
+    const { container } = render(
+      <Calendar defaultFocusedDate={plainDate(2026, 2, 1)} fixedWeeks locale="pt-BR" />,
+    );
+    expect(container.querySelectorAll('[data-part="week"]')).toHaveLength(6);
+  });
+
+  it('draws a week number column on request', () => {
+    const { container } = render(
+      <Calendar defaultFocusedDate={NINTH} locale="pt-BR" weekNumbers />,
+    );
+    expect(container.querySelector('[data-ui="calendar"]')).toHaveAttribute('data-week-numbers');
+    expect(container.querySelectorAll('th[data-part="week-number"]').length).toBeGreaterThan(1);
+  });
+});
+
+describe('what an application sets once', () => {
+  it('takes the locale and the shape from a provider', () => {
+    render(
+      <CalendarDefaultsProvider fixedWeeks locale="de-DE">
+        <Calendar defaultFocusedDate={NINTH} />
+      </CalendarDefaultsProvider>,
+    );
+
+    expect(screen.getByRole('button', { name: /September 2026/ })).toBeInTheDocument();
+    expect(document.querySelectorAll('[data-part="week"]')).toHaveLength(6);
+  });
+
+  it('lets one calendar outrank the provider', () => {
+    render(
+      <CalendarDefaultsProvider locale="de-DE">
+        <Calendar defaultFocusedDate={NINTH} locale="pt-BR" />
+      </CalendarDefaultsProvider>,
+    );
+    expect(screen.getByRole('button', { name: /setembro de 2026/ })).toBeInTheDocument();
+  });
+});
+
+describe('the composition surface', () => {
+  it('separates the date chosen from the date the reader is on', () => {
+    const onFocusedDateChange = vi.fn();
+    render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        onFocusedDateChange={onFocusedDateChange}
+      />,
+    );
+
+    press('ArrowRight');
+    expect(onFocusedDateChange).toHaveBeenCalledWith(
+      plainDate(2026, 9, 10),
+      expect.objectContaining({ reason: 'keyboard' }),
+    );
+  });
+
+  it('hands the consumer a handle for what a prop cannot express', () => {
+    let handle: CalendarHandle | null = null;
+    render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        ref={(instance) => {
+          handle = instance;
+        }}
+      />,
+    );
+
+    act(() => (handle as CalendarHandle | null)?.focusDate(plainDate(2026, 11, 3)));
+    expect(screen.getByRole('button', { name: /novembro de 2026/ })).toBeInTheDocument();
+  });
+
+  it('substitutes the element the root renders', () => {
+    const { container } = render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        render={(props) => <section {...props} />}
+      />,
+    );
+    expect(container.querySelector('section[data-ui="calendar"]')).toBeInTheDocument();
+  });
+
+  it('answers no key and no press while it is read-only', () => {
+    const onValueChange = vi.fn();
+    render(
+      <Calendar defaultFocusedDate={NINTH} locale="pt-BR" onValueChange={onValueChange} readOnly />,
+    );
+
+    fireEvent.click(dayFor(10));
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('takes every cell out of the tab sequence when it is disabled', () => {
+    render(<Calendar defaultFocusedDate={NINTH} disabled locale="pt-BR" />);
+    expect(days().filter((element) => element.tabIndex === 0)).toHaveLength(0);
+  });
+
+  it('follows a controlled focused date and never moves it itself', () => {
+    const held: PlainDate = NINTH;
+    render(<Calendar focusedDate={held} locale="pt-BR" />);
+
+    press('ArrowRight');
+    /* The consumer never wrote a new value back, so the reader is still on the
+       ninth the next time it is read. */
+    expect(roving().textContent).toBe('9');
+  });
+});

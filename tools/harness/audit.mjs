@@ -39,6 +39,29 @@ const COLLAPSE_FLOOR = 96;
 /** A stage narrower than this has no room to collapse anything meaningfully. */
 const STAGE_MINIMUM = 320;
 
+/**
+ * How long the page is given between two readings of how many stages it holds.
+ *
+ * A docs page mounts its blocks one at a time, so two readings this far apart
+ * with the same count is what "it has stopped growing" means here. Shorter and
+ * a slow block lands after the audit has measured; longer and every run pays
+ * for it.
+ */
+export const SETTLE_INTERVAL = 250;
+
+/**
+ * Whether a page has stopped mounting stages.
+ *
+ * `counts` is every reading so far, oldest first. It has settled once two
+ * consecutive readings agree and there is something to measure — a page that
+ * has drawn nothing has not settled, it has not started.
+ */
+export function hasSettled(counts) {
+  if (counts.length < 2) return false;
+  const last = counts[counts.length - 1];
+  return last > 0 && last === counts[counts.length - 2];
+}
+
 /** Overflow under this is a rounding artefact, not content leaving its box. */
 const OVERFLOW_TOLERANCE = 2;
 
@@ -528,15 +551,25 @@ export async function audit({ url, width = 1280, density = 'comfortable' }) {
      * A Storybook docs page mounts after the load event, so measuring at load
      * measures an empty document — which reports no defect and no stages, and
      * reads exactly like a clean page.
+     *
+     * It also mounts its blocks *one at a time*. Waiting for the first stage
+     * and then measuring caught two stages of a page holding twenty-four, and
+     * that read exactly like a clean page as well: the audit passed a picker's
+     * reference page it had seen almost none of. So the wait is for the count
+     * to stop growing rather than for the first stage to exist — `hasSettled`
+     * is the rule, and it is a pure function so a case can be put to it.
      */
     const { result: waited } = await devtools.send('Runtime.evaluate', {
       expression: `new Promise((done) => {
         const deadline = Date.now() + 15000;
+        const counts = [];
         const settle = () => requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
         const poll = () => {
-          if (document.querySelector('.slotted-demo-stage, .stage')) return settle();
-          if (Date.now() > deadline) return done(false);
-          setTimeout(poll, 100);
+          counts.push(document.querySelectorAll('.slotted-demo-stage, .stage').length);
+          const last = counts[counts.length - 1];
+          if (counts.length >= 2 && last > 0 && last === counts[counts.length - 2]) return settle();
+          if (Date.now() > deadline) return done(last > 0);
+          setTimeout(poll, ${SETTLE_INTERVAL});
         };
         poll();
       })`,

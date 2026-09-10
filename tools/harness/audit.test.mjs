@@ -5,8 +5,10 @@ import {
   annotatesTheLine,
   collapsedElements,
   explainedExcess,
+  hasSettled,
   offAxisMarks,
   overflowingElements,
+  SETTLE_INTERVAL,
   turningExcess,
 } from './audit.mjs';
 
@@ -471,4 +473,23 @@ test('measures a glyph that shares the line, however far off it sits', () => {
 
 test('treats a record with no bands as one that shares its line', () => {
   assert.equal(annotatesTheLine({ markCentre: 1, textCentre: 2 }), true);
+});
+
+/**
+ * The wait, as a rule a case can be put to. The audit measured a docs page as
+ * soon as one stage existed, and a page that mounts its blocks one at a time
+ * had two of twenty-four by then — which reported no defect and read exactly
+ * like a clean page.
+ */
+test('waits for the stage count to stop growing, not for the first stage', () => {
+  assert.equal(hasSettled([]), false, 'nothing read yet');
+  assert.equal(hasSettled([2]), false, 'one reading is not two');
+  assert.equal(hasSettled([2, 9]), false, 'still mounting');
+  assert.equal(hasSettled([2, 9, 24, 24]), true, 'two readings agree');
+  assert.equal(hasSettled([0, 0]), false, 'a page that drew nothing has not settled');
+});
+
+test('gives the page long enough between two readings to mount a block', () => {
+  assert.ok(SETTLE_INTERVAL >= 100, 'shorter than a block takes to mount');
+  assert.ok(SETTLE_INTERVAL <= 500, 'every run pays this twice at least');
 });

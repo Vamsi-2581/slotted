@@ -65,9 +65,27 @@ export function splitSelectorList(list) {
   return parts;
 }
 
+/**
+ * Comments, gone before anything is read as a selector.
+ *
+ * What sits between one rule's `}` and the next rule's `{` is the next rule's
+ * selector *and every comment above it*, and this file's own comments explain
+ * the rules they stand over — so they name the pseudo-classes the rules use.
+ * A comment reading "a `:hover` selector outweighs a plain `[data-selected]`,
+ * so the chosen row turned grey" split on its own comma into a fragment
+ * carrying `:hover` and no guard, and a correctly guarded stylesheet was
+ * reported as an unguarded one.
+ *
+ * The sibling defect is already recorded above `splitSelectorList`: both are
+ * this test reading something that is not a selector as one.
+ */
+export function withoutComments(css) {
+  return css.replace(/\/\*[\s\S]*?\*\//g, ' ');
+}
+
 /** Every selector list in the sheet, one entry per selector. */
 function selectors(css) {
-  return [...css.matchAll(/(^|\})([^{}]+)\{/g)]
+  return [...withoutComments(css).matchAll(/(^|\})([^{}]+)\{/g)]
     .map(([, , selector]) => selector.trim())
     .filter((selector) => selector.length > 0 && !selector.startsWith('@'))
     .flatMap(splitSelectorList)
@@ -97,4 +115,22 @@ test('splits a selector list at its own commas and not inside a functional one',
   assert.deepEqual(splitSelectorList('a:is(b, c):hover, d'), ['a:is(b, c):hover', ' d']);
   assert.deepEqual(splitSelectorList('a:has(b:is(c, d)):active'), ['a:has(b:is(c, d)):active']);
   assert.deepEqual(splitSelectorList('a, b'), ['a', ' b']);
+});
+
+/**
+ * A comment is not a selector, and this file's own comments name the
+ * pseudo-classes of the rules they stand over.
+ */
+test("reads a rule's selector and not the prose above it", () => {
+  const css = `
+    a { color: red }
+    /* A :hover selector outweighs a plain [data-selected], so the row turned grey. */
+    b:hover:not([data-disabled]) { color: blue }
+  `;
+  assert.deepEqual(
+    [...withoutComments(css).matchAll(/(^|\})([^{}]+)\{/g)].map(([, , selector]) =>
+      selector.trim(),
+    ),
+    ['a', 'b:hover:not([data-disabled])'],
+  );
 });

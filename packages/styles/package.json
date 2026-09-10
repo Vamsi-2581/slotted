@@ -87,6 +87,8 @@
     "./number-field/tokens.json": "./src/number-field/number-field.tokens.json",
     "./pagination/pagination.css": "./src/pagination/pagination.css",
     "./pagination/tokens.json": "./src/pagination/pagination.tokens.json",
+    "./multi-select/multi-select.css": "./src/multi-select/multi-select.css",
+    "./multi-select/tokens.json": "./src/multi-select/multi-select.tokens.json",
     "./popover/popover.css": "./src/popover/popover.css",
     "./popover/tokens.json": "./src/popover/popover.tokens.json",
     "./progress-indicator/progress-indicator.css": "./src/progress-indicator/progress-indicator.css",

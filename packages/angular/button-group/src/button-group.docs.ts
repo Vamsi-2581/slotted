@@ -85,6 +85,7 @@ export const ANGULAR_BUTTON_GROUP_DOCS = {
       'The separator takes its axis from the group, mirrored: a rule across a row is vertical.',
       'Nothing here depends on hover, and nothing is decided by script. The buttons are joined by the stylesheet alone, so the bar is the same shape in a server render and with JavaScript disabled.',
       'The buttons keep the accessible names, disabled behaviour and loading announcements the button family gives them. The group adds nothing to them and removes nothing from them.',
+      'A toggle button belongs in a bar of actions, and the group keeps its frame whole around one — but an exclusive set of them is toggle-group, not this family. Built here by hand the set has no exclusivity, no shared keyboard and one tab stop per control where the pattern gives one for the set; toggle-group owns the value, the roving focus and the group semantics over it.',
     ],
     snippets: [
       defineSnippet({
@@ -93,13 +94,6 @@ export const ANGULAR_BUTTON_GROUP_DOCS = {
         label: 'A split action: the main action and its menu share one edge',
         source:
           '<div slButtonGroup aria-label="Publish">\n  <button slButton (click)="publish()">Publish</button>\n  <button slIconButton aria-label="More publish options" (click)="openMenu()">\n    <ng-icon aria-hidden="true" name="lucideChevronDown"></ng-icon>\n  </button>\n</div>',
-      }),
-      defineSnippet({
-        id: 'button-group-angular-segmented',
-        language: 'angular',
-        label: 'A joined bar of related views',
-        source:
-          '<div slButtonGroup aria-label="Range" tone="secondary" variant="outline">\n  <button slToggleButton [pressed]="range() === \'day\'" (pressedChange)="range.set(\'day\')">\n    Day\n  </button>\n  <button slToggleButton [pressed]="range() === \'week\'" (pressedChange)="range.set(\'week\')">\n    Week\n  </button>\n</div>',
       }),
       defineSnippet({
         id: 'button-group-angular-runs',

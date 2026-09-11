@@ -349,21 +349,19 @@ export const Composition: Story = {
               </ButtonGroup>
             </div>
             <div style={row}>
-              <Caption>a toggle that is on — at each of the three positions</Caption>
-              <ButtonGroup aria-label="View" tone="secondary" variant="outline">
-                <ToggleButton defaultPressed>List</ToggleButton>
-                <ToggleButton defaultPressed={false}>Board</ToggleButton>
-                <ToggleButton defaultPressed={false}>Calendar</ToggleButton>
+              <Caption>
+                one toggle among actions · the frame stays whole around it, in the middle and at the
+                end — an exclusive set of toggles is toggle-group
+              </Caption>
+              <ButtonGroup aria-label="Record" tone="secondary" variant="outline">
+                <Button>Duplicate</Button>
+                <ToggleButton defaultPressed>Pin</ToggleButton>
+                <Button>Archive</Button>
               </ButtonGroup>
-              <ButtonGroup aria-label="View" tone="secondary" variant="outline">
-                <ToggleButton defaultPressed={false}>List</ToggleButton>
-                <ToggleButton defaultPressed>Board</ToggleButton>
-                <ToggleButton defaultPressed={false}>Calendar</ToggleButton>
-              </ButtonGroup>
-              <ButtonGroup aria-label="View" tone="secondary" variant="outline">
-                <ToggleButton defaultPressed={false}>List</ToggleButton>
-                <ToggleButton defaultPressed={false}>Board</ToggleButton>
-                <ToggleButton defaultPressed>Calendar</ToggleButton>
+              <ButtonGroup aria-label="Record, pinned last" tone="secondary" variant="outline">
+                <Button>Duplicate</Button>
+                <Button>Archive</Button>
+                <ToggleButton defaultPressed>Pin</ToggleButton>
               </ButtonGroup>
             </div>
             <div style={row}>

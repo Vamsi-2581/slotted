@@ -92,6 +92,7 @@ export const REACT_BUTTON_GROUP_DOCS = {
       'The separator takes its axis from the group, mirrored: a rule across a row is vertical.',
       'Nothing here depends on hover, and nothing is decided by script. The buttons are joined by the stylesheet alone, so the bar is the same shape before hydration and with JavaScript disabled.',
       'The buttons keep the accessible names, disabled behaviour and loading announcements the button family gives them. The group adds nothing to them and removes nothing from them.',
+      'A toggle button belongs in a bar of actions, and the group keeps its frame whole around one — but an exclusive set of them is toggle-group, not this family. Built here by hand the set has no exclusivity, no shared keyboard and one tab stop per control where the pattern gives one for the set; toggle-group owns the value, the roving focus and the group semantics over it.',
     ],
     snippets: [
       defineSnippet({
@@ -100,13 +101,6 @@ export const REACT_BUTTON_GROUP_DOCS = {
         label: 'A split action: the main action and its menu share one edge',
         source:
           '<ButtonGroup aria-label="Publish">\n  <Button onClick={publish}>Publish</Button>\n  <IconButton aria-label="More publish options" onClick={openMenu}>\n    <ChevronDown aria-hidden="true" />\n  </IconButton>\n</ButtonGroup>;',
-      }),
-      defineSnippet({
-        id: 'button-group-react-segmented',
-        language: 'tsx',
-        label: 'A joined bar of related views',
-        source:
-          "<ButtonGroup aria-label=\"Range\" tone=\"secondary\" variant=\"outline\">\n  <ToggleButton pressed={range === 'day'} onPressedChange={() => setRange('day')}>\n    Day\n  </ToggleButton>\n  <ToggleButton pressed={range === 'week'} onPressedChange={() => setRange('week')}>\n    Week\n  </ToggleButton>\n</ButtonGroup>;",
       }),
       defineSnippet({
         id: 'button-group-react-runs',

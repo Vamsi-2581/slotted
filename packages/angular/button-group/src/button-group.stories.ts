@@ -368,21 +368,19 @@ export const Composition: Story = {
           </div>
         </div>
         <div [style]="demo.row">
-          <span [style]="demo.caption">a toggle that is on — at each of the three positions</span>
-          <div slButtonGroup aria-label="View" tone="secondary" variant="outline">
-            <button slToggleButton [defaultPressed]="true">List</button>
-            <button slToggleButton [defaultPressed]="false">Board</button>
-            <button slToggleButton [defaultPressed]="false">Calendar</button>
+          <span [style]="demo.caption">
+            one toggle among actions · the frame stays whole around it, in the middle and at the
+            end — an exclusive set of toggles is toggle-group
+          </span>
+          <div slButtonGroup aria-label="Record" tone="secondary" variant="outline">
+            <button slButton>Duplicate</button>
+            <button slToggleButton [defaultPressed]="true">Pin</button>
+            <button slButton>Archive</button>
           </div>
-          <div slButtonGroup aria-label="View" tone="secondary" variant="outline">
-            <button slToggleButton [defaultPressed]="false">List</button>
-            <button slToggleButton [defaultPressed]="true">Board</button>
-            <button slToggleButton [defaultPressed]="false">Calendar</button>
-          </div>
-          <div slButtonGroup aria-label="View" tone="secondary" variant="outline">
-            <button slToggleButton [defaultPressed]="false">List</button>
-            <button slToggleButton [defaultPressed]="false">Board</button>
-            <button slToggleButton [defaultPressed]="true">Calendar</button>
+          <div slButtonGroup aria-label="Record, pinned last" tone="secondary" variant="outline">
+            <button slButton>Duplicate</button>
+            <button slButton>Archive</button>
+            <button slToggleButton [defaultPressed]="true">Pin</button>
           </div>
         </div>
         <div [style]="demo.row">

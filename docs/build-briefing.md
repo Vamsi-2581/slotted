@@ -233,6 +233,22 @@ other families stand on. Justify it at the gate before writing it.
   malformed operand gives `null`, so a bookmark written by an older version of
   an application degrades to no filter rather than to an error on first paint.
 
+- **Where the page chrome ends is a property the page publishes, and every
+  sticky thing under it reads.** `page` writes `--slotted-page-sticky-top` on
+  the element that scrolls — the title area's height, plus the tabs, plus the
+  header area while it is pinned or revealed — and `--slotted-page-sticky-bottom`
+  for its footer, and bridges the first into `--slotted-table-sticky-offset` on
+  its own root. `section` sticks its header at that height; `table` already
+  reads the bridge. A family that adds a sticky part to a page reads the same
+  property and never measures the header itself, and a family that adds
+  chrome of its own to the page adds it to that number rather than publishing
+  a second one. Decided in wave 7 for `page`, `page-header` and `section`; it
+  binds `anchor-nav`, `app-shell` and `filter-bar` in wave 8.
+- **A scroll-driven change carries the reason `scroll`.** The header area
+  collapsing because the reader scrolled past it is a change the consumer did
+  not make and may refuse; `specs/contract.schema.mjs` names the reason, so a
+  handler can tell a scroll from a click without inspecting an event.
+
 ## Working beside another session
 
 Another session may be building a different family in this same worktree at the

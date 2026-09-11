@@ -1102,6 +1102,30 @@ Independentes entre si, exceto a cadeia de data.
   parte dela e do Fiori, e não do que se consegue lembrar de um cabeçalho.
   Nenhuma demonstração desta família cabe num palco de painel — leia _How much
   room a demonstration gets_ em `references/stories.md`.
+
+  **Construída.** Três contratos (`page`, `page-header`, `section`), um motor
+  partilhado em `@slotted/core/sticky-header` e uma mecânica só de CSS: a raiz
+  do cabeçalho é `position: sticky` com deslocamento negativo igual à altura da
+  área, medida pela ligação em `--slotted-page-header-collapse`; a área de
+  título é `sticky` a zero dentro da raiz. O facto medido é `data-scrolled`
+  (um `IntersectionObserver` cuja margem superior é o que está acima da área);
+  `expanded` é uma capacidade `open` com as razões `pointer`, `keyboard`,
+  `scroll` e `programmatic`, `pinned` é `pressed`, `revealed` é o estado do
+  vocabulário para a área reaberta no lugar. A página publica
+  `--slotted-page-sticky-top` no seu scroller e `--slotted-page-sticky-bottom`
+  no rodapé, e faz ponte para `--slotted-table-sticky-offset`; `section` cola o
+  seu cabeçalho a essa altura. **A navegação por âncoras ficou para
+  `anchor-nav`**, uma família própria da onda 8: nem `page` nem `section` a
+  possuem, porque quem a desenha decide onde ela vive no ecrã. Duas decisões
+  que prendem outras famílias estão em `docs/build-briefing.md`. Um defeito
+  fora desta família, corrigido por ela em `@slotted/core/overflow`: `reveal`
+  chamava `scrollIntoView` e rolava todos os antepassados, e um cabeçalho mais
+  alto do que o scroller descia a altura de uma aba ao montar; agora o
+  contentor rola só a si, no seu eixo. Uma dívida de `table`: sob
+  `stickyTo="page"` a tabela é `max-content` e alarga a página quando as
+  colunas não cabem, porque `wrap` só muda o mínimo; as demonstrações
+  estreitas usam duas ou três colunas por isso.
+
 - `app-shell`
 - `action-bar`
 

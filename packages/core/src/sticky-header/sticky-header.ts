@@ -82,6 +82,10 @@ export const STICKY_TOP_PROPERTY = '--slotted-page-sticky-top';
  * change can move the scroll position by a fraction on its own.
  */
 export const REVEAL_SCROLL_THRESHOLD = 2;
+/** How long after a reveal begins a small scroll is taken for an anchoring correction, in milliseconds. */
+export const REVEAL_SETTLE_WINDOW = 400;
+/** The largest scroll, in pixels, that scroll anchoring is taken to have made on its own. */
+export const ANCHOR_CORRECTION = 24;
 
 /**
  * The header area does not re-open in place when it is taller than this share
@@ -119,6 +123,25 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
 
   let scrolled = false;
   let revealed = false;
+  /**
+   * The root is travelling back to its offset after a reveal ended, and the
+   * area is still in the scrollport on the way: an "in" report during that
+   * travel is the reveal's own geometry, not a scroll back. Honouring it set
+   * `scrolled` false, the area's track went to `0fr`, the content shortened,
+   * the scroll position moved, the observer reported again, and the header
+   * expanded and collapsed without end. The report is ignored until the area
+   * is out again or the reader scrolls up.
+   */
+  let settling = false;
+  /**
+   * When the last reveal began. The title grows by a few pixels as the header
+   * expands, everything under it moves by as much, and scroll anchoring moves
+   * the scroll position by the same few pixels to keep the content still —
+   * a scroll event the reader did not make, arriving one or two frames after
+   * the reveal. Inside that window a small delta is the correction, not a
+   * scroll, and the reveal holds.
+   */
+  let revealedAt = 0;
   /** Who collapsed the area last, which decides whether a return scroll re-opens it. */
   let collapsedBy: 'control' | 'scroll' | null = null;
   let lastTop = scrollTop();
@@ -172,7 +195,12 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   function setRevealed(next: boolean) {
     if (next === revealed) return;
     revealed = next;
+    if (next) revealedAt = now();
     options.onRevealed(next);
+  }
+
+  function now() {
+    return typeof performance === 'undefined' ? Date.now() : performance.now();
   }
 
   /**
@@ -229,10 +257,26 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     const { collapse, expanded, pinned } = options.state();
     if (collapse === 'manual') return;
     if (revealed) return;
+    /* An area the control folded to nothing has no box to report on, and an
+       area cannot have been scrolled past while nothing is scrolled. */
+    if (entry.boundingClientRect?.height === 0) return;
     const out = !entry.isIntersecting;
+    if (out && scrollTop() <= 0) return;
+    if (settling) {
+      if (!out) return;
+      settling = false;
+    }
+    const wasScrolled = scrolled;
     setScrolled(out);
     if (out) {
-      if (expanded && !pinned) {
+      /**
+       * Only the crossing asks the area to collapse. The observer is rebuilt
+       * whenever the title changes height, and its first report repeats the
+       * fact it already knew; in Angular that report landed between the
+       * control setting `expanded` and the binding telling the engine, and
+       * the repeat asked the area to close again before it had opened.
+       */
+      if (!wasScrolled && expanded && !pinned) {
         collapsedBy = 'scroll';
         options.onScrollRequest(false);
       }
@@ -264,8 +308,16 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     const top = scrollTop();
     const delta = top - lastTop;
     lastTop = top;
+    if (settling && delta < 0) {
+      /* The reader is scrolling up through the travel: the observer decides again. */
+      settling = false;
+      observeArea();
+      return;
+    }
     if (!revealed || Math.abs(delta) <= REVEAL_SCROLL_THRESHOLD) return;
+    if (now() - revealedAt < REVEAL_SETTLE_WINDOW && Math.abs(delta) <= ANCHOR_CORRECTION) return;
     setRevealed(false);
+    settling = true;
     collapsedBy = 'scroll';
     options.onScrollRequest(false);
   }
@@ -289,6 +341,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
       if (by !== 'scroll' && !scrolled) collapsedBy = null;
       if (by === 'scroll') collapsedBy = null;
     } else {
+      if (revealed) settling = true;
       setRevealed(false);
       if (by !== 'scroll') collapsedBy = 'control';
     }

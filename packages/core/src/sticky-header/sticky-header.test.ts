@@ -30,8 +30,11 @@ class FakeIntersectionObserver {
   takeRecords() {
     return [];
   }
-  report(isIntersecting: boolean) {
-    this.callback([{ isIntersecting } as IntersectionObserverEntry], this as never);
+  report(isIntersecting: boolean, height = 1) {
+    this.callback(
+      [{ isIntersecting, boundingClientRect: { height } } as IntersectionObserverEntry],
+      this as never,
+    );
   }
 }
 
@@ -171,8 +174,10 @@ describe('createStickyHeader', () => {
 
   /** The scroll passes the area: the fact flips and expanded is asked to move. */
   it('collapses with the reason scroll when the area leaves, and re-opens when it returns', () => {
-    const { handle, io, onScrollRequest, onScrolled, state } = scene();
+    const { handle, io, onScrollRequest, onScrolled, scroller, state } = scene();
 
+    /* The reader has scrolled: only then can the area have left. */
+    scroller.scrollTop = 300;
     io.report(false);
     expect(onScrolled).toHaveBeenLastCalledWith(true);
     expect(onScrollRequest).toHaveBeenLastCalledWith(false);
@@ -199,7 +204,9 @@ describe('createStickyHeader', () => {
 
   /** Expanding by the control while scrolled past reveals in place. */
   it('reveals the area in place when the control opens it while the scroll has passed it', () => {
-    const { handle, io, onRevealed, onScrolled, state } = scene();
+    const { handle, io, onRevealed, onScrolled, scroller, state } = scene();
+    /* The reader has scrolled: only then can the area have left. */
+    scroller.scrollTop = 300;
     io.report(false);
     onScrolled.mockClear();
 
@@ -218,16 +225,18 @@ describe('createStickyHeader', () => {
   /** A reveal ends on the next scroll, with the reason scroll. */
   it('ends a reveal on the next scroll of more than two pixels', () => {
     const { handle, io, onRevealed, onScrollRequest, scroller, state } = scene();
+    /* The reader has scrolled: only then can the area have left. */
+    scroller.scrollTop = 300;
     io.report(false);
     state.expanded = true;
     handle.expandedChanged(true, 'control');
     onScrollRequest.mockClear();
 
-    scroller.scrollTop = 1;
+    scroller.scrollTop = 301;
     scroller.dispatchEvent(new Event('scroll'));
     expect(onScrollRequest).not.toHaveBeenCalled();
 
-    scroller.scrollTop = 40;
+    scroller.scrollTop = 340;
     scroller.dispatchEvent(new Event('scroll'));
     expect(onRevealed).toHaveBeenLastCalledWith(false);
     expect(onScrollRequest).toHaveBeenLastCalledWith(false);
@@ -251,6 +260,8 @@ describe('createStickyHeader', () => {
     const { area, handle, io, onRevealed, scroller, state } = scene({ scrollerHeight: 150 });
     sized(area, 120);
     scroller.scrollTo = vi.fn();
+    /* The reader has scrolled: only then can the area have left. */
+    scroller.scrollTop = 300;
     io.report(false);
     state.expanded = true;
     handle.expandedChanged(true, 'control');
@@ -260,6 +271,123 @@ describe('createStickyHeader', () => {
   });
 
   /** Under manual collapse no scroll ever moves expanded. */
+  /**
+   * Scrolled past, revealed by the control, collapsed by the control: the root
+   * travels back to its offset and the observer sees the area in on the way.
+   * Honoured, that report emptied the area, moved the scroll and started a
+   * loop of expand and collapse. It is ignored until the area is out again.
+   */
+  it('ignores the area coming into view while the root travels back after a reveal', () => {
+    const { handle, io, onScrollRequest, onScrolled, scroller, state } = scene();
+    /* The reader has scrolled: only then can the area have left. */
+    scroller.scrollTop = 300;
+    io.report(false);
+    expect(state.expanded).toBe(false);
+    state.expanded = true;
+    handle.expandedChanged(true, 'control');
+    expect(handle.revealed()).toBe(true);
+
+    state.expanded = false;
+    handle.expandedChanged(false, 'control');
+    expect(handle.revealed()).toBe(false);
+    onScrolled.mockClear();
+    onScrollRequest.mockClear();
+
+    io.report(true);
+    expect(onScrolled).not.toHaveBeenCalled();
+    expect(onScrollRequest).not.toHaveBeenCalled();
+    expect(handle.scrolled()).toBe(true);
+
+    /* Out again: the travel is over and the fact is reported as before. */
+    io.report(false);
+    io.report(true);
+    expect(onScrolled).toHaveBeenLastCalledWith(false);
+    handle.destroy();
+  });
+
+  it('lets a scroll up through the travel decide again', () => {
+    const { handle, io, scroller, state } = scene();
+    scroller.scrollTop = 400;
+    scroller.dispatchEvent(new Event('scroll'));
+    io.report(false);
+    state.expanded = true;
+    handle.expandedChanged(true, 'control');
+    state.expanded = false;
+    handle.expandedChanged(false, 'control');
+    const built = FakeIntersectionObserver.instances.length;
+
+    scroller.scrollTop = 100;
+    scroller.dispatchEvent(new Event('scroll'));
+    expect(FakeIntersectionObserver.instances.length).toBe(built + 1);
+    handle.destroy();
+  });
+
+  /**
+   * Folded to nothing by the control, the area is a zero-height box on the
+   * observer's edge, and a browser reports it out; honoured, that set
+   * `scrolled` at the top of the page and opened the fold again.
+   */
+  it('ignores a report on an area with no height, and an "out" while nothing is scrolled', () => {
+    const { handle, io, onScrolled, scroller } = scene();
+    io.report(false, 0);
+    expect(onScrolled).not.toHaveBeenCalled();
+    scroller.scrollTop = 0;
+    io.report(false);
+    expect(onScrolled).not.toHaveBeenCalled();
+    scroller.scrollTop = 300;
+    io.report(false);
+    expect(onScrolled).toHaveBeenLastCalledWith(true);
+    expect(handle.scrolled()).toBe(true);
+    handle.destroy();
+  });
+
+  /**
+   * The observer is rebuilt when the title changes height and repeats the
+   * fact it knew. Between the control setting `expanded` and the binding
+   * telling the engine, that repeat asked the area to close again in Angular.
+   */
+  it('asks to collapse on the crossing only, never on a repeated out report', () => {
+    const { handle, io, onScrollRequest, scroller, state } = scene();
+    scroller.scrollTop = 300;
+    io.report(false);
+    expect(onScrollRequest).toHaveBeenCalledTimes(1);
+    /* The control set it, the binding has not told the engine yet. */
+    state.expanded = true;
+    io.report(false);
+    expect(onScrollRequest).toHaveBeenCalledTimes(1);
+    handle.expandedChanged(true, 'control');
+    expect(handle.revealed()).toBe(true);
+    handle.destroy();
+  });
+
+  /**
+   * Scroll anchoring moves the position by the few pixels the title grew as
+   * the reveal began; that is not the reader scrolling, and the reveal holds.
+   * A real scroll of more than that, or any scroll later on, ends it.
+   */
+  it('holds a reveal through the small scroll that anchoring makes as the title grows', () => {
+    vi.useFakeTimers();
+    try {
+      const { handle, io, onRevealed, scroller, state } = scene();
+      scroller.scrollTop = 300;
+      io.report(false);
+      state.expanded = true;
+      handle.expandedChanged(true, 'control');
+      expect(handle.revealed()).toBe(true);
+
+      scroller.scrollTop = 305;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(handle.revealed()).toBe(true);
+
+      scroller.scrollTop = 360;
+      scroller.dispatchEvent(new Event('scroll'));
+      expect(onRevealed).toHaveBeenLastCalledWith(false);
+      handle.destroy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('attaches no intersection observer under manual collapse', () => {
     FakeIntersectionObserver.instances = [];
     const scroller = document.createElement('div');

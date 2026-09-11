@@ -35,6 +35,10 @@ validação final antes de commitar.
   linhas); transição de tamanho do título removida; voltar cede às migalhas;
   ícone do botão Imprimir no slot `start`; grelha das abas sem gap em torno de
   colunas vazias (`tabs.css`).
+- Quinta ronda: recolher um cabeçalho fixado tremia em React — o motor ouvia a
+  mudança num efeito passivo, depois de a transição começar. Efeito de layout,
+  `transition-property: none` (cancela uma transição em curso), deslocamento a
+  zero no mesmo passo e compensação a partir da altura publicada.
 - Quarta ronda: ar sob o cabeçalho de secção preso, marcas do pill maiores e
   fundo no pin premido, setas de registo alinhadas com as ações e espelhadas
   em RTL, página no drawer sobre superfície, revelação mantida ao rolar para

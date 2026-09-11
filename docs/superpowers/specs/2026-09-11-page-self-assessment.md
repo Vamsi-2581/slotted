@@ -156,6 +156,18 @@ The fourth round, on the same Storybook:
   the area a frame later — a blink. Scrolling up keeps the reveal now; once
   the root leaves the scroller's edge the area is where it would be anyway,
   and the reveal ends without a move.
+- Collapsing a pinned header at any scroll position shook: in React the
+  engine heard of the change in a passive effect, after the browser had
+  already started the fold's transition, so a zero duration set then changed
+  nothing; the fold ran for two hundred milliseconds, the root followed the
+  shrinking offset, the observer saw the area pass under the title and opened
+  the track again. The binding tells the engine in a layout effect now; the
+  fold cancels the transition by `transition-property` rather than duration,
+  which stops one already under way; the collapse offset and the root's own
+  transition go with it in the same step; and the scroll is compensated from
+  the height last published, since a cancelled area already measures as
+  folded. Traced in both frameworks at a hundred and at four hundred pixels:
+  one step, no movement.
 - Pinned and scrolled to the end, a short section's header rose over the
   chrome: it shared the chrome's z-index and came later in the DOM. The root
   now stands three steps above every other sticky thing on the page.

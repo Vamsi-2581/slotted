@@ -463,6 +463,54 @@ describe('createStickyHeader', () => {
     handle.destroy();
   });
 
+  /**
+   * Too much of the screen to hold: on a phone a pinned header took nearly
+   * the whole height. The fact is written, and a held header is let go.
+   */
+  it('says the header is tall when it would take most of the scrollport, and lets a held one go', () => {
+    const onTall = vi.fn();
+    const onPinRequest = vi.fn();
+    const scroller = document.createElement('div');
+    scroller.style.overflowY = 'auto';
+    Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 400 });
+    const root = document.createElement('header');
+    Object.defineProperty(root, 'clientWidth', { configurable: true, value: 1024 });
+    const title = sized(document.createElement('div'), 80);
+    const area = sized(document.createElement('div'), 120);
+    root.append(title, area);
+    scroller.append(root);
+    document.body.append(scroller);
+    const state: StickyHeaderState = { expanded: true, pinned: true, collapse: 'scroll' };
+    const handle = createStickyHeader({
+      root,
+      area: () => area,
+      chrome: () => [title],
+      state: () => state,
+      onScrolled: vi.fn(),
+      onRevealed: vi.fn(),
+      onScrollRequest: vi.fn(),
+      onTall,
+      onPinRequest,
+    });
+    /* 200 of 400: held. */
+    expect(handle.tall()).toBe(false);
+    expect(onPinRequest).not.toHaveBeenCalled();
+
+    /* The area grows past six tenths of the scrollport. */
+    sized(area, 200);
+    (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).callback([], {} as ResizeObserver);
+    expect(onTall).toHaveBeenLastCalledWith(true);
+    expect(onPinRequest).toHaveBeenLastCalledWith(false);
+
+    /* A phone's width says the same whatever the height. */
+    state.pinned = false;
+    sized(area, 40);
+    Object.defineProperty(root, 'clientWidth', { configurable: true, value: 390 });
+    (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).callback([], {} as ResizeObserver);
+    expect(handle.tall()).toBe(true);
+    handle.destroy();
+  });
+
   it('attaches no intersection observer under manual collapse', () => {
     FakeIntersectionObserver.instances = [];
     const scroller = document.createElement('div');

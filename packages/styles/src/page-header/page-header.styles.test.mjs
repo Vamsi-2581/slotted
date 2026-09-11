@@ -301,3 +301,14 @@ test('draws the controls with weight, the pressed pin on a ground, and the arrow
     /\[data-part='navigation'\]:dir\(rtl\)\s*:is\(svg,\s*\[data-ui='icon'\]\)\s*\{scale:-1 1/,
   );
 });
+
+/** Too much of the screen to hold: the pin is not offered on a tall header, nor below 640 pixels. */
+test('hides the pin on a tall header and on a phone', () => {
+  assert.match(
+    rule(`${ui}[data-tall]>*>[data-part='controls']>*>[data-part='pin']`),
+    /display:none/,
+  );
+  const narrow =
+    /@container page-header \(width < 640px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  assert.match(narrow, /\[data-part='controls'\]>\*>\[data-part='pin'\]\{display:none/);
+});

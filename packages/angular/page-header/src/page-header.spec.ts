@@ -49,6 +49,12 @@ class FakeIntersectionObserver {
 }
 
 class FakeResizeObserver {
+  static last: FakeResizeObserver | undefined;
+  readonly callback: ResizeObserverCallback;
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+    FakeResizeObserver.last = this;
+  }
   observe() {}
   disconnect() {}
   unobserve() {}
@@ -229,6 +235,8 @@ describe('SlPageHeader', () => {
 
   it('collapses with the reason scroll when the area leaves the scrollport, and writes the fact', () => {
     expect(FakeIntersectionObserver.last).toBeDefined();
+    /* The document has scrolled: only then can the area have left. */
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 300 });
     FakeIntersectionObserver.last?.report(false);
     fixture.detectChanges();
     expect(host.expandedRequests.at(-1)?.reason).toBe('scroll');
@@ -243,6 +251,7 @@ describe('SlPageHeader', () => {
   });
 
   it('reveals in place when the toggle opens the area after the scroll has passed it', () => {
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 300 });
     FakeIntersectionObserver.last?.report(false);
     fixture.detectChanges();
     click(toggle());
@@ -348,6 +357,24 @@ describe('SlPageHeader', () => {
     const container = root().querySelector(':scope > [data-ui="container"]');
     expect(container?.getAttribute('data-size')).toBe('measure');
     expect(container?.getAttribute('data-inset')).toBe('4');
+  });
+
+  /**
+   * Too much of the screen to hold: on a phone the pin is not offered, and a
+   * header held when the fact turns true is let go.
+   */
+  it('writes data-tall on a phone-wide header and lets a held one go', async () => {
+    host.pinned.set(true);
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-tall')).toBe(false);
+    Object.defineProperty(root(), 'clientWidth', { configurable: true, value: 390 });
+    FakeResizeObserver.last?.callback([], {} as ResizeObserver);
+    /* The engine publishes on the next frame. */
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-tall')).toBe(true);
+    expect(host.pinned()).toBe(false);
+    expect(host.pinnedRequests.at(-1)?.reason).toBe('programmatic');
   });
 });
 

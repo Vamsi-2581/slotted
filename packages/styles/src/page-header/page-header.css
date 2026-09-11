@@ -687,6 +687,16 @@
     > [data-part='pin'][data-pressed]::before {
     mask-image: var(--slotted-icon-pin-off);
   }
+  /**
+   * Too much of the screen to hold: expanded, the header would take more
+   * than six tenths of the scrollport, or it is narrower than 640 pixels. On
+   * a phone a pinned header took nearly the whole height and left nothing to
+   * read, so the pin is not offered — the binding writes the fact and lets a
+   * held header go — and below 640 pixels the sheet hides it on its own.
+   */
+  [data-ui='page-header'][data-tall] > * > [data-part='controls'] > * > [data-part='pin'] {
+    display: none;
+  }
   [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin'][data-pressed] {
     background-color: var(--slotted-tone-accent-surface, transparent);
     color: var(--slotted-tone-accent-text, LinkText);
@@ -851,6 +861,9 @@
       > [data-part='nav']
       > [data-part='back']:has(~ [data-part='breadcrumbs']:not(:empty)) {
       display: inline-flex;
+    }
+    [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin'] {
+      display: none;
     }
     [data-ui='page-header']
       > *

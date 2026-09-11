@@ -82,6 +82,7 @@ type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
     '[attr.data-expanded]': "expanded() ? '' : null",
     '[attr.data-revealed]': "revealed() ? '' : null",
     '[attr.data-scrolled]': "scrolled() ? '' : null",
+    '[attr.data-tall]': "tall() ? '' : null",
     '[attr.data-loading]': "loading() ? '' : null",
     '[attr.aria-busy]': "loading() ? 'true' : null",
   },
@@ -126,6 +127,8 @@ export class SlPageHeader {
 
   /** Whether the scroll has passed the area — a measured fact. */
   readonly scrolled = signal(false);
+  /** The header is too much of the screen to hold; the pin is hidden and a held header let go. */
+  readonly tall = signal(false);
   /** Whether the area is shown whole in place although the scroll has passed it. */
   readonly revealed = signal(false);
 
@@ -178,6 +181,8 @@ export class SlPageHeader {
           onScrolled: (next) => this.scrolled.set(next),
           onRevealed: (next) => this.revealed.set(next),
           onScrollRequest: (next) => this.request(next, 'scroll', undefined, 'scroll'),
+          onTall: (next) => this.tall.set(next),
+          onPinRequest: (next) => this.requestPinned(next, 'programmatic'),
         });
       };
       attach();

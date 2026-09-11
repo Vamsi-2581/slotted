@@ -46,6 +46,15 @@ export interface StickyHeaderOptions {
   onRevealed: (revealed: boolean) => void;
   /** A scroll asks `expanded` to move. The binding requests it with the reason `scroll`. */
   onScrollRequest: (expanded: boolean) => void;
+  /**
+   * The header is too much of the screen to hold: expanded, it would take
+   * more than `TALL_AREA_FRACTION` of the scrollport, or it is narrower than
+   * `NARROW_WIDTH` — a phone. The binding writes `data-tall`, the stylesheet
+   * hides the pin, and a held header is let go through `onPinRequest`.
+   */
+  onTall?: (tall: boolean) => void;
+  /** The engine asks `pinned` to move. The binding requests it with the reason `programmatic`. */
+  onPinRequest?: (pinned: boolean) => void;
 }
 
 export interface StickyHeaderHandle {
@@ -57,6 +66,8 @@ export interface StickyHeaderHandle {
   scroller: () => HTMLElement | null;
   /** Whether the root is stuck at the top of its scroller with the scroll past its rest position. */
   stuck: () => boolean;
+  /** Whether the header is too much of the screen to hold; see `onTall`. */
+  tall: () => boolean;
   /**
    * `expanded` moved. `by` says who moved it: the toggle (`control`), the pin
    * (`pin`), the application (`programmatic`) or this module (`scroll`).
@@ -88,6 +99,8 @@ export const REVEAL_SETTLE_WINDOW = 400;
 export const ANCHOR_CORRECTION = 24;
 /** How long an armed fold waits for the area to shrink before the transition is given back, in milliseconds. */
 export const FOLD_TIMEOUT = 600;
+/** Below this width, in pixels, a header is a phone's and is never held. */
+export const NARROW_WIDTH = 640;
 
 /**
  * The header area does not re-open in place when it is taller than this share
@@ -125,6 +138,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
 
   let scrolled = false;
   let revealed = false;
+  let tall = false;
   /**
    * The root is travelling back to its offset after a reveal ended, and the
    * area is still in the scrollport on the way: an "in" report during that
@@ -281,6 +295,17 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     const chrome = options.chrome().reduce((sum, part) => sum + height(part), 0);
     const held = pinned || revealed || collapse === 'manual';
     target.style.setProperty(STICKY_TOP_PROPERTY, `${chrome + (held ? area : 0)}px`);
+    /* Too much of the screen to hold: on a phone, pinned, the header took
+       nearly the whole height and left nothing to read. */
+    const width = root.clientWidth;
+    const next =
+      chrome + area > scrollportHeight() * TALL_AREA_FRACTION ||
+      (width > 0 && width < NARROW_WIDTH);
+    if (next !== tall) {
+      tall = next;
+      options.onTall?.(tall);
+    }
+    if (tall && pinned) options.onPinRequest?.(false);
     /* The title grew or shrank: the observer's margin is stale. */
     if (aboveArea() !== observedAbove) observeArea();
   }
@@ -308,6 +333,9 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     const area = options.area();
     if (area !== null) sizes.observe(area);
     for (const part of options.chrome()) sizes.observe(part);
+    /* The root's width and the scroller's height decide whether the header may be held. */
+    sizes.observe(root);
+    if (scroller !== null) sizes.observe(scroller);
   }
   observeSizes();
   publish();
@@ -413,6 +441,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     options.onScrollRequest(false);
   }
   scrollSource?.addEventListener('scroll', onScroll, { passive: true });
+  /* The viewport as scroller has no box to observe; its size arrives as a resize. */
+  if (scroller === null) view?.addEventListener('resize', schedule);
 
   /* ── What the binding tells us ─────────────────────────────────────────── */
 
@@ -467,6 +497,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     sizes?.disconnect();
     intersections?.disconnect();
     scrollSource?.removeEventListener('scroll', onScroll);
+    if (scroller === null) view?.removeEventListener('resize', schedule);
     root.style.removeProperty(COLLAPSE_PROPERTY);
     target.style.removeProperty(STICKY_TOP_PROPERTY);
   }
@@ -476,6 +507,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     revealed: () => revealed,
     scroller: () => scroller,
     stuck,
+    tall: () => tall,
     expandedChanged,
     pinnedChanged,
     refresh,

@@ -99,6 +99,7 @@ export function PageHeader({
 
   const [scrolled, setScrolled] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [tall, setTall] = useState(false);
   const [root, setRoot] = useState<HTMLElement | null>(null);
   const engine = useRef<StickyHeaderHandle | null>(null);
 
@@ -234,6 +235,8 @@ export function PageHeader({
       onScrolled: setScrolled,
       onRevealed: setRevealed,
       onScrollRequest: (next) => requestExpanded(next, 'scroll', undefined, 'scroll'),
+      onTall: setTall,
+      onPinRequest: (next) => requestPinned(next, 'programmatic', undefined),
     });
     engine.current = handle;
     return () => {
@@ -279,6 +282,7 @@ export function PageHeader({
     'data-part': 'root',
     ...(revealed ? { 'data-revealed': '' } : {}),
     ...(scrolled ? { 'data-scrolled': '' } : {}),
+    ...(tall ? { 'data-tall': '' } : {}),
     'data-size': resolvedSize,
     'data-ui': 'page-header',
     style,

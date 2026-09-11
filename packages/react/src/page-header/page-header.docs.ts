@@ -166,7 +166,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: false,
     purpose:
-      'A toggle button with aria-pressed, which is the pressed state the vocabulary has. It exists when it is rendered; there is no prop to hide it.',
+      'A toggle button with aria-pressed, which is the pressed state the vocabulary has. It exists when it is rendered; there is no prop to hide it. The stylesheet hides it where the header is too much of the screen to hold — expanded it would take more than six tenths of the scrollport, or the header is narrower than 640 pixels — and a header held when that becomes true is let go, with the reason programmatic.',
   },
   {
     part: 'tabs',
@@ -270,7 +270,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'pin',
     title: 'The pin',
-    note: 'Pressed, the whole header stays while the page scrolls and the area counts into the chrome. Let go while stuck and the area stays revealed until the next scroll; collapse by the toggle and the pin lets go first.',
+    note: 'Pressed, the whole header stays while the page scrolls and the area counts into the chrome. Let go while stuck and the area stays revealed until the next scroll; collapse by the toggle and the pin lets go first. Narrow the stage below 640 pixels, or shorten the window until the header would take most of it: the pin goes, and a held header is let go.',
     snippet: defineSnippet({
       id: 'page-header-react-pin',
       language: 'tsx',

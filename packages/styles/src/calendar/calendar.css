@@ -64,8 +64,30 @@
      * A stated width also survives the flex container inside a popover, where
      * a contained element contributing nothing would collapse the surface.
      */
-    inline-size: calc(
-      var(--_grid-size) * var(--_months) + var(--_month-gap) * (var(--_months) - 1)
+    /**
+     * The row that pages the month is the other thing this width has to hold.
+     *
+     * `dense` takes a cell to 26 pixels, so seven columns are 182 — and
+     * `setembro de 2026` between two triggers needs rather more than that. The
+     * heading was clipped at both ends and read `etembro de 2026`, which is a
+     * month nobody can read above a grid whose only subject is that month.
+     * `contain: inline-size` means the contents cannot ask for the room
+     * themselves, so the floor is stated: twenty characters of the heading's
+     * own type, the three glyph boxes of the two triggers and the view mark,
+     * and the gaps between them. It is written in `ch` and in the icon scale
+     * rather than in pixels, so it moves with the type and with density instead
+     * of being a guess that is right at one step.
+     *
+     * At `comfortable` the grid is wider than the floor and nothing changes. A
+     * locale with a longer month name still loses its tail, from a floor high
+     * enough to keep the name readable, and `grids` centres the month under the
+     * row it belongs to.
+     */
+    --_heading-floor: calc(20ch + 3 * var(--_icon-size) + 4 * var(--_gap));
+
+    inline-size: max(
+      calc(var(--_grid-size) * var(--_months) + var(--_month-gap) * (var(--_months) - 1)),
+      var(--_heading-floor)
     );
     max-inline-size: 100%;
   }
@@ -162,14 +184,30 @@
      * is bounded by the grid and stops long before a character.
      */
     flex: 1 1 auto;
-    justify-content: center;
+    /**
+     * `safe`, and it is the whole difference between a month that is cut and a
+     * month that is unreadable.
+     *
+     * Centred without it, an overflowing heading is clipped at **both** ends:
+     * at `dense` the row read `etembro de 2026` with the view mark sliced off,
+     * which is a month nobody can read above a grid whose only subject is that
+     * month. `safe` falls back to start alignment exactly when the item would
+     * overflow, so the name always begins where it begins and only its tail is
+     * lost. Found from `datetime-picker`'s panel, reproduced on this family
+     * alone at `dense` and 720 pixels.
+     *
+     * `text-overflow: ellipsis` stood here and did nothing: it applies to the
+     * inline content of a block container, and the label is an anonymous flex
+     * item beside the mark. It is removed rather than left to look like a
+     * guard that is holding.
+     */
+    justify-content: safe center;
     min-inline-size: 0;
     padding-block: var(--slotted-space-2, 0.25rem);
     padding-inline: var(--slotted-space-2, 0.25rem);
     /* One line, whatever the locale writes: a month name that wrapped would
        take the grid down with it. */
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
     transition: background-color var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);

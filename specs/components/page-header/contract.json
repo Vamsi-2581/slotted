@@ -44,9 +44,15 @@
     "observed": "header-area",
     "root": "the nearest scroll container, or the viewport",
     "threshold": 0,
-    "rootMargin": "0px",
+    "rootMargin": "the observer's top edge moves down by what stands above the header area inside the root, plus one pixel",
+    "rootMarginReason": "stuck at -H the area's bottom edge lands exactly under the title, inside the scrollport and covered; an observer over the whole scrollport never reported it out, and the header never snapped in a browser while every fake said it did. Rebuilt whenever the title changes height; a rebuilt observer's first report repeats the fact it knew and never asks the area to collapse again",
     "fact": "data-scrolled",
     "reason": "Stuck at -H, the header area is entirely above the scrollport and isIntersecting is false, which the binding writes as data-scrolled on the root — a measured fact like toolbar's data-overflowing, not a state the vocabulary holds. No pixel bias, because the observed element is not the one that animates — Sirius observed the hero it also animated and needed SNAP_BIAS_PX to settle the edge. While revealed the fact is frozen, because a root moved to 0 brings the area back into the scrollport and the observer would otherwise undo the reveal it just caused"
+  },
+  "tall": {
+    "fact": "data-tall",
+    "meaning": "the header is too much of the screen to hold: expanded it would take more than six tenths of the scrollport, or the root is narrower than 640 pixels. The stylesheet hides the pin, and a header held when the fact turns true is let go with the reason programmatic",
+    "reason": "on a phone a pinned header took nearly the whole height and left nothing to read. sap.f does not offer the pin on phones; the fraction covers a short landscape screen and a tall header alike. Measured by the engine from the chrome, the area and the scrollport, and written by the binding as a fact like data-scrolled"
   },
   "revealed": {
     "state": "revealed",

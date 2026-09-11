@@ -139,7 +139,10 @@ test('keeps its root box and sticks with a negative offset the size of the heade
   assert.equal(contract.sticky.pinnedRoot, '0');
   assert.match(contract.declined.displayContents.reason, /box/);
   assert.equal(contract.snapDetection.observed, 'header-area');
-  assert.equal(contract.snapDetection.rootMargin, '0px');
+  assert.match(contract.snapDetection.rootMargin, /moves down by what stands above/);
+  /* Too much of the screen to hold: a fact the binding writes and the sheet reads. */
+  assert.equal(contract.tall.fact, 'data-tall');
+  assert.match(contract.tall.meaning, /640 pixels/);
 });
 
 test('publishes the fixed geometry as runtime properties', () => {

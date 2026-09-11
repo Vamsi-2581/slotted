@@ -58,7 +58,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the a or button carrying slPageHeaderBack',
     required: false,
     purpose:
-      'The way back to where the reader came from — a routerLink, usually. The arrow before it is the family’s, drawn from the glyph scale and mirrored in a right-to-left document. Below 640 pixels it is what remains of the nav row.',
+      'The way back to where the reader came from — a routerLink, usually. The arrow before it is the family’s, drawn from the glyph scale and mirrored in a right-to-left document. Beside breadcrumbs it yields to them — their first crumb says the same — and below 640 pixels, where the breadcrumbs go, it is what remains of the nav row. Write both once; the width decides.',
   },
   {
     part: 'breadcrumbs',
@@ -631,7 +631,6 @@ export const ANGULAR_PAGE_HEADER_DOCS = {
         source: `[data-ui='page-header'] {
   --slotted-page-header-heading-size-md: var(--slotted-font-size-3xl);
   --slotted-page-header-padding-block: var(--slotted-space-6);
-  --slotted-page-header-shadow: var(--slotted-shadow-md);
   --slotted-page-header-description-measure: 60ch;
 }`,
       }),

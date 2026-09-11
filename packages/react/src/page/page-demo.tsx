@@ -224,8 +224,11 @@ export function OrderHeader({
                       <Button variant="ghost">Duplicar</Button>
                     </ToolbarItem>
                     <ToolbarItem counterpart={<MenuItem>Imprimir</MenuItem>}>
-                      <Button variant="ghost">
-                        <Printer aria-hidden="true" size={16} /> Imprimir
+                      <Button
+                        start={<Printer aria-hidden="true" focusable="false" strokeWidth={1.75} />}
+                        variant="ghost"
+                      >
+                        Imprimir
                       </Button>
                     </ToolbarItem>
                     <ToolbarItem counterpart={<MenuItem>Exportar</MenuItem>}>

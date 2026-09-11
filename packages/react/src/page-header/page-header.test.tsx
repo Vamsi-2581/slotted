@@ -117,6 +117,7 @@ describe('PageHeader', () => {
   });
 
   afterEach(() => {
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
     vi.unstubAllGlobals();
     FakeIntersectionObserver.last = undefined;
   });
@@ -168,6 +169,8 @@ describe('PageHeader', () => {
     const onExpandedChange = vi.fn();
     render(<Full onExpandedChange={onExpandedChange} />);
 
+    /* The document has scrolled: only then can the area have left. */
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 300 });
     act(() => FakeIntersectionObserver.last?.report(false));
     expect(onExpandedChange).toHaveBeenLastCalledWith(
       false,
@@ -188,6 +191,7 @@ describe('PageHeader', () => {
 
   it('reveals in place when the toggle opens the area after the scroll has passed it', () => {
     render(<Full />);
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 300 });
     act(() => FakeIntersectionObserver.last?.report(false));
     const control = screen.getByRole('button', { name: 'Expandir cabeçalho' });
 

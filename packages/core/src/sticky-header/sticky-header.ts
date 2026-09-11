@@ -86,6 +86,8 @@ export const REVEAL_SCROLL_THRESHOLD = 2;
 export const REVEAL_SETTLE_WINDOW = 400;
 /** The largest scroll, in pixels, that scroll anchoring is taken to have made on its own. */
 export const ANCHOR_CORRECTION = 24;
+/** How long an armed fold waits for the area to shrink before the transition is given back, in milliseconds. */
+export const FOLD_TIMEOUT = 600;
 
 /**
  * The header area does not re-open in place when it is taller than this share
@@ -142,6 +144,14 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
    * scroll, and the reveal holds.
    */
   let revealedAt = 0;
+  /**
+   * A fold the engine armed while the page was scrolled. The area's track
+   * going to `0fr` takes its height out of the flow above the reader, and
+   * everything under it would jump up by that much — the jump the stylesheet
+   * warns about. So the fold is instant, and as it lands the scroll position
+   * moves up by what was lost, before paint, and nothing on screen moves.
+   */
+  let folding: { from: number; timer: ReturnType<typeof setTimeout> } | null = null;
   /** Who collapsed the area last, which decides whether a return scroll re-opens it. */
   let collapsedBy: 'control' | 'scroll' | null = null;
   let lastTop = scrollTop();
@@ -203,6 +213,41 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     return typeof performance === 'undefined' ? Date.now() : performance.now();
   }
 
+  function setScrollTop(next: number) {
+    if (scroller !== null) scroller.scrollTop = next;
+    else view?.scrollTo({ top: next });
+    lastTop = next;
+  }
+
+  function armFold() {
+    const area = options.area();
+    if (area === null || scrollTop() <= 0) return;
+    if (folding !== null) clearTimeout(folding.timer);
+    area.style.transitionDuration = '0s';
+    folding = {
+      from: height(area),
+      /* A fold that never lands — the binding kept the area — gives the transition back. */
+      timer: setTimeout(() => releaseFold(), FOLD_TIMEOUT),
+    };
+  }
+
+  function releaseFold() {
+    if (folding === null) return;
+    clearTimeout(folding.timer);
+    folding = null;
+    options.area()?.style.removeProperty('transition-duration');
+  }
+
+  /** Runs in the size observer's callback: after layout and before paint. */
+  function landFold() {
+    if (folding === null) return;
+    const current = height(options.area());
+    const lost = folding.from - current;
+    if (lost <= 0) return;
+    setScrollTop(Math.max(0, scrollTop() - lost));
+    releaseFold();
+  }
+
   /**
    * Publishes both properties, coalesced into one frame. The collapse
    * transition changes the area's height on every frame, and a property
@@ -231,7 +276,13 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
 
   /* ── Sizes ─────────────────────────────────────────────────────────────── */
 
-  const sizes = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(schedule);
+  const sizes =
+    typeof ResizeObserver === 'undefined'
+      ? undefined
+      : new ResizeObserver(() => {
+          landFold();
+          schedule();
+        });
   function observeSizes() {
     if (sizes === undefined) return;
     sizes.disconnect();
@@ -267,6 +318,11 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
       settling = false;
     }
     const wasScrolled = scrolled;
+    if (!out && wasScrolled && !expanded && collapsedBy !== 'scroll') {
+      /* The control folded it while scrolled and the reader is back: the
+         area folds here rather than re-opening, with the scroll compensated. */
+      armFold();
+    }
     setScrolled(out);
     if (out) {
       /**
@@ -317,7 +373,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (!revealed || Math.abs(delta) <= REVEAL_SCROLL_THRESHOLD) return;
     if (now() - revealedAt < REVEAL_SETTLE_WINDOW && Math.abs(delta) <= ANCHOR_CORRECTION) return;
     setRevealed(false);
-    settling = true;
+    if (scrolled) settling = true;
+    else armFold(); /* Revealed from a fold: it folds again, compensated. */
     collapsedBy = 'scroll';
     options.onScrollRequest(false);
   }
@@ -328,7 +385,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   function expandedChanged(expanded: boolean, by: 'control' | 'pin' | 'programmatic' | 'scroll') {
     if (expanded) {
       const { pinned } = options.state();
-      if (by !== 'scroll' && !pinned && scrolled) {
+      /* Scrolled past the area, or stuck with the area folded: open in place. */
+      if (by !== 'scroll' && !pinned && (scrolled || stuck())) {
         const area = height(options.area());
         if (area > scrollportHeight() * TALL_AREA_FRACTION) {
           /* Too tall to hold under the title: go to the top instead. */
@@ -341,7 +399,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
       if (by !== 'scroll' && !scrolled) collapsedBy = null;
       if (by === 'scroll') collapsedBy = null;
     } else {
-      if (revealed) settling = true;
+      if (revealed && scrolled) settling = true;
+      else if (!scrolled) armFold();
       setRevealed(false);
       if (by !== 'scroll') collapsedBy = 'control';
     }
@@ -370,6 +429,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   function destroy() {
     destroyed = true;
     if (frame !== 0) view?.cancelAnimationFrame(frame);
+    releaseFold();
     sizes?.disconnect();
     intersections?.disconnect();
     scrollSource?.removeEventListener('scroll', onScroll);

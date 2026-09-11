@@ -388,6 +388,51 @@ describe('createStickyHeader', () => {
     }
   });
 
+  /**
+   * The control folded the area while the page was scrolled and the reader
+   * comes back up: the area folds here rather than re-opening, and as the fold
+   * lands the scroll moves up by what the flow lost, before paint, so nothing
+   * on screen moves. Before this the fold animated, the content shortened,
+   * the observer reported again, and the header flickered all the way up.
+   */
+  it('folds instantly and compensates the scroll when a control-folded area comes back into view', () => {
+    const { area, handle, io, onScrolled, onScrollRequest, scroller, state } = scene();
+    scroller.scrollTop = 300;
+    io.report(false);
+    state.expanded = true;
+    handle.expandedChanged(true, 'control');
+    state.expanded = false;
+    handle.expandedChanged(false, 'control');
+    onScrollRequest.mockClear();
+
+    scroller.scrollTop = 150;
+    scroller.dispatchEvent(new Event('scroll'));
+    (FakeIntersectionObserver.instances.at(-1) as FakeIntersectionObserver).report(true);
+    expect(onScrolled).toHaveBeenLastCalledWith(false);
+    expect(onScrollRequest).not.toHaveBeenCalled();
+    expect(area.style.transitionDuration).toBe('0s');
+
+    /* The binding folded the track: the size observer sees the area at nothing. */
+    sized(area, 0);
+    (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).callback([], {} as ResizeObserver);
+    expect(scroller.scrollTop).toBe(30);
+    expect(area.style.transitionDuration).toBe('');
+    handle.destroy();
+  });
+
+  it('opens a folded header in place while it is stuck', () => {
+    const { handle, onRevealed, root, scroller, state } = scene();
+    state.expanded = false;
+    handle.expandedChanged(false, 'control');
+    scroller.scrollTop = 300;
+    vi.spyOn(root, 'getBoundingClientRect').mockImplementation(() => ({ top: 0 }) as DOMRect);
+    vi.spyOn(scroller, 'getBoundingClientRect').mockImplementation(() => ({ top: 0 }) as DOMRect);
+    state.expanded = true;
+    handle.expandedChanged(true, 'control');
+    expect(onRevealed).toHaveBeenLastCalledWith(true);
+    handle.destroy();
+  });
+
   it('attaches no intersection observer under manual collapse', () => {
     FakeIntersectionObserver.instances = [];
     const scroller = document.createElement('div');

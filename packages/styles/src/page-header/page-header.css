@@ -1,0 +1,821 @@
+@layer slotted.components {
+  /**
+   * The shell of a screen's top: a title area that never leaves, a header
+   * area that scrolls away under it and comes back, a pill of controls on the
+   * chrome's edge, and a slot for tabs. SAP Fiori's Dynamic Page, rebuilt on
+   * one sticky root.
+   *
+   *   ┌──────────────────────────────────────────────┐
+   *   │ title-area  (sticky at 0 inside the root)     │
+   *   │   nav ▸ back · breadcrumbs                    │
+   *   │   title-row ▸ visual · title · actions · nav  │
+   *   ├──────────────────────────────────────────────┤
+   *   │ header-area (scrolls under the title area)    │
+   *   │   figure · content ▸ description …            │
+   *   ├─────────────────── controls ─────────────────┤  ← zero-height row, the rule, the pill
+   *   │ tabs                                         │
+   *   └──────────────────────────────────────────────┘
+   *
+   * ── How it collapses ─────────────────────────────────────────────────────
+   *
+   * The root is `position: sticky` with a negative offset the size of the
+   * header area, measured by the binding into `--slotted-page-header-collapse`.
+   * Scrolling, the root rises until its top is H pixels above the scrollport
+   * and stops there; the title area, sticky at 0 inside the root, stays at the
+   * top; the header area passes under it, hidden by the title area's opaque
+   * ground and higher stacking; the controls and the tabs, last in the root,
+   * are what remains under the title. Pinned, or revealed in place after a
+   * scroll, the offset is 0 and the whole root stays.
+   *
+   * Sirius reached the same picture with `display: contents` on the host, and
+   * lost the host's box with it. This root keeps a background, a shadow, a
+   * container query and the geometry a ref returns.
+   *
+   * Every part is reached from the part that owns it with a child combinator,
+   * because the content the consumer projects is other families — a
+   * description-list has a `description`, a card has `actions` and a `header`
+   * — and a descendant rule would restyle theirs.
+   */
+  [data-ui='page-header'] {
+    --_ground: var(--slotted-page-header-background, var(--slotted-surface, Canvas));
+    --_rule: var(--slotted-page-header-border, var(--slotted-border-subtle, ButtonBorder));
+    --_shadow: var(--slotted-page-header-shadow, var(--slotted-shadow-sm, none));
+    --_text: var(--slotted-text, CanvasText);
+    --_muted: var(--slotted-text-muted, GrayText);
+    --_gap: var(--slotted-page-header-gap, var(--slotted-space-4, 0.5rem));
+    --_padding-block: var(--slotted-page-header-padding-block, var(--slotted-space-5, 0.75rem));
+    /**
+     * The title is set on the type scale, not the control scale: it is the
+     * largest line on the screen, and the control scale tops out at fourteen
+     * pixels. The snapped title takes the step below its expanded size, so a
+     * stuck bar is a bar and not a poster.
+     */
+    --_heading-size: var(
+      --slotted-page-header-heading-size-md,
+      var(--slotted-font-size-2xl, 1.25rem)
+    );
+    --_heading-line-height: var(--slotted-line-height-2xl, 1.4);
+    --_snapped-heading-size: var(
+      --slotted-page-header-snapped-heading-size-md,
+      var(--slotted-font-size-lg, 1rem)
+    );
+    --_snapped-heading-line-height: var(--slotted-line-height-lg, 1.5);
+    --_subheading-size: var(--slotted-font-size-md, 0.875rem);
+    --_description-measure: var(--slotted-page-header-description-measure, 70ch);
+    /**
+     * The pill's buttons are the small control step, so the pill is one row
+     * of the density it sits in; the glyph is the small control glyph.
+     */
+    --_control-size: var(
+      --slotted-page-header-control-size,
+      var(--slotted-control-height-sm, 30px)
+    );
+    --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+    --_rule-size: var(--slotted-border-width-thin, 1px);
+    --_duration: var(--slotted-duration-medium);
+    --_easing: var(--slotted-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+
+    background-color: var(--_ground);
+    color: var(--_text);
+    container-name: page-header;
+    container-type: inline-size;
+    font-family: var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif);
+    inline-size: 100%;
+    inset-block-start: calc(-1 * var(--slotted-page-header-collapse, 0px));
+    min-inline-size: 0;
+    /**
+     * Scroll anchoring would move the scroll position to keep the content
+     * under the reader still when the header area changes height, which is
+     * exactly the jump Sirius absorbed with a timer of two hundred milliseconds after each reveal.
+     */
+    overflow-anchor: none;
+    position: sticky;
+    /**
+     * The offset moves only when a reveal begins or ends, so the transition
+     * is the slide of the header area under the title and never a fight with
+     * the scroll, during which the offset is constant.
+     */
+    transition:
+      inset-block-start var(--_duration) var(--_easing),
+      box-shadow var(--slotted-duration-short) var(--_easing);
+    z-index: var(--slotted-z-index-sticky, 100);
+  }
+
+  [data-ui='page-header'][data-size='sm'] {
+    --_heading-size: var(
+      --slotted-page-header-heading-size-sm,
+      var(--slotted-font-size-xl, 1.125rem)
+    );
+    --_heading-line-height: var(--slotted-line-height-xl, 1.45);
+    --_snapped-heading-size: var(
+      --slotted-page-header-snapped-heading-size-sm,
+      var(--slotted-font-size-md, 0.875rem)
+    );
+    --_snapped-heading-line-height: var(--slotted-line-height-md, 1.5);
+  }
+
+  [data-ui='page-header'][data-size='lg'] {
+    --_heading-size: var(
+      --slotted-page-header-heading-size-lg,
+      var(--slotted-font-size-3xl, 1.5rem)
+    );
+    --_heading-line-height: var(--slotted-line-height-3xl, 1.3);
+    --_snapped-heading-size: var(
+      --slotted-page-header-snapped-heading-size-lg,
+      var(--slotted-font-size-xl, 1.125rem)
+    );
+    --_snapped-heading-line-height: var(--slotted-line-height-xl, 1.45);
+  }
+
+  /**
+   * Pinned, revealed in place, or never collapsing by scroll: the whole root
+   * stays. The pin's own pressed state is read here rather than restated on
+   * the root, so the vocabulary gains no `pinned` — a pin is a toggle button
+   * and `pressed` is its word. Under `collapse="manual"` the offset is what
+   * the scroll would use, so it is zero for good.
+   */
+  [data-ui='page-header'][data-revealed],
+  [data-ui='page-header'][data-collapse='manual'],
+  [data-ui='page-header']:has([data-part='pin'][data-pressed]) {
+    inset-block-start: 0;
+  }
+
+  /**
+   * The shadow says the chrome is floating over content, which is true
+   * exactly while the header area is out of sight. It leaves without a
+   * transition: a shadow fading over the area sliding back in is the artefact
+   * Sirius named.
+   */
+  [data-ui='page-header']:not([data-expanded]) {
+    box-shadow: var(--_shadow);
+  }
+  [data-ui='page-header'][data-expanded] {
+    transition: inset-block-start var(--_duration) var(--_easing);
+  }
+
+  /* ── The title area ──────────────────────────────────────────────────── */
+
+  /**
+   * The one hop through the container: `> *` is the container the family
+   * renders to align its rows to the page's measure, and it is not named,
+   * because a family does not select another family's identity.
+   */
+  [data-ui='page-header'] > * > [data-part='title-area'] {
+    background-color: var(--_ground);
+    display: flex;
+    flex-direction: column;
+    gap: var(--slotted-space-3, 0.375rem);
+    inset-block-start: 0;
+    overflow-anchor: none;
+    padding-block: var(--_padding-block) var(--slotted-space-4, 0.5rem);
+    position: sticky;
+    z-index: 2;
+  }
+
+  /**
+   * The pill straddles the chrome's edge, so whatever ends at that edge
+   * keeps half a pill clear of it: the title area, because stuck the edge
+   * is its own, and the header area's columns, because at rest it is theirs.
+   * The title area reserves it in every state rather than only when stuck,
+   * because a padding that changed at the snap would move the tabs by that
+   * much at the moment the header area left.
+   */
+  [data-ui='page-header']:has([data-part='controls'] > *) > * > [data-part='title-area'] {
+    padding-block-end: calc(var(--slotted-space-4, 0.5rem) + var(--_control-size) / 2);
+  }
+
+  [data-ui='page-header'] > * > [data-part='title-area'] > [data-part='nav'] {
+    align-items: center;
+    color: var(--_muted);
+    display: flex;
+    font-size: var(--slotted-font-size-sm, 0.8125rem);
+    gap: var(--slotted-space-5, 0.75rem);
+    line-height: var(--slotted-line-height-sm, 1.45);
+    min-inline-size: 0;
+  }
+  [data-ui='page-header'] > * > [data-part='title-area'] > [data-part='nav']:empty {
+    display: none;
+  }
+
+  /**
+   * The way back. A link or a button the consumer renders; the arrow is the
+   * family's, drawn from the glyph scale, and it points along the reading
+   * direction, so a right-to-left document mirrors it.
+   */
+  [data-ui='page-header'] > * > [data-part='title-area'] > [data-part='nav'] > [data-part='back'] {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: var(--slotted-control-radius, var(--slotted-radius-sm, 4px));
+    color: var(--_muted);
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    font: inherit;
+    font-weight: var(--slotted-font-weight-medium, 500);
+    gap: var(--slotted-control-gap-sm, 6px);
+    margin: 0;
+    min-block-size: var(--slotted-target-min, 24px);
+    padding: 0;
+    text-decoration: none;
+    transition: color var(--slotted-duration-short) var(--_easing);
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='nav']
+    > [data-part='back']::before {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
+    content: '';
+    inline-size: var(--_icon-size);
+    mask-image: var(--slotted-icon-arrow-left);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='nav']
+    > [data-part='back']:dir(rtl)::before {
+    scale: -1 1;
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='nav']
+    > [data-part='back']:not([data-disabled]):not(:disabled):hover {
+    color: var(--_text);
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='nav']
+    > [data-part='back']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='nav']
+    > [data-part='breadcrumbs'] {
+    min-inline-size: 0;
+  }
+
+  /**
+   * The row: the visual, the title column, and the actions and the record
+   * navigation pushed to the end. Everything after the title wraps under it
+   * when the width runs out, in the order it has in the DOM.
+   */
+  [data-ui='page-header'] > * > [data-part='title-area'] > [data-part='title-row'] {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--_gap) var(--slotted-space-6, 1rem);
+    min-inline-size: 0;
+  }
+
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='visual'] {
+    align-items: center;
+    /* On the title's first line, as Primer's LeadingVisual: centred on the
+       whole column it sank beside the second line of a wrapped title. */
+    align-self: flex-start;
+    display: inline-flex;
+    flex: none;
+  }
+
+  /**
+   * The title column is a wrapping row so the marks sit on the heading's own
+   * line, on its baseline — which is what "a mark beside a line of text is
+   * aligned to the text" asks for — and the subheading, forced to a full
+   * row, takes the line under it.
+   */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title'] {
+    align-items: center;
+    column-gap: var(--slotted-space-4, 0.5rem);
+    display: flex;
+    /**
+     * Twelve rems and not twenty: the basis is what decides whether the
+     * visual keeps the title beside it at 420 pixels, and the column grows to
+     * the line anyway.
+     */
+    flex: 1 1 20rem;
+    flex-wrap: wrap;
+    min-inline-size: 0;
+    row-gap: var(--slotted-space-1, 0.125rem);
+  }
+
+  /**
+   * Expanded, the heading wraps to three lines and then clamps; the binding
+   * repeats the full text in `title`, so nothing leaves the DOM. Snapped it is
+   * one line, a step smaller, and the clamp is the ellipsis a bar can afford
+   * — drawn as a block with `nowrap`, because a `-webkit-box` reports a
+   * width to the flex algorithm that is not the width it then paints, and the
+   * marks beside it ran past the container in the first capture.
+   */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='heading'] {
+    -webkit-box-orient: vertical;
+    color: var(--_text);
+    display: -webkit-box;
+    font-size: var(--_heading-size);
+    font-weight: var(--slotted-font-weight-semibold, 600);
+    letter-spacing: -0.01em;
+    -webkit-line-clamp: 3;
+    line-height: var(--_heading-line-height);
+    margin: 0;
+    min-inline-size: 0;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+    transition:
+      font-size var(--_duration) var(--_easing),
+      line-height var(--_duration) var(--_easing);
+  }
+  [data-ui='page-header']:not([data-expanded])
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='heading'] {
+    display: block;
+    flex: 0 1 auto;
+    font-size: var(--_snapped-heading-size);
+    line-height: var(--_snapped-heading-line-height);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='marks'] {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--slotted-space-2, 0.25rem);
+    min-inline-size: 0;
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='marks']:empty {
+    display: none;
+  }
+
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='subheading'] {
+    color: var(--_muted);
+    flex-basis: 100%;
+    font-size: var(--_subheading-size);
+    line-height: var(--slotted-line-height-md, 1.5);
+    margin: 0;
+    min-inline-size: 0;
+    text-wrap: pretty;
+  }
+  /* Snapped, the bar has one line to give it. */
+  [data-ui='page-header']:not([data-expanded])
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='subheading'] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='actions'] {
+    align-items: center;
+    display: flex;
+    flex: 0 1 auto;
+    /* Loose buttons wrap rather than breaking their own words; a toolbar in
+       here folds what does not fit into its menu before that happens. */
+    flex-wrap: wrap;
+    gap: var(--slotted-control-gap-md, 8px);
+    min-inline-size: 0;
+  }
+
+  /**
+   * Previous and next record, after the actions and set apart from them by a
+   * rule, which is where sap.f puts navigationActions.
+   */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='navigation'] {
+    align-items: center;
+    border-inline-start: var(--_rule-size) solid var(--_rule);
+    display: flex;
+    flex: none;
+    gap: var(--slotted-control-gap-sm, 6px);
+    /* The far end of whichever row it lands on: alone on a wrapped row it
+       stayed at the start, under the title, in the dense capture. */
+    margin-inline-start: auto;
+    padding-inline-start: var(--slotted-space-4, 0.5rem);
+  }
+
+  /* ── The header area ─────────────────────────────────────────────────── */
+
+  /**
+   * A grid with one row, so that collapsing by the control is a track going
+   * to 0fr — the content's own height at every frame, nothing measured — as
+   * collapsible does. Figure and content share the row.
+   */
+  [data-ui='page-header'] > * > [data-part='header-area'] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    min-inline-size: 0;
+    overflow-anchor: none;
+    transition:
+      grid-template-rows var(--_duration) var(--_easing),
+      opacity var(--_duration) var(--_easing);
+  }
+  [data-ui='page-header'] > * > [data-part='header-area']:not(:has([data-part='figure'])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-ui='page-header'] > * > [data-part='header-area'] > * {
+    min-block-size: 0;
+  }
+
+  /**
+   * Collapsed by the control: expanded is false and the scroll has not
+   * passed the area. Scrolled past, expanded is false too, and the sticky
+   * offset is what hides the area — a 0fr row there would shorten the root
+   * under the reader and jump the scroll by the area's height.
+   */
+  [data-ui='page-header']:not([data-expanded]):not([data-scrolled])
+    > *
+    > [data-part='header-area'] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  [data-ui='page-header']:not([data-expanded]):not([data-scrolled])
+    > *
+    > [data-part='header-area']
+    > * {
+    overflow: clip;
+  }
+
+  [data-ui='page-header'] > * > [data-part='header-area'] > [data-part='figure'] {
+    display: flex;
+    padding-block-end: var(--_padding-block);
+    padding-inline-end: var(--slotted-space-6, 1rem);
+  }
+
+  [data-ui='page-header'] > * > [data-part='header-area'] > [data-part='content'] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--_gap);
+    min-inline-size: 0;
+    padding-block-end: var(--_padding-block);
+  }
+
+  [data-ui='page-header']
+    > *
+    > [data-part='header-area']
+    > [data-part='content']
+    > [data-part='description'] {
+    color: var(--_muted);
+    font-size: var(--slotted-font-size-md, 0.875rem);
+    line-height: var(--slotted-line-height-md, 1.5);
+    margin: 0;
+    max-inline-size: var(--_description-measure);
+    text-wrap: pretty;
+  }
+
+  /* The half pill the header area's columns keep clear of the edge; see the
+     title area's reservation above. After the columns' own rules, so it wins. */
+  [data-ui='page-header']:has([data-part='controls'] > *)
+    > *
+    > [data-part='header-area']
+    > [data-part='figure'],
+  [data-ui='page-header']:has([data-part='controls'] > *)
+    > *
+    > [data-part='header-area']
+    > [data-part='content'] {
+    padding-block-end: calc(var(--_padding-block) + var(--_control-size) / 2);
+  }
+
+  /* ── The controls, on the chrome's edge ──────────────────────────────── */
+
+  /**
+   * A zero-height row that carries the rule under the chrome and the pill
+   * that straddles it. It sits after the header area and before the tabs, so
+   * it is on the chrome's bottom edge in every state without moving in the
+   * DOM: at rest under the header area, stuck under the title area, because
+   * the header area is then under the title. Sirius moved the pill between
+   * two slots with `ngTemplateOutlet`.
+   *
+   * The row is `relative` and the pill `absolute`, so the tabs under it lay
+   * out as if it were not there; the pill overlaps their top edge.
+   */
+  [data-ui='page-header'] > * > [data-part='controls'] {
+    block-size: 0;
+    border-block-start: var(--_rule-size) solid var(--_rule);
+    position: relative;
+    z-index: 3;
+  }
+  [data-ui='page-header'] > * > [data-part='controls']:empty {
+    border-block-start-color: var(--_rule);
+  }
+  [data-ui='page-header'] > * > [data-part='controls'] > * {
+    background-color: var(--_ground);
+    border: var(--_rule-size) solid var(--_rule);
+    border-radius: var(--slotted-radius-full, 9999px);
+    box-shadow: var(--slotted-shadow-xs, none);
+    display: inline-flex;
+    gap: var(--slotted-space-1, 0.125rem);
+    inline-size: max-content;
+    inset-block-start: 0;
+    inset-inline: 0;
+    margin-inline: auto;
+    padding: var(--slotted-space-1, 0.125rem);
+    position: absolute;
+    translate: 0 -50%;
+  }
+
+  /**
+   * Two inner controls, drawn by the family and not mounted from `button`
+   * (R2): a button carries a height, a padding, a frame and a shadow that do
+   * not fit inside a pill on a hairline. The ground moves under the pointer
+   * and nothing else does; press goes one step further; both hold back for a
+   * disabled control.
+   */
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle'],
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin'] {
+    align-items: center;
+    appearance: none;
+    background-color: transparent;
+    block-size: var(--_control-size);
+    border: 0;
+    border-radius: var(--slotted-radius-full, 9999px);
+    color: var(--_muted);
+    cursor: pointer;
+    display: inline-flex;
+    inline-size: var(--_control-size);
+    justify-content: center;
+    margin: 0;
+    min-block-size: var(--slotted-target-min, 24px);
+    min-inline-size: var(--slotted-target-min, 24px);
+    padding: 0;
+    transition:
+      background-color var(--slotted-duration-short) var(--_easing),
+      color var(--slotted-duration-short) var(--_easing);
+  }
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']::before,
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']::before {
+    background-color: currentcolor;
+    block-size: var(--_icon-size);
+    content: '';
+    inline-size: var(--_icon-size);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+  }
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']::before {
+    mask-image: var(--slotted-icon-chevron-down);
+    transition: rotate var(--slotted-duration-short) var(--_easing);
+  }
+  [data-ui='page-header'][data-expanded]
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='toggle']::before {
+    rotate: 180deg;
+  }
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']::before {
+    mask-image: var(--slotted-icon-pin);
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='pin'][data-pressed]::before {
+    mask-image: var(--slotted-icon-pin-off);
+  }
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin'][data-pressed] {
+    color: var(--slotted-tone-accent-text, LinkText);
+  }
+
+  [data-ui='page-header']
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='toggle']:not(:disabled):hover,
+  [data-ui='page-header']
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='pin']:not(:disabled):hover {
+    background-color: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
+    color: var(--_text);
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='toggle']:not(:disabled):active,
+  [data-ui='page-header']
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='pin']:not(:disabled):active {
+    background-color: var(--slotted-tone-secondary-subtle-active, ButtonFace);
+  }
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']:focus-visible,
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']:disabled,
+  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']:disabled {
+    color: var(--slotted-disabled-foreground, GrayText);
+    cursor: default;
+  }
+
+  /* ── The tabs ────────────────────────────────────────────────────────── */
+
+  /**
+   * The slot a tabs family sits in, and the last thing in the root, which is
+   * why it needs no sticky of its own. The pill above it needs the room its
+   * lower half takes, so the slot starts half a control down.
+   */
+  [data-ui='page-header'] > * > [data-part='tabs'] {
+    min-inline-size: 0;
+    padding-block-start: calc(var(--_control-size) / 2 + var(--slotted-space-2, 0.25rem));
+  }
+  [data-ui='page-header'] > * > [data-part='tabs']:empty {
+    display: none;
+  }
+  /* Without a pill the tabs sit on the rule. */
+  [data-ui='page-header'] > * > [data-part='controls']:empty + [data-part='tabs'] {
+    padding-block-start: 0;
+  }
+
+  /* ── One state only ──────────────────────────────────────────────────── */
+
+  /**
+   * A child of the title area that exists in one state. Fiori has seven slots
+   * for this; one attribute does the same, and `display: none` keeps one
+   * heading in the accessibility tree at a time.
+   *
+   * The attribute is written twice, beside `data-part`, on purpose: the
+   * deepest part rule sets `display` with six attribute selectors, and this
+   * one has to outweigh it for any part at any depth, so it carries six as
+   * well and comes later. It is honoured on parts, which is where a consumer
+   * writes it.
+   */
+  [data-ui='page-header'][data-expanded]
+    > *
+    > [data-part='title-area']
+    [data-part][data-when='snapped'][data-when],
+  [data-ui='page-header']:not([data-expanded])
+    > *
+    > [data-part='title-area']
+    [data-part][data-when='expanded'][data-when] {
+    display: none;
+  }
+
+  /* ── Loading ─────────────────────────────────────────────────────────── */
+
+  /**
+   * The placeholder is skeleton's — a family that waits paints none of its
+   * own — and this sheet says only how wide each one is. A line is one `lh`
+   * of the text it replaces, which is what keeps the height still when the
+   * title arrives.
+   */
+  [data-ui='page-header'][data-loading]
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='heading'] {
+    --slotted-skeleton-inline-size: 12ch;
+    flex: 1 1 auto;
+  }
+  [data-ui='page-header'][data-loading]
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='title']
+    > [data-part='subheading'] {
+    --slotted-skeleton-inline-size: 20ch;
+  }
+  [data-ui='page-header'][data-loading]
+    > *
+    > [data-part='header-area']
+    > [data-part='content']
+    > [data-part='description'] {
+    --slotted-skeleton-inline-size: 40ch;
+  }
+
+  /* ── Narrow ──────────────────────────────────────────────────────────── */
+
+  /**
+   * Below 640 pixels: the breadcrumbs go and the way back stays; the title
+   * steps down; the actions and the navigation take the row under the title,
+   * navigation first so the pair of arrows keeps to the edge. The rule that
+   * moves the navigation into the actions row is sap.f's at 1280, read
+   * against the component's own width rather than the viewport.
+   */
+  @container page-header (width < 640px) {
+    [data-ui='page-header'] {
+      --_heading-size: var(
+        --slotted-page-header-heading-size-sm,
+        var(--slotted-font-size-xl, 1.125rem)
+      );
+      --_heading-line-height: var(--slotted-line-height-xl, 1.45);
+      --_snapped-heading-size: var(
+        --slotted-page-header-snapped-heading-size-sm,
+        var(--slotted-font-size-md, 0.875rem)
+      );
+      --_snapped-heading-line-height: var(--slotted-line-height-md, 1.5);
+    }
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='nav']
+      > [data-part='back']
+      ~ [data-part='breadcrumbs'] {
+      display: none;
+    }
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='title-row']
+      > [data-part='title'] {
+      flex: 1 1 0;
+      min-inline-size: 60%;
+    }
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='title-row']
+      > [data-part='actions'] {
+      flex: 1 1 auto;
+    }
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='title-row']
+      > [data-part='navigation'] {
+      border-inline-start: 0;
+      padding-inline-start: 0;
+    }
+    [data-ui='page-header'] > * > [data-part='header-area'] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    [data-ui='page-header'] > * > [data-part='header-area'] > [data-part='figure'] {
+      padding-block-end: var(--_gap);
+      padding-inline-end: 0;
+    }
+  }
+
+  @media (forced-colors: active) {
+    /*
+     * A masked glyph is painted with a background, and forced colours replace
+     * a background that is not one of the system's own colours: the mark goes
+     * and the box stays. `forced-color-adjust: none` keeps `currentcolor`,
+     * which is the host's ink, already forced to the right value.
+     */
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='nav']
+      > [data-part='back']::before,
+    [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']::before,
+    [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']::before {
+      forced-color-adjust: none;
+    }
+  }
+}

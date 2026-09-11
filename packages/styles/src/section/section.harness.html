@@ -1,0 +1,323 @@
+<!--
+  Sections of one screen: the parts the contract declares, the three sizes,
+  the three separations, a section inside a section, and content the family
+  did not choose. The rows inside are plain markup, because what a section
+  holds is the consumer's.
+-->
+<section data-scene="default">
+  <section
+    data-ui="section"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-ground="none"
+    aria-labelledby="s-1"
+    id="itens"
+  >
+    <div data-part="header">
+      <div data-part="title">
+        <span data-part="eyebrow">36 itens</span>
+        <h2 data-part="heading" id="s-1">Itens do pedido</h2>
+        <p data-part="description">
+          Quantidades e preços unitários conforme a cotação aceite em 2 de setembro.
+        </p>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Exportar</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="solid"
+          data-tone="accent"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Adicionar item</span>
+        </button>
+      </div>
+    </div>
+    <div data-part="body">
+      <div style="display: grid; gap: 8px">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-block-end: 1px solid var(--slotted-border-subtle);
+          "
+        >
+          <span>Pneu radial 295/80 R22.5</span
+          ><span style="font-variant-numeric: tabular-nums">24 × R$ 2.980,00</span>
+        </div>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-block-end: 1px solid var(--slotted-border-subtle);
+          "
+        >
+          <span>Câmara de ar 22.5</span
+          ><span style="font-variant-numeric: tabular-nums">24 × R$ 190,00</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 0">
+          <span>Serviço de recapagem</span
+          ><span style="font-variant-numeric: tabular-nums">12 × R$ 1.240,00</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<section data-scene="size">
+  <div style="display: grid; gap: 32px">
+    <section
+      data-ui="section"
+      data-part="root"
+      data-size="sm"
+      data-level="3"
+      data-ground="none"
+      aria-labelledby="s-sm"
+    >
+      <div data-part="header">
+        <div data-part="title">
+          <h3 data-part="heading" id="s-sm">Endereço de entrega</h3>
+          <p data-part="description">sm — a group inside a form.</p>
+        </div>
+      </div>
+      <div data-part="body"><p style="margin: 0">Rod. BR-101, km 273 · Cariacica, ES</p></div>
+    </section>
+    <section
+      data-ui="section"
+      data-part="root"
+      data-size="md"
+      data-level="2"
+      data-ground="none"
+      aria-labelledby="s-md"
+    >
+      <div data-part="header">
+        <div data-part="title">
+          <h2 data-part="heading" id="s-md">Endereço de entrega</h2>
+          <p data-part="description">md — the default, a section of a page.</p>
+        </div>
+      </div>
+      <div data-part="body"><p style="margin: 0">Rod. BR-101, km 273 · Cariacica, ES</p></div>
+    </section>
+    <section
+      data-ui="section"
+      data-part="root"
+      data-size="lg"
+      data-level="2"
+      data-ground="none"
+      aria-labelledby="s-lg"
+    >
+      <div data-part="header">
+        <div data-part="title">
+          <h2 data-part="heading" id="s-lg">Endereço de entrega</h2>
+          <p data-part="description">lg — the one section a screen is about.</p>
+        </div>
+      </div>
+      <div data-part="body"><p style="margin: 0">Rod. BR-101, km 273 · Cariacica, ES</p></div>
+    </section>
+  </div>
+</section>
+
+<!-- Space, a rule, or a surface. -->
+<section data-scene="separation">
+  <div
+    style="
+      display: grid;
+      gap: 32px;
+      background: var(--slotted-surface-sunken);
+      padding: 24px;
+      margin: -12px;
+    "
+  >
+    <section
+      data-ui="section"
+      data-part="root"
+      data-size="md"
+      data-level="2"
+      data-ground="none"
+      data-divider
+      aria-labelledby="s-div"
+    >
+      <div data-part="header">
+        <div data-part="title">
+          <h2 data-part="heading" id="s-div">Condições de pagamento</h2>
+        </div>
+        <div data-part="actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Editar</span>
+          </button>
+        </div>
+      </div>
+      <div data-part="body">
+        <p style="margin: 0">45 dias contra a fatura, sem desconto por antecipação.</p>
+      </div>
+    </section>
+    <section
+      data-ui="section"
+      data-part="root"
+      data-size="md"
+      data-level="2"
+      data-ground="surface"
+      aria-labelledby="s-surf"
+    >
+      <div data-part="header">
+        <div data-part="title">
+          <h2 data-part="heading" id="s-surf">Condições de pagamento</h2>
+          <p data-part="description">A surface, not a card: no shadow, no hover, no action.</p>
+        </div>
+      </div>
+      <div data-part="body">
+        <p style="margin: 0">45 dias contra a fatura, sem desconto por antecipação.</p>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- One outline step deeper each time. -->
+<section data-scene="nested">
+  <section
+    data-ui="section"
+    data-part="root"
+    data-size="lg"
+    data-level="2"
+    data-ground="none"
+    aria-labelledby="s-n1"
+  >
+    <div data-part="header">
+      <div data-part="title">
+        <h2 data-part="heading" id="s-n1">Frota</h2>
+      </div>
+    </div>
+    <div data-part="body">
+      <section
+        data-ui="section"
+        data-part="root"
+        data-size="md"
+        data-level="3"
+        data-ground="none"
+        aria-labelledby="s-n2"
+      >
+        <div data-part="header">
+          <div data-part="title">
+            <h3 data-part="heading" id="s-n2">Veículos pesados</h3>
+          </div>
+        </div>
+        <div data-part="body">
+          <section
+            data-ui="section"
+            data-part="root"
+            data-size="sm"
+            data-level="4"
+            data-ground="none"
+            aria-labelledby="s-n3"
+          >
+            <div data-part="header">
+              <div data-part="title">
+                <h4 data-part="heading" id="s-n3">Cavalos mecânicos</h4>
+                <p data-part="description">18 unidades, 6 em manutenção.</p>
+              </div>
+            </div>
+            <div data-part="body">
+              <p style="margin: 0">Scania R 450 · Volvo FH 540 · Mercedes Actros 2651</p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </section>
+</section>
+
+<!-- Sticky header inside a scroller of its own. -->
+<section data-scene="sticky">
+  <div style="block-size: 220px; overflow: auto; border: 1px dashed var(--slotted-border-strong)">
+    <section
+      data-ui="section"
+      data-part="root"
+      data-size="md"
+      data-level="2"
+      data-ground="none"
+      data-sticky
+      data-divider
+      aria-labelledby="s-st"
+    >
+      <div data-part="header">
+        <div data-part="title">
+          <h2 data-part="heading" id="s-st">Histórico de aprovações</h2>
+        </div>
+        <div data-part="actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Filtrar</span>
+          </button>
+        </div>
+      </div>
+      <div data-part="body">
+        <div style="display: grid; gap: 12px">
+          <p style="margin: 0">02/09 · Marina Duarte solicitou aprovação.</p>
+          <p style="margin: 0">03/09 · Carlos Prado aprovou o orçamento.</p>
+          <p style="margin: 0">04/09 · Jurídico devolveu com ressalvas.</p>
+          <p style="margin: 0">05/09 · Marina Duarte reenviou.</p>
+          <p style="margin: 0">08/09 · Carlos Prado aprovou.</p>
+          <p style="margin: 0">09/09 · Financeiro reservou o valor.</p>
+          <p style="margin: 0">10/09 · Aguardando emissão da ordem.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- A title of nine words, a long translated description, and no actions. -->
+<section data-scene="long">
+  <section
+    data-ui="section"
+    data-part="root"
+    data-size="md"
+    data-level="2"
+    data-ground="none"
+    data-divider
+    aria-labelledby="s-long"
+  >
+    <div data-part="header">
+      <div data-part="title">
+        <span data-part="eyebrow">Anexo IV — Especificações técnicas obrigatórias</span>
+        <h2 data-part="heading" id="s-long">
+          Requisitos de homologação, garantia, recapagem e descarte ambientalmente adequado dos
+          pneus fornecidos
+        </h2>
+        <p data-part="description">
+          Der Lieferant gewährleistet die Rückverfolgbarkeit jeder Reifencharge über die gesamte
+          Vertragslaufzeit und übernimmt die fachgerechte Entsorgung gemäß den geltenden
+          Umweltvorschriften.
+        </p>
+      </div>
+      <div data-part="actions"></div>
+    </div>
+    <div data-part="body"><p style="margin: 0">…</p></div>
+  </section>
+</section>

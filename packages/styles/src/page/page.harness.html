@@ -1,0 +1,436 @@
+<!--
+  A page is a screen, so every scene stands in a box the height of one and
+  the box is what scrolls. Under `ancestor` the box is the scroller and the
+  page is at least as tall as it; under `self` the page's own scroll part is.
+  The header inside is the page-header family and the content is sections,
+  because a page with a paragraph in it is a picture of a different family.
+-->
+<section data-scene="default">
+  <div style="block-size: 480px; overflow: auto; border: 1px dashed var(--slotted-border-strong)">
+    <main
+      data-ui="page"
+      data-part="root"
+      data-scroll="ancestor"
+      data-ground="sunken"
+      data-width="wide"
+    >
+      <div data-part="scroll">
+        <header
+          data-ui="page-header"
+          data-part="root"
+          data-size="md"
+          data-level="1"
+          data-collapse="scroll"
+          data-expanded
+        >
+          <div data-ui="container" data-part="root" data-size="wide" data-inset="6">
+            <div data-part="title-area">
+              <div data-part="nav">
+                <a data-part="back" href="#pedidos">Pedidos de compra</a>
+              </div>
+              <div data-part="title-row">
+                <div data-part="title">
+                  <h1 data-part="heading">Pedido de compra PC-2026-004521</h1>
+                  <span data-part="marks">
+                    <span
+                      data-ui="tag"
+                      data-part="root"
+                      data-shape="pill"
+                      data-size="sm"
+                      data-tone="warning"
+                      data-variant="soft"
+                      ><span data-part="body"><span data-part="label">Em análise</span></span></span
+                    >
+                  </span>
+                  <p data-part="subheading">Aurora Logística Ltda · CNPJ 12.345.678/0001-90</p>
+                </div>
+                <div data-part="actions">
+                  <button
+                    data-ui="button"
+                    data-part="root"
+                    data-variant="ghost"
+                    data-tone="secondary"
+                    data-size="md"
+                    type="button"
+                  >
+                    <span data-part="label">Reprovar</span>
+                  </button>
+                  <button
+                    data-ui="button"
+                    data-part="root"
+                    data-variant="solid"
+                    data-tone="accent"
+                    data-size="md"
+                    type="button"
+                  >
+                    <span data-part="label">Aprovar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              data-part="header-area"
+              role="region"
+              aria-label="Cabeçalho da página"
+              id="pg-area-1"
+            >
+              <div data-part="content">
+                <p data-part="description">
+                  Reposição de pneus radiais aro 22.5 para a frota de Cariacica. Entrega prevista
+                  para 24 de setembro de 2026.
+                </p>
+              </div>
+            </div>
+            <div data-part="controls">
+              <div>
+                <button
+                  data-part="toggle"
+                  type="button"
+                  aria-expanded="true"
+                  aria-controls="pg-area-1"
+                  aria-label="Recolher cabeçalho"
+                ></button>
+                <button
+                  data-part="pin"
+                  type="button"
+                  aria-pressed="false"
+                  aria-label="Fixar cabeçalho"
+                ></button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div data-part="body">
+          <div data-ui="container" data-part="root" data-size="wide" data-inset="6">
+            <div style="display: grid; gap: 32px">
+              <section
+                data-ui="section"
+                data-part="root"
+                data-size="md"
+                data-level="2"
+                data-ground="surface"
+                aria-labelledby="pg-s1"
+              >
+                <div data-part="header">
+                  <div data-part="title">
+                    <h2 data-part="heading" id="pg-s1">Itens do pedido</h2>
+                  </div>
+                </div>
+                <div data-part="body">
+                  <p style="margin: 0 0 8px">Pneu radial 295/80 R22.5 — 24 × R$ 2.980,00</p>
+                  <p style="margin: 0 0 8px">Câmara de ar 22.5 — 24 × R$ 190,00</p>
+                  <p style="margin: 0">Serviço de recapagem — 12 × R$ 1.240,00</p>
+                </div>
+              </section>
+              <section
+                data-ui="section"
+                data-part="root"
+                data-size="md"
+                data-level="2"
+                data-ground="surface"
+                aria-labelledby="pg-s2"
+              >
+                <div data-part="header">
+                  <div data-part="title"><h2 data-part="heading" id="pg-s2">Condições</h2></div>
+                </div>
+                <div data-part="body">
+                  <p style="margin: 0">45 dias contra a fatura, sem desconto por antecipação.</p>
+                </div>
+              </section>
+              <section
+                data-ui="section"
+                data-part="root"
+                data-size="md"
+                data-level="2"
+                data-ground="surface"
+                aria-labelledby="pg-s3"
+              >
+                <div data-part="header">
+                  <div data-part="title"><h2 data-part="heading" id="pg-s3">Histórico</h2></div>
+                </div>
+                <div data-part="body">
+                  <p style="margin: 0 0 8px">02/09 · Marina Duarte solicitou aprovação.</p>
+                  <p style="margin: 0 0 8px">03/09 · Carlos Prado aprovou o orçamento.</p>
+                  <p style="margin: 0 0 8px">04/09 · Jurídico devolveu com ressalvas.</p>
+                  <p style="margin: 0">08/09 · Carlos Prado aprovou.</p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer data-part="footer" aria-label="Ações da página" data-status="open">
+        <div data-ui="container" data-part="root" data-size="wide" data-inset="6">
+          <div data-part="actions">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Cancelar</span>
+            </button>
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="outline"
+              data-tone="secondary"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Guardar rascunho</span>
+            </button>
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="solid"
+              data-tone="accent"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Enviar para aprovação</span>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+</section>
+
+<!-- The page is the scroller; the footer sits outside it. -->
+<section data-scene="self">
+  <div style="block-size: 420px; border: 1px dashed var(--slotted-border-strong)">
+    <main
+      data-ui="page"
+      data-part="root"
+      data-scroll="self"
+      data-ground="surface"
+      data-width="content"
+    >
+      <div data-part="scroll">
+        <header
+          data-ui="page-header"
+          data-part="root"
+          data-size="md"
+          data-level="1"
+          data-collapse="scroll"
+          data-expanded
+        >
+          <div data-ui="container" data-part="root" data-size="content" data-inset="6">
+            <div data-part="title-area">
+              <div data-part="title-row">
+                <div data-part="title">
+                  <h1 data-part="heading">Política de compras</h1>
+                  <p data-part="subheading">Revisão 7 · vigente desde 1 de julho de 2026</p>
+                </div>
+              </div>
+            </div>
+            <div
+              data-part="header-area"
+              role="region"
+              aria-label="Cabeçalho da página"
+              id="pg-area-2"
+            >
+              <div data-part="content">
+                <p data-part="description">
+                  A política aplica-se a toda a aquisição de bens e serviços acima de R$ 5.000,00.
+                </p>
+              </div>
+            </div>
+            <div data-part="controls">
+              <div>
+                <button
+                  data-part="toggle"
+                  type="button"
+                  aria-expanded="true"
+                  aria-controls="pg-area-2"
+                  aria-label="Recolher cabeçalho"
+                ></button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div data-part="body">
+          <div data-ui="container" data-part="root" data-size="content" data-inset="6">
+            <p style="margin: 0 0 16px">
+              1. Toda a aquisição parte de uma requisição aprovada pelo gestor do centro de custo.
+            </p>
+            <p style="margin: 0 0 16px">
+              2. Acima de R$ 50.000,00, três cotações são obrigatórias.
+            </p>
+            <p style="margin: 0 0 16px">3. Contratos continuados são revistos anualmente.</p>
+            <p style="margin: 0 0 16px">4. Fornecedores sem cadastro vigente não recebem ordens.</p>
+            <p style="margin: 0 0 16px">5. O prazo padrão de pagamento é de 45 dias.</p>
+            <p style="margin: 0 0 16px">
+              6. Exceções são registadas no processo com a justificação.
+            </p>
+            <p style="margin: 0">7. A área de compras publica o relatório trimestral.</p>
+          </div>
+        </div>
+      </div>
+      <footer data-part="footer" aria-label="Ações da página" data-status="open">
+        <div data-ui="container" data-part="root" data-size="content" data-inset="6">
+          <div data-part="actions">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="solid"
+              data-tone="accent"
+              data-size="md"
+              type="button"
+            >
+              <span data-part="label">Aceitar a política</span>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+</section>
+
+<!-- Filled: the body is exactly the height left and the pane inside scrolls. -->
+<section data-scene="fill">
+  <div style="block-size: 360px; border: 1px dashed var(--slotted-border-strong)">
+    <main
+      data-ui="page"
+      data-part="root"
+      data-scroll="self"
+      data-fill
+      data-ground="sunken"
+      data-width="full"
+    >
+      <div data-part="scroll">
+        <header
+          data-ui="page-header"
+          data-part="root"
+          data-size="sm"
+          data-level="1"
+          data-collapse="manual"
+          data-expanded
+        >
+          <div data-ui="container" data-part="root" data-size="full" data-inset="6">
+            <div data-part="title-area">
+              <div data-part="title-row">
+                <div data-part="title">
+                  <h1 data-part="heading">Fornecedores</h1>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div data-part="body">
+          <div data-ui="container" data-part="root" data-size="full" data-inset="6">
+            <div
+              style="display: grid; grid-template-columns: 1fr 2fr; gap: 16px; min-block-size: 0"
+            >
+              <div
+                style="
+                  overflow: auto;
+                  background: var(--slotted-surface);
+                  border: 1px solid var(--slotted-border-subtle);
+                  border-radius: 8px;
+                  padding: 12px;
+                "
+              >
+                <p style="margin: 0 0 8px">Aurora Logística</p>
+                <p style="margin: 0 0 8px">Michelin do Brasil</p>
+                <p style="margin: 0 0 8px">Pirelli</p>
+                <p style="margin: 0 0 8px">Bridgestone</p>
+                <p style="margin: 0 0 8px">Goodyear</p>
+                <p style="margin: 0 0 8px">Continental</p>
+                <p style="margin: 0 0 8px">Dunlop</p>
+                <p style="margin: 0">Firestone</p>
+              </div>
+              <div
+                style="
+                  overflow: auto;
+                  background: var(--slotted-surface);
+                  border: 1px solid var(--slotted-border-subtle);
+                  border-radius: 8px;
+                  padding: 12px;
+                "
+              >
+                <p style="margin: 0">
+                  Aurora Logística Ltda · CNPJ 12.345.678/0001-90 · Cariacica, ES
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- Two grounds. -->
+<section data-scene="ground">
+  <div style="display: grid; gap: 16px">
+    <main
+      data-ui="page"
+      data-part="root"
+      data-scroll="ancestor"
+      data-ground="sunken"
+      data-width="wide"
+      style="min-block-size: 0; border: 1px dashed var(--slotted-border-strong)"
+    >
+      <div data-part="scroll">
+        <div data-part="body">
+          <div data-ui="container" data-part="root" data-size="wide" data-inset="6">
+            <section
+              data-ui="section"
+              data-part="root"
+              data-size="sm"
+              data-level="2"
+              data-ground="surface"
+              aria-labelledby="pg-g1"
+            >
+              <div data-part="header">
+                <div data-part="title">
+                  <h2 data-part="heading" id="pg-g1">sunken — the application canvas</h2>
+                </div>
+              </div>
+              <div data-part="body">
+                <p style="margin: 0">A section on a surface separates from it.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+    <main
+      data-ui="page"
+      data-part="root"
+      data-scroll="ancestor"
+      data-ground="surface"
+      data-width="wide"
+      style="min-block-size: 0; border: 1px dashed var(--slotted-border-strong)"
+    >
+      <div data-part="scroll">
+        <div data-part="body">
+          <div data-ui="container" data-part="root" data-size="wide" data-inset="6">
+            <section
+              data-ui="section"
+              data-part="root"
+              data-size="sm"
+              data-level="2"
+              data-ground="none"
+              data-divider
+              aria-labelledby="pg-g2"
+            >
+              <div data-part="header">
+                <div data-part="title">
+                  <h2 data-part="heading" id="pg-g2">surface — a document page</h2>
+                </div>
+              </div>
+              <div data-part="body">
+                <p style="margin: 0">The content is the page; a rule separates.</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>

@@ -52,6 +52,21 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-toast-swipe-x',
   '--slotted-toast-swipe-y',
   /**
+   * `page-header` and `page` — the geometry of the chrome that stays while the
+   * page scrolls. `--slotted-page-header-collapse` is the measured height of
+   * the header area, which is the root's negative sticky offset: the first
+   * that many pixels leave the scrollport and the title area stays.
+   * `--slotted-page-sticky-top` is the height of everything that stays at the
+   * top, and `--slotted-page-sticky-bottom` the height of the footer, both
+   * written on the scroll container so a section's sticky header and a table's
+   * sticky column header can stop under the chrome rather than behind it. No
+   * theme can know any of the three: they are what the header turned out to
+   * be, measured.
+   */
+  '--slotted-page-header-collapse',
+  '--slotted-page-sticky-top',
+  '--slotted-page-sticky-bottom',
+  /**
    * `tree` — how deep in the hierarchy one node sits. The stylesheet multiplies
    * it by the indent step to inset the row, and no theme can know it: it is a
    * fact about the consumer's data, stated per node, in the same category as

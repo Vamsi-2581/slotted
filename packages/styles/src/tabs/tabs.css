@@ -66,7 +66,12 @@
      */
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
-    grid-template-rows: auto auto;
+    /**
+     * One explicit row; a panel makes the second. Two explicit rows kept the
+     * row gap under a list with no panel beside it — a tab bar inside a page
+     * header stood sixteen pixels off the edge it was meant to sit on.
+     */
+    grid-template-rows: auto;
     min-inline-size: 0;
     row-gap: var(--slotted-tabs-gap, var(--slotted-space-6, 1rem));
   }

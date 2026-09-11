@@ -356,3 +356,10 @@ test('keeps the list edge to edge when nothing stands beside it', () => {
     /\[data-part='actions'\]\s*\{[^}]*margin-inline-start:\s*var\(--slotted-tabs-actions-gap/,
   );
 });
+
+/** One explicit row: a list with no panel beside it sits on its own edge, with no gap under it. */
+test('keeps no row gap under a list that has no panel', () => {
+  const root = /\[data-ui='tabs'\]\s*\{([\s\S]*?)\n\s*\}/.exec(css)?.[1] ?? '';
+  assert.match(root, /grid-template-rows:\s*auto;/);
+  assert.doesNotMatch(root, /grid-template-rows:\s*auto auto/);
+});

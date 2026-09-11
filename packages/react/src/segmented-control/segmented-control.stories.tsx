@@ -96,8 +96,8 @@ export const Sizes: Story = {
     <Grid columns={1}>
       <Scene
         label="The three steps"
-        note="The track measures its segments back from the control height, so the whole control is the same height as every other control at that step and at every density."
-        layout="block"
+        note="Side by side rather than stacked: thirty, thirty-four and thirty-eight pixels is four pixels between neighbours, and a control stretched across the page hides a difference that small."
+        layout="row"
       >
         <SegmentedControl aria-label="Visualização, pequena" defaultValue="grid" size="sm">
           <Segment value="grid">Grade</Segment>
@@ -117,13 +117,15 @@ export const Sizes: Story = {
         note="This is the reason the height is measured back rather than added to: a control two pixels prouder than the field beside it is the defect nobody can name and everybody sees."
         layout="row"
       >
-        <TextField aria-label="Número da fatura" defaultValue="INV-2048" />
+        <Measure>
+          <TextField aria-label="Número da fatura" defaultValue="INV-2048" />
+        </Measure>
         <SegmentedControl aria-label="Moeda" defaultValue="brl">
           <Segment value="brl">BRL</Segment>
           <Segment value="usd">USD</Segment>
         </SegmentedControl>
         <Button tone="secondary" variant="outline">
-          Salvar
+          Salvar fatura
         </Button>
       </Scene>
     </Grid>

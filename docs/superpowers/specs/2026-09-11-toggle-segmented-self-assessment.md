@@ -265,16 +265,42 @@ the anatomy as it reaches the DOM. `specs/reference-pages.test.mjs` and the four
 `*.stories.test.ts` files hold all of it; every scene has a caption over the
 forty-character floor that says what to look at rather than repeating the title.
 
-**Not read rendered.** Both Storybooks are up, but the React one cannot see
-either family: a new subpath export in `packages/styles/package.json` is
-invisible to a running Vite server, which `docs/build-briefing.md` states and
-`tools/harness/audit.mjs` confirmed — `rendered no demonstration stage within 15
-seconds`. A restart interrupts the other lane, so it is asked for at the gate
-rather than taken.
+**Read rendered, and measured.** Once the React Storybook had restarted and
+could see both families, `tools/harness/audit.mjs` was run on all four pages at
+1280 and at 620 — eight runs, all clean — and the pages were read at both
+schemes. Four defects came out of the reading and none of them out of a test:
 
-**The one change that would most improve it:** reading the four pages at 1280
-and 620 in light and dark and running `audit.mjs` on each. Not made, and it is
-the one piece of this family's work that is still owed.
+1. **The three sizes were stretched across the stage.** Thirty, thirty-four and
+   thirty-eight pixels is four pixels between neighbours, and a control a
+   thousand pixels wide hides a difference that small. They now sit side by side
+   on a `row` stage, where the step reads at a glance.
+2. **The form row put the field on its own line.** `text-field` is
+   `inline-size: 100%` by design, so on a row stage it takes the whole line and
+   pushed the two controls beside it onto a second one — which is the opposite
+   of what a scene about shared height is for. The field is bounded by
+   `.slotted-demo-measure`, and the three edges now line up.
+3. **Four scenes stood below the audit's collapse floor** because the content
+   chosen for them was too thin: a two-mark formatting bar, a vertical bar of
+   three short words, a button that said "Salvar". They carry real content now —
+   four marks, the labels an alignment control actually has, "Salvar fatura" —
+   rather than an escape hatch, which is what `data-collapse-floor` would have
+   been.
+4. **The `in-a-form` scene had no layout at all**, recorded above under
+   Refinement.
+
+**What is not this pass's to fix.** The anatomy table's `PURPOSE` column is
+clipped at the page's right edge. It reproduces identically on `radio-group`'s
+page — a family that has been through its own gate — so it belongs to the shared
+`api-table`, not to either family here. `audit.mjs`, which owns that question,
+reports nothing, and `references/stories.md` explicitly allows wide content to
+scroll inside its own container. Reported rather than changed: editing the
+shared table would touch every family's page while another session is working in
+this tree.
+
+**The one change that would most improve it:** a demonstration of the thumb
+actually travelling — every scene is a still, and the one motion this family
+owns can only be seen by pressing a segment. Not made: a story cannot animate
+itself on load without lying about what a reader would see.
 
 ---
 

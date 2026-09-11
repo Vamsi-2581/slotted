@@ -19,6 +19,7 @@ import { useState } from 'react';
 
 import { Button } from '../button';
 import { Grid, Measure, Scene } from '../field/field-demo';
+import { TextField } from '../text-field';
 import { Toolbar, ToolbarSeparator } from '../toolbar';
 import { Text } from '../typography';
 import { ToggleGroup } from './toggle-group';
@@ -198,12 +199,21 @@ export const Sizes: Story = {
         note="The bar states no frame of its own, so it is exactly one control tall — and a form row holding a field, a toggle group and a button lines up on all three edges."
         layout="row"
       >
+        <Measure>
+          <TextField aria-label="Título do relatório" defaultValue="Relatório trimestral" />
+        </Measure>
         <ToggleGroup aria-label="Estilo do texto, em uma linha" defaultValue={['bold']} multiple>
           <ToggleGroupItem aria-label="Negrito" icon={<Bold size={16} />} value="bold" />
           <ToggleGroupItem aria-label="Itálico" icon={<Italic size={16} />} value="italic" />
+          <ToggleGroupItem
+            aria-label="Sublinhado"
+            icon={<Underline size={16} />}
+            value="underline"
+          />
+          <ToggleGroupItem aria-label="Tachado" icon={<Strikethrough size={16} />} value="strike" />
         </ToggleGroup>
         <Button tone="secondary" variant="outline">
-          Publicar
+          Publicar alterações
         </Button>
       </Scene>
     </Grid>
@@ -235,9 +245,9 @@ export const Orientation: Story = {
           defaultValue={['center']}
           orientation="vertical"
         >
-          <ToggleGroupItem value="start">Início</ToggleGroupItem>
-          <ToggleGroupItem value="center">Centro</ToggleGroupItem>
-          <ToggleGroupItem value="end">Fim</ToggleGroupItem>
+          <ToggleGroupItem value="start">Alinhar à esquerda</ToggleGroupItem>
+          <ToggleGroupItem value="center">Centralizar</ToggleGroupItem>
+          <ToggleGroupItem value="end">Alinhar à direita</ToggleGroupItem>
         </ToggleGroup>
       </Scene>
     </Grid>
@@ -382,6 +392,12 @@ export const IconOnly: Story = {
         >
           <ToggleGroupItem aria-label="Negrito" icon={<Bold size={14} />} value="bold" />
           <ToggleGroupItem aria-label="Itálico" icon={<Italic size={14} />} value="italic" />
+          <ToggleGroupItem
+            aria-label="Sublinhado"
+            icon={<Underline size={14} />}
+            value="underline"
+          />
+          <ToggleGroupItem aria-label="Tachado" icon={<Strikethrough size={14} />} value="strike" />
         </ToggleGroup>
       </Scene>
     </Grid>

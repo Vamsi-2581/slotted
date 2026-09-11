@@ -7,6 +7,7 @@ import {
   lucideAlignRight,
   lucideBold,
   lucideItalic,
+  lucideStrikethrough,
   lucideUnderline,
 } from '@ng-icons/lucide';
 import { SlButton } from '@slotted/angular/button';
@@ -77,6 +78,7 @@ const meta: Meta<ToggleGroupStoryArgs> = {
           lucideAlignRight,
           lucideBold,
           lucideItalic,
+          lucideStrikethrough,
           lucideUnderline,
         }),
       ],
@@ -133,6 +135,9 @@ const FORMATTING = `<button slToggleGroupItem value="bold" aria-label="Negrito">
   </button>
   <button slToggleGroupItem value="underline" aria-label="Sublinhado">
     <ng-icon slToggleGroupIcon name="lucideUnderline" />
+  </button>
+  <button slToggleGroupItem value="strike" aria-label="Tachado">
+    <ng-icon slToggleGroupIcon name="lucideStrikethrough" />
   </button>`;
 
 export const Playground: Story = {
@@ -245,9 +250,11 @@ export const Sizes: Story = {
         scene(
           'Beside the controls it shares a row with',
           'The bar states no frame of its own, so it is exactly one control tall — and a row holding a field, a toggle group and a button lines up on all three edges.',
-          `<div slTextField><input slTextFieldInput value="Relatório trimestral" aria-label="Título" /></div>
+          `<div class="slotted-demo-measure">
+             <div slTextField><input slTextFieldInput value="Relatório trimestral" aria-label="Título" /></div>
+           </div>
            <div slToggleGroup aria-label="Estilo do texto na linha" multiple [defaultValue]="['bold']">${FORMATTING}</div>
-           <button slButton tone="secondary" variant="outline">Publicar</button>`,
+           <button slButton tone="secondary" variant="outline">Publicar alterações</button>`,
           'row',
         ),
     ),
@@ -278,9 +285,9 @@ export const Orientation: Story = {
           'Down the page',
           'A vertical bar moves with ArrowUp and ArrowDown and writes aria-orientation, because role=group carries no implied direction of its own for a reader to assume.',
           `<div slToggleGroup aria-label="Alinhamento empilhado" orientation="vertical" [defaultValue]="['center']">
-             <button slToggleGroupItem value="start">Início</button>
-             <button slToggleGroupItem value="center">Centro</button>
-             <button slToggleGroupItem value="end">Fim</button>
+             <button slToggleGroupItem value="start">Alinhar à esquerda</button>
+             <button slToggleGroupItem value="center">Centralizar</button>
+             <button slToggleGroupItem value="end">Alinhar à direita</button>
            </div>`,
         ),
     ),
@@ -476,7 +483,9 @@ export const Composition: Story = {
              <button slToggleGroupItem value="roads">Ruas</button>
              <button slToggleGroupItem value="terrain">Relevo</button>
            </div>
-           <p slText size="sm" tone="muted">Ligadas: {{ bar.selection().length }}</p>`,
+           <p slText size="sm" tone="muted">
+             O grupo diz que {{ bar.selection().length }} de duas camadas estão ligadas.
+           </p>`,
         ),
     ),
   }),

@@ -176,20 +176,23 @@ export const Sizes: Story = {
       1,
       scene(
         'The three steps',
-        'The track measures its segments back from the control height, so the whole control is the same height as every other control at that step and at every density.',
+        'Side by side rather than stacked: thirty, thirty-four and thirty-eight pixels is four pixels between neighbours, and a control stretched across the page hides a difference that small.',
         `<div slSegmentedControl aria-label="Visualização pequena" size="sm" defaultValue="grid">${VIEW}</div>
          <div slSegmentedControl aria-label="Visualização média" size="md" defaultValue="grid">${VIEW}</div>
          <div slSegmentedControl aria-label="Visualização grande" size="lg" defaultValue="grid">${VIEW}</div>`,
+        'row',
       ) +
         scene(
           'In the row it shares with a field and a button',
           'This is the reason the height is measured back rather than added to: a control two pixels prouder than the field beside it is the defect nobody can name and everybody sees.',
-          `<div slTextField><input slTextFieldInput value="INV-2048" aria-label="Número da fatura" /></div>
+          `<div class="slotted-demo-measure">
+             <div slTextField><input slTextFieldInput value="INV-2048" aria-label="Número da fatura" /></div>
+           </div>
            <div slSegmentedControl aria-label="Moeda" defaultValue="brl">
              <label slSegment value="brl">BRL</label>
              <label slSegment value="usd">USD</label>
            </div>
-           <button slButton tone="secondary" variant="outline">Salvar</button>`,
+           <button slButton tone="secondary" variant="outline">Salvar fatura</button>`,
           'row',
         ),
     ),

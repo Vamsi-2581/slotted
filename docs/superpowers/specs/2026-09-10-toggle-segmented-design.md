@@ -236,6 +236,21 @@ thumb. At `sm` and `dense` that leaves an eighteen-pixel thumb, so the radio
 reaches the track's own edge and the target is the control's height rather than
 the thumb's, with `--slotted-target-min` as the floor across the segment.
 
+**The track's edge stays `--slotted-border-subtle`, by the reviewer's decision,
+and here is the number it costs.** Measured on the running React Storybook, in
+`dark` at `compact`, on a raised demo stage of `#18181b`: the track's ground
+`#0c0c0e` sits at 1.13 : 1 against that stage and its edge `#27272a` at 1.16 : 1,
+while the `button` beside it draws `--slotted-border-strong` at 3.53 : 1. On a
+raised surface in `dark` the track is therefore effectively invisible, and what a
+reader compares to the button is the thumb — which is shorter, by the ring of
+ground the track holds around it, and which produced exactly that report.
+
+`--slotted-control-border-color` is the token whose stated job is the edge of a
+control at 3 : 1 against `--slotted-surface`, `--slotted-surface-raised` and
+`--slotted-surface-sunken`, and it is what would close the gap. It was not taken:
+the reviewer asked for the colours to stay. The number is written here so the
+next person to open this family finds it rather than measuring it again.
+
 **A rule between two segments.** A track of words with nothing between them reads
 as a sentence. Mantine ships the rule on by default, Apple draws it and Carbon
 draws it. It is shorter than the segment, so it reads as a divider rather than as

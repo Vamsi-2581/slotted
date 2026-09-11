@@ -382,14 +382,19 @@ function SubmittedControl() {
           setSubmitted(String(data.get('currency') ?? ''));
         }}
       >
-        <SegmentedControl aria-label="Moeda" defaultValue="brl" name="currency">
-          <Segment value="brl">BRL</Segment>
-          <Segment value="usd">USD</Segment>
-          <Segment value="eur">EUR</Segment>
-        </SegmentedControl>
-        <Button tone="secondary" type="submit" variant="outline">
-          Enviar
-        </Button>
+        {/* The form is one child of the stage, so the distance between the
+            control and the button is this row's and not the stage's — without
+            it the two sit against each other with no gap at all. */}
+        <div className="slotted-demo-row">
+          <SegmentedControl aria-label="Moeda da fatura" defaultValue="brl" name="currency">
+            <Segment value="brl">BRL</Segment>
+            <Segment value="usd">USD</Segment>
+            <Segment value="eur">EUR</Segment>
+          </SegmentedControl>
+          <Button tone="secondary" type="submit" variant="outline">
+            Enviar
+          </Button>
+        </div>
       </form>
       <Text size="sm" tone="muted">
         {submitted === null ? 'Nada enviado ainda.' : `FormData.get('currency') = ${submitted}`}

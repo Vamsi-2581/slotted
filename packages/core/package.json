@@ -117,6 +117,10 @@
       "types": "./dist/types/state/index.d.ts",
       "import": "./dist/state.js"
     },
+    "./sticky-header": {
+      "types": "./dist/types/sticky-header/index.d.ts",
+      "import": "./dist/sticky-header.js"
+    },
     "./steps": {
       "types": "./dist/types/steps/index.d.ts",
       "import": "./dist/steps.js"

@@ -242,8 +242,11 @@ other families stand on. Justify it at the gate before writing it.
   reads the bridge. A family that adds a sticky part to a page reads the same
   property and never measures the header itself, and a family that adds
   chrome of its own to the page adds it to that number rather than publishing
-  a second one. Decided in wave 7 for `page`, `page-header` and `section`; it
-  binds `anchor-nav`, `app-shell` and `filter-bar` in wave 8.
+  a second one — `section` does exactly that: a sticky section measures its
+  header and its body republishes the property as page plus header, so a table
+  or a nested section inside stops under the section's header, and layers add
+  up under one name. Decided in wave 7 for `page`, `page-header` and
+  `section`; it binds `anchor-nav`, `app-shell` and `filter-bar` in wave 8.
 - **A scroll-driven change carries the reason `scroll`.** The header area
   collapsing because the reader scrolled past it is a change the consumer did
   not make and may refuse; `specs/contract.schema.mjs` names the reason, so a

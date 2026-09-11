@@ -40,9 +40,13 @@ family that owned them would own the record model too.
 | The root's sticky offset, on reveal and on snap | `--slotted-duration-medium` | `--slotted-easing-standard` | The area travels the height of itself; a thing that travels needs the longer step. |
 | The header area's track, `1fr` to `0fr`, by the control | `--slotted-duration-medium` | `--slotted-easing-standard` | The content's own height at every frame, nothing measured, as `collapsible` folds. |
 | The area's opacity, with the track | `--slotted-duration-medium` | `--slotted-easing-standard` | Ink that fades while the box closes reads as one movement, not two. |
-| The heading's size and the subheading's line, between expanded and snapped | `--slotted-duration-short` | `--slotted-easing-standard` | A change of size, not of place. |
 | The toggle's chevron | `--slotted-control-transition-duration` | `--slotted-control-transition-easing` | The control's own step, like every other control. |
 | The footer entering and leaving | `--slotted-duration-medium` | `--slotted-easing-standard` | Held through its exit by `presence`; the status is what the sheet transitions on. |
+
+The heading's size does not transition between expanded and snapped: text
+re-rasterised on every frame of a `font-size` change blurs and settles with a
+jolt, which the reviewer read as a tilt, so the step is a cut. No shadow moves
+either; the chrome's edge is one hairline in every state.
 
 No literal duration exists in any of the three sheets;
 `packages/styles/src/motion.test.mjs` caught two fallbacks (`200ms`, `120ms`)
@@ -107,6 +111,39 @@ Defects found by looking, not by a test, and fixed:
   `stuck()` never said so; it measures against the padding edge now.
 - An open code drawer widened the scenes column of the reference page by 37
   pixels; the workbench's scenes track can shrink to nothing now, with a test.
+
+Found by the reviewer on the restarted Storybook, and fixed:
+
+- Collapsing by the control after a reveal expanded and collapsed the header
+  without end: the observer reported the area in while the root travelled back
+  to its offset, the report emptied the track, the content shortened and the
+  scroll moved. The engine ignores that report until the area is out again or
+  the reader scrolls up, ignores a folded area's empty box altogether, and
+  asks the area to collapse on the crossing only — the observer is rebuilt
+  when the title changes height, and its first report repeats a fact that in
+  Angular landed between the control and the binding. A second cause hid
+  under the first: the title grows by a few pixels as the reveal begins,
+  everything under it moves by as much, and scroll anchoring moved the scroll
+  position by the same few pixels — a scroll event the reader did not make,
+  which ended the reveal the instant it began. Nothing under the page's scroll
+  part anchors the scroll now, and the engine holds a reveal through a scroll
+  of up to 24 pixels in the 400 milliseconds after it began.
+- Pinned and scrolled to the end, a short section's header rose over the
+  chrome: it shared the chrome's z-index and came later in the DOM. The root
+  now stands three steps above every other sticky thing on the page.
+- The chrome's edge was a rule inside the container that stopped short of the
+  header's edge, with a shadow under it and the tabs' own track shorter still.
+  The edge is now the root's own full-width border in every state, the pill's
+  rule above tabs is drawn wider than the container and clipped by the root,
+  the tabs' track is transparent so the edge is their line, and the shadow is
+  gone. The tabs grid carried three gaps around empty side columns, which is
+  why its track was inset; the parts that fill those columns carry the gap now.
+- Collapsed by the control the area kept a 27-pixel band under the title, the
+  half pill its columns reserved; the reservation goes with the content.
+- The heading clamped at three lines and nothing bounded the subheading or the
+  description; two and three lines now, the whole string kept.
+- The way back stood beside the breadcrumbs and said what their first crumb
+  said; it yields to them and returns below 640 pixels.
 
 **The one change that would most improve it:** the snapped title's marks and
 subheading share one line, and with five marks the line wraps to two. Not made:
@@ -227,11 +264,14 @@ with `stickyHeader` and `stickyTo="page"` reading the bridged offset,
 `skeleton` for the placeholders, `container` for the width, `typography` for
 the outline, `switch` for the footer's presence.
 
-**The one change that would most improve it:** `section` publishing its own
-sticky height for a second layer of sticky things inside it. Not made: no
-family under `section` sticks today except `table`, which already reads the
-page's offset; a second number would be the briefing's "two answers to one
-question".
+**The one change that would most improve it:** a second layer of sticky
+things under a sticky section header — a table's column header, a nested
+section, a consumer's aside — stopping under the section's header rather than
+under the page's. Made, after the reviewer asked what two stacked stickies
+would do: a sticky section measures its header and its body republishes
+`--slotted-page-sticky-top` as page plus header, and re-bridges the table's
+offset, so every layer reads one property name and layers add up. A consumer's
+own sticky part inside the body reads the same property and needs no number.
 
 ## 11. Documentation
 

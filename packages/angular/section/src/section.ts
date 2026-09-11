@@ -107,8 +107,12 @@ export class SlSection {
     effect((onCleanup) => {
       const header = this.header();
       if (!this.resolvedSticky() || header === null) return;
+      /* Rounded up: a fractional height rounded down leaves a hairline gap the rows show through. */
       const write = () =>
-        this.native.style.setProperty(HEADER_SIZE_PROPERTY, `${header.offsetHeight}px`);
+        this.native.style.setProperty(
+          HEADER_SIZE_PROPERTY,
+          `${Math.ceil(header.getBoundingClientRect().height || header.offsetHeight)}px`,
+        );
       write();
       const sizes = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(write);
       sizes?.observe(header);

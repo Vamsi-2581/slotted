@@ -87,7 +87,12 @@ export function Section({
   useEffect(() => {
     const root = header?.parentElement;
     if (!resolvedSticky || !header || !root) return undefined;
-    const write = () => root.style.setProperty(HEADER_SIZE_PROPERTY, `${header.offsetHeight}px`);
+    /* Rounded up: a fractional height rounded down leaves a hairline gap the rows show through. */
+    const write = () =>
+      root.style.setProperty(
+        HEADER_SIZE_PROPERTY,
+        `${Math.ceil(header.getBoundingClientRect().height || header.offsetHeight)}px`,
+      );
     write();
     if (typeof ResizeObserver === 'undefined') {
       return () => root.style.removeProperty(HEADER_SIZE_PROPERTY);

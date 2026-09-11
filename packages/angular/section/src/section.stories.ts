@@ -484,6 +484,34 @@ export const Sticky: Story = {
             `<div class="slotted-demo-page">${ITEMS('divider sticky', TABLE('more', false))}</div>`,
             'tall',
           ),
+        ) +
+        scene(
+          'Layers that add up',
+          'A sticky section inside a sticky section, and a table held under the page chrome inside that. Scroll: the outer header stops under the page’s chrome, the inner under the outer, the table’s column header under the inner — each sticky header measures itself and republishes --slotted-page-sticky-top for its body, so a consumer’s own sticky part inside the body reads the same property and needs no number.',
+          page(
+            `<section slSection id="frota-camadas" divider sticky>
+  <div slSectionHeader>
+    <div slSectionTitle>
+      <span slSectionEyebrow>18 veículos</span>
+      <h2 slSectionHeading>Frota</h2>
+    </div>
+    <div slSectionActions><button slButton size="sm" variant="outline">Exportar</button></div>
+  </div>
+  <div slSectionBody>
+    <section slSection id="pesados-camadas" divider sticky>
+      <div slSectionHeader>
+        <div slSectionTitle>
+          <h3 slSectionHeading>Veículos pesados</h3>
+          <p slSectionDescription>Pneus por veículo, conforme a última inspeção.</p>
+        </div>
+      </div>
+      <div slSectionBody>${TABLE('more')}</div>
+    </section>
+  </div>
+</section>`,
+            '',
+            true,
+          ),
         ),
     ),
   }),

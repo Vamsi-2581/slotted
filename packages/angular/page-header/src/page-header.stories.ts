@@ -753,7 +753,7 @@ export const Anatomy: Story = {
       1,
       scene(
         'Every part, at rest',
-        'The nav row, the title row with visual, heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay.',
+        'The nav row — the way back is written too, and yields to the breadcrumbs beside it; narrow the stage below 640 pixels and it returns — the title row with visual, heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay.',
         screen(HEADER('', { figure: true })),
       ),
     ),

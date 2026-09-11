@@ -332,6 +332,46 @@ export const Sticky: Story = {
           </div>
         </Viewport>
       </Scene>
+      <Scene
+        label="Layers that add up"
+        note="A sticky section inside a sticky section, and a table held under the page chrome inside that. Scroll: the outer header stops under the page’s chrome, the inner under the outer, the table’s column header under the inner — each sticky header measures itself and republishes --slotted-page-sticky-top for its body, so a consumer’s own sticky part inside the body reads the same property and needs no number."
+      >
+        <Viewport>
+          <Page footer={<OrderFooter />}>
+            <OrderHeader actions="two" />
+            <PageBody>
+              <Section divider id="frota-camadas" sticky>
+                <SectionHeader>
+                  <SectionTitle>
+                    <SectionEyebrow>18 veículos</SectionEyebrow>
+                    <SectionHeading>Frota</SectionHeading>
+                  </SectionTitle>
+                  <SectionActions>
+                    <Button size="sm" variant="outline">
+                      Exportar
+                    </Button>
+                  </SectionActions>
+                </SectionHeader>
+                <SectionBody>
+                  <Section divider id="pesados-camadas" sticky>
+                    <SectionHeader>
+                      <SectionTitle>
+                        <SectionHeading>Veículos pesados</SectionHeading>
+                        <SectionDescription>
+                          Pneus por veículo, conforme a última inspeção.
+                        </SectionDescription>
+                      </SectionTitle>
+                    </SectionHeader>
+                    <SectionBody>
+                      <OrderLines rows={LINES.slice(0, 30)} sticky />
+                    </SectionBody>
+                  </Section>
+                </SectionBody>
+              </Section>
+            </PageBody>
+          </Page>
+        </Viewport>
+      </Scene>
     </Grid>
   ),
 };

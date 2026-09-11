@@ -177,7 +177,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sticky',
     title: 'A header that stays',
-    note: 'Scroll the screen: each section’s header stops under the page chrome and the next one pushes it away. Pin the page header and they all stop lower, because the page publishes where its chrome ends.',
+    note: 'Scroll the screen: each section’s header stops under the page chrome and the next one pushes it away. Pin the page header and they all stop lower, because the page publishes where its chrome ends. A sticky section republishes it for its body as page plus header, so layers add up: a section in a section, a table in that.',
     snippet: defineSnippet({
       id: 'section-react-sticky',
       language: 'tsx',

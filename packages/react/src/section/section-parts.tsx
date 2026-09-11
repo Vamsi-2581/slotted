@@ -49,8 +49,9 @@ export function SectionHeader({
   const { registerHeader } = useSection();
   const setRef = (node: HTMLElement | null) => {
     registerHeader(node);
-    if (typeof ref === 'function') ref(node);
-    else if (ref) ref.current = node;
+    const own = node as HTMLDivElement | null;
+    if (typeof ref === 'function') ref(own);
+    else if (ref) ref.current = own;
   };
   const rootProps: SectionPartProps = {
     ...nativeProps,

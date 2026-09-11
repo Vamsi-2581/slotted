@@ -410,13 +410,13 @@ describe('createStickyHeader', () => {
     (FakeIntersectionObserver.instances.at(-1) as FakeIntersectionObserver).report(true);
     expect(onScrolled).toHaveBeenLastCalledWith(false);
     expect(onScrollRequest).not.toHaveBeenCalled();
-    expect(area.style.transitionDuration).toBe('0s');
+    expect(area.style.transitionProperty).toBe('none');
 
     /* The binding folded the track: the size observer sees the area at nothing. */
     sized(area, 0);
     (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).callback([], {} as ResizeObserver);
     expect(scroller.scrollTop).toBe(30);
-    expect(area.style.transitionDuration).toBe('');
+    expect(area.style.transitionProperty).toBe('');
     handle.destroy();
   });
 

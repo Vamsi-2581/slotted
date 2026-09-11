@@ -125,7 +125,10 @@ export function PageHeader({
    */
   const expandedBy = useRef<'control' | 'pin' | 'programmatic' | 'scroll'>('programmatic');
   const seenExpanded = useRef(currentExpanded);
-  useEffect(() => {
+  /* Layout effects, not passive ones: the engine must hear of the change
+     before the browser computes style for it, so the fold it arms is instant
+     rather than a transition already under way. */
+  useIsomorphicLayoutEffect(() => {
     if (seenExpanded.current === currentExpanded) return;
     seenExpanded.current = currentExpanded;
     engine.current?.expandedChanged(currentExpanded, expandedBy.current);
@@ -133,7 +136,7 @@ export function PageHeader({
   }, [currentExpanded]);
 
   const seenPinned = useRef(currentPinned);
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (seenPinned.current === currentPinned) return;
     seenPinned.current = currentPinned;
     engine.current?.pinnedChanged(currentPinned);

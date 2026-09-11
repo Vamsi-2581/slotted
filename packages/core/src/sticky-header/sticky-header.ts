@@ -152,6 +152,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
    * moves up by what was lost, before paint, and nothing on screen moves.
    */
   let folding: { from: number; timer: ReturnType<typeof setTimeout> } | null = null;
+  /** The area's height as last published, before any fold under way. */
+  let measuredArea = 0;
   /** Who collapsed the area last, which decides whether a return scroll re-opens it. */
   let collapsedBy: 'control' | 'scroll' | null = null;
   let lastTop = scrollTop();
@@ -223,9 +225,19 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     const area = options.area();
     if (area === null || scrollTop() <= 0) return;
     if (folding !== null) clearTimeout(folding.timer);
-    area.style.transitionDuration = '0s';
+    /* What the flow will lose: the height last published, because once the
+       transition is cancelled the area measures as already folded. */
+    const from = Math.max(measuredArea, height(area));
+    /* `transition-property: none` rather than a zero duration: a transition
+       that a forced layout already started keeps its own duration, and only
+       a property it no longer matches cancels it. The root's offset is
+       cancelled with it and the collapse offset goes to nothing in the same
+       step, so the root does not set off for the old offset and slide back. */
+    area.style.transitionProperty = 'none';
+    root.style.transitionProperty = 'none';
+    root.style.setProperty(COLLAPSE_PROPERTY, '0px');
     folding = {
-      from: height(area),
+      from,
       /* A fold that never lands — the binding kept the area — gives the transition back. */
       timer: setTimeout(() => releaseFold(), FOLD_TIMEOUT),
     };
@@ -235,7 +247,8 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (folding === null) return;
     clearTimeout(folding.timer);
     folding = null;
-    options.area()?.style.removeProperty('transition-duration');
+    options.area()?.style.removeProperty('transition-property');
+    root.style.removeProperty('transition-property');
   }
 
   /** Runs in the size observer's callback: after layout and before paint. */
@@ -243,9 +256,14 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (folding === null) return;
     const current = height(options.area());
     const lost = folding.from - current;
-    if (lost <= 0) return;
-    setScrollTop(Math.max(0, scrollTop() - lost));
-    releaseFold();
+    /* Whatever the flow lost this frame, the scroll gives back — every frame,
+       so a fold that still transitions somewhere compensates step by step,
+       and the fold is over once the area is at nothing. */
+    if (lost > 0) {
+      setScrollTop(Math.max(0, scrollTop() - lost));
+      folding.from = current;
+    }
+    if (current === 0) releaseFold();
   }
 
   /**
@@ -258,6 +276,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (destroyed) return;
     const { collapse, pinned } = options.state();
     const area = height(options.area());
+    if (folding === null) measuredArea = area;
     root.style.setProperty(COLLAPSE_PROPERTY, `${area}px`);
     const chrome = options.chrome().reduce((sum, part) => sum + height(part), 0);
     const held = pinned || revealed || collapse === 'manual';

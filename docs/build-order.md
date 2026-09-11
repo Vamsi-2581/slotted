@@ -1067,6 +1067,46 @@ Independentes entre si, exceto a cadeia de data.
   lista impossível é `maxOptions` (1440, um dia ao passo de um minuto) e não um
   piso no passo. Avaliação nas onze dimensões em
   `docs/superpowers/specs/2026-09-10-time-self-assessment.md`.
+  Quando a cadeia existir, `@slotted/core/filter` ganha as espécies `time` e
+  `datetime` e `table` ganha `TableTimeFilter` e `TableDateTimeFilter` — os
+  operadores são os de `date` sobre um `PlainTime` e um `PlainDateTime`, e o
+  descritor guarda o texto ISO, pela mesma razão que a espécie `date` guarda
+  `YYYY-MM-DD`. É uma passagem de `/component table` por si, não um remendo:
+  uma espécie nova é vocabulário no motor, um componente por binding e uma
+  cena. Nada do que já está entregue muda.
+
+  O inventário de `datetime-field` e `datetime-picker`, sobre oito
+  implementações, acrescentou a este parágrafo o que ele não nomeava e que é
+  entregue na mesma sessão. `PlainDateTime` é **aninhado** — `{ date, time }` —
+  para que toda a aritmética que as duas metades já têm se aplique a uma metade
+  sem projeção nenhuma. `datetime-field` **desenha a própria linha** dos sete
+  segmentos e não aninha `date-field` ao lado de `time-field`: duas raízes
+  aninhadas seriam dois `group`, dois valores e dois `SegmentState`, e a ordem
+  das duas metades e o literal entre elas vêm de **um** `Intl.DateTimeFormat`
+  combinado que nenhuma das duas consegue ver. Cada metade é uma caixa
+  (`data-half`) e a linha quebra entre elas e em mais lado nenhum. A metade que
+  falta é dita em voz alta — `data-incomplete`, os segmentos na solicitação e
+  `dateTimeIncomplete` no validador —, o que nenhuma implementação pesquisada
+  sabe dizer. A expressão relativa ganha `d` e `w` e **gasta** o
+  `crossesMidnight` que `time-field` levanta: aqui o dia existe, e a travessia é
+  o valor. `min`/`max` e `minTime`/`maxTime` valem **ao mesmo tempo**, o que a
+  própria página de validação do MUI diz não conseguir fazer, e daí sai a regra
+  do primeiro e do último dia do intervalo que o MDN enuncia e nenhum script
+  implementa. São **dois predicados** — `isDateUnavailable(date)` e
+  `isTimeUnavailable(time, date)` —, porque a grelha precisa de uma resposta por
+  célula. `referenceDateTime` responde às duas perguntas que Ant e MUI respondem
+  com dois nomes. `datetime-picker` guarda as duas superfícies **sempre no DOM**,
+  em qualquer largura: um `tablist` que existe num ecrã estreito e não num largo
+  conta duas histórias diferentes à tecnologia assistiva, e é essa a recusa
+  contra as abas do Kendo e do MUI. `openTo` decide onde o foco cai, não o que é
+  desenhado. A decisão que a família devia cabe numa frase: **o toque que deixa
+  o valor incompleto leva o foco à metade que falta; o toque que completa o
+  valor fecha o painel** — o que dispensa o botão de confirmação que Ant e Kendo
+  gastam. A lista responde ao dia em que o leitor está, e não a um dia já
+  comprometido. `datetime-range-picker` fica adiado para a onda 8, ao lado de
+  `date-range-picker` e de `time-range-picker`, pela mesma pesagem. Inventário em
+  `docs/superpowers/specs/2026-09-10-datetime-capability-inventory.md`, decisões
+  em `docs/superpowers/specs/2026-09-10-datetime-design.md`.
 
 - `upload` — consolida `file-upload`, `dropzone` e `file-input` (guia 17). A
   linha era esta e só esta; o que a família entrega está inventariado em
@@ -1134,15 +1174,8 @@ Independentes entre si, exceto a cadeia de data.
 Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
 `command-palette`, `segmented-control`, `toggle-group`, `scroll-area`,
 `filter-bar`, `data-grid`, `date-range-picker`, `time-range-picker`,
-`tags-input`, `timeline`, `code-block`.
+`datetime-range-picker`, `tags-input`, `timeline`, `code-block`.
 
-- `date-range-picker` são dois campos e o modo `range` que `calendar` já tem,
-  atrás de um gatilho. Fica em Extended, e a cadeia de hora não: um intervalo de
-  datas é uma composição especializada de um valor que a onda 7 já tem, enquanto
-  uma hora é um valor que o Core não sabia dizer. `docs/component-features.md`
-  já separava as duas linhas.
-- `time-range-picker` é o mesmo argumento do outro lado da cadeia: dois
-  `time-picker` com o `max` de um ligado ao `min` do outro, atrás de um gatilho.
 - `date-range-picker` dá à espécie `date` do motor de filtragem um operando só
   para `between`, onde hoje `table` desenha dois `date-picker` lado a lado. O
   descritor não muda — continua `{ operator: 'between', value, end }` — e o que
@@ -1150,10 +1183,23 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   deixa substituir. `tags-input` faz o mesmo pelo filtro de conjunto quando a
   lista de valores é grande demais para caixas de seleção. Ambos são passagens
   de `/component table` posteriores, uma por família.
+- `date-range-picker` são dois campos e o modo `range` que `calendar` já tem,
+  atrás de um gatilho. Fica em Extended, e a cadeia de hora não: um intervalo de
+  datas é uma composição especializada de um valor que a onda 7 já tem, enquanto
+  uma hora é um valor que o Core não sabia dizer. `docs/component-features.md`
+  já separava as duas linhas.
+- `time-range-picker` é o mesmo argumento do outro lado da cadeia: dois
+  `time-picker` com o `max` de um ligado ao `min` do outro, atrás de um gatilho.
   O inventário de `time-picker` adiou-o por escrito — Ant e MUI ambos o
   entregam, e o que os dois entregam é uma composição de um valor que o Core
   passa a ter, não um valor que ele não sabia dizer. Entra na onda 8 ao lado de
   `date-range-picker`, e a lista de Extended acima ganha-o.
+- `datetime-range-picker` fecha a mesma pesagem pela terceira vez: dois
+  `datetime-picker` com o `max` de um ligado ao `min` do outro, atrás de um
+  gatilho. O inventário de `datetime-picker` adiou-o por escrito — MUI entrega
+  `DateTimeRangePicker` no Pro e Ant entrega-o com `RangePicker` sob `showTime`,
+  e o que os dois entregam é uma composição de um valor que o Core passa a ter.
+  Entra na onda 8 ao lado dos outros dois, e a lista de Extended acima ganha-o.
 - O revisor pediu, no gate visual da onda 7, que as famílias de data, hora e
   datetime fossem mais inventivas do que o campo pesquisado. As três aberturas
   que a onda 7 encontrou e não tomou estão em `2026-09-09-date-design.md` §12:
@@ -1161,13 +1207,6 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   comprimento enquanto está a ser desenhado, e uma célula de dia que carrega uma
   marca de densidade. `calendar` já expõe o gancho `data-*` da terceira e não
   desenha nada.
-
-## Destino das 29 famílias atuais
-
-| Atual                                                                                       | Destino                             | Onda |
-| ------------------------------------------------------------------------------------------- | ----------------------------------- | ---- |
-| `visually-hidden`, `divider`, `card`                                                        | refazer                             | 1    |
-| `button`, `link`, `badge`, `tag`, `avatar`, `kbd`, `skeleton`, `alert`                      | refazer                             | 2    |
 - `filter-bar` compõe sobre `@slotted/core/filter` e não inventa vocabulário
   nenhum. O que lhe pertence, e que `table` recusou por escrito: condições sobre
   várias colunas ao mesmo tempo, grupos E/OU aninhados para além de duas
@@ -1180,6 +1219,30 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   modelo de dados e chama `createFilterPredicate` ela própria. Herda também as
   quatro capacidades que `table` adiou pelo papel ARIA: redimensionar coluna,
   virtualização, ordenação por várias chaves e ativação de linha.
+- **`toggle-group segmented-control`** — uma sessão só, porque a semântica é
+  uma decisão e decidi-la duas vezes produz duas respostas. A decisão, escrita
+  em `docs/superpowers/specs/2026-09-10-toggle-segmented-design.md`: o que
+  separa as duas não é a pintura, é o elemento — e a pintura sai dele.
+  `toggle-group` é um conjunto de botões de dois estados sob `role="group"`,
+  cada item um `button` com `aria-pressed`: seleção simples ou múltipla,
+  seleção vazia permitida, foco rotativo de `@slotted/core/focus`, orientação,
+  barra unida ou separada. As setas movem o foco e nunca alternam, porque um
+  item é um botão. Dentro de `toolbar` cede o teclado à barra — a capacidade
+  que `toolbar` já lhe delegou por escrito em `declined.checkedValues`.
+  `segmented-control` é um grupo de rádios sobre um trilho: um
+  `input[type=radio]` real por segmento, colunas iguais, um polegar cuja
+  posição é aritmética e não medida, formulários por `name` e
+  `ControlValueAccessor`, e `field` para `invalid`, `required` e `readonly`.
+  Duas capacidades são recusadas para as famílias que já as possuem: uma fila
+  que navega e uma fila com painéis são ambas `tabs`, e a escolha múltipla de
+  um formulário é `checkbox-group`.
+
+## Destino das 29 famílias atuais
+
+| Atual                                                                                       | Destino                             | Onda |
+| ------------------------------------------------------------------------------------------- | ----------------------------------- | ---- |
+| `visually-hidden`, `divider`, `card`                                                        | refazer                             | 1    |
+| `button`, `link`, `badge`, `tag`, `avatar`, `kbd`, `skeleton`, `alert`                      | refazer                             | 2    |
 | `spinner`, `progress-bar`, `loading-bar`                                                    | consolidar em `progress-indicator`  | 2    |
 | `field`, `fieldset`                                                                         | consolidado em `field field-group`  | 3 ✓  |
 | `input`                                                                                     | renomear para `text-field`          | 3    |

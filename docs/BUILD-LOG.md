@@ -4874,3 +4874,68 @@ contract was history that belonged to another family.
 So `git add` and `git commit` are one operation, in one shell invocation, and
 the window between them is the whole risk. Anything staged and left is a file
 the other lane may commit for you.
+
+## A month name cut at both ends — 2026-09-10
+
+`calendar`'s heading read `etembro de 2026` at `dense`, with the view mark
+sliced off the end. It was found from `datetime-picker`'s panel and reproduced
+on `calendar` alone, with no picker around it, at 720 pixels.
+
+Two rules that look like guards were holding nothing.
+
+**`text-overflow: ellipsis` does nothing on a flex container.** It applies to
+the inline content of a block container, and the heading's label is an anonymous
+flex item beside the mark. The declaration had been written, read as a guard,
+and never truncated anything.
+
+**`justify-content: center` clips at both ends.** With the label centred and the
+row too narrow, the overflow is split evenly, so the _start_ of the month name
+goes first — which is the half a reader needs. `safe center` falls back to start
+alignment exactly when the item would overflow, and is one word.
+
+**A contained element cannot ask for the room its own contents need.**
+`container-type: inline-size` implies `contain: inline-size`, so `calendar`
+states its width from the cell scale — and that width knew about the grid and
+not about the heading row above it. At `dense` a cell is 26 pixels and seven
+columns are 182, which is less than a month name between two triggers. The floor
+is now stated beside the grid arithmetic, in `ch` and in the icon scale so it
+moves with the type and the density, and `max()` picks whichever is larger. At
+`comfortable` the grid wins and nothing changes.
+
+Any family that centres text in a flex row inherits the first two, and any family
+that is its own query container inherits the third.
+
+## A panel that opened at midnight, and an audit that saw a quarter of a page — 2026-09-11
+
+Two defects found at step 11 of `datetime-picker`, neither of which any test in
+this repository could have caught, and both of which a later family inherits.
+
+**A layer is not measured on the frame it mounts.** The picker's list scrolled
+the highlighted row into view in an effect, and the row never moved: a panel
+opened on 15:30 showed 00:00 to 03:30, and the reader had to scroll six hours to
+their own time. The list's height is the panel's, the panel's is the layer's,
+and the layer's is written after the positioner has measured it — so the effect
+ran against a box with nothing to scroll, `scrollIntoView` moved nothing, and
+the cap arrived a frame later with the scroll still at zero. Two passes are not
+the fix either, because the number of frames is the guess: the reveal now runs
+once immediately and again whenever the list's own box changes, which is what
+"the layer has been measured" looks like from inside it. A reader's own
+scrolling resizes nothing, so the observer never fights them.
+
+**A ref to a container can point at the panel on its way out.** Closing and
+reopening inside the exit animation left React's list ref on the exiting layer,
+so even the corrected reveal ran against the wrong element. The scroll is a
+property of one row, so the row carries it: a callback ref on the element that
+holds the highlight fires on the element that actually mounted, and there is
+nothing left to be stale. Angular has no callback ref and no exiting copy — its
+panel is an `@if` — so it reveals from the live list after the next render.
+
+**`tools/harness/audit.mjs` was reporting a clean page it had seen a quarter
+of.** A Storybook docs page mounts its blocks as they come into view, so waiting
+for the stage count to stop growing settles wherever the reader happens to be
+standing: eleven stages of a page holding thirty-nine, reported as eleven and
+passed. The wait is now for the count to stop growing **and** for the document
+to have been walked to its end, a viewport at a time — a jump to the bottom
+would skip every block in between, because a block that was never in view never
+mounted. Every family's reference page is measured whole from here; a page whose
+scenes are heavy is where this mattered first.

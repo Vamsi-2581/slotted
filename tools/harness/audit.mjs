@@ -552,23 +552,39 @@ export async function audit({ url, width = 1280, density = 'comfortable' }) {
      * measures an empty document — which reports no defect and no stages, and
      * reads exactly like a clean page.
      *
-     * It also mounts its blocks *one at a time*. Waiting for the first stage
-     * and then measuring caught two stages of a page holding twenty-four, and
-     * that read exactly like a clean page as well: the audit passed a picker's
-     * reference page it had seen almost none of. So the wait is for the count
-     * to stop growing rather than for the first stage to exist — `hasSettled`
-     * is the rule, and it is a pure function so a case can be put to it.
+     * It also mounts its blocks *one at a time*, and only as they come into
+     * view. Waiting for the first stage and then measuring caught two stages of
+     * a page holding twenty-four; waiting for the count to stop growing while
+     * standing at the top of the document caught eleven of a picker page
+     * holding thirty-nine, because a page whose every scene draws an open panel
+     * pauses longer than one poll between two blocks. Both read exactly like a
+     * clean page.
+     *
+     * So the wait is for the count to stop growing **and** for the document to
+     * have been walked to its end — `hasSettled` is the rule over the counts,
+     * and it is a pure function so a case can be put to it; where the reader
+     * has scrolled to is a property of the page rather than of the counts, so
+     * it is asked here and nowhere else. The walk is a viewport at a time
+     * rather than a jump to the bottom: a block that was never in view on the
+     * way down is a block that never mounted.
      */
     const { result: waited } = await devtools.send('Runtime.evaluate', {
       expression: `new Promise((done) => {
-        const deadline = Date.now() + 15000;
+        const deadline = Date.now() + 30000;
         const counts = [];
-        const settle = () => requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
+        const atBottom = () =>
+          window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+        const settle = () => {
+          window.scrollTo(0, 0);
+          requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
+        };
         const poll = () => {
           counts.push(document.querySelectorAll('.slotted-demo-stage, .stage').length);
           const last = counts[counts.length - 1];
-          if (counts.length >= 2 && last > 0 && last === counts[counts.length - 2]) return settle();
+          const stable = counts.length >= 2 && last > 0 && last === counts[counts.length - 2];
+          if (stable && atBottom()) return settle();
           if (Date.now() > deadline) return done(last > 0);
+          if (stable) window.scrollBy(0, window.innerHeight * 0.9);
           setTimeout(poll, ${SETTLE_INTERVAL});
         };
         poll();
@@ -578,7 +594,7 @@ export async function audit({ url, width = 1280, density = 'comfortable' }) {
     });
 
     if (waited.value !== true) {
-      throw new Error(`${url} rendered no demonstration stage within 15 seconds`);
+      throw new Error(`${url} rendered no demonstration stage within 30 seconds`);
     }
 
     const { result } = await devtools.send('Runtime.evaluate', {

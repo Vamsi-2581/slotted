@@ -1,6 +1,8 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideClipboardList } from '@ng-icons/lucide';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
-import { SlAvatar } from '@slotted/angular/avatar';
+import { SlAvatar, SlAvatarFallback } from '@slotted/angular/avatar';
 import { SlButton } from '@slotted/angular/button';
 import {
   SlCollapsible,
@@ -101,7 +103,7 @@ const HEADER = `<header slPageHeader>
   <div slPageHeaderTitleArea>
     <div slPageHeaderNav><a slPageHeaderBack href="#pedidos">Pedidos de compra</a></div>
     <div slPageHeaderTitleRow>
-      <span slPageHeaderVisual><span slAvatar name="Aurora Logística" shape="square" size="lg" tone="accent"></span></span>
+      <span slPageHeaderVisual><span slAvatar name="Pedido de compra" shape="square" size="lg" tone="accent"><span slAvatarFallback><ng-icon name="lucideClipboardList"></ng-icon></span></span></span>
       <div slPageHeaderTitle>
         <h1 slPageHeaderHeading>Pedido de compra PC-2026-004521</h1>
         <span slPageHeaderMarks><span slTag tone="warning" shape="pill" size="sm"><span slTagBody>Em análise</span></span></span>
@@ -327,6 +329,8 @@ const meta: Meta<SectionStoryArgs> = {
         SlPageHeaderToggle,
         SlPageHeaderPin,
         SlAvatar,
+        SlAvatarFallback,
+        NgIcon,
         SlTag,
         SlTagBody,
         SlButton,
@@ -352,6 +356,7 @@ const meta: Meta<SectionStoryArgs> = {
         SlText,
         SlHeadingLevel,
       ],
+      providers: [provideIcons({ lucideClipboardList })],
     }),
   ],
   parameters: {

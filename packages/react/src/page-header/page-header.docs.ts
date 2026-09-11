@@ -217,7 +217,7 @@ const scenes: ReferenceSceneMeta[] = [
     </PageHeaderNav>
     <PageHeaderTitleRow>
       <PageHeaderVisual>
-        <Avatar name="Aurora Logística" shape="square" size="lg" />
+        <Avatar name="Aurora Logística" shape="square" size="lg" src={logo} />
       </PageHeaderVisual>
       <PageHeaderTitle>
         <PageHeaderHeading>Pedido de compra PC-2026-004521</PageHeaderHeading>

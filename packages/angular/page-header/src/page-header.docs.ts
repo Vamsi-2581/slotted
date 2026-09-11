@@ -221,7 +221,7 @@ const scenes: ReferenceSceneMeta[] = [
     </div>
     <div slPageHeaderTitleRow>
       <span slPageHeaderVisual
-        ><span slAvatar name="Aurora Logística" shape="square" size="lg"></span
+        ><span slAvatar name="Aurora Logística" shape="square" size="lg" [src]="logo"></span
       ></span>
       <div slPageHeaderTitle>
         <h1 slPageHeaderHeading>Pedido de compra PC-2026-004521</h1>

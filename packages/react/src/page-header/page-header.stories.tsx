@@ -114,9 +114,9 @@ export const Anatomy: Story = {
     <Grid columns={1}>
       <Scene
         label="Every part, at rest"
-        note="The nav row — the way back is written too, and yields to the breadcrumbs beside it; narrow the stage below 640 pixels and it returns — the title row with visual, heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay."
+        note="The nav row — the way back is written too, and yields to the breadcrumbs beside it; narrow the stage below 640 pixels and it returns — the title row with visual — the supplier’s mark as an image here, the kind of record as an icon on the other screens, initials where nothing else exists — heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay."
       >
-        <OrderScreen header={{ figure: true }} />
+        <OrderScreen header={{ figure: true, visual: 'image' }} />
       </Scene>
     </Grid>
   ),

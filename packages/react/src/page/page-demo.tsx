@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Printer } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ClipboardList, Printer } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { Avatar } from '../avatar';
@@ -92,6 +92,10 @@ export function Viewport({
 
 /* ── One purchase order, in full ─────────────────────────────────────────── */
 
+/** The supplier's mark, as an application would have it: an image the avatar shows whole. */
+export const LOGO =
+  'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%231d4ed8%27/%3E%3Ccircle cx=%2724%27 cy=%2736%27 r=%2714%27 fill=%27%2360a5fa%27/%3E%3Ccircle cx=%2742%27 cy=%2728%27 r=%2714%27 fill=%27%23bfdbfe%27 fill-opacity=%27.9%27/%3E%3C/svg%3E';
+
 export const MONEY = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export interface OrderLine {
@@ -159,7 +163,7 @@ export function OrderHeader({
   pin = true,
   record = ORDER.id,
   tabs = true,
-  visual = true,
+  visual = 'icon',
   ...props
 }: Partial<PageHeaderProps> & {
   actions?: 'full' | 'two' | 'none';
@@ -171,7 +175,8 @@ export function OrderHeader({
   pin?: boolean;
   record?: string;
   tabs?: boolean;
-  visual?: boolean;
+  /** What stands before the title: the kind of record as an icon, the supplier's mark as an image, or initials. */
+  visual?: 'icon' | 'image' | 'initials' | false;
 }) {
   return (
     <PageHeader {...props}>
@@ -197,11 +202,19 @@ export function OrderHeader({
           ) : null}
         </PageHeaderNav>
         <PageHeaderTitleRow>
-          {visual ? (
+          {visual === false ? null : (
             <PageHeaderVisual>
-              <Avatar name={ORDER.supplier} shape="square" size="lg" tone="accent" />
+              {visual === 'image' ? (
+                <Avatar name={ORDER.supplier} shape="square" size="lg" src={LOGO} />
+              ) : visual === 'initials' ? (
+                <Avatar name={ORDER.supplier} shape="square" size="lg" tone="accent" />
+              ) : (
+                <Avatar name="Pedido de compra" shape="square" size="lg" tone="accent">
+                  <ClipboardList aria-hidden="true" focusable="false" strokeWidth={1.75} />
+                </Avatar>
+              )}
             </PageHeaderVisual>
-          ) : null}
+          )}
           <PageHeaderTitle>
             <PageHeaderHeading>Pedido de compra {record}</PageHeaderHeading>
             {marks ? (

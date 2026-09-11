@@ -1,6 +1,8 @@
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideClipboardList } from '@ng-icons/lucide';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
-import { SlAvatar } from '@slotted/angular/avatar';
+import { SlAvatar, SlAvatarFallback } from '@slotted/angular/avatar';
 import {
   SlBreadcrumb,
   SlBreadcrumbItem,
@@ -235,6 +237,11 @@ const TABS = `<div slPageHeaderTabs>
   </div>
 </div>`;
 
+/* What stands before the title: the kind of record as an icon, the supplier's mark as an image, or initials. */
+const ICON_VISUAL = `<span slPageHeaderVisual><span slAvatar name="Pedido de compra" shape="square" size="lg" tone="accent"><span slAvatarFallback><ng-icon name="lucideClipboardList"></ng-icon></span></span></span>`;
+const IMAGE_VISUAL = `<span slPageHeaderVisual><span slAvatar name="Aurora Logística" shape="square" size="lg" src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%231d4ed8%27/%3E%3Ccircle cx=%2724%27 cy=%2736%27 r=%2714%27 fill=%27%2360a5fa%27/%3E%3Ccircle cx=%2742%27 cy=%2728%27 r=%2714%27 fill=%27%23bfdbfe%27 fill-opacity=%27.9%27/%3E%3C/svg%3E"></span></span>`;
+const INITIALS_VISUAL = `<span slPageHeaderVisual><span slAvatar name="Aurora Logística" shape="square" size="lg" tone="accent"></span></span>`;
+
 function HEADER(
   attributes = '',
   options: {
@@ -244,14 +251,14 @@ function HEADER(
     navigation?: boolean;
     pin?: boolean;
     tabs?: boolean;
-    visual?: boolean;
+    visual?: 'icon' | 'image' | 'initials' | false;
   } = {},
 ) {
   return `<header slPageHeader ${attributes}>
   <div slPageHeaderTitleArea>
     ${NAV(options.breadcrumbs !== false)}
     <div slPageHeaderTitleRow>
-      ${options.visual === false ? '' : '<span slPageHeaderVisual><span slAvatar name="Aurora Logística" shape="square" size="lg" tone="accent"></span></span>'}
+      ${options.visual === false ? '' : options.visual === 'image' ? IMAGE_VISUAL : options.visual === 'initials' ? INITIALS_VISUAL : ICON_VISUAL}
       ${TITLE()}
       ${ACTIONS(options.full !== false)}
       ${options.navigation === false ? '' : NAVIGATION}
@@ -439,6 +446,8 @@ const PROPS = { history: HISTORY, lines: LINES, reasons: [] as string[] };
     SlDescriptionListTerm,
     SlDescriptionListDescription,
     SlAvatar,
+    SlAvatarFallback,
+    NgIcon,
     SlTag,
     SlTagBody,
     SlButton,
@@ -674,6 +683,8 @@ const meta: Meta<PageHeaderStoryArgs> = {
         SlBreadcrumbLink,
         SlBreadcrumbPage,
         SlAvatar,
+        SlAvatarFallback,
+        NgIcon,
         SlTag,
         SlTagBody,
         SlToolbar,
@@ -704,6 +715,7 @@ const meta: Meta<PageHeaderStoryArgs> = {
         LoadingDemo,
         EditableDemo,
       ],
+      providers: [provideIcons({ lucideClipboardList })],
     }),
   ],
   parameters: {
@@ -753,8 +765,8 @@ export const Anatomy: Story = {
       1,
       scene(
         'Every part, at rest',
-        'The nav row — the way back is written too, and yields to the breadcrumbs beside it; narrow the stage below 640 pixels and it returns — the title row with visual, heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay.',
-        screen(HEADER('', { figure: true })),
+        'The nav row — the way back is written too, and yields to the breadcrumbs beside it; narrow the stage below 640 pixels and it returns — the title row with visual — the supplier’s mark as an image here, the kind of record as an icon on the other screens, initials where nothing else exists — heading, mark, subheading, actions and record navigation, the area with the description and the facts, the pill on the edge, and the tabs. Scroll the screen to see which of them stay.',
+        screen(HEADER('', { figure: true, visual: 'image' })),
       ),
     ),
   }),

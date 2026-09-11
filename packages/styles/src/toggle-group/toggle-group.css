@@ -394,12 +394,9 @@
   /* ── Focus ────────────────────────────────────────────────────────────── */
 
   /**
-   * The ring is drawn outside the item, so in a joined bar it would be covered
-   * by the neighbour that follows it in the document. The focused item is
-   * raised above every other, including one that is on, and the ring sits on
-   * its own edge rather than two pixels off it — held off, it is drawn across
-   * the labels either side of it, which the first capture of this family
-   * showed at 720 pixels.
+   * A separated bar has room around each item, so the ring is held off the
+   * edge the way every other control in the library holds it. The focused item
+   * is raised above every other, including one that is on.
    */
   [data-ui='toggle-group'] [data-part='item']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -407,8 +404,20 @@
     z-index: 2;
   }
 
+  /**
+   * A joined bar has no room at all: the items touch, so an outward ring is
+   * drawn over the neighbours either side of it. At offset zero it covered the
+   * neighbour's own edge and the seam beside a focused item read thicker than
+   * every other seam in the same bar — measured at 300% zoom, between a focused
+   * item and the one next to it that was on.
+   *
+   * So the ring is drawn *inside* the item, with its outer edge on the item's
+   * border box, which is what a negative offset of exactly the ring's width
+   * gives. It then replaces that item's own border rather than standing beside
+   * it, and every seam in the bar stays one line wide.
+   */
   [data-ui='toggle-group'][data-part='root'][data-attached] [data-part='item']:focus-visible {
-    outline-offset: 0;
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
   /* ── Disabled ─────────────────────────────────────────────────────────── */

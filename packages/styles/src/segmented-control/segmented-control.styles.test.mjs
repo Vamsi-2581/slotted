@@ -185,7 +185,10 @@ test('moves the ring to the segment and puts out the one the browser draws', () 
     dense,
     /\[data-part='item'\]:has\(\[data-part='control'\]:focus-visible\)\{outline:var\(--slotted-focus-ring-width/,
   );
-  assert.match(dense, /:has\(\[data-part='control'\]:focus-visible\)\{[^}]*outline-offset:0/);
+  assert.match(
+    dense,
+    /:has\(\[data-part='control'\]:focus-visible\)\{[^}]*outline-offset:calc\(-1\*var\(--slotted-focus-ring-width/,
+  );
 });
 
 /**

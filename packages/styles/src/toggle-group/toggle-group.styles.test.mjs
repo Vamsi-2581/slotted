@@ -138,12 +138,20 @@ test('never changes the presence of an edge, only its colour', () => {
 });
 
 /**
- * The items touch in a joined bar, so a ring held off its own edge is drawn
- * across the labels either side of it.
+ * The items touch in a joined bar, so an outward ring is drawn over the
+ * neighbours either side of it: at offset zero it covered the neighbour's own
+ * edge, and the seam beside a focused item read thicker than every other seam
+ * in the same bar. A negative offset of exactly the ring's width puts the
+ * ring's outer edge on the item's border box, so it replaces that item's
+ * border instead of standing beside it.
  */
-test('holds the focus ring on the item’s own edge inside a joined bar', () => {
-  assert.match(dense, /\[data-attached\]\[data-part='item'\]:focus-visible\{outline-offset:0/);
+test('draws the focus ring inside the item in a joined bar, and outside it otherwise', () => {
   assert.match(dense, /:focus-visible\{outline:var\(--slotted-focus-ring-width/);
+  assert.match(dense, /:focus-visible\{[^}]*outline-offset:var\(--slotted-focus-ring-offset/);
+  assert.match(
+    dense,
+    /\[data-attached\]\[data-part='item'\]:focus-visible\{outline-offset:calc\(-1\*var\(--slotted-focus-ring-width/,
+  );
 });
 
 /**

@@ -399,16 +399,23 @@
    * draws where focus actually is, or it paints two rings in two colours —
    * the rule `checkbox`, `switch` and `radio-group` each record.
    *
-   * The ring sits on the segment's own edge rather than two pixels off it. The
-   * segments are flush inside the track, so an offset ring is drawn across the
-   * neighbour beside it and out through the track's own border — which is what
-   * the first capture of this scene showed at 720 pixels. On the edge it lands
-   * exactly where the thumb's edge lands, and the two never disagree by a
-   * pixel about where a segment is.
+   * The ring is drawn *inside* the segment, with its outer edge on the
+   * segment's own border box — which is what a negative offset of exactly the
+   * ring's width gives. An outline is painted outward, and the segments are
+   * flush inside a track that keeps only two pixels of ground around them, so
+   * an outward ring has nowhere of its own to go: at offset zero it crossed
+   * into the neighbour and stacked with that neighbour's thumb edge, which
+   * read as three pixels of ink at one seam and one pixel at every other.
+   * Measured at 300% zoom, between a focused segment and the checked one
+   * beside it.
+   *
+   * Inside, the ring lands exactly where the thumb's edge lands and replaces
+   * it, so a segment that is both checked and focused shows one ring rather
+   * than a ring and a border a pixel apart.
    */
   [data-ui='segmented-control'] [data-part='item']:has([data-part='control']:focus-visible) {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
-    outline-offset: 0;
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
     z-index: 2;
   }
 

@@ -655,13 +655,22 @@ export function DrawerDescription({
  * separator all stay operable, because a drawer a reader cannot leave is the
  * worse failure of the two.
  */
-export function DrawerBody({ children, className, ref, render, style, ...rest }: DrawerBodyProps) {
+export function DrawerBody({
+  children,
+  className,
+  inset,
+  ref,
+  render,
+  style,
+  ...rest
+}: DrawerBodyProps) {
   const drawer = useDrawer();
   const rootProps = {
     ...rest,
     ...(drawer.loading ? { 'aria-busy': true } : {}),
     children,
     className,
+    ...(inset === undefined ? {} : { 'data-inset': inset }),
     'data-part': 'body' as const,
     style,
   };

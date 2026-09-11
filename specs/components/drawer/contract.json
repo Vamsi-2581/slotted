@@ -169,6 +169,12 @@
       "valueType": "number | undefined, where undefined is the panel on the measure its size step gives it"
     }
   },
+  "bodyInset": {
+    "attribute": "data-inset",
+    "values": ["none"],
+    "meaning": "the body's own padding is dropped: what goes inside brings its own inset — a page, a list, a table that wants the panel's edges",
+    "reason": "A page inside a drawer painted its ground inside the drawer's padding, which read as a thick frame. The drawer does not detect what it holds — a family never selects another family's identity — and the page does not reach out with negative margins; the consumer says so, with the word page and container already use for the same thing"
+  },
   "axes": {
     "mode": ["overlay", "inline"],
     "side": ["start", "end", "top", "bottom"],

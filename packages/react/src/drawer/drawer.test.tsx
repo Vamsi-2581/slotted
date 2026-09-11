@@ -648,4 +648,16 @@ describe('Drawer', () => {
     expect(() => render(<DrawerTitle>Loose</DrawerTitle>)).toThrow(/inside Drawer/);
     quiet.mockRestore();
   });
+
+  /** The body's padding is the consumer's to drop, for content that brings its own inset. */
+  it('drops the body inset when told', () => {
+    render(
+      <Drawer defaultOpen>
+        <DrawerPanel>
+          <DrawerBody inset="none">Edge to edge</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    expect(document.querySelector('[data-part="body"]')).toHaveAttribute('data-inset', 'none');
+  });
 });

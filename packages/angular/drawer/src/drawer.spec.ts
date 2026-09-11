@@ -55,13 +55,14 @@ import {
         }
         <button slDrawerClose [value]="'dismissed'"></button>
       </header>
-      <div slDrawerBody><input aria-label="Note" /></div>
+      <div slDrawerBody [inset]="bodyInset()"><input aria-label="Note" /></div>
       <footer slDrawerFooter><button type="button">Cancel</button></footer>
       <div slDrawerResizer></div>
     </sl-drawer>`,
 })
 class DrawerHost {
   readonly open = signal(false);
+  readonly bodyInset = signal<'none' | undefined>(undefined);
   readonly extent = signal<number | undefined>(undefined);
   readonly mode = signal<'overlay' | 'inline' | undefined>(undefined);
   readonly side = signal<'start' | 'end' | 'top' | 'bottom' | undefined>(undefined);

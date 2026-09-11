@@ -489,3 +489,9 @@ test('declares a scenario for every axis and for both new capabilities', () => {
   }
   assert.equal(new Set(ids).size, ids.length);
 });
+
+/** The body's padding is the consumer's to drop, never inferred from what the body holds. */
+test('lets the consumer drop the body inset', () => {
+  assert.equal(contract.bodyInset.attribute, 'data-inset');
+  assert.deepEqual(contract.bodyInset.values, ['none']);
+});

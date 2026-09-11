@@ -91,7 +91,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the consumer’s own element, with slDrawerBody on it',
     required: false,
     purpose:
-      'The one row that scrolls, and the row aria-busy belongs to while the content is still on its way. overscroll-behavior keeps a wheel that reaches its end from scrolling the page behind a non-modal drawer.',
+      'The one row that scrolls, and the row aria-busy belongs to while the content is still on its way. overscroll-behavior keeps a wheel that reaches its end from scrolling the page behind a non-modal drawer. inset="none" drops its padding for content that brings its own inset — a page, a list on the panel’s edges.',
   },
   {
     part: 'footer',
@@ -578,6 +578,13 @@ export const ANGULAR_DRAWER_DOCS = {
       '—',
       '<sl-drawer>',
       'Where focus goes on close. Unstated returns it to the element that held it when the drawer opened, which is the trigger in the ordinary case',
+    ],
+    [
+      'inset',
+      "'none'",
+      '—',
+      'slDrawerBody',
+      'Drops the body’s own padding, for content that brings its own inset: a page inside the drawer, a list that wants the panel’s edges. The drawer never infers it from what it holds — a family does not select another family’s identity',
     ],
     [
       'step',

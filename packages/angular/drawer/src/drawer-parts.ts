@@ -144,10 +144,16 @@ export class SlDrawerDescription implements OnInit, OnDestroy {
   selector: '[slDrawerBody]',
   standalone: true,
   exportAs: 'slDrawerBody',
-  host: { 'data-part': 'body', '[attr.aria-busy]': "drawer.loading() ? 'true' : null" },
+  host: {
+    'data-part': 'body',
+    '[attr.aria-busy]': "drawer.loading() ? 'true' : null",
+    '[attr.data-inset]': 'inset() ?? null',
+  },
 })
 export class SlDrawerBody {
   protected readonly drawer = inject(SlDrawer);
+  /** `none` drops the body's own padding, for content that brings its own inset — a page, a list on the panel's edges. */
+  readonly inset = input<'none' | undefined>(undefined);
 }
 
 @Directive({

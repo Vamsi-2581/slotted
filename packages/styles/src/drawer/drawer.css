@@ -880,6 +880,11 @@
     color: var(--slotted-drawer-body-color, var(--slotted-text, CanvasText));
   }
 
+  /* Content that brings its own inset — a page, a list on the panel's edges. */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='body'][data-inset='none'] {
+    padding: 0;
+  }
+
   [data-ui='drawer'] > [data-part='panel'] > [data-part='body']:not(:first-child) {
     border-block-start: var(--_rule-size) solid
       var(--slotted-drawer-rule-color, var(--slotted-border-subtle, ButtonBorder));

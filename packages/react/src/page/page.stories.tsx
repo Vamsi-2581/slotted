@@ -445,7 +445,7 @@ export const Composition: Story = {
       </Scene>
       <Scene
         label="A page inside a drawer"
-        note="Open the drawer: a page with landmark='none' and scroll='self' scrolls inside the drawer’s body, its header collapsing against that box, while the document keeps its one main."
+        note="Open the drawer: a page with landmark='none' and scroll='self' scrolls inside the drawer’s body, its header collapsing against that box, while the document keeps its one main. The body has inset='none', so the page meets the panel’s edges and the inset is the page’s own."
       >
         <Drawer side="end" size="lg">
           <DrawerTrigger
@@ -458,7 +458,7 @@ export const Composition: Story = {
             Abrir o pedido num painel
           </DrawerTrigger>
           <DrawerPanel>
-            <DrawerBody>
+            <DrawerBody inset="none">
               <Page
                 footer={<OrderFooter />}
                 ground="surface"

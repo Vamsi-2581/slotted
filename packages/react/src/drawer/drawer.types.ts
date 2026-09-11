@@ -254,7 +254,10 @@ export interface DrawerDescriptionProps
   extends ComponentPropsWithRef<'p'>, WithRender<PartProps<HTMLParagraphElement>> {}
 
 export interface DrawerBodyProps
-  extends ComponentPropsWithRef<'div'>, WithRender<PartProps<HTMLDivElement>> {}
+  extends ComponentPropsWithRef<'div'>, WithRender<PartProps<HTMLDivElement>> {
+  /** `none` drops the body's own padding, for content that brings its own inset — a Page, a list on the panel's edges. */
+  inset?: 'none' | undefined;
+}
 
 export interface DrawerFooterProps
   extends ComponentPropsWithRef<'footer'>, WithRender<PartProps<HTMLElement>> {}

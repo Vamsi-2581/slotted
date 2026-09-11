@@ -168,6 +168,14 @@ The fourth round, on the same Storybook:
   the height last published, since a cancelled area already measures as
   folded. Traced in both frameworks at a hundred and at four hundred pixels:
   one step, no movement.
+- On a phone a pinned header took nearly the whole height and left nothing to
+  read. The engine now measures whether the header is too much of the screen
+  to hold — expanded it would take more than six tenths of the scrollport, or
+  the root is narrower than 640 pixels — and the binding writes `data-tall`:
+  the stylesheet hides the pin, a header held when the fact turns true is let
+  go with the reason `programmatic`, and below 640 pixels the sheet hides the
+  pin on its own as well. sap.f offers no pin on phones; the fraction covers a
+  short landscape screen and a tall header alike.
 - Pinned and scrolled to the end, a short section's header rose over the
   chrome: it shared the chrome's z-index and came later in the DOM. The root
   now stands three steps above every other sticky thing on the page.

@@ -35,6 +35,9 @@ validação final antes de commitar.
   linhas); transição de tamanho do título removida; voltar cede às migalhas;
   ícone do botão Imprimir no slot `start`; grelha das abas sem gap em torno de
   colunas vazias (`tabs.css`).
+- Sexta ronda: facto `data-tall` (cabeçalho expandido > 60 % do scrollport ou
+  raiz < 640 px) — o pin esconde-se e um cabeçalho fixado é largado com a razão
+  programmatic; contrato, motor, ligações, folha e docs.
 - Quinta ronda: recolher um cabeçalho fixado tremia em React — o motor ouvia a
   mudança num efeito passivo, depois de a transição começar. Efeito de layout,
   `transition-property: none` (cancela uma transição em curso), deslocamento a

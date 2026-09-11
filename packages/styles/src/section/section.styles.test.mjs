@@ -128,3 +128,10 @@ test('republishes the sticky top for what is under a sticky header', () => {
   );
   assert.match(body, /--slotted-table-sticky-offset:var\(--slotted-page-sticky-top\)/);
 });
+
+/** Stuck, the header keeps air under the chrome; at rest the margin takes it back. */
+test('gives a stuck header air under the chrome without moving it at rest', () => {
+  const header = rule(`${ui}[data-sticky]>[data-part='header']`);
+  assert.match(header, /padding-block-start:var\(--slotted-space-4,0\.5rem\)/);
+  assert.match(header, /margin-block-start:calc\(-1 \* var\(--slotted-space-4,0\.5rem\)\)/);
+});

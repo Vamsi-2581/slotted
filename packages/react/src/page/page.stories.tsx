@@ -461,6 +461,7 @@ export const Composition: Story = {
             <DrawerBody>
               <Page
                 footer={<OrderFooter />}
+                ground="surface"
                 inset={4}
                 landmark="none"
                 scroll="self"

@@ -458,7 +458,24 @@
     /* The far end of whichever row it lands on: alone on a wrapped row it
        stayed at the start, under the title, in the dense capture. */
     margin-inline-start: auto;
+    /* The toolbar beside it pads its controls by the same step; without it
+       the arrows sat four pixels above the actions' line. */
+    padding-block: var(--slotted-space-2, 0.25rem);
     padding-inline-start: var(--slotted-space-4, 0.5rem);
+  }
+  /**
+   * Previous and next are directional: in a right-to-left document the
+   * previous record is to the right, and the consumer's chevrons are drawn
+   * for the other direction. The glyphs mirror; the order is already the
+   * row's.
+   */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='navigation']:dir(rtl)
+    :is(svg, [data-ui='icon']) {
+    scale: -1 1;
   }
 
   /* ── The header area ─────────────────────────────────────────────────── */
@@ -640,9 +657,11 @@
   [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']::before,
   [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']::before {
     background-color: currentcolor;
-    block-size: var(--_icon-size);
+    /* One step above the nav row's arrow: a mark on a hairline pill reads
+       thin at the small step, and the reviewer asked for weight. */
+    block-size: var(--slotted-control-icon-size-md, 16px);
     content: '';
-    inline-size: var(--_icon-size);
+    inline-size: var(--slotted-control-icon-size-md, 16px);
     mask-position: center;
     mask-repeat: no-repeat;
     mask-size: contain;
@@ -669,6 +688,15 @@
     mask-image: var(--slotted-icon-pin-off);
   }
   [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin'][data-pressed] {
+    background-color: var(--slotted-tone-accent-surface, transparent);
+    color: var(--slotted-tone-accent-text, LinkText);
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='pin'][data-pressed]:not(:disabled):hover {
+    background-color: var(--slotted-tone-accent-subtle-hover, ButtonFace);
     color: var(--slotted-tone-accent-text, LinkText);
   }
 

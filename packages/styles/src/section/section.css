@@ -86,6 +86,12 @@
   [data-ui='section'][data-sticky] > [data-part='header'] {
     background-color: var(--_ground);
     inset-block-start: var(--slotted-page-sticky-top, 0px);
+    /* Stuck, the header's text and buttons met the chrome's edge with no
+       air. The padding gives it, and the negative margin takes the same
+       distance back at rest, so the header stands where it stood; the ground
+       it paints there is the page's own, so nothing shows. */
+    margin-block-start: calc(-1 * var(--slotted-space-4, 0.5rem));
+    padding-block-start: var(--slotted-space-4, 0.5rem);
     position: sticky;
     z-index: var(--slotted-z-index-sticky, 100);
   }

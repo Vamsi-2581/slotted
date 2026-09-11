@@ -283,3 +283,21 @@ test('shows the way back only where the breadcrumbs are not', () => {
     /\[data-part='back'\]:has\(~\[data-part='breadcrumbs'\]:not\(:empty\)\)\{display:inline-flex/,
   );
 });
+
+/** The reviewer's fourth round: weight on the marks, a ground under the pressed pin, arrows on the actions' line and mirrored in RTL. */
+test('draws the controls with weight, the pressed pin on a ground, and the arrows aligned and mirrored', () => {
+  const marks = rule(
+    `${ui}>*>[data-part='controls']>*>[data-part='toggle']::before,${ui}>*>[data-part='controls']>*>[data-part='pin']::before`,
+  );
+  assert.match(marks, /block-size:var\(--slotted-control-icon-size-md,16px\)/);
+  const pressed = rule(`${ui}>*>[data-part='controls']>*>[data-part='pin'][data-pressed]`);
+  assert.match(pressed, /background-color:var\(--slotted-tone-accent-surface/);
+  const navigation = rule(
+    `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='navigation']`,
+  );
+  assert.match(navigation, /padding-block:var\(--slotted-space-2,0\.25rem\)/);
+  assert.match(
+    normalized,
+    /\[data-part='navigation'\]:dir\(rtl\)\s*:is\(svg,\s*\[data-ui='icon'\]\)\s*\{scale:-1 1/,
+  );
+});

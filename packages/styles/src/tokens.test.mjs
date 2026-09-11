@@ -95,6 +95,8 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-section-header-size',
     '--slotted-tree-depth',
     '--slotted-tree-row-offset',
+    '--slotted-segmented-control-count',
+    '--slotted-segmented-control-index',
     '--slotted-upload-visible-rows',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);

@@ -94,6 +94,26 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    */
   '--slotted-tree-row-offset',
   /**
+   * `segmented-control` — how many segments the track holds, and which of them
+   * is checked. The thumb is one column wide and moves by its own width times
+   * the index, so the two numbers are the whole of its geometry and no theme
+   * can hold either: they are facts about this consumer's options, stated per
+   * instance.
+   *
+   * They are the first runtime properties in the library that are not
+   * measured. An index and a count are known while the markup is being
+   * written, which is the point of them — Mantine and Ark both measure the
+   * checked node instead, and paint the thumb in the wrong place until
+   * hydration.
+   *
+   * Named one by one rather than by a `--slotted-segmented-control-` prefix,
+   * because the family owns theme tokens under that prefix — its inset, its
+   * radius, its grounds — and a prefix would file every one of them as a value
+   * no theme can retune.
+   */
+  '--slotted-segmented-control-count',
+  '--slotted-segmented-control-index',
+  /**
    * `upload` — how many rows of the file list are shown before the rest is
    * scrolled to. It is `maxRows`, stated per instance, and no theme can hold
    * it: a form that takes one avatar and a page that takes a folder of four

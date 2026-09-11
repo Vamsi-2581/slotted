@@ -117,3 +117,47 @@ describe('createScrollAffordance', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * A tab list below the fold of a page header, revealed with `scrollIntoView`,
+ * brought the whole page down by the tab's height on mount. The container
+ * scrolls itself along its own axis and nothing else moves.
+ */
+describe('createScrollAffordance reveal', () => {
+  function measured(container: HTMLElement, item: HTMLElement, left: number, width: number) {
+    container.getBoundingClientRect = () =>
+      ({ left: 0, top: 0, right: 300, bottom: 40 }) as DOMRect;
+    item.getBoundingClientRect = () =>
+      ({ left, top: 0, right: left + width, bottom: 40 }) as DOMRect;
+  }
+
+  it('scrolls the container by what the item lacks at the far end', () => {
+    const container = mount({ client: 300, scroll: 800 });
+    const item = document.createElement('button');
+    container.append(item);
+    measured(container, item, 250, 100);
+    const handle = createScrollAffordance(container);
+
+    handle.reveal(item);
+
+    expect(container.scrollBy).toHaveBeenCalledWith(expect.objectContaining({ left: 50 }));
+    handle.destroy();
+  });
+
+  it('scrolls back by what the item lacks at the near end, and not at all when it fits', () => {
+    const container = mount({ client: 300, scroll: 800, start: 100 });
+    const item = document.createElement('button');
+    container.append(item);
+    const handle = createScrollAffordance(container);
+
+    measured(container, item, -30, 100);
+    handle.reveal(item);
+    expect(container.scrollBy).toHaveBeenCalledWith(expect.objectContaining({ left: -30 }));
+
+    (container.scrollBy as ReturnType<typeof vi.fn>).mockClear();
+    measured(container, item, 20, 100);
+    handle.reveal(item);
+    expect(container.scrollBy).not.toHaveBeenCalled();
+    handle.destroy();
+  });
+});

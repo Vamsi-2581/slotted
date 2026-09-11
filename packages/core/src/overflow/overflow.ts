@@ -177,11 +177,24 @@ export function createScrollAffordance(
       });
     },
     reveal: (item) => {
-      if (typeof item.scrollIntoView !== 'function') return;
-      item.scrollIntoView({
+      /**
+       * The container scrolls itself, along its own axis, and nothing else
+       * moves. `scrollIntoView` would scroll every ancestor too: a tab list
+       * below the fold of a page header brought the whole page down by the
+       * tab's height on mount, before the reader had touched anything.
+       */
+      if (typeof container.scrollBy !== 'function') return;
+      const vertical = orientation() === 'vertical';
+      const box = container.getBoundingClientRect();
+      const rect = item.getBoundingClientRect();
+      const start = vertical ? rect.top - box.top : rect.left - box.left;
+      const end = vertical ? rect.bottom - box.top : rect.right - box.left;
+      const size = vertical ? container.clientHeight : container.clientWidth;
+      const delta = start < 0 ? start : end > size ? end - size : 0;
+      if (delta === 0) return;
+      container.scrollBy({
         behavior: behaviorFor(container),
-        block: 'nearest',
-        inline: 'nearest',
+        ...(vertical ? { top: delta } : { left: delta }),
       });
     },
   };

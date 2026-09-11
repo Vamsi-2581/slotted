@@ -1,4 +1,4 @@
-import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
+import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
 import type { HeadingLevelValue } from '../typography';
 
@@ -34,6 +34,8 @@ export interface SectionContextValue {
   headingId: string;
   /** Tells the root a heading exists, so it becomes a region. */
   registerHeading: (present: boolean) => void;
+  /** Hands the root the header element, so a sticky header's height can be measured. */
+  registerHeader: (element: HTMLElement | null) => void;
 }
 
 /** What `render` receives for the root. */
@@ -52,6 +54,8 @@ export interface SectionRootProps extends HTMLAttributes<HTMLElement> {
 /** What `render` receives for a plain part. */
 export interface SectionPartProps extends HTMLAttributes<HTMLElement> {
   'data-part': string;
+  /** On the header: the callback the root measures a sticky header through. */
+  ref?: Ref<HTMLElement> | undefined;
 }
 
 /** What `render` receives for the heading. */

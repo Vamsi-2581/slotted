@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/section/contract.json';
 import { HeadingLevel } from '../typography';
@@ -38,6 +38,18 @@ function Items({
 }
 
 const root = () => document.querySelector('[data-ui="section"]') as HTMLElement;
+
+class FakeResizeObserver {
+  static callbacks: ResizeObserverCallback[] = [];
+  readonly callback: ResizeObserverCallback;
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+    FakeResizeObserver.callbacks.push(callback);
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
 
 describe('Section', () => {
   it('renders the anatomy the contract declares', () => {
@@ -127,5 +139,36 @@ describe('Section', () => {
   it('passes native props through', () => {
     render(<Items lang="pt-BR" data-testid="s" />);
     expect(screen.getByTestId('s')).toHaveAttribute('lang', 'pt-BR');
+  });
+});
+
+/**
+ * A sticky header is chrome for what is under it: its measured height goes on
+ * the root, and the stylesheet adds it to the page's sticky top for the body.
+ */
+describe('Section sticky header measurement', () => {
+  beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    FakeResizeObserver.callbacks = [];
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('writes the header height on the root while sticky, and follows a resize', () => {
+    const { rerender } = render(<Items sticky />);
+    const header = document.querySelector('[data-part="header"]') as HTMLElement;
+    Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 48 });
+    rerender(<Items sticky />);
+    /* The observer's first report, as a browser delivers it after observe(). */
+    FakeResizeObserver.callbacks.at(-1)?.([], {} as ResizeObserver);
+    expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('48px');
+
+    Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 72 });
+    FakeResizeObserver.callbacks.at(-1)?.([], {} as ResizeObserver);
+    expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('72px');
+
+    rerender(<Items />);
+    expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('');
   });
 });

@@ -6,9 +6,23 @@ import { SlSection } from './section';
 
 const HEADINGS = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
 
-/** The row above the body: the title column and the actions. */
+/**
+ * The row above the body: the title column and the actions. It hands the
+ * root its element, so a sticky header's height reaches the stylesheet.
+ */
 @Directive({ selector: '[slSectionHeader]', standalone: true, host: { 'data-part': 'header' } })
-export class SlSectionHeader {}
+export class SlSectionHeader implements OnInit, OnDestroy {
+  private readonly section = inject(SlSection);
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+
+  ngOnInit() {
+    this.section.header.set(this.native);
+  }
+
+  ngOnDestroy() {
+    if (this.section.header() === this.native) this.section.header.set(null);
+  }
+}
 
 /** Eyebrow, heading, description, in that order. */
 @Directive({ selector: '[slSectionTitle]', standalone: true, host: { 'data-part': 'title' } })

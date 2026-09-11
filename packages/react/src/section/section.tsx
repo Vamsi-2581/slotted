@@ -1,6 +1,6 @@
 import '@slotted/styles/section/section.css';
 
-import { createContext, useContext, useId, useState } from 'react';
+import { createContext, useContext, useEffect, useId, useState } from 'react';
 
 import { useHeadingLevel } from '../typography';
 import type { HeadingLevelValue } from '../typography';
@@ -39,6 +39,9 @@ export function useSection(): SectionContextValue {
  * `useId` or the consumer's own, and a scroll margin the height of the page's
  * fixed chrome, so a hash link lands under the header rather than behind it.
  */
+/** The measured height of a sticky section's header, written on the root. */
+export const HEADER_SIZE_PROPERTY = '--slotted-section-header-size';
+
 export function Section({
   children,
   className,
@@ -57,6 +60,7 @@ export function Section({
   const ambient = useHeadingLevel();
   const generatedId = useId();
   const [hasHeading, setHasHeading] = useState(false);
+  const [header, setHeader] = useState<HTMLElement | null>(null);
 
   const resolvedDivider = divider ?? defaults.divider;
   const resolvedGround = ground ?? defaults.ground;
@@ -70,7 +74,31 @@ export function Section({
     headingId: `${rootId}-heading`,
     level: resolvedLevel,
     registerHeading: setHasHeading,
+    registerHeader: setHeader,
   };
+
+  /**
+   * A sticky header is chrome for what is under it: its height, measured,
+   * goes on the root as `--slotted-section-header-size`, and the stylesheet
+   * republishes `--slotted-page-sticky-top` for the body as page plus header,
+   * so a table's column header or a nested section stops under this header.
+   * Written on the element rather than rendered, so a resize costs no render.
+   */
+  useEffect(() => {
+    const root = header?.parentElement;
+    if (!resolvedSticky || !header || !root) return undefined;
+    const write = () => root.style.setProperty(HEADER_SIZE_PROPERTY, `${header.offsetHeight}px`);
+    write();
+    if (typeof ResizeObserver === 'undefined') {
+      return () => root.style.removeProperty(HEADER_SIZE_PROPERTY);
+    }
+    const sizes = new ResizeObserver(write);
+    sizes.observe(header);
+    return () => {
+      sizes.disconnect();
+      root.style.removeProperty(HEADER_SIZE_PROPERTY);
+    };
+  }, [header, resolvedSticky]);
 
   const rootProps: SectionRootProps = {
     ...nativeProps,

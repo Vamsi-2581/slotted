@@ -41,7 +41,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'The row above the body: the title column and the actions. Sticky under the page chrome when sticky is set, painted in the page’s ground so what scrolls under it is covered.',
+      'The row above the body: the title column and the actions. Sticky under the page chrome when sticky is set, painted in the page’s ground so what scrolls under it is covered; its height is measured and added to the sticky top the body publishes, so a table’s column header or a nested section inside stops under it, not under the page.',
   },
   {
     part: 'title',

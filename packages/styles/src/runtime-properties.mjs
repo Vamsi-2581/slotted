@@ -67,6 +67,12 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-page-sticky-top',
   '--slotted-page-sticky-bottom',
   /**
+   * `section` — the measured height of a sticky section's header, written on
+   * the section's root so the body can republish `--slotted-page-sticky-top`
+   * as page plus header for everything under it.
+   */
+  '--slotted-section-header-size',
+  /**
    * `tree` — how deep in the hierarchy one node sits. The stylesheet multiplies
    * it by the indent step to inset the row, and no theme can know it: it is a
    * fact about the consumer's data, stated per node, in the same category as

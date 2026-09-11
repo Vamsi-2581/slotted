@@ -34,8 +34,34 @@ function part(name: string, displayName: string) {
   return Part;
 }
 
-/** The row above the body: the title column and the actions. */
-export const SectionHeader = part('header', 'SectionHeader');
+/**
+ * The row above the body: the title column and the actions. It hands the
+ * root its element, so a sticky header's height reaches the stylesheet.
+ */
+export function SectionHeader({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: SectionPartComponentProps) {
+  const { registerHeader } = useSection();
+  const setRef = (node: HTMLElement | null) => {
+    registerHeader(node);
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  };
+  const rootProps: SectionPartProps = {
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'header',
+    style,
+  };
+  if (render !== undefined) return render({ ...rootProps, ref: setRef });
+  return <div {...rootProps} ref={setRef} />;
+}
 /** Eyebrow, heading, description, in that order. */
 export const SectionTitle = part('title', 'SectionTitle');
 /** The end of the header row: a Button, a Toolbar, a Link. */

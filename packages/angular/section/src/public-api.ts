@@ -1,4 +1,4 @@
-export { SlSection } from './section';
+export { HEADER_SIZE_PROPERTY, SlSection } from './section';
 export {
   injectSectionDefaults,
   provideSectionDefaults,

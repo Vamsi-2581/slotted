@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SlHeadingLevel } from '@slotted/angular/typography';
 import { SlSection } from './section';
@@ -77,6 +77,18 @@ class Host {
   readonly heading = signal(true);
 }
 
+class FakeResizeObserver {
+  static callbacks: ResizeObserverCallback[] = [];
+  readonly callback: ResizeObserverCallback;
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+    FakeResizeObserver.callbacks.push(callback);
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 describe('SlSection', () => {
   let fixture: ComponentFixture<Host>;
   let host: Host;
@@ -88,6 +100,32 @@ describe('SlSection', () => {
     fixture = TestBed.createComponent(Host);
     host = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  describe('sticky header measurement', () => {
+    beforeEach(() => {
+      vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+      FakeResizeObserver.callbacks = [];
+    });
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('writes the header height on the root while sticky, and follows a resize', () => {
+      const header = root().querySelector(':scope > [data-part="header"]') as HTMLElement;
+      Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 48 });
+      host.sticky.set(true);
+      fixture.detectChanges();
+      expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('48px');
+
+      Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 72 });
+      FakeResizeObserver.callbacks.at(-1)?.([], {} as ResizeObserver);
+      expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('72px');
+
+      host.sticky.set(false);
+      fixture.detectChanges();
+      expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('');
+    });
   });
 
   it('renders the anatomy the contract declares', () => {

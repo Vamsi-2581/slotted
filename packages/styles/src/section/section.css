@@ -90,6 +90,24 @@
     z-index: var(--slotted-z-index-sticky, 100);
   }
 
+  /**
+   * A sticky header is chrome for what is under it, so the body republishes
+   * where the chrome ends: the page's own value, read once on the root under
+   * a name of its own, plus the header's measured height. A table's column
+   * header, a nested section's header or a consumer's sticky aside inside
+   * the body reads the same property and stops under this header rather
+   * than under the page's; nested layers add up, one section inside another.
+   * The alias on the root is what keeps the redefinition from referring to
+   * itself.
+   */
+  [data-ui='section'][data-sticky] {
+    --_above: var(--slotted-page-sticky-top, 0px);
+  }
+  [data-ui='section'][data-sticky] > [data-part='body'] {
+    --slotted-page-sticky-top: calc(var(--_above) + var(--slotted-section-header-size, 0px));
+    --slotted-table-sticky-offset: var(--slotted-page-sticky-top);
+  }
+
   [data-ui='section'] > [data-part='header'] > [data-part='title'] {
     display: flex;
     flex: 1 1 16rem;

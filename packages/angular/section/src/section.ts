@@ -5,6 +5,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
+  ElementRef,
   HostAttributeToken,
   inject,
   input,
@@ -35,6 +37,9 @@ export type { SectionDefaults, SectionGround, SectionLevel, SectionSize } from '
  * consumer's own or a generated one, and a scroll margin the height of the
  * page's fixed chrome, so a hash link lands under the header.
  */
+/** The measured height of a sticky section's header, written on the root. */
+export const HEADER_SIZE_PROPERTY = '--slotted-section-header-size';
+
 @Component({
   selector: '[slSection]',
   standalone: true,
@@ -74,6 +79,10 @@ export class SlSection {
 
   /** Whether a heading is rendered, which is what makes the section a region. */
   readonly hasHeading = signal(false);
+  /** The header element, handed over by `slSectionHeader`, so a sticky header can be measured. */
+  readonly header = signal<HTMLElement | null>(null);
+
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
 
   readonly id = computed(() => this.writtenId ?? this.generated);
   readonly headingId = computed(() => `${this.id()}-heading`);
@@ -86,4 +95,27 @@ export class SlSection {
     if (level === undefined || level === 'auto') return this.outline?.level ?? 1;
     return Number(level) as HeadingLevelValue;
   });
+
+  constructor() {
+    /**
+     * A sticky header is chrome for what is under it: its height, measured,
+     * goes on the root as `--slotted-section-header-size`, and the stylesheet
+     * republishes `--slotted-page-sticky-top` for the body as page plus
+     * header, so a table's column header or a nested section stops under this
+     * header. Written on the element, so a resize costs no change detection.
+     */
+    effect((onCleanup) => {
+      const header = this.header();
+      if (!this.resolvedSticky() || header === null) return;
+      const write = () =>
+        this.native.style.setProperty(HEADER_SIZE_PROPERTY, `${header.offsetHeight}px`);
+      write();
+      const sizes = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(write);
+      sizes?.observe(header);
+      onCleanup(() => {
+        sizes?.disconnect();
+        this.native.style.removeProperty(HEADER_SIZE_PROPERTY);
+      });
+    });
+  }
 }

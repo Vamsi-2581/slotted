@@ -92,6 +92,7 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-page-header-collapse',
     '--slotted-page-sticky-top',
     '--slotted-page-sticky-bottom',
+    '--slotted-section-header-size',
     '--slotted-tree-depth',
     '--slotted-tree-row-offset',
     '--slotted-upload-visible-rows',

@@ -112,3 +112,19 @@ test('sizes the heading on the type scale, independent of its rank', () => {
   );
   assert.match(fragment, /<h4 data-part="heading"/, 'no scene shows a deeper rank');
 });
+
+/**
+ * A sticky header is chrome for what is under it: the body republishes where
+ * the chrome ends, page plus header, and re-bridges the table's offset, so a
+ * column header inside stops under the section's header and not under the
+ * page's. Layers add up.
+ */
+test('republishes the sticky top for what is under a sticky header', () => {
+  assert.match(rule(`${ui}[data-sticky]`), /--_above:var\(--slotted-page-sticky-top,0px\)/);
+  const body = rule(`${ui}[data-sticky]>[data-part='body']`);
+  assert.match(
+    body,
+    /--slotted-page-sticky-top:calc\(var\(--_above\) \+ var\(--slotted-section-header-size,0px\)\)/,
+  );
+  assert.match(body, /--slotted-table-sticky-offset:var\(--slotted-page-sticky-top\)/);
+});

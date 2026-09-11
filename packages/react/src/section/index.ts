@@ -1,4 +1,4 @@
-export { Section, useSection } from './section';
+export { HEADER_SIZE_PROPERTY, Section, useSection } from './section';
 export { SectionDefaultsProvider, useSectionDefaults } from './section-defaults';
 export {
   SectionActions,

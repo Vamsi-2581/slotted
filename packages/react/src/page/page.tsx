@@ -1,0 +1,261 @@
+import '@slotted/styles/page/page.css';
+
+import { createPresence } from '@slotted/core/presence';
+import type { PresenceStatus } from '@slotted/core/presence';
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+import { Container } from '../container';
+import { HeadingLevel } from '../typography';
+import { usePageDefaults } from './page-defaults';
+import type {
+  PageBodyProps,
+  PageContextValue,
+  PageFooterProps,
+  PageProps,
+  PageRootProps,
+} from './page.types';
+
+/** The custom property the scroller carries for what sticks above the footer. */
+export const STICKY_BOTTOM_PROPERTY = '--slotted-page-sticky-bottom';
+
+const PageContext = createContext<PageContextValue | undefined>(undefined);
+
+/** What the page around this part says, or nothing: a header standing alone is complete. */
+export function usePage(): PageContextValue | undefined {
+  return useContext(PageContext);
+}
+
+const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
+
+/**
+ * The column of a screen: who scrolls, how wide the content is, where the
+ * footer stays, how much air the body has.
+ *
+ * **The header is a direct child of what scrolls.** There is no header part: a
+ * `sticky` element never leaves the box that contains it, so a wrapper exactly
+ * the header's height would pin nothing. A `PageHeader` written as the first
+ * child of the page lands in the scroll part beside the body.
+ *
+ * **The footer is a prop.** It has to sit outside the scroll part — below the
+ * scroller under `self`, stuck to the bottom of the root under `ancestor` —
+ * and a child would be inside it. It is mounted while it is passed and held
+ * through its exit by `@slotted/core/presence`, so the bar slides out rather
+ * than vanishing.
+ *
+ * **The page steps the outline.** Its body is one `HeadingLevel` deeper, so a
+ * section written directly in it takes `h2` under the header's `h1` without
+ * either family reading the other.
+ */
+export function Page({
+  children,
+  className,
+  fill,
+  footer,
+  ground,
+  inset,
+  landmark,
+  loading,
+  ref,
+  render,
+  scroll,
+  style,
+  width,
+  ...nativeProps
+}: PageProps) {
+  const defaults = usePageDefaults();
+  const resolvedGround = ground ?? defaults.ground;
+  const resolvedInset = inset ?? defaults.inset;
+  const resolvedLandmark = landmark ?? defaults.landmark;
+  const resolvedScroll = scroll ?? defaults.scroll;
+  const resolvedWidth = width ?? defaults.width;
+
+  const context: PageContextValue = {
+    ground: resolvedGround,
+    inset: resolvedInset,
+    loading: loading === true,
+    messages: defaults.messages,
+    scroll: resolvedScroll,
+    width: resolvedWidth,
+  };
+
+  const [root, setRoot] = useState<HTMLElement | null>(null);
+
+  /**
+   * The footer's height, written on the scroller so a table's sticky summary
+   * stops above the bar. Under `self` the footer is outside the scroller and
+   * covers nothing, so the property says nought.
+   */
+  useIsomorphicLayoutEffect(() => {
+    if (root === null || typeof ResizeObserver === 'undefined') return undefined;
+    const target = findScroller(root) ?? root.ownerDocument.documentElement;
+    const observer = new ResizeObserver(() => {
+      const bar = root.querySelector<HTMLElement>(':scope > [data-part="footer"]');
+      const height = resolvedScroll === 'self' ? 0 : (bar?.offsetHeight ?? 0);
+      target.style.setProperty(STICKY_BOTTOM_PROPERTY, `${height}px`);
+    });
+    observer.observe(root);
+    const bar = root.querySelector<HTMLElement>(':scope > [data-part="footer"]');
+    if (bar !== null) observer.observe(bar);
+    return () => {
+      observer.disconnect();
+      target.style.removeProperty(STICKY_BOTTOM_PROPERTY);
+    };
+  }, [root, resolvedScroll, footer !== undefined]);
+
+  const rootProps: PageRootProps = {
+    ...nativeProps,
+    children: (
+      <>
+        <div data-part="scroll">{children}</div>
+        <FooterPresence>{footer}</FooterPresence>
+      </>
+    ),
+    className,
+    ...(fill === true ? { 'data-fill': '' } : {}),
+    'data-ground': resolvedGround,
+    ...(loading === true ? { 'data-loading': '' } : {}),
+    'data-part': 'root',
+    'data-scroll': resolvedScroll,
+    'data-ui': 'page',
+    'data-width': resolvedWidth,
+    style,
+  };
+
+  const attach = (node: HTMLElement | null) => {
+    setRoot(node);
+    if (typeof ref === 'function') ref(node);
+    else if (ref !== null && ref !== undefined) ref.current = node;
+  };
+
+  const Root = resolvedLandmark === 'main' ? 'main' : 'div';
+
+  return (
+    <PageContext.Provider value={context}>
+      {render === undefined ? <Root {...rootProps} ref={attach} /> : render(rootProps)}
+    </PageContext.Provider>
+  );
+}
+
+function findScroller(element: HTMLElement): HTMLElement | null {
+  const view = element.ownerDocument.defaultView;
+  let node = element.parentElement;
+  while (view !== null && node !== null && node !== element.ownerDocument.body) {
+    const overflow = view.getComputedStyle(node).overflowY;
+    if (overflow === 'auto' || overflow === 'scroll') return node;
+    node = node.parentElement;
+  }
+  return null;
+}
+
+/**
+ * Keeps the footer mounted through its exit. The status reaches the DOM on the
+ * footer itself, which is what the stylesheet transitions on.
+ */
+function FooterPresence({ children }: { children: React.ReactNode }) {
+  const present = children !== undefined && children !== null && children !== false;
+  const [status, setStatus] = useState<PresenceStatus>(present ? 'open' : 'unmounted');
+  const last = useRef(children);
+  if (present) last.current = children;
+  const presence = useRef(
+    createPresence({
+      present,
+      skipInitialAnimation: true,
+      onStatusChange: (next) => setStatus(next),
+    }),
+  );
+
+  useEffect(() => {
+    presence.current.sync(present);
+  }, [present]);
+
+  useEffect(() => {
+    const handle = presence.current;
+    return () => handle.destroy();
+  }, []);
+
+  if (status === 'unmounted') return null;
+  return (
+    <FooterStatusContext.Provider value={{ status, setNode: presence.current.setNode }}>
+      {present ? children : last.current}
+    </FooterStatusContext.Provider>
+  );
+}
+
+const FooterStatusContext = createContext<{
+  status: PresenceStatus;
+  setNode: (node: HTMLElement | null) => void;
+}>({ status: 'open', setNode: () => {} });
+
+/**
+ * The padded column: one container at the page's width and inset, and one
+ * outline step deeper than the header.
+ */
+export function PageBody({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: PageBodyProps) {
+  const page = usePage();
+  const rootProps = {
+    ...nativeProps,
+    ...(page?.loading ? { 'aria-busy': true as const } : {}),
+    children: (
+      <Container inset={page?.inset} size={page?.width}>
+        <HeadingLevel>{children}</HeadingLevel>
+      </Container>
+    ),
+    className,
+    'data-part': 'body',
+    style,
+  };
+
+  if (render !== undefined) return render(rootProps);
+  return <div {...rootProps} ref={ref} />;
+}
+
+/**
+ * The bar for the actions that finish the task. In the flow and never fixed:
+ * it takes its own height, so the last line of content scrolls up to it
+ * rather than under it. Its actions sit in one wrapping row aligned to the
+ * end, inside a container at the page's measure.
+ */
+export function PageFooter({
+  'aria-label': ariaLabel,
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: PageFooterProps) {
+  const page = usePage();
+  const { setNode, status } = useContext(FooterStatusContext);
+  const rootProps = {
+    ...nativeProps,
+    'aria-label': ariaLabel ?? page?.messages.footer ?? 'Ações da página',
+    children: (
+      <Container inset={page?.inset} size={page?.width}>
+        <div data-part="actions">{children}</div>
+      </Container>
+    ),
+    className,
+    'data-part': 'footer',
+    'data-status': status,
+    style,
+  };
+
+  if (render !== undefined) return render(rootProps);
+  return (
+    <footer
+      {...rootProps}
+      ref={(node) => {
+        setNode(node);
+        if (typeof ref === 'function') ref(node);
+        else if (ref !== null && ref !== undefined) ref.current = node;
+      }}
+    />
+  );
+}

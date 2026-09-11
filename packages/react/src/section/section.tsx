@@ -1,0 +1,96 @@
+import '@slotted/styles/section/section.css';
+
+import { createContext, useContext, useId, useState } from 'react';
+
+import { useHeadingLevel } from '../typography';
+import type { HeadingLevelValue } from '../typography';
+import { useSectionDefaults } from './section-defaults';
+import type { SectionContextValue, SectionProps, SectionRootProps } from './section.types';
+
+const SectionContext = createContext<SectionContextValue | undefined>(undefined);
+
+/**
+ * What the section around this part says. A part outside one has no rank to
+ * take, so this throws rather than rendering a heading at a guess.
+ */
+export function useSection(): SectionContextValue {
+  const context = useContext(SectionContext);
+  if (context === undefined) {
+    throw new Error('A Section part must be rendered inside Section.');
+  }
+  return context;
+}
+
+/**
+ * One unit of content inside a page: a header — eyebrow, heading,
+ * description, actions — and a body one outline step deeper.
+ *
+ * **The rank is the outline's.** `typography` owns it: the heading takes the
+ * rank `HeadingLevel` gives, `h2` directly in a page and one deeper inside
+ * another section, unless `level` says otherwise. The body is wrapped one
+ * step deeper, so a nested section takes the next rank.
+ *
+ * **A region only when it has a name.** The root is `aria-labelledby` its
+ * heading once one is rendered, which makes the `section` a region landmark;
+ * without a heading it is a plain `section`, as the APG says of an unnamed
+ * one.
+ *
+ * **The hooks anchor navigation needs.** The root carries an `id`, from
+ * `useId` or the consumer's own, and a scroll margin the height of the page's
+ * fixed chrome, so a hash link lands under the header rather than behind it.
+ */
+export function Section({
+  children,
+  className,
+  divider,
+  ground,
+  id,
+  level,
+  ref,
+  render,
+  size,
+  sticky,
+  style,
+  ...nativeProps
+}: SectionProps) {
+  const defaults = useSectionDefaults();
+  const ambient = useHeadingLevel();
+  const generatedId = useId();
+  const [hasHeading, setHasHeading] = useState(false);
+
+  const resolvedDivider = divider ?? defaults.divider;
+  const resolvedGround = ground ?? defaults.ground;
+  const resolvedSize = size ?? defaults.size;
+  const resolvedSticky = sticky ?? defaults.sticky;
+  const resolvedLevel: HeadingLevelValue =
+    level === undefined || level === 'auto' ? ambient : (Number(level) as HeadingLevelValue);
+  const rootId = id ?? `${generatedId}section`;
+
+  const context: SectionContextValue = {
+    headingId: `${rootId}-heading`,
+    level: resolvedLevel,
+    registerHeading: setHasHeading,
+  };
+
+  const rootProps: SectionRootProps = {
+    ...nativeProps,
+    ...(hasHeading ? { 'aria-labelledby': context.headingId } : {}),
+    children,
+    className,
+    ...(resolvedDivider ? { 'data-divider': '' } : {}),
+    'data-ground': resolvedGround,
+    'data-level': String(resolvedLevel),
+    'data-part': 'root',
+    'data-size': resolvedSize,
+    ...(resolvedSticky ? { 'data-sticky': '' } : {}),
+    'data-ui': 'section',
+    id: rootId,
+    style,
+  };
+
+  return (
+    <SectionContext.Provider value={context}>
+      {render === undefined ? <section {...rootProps} ref={ref} /> : render(rootProps)}
+    </SectionContext.Provider>
+  );
+}

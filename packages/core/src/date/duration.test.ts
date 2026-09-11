@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import { plainTime } from './plain-time';
-import { isRelativeKey, parseDuration, resolveRelative } from './duration';
+import {
+  DATE_TIME_UNITS,
+  isRelativeKey,
+  parseDuration,
+  resolveRelative,
+  resolveRelativeDateTime,
+  TIME_UNITS,
+} from './duration';
 
 describe('isRelativeKey', () => {
   it('names the three keys that open an expression, and nothing else', () => {
@@ -102,5 +109,77 @@ describe('resolveRelative', () => {
 
   it('answers now with the anchor itself', () => {
     expect(resolveRelative(plainTime(9, 7, 3), 0)).toEqual({ time: plainTime(9, 7, 3), days: 0 });
+  });
+});
+
+/**
+ * The grammar widens for `datetime-field`, and it widens **additively**: the
+ * default unit set is still the three a time can mean, so every expression
+ * `time-field` parsed parses the same way and a `d` typed into a `time-field`
+ * is refused there exactly as it was before.
+ */
+describe('the wider unit set', () => {
+  it('refuses days and weeks by default, which is what a time alone can mean', () => {
+    expect(TIME_UNITS).toEqual(['h', 'm', 's']);
+    expect(parseDuration('+2d')).toBeNull();
+    expect(parseDuration('+1w')).toBeNull();
+  });
+
+  it('reads them when the caller states the wider set', () => {
+    const units = DATE_TIME_UNITS;
+    expect(parseDuration('+2d', { units })).toBe(2 * 86_400);
+    expect(parseDuration('+1w', { units })).toBe(7 * 86_400);
+    expect(parseDuration('1d6h', { units })).toBe(86_400 + 6 * 3600);
+    expect(parseDuration('-3d', { units })).toBe(-3 * 86_400);
+  });
+
+  it('leaves every expression the narrower set read exactly as it was', () => {
+    const units = DATE_TIME_UNITS;
+    for (const text of ['+40', '+40m', '1h30', '1:30', '2h', '90s', '0', '=', '-15']) {
+      expect(parseDuration(text, { units })).toBe(parseDuration(text));
+    }
+  });
+
+  it('keeps the units in order, whichever set is allowed', () => {
+    const units = DATE_TIME_UNITS;
+    /* A unit written above the one before it is two durations rather than one. */
+    expect(parseDuration('6h1d', { units })).toBeNull();
+    expect(parseDuration('1d1w', { units })).toBeNull();
+  });
+
+  it('refuses a bare number that would fall to a unit the caller did not allow', () => {
+    /* `1w30` in a grammar without days means nothing, and is refused rather
+       than read as the part before it. */
+    expect(parseDuration('1w30', { units: ['w'] })).toBeNull();
+  });
+});
+
+/**
+ * Where `crossesMidnight` is spent. `time-field` raises the flag because a
+ * `PlainTime` has no day to put the crossing in; here the day exists, so the
+ * crossing is the value.
+ */
+describe('resolveRelativeDateTime', () => {
+  const anchor = {
+    date: { year: 2026, month: 9, day: 30 },
+    time: plainTime(23, 0),
+  };
+
+  it('rolls the day rather than raising a flag', () => {
+    expect(resolveRelativeDateTime(anchor, 90 * 60)).toEqual({
+      date: { year: 2026, month: 10, day: 1 },
+      time: plainTime(0, 30),
+    });
+  });
+
+  it('moves whole days without touching the time', () => {
+    expect(resolveRelativeDateTime(anchor, 2 * 86_400)).toEqual({
+      date: { year: 2026, month: 10, day: 2 },
+      time: plainTime(23, 0),
+    });
+  });
+
+  it('answers now with the anchor itself', () => {
+    expect(resolveRelativeDateTime(anchor, 0)).toEqual(anchor);
   });
 });

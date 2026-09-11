@@ -15,6 +15,8 @@
  * Nothing here touches the DOM or a framework.
  */
 
+import { addDateTimeSeconds } from './plain-date-time';
+import type { PlainDateTime } from './plain-date-time';
 import { addSeconds } from './plain-time';
 import type { PlainTime, TimeStep } from './plain-time';
 
@@ -24,12 +26,48 @@ const RELATIVE_KEYS = ['+', '-', '='];
 /** `1:30` and `1:30:15`, and nothing with a fourth field. */
 const COLON_FORM = /^(\d{1,3}):(\d{1,2})(?::(\d{1,2}))?$/;
 /** One run of digits and the unit letter that may follow it. */
-const TOKEN = /(\d+)([hms]?)/y;
+const TOKEN = /(\d+)([wdhms]?)/y;
 
-const SECONDS: Record<'h' | 'm' | 's', number> = { h: 3600, m: 60, s: 1 };
+/**
+ * The five units, and the three of them a time alone can mean.
+ *
+ * `time-field` opened this grammar with `h`, `m` and `s`, because a `PlainTime`
+ * has no day for `d` to move. `datetime-field` has one, so it states the wider
+ * set — and the widening is **additive**: the default here is still the three,
+ * so every expression `time-field` parsed parses the same way and a `d` typed
+ * into a `time-field` is refused there exactly as it was before.
+ */
+export type DurationUnit = 'w' | 'd' | 'h' | 'm' | 's';
+
+/** The units a time alone can mean. */
+export const TIME_UNITS: readonly DurationUnit[] = ['h', 'm', 's'];
+/** The units a datetime can mean. */
+export const DATE_TIME_UNITS: readonly DurationUnit[] = ['w', 'd', 'h', 'm', 's'];
+
+const SECONDS: Record<DurationUnit, number> = {
+  w: 604_800,
+  d: 86_400,
+  h: 3600,
+  m: 60,
+  s: 1,
+};
 /** What a bare number means after each unit: one step further down. */
-const NEXT_DOWN: Record<'h' | 'm' | 's', 'h' | 'm' | 's' | null> = { h: 'm', m: 's', s: null };
-const ORDER: Record<'h' | 'm' | 's', number> = { h: 3, m: 2, s: 1 };
+const NEXT_DOWN: Record<DurationUnit, DurationUnit | null> = {
+  w: 'd',
+  d: 'h',
+  h: 'm',
+  m: 's',
+  s: null,
+};
+const ORDER: Record<DurationUnit, number> = { w: 5, d: 4, h: 3, m: 2, s: 1 };
+
+export interface DurationOptions {
+  /**
+   * Which unit letters the expression may use. Defaults to `TIME_UNITS`, so a
+   * caller that does not state the wider set keeps the grammar it had.
+   */
+  readonly units?: readonly DurationUnit[] | undefined;
+}
 
 export function isRelativeKey(key: string): boolean {
   return RELATIVE_KEYS.includes(key);
@@ -43,7 +81,8 @@ export function isRelativeKey(key: string): boolean {
  * empty and both refuse `Enter`. Reading `+` as zero would commit "now" on the
  * keystroke that opened the field.
  */
-export function parseDuration(text: string): number | null {
+export function parseDuration(text: string, options: DurationOptions = {}): number | null {
+  const units = options.units ?? TIME_UNITS;
   const cleaned = text.trim().toLowerCase().replace(/\s+/g, '');
   if (cleaned === '') return null;
 
@@ -72,7 +111,7 @@ export function parseDuration(text: string): number | null {
 
   let total = 0;
   let index = 0;
-  let previous: 'h' | 'm' | 's' | null = null;
+  let previous: DurationUnit | null = null;
 
   while (index < body.length) {
     TOKEN.lastIndex = index;
@@ -80,13 +119,18 @@ export function parseDuration(text: string): number | null {
     if (token === null) return null;
 
     const [whole, digits, letter] = token as unknown as [string, string, string];
-    const unit: 'h' | 'm' | 's' | null =
-      letter === '' ? (previous === null ? 'm' : NEXT_DOWN[previous]) : (letter as 'h' | 'm' | 's');
+    /* A letter the caller did not allow is not a unit, and the expression is
+       refused whole rather than read as the part before it. */
+    if (letter !== '' && !units.includes(letter as DurationUnit)) return null;
+    const unit: DurationUnit | null =
+      letter === '' ? (previous === null ? 'm' : NEXT_DOWN[previous]) : (letter as DurationUnit);
 
     /* A bare number after seconds has no unit below it to mean, and a unit
        written above the one before it — `30m1h` — is two durations rather than
-       one. Both are refused instead of being added anyway. */
-    if (unit === null) return null;
+       one. Both are refused instead of being added anyway. A bare number that
+       would fall to a unit the caller did not allow is refused for the same
+       reason: `1w30` in a grammar without days means nothing. */
+    if (unit === null || !units.includes(unit)) return null;
     if (previous !== null && ORDER[unit] >= ORDER[previous]) return null;
 
     total += Number(digits) * SECONDS[unit];
@@ -106,4 +150,16 @@ export function parseDuration(text: string): number | null {
  */
 export function resolveRelative(anchor: PlainTime, seconds: number): TimeStep {
   return addSeconds(anchor, seconds);
+}
+
+/**
+ * The same expression against a whole datetime.
+ *
+ * This is where `crossesMidnight` is spent. `time-field` raises the flag
+ * because a `PlainTime` has no day to put the crossing in, and names
+ * `datetime-field` as the consumer that would answer it; here the day exists,
+ * so the crossing is not a flag beside the value — it is the value.
+ */
+export function resolveRelativeDateTime(anchor: PlainDateTime, seconds: number): PlainDateTime {
+  return addDateTimeSeconds(anchor, seconds);
 }

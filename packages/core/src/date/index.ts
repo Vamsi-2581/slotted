@@ -57,7 +57,46 @@ export type {
   TimeFormatOptions,
   TimePatternPart,
 } from './time-format';
-export { isRelativeKey, parseDuration, resolveRelative } from './duration';
+export {
+  DATE_TIME_UNITS,
+  isRelativeKey,
+  parseDuration,
+  resolveRelative,
+  resolveRelativeDateTime,
+  TIME_UNITS,
+} from './duration';
+export type { DurationOptions, DurationUnit } from './duration';
+export {
+  addDateTimeSeconds,
+  compareDateTime,
+  dateBoundsOf,
+  dayWindow,
+  END_OF_DAY,
+  isDateTimeInRange,
+  isDateWithin,
+  isDayInRange,
+  isPlainDateTime,
+  isSameDateTime,
+  nowDateTimeIn,
+  parseISODateTime,
+  plainDateTime,
+  START_OF_DAY,
+  toISODateTime,
+} from './plain-date-time';
+export type { DayWindow, DayWindowOptions, PlainDateTime } from './plain-date-time';
+export {
+  createDateTimeFormat,
+  dateTimeOf,
+  halfOfField,
+  incompleteHalf,
+  segmentsOfDateTime,
+} from './datetime-format';
+export type {
+  DateTimeFormat,
+  DateTimeFormatOptions,
+  DateTimeHalf,
+  DateTimePatternPart,
+} from './datetime-format';
 export {
   groupByHour,
   hourJump,

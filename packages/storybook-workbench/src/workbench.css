@@ -1371,3 +1371,48 @@
     min-block-size: 78px;
   }
 }
+
+/**
+ * Two panes side by side inside a page that fills: a list and the detail it
+ * opens, each scrolling on its own. It exists for `page`'s `fill` axis, whose
+ * demonstration has to show two scrollers under one header; a story may not
+ * write the grid inline, so the ground is a primitive.
+ */
+.slotted-demo-split {
+  display: grid;
+  gap: var(--slotted-space-6, 1rem);
+  grid-template-columns: minmax(10rem, 1fr) minmax(0, 3fr);
+  min-block-size: 0;
+}
+
+.slotted-demo-split__pane {
+  background: var(--slotted-surface);
+  border: 1px solid var(--slotted-border-subtle);
+  border-radius: var(--slotted-radius-lg, 8px);
+  min-block-size: 0;
+  overflow: auto;
+  padding: var(--slotted-space-5, 12px);
+}
+
+/**
+ * The scenes stack in an implicit `auto` track, and an `auto` track is at
+ * least as wide as the widest line inside it: one open code drawer with a
+ * hundred-column snippet carried every stage on the page-header reference
+ * page 37 pixels past the column and under the page's own outline. A track
+ * that may shrink to nothing keeps the drawer scrolling inside its box.
+ */
+.slotted-reference-scenes {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/**
+ * Below 760 pixels every grid is one column — the three-column grid had its
+ * own rule there and the two-column grid did not, because the attribute
+ * selector outranks the class the rule was written on. Two page screens side
+ * by side in a 430-pixel column stood 186 pixels wide each.
+ */
+@media (max-width: 760px) {
+  .slotted-demo-grid[data-columns='2'] {
+    --slotted-demo-columns: 1;
+  }
+}

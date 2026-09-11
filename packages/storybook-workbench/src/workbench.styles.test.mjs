@@ -601,3 +601,48 @@ test('offers a box the size of a screen, for a family that owns one', () => {
   const tall = /\.slotted-demo-viewport\[data-size='tall'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
   assert.match(tall, /block-size:\s*22rem/, 'the panel size is still the step below it');
 });
+
+/**
+ * A page that fills gives its body an exact height and the panes inside it
+ * scroll on their own. The demonstration needs two of them, and a story may
+ * not write the grid inline.
+ */
+test('offers two panes that scroll themselves, for a page that fills', () => {
+  const split = /\.slotted-demo-split\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(split, /display:\s*grid/);
+  assert.match(split, /grid-template-columns:/);
+  /* A grid item may not shrink below its content unless told; the panes must. */
+  assert.match(split, /min-block-size:\s*0/);
+  const pane = /\.slotted-demo-split__pane\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(pane, /overflow:\s*auto/);
+  assert.match(pane, /min-block-size:\s*0/);
+});
+
+/**
+ * A code drawer scrolls its own long lines. The track the scenes stack in
+ * must be allowed to shrink to nothing, or the drawer's longest line widens
+ * it and carries every stage past the column.
+ */
+test('keeps an open code drawer from widening the scenes column', () => {
+  const rules = [...css.matchAll(/\.slotted-reference-scenes\s*\{([\s\S]*?)\}/g)].map((m) => m[1]);
+  assert.ok(
+    rules.some((rule) => /grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(rule)),
+    'the scenes track shrinks below its content',
+  );
+});
+
+/**
+ * A two-column grid stacks below 760 pixels like the three-column one: the
+ * attribute selector outranks the class, so it needs a rule of its own.
+ */
+test('stacks a two-column grid in a narrow window', () => {
+  const narrow = [...css.matchAll(/@media \(max-width: 760px\)\s*\{([\s\S]*?)\n\}/g)].map(
+    (m) => m[1],
+  );
+  assert.ok(
+    narrow.some((block) =>
+      /\.slotted-demo-grid\[data-columns='2'\]\s*\{\s*--slotted-demo-columns:\s*1;/.test(block),
+    ),
+    'the two-column grid drops to one column below 760px',
+  );
+});

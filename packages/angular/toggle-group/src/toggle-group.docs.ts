@@ -199,7 +199,13 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'A toggle group in a bar',
       source: `<div slToolbar aria-label="Formatação">
-  <div slToggleGroup aria-label="Estilo do texto" multiple variant="ghost" [defaultValue]="['bold']">
+  <div
+    slToggleGroup
+    aria-label="Estilo do texto"
+    multiple
+    variant="ghost"
+    [defaultValue]="['bold']"
+  >
     <button slToggleGroupItem value="bold" aria-label="Negrito">
       <ng-icon slToggleGroupIcon name="lucideBold" />
     </button>

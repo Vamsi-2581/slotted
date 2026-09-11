@@ -57,6 +57,13 @@
     flex: 1 0 auto;
     flex-direction: column;
     min-inline-size: 0;
+    /**
+     * Nothing in here anchors the scroll. The header's chrome changes height
+     * by a few pixels as it snaps and reveals, and scroll anchoring would move
+     * the scroll position by as much to keep the content still: a scroll event
+     * the reader did not make, which ended a reveal the instant it began.
+     */
+    overflow-anchor: none;
   }
 
   [data-ui='page'][data-scroll='self'] {

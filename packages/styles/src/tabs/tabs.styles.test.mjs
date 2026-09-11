@@ -332,3 +332,27 @@ test('turns the whole family for a vertical list rather than rearranging it', ()
     /transform:scale\(1,0\)/,
   );
 });
+
+/**
+ * The grid carries no column gap of its own: three gaps stood around two
+ * empty paging columns and an empty actions column, and the list's track
+ * started eight pixels in and stopped sixteen short of the family's edge. The
+ * parts that fill those columns carry the distance, so a list alone runs
+ * edge to edge.
+ */
+test('keeps the list edge to edge when nothing stands beside it', () => {
+  const root = /\[data-ui='tabs'\]\s*\{([\s\S]*?)\n\s*\}/.exec(css)?.[1] ?? '';
+  assert.doesNotMatch(root, /column-gap/);
+  assert.match(
+    css,
+    /\[data-part='scroll'\]\[data-direction='start'\]\s*\{[^}]*margin-inline-end:\s*var\(--slotted-tabs-actions-gap/,
+  );
+  assert.match(
+    css,
+    /\[data-part='scroll'\]\[data-direction='end'\]\s*\{[^}]*margin-inline-start:\s*var\(--slotted-tabs-actions-gap/,
+  );
+  assert.match(
+    css,
+    /\[data-part='actions'\]\s*\{[^}]*margin-inline-start:\s*var\(--slotted-tabs-actions-gap/,
+  );
+});

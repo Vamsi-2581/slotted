@@ -58,7 +58,12 @@
     --_marker-origin: 50%;
     --_marker-origin-selected: 50%;
 
-    column-gap: var(--slotted-tabs-actions-gap, var(--slotted-space-4, 0.5rem));
+    /**
+     * No column gap on the grid itself: three gaps stood around two empty
+     * paging columns and an empty actions column, and the list — and the
+     * track drawn under it — started eight pixels in and stopped sixteen
+     * short. The parts that fill those columns carry the distance instead.
+     */
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     grid-template-rows: auto auto;
@@ -639,10 +644,12 @@
   [data-ui='tabs'] [data-part='scroll'][data-direction='start'] {
     grid-column: 1;
     grid-row: 1;
+    margin-inline-end: var(--slotted-tabs-actions-gap, var(--slotted-space-4, 0.5rem));
   }
 
   [data-ui='tabs'] [data-part='scroll'][data-direction='end'] {
     grid-column: 3;
+    margin-inline-start: var(--slotted-tabs-actions-gap, var(--slotted-space-4, 0.5rem));
     grid-row: 1;
   }
 
@@ -717,6 +724,7 @@
     align-self: center;
     display: flex;
     grid-column: 4;
+    margin-inline-start: var(--slotted-tabs-actions-gap, var(--slotted-space-4, 0.5rem));
     grid-row: 1;
     min-inline-size: 0;
   }

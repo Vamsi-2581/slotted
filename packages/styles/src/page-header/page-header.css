@@ -39,7 +39,6 @@
   [data-ui='page-header'] {
     --_ground: var(--slotted-page-header-background, var(--slotted-surface, Canvas));
     --_rule: var(--slotted-page-header-border, var(--slotted-border-subtle, ButtonBorder));
-    --_shadow: var(--slotted-page-header-shadow, var(--slotted-shadow-sm, none));
     --_text: var(--slotted-text, CanvasText);
     --_muted: var(--slotted-text-muted, GrayText);
     --_gap: var(--slotted-page-header-gap, var(--slotted-space-4, 0.5rem));
@@ -95,10 +94,23 @@
      * is the slide of the header area under the title and never a fight with
      * the scroll, during which the offset is constant.
      */
-    transition:
-      inset-block-start var(--_duration) var(--_easing),
-      box-shadow var(--slotted-duration-short) var(--_easing);
-    z-index: var(--slotted-z-index-sticky, 100);
+    transition: inset-block-start var(--_duration) var(--_easing);
+    /**
+     * Above every other sticky thing on the page — a section's header, a
+     * table's column header, a pinned corner — so what a short section pushes
+     * up at the end of the scroll goes under the chrome and never over it.
+     */
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 3);
+    /**
+     * The chrome's edge is one hairline, the whole width of the header, in
+     * every state: with tabs under it, with an area, with a title alone. It
+     * is the root's own border, not a rule inside the container, so it runs
+     * to the header's edges and not to the measure's. `overflow-x: clip` is
+     * for the rule the pill straddles, drawn wider than the container below;
+     * the block axis stays visible for the pill's lower half.
+     */
+    border-block-end: var(--_rule-size) solid var(--_rule);
+    overflow-x: clip;
   }
 
   [data-ui='page-header'][data-size='sm'] {
@@ -138,19 +150,6 @@
   [data-ui='page-header'][data-collapse='manual'],
   [data-ui='page-header']:has([data-part='pin'][data-pressed]) {
     inset-block-start: 0;
-  }
-
-  /**
-   * The shadow says the chrome is floating over content, which is true
-   * exactly while the header area is out of sight. It leaves without a
-   * transition: a shadow fading over the area sliding back in is the artefact
-   * Sirius named.
-   */
-  [data-ui='page-header']:not([data-expanded]) {
-    box-shadow: var(--_shadow);
-  }
-  [data-ui='page-header'][data-expanded] {
-    transition: inset-block-start var(--_duration) var(--_easing);
   }
 
   /* ── The title area ──────────────────────────────────────────────────── */
@@ -194,6 +193,19 @@
     min-inline-size: 0;
   }
   [data-ui='page-header'] > * > [data-part='title-area'] > [data-part='nav']:empty {
+    display: none;
+  }
+  /**
+   * One way back at a time. Beside breadcrumbs the arrow says what their
+   * first crumb already says, so it yields to them; below 640 pixels the
+   * breadcrumbs go and the arrow is what remains. A consumer writes both
+   * once and the width decides.
+   */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='nav']
+    > [data-part='back']:has(~ [data-part='breadcrumbs']:not(:empty)) {
     display: none;
   }
 
@@ -336,16 +348,15 @@
     font-size: var(--_heading-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
     letter-spacing: -0.01em;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     line-height: var(--_heading-line-height);
     margin: 0;
     min-inline-size: 0;
     overflow: hidden;
     overflow-wrap: anywhere;
     text-wrap: pretty;
-    transition:
-      font-size var(--_duration) var(--_easing),
-      line-height var(--_duration) var(--_easing);
+    /* No transition on the size: text re-rasterised on every frame of a
+       font-size change blurs and settles with a jolt, so the step is a cut. */
   }
   [data-ui='page-header']:not([data-expanded])
     > *
@@ -388,12 +399,18 @@
     > [data-part='title-row']
     > [data-part='title']
     > [data-part='subheading'] {
+    -webkit-box-orient: vertical;
     color: var(--_muted);
+    display: -webkit-box;
     flex-basis: 100%;
     font-size: var(--_subheading-size);
+    /* Two lines, and the whole string in `title`: a header is a fixed cost
+       on every screen, so nothing in it grows without a bound. */
+    -webkit-line-clamp: 2;
     line-height: var(--slotted-line-height-md, 1.5);
     margin: 0;
     min-inline-size: 0;
+    overflow: hidden;
     text-wrap: pretty;
   }
   /* Snapped, the bar has one line to give it. */
@@ -403,6 +420,7 @@
     > [data-part='title-row']
     > [data-part='title']
     > [data-part='subheading'] {
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -505,11 +523,15 @@
     > [data-part='header-area']
     > [data-part='content']
     > [data-part='description'] {
+    -webkit-box-orient: vertical;
     color: var(--_muted);
+    display: -webkit-box;
     font-size: var(--slotted-font-size-md, 0.875rem);
+    -webkit-line-clamp: 3;
     line-height: var(--slotted-line-height-md, 1.5);
     margin: 0;
     max-inline-size: var(--_description-measure);
+    overflow: hidden;
     text-wrap: pretty;
   }
 
@@ -524,6 +546,18 @@
     > [data-part='header-area']
     > [data-part='content'] {
     padding-block-end: calc(var(--_padding-block) + var(--_control-size) / 2);
+  }
+
+  /**
+   * Collapsed by the control the track is 0fr, and the half pill the columns
+   * reserved would keep the area 27 pixels tall: the reservation goes with
+   * the content, and the pill straddles the title area's own reservation.
+   */
+  [data-ui='page-header']:not([data-expanded]):not([data-scrolled])
+    > *
+    > [data-part='header-area']
+    > * {
+    padding-block: 0;
   }
 
   /* ── The controls, on the chrome's edge ──────────────────────────────── */
@@ -541,18 +575,29 @@
    */
   [data-ui='page-header'] > * > [data-part='controls'] {
     block-size: 0;
-    border-block-start: var(--_rule-size) solid var(--_rule);
     position: relative;
     z-index: 3;
   }
-  [data-ui='page-header'] > * > [data-part='controls']:empty {
-    border-block-start-color: var(--_rule);
+  /**
+   * With tabs under the chrome the edge the pill straddles is above them, and
+   * it is drawn the whole width of the header — wider than the container and
+   * clipped by the root — so it is the same line as the root's own edge.
+   * Without tabs the root's edge is where the pill sits, and no second rule
+   * is drawn.
+   */
+  [data-ui='page-header']:has(> * > [data-part='tabs']:not(:empty))
+    > *
+    > [data-part='controls']::before {
+    border-block-start: var(--_rule-size) solid var(--_rule);
+    content: '';
+    inset-block-start: 0;
+    inset-inline: -50vw;
+    position: absolute;
   }
   [data-ui='page-header'] > * > [data-part='controls'] > * {
     background-color: var(--_ground);
     border: var(--_rule-size) solid var(--_rule);
     border-radius: var(--slotted-radius-full, 9999px);
-    box-shadow: var(--slotted-shadow-xs, none);
     display: inline-flex;
     gap: var(--slotted-space-1, 0.125rem);
     inline-size: max-content;
@@ -671,6 +716,9 @@
    * lower half takes, so the slot starts half a control down.
    */
   [data-ui='page-header'] > * > [data-part='tabs'] {
+    /* The root's bottom edge is the tabs' track: one line, the whole width. */
+    --slotted-tabs-track-color: transparent;
+
     min-inline-size: 0;
     padding-block-start: calc(var(--_control-size) / 2 + var(--slotted-space-2, 0.25rem));
   }
@@ -768,6 +816,13 @@
       > [data-part='back']
       ~ [data-part='breadcrumbs'] {
       display: none;
+    }
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='nav']
+      > [data-part='back']:has(~ [data-part='breadcrumbs']:not(:empty)) {
+      display: inline-flex;
     }
     [data-ui='page-header']
       > *

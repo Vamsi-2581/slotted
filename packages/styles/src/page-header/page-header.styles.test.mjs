@@ -100,11 +100,25 @@ test('collapses by the control as a grid track, and never while scrolled out', (
   );
 });
 
-/** The shadow enters with a transition and leaves without one. */
-test('floats the chrome only while the header area is out of sight', () => {
-  assert.match(rule(`${ui}:not([data-expanded])`), /box-shadow:var\(--_shadow\)/);
-  assert.match(rule(ui), /box-shadow var\(--slotted-duration-short/);
-  assert.doesNotMatch(rule(`${ui}[data-expanded]`), /box-shadow/);
+/**
+ * The chrome's edge is one hairline the whole width of the header, in every
+ * state, and no shadow: the reviewer read the shadow as ugly and the rule
+ * inside the container as one that stopped short of the header's edge.
+ */
+test('draws one full-width edge on the root and no shadow', () => {
+  const root = rule(ui);
+  assert.match(root, /border-block-end:var\(--_rule-size\) solid var\(--_rule\)/);
+  assert.match(root, /overflow-x:clip/);
+  assert.match(root, /z-index:calc\(var\(--slotted-z-index-sticky,100\)\s*\+\s*3\)/);
+  assert.doesNotMatch(css, /box-shadow/);
+  /* With tabs under it the edge the pill straddles is above them, drawn wider than the container. */
+  const above = rule(
+    `${ui}:has(>*>[data-part='tabs']:not(:empty))>*>[data-part='controls']::before`,
+  );
+  assert.match(above, /inset-inline:-50vw/);
+  assert.match(above, /border-block-start:var\(--_rule-size\) solid var\(--_rule\)/);
+  /* And the tabs' own track is the root's edge. */
+  assert.match(rule(`${ui}>*>[data-part='tabs']`), /--slotted-tabs-track-color:transparent/);
 });
 
 /** One attribute where Fiori has seven slots. */
@@ -167,7 +181,7 @@ test('draws the toggle and the pin as inner controls with a ring and a reachable
 test('places the controls on a zero-height row that carries the rule', () => {
   const row = rule(`${ui}>*>[data-part='controls']`);
   assert.match(row, /block-size:0/);
-  assert.match(row, /border-block-start:var\(--_rule-size\) solid var\(--_rule\)/);
+  assert.doesNotMatch(row, /border-block-start/);
   assert.match(row, /position:relative/);
   const pill = rule(`${ui}>*>[data-part='controls']>*`);
   assert.match(pill, /position:absolute/);
@@ -183,7 +197,8 @@ test('clamps the heading at three lines expanded and one line snapped', () => {
   const heading = rule(
     `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='title']>[data-part='heading']`,
   );
-  assert.match(heading, /-webkit-line-clamp:3/);
+  assert.match(heading, /-webkit-line-clamp:2/);
+  assert.doesNotMatch(heading, /transition/);
   assert.match(heading, /font-size:var\(--_heading-size\)/);
   const snapped = rule(
     `${ui}:not([data-expanded])>*>[data-part='title-area']>[data-part='title-row']>[data-part='title']>[data-part='heading']`,
@@ -228,4 +243,43 @@ test('reaches its own parts with child combinators only', () => {
     const descendant = new RegExp(`\\[data-ui='page-header'\\][^{]*? \\[data-part='${part}'\\]`);
     assert.ok(!descendant.test(normalized), `a descendant rule reaches ${part}`);
   }
+});
+
+/**
+ * A header is a fixed cost on every screen, so nothing in it grows without a
+ * bound: two lines for the subheading, three for the description, the whole
+ * string kept in the DOM.
+ */
+test('bounds the subheading and the description', () => {
+  const subheading = rule(
+    `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='title']>[data-part='subheading']`,
+  );
+  assert.match(subheading, /-webkit-line-clamp:2/);
+  const description = rule(
+    `${ui}>*>[data-part='header-area']>[data-part='content']>[data-part='description']`,
+  );
+  assert.match(description, /-webkit-line-clamp:3/);
+});
+
+/** Collapsed by the control, the area is at zero: the columns give up the half pill they reserved. */
+test('leaves no band under the title when the control collapses the area', () => {
+  const columns = normalized
+    .split(`${ui}:not([data-expanded]):not([data-scrolled])>*>[data-part='header-area']>*{`)
+    .slice(1)
+    .map((segment) => segment.split('}')[0]);
+  assert.ok(columns.some((segment) => /padding-block:0/.test(segment)));
+});
+
+/** One way back at a time: beside breadcrumbs the arrow yields; below 640 pixels it returns. */
+test('shows the way back only where the breadcrumbs are not', () => {
+  const beside = rule(
+    `${ui}>*>[data-part='title-area']>[data-part='nav']>[data-part='back']:has(~[data-part='breadcrumbs']:not(:empty))`,
+  );
+  assert.match(beside, /display:none/);
+  const narrow =
+    /@container page-header \(width < 640px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  assert.match(
+    narrow,
+    /\[data-part='back'\]:has\(~\[data-part='breadcrumbs'\]:not\(:empty\)\)\{display:inline-flex/,
+  );
 });

@@ -110,3 +110,8 @@ test('lays the footer actions out as one wrapping row aligned to the end', () =>
 test('has no header part', () => {
   assert.ok(!normalized.includes("[data-part='header']"), 'a header part is styled');
 });
+
+/** The header's chrome changes height as it snaps; anchoring would turn that into a scroll. */
+test('lets nothing under the scroll part anchor the scroll', () => {
+  assert.match(rule(`${ui}>[data-part='scroll']`), /overflow-anchor:none/);
+});

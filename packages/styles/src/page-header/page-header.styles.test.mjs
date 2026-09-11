@@ -216,7 +216,7 @@ test('paints no placeholder of its own while loading', () => {
     rule(
       `${ui}[data-loading]>*>[data-part='title-area']>[data-part='title-row']>[data-part='title']>[data-part='heading']`,
     ),
-    /--slotted-skeleton-inline-size:12ch/,
+    /--slotted-skeleton-inline-size:24ch/,
   );
   assert.match(fragment, /data-loading[\s\S]*data-ui="skeleton"/);
 });

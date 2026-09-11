@@ -231,7 +231,7 @@ estava `false`; soltar não muda `expanded`.
 `data-loading` na raiz e `aria-busy="true"`. Enquanto carrega, o binding
 renderiza `skeleton` com a forma `text` dentro de `heading`, `subheading` e
 `description`, no lugar do texto; a folha desta família diz só quanto cada um
-mede — `12ch`, `20ch` e `40ch` — através de `--slotted-skeleton-inline-size`,
+mede — `24ch`, `32ch` e `40ch` — através de `--slotted-skeleton-inline-size`,
 e o placeholder é desenhado pela folha de `skeleton`. É a regra SL6/CB5 que
 `packages/styles/src/waiting.test.mjs` prende: uma família que espera não pinta
 o próprio placeholder. A altura fica estável porque cada linha do placeholder

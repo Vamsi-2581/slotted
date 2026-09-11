@@ -380,7 +380,7 @@ own; every offset is logical, and the `rtl` capture mirrors the way back, the
 pill and the navigation rule.
 
 **Loading.** `data-loading` on the root, `aria-busy` on the body and the
-header, skeleton text of 12, 20 and 40 characters in the heading, the subheading
+header, skeleton text of 24, 32 and 40 characters in the heading, the subheading
 and the description, the actions pressable throughout.
 
 **Empty.** A header with one heading and nothing else leaves no vacancy: the

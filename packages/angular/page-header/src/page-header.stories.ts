@@ -1007,7 +1007,7 @@ export const Loading: Story = {
       1,
       scene(
         'The title has not arrived',
-        'The heading, the subheading and the description stand as skeleton text of their own width — 12, 20 and 40 characters — while the actions stay pressable and the root says aria-busy. Press Chegou: nothing under them moves.',
+        'The heading, the subheading and the description stand as skeleton text of their own width — 24, 32 and 40 characters — while the actions stay pressable and the root says aria-busy. Press Chegou: nothing under them moves.',
         '<sl-page-header-loading-demo />',
       ),
     ),

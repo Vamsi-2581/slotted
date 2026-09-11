@@ -574,7 +574,7 @@ export const Loading: Story = {
       <Grid columns={1}>
         <Scene
           label="The title has not arrived"
-          note="The heading, the subheading and the description stand as Skeleton text of their own width — 12, 20 and 40 characters — while the actions stay pressable and the root says aria-busy. Press Chegou: nothing under them moves."
+          note="The heading, the subheading and the description stand as Skeleton text of their own width — 24, 32 and 40 characters — while the actions stay pressable and the root says aria-busy. Press Chegou: nothing under them moves."
         >
           <Fetching />
         </Scene>

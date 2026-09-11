@@ -806,8 +806,11 @@
     > [data-part='title-row']
     > [data-part='title']
     > [data-part='heading'] {
-    --slotted-skeleton-inline-size: 12ch;
-    flex: 1 1 auto;
+    /* The width a title has, and no growth: grown, the heading pushed the
+       marks to the far end and they jumped back beside it when the title
+       arrived. The bar is what the words will be. */
+    --slotted-skeleton-inline-size: 24ch;
+    flex: 0 1 auto;
   }
   [data-ui='page-header'][data-loading]
     > *
@@ -815,7 +818,7 @@
     > [data-part='title-row']
     > [data-part='title']
     > [data-part='subheading'] {
-    --slotted-skeleton-inline-size: 20ch;
+    --slotted-skeleton-inline-size: 32ch;
   }
   [data-ui='page-header'][data-loading]
     > *

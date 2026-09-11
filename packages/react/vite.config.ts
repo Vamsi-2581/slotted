@@ -19,6 +19,8 @@ export default defineConfig({
         container: resolve(import.meta.dirname, 'src/container/index.ts'),
         'date-field': resolve(import.meta.dirname, 'src/date-field/index.ts'),
         'date-picker': resolve(import.meta.dirname, 'src/date-picker/index.ts'),
+        'datetime-field': resolve(import.meta.dirname, 'src/datetime-field/index.ts'),
+        'datetime-picker': resolve(import.meta.dirname, 'src/datetime-picker/index.ts'),
         'description-list': resolve(import.meta.dirname, 'src/description-list/index.ts'),
         dialog: resolve(import.meta.dirname, 'src/dialog/index.ts'),
         drawer: resolve(import.meta.dirname, 'src/drawer/index.ts'),

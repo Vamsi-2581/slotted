@@ -64,6 +64,14 @@
       "types": "./dist/types/date-picker/index.d.ts",
       "import": "./dist/date-picker.js"
     },
+    "./datetime-field": {
+      "types": "./dist/types/datetime-field/index.d.ts",
+      "import": "./dist/datetime-field.js"
+    },
+    "./datetime-picker": {
+      "types": "./dist/types/datetime-picker/index.d.ts",
+      "import": "./dist/datetime-picker.js"
+    },
     "./description-list": {
       "types": "./dist/types/description-list/index.d.ts",
       "import": "./dist/description-list.js"

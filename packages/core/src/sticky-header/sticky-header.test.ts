@@ -433,6 +433,36 @@ describe('createStickyHeader', () => {
     handle.destroy();
   });
 
+  /**
+   * Scrolling up keeps a reveal; once the root leaves the scroller's edge the
+   * area is where it would be anyway and the reveal ends without a move.
+   */
+  it('keeps a reveal on a scroll up, and lets it go once the root is off the edge', () => {
+    const { handle, io, onRevealed, onScrolled, root, scroller, state } = scene();
+    scroller.scrollTop = 300;
+    io.report(false);
+    state.expanded = true;
+    handle.expandedChanged(true, 'control');
+    /* Stuck: the root sits on the scroller's edge while the reveal holds. */
+    const rect = vi
+      .spyOn(root, 'getBoundingClientRect')
+      .mockImplementation(() => ({ top: 0 }) as DOMRect);
+    vi.spyOn(scroller, 'getBoundingClientRect').mockImplementation(() => ({ top: 0 }) as DOMRect);
+
+    scroller.scrollTop = 200;
+    scroller.dispatchEvent(new Event('scroll'));
+    expect(handle.revealed()).toBe(true);
+
+    /* Above its natural top the root leaves the edge. */
+    rect.mockImplementation(() => ({ top: 40 }) as DOMRect);
+    scroller.scrollTop = 100;
+    scroller.dispatchEvent(new Event('scroll'));
+    expect(onRevealed).toHaveBeenLastCalledWith(false);
+    expect(onScrolled).toHaveBeenLastCalledWith(false);
+    expect(state.expanded).toBe(true);
+    handle.destroy();
+  });
+
   it('attaches no intersection observer under manual collapse', () => {
     FakeIntersectionObserver.instances = [];
     const scroller = document.createElement('div');

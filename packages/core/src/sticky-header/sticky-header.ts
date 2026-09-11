@@ -370,8 +370,23 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
       observeArea();
       return;
     }
-    if (!revealed || Math.abs(delta) <= REVEAL_SCROLL_THRESHOLD) return;
-    if (now() - revealedAt < REVEAL_SETTLE_WINDOW && Math.abs(delta) <= ANCHOR_CORRECTION) return;
+    if (!revealed) return;
+    if (delta < 0) {
+      /**
+       * Scrolling up keeps the reveal: the reader is heading where the area
+       * shows anyway, and ending it here snapped the title and re-opened it
+       * a frame later. Once the root leaves the scroller's edge the area is
+       * at its natural place, and the reveal is over without anything moving.
+       */
+      if (scrollTop() > 0 && stuck()) return;
+      revealed = false;
+      options.onRevealed(false);
+      setScrolled(false);
+      collapsedBy = null;
+      return;
+    }
+    if (delta <= REVEAL_SCROLL_THRESHOLD) return;
+    if (now() - revealedAt < REVEAL_SETTLE_WINDOW && delta <= ANCHOR_CORRECTION) return;
     setRevealed(false);
     if (scrolled) settling = true;
     else armFold(); /* Revealed from a fold: it folds again, compensated. */

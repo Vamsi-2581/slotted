@@ -142,6 +142,19 @@ export const CHANGE_REASONS = [
    * `toast` is the first family in the library with a timer of its own.
    */
   'timeout',
+  /**
+   * The reader scrolled past the thing, and the thing answered. It is neither
+   * `pointer` — a wheel, a trackpad, a scrollbar drag and a touch fling are one
+   * gesture, and none of them is a press on the control — nor `programmatic`,
+   * because the application asked for nothing.
+   *
+   * `page-header` is the first family whose state a scroll moves: the header
+   * area collapses when it leaves the scrollport and expands when it returns.
+   * UI5's `title-toggle` fires the same event for a scroll and for a click, so
+   * a product saving the reader's preference has to guess which one it saw;
+   * the reason is what lets it persist the click and ignore the scroll.
+   */
+  'scroll',
 ];
 
 export const KNOWN_CAPABILITIES = [

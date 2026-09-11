@@ -35,7 +35,14 @@ export type ChangeReason =
    * reader pressing the control, and not `programmatic`, which is the
    * application asking. `toast` is the first family with a timer of its own.
    */
-  | 'timeout';
+  | 'timeout'
+  /**
+   * The reader scrolled past the thing and it answered. Not `pointer`: a wheel,
+   * a trackpad, a scrollbar drag and a touch fling are one gesture and none of
+   * them is a press on the control. Not `programmatic`: the application asked
+   * for nothing. `page-header` is the first family whose state a scroll moves.
+   */
+  | 'scroll';
 
 export interface ChangeRequest<T> {
   readonly value: T;

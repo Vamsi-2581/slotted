@@ -127,7 +127,17 @@ Found by the reviewer on the restarted Storybook, and fixed:
   position by the same few pixels — a scroll event the reader did not make,
   which ended the reveal the instant it began. Nothing under the page's scroll
   part anchors the scroll now, and the engine holds a reveal through a scroll
-  of up to 24 pixels in the 400 milliseconds after it began.
+  of up to 24 pixels in the 400 milliseconds after it began. A third came out
+  under a stress probe that scrolls in 6-pixel steps: an area the control
+  folded while the page was scrolled came back into view, folded over a
+  transition, shortened the content, moved the scroll, and the observer
+  reported again — the header flickered all the way up. The fold is instant
+  now and the scroll position moves up by what the flow lost as the fold
+  lands, before paint, so nothing on screen moves; and a folded header that is
+  stuck opens in place when the control asks.
+- The tabs floated between the pill's rule and the edge: the tabs grid kept a
+  row gap under a list with no panel beside it. One explicit row now; the
+  list's line is the header's edge.
 - Pinned and scrolled to the end, a short section's header rose over the
   chrome: it shared the chrome's z-index and came later in the DOM. The root
   now stands three steps above every other sticky thing on the page.
@@ -292,7 +302,12 @@ under the chrome and the 360-pixel column.
 **The one change that would most improve it:** a scene that reads the reasons
 off the request as they happen. Made: the accessibility scene of the
 page-header page logs each `ChangeRequest` with its reason as the reader
-scrolls and presses.
+scrolls and presses. After the review, a scene for the sticky layers — a
+section in a section, a table in that — on both section pages, and the
+anatomy scene of the header page says that the way back is written and yields.
+The stress probe that found the fold is `$SCRATCH/stress.mjs`: six sweeps of
+the scroll, a toggle mid-scroll and a hover around the threshold, with every
+attribute flip logged; a pass is one flip per crossing.
 
 ---
 

@@ -35,6 +35,11 @@ validação final antes de commitar.
   linhas); transição de tamanho do título removida; voltar cede às migalhas;
   ícone do botão Imprimir no slot `start`; grelha das abas sem gap em torno de
   colunas vazias (`tabs.css`).
+- Terceira ronda: abas a flutuar (grelha de `tabs` com gap sob a lista sem
+  painel — uma linha explícita), oscilação ao rolar para cima com a área
+  recolhida pelo controlo (dobra instantânea com compensação do scroll no
+  motor, `$SCRATCH/stress.mjs` a zero flips espúrios), cena das camadas sticky
+  nas duas páginas de `section`, nota do voltar na cena de anatomia.
 - Novo: uma secção sticky mede o cabeçalho (`--slotted-section-header-size`)
   e o corpo republica `--slotted-page-sticky-top` = página + cabeçalho, e
   faz ponte para a tabela — camadas sticky somam-se sob um só nome.

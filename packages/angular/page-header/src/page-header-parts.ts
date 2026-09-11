@@ -1,0 +1,284 @@
+import { SlSkeletonText } from '@slotted/angular/skeleton';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  Directive,
+  effect,
+  ElementRef,
+  HostAttributeToken,
+  inject,
+  ViewEncapsulation,
+} from '@angular/core';
+
+import { SlPageHeader } from './page-header';
+
+const HEADINGS = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
+
+/** A click synthesised by the keyboard reports no detail; a real one reports the click count. */
+function activationReason(event: MouseEvent) {
+  return event.detail === 0 ? ('keyboard' as const) : ('pointer' as const);
+}
+
+/** The strip that never leaves: nav, title row and controls. Sticky at 0 inside the root. */
+@Directive({
+  selector: '[slPageHeaderTitleArea]',
+  standalone: true,
+  host: { 'data-part': 'title-area' },
+})
+export class SlPageHeaderTitleArea {}
+
+/** The row above the title: the way back, then the breadcrumbs. */
+@Directive({ selector: '[slPageHeaderNav]', standalone: true, host: { 'data-part': 'nav' } })
+export class SlPageHeaderNav {}
+
+/** The way back: the consumer's own link or button, with the arrow the family draws before it. */
+@Directive({ selector: '[slPageHeaderBack]', standalone: true, host: { 'data-part': 'back' } })
+export class SlPageHeaderBack {}
+
+/** The slot a breadcrumb sits in. Hidden below 640 pixels. */
+@Directive({
+  selector: '[slPageHeaderBreadcrumbs]',
+  standalone: true,
+  host: { 'data-part': 'breadcrumbs' },
+})
+export class SlPageHeaderBreadcrumbs {}
+
+/** Visual, title, actions and navigation, on one row that wraps. */
+@Directive({
+  selector: '[slPageHeaderTitleRow]',
+  standalone: true,
+  host: { 'data-part': 'title-row' },
+})
+export class SlPageHeaderTitleRow {}
+
+/** The mark before the heading: an avatar, an icon, an image. */
+@Directive({ selector: '[slPageHeaderVisual]', standalone: true, host: { 'data-part': 'visual' } })
+export class SlPageHeaderVisual {}
+
+/** The column of heading, marks and subheading. */
+@Directive({ selector: '[slPageHeaderTitle]', standalone: true, host: { 'data-part': 'title' } })
+export class SlPageHeaderTitle {}
+
+/** The status beside the heading: a tag, a badge, a status indicator. */
+@Directive({ selector: '[slPageHeaderMarks]', standalone: true, host: { 'data-part': 'marks' } })
+export class SlPageHeaderMarks {}
+
+/** The slot a toolbar sits in, pushed to the end of the title row. */
+@Directive({
+  selector: '[slPageHeaderActions]',
+  standalone: true,
+  host: { 'data-part': 'actions' },
+})
+export class SlPageHeaderActions {}
+
+/** The previous and next record, at the far end of the title row. */
+@Directive({
+  selector: '[slPageHeaderNavigation]',
+  standalone: true,
+  host: { 'data-part': 'navigation' },
+})
+export class SlPageHeaderNavigation {}
+
+/** The picture of the record, a column before the content of the header area. */
+@Directive({ selector: '[slPageHeaderFigure]', standalone: true, host: { 'data-part': 'figure' } })
+export class SlPageHeaderFigure {}
+
+/** A column of whatever only makes sense at rest. */
+@Directive({
+  selector: '[slPageHeaderContent]',
+  standalone: true,
+  host: { 'data-part': 'content' },
+})
+export class SlPageHeaderContent {}
+
+/** The slot a tabs family sits in, last in the root. */
+@Directive({ selector: '[slPageHeaderTabs]', standalone: true, host: { 'data-part': 'tabs' } })
+export class SlPageHeaderTabs {}
+
+/**
+ * The heading. The element is the consumer's own: `<h1 slPageHeaderHeading>`
+ * is a native heading and this adds nothing to it, while a `div` or an
+ * `input` gets `role="heading"` and the level the header resolved. While
+ * loading it renders `slSkeletonText` in place of its words.
+ */
+@Component({
+  selector: '[slPageHeaderHeading]',
+  standalone: true,
+  exportAs: 'slPageHeaderHeading',
+  imports: [SlSkeletonText],
+  template: `@if (header.loading()) {
+      <span slSkeletonText [lines]="1"></span>
+    } @else {
+      <ng-content />
+    }`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: {
+    'data-part': 'heading',
+    '[attr.id]': 'header.ids().headingId',
+    '[attr.role]': 'ariaRole()',
+    '[attr.aria-level]': 'ariaLevel()',
+  },
+})
+export class SlPageHeaderHeading {
+  protected readonly header = inject(SlPageHeader);
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+  private readonly isNativeHeading = HEADINGS.has(this.native.tagName);
+
+  protected readonly ariaRole = computed(() => (this.isNativeHeading ? null : 'heading'));
+  protected readonly ariaLevel = computed(() =>
+    this.isNativeHeading ? null : this.header.resolvedLevel(),
+  );
+}
+
+/** One line under the heading, in the muted text, part of what stays visible. */
+@Component({
+  selector: '[slPageHeaderSubheading]',
+  standalone: true,
+  imports: [SlSkeletonText],
+  template: `@if (header.loading()) {
+      <span slSkeletonText [lines]="1"></span>
+    } @else {
+      <ng-content />
+    }`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'subheading' },
+})
+export class SlPageHeaderSubheading {
+  protected readonly header = inject(SlPageHeader);
+}
+
+/** A paragraph with a measure, inside the header area's content. */
+@Component({
+  selector: '[slPageHeaderDescription]',
+  standalone: true,
+  imports: [SlSkeletonText],
+  template: `@if (header.loading()) {
+      <span slSkeletonText [lines]="2"></span>
+    } @else {
+      <ng-content />
+    }`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'description' },
+})
+export class SlPageHeaderDescription {
+  protected readonly header = inject(SlPageHeader);
+}
+
+/**
+ * The region that collapses. Collapsed by the control it is `inert` and
+ * hidden from assistive technology; scrolled past it is neither, so a control
+ * inside it that receives focus is scrolled back into view and the header
+ * re-opens with the reason `scroll`.
+ */
+@Directive({
+  selector: '[slPageHeaderArea]',
+  standalone: true,
+  exportAs: 'slPageHeaderArea',
+  host: {
+    'data-part': 'header-area',
+    role: 'region',
+    '[attr.id]': 'header.ids().areaId',
+    '[attr.aria-label]': 'label()',
+  },
+})
+export class SlPageHeaderArea {
+  protected readonly header = inject(SlPageHeader);
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+
+  protected readonly label = computed(
+    () => this.written ?? this.header.resolvedMessages().headerArea,
+  );
+
+  constructor() {
+    effect(() => {
+      const closedByControl = !this.header.expanded() && !this.header.scrolled();
+      if (closedByControl) {
+        this.native.setAttribute('inert', '');
+        this.native.setAttribute('aria-hidden', 'true');
+      } else {
+        this.native.removeAttribute('inert');
+        this.native.removeAttribute('aria-hidden');
+      }
+    });
+  }
+}
+
+/** The zero-height row on the chrome's edge; the pill is its only child. */
+@Component({
+  selector: '[slPageHeaderControls]',
+  standalone: true,
+  template: `<div><ng-content /></div>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { 'data-part': 'controls' },
+})
+export class SlPageHeaderControls {}
+
+/**
+ * The disclosure control: the consumer's own `button`, so `Enter` and `Space`
+ * are the platform's. `aria-expanded` and `aria-controls` are the pattern's
+ * two properties.
+ */
+@Directive({
+  selector: 'button[slPageHeaderToggle]',
+  standalone: true,
+  exportAs: 'slPageHeaderToggle',
+  host: {
+    'data-part': 'toggle',
+    type: 'button',
+    '[attr.aria-expanded]': 'header.expanded()',
+    '[attr.aria-controls]': 'header.ids().areaId',
+    '[attr.aria-label]': 'label()',
+    '(click)': 'onClick($event)',
+  },
+})
+export class SlPageHeaderToggle {
+  protected readonly header = inject(SlPageHeader);
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+
+  protected readonly label = computed(() => {
+    if (this.written !== null) return this.written;
+    const messages = this.header.resolvedMessages();
+    return this.header.expanded() ? messages.collapse : messages.expand;
+  });
+
+  protected onClick(event: MouseEvent) {
+    if (event.defaultPrevented) return;
+    this.header.setExpanded(!this.header.expanded(), activationReason(event), event);
+  }
+}
+
+/** The pin: a toggle button with `aria-pressed`, which is the `pressed` state the vocabulary has. */
+@Directive({
+  selector: 'button[slPageHeaderPin]',
+  standalone: true,
+  exportAs: 'slPageHeaderPin',
+  host: {
+    'data-part': 'pin',
+    type: 'button',
+    '[attr.aria-pressed]': 'header.pinned()',
+    '[attr.data-pressed]': "header.pinned() ? '' : null",
+    '[attr.aria-label]': 'label()',
+    '(click)': 'onClick($event)',
+  },
+})
+export class SlPageHeaderPin {
+  protected readonly header = inject(SlPageHeader);
+  private readonly written = inject(new HostAttributeToken('aria-label'), { optional: true });
+
+  protected readonly label = computed(() => {
+    if (this.written !== null) return this.written;
+    const messages = this.header.resolvedMessages();
+    return this.header.pinned() ? messages.unpin : messages.pin;
+  });
+
+  protected onClick(event: MouseEvent) {
+    if (event.defaultPrevented) return;
+    this.header.setPinned(!this.header.pinned(), activationReason(event), event);
+  }
+}

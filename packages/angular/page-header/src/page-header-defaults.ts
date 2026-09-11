@@ -1,0 +1,100 @@
+import { inject, Injectable, InjectionToken } from '@angular/core';
+
+/** The type step the title sits at. The snapped title takes the step below it. */
+export type PageHeaderSize = 'sm' | 'md' | 'lg';
+
+/** The rank of the heading. A page's own header is `1`. */
+export type PageHeaderLevel = '1' | '2' | '3';
+
+/**
+ * What collapses the header area. `scroll` collapses it when it leaves the
+ * scrollport and re-opens it when it returns; `manual` leaves it to the toggle,
+ * the pin and the application, and the whole header stays while the page
+ * scrolls.
+ */
+export type PageHeaderCollapse = 'scroll' | 'manual';
+
+/** Why the header area opened or closed. */
+export type PageHeaderExpandedReason = 'pointer' | 'keyboard' | 'scroll' | 'programmatic';
+
+/** Why the pin took hold or let go. */
+export type PageHeaderPinnedReason = 'pointer' | 'keyboard' | 'programmatic';
+
+/** The strings the family says on the reader's behalf. */
+export interface PageHeaderMessages {
+  expand: string;
+  collapse: string;
+  pin: string;
+  unpin: string;
+  headerArea: string;
+}
+
+export interface PageHeaderDefaults {
+  collapse: PageHeaderCollapse;
+  level: PageHeaderLevel;
+  messages: PageHeaderMessages;
+  size: PageHeaderSize;
+}
+
+/** The strings the family says before an application says otherwise. */
+export const DEFAULT_PAGE_HEADER_MESSAGES: PageHeaderMessages = {
+  expand: 'Expandir cabeçalho',
+  collapse: 'Recolher cabeçalho',
+  pin: 'Fixar cabeçalho',
+  unpin: 'Soltar cabeçalho',
+  headerArea: 'Cabeçalho da página',
+};
+
+const FALLBACK: PageHeaderDefaults = {
+  collapse: 'scroll',
+  level: '1',
+  messages: DEFAULT_PAGE_HEADER_MESSAGES,
+  size: 'md',
+};
+
+export const PAGE_HEADER_DEFAULTS = new InjectionToken<PageHeaderDefaults>(
+  'slotted page-header defaults',
+  { providedIn: 'root', factory: () => FALLBACK },
+);
+
+/**
+ * An application decides once how its page headers behave — the size, the
+ * rank, whether a scroll collapses the area, and the words the two controls
+ * say — rather than repeating them on every screen. A header that states any
+ * of them itself still wins.
+ */
+export function providePageHeaderDefaults(
+  defaults: Partial<Omit<PageHeaderDefaults, 'messages'>> & {
+    messages?: Partial<PageHeaderMessages>;
+  },
+) {
+  return {
+    provide: PAGE_HEADER_DEFAULTS,
+    useFactory: (): PageHeaderDefaults => ({
+      ...FALLBACK,
+      ...defaults,
+      messages: { ...FALLBACK.messages, ...defaults.messages },
+    }),
+  };
+}
+
+/** What a page header renders as here, before it states anything of its own. */
+export function injectPageHeaderDefaults(): PageHeaderDefaults {
+  return inject(PAGE_HEADER_DEFAULTS);
+}
+
+/**
+ * Application-scoped rather than module-scoped, for the reason `field`
+ * records: a module-level counter produces colliding sequences when two
+ * applications render in one server process, and the server and the client
+ * sequences must match for hydration.
+ */
+@Injectable({ providedIn: 'root' })
+export class SlPageHeaderIdFactory {
+  private count = 0;
+
+  next() {
+    this.count += 1;
+    return `slotted-page-header-${this.count}`;
+  }
+}

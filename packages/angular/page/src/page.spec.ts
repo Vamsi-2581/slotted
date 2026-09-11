@@ -1,0 +1,189 @@
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  SlSection,
+  SlSectionHeader,
+  SlSectionHeading,
+  SlSectionTitle,
+} from '@slotted/angular/section';
+import { SlPage, SlPageBody, SlPageFooter, STICKY_BOTTOM_PROPERTY } from './page';
+import { providePageDefaults } from './page-defaults';
+
+class FakeResizeObserver {
+  static callbacks: ResizeObserverCallback[] = [];
+  constructor(callback: ResizeObserverCallback) {
+    FakeResizeObserver.callbacks.push(callback);
+  }
+  observe() {}
+  disconnect() {}
+  unobserve() {}
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    SlPage,
+    SlPageBody,
+    SlPageFooter,
+    SlSection,
+    SlSectionHeader,
+    SlSectionTitle,
+    SlSectionHeading,
+  ],
+  template: `@if (main()) {
+      <main
+        slPage
+        [width]="width()"
+        [inset]="inset()"
+        [scroll]="scroll()"
+        [ground]="ground()"
+        [fill]="fill()"
+        [loading]="loading()"
+      >
+        <div slPageBody>
+          <section slSection>
+            <div slSectionHeader>
+              <div slSectionTitle><h2 slSectionHeading>Itens do pedido</h2></div>
+            </div>
+          </section>
+        </div>
+        <footer slPageFooter [open]="footer()"><button type="button">Enviar</button></footer>
+      </main>
+    } @else {
+      <div slPage [landmark]="landmark()"><div slPageBody>x</div></div>
+    }`,
+})
+class Host {
+  readonly main = signal(true);
+  readonly landmark = signal<'main' | 'none' | undefined>(undefined);
+  readonly width = signal<'measure' | 'content' | 'wide' | 'full' | undefined>(undefined);
+  readonly inset = signal<0 | 4 | 6 | undefined>(undefined);
+  readonly scroll = signal<'ancestor' | 'self' | undefined>(undefined);
+  readonly ground = signal<'sunken' | 'surface' | undefined>(undefined);
+  readonly fill = signal(false);
+  readonly loading = signal(false);
+  readonly footer = signal(true);
+}
+
+describe('SlPage', () => {
+  let fixture: ComponentFixture<Host>;
+  let host: Host;
+  const query = (selector: string) => fixture.nativeElement.querySelector(selector) as HTMLElement;
+  const root = () => query('[data-ui="page"]');
+
+  beforeEach(async () => {
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    FakeResizeObserver.callbacks = [];
+    fixture = TestBed.createComponent(Host);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('renders the anatomy the contract declares', () => {
+    for (const part of ['root', 'scroll', 'body', 'footer', 'actions']) {
+      expect(query(`[data-part="${part}"]`), part).not.toBeNull();
+    }
+    expect(root().tagName).toBe('MAIN');
+    expect(root().hasAttribute('role')).toBe(false);
+  });
+
+  it('adds role=main to an element that is not main, unless landmark says none', () => {
+    host.main.set(false);
+    fixture.detectChanges();
+    expect(root().tagName).toBe('DIV');
+    expect(root().getAttribute('role')).toBe('main');
+    host.landmark.set('none');
+    fixture.detectChanges();
+    expect(root().hasAttribute('role')).toBe(false);
+  });
+
+  it('writes its axes and hands its measure to the body and the footer', () => {
+    host.width.set('measure');
+    host.inset.set(4);
+    host.scroll.set('self');
+    host.ground.set('surface');
+    host.fill.set(true);
+    fixture.detectChanges();
+    expect(root().getAttribute('data-width')).toBe('measure');
+    expect(root().getAttribute('data-scroll')).toBe('self');
+    expect(root().getAttribute('data-ground')).toBe('surface');
+    expect(root().hasAttribute('data-fill')).toBe(true);
+    const body = query('[data-part="body"] > [data-ui="container"]');
+    expect(body.getAttribute('data-size')).toBe('measure');
+    expect(body.getAttribute('data-inset')).toBe('4');
+    const footer = query('[data-part="footer"] > [data-ui="container"]');
+    expect(footer.getAttribute('data-size')).toBe('measure');
+  });
+
+  it('steps the heading level for its body', () => {
+    const heading = query('[data-part="heading"]');
+    expect(heading.tagName).toBe('H2');
+    expect(query('[data-ui="section"]').getAttribute('data-level')).toBe('2');
+  });
+
+  it('names the footer and holds it through its exit', async () => {
+    const footer = query('[data-part="footer"]');
+    expect(footer.getAttribute('aria-label')).toBe('Ações da página');
+    expect(footer.getAttribute('data-status')).toBe('open');
+    expect(query('[data-part="footer"] [data-part="actions"]')).not.toBeNull();
+    host.footer.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(['exiting', 'unmounted']).toContain(footer.getAttribute('data-status'));
+  });
+
+  it('carries aria-busy on the body while loading', () => {
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-loading')).toBe(true);
+    expect(query('[data-part="body"]').getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('publishes the footer height on the document and removes it on destroy', () => {
+    const footer = query('[data-part="footer"]');
+    Object.defineProperty(footer, 'offsetHeight', { configurable: true, value: 56 });
+    for (const callback of FakeResizeObserver.callbacks) callback([], {} as never);
+    expect(document.documentElement.style.getPropertyValue(STICKY_BOTTOM_PROPERTY)).toBe('56px');
+    fixture.destroy();
+    expect(document.documentElement.style.getPropertyValue(STICKY_BOTTOM_PROPERTY)).toBe('');
+  });
+});
+
+describe('SlPage defaults', () => {
+  @Component({
+    standalone: true,
+    imports: [SlPage, SlPageBody, SlPageFooter],
+    providers: [
+      providePageDefaults({
+        ground: 'surface',
+        scroll: 'self',
+        width: 'content',
+        messages: { footer: 'Decisões' },
+      }),
+    ],
+    template: `<main slPage width="full">
+      <div slPageBody>x</div>
+      <footer slPageFooter><button type="button">Enviar</button></footer>
+    </main>`,
+  })
+  class Provided {}
+
+  it('takes its defaults from the provider, and its own inputs over them', () => {
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    const fixture = TestBed.createComponent(Provided);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[data-ui="page"]') as HTMLElement;
+    expect(root.getAttribute('data-ground')).toBe('surface');
+    expect(root.getAttribute('data-scroll')).toBe('self');
+    expect(root.getAttribute('data-width')).toBe('full');
+    expect(root.querySelector('[data-part="footer"]')?.getAttribute('aria-label')).toBe('Decisões');
+    vi.unstubAllGlobals();
+  });
+});

@@ -138,6 +138,24 @@ Found by the reviewer on the restarted Storybook, and fixed:
 - The tabs floated between the pill's rule and the edge: the tabs grid kept a
   row gap under a list with no panel beside it. One explicit row now; the
   list's line is the header's edge.
+
+The fourth round, on the same Storybook:
+
+- A section header stuck under the chrome met its edge with no air: it keeps
+  half a step of padding above, taken back by a negative margin at rest, so it
+  stands where it stood and paints the page's own ground there.
+- The pill's marks read thin: one step up, to the medium icon size. The
+  pressed pin stands on the accent surface, not only in accent ink.
+- The record arrows sat four pixels above the actions: the toolbar pads its
+  controls by a step and the navigation slot did not. In a right-to-left
+  document the chevrons pointed the wrong way while standing in the right
+  place; the glyphs mirror there.
+- The page inside a drawer painted its sunken ground inside the drawer's
+  padding, which read as a thick frame; it stands on the surface.
+- A reveal ended on a scroll up as well as down, and the observer re-opened
+  the area a frame later — a blink. Scrolling up keeps the reveal now; once
+  the root leaves the scroller's edge the area is where it would be anyway,
+  and the reveal ends without a move.
 - Pinned and scrolled to the end, a short section's header rose over the
   chrome: it shared the chrome's z-index and came later in the DOM. The root
   now stands three steps above every other sticky thing on the page.

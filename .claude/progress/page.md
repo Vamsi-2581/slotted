@@ -35,6 +35,10 @@ validação final antes de commitar.
   linhas); transição de tamanho do título removida; voltar cede às migalhas;
   ícone do botão Imprimir no slot `start`; grelha das abas sem gap em torno de
   colunas vazias (`tabs.css`).
+- Quarta ronda: ar sob o cabeçalho de secção preso, marcas do pill maiores e
+  fundo no pin premido, setas de registo alinhadas com as ações e espelhadas
+  em RTL, página no drawer sobre superfície, revelação mantida ao rolar para
+  cima (fim sem movimento quando a raiz sai da aresta).
 - Terceira ronda: abas a flutuar (grelha de `tabs` com gap sob a lista sem
   painel — uma linha explícita), oscilação ao rolar para cima com a área
   recolhida pelo controlo (dobra instantânea com compensação do scroll no

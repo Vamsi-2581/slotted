@@ -472,6 +472,27 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-arrow-left",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-pin",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-pin-off",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-chevron-down",
       "layer": "primitive",
       "axis": "base",

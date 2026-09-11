@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 100    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 103    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
 | `component` | One family adjusting a semantic value for itself.              | 15     |
 
@@ -212,6 +212,9 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-chevron-right`    | `chevron-right`        | stroke 2   |
 | `--slotted-icon-chevron-down`     | `chevron-down`         | stroke 2   |
 | `--slotted-icon-chevrons-right`   | `chevrons-right`       | stroke 2   |
+| `--slotted-icon-arrow-left`       | `arrow-left`           | stroke 2   |
+| `--slotted-icon-pin`              | `pin`                  | stroke 2   |
+| `--slotted-icon-pin-off`          | `pin-off`              | stroke 2   |
 | `--slotted-icon-external`         | `arrow-up-right`       | stroke 2   |
 | `--slotted-icon-calendar`         | `calendar`             | stroke 2   |
 | `--slotted-icon-clock`            | `clock`                | stroke 2   |
@@ -256,6 +259,15 @@ was added for `pagination`, whose first and last triggers are the one pair in
 the library that means "all the way to the end" rather than "one step"; like
 every chevron it is mirrored by the family that draws it, so the same token
 serves both ends of the row.
+
+`--slotted-icon-arrow-left`, `--slotted-icon-pin` and `--slotted-icon-pin-off`
+were added for `page-header`. The arrow is the mark on the control that takes
+the reader back to where they came from — the one glyph in the scale that
+points along the reading direction, so the family that draws it mirrors it in a
+right-to-left document. The pin and the struck pin are the two states of the
+control that holds the header area open while the page scrolls: one artwork
+with a stroke added, for the reason `eye` and `eye-off` are, so the pressed
+control reads as the same control changed rather than as another icon.
 
 `--slotted-icon-copy` is two sheets, one behind the other, rather than a pair of
 brackets or a page: the mark has to be read at sixteen pixels beside a value, and

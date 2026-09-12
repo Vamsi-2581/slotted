@@ -1,4 +1,4 @@
-export { holdResizeGesture } from './gesture';
+export { holdResizeGesture, measureLength } from './gesture';
 export type { ResizeCursor } from './gesture';
 export {
   anchorsAtStart,
@@ -6,10 +6,19 @@ export {
   EXTENT_STEP_PX,
   extentBounds,
   extentAtPoint,
+  extentFromLength,
+  extentVelocity,
   isInlineSide,
   nearestSnap,
   orderSnapPoints,
+  projectExtent,
   stepAmountFromPixels,
   stepExtent,
 } from './extent';
-export type { ExtentPointRequest, ExtentRect, ExtentSide, ExtentStepRequest } from './extent';
+export type {
+  ExtentPointRequest,
+  ExtentRect,
+  ExtentSample,
+  ExtentSide,
+  ExtentStepRequest,
+} from './extent';

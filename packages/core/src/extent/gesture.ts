@@ -42,3 +42,34 @@ export function holdResizeGesture(
     root.style.userSelect = priorSelect;
   };
 }
+
+/**
+ * A CSS length in pixels, resolved where it will be used.
+ *
+ * `18rem`, `200px`, `25%` and `10vw` are all limits a consumer may reasonably
+ * write, and only the browser knows what any of them come to: `rem` against the
+ * root, `em` and percentages against the element the probe is placed in. So the
+ * probe is placed in that element rather than in the document, and every unit
+ * resolves the way the consumer's own stylesheet would resolve it.
+ *
+ * It is a measurement and not a parse for the same reason `positioner` measures
+ * rather than computes: a parser here would be a second, worse implementation
+ * of the CSS value grammar, and it would be wrong first for the unit nobody
+ * thought of.
+ *
+ * The probe is removed before the value is returned, and it is out of flow and
+ * invisible while it is there, so nothing the consumer can see moves.
+ */
+export function measureLength(value: string, against: HTMLElement): number {
+  const probe = against.ownerDocument.createElement('div');
+  probe.style.position = 'absolute';
+  probe.style.visibility = 'hidden';
+  probe.style.pointerEvents = 'none';
+  probe.style.inlineSize = value;
+
+  against.append(probe);
+  const pixels = probe.getBoundingClientRect().width;
+  probe.remove();
+
+  return pixels;
+}

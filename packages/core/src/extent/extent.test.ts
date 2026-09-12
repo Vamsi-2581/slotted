@@ -8,9 +8,13 @@ import {
   stepAmountFromPixels,
   extentBounds,
   extentAtPoint,
+  extentFromLength,
+  extentVelocity,
   isInlineSide,
+  measureLength,
   nearestSnap,
   orderSnapPoints,
+  projectExtent,
   stepExtent,
 } from './index';
 
@@ -249,5 +253,156 @@ describe('holdResizeGesture', () => {
 
   it('answers a document it has not got with a release that does nothing', () => {
     expect(() => holdResizeGesture(undefined, 'col-resize')()).not.toThrow();
+  });
+});
+
+describe('extentFromLength', () => {
+  it('answers the share of the span a length takes', () => {
+    expect(extentFromLength({ pixels: 200, span: 800 })).toBe(0.25);
+  });
+
+  /**
+   * The case the family exists for: a two-hundred-pixel floor in a container
+   * narrower than two hundred pixels. Every surveyed splitter is percentage-only
+   * and cannot reach this question at all.
+   */
+  it('clamps a floor larger than the container to one rather than past it', () => {
+    expect(extentFromLength({ pixels: 200, span: 160 })).toBe(1);
+  });
+
+  it('clamps a negative length to nought', () => {
+    expect(extentFromLength({ pixels: -40, span: 800 })).toBe(0);
+  });
+
+  /** A container with no measure answers nought, never infinity. */
+  it('answers a span it has not got with nought', () => {
+    expect(extentFromLength({ pixels: 200, span: 0 })).toBe(0);
+    expect(extentFromLength({ pixels: 200, span: -1 })).toBe(0);
+  });
+});
+
+describe('measureLength', () => {
+  /**
+   * jsdom performs no layout, so `getBoundingClientRect` answers nought here
+   * for every length and the number this function returns cannot be asserted in
+   * this environment. What can be asserted is the decision the function is
+   * *for*: the probe carries the consumer's value verbatim and is measured
+   * inside the element it was given, which is what makes `25%`, `em` and `rem`
+   * resolve the way the consumer's own stylesheet resolves them. A probe
+   * measured in the document would answer a percentage of the page.
+   *
+   * The resolved number is exercised where there is layout: the harness page at
+   * `tools/harness/out/splitter.html` and both reference pages.
+   */
+  it('measures inside the element it was given, carrying the value verbatim', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+
+    let measured: HTMLElement | undefined;
+    const append = host.append.bind(host);
+    host.append = (...nodes: (Node | string)[]) => {
+      measured = nodes[0] as HTMLElement;
+      append(...nodes);
+    };
+
+    measureLength('18rem', host);
+
+    expect(measured?.style.inlineSize).toBe('18rem');
+    expect(measured?.parentElement).toBe(null);
+    host.remove();
+  });
+
+  it('leaves nothing behind in the element it measured in', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    measureLength('10rem', host);
+    expect(host.childElementCount).toBe(0);
+    host.remove();
+  });
+
+  it('takes the probe out of flow and out of sight while it is there', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+
+    let measured: HTMLElement | undefined;
+    const append = host.append.bind(host);
+    host.append = (...nodes: (Node | string)[]) => {
+      measured = nodes[0] as HTMLElement;
+      append(...nodes);
+    };
+
+    measureLength('200px', host);
+
+    expect(measured?.style.position).toBe('absolute');
+    expect(measured?.style.visibility).toBe('hidden');
+    expect(measured?.style.pointerEvents).toBe('none');
+    host.remove();
+  });
+});
+
+describe('extentVelocity', () => {
+  it('answers fractions per second from the last three samples', () => {
+    const samples = [
+      { fraction: 0.2, at: 0 },
+      { fraction: 0.3, at: 100 },
+      { fraction: 0.4, at: 200 },
+    ];
+    expect(extentVelocity(samples)).toBeCloseTo(1);
+  });
+
+  /**
+   * The case three samples exist for. A hand that flicks and then rests for one
+   * frame before lifting meant to end where it is; a two-sample reading would
+   * report that pause as the whole gesture and lose the flick before it, and a
+   * longer window would report the flick and ignore the pause.
+   */
+  it('keeps a pause before the release honest without erasing the flick', () => {
+    const flicked = extentVelocity([
+      { fraction: 0.2, at: 0 },
+      { fraction: 0.5, at: 60 },
+      { fraction: 0.5, at: 80 },
+    ]);
+    expect(flicked).toBeGreaterThan(0);
+    expect(flicked).toBeCloseTo(((0.5 - 0.2) / 80) * 1000);
+  });
+
+  it('falls back to no velocity when a stream delivered too little', () => {
+    expect(extentVelocity([])).toBe(0);
+    expect(extentVelocity([{ fraction: 0.4, at: 10 }])).toBe(0);
+  });
+
+  /** Two samples in the same millisecond are a division by nought. */
+  it('answers nought rather than infinity for samples with no time between them', () => {
+    expect(
+      extentVelocity([
+        { fraction: 0.2, at: 40 },
+        { fraction: 0.6, at: 40 },
+      ]),
+    ).toBe(0);
+  });
+});
+
+describe('projectExtent', () => {
+  it('looks ahead by the horizon at the velocity given', () => {
+    expect(projectExtent({ fraction: 0.4, velocity: 1, horizon: 0.15 })).toBeCloseTo(0.55);
+  });
+
+  /**
+   * The whole reason it exists: a short fast flick reaches the stop the hand
+   * was aiming at, where the instantaneous position would have missed it.
+   */
+  it('carries a short fast flick past the stop the instant position would take', () => {
+    const instant = 0.42;
+    const projected = projectExtent({ fraction: instant, velocity: -2 });
+    expect(projected).toBeLessThan(0.2);
+  });
+
+  it('stands still when the hand did', () => {
+    expect(projectExtent({ fraction: 0.4, velocity: 0 })).toBe(0.4);
+  });
+
+  it('projects to the end of the range and never past it', () => {
+    expect(projectExtent({ fraction: 0.9, velocity: 40 })).toBe(1);
+    expect(projectExtent({ fraction: 0.1, velocity: -40 })).toBe(0);
   });
 });

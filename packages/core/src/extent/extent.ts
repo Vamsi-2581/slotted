@@ -184,6 +184,97 @@ export function stepExtent({
  * range whose ends are not reachable is a range with two values nothing can
  * produce.
  */
+/**
+ * A limit expressed as a length, as a fraction of the span it limits.
+ *
+ * `splitter` is why this exists. Every surveyed implementation of that pattern
+ * states its limits as percentages and Zag says so outright — "the splitter
+ * only supports setting percentage values" — but the commonest real constraint
+ * in the family is a floor in pixels: a navigation panel that never goes below
+ * two hundred of them, whatever the window is doing. A percentage cannot say
+ * that, and a family that only takes percentages makes the consumer recompute
+ * one on every resize.
+ *
+ * The caller measures the length; `measureLength` in `./gesture` is where that
+ * happens, because it needs the DOM and nothing in this file does. What arrives
+ * here is two numbers.
+ *
+ * A span of nought answers nought rather than infinity, which is what a limit
+ * against an unmeasured or collapsed container has to do. The result is clamped
+ * to `[0, 1]`, so a floor larger than the container reports a fraction that
+ * exists rather than one nothing can produce.
+ */
+export function extentFromLength({
+  pixels,
+  span,
+}: {
+  readonly pixels: number;
+  readonly span: number;
+}): number {
+  return span > 0 ? clamp(pixels / span, 0, 1) : 0;
+}
+
+/**
+ * Where a value is heading, as a fraction.
+ *
+ * A release lands on the stop nearest the *projected* position rather than the
+ * instantaneous one, and that difference is the whole of what makes a short
+ * fast flick reach the stop the hand was aiming at. Without it a reader who
+ * flicks a sheet twenty pixels and lets go gets twenty pixels of movement,
+ * which reads as a gesture the component ignored.
+ *
+ * `velocity` is a fraction of the container per second, signed along the
+ * panel's own axis. `horizon` is how far ahead to look; a hundred and fifty
+ * milliseconds is the figure the surveyed sheet implementations converge on,
+ * and it is a parameter rather than a constant because a family with a longer
+ * settle wants a longer look.
+ *
+ * The result is clamped, so a violent flick projects to the end of the range
+ * and not past it.
+ */
+export function projectExtent({
+  fraction,
+  velocity,
+  horizon = 0.15,
+}: {
+  readonly fraction: number;
+  readonly velocity: number;
+  readonly horizon?: number;
+}): number {
+  return clamp(fraction + velocity * horizon, 0, 1);
+}
+
+/**
+ * A sample of where the pointer was and when, for the velocity a release reads.
+ *
+ * Three samples rather than two: one stalled frame before the hand lifts reads
+ * as a stop, and a gesture that ended in a pause is exactly the gesture a
+ * reader means to end where it is. Averaging over the last three keeps the
+ * pause honest without letting it erase the flick before it.
+ */
+export interface ExtentSample {
+  readonly fraction: number;
+  readonly at: number;
+}
+
+/**
+ * Fractions per second, from the samples a drag collected.
+ *
+ * An empty or single-sample history has no velocity to report and answers
+ * nought, which falls the caller back on distance alone — the behaviour a
+ * pointer stream that delivered one event before release has to have.
+ */
+export function extentVelocity(samples: readonly ExtentSample[]): number {
+  if (samples.length < 2) return 0;
+
+  const last = samples[samples.length - 1] as ExtentSample;
+  const first = samples[Math.max(0, samples.length - 3)] as ExtentSample;
+  const elapsed = last.at - first.at;
+  if (elapsed <= 0) return 0;
+
+  return ((last.fraction - first.fraction) / elapsed) * 1000;
+}
+
 export function extentBounds(
   snapPoints: readonly number[],
   min: number,

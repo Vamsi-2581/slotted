@@ -119,6 +119,8 @@
     "./slider/tokens.json": "./src/slider/slider.tokens.json",
     "./spinner/spinner.css": "./src/spinner/spinner.css",
     "./spinner/tokens.json": "./src/spinner/spinner.tokens.json",
+    "./splitter/splitter.css": "./src/splitter/splitter.css",
+    "./splitter/tokens.json": "./src/splitter/splitter.tokens.json",
     "./stack/stack.css": "./src/stack/stack.css",
     "./stack/tokens.json": "./src/stack/stack.tokens.json",
     "./status-indicator/status-indicator.css": "./src/status-indicator/status-indicator.css",

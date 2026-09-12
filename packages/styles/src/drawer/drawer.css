@@ -85,7 +85,23 @@
      * gutter, so it takes ten pixels from each side rather than twenty from
      * the panel — which is what keeps it off the header of a sheet.
      */
-    --_resizer-thickness: var(--slotted-space-2, 0.25rem);
+    /**
+     * One rem, and not the four pixels it was.
+     *
+     * Four was right for a gutter that drew nothing: the picture was the edge,
+     * and the target came from the reach alone. It is wrong for a gutter that
+     * carries a grip — the grip does not fit — and it was wrong for the focus
+     * ring too: a two-pixel ring inset into a four-pixel box leaves nothing
+     * between its own edges, so a focused separator read as a solid accent
+     * stripe rather than as a ring around something. The capture is what
+     * showed it.
+     *
+     * It is `splitter`'s track, because the two families draw one picture and a
+     * picture is a geometry as much as a colour. The panel's rows already read
+     * this through `max(--_padding-inline, --_resizer-thickness)`, so widening
+     * it moves nothing else.
+     */
+    --_resizer-thickness: var(--slotted-space-6, 1rem);
     --_resizer-reach: var(--slotted-target-min, 24px);
     --_resizer-line: var(--slotted-border-width-thick, 2px);
     --_radius: var(--slotted-radius-lg, 8px);
@@ -100,11 +116,18 @@
      * the motion scale arriving and one step down leaving, because a reader who
      * has decided to close is waiting.
      *
-     * `--_move` is everything that travels a fraction of that: the scrim's
-     * opacity, and any measure that changes — an inline drawer opening, and a
-     * separator released onto a snap point. One step below the slide, so the
-     * scrim has settled by the time the panel lands rather than arriving with
-     * it.
+     * `--_move` is any measure that changes — an inline drawer opening, and a
+     * separator released onto a snap point. One step below the slide.
+     *
+     * It used to carry the scrim as well, on the argument that the scrim should
+     * have settled by the time the panel lands. It was reported as a scrim that
+     * simply appeared, and the correction is `dialog`'s, which had the same
+     * complaint and answered it with measurement: on the entrance curve the ink
+     * was at 57.6 per cent by the second frame and 83 by the fourth, while the
+     * standard curve over the long step spends the frames where they can be
+     * seen — 10.8 per cent at 25 milliseconds and 55 at 100. The scrim's own
+     * pair is on the backdrop rules below, read from that family rather than
+     * invented again here.
      *
      * Both are custom properties rather than pairs of rules because of the
      * cascade: the side rules that set the exit offset carry the same
@@ -282,11 +305,22 @@
     grid-area: 1 / 1;
     background: var(--slotted-drawer-scrim, var(--slotted-scrim, Canvas));
     opacity: 0;
-    transition: opacity var(--_move);
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
+  /**
+   * The arrival is the long step on the standard curve, and it is `dialog`'s
+   * pair rather than a second answer to the same question — the two halves of
+   * one layer arrive together, and `packages/styles/src/scrim-motion.test.mjs`
+   * reads one family's declaration and holds the other to it.
+   *
+   * Leaving is the short step on the exit curve: a reader who has decided to
+   * close is waiting, and the page behind is back before the panel has finished
+   * going.
+   */
   [data-ui='drawer'][data-open] > [data-part='backdrop'] {
     opacity: 1;
+    transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
 
   /* ── The panel ────────────────────────────────────────────────────────── */
@@ -571,18 +605,34 @@
    * are both pointer-only; this one is a target a keyboard can reach, which is
    * what `docs/component-features.md` §2.8 asks of every resize.
    *
-   * **It is a gutter and not a handle.** Four pixels of nothing at rest, a
-   * two-pixel line in the accent border under the hand or under the drag, and
-   * nothing else: no grip, no dots, no mark. A separator that draws something
-   * at rest is a decoration on an edge nobody is touching, and the edge is
-   * already there — SAP's Splitter, VS Code's and every desktop pane divider
-   * read this way.
+   * **It draws something at rest, and that is a correction.** It used to be
+   * four pixels of nothing until a hand arrived, and then a two-pixel line in
+   * the accent border — no grip, no dots, no mark — on the argument that a
+   * separator drawing anything at rest is a decoration on an edge nobody is
+   * touching. Both halves of that were wrong. A resizable edge nobody can see
+   * is a capability nobody finds, and it was reported as exactly that; and the
+   * accent is the one colour in the library that means "the keyboard is here",
+   * so spending it on hover left nothing to say at focus.
    *
-   * **The pointer reach is not the line.** `::before` is a transparent box of
-   * `--slotted-target-min`, centred on the gutter, so the target holds at the
-   * WCAG 2.2 floor while the picture stays four pixels wide. Centred rather
-   * than run inward: inward it would take twenty pixels of the panel and, on a
-   * sheet, sit over the header.
+   * The picture is `splitter`'s, which is the family that settled it: two
+   * hairlines in the strong border step with a grip between them, running the
+   * whole gutter under the hand, and the accent reserved for the focus ring.
+   * SAP's own splitter is where both families read it. The two are written
+   * twice rather than shared, because `packages/styles/src/identity.test.mjs`
+   * forbids one family reaching into another's rules — about thirty lines, and
+   * the cost of two families that can move apart.
+   *
+   * **A sheet is held differently, so it draws differently.** On a block side
+   * the lines are not painted at all and the grip becomes a pill above the
+   * header, which is where a hand looks for a sheet. The old gutter put the
+   * gesture on the bottom edge of the screen, which is nowhere a thumb goes
+   * looking.
+   *
+   * **The pointer reach is not the picture.** `::before` is a transparent box
+   * of `--slotted-target-min`, centred on the gutter, so the target holds at
+   * the WCAG 2.2 floor while the picture stays thin. Centred rather than run
+   * inward: inward it would take twenty pixels of the panel and, on a sheet,
+   * sit over the header.
    *
    * **It is a row on a block side and an overlay on an inline side**, and the
    * asymmetry has one cause: every rule in this panel runs across the inline
@@ -603,10 +653,44 @@
    * `touch-action: none` so a drag is not read as a scroll on the way past.
    */
   [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer'] {
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: min(var(--slotted-space-9, 2rem), 12%);
     background: transparent;
     touch-action: none;
+
+    /**
+     * The two steps, and the whole of the colour decision — the same one
+     * `splitter` makes, because the two are one picture in two families.
+     *
+     * The strong border step at rest, not the subtle one and not the accent.
+     * The accent is the one colour in the library that means "the keyboard is
+     * here", and this family used to spend it on hover as well: a two-pixel
+     * accent line appearing under the hand on an edge that drew nothing at all
+     * before it. Both halves of that were wrong. An edge nobody can see is a
+     * capability nobody finds, and an accent spent on hover has nothing left to
+     * say at focus.
+     */
+    --_rest: var(--slotted-drawer-resizer-line-color, var(--slotted-border-strong, ButtonBorder));
+    --_active: var(
+      --slotted-drawer-resizer-line-active-color,
+      var(--slotted-text-muted, ButtonText)
+    );
+  }
+
+  /* Under the hand the gap closes and the marks read as one. */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:not([data-disabled]):hover,
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):focus-visible,
+  [data-ui='drawer'][data-dragging] > [data-part='panel'] > [data-part='resizer'] {
+    gap: var(--slotted-space-4, 0.5rem);
+  }
+
+  [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer'],
+  [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer'] {
+    flex-direction: column;
   }
 
   /**
@@ -663,37 +747,141 @@
   }
 
   /**
-   * The line. It runs the whole length of the gutter rather than a segment of
-   * it, because a segment is a grip and a grip is what this separator does not
-   * have. Only `opacity` moves, so nothing about the reader's hand costs a
-   * layout frame while the panel beside it is being resized.
+   * The lines, on an inline side only. A hairline each side of the grip, fading
+   * to transparent away from it, running the whole gutter once a hand is on
+   * them. `splitter`'s picture, and its arithmetic too: a resting length of
+   * `min(4rem, 20%)` leaves slack at every gutter length, and it is that slack
+   * the hand claims.
+   *
+   * A sheet paints none of them — see the grabber below.
    */
-  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']::after {
-    content: '';
-    background: var(--slotted-drawer-resizer-line-color, var(--slotted-tone-accent-border));
-    opacity: 0;
-    transition: opacity var(--slotted-control-transition-duration, var(--slotted-duration-short))
-      var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer'] > [data-part='line'] {
+    flex: 0 1 min(var(--slotted-space-12, 4rem), 20%);
+    min-block-size: 0;
+    min-inline-size: 0;
+    inline-size: var(--slotted-border-width-thin, 1px);
+    border-radius: var(--slotted-radius-sm, 2px);
+    transition:
+      flex-basis var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='drawer'][data-side='start'] > [data-part='panel'] > [data-part='resizer']::after,
-  [data-ui='drawer'][data-side='end'] > [data-part='panel'] > [data-part='resizer']::after {
-    inline-size: var(--_resizer-line);
-    block-size: 100%;
+  [data-ui='drawer'][data-side='start']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='line']:first-child,
+  [data-ui='drawer'][data-side='end']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='line']:first-child {
+    background: linear-gradient(to bottom, transparent, var(--_rest));
   }
 
-  [data-ui='drawer'][data-side='top'] > [data-part='panel'] > [data-part='resizer']::after,
-  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='resizer']::after {
-    inline-size: 100%;
-    block-size: var(--_resizer-line);
+  [data-ui='drawer'][data-side='start']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='line']:last-child,
+  [data-ui='drawer'][data-side='end']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='line']:last-child {
+    background: linear-gradient(to top, transparent, var(--_rest));
   }
 
   [data-ui='drawer']
     > [data-part='panel']
-    > [data-part='resizer']:not([data-disabled]):hover::after,
-  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer']:focus-visible::after,
-  [data-ui='drawer'][data-dragging] > [data-part='panel'] > [data-part='resizer']::after {
-    opacity: 1;
+    > [data-part='resizer']:not([data-disabled]):hover
+    > [data-part='line'],
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):focus-visible
+    > [data-part='line'],
+  [data-ui='drawer'][data-dragging]
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='line'] {
+    flex-basis: 100%;
+    background: var(--_active);
+  }
+
+  /**
+   * The grip, and the two pictures it takes.
+   *
+   * On an inline side it is `splitter`'s dot matrix: a mark on an edge, small
+   * enough to read as a texture rather than as a control.
+   *
+   * On a block side it is a pill, and the whole separator becomes it — the
+   * grabber a hand looks for at the top of a sheet. The lines are not painted
+   * there because a sheet is not held at its corners; it is held in the middle,
+   * which is where every mobile sheet in the field puts its mark.
+   */
+  [data-ui='drawer'] > [data-part='panel'] > [data-part='resizer'] > [data-part='grip'] {
+    flex: none;
+    transition:
+      background-color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
+      color var(--slotted-control-transition-duration, var(--slotted-duration-short))
+        var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  [data-ui='drawer'][data-side='start']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='grip'],
+  [data-ui='drawer'][data-side='end']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='grip'] {
+    color: var(--_rest);
+    background-image: radial-gradient(circle at center, currentColor 40%, transparent 42%);
+    background-size: var(--slotted-space-2, 0.25rem) var(--slotted-space-2, 0.25rem);
+    inline-size: calc(2 * var(--slotted-space-2, 0.25rem));
+    block-size: calc(3 * var(--slotted-space-2, 0.25rem));
+  }
+
+  /* The grabber. Four by thirty-six, full radius, centred above the header. */
+  [data-ui='drawer'][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='grip'],
+  [data-ui='drawer'][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='grip'] {
+    background-color: var(--_rest);
+    border-radius: var(--slotted-radius-full, 9999px);
+    block-size: var(--slotted-space-2, 0.25rem);
+    inline-size: var(--slotted-space-11, 3rem);
+  }
+
+  /* A sheet's lines are not painted: the pill is the whole picture. */
+  [data-ui='drawer'][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='line'],
+  [data-ui='drawer'][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='line'] {
+    display: none;
+  }
+
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover
+    > [data-part='grip'],
+  [data-ui='drawer']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):focus-visible
+    > [data-part='grip'],
+  [data-ui='drawer'][data-dragging]
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='grip'] {
+    color: var(--_active);
+    background-color: var(--_active);
   }
 
   /**
@@ -919,6 +1107,25 @@
     padding-block: var(--_padding-block);
     padding-inline: var(--_row-padding-inline-start) var(--_row-padding-inline-end);
     background: var(--slotted-drawer-footer-surface, var(--slotted-surface-sunken, Canvas));
+  }
+
+  /**
+   * The edge of the device, on a sheet.
+   *
+   * A bottom sheet's footer sits where the home indicator and the gesture bar
+   * live, and a row of actions under them is a row the reader taps twice: once
+   * on the system and once on the button. `env()` resolves to nought wherever
+   * there is no inset, so this costs nothing on a desktop and there is no query
+   * to keep in step.
+   *
+   * Only `bottom`, and only the footer. A sheet from the top has the status bar
+   * above it and the header already clears it; the body scrolls, so an inset on
+   * it would be padding inside a scrollport rather than under it.
+   */
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='footer'] {
+    padding-block-end: calc(
+      var(--_footer-padding-block, var(--_padding-block)) + env(safe-area-inset-bottom, 0px)
+    );
   }
 
   [data-ui='drawer'] > [data-part='panel'] > [data-part='footer']:not(:first-child) {

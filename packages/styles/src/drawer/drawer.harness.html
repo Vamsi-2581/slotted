@@ -106,7 +106,11 @@
         aria-valuemax="100"
         aria-labelledby="d2-title"
         aria-controls="d2-panel"
-      ></div>
+      >
+        <span data-part="line" aria-hidden="true"></span
+        ><span data-part="grip" aria-hidden="true"></span
+        ><span data-part="line" aria-hidden="true"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -115,9 +119,9 @@
   <div style="display: grid; gap: var(--slotted-space-4)">
     <h2 style="font-size: var(--slotted-font-size-lg); margin: 0">Filtros</h2>
     <p style="color: var(--slotted-text-muted); margin: 0">
-      A folha vem de baixo e guarda os dois cantos que o leitor consegue ver. O separador é a mesma
-      calha de quatro pixels que um drawer lateral tem, virada: nada em repouso, uma linha sob a
-      mão.
+      A folha vem de baixo e guarda os dois cantos que o leitor consegue ver. A pega fica acima do
+      cabeçalho e é visível em repouso, que é onde uma mão procura uma folha — e não na aresta, onde
+      ninguém a encontrava.
     </p>
   </div>
 
@@ -142,7 +146,11 @@
         aria-valuemax="100"
         aria-labelledby="d3-title"
         aria-controls="d3-panel"
-      ></div>
+      >
+        <span data-part="line" aria-hidden="true"></span
+        ><span data-part="grip" aria-hidden="true"></span
+        ><span data-part="line" aria-hidden="true"></span>
+      </div>
       <header data-part="header">
         <h2 data-part="title" id="d3-title">Filtrar faturas</h2>
         <button data-part="close" type="button" aria-label="Fechar"></button>
@@ -228,7 +236,11 @@
           aria-valuemax="100"
           aria-labelledby="d5-title"
           aria-controls="d5-panel"
-        ></div>
+        >
+          <span data-part="line" aria-hidden="true"></span
+          ><span data-part="grip" aria-hidden="true"></span
+          ><span data-part="line" aria-hidden="true"></span>
+        </div>
       </div>
     </div>
     <main style="padding: var(--slotted-space-6); min-inline-size: 0">

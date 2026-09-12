@@ -6,7 +6,7 @@
   "resizePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/",
   "composes": ["portal", "dismissable-layer", "presence", "focus", "extent"],
   "identity": {
-    "reason": "A drawer is not a member of dialog, and one fact decides it: a persistent drawer has no dialog role at all. An alert dialog is a dialog \u2014 same role family, same keyboard, same modality \u2014 so a consumer writing [data-ui='dialog'] means it too. An inline drawer is a region of the page, nothing is inert, nothing is contained, and role=dialog on it would be the claim the APG calls severe",
+    "reason": "A drawer is not a member of dialog, and one fact decides it: a persistent drawer has no dialog role at all. An alert dialog is a dialog — same role family, same keyboard, same modality — so a consumer writing [data-ui='dialog'] means it too. An inline drawer is a region of the page, nothing is inert, nothing is contained, and role=dialog on it would be the claim the APG calls severe",
     "cost": "The header's three columns, the words' overflow handling, the close button's geometry and the forced-colours rule are shapes dialog already holds, and packages/styles/src/identity.test.mjs forbids reaching for them. Around eighty lines are written twice, and the two families can move apart without one breaking the other"
   },
   "wiring": {
@@ -110,10 +110,12 @@
     "submit": "alertDialog owns a part whose meaning is confirmation and this family owns none. A drawer's Apply button is the consumer's own control, and it closes the drawer by setting open or by calling the handle"
   },
   "anatomy": {
-    "root": "the layer under mode=overlay \u2014 fixed to the viewport, stacked with --slotted-z-index-overlay plus the depth dismissable-layer writes \u2014 and the flow box under mode=inline, whose own size is what transitions. A one-cell grid either way",
-    "backdrop": "the scrim, in that one cell. Painted under mode=overlay, whether the layer is modal or not: modal decides what happens to the page behind the scrim \u2014 inert, the scroll lock, focus containment \u2014 and never what is painted. Tying the two cost a reference page, where a demonstration that stands open must not be modal and every still picture lost the scrim that is half of it. dialog draws it the same way, and a consumer who wants none sets --slotted-drawer-scrim: transparent",
+    "root": "the layer under mode=overlay — fixed to the viewport, stacked with --slotted-z-index-overlay plus the depth dismissable-layer writes — and the flow box under mode=inline, whose own size is what transitions. A one-cell grid either way",
+    "backdrop": "the scrim, in that one cell. Painted under mode=overlay, whether the layer is modal or not: modal decides what happens to the page behind the scrim — inert, the scroll lock, focus containment — and never what is painted. Tying the two cost a reference page, where a demonstration that stands open must not be modal and every still picture lost the scrim that is half of it. dialog draws it the same way, and a consumer who wants none sets --slotted-drawer-scrim: transparent",
     "panel": "the surface, in the same cell, aligned to the side. Two boxes and not three: dialog needs a viewport between the layer and the panel because its root is a query container, which makes a scrim inside a scrolling root part of what scrolls. A drawer's root declares no container and never scrolls, because the panel is bounded to the layer by construction",
-    "resizer": "a four-pixel gutter on the edge the reader reaches from, whose pointer reach is --slotted-target-min drawn by a transparent pseudo-element centred on it. Invisible at rest; a two-pixel line in the accent border under the hand, under focus and under a drag, and no grip, no dots and no mark at any time \u2014 a separator that draws something at rest is a decoration on an edge nobody is touching. It is a row of the panel's grid on a block side and an overlay on the inner edge on an inline side, and the asymmetry has one cause: every rule in the panel runs across the inline axis, so a resizer row crosses none of them and a resizer column would cut all of them. The first capture showed exactly that \u2014 a rule under the header stopping short of the panel's own edge, which reads as an unfinished line rather than as a track. On an inline side the rows keep clear of it with an inset of max(the panel padding, the separator thickness)"
+    "resizer": "the separator the reader moves, and it draws something at rest. Two hairlines in the strong border step with a grip between them on an inline side; a four-by-thirty-six pill above the header on a block side, which is where a hand looks for a sheet. The picture is splitter's, and the reason it changed is that the old one drew nothing at rest and then a two-pixel line in the accent under the hand: a resizable edge nobody can see is a capability nobody finds, and the accent is the one colour that means the keyboard is here. It is spent on the focus ring alone now. The pointer reach stays --slotted-target-min, drawn by a transparent pseudo-element centred on the gutter. It is a row of the panel's grid on a block side and an overlay on the inner edge on an inline side, and the asymmetry has one cause: every rule in the panel runs across the inline axis, so a resizer row crossing none of them is a track while a resizer column would cut all of them.",
+    "line": "a hairline each side of the grip on an inline side, fading to transparent away from it and running the whole gutter under the hand, under focus and under a drag. Not painted on a block side, where the grip is the whole picture.",
+    "grip": "the mark a hand aims at. A two-by-three dot matrix on an inline side and a rounded pill on a block one, aria-hidden in both: the separator around it is already named and already valued."
   },
   "scroll": {
     "body": "the body scrolls; the header, the footer and the resizer stay",
@@ -130,13 +132,13 @@
     "overlay": "portalled, fixed to the viewport, with a scrim and the whole dismissal policy",
     "inline": "in the consumer's own layout, with no portal, no scrim, no z-index and no dismissal policy. The root's own size is what opens and closes",
     "default": "overlay",
-    "reason": "docs/component-features.md section 8 asks for both \u2014 modal ou persistente conforme viewport \u2014 so only the packaging is open. An axis rather than two components, because the switch is the point: two components mean the consumer swaps one element for another at a breakpoint, and both frameworks destroy the subtree when they do, taking the panel's scroll position, focus and every uncontrolled input with it",
+    "reason": "docs/component-features.md section 8 asks for both — modal ou persistente conforme viewport — so only the packaging is open. An axis rather than two components, because the switch is the point: two components mean the consumer swaps one element for another at a breakpoint, and both frameworks destroy the subtree when they do, taking the panel's scroll position, focus and every uncontrolled input with it",
     "responsive": "The breakpoint is the consumer's. A family owning a viewport media query is what references/rubric.md dimension 3 refuses, and a container query cannot answer it because an overlay drawer has no place in the layout to measure. Fluent, MUI and Angular Material all document the consumer binding it"
   },
   "extent": {
     "unit": "a fraction of the layer along the panel's own axis, in [0, 1], rather than a CSS length",
     "unset": "the size step decides, through --_extent: var(--slotted-drawer-extent, var(--_step))",
-    "property": "--slotted-drawer-extent, written by the binding as an inline custom property once the reader has moved it. It is a theme-owned decision as well \u2014 an application setting one measure for every drawer writes it on [data-ui='drawer'] \u2014 which is why it is in drawer.tokens.json and not in packages/styles/src/runtime-properties.mjs",
+    "property": "--slotted-drawer-extent, written by the binding as an inline custom property once the reader has moved it. It is a theme-owned decision as well — an application setting one measure for every drawer writes it on [data-ui='drawer'] — which is why it is in drawer.tokens.json and not in packages/styles/src/runtime-properties.mjs",
     "min": "minExtent, default 0.2",
     "max": "maxExtent, default 1",
     "step": "16px per arrow press and 64px with Shift, converted against the layer measured at the moment of the press, when there are no snap points. A distance and not a proportion: five per cent of a wide layer is a jump rather than an adjustment, and SAP's Splitter, VS Code's sash and the Window Splitter pattern's own examples all move a fixed distance",
@@ -145,7 +147,7 @@
     "overlapCost": "On side=start the separator sits at the panel's inline-end edge, which is where a left-to-right document also puts the body's scrollbar. The wheel still scrolls and the scrollbar's inner half is still reachable, and every desktop application with a resizable sidebar has the same overlap",
     "capability": "Rendering the resizer part is the capability. There is no resizable prop, so a resizable prop with no resizer part, and a resizer part a prop has switched off, are both states this family cannot be in",
     "reason": "A fraction and not a length: the Window Splitter pattern's three aria values are then the fraction times a hundred, the limits and the snap points are the same kind of number so one clamp covers all three, and a keyboard step is a proportion rather than a pixel literal the family would have to tokenise",
-    "restore": "a double click on the separator puts the panel back on the measure it started from, which is `undefined` \u2014 the size step decides \u2014 when the consumer named none. It is the one gesture that restores rather than moves, and every desktop pane divider answers a double click with it",
+    "restore": "a double click on the separator puts the panel back on the measure it started from, which is `undefined` — the size step decides — when the consumer named none. It is the one gesture that restores rather than moves, and every desktop pane divider answers a double click with it",
     "gesture": "while the pointer is down the separator holds the pointer capture, the document's cursor becomes col-resize or row-resize and its selection is suspended; the panel carries will-change on the axis it is growing in and no transition on that axis at all. R7 forbids animating a layout property, and this animates none: the width is the value the reader is holding, written once per pointermove"
   },
   "stateAttributes": {
@@ -207,7 +209,7 @@
     },
     "pushMode": {
       "reason": "Angular Material's push and MUI's persistent shift the page content aside. mode=inline puts the drawer in the consumer's own grid or flex row, and the sibling reflows because the layout says so rather than because a family wrote a margin on an element it does not own",
-      "replacedBy": "<div style=\"display: grid; grid-template-columns: auto 1fr\"><sl-drawer mode=\"inline\" side=\"start\">\u2026</sl-drawer><main>\u2026</main></div>"
+      "replacedBy": "<div style=\"display: grid; grid-template-columns: auto 1fr\"><sl-drawer mode=\"inline\" side=\"start\">…</sl-drawer><main>…</main></div>"
     },
     "parentPush": {
       "reason": "Ant's push slides a parent drawer aside when a child opens. The depth comes from dismissable-layer's single stack and the layers overlap; animating the parent would mean this family owning the geometry of a layer it no longer controls"
@@ -263,6 +265,8 @@
         "backdrop",
         "panel",
         "resizer",
+        "line",
+        "grip",
         "header",
         "title",
         "description",

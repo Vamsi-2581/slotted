@@ -142,17 +142,40 @@ test('declares a state model for both values a consumer can own', () => {
 
 /**
  * A separator is a gutter and not a handle. Four pixels of nothing at rest, a
- * two-pixel line under the hand, and a reach that holds the WCAG 2.2 floor
- * without the eye being told where it is: the picture is the edge, and the
- * edge is already there. SAP's Splitter — the behaviour this item names — VS
- * Code's sash and every desktop pane divider read the same way.
+ * a reach that holds the WCAG 2.2 floor without the eye being told where it is.
+ *
+ * That last clause is what changed, and this test changed with the decision
+ * rather than being deleted around it. The separator used to draw nothing at
+ * rest and then a two-pixel line in the accent under the hand, on the argument
+ * that the edge is already there. It was reported as an edge nobody could find,
+ * and the accent — the one colour that means the keyboard is here — had been
+ * spent on hover, leaving nothing for focus.
+ *
+ * So the family now draws `splitter`'s picture: two hairlines and a grip on an
+ * inline side, a pill above the header on a block one, and the accent on the
+ * focus ring alone. What did not change is the reach, and it is asserted below
+ * exactly as it was.
  */
-test('draws the separator as a gutter, with a reach wider than its picture', () => {
-  assert.match(contract.anatomy.resizer, /four-pixel gutter/);
+test('draws the separator as something a hand can find, with a reach wider than its picture', () => {
   assert.match(contract.anatomy.resizer, /--slotted-target-min/);
-  assert.match(contract.anatomy.resizer, /centred on it/);
-  assert.match(contract.anatomy.resizer, /Invisible at rest/);
-  assert.match(contract.anatomy.resizer, /no grip, no dots and no mark/);
+  assert.match(contract.anatomy.resizer, /centred on the gutter/);
+  assert.match(contract.anatomy.resizer, /draws something at rest/);
+  assert.match(contract.anatomy.resizer, /grip/);
+
+  /* The accent is reserved, and the contract says where it went. */
+  assert.match(contract.anatomy.resizer, /focus ring alone/);
+  assert.doesNotMatch(contract.anatomy.resizer, /Invisible at rest/);
+
+  /* A sheet is held in the middle, not at the edge of the screen. */
+  assert.match(contract.anatomy.resizer, /pill above the header/);
+});
+
+/** The two parts the picture is made of, and why neither is a pseudo-element. */
+test('declares the two parts the separator draws itself with', () => {
+  assert.ok(contract.members.drawer.parts.includes('line'));
+  assert.ok(contract.members.drawer.parts.includes('grip'));
+  assert.match(contract.anatomy.grip, /aria-hidden/);
+  assert.match(contract.anatomy.line, /Not painted on a block side/);
 });
 
 /**
@@ -224,6 +247,13 @@ test('carries the result out on the request rather than as a second state', () =
   assert.ok(contract.result.parts.every((part) => drawer.parts.includes(part)));
 });
 
+/**
+ * `line` and `grip` arrived with the separator's repaint. They are elements and
+ * not pseudo-elements for one reason: `packages/styles/src/fallbacks.test.mjs`
+ * forbids a system colour inside `::before` or `::after`, and both steps the
+ * picture takes — the strong border and the muted text — have one as their last
+ * resort. The reach is still a pseudo-element, because it paints nothing.
+ */
 test('declares the anatomy the family renders', () => {
   assert.deepEqual(drawer.parts, [
     'root',
@@ -231,6 +261,8 @@ test('declares the anatomy the family renders', () => {
     'backdrop',
     'panel',
     'resizer',
+    'line',
+    'grip',
     'header',
     'title',
     'description',

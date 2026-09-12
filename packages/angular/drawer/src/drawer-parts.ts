@@ -1,16 +1,30 @@
 import {
-  anchorsAtStart,
-  extentAtPoint,
-  isInlineSide,
-  nearestSnap,
   EXTENT_LARGE_STEP_PX,
   EXTENT_STEP_PX,
+  anchorsAtStart,
+  extentAtPoint,
+  extentVelocity,
   holdResizeGesture,
+  isInlineSide,
+  nearestSnap,
+  projectExtent,
   stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
+import type { ExtentSample } from '@slotted/core/extent';
 import { clamp } from '@slotted/core/measure';
-import { computed, Directive, ElementRef, inject, input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  Directive,
+  ElementRef,
+  inject,
+  input,
+  OnDestroy,
+  OnInit,
+  ViewEncapsulation,
+} from '@angular/core';
 
 import { SlDrawer } from './drawer';
 import type { DrawerOpenReason } from './drawer-defaults';
@@ -210,10 +224,38 @@ export class SlDrawerClose {
  * one, because there the panel is on the left and the reader is pushing its
  * edge toward the wall.
  */
-@Directive({
+/**
+ * Fractions of the layer per second, past which a release asks to close
+ * whatever distance it covered.
+ *
+ * Half the panel a second is a deliberate gesture and not a nudge: a hand
+ * moving that fast has decided. Stated here rather than in the stylesheet
+ * because it is a decision about intent and not about paint — no theme should
+ * be able to retune what counts as meaning to dismiss something.
+ */
+const DISMISS_VELOCITY = 0.5;
+
+@Component({
   selector: '[slDrawerResizer]',
   standalone: true,
   exportAs: 'slDrawerResizer',
+  /**
+   * A component rather than a directive, and the template is the whole reason:
+   * the separator draws its own picture now — two hairlines and a grip, or a
+   * pill on a block side — and a directive has nothing to draw them with.
+   *
+   * Three elements rather than pseudo-elements because
+   * `packages/styles/src/fallbacks.test.mjs` forbids a system colour inside
+   * `::before` or `::after`, and both steps these take have one as their last
+   * resort. The selector is unchanged, so no consumer's template moves.
+   */
+  template: `
+    <span data-part="line" aria-hidden="true"></span>
+    <span data-part="grip" aria-hidden="true"></span>
+    <span data-part="line" aria-hidden="true"></span>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'resizer',
     role: 'separator',
@@ -248,6 +290,8 @@ export class SlDrawerResizer {
 
   /** Where the pointer last was, which is what decides a dismissal on release. */
   private dragged: number | null = null;
+  /** Where the pointer has been, for the velocity the release reads. */
+  private samples: ExtentSample[] = [];
   /** What `Enter` restores to once it has collapsed the panel. */
   private collapsed: number | null = null;
   /** What the document looked like before the drag, and how to put it back. */
@@ -313,15 +357,28 @@ export class SlDrawerResizer {
     const fraction = this.fractionAt(event);
     if (fraction === null) return;
     this.dragged = fraction;
+    /* Three samples is what `extentVelocity` reads; keeping more would only let
+       an older, slower stretch of the same drag dilute the flick. */
+    this.samples = [...this.samples, { at: event.timeStamp, fraction }].slice(-3);
     this.drawer.requestExtent(fraction, 'pointer', event);
   }
 
   /**
-   * One rule on release: a measure below the floor asks to close, carrying
-   * `pointer`; anything else commits the nearest stop. A close the consumer
-   * cancels leaves the panel at the floor. MUI's `SwipeableDrawer` and Vaul's
-   * dismiss gesture both do this, expressed here as a consequence of the resize
-   * rather than as a second mechanism.
+   * Two ways out on release, and the second one is new.
+   *
+   * **By distance**: a measure below the floor asks to close. On its own it
+   * means a reader who flicks a sheet twenty pixels and lets go gets twenty
+   * pixels of movement — a gesture the component ignored, and it was reported
+   * as exactly that.
+   *
+   * **By velocity**: a hand still travelling toward the closed edge faster than
+   * `DISMISS_VELOCITY` asks to close wherever it is. A flick is short by
+   * definition, and distance cannot see it.
+   *
+   * Whichever comes first. A close the consumer cancels leaves the panel at the
+   * floor, as it always did. What is not a dismissal settles on the stop
+   * nearest the *projected* position, so a release still travelling lands where
+   * the hand was aiming.
    */
   protected endDrag(event: PointerEvent) {
     if (!this.drawer.dragging()) return;
@@ -334,15 +391,19 @@ export class SlDrawerResizer {
 
     const bounds = this.drawer.bounds();
     const last = this.dragged ?? this.current();
+    const velocity = extentVelocity(this.samples);
     this.dragged = null;
+    this.samples = [];
 
-    if (last < bounds.min) {
+    if (last < bounds.min || velocity < -DISMISS_VELOCITY) {
       this.drawer.request(false, 'pointer', undefined, event);
       this.drawer.requestExtent(bounds.min, 'pointer', event);
       return;
     }
+
+    const settled = projectExtent({ fraction: last, velocity });
     this.drawer.requestExtent(
-      nearestSnap(clamp(last, bounds.min, bounds.max), this.drawer.snapPoints()),
+      nearestSnap(clamp(settled, bounds.min, bounds.max), this.drawer.snapPoints()),
       'pointer',
       event,
     );

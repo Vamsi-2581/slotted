@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -659,5 +659,118 @@ describe('Drawer', () => {
       </Drawer>,
     );
     expect(document.querySelector('[data-part="body"]')).toHaveAttribute('data-inset', 'none');
+  });
+});
+
+/**
+ * The gesture the family was reported as ignoring. A flick is short by
+ * definition, so the distance rule — released below the floor — cannot see one:
+ * a reader who threw a sheet twenty pixels and let go got twenty pixels of
+ * movement back.
+ */
+/**
+ * `fireEvent` cannot set `timeStamp`: it is readonly on `Event`, and jsdom
+ * fills it from the real clock — so two moves dispatched in the same tick are
+ * a violent flick, which is correct in a browser and useless in a test. The
+ * event is built and stamped by hand instead.
+ */
+function stamped(
+  kind: 'pointerDown' | 'pointerMove' | 'pointerUp',
+  target: Element,
+  init: { clientY: number; pointerId: number },
+  at: number,
+) {
+  const event = createEvent[kind](target, init);
+  Object.defineProperty(event, 'timeStamp', { value: at });
+  fireEvent(target, event);
+}
+
+/**
+ * The gesture the family was reported as ignoring. A flick is short by
+ * definition, so the distance rule — released below the floor — cannot see one:
+ * a reader who threw a sheet twenty pixels and let go got twenty pixels of
+ * movement back.
+ */
+describe('a sheet dismissed by velocity', () => {
+  function sheet(onOpenChange = vi.fn()) {
+    render(
+      <Drawer defaultOpen onOpenChange={onOpenChange} side="bottom">
+        <DrawerPanel>
+          <DrawerResizer />
+          <DrawerHeader>
+            <DrawerTitle>Filtrar faturas</DrawerTitle>
+          </DrawerHeader>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    const resizer = screen.getByRole('separator');
+    const layer = resizer.closest("[data-ui='drawer']") as HTMLElement;
+    layer.getBoundingClientRect = () =>
+      ({
+        x: 0,
+        y: 0,
+        width: 400,
+        height: 800,
+        top: 0,
+        left: 0,
+        right: 400,
+        bottom: 800,
+      }) as DOMRect;
+    resizer.setPointerCapture = () => {};
+    resizer.hasPointerCapture = () => true;
+    resizer.releasePointerCapture = () => {};
+
+    const drag = (moves: readonly (readonly [number, number])[]) => {
+      stamped('pointerDown', resizer, { clientY: 400, pointerId: 1 }, 0);
+      for (const [clientY, at] of moves) {
+        stamped('pointerMove', resizer, { clientY, pointerId: 1 }, at);
+      }
+      const [lastY, lastAt] = moves[moves.length - 1] as readonly [number, number];
+      stamped('pointerUp', resizer, { clientY: lastY, pointerId: 1 }, lastAt);
+    };
+
+    return { drag, onOpenChange, resizer };
+  }
+
+  /** Forty pixels in forty milliseconds, and never near the floor. */
+  it('closes on a flick that never reaches the floor', () => {
+    const { drag, onOpenChange } = sheet();
+    drag([
+      [420, 20],
+      [440, 40],
+    ]);
+    expect(onOpenChange).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  /**
+   * The other half of the rule, and the reason velocity is a threshold rather
+   * than a direction: the same forty pixels over a second and a half is an
+   * adjustment, and closing on it would make a sheet impossible to resize.
+   */
+  it('leaves a slow drag of the same distance open', () => {
+    const { drag, onOpenChange } = sheet();
+    drag([
+      [420, 700],
+      [440, 1400],
+    ]);
+    expect(onOpenChange).not.toHaveBeenCalledWith(false, expect.anything());
+  });
+
+  /** A flick the consumer refuses leaves the panel where the floor is, open. */
+  it('lets the consumer refuse a flick', () => {
+    const onOpenChange = vi.fn((_next: boolean, request: { cancel(): void }) => request.cancel());
+    const { drag } = sheet(onOpenChange as never);
+    /* Two moves, because one is a position and not a gesture: `extentVelocity`
+       answers nought for a single sample, which is what a pointer stream that
+       delivered one event before the release has to fall back to. */
+    drag([
+      [420, 20],
+      [440, 40],
+    ]);
+    expect(onOpenChange).toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

@@ -1,15 +1,18 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import {
   anchorsAtStart,
+  extentVelocity,
   EXTENT_LARGE_STEP_PX,
   EXTENT_STEP_PX,
   extentAtPoint,
   holdResizeGesture,
   isInlineSide,
   nearestSnap,
+  projectExtent,
   stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
+import type { ExtentSample } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
 import { clamp } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -363,6 +366,18 @@ export function DrawerPanel({
  * one, because there the panel is on the left and the reader is pushing its
  * edge toward the wall.
  */
+/**
+ * Fractions of the layer per second, past which a release asks to close
+ * whatever distance it covered.
+ *
+ * Half the panel a second is a deliberate gesture and not a nudge: a hand
+ * moving that fast has decided. It is the figure the surveyed sheets converge
+ * on, and it is stated here rather than in the stylesheet because it is a
+ * decision about intent, not about paint — no theme should be able to retune
+ * what counts as meaning to dismiss something.
+ */
+const DISMISS_VELOCITY = 0.5;
+
 export function DrawerResizer({
   className,
   largeStep = EXTENT_LARGE_STEP_PX,
@@ -379,6 +394,8 @@ export function DrawerResizer({
   const node = useRef<HTMLDivElement | null>(null);
   /** Where the pointer last was, which is what decides a dismissal on release. */
   const dragged = useRef<number | null>(null);
+  /** Where the pointer has been, for the velocity the release reads. */
+  const samples = useRef<ExtentSample[]>([]);
   /** What `Enter` restores to once it has collapsed the panel. */
   const restore = useRef<number | null>(null);
   /** What the document looked like before the drag, and how to put it back. */
@@ -432,23 +449,36 @@ export function DrawerResizer({
     if (!drawer.dragging) return;
     const rect = layerRect();
     if (rect === null) return;
-    move(
-      extentAtPoint({
-        point: { x: event.clientX, y: event.clientY },
-        rect,
-        rtl: isRtl(node.current),
-        side: drawer.side,
-      }),
-      event,
-    );
+    const fraction = extentAtPoint({
+      point: { x: event.clientX, y: event.clientY },
+      rect,
+      rtl: isRtl(node.current),
+      side: drawer.side,
+    });
+    /* Three samples is what `extentVelocity` reads; keeping more would only
+       let an older, slower stretch of the same drag dilute the flick. */
+    samples.current = [...samples.current, { at: event.timeStamp, fraction }].slice(-3);
+    move(fraction, event);
   };
 
   /**
-   * One rule on release: a measure below the floor asks to close, carrying
-   * `pointer`; anything else commits the nearest stop. A close the consumer
-   * cancels leaves the panel at the floor. MUI's `SwipeableDrawer` and Vaul's
-   * dismiss gesture both do this, expressed here as a consequence of the resize
-   * rather than as a second mechanism.
+   * Two ways out on release, and the second one is new.
+   *
+   * **By distance**: a measure below the floor asks to close. This is what the
+   * family always had, and on its own it means a reader who flicks a sheet
+   * twenty pixels and lets go gets twenty pixels of movement — a gesture the
+   * component ignored. It was reported as exactly that.
+   *
+   * **By velocity**: a hand still moving toward the closed edge faster than
+   * `DISMISS_VELOCITY` asks to close wherever it is. A flick is short by
+   * definition; distance cannot see it.
+   *
+   * Whichever comes first. A close the consumer cancels leaves the panel at the
+   * floor, as it always did.
+   *
+   * What is not a dismissal settles on the stop nearest the *projected*
+   * position rather than the instantaneous one, so a release that was still
+   * travelling lands where the hand was aiming.
    */
   const endDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (!drawer.dragging) return;
@@ -460,15 +490,19 @@ export function DrawerResizer({
     drawer.setDragging(false);
 
     const last = dragged.current ?? current;
+    const velocity = extentVelocity(samples.current);
     dragged.current = null;
+    samples.current = [];
 
-    if (last < drawer.minExtent) {
+    if (last < drawer.minExtent || velocity < -DISMISS_VELOCITY) {
       drawer.close('pointer', undefined, event);
       drawer.requestExtent(drawer.minExtent, 'pointer', event);
       return;
     }
+
+    const settled = projectExtent({ fraction: last, velocity });
     drawer.requestExtent(
-      nearestSnap(clamp(last, drawer.minExtent, drawer.maxExtent), drawer.snapPoints),
+      nearestSnap(clamp(settled, drawer.minExtent, drawer.maxExtent), drawer.snapPoints),
       'pointer',
       event,
     );
@@ -583,8 +617,30 @@ export function DrawerResizer({
     else if (ref) ref.current = element;
   };
 
-  if (render !== undefined) return render({ ...rootProps, ref: attach } as never);
-  return <div {...rootProps} ref={attach} />;
+  /**
+   * The separator's own picture, and the reason it is three elements rather
+   * than a pseudo-element: `packages/styles/src/fallbacks.test.mjs` forbids a
+   * system colour inside `::before` or `::after`, and both steps these take
+   * have one as their last resort.
+   *
+   * Which picture is the stylesheet's decision, by `data-side`: two hairlines
+   * and a grip on an inline side, a pill on a block one.
+   */
+  const picture = (
+    <>
+      <span aria-hidden="true" data-part="line" />
+      <span aria-hidden="true" data-part="grip" />
+      <span aria-hidden="true" data-part="line" />
+    </>
+  );
+
+  if (render !== undefined)
+    return render({ ...rootProps, children: picture, ref: attach } as never);
+  return (
+    <div {...rootProps} ref={attach}>
+      {picture}
+    </div>
+  );
 }
 
 export function DrawerHeader({

@@ -89,8 +89,8 @@ test('offers a box a sticky demonstration can be scrolled inside', () => {
 });
 
 test('workbench CSS keeps the reference-sheet layout and accessibility invariants', () => {
-  assert.match(css, /@import '@fontsource-variable\/inter';/);
-  assert.match(css, /@import '@fontsource-variable\/jetbrains-mono';/);
+  assert.match(css, /@import '@fontsource-variable\/geist';/);
+  assert.match(css, /@import '@fontsource-variable\/geist-mono';/);
   assert.match(css, /max-inline-size:\s*1480px/);
   assert.match(css, /\.slotted-matrix-scroll\s*\{[\s\S]*?overflow-x:\s*auto/);
   assert.match(css, /@media \(max-width:\s*760px\)/);
@@ -380,7 +380,7 @@ test('every snippet renders in the monospaced family its block declares', () => 
 test('the workbench sets type in one pair of stacks', () => {
   assert.equal(fontStack('font-sans'), WORKBENCH_FONT_SANS);
   assert.equal(fontStack('font-code'), WORKBENCH_FONT_CODE);
-  assert.match(WORKBENCH_FONT_CODE, /^"JetBrains Mono Variable"/);
+  assert.match(WORKBENCH_FONT_CODE, /^"Geist Mono Variable"/);
   assert.doesNotMatch(WORKBENCH_FONT_CODE, /ui-monospace/);
   assert.doesNotMatch(css, /font(-family)?:[^;]*ui-monospace/);
 });
@@ -645,4 +645,32 @@ test('stacks a two-column grid in a narrow window', () => {
     ),
     'the two-column grid drops to one column below 760px',
   );
+});
+
+/**
+ * A separator has no demonstration without two regions to separate, and the
+ * regions cannot be painted by the story: `specs/reference-pages.test.mjs`
+ * refuses an inline style, and rightly — it answers no scheme and no density.
+ *
+ * The rule that matters is the last one: the sized region reads
+ * `--slotted-splitter-value` rather than holding a measure of its own. A
+ * workspace that held its own number would keep moving with the family removed,
+ * which is a demonstration of the workspace.
+ */
+test('offers two regions whose boundary the demonstrated family moves', () => {
+  const workspace = /\.slotted-demo-workspace\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(workspace, /display:\s*flex/, 'the two regions sit along one axis');
+  assert.match(workspace, /overflow:\s*hidden/, 'a region cannot spill past the boundary');
+
+  const region = /\.slotted-demo-workspace__region\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(
+    region,
+    /var\(--slotted-splitter-value/,
+    'the sized region reads the property the family writes, rather than holding a measure of its own',
+  );
+  assert.match(region, /flex:\s*none/, 'the region keeps the measure it was given');
+
+  const body = /\.slotted-demo-workspace__body\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(body, /flex:\s*1/, 'the other region takes whatever is left');
+  assert.match(body, /min-inline-size:\s*0/, 'and may be narrower than its own content');
 });

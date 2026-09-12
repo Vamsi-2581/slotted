@@ -54,22 +54,51 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/**
+ * A line of its own.
+ *
+ * `Text` renders a `span`, so a column of them is one paragraph with no spaces
+ * in it: the first capture of this page read
+ * "Contas a receberVencidas · 14A vencer em 7 dias · 32". `drawer.stories.tsx`
+ * records the same defect from its own first publish, which is how this one is
+ * a repeat rather than a discovery.
+ */
+function Line({
+  children,
+  id,
+  tone,
+  weight,
+  size = 'sm',
+}: {
+  children: ReactNode;
+  id?: string;
+  tone?: 'muted';
+  weight?: 'semibold';
+  size?: 'sm' | 'lg';
+}) {
+  return (
+    <Text id={id} render={(props) => <p {...props} />} size={size} tone={tone} weight={weight}>
+      {children}
+    </Text>
+  );
+}
+
 /** One account, as the product's own navigation lists them. */
 function Accounts({ children }: { children?: ReactNode }) {
   return (
     <Region>
-      <Text size="sm" weight="semibold">
+      <Line size="sm" weight="semibold">
         Contas a receber
-      </Text>
-      <Text size="sm" tone="muted">
+      </Line>
+      <Line size="sm" tone="muted">
         Vencidas · 14
-      </Text>
-      <Text size="sm" tone="muted">
+      </Line>
+      <Line size="sm" tone="muted">
         A vencer em 7 dias · 32
-      </Text>
-      <Text size="sm" tone="muted">
+      </Line>
+      <Line size="sm" tone="muted">
         Em conciliação · 3
-      </Text>
+      </Line>
       {children}
     </Region>
   );
@@ -78,12 +107,12 @@ function Accounts({ children }: { children?: ReactNode }) {
 function Invoice({ children }: { children?: ReactNode }) {
   return (
     <Body>
-      <Text size="lg" weight="semibold">
+      <Line size="lg" weight="semibold">
         NF-e 20 483 · Metalúrgica Boa Vista Ltda
-      </Text>
-      <Text size="sm" tone="muted">
+      </Line>
+      <Line size="sm" tone="muted">
         Emitida em 02/09/2026 · vence em 02/10/2026 · R$ 18 420,00
-      </Text>
+      </Line>
       <Badge tone="warning">Vencida há 9 dias</Badge>
       {children}
     </Body>
@@ -95,8 +124,8 @@ export const Playground: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Um espaço de trabalho com fronteira móvel"
-        note="Arraste a barra, ou chegue a ela com Tab e use as setas. O número anunciado e a medida aplicada são o mesmo número, e a região ao lado fica com o que sobra."
+        label="0.34 · sem limites · sem paragens"
+        note="A configuração mais simples que a família tem: uma fracção inicial e nada mais. Tudo o que as outras cenas acrescentam — limites, paragens, colapso — é opcional sobre isto."
       >
         <Workspace>
           <Accounts />
@@ -146,9 +175,9 @@ function Controlled() {
   return (
     <Workspace>
       <Accounts>
-        <Text size="sm" tone="muted">
+        <Line size="sm" tone="muted">
           {Math.round(value * 100)}% do contentor
-        </Text>
+        </Line>
       </Accounts>
       <Splitter
         aria-label="Largura das contas"
@@ -254,8 +283,8 @@ export const SnapPoints: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Três paragens, e a mão que as encontra"
-        note="Arraste para lá de uma paragem e largue: a barra assenta na mais próxima. Encaixa ao largar e nunca durante o arrasto, porque uma barra que encaixasse a cada frame lutava com a mão em vez de a ajudar. As setas andam de paragem em paragem."
+        label="snapPoints={[0.2, 0.34, 0.5]}"
+        note="Repare em quando encaixa: durante o arrasto a barra segue o ponteiro exactamente, e só ao largar salta. Com paragens declaradas as setas deixam de andar dezasseis pixels e passam a andar de paragem em paragem."
       >
         <Workspace>
           <Accounts />
@@ -276,8 +305,8 @@ export const Reset: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Duplo clique volta ao princípio"
-        note="Mova a barra para onde quiser e faça duplo clique nela: regressa aos trinta e quatro por cento com que começou. O padrão não atribui nada ao duplo clique, e toda a implementação levantada que traz um reset o põe aí."
+        label="defaultValue={0.34}"
+        note="O mesmo número serve de ponto de partida e de destino do reset, que é o motivo de não haver um segundo input para ele. Enter, que colapsa, vai a outro sítio — os dois gestos não competem."
       >
         <Workspace>
           <Accounts />
@@ -294,8 +323,8 @@ export const Disabled: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Congelada, e ainda legível"
-        note="A barra mantém o ponto de tabulação e os três valores ARIA; as linhas descem ao passo apagado e o hover e a pressão ficam retidos. Quem não pode mover um separador ainda pode ser informado de onde ele está."
+        label="disabled, com value={0.34}"
+        note="Chegue-lhe com Tab: o foco pára aqui na mesma. É deliberado — tirar o ponto de tabulação tiraria também o valor anunciado, e quem não pode mover um separador ainda precisa de saber onde ele está."
       >
         <Workspace>
           <Accounts />
@@ -322,9 +351,9 @@ function Announced() {
         value={value}
       />
       <Invoice>
-        <Text size="sm" tone="muted">
+        <Line size="sm" tone="muted">
           aria-valuenow={Math.round(value * 100)} · aria-valuemin=15 · aria-valuemax=75
-        </Text>
+        </Line>
       </Invoice>
     </Workspace>
   );
@@ -335,8 +364,8 @@ export const Keyboard: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Todas as teclas que o padrão lista"
-        note="Chegue à barra com Tab: as setas movem dezasseis pixels e sessenta e quatro com Shift, Home e End vão aos limites, Enter colapsa e restaura. O valor anunciado, impresso à direita, muda com cada uma."
+        label="min={0.15} · max={0.75} · collapsible"
+        note="A linha impressa à direita é o que um leitor de ecrã diz. Prima Home e End para ver que ele pára em 15 e 75, e não em 0 e 100: o valor reportado é o já travado, portanto o anúncio e o layout não podem discordar."
       >
         <Announced />
       </Scene>
@@ -352,15 +381,15 @@ function Workspace3() {
     <div className="slotted-demo-viewport" data-size="tall">
       <div className="slotted-demo-workspace">
         <Region ref={toc}>
-          <Text size="sm" weight="semibold">
+          <Line size="sm" weight="semibold">
             Sumário
-          </Text>
-          <Text size="sm" tone="muted">
+          </Line>
+          <Line size="sm" tone="muted">
             Conciliação bancária
-          </Text>
-          <Text size="sm" tone="muted">
+          </Line>
+          <Line size="sm" tone="muted">
             Baixa automática
-          </Text>
+          </Line>
         </Region>
         <Splitter
           aria-label="Largura do sumário"
@@ -370,13 +399,13 @@ function Workspace3() {
           min="180px"
         />
         <Body>
-          <Text size="lg" weight="semibold">
+          <Line size="lg" weight="semibold">
             Procedimento de conciliação
-          </Text>
-          <Text size="sm" tone="muted">
+          </Line>
+          <Line size="sm" tone="muted">
             Cada barra trava contra os seus próprios limites e nenhuma negoceia com a outra: quem
             possui o layout possui a política.
-          </Text>
+          </Line>
         </Body>
         <Splitter
           aria-label="Largura das notas"
@@ -386,12 +415,12 @@ function Workspace3() {
           min={0.4}
         />
         <Region>
-          <Text size="sm" weight="semibold">
+          <Line size="sm" weight="semibold">
             Notas
-          </Text>
-          <Text size="sm" tone="muted">
+          </Line>
+          <Line size="sm" tone="muted">
             Revisto por Auditoria em 08/09.
-          </Text>
+          </Line>
         </Region>
       </div>
     </div>
@@ -403,8 +432,8 @@ export const TwoBars: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Duas barras em série"
-        note="A forma que o portal de ajuda da SAP usa. A família não segura painéis, portanto quem possui o layout possui também a política de acoplamento: cada barra trava sozinha e nenhuma empurra a vizinha."
+        label="Duas barras, três regiões"
+        note="Empurre a primeira barra toda para a direita e depois tente mover a segunda: ela não cede terreno à vizinha. É o custo escrito da decisão de não segurar painéis — quem possui o layout possui a política, e aqui o consumidor escolheu não ter nenhuma."
       >
         <Workspace3 />
       </Scene>
@@ -426,9 +455,9 @@ function Persisted() {
         value={value}
       />
       <Invoice>
-        <Text size="sm" tone="muted">
+        <Line size="sm" tone="muted">
           Guardado: {Math.round(saved * 100)}% · em movimento: {Math.round(value * 100)}%
-        </Text>
+        </Line>
         <Button onClick={() => setValue(saved)} size="sm" variant="outline">
           Recarregar a partir do guardado
         </Button>
@@ -442,8 +471,8 @@ export const Persistence: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="Um layout que sobrevive a um recarregamento"
-        note="Arraste a barra: o número em movimento muda a cada frame e o guardado muda uma vez, ao largar. Prima Recarregar para ver de onde a página voltaria. A família nunca toca em armazenamento — qual armazenamento, e se um layout atravessa um login, são decisões da aplicação."
+        label="onResizeEnd, ao lado de onValueChange"
+        note="Os dois números à direita são o mesmo valor lido em dois momentos. Arraste devagar e veja o de cima mudar a cada frame enquanto o de baixo fica quieto até largar: é essa diferença que separa uma escrita em armazenamento de sessenta."
       >
         <Persisted />
       </Scene>
@@ -545,18 +574,18 @@ function Named() {
   return (
     <Workspace>
       <Region ref={region}>
-        <Text id="contas-heading" size="sm" weight="semibold">
+        <Line id="contas-heading" size="sm" weight="semibold">
           Contas a receber
-        </Text>
-        <Text size="sm" tone="muted">
+        </Line>
+        <Line size="sm" tone="muted">
           O separador toma o nome deste título.
-        </Text>
+        </Line>
       </Region>
       <Splitter aria-labelledby="contas-heading" defaultValue={0.34} for={region} />
       <Invoice>
-        <Text size="sm" tone="muted">
+        <Line size="sm" tone="muted">
           role=separator · tabindex=0 · aria-orientation=vertical · aria-controls aponta à região
-        </Text>
+        </Line>
       </Invoice>
     </Workspace>
   );
@@ -567,8 +596,8 @@ export const Accessibility: Story = {
   render: () => (
     <Grid columns={1}>
       <Scene
-        label="O que um leitor de ecrã ouve"
-        note="A barra nomeia a região por aria-controls e toma o nome do título dessa região, que é a regra do próprio padrão: um separador chama-se pela região que dimensiona. A região recebe um id da família quando não traz nenhum."
+        label="aria-labelledby, apontado ao título da região"
+        note="Inspeccione a barra: aria-controls aponta ao aside e aria-labelledby ao h3 lá dentro. São o mesmo elemento por construção, porque for entrega um só — o que se ouve e o que se vê não podem divergir."
       >
         <Named />
       </Scene>

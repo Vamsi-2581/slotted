@@ -191,7 +191,6 @@ export function Splitter({
     (next: boolean, reason: SplitterValueReason, source: unknown) => {
       if (next === currentCollapsed) return;
 
-      let refused = false;
       const state = createControllable<boolean>({
         controlled: collapsed,
         initial: currentCollapsed,
@@ -210,11 +209,11 @@ export function Splitter({
       });
 
       const moved = state.request(next, reason, source);
-      /* Controlled mode reports and waits for the consumer, so `moved` is
-         false there without anything having been refused. A refusal is a
-         request that did not move an *uncontrolled* value. */
-      refused = !moved && collapsed === undefined;
-      if (refused) return false;
+      /* Controlled mode reports and waits for the consumer, so `moved` is false
+         there without anything having been refused. A refusal is a request that
+         did not move an *uncontrolled* value, and only that case stops the
+         measure moving with the state. */
+      if (!moved && collapsed === undefined) return false;
       if (moved) setOwnCollapsed(next);
       return true;
     },

@@ -71,3 +71,4 @@ export * from './tree';
 export * from './typography';
 export * from './upload';
 export * from './visually-hidden';
+export * from './splitter';

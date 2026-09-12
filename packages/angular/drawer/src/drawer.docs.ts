@@ -66,6 +66,20 @@ const anatomy: AnatomyRow[] = [
       'The edge the reader moves. Rendering it is the resize capability — there is no resizable input — and it answers the Window Splitter pattern: aria-valuenow, aria-valuemin and aria-valuemax as percentages, aria-orientation, aria-controls the panel and aria-labelledby the title. It is a four-pixel gutter whose pointer reach is --slotted-target-min, invisible at rest and a two-pixel line under the hand, and it is a row of the panel’s grid on a block side and an overlay on the inner edge on an inline one.',
   },
   {
+    part: 'line',
+    element: 'span',
+    required: true,
+    purpose:
+      'A hairline each side of the grip on an inline side, fading to transparent away from it and running the whole gutter under the hand. Not painted on a sheet, where the grip is the whole picture.',
+  },
+  {
+    part: 'grip',
+    element: 'span[aria-hidden]',
+    required: true,
+    purpose:
+      'The mark a hand aims at: a dot matrix on an inline side, a pill above the header on a sheet. Hidden from the accessibility tree, because the separator around it is already named and already valued.',
+  },
+  {
     part: 'header',
     element: 'the consumer’s own element, with slDrawerHeader on it',
     required: false,

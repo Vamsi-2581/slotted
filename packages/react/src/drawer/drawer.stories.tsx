@@ -163,6 +163,54 @@ function Page({ children }: { children?: ReactNode }) {
   );
 }
 
+/**
+ * The navigation a product would actually have, and not three words standing in
+ * for one.
+ *
+ * `references/stories.md` asks for a real screen rather than a specimen, and the
+ * inline scenes were the page's clearest failure of it: a panel called
+ * "Coleções" holding "Todas", "Recentes" and "Arquivadas" beside a paragraph
+ * describing the component. It demonstrated that the family renders. Real
+ * labels, real counts and one awkward one — a queue with nothing in it — are
+ * what show whether it holds.
+ */
+function Navigation() {
+  return (
+    <>
+      <Text size="sm" weight="semibold">
+        Contas a receber
+      </Text>
+      <Text size="sm">Vencidas · 14</Text>
+      <Text size="sm">A vencer em 7 dias · 32</Text>
+      <Text size="sm">Em conciliação · 3</Text>
+      <Text size="sm" tone="muted">
+        Contestações · nenhuma
+      </Text>
+      <Text size="sm" tone="muted">
+        Baixas automáticas não conciliadas desde 02/09
+      </Text>
+    </>
+  );
+}
+
+/** The invoice the navigation leads to. */
+function Workbench() {
+  return (
+    <main>
+      <Text size="lg" weight="semibold">
+        NF-e 20 483 · Metalúrgica Boa Vista Ltda
+      </Text>
+      <Text size="sm" tone="muted">
+        Emitida em 02/09/2026 · vence em 02/10/2026 · R$ 18 420,00 · vencida há 9 dias
+      </Text>
+      <Text size="sm" tone="muted">
+        Arraste a aresta da barra lateral: a medida que ela publica é a mesma que este layout
+        aplica.
+      </Text>
+    </main>
+  );
+}
+
 export const Playground: Story = {
   args: {
     escape: 'close',
@@ -218,22 +266,21 @@ export const Mode: Story = {
       </Scene>
       <Scene
         label="inline — a panel beside it"
-        note="No portal, no scrim and no z-index. The page beside it reflows because the consumer’s own grid says so, which is what replaces Angular Material’s push and MUI’s persistent."
+        note="Sem portal, sem scrim e sem z-index: é uma barra lateral de verdade, com o separador na aresta e a fatura ao lado. A página reflui porque o grid do consumidor diz isso, que é o que substitui o push do Angular Material e o persistent do MUI."
       >
         <Shell>
-          <Drawer defaultOpen mode="inline" side="start" size="sm">
-            <DrawerPanel render={(props) => <nav {...props} aria-label="Seções" />}>
+          <Drawer defaultExtent={0.34} defaultOpen mode="inline" side="start" size="sm">
+            <DrawerPanel render={(props) => <nav {...props} aria-label="Contas" />}>
               <DrawerHeader>
-                <DrawerTitle>Coleções</DrawerTitle>
+                <DrawerTitle>Recebíveis</DrawerTitle>
               </DrawerHeader>
               <DrawerBody>
-                <Line>Todas</Line>
-                <Line>Recentes</Line>
-                <Line>Arquivadas</Line>
+                <Navigation />
               </DrawerBody>
+              <DrawerResizer />
             </DrawerPanel>
           </Drawer>
-          <Page />
+          <Workbench />
         </Shell>
       </Scene>
     </Grid>
@@ -301,16 +348,16 @@ export const Resize: Story = {
     <Grid columns={1}>
       <Scene
         label="A separator, not a prop"
-        note="The edge itself is the control: four pixels of nothing until a hand is near it, then a line. Tab to it and press the arrows — sixteen pixels a press, sixty-four with Shift — Home and End reach the limits, Enter collapses it and puts it back, and a double click restores the measure the size step gives it. Ant’s resizer and Vaul’s snap dragging are both pointer-only."
+        note="A aresta é o controlo, e vê-se sem lhe tocar: duas hairlines com a pega ao meio, que correm a calha inteira sob a mão. Chegue lá com Tab e use as setas — dezasseis pixels por toque, sessenta e quatro com Shift — Home e End vão aos limites, Enter colapsa e repõe, e o duplo clique volta à medida do passo de tamanho. O resizer do Ant e o arrasto do Vaul são só de ponteiro."
       >
         <Shell>
           <Drawer defaultExtent={0.32} defaultOpen minExtent={0.18} mode="inline" side="start">
             <DrawerPanel>
               <DrawerHeader>
-                <DrawerTitle>Coleções</DrawerTitle>
+                <DrawerTitle>Recebíveis</DrawerTitle>
               </DrawerHeader>
               <DrawerBody>
-                <Text size="sm">Arraste a borda, ou use as setas.</Text>
+                <Navigation />
               </DrawerBody>
               <DrawerResizer />
             </DrawerPanel>
@@ -491,11 +538,14 @@ export const Focus: Story = {
           <Drawer defaultOpen mode="inline" side="start" size="sm">
             <DrawerPanel>
               <DrawerHeader>
-                <DrawerTitle>Coleções</DrawerTitle>
+                <DrawerTitle>Recebíveis</DrawerTitle>
               </DrawerHeader>
               <DrawerBody>
                 <Button size="sm" variant="ghost">
-                  Todas
+                  Vencidas · 14
+                </Button>
+                <Button size="sm" variant="ghost">
+                  Em conciliação · 3
                 </Button>
               </DrawerBody>
             </DrawerPanel>
@@ -674,8 +724,8 @@ export const Composition: Story = {
                 <DrawerTitle>Seções</DrawerTitle>
               </DrawerHeader>
               <DrawerBody>
-                <Line>Resumo</Line>
-                <Line>Histórico</Line>
+                <Line>Resumo da fatura</Line>
+                <Line>Histórico de cobrança · 4 tentativas</Line>
               </DrawerBody>
             </DrawerPanel>
           </Drawer>
@@ -724,12 +774,10 @@ export const Accessibility: Story = {
           <Drawer defaultExtent={0.35} defaultOpen mode="inline" side="start">
             <DrawerPanel>
               <DrawerHeader>
-                <DrawerTitle>Coleções</DrawerTitle>
+                <DrawerTitle>Recebíveis</DrawerTitle>
               </DrawerHeader>
               <DrawerBody>
-                <Text size="sm">
-                  O separador anuncia o nome do painel, a orientação e a medida de 0 a 100.
-                </Text>
+                <Navigation />
               </DrawerBody>
               <DrawerResizer />
             </DrawerPanel>

@@ -1167,7 +1167,31 @@ Independentes entre si, exceto a cadeia de data.
   estreitas usam duas ou três colunas por isso.
 
 - `app-shell`
-- `action-bar`
+- `action-bar` — as ações que terminam uma tarefa numa página ou num painel.
+  Deriva de `docs/component-features.md` §15: primária, secundárias, danger e
+  **overflow por prioridade**; pode ficar `sticky` sem cobrir conteúdo; dirty
+  state, loading e permissões não deslocam as ações principais. A terceira linha
+  é estrutural — a fila ancora-se à borda de fim com `margin-inline-start: auto`,
+  pelo que tudo o que cresce ou sai mexe no que está antes da última ação e nunca
+  nela. O posto é o que separa esta família de `toolbar`, que recusou prioridade
+  por escrito e tem razão para a recusar: numa barra de ferramentas a ordem de
+  leitura e a de importância correm no mesmo sentido, e numa barra de ações
+  correm em sentidos opostos. São cinco postos adaptados de
+  `sap.m.OverflowToolbarPriority` — `pinned`, `high`, `low`, `hide`, `always` — e
+  custaram um `rank` opcional em `collapseState`, aditivo, com `toolbar` intacta.
+  `sticky` lê `--slotted-page-sticky-bottom` e para acima do rodapé da página em
+  vez de o cobrir; abaixo de `30rem` de contentor a fila passa a coluna, e o
+  número está escrito uma só vez — a folha levanta `--_stacked` dentro da
+  consulta e o _binding_ lê-o de volta. **A barra de ações em massa é esta
+  família**, e não uma família por construir: `specs/components/table/contract.json`
+  recusa `batchActions` e adia-o para cá por escrito, entregando a seleção e a
+  contagem. O que isso acrescentou foi `present`, segurado por
+  `@slotted/core/presence`, porque uma barra que aparece com a seleção tem de
+  entrar e sair à vista e deixar o DOM depois — Carbon deixa-a montada com
+  `aria-hidden` e os botões lá dentro continuam alcançáveis por `Tab`. Recusas
+  com família nomeada: foco rotativo para `toolbar`, forma da corrida de botões
+  para `button-group`, `loading` e `disabled` para `button` e para a plataforma,
+  confirmação de ação destrutiva para `dialog`, contagem da seleção para `table`.
 
 ## Onda 8 — Extended
 

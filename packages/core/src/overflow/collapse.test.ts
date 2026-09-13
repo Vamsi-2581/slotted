@@ -155,4 +155,75 @@ describe('collapseState', () => {
       triggerVisible: false,
     });
   });
+
+  /**
+   * The rank. A bar whose reading order and whose order of importance run the
+   * same way needs none, and `toolbar` says so in its own contract. A bar of
+   * actions is the case where they run in opposite directions: every surveyed
+   * implementation puts the action that confirms at the end of the line, so
+   * giving way from the end gives up Save first.
+   */
+  describe('rank', () => {
+    const ranked = (size: number, rank: number) => ({ collapsible: true, rank, size });
+
+    it('gives way from the lowest rank, whatever the position', () => {
+      /* Four units of 40 and no gap in 100: two have to go, and the two that
+         go are the ones ranked lowest rather than the two at the end. */
+      const state = collapseState({
+        available: 100,
+        gap: 0,
+        triggerSize: 20,
+        units: [ranked(40, 0), ranked(40, 2), ranked(40, 0), ranked(40, 2)],
+      });
+
+      expect(state.collapsed).toEqual([0, 2]);
+      expect(state.triggerVisible).toBe(true);
+    });
+
+    it('gives way from the end within one rank', () => {
+      const state = collapseState({
+        available: 100,
+        gap: 0,
+        triggerSize: 20,
+        units: [ranked(40, 1), ranked(40, 1), ranked(40, 1)],
+      });
+
+      expect(state.collapsed).toEqual([2]);
+    });
+
+    it('reaches a higher rank only once the lower one is exhausted', () => {
+      const state = collapseState({
+        available: 60,
+        gap: 0,
+        triggerSize: 20,
+        units: [ranked(40, 5), ranked(40, 1), ranked(40, 5)],
+      });
+
+      expect(state.collapsed).toEqual([1, 2]);
+    });
+
+    it('reads an unranked unit as rank nought, which is what the bar did before', () => {
+      /* Both unranked units give way before the one ranked above them, and the
+         one ranked above them is left holding the bar. */
+      const state = collapseState({
+        available: 60,
+        gap: 0,
+        triggerSize: 20,
+        units: [unit(40), ranked(40, 1), unit(40)],
+      });
+
+      expect(state.collapsed).toEqual([0, 2]);
+    });
+
+    it('never gives way a unit with nowhere to go, whatever its rank', () => {
+      const state = collapseState({
+        available: 40,
+        gap: 0,
+        triggerSize: 20,
+        units: [{ collapsible: false, rank: 0, size: 40 }, ranked(40, 9)],
+      });
+
+      expect(state.collapsed).toEqual([1]);
+    });
+  });
 });

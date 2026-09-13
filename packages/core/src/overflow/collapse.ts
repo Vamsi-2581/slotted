@@ -8,11 +8,22 @@
  * without a layout engine and the two bindings of a family cannot disagree
  * about what fits.
  *
- * The order is fixed and there is no priority: the last unit that can give way
- * is the first that does. A priority is a way of saying "hide this one", and a
- * bar is not supposed to have an opinion about which control matters — the
- * author already stated that by placing it. What must never be hidden has
- * nowhere to go, which is what `collapsible: false` says.
+ * The order is the bar's own, reversed: the last unit that can give way is the
+ * first that does. What must never be hidden has nowhere to go, which is what
+ * `collapsible: false` says.
+ *
+ * `rank` is the exception, and it exists because one kind of bar reads the
+ * other way round. In a bar of tools, reading order and importance run the same
+ * way — the first tool is the most used — so giving way from the end gives up
+ * the least used, and `toolbar` records the refusal of a priority in its own
+ * contract for exactly that reason. In a bar of actions they run in opposite
+ * directions: every surveyed implementation puts the action that confirms at
+ * the end of the line, so giving way from the end gives up Save first.
+ *
+ * So a unit may state where it stands in the order of giving way, and the
+ * position still decides between two units that stand in the same place. A
+ * caller that states nothing gets the original rule back untouched, because
+ * every unit is then rank nought.
  */
 
 import type { ScrollOrientation } from './overflow';
@@ -32,6 +43,12 @@ export interface CollapseUnitInput {
    * as soon as the bar fits.
    */
   divides?: boolean;
+  /**
+   * Where the unit stands in the order of giving way: the lowest rank goes
+   * first, and position decides inside one rank. Nought by default, which is
+   * the bar that has no opinion at all.
+   */
+  rank?: number;
 }
 
 export interface CollapseInput {
@@ -87,11 +104,14 @@ export function collapseState({
   if (roomTaken(total, units.length, gap) <= limit) return NOTHING_COLLAPSED;
 
   /* The end gives way first, which is what "the overflow takes what is left
-     over" means when the bar is read in its own order. */
+     over" means when the bar is read in its own order — and the rank comes
+     before the position, so a bar whose most important control is its last one
+     can say so. The sort is stable, so the reversal is what orders one rank. */
   const candidates = units
     .map((item, index) => ({ ...item, index }))
     .filter((item) => item.collapsible)
-    .reverse();
+    .reverse()
+    .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0));
 
   if (candidates.length === 0) return NOTHING_COLLAPSED;
 
@@ -130,6 +150,12 @@ export interface CollapseOptions {
   collapsible: (unit: HTMLElement) => boolean;
   /** Whether a unit only means something between two others. */
   divides?: (unit: HTMLElement) => boolean;
+  /**
+   * Where a unit stands in the order of giving way. Nought for every unit
+   * unless the caller says otherwise, which is the bar that gives way from its
+   * own end.
+   */
+  rank?: (unit: HTMLElement) => number;
   /**
    * The room a unit takes, when the caller knows it cannot be measured. A
    * spacer grows into whatever is left, so its size is nought and it is still
@@ -246,6 +272,7 @@ export function createCollapse(container: HTMLElement, options: CollapseOptions)
       units: units.map((unit) => ({
         collapsible: trigger !== null && options.collapsible(unit),
         divides: options.divides?.(unit) ?? false,
+        rank: options.rank?.(unit) ?? 0,
         size: room.get(unit) ?? 0,
       })),
     });

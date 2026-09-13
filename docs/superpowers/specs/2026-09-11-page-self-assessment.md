@@ -176,6 +176,15 @@ The fourth round, on the same Storybook:
   go with the reason `programmatic`, and below 640 pixels the sheet hides the
   pin on its own as well. sap.f offers no pin on phones; the fraction covers a
   short landscape screen and a tall header alike.
+- A page inside a drawer painted its ground inside the drawer's padding. The
+  drawer's body gained `inset="none"`, the word `page` and `container` already
+  use, and the consumer says so; neither family reaches into the other.
+- Loading, the heading grew and pushed the marks to the far end, and a bar of
+  twelve characters did not look like the title it stood for: twenty-four for
+  the heading, thirty-two for the subheading, no growth.
+- The demonstrations showed initials only, which is the fallback and not the
+  use: the kind of record as an icon on most screens, the supplier's mark as an
+  image on the anatomy scene, initials where nothing else exists.
 - Pinned and scrolled to the end, a short section's header rose over the
   chrome: it shared the chrome's z-index and came later in the DOM. The root
   now stands three steps above every other sticky thing on the page.

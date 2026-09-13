@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { collapseState } from './collapse';
+import { collapseState, createCollapse } from './collapse';
 
 /**
  * The arithmetic of a bar that has to give something up: which units go, and
@@ -225,5 +225,55 @@ describe('collapseState', () => {
 
       expect(state.collapsed).toEqual([1]);
     });
+  });
+});
+
+/**
+ * The half of the module that touches the DOM. `ResizeObserver` does not exist
+ * in jsdom and no box has a width there, so what is exercised here is the one
+ * decision the arithmetic cannot make on its own: whether the control that holds
+ * the surface is drawn.
+ */
+describe('createCollapse', () => {
+  function bar() {
+    const container = document.createElement('div');
+    const trigger = document.createElement('button');
+    trigger.setAttribute('hidden', '');
+    container.append(trigger);
+    document.body.append(container);
+    return { container, trigger };
+  }
+
+  it('hides the control while nothing gave way', () => {
+    const { container, trigger } = bar();
+
+    const handle = createCollapse(container, {
+      collapsible: () => true,
+      trigger: () => trigger,
+      units: () => [],
+    });
+
+    expect(trigger.hasAttribute('hidden')).toBe(true);
+    handle.destroy();
+  });
+
+  /**
+   * A bar whose surface holds something permanently — `action-bar`'s `always`
+   * rank, Fluent's `overflowItems`, SAP's `AlwaysOverflow` — has rows in the
+   * surface while every unit still fits. A control that hid itself then would be
+   * a menu nobody can open.
+   */
+  it('draws the control anyway when the surface holds something permanently', () => {
+    const { container, trigger } = bar();
+
+    const handle = createCollapse(container, {
+      collapsible: () => true,
+      trigger: () => trigger,
+      triggerAlways: () => true,
+      units: () => [],
+    });
+
+    expect(trigger.hasAttribute('hidden')).toBe(false);
+    handle.destroy();
   });
 });

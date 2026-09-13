@@ -164,6 +164,17 @@ export interface CollapseOptions {
   fixedSize?: (unit: HTMLElement) => number | undefined;
   /** The control that opens what did not fit, or `null` while the bar has none. */
   trigger: () => HTMLElement | null;
+  /**
+   * Whether the control is needed whatever the measurement says.
+   *
+   * The measurement alone assumes the surface is empty exactly when nothing gave
+   * way, which is true for a bar whose surface holds only what did not fit. A
+   * family that puts something in the surface permanently — `action-bar`'s
+   * `always` rank, Fluent's `overflowItems`, SAP's `AlwaysOverflow` — has a
+   * surface with rows in it while every unit still fits, and a control that
+   * hides itself then is a menu nobody can open.
+   */
+  triggerAlways?: () => boolean;
   orientation?: () => ScrollOrientation;
   /** Reports the collapsed units, in DOM order, and only when the set changes. */
   onChange?: (collapsed: readonly HTMLElement[]) => void;
@@ -301,8 +312,9 @@ export function createCollapse(container: HTMLElement, options: CollapseOptions)
       else unit.removeAttribute('hidden');
     });
 
+    const drawTrigger = state.triggerVisible || (options.triggerAlways?.() ?? false);
     if (trigger !== null) {
-      if (state.triggerVisible) trigger.removeAttribute('hidden');
+      if (drawTrigger) trigger.removeAttribute('hidden');
       else if (!trigger.hasAttribute('hidden')) trigger.setAttribute('hidden', '');
     }
 

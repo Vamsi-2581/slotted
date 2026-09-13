@@ -9,6 +9,8 @@
   "exports": {
     "./accordion/accordion.css": "./src/accordion/accordion.css",
     "./accordion/tokens.json": "./src/accordion/accordion.tokens.json",
+    "./action-bar/action-bar.css": "./src/action-bar/action-bar.css",
+    "./action-bar/tokens.json": "./src/action-bar/action-bar.tokens.json",
     "./alert/alert.css": "./src/alert/alert.css",
     "./alert/tokens.json": "./src/alert/alert.tokens.json",
     "./avatar-group/avatar-group.css": "./src/avatar-group/avatar-group.css",

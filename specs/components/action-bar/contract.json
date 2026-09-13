@@ -38,7 +38,11 @@
   "priority": {
     "attribute": "data-priority",
     "values": ["pinned", "high", "low", "hide", "always"],
-    "rank": { "hide": 0, "low": 1, "high": 2 },
+    "rank": {
+      "hide": 0,
+      "low": 1,
+      "high": 2
+    },
     "order": "the lowest rank gives way first, and the bar's own order reversed decides within one rank",
     "engine": "@slotted/core/overflow",
     "reason": "In a bar of tools, reading order and importance run the same way, so giving way from the end gives up the least used control — which is why `toolbar` refuses a priority in its own contract. In a bar of actions they run in opposite directions: Polaris, Salesforce and the footer of SAP's DynamicPage all put the action that confirms at the end of the line, so giving way from the end gives up Save first.",
@@ -79,7 +83,7 @@
     "reason": "Sticky and not fixed, for the reason page already wrote into its own contract: a fixed bar covers the last line of content and every implementation that uses one then pads the body by a magic number. The offset is what page publishes on the element that scrolls, so a sticky action bar inside a page with a footer stops above that footer instead of covering it; with no page around it the fallback sticks the bar to the end of whatever scrolls."
   },
   "stack": {
-    "breakpoint": "30rem",
+    "breakpoint": "24rem",
     "container": "root",
     "queried": "actions",
     "property": "--_stacked",
@@ -91,7 +95,8 @@
     "input": "present",
     "module": "@slotted/core/presence",
     "movesFocus": false,
-    "reason": "A bulk bar exists while there is a selection and a contextual save bar while there are unsaved changes. Carbon keeps its bar in the DOM and writes aria-hidden on the root, which leaves the buttons inside it reachable by Tab and puts focus in a region the screen reader announces as absent. A bar that is not present leaves the DOM once it has left the view, and focus returns to the document in its own order. Appearing never moves focus: the bar is not a dialog, and taking focus from a reader who is ticking boxes is the jump docs/component-features.md §11 forbids by name."
+    "reason": "A bulk bar exists while there is a selection and a contextual save bar while there are unsaved changes. Carbon keeps its bar in the DOM and writes aria-hidden on the root, which leaves the buttons inside it reachable by Tab and puts focus in a region the screen reader announces as absent. A bar that is not present leaves the DOM once it has left the view, and focus returns to the document in its own order. Appearing never moves focus: the bar is not a dialog, and taking focus from a reader who is ticking boxes is the jump docs/component-features.md §11 forbids by name.",
+    "leaves": "React unmounts the bar. An Angular directive cannot remove the host the consumer wrote, so it is painted out with display:none once the exit finishes — which takes it out of the accessibility tree and out of the tab order alike, and is the half of Carbon's defect that matters. A consumer who wants the node itself gone writes @if around it and gives up the exit. The asymmetry is idiom, and it is recorded rather than levelled down."
   },
   "keyboard": [
     {

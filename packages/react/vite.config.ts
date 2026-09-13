@@ -9,6 +9,7 @@ export default defineConfig({
       cssFileName: 'styles',
       entry: {
         index: resolve(import.meta.dirname, 'src/index.ts'),
+        'action-bar': resolve(import.meta.dirname, 'src/action-bar/index.ts'),
         avatar: resolve(import.meta.dirname, 'src/avatar/index.ts'),
         'avatar-group': resolve(import.meta.dirname, 'src/avatar-group/index.ts'),
         badge: resolve(import.meta.dirname, 'src/badge/index.ts'),

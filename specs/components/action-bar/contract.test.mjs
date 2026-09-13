@@ -133,7 +133,7 @@ test('stops above the page own chrome rather than covering it', () => {
  * comparing widths of its own.
  */
 test('states the stacking breakpoint in one place and reads it from there', () => {
-  assert.equal(contract.stack.breakpoint, '30rem');
+  assert.equal(contract.stack.breakpoint, '24rem');
   assert.equal(contract.stack.container, 'root');
   assert.equal(contract.stack.queried, 'actions');
   assert.equal(contract.stack.property, '--_stacked');
@@ -148,6 +148,8 @@ test('enters and leaves without leaving focus inside a region that is gone', () 
   assert.equal(contract.presence.module, '@slotted/core/presence');
   assert.equal(contract.presence.movesFocus, false);
   assert.match(contract.presence.reason, /aria-hidden/);
+  assert.match(contract.presence.leaves, /React unmounts/);
+  assert.match(contract.presence.leaves, /display:none/);
   assert.ok(contract.composes.includes('presence'));
 });
 

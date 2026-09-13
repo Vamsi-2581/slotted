@@ -11,6 +11,10 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./action-bar": {
+      "types": "./dist/types/action-bar/index.d.ts",
+      "import": "./dist/action-bar.js"
+    },
     "./alert": {
       "types": "./dist/types/alert/index.d.ts",
       "import": "./dist/alert.js"

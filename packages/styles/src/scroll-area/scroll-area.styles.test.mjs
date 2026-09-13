@@ -1,0 +1,172 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import test from 'node:test';
+
+const source = readFileSync(new URL('./scroll-area.css', import.meta.url), 'utf8');
+
+/**
+ * A comment is not a rule, and this sheet's comments name the very declarations
+ * the rules below refuse — the field's `::-webkit-scrollbar`, the
+ * `scrollbar-width: none` every other implementation writes, the `[dir='rtl']`
+ * this one does not use. Read whole, the file reported itself as three defects
+ * it does not have. `packages/styles/src/states.test.mjs` records the same
+ * mistake, made the same way.
+ */
+const css = source.replace(/\/\*[\s\S]*?\*\//g, ' ');
+const contract = JSON.parse(
+  readFileSync(
+    new URL('../../../../specs/components/scroll-area/contract.json', import.meta.url),
+    'utf8',
+  ),
+);
+const fragment = readFileSync(new URL('./scroll-area.harness.html', import.meta.url), 'utf8');
+
+/**
+ * The whole of the family's headline decision, in one declaration each. A later
+ * pass that reaches for a drawn thumb has to delete these.
+ */
+test('themes the platform scrollbar rather than hiding it', () => {
+  assert.match(css, /scrollbar-color:\s*var\(--_thumb\) var\(--_track\)/);
+  assert.match(css, /scrollbar-width:\s*thin/);
+
+  assert.doesNotMatch(
+    css,
+    /::-webkit-scrollbar/,
+    'the native bar is never hidden under a drawn one',
+  );
+  assert.doesNotMatch(
+    css,
+    /\[data-part='(?:scrollbar|thumb|corner)'\]/,
+    'a drawn scrollbar has parts, and this family draws none',
+  );
+});
+
+/**
+ * `scrollbar-width: none` removes the bar and nothing else: the content still
+ * scrolls by wheel, by touch, by keyboard and by `scrollTo`. It is reachable
+ * only through the axis, never as the family's own default.
+ */
+test('removes the bar only where the consumer asked for it', () => {
+  const hidden = /\[data-scrollbars='none'\][^{]*\{[^}]*scrollbar-width:\s*none/;
+  assert.match(css, hidden);
+  assert.equal(
+    [...css.matchAll(/scrollbar-width:\s*none/g)].length,
+    1,
+    'the bar is removed in exactly one rule, and that rule is the axis',
+  );
+});
+
+/**
+ * The veil is a mask, so it covers everything the element paints. Two rules
+ * follow from that and both were found in a capture rather than in a test.
+ */
+test('keeps the veil off the frame and off the focus ring', () => {
+  const maskRule =
+    /\[data-ui='scroll-area'\] > \[data-part='viewport'\] \{[\s\S]*?mask-composite: intersect;/;
+  assert.match(css, maskRule, 'the mask is on the viewport');
+  assert.doesNotMatch(
+    css,
+    /\[data-ui='scroll-area'\] \{[^}]*mask-image/,
+    'a mask on the root fades the border the consumer put there',
+  );
+
+  const focus =
+    /\[data-ui='scroll-area'\]:has\(> \[data-part='viewport'\]:focus-visible\) \{[^}]*outline:/;
+  assert.match(css, focus, 'the ring is drawn by the element the mask is not on');
+  assert.doesNotMatch(
+    css,
+    /\[data-part='viewport'\]:focus-visible \{[^}]*outline:/,
+    'a ring on the masked element is a ring the veil cuts',
+  );
+});
+
+/**
+ * A gradient cannot be given a logical direction, so the two physical inline
+ * lengths swap once, in one rule. Every other rule states the logical edge.
+ *
+ * Without it a right-to-left document veils the edge the reader can already
+ * see, which the RTL capture is what showed.
+ */
+test('mirrors the inline veil, once, with a selector that reads the direction', () => {
+  assert.match(
+    css,
+    /:dir\(rtl\) > \[data-part='viewport'\] \{\s*--_fade-left: var\(--_scroll-area-fade-inline-end\);\s*--_fade-right: var\(--_scroll-area-fade-inline-start\);/,
+  );
+  assert.doesNotMatch(css, /\[dir='rtl'\]/, 'an attribute misses a direction set in CSS');
+});
+
+/**
+ * The four lengths are registered so they interpolate: an unregistered custom
+ * property animates discretely, and the veil would snap.
+ */
+test('registers the four lengths so the veil moves rather than appears', () => {
+  for (const edge of ['block-start', 'block-end', 'inline-start', 'inline-end']) {
+    assert.match(css, new RegExp(`@property --_scroll-area-fade-${edge}`));
+  }
+  assert.equal(
+    [...css.matchAll(/syntax: '<length-percentage>'/g)].length,
+    4,
+    'a percentage is how the reach is capped against a short box, so the type has to allow one',
+  );
+});
+
+/**
+ * A veil that is a fifth of a tall panel is a third of a short one, and at a
+ * third it stops being a hint. `splitter` caps its own gaps the same way.
+ */
+test('caps the veil against the box it is drawn in', () => {
+  assert.match(css, /--_fade: min\(var\(--slotted-scroll-area-fade-size[\s\S]*?\), 20%\)/);
+});
+
+/**
+ * `docs/component-features.md` §4 names printing in this family's own sentence,
+ * and no surveyed implementation answers it.
+ */
+test('prints the whole content rather than the visible slice', () => {
+  const print = css.slice(css.indexOf('@media print'));
+  assert.match(print, /max-block-size: none/);
+  assert.match(print, /overflow: visible/);
+  assert.match(print, /mask-image: none/);
+});
+
+/**
+ * The system owns the palette under forced colours, and a veil over system text
+ * is a legibility loss with nothing bought.
+ */
+test('gives the palette back under forced colours', () => {
+  const forced = css.slice(css.indexOf('@media (forced-colors: active)'));
+  assert.match(forced, /mask-image: none/);
+  assert.match(forced, /scrollbar-color: auto/);
+});
+
+/**
+ * The fragment is the third place this family's DOM is written, and it drifts.
+ * Every part the contract declares has to appear in it, and so does every value
+ * of every axis — a scene the harness cannot photograph is a decision nobody
+ * looked at.
+ */
+test('exercises every part and every axis value in the harness', () => {
+  for (const part of contract.members.scrollArea.parts) {
+    if (part === 'root') continue;
+    assert.ok(fragment.includes(`data-part="${part}"`), `no scene renders ${part}`);
+  }
+
+  const axes = {
+    'data-axis': ['block', 'inline', 'both'],
+    'data-scrollbars': ['auto', 'always', 'hover', 'none'],
+    'data-gutter': ['auto', 'stable', 'both-edges'],
+    'data-fade': ['both', 'end', 'none'],
+  };
+  for (const [attribute, values] of Object.entries(axes)) {
+    for (const value of values) {
+      assert.ok(
+        fragment.includes(`${attribute}="${value}"`),
+        `no scene renders ${attribute}="${value}"`,
+      );
+    }
+  }
+
+  for (const edge of contract.edges.attributes) {
+    assert.ok(fragment.includes(edge), `no scene renders ${edge}`);
+  }
+});

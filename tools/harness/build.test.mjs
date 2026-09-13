@@ -199,6 +199,7 @@ test('defaults every axis and names each one in the file it writes', () => {
     hover: undefined,
     motion: undefined,
     scene: undefined,
+    scrollbars: 'hide',
     zoom: '100',
     scheme: 'light',
     width: '420',
@@ -276,6 +277,25 @@ test('states the reader’s motion preference instead of inheriting the browser�
   assert.throws(() => parseArguments(['demo', '--motion', 'off']), /reduce, no-preference/);
 });
 
+/**
+ * The shooter has always launched Chrome with `--hide-scrollbars`, which keeps
+ * a page-level bar out of a full-page capture and makes one family
+ * unphotographable: `scroll-area` decided the scrollbar is the platform's,
+ * themed through `scrollbar-color`, and the tool that judges the picture was
+ * hiding the thing the family is about.
+ */
+test('can photograph a scrollbar, and hides one by default', () => {
+  const hidden = parseArguments(['demo']);
+  assert.equal(hidden.scrollbars, 'hide');
+  assert.equal(captureName(hidden), 'demo-light-comfortable-ltr-420.png');
+
+  const shown = parseArguments(['demo', '--scrollbars', 'show']);
+  assert.equal(shown.scrollbars, 'show');
+  assert.equal(captureName(shown), 'demo-light-comfortable-ltr-420-scrollbars.png');
+
+  assert.throws(() => parseArguments(['demo', '--scrollbars', 'yes']), /hide, show/);
+});
+
 test('refuses a moment that is not a whole number of milliseconds', () => {
   assert.throws(() => parseArguments(['demo', '--at', 'halfway']), /whole number of milliseconds/);
   assert.throws(() => parseArguments(['demo', '--at', '1.5']), /whole number of milliseconds/);
@@ -320,6 +340,61 @@ test('refuses an axis value the harness cannot render', () => {
   assert.throws(() => parseArguments(['demo', '--density', 'roomy']), /density must be one of/);
   assert.throws(() => parseArguments(['demo', '--scheme']), /needs a value/);
   assert.throws(() => parseArguments(['--scheme', 'dark']), /usage/);
+});
+
+/**
+ * A family whose smallest meaningful layout is wider than the widest default
+ * stage could not be photographed at all: `app-shell` answers its own inline
+ * size at 768 pixels, so all three defaults rendered the narrow layout and the
+ * wide one — the navigation as a column, the pane beside the content, the rail
+ * — never reached an image. A fixed-width stage does not answer it, because
+ * the capture is clipped to the width the shooter was asked for.
+ */
+test('lets one scene state the widths it is worth photographing at', () => {
+  const html = renderHarness({
+    family: 'demo',
+    fragment: `
+      <section data-scene="wide" data-widths="420 1080"><b>one</b></section>
+      <section data-scene="narrow"><b>two</b></section>
+    `,
+    familyCss: '',
+    themeCss: '',
+  });
+
+  for (const scheme of SCHEMES) {
+    assert.ok(html.includes(`id="wide-${scheme}-1080"`), `missing wide-${scheme}-1080`);
+    assert.ok(html.includes(`id="wide-${scheme}-420"`), `missing wide-${scheme}-420`);
+    assert.equal(
+      html.includes(`id="wide-${scheme}-240"`),
+      false,
+      'a declared width list is the whole list',
+    );
+    for (const width of WIDTHS) {
+      assert.ok(
+        html.includes(`id="narrow-${scheme}-${width}"`),
+        'a scene that declares nothing keeps the three',
+      );
+    }
+  }
+});
+
+test('reads a scene declared width list, and only whole pixel counts', () => {
+  const [wide, narrow] = parseScenes(
+    '<section data-scene="wide" data-widths="420 1080"><b>a</b></section>' +
+      '<section data-scene="narrow"><b>b</b></section>',
+  );
+  assert.deepEqual(wide.widths, [420, 1080]);
+  assert.equal(narrow.widths, null);
+});
+
+/** A width that is not a whole number of pixels can only produce a blank capture. */
+test('takes a width outside the three the page ships, and nothing that is not a width', () => {
+  assert.equal(parseArguments(['demo', '--width', '1080']).width, '1080');
+  assert.throws(
+    () => parseArguments(['demo', '--width', 'wide']),
+    /width must be a whole number of pixels/,
+  );
+  assert.throws(() => parseArguments(['demo', '--width', '0']), /whole number of pixels/);
 });
 
 test('sizes each cell so a container query has something to answer', () => {

@@ -103,13 +103,25 @@ class Devtools {
   }
 }
 
-export async function launch() {
+/**
+ * `--hide-scrollbars` keeps a page-level bar out of a full-page capture, and
+ * every capture this harness has taken was taken with it. It also makes one
+ * family unphotographable: `scroll-area` decided that the scrollbar is the
+ * platform's, themed through `scrollbar-color` and `scrollbar-width`, and the
+ * one tool that judges a picture was configured to hide the thing the family is
+ * about.
+ *
+ * So the flag becomes an axis rather than a constant. It stays on by default,
+ * so every existing capture is unchanged, and `--scrollbars show` turns it off
+ * for the family that needs to see one.
+ */
+export async function launch({ scrollbars = 'hide' } = {}) {
   const profile = await mkdtemp(join(tmpdir(), 'slotted-harness-'));
   const chrome = spawn(process.env['CHROME_BIN'] ?? 'google-chrome', [
     '--headless=new',
     '--disable-gpu',
     '--no-sandbox',
-    '--hide-scrollbars',
+    ...(scrollbars === 'show' ? [] : ['--hide-scrollbars']),
     '--remote-debugging-port=0',
     `--user-data-dir=${profile}`,
     'about:blank',
@@ -190,6 +202,7 @@ export function captureName({
   zoom,
   at,
   motion,
+  scrollbars,
 }) {
   /* Every forced state named, not the first one: a capture of a hovered card
      with focus inside it is neither of the two, and overwriting one with the
@@ -204,6 +217,9 @@ export function captureName({
      axis existed keeps the name it had. */
   const moment = at === undefined ? undefined : `at${at}ms`;
   const preference = motion === undefined ? undefined : `motion-${motion}`;
+  /* Left out when the bars are hidden, which is the axis's own default, so
+     every capture taken before the axis existed keeps the name it had. */
+  const bars = scrollbars === 'show' ? 'scrollbars' : undefined;
   const parts = [
     family,
     scene,
@@ -215,6 +231,7 @@ export function captureName({
     magnified,
     preference,
     moment,
+    bars,
   ];
   return `${parts.filter(Boolean).join('-')}.png`;
 }
@@ -301,9 +318,9 @@ async function contentHeight(devtools, cssContentSize) {
 }
 
 export async function shoot(options) {
-  const { width, outDir } = options;
+  const { width, outDir, scrollbars } = options;
   const out = join(outDir, captureName(options));
-  const { devtools, close } = await launch();
+  const { devtools, close } = await launch({ scrollbars });
 
   try {
     await devtools.send('Page.enable');
@@ -417,7 +434,7 @@ export function parseArguments(argv) {
   const [family, ...rest] = argv;
   if (!family || family.startsWith('--')) {
     throw new Error(
-      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--scene name] [--focus selector] [--hover selector] [--active selector] [--zoom percent] [--motion reduce|no-preference] [--at milliseconds] [--out dir]',
+      'usage: node tools/harness/shoot.mjs <family> [--scheme s] [--width w] [--density d] [--dir ltr|rtl] [--scene name] [--focus selector] [--hover selector] [--active selector] [--zoom percent] [--motion reduce|no-preference] [--scrollbars hide|show] [--at milliseconds] [--out dir]',
     );
   }
 
@@ -430,6 +447,7 @@ export function parseArguments(argv) {
     hover: undefined,
     motion: undefined,
     scene: undefined,
+    scrollbars: 'hide',
     zoom: '100',
   };
   for (const [axis, { fallback }] of Object.entries(AXES)) options[axis] = fallback;
@@ -465,6 +483,13 @@ export function parseArguments(argv) {
       options.at = value;
       continue;
     }
+    if (flag === 'scrollbars') {
+      if (value !== 'hide' && value !== 'show') {
+        throw new Error(`scrollbars must be one of hide, show, received ${value}`);
+      }
+      options.scrollbars = value;
+      continue;
+    }
     if (flag === 'zoom') {
       if (!/^[1-9][0-9]{1,2}$/.test(value)) {
         throw new Error(`zoom is a percentage between 10 and 999, received ${value}`);
@@ -475,6 +500,20 @@ export function parseArguments(argv) {
 
     const axis = AXES[flag];
     if (axis === undefined) throw new Error(`unknown option ${rest[index]}`);
+    /**
+     * A scene may declare widths of its own — see `data-widths` in
+     * `build.mjs` — so the width axis is open at the top rather than closed to
+     * the three the page ships. What it is not is free-form: a value that is
+     * not a positive whole number of pixels can only produce a blank capture,
+     * and a blank capture is the failure this check exists to make loud.
+     */
+    if (flag === 'width') {
+      if (!/^[1-9]\d*$/.test(value)) {
+        throw new Error(`width must be a whole number of pixels, received ${value}`);
+      }
+      options[flag] = value;
+      continue;
+    }
     if (!axis.values.includes(value)) {
       throw new Error(`${flag} must be one of ${axis.values.join(', ')}, received ${value}`);
     }

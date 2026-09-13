@@ -1180,7 +1180,7 @@ Independentes entre si, exceto a cadeia de data.
   `sap.m.OverflowToolbarPriority` — `pinned`, `high`, `low`, `hide`, `always` — e
   custaram um `rank` opcional em `collapseState`, aditivo, com `toolbar` intacta.
   `sticky` lê `--slotted-page-sticky-bottom` e para acima do rodapé da página em
-  vez de o cobrir; abaixo de `30rem` de contentor a fila passa a coluna, e o
+  vez de o cobrir; abaixo de `24rem` de contentor a fila passa a coluna, e o
   número está escrito uma só vez — a folha levanta `--_stacked` dentro da
   consulta e o _binding_ lê-o de volta. **A barra de ações em massa é esta
   família**, e não uma família por construir: `specs/components/table/contract.json`

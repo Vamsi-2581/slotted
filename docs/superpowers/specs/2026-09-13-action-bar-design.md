@@ -197,7 +197,7 @@ que nenhum token explica.
 
 ## 8. Empilhar
 
-Abaixo de `30rem` de largura de contentor a fila passa a coluna de largura
+Abaixo de `24rem` de largura de contentor a fila passa a coluna de largura
 inteira, com a ação que confirma em cima. O valor é literal porque
 `@container (width < var(--x))` é inválido — regra 4 de
 `docs/token-foundation.md`.

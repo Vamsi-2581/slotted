@@ -524,7 +524,16 @@ const MEASURE = `(() => {
   };
 })()`;
 
-export async function audit({ url, width = 1280, density = 'comfortable' }) {
+/**
+ * How long a page is given to mount every stage. Thirty seconds held for every
+ * family until `app-shell`: eighteen scenes of a whole application each, and
+ * the Angular page bootstraps them one at a time — it reached the deadline at
+ * thirty-three of forty-two, and the audit reported a clean page it had read
+ * three quarters of. A page that needs longer says so with `--deadline`.
+ */
+export const DEADLINE = 30000;
+
+export async function audit({ url, width = 1280, density = 'comfortable', deadline = DEADLINE }) {
   const { devtools, close } = await launch();
 
   try {
@@ -570,7 +579,7 @@ export async function audit({ url, width = 1280, density = 'comfortable' }) {
      */
     const { result: waited } = await devtools.send('Runtime.evaluate', {
       expression: `new Promise((done) => {
-        const deadline = Date.now() + 30000;
+        const deadline = Date.now() + ${deadline};
         const counts = [];
         const atBottom = () =>
           window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
@@ -594,7 +603,7 @@ export async function audit({ url, width = 1280, density = 'comfortable' }) {
     });
 
     if (waited.value !== true) {
-      throw new Error(`${url} rendered no demonstration stage within 30 seconds`);
+      throw new Error(`${url} rendered no demonstration stage within ${deadline} ms`);
     }
 
     const { result } = await devtools.send('Runtime.evaluate', {
@@ -642,16 +651,17 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const [url, ...rest] = process.argv.slice(2);
   if (!url) {
     throw new Error(
-      'usage: node tools/harness/audit.mjs <url> [--width 1280] [--density comfortable|compact|dense]',
+      'usage: node tools/harness/audit.mjs <url> [--width 1280] [--density comfortable|compact|dense] [--deadline 30000]',
     );
   }
 
-  const options = { url, width: 1280, density: 'comfortable' };
+  const options = { url, width: 1280, density: 'comfortable', deadline: DEADLINE };
   for (let index = 0; index < rest.length; index += 2) {
     const flag = rest[index]?.replace(/^--/, '');
     const value = rest[index + 1];
     if (flag === 'width') options.width = Number(value);
     else if (flag === 'density') options.density = String(value);
+    else if (flag === 'deadline') options.deadline = Number(value);
     else throw new Error(`unknown option ${rest[index]}`);
   }
 

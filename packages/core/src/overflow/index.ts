@@ -7,8 +7,20 @@ export type {
   CollapseUnitInput,
 } from './collapse';
 export { createScrollEdges, NO_SCROLL_EDGES, scrollEdgeAttributes } from './edges';
-export type { ScrollEdgesHandle, ScrollEdgesOptions, ScrollEdgesState } from './edges';
-export { createScrollAffordance, NOT_OVERFLOWING, overflowState, PAGE_FRACTION } from './overflow';
+export type {
+  LogicalEdge,
+  ScrollEdgesHandle,
+  ScrollEdgesOptions,
+  ScrollEdgesState,
+  ScrollPosition,
+} from './edges';
+export {
+  createScrollAffordance,
+  NOT_OVERFLOWING,
+  overflowState,
+  PAGE_FRACTION,
+  scrollBehaviorFor,
+} from './overflow';
 export type {
   ScrollOrientation,
   OverflowInput,

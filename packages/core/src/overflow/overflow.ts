@@ -104,7 +104,11 @@ function prefersReducedMotion(view: Window | null): boolean {
   return view?.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 }
 
-function behaviorFor(container: Element): ScrollBehavior {
+/**
+ * Exported for `edges.ts`, which moves the same containers for the same reason
+ * and must not answer the preference a second way.
+ */
+export function scrollBehaviorFor(container: Element): ScrollBehavior {
   return prefersReducedMotion(container.ownerDocument?.defaultView ?? null) ? 'auto' : 'smooth';
 }
 
@@ -172,7 +176,7 @@ export function createScrollAffordance(
         !vertical &&
         container.ownerDocument?.defaultView?.getComputedStyle?.(container)?.direction === 'rtl';
       container.scrollBy({
-        behavior: behaviorFor(container),
+        behavior: scrollBehaviorFor(container),
         ...(vertical ? { top: distance } : { left: mirrored ? -distance : distance }),
       });
     },
@@ -193,7 +197,7 @@ export function createScrollAffordance(
       const delta = start < 0 ? start : end > size ? end - size : 0;
       if (delta === 0) return;
       container.scrollBy({
-        behavior: behaviorFor(container),
+        behavior: scrollBehaviorFor(container),
         ...(vertical ? { top: delta } : { left: delta }),
       });
     },

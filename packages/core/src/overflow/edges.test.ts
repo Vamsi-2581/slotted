@@ -247,3 +247,157 @@ describe('scrollEdgeAttributes', () => {
     });
   });
 });
+
+/**
+ * A layout-less document implements neither scrolling method, so the tests
+ * give the element the two it needs and read what they were asked for.
+ */
+function scrollable(sizes: Parameters<typeof mount>[0]) {
+  const container = mount(sizes);
+  const calls: { to: ScrollToOptions[]; by: ScrollToOptions[] } = { to: [], by: [] };
+  Object.defineProperty(container, 'scrollTo', {
+    value: (options: ScrollToOptions) => calls.to.push(options),
+    configurable: true,
+  });
+  Object.defineProperty(container, 'scrollBy', {
+    value: (options: ScrollToOptions) => calls.by.push(options),
+    configurable: true,
+  });
+  return { container, calls };
+}
+
+describe('the imperative actions', () => {
+  it('reports the position as a distance from each logical start', () => {
+    const container = mount({
+      clientHeight: 200,
+      scrollHeight: 800,
+      scrollTop: 150,
+      clientWidth: 300,
+      scrollWidth: 900,
+      scrollLeft: -40,
+    });
+    const handle = createScrollEdges(container);
+
+    expect(handle.position()).toEqual({ block: 150, inline: 40 });
+
+    handle.destroy();
+  });
+
+  it('moves to a logical position, and signs the inline axis for a mirrored scroller', () => {
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      writingMode: 'horizontal-tb',
+      direction: 'rtl',
+    } as unknown as CSSStyleDeclaration);
+    const { container, calls } = scrollable({ clientHeight: 200, scrollHeight: 800 });
+    const handle = createScrollEdges(container);
+
+    handle.scrollTo({ block: 120, inline: 60 });
+
+    expect(calls.to).toEqual([expect.objectContaining({ top: 120, left: -60 })]);
+
+    handle.destroy();
+  });
+
+  it('turns the axes round in a vertical writing mode', () => {
+    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      writingMode: 'vertical-rl',
+      direction: 'ltr',
+    } as unknown as CSSStyleDeclaration);
+    const { container, calls } = scrollable({ clientWidth: 200, scrollWidth: 800 });
+    const handle = createScrollEdges(container);
+
+    handle.scrollTo({ block: 120, inline: 60 });
+
+    /* The block axis runs right to left, so its distance is a negative left. */
+    expect(calls.to).toEqual([expect.objectContaining({ left: -120, top: 60 })]);
+
+    handle.destroy();
+  });
+
+  it('leaves an axis alone when it was not asked to move', () => {
+    const { container, calls } = scrollable({ clientHeight: 200, scrollHeight: 800 });
+    const handle = createScrollEdges(container);
+
+    handle.scrollTo({ block: 500 });
+
+    expect(calls.to).toHaveLength(1);
+    expect(calls.to[0]).toMatchObject({ top: 500 });
+    expect(calls.to[0]).not.toHaveProperty('left');
+
+    handle.destroy();
+  });
+
+  it('goes to an edge by name', () => {
+    const { container, calls } = scrollable({
+      clientHeight: 200,
+      scrollHeight: 800,
+      clientWidth: 300,
+      scrollWidth: 900,
+    });
+    const handle = createScrollEdges(container);
+
+    handle.scrollToEdge('block-end');
+    handle.scrollToEdge('inline-start');
+
+    expect(calls.to).toEqual([
+      expect.objectContaining({ top: 600 }),
+      expect.objectContaining({ left: 0 }),
+    ]);
+
+    handle.destroy();
+  });
+
+  /**
+   * `scrollIntoView` scrolls every ancestor too, which is the defect `tabs`
+   * recorded: a list below the fold brought the whole page down on mount. The
+   * container moves itself, on both axes, by the shortest distance that shows
+   * the item.
+   */
+  it('reveals an item by moving the container alone, on both axes', () => {
+    const { container, calls } = scrollable({ clientHeight: 200, clientWidth: 300 });
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      left: 0,
+      bottom: 200,
+      right: 300,
+    } as DOMRect);
+    const item = document.createElement('div');
+    vi.spyOn(item, 'getBoundingClientRect').mockReturnValue({
+      top: 250,
+      left: -20,
+      bottom: 280,
+      right: 40,
+    } as DOMRect);
+    const handle = createScrollEdges(container);
+
+    handle.reveal(item);
+
+    expect(calls.by).toEqual([expect.objectContaining({ top: 80, left: -20 })]);
+
+    handle.destroy();
+  });
+
+  it('does not move for an item already in view', () => {
+    const { container, calls } = scrollable({ clientHeight: 200, clientWidth: 300 });
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      left: 0,
+      bottom: 200,
+      right: 300,
+    } as DOMRect);
+    const item = document.createElement('div');
+    vi.spyOn(item, 'getBoundingClientRect').mockReturnValue({
+      top: 20,
+      left: 20,
+      bottom: 60,
+      right: 80,
+    } as DOMRect);
+    const handle = createScrollEdges(container);
+
+    handle.reveal(item);
+
+    expect(calls.by).toEqual([]);
+
+    handle.destroy();
+  });
+});

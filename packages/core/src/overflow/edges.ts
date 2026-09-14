@@ -15,7 +15,7 @@
  */
 
 import type { OverflowState } from './overflow';
-import { NOT_OVERFLOWING, overflowState } from './overflow';
+import { NOT_OVERFLOWING, overflowState, scrollBehaviorFor } from './overflow';
 
 export interface ScrollEdgesState {
   /** Down the page in a horizontal writing mode, across it in a vertical one. */
@@ -34,6 +34,18 @@ export interface ScrollEdgesOptions {
   onChange?: (state: ScrollEdgesState) => void;
 }
 
+export type LogicalEdge = 'block-start' | 'block-end' | 'inline-start' | 'inline-end';
+
+/**
+ * Where the scroller is, as a distance from each logical start. Never signed:
+ * a mirrored scroller counts its own start as zero and goes negative, and a
+ * consumer persisting a position should not have to know that.
+ */
+export interface ScrollPosition {
+  readonly block: number;
+  readonly inline: number;
+}
+
 export interface ScrollEdgesHandle {
   /** Releases every observer and listener, and scrolls nothing. */
   destroy: () => void;
@@ -41,6 +53,14 @@ export interface ScrollEdgesHandle {
   refresh: () => void;
   /** The last measurement. */
   state: () => ScrollEdgesState;
+  /** The distance from each logical start, read now. */
+  position: () => ScrollPosition;
+  /** Moves to a logical position. An axis left out is an axis left alone. */
+  scrollTo: (target: Partial<ScrollPosition>) => void;
+  /** Moves to one end of one axis. */
+  scrollToEdge: (edge: LogicalEdge) => void;
+  /** Brings one item into view by the shortest movement that does it, on both axes. */
+  reveal: (item: Element) => void;
 }
 
 /**
@@ -51,9 +71,28 @@ export interface ScrollEdgesHandle {
  */
 const SIDEWAYS_BLOCK = /^(?:vertical|sideways)/;
 
-function blockRunsAcross(container: HTMLElement): boolean {
-  const mode = container.ownerDocument?.defaultView?.getComputedStyle?.(container)?.writingMode;
-  return typeof mode === 'string' && SIDEWAYS_BLOCK.test(mode);
+/**
+ * How the two logical axes land on the two physical ones, and which way each
+ * one counts. The block axis runs across the page in a vertical writing mode,
+ * and in `vertical-rl` it runs from the right — so its physical offset is
+ * negative, the way a right-to-left inline axis is. `sideways-lr` turns the
+ * inline axis upward as well; it is not read here, and a scroller in it moves
+ * along the wrong sign on that one axis.
+ */
+interface Axes {
+  readonly across: boolean;
+  readonly blockNegative: boolean;
+  readonly inlineNegative: boolean;
+}
+
+function readAxes(container: HTMLElement): Axes {
+  const style = container.ownerDocument?.defaultView?.getComputedStyle?.(container);
+  const mode = typeof style?.writingMode === 'string' ? style.writingMode : 'horizontal-tb';
+  return {
+    across: SIDEWAYS_BLOCK.test(mode),
+    blockNegative: mode === 'vertical-rl' || mode === 'sideways-rl',
+    inlineNegative: style?.direction === 'rtl',
+  };
 }
 
 function same(a: OverflowState, b: OverflowState): boolean {
@@ -72,9 +111,10 @@ export function createScrollEdges(
    * and a writing mode does not change during a scroll — it changes when the
    * element or its ancestors are restyled, which resizes the box.
    */
-  let across = blockRunsAcross(container);
+  let axes = readAxes(container);
 
   function measure(): ScrollEdgesState {
+    const { across } = axes;
     const horizontal = overflowState({
       clientSize: container.clientWidth,
       scrollSize: container.scrollWidth,
@@ -91,7 +131,7 @@ export function createScrollEdges(
   }
 
   function update(remeasureWritingMode: boolean) {
-    if (remeasureWritingMode) across = blockRunsAcross(container);
+    if (remeasureWritingMode) axes = readAxes(container);
     const next = measure();
     if (same(next.block, current.block) && same(next.inline, current.inline)) return;
     current = next;
@@ -106,6 +146,68 @@ export function createScrollEdges(
   container.addEventListener('scroll', onScroll, { passive: true });
   update(false);
 
+  /** The physical offset an axis is at, as a magnitude. */
+  function position(): ScrollPosition {
+    const horizontal = Math.abs(container.scrollLeft);
+    const vertical = Math.abs(container.scrollTop);
+    return axes.across
+      ? { block: horizontal, inline: vertical }
+      : { block: vertical, inline: horizontal };
+  }
+
+  /* A document with no layout engine — a test environment — implements
+     neither scrolling method, and a family that assumed them would crash in
+     every consumer's unit test. */
+  const canScroll = () => typeof container.scrollTo === 'function';
+
+  function scrollTo(target: Partial<ScrollPosition>) {
+    if (!canScroll()) return;
+    const { across, blockNegative, inlineNegative } = axes;
+    const options: ScrollToOptions = { behavior: scrollBehaviorFor(container) };
+
+    if (target.block !== undefined) {
+      const distance = blockNegative ? -target.block : target.block;
+      if (across) options.left = distance;
+      else options.top = distance;
+    }
+    if (target.inline !== undefined) {
+      const distance = inlineNegative ? -target.inline : target.inline;
+      if (across) options.top = distance;
+      else options.left = distance;
+    }
+    container.scrollTo(options);
+  }
+
+  function scrollToEdge(edge: LogicalEdge) {
+    const [axis, end] = edge.split('-') as ['block' | 'inline', 'start' | 'end'];
+    const horizontal = axes.across ? axis === 'block' : axis === 'inline';
+    const extent = horizontal
+      ? container.scrollWidth - container.clientWidth
+      : container.scrollHeight - container.clientHeight;
+    scrollTo({ [axis]: end === 'start' ? 0 : Math.max(extent, 0) });
+  }
+
+  /**
+   * The container scrolls itself, on its own two axes, and nothing else moves.
+   * `scrollIntoView` would scroll every ancestor too — the defect `tabs`
+   * recorded, where a list below the fold brought the whole page down on
+   * mount. Physical deltas, because a delta is the same sign in every
+   * direction and writing mode.
+   */
+  function reveal(item: Element) {
+    if (typeof container.scrollBy !== 'function') return;
+    const box = container.getBoundingClientRect();
+    const rect = item.getBoundingClientRect();
+
+    const shortest = (start: number, end: number, size: number) =>
+      start < 0 ? start : end > size ? end - size : 0;
+    const top = shortest(rect.top - box.top, rect.bottom - box.top, container.clientHeight);
+    const left = shortest(rect.left - box.left, rect.right - box.left, container.clientWidth);
+
+    if (top === 0 && left === 0) return;
+    container.scrollBy({ top, left, behavior: scrollBehaviorFor(container) });
+  }
+
   return {
     destroy: () => {
       observer?.disconnect();
@@ -113,6 +215,10 @@ export function createScrollEdges(
     },
     refresh: () => update(true),
     state: () => current,
+    position,
+    scrollTo,
+    scrollToEdge,
+    reveal,
   };
 }
 

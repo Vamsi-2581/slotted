@@ -72,6 +72,10 @@
       "types": "./dist/types/date-picker/index.d.ts",
       "import": "./dist/date-picker.js"
     },
+    "./date-range-picker": {
+      "types": "./dist/types/date-range-picker/index.d.ts",
+      "import": "./dist/date-range-picker.js"
+    },
     "./datetime-field": {
       "types": "./dist/types/datetime-field/index.d.ts",
       "import": "./dist/datetime-field.js"
@@ -219,6 +223,10 @@
     "./tag": {
       "types": "./dist/types/tag/index.d.ts",
       "import": "./dist/tag.js"
+    },
+    "./tags-input": {
+      "types": "./dist/types/tags-input/index.d.ts",
+      "import": "./dist/tags-input.js"
     },
     "./textarea": {
       "types": "./dist/types/textarea/index.d.ts",

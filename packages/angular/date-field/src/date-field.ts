@@ -102,7 +102,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
       data-part="segments"
       role="group"
       [attr.id]="controlId()"
-      [attr.aria-label]="writtenLabel"
+      [attr.aria-label]="label() ?? writtenLabel"
       [attr.aria-labelledby]="labelledBy()"
       [attr.aria-describedby]="describedBy()"
       [attr.aria-invalid]="ariaInvalid()"
@@ -218,6 +218,13 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
   readonly clearLabel = input<string | undefined>(undefined);
   /** The name a plain form post carries the ISO string under. */
   readonly name = input<string | undefined>(undefined);
+  /**
+   * The accessible name, when it is bound rather than written: a static
+   * `aria-label` is read once from the host, and a family naming this field
+   * from its own input — `date-range-picker` names its two ends — has no
+   * static attribute to write.
+   */
+  readonly label = input<string | undefined>(undefined);
 
   /**
    * One output for one transition, carrying the value, the value it replaces,
@@ -315,7 +322,7 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     () => this.writtenId ?? this.field?.ids().control ?? null,
   );
   protected readonly labelledBy = computed(() => {
-    if (this.writtenLabel !== null) return null;
+    if (this.label() !== undefined || this.writtenLabel !== null) return null;
     const merged = [this.writtenLabelledBy ?? this.field?.ids().label, this.valueTextId].filter(
       Boolean,
     );

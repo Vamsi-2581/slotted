@@ -90,6 +90,25 @@ describe('the shape the pattern asks for', () => {
     for (const part of member.parts) expect(present).toContain(part);
   });
 
+  /**
+   * A static `aria-label` is read once from the host; a name that changes —
+   * a range picker naming its two ends from an input — arrives as `label`, and
+   * wins over the attribute it would otherwise erase.
+   */
+  it('takes its accessible name from a static attribute or from the label input', () => {
+    const written = renderTemplate(`<div slDateField locale="pt-BR" aria-label="Data"></div>`);
+    expect(
+      written.nativeElement.querySelector('[data-part="segments"]').getAttribute('aria-label'),
+    ).toBe('Data');
+
+    const bound = renderTemplate(
+      `<div slDateField locale="pt-BR" aria-label="Data" [label]="'Início'"></div>`,
+    );
+    expect(
+      bound.nativeElement.querySelector('[data-part="segments"]').getAttribute('aria-label'),
+    ).toBe('Início');
+  });
+
   it('wraps three spin buttons in a group', () => {
     const fixture = renderTemplate(`<div slDateField locale="pt-BR" aria-label="Data"></div>`);
 

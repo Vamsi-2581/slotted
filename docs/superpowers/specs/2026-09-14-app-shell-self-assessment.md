@@ -19,7 +19,7 @@ Contra `.claude/skills/component/references/rubric.md` e
 | API nativa              | O `aside` aceitar `aria-label` do consumidor e escrever o seu próprio `data-open`                                                        | Sim. `HostAttributeToken('aria-label')` em Angular, prop em React; `data-open` na região, `data-open` da raiz continua a ser a navegação      |
 | Capacidade              | O painel abrir e fechar como região, em vez de ser uma coluna fixa que um `drawer` interno não consegue fechar                            | Sim. `open.aside` com `asideOpen`/`defaultAsideOpen`/`onAsideOpenChange`, `asideMode`, `openAside()`/`closeAside()`; inventário §7            |
 | Integração de ecossistema | Angular: `asideOpen` como `model()` e `asideOpenChangeRequest` como `output()`; React: o handle com as duas ações novas                | Sim. `provideAppShellDefaults({ asideMode })` e `AppShellDefaultsProvider asideMode`; ambos testados                                            |
-| Documentação            | Três produtos em vez de um, e uma cena por capacidade nova (`banner`, `aside`)                                                          | Sim. Dezoito cenas em cada binding; `audit.mjs` limpo a 1280 e a 620 na página React; a página Angular espera o reinício do Storybook            |
+| Documentação            | Três produtos em vez de um, e uma cena por capacidade nova (`banner`, `aside`)                                                          | Sim. Dezoito cenas em cada binding; `audit.mjs` limpo a 1280 e a 620 nas duas páginas            |
 
 O detalhe que mudaria com mais uma hora: a coluna de estado da tabela de Aurora
 a 1280 px com o painel `md` aberto rola horizontalmente dentro do seu próprio
@@ -63,7 +63,7 @@ uma pílula ao meio. A rota ficou no painel. Feito.
 10. **Exemplos.** Três produtos — Aurora, Cadence, Átrio — em dezoito cenas por
     binding.
 11. **Testes partilhados.** React 35 (31 comportamento + 4 histórias); Angular
-    20 (16 + 4); contrato 26; estilo 15; workbench 44 + 25.
+    21 (17 + 4); contrato 26; estilo 15; workbench 44 + 25.
 12. **Quebra de contrato.** Registada em §10 do desenho: `declined.asideOpen`
     sai; `aside` fechado passa a `display: none` (omissão aberto); `data-open`
     no `aside`; `stateModel.open` passa a conjunto.

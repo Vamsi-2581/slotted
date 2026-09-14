@@ -41,10 +41,10 @@
     "declinedTimer": "scrollHideDelay, which Radix and Mantine both ship, tunes a JavaScript timer that hides a drawn scrollbar. There is no timer here to tune"
   },
   "affordance": {
-    "mechanism": "four mask-image layers on the scrollport, composed with mask-composite: intersect",
+    "mechanism": "two mask-image layers on the scrollport, one per physical axis, composed with mask-composite: intersect, with the inline pair swapped under :dir(rtl)",
     "reason": "table's own refusal is the argument: a gradient at an edge has to be the colour of the ground beneath it, so it is wrong on every surface but one and in every scheme but one. A mask fades the content to transparent and needs no ink. Four edges also need more than the two pseudo-elements one box has, and a pseudo-element positioned inside a scrollport scrolls away with the content while a mask applies to the border box and stays",
     "forcedColors": "removed. The system owns the palette there, and a veil over system text loses legibility and buys nothing",
-    "enhancement": "Where the browser has scroll-driven timelines the same fade is driven by the scroll position instead of switched at the edge, inside @supports (animation-timeline: scroll()). The property is not Baseline, so it is an enhancement over a floor that is already correct",
+    "enhancement": "A scroll-driven timeline — animation-timeline: scroll() — was considered and not built: the transition already moves the veil rather than snapping it, the property is not Baseline, and a second paint path for one veil is a second thing to keep right. It stays open in the family's scope in docs/build-order.md",
     "element": "the viewport, never the root: the root is where a consumer's border, radius and ground go, and a mask over them fades the frame as well as the content"
   },
   "wiring": {

@@ -190,7 +190,10 @@ test('publishes the measurement in logical names', () => {
 test('draws the affordance without an ink', () => {
   assert.match(contract.affordance.mechanism, /mask-image/);
   assert.match(contract.affordance.forcedColors, /^removed\./);
-  assert.match(contract.affordance.enhancement, /animation-timeline: scroll\(\)/);
+  assert.match(
+    contract.affordance.enhancement,
+    /animation-timeline: scroll\(\) — was considered and not built/,
+  );
 });
 
 /**

@@ -1281,3 +1281,28 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
 Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.
 Consolidação e remoção da família antiga ocorrem no mesmo commit, para que a
 árvore nunca tenha duas famílias descrevendo a mesma capacidade.
+- **`scroll-area splitter`** — entregue em 2026-09-14. `splitter` estava
+  refeito desde 2026-09-11 e não foi tocado; a chegada de `scroll-area` não lhe
+  tira nenhuma linha (inventário, §6). `scroll-area` é a porta de rolagem e a
+  caixa que a emoldura: **a barra é a da plataforma**, tematizada por
+  `scrollbar-color` e `scrollbar-width: thin` — as cinco implementações
+  pesquisadas escondem a nativa e redesenham-na, ao custo do clique na calha,
+  do menu de contexto e da barra antes da hidratação, e
+  `docs/component-features.md` §4 pede o contrário na frase desta família. O
+  aviso de transbordo é uma máscara e não um gradiente, pelo argumento que
+  `table` escreveu ao recusar um; a moldura e a porta de rolagem são dois
+  elementos porque uma máscara cobre a borda do elemento que a tem, o que a
+  primeira captura mostrou. Sem `stateModel`: a posição de rolagem é reportada
+  e nunca pedida, pelo argumento que o esquema já faz para `overflow`. A região
+  com nome e ponto de tabulação só existe enquanto o conteúdo transborda — o
+  padrão que `prose` já entregava, e que Base UI e Zag respondem com
+  `role="presentation"`. `@slotted/core/overflow` ganhou `createScrollEdges`
+  (os dois eixos, nomes lógicos, `position`, `scrollTo`, `scrollToEdge`,
+  `reveal`), e o fotógrafo ganhou `--scrollbars show`.
+  Por fazer, aqui e não noutro sítio: `prose`, `table` e `tabs` escreveram cada
+  uma a sua medida de rolagem a partir de `@slotted/core/overflow` antes de
+  esta família existir, e cada uma toma a família quando for aberta a seguir;
+  a linha do tempo de rolagem (`animation-timeline: scroll()`) para o véu
+  ficou por construir, com a razão em `2026-09-13-scroll-area-design.md` §5.
+  Inventário, decisões e autoavaliação em
+  `docs/superpowers/specs/2026-09-13-scroll-area-*.md`.

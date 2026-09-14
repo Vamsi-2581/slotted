@@ -12,9 +12,10 @@ decisions.
 
 ## 1. Responsibility
 
-**The family is the scrollport.** One element that clips and scrolls, the
-measurement of whether it does, the four edges of that measurement in the DOM,
-the affordance drawn from it, and the wiring a scrolling region owes a keyboard.
+**The family is the scrollport and the box that frames it.** The element that
+clips and scrolls, the measurement of whether it does, the four edges of that
+measurement in the DOM, the affordance drawn from it, and the wiring a
+scrolling region owes a keyboard.
 
 It is not a layout, not a list, not a virtualiser, and not a scrollbar painter.
 
@@ -22,34 +23,37 @@ It is not a layout, not a list, not a virtualiser, and not a scrollbar painter.
 
 | Part | Element | Always present | What it is |
 | --- | --- | --- | --- |
-| `root` | `div` | yes | The scrollport. Carries `data-ui="scroll-area"`, the overflow rules, the maximum size, the gutter, the mask, the measurement and the region wiring |
-| `content` | `div` | no | The inset that scrolls with the content, for a consumer who wants one |
+| `root` | `div` | yes | The frame. Carries `data-ui="scroll-area"`, the axes, the maximum, the five measurement attributes, and whatever border, radius and ground the consumer gives it |
+| `viewport` | `div` | yes | The scrollport. Clips, scrolls, carries the platform scrollbar and the veil, and takes the region wiring |
+| `content` | `div` | no | The inset that scrolls with the content, carried by default |
 
-Two parts, and the second is optional. Base UI, Zag and Chakra each ship six;
-four of the six — `scrollbar`, `thumb`, `corner`, and the `viewport`/`root`
-split that exists to hold them — are the parts a drawn scrollbar needs, and this
-family does not draw one.
+Three parts. Base UI, Zag and Chakra each ship six; the three this family does
+not have — `scrollbar`, `thumb`, `corner` — are the parts a drawn scrollbar
+needs, and the scrollbar here is the platform's.
 
-**Why the root scrolls rather than a `viewport` inside it.** A separate viewport
-buys one thing: a non-scrolling box to hang an affordance on. Section 5 below
-draws the affordance with a mask on the scrollport itself, which needs no such
-box. What the merge buys is the Angular directive form: `<div slScrollArea>` is
-a complete scroll area on an element the consumer already had, which is how the
-CDK ships `cdkScrollable` and is the one integration point Angular has here that
-React does not.
+**Why the frame and the scrollport are two elements.** The first draft made
+them one, and the first harness capture refused it. The affordance is a mask,
+and a mask covers everything the element paints — its border included. A
+bounded region with a border round it is the commonest shape this family has,
+and the veil took the ends of that border with the content: crisp down both
+sides, absent across both ends, which reads as a rendering fault rather than as
+an affordance. Nothing can be excluded from a mask — `mask-clip` moves where a
+mask is painted, never what it covers — so the frame is on an element the mask
+is not on. The focus ring moved to the root for the same reason: drawn on the
+scrollport, the veil cut it exactly on the edge the reader was moving toward.
 
-**The cost.** A consumer who wants the fade over a ground the family does not
-own — a sticky header inside the area, say — cannot put one element between the
-clip and the fade, because they are the same element. The composition is stated
-on the reference page: nest a second scroll area, or set
-`--slotted-scroll-area-fade-size: 0` and draw the affordance from the four edge
-attributes, which are published on the same element.
+**The cost.** One element more in the DOM than a scrollport alone. In both
+bindings the viewport is the family's own element — `ScrollArea` renders it
+around `children`, `[slScrollArea]` projects into it — so a consumer writes
+two elements and gets three.
 
-**Why `content` is optional.** Padding on a scrollport is not applied at the end
-edge of the scrollable overflow in every engine, so an inset that must survive a
-scroll to the end has to be on an element inside it. A consumer whose content
-already carries its own inset renders no `content` at all, and the family works
-as one element.
+**Why `content` carries an inset.** Padding on a scrollport is not applied at
+the end edge of its scrollable overflow in every engine, so an inset that must
+survive a scroll to the end has to be on an element inside it. Nearly every
+area wants one, and a part that only held the consumer's padding would be a
+part nobody used: it carries `--slotted-scroll-area-inset`, falling back to the
+step a card's own inset takes, and a consumer whose content carries its own
+renders no `content` at all.
 
 ## 3. Axes
 
@@ -94,10 +98,14 @@ No new word enters the shared vocabulary, and no shared schema changes.
 
 ## 5. The affordance is a mask, not a gradient
 
-The fade is four `mask-image` layers on the scrollport, composed with
-`mask-composite: intersect`, each one a `linear-gradient` whose opaque length is
-`--slotted-scroll-area-fade-size` and whose transparent end is toggled to zero
-length by the edge attribute for that side.
+The fade is two `mask-image` layers on the scrollport, one per physical axis,
+composed with `mask-composite: intersect`: each is a `linear-gradient` fading
+both of its ends, and each end's length is `--slotted-scroll-area-fade-size`
+or nought, switched by the edge attribute for that side and interpolated
+through a registered custom property so the veil moves rather than appears.
+The inline pair swaps under `:dir(rtl)`, because a gradient cannot be given a
+logical direction and the RTL capture showed the veil on the edge the reader
+could already see.
 
 Three reasons, and the first is `table`'s own written refusal:
 
@@ -121,13 +129,13 @@ there, a veil over system text is a legibility loss with nothing bought, and
 paints something the theme cannot reach — this is that case, and the rule is
 one line that removes rather than adds.
 
-Where the browser has scroll-driven timelines the same opacity is driven by the
-scroll position instead of switched at the edge, inside
-`@supports (animation-timeline: scroll())`, so the fade grows as the reader
-leaves the edge rather than appearing whole. The property is not Baseline
-(`https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-timeline`), which is
-why it is an enhancement over a floor that is already correct, and why the
-floor is the thing the harness is judged on.
+A scroll-driven timeline — the same lengths driven by the scroll position
+inside `@supports (animation-timeline: scroll())` — was considered and not
+built in this pass. The transition already moves the veil rather than snapping
+it, the property is not Baseline
+(`https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-timeline`), and a
+second paint path for the same veil is a second thing to keep right. It stays
+open in this family's scope in `docs/build-order.md`.
 
 The transition between the two states comes from the motion scale, and a fade
 that appears instantly is the state change the eye is meant to follow.
@@ -139,7 +147,7 @@ There is no APG pattern. The requirement is SC 2.1.1, tested by the
 
 | Key | Effect | Precondition | Source |
 | --- | --- | --- | --- |
-| `Tab` | Reaches the scrollport | Only while it overflows and has no focusable child that is already reachable | family |
+| `Tab` | Reaches the scrollport | Only while it overflows, and while `tabbable` has not been turned off | family |
 | `ArrowUp` / `ArrowDown` | Scrolls one line along the block axis | The scrollport has focus | platform |
 | `ArrowLeft` / `ArrowRight` | Scrolls one line along the inline axis | The scrollport has focus | platform |
 | `PageUp` / `PageDown` | Scrolls one page along the block axis | The scrollport has focus | platform |
@@ -156,6 +164,9 @@ role="region"  aria-label | aria-labelledby  tabindex="0"
 all three present **only while the content overflows**, measured rather than
 assumed, which is the pattern `packages/react/src/prose/prose-scroll.tsx`
 already ships in this repository and Adrian Roselli's answer to the axe rule.
+The family does not look for focusable children on its own: Chrome's heuristic
+does, and it is the heuristic that was withdrawn for web compatibility. A
+consumer who knows a child already takes focus says `tabbable={false}`.
 
 Base UI and Zag both write `role="presentation"` beside the tab stop. That
 satisfies the rule that is tested and breaks SC 4.1.2, which is not: a reader
@@ -224,13 +235,17 @@ single-axis function they use.
 | Substituting projected content, kept lazy | `ng-content` on the component form; the directive form projects nothing, because the element and its children are already the consumer's |
 | Zoneless change detection and `OnPush` | Signals throughout. The measurement writes a signal from the observer callback; nothing calls `markForCheck` |
 | Every subscription and listener torn down | `DestroyRef`, and the handle's own `destroy` |
-| A static attribute the consumer wrote survives the host bindings | `HostAttributeToken` for `role`, `aria-label` and `tabindex`. A consumer who wrote `role="log"` on the element keeps it, which is the same promise `ProseScroll` keeps on the React side |
+| A static attribute the consumer wrote survives the host bindings | Nothing on the host is written over: the role, the tab stop and the name go on the viewport, which is the family's own element inside the host. `HostAttributeToken` is therefore not needed here |
 | A single class per entry point | `@slotted/angular/scroll-area` |
 
-**The asymmetry, recorded rather than levelled.** Angular ships two forms — a
-directive for an element the consumer already has, and a component for the
-composed case. React ships one component with `render`, which covers the same
-ground in the idiom React has. Neither ecosystem is made to imitate the other.
+**The asymmetry, recorded rather than levelled.** In Angular the frame is the
+consumer's own element — `<div slScrollArea>`, which is how every multi-part
+family in this repository composes — and the inset is `[slScrollAreaContent]`
+on the consumer's own element too. In React the frame is `ScrollArea` with
+`render` for a different element, and the inset is `ScrollArea.Content`.
+Neither ecosystem is made to imitate the other. The first draft of this
+document called the Angular form a differentiator; it is the convention here,
+and the sentence was corrected.
 
 ## 11. Tokens
 
@@ -241,7 +256,8 @@ literal:
 | --- | --- | --- |
 | `--slotted-scroll-area-thumb-color` | `--slotted-border-strong` | The scrollbar thumb, at the non-text ratio the foundation holds that step to |
 | `--slotted-scroll-area-track-color` | `--slotted-surface-sunken` | The scrollbar track |
-| `--slotted-scroll-area-fade-size` | `--slotted-space-8` | How far the affordance reaches in from an edge |
+| `--slotted-scroll-area-fade-size` | `--slotted-space-8` | How far the affordance reaches in from an edge, capped at a fifth of the box |
+| `--slotted-scroll-area-inset` | `--slotted-space-5` | The inset the `content` part carries |
 
 **Density.** The family answers density by holding still. Nothing it draws is a
 control, and the one thing it does draw is a veil over the consumer's own

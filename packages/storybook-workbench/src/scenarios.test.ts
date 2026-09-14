@@ -228,6 +228,37 @@ describe('a state model the contract declares', () => {
     ]);
   });
 
+  /**
+   * One capability held twice is a set of named models, as
+   * `specs/contract.schema.mjs` allows: `app-shell` has a navigation region and
+   * a secondary pane, and each of them opens. Every member of the set is asked
+   * for, and a two-way member is asked for its one half like any other.
+   */
+  it('asks for every member of a set held under one capability', () => {
+    const set = {
+      open: {
+        nav: { controlled: 'navOpen', uncontrolled: 'defaultNavOpen' },
+        aside: { controlled: 'asideOpen', uncontrolled: 'defaultAsideOpen' },
+      },
+    };
+    expect(apiMetadataErrors({ capabilities: ['open'], defaults: {} }, [], set)).toEqual([
+      'missing API navOpen',
+      'missing API defaultNavOpen',
+      'missing API asideOpen',
+      'missing API defaultAsideOpen',
+    ]);
+    expect(
+      apiMetadataErrors(
+        { capabilities: ['open'], defaults: {} },
+        [
+          { name: 'navOpen', type: 'model<boolean>', defaultValue: 'true' },
+          { name: 'asideOpen', type: 'model<boolean>', defaultValue: 'true' },
+        ],
+        set,
+      ),
+    ).toEqual([]);
+  });
+
   it('accepts a page that documents them', () => {
     expect(
       apiMetadataErrors(

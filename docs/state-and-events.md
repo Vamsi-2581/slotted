@@ -42,12 +42,20 @@ event, and it can be cancelled before anything commits.
 
 The reason vocabulary is closed: `pointer`, `keyboard`, `clear`, `remove`,
 `select`, `dismiss`, `escape`, `outsidePress`, `blur`, `submit`,
-`programmatic`, `timeout`. A family declares the subset it can emit.
+`programmatic`, `timeout`, `scroll`, `resize`. A family declares the subset it
+can emit.
 
 `timeout` says the time the component was given ran out, and it is neither of
 the two words a family without it would reach for: `dismiss` is the reader
 pressing the control, and `programmatic` is the application asking. It was added
 when `toast` became the first family in the library to hold a timer of its own.
+
+`scroll` says the reader scrolled past the thing and it answered; `page-header`
+was the first family whose state a scroll moves. `resize` says the space the
+thing was given changed and it answered; `app-shell` was the first family whose
+state a width moves. Neither is `pointer`, because a wheel, a fling and a window
+corner are gestures and none of them is a press on the control, and neither is
+`programmatic`, because the application asked for nothing.
 
 A boolean cannot say whether a menu closed because Escape was pressed or
 because focus left the layer, and a consumer that has to guess writes the wrong

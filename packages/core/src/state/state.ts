@@ -42,7 +42,16 @@ export type ChangeReason =
    * them is a press on the control. Not `programmatic`: the application asked
    * for nothing. `page-header` is the first family whose state a scroll moves.
    */
-  | 'scroll';
+  | 'scroll'
+  /**
+   * The space the thing was given changed and it answered. Not `pointer`:
+   * dragging a window's corner, rotating a phone and zooming to 400% are three
+   * gestures and none of them is a press on the control. Not `programmatic`:
+   * the application asked for nothing. `app-shell` is the first family whose
+   * state a width moves, and the reason is what lets a product persist the
+   * reader's own choice and ignore the one the layout forced.
+   */
+  | 'resize';
 
 export interface ChangeRequest<T> {
   readonly value: T;

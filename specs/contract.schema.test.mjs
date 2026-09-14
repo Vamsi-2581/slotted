@@ -194,6 +194,41 @@ test('rejects a state model for a capability the family does not hold', () => {
 });
 
 /**
+ * A family may hold the same capability for more than one thing: `app-shell`
+ * has a navigation region and a secondary pane, and each of them opens. The
+ * model is indexed by capability, so the entry for one becomes a *set* of named
+ * models — told apart from a single model by the absence of `controlled` on
+ * the entry itself — and every member of the set is held to the same shape.
+ */
+test('accepts a set of named models for one capability held twice', () => {
+  const set = {
+    nav: { ...openModel, controlled: 'navOpen', uncontrolled: 'defaultNavOpen' },
+    aside: { ...openModel, controlled: 'asideOpen', uncontrolled: 'defaultAsideOpen' },
+  };
+  assert.doesNotThrow(() => assertContractShape(withOpenState(set)));
+});
+
+test('holds every member of a set to the shape of a model', () => {
+  const set = {
+    nav: openModel,
+    aside: { controlled: 'asideOpen', request: 'onAsideOpenChange', reasons: ['pointer'] },
+  };
+  assert.throws(() => assertContractShape(withOpenState(set)), /open\.aside .*uncontrolled/);
+
+  const bad = { nav: openModel, aside: { ...openModel, reasons: ['pointer', 'telepathy'] } };
+  assert.throws(() => assertContractShape(withOpenState(bad)), /open\.aside .*telepathy/);
+});
+
+test('rejects an empty set, which declares a model and models nothing', () => {
+  assert.throws(() => assertContractShape(withOpenState({})), /open .*models nothing/);
+});
+
+test('rejects two members of a set that share a prop name', () => {
+  const set = { nav: openModel, aside: openModel };
+  assert.throws(() => assertContractShape(withOpenState(set)), /open .*repeats/);
+});
+
+/**
  * The text a control holds is the most common mutable value in a component
  * library and the vocabulary could not name it, which is why the deleted
  * `input` family declared five capabilities and none of them mutable: the

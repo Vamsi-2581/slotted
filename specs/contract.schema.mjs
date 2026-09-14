@@ -155,6 +155,22 @@ export const CHANGE_REASONS = [
    * the reason is what lets it persist the click and ignore the scroll.
    */
   'scroll',
+  /**
+   * The space the thing was given changed, and the thing answered. It is
+   * neither `pointer` — dragging a window's corner, rotating a phone and
+   * zooming to 400% are three gestures and none of them is a press on the
+   * control — nor `programmatic`, because the application asked for nothing.
+   *
+   * `app-shell` is the first family whose state a width moves: the navigation
+   * region closes when the shell becomes too narrow to hold it beside the
+   * content. The reason is what lets a product persist the reader's own choice
+   * and ignore the one the layout forced, which is the line
+   * `docs/component-features.md` §15 asks for when it says sidebar persistence
+   * belongs to the product. Ant Design is the only surveyed implementation
+   * that distinguishes the two origins, and it does so with a string of its
+   * own outside any shared vocabulary.
+   */
+  'resize',
 ];
 
 export const KNOWN_CAPABILITIES = [
@@ -358,6 +374,31 @@ function assertUnique(values, label) {
   assert.deepEqual(duplicates, [], `${label} repeats ${duplicates.join(', ')}`);
 }
 
+function assertOneModel(entry, label) {
+  for (const field of ['controlled', 'uncontrolled', 'request', 'reasons']) {
+    assert.ok(field in entry, `${label} state model is missing ${field}`);
+  }
+  assert.ok(Array.isArray(entry.reasons) && entry.reasons.length > 0, `${label} reasons`);
+  assertUnique(entry.reasons, `${label} reasons`);
+  for (const reason of entry.reasons) {
+    assert.ok(CHANGE_REASONS.includes(reason), `${label} unknown reason ${reason}`);
+  }
+}
+
+/**
+ * A family may hold one capability for more than one thing — `app-shell` has
+ * a navigation region and a secondary pane, and each of them opens — and the
+ * model is indexed by capability. The entry for such a capability is a *set*
+ * of named models, told apart from a single model by the absence of
+ * `controlled` on the entry itself, and every member is held to the same
+ * shape a single model is. A set that names nothing declares a model and
+ * models nothing; two members that share a prop name are one model written
+ * twice.
+ */
+export function stateModels(entry) {
+  return 'controlled' in entry ? [entry] : Object.values(entry);
+}
+
 function assertStateModel(contract, capabilities) {
   const model = contract.stateModel ?? {};
 
@@ -366,14 +407,17 @@ function assertStateModel(contract, capabilities) {
     const entry = model[capability];
     assert.ok(entry, `${capability} holds state and declares no model`);
 
-    for (const field of ['controlled', 'uncontrolled', 'request', 'reasons']) {
-      assert.ok(field in entry, `${capability} state model is missing ${field}`);
+    if ('controlled' in entry) {
+      assertOneModel(entry, capability);
+      continue;
     }
-    assert.ok(Array.isArray(entry.reasons) && entry.reasons.length > 0, `${capability} reasons`);
-    assertUnique(entry.reasons, `${capability} reasons`);
-    for (const reason of entry.reasons) {
-      assert.ok(CHANGE_REASONS.includes(reason), `${capability} unknown reason ${reason}`);
-    }
+    const names = Object.keys(entry);
+    assert.ok(names.length > 0, `${capability} declares a set and models nothing`);
+    for (const name of names) assertOneModel(entry[name], `${capability}.${name}`);
+    assertUnique(
+      names.flatMap((name) => [entry[name].controlled, entry[name].uncontrolled]),
+      `${capability} set`,
+    );
   }
 
   for (const capability of Object.keys(model)) {

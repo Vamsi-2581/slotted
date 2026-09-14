@@ -108,7 +108,16 @@ const capabilityApi = {
    * default is required row by row below.
    */
   arrangement: [],
-  size: ['size'],
+  /**
+   * Nothing, for the reason `arrangement` asks for nothing: the table cannot
+   * see *what* a family sizes. A control has one measure and calls it `size`;
+   * `app-shell` sizes two regions and calls them `navSize` and `asideSize`,
+   * because a shell has no single size and a prop called `size` on it would
+   * have to mean one of the two. A family that does ship `size` still documents
+   * it, because it is in its declared defaults and every default is required
+   * row by row below — so nothing is lost by not demanding the word here.
+   */
+  size: [],
   shape: ['shape'],
   measurement: ['value', 'max'],
   /**
@@ -227,6 +236,20 @@ interface StateModelEntry {
 }
 
 /**
+ * One capability held for more than one thing is a *set* of named models —
+ * `app-shell` has a navigation region and a secondary pane, and each of them
+ * opens. `specs/contract.schema.mjs` tells the two shapes apart by the
+ * presence of `controlled` on the entry itself, and so does this.
+ */
+type StateModelDeclaration = StateModelEntry | Readonly<Record<string, StateModelEntry>>;
+
+function stateModels(entry: StateModelDeclaration): readonly StateModelEntry[] {
+  return 'controlled' in entry && typeof entry.controlled === 'string'
+    ? [entry as StateModelEntry]
+    : Object.values(entry as Record<string, StateModelEntry>);
+}
+
+/**
  * `capabilityApi` guesses a prop name from a capability, and the guess is
  * wrong for every family that holds two values of the same kind or calls its
  * own by another name: pagination holds a page and a page size, and neither of
@@ -258,7 +281,7 @@ function twoWay(rows: readonly { name: string; type?: string }[], controlled: st
 export function apiMetadataErrors(
   member: ContractMember,
   rows: readonly { appliesTo?: string; name: string; type?: string; defaultValue: string }[],
-  stateModel?: Readonly<Record<string, StateModelEntry>> | undefined,
+  stateModel?: Readonly<Record<string, StateModelDeclaration>> | undefined,
 ) {
   const errors: string[] = [];
   const names = rows.map((row) => row.name);
@@ -283,7 +306,10 @@ export function apiMetadataErrors(
   for (const capability of member.capabilities) {
     const declared = stateModel?.[capability];
     const required = declared
-      ? [declared.controlled, ...(twoWay(rows, declared.controlled) ? [] : [declared.uncontrolled])]
+      ? stateModels(declared).flatMap((model) => [
+          model.controlled,
+          ...(twoWay(rows, model.controlled) ? [] : [model.uncontrolled]),
+        ])
       : (capabilityApi[capability as keyof typeof capabilityApi] ?? []);
     for (const name of required) {
       if (!names.includes(name)) errors.push(`missing API ${name}`);

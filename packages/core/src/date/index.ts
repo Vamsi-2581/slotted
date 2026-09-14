@@ -38,6 +38,19 @@ export {
   toISOTime,
 } from './plain-time';
 export type { PlainTime, TimeGranularity, TimeStep } from './plain-time';
+export {
+  blockedAround,
+  isDateRefusedInRun,
+  orderedRun,
+  rangeLength,
+  rangeProblems,
+} from './date-range';
+export type {
+  DateRangeCount,
+  DateRangeProblem,
+  DateRangeRules,
+  DateRangeValue,
+} from './date-range';
 export { createDateFormat, fieldRange } from './format';
 export type {
   DateFieldName,

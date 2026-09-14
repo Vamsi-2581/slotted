@@ -324,13 +324,13 @@ const AURORA_CONTENT = (
           <h1 slPageHeaderHeading>${title}</h1>
           <p slPageHeaderSubheading>412 em curso · 19 aguardam confirmação de transporte</p>
         </div>
-        <div slPageHeaderActions><button slButton size="sm" variant="outline">Filtros</button></div>
+        <div slPageHeaderActions><button slButton size="sm" tone="secondary" variant="outline">Filtros</button></div>
       </div>
     </div>
   </header>
   <div slPageBody>${body}</div>
   <footer slPageFooter>
-    <button slButton size="sm" variant="ghost">Exportar</button>
+    <button slButton size="sm" tone="secondary" variant="ghost">Exportar</button>
     <button slButton size="sm" tone="accent">Nova encomenda</button>
   </footer>
 </main>`;
@@ -351,7 +351,7 @@ const AURORA_PANE = `<aside slAppShellAside>
     </dl>
   </div>
   <div slAppShellAsideFooter>
-    <button slButton size="sm" variant="outline">Rastrear</button>
+    <button slButton size="sm" tone="secondary" variant="outline">Rastrear</button>
     <button slButton size="sm" tone="accent">Confirmar</button>
   </div>
 </aside>`;
@@ -609,7 +609,7 @@ const ATRIO_PANE = `<aside slAppShellAside>
     </div>
   </div>
   <div slAppShellAsideFooter>
-    <button slButton size="sm" variant="ghost">Cancelar</button>
+    <button slButton size="sm" tone="secondary" variant="ghost">Cancelar</button>
     <button slButton size="sm" tone="accent">Marcar</button>
   </div>
 </aside>`;
@@ -1233,10 +1233,10 @@ export const Defaults: StoryObj<Data> = {
         'openNav(), closeNav(), openAside() and closeAside() ask with the reason programmatic, and focusMain() does what the skip link does. The template reaches them through #shell="slAppShell", which is the Angular half of what a React ref hands back.',
         `<div slStack [gap]="4">
           <div class="slotted-demo-row">
-            <button slButton size="sm" variant="outline" (click)="shell.openNav()">openNav()</button>
-            <button slButton size="sm" variant="outline" (click)="shell.closeNav()">closeNav()</button>
-            <button slButton size="sm" variant="outline" (click)="shell.openAside()">openAside()</button>
-            <button slButton size="sm" variant="outline" (click)="shell.closeAside()">closeAside()</button>
+            <button slButton size="sm" tone="secondary" variant="outline" (click)="shell.openNav()">openNav()</button>
+            <button slButton size="sm" tone="secondary" variant="outline" (click)="shell.closeNav()">closeNav()</button>
+            <button slButton size="sm" tone="secondary" variant="outline" (click)="shell.openAside()">openAside()</button>
+            <button slButton size="sm" tone="secondary" variant="outline" (click)="shell.closeAside()">closeAside()</button>
             <button slButton size="sm" tone="accent" (click)="shell.focusMain()">focusMain()</button>
           </div>
           ${viewport(

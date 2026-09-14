@@ -95,6 +95,34 @@ class CancellingHost {
   readonly open = signal(true);
 }
 
+@Component({
+  standalone: true,
+  imports: PARTS,
+  template: `<div
+    slAppShell
+    navMode="overlay"
+    asideMode="overlay"
+    [(navOpen)]="open"
+    [(asideOpen)]="asideOpen"
+    (navOpenChangeRequest)="requests.push($event)"
+    (asideOpenChangeRequest)="requests.push($event)"
+  >
+    <header slAppShellBanner>
+      <div slAppShellBrand><button slAppShellNavToggle></button></div>
+    </header>
+    <nav slAppShellNav>
+      <div slAppShellNavBody><a href="#painel">Painel</a></div>
+    </nav>
+    <main slAppShellMain>Encomendas</main>
+    <aside slAppShellAside><div slAppShellAsideBody>ENC-4521</div></aside>
+  </div>`,
+})
+class ForcedHost {
+  readonly open = signal(true);
+  readonly asideOpen = signal(true);
+  readonly requests: AppShellOpenRequest[] = [];
+}
+
 function setup(providers: unknown[] = []) {
   TestBed.configureTestingModule({ imports: [Host], providers: providers as never[] });
   const fixture = TestBed.createComponent(Host);
@@ -302,5 +330,23 @@ describe('SlAppShell', () => {
       const stated = setup([provideAppShellDefaults({ asideMode: 'overlay' })]);
       expect(query(stated, '[data-part="root"]').getAttribute('data-aside-mode')).toBe('inline');
     });
+  });
+
+  /**
+   * A mode forced to overlay is where the region starts, not a width it
+   * crossed: the first run of the crossing effect closed a region the template
+   * had just opened, and the overlay scenes photographed a closed panel.
+   */
+  it('keeps a region the template opened in a forced overlay mode open', async () => {
+    TestBed.configureTestingModule({ imports: [ForcedHost] });
+    const fixture = TestBed.createComponent(ForcedHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+    const host = fixture.componentInstance;
+    expect(host.open()).toBe(true);
+    expect(host.asideOpen()).toBe(true);
+    expect(host.requests).toEqual([]);
   });
 });

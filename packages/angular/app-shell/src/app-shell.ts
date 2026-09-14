@@ -294,24 +294,32 @@ export class SlAppShell {
      * `if (reason !== 'resize') persist(next)` and keeps the wide preference
      * through every narrow window the reader ever opens.
      */
-    let wasOverlay = false;
+    /* `undefined` until the first resolved mode is seen: a mode *forced* to
+       overlay is the region's starting point, not a crossing, and the first
+       run closed a region the template had just opened. Only a mode the width
+       decided — `auto` resolving narrow — is a crossing on first sight. */
+    let wasOverlay: boolean | undefined;
     effect(() => {
       const mode = this.resolvedMode();
+      if (mode === null) return;
       const overlay = mode === 'overlay';
-      const entered = overlay && !wasOverlay;
+      const first = wasOverlay === undefined;
+      const entered = overlay && (first ? this.wantedMode() === 'auto' : !wasOverlay);
       wasOverlay = overlay;
-      if (mode === null || !entered) return;
+      if (!entered) return;
       queueMicrotask(() => {
         if (this.navOpen()) this.request(false, 'resize', undefined);
       });
     });
-    let asideWasOverlay = false;
+    let asideWasOverlay: boolean | undefined;
     effect(() => {
       const mode = this.resolvedAsideMode();
+      if (mode === null) return;
       const overlay = mode === 'overlay';
-      const entered = overlay && !asideWasOverlay;
+      const first = asideWasOverlay === undefined;
+      const entered = overlay && (first ? this.wantedAsideMode() === 'auto' : !asideWasOverlay);
       asideWasOverlay = overlay;
-      if (mode === null || !entered) return;
+      if (!entered) return;
       queueMicrotask(() => {
         if (this.asideOpen()) this.requestAside(false, 'resize', undefined);
       });

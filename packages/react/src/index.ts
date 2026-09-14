@@ -66,6 +66,7 @@ export * from './text-field';
 export * from './textarea';
 export * from './time-field';
 export * from './time-picker';
+export * from './timeline';
 export * from './toast';
 export * from './toggle-group';
 export * from './toolbar';

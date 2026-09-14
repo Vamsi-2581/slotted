@@ -51,6 +51,7 @@ export default defineConfig({
         stack: resolve(import.meta.dirname, 'src/stack/index.ts'),
         table: resolve(import.meta.dirname, 'src/table/index.ts'),
         tag: resolve(import.meta.dirname, 'src/tag/index.ts'),
+        timeline: resolve(import.meta.dirname, 'src/timeline/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         'time-field': resolve(import.meta.dirname, 'src/time-field/index.ts'),
         'time-picker': resolve(import.meta.dirname, 'src/time-picker/index.ts'),

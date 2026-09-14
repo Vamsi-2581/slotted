@@ -1,0 +1,502 @@
+import {
+  Bell,
+  ChartNoAxesColumn,
+  CircleHelp,
+  FileText,
+  LayoutDashboard,
+  LifeBuoy,
+  Package,
+  Search,
+  Settings,
+  Truck,
+  Users,
+  Warehouse,
+} from 'lucide-react';
+import { useState } from 'react';
+import type { ReactNode } from 'react';
+
+import { Avatar } from '../../avatar';
+import { Button, IconButton } from '../../button';
+import { Icon } from '../../icon';
+import { Shortcut } from '../../kbd';
+import { Page, PageBody, PageFooter } from '../../page';
+import {
+  PageHeader,
+  PageHeaderActions,
+  PageHeaderHeading,
+  PageHeaderSubheading,
+  PageHeaderTitle,
+  PageHeaderTitleArea,
+  PageHeaderTitleRow,
+} from '../../page-header';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableColumnHeader,
+  TableContent,
+  TableHead,
+  TableRow,
+  TableRowHeader,
+} from '../../table';
+import { Tag } from '../../tag';
+import { TextField } from '../../text-field';
+import { Text } from '../../typography';
+import {
+  AppShell,
+  AppShellActions,
+  AppShellAside,
+  AppShellAsideBody,
+  AppShellAsideFooter,
+  AppShellAsideHeader,
+  AppShellAsideToggle,
+  AppShellBanner,
+  AppShellBrand,
+  AppShellCentre,
+  AppShellFooter,
+  AppShellMain,
+  AppShellNav,
+  AppShellNavBody,
+  AppShellNavFooter,
+  AppShellNavHeader,
+  AppShellNavToggle,
+} from '../index';
+import type { AppShellProps } from '../app-shell.types';
+import { MONEY, NavAccount, NavGroup, NavItem, PaneFields, Viewport, Wordmark } from './shared';
+import type { Destination } from './shared';
+
+/**
+ * Aurora Logística: a freight operator's back office. The neutral product —
+ * banner across the top, content as a card on the frame, a detail pane that
+ * opens on the row the coordinator selects. Real routes, real carriers, real
+ * money, real states including the awkward ones.
+ */
+
+export const AURORA_DESTINATIONS: readonly Destination[] = [
+  { id: 'painel', label: 'Painel', icon: LayoutDashboard },
+  { id: 'expedicoes', label: 'Expedições', icon: Truck, count: 19 },
+  { id: 'encomendas', label: 'Encomendas', icon: Package, count: 412 },
+  { id: 'armazens', label: 'Armazéns', icon: Warehouse },
+  { id: 'clientes', label: 'Clientes', icon: Users },
+  { id: 'faturacao', label: 'Faturação', icon: FileText, count: 7 },
+  { id: 'relatorios', label: 'Relatórios', icon: ChartNoAxesColumn },
+];
+
+const SYSTEM: readonly Destination[] = [
+  { id: 'definicoes', label: 'Definições', icon: Settings },
+  { id: 'suporte', label: 'Suporte', icon: LifeBuoy },
+];
+
+interface Shipment {
+  readonly id: string;
+  readonly customer: string;
+  readonly route: string;
+  readonly carrier: string;
+  readonly weight: string;
+  readonly due: string;
+  readonly value: number | null;
+  readonly state: 'em trânsito' | 'em risco' | 'entregue' | 'aguarda';
+}
+
+export const SHIPMENTS: readonly Shipment[] = [
+  {
+    id: 'ENC-4521',
+    customer: 'Metalúrgica Sarmento',
+    route: 'Porto → Badajoz',
+    carrier: 'Translusa Ibérica',
+    weight: '3 240 kg',
+    due: '16 set, 14:00',
+    value: 18420.5,
+    state: 'em trânsito',
+  },
+  {
+    id: 'ENC-4522',
+    customer: 'Cooperativa do Vouga',
+    route: 'Aveiro → Vigo',
+    carrier: 'Galitrans',
+    weight: '860 kg',
+    due: '15 set, 09:30',
+    value: 2380,
+    state: 'em risco',
+  },
+  {
+    id: 'ENC-4523',
+    customer: 'Farmacêutica Beira',
+    route: 'Coimbra → Madrid',
+    carrier: 'Translusa Ibérica',
+    weight: '1 120 kg',
+    due: '17 set, 11:00',
+    value: 41290.9,
+    state: 'aguarda',
+  },
+  {
+    id: 'ENC-4524',
+    customer: 'Têxteis do Ave',
+    route: 'Guimarães → Lyon',
+    carrier: '—',
+    weight: '4 800 kg',
+    due: '19 set',
+    value: null,
+    state: 'aguarda',
+  },
+  {
+    id: 'ENC-4519',
+    customer: 'Distribuidora Atlântico',
+    route: 'Leixões → Las Palmas',
+    carrier: 'Naviera Canária',
+    weight: '12 400 kg',
+    due: '12 set, 16:20',
+    value: 7640.25,
+    state: 'entregue',
+  },
+];
+
+const TONE = {
+  'em trânsito': 'accent',
+  'em risco': 'danger',
+  entregue: 'success',
+  aguarda: 'warning',
+} as const;
+
+/** The bar: the control, the name, the search a coordinator reaches for first, and what is global. */
+export function AuroraBanner({
+  centre = true,
+  toggle = true,
+  wordmark = true,
+}: {
+  centre?: boolean | undefined;
+  toggle?: boolean | undefined;
+  wordmark?: boolean | undefined;
+}) {
+  return (
+    <AppShellBanner>
+      <AppShellBrand>
+        {toggle ? <AppShellNavToggle /> : null}
+        {wordmark ? <Wordmark>Aurora</Wordmark> : null}
+      </AppShellBrand>
+      {centre ? (
+        <AppShellCentre>
+          <TextField
+            aria-label="Procurar"
+            className="slotted-demo-bar-search"
+            end={<Shortcut keys="mod+k" size="sm" variant="soft" />}
+            placeholder="Procurar encomendas, clientes…"
+            size="sm"
+            start={
+              <Icon>
+                <Search />
+              </Icon>
+            }
+            type="search"
+            variant="subtle"
+          />
+        </AppShellCentre>
+      ) : null}
+      <AppShellActions>
+        <IconButton
+          aria-label="Notificações — 3 por ler"
+          className="slotted-demo-bar-optional"
+          size="sm"
+          tone="secondary"
+          variant="ghost"
+        >
+          <Bell aria-hidden size={16} />
+        </IconButton>
+        <IconButton
+          aria-label="Ajuda"
+          className="slotted-demo-bar-optional"
+          size="sm"
+          tone="secondary"
+          variant="ghost"
+        >
+          <CircleHelp aria-hidden size={16} />
+        </IconButton>
+        <Avatar size="sm" tone="accent" variant="soft">
+          AB
+        </Avatar>
+      </AppShellActions>
+    </AppShellBanner>
+  );
+}
+
+/**
+ * The column: the workspace, the destinations in two groups, the person.
+ *
+ * `longLabels` swaps two destinations for the names a translation produces —
+ * the German for "shipment tracking" is one word and it does not fit.
+ */
+export function AuroraNav({
+  current = 'encomendas',
+  longLabels = false,
+  toggleInFooter = false,
+}: {
+  current?: string | undefined;
+  longLabels?: boolean | undefined;
+  toggleInFooter?: boolean | undefined;
+}) {
+  const destinations = longLabels
+    ? AURORA_DESTINATIONS.map((item) =>
+        item.id === 'expedicoes'
+          ? { ...item, label: 'Sendungsverfolgung' }
+          : item.id === 'faturacao'
+            ? { ...item, label: 'Rechnungsstellung und Mahnwesen' }
+            : item,
+      )
+    : AURORA_DESTINATIONS;
+
+  return (
+    <AppShellNav className="slotted-demo-nav">
+      <AppShellNavHeader>
+        <NavAccount
+          initials="AL"
+          label="Aurora Logística — mudar de espaço de trabalho"
+          name="Aurora Logística"
+          role="Porto · Operações"
+          shape="square"
+          tone="accent"
+          variant="solid"
+        />
+      </AppShellNavHeader>
+      <AppShellNavBody>
+        <NavGroup>Operação</NavGroup>
+        {destinations.map((item) => (
+          <NavItem current={item.id === current} item={item} key={item.id} />
+        ))}
+        <NavGroup>Sistema</NavGroup>
+        {SYSTEM.map((item) => (
+          <NavItem item={item} key={item.id} />
+        ))}
+      </AppShellNavBody>
+      <AppShellNavFooter>
+        {toggleInFooter ? <AppShellNavToggle /> : null}
+        <NavAccount
+          initials="AB"
+          label="Ana Beltrão — abrir menu da conta"
+          name="Ana Beltrão"
+          role="Coordenadora"
+        />
+      </AppShellNavFooter>
+    </AppShellNav>
+  );
+}
+
+/** The table a coordinator actually looks at, with the row that has no price. */
+export function Shipments({
+  onSelect,
+  rows = SHIPMENTS,
+  selected,
+}: {
+  onSelect?: ((id: string) => void) | undefined;
+  rows?: readonly Shipment[] | undefined;
+  selected?: string | undefined;
+}) {
+  return (
+    <Table
+      columns={4}
+      selectionMode="single"
+      value={selected === undefined ? [] : [selected]}
+      variant="ruled"
+      {...(onSelect === undefined ? {} : { onValueChange: (keys) => onSelect(keys[0] ?? '') })}
+    >
+      <TableContent>
+        <TableCaption>Encomendas em curso</TableCaption>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader>Encomenda</TableColumnHeader>
+            <TableColumnHeader>Cliente</TableColumnHeader>
+            <TableColumnHeader numeric>Valor</TableColumnHeader>
+            <TableColumnHeader>Estado</TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map((row) => (
+            <TableRow
+              key={row.id}
+              value={row.id}
+              {...(onSelect === undefined ? {} : { onClick: () => onSelect(row.id) })}
+            >
+              <TableRowHeader>{row.id}</TableRowHeader>
+              <TableCell>{row.customer}</TableCell>
+              <TableCell numeric>{row.value === null ? '—' : MONEY.format(row.value)}</TableCell>
+              <TableCell>
+                <Tag shape="pill" size="sm" tone={TONE[row.state]} variant="soft">
+                  {row.state}
+                </Tag>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+/** What the content column holds: a page, its header, its table, its footer. */
+export function AuroraContent({
+  children,
+  title = 'Encomendas',
+}: {
+  children?: ReactNode | undefined;
+  title?: string | undefined;
+}) {
+  return (
+    <Page
+      footer={
+        <PageFooter>
+          <Button size="sm" tone="secondary" variant="ghost">
+            Exportar
+          </Button>
+          <Button size="sm" tone="accent">
+            Nova encomenda
+          </Button>
+        </PageFooter>
+      }
+      landmark="none"
+      scroll="ancestor"
+      width="full"
+    >
+      <PageHeader level="1" size="md">
+        <PageHeaderTitleArea>
+          <PageHeaderTitleRow>
+            <PageHeaderTitle>
+              <PageHeaderHeading>{title}</PageHeaderHeading>
+              <PageHeaderSubheading>
+                412 em curso · 19 aguardam confirmação de transporte
+              </PageHeaderSubheading>
+            </PageHeaderTitle>
+            <PageHeaderActions>
+              <Button size="sm" tone="secondary" variant="outline">
+                Filtros
+              </Button>
+            </PageHeaderActions>
+          </PageHeaderTitleRow>
+        </PageHeaderTitleArea>
+      </PageHeader>
+      <PageBody>{children ?? <Shipments selected="ENC-4521" />}</PageBody>
+    </Page>
+  );
+}
+
+/** The pane: one consignment, read while the list stays on screen. */
+export function AuroraPane({ id = 'ENC-4521' }: { id?: string | undefined }) {
+  const row = SHIPMENTS.find((shipment) => shipment.id === id) ?? SHIPMENTS[0]!;
+  return (
+    <AppShellAside>
+      <AppShellAsideHeader>
+        <span className="slotted-demo-pane-title">
+          {row.id} · {row.customer}
+        </span>
+        <AppShellAsideToggle />
+      </AppShellAsideHeader>
+      <AppShellAsideBody>
+        <PaneFields
+          fields={[
+            ['Rota', row.route],
+            ['Transportador', row.carrier],
+            ['Peso', row.weight],
+            ['Valor', row.value === null ? '—' : MONEY.format(row.value)],
+            ['Entrega prevista', row.due],
+            [
+              'Estado',
+              <Tag key="state" shape="pill" size="sm" tone={TONE[row.state]} variant="soft">
+                {row.state}
+              </Tag>,
+            ],
+          ]}
+        />
+      </AppShellAsideBody>
+      <AppShellAsideFooter>
+        <Button size="sm" tone="secondary" variant="outline">
+          Rastrear
+        </Button>
+        <Button size="sm" tone="accent">
+          Confirmar
+        </Button>
+      </AppShellAsideFooter>
+    </AppShellAside>
+  );
+}
+
+export function AuroraFooter() {
+  return (
+    <AppShellFooter>
+      <Text size="xs" tone="muted">
+        Aurora 4.2.0 · Ambiente de produção · Sessão iniciada às 08:14
+      </Text>
+    </AppShellFooter>
+  );
+}
+
+/**
+ * The whole application, in one call. Every scene starts from this and changes
+ * one axis, so the page reads as one product rather than as a bag of fragments.
+ */
+export function Aurora({
+  aside = true,
+  centre = true,
+  children,
+  footer = false,
+  longLabels = false,
+  shell,
+  size = 'screen',
+  title,
+  toggleInFooter = false,
+}: {
+  aside?: boolean | undefined;
+  centre?: boolean | undefined;
+  children?: ReactNode | undefined;
+  footer?: boolean | undefined;
+  longLabels?: boolean | undefined;
+  shell?: Partial<AppShellProps> | undefined;
+  size?: 'screen' | 'tall' | undefined;
+  title?: string | undefined;
+  toggleInFooter?: boolean | undefined;
+}) {
+  return (
+    <Viewport size={size}>
+      <AppShell {...shell}>
+        <AuroraBanner centre={centre} toggle={!toggleInFooter} />
+        <AuroraNav longLabels={longLabels} toggleInFooter={toggleInFooter} />
+        <AppShellMain>
+          {children ?? <AuroraContent {...(title === undefined ? {} : { title })} />}
+        </AppShellMain>
+        {aside ? <AuroraPane /> : null}
+        {footer ? <AuroraFooter /> : null}
+      </AppShell>
+    </Viewport>
+  );
+}
+
+/**
+ * The pane driven by the table: selecting a row opens it, and the pane's own
+ * control closes it. The shell holds nothing of the selection; the product
+ * does, and passes `asideOpen` down from it.
+ */
+export function AuroraSelection(props: { shell?: Partial<AppShellProps> | undefined }) {
+  const [selected, setSelected] = useState<string | undefined>('ENC-4521');
+  return (
+    <Viewport>
+      <AppShell
+        asideOpen={selected !== undefined}
+        onAsideOpenChange={(open) => {
+          if (!open) setSelected(undefined);
+        }}
+        asideMode="inline"
+        {...props.shell}
+      >
+        <AuroraBanner />
+        <AuroraNav />
+        <AppShellMain>
+          <AuroraContent>
+            <Shipments
+              onSelect={(id) => setSelected(id === '' ? undefined : id)}
+              selected={selected}
+            />
+          </AuroraContent>
+        </AppShellMain>
+        <AuroraPane id={selected} />
+      </AppShell>
+    </Viewport>
+  );
+}

@@ -23,5 +23,6 @@ export * from './presence';
 export * from './slider';
 export * from './state';
 export * from './steps';
+export * from './timeline';
 export * from './toast';
 export * from './typeahead';

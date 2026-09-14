@@ -125,6 +125,10 @@
       "types": "./dist/types/steps/index.d.ts",
       "import": "./dist/steps.js"
     },
+    "./timeline": {
+      "types": "./dist/types/timeline/index.d.ts",
+      "import": "./dist/timeline.js"
+    },
     "./toast": {
       "types": "./dist/types/toast/index.d.ts",
       "import": "./dist/toast.js"

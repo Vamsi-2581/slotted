@@ -47,6 +47,8 @@
     "./date-field/tokens.json": "./src/date-field/date-field.tokens.json",
     "./date-picker/date-picker.css": "./src/date-picker/date-picker.css",
     "./date-picker/tokens.json": "./src/date-picker/date-picker.tokens.json",
+    "./date-range-picker/date-range-picker.css": "./src/date-range-picker/date-range-picker.css",
+    "./date-range-picker/tokens.json": "./src/date-range-picker/date-range-picker.tokens.json",
     "./datetime-field/datetime-field.css": "./src/datetime-field/datetime-field.css",
     "./datetime-field/tokens.json": "./src/datetime-field/datetime-field.tokens.json",
     "./datetime-picker/datetime-picker.css": "./src/datetime-picker/datetime-picker.css",

@@ -1,0 +1,2231 @@
+<!--
+  Static markup for the family stylesheet. It is the third place the DOM is
+  written, after React and Angular, and it is re-read whenever either changes.
+
+  The layer carries the inline style `packages/core/src/positioner` would have
+  written on it. Nothing here writes `data-positioned`, which the positioner
+  writes after its first measurement: a layer written open in static markup is
+  simply there, and is photographed where it stands.
+
+  The two fields inside the frame are `date-field` in `variant="plain"`, and
+  the calendar is `calendar` in range mode: both keep their own `data-ui`, and
+  this fragment restates their markup only so the frame has something to hold.
+  The pending band — `data-preview` on the cells between the chosen start and
+  the day the reader is on — is the calendar's, drawn in `calendar.css`.
+-->
+
+<section data-scene="closed">
+  <div
+    data-ui="date-range-picker"
+    data-part="root"
+    data-size="md"
+    data-variant="outline"
+    data-count="days"
+    data-calendar="gregory"
+  >
+    <div data-part="control">
+      <div data-part="start" data-current>
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+            <div
+              data-part="segment"
+              data-field="day"
+              role="spinbutton"
+              tabindex="0"
+              aria-label="dia"
+              aria-valuenow="7"
+              aria-valuetext="7"
+            >
+              07
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuenow="9"
+              aria-valuetext="setembro"
+            >
+              09
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuenow="2026"
+              aria-valuetext="2026"
+            >
+              2026
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="estadia-inicio" value="2026-09-07" />
+        </div>
+      </div>
+      <span data-part="separator" aria-hidden="true">–</span>
+      <div data-part="end">
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Fim, 11 de setembro de 2026">
+            <div
+              data-part="segment"
+              data-field="day"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="dia"
+              aria-valuenow="11"
+              aria-valuetext="11"
+            >
+              11
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuenow="9"
+              aria-valuetext="setembro"
+            >
+              09
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuenow="2026"
+              aria-valuetext="2026"
+            >
+              2026
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="estadia-fim" value="2026-09-11" />
+        </div>
+      </div>
+
+      <button
+        data-part="trigger"
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-label="Alterar período, 7 de setembro de 2026 – 11 de setembro de 2026, 5 dias"
+      ></button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="open" data-fixed>
+  <div
+    data-ui="date-range-picker"
+    data-part="root"
+    data-size="md"
+    data-variant="outline"
+    data-count="days"
+    data-calendar="gregory"
+    data-open
+  >
+    <div data-part="control">
+      <div data-part="start">
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+            <div
+              data-part="segment"
+              data-field="day"
+              role="spinbutton"
+              tabindex="0"
+              aria-label="dia"
+              aria-valuenow="7"
+              aria-valuetext="7"
+            >
+              07
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuenow="9"
+              aria-valuetext="setembro"
+            >
+              09
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuenow="2026"
+              aria-valuetext="2026"
+            >
+              2026
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="rascunho-inicio" value="2026-09-07" />
+        </div>
+      </div>
+      <span data-part="separator" aria-hidden="true">–</span>
+      <div data-part="end" data-current>
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Fim, vazia">
+            <div
+              data-part="segment"
+              data-field="day"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="dia"
+              aria-valuetext="vazio"
+            >
+              dd
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuetext="vazio"
+            >
+              mm
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuetext="vazio"
+            >
+              aaaa
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="rascunho-fim" value="" />
+        </div>
+      </div>
+
+      <button
+        data-part="trigger"
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded="true"
+        aria-label="Escolher período"
+      ></button>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="positioner"
+      data-side="bottom"
+      data-align="start"
+      data-presentation="popover"
+      data-open
+      style="
+        top: 46px;
+        inset-inline-start: 0;
+        --slotted-positioner-anchor-width: 100%;
+        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-transform-origin: left top;
+      "
+    >
+      <div data-part="content" role="dialog" aria-label="Escolher período">
+        <div data-part="head">
+          <span data-part="head-start">7 de set.</span>
+          –
+          <span data-part="head-end" data-pending>16 de set.</span>
+          <span data-part="length" aria-live="polite" data-pending>10 dias</span>
+        </div>
+        <div data-part="panels">
+          <div data-ui="calendar" data-part="root" data-months="2" data-view="day">
+            <div data-part="header">
+              <button data-part="previous" type="button" aria-label="Mês anterior"></button>
+              <button data-part="heading" type="button" aria-live="polite">
+                setembro – outubro de 2026
+              </button>
+              <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            </div>
+            <div data-part="grids">
+              <table data-part="grid" role="grid" aria-label="setembro de 2026">
+                <caption data-part="grid-caption">
+                  setembro de 2026
+                </caption>
+                <thead>
+                  <tr data-part="week-headers">
+                    <th data-part="week-header" scope="col" abbr="domingo">D</th>
+                    <th data-part="week-header" scope="col" abbr="segunda-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="terça-feira">T</th>
+                    <th data-part="week-header" scope="col" abbr="quarta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="quinta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="sexta-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="sábado">S</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">30</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">31</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">1</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">2</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">3</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">4</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">5</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">6</span>
+                    </td>
+                    <td data-part="cell" data-selected data-range-start>
+                      <span data-part="day" aria-selected="true" tabindex="-1" role="button"
+                        >7</span
+                      >
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">8</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">9</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">10</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">11</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">12</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">13</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview data-today>
+                      <span data-part="day" data-today tabindex="-1" role="button">14</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">15</span>
+                    </td>
+                    <td data-part="cell" data-range-end data-preview>
+                      <span data-part="day" tabindex="0" role="button">16</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">17</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">18</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">19</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">20</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">21</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">22</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">23</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">24</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">25</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">26</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">27</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">28</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">29</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">30</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">1</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">2</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">3</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">4</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">5</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">6</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">7</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">8</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">9</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">10</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <table data-part="grid" role="grid" aria-label="outubro de 2026">
+                <caption data-part="grid-caption">
+                  outubro de 2026
+                </caption>
+                <thead>
+                  <tr data-part="week-headers">
+                    <th data-part="week-header" scope="col" abbr="domingo">D</th>
+                    <th data-part="week-header" scope="col" abbr="segunda-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="terça-feira">T</th>
+                    <th data-part="week-header" scope="col" abbr="quarta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="quinta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="sexta-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="sábado">S</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">27</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">28</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">29</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">30</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">1</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">2</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">3</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">4</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">5</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">6</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">7</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">8</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">9</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">10</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">11</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">12</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">13</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">14</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">15</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">16</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">17</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">18</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">19</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">20</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">21</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">22</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">23</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">24</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">25</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">26</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">27</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">28</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">29</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">30</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">31</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">1</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">2</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">3</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">4</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">5</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">6</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">7</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="presets" data-fixed>
+  <div
+    data-ui="date-range-picker"
+    data-part="root"
+    data-size="md"
+    data-variant="outline"
+    data-count="days"
+    data-calendar="gregory"
+    data-open
+  >
+    <div data-part="control">
+      <div data-part="start" data-current>
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Início, 8 de setembro de 2026">
+            <div
+              data-part="segment"
+              data-field="day"
+              role="spinbutton"
+              tabindex="0"
+              aria-label="dia"
+              aria-valuenow="8"
+              aria-valuetext="8"
+            >
+              08
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuenow="9"
+              aria-valuetext="setembro"
+            >
+              09
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuenow="2026"
+              aria-valuetext="2026"
+            >
+              2026
+            </div>
+          </div>
+          <input
+            data-part="hidden-input"
+            type="hidden"
+            name="relatorio-inicio"
+            value="2026-09-08"
+          />
+        </div>
+      </div>
+      <span data-part="separator" aria-hidden="true">–</span>
+      <div data-part="end">
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Fim, 14 de setembro de 2026">
+            <div
+              data-part="segment"
+              data-field="day"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="dia"
+              aria-valuenow="14"
+              aria-valuetext="14"
+            >
+              14
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuenow="9"
+              aria-valuetext="setembro"
+            >
+              09
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuenow="2026"
+              aria-valuetext="2026"
+            >
+              2026
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="relatorio-fim" value="2026-09-14" />
+        </div>
+      </div>
+
+      <button
+        data-part="trigger"
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded="true"
+        aria-label="Alterar período, 8 de setembro de 2026 – 14 de setembro de 2026, 7 dias"
+      ></button>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="positioner"
+      data-side="bottom"
+      data-align="start"
+      data-presentation="popover"
+      data-open
+      style="
+        top: 46px;
+        inset-inline-start: 0;
+        --slotted-positioner-anchor-width: 100%;
+        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-transform-origin: left top;
+      "
+    >
+      <div data-part="content" role="dialog" aria-label="Escolher período">
+        <div data-part="head">
+          <span data-part="head-start">8 de set.</span>
+          –
+          <span data-part="head-end">14 de set.</span>
+          <span data-part="length" aria-live="polite">7 dias</span>
+        </div>
+        <div data-part="panels">
+          <div data-part="presets">
+            <button data-part="preset" type="button">Hoje</button>
+            <button data-part="preset" type="button" data-selected>Últimos 7 dias</button>
+            <button data-part="preset" type="button">Últimos 30 dias</button>
+            <button data-part="preset" type="button">Este mês</button>
+          </div>
+          <div data-ui="calendar" data-part="root" data-view="day">
+            <div data-part="header">
+              <button data-part="previous" type="button" aria-label="Mês anterior"></button>
+              <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
+              <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            </div>
+            <div data-part="grids">
+              <table data-part="grid" role="grid" aria-label="setembro de 2026">
+                <caption data-part="grid-caption">
+                  setembro de 2026
+                </caption>
+                <thead>
+                  <tr data-part="week-headers">
+                    <th data-part="week-header" scope="col" abbr="domingo">D</th>
+                    <th data-part="week-header" scope="col" abbr="segunda-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="terça-feira">T</th>
+                    <th data-part="week-header" scope="col" abbr="quarta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="quinta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="sexta-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="sábado">S</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">30</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">31</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">1</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">2</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">3</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">4</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">5</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">6</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">7</span>
+                    </td>
+                    <td data-part="cell" data-selected data-range-start>
+                      <span data-part="day" aria-selected="true" tabindex="0" role="button">8</span>
+                    </td>
+                    <td data-part="cell" data-in-range>
+                      <span data-part="day" tabindex="-1" role="button">9</span>
+                    </td>
+                    <td data-part="cell" data-in-range>
+                      <span data-part="day" tabindex="-1" role="button">10</span>
+                    </td>
+                    <td data-part="cell" data-in-range>
+                      <span data-part="day" tabindex="-1" role="button">11</span>
+                    </td>
+                    <td data-part="cell" data-in-range>
+                      <span data-part="day" tabindex="-1" role="button">12</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-in-range>
+                      <span data-part="day" tabindex="-1" role="button">13</span>
+                    </td>
+                    <td data-part="cell" data-selected data-range-end data-today>
+                      <span
+                        data-part="day"
+                        aria-selected="true"
+                        data-today
+                        tabindex="-1"
+                        role="button"
+                        >14</span
+                      >
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">15</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">16</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">17</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">18</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">19</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">20</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">21</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">22</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">23</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">24</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">25</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">26</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">27</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">28</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">29</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">30</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">1</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">2</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">3</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">4</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">5</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">6</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">7</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">8</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">9</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">10</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div data-part="footer">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="ghost"
+            data-tone="secondary"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Limpar</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-variant="solid"
+            data-tone="accent"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Aplicar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="limits" data-fixed>
+  <div
+    data-ui="date-range-picker"
+    data-part="root"
+    data-size="md"
+    data-variant="outline"
+    data-count="nights"
+    data-calendar="gregory"
+    data-open
+  >
+    <div data-part="control">
+      <div data-part="start">
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+            <div
+              data-part="segment"
+              data-field="day"
+              role="spinbutton"
+              tabindex="0"
+              aria-label="dia"
+              aria-valuenow="7"
+              aria-valuetext="7"
+            >
+              07
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuenow="9"
+              aria-valuetext="setembro"
+            >
+              09
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuenow="2026"
+              aria-valuetext="2026"
+            >
+              2026
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="reserva-inicio" value="2026-09-07" />
+        </div>
+      </div>
+      <span data-part="separator" aria-hidden="true">–</span>
+      <div data-part="end" data-current>
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Fim, vazia">
+            <div
+              data-part="segment"
+              data-field="day"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="dia"
+              aria-valuetext="vazio"
+            >
+              dd
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuetext="vazio"
+            >
+              mm
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuetext="vazio"
+            >
+              aaaa
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="reserva-fim" value="" />
+        </div>
+      </div>
+
+      <button
+        data-part="trigger"
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded="true"
+        aria-label="Escolher período"
+      ></button>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="positioner"
+      data-side="bottom"
+      data-align="start"
+      data-presentation="popover"
+      data-open
+      style="
+        top: 46px;
+        inset-inline-start: 0;
+        --slotted-positioner-anchor-width: 100%;
+        --slotted-positioner-available-width: 100%;
+        --slotted-positioner-transform-origin: left top;
+      "
+    >
+      <div data-part="content" role="dialog" aria-label="Escolher período">
+        <div data-part="head">
+          <span data-part="head-start">7 de set.</span>
+          –
+          <span data-part="head-end" data-pending>11 de set.</span>
+          <span data-part="length" aria-live="polite" data-pending>4 noites</span>
+          <span data-part="limit">de 2 a 7 noites</span>
+        </div>
+        <div data-part="panels">
+          <div data-ui="calendar" data-part="root" data-view="day">
+            <div data-part="header">
+              <button data-part="previous" type="button" aria-label="Mês anterior"></button>
+              <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
+              <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            </div>
+            <div data-part="grids">
+              <table data-part="grid" role="grid" aria-label="setembro de 2026">
+                <caption data-part="grid-caption">
+                  setembro de 2026
+                </caption>
+                <thead>
+                  <tr data-part="week-headers">
+                    <th data-part="week-header" scope="col" abbr="domingo">D</th>
+                    <th data-part="week-header" scope="col" abbr="segunda-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="terça-feira">T</th>
+                    <th data-part="week-header" scope="col" abbr="quarta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="quinta-feira">Q</th>
+                    <th data-part="week-header" scope="col" abbr="sexta-feira">S</th>
+                    <th data-part="week-header" scope="col" abbr="sábado">S</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">30</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">31</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">1</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">2</span>
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >3</span
+                      >
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">4</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">5</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">6</span>
+                    </td>
+                    <td data-part="cell" data-selected data-range-start>
+                      <span data-part="day" aria-selected="true" tabindex="-1" role="button"
+                        >7</span
+                      >
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">8</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">9</span>
+                    </td>
+                    <td data-part="cell" data-in-range data-preview>
+                      <span data-part="day" tabindex="-1" role="button">10</span>
+                    </td>
+                    <td data-part="cell" data-range-end data-preview>
+                      <span data-part="day" tabindex="0" role="button">11</span>
+                    </td>
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">12</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell">
+                      <span data-part="day" tabindex="-1" role="button">13</span>
+                    </td>
+                    <td data-part="cell" data-today>
+                      <span data-part="day" data-today tabindex="-1" role="button">14</span>
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >15</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >16</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >17</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >18</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >19</span
+                      >
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >20</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >21</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >22</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >23</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >24</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >25</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >26</span
+                      >
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >27</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >28</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >29</span
+                      >
+                    </td>
+                    <td data-part="cell" data-unavailable>
+                      <span data-part="day" aria-disabled="true" tabindex="-1" role="button"
+                        >30</span
+                      >
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">1</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">2</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">3</span>
+                    </td>
+                  </tr>
+                  <tr data-part="week">
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">4</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">5</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">6</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">7</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">8</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">9</span>
+                    </td>
+                    <td data-part="cell" data-outside-month>
+                      <span data-part="day" tabindex="-1">10</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="open-end">
+  <div
+    data-ui="date-range-picker"
+    data-part="root"
+    data-size="md"
+    data-variant="outline"
+    data-count="days"
+    data-calendar="gregory"
+  >
+    <div data-part="control">
+      <div data-part="start">
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+            <div
+              data-part="segment"
+              data-field="day"
+              role="spinbutton"
+              tabindex="0"
+              aria-label="dia"
+              aria-valuenow="7"
+              aria-valuetext="7"
+            >
+              07
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuenow="9"
+              aria-valuetext="setembro"
+            >
+              09
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuenow="2026"
+              aria-valuetext="2026"
+            >
+              2026
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="apartir-inicio" value="2026-09-07" />
+        </div>
+      </div>
+      <span data-part="separator" aria-hidden="true">–</span>
+      <div data-part="end" data-current>
+        <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+          <div data-part="segments" role="group" aria-label="Fim, vazia">
+            <div
+              data-part="segment"
+              data-field="day"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="dia"
+              aria-valuetext="vazio"
+            >
+              dd
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="month"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="mês"
+              aria-valuetext="vazio"
+            >
+              mm
+            </div>
+            <span data-part="literal" aria-hidden="true">/</span>
+            <div
+              data-part="segment"
+              data-field="year"
+              data-placeholder
+              role="spinbutton"
+              tabindex="-1"
+              aria-label="ano"
+              aria-valuetext="vazio"
+            >
+              aaaa
+            </div>
+          </div>
+          <input data-part="hidden-input" type="hidden" name="apartir-fim" value="" />
+        </div>
+      </div>
+      <button data-part="clear" type="button" aria-label="Limpar período"></button>
+      <button
+        data-part="trigger"
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-label="Escolher período"
+      ></button>
+    </div>
+  </div>
+</section>
+
+<section data-scene="states">
+  <div style="display: grid; gap: 12px">
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="sm"
+      data-variant="outline"
+      data-count="days"
+      data-calendar="gregory"
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuenow="7"
+                aria-valuetext="7"
+              >
+                07
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="sm-inicio" value="2026-09-07" />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Fim, 11 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuenow="11"
+                aria-valuetext="11"
+              >
+                11
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="sm-fim" value="2026-09-11" />
+          </div>
+        </div>
+
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Alterar período, 7 de setembro de 2026 – 11 de setembro de 2026, 5 dias"
+        ></button>
+      </div>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="lg"
+      data-variant="outline"
+      data-count="days"
+      data-calendar="gregory"
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuenow="7"
+                aria-valuetext="7"
+              >
+                07
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="lg-inicio" value="2026-09-07" />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Fim, 11 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuenow="11"
+                aria-valuetext="11"
+              >
+                11
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="lg-fim" value="2026-09-11" />
+          </div>
+        </div>
+
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Alterar período, 7 de setembro de 2026 – 11 de setembro de 2026, 5 dias"
+        ></button>
+      </div>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="md"
+      data-variant="subtle"
+      data-count="days"
+      data-calendar="gregory"
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuenow="7"
+                aria-valuetext="7"
+              >
+                07
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="subtle-inicio" value="2026-09-07" />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Fim, 11 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuenow="11"
+                aria-valuetext="11"
+              >
+                11
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="subtle-fim" value="2026-09-11" />
+          </div>
+        </div>
+
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Alterar período, 7 de setembro de 2026 – 11 de setembro de 2026, 5 dias"
+        ></button>
+      </div>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="md"
+      data-variant="plain"
+      data-count="days"
+      data-calendar="gregory"
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuenow="7"
+                aria-valuetext="7"
+              >
+                07
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="plain-inicio" value="2026-09-07" />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Fim, 11 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuenow="11"
+                aria-valuetext="11"
+              >
+                11
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="plain-fim" value="2026-09-11" />
+          </div>
+        </div>
+
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Alterar período, 7 de setembro de 2026 – 11 de setembro de 2026, 5 dias"
+        ></button>
+      </div>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-count="days"
+      data-calendar="gregory"
+      data-invalid
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, 11 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuenow="11"
+                aria-valuetext="11"
+              >
+                11
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input
+              data-part="hidden-input"
+              type="hidden"
+              name="invalido-inicio"
+              value="2026-09-11"
+            />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div
+            data-ui="date-field"
+            data-part="root"
+            data-size="md"
+            data-variant="plain"
+            data-invalid
+          >
+            <div data-part="segments" role="group" aria-label="Fim, 7 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuenow="7"
+                aria-valuetext="7"
+              >
+                07
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="invalido-fim" value="2026-09-07" />
+          </div>
+        </div>
+
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Alterar período, 11 de setembro de 2026 – 7 de setembro de 2026, 5 dias"
+        ></button>
+      </div>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-count="days"
+      data-calendar="gregory"
+      data-readonly
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuenow="7"
+                aria-valuetext="7"
+              >
+                07
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input
+              data-part="hidden-input"
+              type="hidden"
+              name="leitura-inicio"
+              value="2026-09-07"
+            />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Fim, 11 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuenow="11"
+                aria-valuetext="11"
+              >
+                11
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="leitura-fim" value="2026-09-11" />
+          </div>
+        </div>
+
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Alterar período, 7 de setembro de 2026 – 11 de setembro de 2026, 5 dias"
+        ></button>
+      </div>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-count="days"
+      data-calendar="gregory"
+      data-disabled
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, 7 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuenow="7"
+                aria-valuetext="7"
+              >
+                07
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input
+              data-part="hidden-input"
+              type="hidden"
+              name="desativado-inicio"
+              value="2026-09-07"
+            />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Fim, 11 de setembro de 2026">
+              <div
+                data-part="segment"
+                data-field="day"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuenow="11"
+                aria-valuetext="11"
+              >
+                11
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuenow="9"
+                aria-valuetext="setembro"
+              >
+                09
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuenow="2026"
+                aria-valuetext="2026"
+              >
+                2026
+              </div>
+            </div>
+            <input
+              data-part="hidden-input"
+              type="hidden"
+              name="desativado-fim"
+              value="2026-09-11"
+            />
+          </div>
+        </div>
+        <button data-part="clear" type="button" aria-label="Limpar período" disabled></button>
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Alterar período, 7 de setembro de 2026 – 11 de setembro de 2026, 5 dias"
+          disabled
+        ></button>
+      </div>
+    </div>
+    <div
+      data-ui="date-range-picker"
+      data-part="root"
+      data-size="md"
+      data-variant="outline"
+      data-count="days"
+      data-calendar="gregory"
+      data-required
+    >
+      <div data-part="control">
+        <div data-part="start" data-current>
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Início, vazia">
+              <div
+                data-part="segment"
+                data-field="day"
+                data-placeholder
+                role="spinbutton"
+                tabindex="0"
+                aria-label="dia"
+                aria-valuetext="vazio"
+              >
+                dd
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                data-placeholder
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuetext="vazio"
+              >
+                mm
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                data-placeholder
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuetext="vazio"
+              >
+                aaaa
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="vazio-inicio" value="" />
+          </div>
+        </div>
+        <span data-part="separator" aria-hidden="true">–</span>
+        <div data-part="end">
+          <div data-ui="date-field" data-part="root" data-size="md" data-variant="plain">
+            <div data-part="segments" role="group" aria-label="Fim, vazia">
+              <div
+                data-part="segment"
+                data-field="day"
+                data-placeholder
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="dia"
+                aria-valuetext="vazio"
+              >
+                dd
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="month"
+                data-placeholder
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="mês"
+                aria-valuetext="vazio"
+              >
+                mm
+              </div>
+              <span data-part="literal" aria-hidden="true">/</span>
+              <div
+                data-part="segment"
+                data-field="year"
+                data-placeholder
+                role="spinbutton"
+                tabindex="-1"
+                aria-label="ano"
+                aria-valuetext="vazio"
+              >
+                aaaa
+              </div>
+            </div>
+            <input data-part="hidden-input" type="hidden" name="vazio-fim" value="" />
+          </div>
+        </div>
+
+        <button
+          data-part="trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Escolher período"
+        ></button>
+      </div>
+    </div>
+  </div>
+</section>

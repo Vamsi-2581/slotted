@@ -1582,6 +1582,102 @@
       "forcedColor": "ButtonText"
     },
     {
+      "name": "--slotted-code-comment",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-keyword",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-string",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-number",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-function",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-type",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-variable",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-property",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-punctuation",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-tag",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-attribute",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-code-constant",
+      "layer": "component",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
       "name": "--slotted-avatar-size-xs",
       "layer": "component",
       "axis": "density",

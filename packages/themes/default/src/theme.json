@@ -203,7 +203,19 @@
       "--slotted-upload-kind-audio": "#a21caf",
       "--slotted-upload-kind-archive": "#a16207",
       "--slotted-upload-kind-other": "#475569",
-      "--slotted-upload-kind-foreground": "#ffffff"
+      "--slotted-upload-kind-foreground": "#ffffff",
+      "--slotted-code-comment": "#5b6b7f",
+      "--slotted-code-keyword": "#a21caf",
+      "--slotted-code-string": "#15803d",
+      "--slotted-code-number": "#b45309",
+      "--slotted-code-function": "#1d4ed8",
+      "--slotted-code-type": "#0e7490",
+      "--slotted-code-variable": "#4338ca",
+      "--slotted-code-property": "#6d28d9",
+      "--slotted-code-punctuation": "#475569",
+      "--slotted-code-tag": "#be123c",
+      "--slotted-code-attribute": "#0369a1",
+      "--slotted-code-constant": "#9a3412"
     },
     "dark": {
       "--slotted-focus-ring-color": "#60a5fa",
@@ -281,7 +293,19 @@
       "--slotted-upload-kind-audio": "#c026d3",
       "--slotted-upload-kind-archive": "#b45309",
       "--slotted-upload-kind-other": "#64748b",
-      "--slotted-upload-kind-foreground": "#ffffff"
+      "--slotted-upload-kind-foreground": "#ffffff",
+      "--slotted-code-comment": "#a1a1aa",
+      "--slotted-code-keyword": "#e879f9",
+      "--slotted-code-string": "#4ade80",
+      "--slotted-code-number": "#fbbf24",
+      "--slotted-code-function": "#60a5fa",
+      "--slotted-code-type": "#22d3ee",
+      "--slotted-code-variable": "#a5b4fc",
+      "--slotted-code-property": "#c4b5fd",
+      "--slotted-code-punctuation": "#cbd5e1",
+      "--slotted-code-tag": "#fb7185",
+      "--slotted-code-attribute": "#7dd3fc",
+      "--slotted-code-constant": "#fb923c"
     },
     "high-contrast": {
       "--slotted-focus-ring-color": "#000000",
@@ -359,7 +383,19 @@
       "--slotted-upload-kind-audio": "#701a75",
       "--slotted-upload-kind-archive": "#713f12",
       "--slotted-upload-kind-other": "#1e293b",
-      "--slotted-upload-kind-foreground": "#ffffff"
+      "--slotted-upload-kind-foreground": "#ffffff",
+      "--slotted-code-comment": "#1f2937",
+      "--slotted-code-keyword": "#701a75",
+      "--slotted-code-string": "#14532d",
+      "--slotted-code-number": "#713f12",
+      "--slotted-code-function": "#1e3a8a",
+      "--slotted-code-type": "#164e63",
+      "--slotted-code-variable": "#312e81",
+      "--slotted-code-property": "#4c1d95",
+      "--slotted-code-punctuation": "#1e293b",
+      "--slotted-code-tag": "#881337",
+      "--slotted-code-attribute": "#0c4a6e",
+      "--slotted-code-constant": "#7c2d12"
     }
   },
   "densities": {

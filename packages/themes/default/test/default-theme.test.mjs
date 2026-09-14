@@ -299,3 +299,43 @@ test('gives every file kind a colour of its own in every scheme', () => {
     assert.equal(new Set(painted).size, painted.length, `${scheme} paints two kinds alike`);
   }
 });
+
+/**
+ * The code-scope palette is the third scale in the component layer, and it is
+ * there for the reason the file-kind palette is: twelve kinds of word, and five
+ * tones. Every scope is text — a keyword is read, not glanced at — so the
+ * floor is the text ratio each scheme promises, measured against the fence
+ * ground `prose` and `code-block` both draw, `--slotted-surface-sunken`.
+ */
+test('keeps every code scope legible as text against the fence ground', () => {
+  const scopes = contract.tokens
+    .filter((token) => token.name.startsWith('--slotted-code-'))
+    .map((token) => token.name);
+
+  assert.equal(scopes.length, 12, 'the palette changed size without this test noticing');
+
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const ground = values['--slotted-surface-sunken'];
+    for (const scope of scopes) {
+      const ink = values[scope];
+      assert.ok(ink, `${scheme} ${scope} is missing`);
+      assert.ok(
+        contrast(ink, ground) >= TEXT_RATIO[scheme],
+        `${scheme} ${scope} is ${contrast(ink, ground).toFixed(2)}:1 against the fence ground`,
+      );
+    }
+  }
+});
+
+/**
+ * Twelve hues a reader tells apart one character at a time. Two scopes painted
+ * alike would be one scope drawn twice.
+ */
+test('gives every code scope a colour of its own in every scheme', () => {
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const painted = contract.tokens
+      .filter((token) => token.name.startsWith('--slotted-code-'))
+      .map((token) => values[token.name]);
+    assert.equal(new Set(painted).size, painted.length, `${scheme} paints two scopes alike`);
+  }
+});

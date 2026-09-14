@@ -22,7 +22,7 @@ convention.
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 105    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
-| `component` | One family adjusting a semantic value for itself.              | 15     |
+| `component` | One family adjusting a semantic value for itself.              | 27     |
 
 A token is a **scale root** when it states a value rather than composing one: a
 primitive, a colour a scheme paints, or the geometry a density defines. Every
@@ -44,7 +44,8 @@ because control geometry names a control and an avatar is not one. The bar for
 adding to this layer is the one Avatar cleared, written out under **Avatar
 size** below: a family may not alias a semantic token here, and it may not
 restate a scale that already exists. **File kind** cleared it a second time, for
-a palette rather than for a size.
+a palette rather than for a size, and **Code scope** a third, for a palette of
+text.
 
 Every token varies on one axis: `base` is stated once, `scheme` is restated by
 each colour scheme, and `density` by each density. The axis decides which CSS
@@ -623,6 +624,18 @@ that reads a semantic token keeps working without writing a rule of its own.
 | `--slotted-upload-kind-archive`      | `ButtonFace`   |
 | `--slotted-upload-kind-other`        | `ButtonFace`   |
 | `--slotted-upload-kind-foreground`   | `ButtonText`   |
+| `--slotted-code-comment`             | `CanvasText`   |
+| `--slotted-code-keyword`             | `CanvasText`   |
+| `--slotted-code-string`              | `CanvasText`   |
+| `--slotted-code-number`              | `CanvasText`   |
+| `--slotted-code-function`            | `CanvasText`   |
+| `--slotted-code-type`                | `CanvasText`   |
+| `--slotted-code-variable`            | `CanvasText`   |
+| `--slotted-code-property`            | `CanvasText`   |
+| `--slotted-code-punctuation`         | `CanvasText`   |
+| `--slotted-code-tag`                 | `CanvasText`   |
+| `--slotted-code-attribute`           | `CanvasText`   |
+| `--slotted-code-constant`            | `CanvasText`   |
 
 Every tone maps by rule rather than by row: `accent` is the selected tone and
 takes `Highlight` and `HighlightText`; the other four take `ButtonFace` and
@@ -736,6 +749,52 @@ Under forced colours the whole scale goes, by the rule the theme applies to
 every tone that is not `accent` — the rows are in **Forced colours** below. The
 system owns the palette there, and a file's kind is then said by its shape
 alone.
+
+## Code scope
+
+This scale answers what colour a kind of word in a block of source is drawn
+in. It is the third scale in the component layer, and it is there for the
+reason the second is: a family met a palette no semantic token can be retuned
+to give.
+
+| Token                        | Light     | Dark      | High contrast |
+| ---------------------------- | --------- | --------- | ------------- |
+| `--slotted-code-comment`     | `#5b6b7f` | `#a1a1aa` | `#1f2937`     |
+| `--slotted-code-keyword`     | `#a21caf` | `#e879f9` | `#701a75`     |
+| `--slotted-code-string`      | `#15803d` | `#4ade80` | `#14532d`     |
+| `--slotted-code-number`      | `#b45309` | `#fbbf24` | `#713f12`     |
+| `--slotted-code-function`    | `#1d4ed8` | `#60a5fa` | `#1e3a8a`     |
+| `--slotted-code-type`        | `#0e7490` | `#22d3ee` | `#164e63`     |
+| `--slotted-code-variable`    | `#4338ca` | `#a5b4fc` | `#312e81`     |
+| `--slotted-code-property`    | `#6d28d9` | `#c4b5fd` | `#4c1d95`     |
+| `--slotted-code-punctuation` | `#475569` | `#cbd5e1` | `#1e293b`     |
+| `--slotted-code-tag`         | `#be123c` | `#fb7185` | `#881337`     |
+| `--slotted-code-attribute`   | `#0369a1` | `#7dd3fc` | `#0c4a6e`     |
+| `--slotted-code-constant`    | `#9a3412` | `#fb923c` | `#7c2d12`     |
+
+The five tones give five hues and a language has more than five kinds of
+word. Reaching for `danger` to paint a keyword would make one tone mean two
+things on a page that also shows an error, and `code-block` draws both at
+once — a removed line is a `danger` ground under keyword-coloured text.
+Twelve scopes rather than Prism's sixteen standard names or TextMate's
+hundreds, because twelve is what one ground can hold apart at the text ratio
+and what a reader can tell apart one character at a time; `@slotted/core/code`
+folds both engines' names onto them.
+
+Every scope is text, so the floor is the text ratio each scheme promises —
+4.5:1 in `light` and `dark`, 7:1 in `high-contrast` — measured against the
+fence ground `prose` and `code-block` both draw, `--slotted-surface-sunken`,
+by `packages/themes/default/test/default-theme.test.mjs`. The lowest in the
+scale is 4.80:1, `string` and `number` in `light`. A marked line — added,
+removed, highlighted — tints that ground at `--slotted-highlight-tint-opacity`
+from the tone's `text` role, for the reason the highlight band does: a fill
+from the tone's `surface` role would take `string` to 3.98:1.
+
+`comment` in `light` and `dark` is the muted text step, so a comment reads as
+an aside in the same voice the page uses for one; the other eleven are hues the
+semantic layer does not hold. Under forced colours the whole scale is
+`CanvasText`: the system owns the palette, and code is then read by its shape,
+which is what `prose` decided for a fence.
 
 ## Rules for component tokens and containers
 

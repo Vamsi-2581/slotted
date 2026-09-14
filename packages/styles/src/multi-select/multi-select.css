@@ -93,31 +93,43 @@
       )
     );
 
-    /* One row's height. It is the target minimum, because that is what the
-       chip's own remove control needs, and stating it here is what lets the
-       three-row cap below be exact. */
-    --_row-size: var(--slotted-target-min, 24px);
     /**
-     * The air above and below a row of chips: a space step, but never more than
-     * the room a single row has left inside the control's own height.
+     * The air above and below a row of chips: a space step, kept at every
+     * density. It is the chip that yields, below — not the air — so a control
+     * holding one row of chips is the height of an empty one beside it and the
+     * chip never touches the frame.
      *
-     * A flat space step was the first answer and it made a control holding one
-     * chip two pixels taller than an empty one beside it at `dense`, so a form
-     * of mixed fields went ragged the moment a value was chosen. Taking the
-     * smaller of the two closes it at every density but one: at `sm` with
-     * `dense` the whole control is 24 pixels and the chip inside it is 24, so
-     * the air is nothing and the control is still two pixels of border taller
-     * than an empty one. A chip cannot be smaller than the target its remove
-     * control needs, so the two pixels are the honest price of a chip at the
-     * tightest step, and they are recorded rather than hidden.
+     * The first answer sized the row at the target minimum and let the air
+     * give way, which stood the chip edge to edge inside a `dense` frame and
+     * two pixels taller than an `sm` one; it was recorded as the honest price
+     * of a chip at the tightest step, and the reviewer refused it at
+     * `tags-input`'s release gate. The geometry below is `tags-input.css`'s.
      */
-    --_row-air: min(
-      var(--slotted-space-1, 0.125rem),
-      max(
-        0px,
-        calc((var(--_height) - 2 * var(--slotted-control-border-width, 1px) - var(--_row-size)) / 2)
-      )
+    --_row-air: var(--slotted-space-1, 0.125rem);
+    /* The chip's own line: the small step of the control type scale at the
+       tag's own line height, plus the tag's edge — `tag.css`'s arithmetic for
+       its `sm` size, repeated because the row's cap has to count in it. */
+    --_chip-line: calc(
+      var(--slotted-control-font-size-sm, 12px) * var(--slotted-line-height-xs, 1.4) + 2 *
+        var(--slotted-tag-border-width, var(--slotted-border-width-thin, 1px))
     );
+    /* The chip's block inset: `tag`'s own step where the frame has room for
+       it, and whatever room is left where it has not. The type stays 12px and
+       the remove control keeps its 24-pixel target through `tag`'s own halo. */
+    --_chip-inset: clamp(
+      0px,
+      calc(
+        (
+            var(--_height) - 2 * var(--slotted-control-border-width, 1px) - 2 * var(--_row-air) -
+              var(--_chip-line)
+          ) /
+          2
+      ),
+      var(--slotted-space-1, 0.125rem)
+    );
+    /* One row's height: exactly the chip's, so three rows plus their gaps
+       divide the cap below with no sliver of a fourth. */
+    --_row-size: calc(var(--_chip-line) + 2 * var(--_chip-inset));
     --_row-gap: var(--slotted-space-2, 0.25rem);
 
     align-items: center;
@@ -293,17 +305,20 @@
   [data-ui='multi-select'] [data-part='chips'] > :not([data-part='field']) {
     flex: 0 0 auto;
     max-inline-size: 100%;
-    /**
-     * The row's own height, which is the target minimum. A chip's box is the
-     * height of what it says — 22.8 pixels at the small step in the default
-     * theme, measured in this harness — and three of those plus their gaps do
-     * not divide the cap the row above states in target minimums, so the fourth
-     * row showed as a three-pixel sliver under the third. Stating the height
-     * here makes the two agree, and it is the same number `select`'s row uses,
-     * for the same reason: it is what the chip's own remove control needs.
-     */
+    /* The row's own height, so three chips plus their gaps divide the cap the
+       row above states and no fourth row shows as a sliver under the third. */
     min-block-size: var(--_row-size);
     min-inline-size: 0;
+  }
+
+  /**
+   * The chip takes the inset the frame has room for, through the token `tag`
+   * reads for it. Set on the row, inherited by every chip, and no rule of this
+   * sheet names `[data-ui='tag']`: the host stands beside the tag sheet and
+   * never reaches into it.
+   */
+  [data-ui='multi-select'] [data-part='chips'] {
+    --slotted-tag-inset-block: var(--_chip-inset);
   }
 
   /**

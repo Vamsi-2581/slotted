@@ -19,6 +19,14 @@ const source = new URL('.', import.meta.url).pathname;
  * defers a collection of values to `multi-select`, so it has no several to
  * preview (CB4).
  *
+ * What a host needs from a chip it asks for through the two tokens `tag.css`
+ * reads — `--slotted-tag-inset-block`, so a frame shorter than the chip at
+ * `dense` can ask it to give up its air rather than its type, and
+ * `--slotted-tag-border-color`, to mark one chip — set on the row and
+ * inherited, never by naming the tag's identifier or its private hooks.
+ * `tags-input` holds the same rule in its own styles test, because the popup
+ * rules below do not apply to it.
+ *
  * Each host names the row it owns, because the two arrangements are different
  * and the rule is the same. `select`'s row is a lane of the control, beside a
  * `button` that cannot contain a remove control; `multi-select`'s is inside the

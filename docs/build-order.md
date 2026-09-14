@@ -1250,7 +1250,16 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   atrás de um gatilho. Fica em Extended, e a cadeia de hora não: um intervalo de
   datas é uma composição especializada de um valor que a onda 7 já tem, enquanto
   uma hora é um valor que o Core não sabia dizer. `docs/component-features.md`
-  já separava as duas linhas.
+  já separava as duas linhas. O que a família entrega está inventariado em
+  `docs/superpowers/specs/2026-09-14-date-range-picker-capability-inventory.md`
+  e decidido em `2026-09-14-date-range-picker-design.md`; o que acrescenta ao
+  parágrafo: **o comprimento dito enquanto a corrida é desenhada** (`length`,
+  `aria-live`), a unidade `count: days | nights`, `minLength`/`maxLength`
+  explicados na banda, `contiguous`, a parte `preset`, o modelo `position`, e o
+  rascunho que nunca chega a um formulário. Fora da família: `calendar` ganhou
+  `data-preview` e `onPreviewChange`, `date-field` Angular ganhou `label`, e
+  `@slotted/core/date` ganhou `date-range.ts`. Pendente: `time-range-picker` e
+  `datetime-range-picker` herdam a banda e o rascunho.
 - `time-range-picker` é o mesmo argumento do outro lado da cadeia: dois
   `time-picker` com o `max` de um ligado ao `min` do outro, atrás de um gatilho.
   O inventário de `time-picker` adiou-o por escrito — Ant e MUI ambos o

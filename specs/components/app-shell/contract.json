@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 5,
+  "family": "app-shell",
+  "ui": "app-shell",
+  "pattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
+  "control": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/",
+  "design": "docs/superpowers/specs/2026-09-14-app-shell-redesign-design.md",
+  "inventory": "docs/superpowers/specs/2026-09-13-app-shell-capability-inventory.md",
+  "composes": ["presence", "dismissable-layer", "focus", "portal", "measure"],
+  "anatomy": {
+    "root": "a div, and a grid. It is deliberately not a sectioning element: a main inside an article stops being a landmark, and the root has to be placeable anywhere without changing what the five regions mean. It is the query container the whole family answers",
+    "skip": "the links that jump past the chrome. One anchor per region that has a target, so a skip link never points at a region nobody rendered. Not a landmark: a nav here would be a third navigation region the reader has to cross to reach the two that matter",
+    "banner": "a header in the context of the body, so it is the banner landmark with no ARIA written",
+    "brand": "the start cluster of the banner: the toggle, the mark, the name of the application or of the workspace. The shell owns where a top bar's things go and owns none of what they are",
+    "centre": "the middle of the banner, between brand and actions, and the one cluster that grows: search, a breadcrumb trail, the route title, tabs. Without it a bar is two clusters and a void, which is what the first reference page photographed",
+    "actions": "the end cluster of the banner, pushed there by the space it takes so an empty one costs nothing: search, notifications, help, account. top-navigation fills it in wave 8, and until then a consumer puts a toolbar, a menu and an avatar there itself",
+    "nav-toggle": "the disclosure control for the navigation region. Rendered inside the banner by default and placeable anywhere, because it takes its id, its aria-expanded, its aria-controls and its handler from the family's context",
+    "nav": "a nav, so it is the navigation landmark. One element across all three modes: the rail is the same region at another width, which is what keeps focus and scroll position where they were",
+    "nav-header": "the top of the navigation column, pinned. The brand, the workspace switcher",
+    "nav-body": "the middle of the navigation column, and the only part of it that scrolls",
+    "nav-footer": "the bottom of the navigation column, pinned. The account, the collapse control",
+    "scrim": "the veil under the overlay panel, mounted only while the layer is modal",
+    "main": "a main with tabindex=-1. Without the tabindex the skip link moves the scroll and leaves focus behind, in Safari and in Firefox",
+    "aside": "an aside, so it is the complementary landmark. It opens and closes like the navigation region does — a column beside the content or a layer over it, by asideMode — because a pane whose column has a fixed width cannot be closed by anything placed inside it",
+    "aside-header": "the top of the secondary pane, pinned: the title of what the pane shows and the control that closes it",
+    "aside-body": "the middle of the secondary pane, and the only part of it that scrolls",
+    "aside-footer": "the bottom of the secondary pane, pinned: the actions that close the task the pane holds",
+    "aside-toggle": "the disclosure control for the secondary pane. Placeable anywhere for the reason nav-toggle is: it takes its id, its aria-expanded, its aria-controls and its handler from the family context",
+    "footer": "a footer in the context of the body, so it is the contentinfo landmark. It is the application's footer, not the page's action bar, which lives inside main",
+    "layer": "the application's portal root, published on the family's context and installed with setPortalContainer from @slotted/core/portal"
+  },
+  "landmarks": {
+    "banner": "header",
+    "navigation": "nav",
+    "main": "main",
+    "complementary": "aside",
+    "contentinfo": "footer",
+    "reason": "Every one of the five is an HTML sectioning element in the context of the body, which the APG's HTML Sectioning Elements table maps to the landmark with no ARIA written. The root being a div is what keeps that true"
+  },
+  "overlayAt": 768,
+  "overlayAtReason": "The inline size of the shell, not of the window: container-type inline-size on the root, and the condition is literal because @container (min-width: var(--x)) is invalid — rule 4 of docs/token-foundation.md. The number is declared here because the stylesheet needs it literal and the script needs it to know whether the keyboard and the focus are in overlay mode; app-shell.styles.test.mjs reads the @container condition and compares it to this value, which is what stops the two drifting",
+  "navMode": {
+    "inline": "the navigation is a column of the grid. open is the wide column, closed is what collapsedTo names",
+    "overlay": "the navigation is out of the grid and over the content, as a dismissable layer composed from packages/core. open is the panel, closed is nothing",
+    "auto": "inline at or above overlayAt, overlay below it",
+    "default": "auto",
+    "firstPaint": "data-nav-mode exists only once the script has decided. Below overlayAt the stylesheet shows the panel under [data-nav-mode=overlay][data-open] alone, so a server render and the frame before hydration draw the narrow shell closed, which is the safe default. Above it the container query alone puts the navigation in its column, waiting for no script"
+  },
+  "collapsedTo": {
+    "rail": "a strip the width of a target, holding each destination's mark. The region stays in the tab order, which is what a rail is for",
+    "hidden": "the region leaves the layout, the tab order and the accessibility tree, by display: none. Mantine and Ant leave a zero-width navbar behind and Tab still crosses it — and a region at nought pixels that still lays its children out puts content outside the box that owns it, which tools/harness/audit.mjs reports and a screenshot cannot show",
+    "default": "rail",
+    "reason": "Ant collapsedWidth defaults to 80 and Carbon ships a rail; Mantine and PatternFly have neither. A boolean that only says the navigation exists loses six destinations the moment the reader collapses it",
+    "hiddenCost": "closing to hidden does not animate: what happens is a removal rather than a change of width, and the width transition belongs to rail. content-visibility: hidden was tried instead and does not fix the geometry — it skips the contents' layout and preserves their last measured size"
+  },
+  "primary": {
+    "banner": "the banner spans the full width and the navigation starts below it",
+    "nav": "the navigation spans the full height and the banner starts beside it",
+    "default": "banner",
+    "reason": "Mantine layout=default|alt and Vaadin primarySection answer the same question, and the answer moves where the brand lives. The grid changes where a region is drawn and never where it is written, so the focus order is the same under both"
+  },
+  "scroll": {
+    "content": "the shell is the height it was given and only main scrolls. A page-header inside it sticks to the top of main, which is already below the banner, so nothing has to add the banner's height to anything",
+    "document": "the shell grows with its content and the document scrolls. The banner travels with it",
+    "default": "content",
+    "cost": "under document the banner is not sticky. A sticky banner there would oblige the shell to write --slotted-page-sticky-top, which page-header owns writing, and the two writes would erase each other. A shell that wants a permanent banner uses content, which is the default and what every surveyed implementation does"
+  },
+  "overlay": {
+    "presence": "@slotted/core/presence holds the panel through its exit",
+    "dismiss": "@slotted/core/dismissable-layer, with escape and outsidePress as axes. Escape is registered in the capture phase there, so the family handles the key on no element of its own",
+    "focus": "@slotted/core/focus contains focus while modal and returns it to the nav-toggle on close",
+    "inert": "every region beside the layer takes inert while it is modal — the banner and its toggle included, exactly as a dialog's trigger is. @slotted/core/dismissable-layer applies it to the layer's siblings, and the toggle is registered as a branch so a press on it is never read as a press outside. The ways out are Escape, the veil, a destination, and whatever control the consumer put inside the panel. No surveyed implementation inerts anything: Vaadin and PatternFly draw the veil and leave what is under it operable",
+    "extent": "the panel stops under the banner rather than covering it, and the grid says where that is: an absolutely positioned child placed into rows two to the end takes that area as its containing block, so a banner that wraps moves the panel with it and nobody measures anything. It is a decision about what the reader can see rather than about what they can press — under a modal layer the banner is inert like everything else",
+    "stack": "two layers can be open together only with navMode and asideMode both forced to overlay; @slotted/core/dismissable-layer keeps one stack, so Escape and an outside press reach the topmost and the other waits",
+    "aside": "the pane layer slides from the end of the line the navigation is not on, stops under the banner by the same grid placement, and returns focus to the aside-toggle that opened it"
+  },
+  "skip": {
+    "targets": ["main", "nav", "aside"],
+    "reason": "One anchor per region that exists and is open: a link to a region nobody rendered, or to a pane the reader closed, is a dead destination. The banner gets none: it is before all three in the focus order"
+  },
+  "closeOnNavigate": {
+    "reason": "A click that lands on an a[href] inside the navigation region, in overlay mode, asks to close with the reason select. Vaadin and PatternFly both do it, and without it a phone costs two taps per destination"
+  },
+  "focusOrder": ["skip", "banner", "nav-toggle", "nav", "main", "aside", "aside-toggle", "footer"],
+  "focusOrderReason": "The DOM order, and it does not move with primary: grid-template-areas changes where a region is drawn, never where it is written. The nav-toggle stands before the region it controls, which is what the Disclosure pattern assumes; the aside-toggle stands inside the pane header by default, so a pane the reader has opened puts its own close control first",
+  "messages": {
+    "nav": "Navegação principal",
+    "open": "Abrir navegação",
+    "close": "Fechar navegação",
+    "aside": "Painel lateral",
+    "openAside": "Abrir painel lateral",
+    "closeAside": "Fechar painel lateral",
+    "skipToMain": "Saltar para o conteúdo",
+    "skipToNav": "Saltar para a navegação",
+    "skipToAside": "Saltar para o painel lateral"
+  },
+  "declined": {
+    "navItems": {
+      "deferTo": "side-navigation",
+      "reason": "Destinations, groups, nesting and selection by route. docs/component-features.md §7 lists Side Navigation as an Extended family, wave 8. The shell owns the region, its width, its landmark and its open state"
+    },
+    "bannerContent": {
+      "deferTo": "top-navigation",
+      "reason": "Brand, search, notifications and account. docs/component-features.md §7 lists Top Navigation / App Bar as an Extended family. The shell owns where a bar puts things — brand, centre, actions — and none of what they are; what is served inside the three clusters — text-field, breadcrumb, menu, avatar — already exists"
+    },
+    "breadcrumbs": {
+      "deferTo": "page-header",
+      "reason": "The trail belongs to the route and the shell is what does not change between routes. PatternFly puts it on Page and pays for it with breadcrumbProps, an object crossing two layers"
+    },
+    "contentPadding": {
+      "deferTo": "page",
+      "reason": "page already has inset and width and passes both to the container it renders. A second answer to one question"
+    },
+    "measure": {
+      "deferTo": "container",
+      "reason": "Measure belongs to container and to it alone, by docs/build-briefing.md"
+    },
+    "transitionDuration": {
+      "reason": "Mantine takes transitionDuration and transitionTimingFunction per instance. The motion scale is the answer and it is the only one that collapses under prefers-reduced-motion; a number stated here would sit outside the query that collapses it"
+    },
+    "bottomNavigation": {
+      "reason": "Vaadin's navbar touch-optimized slot, one source only. docs/component-features.md §7 names Navigation Rail / Bottom Navigation as a Specialized family of its own, and the shell gives it the footer region to sit in"
+    },
+    "session": {
+      "reason": "Session, tenant and permissions are content the consumer projects into the banner and the navigation, not capabilities. docs/component-features.md §15 asks that authentication not be coupled to the design system, and the requirement is met by having no prop on the subject"
+    },
+    "print": {
+      "reason": "No surveyed implementation has a @media print rule, and what a shell should print is the consumer's decision. The family does not write a rule nobody asked for"
+    },
+    "breakpointEvent": {
+      "reason": "PatternFly exposes getBreakpoint(width) and the width it measured. The family answers its own width with a container query and reports the resolved mode as data-nav-mode; a consumer who needs the number writes a three-line ResizeObserver on the root"
+    },
+    "runtimeProperties": {
+      "reason": "Mantine in mode=fixed writes padding on Main equal to the height and width of the sections, and has to know both; PatternFly runs a ResizeObserver over the whole page. A grid sizes its own tracks, so the family publishes no measured custom property and adds no line to packages/styles/src/runtime-properties.mjs. The one observer it creates draws nothing: it decides whether the keyboard and the focus are in overlay mode"
+    },
+    "asideCollapsedTo": {
+      "reason": "A closed pane leaves no rail. A rail is a column of marks the reader can still reach, and a detail pane has no marks — its content is the thing it shows or nothing. Closing to hidden, the way collapsedTo=hidden does, is the only closed state a pane has"
+    },
+    "asideSide": {
+      "reason": "The pane sits at the end of the line the navigation is not on, because two regions on one side of the content is a navigation with a sub-navigation, which is side-navigation nesting and not a shell arrangement. navSide=end puts the pane at the start"
+    }
+  },
+  "axes": {
+    "primary": ["banner", "nav"],
+    "canvas": ["inset", "flush"],
+    "navMode": ["inline", "overlay", "auto"],
+    "navSide": ["start", "end"],
+    "navSize": ["sm", "md", "lg"],
+    "collapsedTo": ["rail", "hidden"],
+    "asideMode": ["inline", "overlay", "auto"],
+    "asideSize": ["sm", "md", "lg"],
+    "scroll": ["content", "document"],
+    "dividers": [true, false],
+    "modal": [true, false],
+    "escape": ["close", "none"],
+    "outsidePress": ["close", "none"],
+    "closeOnNavigate": [true, false]
+  },
+  "resolution": {
+    "primary": ["prop", "defaults", "banner"],
+    "canvas": ["prop", "defaults", "inset"],
+    "navMode": ["prop", "defaults", "auto"],
+    "navSide": ["prop", "defaults", "start"],
+    "navSize": ["prop", "defaults", "md"],
+    "collapsedTo": ["prop", "defaults", "rail"],
+    "asideMode": ["prop", "defaults", "auto"],
+    "asideSize": ["prop", "defaults", "md"],
+    "scroll": ["prop", "defaults", "content"],
+    "dividers": ["prop", "defaults", true],
+    "modal": ["prop", "defaults", true],
+    "escape": ["prop", "defaults", "close"],
+    "outsidePress": ["prop", "defaults", "close"],
+    "closeOnNavigate": ["prop", "defaults", true]
+  },
+  "provides": {
+    "appShellDefaults": [
+      "primary",
+      "canvas",
+      "navMode",
+      "navSide",
+      "navSize",
+      "collapsedTo",
+      "asideMode",
+      "asideSize",
+      "scroll",
+      "dividers",
+      "modal",
+      "escape",
+      "outsidePress",
+      "closeOnNavigate",
+      "messages"
+    ]
+  },
+  "stateModel": {
+    "open": {
+      "nav": {
+        "controlled": "navOpen",
+        "uncontrolled": "defaultNavOpen",
+        "request": "onNavOpenChange",
+        "reasons": [
+          "pointer",
+          "keyboard",
+          "escape",
+          "outsidePress",
+          "select",
+          "resize",
+          "programmatic"
+        ],
+        "attributeOn": "root"
+      },
+      "aside": {
+        "controlled": "asideOpen",
+        "uncontrolled": "defaultAsideOpen",
+        "request": "onAsideOpenChange",
+        "reasons": ["pointer", "keyboard", "escape", "outsidePress", "resize", "programmatic"],
+        "attributeOn": "aside",
+        "reason": "No select: a pane has no destinations. The attribute is written on the region and not on the root, because the root data-open was the navigation before the pane had a state and every selector written over it still reads the navigation"
+      }
+    }
+  },
+  "stateAttributes": {
+    "open": "data-open"
+  },
+  "members": {
+    "appShell": {
+      "nativeElement": "div",
+      "defaults": {
+        "primary": "banner",
+        "canvas": "inset",
+        "navMode": "auto",
+        "navSide": "start",
+        "navSize": "md",
+        "collapsedTo": "rail",
+        "asideMode": "auto",
+        "asideSize": "md",
+        "scroll": "content",
+        "dividers": true,
+        "modal": true,
+        "escape": "close",
+        "outsidePress": "close",
+        "closeOnNavigate": true
+      },
+      "capabilities": ["open", "arrangement", "size", "appearance", "wiring"],
+      "states": ["default", "hover", "active", "focus-visible", "open"],
+      "parts": [
+        "root",
+        "skip",
+        "banner",
+        "brand",
+        "centre",
+        "actions",
+        "nav-toggle",
+        "nav",
+        "nav-header",
+        "nav-body",
+        "nav-footer",
+        "scrim",
+        "main",
+        "aside",
+        "aside-header",
+        "aside-body",
+        "aside-footer",
+        "aside-toggle",
+        "footer",
+        "layer"
+      ],
+      "defaultsReason": "Axis defaults only. The uncontrolled starting values are the state models own `uncontrolled` names, and they exist in one binding and not in the other: React ships navOpen and defaultNavOpen, asideOpen and defaultAsideOpen; Angular ships one model() for each that is both. Listing them here would oblige the Angular reference page to document props it does not have, which is levelling the two bindings down to the smaller shape — the thing references/frameworks.md says to record instead of doing"
+    }
+  },
+  "scenarios": {
+    "appShell": [
+      "playground",
+      "anatomy",
+      "regions",
+      "banner",
+      "canvas",
+      "theming",
+      "navModes",
+      "rail",
+      "aside",
+      "overlay",
+      "primary",
+      "sides",
+      "scroll",
+      "skipLinks",
+      "persistence",
+      "defaults",
+      "composition",
+      "accessibility"
+    ]
+  },
+  "canvas": {
+    "inset": "the frame — banner, navigation, footer — is painted the sunken ground and carries no surface of its own, and the content is a raised card inset from it with a radius and an edge. The gutter does the separating, so no rule is drawn between two regions",
+    "flush": "the regions carry the surface and the content carries the ground, edge to edge, separated by a rule. It is the arrangement every surveyed implementation ships, and it is what a grid or a table that owns the whole column wants",
+    "default": "inset",
+    "reason": "The first arrangement this family had was flush, and the reviewer read it as a wireframe: in the light scheme --slotted-surface-sunken is two per cent away from --slotted-surface, so every boundary was carried by a one-pixel rule and nothing on the screen had a plane. An inset card gives the content an elevation the two near-identical surfaces cannot. flush stays an axis because an edge-to-edge table wants no gutter around it"
+  },
+  "mark": {
+    "open": "--slotted-icon-panel-open",
+    "close": "--slotted-icon-panel-close",
+    "reason": "The mark draws the region it toggles — a frame with a bar down one side — and the chevron says which way pressing sends it. Three bars say \"a menu is here\" and say nothing about which menu or where it goes, and the glyph scale does not hold them; a double chevron says \"all the way to the end\", which is what pagination draws it for. Both were on this control before this pair was, and the second was read as the wrong mark. The pair is one artwork with the chevron turned, for the reason eye and eye-off are",
+    "mirrored": "the artwork is direction-sensitive, so the family turns it whole wherever the region is not at the start of the line: navSide=end, a right-to-left document, or either but not both",
+    "aside": "the aside-toggle draws the same pair mirrored: the pane is on the end of the line the navigation is not on, so the artwork the navigation turns for navSide=end is the pane artwork at rest, and it turns back where the pane is at the start"
+  },
+  "designHistory": ["docs/superpowers/specs/2026-09-13-app-shell-design.md"],
+  "asideMode": {
+    "inline": "the pane is a column of the grid beside the content, at or above overlayAt, and a row under the content below it. Closed, it leaves the layout by display: none — a pane has no rail, and a region at nought pixels that still lays its children out puts content outside the box that owns it",
+    "overlay": "the pane is out of the grid and over the content as a dismissable layer, from the end of the line the navigation is not on. Composed from the same three modules the navigation layer is",
+    "auto": "inline at or above overlayAt, overlay below it",
+    "default": "auto",
+    "reason": "A detail pane at 1280 pixels is a column and at 600 pixels is a layer, and the pair is the one the navigation already resolves on the same width. Mantine collapses its Aside on a breakpoint, PatternFly opens its Drawer inline or over the page by a prop, Primer hides its Pane; none of the three lets a product state the answer at any width",
+    "firstPaint": "data-aside-mode exists only once the script has decided, exactly as data-nav-mode does; below overlayAt the stylesheet shows the overlaid pane under [data-aside-mode=overlay] > [data-part=aside][data-open] alone"
+  },
+  "stateModelReason": "One capability held twice, as specs/contract.schema.mjs allows: a set of named models under open, each with its own pair and its own reasons. The first pass deferred the pane to drawer with mode=inline; the column the pane sits in has a fixed width by axis, so a drawer closed inside it left the column empty at its full width, and the pane could not be closed by anything placed inside it",
+  "published": {
+    "--slotted-app-shell-row-inset": "how far a row sits inside its region",
+    "--slotted-app-shell-row-mark": "the box a row mark occupies, and the width of the rail",
+    "--slotted-app-shell-row-gap": "the gap between a row mark and its label",
+    "--slotted-app-shell-row-height": "the height of a row: the mark box, so a mark is centred in the row it stands in",
+    "--slotted-app-shell-row-font-size": "the type size of a row label. A list of destinations is text and not a control, so it composes the type scale and not the control scale",
+    "--slotted-app-shell-row-line-height": "the line height of a row label, from the scale: normal varies by font and a two-line row needs the number",
+    "reason": "The rows inside the regions are not this family — side-navigation and top-navigation, wave 8 — and a consumer who brings its own list has nothing to align to unless the shell says what a row is. Six numbers, and every left edge, every row height and every label in the frame is one of them. No surveyed implementation publishes its row geometry"
+  }
+}

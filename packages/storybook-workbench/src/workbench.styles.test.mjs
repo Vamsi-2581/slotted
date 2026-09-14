@@ -581,6 +581,17 @@ test('offers a bounded height, so a demonstration can be made to overflow', () =
 });
 
 /**
+ * A family that paints no frame of its own still has to be shown inside one,
+ * because the frame is what a product puts round it — and `scroll-area`'s
+ * anatomy exists to keep that frame off the element its veil is on.
+ */
+test('offers a frame from the foundation, for a family that paints none', () => {
+  const rule = /\.slotted-demo-frame\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(rule, /border: 1px solid var\(--slotted-border-subtle\)/);
+  assert.match(rule, /border-radius: var\(--slotted-radius-md\)/);
+});
+
+/**
  * The scale had a panel size and nothing above it. A family that owns a whole
  * screen — a page, a page header that snaps, a shell, a split view — drawn in
  * a box the height of a card is a picture of a different component, and the

@@ -821,6 +821,19 @@
  * an element it does not own — and a demonstration that hid the grid would be
  * claiming the family does something it deliberately does not.
  *
+/**
+ * A frame for a demonstration whose family paints none of its own. A scroll
+ * area is the box a product puts a border round, and the border is the thing
+ * its anatomy decision is about — the frame on one element and the veil on
+ * another — so a page that never shows one has not shown the decision. A story
+ * may not write the border inline, and a frame drawn in a literal answers no
+ * scheme; this reads the foundation's own edge and radius.
+ */
+.slotted-demo-frame {
+  border: 1px solid var(--slotted-border-subtle);
+  border-radius: var(--slotted-radius-md);
+}
+
  * Added when `drawer` needed to show a persistent panel beside a page.
  */
 .slotted-demo-viewport[data-layout='shell'] {

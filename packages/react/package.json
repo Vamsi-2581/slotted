@@ -19,6 +19,10 @@
       "types": "./dist/types/alert/index.d.ts",
       "import": "./dist/alert.js"
     },
+    "./app-shell": {
+      "types": "./dist/types/app-shell/index.d.ts",
+      "import": "./dist/app-shell.js"
+    },
     "./avatar": {
       "types": "./dist/types/avatar/index.d.ts",
       "import": "./dist/avatar.js"
@@ -171,6 +175,10 @@
     "./result-state": {
       "types": "./dist/types/result-state/index.d.ts",
       "import": "./dist/result-state.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/types/scroll-area/index.d.ts",
+      "import": "./dist/scroll-area.js"
     },
     "./section": {
       "types": "./dist/types/section/index.d.ts",

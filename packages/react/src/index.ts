@@ -1,6 +1,7 @@
 export * from './accordion';
 export * from './action-bar';
 export * from './alert';
+export * from './app-shell';
 export * from './avatar';
 export * from './avatar-group';
 export * from './badge';
@@ -48,6 +49,7 @@ export * from './progress-indicator';
 export * from './prose';
 export * from './radio-group';
 export * from './result-state';
+export * from './scroll-area';
 export * from './section';
 export * from './segmented-control';
 export * from './select';

@@ -79,7 +79,7 @@ describe('createScrollEdges', () => {
     handle.destroy();
   });
 
-  it('maps the block axis to the horizontal one in a vertical writing mode', () => {
+  it('maps the block axis to the horizontal one in a vertical writing mode, and says so', () => {
     writingMode('vertical-rl');
     const container = mount({
       clientWidth: 200,
@@ -93,6 +93,7 @@ describe('createScrollEdges', () => {
 
     expect(handle.state().block).toEqual({ overflowing: true, atStart: false, atEnd: true });
     expect(handle.state().inline.overflowing).toBe(false);
+    expect(handle.sideways()).toBe(true);
 
     handle.destroy();
   });

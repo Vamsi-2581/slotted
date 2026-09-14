@@ -53,6 +53,12 @@ export interface ScrollEdgesHandle {
   refresh: () => void;
   /** The last measurement. */
   state: () => ScrollEdgesState;
+  /**
+   * Whether the block axis runs across the page — a vertical writing mode.
+   * Only script can read one, and the stylesheet needs to know: a gradient
+   * cannot be given a logical direction, so the veil is dropped there.
+   */
+  sideways: () => boolean;
   /** The distance from each logical start, read now. */
   position: () => ScrollPosition;
   /** Moves to a logical position. An axis left out is an axis left alone. */
@@ -215,6 +221,7 @@ export function createScrollEdges(
     },
     refresh: () => update(true),
     state: () => current,
+    sideways: () => axes.across,
     position,
     scrollTo,
     scrollToEdge,

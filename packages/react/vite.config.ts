@@ -10,6 +10,7 @@ export default defineConfig({
       entry: {
         index: resolve(import.meta.dirname, 'src/index.ts'),
         'action-bar': resolve(import.meta.dirname, 'src/action-bar/index.ts'),
+        'app-shell': resolve(import.meta.dirname, 'src/app-shell/index.ts'),
         avatar: resolve(import.meta.dirname, 'src/avatar/index.ts'),
         'avatar-group': resolve(import.meta.dirname, 'src/avatar-group/index.ts'),
         badge: resolve(import.meta.dirname, 'src/badge/index.ts'),
@@ -43,6 +44,7 @@ export default defineConfig({
         'page-header': resolve(import.meta.dirname, 'src/page-header/index.ts'),
         popover: resolve(import.meta.dirname, 'src/popover/index.ts'),
         prose: resolve(import.meta.dirname, 'src/prose/index.ts'),
+        'scroll-area': resolve(import.meta.dirname, 'src/scroll-area/index.ts'),
         section: resolve(import.meta.dirname, 'src/section/index.ts'),
         select: resolve(import.meta.dirname, 'src/select/index.ts'),
         skeleton: resolve(import.meta.dirname, 'src/skeleton/index.ts'),

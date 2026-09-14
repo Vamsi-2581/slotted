@@ -34,7 +34,7 @@ os seis tokens publicados, `bar-search`, `bar-crumbs`, `bar-wordmark`,
 `pane-fields`, `pane-form`, `pane-title`, `viewport[data-frame='window']`;
 44 testes. Demos React em `app-shell-demo/` (shared, aurora, cadence, atrio);
 docs e histórias React e Angular com dezoito cenas. `audit.mjs` React limpo a
-1280 e 620. Angular Storybook em 6007 serve a história antiga (reinício).
+1280 e 620. Angular Storybook reiniciado; `audit.mjs --deadline 120000` limpo a 1280 e 620 (41 palcos).
 12\. `format:check` limpo; `lint` limpo nos caminhos da família (dois erros
 pré-existentes em `toggle-group`); `typecheck` limpo; `test:contracts` 1478;
 `test:docs` com nove ids de outras famílias; styles 1095 (+ `page-header`
@@ -43,11 +43,11 @@ pré-existente); workbench 53 + 44; React completo 2348/2348; Angular completo 1
 
 ## Tarefa em curso
 
-Nenhuma: os oito commits do passo 15 estão feitos (f9237c4…a11a36d).
+Nenhuma: os onze commits do passo 15 estão feitos (f9237c4…acd549a).
 
 ## Próxima ação executável
 
-Reiniciar o Storybook Angular (6007) e ler `iframe.html?viewMode=docs&id=components-app-shell--reference` a 1280 e 620 com `node tools/harness/audit.mjs`.
+Nenhuma nesta família. Revisão humana ao vivo em 6006 e 6007.
 
 ## Fora desta família
 

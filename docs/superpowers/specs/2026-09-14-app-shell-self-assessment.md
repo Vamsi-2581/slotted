@@ -79,8 +79,9 @@ uma pílula ao meio. A rota ficou no painel. Feito.
   `react-aside-v2.png`, `react-aside-narrow.png`, `react-rail-v2.png`,
   `react-banner-scene-v2.png`, `react-theming-v2.png`.
 - `audit.mjs` React: 42 palcos, zero achados a 1280 e a 620.
-- Angular Storybook em 6007 serve a história da primeira passagem (lê os
-  pontos de entrada uma vez, no arranque); a página nova espera o reinício.
+- `audit.mjs --deadline 120000` Angular: 41 palcos, zero achados a 1280 e a
+  620; `angular-playground-v3.png`, `angular-aside-v3.png`,
+  `angular-aside-overlay.png` lidos.
 
 ## O que a revisão apanhou e o código não
 

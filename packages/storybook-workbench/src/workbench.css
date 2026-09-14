@@ -195,9 +195,18 @@
  * inside one — so a demonstration's own prose in the same stage keeps the
  * page's voice. Two attribute selectors is one more than
  * `.slotted-reference-page p` carries, which is the rule this has to outrank.
+ *
+ * A demonstration primitive inside a library element is not a library element,
+ * and it is excluded. `app-shell` projects a product's own rows into its
+ * regions, and every one of them is a descendant of `[data-ui="app-shell"]`:
+ * the reset reverted their `font-size` to a layer that declares none and the
+ * rows were drawn at the page's sixteen pixels in the user agent's button face
+ * — the navigation the reviewer read as large and careless. The primitives'
+ * declarations are not the noise the reset exists to clear; they are the
+ * demonstration.
  */
-.slotted-workbench-preview :is([data-ui], [data-ui] *),
-.slotted-reference-page :is([data-ui], [data-ui] *) {
+.slotted-workbench-preview :is([data-ui], [data-ui] *):not([class*='slotted-demo-']),
+.slotted-reference-page :is([data-ui], [data-ui] *):not([class*='slotted-demo-']) {
   color: revert-layer;
   font-family: revert-layer;
   font-size: revert-layer;
@@ -676,6 +685,21 @@
 }
 
 /**
+ * A window around a screen, for a family that owns one. A dashed edge says
+ * "diagram"; a solid edge, a corner and a shadow say "an application in a
+ * window", which is what the reviewer asked a shell demonstration to read as.
+ * The shadow is the workbench's own, not a foundation token: it is the page's
+ * ground casting it, and the page is not the family being demonstrated.
+ */
+.slotted-demo-viewport[data-frame='window'] {
+  border: 1px solid var(--slotted-workbench-border-strong);
+  border-radius: 10px;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 12px 32px -12px rgb(0 0 0 / 0.22);
+}
+
+/**
  * A box that **scrolls** rather than one that clips, for a family whose
  * behaviour is about what happens while the reader scrolls past it.
  *
@@ -760,6 +784,66 @@
 }
 
 /**
+ * A region drawn as itself: a dashed outline and the part's own name.
+ *
+ * A reference page made of finished screens cannot say which lines the family
+ * draws and which the demonstration brought — `app-shell`'s reviewer asked for
+ * exactly that separation, having read fourteen scenes of a logistics product
+ * without ever seeing the frame on its own. The primitive is the frame's
+ * content reduced to a label, so the scene beside it is the same anatomy with
+ * a product in it.
+ */
+.slotted-demo-slot {
+  align-items: center;
+  block-size: 100%;
+  border: 1px dashed var(--slotted-border-subtle);
+  border-radius: var(--slotted-radius-sm);
+  color: var(--slotted-text-muted);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--slotted-font-family-mono);
+  font-size: var(--slotted-font-size-xs);
+  /* The bar's brand part sets a weight, and a label is not the thing it
+     labels: every slot reads at the same weight wherever it stands. */
+  font-weight: var(--slotted-font-weight-regular);
+  gap: var(--slotted-space-1);
+  justify-content: center;
+  min-block-size: var(--slotted-control-height-md);
+  /* A slot gives way where a control would not: the bar keeps a control's
+     width and lets what is beside it shrink, and a slot is what is beside it. */
+  flex-shrink: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  padding: var(--slotted-space-3);
+  text-align: center;
+}
+.slotted-demo-slot > * {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/**
+ * A region whose box is the whole track it stands in, rather than the width of
+ * its own label: a frame's content region is not a chip in a row.
+ */
+.slotted-demo-slot[data-fill] {
+  flex: 1 1 auto;
+  inline-size: 100%;
+}
+/** What the part is for, in the reader's own face rather than in the code one. */
+.slotted-demo-slot__note {
+  font-family: var(--slotted-font-family-sans);
+  font-weight: var(--slotted-font-weight-regular);
+}
+/* The extra ancestor is the same one the destination rows need, and for the
+   same reason: the preview reverts `color` inside a `[data-ui]` subtree. */
+[data-ui] .slotted-demo-slot,
+.slotted-demo-slot {
+  color: var(--slotted-text-muted);
+}
+
+/**
  * A height for a demonstration that has to overflow. A story may not write one
  * inline — an inline length answers no density and no scheme — and a scroller
  * with no height has nothing to scroll, so the two demands meet in a primitive.
@@ -770,6 +854,19 @@
 
 .slotted-demo-bound--tall {
   max-block-size: 22rem;
+}
+
+/**
+ * A frame for a demonstration whose family paints none of its own. A scroll
+ * area is the box a product puts a border round, and the border is the thing
+ * its anatomy decision is about — the frame on one element and the veil on
+ * another — so a page that never shows one has not shown the decision. A story
+ * may not write the border inline, and a frame drawn in a literal answers no
+ * scheme; this reads the foundation's own edge and radius.
+ */
+.slotted-demo-frame {
+  border: 1px solid var(--slotted-border-subtle);
+  border-radius: var(--slotted-radius-md);
 }
 
 /**
@@ -821,19 +918,6 @@
  * an element it does not own — and a demonstration that hid the grid would be
  * claiming the family does something it deliberately does not.
  *
-/**
- * A frame for a demonstration whose family paints none of its own. A scroll
- * area is the box a product puts a border round, and the border is the thing
- * its anatomy decision is about — the frame on one element and the veil on
- * another — so a page that never shows one has not shown the decision. A story
- * may not write the border inline, and a frame drawn in a literal answers no
- * scheme; this reads the foundation's own edge and radius.
- */
-.slotted-demo-frame {
-  border: 1px solid var(--slotted-border-subtle);
-  border-radius: var(--slotted-radius-md);
-}
-
  * Added when `drawer` needed to show a persistent panel beside a page.
  */
 .slotted-demo-viewport[data-layout='shell'] {
@@ -1485,5 +1569,316 @@
 @media (max-width: 760px) {
   .slotted-demo-grid[data-columns='2'] {
     --slotted-demo-columns: 1;
+  }
+}
+
+/**
+ * A destination in an application shell's navigation region: a mark, a label,
+ * and a count where the product has one.
+ *
+ * The row belongs to `side-navigation`, wave 8, and until that family exists
+ * `app-shell`'s reference pages would show the region holding bare links —
+ * which photographs the missing family rather than the one being documented.
+ * `references/stories.md` allows a primitive here, with a test, for exactly
+ * this: a ground the demonstrations need and the family does not own.
+ *
+ * **Every number is one the shell publishes.** The shell says what a row is —
+ * its inset, its mark box, its gap, its height, its type size and its line
+ * height — and the rows here read the six and state nothing of their own,
+ * which is what a product's own list does. Before the six existed the rows
+ * carried control geometry and control type, and the reset above reverted
+ * both: a column at the page's sixteen pixels, in the user agent's button
+ * face, with two lines of text crushed into one row's height.
+ */
+.slotted-demo-nav {
+  --slotted-demo-nav-inset: var(--slotted-app-shell-row-inset, var(--slotted-space-4));
+  --slotted-demo-nav-mark: var(--slotted-app-shell-row-mark, var(--slotted-avatar-size-sm));
+  --slotted-demo-nav-gap: var(--slotted-app-shell-row-gap, var(--slotted-control-gap-md));
+  --slotted-demo-nav-height: var(--slotted-app-shell-row-height, var(--slotted-demo-nav-mark));
+  --slotted-demo-nav-font-size: var(--slotted-app-shell-row-font-size, var(--slotted-font-size-sm));
+  --slotted-demo-nav-line-height: var(
+    --slotted-app-shell-row-line-height,
+    var(--slotted-line-height-sm)
+  );
+  --slotted-demo-nav-label: calc(
+    var(--slotted-demo-nav-inset) + var(--slotted-demo-nav-mark) + var(--slotted-demo-nav-gap)
+  );
+}
+
+a.slotted-demo-nav-item,
+.slotted-demo-nav-item,
+.slotted-demo-nav-brand {
+  align-items: center;
+  border-radius: var(--slotted-radius-md);
+  color: var(--slotted-text-muted);
+  display: flex;
+  font-family: var(--slotted-font-family-sans);
+  font-size: var(--slotted-demo-nav-font-size);
+  font-weight: var(--slotted-font-weight-regular);
+  gap: var(--slotted-demo-nav-gap);
+  line-height: var(--slotted-demo-nav-line-height);
+  min-block-size: var(--slotted-demo-nav-height);
+  min-inline-size: 0;
+  padding-inline: var(--slotted-demo-nav-inset);
+  text-decoration: none;
+}
+a.slotted-demo-nav-item:hover,
+.slotted-demo-nav-item:hover {
+  background-color: var(--slotted-tone-secondary-subtle-hover);
+  color: var(--slotted-text);
+}
+.slotted-demo-nav-item:focus-visible,
+.slotted-demo-nav-account:focus-visible {
+  outline: var(--slotted-focus-ring-width) solid var(--slotted-focus-ring-color);
+  outline-offset: calc(var(--slotted-focus-ring-offset) * -1);
+}
+a.slotted-demo-nav-item[aria-current='page'],
+.slotted-demo-nav-item[aria-current='page'] {
+  background-color: var(--slotted-tone-accent-surface);
+  color: var(--slotted-tone-accent-text);
+  font-weight: var(--slotted-font-weight-medium);
+}
+
+/** The mark column: the shell's mark box, with the glyph centred in it. */
+.slotted-demo-nav-item__mark {
+  block-size: var(--slotted-demo-nav-mark);
+  display: grid;
+  flex: 0 0 var(--slotted-demo-nav-mark);
+  place-items: center;
+}
+.slotted-demo-nav-item__label {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.slotted-demo-nav-item__count {
+  flex: 0 0 auto;
+}
+
+/**
+ * The two rows a navigation column pins at its ends: the workspace at the top
+ * and the account at the bottom. Both are a destination row with two lines of
+ * text instead of one — the same inset, the same mark column, the same corner
+ * radius — and block padding of their own, because two lines in one row's
+ * height is the row the reviewer read as crushed. `-aside` is the part only a
+ * wide region has room for; the names wrapped one character per line inside
+ * the rail before it existed.
+ */
+.slotted-demo-nav-brand {
+  color: var(--slotted-text);
+  inline-size: 100%;
+  padding-block: var(--slotted-space-2);
+}
+.slotted-demo-nav-aside {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+  text-align: start;
+}
+.slotted-demo-nav-aside > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
+ * The account row is pressable, so it is a control and looks like one: the
+ * geometry of every other row in the column, plus the hover, the focus ring and
+ * the trailing mark that say a menu opens from it. It was a bare `span` with an
+ * avatar beside two lines of text — no target, no feedback, and its own
+ * spacing — which is the row the reviewer named.
+ */
+button.slotted-demo-nav-account,
+.slotted-demo-nav-account {
+  appearance: none;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--slotted-demo-nav-font-size);
+  line-height: var(--slotted-demo-nav-line-height);
+  text-align: start;
+}
+.slotted-demo-nav-account:hover {
+  background-color: var(--slotted-tone-secondary-subtle-hover);
+}
+/* The mark that says the row opens something, on the far edge of the row. */
+.slotted-demo-nav-account__more {
+  color: var(--slotted-text-muted);
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+/** The heading over a run of destinations, on the label column. */
+.slotted-demo-nav-group {
+  color: var(--slotted-text-muted);
+  font-size: var(--slotted-font-size-xs);
+  font-weight: var(--slotted-font-weight-medium);
+  letter-spacing: 0.06em;
+  line-height: var(--slotted-line-height-xs);
+  margin-block: var(--slotted-space-5) var(--slotted-space-2);
+  padding-inline-start: var(--slotted-demo-nav-label, var(--slotted-space-4));
+  text-transform: uppercase;
+}
+/* The first heading keeps its air: the workspace row above it is a row like any
+   other, and a group that begins tight against it reads as part of it. */
+.slotted-demo-nav-group:first-child {
+  margin-block-start: var(--slotted-space-2);
+}
+
+/**
+ * What a bar's middle holds, in a product. A search that is a field rather than
+ * a button — the first page put a button there and the reviewer read it as no
+ * shell anyone ships — and a trail for the product whose bar holds the route.
+ */
+.slotted-demo-bar-search {
+  inline-size: min(100%, 24rem);
+}
+.slotted-demo-bar-crumbs {
+  align-items: center;
+  color: var(--slotted-text-muted);
+  display: flex;
+  font-family: var(--slotted-font-family-sans);
+  font-size: var(--slotted-font-size-sm);
+  gap: var(--slotted-space-3);
+  line-height: var(--slotted-line-height-sm);
+  min-inline-size: 0;
+  white-space: nowrap;
+}
+.slotted-demo-bar-crumbs > * {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slotted-demo-bar-crumbs > [aria-current] {
+  color: var(--slotted-text);
+  font-weight: var(--slotted-font-weight-medium);
+}
+.slotted-demo-bar-crumbs > [aria-hidden] {
+  flex: 0 0 auto;
+}
+/** The application's name beside its mark. */
+.slotted-demo-bar-wordmark {
+  color: var(--slotted-text);
+  font-family: var(--slotted-font-family-sans);
+  font-size: var(--slotted-font-size-sm);
+  font-weight: var(--slotted-font-weight-semibold);
+  line-height: var(--slotted-line-height-sm);
+}
+
+/**
+ * What a pane's body holds, in a product: a record's fields on the pane's own
+ * inset, and a title that is one line. The shell gives the pane its head, its
+ * body and its foot; the product gives them content on the geometry the head
+ * stands on, so the first field's label starts where the title does.
+ */
+.slotted-demo-pane-fields {
+  display: grid;
+  font-family: var(--slotted-font-family-sans);
+  font-size: var(--slotted-font-size-sm);
+  gap: var(--slotted-space-2) var(--slotted-space-5);
+  grid-template-columns: max-content minmax(0, 1fr);
+  line-height: var(--slotted-line-height-sm);
+  margin: 0;
+  padding: var(--slotted-space-4)
+    calc(
+      var(--slotted-app-shell-row-inset, var(--slotted-space-4)) +
+        var(--slotted-app-shell-row-gap, var(--slotted-control-gap-md))
+    );
+}
+.slotted-demo-pane-fields > dt {
+  color: var(--slotted-text-muted);
+}
+.slotted-demo-pane-fields > dd {
+  color: var(--slotted-text);
+  margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.slotted-demo-pane-title {
+  color: var(--slotted-text);
+  font-family: var(--slotted-font-family-sans);
+  font-size: var(--slotted-font-size-sm);
+  font-weight: var(--slotted-font-weight-semibold);
+  line-height: var(--slotted-line-height-sm);
+}
+/* A pane holding a form: the fields take the pane's own inset. */
+.slotted-demo-pane-form {
+  display: grid;
+  gap: var(--slotted-space-5);
+  padding: var(--slotted-space-5)
+    calc(
+      var(--slotted-app-shell-row-inset, var(--slotted-space-4)) +
+        var(--slotted-app-shell-row-gap, var(--slotted-control-gap-md))
+    );
+}
+
+/**
+ * A frame repainted region by region, for the scene that shows a product doing
+ * it. The declarations are the demonstration — a story may not write them
+ * inline, because an inline paint answers no scheme switch and no density, and
+ * `specs/reference-pages.test.mjs` refuses one.
+ *
+ * The column's ground is read from *inside* the column, which is the whole
+ * point of the pair: `data-slotted-scheme` on the region restates every tone
+ * in it, so `var(--slotted-surface-sunken)` resolves to that scheme's ground
+ * and the destinations, the counts and the focus ring are calibrated against
+ * the ground they are actually on.
+ */
+.slotted-demo-shell-repaint {
+  --slotted-app-shell-banner-surface: var(--slotted-surface-raised);
+  --slotted-app-shell-radius: var(--slotted-radius-md);
+}
+.slotted-demo-shell-repaint-nav {
+  --slotted-app-shell-nav-surface: var(--slotted-surface-sunken);
+}
+
+/**
+ * What the bar sheds first. The application's search reads as a field while
+ * the bar is wide and disappears when the navigation has taken most of the
+ * frame — the bar's own query container says which, the same way the column's
+ * says whether a destination shows its label. A product would fold it into a
+ * control; the demonstration drops it, because the control that would hold it
+ * belongs to `menu` and not to this page.
+ */
+@container slotted-app-shell-banner (inline-size < 30rem) {
+  .slotted-demo-bar-search,
+  .slotted-demo-bar-label {
+    display: none;
+  }
+}
+@container slotted-app-shell-banner (inline-size < 20rem) {
+  .slotted-demo-bar-optional {
+    display: none;
+  }
+}
+
+/* The rail: below the width a word needs, a destination is its mark alone, and
+   the region's own container query is what says so. */
+@container slotted-app-shell-nav (inline-size < 120px) {
+  .slotted-demo-nav-item,
+  .slotted-demo-nav-brand {
+    justify-content: center;
+    padding-inline: 0;
+  }
+  .slotted-demo-nav-item__label,
+  .slotted-demo-nav-item__count,
+  .slotted-demo-nav-account__more,
+  .slotted-demo-nav-group,
+  .slotted-demo-nav-aside {
+    display: none;
+  }
+  /* A rail is fifty pixels wide and a part's name is not: the anatomy scene
+     keeps the region's box and drops the words, the way a real column keeps
+     the mark and drops the label. */
+  .slotted-demo-slot {
+    padding: var(--slotted-space-1);
+  }
+  .slotted-demo-slot > * {
+    display: none;
   }
 }

@@ -150,7 +150,7 @@ test('workbench CSS leaves the focus ring of a demonstrated family to the family
  */
 test('workbench CSS returns a family’s own type and ink inside the demonstration', () => {
   const reset =
-    /\.slotted-workbench-preview :is\(\[data-ui\], \[data-ui\] \*\),\s*\.slotted-reference-page :is\(\[data-ui\], \[data-ui\] \*\)\s*\{([\s\S]*?)\}/;
+    /\.slotted-workbench-preview :is\(\[data-ui\], \[data-ui\] \*\):not\(\[class\*='slotted-demo-'\]\),\s*\.slotted-reference-page :is\(\[data-ui\], \[data-ui\] \*\):not\(\[class\*='slotted-demo-'\]\)\s*\{([\s\S]*?)\}/;
 
   const declarations = css.match(reset)?.[1];
   assert.ok(declarations, 'Missing the demonstration reset');
@@ -162,6 +162,29 @@ test('workbench CSS returns a family’s own type and ink inside the demonstrati
     css.search(reset) > css.indexOf('.slotted-reference-page p,'),
     'the reset has to come after the rule it stands out of the way of',
   );
+});
+
+/**
+ * A demonstration primitive inside a library element keeps its own
+ * declarations. `app-shell` projects a product's rows into its regions, every
+ * one a descendant of `[data-ui="app-shell"]`, and the reset reverted their
+ * type to a layer that declares none: sixteen pixels in the user agent's button
+ * face, which is the navigation the reviewer read as careless.
+ */
+test('the demonstration reset leaves a demonstration primitive its own declarations', () => {
+  const selectors = [
+    ...css.matchAll(
+      /^\.slotted-(?:workbench-preview|reference-page) :is\(\[data-ui\], \[data-ui\] \*\)([^,{]*)/gm,
+    ),
+  ];
+  assert.ok(selectors.length >= 2, 'the reset is written twice, once per page kind');
+  for (const [, tail] of selectors) {
+    assert.match(
+      tail,
+      /:not\(\[class\*='slotted-demo-'\]\)/,
+      'the reset reaches a demonstration primitive',
+    );
+  }
 });
 
 test('workbench CSS offers a column whose children fill it', () => {
@@ -684,4 +707,108 @@ test('offers two regions whose boundary the demonstrated family moves', () => {
   const body = /\.slotted-demo-workspace__body\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
   assert.match(body, /flex:\s*1/, 'the other region takes whatever is left');
   assert.match(body, /min-inline-size:\s*0/, 'and may be narrower than its own content');
+});
+
+/**
+ * `app-shell` documents a navigation region whose contents belong to
+ * `side-navigation`, wave 8. Without a destination row the reference pages show
+ * the region holding bare links, which photographs the missing family rather
+ * than the one being documented — and the rail, whose whole point is that a
+ * destination answers the width it is given, shows nothing at all.
+ */
+test('offers a destination row that answers the rail it is put in', () => {
+  assert.match(css, /a\.slotted-demo-nav-item,\n\.slotted-demo-nav-item,/);
+  /* Every number a row carries is one the shell publishes: the row states
+     nothing of its own, which is what a product's own list does. */
+  const nav = /\.slotted-demo-nav \{([^}]*)\}/.exec(css)?.[1] ?? '';
+  for (const measure of ['inset', 'mark', 'gap', 'height', 'font-size', 'line-height']) {
+    assert.match(nav, new RegExp(`--slotted-app-shell-row-${measure}`), `${measure} is not read`);
+  }
+  const item =
+    /\.slotted-demo-nav-brand \{([^}]*)\}/.exec(
+      css.slice(css.indexOf('a.slotted-demo-nav-item,')),
+    )?.[1] ?? '';
+  assert.ok(item.length > 0);
+  assert.doesNotMatch(
+    css.slice(css.indexOf('.slotted-demo-nav {')),
+    /--slotted-control-font-size/,
+    'a row is text, not a control',
+  );
+  /* The workspace and the account are rows too, and a rail has no room for
+     their names: they wrapped one character per line before this existed. */
+  assert.match(css, /\.slotted-demo-nav-brand\s*\{/);
+  assert.match(css, /\.slotted-demo-nav-item__label\s*\{/);
+  assert.match(css, /\.slotted-demo-nav-group\s*\{/);
+  /* The region's own query container, not the shell's: the rail is a width the
+     family inside answers, which is the decision app-shell's contract records. */
+  assert.match(css, /@container slotted-app-shell-nav \(inline-size < \d+px\)/);
+  const rail =
+    /@container slotted-app-shell-nav \(inline-size < \d+px\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ??
+    '';
+  assert.match(rail, /\.slotted-demo-nav-item__label,[\s\S]*display: none/);
+  assert.match(rail, /\.slotted-demo-nav-aside/);
+});
+
+/**
+ * What a bar's middle and a pane's body hold in a product: a search that is a
+ * field, a trail, a record's fields on the pane's own inset. The first page put
+ * a button where the search goes and a bare list where the pane's fields go.
+ */
+test('offers the furniture a shell demonstration needs and the family does not own', () => {
+  assert.match(css, /\.slotted-demo-bar-search\s*\{/);
+  assert.match(css, /\.slotted-demo-bar-crumbs\s*\{/);
+  assert.match(css, /\.slotted-demo-bar-wordmark\s*\{/);
+  assert.match(css, /\.slotted-demo-pane-fields\s*\{[^}]*--slotted-app-shell-row-inset/);
+  assert.match(css, /\.slotted-demo-pane-title\s*\{/);
+  assert.match(css, /\.slotted-demo-pane-form\s*\{/);
+  /* And a window around a screen, so a shell reads as an application. */
+  const frame = /\.slotted-demo-viewport\[data-frame='window'\]\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+  assert.match(frame, /border-radius/);
+  assert.match(frame, /box-shadow/);
+});
+
+/**
+ * The repaint primitive: the scene that shows a product giving one region its
+ * own ground, without a story writing the declarations inline.
+ */
+test('repaints a shell region by region, for the theming scene', () => {
+  assert.match(css, /\.slotted-demo-shell-repaint \{[^}]*--slotted-app-shell-banner-surface/);
+  assert.match(
+    css,
+    /\.slotted-demo-shell-repaint-nav \{[^}]*--slotted-app-shell-nav-surface: var\(--slotted-surface-sunken\)/,
+  );
+});
+
+/**
+ * The anatomy primitive: a part drawn as its own name, so a page can show the
+ * frame a family delivers next to the same frame with a product in it.
+ */
+test('draws a part as itself, for an anatomy scene', () => {
+  assert.match(css, /\.slotted-demo-slot \{[^}]*border: 1px dashed/);
+  assert.match(css, /\.slotted-demo-slot \{[^}]*font-family: var\(--slotted-font-family-mono\)/);
+  assert.match(css, /\.slotted-demo-slot__note \{/);
+});
+
+/**
+ * The account row is pressed, so it is a control: the reviewer read a bare
+ * block of text with an avatar beside it as the worst thing in the column. It
+ * carries the geometry of a destination row and the feedback of a button.
+ */
+test('makes the account row a control rather than a block of text', () => {
+  assert.match(css, /button\.slotted-demo-nav-account,/);
+  assert.match(css, /\.slotted-demo-nav-account:hover \{[^}]*background-color/);
+  assert.match(css, /\.slotted-demo-nav-account:focus-visible \{[^}]*outline:/);
+  assert.match(css, /\.slotted-demo-nav-account__more \{/);
+  /* The row it shares its geometry with, and the two measures that make them
+     one column: the inset every row stands on and the mark column. */
+  const row = /\.slotted-demo-nav-brand \{([^}]*)\}/.exec(css)?.[1] ?? '';
+  assert.match(row, /padding-inline: var\(--slotted-demo-nav-inset/);
+  assert.match(row, /min-block-size: var\(--slotted-demo-nav-height/);
+  assert.match(row, /border-radius:/);
+  /* Two lines of text get their own block air. */
+  const brand =
+    /\.slotted-demo-nav-brand \{([^}]*)\}/.exec(
+      css.slice(css.indexOf('.slotted-demo-nav-aside') - 600),
+    )?.[1] ?? '';
+  assert.match(brand, /padding-block: var\(--slotted-space-2\)/);
 });

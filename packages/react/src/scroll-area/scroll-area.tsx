@@ -6,7 +6,7 @@ import {
   type ScrollEdgesHandle,
   type ScrollEdgesState,
 } from '@slotted/core/overflow';
-import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useCallback, useImperativeHandle, useRef, useState } from 'react';
 import type { Ref, UIEvent } from 'react';
 
 import { useScrollAreaDefaults } from './scroll-area-defaults';
@@ -89,41 +89,42 @@ export function ScrollArea({
   const latestOverflowChange = useRef(onOverflowChange);
   latestOverflowChange.current = onOverflowChange;
 
+  /**
+   * The measurement starts in the ref callback, at the moment the scrollport
+   * is in the document, and never during render — so the server renders a
+   * plain scrollport and hydration finds the same DOM. A ref callback runs in
+   * the commit, before the parent's own effects, which is what lets a parent
+   * call `scrollTo` on the handle from its first effect and have it move: an
+   * effect here would have started one render later, after that call had
+   * already found nothing to move.
+   *
+   * The first measurement is reported synchronously, before the handle is
+   * returned, so the writing mode is read from the ref once it holds one.
+   */
   const attachViewport = useCallback(
     (node: HTMLDivElement | null) => {
       setViewport(node);
       assign(viewportProps?.ref, node);
+      if (node === null) return undefined;
+
+      const handle = createScrollEdges(node, {
+        onChange: (next) => {
+          setState(next);
+          if (edges.current !== null) setSideways(edges.current.sideways());
+          latestOverflowChange.current?.(next);
+        },
+      });
+      edges.current = handle;
+      setState(handle.state());
+      setSideways(handle.sideways());
+
+      return () => {
+        handle.destroy();
+        edges.current = null;
+      };
     },
     [viewportProps?.ref],
   );
-
-  /**
-   * Never during render, so the server renders a plain scrollport and
-   * hydration finds the same DOM. The wiring appears in the first effect after
-   * mount, which is also the first moment a browser can say whether the
-   * content overflows at all.
-   */
-  useEffect(() => {
-    if (viewport === null) return undefined;
-
-    /* The first measurement is reported synchronously, before the handle is
-       returned, so the writing mode is read from the ref once it holds one. */
-    const handle = createScrollEdges(viewport, {
-      onChange: (next) => {
-        setState(next);
-        if (edges.current !== null) setSideways(edges.current.sideways());
-        latestOverflowChange.current?.(next);
-      },
-    });
-    edges.current = handle;
-    setState(handle.state());
-    setSideways(handle.sideways());
-
-    return () => {
-      handle.destroy();
-      edges.current = null;
-    };
-  }, [viewport]);
 
   useImperativeHandle<ScrollAreaHandle, ScrollAreaHandle>(
     ref,

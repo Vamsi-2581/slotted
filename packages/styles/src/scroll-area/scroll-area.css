@@ -365,12 +365,19 @@
   /**
    * Padding on a scrollport is not applied at the end edge of its scrollable
    * overflow in every engine, so an inset that has to survive a scroll to the
-   * end goes on an element inside it. The family states no inset of its own:
-   * the part exists to give the consumer's one a place to live.
+   * end goes on an element inside it. The part carries one by default — the
+   * step a card's own inset takes — because nearly every area wants one and a
+   * part that only held the consumer's padding would be a part nobody used.
+   * A consumer whose content carries its own inset renders no `content` at
+   * all, or sets the token to nought.
+   *
+   * `min-inline-size: fit-content` so a row wider than the scrollport widens
+   * this box with it, and the inset survives at the far end.
    */
-  [data-ui='scroll-area'] > [data-part='content'] {
+  [data-ui='scroll-area'] > [data-part='viewport'] > [data-part='content'] {
     box-sizing: border-box;
     min-inline-size: fit-content;
+    padding: var(--slotted-scroll-area-inset, var(--slotted-space-5, 0.75rem));
   }
 
   /* ── Focus ─────────────────────────────────────────────────────────────── */

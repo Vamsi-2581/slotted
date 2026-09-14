@@ -29,7 +29,7 @@
     ]
   },
   "identity": {
-    "reason": "The family is the scrollport and the box that frames it. Three parts: root holds the frame, the radius and the maximum; viewport scrolls, carries the veil and takes the region wiring; content carries the inset that scrolls with the content. Base UI, Zag and Chakra each ship six; the three this family does not have — scrollbar, thumb and corner — are the parts a drawn scrollbar needs, and the scrollbar here is the platform's",
+    "reason": "The family is the scrollport and the box that frames it. Three parts: root holds the frame, the radius and the maximum; viewport scrolls, carries the veil and takes the region wiring; content carries the inset that scrolls with the content, and carries one by default. Base UI, Zag and Chakra each ship six; the three this family does not have — scrollbar, thumb and corner — are the parts a drawn scrollbar needs, and the scrollbar here is the platform's",
     "cost": "One element more in the DOM than a scrollport alone, and a consumer who writes the markup by hand has to nest three divs rather than one",
     "whyTwoElements": "They were one element, and the first harness capture refused it. The affordance is a mask, a mask covers everything the element paints including its border, and nothing can be excluded from it — mask-clip moves where a mask is painted, never what it covers. A bounded region with a border round it is the commonest shape this family has, and the veil took the ends of that border with the content: crisp down both sides, absent across both ends, which reads as a rendering fault rather than as an affordance. So the frame is on an element the mask is not on"
   },

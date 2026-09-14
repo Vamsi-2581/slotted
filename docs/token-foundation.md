@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 105    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 106    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
 | `component` | One family adjusting a semantic value for itself.              | 27     |
 
@@ -272,6 +272,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-file-archive`     | `file-archive`         | stroke 2   |
 | `--slotted-icon-file-type`        | `file-type`            | stroke 2   |
 | `--slotted-icon-presentation`     | `presentation`         | stroke 2   |
+| `--slotted-icon-text-wrap`        | `text-wrap`            | stroke 2   |
 
 A component-owned icon is a mask from a glyph token; a character is never an
 icon.
@@ -374,6 +375,13 @@ transfer and removing a file are two different actions and the row has to say
 which is which, so a cross that means _stop this_ stands beside a bin that means
 _take it away_. Reusing the cross for both was the alternative, and it makes the
 two controls one control drawn twice.
+
+`--slotted-icon-text-wrap` is the mark on the control that wraps a block of
+source, and it was added for `code-block`. It is a return arrow under two
+lines — the one mark a reader has learnt for "wrap" from every editor — and
+nothing in the scale stands in for it: `chevron-down` says a list opens, and
+the arrows say where the reader goes. Docusaurus draws the same mark on the
+same control.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph

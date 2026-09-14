@@ -35,6 +35,7 @@ export default defineConfig({
         state: resolve(import.meta.dirname, 'src/state/index.ts'),
         'sticky-header': resolve(import.meta.dirname, 'src/sticky-header/index.ts'),
         steps: resolve(import.meta.dirname, 'src/steps/index.ts'),
+        tags: resolve(import.meta.dirname, 'src/tags/index.ts'),
         timeline: resolve(import.meta.dirname, 'src/timeline/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         typeahead: resolve(import.meta.dirname, 'src/typeahead/index.ts'),

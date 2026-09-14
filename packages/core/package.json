@@ -125,6 +125,10 @@
       "types": "./dist/types/steps/index.d.ts",
       "import": "./dist/steps.js"
     },
+    "./tags": {
+      "types": "./dist/types/tags/index.d.ts",
+      "import": "./dist/tags.js"
+    },
     "./timeline": {
       "types": "./dist/types/timeline/index.d.ts",
       "import": "./dist/timeline.js"

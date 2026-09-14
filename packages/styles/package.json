@@ -149,6 +149,8 @@
     "./time-field/tokens.json": "./src/time-field/time-field.tokens.json",
     "./time-picker/time-picker.css": "./src/time-picker/time-picker.css",
     "./time-picker/tokens.json": "./src/time-picker/time-picker.tokens.json",
+    "./timeline/timeline.css": "./src/timeline/timeline.css",
+    "./timeline/tokens.json": "./src/timeline/timeline.tokens.json",
     "./toast/toast.css": "./src/toast/toast.css",
     "./toast/tokens.json": "./src/toast/toast.tokens.json",
     "./toggle-group/toggle-group.css": "./src/toggle-group/toggle-group.css",

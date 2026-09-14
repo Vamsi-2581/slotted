@@ -291,14 +291,22 @@ export const Gutter: Story = {
   }),
 };
 
+/**
+ * A page that scrolls, with an area inside it: the workbench's scrolling
+ * stage, inset by a surface, with enough lines either side of the area that
+ * scrolling the page is visibly a different movement from scrolling the area.
+ */
 const page = (body: string) =>
   `<div class="slotted-demo-scroll">
-    <div slStack gap="4">
-      <p slText size="sm" tone="muted">Role a página até à área, e depois role a área até ao fim.</p>
-      ${body}
-      <p slText size="sm" tone="muted">Esta linha está por baixo da área, na página.</p>
-      <p slText size="sm" tone="muted">E esta também.</p>
-      <p slText size="sm" tone="muted">E esta é a última da página.</p>
+    <div class="slotted-demo-surface">
+      <div slStack gap="4">
+        <p slText size="sm" tone="muted">Esta página rola. Role-a até chegar à área.</p>
+        <p slText size="sm" tone="muted">Depois role a área até ao fim, e continue.</p>
+        ${body}
+        <p slText size="sm" tone="muted">Esta linha está por baixo da área, na página.</p>
+        <p slText size="sm" tone="muted">E esta também.</p>
+        <p slText size="sm" tone="muted">E esta é a última linha da página.</p>
+      </div>
     </div>
   </div>`;
 
@@ -311,8 +319,8 @@ export const Overscroll: Story = {
         'contain — por omissão',
         'Chegue ao fim da área e continue a rolar: a página por trás fica quieta. Uma região limitada cujo último centímetro move a página é o defeito que a propriedade veio resolver.',
         page(
-          `<div slScrollArea class="slotted-demo-frame" label="Notas de versão" maxBlockSize="8rem">
-            <div slScrollAreaContent>${notes(3)}</div>
+          `<div slScrollArea class="slotted-demo-frame" label="Notas de versão" maxBlockSize="7rem">
+            <div slScrollAreaContent>${notes(2)}</div>
           </div>`,
         ),
       ) +
@@ -320,8 +328,8 @@ export const Overscroll: Story = {
           'auto',
           'O mesmo gesto encadeia para a página, que é o que o navegador faz por omissão. Um consumidor que queira isso di-lo.',
           page(
-            `<div slScrollArea class="slotted-demo-frame" label="Notas de versão" maxBlockSize="8rem" overscroll="auto">
-              <div slScrollAreaContent>${notes(3)}</div>
+            `<div slScrollArea class="slotted-demo-frame" label="Notas de versão" maxBlockSize="7rem" overscroll="auto">
+              <div slScrollAreaContent>${notes(2)}</div>
             </div>`,
           ),
         ),

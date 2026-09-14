@@ -260,17 +260,25 @@ export const Gutter: Story = {
   ),
 };
 
-/** A page that scrolls, with an area inside it. */
+/**
+ * A page that scrolls, with an area inside it. The page is the workbench's
+ * scrolling stage, inset by a surface so the area does not sit against the
+ * stage's own edge, with enough lines either side of the area that scrolling
+ * the page is visibly a different movement from scrolling the area.
+ */
 function Page({ children }: { children: ReactNode }) {
   return (
     <div className="slotted-demo-scroll">
-      <Stack gap={4}>
-        <Line tone="muted">Role a página até à área, e depois role a área até ao fim.</Line>
-        {children}
-        <Line tone="muted">Esta linha está por baixo da área, na página.</Line>
-        <Line tone="muted">E esta também.</Line>
-        <Line tone="muted">E esta é a última da página.</Line>
-      </Stack>
+      <div className="slotted-demo-surface">
+        <Stack gap={4}>
+          <Line tone="muted">Esta página rola. Role-a até chegar à área.</Line>
+          <Line tone="muted">Depois role a área até ao fim, e continue.</Line>
+          {children}
+          <Line tone="muted">Esta linha está por baixo da área, na página.</Line>
+          <Line tone="muted">E esta também.</Line>
+          <Line tone="muted">E esta é a última linha da página.</Line>
+        </Stack>
+      </div>
     </div>
   );
 }
@@ -284,9 +292,9 @@ export const Overscroll: Story = {
         note="Chegue ao fim da área e continue a rolar: a página por trás fica quieta. Uma região limitada cujo último centímetro move a página é o defeito que a propriedade veio resolver."
       >
         <Page>
-          <ScrollArea className="slotted-demo-frame" label="Notas de versão" maxBlockSize="8rem">
+          <ScrollArea className="slotted-demo-frame" label="Notas de versão" maxBlockSize="7rem">
             <ScrollArea.Content>
-              <Notes releases={RELEASES.slice(0, 3)} />
+              <Notes releases={RELEASES.slice(0, 2)} />
             </ScrollArea.Content>
           </ScrollArea>
         </Page>
@@ -299,11 +307,11 @@ export const Overscroll: Story = {
           <ScrollArea
             className="slotted-demo-frame"
             label="Notas de versão"
-            maxBlockSize="8rem"
+            maxBlockSize="7rem"
             overscroll="auto"
           >
             <ScrollArea.Content>
-              <Notes releases={RELEASES.slice(0, 3)} />
+              <Notes releases={RELEASES.slice(0, 2)} />
             </ScrollArea.Content>
           </ScrollArea>
         </Page>

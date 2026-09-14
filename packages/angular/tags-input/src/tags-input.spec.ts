@@ -1,0 +1,364 @@
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { SlTagsInput } from './tags-input';
+import { provideTagsInputDefaults } from './tags-input-defaults';
+import type { TagsInputRefuseCause } from './tags-input-defaults';
+
+@Component({
+  standalone: true,
+  imports: [SlTagsInput],
+  template: `
+    <sl-tags-input
+      aria-label="To"
+      [defaultValue]="defaultValue()"
+      [editable]="editable()"
+      [reorderable]="reorderable()"
+      [max]="max()"
+      [name]="name()"
+      [validateValue]="validate()"
+      [invalidValues]="invalidValues()"
+      [pendingOnBlur]="pendingOnBlur()"
+      [lockedValues]="lockedValues()"
+      [readOnly]="readOnly()"
+      [pattern]="pattern()"
+      (valueChange)="value.set($event)"
+      (valueChangeRequest)="reason.set($event.reason)"
+      (valueRefuse)="refused.set($event)"
+      (valueCopy)="copied.set($event.values)"
+    />
+  `,
+})
+class Host {
+  readonly defaultValue = signal<readonly string[] | undefined>(undefined);
+  readonly editable = signal(false);
+  readonly reorderable = signal(false);
+  readonly readOnly = signal(false);
+  readonly max = signal<number | undefined>(undefined);
+  readonly name = signal<string | undefined>(undefined);
+  readonly pattern = signal<string | undefined>(undefined);
+  readonly validate = signal<((text: string) => boolean | string) | undefined>(undefined);
+  readonly invalidValues = signal<'keep' | 'refuse' | undefined>(undefined);
+  readonly pendingOnBlur = signal<'commit' | 'keep' | 'discard' | undefined>(undefined);
+  readonly lockedValues = signal<readonly string[]>([]);
+  readonly value = signal<readonly string[] | undefined>(undefined);
+  readonly reason = signal<string | undefined>(undefined);
+  readonly refused = signal<{ values: readonly string[]; cause: TagsInputRefuseCause } | null>(
+    null,
+  );
+  readonly copied = signal<readonly string[] | null>(null);
+}
+
+@Component({
+  standalone: true,
+  imports: [SlTagsInput, ReactiveFormsModule],
+  template: `<sl-tags-input aria-label="To" [formControl]="control" [validateValue]="validate" />`,
+})
+class FormHost {
+  readonly control = new FormControl<readonly string[]>(['ana@x.com'], { nonNullable: true });
+  readonly validate = (text: string) => text.includes('@');
+}
+
+const field = () => document.querySelector<HTMLInputElement>("[data-part='input']")!;
+const root = () => document.querySelector<HTMLElement>("[data-ui='tags-input'][data-part='root']")!;
+const chips = () =>
+  [
+    ...document.querySelectorAll<HTMLElement>(
+      "[data-part='chips'] > [role='gridcell']:not([data-part='field'])",
+    ),
+  ].filter((chip) => chip.hasAttribute('data-value'));
+const chipValues = () => chips().map((chip) => chip.dataset['value']);
+
+const press = (target: Element, key: string, modifiers: KeyboardEventInit = {}) =>
+  target.dispatchEvent(
+    new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key, ...modifiers }),
+  );
+
+const type = (fixture: ComponentFixture<unknown>, text: string) => {
+  field().value = text;
+  field().dispatchEvent(new Event('input'));
+  fixture.detectChanges();
+};
+
+const settle = async (fixture: ComponentFixture<unknown>) => {
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
+};
+
+describe('SlTagsInput', () => {
+  let fixture: ComponentFixture<Host>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [Host, FormHost] }).compileComponents();
+    fixture = TestBed.createComponent(Host);
+  });
+
+  it('is a text box inside a layout grid, and no combobox', async () => {
+    fixture.componentInstance.defaultValue.set(['a']);
+    await settle(fixture);
+    expect(field().hasAttribute('role')).toBe(false);
+    expect(field().hasAttribute('aria-expanded')).toBe(false);
+    expect(document.querySelector("[data-part='control']")?.getAttribute('aria-label')).toBe(
+      'To, 1 values',
+    );
+    expect(document.querySelector("[data-part='chips']")?.getAttribute('role')).toBe('row');
+    for (const chip of chips()) expect(chip.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('commits on Enter and on a delimiter, and never submits with text', async () => {
+    await settle(fixture);
+    field().focus();
+    type(fixture, 'ana@x.com');
+    const allowed = press(field(), 'Enter');
+    await settle(fixture);
+    expect(allowed).toBe(false);
+    expect(chipValues()).toEqual(['ana@x.com']);
+    expect(fixture.componentInstance.reason()).toBe('submit');
+    expect(field().value).toBe('');
+    type(fixture, 'lee@x.org');
+    press(field(), ',');
+    await settle(fixture);
+    expect(chipValues()).toEqual(['ana@x.com', 'lee@x.org']);
+  });
+
+  it('splits a paste on the delimiters and on line breaks', async () => {
+    await settle(fixture);
+    const paste = new Event('paste', { bubbles: true, cancelable: true }) as ClipboardEvent;
+    Object.defineProperty(paste, 'clipboardData', {
+      value: { getData: () => 'a, b\nc' },
+    });
+    field().dispatchEvent(paste);
+    await settle(fixture);
+    expect(chipValues()).toEqual(['a', 'b', 'c']);
+  });
+
+  /** The reason the family exists: an invalid value is held, marked, described. */
+  it('holds an invalid value, marks it, describes it, and blocks the native submit', async () => {
+    fixture.componentInstance.validate.set((text) => (text.includes('@') ? true : 'Needs an @'));
+    await settle(fixture);
+    field().focus();
+    type(fixture, 'jhon');
+    press(field(), 'Enter');
+    await settle(fixture);
+    const [chip] = chips();
+    expect(chip?.hasAttribute('data-invalid')).toBe(true);
+    expect(chip?.dataset['tone']).toBe('danger');
+    expect(chip?.getAttribute('aria-invalid')).toBe('true');
+    expect(chip?.getAttribute('title')).toBe('Needs an @');
+    const message = document.getElementById(chip?.getAttribute('aria-describedby') ?? '');
+    expect(message?.textContent).toBe('Needs an @');
+    expect(chip?.querySelector("[data-part='start']")).not.toBeNull();
+    expect(root().hasAttribute('data-invalid')).toBe(true);
+    expect(field().getAttribute('aria-invalid')).toBe('true');
+    expect(field().validity.customError).toBe(true);
+  });
+
+  it('refuses an invalid value instead, on request, and reports it', async () => {
+    fixture.componentInstance.validate.set(() => false);
+    fixture.componentInstance.invalidValues.set('refuse');
+    await settle(fixture);
+    field().focus();
+    type(fixture, 'jhon');
+    press(field(), 'Enter');
+    await settle(fixture);
+    expect(chipValues()).toEqual([]);
+    expect(fixture.componentInstance.refused()).toEqual({ values: ['jhon'], cause: 'invalid' });
+  });
+
+  it('judges by the input’s own constraints when no validator is given', async () => {
+    fixture.componentInstance.pattern.set('[A-Z]{3}-\\d{4}');
+    fixture.componentInstance.defaultValue.set(['ABC-1234', 'nope']);
+    await settle(fixture);
+    const [good, bad] = chips();
+    expect(good?.hasAttribute('data-invalid')).toBe(false);
+    expect(bad?.hasAttribute('data-invalid')).toBe(true);
+  });
+
+  it('refuses a duplicate under the locale rule and focuses the chip that holds it', async () => {
+    fixture.componentInstance.defaultValue.set(['Ana']);
+    await settle(fixture);
+    field().focus();
+    type(fixture, 'ana');
+    press(field(), 'Enter');
+    await settle(fixture);
+    expect(chipValues()).toEqual(['Ana']);
+    expect(fixture.componentInstance.refused()).toEqual({ values: ['ana'], cause: 'duplicate' });
+    expect(document.activeElement).toBe(chips()[0]);
+    expect(chips()[0]?.hasAttribute('data-current')).toBe(true);
+  });
+
+  it('caps at the limit, says so, and reports what did not fit', async () => {
+    fixture.componentInstance.max.set(2);
+    await settle(fixture);
+    expect(document.querySelector("[data-part='counter']")?.textContent).toBe('0 of 2');
+    const paste = new Event('paste', { bubbles: true, cancelable: true }) as ClipboardEvent;
+    Object.defineProperty(paste, 'clipboardData', { value: { getData: () => 'a,b,c,d' } });
+    field().dispatchEvent(paste);
+    await settle(fixture);
+    expect(chipValues()).toEqual(['a', 'b']);
+    expect(root().hasAttribute('data-complete')).toBe(true);
+    expect(fixture.componentInstance.refused()).toEqual({ values: ['c', 'd'], cause: 'limit' });
+  });
+
+  it('removes with Backspace only from an empty field, and only on the second press', async () => {
+    fixture.componentInstance.defaultValue.set(['a', 'b']);
+    await settle(fixture);
+    field().focus();
+    press(field(), 'Backspace');
+    await settle(fixture);
+    expect(document.activeElement).toBe(chips()[1]);
+    expect(chipValues()).toEqual(['a', 'b']);
+    press(chips()[1]!, 'Backspace');
+    await settle(fixture);
+    expect(chipValues()).toEqual(['a']);
+    expect(fixture.componentInstance.reason()).toBe('remove');
+  });
+
+  it('never removes a locked value', async () => {
+    fixture.componentInstance.defaultValue.set(['support@x.com', 'a']);
+    fixture.componentInstance.lockedValues.set(['support@x.com']);
+    await settle(fixture);
+    const [locked] = chips();
+    expect(locked?.hasAttribute('data-disabled')).toBe(true);
+    expect(locked?.querySelector("[data-part='remove']")).toBeNull();
+    press(locked!, 'Delete');
+    await settle(fixture);
+    expect(chipValues()).toEqual(['support@x.com', 'a']);
+    document.querySelector<HTMLElement>("[data-part='clear']")?.click();
+    await settle(fixture);
+    expect(chipValues()).toEqual(['support@x.com']);
+  });
+
+  it('reorders with Alt and an arrow, and emits keyboard', async () => {
+    fixture.componentInstance.defaultValue.set(['a', 'b', 'c']);
+    fixture.componentInstance.reorderable.set(true);
+    await settle(fixture);
+    press(chips()[2]!, 'ArrowLeft', { altKey: true });
+    await settle(fixture);
+    expect(chipValues()).toEqual(['a', 'c', 'b']);
+    expect(fixture.componentInstance.reason()).toBe('keyboard');
+  });
+
+  it('edits a chip in place, and reverts on Escape', async () => {
+    fixture.componentInstance.defaultValue.set(['a', 'b']);
+    fixture.componentInstance.editable.set(true);
+    await settle(fixture);
+    press(chips()[1]!, 'Enter');
+    await settle(fixture);
+    const editor = chips()[1]?.querySelector('input') as HTMLInputElement;
+    expect(editor.value).toBe('b');
+    editor.value = 'z';
+    editor.dispatchEvent(new Event('input'));
+    press(editor, 'Escape');
+    await settle(fixture);
+    expect(chipValues()).toEqual(['a', 'b']);
+
+    press(chips()[1]!, 'Enter');
+    await settle(fixture);
+    const again = chips()[1]?.querySelector('input') as HTMLInputElement;
+    again.value = 'z';
+    again.dispatchEvent(new Event('input'));
+    press(again, 'Enter');
+    await settle(fixture);
+    expect(chipValues()).toEqual(['a', 'z']);
+  });
+
+  it('answers blur with the three words', async () => {
+    await settle(fixture);
+    field().focus();
+    type(fixture, 'a');
+    field().dispatchEvent(new FocusEvent('blur', { relatedTarget: document.body }));
+    await settle(fixture);
+    expect(chipValues()).toEqual(['a']);
+
+    fixture.componentInstance.pendingOnBlur.set('keep');
+    await settle(fixture);
+    type(fixture, 'b');
+    field().dispatchEvent(new FocusEvent('blur', { relatedTarget: document.body }));
+    await settle(fixture);
+    expect(field().value).toBe('b');
+
+    fixture.componentInstance.pendingOnBlur.set('discard');
+    await settle(fixture);
+    field().dispatchEvent(new FocusEvent('blur', { relatedTarget: document.body }));
+    await settle(fixture);
+    expect(field().value).toBe('');
+    expect(chipValues()).toEqual(['a']);
+  });
+
+  it('copies a chip with Ctrl+C and the list from the empty field', async () => {
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.assign(navigator, { clipboard: { writeText } });
+    fixture.componentInstance.defaultValue.set(['a', 'b']);
+    await settle(fixture);
+    field().focus();
+    press(field(), 'c', { ctrlKey: true });
+    await settle(fixture);
+    expect(writeText).toHaveBeenLastCalledWith('a, b');
+    expect(fixture.componentInstance.copied()).toEqual(['a', 'b']);
+    press(chips()[0]!, 'x', { ctrlKey: true });
+    await settle(fixture);
+    expect(writeText).toHaveBeenLastCalledWith('a');
+    expect(chipValues()).toEqual(['b']);
+  });
+
+  it('writes one hidden input per value under one name', async () => {
+    fixture.componentInstance.name.set('to');
+    fixture.componentInstance.defaultValue.set(['a', 'b']);
+    await settle(fixture);
+    const hidden = document.querySelectorAll<HTMLInputElement>("input[type='hidden'][name='to']");
+    expect([...hidden].map((node) => node.value)).toEqual(['a', 'b']);
+  });
+
+  it('withholds every remove control while read-only, and keeps the chips legible', async () => {
+    fixture.componentInstance.defaultValue.set(['a']);
+    fixture.componentInstance.readOnly.set(true);
+    await settle(fixture);
+    expect(root().hasAttribute('data-readonly')).toBe(true);
+    expect(chips()[0]?.hasAttribute('data-disabled')).toBe(false);
+    expect(document.querySelector("[data-part='remove']")).toBeNull();
+    expect(document.querySelector("[data-part='clear']")).toBeNull();
+  });
+
+  it('takes its defaults from the provider, and the input over the provider', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideTagsInputDefaults({ delimiters: [';'], removeLabel: 'Drop {label}' })],
+    }).compileComponents();
+    const own = TestBed.createComponent(Host);
+    own.componentInstance.defaultValue.set(['a']);
+    await settle(own);
+    expect(document.querySelector("[data-part='remove']")?.getAttribute('aria-label')).toBe(
+      'Drop a',
+    );
+    field().focus();
+    type(own, 'b');
+    press(field(), ';');
+    await settle(own);
+    expect(chipValues()).toEqual(['a', 'b']);
+  });
+
+  it('belongs in a Reactive Form, and reports the values that failed by name', async () => {
+    const form = TestBed.createComponent(FormHost);
+    await settle(form);
+    expect(chipValues()).toEqual(['ana@x.com']);
+    expect(form.componentInstance.control.valid).toBe(true);
+
+    field().focus();
+    type(form, 'jhon');
+    press(field(), 'Enter');
+    await settle(form);
+    expect(form.componentInstance.control.value).toEqual(['ana@x.com', 'jhon']);
+    expect(form.componentInstance.control.errors).toEqual({ invalidValues: ['jhon'] });
+
+    form.componentInstance.control.setValue(['lee@x.org']);
+    await settle(form);
+    expect(chipValues()).toEqual(['lee@x.org']);
+    expect(form.componentInstance.control.valid).toBe(true);
+  });
+});

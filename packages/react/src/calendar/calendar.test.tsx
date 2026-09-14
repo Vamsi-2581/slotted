@@ -261,6 +261,89 @@ describe('the three selection modes', () => {
     expect(container.querySelectorAll('[data-in-range]')).toHaveLength(3);
   });
 
+  /**
+   * While the run has one end, the grid draws where it would close — under
+   * the pointer, or on the focused day — and says so. `date-range-picker`
+   * reads the day to say how long the run would be.
+   */
+  it('previews the open run to the day under the pointer, and reports it', () => {
+    const onPreviewChange = vi.fn<(date: PlainDate | null) => void>();
+    const { container } = render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        defaultValue={{ start: plainDate(2026, 9, 7), end: null }}
+        locale="pt-BR"
+        onPreviewChange={onPreviewChange}
+        selectionMode="range"
+      />,
+    );
+
+    fireEvent.pointerEnter(dayFor(11));
+
+    expect(onPreviewChange).toHaveBeenLastCalledWith(plainDate(2026, 9, 11));
+    expect(
+      container.querySelector('[data-range-end][data-preview] [data-part="day"]')?.textContent,
+    ).toBe('11');
+    expect(container.querySelectorAll('[data-in-range][data-preview]')).toHaveLength(3);
+    /* The chosen start is a choice, not a proposal. */
+    expect(container.querySelector('[data-range-start]')).not.toHaveAttribute('data-preview');
+
+    fireEvent.pointerLeave(dayFor(11));
+    /* Nothing under the pointer: the focused day is the pending end. */
+    expect(onPreviewChange).toHaveBeenLastCalledWith(NINTH);
+    expect(
+      container.querySelector('[data-range-end][data-preview] [data-part="day"]')?.textContent,
+    ).toBe('9');
+  });
+
+  it('previews backwards when the pending end is before the start', () => {
+    const { container } = render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        defaultValue={{ start: plainDate(2026, 9, 11), end: null }}
+        locale="pt-BR"
+        selectionMode="range"
+      />,
+    );
+
+    press('ArrowLeft');
+    press('ArrowLeft');
+
+    expect(
+      container.querySelector('[data-range-start][data-preview] [data-part="day"]')?.textContent,
+    ).toBe('7');
+    expect(container.querySelector('[data-range-end] [data-part="day"]')?.textContent).toBe('11');
+    expect(container.querySelector('[data-range-end]')).not.toHaveAttribute('data-preview');
+  });
+
+  it('draws no preview once the run is whole, nor outside range mode', () => {
+    const onPreviewChange = vi.fn<(date: PlainDate | null) => void>();
+    const { container, rerender } = render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        onPreviewChange={onPreviewChange}
+        selectionMode="range"
+        value={{ start: plainDate(2026, 9, 7), end: plainDate(2026, 9, 11) }}
+      />,
+    );
+    fireEvent.pointerEnter(dayFor(20));
+    expect(container.querySelector('[data-preview]')).toBeNull();
+    expect(onPreviewChange).not.toHaveBeenCalledWith(plainDate(2026, 9, 20));
+
+    rerender(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="pt-BR"
+        onPreviewChange={onPreviewChange}
+        selectionMode="single"
+        value={plainDate(2026, 9, 7)}
+      />,
+    );
+    fireEvent.pointerEnter(dayFor(20));
+    expect(container.querySelector('[data-preview]')).toBeNull();
+  });
+
   it('adds to a set and takes a date back out of it', () => {
     const onValueChange = vi.fn<(value: CalendarValue) => void>();
     render(

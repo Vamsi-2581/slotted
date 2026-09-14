@@ -45,7 +45,14 @@ import type {
   CalendarValue,
   CalendarView,
 } from './calendar-defaults';
-import { isSameValue, isSelected, nextValue, rangeStateOf } from './calendar-selection';
+import {
+  isRange,
+  isSameValue,
+  isSelected,
+  nextValue,
+  previewRun,
+  rangeStateOf,
+} from './calendar-selection';
 
 /** How many years one page of the year view holds. */
 const YEAR_PAGE = 12;
@@ -155,6 +162,7 @@ let sequence = 0;
                         [attr.data-in-range]="
                           drawn(day) && rangeState(day.date) === 'inside' ? '' : null
                         "
+                        [attr.data-preview]="drawn(day) && proposed(day.date) ? '' : null"
                       >
                         @if (drawn(day)) {
                           <span
@@ -165,6 +173,8 @@ let sequence = 0;
                             [attr.aria-disabled]="refused(day) ? 'true' : null"
                             [tabindex]="tabIndexOf(day.date)"
                             (click)="!refused(day) && select(day.date, 'pointer', $event)"
+                            (pointerenter)="hovered.set(day.date)"
+                            (pointerleave)="hovered.set(null)"
                           >
                             {{ day.date.day }}
                           </span>
@@ -278,6 +288,14 @@ export class SlCalendar implements OnInit {
   readonly valueChange = output<ChangeRequest<CalendarValue>>();
   readonly focusedDateChange = output<ChangeRequest<PlainDate>>();
   readonly viewChange = output<CalendarView>();
+  /**
+   * The pending end of an open run: the day under the pointer, or the focused
+   * day when no pointer is over the grid, and `null` while no run is open. A
+   * fact the grid states rather than a value the consumer owns, which is why
+   * it is an output and not a model — `date-range-picker` reads it to say how
+   * long the run would be.
+   */
+  readonly previewChange = output<PlainDate | null>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly defaults = injectCalendarDefaults();
@@ -378,6 +396,16 @@ export class SlCalendar implements OnInit {
      * Written as an effect rather than inside the request, so a consumer who
      * owns `focusedDate` and moves it from outside is followed too.
      */
+    /* The pending end, reported once per change and never while it is the
+       same day: a pointer crossing a cell twice is one fact, not two. */
+    let reported: PlainDate | null = null;
+    effect(() => {
+      const end = this.previewEnd();
+      if (isSameDate(reported, end)) return;
+      reported = end;
+      this.previewChange.emit(end);
+    });
+
     effect(() => {
       const focused = this.focused();
       const held = this.page();
@@ -450,8 +478,36 @@ export class SlCalendar implements OnInit {
     return isSelected(date, this.held());
   }
 
+  /**
+   * The day under the pointer, held only to name the pending end of an open
+   * run. It never moves the roving focus: a pointer crossing the grid is not
+   * the reader choosing where they are.
+   */
+  protected readonly hovered = signal<PlainDate | null>(null);
+
+  /** The run as it would close on the pending end; `null` while no run is open. */
+  private readonly pending = computed(() =>
+    this.selectionMode() === 'range' && this.editable()
+      ? previewRun(this.held(), this.hovered() ?? this.focused())
+      : null,
+  );
+
+  private readonly previewEnd = computed(() => {
+    const pending = this.pending();
+    const held = this.held();
+    if (pending === null) return null;
+    return isRange(held) && held.start !== null && isSameDate(pending.start, held.start)
+      ? pending.end
+      : pending.start;
+  });
+
   protected rangeState(date: PlainDate) {
-    return rangeStateOf(date, this.held());
+    return rangeStateOf(date, this.pending() ?? this.held());
+  }
+
+  /** Every cell of the pending band is a proposal except the start the reader chose. */
+  protected proposed(date: PlainDate): boolean {
+    return this.pending() !== null && this.rangeState(date) !== null && !this.chosen(date);
   }
 
   protected isToday(date: PlainDate): boolean {

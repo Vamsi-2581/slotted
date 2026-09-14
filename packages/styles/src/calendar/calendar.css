@@ -651,6 +651,35 @@
     color: var(--slotted-calendar-in-range-color, var(--slotted-tone-accent-text));
   }
 
+  /**
+   * ── The pending band ───────────────────────────────────────────────────
+   *
+   * While the run has one end, the band runs from it to the day the reader is
+   * on — under the pointer, or focused — and that band is a proposal rather
+   * than a choice. It takes the same tint at half the share, so the chosen run
+   * and the pending one are the same gesture at two weights, and the pending
+   * end takes an edge in the accent's border role rather than the solid the
+   * chosen end takes: a proposal is drawn as an outline, a choice as a fill.
+   */
+  [data-ui='calendar'] [data-part='cell'][data-preview]::before {
+    background-color: var(
+      --slotted-calendar-preview-background,
+      color-mix(
+        in oklab,
+        var(--slotted-tone-accent-text) calc(var(--slotted-highlight-tint-opacity, 0.075) * 50%),
+        transparent
+      )
+    );
+  }
+
+  [data-ui='calendar']
+    [data-part='cell'][data-preview]:is([data-range-start], [data-range-end]):not([data-selected])
+    [data-part='day'] {
+    box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px)
+      var(--slotted-calendar-preview-border-color, var(--slotted-tone-accent-border));
+    color: var(--slotted-calendar-in-range-color, var(--slotted-tone-accent-text));
+  }
+
   /* ── States ───────────────────────────────────────────────────────────
    *
    * Written strongest last, and each weaker one guarded against every stronger
@@ -823,6 +852,12 @@
     [data-ui='calendar'] [data-part='cell'][data-range-end]::before {
       border-block: var(--slotted-border-width-thin, 1px) solid
         var(--slotted-calendar-range-border-color, var(--slotted-tone-accent-border));
+    }
+
+    /* A proposal keeps its own distance from a choice here too: the pending
+       band's edges are dashed where the chosen run's are solid. */
+    [data-ui='calendar'] [data-part='cell'][data-preview]::before {
+      border-block-style: dashed;
     }
   }
 }

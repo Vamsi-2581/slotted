@@ -13,6 +13,8 @@
   "--slotted-calendar-invalid-focus-ring-color",
   "--slotted-calendar-outside-color",
   "--slotted-calendar-page-icon",
+  "--slotted-calendar-preview-background",
+  "--slotted-calendar-preview-border-color",
   "--slotted-calendar-radius",
   "--slotted-calendar-range-active-background",
   "--slotted-calendar-range-background",

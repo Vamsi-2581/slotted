@@ -108,6 +108,14 @@ export interface CalendarProps extends Omit<
   view?: CalendarView | undefined;
   defaultView?: CalendarView | undefined;
   onViewChange?: ((view: CalendarView) => void) | undefined;
+  /**
+   * The pending end of an open run: the day under the pointer, or the focused
+   * day when no pointer is over the grid, and `null` while no run is open. A
+   * fact the grid states rather than a value the consumer owns, which is why
+   * it is not a state model — `date-range-picker` reads it to say how long the
+   * run would be.
+   */
+  onPreviewChange?: ((date: PlainDate | null) => void) | undefined;
 
   weekNumbers?: boolean | undefined;
   fixedWeeks?: boolean | undefined;

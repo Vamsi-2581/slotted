@@ -82,6 +82,20 @@ export function nextValue(
     : { start: run.start, end: date };
 }
 
+/**
+ * The run the grid draws while the reader is choosing the second end: from
+ * the chosen start to the pending end — the day under the pointer, or the
+ * focused day — ordered the way the second press will order it. `null` while
+ * there is no open run, so a whole range and a single date preview nothing.
+ */
+export function previewRun(value: CalendarValue, pending: PlainDate | null): DateRange | null {
+  if (pending === null || !isRange(value) || value.start === null || value.end !== null)
+    return null;
+  return compareDate(pending, value.start) < 0
+    ? { start: pending, end: value.start }
+    : { start: value.start, end: pending };
+}
+
 /** Value equality, which `Object.is` cannot give for a run or a set. */
 export function isSameValue(a: CalendarValue, b: CalendarValue): boolean {
   if (isRange(a) || isRange(b)) {

@@ -25,8 +25,14 @@ class Host {
   readonly seventeenth = plainDate(2026, 9, 17);
   readonly fifteenth = plainDate(2026, 9, 15);
   readonly run: DateRange = { start: plainDate(2026, 9, 7), end: plainDate(2026, 9, 11) };
+  readonly openRun: DateRange = { start: plainDate(2026, 9, 7), end: null };
+  readonly openFromEleventh: DateRange = { start: plainDate(2026, 9, 11), end: null };
   readonly refuseTenth = (date: PlainDate) => date.day === 10;
   readonly values: CalendarValue[] = [];
+  readonly previews: (PlainDate | null)[] = [];
+  readonly onPreview = vi.fn((date: PlainDate | null) => {
+    this.previews.push(date);
+  });
   readonly focusRequests: ChangeRequest<PlainDate>[] = [];
   readonly onValue = vi.fn((request: ChangeRequest<CalendarValue>) => {
     this.values.push(request.value);
@@ -315,6 +321,79 @@ describe('the three selection modes', () => {
       ).trim(),
     ).toBe('7');
     expect(fixture.nativeElement.querySelectorAll('[data-in-range]')).toHaveLength(3);
+  });
+
+  /**
+   * While the run has one end, the grid draws where it would close — under
+   * the pointer, or on the focused day — and says so. `date-range-picker`
+   * reads the day to say how long the run would be.
+   */
+  it('previews the open run to the day under the pointer, and reports it', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         selectionMode="range"
+         [defaultFocusedDate]="ninth"
+         [defaultValue]="openRun"
+         (previewChange)="onPreview($event)"
+       ></div>`,
+    );
+    const text = (selector: string) =>
+      (fixture.nativeElement.querySelector(selector)?.textContent ?? '').trim();
+
+    dayFor(fixture, 11).dispatchEvent(new Event('pointerenter', { bubbles: false }));
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.previews.at(-1)).toEqual(plainDate(2026, 9, 11));
+    expect(text('[data-range-end][data-preview] [data-part="day"]')).toBe('11');
+    expect(fixture.nativeElement.querySelectorAll('[data-in-range][data-preview]')).toHaveLength(3);
+    /* The chosen start is a choice, not a proposal. */
+    expect(
+      fixture.nativeElement.querySelector('[data-range-start]')?.hasAttribute('data-preview'),
+    ).toBe(false);
+
+    dayFor(fixture, 11).dispatchEvent(new Event('pointerleave', { bubbles: false }));
+    fixture.detectChanges();
+    /* Nothing under the pointer: the focused day is the pending end. */
+    expect(fixture.componentInstance.previews.at(-1)).toEqual(NINTH);
+    expect(text('[data-range-end][data-preview] [data-part="day"]')).toBe('9');
+  });
+
+  it('previews backwards when the pending end is before the start', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         selectionMode="range"
+         [defaultFocusedDate]="ninth"
+         [defaultValue]="openFromEleventh"
+       ></div>`,
+    );
+    press(fixture, 'ArrowLeft');
+    press(fixture, 'ArrowLeft');
+
+    const start = fixture.nativeElement.querySelector('[data-range-start]');
+    expect((start?.textContent ?? '').trim()).toBe('7');
+    expect(start?.hasAttribute('data-preview')).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector('[data-range-end]')?.hasAttribute('data-preview'),
+    ).toBe(false);
+  });
+
+  it('draws no preview once the run is whole', () => {
+    const fixture = renderTemplate(
+      `<div
+         slCalendar
+         locale="pt-BR"
+         selectionMode="range"
+         [defaultFocusedDate]="ninth"
+         [value]="run"
+       ></div>`,
+    );
+    dayFor(fixture, 20).dispatchEvent(new Event('pointerenter', { bubbles: false }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-preview]')).toBeNull();
   });
 
   it('adds to a set and takes a date back out of it', () => {

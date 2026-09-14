@@ -130,6 +130,19 @@ test('ships the three selection modes the field ships', () => {
   }
 });
 
+/**
+ * While a run has one end, the grid draws where it would close — the day
+ * under the pointer, or the focused day — and says so. Four of the nine
+ * implementations `date-range-picker` surveyed draw it; the picker needs the
+ * day itself to say how long the run would be.
+ */
+test('previews the open run to the pending end, and reports that end', () => {
+  assert.ok('data-preview' in contract.dataAttributes);
+  assert.match(contract.preview.pendingEnd, /pointer.*focused/);
+  assert.equal(contract.preview.reportedBy, 'onPreviewChange');
+  assert.match(contract.preview.notAModel, /not own/);
+});
+
 test('ships the three views, and the columns each one is drawn in', () => {
   assert.deepEqual(contract.views.order, ['day', 'month', 'year']);
   assert.deepEqual(contract.views.columns, { day: 7, month: 4, year: 4 });

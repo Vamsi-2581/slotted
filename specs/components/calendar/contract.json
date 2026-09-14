@@ -120,7 +120,13 @@
     "data-range-start": "the first date of a range",
     "data-range-end": "the last date of a range",
     "data-in-range": "a date between the two",
+    "data-preview": "beside one of the three range attributes: the band runs to the pending end, not to a chosen one",
     "data-view": "which of day, month or year the calendar is showing"
+  },
+  "preview": {
+    "pendingEnd": "in range mode, while the run has one end: the day under the pointer, or the focused day when no pointer is over the grid",
+    "reportedBy": "onPreviewChange",
+    "notAModel": "a fact the grid states, like onViewChange; the consumer does not own it"
   },
   "stateModel": {
     "value": {

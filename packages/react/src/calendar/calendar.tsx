@@ -30,12 +30,20 @@ import {
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useCalendarDefaults } from './calendar-defaults';
-import { isSameValue, isSelected, nextValue, rangeStateOf } from './calendar-selection';
+import {
+  isRange,
+  isSameValue,
+  isSelected,
+  nextValue,
+  previewRun,
+  rangeStateOf,
+} from './calendar-selection';
 import type {
   CalendarProps,
   CalendarRootProps,
   CalendarValue,
   CalendarView,
+  DateRange,
 } from './calendar.types';
 
 /** The month and year views are drawn four across; a week is seven. */
@@ -85,6 +93,7 @@ export function Calendar({
   nextLabel,
   onFocusedDateChange,
   onKeyDown,
+  onPreviewChange,
   onValueChange,
   onViewChange,
   outsideDays,
@@ -159,6 +168,27 @@ export function Calendar({
 
   const [ownView, setOwnView] = useState<CalendarView>(defaultView ?? 'day');
   const currentView = view ?? ownView;
+
+  /**
+   * The day under the pointer, held only to name the pending end of an open
+   * run. It never moves the roving focus: a pointer crossing the grid is not
+   * the reader choosing where they are.
+   */
+  const [hovered, setHovered] = useState<PlainDate | null>(null);
+  const pending =
+    selectionMode === 'range' && editable ? previewRun(held, hovered ?? focused) : null;
+  const previewEnd =
+    pending === null
+      ? null
+      : isRange(held) && held.start !== null && isSameDate(pending.start, held.start)
+        ? pending.end
+        : pending.start;
+  const reported = useRef<PlainDate | null>(null);
+  useEffect(() => {
+    if (isSameDate(reported.current, previewEnd)) return;
+    reported.current = previewEnd;
+    onPreviewChange?.(previewEnd);
+  }, [onPreviewChange, previewEnd]);
 
   /**
    * The first month on screen, which is **not** the month the reader is on.
@@ -379,8 +409,10 @@ export function Calendar({
             headingId={headingId}
             key={`${String(month.year)}-${String(month.month)}`}
             month={month}
+            onHover={setHovered}
             onSelect={select}
             outsideDays={resolvedOutsideDays}
+            pending={pending}
             today={today}
             unavailable={unavailable}
             value={held}
@@ -493,8 +525,10 @@ function MonthTable({
   format,
   headingId,
   month,
+  onHover,
   onSelect,
   outsideDays,
+  pending,
   today,
   unavailable,
   value,
@@ -507,8 +541,11 @@ function MonthTable({
   format: ReturnType<typeof createDateFormat>;
   headingId: string;
   month: { year: number; month: number };
+  onHover: (date: PlainDate | null) => void;
   onSelect: (date: PlainDate, reason: 'pointer' | 'keyboard', source: unknown) => void;
   outsideDays: 'shown' | 'selectable' | 'hidden';
+  /** The run as drawn, which is the value's own once the run is whole. */
+  pending: DateRange | null;
   today: PlainDate | null;
   unavailable: (date: PlainDate) => boolean;
   value: CalendarValue;
@@ -548,7 +585,10 @@ function MonthTable({
               const hidden = outside && outsideDays === 'hidden';
               const refused = unavailable(day.date) || (outside && outsideDays === 'shown');
               const chosen = isSelected(day.date, value);
-              const run = rangeStateOf(day.date, value);
+              const run = rangeStateOf(day.date, pending ?? value);
+              /* Every cell of the pending band is a proposal except the start
+                 the reader already chose. */
+              const proposed = pending !== null && run !== null && !chosen;
               const roving = isSameDate(day.date, focused);
 
               return (
@@ -564,6 +604,7 @@ function MonthTable({
                   {...(!hidden && run === 'start' ? { 'data-range-start': '' } : {})}
                   {...(!hidden && run === 'end' ? { 'data-range-end': '' } : {})}
                   {...(!hidden && run === 'inside' ? { 'data-in-range': '' } : {})}
+                  {...(!hidden && proposed ? { 'data-preview': '' } : {})}
                 >
                   {hidden ? null : (
                     <span
@@ -576,6 +617,8 @@ function MonthTable({
                       onClick={(event) => {
                         if (!refused) onSelect(day.date, 'pointer', event);
                       }}
+                      onPointerEnter={() => onHover(day.date)}
+                      onPointerLeave={() => onHover(null)}
                       role="button"
                       tabIndex={roving && editable ? 0 : -1}
                     >

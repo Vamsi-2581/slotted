@@ -1,69 +1,54 @@
-# Checkpoint — splitter e drawer
+# Checkpoint — `/component app-shell`, segunda passagem
 
-`/component splitter` concluído até ao passo 15. As correcções pedidas ao
-`drawer` entraram na mesma sessão, fora da sua própria execução, por decisão
-explícita do utilizador.
+## Plano
 
-## Entregue
+`.claude/skills/component/SKILL.md`, quinze passos, modo **rebuild**. Desenho em
+`docs/superpowers/specs/2026-09-14-app-shell-redesign-design.md`; inventário
+revisto na §7 de `2026-09-13-app-shell-capability-inventory.md`.
 
-- `splitter`: contrato, folha, harness, as duas ligações, as duas páginas de
-  referência. Quinze entradas indexadas nos dois Storybooks.
-- `drawer`: scrim em paridade com o `dialog` e um cravo que o mantém; resizer
-  repintado do `splitter` com o acento só no anel de foco; pega do sheet acima
-  do cabeçalho; fecho por velocidade com assentamento projectado;
-  `env(safe-area-inset-bottom)` no rodapé do sheet; cenas inline com produto
-  real.
-- `@slotted/core/extent`: `extentFromLength`, `measureLength`, `extentVelocity`,
-  `projectExtent`.
-- `@slotted/storybook-workbench`: `.slotted-demo-workspace`, em commit próprio
-  antes da família que o pediu.
+## Git
 
-## Commits
+Branch `review/implementation-pass-1`, HEAD `a2a9026`. Árvore suja: toda a
+família app-shell da primeira passagem está por commitar, mais as alterações
+desta passagem.
 
-`c03d534` a `1d8a52e`, dez ao todo, um por passo de substância.
+## Passos concluídos
 
-## Estado dos testes
+1–5. Lei, modo, inventário (delta), padrão (inalterado), desenho (documento).
+6\. Esquema partilhado: `stateModel[capacidade]` aceita conjunto nomeado
+(`specs/contract.schema.mjs`, 4 testes novos); workbench `apiMetadataErrors`
+percorre o conjunto (`scenarios.tsx`, 1 teste). Contrato app-shell reescrito:
+partes `centre`, `aside-header/body/footer/toggle`; eixo `asideMode`;
+`stateModel.open.{nav,aside}`; `published` com seis tokens; 26 testes.
+7\. Stylesheet: tokens de fila publicados, `centre`, painel com cabeçalho/
+corpo/rodapé, painel como camada, `aside-toggle`; `actions > *` não encolhe.
+15 testes de estilo. `tokens.json` regenerado. Harness reescrito: seis cenas
+com três produtos sobre a geometria publicada.
+8\. Capturas lidas: default 1080 light/dark/hc/rtl, 420 light (página), rail
+1080, primary-nav dark 1080, nav-end 1080. Imagem certa.
+9\. Gate visual — utilizador delegou («pode seguir sozinho»); registado.
+10\. Bindings: React (31 testes) e Angular (16 testes) compilam e passam.
 
-- `pnpm test:contracts`: 1372 verdes.
-- `pnpm test:package-layers`: 12 verdes.
-- `pnpm typecheck`: limpo.
-- `pnpm format:check`: limpo.
-- `@slotted/core`: 1131 verdes.
-- React `splitter` + `drawer`: 80 verdes.
-- Angular, `splitter` + `drawer` + `dialog`: 99 verdes.
-- Folhas partilhadas: 133 de 134.
+11\. Workbench: reset exclui `slotted-demo-*` (teste), primitivas de fila sobre
+os seis tokens publicados, `bar-search`, `bar-crumbs`, `bar-wordmark`,
+`pane-fields`, `pane-form`, `pane-title`, `viewport[data-frame='window']`;
+44 testes. Demos React em `app-shell-demo/` (shared, aurora, cadence, atrio);
+docs e histórias React e Angular com dezoito cenas. `audit.mjs` React limpo a
+1280 e 620. Angular Storybook em 6007 serve a história antiga (reinício).
+12\. `format:check` limpo; `lint` limpo nos caminhos da família (dois erros
+pré-existentes em `toggle-group`); `typecheck` limpo; `test:contracts` 1478;
+`test:docs` com nove ids de outras famílias; styles 1095 (+ `page-header`
+pré-existente); workbench 53 + 44. React e Angular completos em curso.
+13\. Autoavaliação em `docs/superpowers/specs/2026-09-14-app-shell-self-assessment.md`.
 
-## Falhas que não são desta sessão
+## Tarefa em curso
 
-Da outra faixa desta worktree, reportadas e não tocadas:
+Passo 14/15 — commits por passo de substância, caminhos explícitos.
 
-- `packages/styles/src/tokens.test.mjs`: `page-header tokens.json` diverge da
-  sua folha.
-- `pnpm lint`: `packages/react/src/toggle-group/toggle-group.tsx:6` e
-  `packages/styles/src/toggle-group/toggle-group.styles.test.mjs:23`, ambos
-  `no-unused-vars`. Bloqueiam a cadeia de `pnpm check`, que por isso foi corrida
-  passo a passo.
+## Próxima ação executável
 
-## Por fazer, e onde está escrito
+`git add specs/contract.schema.mjs specs/contract.schema.test.mjs packages/core/src/state/state.ts docs/state-and-events.md packages/storybook-workbench/src/scenarios.tsx packages/storybook-workbench/src/scenarios.test.ts` e commit «schema: a razão resize e o conjunto nomeado».
 
-- `dialog`: só o scrim foi verificado, e o utilizador aceitou-o. A página de
-  referência é execução própria.
-- Arbitragem entre arrastar e rolar, e resistência elástica no sheet. A primeira
-  só se torna real quando o cabeçalho for arrastável; a segunda faria o valor
-  sair dos limites durante o arrasto, contra o que o contrato afirma. As duas
-  estão recusadas com a razão em
-  `docs/superpowers/specs/2026-09-12-splitter-and-drawer-self-assessment.md`.
-- Painéis, acoplamento entre N regiões e o empilhamento responsivo: `app-shell`,
-  onda 8, por `2026-09-11-splitter-design.md` §1.
+## Fora desta família
 
-## A lição que custou tempo ao utilizador
-
-Nada neste repositório verifica que a folha de estilo de uma família React chega
-a um browser. O jsdom não aplica CSS, o harness carrega a sua própria folha, e
-`audit.mjs` mede colapso dentro do palco: três verificações verdes sobre um DOM
-sem uma única regra. `splitter.tsx` ficou sem o seu `import` e renderizou com
-largura zero até o utilizador abrir a página.
-
-## Próxima acção executável
-
-    /component dialog
+`page-header tokens.json disagrees with its stylesheets` — pré-existente.

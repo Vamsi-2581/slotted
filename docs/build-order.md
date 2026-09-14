@@ -1166,7 +1166,46 @@ Independentes entre si, exceto a cadeia de data.
   colunas não cabem, porque `wrap` só muda o mínimo; as demonstrações
   estreitas usam duas ou três colunas por isso.
 
-- `app-shell`
+- `app-shell` — a moldura exterior de uma rota: as regiões que não mudam quando
+  o conteúdo muda. `docs/component-features.md` §15 pede skip link, header,
+  side nav/rail, main, contexto e regiões de overlay/toast; navegação
+  responsiva, sessão, tenant e permissões sem acoplar autenticação ao design
+  system; e persistência de sidebar como preferência do produto, com os
+  landmarks e a ordem de foco intactos. Inventário em
+  `docs/superpowers/specs/2026-09-13-app-shell-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-13-app-shell-design.md` e, na
+  segunda passagem, em `2026-09-14-app-shell-redesign-design.md`.
+
+  **Construída, em duas passagens.** Cinco landmarks ganhos do elemento e
+  nenhum `role` escrito — a raiz é um `div` para que continue verdade.
+  Catorze eixos, duas regiões que abrem sob uma capacidade (`open.nav` e
+  `open.aside`, o primeiro conjunto nomeado que `specs/contract.schema.mjs`
+  aceita), e três modos para cada uma: coluna, calha ou nada, e camada
+  sobreposta composta de `presence`, `dismissable-layer` e `focus`. A barra é
+  três aglomerados — `brand`, `centre`, `actions` — e o painel tem cabeça,
+  corpo e rodapé como a coluna. A casca publica seis medidas de fila
+  (`--slotted-app-shell-row-*`) para as listas que um produto traz. O eixo
+  `canvas` decide o plano — `inset`, a omissão, põe a moldura no fundo
+  rebaixado e o conteúdo num cartão; `flush` é o arranjo que todas as fontes
+  pesquisadas entregam. A largura é a da própria casca, respondida em
+  `@container` para o desenho e em `@slotted/core/measure` para o teclado, com
+  o número em `contract.json` e um teste a segurar os dois.
+
+  Três adições a ficheiro partilhado, cada uma no seu commit: a razão
+  **`resize`** no vocabulário fechado de `specs/contract.schema.mjs` e de
+  `packages/core/src/state/state.ts` — é o que torna escrevível
+  `if (reason !== 'resize') persist(next)`, que é a persistência que o
+  parágrafo §15 pede; o par de glifos **`panel-open` / `panel-close`**, a
+  primeira marca da escala que representa uma região do ecrã; e **`data-widths`
+  numa cena do harness**, sem o qual uma casca de 768 px de ponto de viragem não
+  podia ser fotografada de todo. A segunda passagem acrescentou duas: o
+  **conjunto nomeado em `stateModel`** para uma capacidade que uma família
+  detém duas vezes, e o **reset do workbench a excluir primitivas de
+  demonstração** — dentro de `[data-ui]` uma fila de demonstração revertia o
+  tipo para uma camada que nada declara e era desenhada a 16 px na face de
+  botão do agente. Duas decisões prendem outras famílias e estão em
+  `docs/build-briefing.md`.
+
 - `action-bar` — as ações que terminam uma tarefa numa página ou num painel.
   Deriva de `docs/component-features.md` §15: primária, secundárias, danger e
   **overflow por prioridade**; pode ficar `sticky` sem cobrir conteúdo; dirty
@@ -1260,27 +1299,6 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   Duas capacidades são recusadas para as famílias que já as possuem: uma fila
   que navega e uma fila com painéis são ambas `tabs`, e a escolha múltipla de
   um formulário é `checkbox-group`.
-
-## Destino das 29 famílias atuais
-
-| Atual                                                                                       | Destino                             | Onda |
-| ------------------------------------------------------------------------------------------- | ----------------------------------- | ---- |
-| `visually-hidden`, `divider`, `card`                                                        | refazer                             | 1    |
-| `button`, `link`, `badge`, `tag`, `avatar`, `kbd`, `skeleton`, `alert`                      | refazer                             | 2    |
-| `spinner`, `progress-bar`, `loading-bar`                                                    | consolidar em `progress-indicator`  | 2    |
-| `field`, `fieldset`                                                                         | consolidado em `field field-group`  | 3 ✓  |
-| `input`                                                                                     | renomear para `text-field`          | 3    |
-| `textarea`, `switch`                                                                        | refazer                             | 3    |
-| `tabs`, `breadcrumb`, `pagination`, `collapsible`, `stepper`, `description-list`, `toolbar` | refazer                             | 4    |
-| `virtual-list`                                                                              | retirar; vira capacidade de coleção | 6    |
-| `file-upload`                                                                               | consolidar em `upload`              | 7    |
-| `splitter`                                                                                  | refazer como Extended               | 8    |
-
-## Regra de commit durante a reconstrução
-
-Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.
-Consolidação e remoção da família antiga ocorrem no mesmo commit, para que a
-árvore nunca tenha duas famílias descrevendo a mesma capacidade.
 - **`scroll-area splitter`** — entregue em 2026-09-14. `splitter` estava
   refeito desde 2026-09-11 e não foi tocado; a chegada de `scroll-area` não lhe
   tira nenhuma linha (inventário, §6). `scroll-area` é a porta de rolagem e a
@@ -1306,3 +1324,42 @@ Consolidação e remoção da família antiga ocorrem no mesmo commit, para que 
   ficou por construir, com a razão em `2026-09-13-scroll-area-design.md` §5.
   Inventário, decisões e autoavaliação em
   `docs/superpowers/specs/2026-09-13-scroll-area-*.md`.
+- **`timeline`** — escopo derivado de `docs/component-features.md` §10,
+  _Timeline / Activity Feed_: eventos ordenados com timestamp, ator, título,
+  descrição, marcador e ações; orientação, agrupamento por período, loading
+  incremental e marcador atual; ordem temporal e fuso horário explícitos; a
+  lista e os headings semânticos por baixo do visual da linha. O que o
+  inventário acrescenta ao parágrafo: o eixo `mode` com `list` (uma `ol`) e
+  `feed` (o padrão _Feed_ do APG, com `article`, `aria-posinset`, `aria-busy` e
+  as quatro teclas), `placement` com `end`, `start` e `alternate` e a parte
+  `opposite`; `order` declarada em vez de `reverse`, porque uma inversão visual
+  que discorda do DOM é uma ordem de leitura que mente, e é a ordem que decide
+  de que lado `autoComplete` corta; `<time datetime>` com `locale` e `timeZone`
+  declarados e `timeFormat="relative"` sobre `Intl.RelativeTimeFormat`; a parte
+  `fresh` que segura os eventos novos atrás de um botão até o leitor os pedir;
+  grupos colapsáveis com o único modelo de estado da família, `open`, sobre
+  `@slotted/core/disclosure`; `growing` com `button` e `scroll`. Recusas com
+  família nomeada: conteúdo expansível para `collapsible`, filtros para
+  `filter-bar`, esqueleto para `skeleton`, virtualização para `growing`.
+  Inventário e desenho em `docs/superpowers/specs/2026-09-14-timeline-*.md`.
+
+## Destino das 29 famílias atuais
+
+| Atual                                                                                       | Destino                             | Onda |
+| ------------------------------------------------------------------------------------------- | ----------------------------------- | ---- |
+| `visually-hidden`, `divider`, `card`                                                        | refazer                             | 1    |
+| `button`, `link`, `badge`, `tag`, `avatar`, `kbd`, `skeleton`, `alert`                      | refazer                             | 2    |
+| `spinner`, `progress-bar`, `loading-bar`                                                    | consolidar em `progress-indicator`  | 2    |
+| `field`, `fieldset`                                                                         | consolidado em `field field-group`  | 3 ✓  |
+| `input`                                                                                     | renomear para `text-field`          | 3    |
+| `textarea`, `switch`                                                                        | refazer                             | 3    |
+| `tabs`, `breadcrumb`, `pagination`, `collapsible`, `stepper`, `description-list`, `toolbar` | refazer                             | 4    |
+| `virtual-list`                                                                              | retirar; vira capacidade de coleção | 6    |
+| `file-upload`                                                                               | consolidar em `upload`              | 7    |
+| `splitter`                                                                                  | refazer como Extended               | 8    |
+
+## Regra de commit durante a reconstrução
+
+Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.
+Consolidação e remoção da família antiga ocorrem no mesmo commit, para que a
+árvore nunca tenha duas famílias descrevendo a mesma capacidade.

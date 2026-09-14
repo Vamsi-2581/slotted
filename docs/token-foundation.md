@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 103    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 105    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
 | `component` | One family adjusting a semantic value for itself.              | 15     |
 
@@ -124,10 +124,31 @@ This scale answers how much typographic emphasis text needs.
 
 This scale answers which typeface a component sets text in.
 
-| Token                        | Default value                                    |
-| ---------------------------- | ------------------------------------------------ |
-| `--slotted-font-family-sans` | `ui-sans-serif, system-ui, sans-serif`           |
-| `--slotted-font-family-mono` | `ui-monospace, SFMono-Regular, Menlo, monospace` |
+| Token                        | Default value                                                           |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `--slotted-font-family-sans` | `'Geist Variable', ui-sans-serif, system-ui, sans-serif`                |
+| `--slotted-font-family-mono` | `'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace` |
+
+Both values name a family no package ships. Nothing in the repository emits
+`@font-face` or a font file: `packages/storybook-workbench` installs
+`@fontsource-variable/geist` and `@fontsource-variable/geist-mono` for the two
+Storybooks, and an application that loads the theme loads the faces the same
+way. Where the faces are absent, each stack resolves to its generic keyword.
+
+Substituting the typeface is a declaration of these two tokens. The theme emits
+them inside `@layer slotted.theme`, and an unlayered rule outranks a layered one
+whatever the selectors are:
+
+```css
+:root {
+  --slotted-font-family-sans: 'X Variable', ui-sans-serif, system-ui, sans-serif;
+  --slotted-font-family-mono: 'X Mono Variable', ui-monospace, monospace;
+}
+```
+
+Every family reads one of the two, directly or through
+`--slotted-control-font-family`. No sheet in `packages/styles` names a family
+literally, so the pair is the whole substitution surface.
 
 ## Border width
 
@@ -212,6 +233,8 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-chevron-right`    | `chevron-right`        | stroke 2   |
 | `--slotted-icon-chevron-down`     | `chevron-down`         | stroke 2   |
 | `--slotted-icon-chevrons-right`   | `chevrons-right`       | stroke 2   |
+| `--slotted-icon-panel-open`       | `panel-left-open`      | stroke 2   |
+| `--slotted-icon-panel-close`      | `panel-left-close`     | stroke 2   |
 | `--slotted-icon-arrow-left`       | `arrow-left`           | stroke 2   |
 | `--slotted-icon-pin`              | `pin`                  | stroke 2   |
 | `--slotted-icon-pin-off`          | `pin-off`              | stroke 2   |
@@ -259,6 +282,27 @@ was added for `pagination`, whose first and last triggers are the one pair in
 the library that means "all the way to the end" rather than "one step"; like
 every chevron it is mirrored by the family that draws it, so the same token
 serves both ends of the row.
+
+`--slotted-icon-panel-open` and `--slotted-icon-panel-close` are the two states
+of the control that shows and hides an application's navigation region, and
+they were added for `app-shell`. They are one artwork with the chevron turned,
+for the reason `eye` and `eye-off` are one artwork with a stroke added: the
+control reads as the same control changed rather than as two marks swapping
+places.
+
+The mark draws the region it toggles — a frame with a bar down one side —
+which is what neither of the two marks the field reaches for does. Three bars
+say _a menu is here_ and say nothing about which menu or where it goes; the
+scale does not hold them and this is the argument for not adding them. A double
+chevron says _all the way to the end_, which is what `pagination` uses it for,
+and a single chevron says _a list opens here_, which is what `select` uses it
+for: both were tried on this control and both are a promise the control does
+not keep. The panel is the one mark that names the thing being moved, and it is
+the mark Linear, Vercel and shadcn all draw on the same control.
+
+It is direction-sensitive, so the family drawing it turns it: a navigation
+region at the inline end, and a right-to-left document, both mirror the whole
+artwork, bar and chevron together.
 
 `--slotted-icon-arrow-left`, `--slotted-icon-pin` and `--slotted-icon-pin-off`
 were added for `page-header`. The arrow is the mark on the control that takes
@@ -466,7 +510,7 @@ operating system's own high-contrast mode is handled by forced colours instead.
 | `--slotted-disabled-border`          | `#cbd5e1`                           | `#27272a`                           | `#595959`                           |
 | `--slotted-surface`                  | `#ffffff`                           | `#131316`                           | `#ffffff`                           |
 | `--slotted-surface-raised`           | `#ffffff`                           | `#1c1c20`                           | `#ffffff`                           |
-| `--slotted-surface-sunken`           | `#f6f8fb`                           | `#0c0c0e`                           | `#ffffff`                           |
+| `--slotted-surface-sunken`           | `#f8fafd`                           | `#0c0c0e`                           | `#ffffff`                           |
 | `--slotted-surface-inverse`          | `#172033`                           | `#fafafa`                           | `#000000`                           |
 | `--slotted-text-inverse`             | `#f8fafc`                           | `#18181b`                           | `#ffffff`                           |
 | `--slotted-border-strong`            | `#78899c`                           | `#71717a`                           | `#000000`                           |

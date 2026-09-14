@@ -11,6 +11,8 @@
   "--slotted-icon-chevron-right": { "icon": "chevron-right" },
   "--slotted-icon-chevron-down": { "icon": "chevron-down" },
   "--slotted-icon-chevrons-right": { "icon": "chevrons-right" },
+  "--slotted-icon-panel-open": { "icon": "panel-left-open" },
+  "--slotted-icon-panel-close": { "icon": "panel-left-close" },
   "--slotted-icon-arrow-left": { "icon": "arrow-left" },
   "--slotted-icon-pin": { "icon": "pin" },
   "--slotted-icon-pin-off": { "icon": "pin-off" },

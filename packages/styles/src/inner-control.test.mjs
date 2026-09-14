@@ -42,6 +42,7 @@ const PARTS = [
   { family: 'select', part: 'clear' },
   { family: 'combobox', part: 'clear' },
   { family: 'multi-select', part: 'clear' },
+  { family: 'tags-input', part: 'clear' },
   { family: 'number-field', part: 'increment' },
   { family: 'number-field', part: 'decrement' },
   { family: 'currency-field', part: 'increment' },
@@ -76,6 +77,7 @@ const FLOORED = [
   'select',
   'combobox',
   'multi-select',
+  'tags-input',
   'number-field',
   'currency-field',
 ];

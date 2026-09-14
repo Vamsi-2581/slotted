@@ -143,6 +143,8 @@
     "./tabs/tokens.json": "./src/tabs/tabs.tokens.json",
     "./tag/tag.css": "./src/tag/tag.css",
     "./tag/tokens.json": "./src/tag/tag.tokens.json",
+    "./tags-input/tags-input.css": "./src/tags-input/tags-input.css",
+    "./tags-input/tokens.json": "./src/tags-input/tags-input.tokens.json",
     "./text-field/text-field.css": "./src/text-field/text-field.css",
     "./text-field/tokens.json": "./src/text-field/text-field.tokens.json",
     "./textarea/textarea.css": "./src/textarea/textarea.css",

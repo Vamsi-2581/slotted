@@ -50,11 +50,35 @@ export function parseScenes(fragment) {
     if (end === -1) throw new Error(`the scene "${open[1]}" is never closed`);
     const attributes = open[2] ?? '';
     const floor = /data-collapse-floor="(\d+(?:\.\d+)?)"/.exec(attributes);
+    /**
+     * The widths this scene is worth photographing at, when the three the page
+     * ships are not among them.
+     *
+     * `app-shell` found the gap: the shell's own breakpoint is 768 pixels, so
+     * every one of the three default widths renders the narrow layout and the
+     * wide one — the navigation as a column, the pane beside the content, the
+     * rail — could not be photographed at all. A fixed-width stage does not
+     * answer it either, because the capture is clipped to the width the shooter
+     * was asked for.
+     *
+     * It is opt-in per scene and changes nothing for a family that declares
+     * nothing, which is what keeps a screen-sized family from adding a fourth
+     * column to every other family's review page.
+     */
+    const widths = /data-widths="([\d\s]+)"/.exec(attributes);
     scenes.push({
       name: open[1],
       markup: fragment.slice(start, end),
       fixed: attributes.includes('data-fixed'),
       floor: floor === null ? null : Number(floor[1]),
+      widths:
+        widths === null
+          ? null
+          : widths[1]
+              .trim()
+              .split(/\s+/)
+              .map(Number)
+              .filter((width) => Number.isInteger(width) && width > 0),
     });
     SCENE_OPEN.lastIndex = end;
   }
@@ -134,8 +158,8 @@ export function renderHarness({
    * scene at the same size in the three schemes — which is also the comparison
    * a reviewer actually makes.
    */
-  const cells = scenes.flatMap(({ name, markup, fixed, floor }) =>
-    WIDTHS.flatMap(
+  const cells = scenes.flatMap(({ name, markup, fixed, floor, widths }) =>
+    (widths ?? WIDTHS).flatMap(
       (width) =>
         SCHEMES.map(
           (scheme) => `

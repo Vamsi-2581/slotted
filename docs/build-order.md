@@ -1279,6 +1279,29 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   comprimento enquanto está a ser desenhado, e uma célula de dia que carrega uma
   marca de densidade. `calendar` já expõe o gancho `data-*` da terceira e não
   desenha nada.
+- `tags-input` é o campo de texto cujo valor é uma lista de textos: a outra
+  metade do que `multi-select` entrega, e a fronteira entre os dois é **o que o
+  valor é** — chaves resolvidas por uma coleção lá, o texto que o leitor
+  escreveu aqui. Sem popup, sem positioner e sem coleção; o `list` nativo passa
+  para uma `datalist`. O que acrescenta ao parágrafo do guia, inventariado em
+  `docs/superpowers/specs/2026-09-14-tags-input-capability-inventory.md` e
+  decidido em `2026-09-14-tags-input-design.md`: **um valor inválido fica, é
+  marcado e descrito** em vez de ser descartado (`invalidValues: keep | refuse`,
+  chip em tom `danger` com marca, `setCustomValidity` no input, `invalidValues`
+  no `Validator` Angular); **o browser julga** quando não há `validate` — `type`,
+  `pattern`, `minlength`, `maxlength` via um input destacado, com a
+  `validationMessage` do próprio browser como razão; `pendingOnBlur: commit |
+keep | discard`; `lockedValues`; cópia por `Ctrl+C`/`Ctrl+X`, e a lista inteira
+  do input vazio; `overflow="collapse"` que expande enquanto o controlo tem foco
+  (o tokenizer do UI5), sem popup. O motor está em `@slotted/core/tags`
+  (`splitValues`, `admitValues`, `constraintVerdict`). Pendente para
+  `multi-select`, quando for reaberto: ler a mesma sequência de
+  `@slotted/core/tags` em vez das duas cópias que tem, e alargar `commitOnBlur`
+  ao eixo de três valores. A geometria de chip já foi corrigida nesta sessão,
+  a pedido do revisor: `multi-select.css` toma `--_chip-inset` e `--_row-size`
+  de `tags-input.css`, porque em `compact` e `dense` o chip ficava encostado às
+  bordas da moldura e, em `sm` com `dense`, mais alto do que ela — o que a
+  família tinha registado como "the honest price".
 - `filter-bar` compõe sobre `@slotted/core/filter` e não inventa vocabulário
   nenhum. O que lhe pertence, e que `table` recusou por escrito: condições sobre
   várias colunas ao mesmo tempo, grupos E/OU aninhados para além de duas

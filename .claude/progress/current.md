@@ -38,16 +38,16 @@ docs e histórias React e Angular com dezoito cenas. `audit.mjs` React limpo a
 12\. `format:check` limpo; `lint` limpo nos caminhos da família (dois erros
 pré-existentes em `toggle-group`); `typecheck` limpo; `test:contracts` 1478;
 `test:docs` com nove ids de outras famílias; styles 1095 (+ `page-header`
-pré-existente); workbench 53 + 44. React e Angular completos em curso.
+pré-existente); workbench 53 + 44; React completo 2348/2348; Angular completo 1767/1767.
 13\. Autoavaliação em `docs/superpowers/specs/2026-09-14-app-shell-self-assessment.md`.
 
 ## Tarefa em curso
 
-Passo 14/15 — commits por passo de substância, caminhos explícitos.
+Nenhuma: os oito commits do passo 15 estão feitos (f9237c4…a11a36d).
 
 ## Próxima ação executável
 
-`git add specs/contract.schema.mjs specs/contract.schema.test.mjs packages/core/src/state/state.ts docs/state-and-events.md packages/storybook-workbench/src/scenarios.tsx packages/storybook-workbench/src/scenarios.test.ts` e commit «schema: a razão resize e o conjunto nomeado».
+Reiniciar o Storybook Angular (6007) e ler `iframe.html?viewMode=docs&id=components-app-shell--reference` a 1280 e 620 com `node tools/harness/audit.mjs`.
 
 ## Fora desta família
 

@@ -30,20 +30,16 @@ sombreava o input).
 
 ## Tarefa em curso
 
-Passo 14: gate de release. À espera do revisor.
+Nenhuma: gate de release passado («siga») e os seis commits do passo 15
+feitos, `a2ae173`…`6040d3a`.
 
 ## Git
 
-HEAD `d300090`, ramo `review/implementation-pass-1`. Nada desta passagem está
-commitado. Ficheiros desta passagem:
-`packages/core/src/filter/{operators,descriptor,predicate,serialize,index}.ts`
-e quatro `*.test.ts`; `specs/components/table/contract.json`,
-`contract.test.mjs`; `packages/styles/src/table/table.css`,
-`table.harness.html`; `packages/react/src/table/{table-filter.tsx,table.types.ts,index.ts,table.test.tsx,table.stories.tsx,table.docs.ts}`;
-`packages/angular/table/src/{table-filter.ts,public-api.ts,table.spec.ts,table.stories.ts,table.docs.ts}`;
-`docs/build-order.md` (inserções); os três documentos
-`docs/superpowers/specs/2026-09-14-table-filter-operands-*.md`; este ficheiro.
-Tudo o mais na árvore é da outra faixa.
+HEAD `6040d3a`, ramo `review/implementation-pass-1`. Os seis commits desta
+passagem: `a2ae173` motor e contrato · `69ca00c` folha e harness ·
+`fe2ffc6` React · `6a7d087` Angular · `8cf11a8` páginas · `6040d3a` docs.
+Árvore limpa quanto a `table` e `packages/core/src/filter`; o resto é da
+outra faixa.
 
 ## Estado dos testes
 
@@ -89,12 +85,8 @@ Tudo o mais na árvore é da outra faixa.
 
 ## Próxima ação executável
 
-Depois da resposta ao gate: passo 15, commits por passo de substância, com
-caminhos explícitos:
-
-1. `git add packages/core/src/filter specs/components/table/contract.json specs/components/table/contract.test.mjs` — `feat(filter): as espécies time e datetime`.
-2. `git add packages/styles/src/table/table.css packages/styles/src/table/table.harness.html` — `feat(table): a folha e o harness dos operandos novos`.
-3. `git add packages/react/src/table/table-filter.tsx packages/react/src/table/table.types.ts packages/react/src/table/index.ts packages/react/src/table/table.test.tsx` — React.
-4. `git add packages/angular/table/src/table-filter.ts packages/angular/table/src/public-api.ts packages/angular/table/src/table.spec.ts` — Angular.
-5. `git add packages/react/src/table/table.stories.tsx packages/react/src/table/table.docs.ts packages/angular/table/src/table.stories.ts packages/angular/table/src/table.docs.ts` — páginas.
-6. `git add docs/superpowers/specs/2026-09-14-table-filter-operands-*.md docs/build-order.md .claude/progress/table.md` — docs.
+Nenhuma nesta família. Fora dela: reiniciar o Storybook Angular em 6007 e ler
+`iframe.html?viewMode=docs&id=components-table--reference` a 1280 e 620 com
+`node tools/harness/audit.mjs "<url>" --deadline 120000`; e o defeito do
+`aria-label` de `time-picker`, `datetime-picker` e `date-picker`, para as
+famílias que o possuem.

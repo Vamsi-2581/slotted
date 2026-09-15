@@ -34,7 +34,7 @@ import {
   AppShellNavToggle,
 } from '../index';
 import type { AppShellProps } from '../app-shell.types';
-import { NavAccount, NavItem, Viewport, Wordmark } from './shared';
+import { NavAccount, NavColumn, Viewport, Wordmark } from './shared';
 import type { Destination } from './shared';
 
 /**
@@ -84,9 +84,7 @@ export function AtrioNav({ current = 'agenda' }: { current?: string | undefined 
         />
       </AppShellNavHeader>
       <AppShellNavBody>
-        {DESTINATIONS.map((item) => (
-          <NavItem current={item.id === current} item={item} key={item.id} />
-        ))}
+        <NavColumn current={current} sections={[{ items: DESTINATIONS }]} />
       </AppShellNavBody>
       <AppShellNavFooter>
         <NavAccount

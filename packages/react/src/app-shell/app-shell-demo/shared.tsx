@@ -4,6 +4,18 @@ import type { ComponentType, ReactNode } from 'react';
 
 import { Avatar } from '../../avatar';
 import { Badge } from '../../badge';
+import {
+  SideNavigation,
+  SideNavigationCount,
+  SideNavigationEnd,
+  SideNavigationIcon,
+  SideNavigationItem,
+  SideNavigationLabel,
+  SideNavigationLink,
+  SideNavigationList,
+  SideNavigationSection,
+  SideNavigationSectionLabel,
+} from '../../side-navigation';
 import { Text } from '../../typography';
 import {
   AppShell,
@@ -26,10 +38,10 @@ import {
 } from '../index';
 
 /**
- * What every product on the reference page is built from. The shell publishes
- * the geometry of a row; these read it and draw what `side-navigation` and
- * `top-navigation` will draw in wave 8, so the page shows the region holding a
- * product rather than pretending the missing families are there.
+ * What every product on the reference page is built from. The column of
+ * destinations is `side-navigation`, which reads the row geometry the shell
+ * publishes; the workspace and account rows at the ends of the column are
+ * still drawn here, on the same geometry, until `top-navigation` lands.
  */
 
 export const MONEY = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -56,42 +68,73 @@ export interface Destination {
   readonly label: string;
   readonly icon: Glyph;
   readonly count?: number;
+  /** A count that carries a tone is a Badge; a plain one is the family's own count. */
   readonly tone?: 'accent' | 'secondary';
 }
 
+/** A titled run of destinations, or an untitled one at the top of the column. */
+export interface NavSection {
+  readonly label?: string;
+  readonly items: readonly Destination[];
+}
+
 /** A destination: a link, its mark, its label, and a count where a product has one. */
-export function NavItem({ current, item }: { current?: boolean | undefined; item: Destination }) {
+function NavItem({ item }: { item: Destination }) {
   const Icon = item.icon;
   return (
-    <a
-      aria-current={current === true ? 'page' : undefined}
-      className="slotted-demo-nav-item"
-      href={`#${item.id}`}
-    >
-      <span className="slotted-demo-nav-item__mark">
-        <Icon aria-hidden size={16} />
-      </span>
-      <span className="slotted-demo-nav-item__label">{item.label}</span>
-      {item.count === undefined ? null : (
-        <Badge
-          className="slotted-demo-nav-item__count"
-          size="sm"
-          tone={item.tone ?? 'secondary'}
-          variant={item.tone === 'accent' ? 'solid' : 'soft'}
-        >
-          {item.count}
-        </Badge>
-      )}
-    </a>
+    <SideNavigationItem value={item.id}>
+      <SideNavigationLink href={`#${item.id}`}>
+        <SideNavigationIcon>
+          <Icon aria-hidden size={16} />
+        </SideNavigationIcon>
+        <SideNavigationLabel>{item.label}</SideNavigationLabel>
+        {item.count === undefined ? null : item.tone === 'accent' ? (
+          <SideNavigationEnd>
+            <Badge size="sm" tone="accent" variant="solid">
+              {item.count}
+            </Badge>
+          </SideNavigationEnd>
+        ) : (
+          <SideNavigationCount>{item.count}</SideNavigationCount>
+        )}
+      </SideNavigationLink>
+    </SideNavigationItem>
   );
 }
 
-/** The heading over a run of destinations. */
-export function NavGroup({ children }: { children: ReactNode }) {
+/**
+ * The column of destinations, which is `side-navigation` inside the shell's
+ * nav region: a div rather than a second landmark, rows on the geometry the
+ * shell publishes, and the rail read from the region's own width.
+ */
+export function NavColumn({
+  current,
+  sections,
+}: {
+  current?: string | undefined;
+  sections: readonly NavSection[];
+}) {
   return (
-    <Text className="slotted-demo-nav-group" render={(props) => <p {...props} />} size="xs">
-      {children}
-    </Text>
+    <SideNavigation value={current ?? null}>
+      {sections.map((section, index) =>
+        section.label === undefined ? (
+          <SideNavigationList key={index}>
+            {section.items.map((item) => (
+              <NavItem item={item} key={item.id} />
+            ))}
+          </SideNavigationList>
+        ) : (
+          <SideNavigationSection key={section.label}>
+            <SideNavigationSectionLabel>{section.label}</SideNavigationSectionLabel>
+            <SideNavigationList>
+              {section.items.map((item) => (
+                <NavItem item={item} key={item.id} />
+              ))}
+            </SideNavigationList>
+          </SideNavigationSection>
+        ),
+      )}
+    </SideNavigation>
   );
 }
 

@@ -63,7 +63,7 @@ import {
   AppShellNavToggle,
 } from '../index';
 import type { AppShellProps } from '../app-shell.types';
-import { MONEY, NavAccount, NavGroup, NavItem, PaneFields, Viewport, Wordmark } from './shared';
+import { MONEY, NavAccount, NavColumn, PaneFields, Viewport, Wordmark } from './shared';
 import type { Destination } from './shared';
 
 /**
@@ -259,14 +259,13 @@ export function AuroraNav({
         />
       </AppShellNavHeader>
       <AppShellNavBody>
-        <NavGroup>Operação</NavGroup>
-        {destinations.map((item) => (
-          <NavItem current={item.id === current} item={item} key={item.id} />
-        ))}
-        <NavGroup>Sistema</NavGroup>
-        {SYSTEM.map((item) => (
-          <NavItem item={item} key={item.id} />
-        ))}
+        <NavColumn
+          current={current}
+          sections={[
+            { label: 'Operação', items: destinations },
+            { label: 'Sistema', items: SYSTEM },
+          ]}
+        />
       </AppShellNavBody>
       <AppShellNavFooter>
         {toggleInFooter ? <AppShellNavToggle /> : null}

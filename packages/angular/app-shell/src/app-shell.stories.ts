@@ -44,6 +44,18 @@ import { SlField, SlFieldLabel } from '@slotted/angular/field';
 import { SlShortcut } from '@slotted/angular/kbd';
 import { SlPage, SlPageBody, SlPageFooter } from '@slotted/angular/page';
 import {
+  SlSideNavigation,
+  SlSideNavigationCount,
+  SlSideNavigationEnd,
+  SlSideNavigationIcon,
+  SlSideNavigationItem,
+  SlSideNavigationLabel,
+  SlSideNavigationLink,
+  SlSideNavigationList,
+  SlSideNavigationSection,
+  SlSideNavigationSectionLabel,
+} from '@slotted/angular/side-navigation';
+import {
   SlPageHeader,
   SlPageHeaderActions,
   SlPageHeaderHeading,
@@ -134,19 +146,37 @@ const account = (
   <span class="slotted-demo-nav-account__more"><ng-icon name="lucideChevronsUpDown" size="14" /></span>
 </button>`;
 
-/** A run of destinations, read from a property of the story's data. */
+/**
+ * A run of destinations, read from a property of the story's data. It is
+ * `side-navigation` inside the shell's nav region: rows on the geometry the
+ * shell publishes, and the rail read from the region's own width.
+ */
 const items = (source: string) => `@for (item of ${source}; track item.id) {
-  <a class="slotted-demo-nav-item" [href]="'#' + item.id" [attr.aria-current]="item.id === current() ? 'page' : null">
-    <span class="slotted-demo-nav-item__mark"><ng-icon [name]="item.icon" size="16" /></span>
-    <span class="slotted-demo-nav-item__label">{{ item.label }}</span>
-    @if (item.count !== null) {
-      <span slBadge class="slotted-demo-nav-item__count" size="sm" [tone]="item.tone" [variant]="item.tone === 'accent' ? 'solid' : 'soft'">{{ item.count }}</span>
-    }
-  </a>
+  <li slSideNavigationItem [value]="item.id">
+    <a slSideNavigationLink [href]="'#' + item.id">
+      <span slSideNavigationIcon><ng-icon [name]="item.icon" size="16" /></span>
+      <span slSideNavigationLabel>{{ item.label }}</span>
+      @if (item.count !== null && item.tone === 'accent') {
+        <span slSideNavigationEnd><span slBadge size="sm" tone="accent" variant="solid">{{ item.count }}</span></span>
+      } @else if (item.count !== null) {
+        <span slSideNavigationCount>{{ item.count }}</span>
+      }
+    </a>
+  </li>
 }`;
 
-const group = (label: string) =>
-  `<p slText class="slotted-demo-nav-group" size="xs" tone="muted">${label}</p>`;
+/** A titled section of destinations, or an untitled list at the top of the column. */
+const section = (label: string | null, source: string) =>
+  label === null
+    ? `<ul slSideNavigationList>${items(source)}</ul>`
+    : `<div slSideNavigationSection>
+  <div slSideNavigationSectionLabel>${label}</div>
+  <ul slSideNavigationList>${items(source)}</ul>
+</div>`;
+
+/** The column: a div, because the shell's region is already the landmark. */
+const column = (...sections: string[]) =>
+  `<div slSideNavigation [value]="current()">${sections.join('')}</div>`;
 
 const viewport = (body: string, size = 'screen') =>
   `<div class="slotted-demo-viewport" data-frame="window" data-layout="page" data-size="${size}">${body}</div>`;
@@ -253,10 +283,7 @@ const AURORA_NAV = (
     ${account('Aurora Logística — mudar de espaço de trabalho', 'AL', 'Aurora Logística', 'Porto · Operações', 'shape="square" size="sm" tone="accent" variant="solid"')}
   </div>
   <div slAppShellNavBody>
-    ${group('Operação')}
-    ${items(source)}
-    ${group('Sistema')}
-    ${items('system')}
+    ${column(section('Operação', source), section('Sistema', 'system'))}
   </div>
   <div slAppShellNavFooter>
     ${toggleInFooter ? '<button slAppShellNavToggle></button>' : ''}
@@ -446,9 +473,7 @@ const CADENCE_NAV = `<nav slAppShellNav class="slotted-demo-nav slotted-demo-she
     <button slAppShellNavToggle></button>
   </div>
   <div slAppShellNavBody>
-    ${items('cadenceTop')}
-    ${group('Espaço')}
-    ${items('cadenceSpace')}
+    ${column(section(null, 'cadenceTop'), section('Espaço', 'cadenceSpace'))}
   </div>
   <div slAppShellNavFooter>
     ${account('Rui Tavares — abrir menu da conta', 'RT', 'Rui Tavares', 'Engenharia')}
@@ -548,7 +573,7 @@ const ATRIO_NAV = `<nav slAppShellNav class="slotted-demo-nav">
   <div slAppShellNavHeader>
     ${account('Átrio — mudar de unidade', 'Á', 'Clínica do Átrio', 'Unidade de Cedofeita', 'shape="square" size="sm" tone="accent" variant="solid"')}
   </div>
-  <div slAppShellNavBody>${items('atrio')}</div>
+  <div slAppShellNavBody>${column(section(null, 'atrio'))}</div>
   <div slAppShellNavFooter>
     ${account('Marta Figueira — abrir menu da conta', 'MF', 'Marta Figueira', 'Receção')}
   </div>
@@ -724,6 +749,16 @@ const DIRECTIVES = [
   SlTextFieldEnd,
   SlTextFieldInput,
   SlTextFieldStart,
+  SlSideNavigation,
+  SlSideNavigationSection,
+  SlSideNavigationSectionLabel,
+  SlSideNavigationList,
+  SlSideNavigationItem,
+  SlSideNavigationLink,
+  SlSideNavigationIcon,
+  SlSideNavigationLabel,
+  SlSideNavigationCount,
+  SlSideNavigationEnd,
   NgIcon,
 ];
 

@@ -16,11 +16,10 @@ export {
   Anatomy,
   MONEY,
   NavAccount,
-  NavGroup,
-  NavItem,
+  NavColumn,
   PaneFields,
   Slot,
   Viewport,
   Wordmark,
 } from './shared';
-export type { Destination, Glyph } from './shared';
+export type { Destination, Glyph, NavSection } from './shared';

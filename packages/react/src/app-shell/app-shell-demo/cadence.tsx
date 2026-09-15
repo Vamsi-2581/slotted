@@ -53,7 +53,7 @@ import {
   AppShellNavToggle,
 } from '../index';
 import type { AppShellProps } from '../app-shell.types';
-import { NavAccount, NavGroup, NavItem, Viewport } from './shared';
+import { NavAccount, NavColumn, Viewport } from './shared';
 import type { Destination } from './shared';
 
 /**
@@ -142,13 +142,10 @@ export function CadenceNav({ current = 'cycle' }: { current?: string | undefined
         <AppShellNavToggle />
       </AppShellNavHeader>
       <AppShellNavBody>
-        {TOP.map((item) => (
-          <NavItem item={item} key={item.id} />
-        ))}
-        <NavGroup>Espaço</NavGroup>
-        {SPACE.map((item) => (
-          <NavItem current={item.id === current} item={item} key={item.id} />
-        ))}
+        <NavColumn
+          current={current}
+          sections={[{ items: TOP }, { label: 'Espaço', items: SPACE }]}
+        />
       </AppShellNavBody>
       <AppShellNavFooter>
         <NavAccount

@@ -20,12 +20,9 @@ mesma worktree.
 
 ## Tarefa em curso
 
-Passo 14 — gate de release. Passos 10–13 feitos: `@slotted/core/text`
-(commit próprio), `useAppShellIfPresent()` em `app-shell` React, binding React
-(19 testes + 4 de página), binding Angular (13 + 4), demonstrações de
-`app-shell` nos dois bindings sobre a família, autoavaliação em
-`docs/superpowers/specs/2026-09-15-side-navigation-self-assessment.md`.
-Páginas de referência não lidas: os Storybooks precisam de reinício.
+Nenhuma: a família foi entregue em seis commits (`19f120c`…`b2991e7`).
+Pendente fora desta sessão: a página de referência Angular por ler (o
+Storybook em 6007 não arrancou depois do reinício).
 
 ## Git
 

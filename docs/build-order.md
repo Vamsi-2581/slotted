@@ -1164,7 +1164,13 @@ Independentes entre si, exceto a cadeia de data.
   contentor rola só a si, no seu eixo. Uma dívida de `table`: sob
   `stickyTo="page"` a tabela é `max-content` e alarga a página quando as
   colunas não cabem, porque `wrap` só muda o mínimo; as demonstrações
-  estreitas usam duas ou três colunas por isso.
+  estreitas usam duas ou três colunas por isso. Pendente: uma célula que
+  contém um controlo `plain` cede a sua inserção ao controlo, como o cabeçalho
+  cede ao `sort` — `padding-inline: 0` na célula e
+  `--slotted-control-padding-inline-*: var(--_pad-inline)` para o controlo —
+  para que o valor editável alinhe com o cabeçalho da coluna; a cena
+  `in-a-row` do harness de `text-field` mostra a inserção dobrada. A decisão
+  sobre o que `plain` pinta está em `docs/build-briefing.md`.
 
 - `app-shell` — a moldura exterior de uma rota: as regiões que não mudam quando
   o conteúdo muda. `docs/component-features.md` §15 pede skip link, header,
@@ -1374,6 +1380,32 @@ keep | discard`; `lockedValues`; cópia por `Ctrl+C`/`Ctrl+X`, e a lista inteira
   família nomeada: conteúdo expansível para `collapsible`, filtros para
   `filter-bar`, esqueleto para `skeleton`, virtualização para `growing`.
   Inventário e desenho em `docs/superpowers/specs/2026-09-14-timeline-*.md`.
+- **`filter-bar code-block`** — uma sessão só (rodada 11). `filter-bar`
+  compõe sobre `@slotted/core/filter` e o motor ganhou `group.ts`: o valor da
+  família é uma árvore `FilterGroup = { join, rules: (FilterRule | FilterGroup)[] }`
+  cujas folhas são o descritor que `table` já edita no cabeçalho de uma
+  coluna, sem alteração — um ecrã que oferece os dois edita um objeto só
+  (`ruleFor`/`withRuleFor` são o primeiro nível como mapa). O que o inventário
+  acrescenta ao parágrafo de §15: raiz `role=search` com três paradas de
+  tabulação (busca, toolbar de pills, grelha de chips); o construtor da
+  árvore num `drawer` em toda a largura, os pills em `popover`; `apply: live |
+manual` com rascunho e `data-dirty`; campo `required` com `defaultValue` a
+  que Clear regressa; presets como `selection`; `createSearchPredicate` para a
+  busca sobre todos os campos; codec de URL `f=and(…)` + `q`, total; contagem
+  como região viva; três composições por container query (≥64rem, 40–64rem,
+  <40rem com `summary`). Recusas com dono: ordenação e seletor de colunas para
+  `table`/`data-grid`/`column-manager` via `end`, linguagem de consulta
+  textual para a aplicação. `code-block` recebe tokens e nunca HTML
+  (`@slotted/core/code`: doze escopos, `fromPrismTokens`, `fromShikiTokens`,
+  `parseLineRanges`, `copyText`); a paleta de escopos é a terceira escala da
+  camada component (`--slotted-code-*`, doc **Code scope**); o corpo é
+  `scroll-area`; `marks` com `highlight`/`add`/`remove`/`focus`/`error`/
+  `warning`; `wrap` (`pressed`, glifo `--slotted-icon-text-wrap`), números,
+  título com ícone de espécie de ficheiro, `collapseAfter` (`revealed`),
+  `maxLines`, cópia de `description-list` sem as linhas removidas. Recusas com
+  dono: abas para `tabs`, código em linha para `prose`/`kbd`, moldura de
+  terminal e `disabled` recusados com uma implementação cada. Inventários e
+  desenhos em `docs/superpowers/specs/2026-09-14-{filter-bar,code-block}-*.md`.
 
 ## Destino das 29 famílias atuais
 

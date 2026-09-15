@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 5,
+  "family": "filter-bar",
+  "ui": "filter-bar",
+  "rootRole": "search",
+  "valueType": "FilterGroup | null",
+  "valueRules": {
+    "shape": "{ join: 'and' | 'or', rules: (FilterRule | FilterGroup)[] }, where a FilterRule is { field, filter } and `filter` is the FilterDescriptor `table` edits in a column header, unchanged",
+    "engine": "@slotted/core/filter — group.ts holds the tree, the predicate, the sentence and the codec; the family invents no vocabulary",
+    "firstLevel": "a first-level rule for a field is the object a column header reads and writes through ruleFor and withRuleFor, so a screen offering both edits one value",
+    "inactive": "a leaf without every operand its operator needs is dropped before the join, and a group left empty is dropped with it — normalizeFilterGroup, the engine's rule one level up",
+    "null": "a value with no active rule is null, which is what a consumer stores and a URL carries",
+    "unknownField": "a rule over a field the consumer no longer declares is kept, drawn as a chip with the key and data-invalid, removable, and never evaluated"
+  },
+  "query": {
+    "value": "string, the one condition that belongs to no column",
+    "predicate": "createSearchPredicate: a contains text condition against every searchable field, or-joined, through the collator the typed conditions use",
+    "delay": "queryDelay in milliseconds, default 320, debounces the request under apply=live; under manual the query joins the draft",
+    "escape": "Escape in the search clears the query when it holds one, reason clear"
+  },
+  "pattern": {
+    "url": "https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/",
+    "title": "Toolbar Pattern",
+    "readOn": "2026-09-14",
+    "chips": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
+    "chipsTitle": "Grid Pattern, the layout grid half",
+    "root": "role=search rather than role=toolbar, because the pattern asks a toolbar to avoid controls whose operation requires the pair of arrow keys used for toolbar navigation, and a text box is one",
+    "departure": "the optional 'focus is set on the control that last had focus' is taken for the bar and the chips; the grid pattern's in-place Enter editing is not a chip's — Enter opens the same popover a pointer gets"
+  },
+  "wiring": {
+    "root": "role=search with aria-label from labels.bar unless the consumer wrote one",
+    "bar": "role=toolbar, aria-label labels.filters, one tab stop, roving tabindex from @slotted/core/focus",
+    "chips": "role=grid with one role=row and a role=gridcell per chip, aria-label labels.applied, one tab stop",
+    "pill": "button, aria-haspopup=dialog, aria-expanded, data-filtered while the field holds a rule",
+    "chip": "tag worn as data-ui; accessible name '<field label>: <sentence>'; the remove control is tag's",
+    "count": "aria-live=polite on the part itself",
+    "builder": "drawer worn as data-ui, titled labels.builder"
+  },
+  "surfaces": {
+    "pill": "popover editing one first-level rule",
+    "chip": "the same popover, opened from the chip",
+    "builder": "drawer editing the whole tree, on every width",
+    "summary": "below the narrow breakpoint the pills and the chips fold behind one button, 'Filters (n)', which opens the builder",
+    "reason": "a tree with a nested group needs a column; a popover anchored to a pill has neither the height nor the anchor for it"
+  },
+  "apply": {
+    "live": "a popover commits every change and the engine's inactive rule keeps a half-typed condition out; the builder commits on Apply; removing a chip, Clear and choosing a preset commit at once",
+    "manual": "everything goes to a draft; apply commits with reason submit, reset discards, data-dirty on the root meanwhile; Enter in an operand applies",
+    "escape": "closes the surface and discards what it held"
+  },
+  "required": {
+    "rule": "a field with required: true has a defaultValue; Clear returns it to that value rather than to nothing",
+    "refusal": "a required field whose rule is inactive refuses Apply under manual and refuses removal under live: data-invalid on its chip, labels.required(field) associated, focus moved to it",
+    "pinned": "a required field is pinned whether or not the consumer said so"
+  },
+  "preset": {
+    "shape": "{ key, label, value: FilterGroup }[]",
+    "select": "choosing one replaces the value, reason select; the value changing afterwards keeps the preset current and marks the root data-dirty",
+    "save": "onPresetSave(value) from the builder, and nothing else about saving — the name is typed in a dialog the application owns"
+  },
+  "responsive": {
+    "container": "filter-bar, inline-size, on the root; the grid is on frame, one element in, because a container query cannot restyle the element it measures",
+    "wide": "64rem and up: search, toolbar, the consumer's controls and the count on one line, the chips under it",
+    "medium": "40rem to 64rem: the search shares its line with the consumer's controls and the count; the toolbar takes a line of its own; the chips under both",
+    "narrow": "40rem, literal by rule 4 of the token foundation: the search alone, then summary beside the consumer's controls, then the count; pills and chips hidden"
+  },
+  "sticky": {
+    "axis": "sticky, off by default",
+    "on": "position: sticky at --slotted-page-sticky-top; the root measures itself into --slotted-filter-bar-size and republishes --slotted-page-sticky-top for what follows as the sum, which is the rule section established and the briefing binds this family to"
+  },
+  "announcements": {
+    "count": "labels.count(count, total) — the count part is the live region",
+    "applied": "the field and its sentence, the same text the chip shows",
+    "removed": "labels.removed(field)",
+    "cleared": "labels.cleared, and for a required field its default's sentence",
+    "preset": "the preset's label",
+    "refused": "the required field's message"
+  },
+  "keyboard": [
+    {
+      "key": "Tab / Shift+Tab",
+      "effect": "search, then the bar, then the chips, then what follows",
+      "focus": "into the bar or the chips: the last-focused control, else the first enabled",
+      "source": "toolbar pattern; grid pattern"
+    },
+    {
+      "key": "ArrowLeft / ArrowRight",
+      "effect": "previous / next control in the bar, previous / next chip; wraps; mirrored under dir=rtl",
+      "focus": "the neighbour",
+      "source": "toolbar pattern, loop"
+    },
+    {
+      "key": "ArrowUp / ArrowDown",
+      "effect": "nothing — the page scrolls",
+      "focus": "unchanged",
+      "source": "toolbar pattern, crossAxis false"
+    },
+    {
+      "key": "Home / End",
+      "effect": "first / last control in the bar or the chips",
+      "focus": "the first / the last",
+      "source": "toolbar pattern (optional); grid pattern"
+    },
+    {
+      "key": "Enter / Space",
+      "effect": "on a pill, a chip or add: opens the editor",
+      "focus": "the first control inside the surface",
+      "source": "button"
+    },
+    {
+      "key": "Delete / Backspace",
+      "effect": "on a chip: removes the rule, reason remove; a required field's chip refuses and takes data-invalid",
+      "focus": "the next chip, else the previous, else add",
+      "source": "grid pattern; createRemovalFocus"
+    },
+    {
+      "key": "Escape",
+      "effect": "in the search: clears the query when it holds one, reason clear. In a surface: closes and discards",
+      "focus": "unchanged; the trigger, for a surface",
+      "source": "Polaris; dismissable-layer"
+    },
+    {
+      "key": "Enter",
+      "effect": "in an operand: what Apply does in that surface",
+      "focus": "unchanged",
+      "source": "table's panel"
+    },
+    {
+      "key": "shortcut",
+      "effect": "when set, focuses the search unless focus is in an editable element; default none",
+      "focus": "the search",
+      "source": "Polaris f; toolbar pattern note 3"
+    }
+  ],
+  "declined": {
+    "sort": "table and data-grid hold sort with a model of their own; a select in the end slot is the composition",
+    "columnChooser": "column-manager, docs/component-features.md §12; its trigger goes in the end slot",
+    "queryLanguage": "EUI and AG Grid both build a parser and an autocompleter over field names; the tree is the value here and the builder its editor. A product that wants the expression form parses to FilterGroup and passes value",
+    "applyingRows": "the consumer, or data-grid — createFilterGroupPredicate and createSearchPredicate are what it applies",
+    "presetLifecycle": "saving, renaming and deleting a preset are the application's; onPresetSave is the one request"
+  },
+  "provides": {
+    "filterBarDefaults": [
+      "labels",
+      "apply",
+      "queryDelay",
+      "chipLimit",
+      "shortcut"
+    ]
+  },
+  "labels": [
+    "bar",
+    "filters",
+    "applied",
+    "builder",
+    "search",
+    "add",
+    "clear",
+    "apply",
+    "reset",
+    "done",
+    "cancel",
+    "summary",
+    "more",
+    "preset",
+    "presetNone",
+    "savePreset",
+    "addRule",
+    "addGroup",
+    "removeRule",
+    "removeGroup",
+    "and",
+    "or",
+    "field",
+    "operator",
+    "value",
+    "end",
+    "count",
+    "remove",
+    "removed",
+    "cleared",
+    "required",
+    "unknownField",
+    "operators"
+  ],
+  "imperative": [
+    "focusSearch()",
+    "open(path?)"
+  ],
+  "axes": {
+    "apply": [
+      "live",
+      "manual"
+    ],
+    "sticky": [
+      "false",
+      "true"
+    ],
+    "size": [
+      "sm",
+      "md",
+      "lg"
+    ]
+  },
+  "resolution": {
+    "apply": [
+      "prop",
+      "defaults",
+      "live"
+    ],
+    "queryDelay": [
+      "prop",
+      "defaults",
+      "320"
+    ],
+    "chipLimit": [
+      "prop",
+      "defaults",
+      "6"
+    ],
+    "shortcut": [
+      "prop",
+      "defaults",
+      "none"
+    ],
+    "size": [
+      "prop",
+      "defaults",
+      "md"
+    ]
+  },
+  "stateAttributes": {
+    "disabled": "data-disabled",
+    "loading": "data-loading",
+    "open": "data-open",
+    "invalid": "data-invalid",
+    "revealed": "data-revealed"
+  },
+  "dataAttributes": {
+    "data-filtered": "on a pill while its field holds an active rule",
+    "data-dirty": "on the root while the draft, or the value against the current preset, differs",
+    "data-apply": "live or manual, on the root",
+    "data-sticky": "on the root while sticky",
+    "data-kind": "on a rule, the field's kind",
+    "data-operands": "on a rule, 0, 1 or 2",
+    "data-depth": "on a group, its nesting depth from 0"
+  },
+  "stateModel": {
+    "filter": {
+      "controlled": "value",
+      "uncontrolled": "defaultValue",
+      "request": "onValueChange",
+      "reasons": [
+        "pointer",
+        "keyboard",
+        "clear",
+        "remove",
+        "select",
+        "submit",
+        "programmatic"
+      ]
+    },
+    "value": {
+      "controlled": "query",
+      "uncontrolled": "defaultQuery",
+      "request": "onQueryChange",
+      "reasons": [
+        "keyboard",
+        "clear",
+        "submit",
+        "programmatic"
+      ]
+    },
+    "selection": {
+      "controlled": "preset",
+      "uncontrolled": "defaultPreset",
+      "request": "onPresetChange",
+      "reasons": [
+        "select",
+        "clear",
+        "programmatic"
+      ]
+    },
+    "open": {
+      "controlled": "open",
+      "uncontrolled": "defaultOpen",
+      "request": "onOpenChange",
+      "reasons": [
+        "pointer",
+        "keyboard",
+        "escape",
+        "outsidePress",
+        "dismiss",
+        "submit",
+        "programmatic"
+      ]
+    },
+    "revealed": {
+      "controlled": "revealed",
+      "uncontrolled": "defaultRevealed",
+      "request": "onRevealedChange",
+      "reasons": [
+        "pointer",
+        "keyboard",
+        "programmatic"
+      ]
+    }
+  },
+  "literals": {
+    "--slotted-filter-bar-chip-max": "18rem: no scale holds a measure, and container owns the page's",
+    "narrow breakpoint": "40rem, inside @container, where a custom property is invalid"
+  },
+  "members": {
+    "filterBar": {
+      "nativeElement": "div",
+      "defaults": {
+        "apply": "live",
+        "sticky": false,
+        "size": "md",
+        "queryDelay": 320,
+        "chipLimit": 6,
+        "shortcut": null,
+        "disabled": false,
+        "loading": false,
+        "defaultQuery": "",
+        "defaultOpen": false,
+        "defaultRevealed": false
+      },
+      "capabilities": [
+        "filter",
+        "value",
+        "selection",
+        "open",
+        "revealed",
+        "size",
+        "disabled",
+        "loading",
+        "wiring",
+        "invalid"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "active",
+        "focus-visible",
+        "disabled",
+        "loading",
+        "open",
+        "invalid",
+        "revealed"
+      ],
+      "parts": [
+        "root",
+        "frame",
+        "search",
+        "bar",
+        "pill",
+        "add",
+        "clear",
+        "preset",
+        "actions",
+        "apply",
+        "reset",
+        "summary",
+        "end",
+        "chips",
+        "chip",
+        "more",
+        "count",
+        "builder",
+        "group",
+        "join",
+        "rule",
+        "field",
+        "operator",
+        "operand",
+        "remove",
+        "add-rule",
+        "add-group",
+        "remove-group",
+        "save-preset"
+      ]
+    }
+  },
+  "scenarios": {
+    "filterBar": [
+      "playground",
+      "listing",
+      "pinned",
+      "chips",
+      "builder",
+      "groups",
+      "manual",
+      "required",
+      "presets",
+      "query",
+      "url",
+      "count",
+      "narrow",
+      "sticky",
+      "states",
+      "content",
+      "keyboard"
+    ]
+  }
+}

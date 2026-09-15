@@ -1,5 +1,7 @@
 import type {
   BooleanFilter,
+  DateTimeFilter,
+  DateTimeOperator,
   BooleanOperator,
   DateFilter,
   DateOperator,
@@ -11,8 +13,12 @@ import type {
   SetFilter,
   SetOperator,
   TextFilter,
+  TimeFilter,
+  TimeOperator,
   TextOperator,
 } from '@slotted/core/filter';
+import type { PlainTime, TimeGranularity } from '@slotted/core/date';
+import type { TimeFieldHourCycle } from '../time-field';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { PopoverChangeRequest, PopoverProps } from '../popover/popover.types';
 import type {
@@ -266,6 +272,65 @@ export interface TableDateFilterProps extends TableConditionFilterProps<
   min?: string | undefined;
   /** The latest, as an ISO day. */
   max?: string | undefined;
+  /**
+   * The application's own ranges — this week, this month — as
+   * `DateRangePickerPreset`s, offered inside the range picker `between` draws.
+   * The descriptor still receives two ISO days; the preset is how they were
+   * chosen.
+   */
+  presets?: ReactNode | undefined;
+}
+
+/**
+ * A column of times of day. The operand is `time-picker`, and the descriptor
+ * holds the ISO text it writes at the column's own granularity: `HH:MM` at a
+ * minute, `HH:MM:SS` at a second. The engine compares at that precision.
+ */
+export interface TableTimeFilterProps extends TableConditionFilterProps<
+  TimeFilter,
+  TimeOperator,
+  string
+> {
+  /** BCP 47. Decides the operand's hour cycle and separators. */
+  locale?: string | undefined;
+  /** Twelve or twenty-four hours, overriding what the locale says. */
+  hourCycle?: TimeFieldHourCycle | undefined;
+  /** The last unit the operand writes. Minute unless stated. */
+  granularity?: TimeGranularity | undefined;
+  /** The list's step, in seconds. */
+  step?: number | undefined;
+  /** The list's own entries, replacing the step. */
+  options?: readonly PlainTime[] | undefined;
+  /** The earliest time the operand accepts, as ISO time text. */
+  min?: string | undefined;
+  /** The latest, as ISO time text. */
+  max?: string | undefined;
+}
+
+/**
+ * A column of dates with times. The operand is `datetime-picker`, and the
+ * descriptor holds `YYYY-MM-DDTHH:MM` or `…:SS` at the column's granularity. A
+ * condition whose operand has one half missing is inactive until both exist.
+ */
+export interface TableDateTimeFilterProps extends TableConditionFilterProps<
+  DateTimeFilter,
+  DateTimeOperator,
+  string
+> {
+  /** BCP 47. Decides the operand's field order and separators. */
+  locale?: string | undefined;
+  /** Twelve or twenty-four hours, overriding what the locale says. */
+  hourCycle?: TimeFieldHourCycle | undefined;
+  /** The last unit the operand writes. Minute unless stated. */
+  granularity?: TimeGranularity | undefined;
+  /** The list's step, in seconds. */
+  step?: number | undefined;
+  /** The earliest date-time the operand accepts, as ISO date-time text. */
+  min?: string | undefined;
+  /** The latest, as ISO date-time text. */
+  max?: string | undefined;
+  /** The zone "now" is read in. Defaults to the runtime's. */
+  timeZone?: string | undefined;
 }
 
 export interface TableBooleanFilterProps extends TableConditionFilterProps<
@@ -285,8 +350,20 @@ export interface TableSetFilterProps extends TableConditionFilterProps<
 > {
   /** The word shown when the search matches nothing. */
   emptyLabel?: string | undefined;
-  /** The values this column can be filtered to, and optionally their counts. */
-  options: readonly TableFilterOption[];
+  /**
+   * How the values are chosen. `list` is the search, the covering checkbox and
+   * the values; `tags` is `tags-input`, for a list too long to tick — the
+   * chosen values are chips, and `options` become a `datalist` of suggestions
+   * and the set a typed value must belong to. The descriptor is the same list
+   * either way.
+   */
+  operand?: 'list' | 'tags' | undefined;
+  /**
+   * The values this column can be filtered to, and optionally their counts.
+   * Optional with `tags`, where a column may hold more values than a page
+   * knows; without it any typed value is admitted.
+   */
+  options?: readonly TableFilterOption[] | undefined;
   /** The search field's name and placeholder. */
   searchLabel?: string | undefined;
   /**

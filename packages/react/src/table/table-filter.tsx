@@ -20,8 +20,17 @@ import type {
 } from '@slotted/core/filter';
 import { createFilter } from '@slotted/core/collection';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
-import { isPlainDate, parseISODate, toISODate } from '@slotted/core/date';
-import type { PlainDate } from '@slotted/core/date';
+import {
+  isPlainDate,
+  isPlainDateTime,
+  isPlainTime,
+  parseISODate,
+  parseISODateTime,
+  parseISOTime,
+  toISODate,
+  toISOTime,
+} from '@slotted/core/date';
+import type { PlainDate, PlainDateTime, PlainTime } from '@slotted/core/date';
 import { createControllable } from '@slotted/core/state';
 import { useId, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -29,17 +38,22 @@ import type { ReactNode } from 'react';
 import { Button } from '../button';
 import { Checkbox } from '../checkbox';
 import { DatePicker } from '../date-picker';
+import { DateRangePicker } from '../date-range-picker';
+import { DateTimePicker } from '../datetime-picker';
 import { NumberField } from '../number-field';
 import { Popover, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
 import { Radio, RadioGroup } from '../radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
+import { TagsInput } from '../tags-input';
 import { TextField } from '../text-field';
+import { TimePicker } from '../time-picker';
 import { useTable } from './table';
 import { useTableColumn } from './table-parts';
 import type {
   TableBooleanFilterProps,
   TableConditionFilterProps,
   TableDateFilterProps,
+  TableDateTimeFilterProps,
   TableFilterOperandProps,
   TableFilterOption,
   TableFilterReason,
@@ -47,6 +61,7 @@ import type {
   TableResolvedLabels,
   TableSetFilterProps,
   TableTextFilterProps,
+  TableTimeFilterProps,
 } from './table.types';
 
 /**
@@ -81,6 +96,12 @@ interface BodyProps {
   labels: TableResolvedLabels;
   /** Writes one operand back into the draft. `slot` is `value` or `end`. */
   setOperand: (slot: 0 | 1, value: unknown) => void;
+  /**
+   * Writes both operands of a range at once, for a control that holds both.
+   * Two calls to `setOperand` from one event would each read the draft the
+   * other did not write.
+   */
+  setOperands: (value: unknown, end: unknown) => void;
 }
 
 interface ShellProps {
@@ -91,6 +112,14 @@ interface ShellProps {
   props: TableConditionFilterProps<FilterDescriptor, string, unknown>;
   /** The set filter offers one condition and draws no join — see the design, §3.2. */
   singleCondition?: boolean;
+  /**
+   * Whether the body draws one control for both operands of a range. Written
+   * as `data-range` on `filter-operand`, so the two-column operand grid
+   * collapses to one; a consumer's own `renderOperand` is still one per slot.
+   */
+  rangeOperand?: boolean;
+  /** Which of a kind's operands the body draws, written as `data-operand`. */
+  operandName?: string;
 }
 
 /** Two descriptors are the same filter when they serialise the same. */
@@ -112,7 +141,15 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
  * `createFilterPredicate` in `@slotted/core/filter` is what a consumer applies
  * to its own rows — the same division `sort` records.
  */
-function TableFilterShell({ body, kind, operators, props, singleCondition }: ShellProps) {
+function TableFilterShell({
+  body,
+  kind,
+  operandName,
+  operators,
+  props,
+  rangeOperand,
+  singleCondition,
+}: ShellProps) {
   const {
     align,
     applyLabel,
@@ -230,6 +267,17 @@ function TableFilterShell({ body, kind, operators, props, singleCondition }: She
     }
   }
 
+  function setOperands(index: number, value: unknown, end: unknown) {
+    const condition = conditionAt(index);
+    const wasActive = isConditionActive(kind, condition);
+    const next: Condition = { ...condition, value, end };
+
+    setDraft(withCondition(draft, index, next as never));
+    if (index === 0 && allowed === 2 && !wasActive && isConditionActive(kind, next)) {
+      announce(labels.filterConditionAdded);
+    }
+  }
+
   function apply(source: unknown, reason: TableFilterReason) {
     const next = normalizeFilter(draft);
     request(next, reason, source);
@@ -301,7 +349,12 @@ function TableFilterShell({ body, kind, operators, props, singleCondition }: She
         </div>
 
         {operands === 0 ? null : (
-          <div data-kind={kind} data-part="filter-operand">
+          <div
+            data-kind={kind}
+            data-part="filter-operand"
+            {...(operandName === undefined || renderOperand ? {} : { 'data-operand': operandName })}
+            {...(rangeOperand && operands === 2 && !renderOperand ? { 'data-range': '' } : {})}
+          >
             {renderOperand
               ? Array.from({ length: operands }, (_, slot) =>
                   renderOperand(operandProps(slot as 0 | 1)),
@@ -312,6 +365,7 @@ function TableFilterShell({ body, kind, operators, props, singleCondition }: She
                   condition,
                   labels,
                   setOperand: (slot, operand) => setOperand(index, slot, operand),
+                  setOperands: (value, end) => setOperands(index, value, end),
                 })}
           </div>
         )}
@@ -487,8 +541,78 @@ export function TableNumberFilter(props: TableNumberFilterProps) {
  * The descriptor holds the ISO day the picker produces, never a `Date`.
  */
 export function TableDateFilter(props: TableDateFilterProps) {
-  const { locale, max, min } = props;
+  const { locale, max, min, presets } = props;
   const day = (value: unknown) => (value ? parseISODate(String(value)) : null);
+  const iso = (value: unknown) => (isPlainDate(value) ? toISODate(value) : null);
+
+  return (
+    <TableFilterShell
+      body={({ apply, condition, labels, setOperand, setOperands }) =>
+        operandCount(condition.operator as FilterOperator) === 2 ? (
+          /* One control for both ends rather than two pickers: it says the
+             run's length while it is drawn, takes the ends in either order and
+             carries the application's presets. The descriptor is unchanged. */
+          <DateRangePicker
+            endLabel={labels.filterTo}
+            onKeyDown={applyOnEnter(apply)}
+            onValueChange={(next) => setOperands(iso(next?.start), iso(next?.end))}
+            size="sm"
+            startLabel={labels.filterFrom}
+            value={{ start: day(condition.value), end: day(condition.end) }}
+            {...(locale === undefined ? {} : { locale })}
+            {...(day(min) ? { min: day(min) as PlainDate } : {})}
+            {...(day(max) ? { max: day(max) as PlainDate } : {})}
+            {...(presets === undefined ? {} : { presets })}
+          />
+        ) : (
+          <DatePicker
+            aria-label={labels.filterValue}
+            onKeyDown={applyOnEnter(apply)}
+            onValueChange={(next) => setOperand(0, iso(next))}
+            size="sm"
+            value={day(condition.value)}
+            {...(locale === undefined ? {} : { locale })}
+            {...(day(min) ? { min: day(min) as PlainDate } : {})}
+            {...(day(max) ? { max: day(max) as PlainDate } : {})}
+          />
+        )
+      }
+      kind="date"
+      operators={narrowed('date', props.operators)}
+      props={props as never}
+      rangeOperand
+      {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
+    />
+  );
+}
+
+/** `HH` and `HH:MM` are prefixes the engine accepts and the field cannot read. */
+function timeOf(text: unknown): PlainTime | null {
+  if (!text) return null;
+  const written = String(text);
+  return parseISOTime(/^\d{2}$/.test(written) ? `${written}:00` : written);
+}
+
+/** A day, or a day and an hour, padded to the `T…:MM` the field reads. */
+function dateTimeOf(text: unknown): PlainDateTime | null {
+  if (!text) return null;
+  const written = String(text);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(written)) return parseISODateTime(`${written}T00:00`);
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}$/.test(written)) return parseISODateTime(`${written}:00`);
+  return parseISODateTime(written);
+}
+
+/**
+ * A column of times of day. The operand is `time-picker` — the segmented field
+ * and the list behind it — at the column's own granularity, which is what
+ * decides the precision the descriptor is written at and the engine compares
+ * at: a picker writing minutes produces `09:14`, and `is 09:14` then matches
+ * every second of that minute.
+ */
+export function TableTimeFilter(props: TableTimeFilterProps) {
+  const { granularity, hourCycle, locale, max, min, options, step } = props;
+  const iso = (value: unknown) =>
+    isPlainTime(value) ? toISOTime(value, granularity ?? 'minute') : null;
 
   return (
     <TableFilterShell
@@ -497,7 +621,7 @@ export function TableDateFilter(props: TableDateFilterProps) {
           {([0, 1] as const)
             .slice(0, operandCount(condition.operator as FilterOperator))
             .map((slot) => (
-              <DatePicker
+              <TimePicker
                 aria-label={
                   operandCount(condition.operator as FilterOperator) === 2
                     ? slot === 0
@@ -507,20 +631,75 @@ export function TableDateFilter(props: TableDateFilterProps) {
                 }
                 key={slot}
                 onKeyDown={applyOnEnter(apply)}
-                onValueChange={(next) =>
-                  setOperand(slot, isPlainDate(next) ? toISODate(next) : null)
-                }
+                onValueChange={(next) => setOperand(slot, iso(next))}
                 size="sm"
-                value={day(slot === 0 ? condition.value : condition.end)}
+                value={timeOf(slot === 0 ? condition.value : condition.end)}
+                {...(granularity === undefined ? {} : { granularity })}
+                {...(hourCycle === undefined ? {} : { hourCycle })}
                 {...(locale === undefined ? {} : { locale })}
-                {...(day(min) ? { min: day(min) as PlainDate } : {})}
-                {...(day(max) ? { max: day(max) as PlainDate } : {})}
+                {...(options === undefined ? {} : { options })}
+                {...(step === undefined ? {} : { step })}
+                {...(timeOf(min) ? { min: timeOf(min) as PlainTime } : {})}
+                {...(timeOf(max) ? { max: timeOf(max) as PlainTime } : {})}
               />
             ))}
         </>
       )}
-      kind="date"
-      operators={narrowed('date', props.operators)}
+      kind="time"
+      operators={narrowed('time', props.operators)}
+      props={props as never}
+      {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
+    />
+  );
+}
+
+/**
+ * A column of dates with times. The operand is `datetime-picker`, the
+ * seven-segment field and the two surfaces behind it. A value with one half
+ * missing reaches the draft as no operand at all, so the condition stays
+ * inactive until both halves exist — the engine's one rule for a missing
+ * operand, and the reason Apply reports nothing for a date without a time.
+ */
+export function TableDateTimeFilter(props: TableDateTimeFilterProps) {
+  const { granularity, hourCycle, locale, max, min, step, timeZone } = props;
+  const iso = (value: unknown) =>
+    isPlainDateTime(value)
+      ? `${toISODate(value.date)}T${toISOTime(value.time, granularity ?? 'minute')}`
+      : null;
+
+  return (
+    <TableFilterShell
+      body={({ apply, condition, labels, setOperand }) => (
+        <>
+          {([0, 1] as const)
+            .slice(0, operandCount(condition.operator as FilterOperator))
+            .map((slot) => (
+              <DateTimePicker
+                aria-label={
+                  operandCount(condition.operator as FilterOperator) === 2
+                    ? slot === 0
+                      ? labels.filterFrom
+                      : labels.filterTo
+                    : labels.filterValue
+                }
+                key={slot}
+                onKeyDown={applyOnEnter(apply)}
+                onValueChange={(next) => setOperand(slot, iso(next))}
+                size="sm"
+                value={dateTimeOf(slot === 0 ? condition.value : condition.end)}
+                {...(granularity === undefined ? {} : { granularity })}
+                {...(hourCycle === undefined ? {} : { hourCycle })}
+                {...(locale === undefined ? {} : { locale })}
+                {...(step === undefined ? {} : { step })}
+                {...(timeZone === undefined ? {} : { timeZone })}
+                {...(dateTimeOf(min) ? { min: dateTimeOf(min) as PlainDateTime } : {})}
+                {...(dateTimeOf(max) ? { max: dateTimeOf(max) as PlainDateTime } : {})}
+              />
+            ))}
+        </>
+      )}
+      kind="datetime"
+      operators={narrowed('datetime', props.operators)}
       props={props as never}
       {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
     />
@@ -568,7 +747,8 @@ export function TableBooleanFilter(props: TableBooleanFilterProps) {
 export function TableSetFilter(props: TableSetFilterProps) {
   const {
     emptyLabel,
-    options,
+    operand = 'list',
+    options = [],
     searchLabel,
     searchThreshold = 8,
     searchable,
@@ -577,25 +757,94 @@ export function TableSetFilter(props: TableSetFilterProps) {
 
   return (
     <TableFilterShell
-      body={({ announce, condition, labels, setOperand }) => (
-        <SetOperand
-          announce={announce}
-          chosen={(condition.value as readonly string[] | null) ?? []}
-          labels={labels}
-          onChange={(next) => setOperand(0, next)}
-          options={options}
-          searchThreshold={searchThreshold}
-          {...(emptyLabel === undefined ? {} : { emptyLabel })}
-          {...(searchLabel === undefined ? {} : { searchLabel })}
-          {...(searchable === undefined ? {} : { searchable })}
-          {...(selectAllLabel === undefined ? {} : { selectAllLabel })}
-        />
-      )}
+      body={({ announce, apply, condition, labels, setOperand }) =>
+        operand === 'tags' ? (
+          <TagsOperand
+            apply={apply}
+            chosen={(condition.value as readonly string[] | null) ?? []}
+            labels={labels}
+            onChange={(next) => setOperand(0, next)}
+            options={options}
+          />
+        ) : (
+          <SetOperand
+            announce={announce}
+            chosen={(condition.value as readonly string[] | null) ?? []}
+            labels={labels}
+            onChange={(next) => setOperand(0, next)}
+            options={options}
+            searchThreshold={searchThreshold}
+            {...(emptyLabel === undefined ? {} : { emptyLabel })}
+            {...(searchLabel === undefined ? {} : { searchLabel })}
+            {...(searchable === undefined ? {} : { searchable })}
+            {...(selectAllLabel === undefined ? {} : { selectAllLabel })}
+          />
+        )
+      }
       kind="set"
+      operandName={operand}
       operators={narrowed('set', props.operators)}
       props={props as never}
       singleCondition
     />
+  );
+}
+
+interface TagsOperandProps {
+  apply: () => void;
+  chosen: readonly string[];
+  labels: TableResolvedLabels;
+  onChange: (values: readonly string[]) => void;
+  options: readonly TableFilterOption[];
+}
+
+/**
+ * The chosen values as chips, for a list too long to tick. With `options`, a
+ * typed value outside them is refused — and announced — by `tags-input`'s own
+ * validation, and the options are a `datalist`: native completion in every
+ * engine, with no second listbox inside the panel. Without `options` any
+ * value is admitted, because a list too long to tick is often a list the page
+ * does not hold in full.
+ *
+ * `Enter` with pending text commits a chip, which is `tags-input`'s own key;
+ * `Enter` on an empty field applies, which is the panel's.
+ */
+function TagsOperand({ apply, chosen, labels, onChange, options }: TagsOperandProps) {
+  const base = useId();
+  const known = useMemo(() => new Map(options.map((option) => [option.value, option])), [options]);
+  const constrained = options.length > 0;
+
+  return (
+    <>
+      <TagsInput
+        aria-label={labels.filterValue}
+        formatLabel={(value) => known.get(value)?.label ?? value}
+        fullWidth
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && !event.defaultPrevented && event.currentTarget.value === '')
+            apply();
+        }}
+        onValueChange={(next) => onChange(next)}
+        size="sm"
+        value={chosen}
+        {...(constrained
+          ? {
+              invalidValues: 'refuse' as const,
+              list: `${base}-options`,
+              validate: (text: string) => known.has(text),
+            }
+          : {})}
+      />
+      {constrained ? (
+        <datalist id={`${base}-options`}>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label ?? option.value}
+            </option>
+          ))}
+        </datalist>
+      ) : null}
+    </>
   );
 }
 

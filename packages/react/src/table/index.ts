@@ -3,9 +3,11 @@ export { TableContent } from './table-content';
 export {
   TableBooleanFilter,
   TableDateFilter,
+  TableDateTimeFilter,
   TableNumberFilter,
   TableSetFilter,
   TableTextFilter,
+  TableTimeFilter,
 } from './table-filter';
 export { DEFAULT_TABLE_LABELS, TableDefaultsProvider, useTableDefaults } from './table-defaults';
 export {
@@ -49,11 +51,13 @@ export type {
   TableBooleanFilterProps,
   TableConditionFilterProps,
   TableDateFilterProps,
+  TableDateTimeFilterProps,
   TableFilterOperandProps,
   TableFilterSharedProps,
   TableNumberFilterProps,
   TableSetFilterProps,
   TableTextFilterProps,
+  TableTimeFilterProps,
   TableFilterReason,
   TableFilterRequest,
   TableExpanderProps,

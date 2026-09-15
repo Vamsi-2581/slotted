@@ -10,9 +10,11 @@ import { DEFAULT_TABLE_LABELS, TableDefaultsProvider } from './table-defaults';
 import {
   TableBooleanFilter,
   TableDateFilter,
+  TableDateTimeFilter,
   TableNumberFilter,
   TableSetFilter,
   TableTextFilter,
+  TableTimeFilter,
 } from './table-filter';
 import {
   TableBody,
@@ -320,13 +322,16 @@ describe('the column filter', () => {
   function Typed({
     kind,
     onValueChange,
+    value,
   }: {
-    kind: 'boolean' | 'date' | 'number' | 'text';
+    kind: 'boolean' | 'date' | 'datetime' | 'number' | 'text' | 'time';
     onValueChange?: (value: FilterDescriptor | null) => void;
+    value?: FilterDescriptor | null;
   }) {
     const props = {
       columnLabel: 'amount',
       ...(onValueChange ? { onValueChange: onValueChange as never } : {}),
+      ...(value === undefined ? {} : { value: value as never }),
     };
 
     return (
@@ -340,6 +345,8 @@ describe('the column filter', () => {
                   {kind === 'text' ? <TableTextFilter {...props} /> : null}
                   {kind === 'number' ? <TableNumberFilter {...props} /> : null}
                   {kind === 'date' ? <TableDateFilter {...props} /> : null}
+                  {kind === 'time' ? <TableTimeFilter {...props} /> : null}
+                  {kind === 'datetime' ? <TableDateTimeFilter {...props} /> : null}
                   {kind === 'boolean' ? <TableBooleanFilter {...props} /> : null}
                 </TableColumnActions>
               </TableColumnHeader>
@@ -608,6 +615,174 @@ describe('the column filter', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Clear' }));
 
     expect(onValueChange).toHaveBeenCalledWith(null, expect.objectContaining({ reason: 'clear' }));
+  });
+
+  /**
+   * The two kinds the date chain supplied. The operand is the whole picker,
+   * and the descriptor it holds is the ISO text the engine compares at the
+   * operand's own precision — so a value that came in as text goes back out
+   * unchanged, whatever the picker showed in between.
+   */
+  it('draws a time picker per operand, and writes the ISO text at its granularity', async () => {
+    const onValueChange = vi.fn();
+    const night = {
+      conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],
+      join: 'and',
+      kind: 'time',
+    } as const;
+    render(<Typed kind="time" onValueChange={onValueChange} value={night} />);
+
+    const trigger = screen.getByRole('button', { name: /^Filter amount: Between 22:00/ });
+    expect(trigger).toHaveAttribute('data-filtered', '');
+    fireEvent.click(trigger);
+
+    const operand = await waitFor(() => {
+      const found = document.querySelector('[data-part="filter-operand"][data-kind="time"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(operand.querySelectorAll('[data-ui="time-picker"]').length).toBe(2);
+    expect(operand).not.toHaveAttribute('data-range');
+
+    /* The first picker's hour segment, stepped once: the picker writes the
+       minute it is set to, and the descriptor receives `HH:MM` rather than a
+       `PlainTime` or a padded second. */
+    const hour = operand.querySelectorAll('[role="spinbutton"]')[0] as HTMLElement;
+    fireEvent.keyDown(hour, { key: 'ArrowUp' });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(onValueChange).toHaveBeenCalledWith(
+      { ...night, conditions: [{ end: '02:00', operator: 'between', value: '23:00' }] },
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('draws a date-time picker, and offers the operators of a day', async () => {
+    render(
+      <Typed
+        kind="datetime"
+        value={{
+          conditions: [{ operator: 'after', value: '2026-09-14T09:00' }],
+          join: 'and',
+          kind: 'datetime',
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /^Filter amount: After 2026-09-14T09:00/ }));
+    const operand = await waitFor(() => {
+      const found = document.querySelector('[data-part="filter-operand"][data-kind="datetime"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(operand.querySelectorAll('[data-ui="datetime-picker"]').length).toBe(1);
+
+    /* The first condition is complete, so the second stands beside it with a
+       chooser of its own; the first chooser is the one read. */
+    fireEvent.click(screen.getAllByRole('combobox', { name: 'Condition' })[0] as HTMLElement);
+    const offered = (await screen.findAllByRole('option')).map((option) => option.textContent);
+    expect(offered).toEqual(
+      operatorsFor('datetime').map((operator) => DEFAULT_TABLE_LABELS.filterOperators[operator]),
+    );
+  });
+
+  /**
+   * One control for both ends of a date range rather than two pickers: it says
+   * the run's length while it is drawn and takes the ends in either order. The
+   * operand grid is told, so a single child is not left in the first of two
+   * columns. Every other operator keeps the one picker it had.
+   */
+  it('draws one range picker for a date between, and one date picker otherwise', async () => {
+    render(
+      <Typed
+        kind="date"
+        value={{
+          conditions: [{ end: '2026-09-30', operator: 'between', value: '2026-09-01' }],
+          join: 'and',
+          kind: 'date',
+        }}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /^Filter amount: Between/ }));
+    const operand = await waitFor(() => {
+      const found = document.querySelector('[data-part="filter-operand"][data-kind="date"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(operand).toHaveAttribute('data-range', '');
+    expect(operand.querySelectorAll('[data-ui="date-range-picker"]').length).toBe(1);
+    expect(screen.getByRole('group', { name: 'From' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'To' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('combobox', { name: 'Condition' })[0] as HTMLElement);
+    fireEvent.click(await screen.findByRole('option', { name: 'Is' }));
+
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-part="filter-operand"] [data-ui="date-picker"]'),
+      ).not.toBeNull(),
+    );
+    expect(document.querySelector('[data-part="filter-operand"]')).not.toHaveAttribute(
+      'data-range',
+    );
+  });
+
+  /**
+   * A list too long to tick is typed instead. The chips hold the same list the
+   * checkboxes held, so a saved view is read by either; the options are a
+   * datalist of suggestions and the set a typed value must belong to.
+   */
+  it('types the set as chips, and refuses a value the column does not hold', async () => {
+    const onValueChange = vi.fn();
+    render(
+      <Table columns={1}>
+        <TableContent>
+          <TableHead>
+            <TableRow>
+              <TableColumnHeader column="status">
+                Status
+                <TableColumnActions>
+                  <TableSetFilter
+                    columnLabel="status"
+                    onValueChange={onValueChange}
+                    operand="tags"
+                    options={OPTIONS}
+                  />
+                </TableColumnActions>
+              </TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody />
+        </TableContent>
+      </Table>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter status' }));
+    const operand = await waitFor(() => {
+      const found = document.querySelector('[data-part="filter-operand"][data-operand="tags"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(operand.querySelector('[data-ui="tags-input"]')).not.toBeNull();
+    expect(document.querySelector('[data-part="filter-list"]')).toBeNull();
+    expect(operand.querySelectorAll('datalist option').length).toBe(OPTIONS.length);
+
+    const input = operand.querySelector('[data-part="input"]') as HTMLInputElement;
+    expect(input).toHaveAttribute('list', operand.querySelector('datalist')?.id);
+    fireEvent.change(input, { target: { value: 'Paid' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(operand.querySelectorAll('[data-ui="tag"]').length).toBe(1));
+
+    fireEvent.change(input, { target: { value: 'Nope' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(operand.querySelectorAll('[data-ui="tag"]').length).toBe(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+    expect(onValueChange).toHaveBeenCalledWith(
+      setFilter(['Paid']),
+      expect.objectContaining({ reason: 'pointer' }),
+    );
   });
 
   /**

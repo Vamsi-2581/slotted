@@ -430,7 +430,7 @@ export const ANGULAR_SEGMENTED_CONTROL_DOCS = {
 </div>`,
       }),
       defineSnippet({
-        id: 'segmented-control-angular-theming',
+        id: 'segmented-control-theming',
         language: 'css',
         label: 'Retuning the family for an application',
         source: `[data-ui='segmented-control'] {

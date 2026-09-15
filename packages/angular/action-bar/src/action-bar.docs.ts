@@ -567,7 +567,7 @@ export const ANGULAR_ACTION_BAR_DOCS = {
 </footer>`,
       }),
       defineSnippet({
-        id: 'action-bar-angular-theming',
+        id: 'action-bar-theming',
         language: 'css',
         label: 'Retuning the family for an application',
         source: `[data-ui='action-bar'] {

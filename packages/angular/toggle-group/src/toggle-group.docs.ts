@@ -439,7 +439,7 @@ export const ANGULAR_TOGGLE_GROUP_DOCS = {
 </div>`,
       }),
       defineSnippet({
-        id: 'toggle-group-angular-theming',
+        id: 'toggle-group-theming',
         language: 'css',
         label: 'Retuning the family for an application',
         source: `[data-ui='toggle-group'] {

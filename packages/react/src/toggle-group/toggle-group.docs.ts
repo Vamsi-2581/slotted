@@ -436,7 +436,7 @@ export const REACT_TOGGLE_GROUP_DOCS = {
     ],
     snippets: [
       defineSnippet({
-        id: 'toggle-group-anatomy',
+        id: 'toggle-group-react-anatomy',
         language: 'tsx',
         label: 'The anatomy as it reaches the DOM',
         source: `<div

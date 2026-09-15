@@ -434,7 +434,7 @@ export const REACT_SEGMENTED_CONTROL_DOCS = {
     ],
     snippets: [
       defineSnippet({
-        id: 'segmented-control-anatomy',
+        id: 'segmented-control-react-anatomy',
         language: 'tsx',
         label: 'The anatomy as it reaches the DOM',
         source: `<div

@@ -344,14 +344,14 @@ export const ANGULAR_SPLITTER_DOCS = {
       source: "import { SlSplitter } from '@slotted/angular/splitter';",
     }),
     defineSnippet({
-      id: 'splitter-angular-css',
+      id: 'splitter-css',
       language: 'css',
       label: 'The one rule a consumer writes',
       source:
         '.workspace {\n  display: flex;\n}\n\n.workspace > aside {\n  flex: none;\n  inline-size: calc(var(--slotted-splitter-value, 0.34) * 100%);\n}\n\n.workspace > main {\n  flex: 1;\n  min-inline-size: 0;\n}',
     }),
     defineSnippet({
-      id: 'splitter-angular-theme',
+      id: 'splitter-theming',
       language: 'css',
       label: 'Retuning the family in an application',
       source:

@@ -25,6 +25,7 @@ const BROWSERS = new Set(['chromium', 'firefox', 'webkit']);
 const STRATEGIES = ['full', 'partitioned', 'on-demand', 'hybrid'];
 const BROWSER_TYPES = { chromium, firefox, webkit };
 const require = createRequire(import.meta.url);
+const PROGRESS_FILE = path.join(REPOSITORY_ROOT, '.codex/progress/nexora-calibration-runs.json');
 
 function option(arguments_, name) {
   return arguments_.find((argument) => argument.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -142,9 +143,25 @@ async function startLaboratory() {
 }
 
 export async function runCalibrationMatrix(configuration) {
-  const runs = [];
-  const browserVersions = {};
+  const strategies = configuration.strategies ?? STRATEGIES;
+  const targetRunIds = new Set(
+    configuration.browsers.flatMap((browserName) =>
+      configuration.profiles.flatMap((profile) =>
+        strategies.flatMap((strategy) =>
+          Array.from(
+            { length: configuration.samples },
+            (_, index) => `${profile}-${browserName}-${strategy}-${index + 1}`,
+          ),
+        ),
+      ),
+    ),
+  );
+  const runs = (configuration.existingRuns ?? []).filter((run) => targetRunIds.has(run.runId));
+  const browserVersions = { ...(configuration.existingBrowserVersions ?? {}) };
   const references = new Map();
+  for (const run of runs) {
+    if (run.strategy === 'full') references.set(`${run.profile}\u0000${run.browser}`, run);
+  }
   const laboratory = await startLaboratory();
   try {
     for (const browserName of configuration.browsers) {
@@ -152,9 +169,14 @@ export async function runCalibrationMatrix(configuration) {
       browserVersions[browserName] = browser.version();
       try {
         for (const profile of configuration.profiles) {
-          for (const strategy of STRATEGIES) {
+          for (const strategy of strategies) {
             for (let sample = 1; sample <= configuration.samples; sample += 1) {
               const runId = `${profile}-${browserName}-${strategy}-${sample}`;
+              if (runs.some((run) => run.runId === runId)) {
+                console.log(`[skip] ${runId}`);
+                continue;
+              }
+              console.log(`[start] ${runId}`);
               const request = {
                 type: 'start',
                 scenario: 'nexora-materialization-calibration-v1',
@@ -171,6 +193,10 @@ export async function runCalibrationMatrix(configuration) {
               assertCorrectness(run, reference);
               if (strategy === 'full' && !reference) references.set(referenceKey, run);
               runs.push(run);
+              await configuration.onRun?.({ runs, browserVersions });
+              console.log(
+                `[done] ${runId} operational=${run.metrics.operationalReadyMs.toFixed(1)}ms complete=${run.metrics.completeReadyMs.toFixed(1)}ms`,
+              );
             }
           }
         }
@@ -181,7 +207,54 @@ export async function runCalibrationMatrix(configuration) {
   } finally {
     await laboratory.server.close();
   }
-  return { runs, browserVersions };
+  return {
+    runs: runs.sort((left, right) => left.runId.localeCompare(right.runId)),
+    browserVersions,
+  };
+}
+
+function gitCommit() {
+  return execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: REPOSITORY_ROOT,
+    encoding: 'utf8',
+  }).trim();
+}
+
+async function resumableConfiguration(configuration) {
+  const sourceCommit = gitCommit();
+  let progress;
+  try {
+    progress = JSON.parse(await readFile(PROGRESS_FILE, 'utf8'));
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error;
+  }
+  const reusable = progress?.sourceCommit === sourceCommit;
+  const persist = async ({ runs, browserVersions }) => {
+    await mkdir(path.dirname(PROGRESS_FILE), { recursive: true });
+    await writeFile(
+      PROGRESS_FILE,
+      `${JSON.stringify(
+        {
+          sourceCommit,
+          configuration: {
+            profiles: configuration.profiles,
+            browsers: configuration.browsers,
+            samples: configuration.samples,
+          },
+          browserVersions,
+          runs,
+        },
+        null,
+        2,
+      )}\n`,
+    );
+  };
+  return {
+    ...configuration,
+    existingRuns: reusable ? progress.runs : [],
+    existingBrowserVersions: reusable ? progress.browserVersions : {},
+    onRun: persist,
+  };
 }
 
 function environmentFor(configuration, browserVersions) {
@@ -199,10 +272,7 @@ function environmentFor(configuration, browserVersions) {
     profiles: configuration.profiles,
     seed: 'nexora-calibration-v1',
     samples: configuration.samples,
-    gitCommit: execFileSync('git', ['rev-parse', 'HEAD'], {
-      cwd: REPOSITORY_ROOT,
-      encoding: 'utf8',
-    }).trim(),
+    gitCommit: gitCommit(),
   };
 }
 
@@ -216,7 +286,10 @@ function printSummary(aggregates) {
       operationalP95: item.operationalReadyMs.p95.toFixed(1),
       completeP95: item.completeReadyMs.p95.toFixed(1),
       queryP95: Math.max(...Object.values(item.probeP95Ms)).toFixed(1),
+      workerMax: item.maxWorkerBatchMs.toFixed(1),
+      mainGapMax: item.maxMainThreadGapMs.toFixed(1),
       bytesP95: item.storageBytes.p95,
+      reasons: qualifyStrategy(item).reasons.join('; '),
     })),
   );
 }
@@ -267,7 +340,9 @@ async function writeRecordedEvidence({ runs, aggregates, recommendation, budgets
 
 async function main() {
   const configuration = parseArguments(process.argv.slice(2));
-  const measured = await runCalibrationMatrix(configuration);
+  const executionConfiguration =
+    configuration.mode === 'record' ? await resumableConfiguration(configuration) : configuration;
+  const measured = await runCalibrationMatrix(executionConfiguration);
   const aggregates = aggregateRuns(measured.runs);
   const recommendation = recommendMaterialization(aggregates);
   printSummary(aggregates);

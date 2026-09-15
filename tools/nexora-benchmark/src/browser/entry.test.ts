@@ -85,6 +85,23 @@ describe('calibration browser protocol', () => {
     ).toThrow('Worker progress regressed from 3/10 to 2/10');
   });
 
+  it('retains only the maximum batch duration instead of growing main-thread history', () => {
+    const slower = reduceWorkerEvent(createRunState('run-17'), {
+      type: 'batch',
+      runId: 'run-17',
+      records: 512,
+      durationMs: 12,
+    });
+    const faster = reduceWorkerEvent(slower, {
+      type: 'batch',
+      runId: 'run-17',
+      records: 512,
+      durationMs: 4,
+    });
+
+    expect(faster.maxWorkerBatchMs).toBe(12);
+  });
+
   it('makes cancellation terminal for the correlated run', () => {
     const cancelled = reduceWorkerEvent(createRunState('run-17'), {
       type: 'cancelled',

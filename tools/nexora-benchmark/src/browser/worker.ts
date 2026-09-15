@@ -18,6 +18,7 @@ const PROBES: readonly ProbeName[] = [
   'finance-summary',
   'historical-point-lookup',
 ];
+const WORKER_BATCH_SIZE = 32;
 
 interface ActiveRun {
   readonly runId: string;
@@ -64,25 +65,31 @@ async function execute(request: CalibrationStartRequest, run: ActiveRun): Promis
   const started = performance.now();
   const totalRecords = recordCount(request);
   const readiness: ReadinessTransition[] = [];
-  const batchDurations: number[] = [];
   let processedRecords = 0;
+  let maxWorkerBatchMs = 0;
+  let nextProgress = Math.max(1, Math.ceil(totalRecords / 100));
 
   const strategy = createStrategy(request.strategy, {
     databaseName: `nexora-${request.runId}`,
-    batchSize: 512,
+    batchSize: WORKER_BATCH_SIZE,
   });
   run.session = await strategy.prepare(profile, {
     onBatch(sample) {
       processedRecords = Math.min(totalRecords, processedRecords + sample.records);
-      batchDurations.push(sample.durationMs);
-      emit({ type: 'batch', runId: request.runId, ...sample });
-      emit({
-        type: 'progress',
-        runId: request.runId,
-        phase: 'materialization',
-        completed: processedRecords,
-        total: totalRecords,
-      });
+      if (sample.durationMs > maxWorkerBatchMs) {
+        maxWorkerBatchMs = sample.durationMs;
+        emit({ type: 'batch', runId: request.runId, ...sample });
+      }
+      if (processedRecords >= nextProgress) {
+        emit({
+          type: 'progress',
+          runId: request.runId,
+          phase: 'materialization',
+          completed: processedRecords,
+          total: totalRecords,
+        });
+        nextProgress = processedRecords + Math.max(1, Math.ceil(totalRecords / 100));
+      }
     },
     onReadiness(snapshot) {
       const transition = { state: snapshot.state, atMs: elapsed(started) };
@@ -147,7 +154,7 @@ async function execute(request: CalibrationStartRequest, run: ActiveRun): Promis
     metrics: {
       operationalReadyMs,
       completeReadyMs,
-      maxWorkerBatchMs: Math.max(0, ...batchDurations),
+      maxWorkerBatchMs,
       maxMainThreadGapMs: 0,
       storageBytes,
       probes,

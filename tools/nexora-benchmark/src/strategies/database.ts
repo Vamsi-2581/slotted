@@ -462,22 +462,27 @@ export abstract class DatabaseStrategySession implements StrategySession {
 
   protected async writeBatch(batch: RecordBatch): Promise<void> {
     if (this.disposed || batch.records.length === 0) return;
-    const started = now();
-    await this.database.records(batch.table).bulkPut(batch.records);
+    const writeStarted = now();
+    const write = this.database.records(batch.table).bulkPut(batch.records);
+    let blockingDurationMs = now() - writeStarted;
+    await write;
     if (this.disposed) return;
+    const finalizeStarted = now();
     this.committedCounts[batch.table] += batch.records.length;
     const partitionId = `${batch.table}:${batch.partition}`;
     this.committedPartitions.add(partitionId);
     const partitionCount = (this.partitionCounts.get(partitionId) ?? 0) + batch.records.length;
     this.partitionCounts.set(partitionId, partitionCount);
     this.storedBytes += JSON.stringify(batch.records).length;
-    await this.database.partitions.put({
+    const partitionWrite = this.database.partitions.put({
       id: partitionId,
       table: batch.table,
       partition: batch.partition,
       records: partitionCount,
     });
-    this.observer.onBatch({ records: batch.records.length, durationMs: now() - started });
+    blockingDurationMs = Math.max(blockingDurationMs, now() - finalizeStarted);
+    await partitionWrite;
+    this.observer.onBatch({ records: batch.records.length, durationMs: blockingDurationMs });
   }
 
   protected trackCommittedBatch(batch: RecordBatch, durationMs: number): void {

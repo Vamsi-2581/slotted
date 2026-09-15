@@ -250,7 +250,7 @@ Recorded from commit \`${environment.gitCommit}\` on ${environment.os}/${environ
 
 ## Recommendation
 
-**${recommendation.strategy ?? 'No strategy qualified'}** is the highest-ranked candidate under the recorded hard gates and lexicographic performance priorities. The next persistence plan must retain the recorded 512-record worker batch and 12-month hybrid operational window when hybrid is selected.
+**${recommendation.strategy ?? 'No strategy qualified'}** is the highest-ranked candidate under the recorded hard gates and lexicographic performance priorities. The next persistence plan must retain the recorded 32-record worker batch and 12-month hybrid operational window when hybrid is selected.
 
 ## Measured evidence
 

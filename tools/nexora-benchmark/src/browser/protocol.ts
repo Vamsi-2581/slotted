@@ -69,7 +69,7 @@ export interface CalibrationRunState {
     readonly total: number;
   };
   readonly readiness: readonly ReadinessTransition[];
-  readonly batchDurations: readonly number[];
+  readonly maxWorkerBatchMs: number;
   readonly probes: readonly ProbeMetric[];
   readonly storageBytes?: number;
   readonly digest?: string;
@@ -119,7 +119,7 @@ export function createRunState(runId: string): CalibrationRunState {
     runId,
     status: 'running',
     readiness: [],
-    batchDurations: [],
+    maxWorkerBatchMs: 0,
     probes: [],
   };
 }
@@ -175,7 +175,10 @@ export function reduceWorkerEvent(
       };
     }
     case 'batch':
-      return { ...state, batchDurations: [...state.batchDurations, event.durationMs] };
+      return {
+        ...state,
+        maxWorkerBatchMs: Math.max(state.maxWorkerBatchMs, event.durationMs),
+      };
     case 'probe':
       return { ...state, probes: [...state.probes, event.metric] };
     case 'storage':

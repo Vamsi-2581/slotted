@@ -139,7 +139,7 @@ export function resolveCommands<T extends CommandItem>({
   const ranker = rank === undefined ? createCommandRanker<T>() : rank;
 
   /* Score, or keep, every item of the page. */
-  let scored: Scored<T>[] = [];
+  const scored: Scored<T>[] = [];
   page.items.forEach((item, index) => {
     if (trimmed === '' || ranker === null) {
       scored.push({ item, score: 0, index });

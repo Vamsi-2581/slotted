@@ -308,6 +308,17 @@ other families stand on. Justify it at the gate before writing it.
   cancel and emits no drop. Decided in wave 9; it binds `data-grid`,
   `listbox`, `tree`, `tags-input` and `dashboard-grid`.
 
+- **A grid that animates an `fr` track beside an `auto` track packs its
+  tracks at the start.** `side-navigation` opens a group on the technique
+  `collapsible` uses — a track transitioning between `0fr` and `1fr` — but
+  puts the row in an `auto` track of the same grid. While the fr track is
+  between the two values the grid holds free space, and the default
+  `align-content: normal` stretches the `auto` track with it: measured, the
+  row grew from 34 to 60 pixels at the middle of every open and close and came
+  back, a bounce on the row the reader had just pressed. `align-content:
+start` on the grid is the fix, and `collapsible` never met it because its
+  animated track is alone in its grid.
+
 ## Working beside another session
 
 Another session may be building a different family in this same worktree at the

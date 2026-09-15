@@ -49,7 +49,8 @@ Módulos de `packages/core` entregues: `clipboard`, `code`, `collection`,
 `live-announcer`,
 `loading`, `measure`, `number`, `overflow`, `pagination`, `pointer-intent`,
 `portal`, `positioner`, `presence`, `progress`, `slider`, `state`, `steps`,
-`sticky-header`, `tags`, `timeline`, `toast`, `typeahead`, `upload`.
+`sticky-header`, `tags`, `text` (onda 9), `timeline`, `toast`, `typeahead`,
+`upload`.
 
 ## Reaberturas prometidas por escrito
 
@@ -121,6 +122,24 @@ que três autoavaliações pediram.
   `app-shell` e lê `collapsedTo="rail"` dela. Constrói sobre `list-item`,
   `collapsible` e `@slotted/core/disclosure`; a marca de região reutiliza
   `--slotted-icon-panel-open`/`-close`, virada por lado e por direção.
+
+  Entregue em 2026-09-15. Inventário em
+  `docs/superpowers/specs/2026-09-15-side-navigation-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-15-side-navigation-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-15-side-navigation-self-assessment.md`. Dezassete
+  partes; três modelos (`value`, `expanded`, `flyout`); a calha lida pela
+  largura da própria raiz (`compactAt: 96`) e não pelo contexto da casca, com
+  `landmark` resolvido pelo contexto (`nav` sozinha, `div` na região `nav`);
+  o flyout composto de `portal`, `positioner`, `presence` e
+  `dismissable-layer`; `truncate: end | middle | none` com o corte pelo meio
+  em `@slotted/core/text` e o tooltip a carregar o texto inteiro; `count` como
+  parte própria, o `badge` em `end`. O item de comando é um `button` na parte
+  `link`. As demonstrações de `app-shell` montam a navegação com a família.
+  Recusado por escrito: barra de estado na aresta (R1), drawer próprio
+  (`app-shell`), horizontal (`top-navigation`), reordenar (reabertura depois
+  de `drag-and-drop`), pesquisa (`text-field` + filtro do consumidor).
+
 - `top-navigation` — regiões de marca, navegação, busca, contexto, ajuda,
   notificações e conta, com prioridade de colapso por container query. Ocupa a
   região `header` de `app-shell`. Landmarks e skip link; a barra não é um

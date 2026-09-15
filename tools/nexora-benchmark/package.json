@@ -6,7 +6,7 @@
   "scripts": {
     "build": "vite build",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
+    "typecheck": "tsc -p tsconfig.json --noEmit --pretty false && tsc -p tsconfig.worker.json --noEmit --pretty false",
     "verify": "pnpm test && pnpm typecheck && pnpm build",
     "benchmark:smoke": "node scripts/calibrate.mjs --mode=smoke --profile=smoke --samples=1",
     "benchmark:record": "node scripts/calibrate.mjs --mode=record --profile=canonical,enterprise --samples=3",

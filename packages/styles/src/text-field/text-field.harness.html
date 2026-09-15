@@ -49,6 +49,140 @@
   </div>
 </section>
 
+<!--
+  The context `plain` is for: a cell that is only a control while it is being
+  used. The row is the ground, the cell is the box, and the control has to draw
+  hover and focus inside that box without rounding a corner the cell does not
+  have or reaching past an edge the next row owns.
+-->
+<section data-scene="in-a-row">
+  <div data-ui="table" data-part="root" data-variant="ruled" data-density="compact">
+    <div data-part="scroll">
+      <table data-part="table">
+        <thead data-part="head">
+          <tr data-part="row">
+            <th data-part="column-header" scope="col">SKU</th>
+            <th data-part="column-header" scope="col">Descrição</th>
+            <th data-part="column-header" scope="col" data-numeric>Qtd.</th>
+          </tr>
+        </thead>
+        <tbody data-part="body">
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">PRD-0412</th>
+            <td data-part="cell">
+              <div data-ui="text-field" data-part="root" data-size="sm" data-variant="plain">
+                <input data-part="input" value="Parafuso sextavado M8" aria-label="Descrição" />
+              </div>
+            </td>
+            <td data-part="cell" data-numeric>
+              <div
+                data-ui="text-field"
+                data-part="root"
+                data-size="sm"
+                data-variant="plain"
+                data-mono
+              >
+                <input data-part="input" value="1200" aria-label="Quantidade" />
+              </div>
+            </td>
+          </tr>
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">PRD-0413</th>
+            <td data-part="cell">
+              <div data-ui="text-field" data-part="root" data-size="sm" data-variant="plain">
+                <input data-part="input" value="Arruela lisa M8" aria-label="Descrição" />
+              </div>
+            </td>
+            <td data-part="cell" data-numeric>
+              <div
+                data-ui="text-field"
+                data-part="root"
+                data-size="sm"
+                data-variant="plain"
+                data-mono
+              >
+                <input data-part="input" value="3400" aria-label="Quantidade" />
+              </div>
+            </td>
+          </tr>
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">PRD-0414</th>
+            <td data-part="cell">
+              <div
+                data-ui="text-field"
+                data-part="root"
+                data-size="sm"
+                data-variant="plain"
+                data-invalid
+              >
+                <input
+                  data-part="input"
+                  value=""
+                  placeholder="Obrigatório"
+                  aria-label="Descrição"
+                  aria-invalid="true"
+                />
+              </div>
+            </td>
+            <td data-part="cell" data-numeric>
+              <div
+                data-ui="text-field"
+                data-part="root"
+                data-size="sm"
+                data-variant="plain"
+                data-mono
+              >
+                <input data-part="input" value="0" aria-label="Quantidade" />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!--
+  The box the control fills has a corner. The control does not know that, and
+  it does not need to: the frame clips what its rows paint into its radius, and
+  a `plain` control's wash and ring are painted by the row. The control in the
+  bottom-right cell is the one to hover and focus; its cell has no inset, which
+  is what `table` will do for a cell holding a `plain` control (pending in
+  `docs/build-order.md`) and is written inline here until it does.
+-->
+<section data-scene="in-a-frame">
+  <div data-ui="table" data-part="root" data-variant="framed" data-density="compact">
+    <div data-part="scroll">
+      <table data-part="table">
+        <thead data-part="head">
+          <tr data-part="row">
+            <th data-part="column-header" scope="col">SKU</th>
+            <th data-part="column-header" scope="col">Descrição</th>
+          </tr>
+        </thead>
+        <tbody data-part="body">
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">PRD-0412</th>
+            <td data-part="cell">
+              <div data-ui="text-field" data-part="root" data-size="sm" data-variant="plain">
+                <input data-part="input" value="Parafuso sextavado M8" aria-label="Descrição" />
+              </div>
+            </td>
+          </tr>
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">PRD-0413</th>
+            <td data-part="cell" style="padding: 0">
+              <div data-ui="text-field" data-part="root" data-size="sm" data-variant="plain">
+                <input data-part="input" value="Arruela lisa M8" aria-label="Descrição" />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <section data-scene="adornments">
   <div data-ui="stack" data-part="root" data-gap="6">
     <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">

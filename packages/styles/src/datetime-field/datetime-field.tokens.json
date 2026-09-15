@@ -72,6 +72,7 @@
   "--slotted-font-weight-semibold",
   "--slotted-icon-chevron-right",
   "--slotted-icon-x",
+  "--slotted-radius-none",
   "--slotted-radius-xs",
   "--slotted-space-1",
   "--slotted-space-2",

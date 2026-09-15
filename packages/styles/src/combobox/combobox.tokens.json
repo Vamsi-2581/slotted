@@ -92,6 +92,7 @@
   "--slotted-line-height-md",
   "--slotted-line-height-sm",
   "--slotted-radius-lg",
+  "--slotted-radius-none",
   "--slotted-shadow-md",
   "--slotted-space-1",
   "--slotted-space-2",

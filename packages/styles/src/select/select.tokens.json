@@ -47,6 +47,7 @@
   "--slotted-line-height-md",
   "--slotted-line-height-sm",
   "--slotted-radius-lg",
+  "--slotted-radius-none",
   "--slotted-select-action-active-background",
   "--slotted-select-action-color",
   "--slotted-select-action-hover-background",

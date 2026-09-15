@@ -26,6 +26,7 @@
   "--slotted-focus-ring-width",
   "--slotted-font-family-mono",
   "--slotted-line-height-md",
+  "--slotted-radius-none",
   "--slotted-surface-sunken",
   "--slotted-text",
   "--slotted-text-muted",

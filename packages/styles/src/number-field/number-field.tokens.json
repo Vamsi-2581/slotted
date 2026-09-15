@@ -62,6 +62,7 @@
   "--slotted-number-field-subtle-background",
   "--slotted-number-field-subtle-border-color",
   "--slotted-number-field-subtle-hover-background",
+  "--slotted-radius-none",
   "--slotted-space-2",
   "--slotted-surface-sunken",
   "--slotted-target-min",

@@ -379,6 +379,7 @@
   [data-ui='time-field'][data-part='root'][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
+    border-radius: var(--slotted-radius-none, 0px);
     box-shadow: none;
   }
 
@@ -539,6 +540,19 @@
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /**
+   * The ring of a control whose box is not its own is drawn inside that box,
+   * the way the inner controls draw theirs inside the frame: two pixels past
+   * the control is two pixels over the next row's rule. No lift either — a
+   * shadow that appears only under focus is a cell that changes size when it
+   * is used.
+   */
+  [data-ui='time-field'][data-part='root'][data-variant='plain']:has([data-part='segment']:focus),
+  [data-ui='time-field'][data-part='root'][data-variant='plain']:has([data-part='duration']:focus) {
+    box-shadow: none;
+    outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   [data-ui='time-field'] [data-part='segment']:focus {

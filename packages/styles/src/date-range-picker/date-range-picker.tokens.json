@@ -84,6 +84,7 @@
   "--slotted-icon-x",
   "--slotted-line-height-sm",
   "--slotted-radius-lg",
+  "--slotted-radius-none",
   "--slotted-radius-xs",
   "--slotted-shadow-md",
   "--slotted-space-1",

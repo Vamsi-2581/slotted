@@ -98,6 +98,10 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-segmented-control-count',
     '--slotted-segmented-control-index',
     '--slotted-upload-visible-rows',
+    '--slotted-code-block-digits',
+    '--slotted-code-block-indent',
+    '--slotted-code-block-collapse',
+    '--slotted-code-block-max-lines',
   ]);
   assert.equal(isRuntimeProperty('--slotted-positioner-arrow-x'), true);
   assert.equal(isRuntimeProperty('--slotted-space-4'), false);
@@ -106,4 +110,6 @@ test('names every runtime prefix once, where a family can find the reason', () =
   assert.equal(isRuntimeProperty('--slotted-toast-gap'), false);
   assert.equal(isRuntimeProperty('--slotted-tree-depth'), true);
   assert.equal(isRuntimeProperty('--slotted-tree-indent'), false);
+  assert.equal(isRuntimeProperty('--slotted-code-block-digits'), true);
+  assert.equal(isRuntimeProperty('--slotted-code-block-radius'), false);
 });

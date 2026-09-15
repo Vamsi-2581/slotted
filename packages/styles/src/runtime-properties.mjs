@@ -129,6 +129,19 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    * file every one of them as unreachable by a theme.
    */
   '--slotted-upload-visible-rows',
+  /**
+   * `code-block` — four facts about the content, written by the binding: how
+   * many digits the last line number has, so the gutter is measured in
+   * characters; the leading whitespace of a line, so a wrapped continuation
+   * keeps the code's own indent; the line the block collapses after; and the
+   * line it scrolls past. No theme can know any of them. Named one by one
+   * rather than by a prefix, for the reason `tree-depth` is: the family owns
+   * theme tokens under `--slotted-code-block-`.
+   */
+  '--slotted-code-block-digits',
+  '--slotted-code-block-indent',
+  '--slotted-code-block-collapse',
+  '--slotted-code-block-max-lines',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

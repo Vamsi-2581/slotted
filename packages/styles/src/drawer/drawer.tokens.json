@@ -5,6 +5,7 @@
   "--slotted-border-width-thin",
   "--slotted-control-font-family",
   "--slotted-control-icon-size-md",
+  "--slotted-control-inner-size-md",
   "--slotted-control-radius",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",

@@ -30,6 +30,7 @@
      * keeps the trail's own type.
      */
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
     --_ellipsis-hover: var(--slotted-tone-secondary-subtle-hover);
     --_ellipsis-active: var(--slotted-tone-secondary-subtle-active);
 
@@ -248,7 +249,7 @@
     font: inherit;
     inline-size: max(
       var(--slotted-target-min, 24px),
-      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+      min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
     );
     justify-content: center;
     padding: 0;

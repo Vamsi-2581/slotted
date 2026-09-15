@@ -57,6 +57,7 @@
      */
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+    --_inner-size: var(--slotted-control-inner-size-sm, 22px);
     /**
      * The two tokens a host sets on a row of chips and never on a chip: the
      * block inset, so a frame that is shorter than the chip at `dense` can
@@ -254,6 +255,7 @@
   [data-ui='tag'][data-part='root'][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
     --_inset-block: var(--slotted-tag-inset-block, var(--slotted-space-3, 0.375rem));
     --_inset-inline: var(--slotted-space-5, 0.75rem);
     --_gap: var(--slotted-space-3, 0.375rem);
@@ -456,7 +458,7 @@
     flex: none;
     inline-size: max(
       var(--slotted-target-min, 24px),
-      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+      min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
     );
     justify-content: center;
     padding: 0;

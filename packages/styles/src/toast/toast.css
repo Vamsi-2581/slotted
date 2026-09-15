@@ -201,6 +201,7 @@
        not — the cost `card` and `alert` both accepted and recorded. */
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_glyph-size: var(--slotted-control-icon-size-md, 16px);
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
     /**
      * The status mark is the title's own size (R5), which is the rule `alert`
      * draws its mark with: `1em` resolves against this box, whose font size is
@@ -226,7 +227,7 @@
       --slotted-toast-close-size,
       max(
         var(--slotted-target-min, 24px),
-        calc(var(--_glyph-size) + 2 * var(--slotted-space-2, 0.25rem))
+        min(calc(var(--_glyph-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
       )
     );
     --_progress-size: var(--slotted-toast-progress-size, var(--slotted-space-1, 0.125rem));

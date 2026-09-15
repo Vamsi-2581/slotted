@@ -26,6 +26,7 @@
   "--slotted-control-font-size-md",
   "--slotted-control-gap-md",
   "--slotted-control-icon-size-md",
+  "--slotted-control-inner-size-md",
   "--slotted-control-radius",
   "--slotted-duration-short",
   "--slotted-easing-standard",

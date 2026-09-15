@@ -87,22 +87,17 @@
     /** The floor under the glyph scale at the dense step (SL3); a family token so a theme can retune it. */
     --_icon-floor: var(--slotted-select-icon-size-min, 14px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
 
     /**
-     * The drawn clear button, sized by its glyph and bounded by the frame, so
-     * two pixels of the frame's inner box always show above and below it. The
+     * The drawn clear button, sized by its glyph and capped at the inner size
+     * of a control at this step (`--slotted-control-inner-size-*`). The
      * arithmetic is `text-field`'s, because the two buttons are the same button
      * in the same frame and a second answer would drift from the first.
      */
     --_action-size: var(
       --slotted-select-action-size,
-      min(
-        calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)),
-        calc(
-          var(--_height) - var(--slotted-control-border-width, 1px) * 2 -
-            var(--slotted-space-2, 0.25rem)
-        )
-      )
+      min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
     );
 
     align-items: center;
@@ -481,6 +476,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
+    --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
   [data-ui='select'][data-part='root'][data-size='md'] {
@@ -489,6 +485,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
   [data-ui='select'][data-part='root'][data-size='lg'] {
@@ -497,6 +494,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_gap: var(--slotted-control-gap-lg, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-lg, 18px));
+    --_inner-size: var(--slotted-control-inner-size-lg, 28px);
   }
 
   /* ── Variant ──────────────────────────────────────────────────────────

@@ -7,6 +7,8 @@
   "--slotted-control-icon-size-md",
   "--slotted-control-icon-size-sm",
   "--slotted-control-inner-size",
+  "--slotted-control-inner-size-md",
+  "--slotted-control-inner-size-sm",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",
   "--slotted-disabled-background",

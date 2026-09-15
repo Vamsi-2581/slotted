@@ -688,6 +688,10 @@ between comfortable and dense while the control drops eight, and at dense a
 this scale when its container states it (`text-field` writes
 `--slotted-control-inner-size` on its adornments the way it writes
 `--slotted-icon-size`); on its own it keeps the height its own type gives it.
+An inner control a family draws itself — the clear mark, a stepper, a close —
+reads the scale at the family's own size step as the cap on its box:
+`min(glyph + a step of air a side, --slotted-control-inner-size-*)`, held by
+`packages/styles/src/inner-control.test.mjs`.
 
 ## Avatar size
 

@@ -139,7 +139,7 @@ Botões internos de componentes compostos (limpar valor em `Select`, `Combobox`,
 
 Substituição obrigatória: uma parte interna (`[data-part='clear']`, `[data-part='close']`, `[data-part='expand']`) estilizada no CSS do próprio componente, com:
 
-- Tamanho derivado de `--slotted-control-icon-size-<densidade>` mais padding de 2px a 4px. Nunca maior que a altura interna do controle hospedeiro.
+- Tamanho `min(glifo + um passo de ar por lado, --slotted-control-inner-size-<passo>)`: o glifo vem de `--slotted-control-icon-size-<passo>`, o teto é a escala interna do controle no mesmo passo. Nunca derivado de uma altura de controle. Guarda: `packages/styles/src/inner-control.test.mjs`.
 - Sem borda e sem sombra em repouso. `hover` altera apenas `background-color` em um passo (`secondary-subtle-hover`). `active` altera para `secondary-subtle-active`.
 - `:focus-visible` com o mesmo anel de foco global (R3).
 - Alvo de toque mínimo de 24px via `::before` transparente, não via aumento do glifo.

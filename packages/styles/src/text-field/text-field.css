@@ -36,10 +36,11 @@
     /**
      * The drawn button, and only the drawn button. It is sized by its glyph —
      * a step of air on each side, the same box every inner control in the
-     * library draws (R2) — and bounded by the frame, so two pixels of the
-     * frame's inner box always show above and below it. A button as tall as
-     * that box touched both borders and left the frame with no vertical air
-     * at all.
+     * library draws (R2) — and capped at the inner size of a control at this
+     * step, `--slotted-control-inner-size-*`, the height a key or a chip
+     * already takes inside the same frame. Before the cap it was bounded by
+     * the frame's inner box less a step of air, which let it measure 22px in a
+     * 26px field at the compact step, where the inside of that field is 20px.
      *
      * The WCAG 2.2 minimum is not this measurement. At `sm` and `dense` the
      * whole control is 24 pixels tall, so a button inset inside it cannot also
@@ -48,13 +49,7 @@
      */
     --_action-size: var(
       --slotted-text-field-action-size,
-      min(
-        calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)),
-        calc(
-          var(--_height) - var(--slotted-control-border-width, 1px) * 2 -
-            var(--slotted-space-2, 0.25rem)
-        )
-      )
+      min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
     );
 
     align-items: center;

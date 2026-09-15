@@ -64,7 +64,6 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `prose`, `table`, `tabs`        | substituir a medida de rolagem própria por `scroll-area`                                                                                        | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                             |
 | `scroll-area`                   | véu por `animation-timeline: scroll()`                                                                                                          | —                                         | `2026-09-13-scroll-area-design.md` §5                                    |
 | `listbox`, `tree`, `tags-input` | reordenar por arrasto                                                                                                                           | `drag-and-drop`                           | inventários de `listbox` (l. 125), `tree` (l. 101), `tags-input` (l. 90) |
-| fundação (R2)                   | inner controls (`clear`, `reveal`, steppers) medem `min(glifo + ar, --slotted-control-inner-size-*)`; recaptura das 27 partes                   | —                                         | `docs/archive/build-order-pass-1.md`, onda 8; `docs/build-briefing.md`   |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.

@@ -286,8 +286,13 @@ other families stand on. Justify it at the gate before writing it.
   their row of chips — and `kbd` and `tag` read it as their block size,
   deriving line and inset from it; on their own they keep the height their type
   gives them. `--slotted-tag-inset-block` stays as the standalone inset. Decided
-  in wave 8 at `filter-bar`'s release gate; the R2 inner controls (clear, reveal,
-  steppers) still take glyph plus a step of air and are pending in the foundation's scope.
+  in wave 8 at `filter-bar`'s release gate. The R2 inner controls (clear,
+  reveal, steppers, close, dismiss, the rest of
+  `packages/styles/src/inner-control.test.mjs`) read the same scale as a cap:
+  their box is `min(glyph + a step of air a side, --slotted-control-inner-size-*)`
+  at the family's own size step, never a control height; the 24-pixel target
+  is recovered by the box or by a transparent halo, as before. Decided in
+  round 13 of pass 2.
 
 ## Working beside another session
 

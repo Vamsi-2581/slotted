@@ -25,6 +25,7 @@
     --_separator-inset: var(--slotted-space-2, 0.25rem);
     --_font-size: var(--slotted-control-font-size-md, 0.875rem);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
     /**
      * What the bar actually pads with. It is the size step for a bar with no
      * frame, and at least the reach of a focus ring for one with a frame: the
@@ -50,6 +51,7 @@
     --_separator-inset: var(--slotted-space-1, 0.125rem);
     --_font-size: var(--slotted-control-font-size-sm, 0.8125rem);
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
+    --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
   [data-ui='toolbar'][data-size='lg'] {
@@ -59,6 +61,7 @@
     --_separator-inset: var(--slotted-space-3, 0.375rem);
     --_font-size: var(--slotted-control-font-size-lg, 0.9375rem);
     --_icon-size: var(--slotted-control-icon-size-lg, 18px);
+    --_inner-size: var(--slotted-control-inner-size-lg, 28px);
   }
 
   /**
@@ -234,7 +237,7 @@
      */
     min-inline-size: max(
       var(--slotted-target-min, 24px),
-      calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem))
+      min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
     );
     padding: 0;
     transition:

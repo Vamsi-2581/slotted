@@ -17,8 +17,12 @@ const source = new URL('.', import.meta.url).pathname;
  * part:
  *
  * 1. the box is sized from the control glyph scale
- *    (`--slotted-control-icon-size-*`) plus a step of air, never from a
- *    control height;
+ *    (`--slotted-control-icon-size-*`) plus a step of air, capped at the
+ *    inner size of a control at that step (`--slotted-control-inner-size-*`,
+ *    the scale `kbd` and `tag` already take as their height inside a
+ *    control) — `min(glyph + air, inner-size)` — and never from a control
+ *    height. Before the cap, a clear mark measured 22px inside a 26px field
+ *    at the compact step, where the inside of that field is 20px;
  * 2. at rest it has no frame and no shadow, and no ground;
  * 3. `hover` and `active` move the ground and nothing else — one step each,
  *    no ink change, no border, no shadow;
@@ -210,7 +214,10 @@ function audit(family, part) {
   if (!widths.some((value) => value.includes('--slotted-control-icon-size-'))) {
     findings.push('is not sized from --slotted-control-icon-size-*');
   }
-  if (widths.some((value) => /--slotted-control-height-/.test(value) && !/min\(/.test(value))) {
+  if (!widths.some((value) => value.includes('--slotted-control-inner-size-'))) {
+    findings.push('is not capped at --slotted-control-inner-size-*');
+  }
+  if (widths.some((value) => /--slotted-control-height-/.test(value))) {
     findings.push('is sized from a control height');
   }
 

@@ -1,59 +1,43 @@
-# Checkpoint — reorganização de `docs/` para o passe 2
+# Checkpoint — rodada 13: inner controls R2 lidos pela escala interna
 
 ## Plano
 
-Sem arquivo de plano. Escopo aprovado em chat: índice `docs/README.md`,
-`docs/archive/` para o passe 1 e prompts de uso único, `build-order.md` e
-`build-schedule.md` reescritos para as ondas 9 a 12, `implementation-review.md`
-do passe 2 com triagem por família, índice de `docs/superpowers/specs/`,
-limpeza de `.claude/progress/`.
+`docs/build-schedule.md`, rodada 13 (bloco único). Sem arquivo de plano.
 
 ## Tarefas concluídas
 
-1. `docs/archive/`: 8 arquivos movidos por `git mv`.
-2. `docs/build-order.md`: passe 1 em tabela, reaberturas prometidas, ondas 9–12
-   com escopo por família (6 + 15 + 12 + 6 invocações), Specialized fora.
-3. `docs/build-schedule.md`: "Onde estamos — 2026-09-15", rodadas 13–22.
-4. `docs/implementation-review.md`: triagem (67 linhas, veredito vazio),
-   R1–R7 sem os diagnósticos do passe 1, 4 itens pré-registrados
-   (MS-2.1, MS-2.2, SA-2.1, SA-2.2). `docs/implementation-review-log.md` criado.
-5. `docs/README.md` e `docs/superpowers/specs/README.md` (66 temas).
-6. `docs/build-briefing.md` e `.claude/skills/component/SKILL.md`: item pendente
-   de família entregue vai para "Reaberturas prometidas por escrito".
-7. `.claude/progress/`: 11 checkpoints de famílias entregues removidos;
-   `filter-bar.md` e `plain-variant.md` mantidos (rodada 13 os lê).
+1. `packages/styles/src/inner-control.test.mjs`: regra 1 exige
+   `--slotted-control-inner-size-*` na largura e recusa qualquer
+   `--slotted-control-height-*` (a isenção `min(` foi removida). 34/34.
+2. 16 stylesheets: `min(calc(glifo + 2 * space-2), var(--_inner-size))` no
+   lugar de `calc(height - bordas - ar)` (campos) ou como novo teto dentro de
+   `max(target-min, …)` (alert, toast, tag, breadcrumb, tabs, toolbar, dialog,
+   drawer, upload); `--_inner-size` declarado por passo de tamanho ao lado de
+   cada `--_icon-size`/`--_glyph-size`. `tabs` `--_dismiss-size` (fora da lista)
+   recebeu o mesmo teto.
+3. 16 `*.tokens.json` regenerados; `packages/styles` 159/159;
+   `verify-docs-snippets` 5/5; `verify-token-foundation` 15/15.
+4. Docs: `docs/build-briefing.md` (decisão), `docs/token-foundation.md`
+   (parágrafo em Control geometry), `docs/implementation-review.md` (R2 regra
+   1), `docs/build-order.md` (linha "fundação (R2)" removida das reaberturas).
+5. Sonda antes/depois (`scratchpad/probe.mjs`, harness HEAD vs. árvore): só
+   `clear`/`reveal` de text-field, select, combobox, multi-select e tags-input
+   mudam — compact 22→20 (sm 20→18), dense 20→18 (sm 18→16). As outras 21
+   partes mantêm 24px pelo piso do alvo.
 
 ## Tarefa em curso
 
-Commit da reorganização.
+Capturas das seis combinações para as 16 famílias em `scratchpad/shots/`
+(tarefa em segundo plano); leitura das capturas dense/compact das cinco
+famílias que mudaram.
 
 ## Git
 
-Branch `review/implementation-pass-1`, HEAD `fcb026d`. Índice: só os arquivos
-desta reorganização (hunks de `docs/build-briefing.md` da sessão filter-bar
-ficaram fora do índice). Árvore de trabalho: trabalho por commitar da sessão
-`filter-bar code-block` e da variante `plain` (57 arquivos modificados,
-famílias untracked em `packages/`).
-
-## Testes
-
-`pnpm exec prettier --check` passa nos arquivos novos.
-`node --test scripts/verify-docs-snippets.test.mjs` falha em 9 snippets de
-`segmented-control`, `splitter`, `toggle-group`, `action-bar` (`.docs.ts` em
-`packages/`), sem relação com esta reorganização.
-
-## Ajustes de escopo
-
-- `docs/decisions/README.md` não foi alterado: `PROJECT-PRD.md` existe na raiz.
-- `.codex/skills/component/SKILL.md` não contém a frase alterada em
-  `.claude/skills/component/SKILL.md`; não foi tocado.
-
-## Problemas conhecidos
-
-- A triagem em `docs/implementation-review.md` depende do veredito humano por
-  família; até lá a rodada 15 só tem os 4 itens pré-registrados.
+Branch `review/implementation-pass-1`, HEAD `71631c0`. Árvore: 16 css, 16
+tokens.json, inner-control.test.mjs, 4 docs, este checkpoint. Nada no índice.
 
 ## Próxima ação
 
-`git commit` com os arquivos já no índice, mensagem
-`docs: reorganiza docs/ para o passe 2 — arquivo do passe 1, ondas 9–12, triagem`.
+Ler `shots/{text-field,select,combobox,multi-select,tags-input}-light-dense-ltr-420.png`
+e `-light-compact-ltr-420.png`; se a imagem estiver certa, commit único:
+`style(foundation): os inner controls da regra R2 lidos pela escala interna do controle`.

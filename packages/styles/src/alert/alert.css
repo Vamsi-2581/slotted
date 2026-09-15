@@ -88,6 +88,7 @@
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_description-font-size: var(--slotted-control-font-size-md, 13px);
     --_glyph-size: var(--slotted-control-icon-size-md, 16px);
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
     --_mark-size: 1em;
     --_line-height: var(--slotted-line-height-md, 1.5);
 
@@ -124,7 +125,7 @@
       --slotted-alert-dismiss-size,
       max(
         var(--slotted-target-min, 24px),
-        calc(var(--_glyph-size) + 2 * var(--slotted-space-2, 0.25rem))
+        min(calc(var(--_glyph-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
       )
     );
 
@@ -333,6 +334,7 @@
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_description-font-size: var(--slotted-control-font-size-sm, 12px);
     --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
+    --_inner-size: var(--slotted-control-inner-size-sm, 22px);
     --_inset-block: var(--slotted-alert-padding-block, var(--slotted-space-4, 0.5rem));
     --_inset-inline: var(--slotted-alert-padding-inline, var(--slotted-space-5, 0.75rem));
     --_row-gap: var(--slotted-alert-row-gap, var(--slotted-space-4, 0.5rem));
@@ -351,6 +353,7 @@
   [data-ui='alert'][data-part='root'][data-reach='page'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_glyph-size: var(--slotted-control-icon-size-lg, 18px);
+    --_inner-size: var(--slotted-control-inner-size-lg, 28px);
     /**
      * A banner is much wider than it is tall, so its two insets are not equal:
      * the inline one is a step wider than a section's because it has a page's

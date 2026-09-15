@@ -29,25 +29,24 @@
     /** The floor under the glyph scale at the dense step (SL3); a family token so a theme can retune it. */
     --_icon-floor: var(--slotted-number-field-icon-size-min, 14px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
 
     /**
      * The stepper's cross measurement — the column's width when the two halves
      * are stacked, and each button's width when they are split.
      *
      * It is the glyph plus a step of air on each side — the box every inner
-     * control in the library draws (R2) — bounded above by the frame's own
-     * inner box so the column stays square-ish, and bounded below by the WCAG
-     * 2.2 minimum so the inline axis is never short.
+     * control in the library draws (R2) — capped at the inner size of a
+     * control at this step (`--slotted-control-inner-size-*`) so the column
+     * stays square-ish, and floored at the WCAG 2.2 minimum so the inline axis
+     * is never short.
      * The block axis is answered per arrangement further down.
      */
     --_stepper-size: var(
       --slotted-number-field-stepper-size,
       max(
         var(--slotted-target-min, 24px),
-        min(
-          calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)),
-          calc(var(--_height) - var(--slotted-control-border-width, 1px) * 2)
-        )
+        min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
       )
     );
 
@@ -166,6 +165,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
+    --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
   [data-ui='number-field'][data-part='root'][data-size='md'] {
@@ -174,6 +174,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
   [data-ui='number-field'][data-part='root'][data-size='lg'] {
@@ -182,6 +183,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_gap: var(--slotted-control-gap-lg, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-lg, 18px));
+    --_inner-size: var(--slotted-control-inner-size-lg, 28px);
   }
 
   /* ── Variant ──────────────────────────────────────────────────────────

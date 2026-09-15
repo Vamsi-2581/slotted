@@ -84,13 +84,7 @@
        frame and a second answer would drift from the first. */
     --_action-size: var(
       --slotted-multi-select-action-size,
-      min(
-        calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)),
-        calc(
-          var(--_height) - var(--slotted-control-border-width, 1px) * 2 -
-            var(--slotted-space-2, 0.25rem)
-        )
-      )
+      min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size))
     );
 
     /**
@@ -540,6 +534,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
   [data-ui='multi-select'][data-part='root'][data-size='lg'] {

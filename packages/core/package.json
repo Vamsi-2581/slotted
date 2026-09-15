@@ -13,6 +13,10 @@
       "types": "./dist/types/clipboard/index.d.ts",
       "import": "./dist/clipboard.js"
     },
+    "./code": {
+      "types": "./dist/types/code/index.d.ts",
+      "import": "./dist/code.js"
+    },
     "./collection": {
       "types": "./dist/types/collection/index.d.ts",
       "import": "./dist/collection.js"

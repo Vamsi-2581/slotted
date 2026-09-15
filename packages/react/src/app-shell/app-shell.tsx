@@ -53,6 +53,16 @@ export function useAppShell(): AppShellContextValue {
 }
 
 /**
+ * The shell around this element, or nothing. For a family that lives inside
+ * the shell *or* on its own — `side-navigation` renders a `nav` landmark
+ * standing alone and a `div` inside the shell's `nav` region, which is already
+ * the landmark — and has to know which without throwing.
+ */
+export function useAppShellIfPresent(): AppShellContextValue | undefined {
+  return useContext(AppShellContext);
+}
+
+/**
  * The outer frame of a route: the regions that do not change when the content
  * does.
  *

@@ -1,4 +1,4 @@
-export { APP_SHELL_OVERLAY_AT, AppShell, useAppShell } from './app-shell';
+export { APP_SHELL_OVERLAY_AT, AppShell, useAppShell, useAppShellIfPresent } from './app-shell';
 export {
   AppShellActions,
   AppShellAside,

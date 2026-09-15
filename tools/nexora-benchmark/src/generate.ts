@@ -117,6 +117,18 @@ function idFor(context: GenerationContext, table: RecordTable, index: number): s
   return `${TABLE_PREFIX[table]}_${context.idTokens[table]}_${index.toString(36).padStart(7, '0')}`;
 }
 
+export function representativeRecordId(
+  profile: ScaleProfile,
+  table: RecordTable,
+  index: number,
+): string {
+  const count = tableCount(profile.counts, table);
+  if (!Number.isSafeInteger(index) || index < 0 || index >= count) {
+    throw new RangeError(`Record index ${index} is outside ${table} count ${count}`);
+  }
+  return idFor(createContext(profile), table, index);
+}
+
 function iso(value: number): string {
   return new Date(value).toISOString();
 }

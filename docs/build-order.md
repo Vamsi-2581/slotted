@@ -989,6 +989,18 @@ avaliação em
    decisões em `docs/superpowers/specs/2026-09-10-table-filter-design.md`,
    avaliação em
    `docs/superpowers/specs/2026-09-10-table-filter-self-assessment.md`.
+   A 14 de setembro, na rodada 12, o filtro ganhou os três operandos que não
+   existiam quando foi construído: as espécies `time` e `datetime` no motor,
+   com os operadores de `date` sobre texto ISO cortado num campo — `HH:MM`,
+   `YYYY-MM-DDTHH:MM` — e a comparação feita à precisão do operando; a
+   janela de hora que atravessa a meia-noite (`between 22:00 e 02:00`);
+   `TableTimeFilter` e `TableDateTimeFilter` nos dois bindings; o
+   `date-range-picker` como operando único do `between` de `date`, com
+   `presets`; e `operand="tags"` no filtro de conjunto, com `options`
+   opcional. Nada do que estava entregue mudou de forma. Inventário em
+   `docs/superpowers/specs/2026-09-14-table-filter-operands-capability-inventory.md`,
+   decisões em `2026-09-14-table-filter-operands-design.md`, avaliação em
+   `2026-09-14-table-filter-operands-self-assessment.md`.
 
 ## Onda 7 — Data, arquivo e o restante do Core
 
@@ -1272,12 +1284,18 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   entregam, e o que os dois entregam é uma composição de um valor que o Core
   passa a ter, não um valor que ele não sabia dizer. Entra na onda 8 ao lado de
   `date-range-picker`, e a lista de Extended acima ganha-o.
+  Pendente, da rodada 12: quando existir, substitui os dois `time-picker` que
+  `TableTimeFilter` desenha para `between`, numa passagem de
+  `/component table`, como `date-range-picker` fez pela espécie `date`.
 - `datetime-range-picker` fecha a mesma pesagem pela terceira vez: dois
   `datetime-picker` com o `max` de um ligado ao `min` do outro, atrás de um
   gatilho. O inventário de `datetime-picker` adiou-o por escrito — MUI entrega
   `DateTimeRangePicker` no Pro e Ant entrega-o com `RangePicker` sob `showTime`,
   e o que os dois entregam é uma composição de um valor que o Core passa a ter.
   Entra na onda 8 ao lado dos outros dois, e a lista de Extended acima ganha-o.
+  Pendente, da rodada 12: quando existir, substitui os dois `datetime-picker`
+  que `TableDateTimeFilter` desenha para `between`, numa passagem de
+  `/component table`.
 - O revisor pediu, no gate visual da onda 7, que as famílias de data, hora e
   datetime fossem mais inventivas do que o campo pesquisado. As três aberturas
   que a onda 7 encontrou e não tomou estão em `2026-09-09-date-design.md` §12:

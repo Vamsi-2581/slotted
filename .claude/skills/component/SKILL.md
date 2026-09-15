@@ -211,4 +211,4 @@ Run only the minimum verification for the current cycle and do not add extra ver
 
 15. **Commit after the release gate.** Make one commit per step of substance, name every staged file explicitly, and include only this family's work. Do not stage a directory.
 
-    `docs/BUILD-LOG.md` is not a diary. A decision that binds another family goes to the briefing's _Decisions already taken_; a pending item goes to that family's scope in `docs/build-order.md`; a convention goes to the comment of the test that enforces it. Write in the log only what a later family must know and none of those three places can hold — a defect with a lesson, or a debt nobody else owns.
+    `docs/BUILD-LOG.md` is not a diary. A decision that binds another family goes to the briefing's _Decisions already taken_; a pending item goes to `docs/build-order.md` — the family's scope when it is not built yet, _Reaberturas prometidas por escrito_ when it is; a convention goes to the comment of the test that enforces it. Write in the log only what a later family must know and none of those three places can hold — a defect with a lesson, or a debt nobody else owns.

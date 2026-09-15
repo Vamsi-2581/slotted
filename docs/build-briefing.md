@@ -4,10 +4,11 @@ Read before every `/component` invocation. It holds what does not change between
 families. It directs judgement; it does not replace it. Where it decides
 something, it says why, and a better reason beats it.
 
-Some families are new and some replace one built before this foundation
-existed. `docs/build-order.md` says which, and what each one delivers. If the
-invoked family has no scope written there yet, derive it from its section in
-`docs/component-features.md`, write it in as part of the work, and carry on.
+`docs/build-order.md` says what each family delivers, and which invocations
+reopen a family already delivered. If the invoked family has no scope written
+there yet, derive it from its section in `docs/component-features.md`, write it
+in as part of the work, and carry on. The scopes of the families delivered in
+pass 1 are in `docs/archive/build-order-pass-1.md`.
 
 ## Read first
 
@@ -85,9 +86,10 @@ inherits it.
 
 `docs/BUILD-LOG.md` is not a diary, and writing one entry per family is how it
 grew past four thousand lines. A decision that binds another family belongs in
-_Decisions already taken_ below; a pending item belongs in that family's scope
-in `docs/build-order.md`; a convention belongs in the comment of the test that
-enforces it. What is left for the log is a defect with a lesson, or a debt
+_Decisions already taken_ below; a pending item belongs in
+`docs/build-order.md` — in the family's scope when it is not built yet, in
+_Reaberturas prometidas por escrito_ when it is; a convention belongs in the
+comment of the test that enforces it. What is left for the log is a defect with a lesson, or a debt
 nobody else owns — and nothing at all is a valid entry.
 
 ## Constraints

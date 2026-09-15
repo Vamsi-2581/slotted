@@ -1,54 +1,59 @@
-# Checkpoint — `/component app-shell`, segunda passagem
+# Checkpoint — reorganização de `docs/` para o passe 2
 
 ## Plano
 
-`.claude/skills/component/SKILL.md`, quinze passos, modo **rebuild**. Desenho em
-`docs/superpowers/specs/2026-09-14-app-shell-redesign-design.md`; inventário
-revisto na §7 de `2026-09-13-app-shell-capability-inventory.md`.
+Sem arquivo de plano. Escopo aprovado em chat: índice `docs/README.md`,
+`docs/archive/` para o passe 1 e prompts de uso único, `build-order.md` e
+`build-schedule.md` reescritos para as ondas 9 a 12, `implementation-review.md`
+do passe 2 com triagem por família, índice de `docs/superpowers/specs/`,
+limpeza de `.claude/progress/`.
 
-## Git
+## Tarefas concluídas
 
-Branch `review/implementation-pass-1`, HEAD `a2a9026`. Árvore suja: toda a
-família app-shell da primeira passagem está por commitar, mais as alterações
-desta passagem.
-
-## Passos concluídos
-
-1–5. Lei, modo, inventário (delta), padrão (inalterado), desenho (documento).
-6\. Esquema partilhado: `stateModel[capacidade]` aceita conjunto nomeado
-(`specs/contract.schema.mjs`, 4 testes novos); workbench `apiMetadataErrors`
-percorre o conjunto (`scenarios.tsx`, 1 teste). Contrato app-shell reescrito:
-partes `centre`, `aside-header/body/footer/toggle`; eixo `asideMode`;
-`stateModel.open.{nav,aside}`; `published` com seis tokens; 26 testes.
-7\. Stylesheet: tokens de fila publicados, `centre`, painel com cabeçalho/
-corpo/rodapé, painel como camada, `aside-toggle`; `actions > *` não encolhe.
-15 testes de estilo. `tokens.json` regenerado. Harness reescrito: seis cenas
-com três produtos sobre a geometria publicada.
-8\. Capturas lidas: default 1080 light/dark/hc/rtl, 420 light (página), rail
-1080, primary-nav dark 1080, nav-end 1080. Imagem certa.
-9\. Gate visual — utilizador delegou («pode seguir sozinho»); registado.
-10\. Bindings: React (31 testes) e Angular (16 testes) compilam e passam.
-
-11\. Workbench: reset exclui `slotted-demo-*` (teste), primitivas de fila sobre
-os seis tokens publicados, `bar-search`, `bar-crumbs`, `bar-wordmark`,
-`pane-fields`, `pane-form`, `pane-title`, `viewport[data-frame='window']`;
-44 testes. Demos React em `app-shell-demo/` (shared, aurora, cadence, atrio);
-docs e histórias React e Angular com dezoito cenas. `audit.mjs` React limpo a
-1280 e 620. Angular Storybook reiniciado; `audit.mjs --deadline 120000` limpo a 1280 e 620 (41 palcos).
-12\. `format:check` limpo; `lint` limpo nos caminhos da família (dois erros
-pré-existentes em `toggle-group`); `typecheck` limpo; `test:contracts` 1478;
-`test:docs` com nove ids de outras famílias; styles 1095 (+ `page-header`
-pré-existente); workbench 53 + 44; React completo 2348/2348; Angular completo 1767/1767.
-13\. Autoavaliação em `docs/superpowers/specs/2026-09-14-app-shell-self-assessment.md`.
+1. `docs/archive/`: 8 arquivos movidos por `git mv`.
+2. `docs/build-order.md`: passe 1 em tabela, reaberturas prometidas, ondas 9–12
+   com escopo por família (6 + 15 + 12 + 6 invocações), Specialized fora.
+3. `docs/build-schedule.md`: "Onde estamos — 2026-09-15", rodadas 13–22.
+4. `docs/implementation-review.md`: triagem (67 linhas, veredito vazio),
+   R1–R7 sem os diagnósticos do passe 1, 4 itens pré-registrados
+   (MS-2.1, MS-2.2, SA-2.1, SA-2.2). `docs/implementation-review-log.md` criado.
+5. `docs/README.md` e `docs/superpowers/specs/README.md` (66 temas).
+6. `docs/build-briefing.md` e `.claude/skills/component/SKILL.md`: item pendente
+   de família entregue vai para "Reaberturas prometidas por escrito".
+7. `.claude/progress/`: 11 checkpoints de famílias entregues removidos;
+   `filter-bar.md` e `plain-variant.md` mantidos (rodada 13 os lê).
 
 ## Tarefa em curso
 
-Nenhuma: os onze commits do passo 15 estão feitos (f9237c4…acd549a).
+Commit da reorganização.
 
-## Próxima ação executável
+## Git
 
-Nenhuma nesta família. Revisão humana ao vivo em 6006 e 6007.
+Branch `review/implementation-pass-1`, HEAD `fcb026d`. Índice: só os arquivos
+desta reorganização (hunks de `docs/build-briefing.md` da sessão filter-bar
+ficaram fora do índice). Árvore de trabalho: trabalho por commitar da sessão
+`filter-bar code-block` e da variante `plain` (57 arquivos modificados,
+famílias untracked em `packages/`).
 
-## Fora desta família
+## Testes
 
-`page-header tokens.json disagrees with its stylesheets` — pré-existente.
+`pnpm exec prettier --check` passa nos arquivos novos.
+`node --test scripts/verify-docs-snippets.test.mjs` falha em 9 snippets de
+`segmented-control`, `splitter`, `toggle-group`, `action-bar` (`.docs.ts` em
+`packages/`), sem relação com esta reorganização.
+
+## Ajustes de escopo
+
+- `docs/decisions/README.md` não foi alterado: `PROJECT-PRD.md` existe na raiz.
+- `.codex/skills/component/SKILL.md` não contém a frase alterada em
+  `.claude/skills/component/SKILL.md`; não foi tocado.
+
+## Problemas conhecidos
+
+- A triagem em `docs/implementation-review.md` depende do veredito humano por
+  família; até lá a rodada 15 só tem os 4 itens pré-registrados.
+
+## Próxima ação
+
+`git commit` com os arquivos já no índice, mensagem
+`docs: reorganiza docs/ para o passe 2 — arquivo do passe 1, ondas 9–12, triagem`.

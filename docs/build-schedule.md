@@ -5,380 +5,186 @@ código é uma sessão limpa: cole exatamente o que está nele.
 
 `docs/build-order.md` diz o que cada família entrega.
 `docs/build-briefing.md` é lido pelo passo 1 da skill e carrega o resto.
+As rodadas 1 a 12 do passe 1 estão em `docs/archive/build-schedule-pass-1.md`.
 
 ## Como ler
 
 - **Rodada** é uma barreira. Nada de uma rodada começa antes de todas as sessões
   da rodada anterior terem passado no gate de release.
-- Cada sessão para **duas vezes**. A primeira é o gate visual: só o harness, sem
-  Storybook e sem binding nenhum, e é onde uma anatomia errada custa o
-  stylesheet em vez da família inteira. Responda rápido — a sessão fica parada.
-  A segunda é o gate de release, a revisão que você já faz.
+- Cada sessão de família para **duas vezes**. A primeira é o gate visual: só o
+  harness, sem Storybook e sem binding nenhum. A segunda é o gate de release.
 - Dentro de uma rodada, cada bloco é uma sessão. Blocos da mesma rodada rodam
   **ao mesmo tempo**, na mesma worktree.
 - Um bloco com duas ou mais invocações é **uma sessão só**, em série: as famílias
   compartilham uma decisão e separá-las significaria decidi-la duas vezes.
 - Rodada com um bloco só é sequencial por dependência, não por precaução.
+- Quando uma rodada tem mais de um bloco, cada prompt carrega o aviso de
+  concorrência. Sem ele a sessão roda `pnpm format` ou `git add -A` e leva
+  junto o trabalho da outra.
+- Uma rodada de **revisão** não invoca `/component`. O bloco é o comando que
+  a inicia.
 
-- **A barra das páginas de referência subiu.** Demos fiéis à realidade e não
-  espécimes, cobertura exaustiva do que a família faz e não uma amostra, e
-  palco do tamanho do que a família é. Está em _Demonstrations_ e em _How much
-  room a demonstration gets_, em `.claude/skills/component/references/stories.md`,
-  que o passo 11 da skill lê. Uma família que ocupa uma tela inteira usa
-  `.slotted-demo-viewport` com `data-size="screen"`.
+## Onde estamos — 2026-09-15
 
-Quando uma rodada tem mais de um bloco, cada prompt carrega o aviso de
-concorrência. Ele não é decoração: sem ele a sessão roda `pnpm format` ou
-`git add -A` e leva junto o trabalho da outra.
+O passe 1 terminou: 79 famílias em `specs/components/`, ondas 0 a 8, rodadas 1
+a 12. A rodada 12 (operandos `time`, `datetime`, `date-range-picker` e
+`tags-input` no filtro do `table`) foi commitada em 2026-09-15.
 
-## Onde estamos — 2026-09-10
+Por commitar, na worktree: a sessão `filter-bar code-block` da rodada 11 parou
+no gate de release com contrato commitado (`7edc5c5`) e stylesheet, bindings,
+autoavaliações e a decisão transversal da variante `plain`
+(`packages/styles/src/plain-variant.test.mjs`, `docs/build-briefing.md`,
+`docs/token-foundation.md`) fora do índice. Nenhuma sessão nova começa antes
+desse commit.
 
-Rodadas 1 a 7 passaram. Da rodada 8 passou uma sessão de quatro,
-`date-field calendar date-picker`. A árvore está verde.
+Seis famílias da onda 8 não foram construídas: `side-navigation`,
+`top-navigation`, `command-palette`, `data-grid`, `time-range-picker` e
+`datetime-range-picker`. Estão na onda 9.
 
-**Uma família ficou para trás de uma barreira que já foi ultrapassada:**
-`loading-overlay`, da rodada 5. Nunca foi construída e as rodadas 6, 7 e 8
-seguiram sem ela. Não depende de nada que falte, e está realojada na rodada 8,
-que é a rodada corrente.
+Duas passagens de revisão ficaram devidas por escrito e não são sessão de
+família: as páginas de referência entregues antes da barra de _Demonstrations_
+(`.claude/skills/component/references/stories.md`), e o refino das famílias
+que o passe 1 deixou instáveis (`docs/implementation-review.md`, passe 2). A
+segunda depende da triagem por família registrada nesse arquivo.
 
-`alert-dialog` não está em falta: foi entregue dentro de `dialog`, como uma
-família com dois papéis, e por isso não tem `specs/components/alert-dialog/`.
+## Rodada 13 — fechar o passe 1 · 2 sessões, em série
 
-Falta ainda ver, e não é uma sessão de família: as páginas de referência já
-entregues foram escritas antes da barra de _Demonstrations_ em
-`references/stories.md` — demos fiéis à realidade, cobertura exaustiva das
-capacidades, e palco do tamanho do que a família é. Uma passagem de revisão
-sobre elas é trabalho a agendar, não um defeito de nenhuma família.
-
-A rodada 12 é a única que volta a uma família entregue. O filtro por coluna do
-`table` está construído sobre `@slotted/core/filter`, e três famílias que ainda
-não existem trazem operandos que o motor ainda não sabe dizer — a cadeia de
-hora, `date-range-picker` e `tags-input`. Está agendada e não é dívida: o que
-está entregue não muda de forma.
-
-## Rodada 1 — o que falta da onda 4 · 3 sessões
-
-Nenhuma das três depende da outra.
+A primeira sessão commita o que está na worktree. A segunda muda a fundação e
+por isso corre sozinha.
 
 ```
-/component description-list
+Feche a sessão `/component filter-bar code-block` que parou no gate de release.
+Leia .claude/progress/filter-bar.md e .claude/progress/plain-variant.md. Rode
+pnpm check:full. Commite em três: a decisão transversal da variante plain
+(plain-variant.test.mjs, os onze stylesheets de campo, build-briefing.md,
+token-foundation.md), depois filter-bar, depois code-block. Uma família por
+commit. Não toque em docs/build-order.md nem em docs/build-schedule.md.
+```
+
+```
+Reabertura da fundação, regra R2 de docs/archive/implementation-review-pass-1.md:
+os inner controls (clear, reveal, os steppers de number-field e currency-field
+e os restantes de packages/styles/src/inner-control.test.mjs) medem glifo mais
+um passo de ar — 22px num controle de 26px em compact — e não a escala
+--slotted-control-inner-size-* que kbd e tag já leem dentro de um controle.
+Mude a regra 1 de R2 para min(glifo + ar, inner-size) nas 27 partes, atualize
+inner-control.test.mjs e recapture cada família tocada nas seis combinações do
+harness. Uma sessão só; nenhuma outra corre ao mesmo tempo.
+```
+
+## Rodada 14 — revisão das páginas de referência · até 3 sessões
+
+Cada sessão recebe um grupo de famílias e aplica _Demonstrations_ e _How much
+room a demonstration gets_ de `.claude/skills/component/references/stories.md`
+às duas páginas de referência (React e Angular) de cada uma. Uma família por
+commit. Os grupos seguem as ondas para que duas sessões não abram a mesma
+família.
+
+```
+Revisão das páginas de referência, grupo 1: as famílias das ondas 1 a 3 de
+docs/build-order.md (tabela "Passe 1 — entregue"). Para cada família, leia
+references/stories.md, secções Demonstrations e How much room a demonstration
+gets, e reescreva as duas páginas de referência para cumpri-las: demos fiéis
+à realidade, cobertura exaustiva das capacidades do contrato, palco do tamanho
+do que a família é. Não mude contrato, stylesheet nem binding; um defeito
+encontrado vira item [ ] no fim da secção da família em
+docs/implementation-review.md. Uma família por commit.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
 ```
-/component list list-item
+Revisão das páginas de referência, grupo 2: as famílias das ondas 4 e 5.
+[mesmas instruções do grupo 1]
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
 ```
-/component result-state
+Revisão das páginas de referência, grupo 3: as famílias das ondas 6 a 8,
+exceto as entregues a partir de 2026-09-13 (app-shell, action-bar, scroll-area,
+code-block, date-range-picker, filter-bar, tags-input, timeline), que já foram
+escritas sob a barra atual.
+[mesmas instruções do grupo 1]
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 2 — Prose · 1 sessão
+## Rodada 15 — passe de revisão 2 · 1 loop
 
-Depende de `list` e de `link`, e fecha a onda 4.
-
-```
-/component prose
-```
-
-## Rodada 3 — infraestrutura de overlay · 1 sessão
-
-Quatro módulos de `packages/core`, sem UI. Um bloco só porque os quatro editam
-`packages/core/package.json`, `vite.config.ts` e `src/index.ts` — em sessões
-paralelas eles brigariam pelos mesmos três arquivos a cada minuto.
+Depende da triagem em `docs/implementation-review.md`: uma seção por família
+com veredito `ajuste` ou `refazer`, cada uma com itens no formato do passe 1.
+Sem itens `[ ]` o loop termina na primeira sessão.
 
 ```
-/component presence dismissable-layer portal positioner live-announcer
-
-São módulos de packages/core, não famílias de UI: sem stylesheet, sem harness,
-sem página de referência. Cada um com teste próprio. `focus` já existe e é
-revisado, não reescrito. Ao final, rode pnpm --filter @slotted/core build, ou
-nenhum pacote de framework conseguirá importá-los.
+REVIEW_BRANCH=review/implementation-pass-2 scripts/review-loop.sh
 ```
 
-## Rodada 4 — overlays · 4 sessões
+Uma família com veredito `refazer` não é item de revisão: é uma invocação
+`/component <família>` em modo rebuild, agendada na rodada 16 com as famílias
+novas da onda 9, porque o custo é o de uma família inteira.
 
-Todos consomem a infra da rodada 3 e nenhum consome o outro.
-
-```
-/component tooltip popover
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
+## Rodada 16 — onda 9, infraestrutura · 1 sessão
 
 ```
-/component dialog alert-dialog
+/component drag-and-drop
 
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
+Módulo @slotted/core/drag, sem UI. Escopo em docs/build-order.md, onda 9. A
+alternativa por teclado é construída primeiro e o ponteiro deriva dela. Os
+consumidores previstos (data-grid, listbox, tree, tags-input, dashboard-grid)
+não são tocados nesta sessão; o módulo entrega o seu próprio teste e um
+harness de core, como positioner fez na onda 5.
 ```
 
-```
-/component menu menubar
+Mais as famílias com veredito `refazer` na rodada 15, uma por bloco, com o
+aviso de concorrência.
 
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
+## Rodada 17 — onda 9, famílias · 5 sessões
 
-```
-/component toast
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-`tooltip popover` é uma sessão só: são o mesmo posicionamento com políticas de
-dismissal diferentes, e decidir isso duas vezes produz duas respostas.
-
-## Rodada 5 — o que depende dos overlays · 1 sessão, mais um refino em seguida
-
-```
-/component drawer
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-`loading-overlay` era a segunda sessão desta rodada e não foi executada. Está
-realojada na rodada 8; ver _Onde estamos_.
-
-E, quando `drawer` passar, o refino que estava esperando `menu`:
-
-```
-/component toolbar
-
-Refino: o overflow para menu, que ficou de fora quando a família foi construída
-porque `menu` ainda não existia. Ação primária permanece visível; o que entra no
-overflow é o que sobra, não o que é conveniente esconder.
-```
-
-## Rodada 6 — o motor de coleções · 1 sessão
-
-```
-/component listbox
-
-Antes da família, revise packages/core/collection: chaves estáveis, seções,
-typeahead, seleção, carregamento incremental e virtualização como capacidade
-opcional da coleção — nunca uma família paralela. Listbox é o primeiro consumidor
-real do motor e o primeiro caso de janela com seleção ao mesmo tempo, que é o
-teste de se `virtualWindow` foi desenhado certo.
-```
-
-## Rodada 7 — coleções · 3 sessões
-
-```
-/component select combobox
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component tree
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component table
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-## Rodada 8 — o resto do Core · 6 sessões
-
-`date-field calendar date-picker` já passou; as outras cinco continuam abertas.
-
-```
-/component date-field calendar date-picker
-
-Uma sessão só: os três compartilham a aritmética de data e o formato por locale.
-Decida onde essa aritmética vive — ao lado de core/collection ou em entrada
-própria — antes de escrever a primeira.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component time-field time-picker
-
-Logo depois de date-field calendar date-picker, que já passou e que deixou o
-motor pronto. Uma sessão só, e nesta ordem: o picker compõe o campo.
-
-Core, não Extended: um formulário que sabe dizer quando precisa da hora, e
-entregar o campo de data sem o de hora deixa o consumidor escrever o dele contra
-o motor que esta biblioteca publicou.
-
-Não há motor novo aqui: packages/core/src/date/segments.ts percorre um número
-dentro de um intervalo, dá a volta, aceita algarismos e termina a sequência
-quando mais nenhum cabe, sem saber o que o campo significa. fieldRange é o único
-lugar onde os campos são nomeados. Hora, minuto e segundo são uma união mais
-larga e três linhas ali.
-
-O painel de horas é uma lista no passo que o consumidor definiu, o que é listbox
-e não grid: compõe select, não calendar. O valor é PlainTime, nunca um instante
-com fuso — a razão está em "Decisions already taken" no briefing.
-
-O revisor pediu que esta cadeia seja mais inventiva que o campo pesquisado. A
-abertura que a onda 7 encontrou e não tomou: uma hora escrita como duração a
-partir de agora, resolvida à vista antes de ser aceita. Está em
-docs/superpowers/specs/2026-09-09-date-design.md §12.
-
-De todas as sessões desta rodada é a que menos toca em arquivo compartilhado:
-@slotted/core/date já é uma entrada, então nem package.json nem vite.config.ts
-de core mudam.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component upload
-
-Consolidação: dropzone, file-input e upload são partes de uma família só.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component page page-header section
-
-A referência é a Dynamic Page do SAP Fiori, e a ideia é a mesma com mais
-robustez e mais refino. Não é um cabeçalho com um título: é uma casca de tela
-com mecânica própria — área de título sempre visível, área de cabeçalho que
-encolhe ao rolar e reabre, fixador para quem quer o cabeçalho aberto enquanto
-rola, título encolhido diferente do expandido, ações de navegação entre
-registros, e barra inferior flutuante para as ações que fecham a tarefa.
-
-Peça ao revisor, antes de inventariar, a implementação de page-header que ele
-tem em outro repositório. O inventário parte dela e do Fiori. Sem ela, pare e
-pergunte: essa é a única pergunta bloqueante desta sessão.
-
-Nenhuma demo desta família cabe em um palco de painel. Use
-.slotted-demo-viewport com data-size="screen" e leia "How much room a
-demonstration gets" em references/stories.md antes de escrever a primeira
-story.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component multi-select
-
-`select` entrega multiple com um resumo no gatilho, e o contrato dele diz por
-escrito que as fichas removíveis, a criação, os limites, os duplicados, a
-reordenação e a colagem são desta família. Enquanto ela não existir, essas seis
-capacidades não existem em lugar nenhum da biblioteca.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component loading-overlay
-
-Atrasada: é da onda 5 e as rodadas 6, 7 e 8 seguiram sem ela. Consome a infra de
-overlay da rodada 3, que já existe. A fronteira a decidir é com skeleton e com
-progress-indicator: um scrim sobre uma região que já tem conteúdo não é o mesmo
-que um esqueleto no lugar de conteúdo que ainda não chegou, e a família precisa
-dizer qual das duas é.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-## Rodada 9 — datetime e composições · 3 sessões
-
-As duas composições dependem de `page` e das coleções. `datetime-field` e
-`datetime-picker` dependem da cadeia de hora, que é a razão de estarem aqui e
-não uma rodada acima.
-
-```
-/component datetime-field datetime-picker
-
-Depois de time-field e time-picker, que estas duas compõem junto com date-field
-e calendar. É a razão de estarem nesta rodada e não na anterior, ao lado da
-cadeia de hora: compõem o que ela entrega.
-
-datetime-field é uma moldura, um group e um valor só: PlainDateTime, que é um
-PlainDate ao lado de um PlainTime. datetime-picker é a única família da
-biblioteca que segura duas superfícies, e a decisão que ela deve é qual delas
-abre primeiro — e o que acontece com a outra quando o leitor termina na
-primeira.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component app-shell
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component action-bar
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-Com isto o Core está inteiro.
-
-## Rodada 10 — Extended, primeira leva · 4 sessões
-
-```
-/component scroll-area splitter
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component toggle-group segmented-control
-
-Uma sessão só: os dois são o mesmo grupo de itens exclusivos com aparências
-diferentes, e decidir a semântica duas vezes produz duas respostas.
-
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
+Nenhuma depende da outra. `data-grid` depende de `drag-and-drop`, que a rodada
+16 fechou.
 
 ```
 /component side-navigation
 
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component timeline
+Ocupa a região nav de app-shell e lê collapsedTo="rail" dela. Escopo em
+docs/build-order.md, onda 9. As demonstrações de app-shell que hoje montam a
+navegação com list-item passam a usar a família.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
-## Rodada 11 — Extended, segunda leva · 5 sessões
+```
+/component top-navigation
 
-Cada uma depende de algo da rodada 10, das coleções ou da cadeia de data.
+Ocupa a região header de app-shell. Escopo em docs/build-order.md, onda 9.
+Prioridade de colapso por container query; não é um toolbar.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
 
 ```
 /component command-palette
+
+dialog com combobox e listbox dentro. Escopo em docs/build-order.md, onda 9.
+menu recusou o menu filtrado por texto para esta família; leia a recusa no
+inventário de menu antes de decidir a anatomia.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component time-range-picker datetime-range-picker
+
+Uma sessão só: os dois herdam de date-range-picker a banda, o comprimento dito
+enquanto o intervalo é desenhado e o rascunho. Escopo em docs/build-order.md,
+onda 9. A reabertura de table fica para a rodada 18.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
@@ -387,46 +193,189 @@ beside another session" em docs/build-briefing.md.
 ```
 /component data-grid
 
-Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
-beside another session" em docs/build-briefing.md.
-```
-
-```
-/component date-range-picker
-
-Dois campos e o modo range que calendar já tem, atrás de um gatilho. Não depende
-da cadeia de hora. O revisor pediu que o comprimento do intervalo seja dito
-enquanto ele está sendo desenhado, e não só as duas pontas; a razão está em
-docs/superpowers/specs/2026-09-09-date-design.md §12.
+A família que aplica o descritor de @slotted/core/filter e herda as quatro
+capacidades que table recusou pelo papel ARIA. Escopo em docs/build-order.md,
+onda 9. Leia docs/superpowers/specs/2026-09-09-table-design.md §1 antes de
+escrever: a linha entre as duas famílias foi traçada lá.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
+## Rodada 18 — onda 10, primeira leva · 5 sessões
+
+As reaberturas e as famílias de custo mais baixo.
+
 ```
-/component tags-input
+/component table
+
+Reabertura, a segunda: time-range-picker como operando único de between na
+espécie time e datetime-range-picker na espécie datetime, no lugar dos dois
+pickers de TableTimeFilter e TableDateTimeFilter; e a regra de célula
+pendente — uma célula com controle plain cede a inserção ao controle. Escopo
+em docs/build-order.md, onda 10. Descritor, predicado, codec e resumo não
+mudam.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
 
 ```
-/component filter-bar code-block
+/component highlight
+
+A folha partilhada em packages/styles/src/highlight vira família com binding e
+motor em @slotted/core/highlight. combobox, select, listbox e menu passam a
+usar a família no lugar da folha, na mesma sessão. Escopo em
+docs/build-order.md, onda 10.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
 ```
+
+```
+/component context-menu hover-card
+
+Uma sessão só: os dois são o núcleo de uma família entregue (menu, popover)
+atrás de um gatilho novo, e a decisão de quanto do núcleo se reexporta é uma.
+Escopo em docs/build-order.md, onda 10.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component split-button toggle
+
+Uma sessão só: os dois são um button com uma semântica a mais, e o que separa
+um toggle de um segmento de toggle-group já foi decidido em
+docs/superpowers/specs/2026-09-10-toggle-segmented-design.md. Escopo em
+docs/build-order.md, onda 10.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component otp-input
+
+Um input real, oculto, e N caixas pintadas; uma parada de foco. Escopo em
+docs/build-order.md, onda 10.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+## Rodada 19 — onda 10, segunda leva · 5 sessões
+
+```
+/component aspect-ratio image
+
+Uma sessão só: image compõe sobre aspect-ratio e a proporção é uma decisão.
+Escopo em docs/build-order.md, onda 10.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component stat-card sparkline
+
+Uma sessão só: sparkline vive dentro do card e da célula. O primeiro SVG da
+biblioteca e a primeira escala de cor de dados; decida a escala no gate visual
+e registre-a em docs/token-foundation.md. Escopo em docs/build-order.md,
+onda 10.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component table-of-contents
+
+Responde à capacidade que page adiou (inventário de page, l. 154). Escopo em
+docs/build-order.md, onda 10.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component selection-toolbar column-manager
+
+Uma sessão só: os dois leem o modelo de data-grid e de table, e o modelo comum
+de seleção e de colunas em @slotted/core/collection é decidido uma vez. Escopo
+em docs/build-order.md, onda 10.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component data-list
+
+Escopo em docs/build-order.md, onda 10. table sob wrap continua a resposta
+para o que cabe; a família começa onde ela não cabe.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+## Rodada 20 — onda 10, composições Core · 2 sessões
+
+```
+/component data-entry-form
+
+Composição de form, field-group, section, grid, action-bar e inline-message.
+Escopo em docs/build-order.md, onda 10. A página de referência é um formulário
+de cadastro real, com seções condicionais e resumo de erros.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+```
+/component crud-list
+
+page-header + filter-bar + data-grid ou table + pagination + selection-toolbar
++ result-state, com criação, edição e detalhe em drawer ou rota. Escopo em
+docs/build-order.md, onda 10. O estado de query é o codec de URL de filter-bar
+mais ordenação e página.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+## Rodada 21 — onda 11 · 12 sessões, em levas de 3
+
+Nenhuma depende da outra; a leva é o limite de revisão, não de dependência.
+Ordem sugerida das levas: (`transfer`, `entity-picker`, `hierarchical-picker`),
+(`master-detail`, `dashboard-grid`, `wizard`), (`detail-panel`,
+`notification-center`, `markdown`), (`tour`, `action-sheet`, `fullscreen`).
+Cada bloco é:
+
+```
+/component <família>
+
+Escopo em docs/build-order.md, onda 11.
+
+Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
+beside another session" em docs/build-briefing.md.
+```
+
+## Rodada 22 — onda 12 · 6 sessões, em levas de 2
+
+Ordem sugerida: (`chart`, `event-calendar`), (`audit-log`, `workflow-tracker`),
+(`import-export-center`, `search-results`). `chart` primeiro porque
+`audit-log` e `search-results` não dependem dele mas as demonstrações de
+`dashboard-grid` e `stat-card` passam a usá-lo. Cada bloco segue o formato da
+rodada 21 com "onda 12".
 
 ## Quantas sessões ao mesmo tempo
 
-Duas é confortável, três é o teto útil. O limite não é a máquina: é você. Cada
-sessão para num gate e espera uma revisão sua, e quatro gates abertos ao mesmo
-tempo transformam a revisão — que é a única etapa que ninguém pode delegar — no
-gargalo que o paralelismo deveria remover.
-
-Quando uma rodada tem mais blocos do que você quer revisar de uma vez, rode os
-que quiser e deixe o resto para a mesma rodada depois. A barreira é entre
-rodadas, não dentro.
+Duas é confortável, três é o teto útil. O limite é a revisão humana em cada
+gate, não a máquina. Quando uma rodada tem mais blocos do que a revisão
+comporta, os blocos restantes ficam para a mesma rodada depois. A barreira é
+entre rodadas, não dentro.
 
 ## O que nunca roda em paralelo
 
@@ -434,6 +383,8 @@ rodadas, não dentro.
   contrato ou o vocabulário de estados. A segunda começa depois que a primeira
   commitou.
 - Uma sessão de família e uma correção de ferramenta compartilhada — harness,
-  workbench, schema. A correção vai sozinha e primeiro.
+  workbench, schema, fundação. A correção vai sozinha e primeiro.
 - `pnpm check:full` de duas sessões ao mesmo tempo. Cada uma veria a outra pela
   metade.
+- `scripts/review-loop.sh` e qualquer outra sessão: o loop exige árvore limpa e
+  reverte o que encontra fora do índice.

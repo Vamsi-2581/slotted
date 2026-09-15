@@ -30,12 +30,8 @@ O passe 1 terminou: 79 famílias em `specs/components/`, ondas 0 a 8, rodadas 1
 a 12. A rodada 12 (operandos `time`, `datetime`, `date-range-picker` e
 `tags-input` no filtro do `table`) foi commitada em 2026-09-15.
 
-Por commitar, na worktree: a sessão `filter-bar code-block` da rodada 11 parou
-no gate de release com contrato commitado (`7edc5c5`) e stylesheet, bindings,
-autoavaliações e a decisão transversal da variante `plain`
-(`packages/styles/src/plain-variant.test.mjs`, `docs/build-briefing.md`,
-`docs/token-foundation.md`) fora do índice. Nenhuma sessão nova começa antes
-desse commit.
+A sessão `filter-bar code-block` da rodada 11 fechou em `8db03ea`; a decisão
+transversal da variante `plain` fechou em `bad653d`. A árvore está limpa.
 
 Seis famílias da onda 8 não foram construídas: `side-navigation`,
 `top-navigation`, `command-palette`, `data-grid`, `time-range-picker` e
@@ -47,19 +43,9 @@ família: as páginas de referência entregues antes da barra de _Demonstrations
 que o passe 1 deixou instáveis (`docs/implementation-review.md`, passe 2). A
 segunda depende da triagem por família registrada nesse arquivo.
 
-## Rodada 13 — fechar o passe 1 · 2 sessões, em série
+## Rodada 13 — fechar o passe 1 · 1 sessão
 
-A primeira sessão commita o que está na worktree. A segunda muda a fundação e
-por isso corre sozinha.
-
-```
-Feche a sessão `/component filter-bar code-block` que parou no gate de release.
-Leia .claude/progress/filter-bar.md e .claude/progress/plain-variant.md. Rode
-pnpm check:full. Commite em três: a decisão transversal da variante plain
-(plain-variant.test.mjs, os onze stylesheets de campo, build-briefing.md,
-token-foundation.md), depois filter-bar, depois code-block. Uma família por
-commit. Não toque em docs/build-order.md nem em docs/build-schedule.md.
-```
+Muda a fundação e por isso corre sozinha.
 
 ```
 Reabertura da fundação, regra R2 de docs/archive/implementation-review-pass-1.md:

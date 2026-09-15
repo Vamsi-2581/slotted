@@ -1,43 +1,62 @@
-# Checkpoint — rodada 13: inner controls R2 lidos pela escala interna
+# Checkpoint — rodada 16: `drag-and-drop` (`@slotted/core/drag`)
 
 ## Plano
 
-`docs/build-schedule.md`, rodada 13 (bloco único). Sem arquivo de plano.
+`docs/build-schedule.md`, rodada 16 (bloco único). Sem arquivo de plano. Skill
+`/component`, modo `infra`: sem contrato em `specs/components`, sem stylesheet,
+sem binding, sem página de referência.
 
 ## Tarefas concluídas
 
-1. `packages/styles/src/inner-control.test.mjs`: regra 1 exige
-   `--slotted-control-inner-size-*` na largura e recusa qualquer
-   `--slotted-control-height-*` (a isenção `min(` foi removida). 34/34.
-2. 16 stylesheets: `min(calc(glifo + 2 * space-2), var(--_inner-size))` no
-   lugar de `calc(height - bordas - ar)` (campos) ou como novo teto dentro de
-   `max(target-min, …)` (alert, toast, tag, breadcrumb, tabs, toolbar, dialog,
-   drawer, upload); `--_inner-size` declarado por passo de tamanho ao lado de
-   cada `--_icon-size`/`--_glyph-size`. `tabs` `--_dismiss-size` (fora da lista)
-   recebeu o mesmo teto.
-3. 16 `*.tokens.json` regenerados; `packages/styles` 159/159;
-   `verify-docs-snippets` 5/5; `verify-token-foundation` 15/15.
-4. Docs: `docs/build-briefing.md` (decisão), `docs/token-foundation.md`
-   (parágrafo em Control geometry), `docs/implementation-review.md` (R2 regra
-   1), `docs/build-order.md` (linha "fundação (R2)" removida das reaberturas).
-5. Sonda antes/depois (`scratchpad/probe.mjs`, harness HEAD vs. árvore): só
-   `clear`/`reveal` de text-field, select, combobox, multi-select e tags-input
-   mudam — compact 22→20 (sm 20→18), dense 20→18 (sm 18→16). As outras 21
-   partes mantêm 24px pelo piso do alvo.
+1. Inventário, desenho e autoavaliação em
+   `docs/superpowers/specs/2026-09-15-drag-{capability-inventory,design,self-assessment}.md`.
+2. Módulo `packages/core/src/drag/` — `types`, `positions`, `keys`, `geometry`,
+   `messages`, `drag`, `index`, quatro testes (70/70). Registro em
+   `packages/core/package.json` (`./drag`) e `vite.config.ts`; fora de
+   `src/index.ts`.
+3. Harness de core: `tools/harness/core.mjs` (+ `core.test.mjs`, `vite` como
+   devDependency de `@slotted/harness`), fragmento
+   `packages/core/src/drag/drag.harness.html`, página em
+   `tools/harness/out/drag.html`. Capturas lidas; ponteiro e teclado dirigidos
+   em Chrome por `scratchpad/{drive,keys}.mjs`.
+4. Docs: `docs/build-order.md` (módulo entregue, parágrafo da onda 9, linha de
+   reabertura `tags-input`/`multi-select` → `moveBy`), `docs/build-briefing.md`
+   (decisão `Escape` em `window`; harness de core no visual loop).
+5. Verificação: `turbo run verify` em `@slotted/core` (68/1317) e
+   `@slotted/harness` (85); `typecheck`, `test:contracts` (1552),
+   `test:package-layers`, `test:docs` limpos; prettier nos caminhos deste
+   módulo. `format:check` e `lint` globais falham fora do módulo
+   (`side-navigation`, outra sessão; `toggle-group`, já em `HEAD`).
 
 ## Tarefa em curso
 
-Capturas das seis combinações para as 16 famílias em `scratchpad/shots/`
-(tarefa em segundo plano); leitura das capturas dense/compact das cinco
-famílias que mudaram.
+Gate aprovado ("continue"). Depois do gate: anel de foco do harness
+(`z-index: 1`), alça opcional por contentor (`data-grip`), guarda de controle
+interativo sem alça, menor contentor vence, `resolveTarget` opcional,
+`touch-action` fora da alça. 72/72. Commits em curso.
 
 ## Git
 
-Branch `review/implementation-pass-1`, HEAD `71631c0`. Árvore: 16 css, 16
-tokens.json, inner-control.test.mjs, 4 docs, este checkpoint. Nada no índice.
+Branch `review/implementation-pass-1`, HEAD `7627cd6`. Nada no índice. Árvore
+com os arquivos acima mais `pnpm-lock.yaml` (entrada de `tools/harness` e
+snapshots duplicados removidos pelo `pnpm add`). Não deste módulo:
+`packages/styles/src/overlay-motion.test.mjs`, `side-navigation/*`,
+`apps/demos/`.
+
+## Ajustes de escopo
+
+- `blocked` removido das mensagens.
+- Soltar na identidade, em nada ou em posição recusada é cancelamento.
+- A pré-visualização é clonada antes de a sessão ser publicada; `dropped` é
+  anunciado antes de `onDrop`.
+
+## Problemas conhecidos
+
+Nenhum neste módulo.
 
 ## Próxima ação
 
-Ler `shots/{text-field,select,combobox,multi-select,tags-input}-light-dense-ltr-420.png`
-e `-light-compact-ltr-420.png`; se a imagem estiver certa, commit único:
-`style(foundation): os inner controls da regra R2 lidos pela escala interna do controle`.
+Commits por passo, caminhos explícitos —
+(1) `tools/harness/core.mjs core.test.mjs package.json pnpm-lock.yaml`;
+(2) `packages/core/src/drag packages/core/package.json packages/core/vite.config.ts`;
+(3) `docs/superpowers/specs/2026-09-15-drag-* docs/build-order.md docs/build-briefing.md`.

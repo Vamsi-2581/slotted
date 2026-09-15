@@ -294,6 +294,20 @@ other families stand on. Justify it at the gate before writing it.
   is recovered by the box or by a transparent halo, as before. Decided in
   round 13 of pass 2.
 
+- **A drag is a session over the consumer's model, and `Escape` during one
+  belongs to the drag.** `@slotted/core/drag` holds `pickUp`, `move`, `drop`,
+  `cancel` over positions — `between` a splice index, `on` an item, `root` an
+  empty container — read from the consumer's `items()`; the pointer resolves
+  a point to the same position, and the drop event carries keys and indexes
+  and never a pixel. The module writes nothing on a registered element: a
+  family renders `data-dragging`, `data-drop-target` and `data-drop-invalid`
+  from `state`. While a session is open the module takes `Escape` on `window`
+  in the capture phase and stops it, so `dismissable-layer` does not see the
+  key and a drag inside a dialog cancels without closing the dialog. A drop on
+  the position the item came from, on nothing, or on a refused position is a
+  cancel and emits no drop. Decided in wave 9; it binds `data-grid`,
+  `listbox`, `tree`, `tags-input` and `dashboard-grid`.
+
 ## Working beside another session
 
 Another session may be building a different family in this same worktree at the
@@ -331,6 +345,12 @@ node tools/harness/shoot.mjs <family> --scheme light --dir rtl
 
 The capture is the whole page; `--scene <name>` narrows it to one scene. Read
 every image. The exit condition is the right picture, not finished code.
+
+A module of `packages/core` with a `<module>.harness.html` beside it is built
+by `node tools/harness/core.mjs <module>` instead: the fragment carries its own
+`<style>` and a `<script type="module">` that imports `@slotted/core/<module>`,
+and the page ships the module bundled, so the reviewer drives it live. The
+shooter reads the same `out/<module>.html`.
 
 ## Verification
 

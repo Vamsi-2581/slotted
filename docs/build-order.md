@@ -44,8 +44,9 @@ Famílias do guia entregues dentro de outra: `alert-dialog` em `dialog`;
 binding.
 
 Módulos de `packages/core` entregues: `clipboard`, `code`, `collection`,
-`count`, `currency`, `date`, `disclosure`, `dismissable-layer`, `extent`,
-`files`, `filter`, `focus`, `form`, `identity`, `keys`, `live-announcer`,
+`count`, `currency`, `date`, `disclosure`, `dismissable-layer`, `drag` (onda
+9), `extent`, `files`, `filter`, `focus`, `form`, `identity`, `keys`,
+`live-announcer`,
 `loading`, `measure`, `number`, `overflow`, `pagination`, `pointer-intent`,
 `portal`, `positioner`, `presence`, `progress`, `slider`, `state`, `steps`,
 `sticky-header`, `tags`, `timeline`, `toast`, `typeahead`, `upload`.
@@ -64,6 +65,7 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `prose`, `table`, `tabs`        | substituir a medida de rolagem própria por `scroll-area`                                                                                        | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                             |
 | `scroll-area`                   | véu por `animation-timeline: scroll()`                                                                                                          | —                                         | `2026-09-13-scroll-area-design.md` §5                                    |
 | `listbox`, `tree`, `tags-input` | reordenar por arrasto                                                                                                                           | `drag-and-drop`                           | inventários de `listbox` (l. 125), `tree` (l. 101), `tags-input` (l. 90) |
+| `tags-input`, `multi-select`    | o `Alt`+seta passa a `moveBy` de `@slotted/core/drag`, emitindo o mesmo evento que o arrasto                                                    | —                                         | `2026-09-15-drag-design.md` §1                                           |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -95,6 +97,23 @@ que três autoavaliações pediram.
   soltar) é construída primeiro e o ponteiro deriva dela. Consumidores
   previstos: `data-grid` (colunas), `listbox`, `tree`, `tags-input`,
   `dashboard-grid`.
+
+  Entregue em 2026-09-15. Inventário em
+  `docs/superpowers/specs/2026-09-15-drag-capability-inventory.md`, decisões em
+  `docs/superpowers/specs/2026-09-15-drag-design.md`, autoavaliação em
+  `docs/superpowers/specs/2026-09-15-drag-self-assessment.md`. A sessão é o
+  desenho: `pickUp`, `move`, `drop`, `cancel` sobre posições (`between`, `on`,
+  `root`) derivadas de `items()` do consumidor; o ponteiro resolve um ponto para
+  a mesma posição. `moveBy` é a sessão em uma chamada, para o `Alt`+seta que
+  `tags-input` e `multi-select` já pressionam. O módulo fica fora de
+  `packages/core/src/index.ts`, como `filter`. O harness de core —
+  `node tools/harness/core.mjs drag` — empacota o módulo na página e o revisor
+  o dirige por teclado e ponteiro. O que os consumidores herdam: o binding
+  renderiza `data-dragging`, `data-drop-target` e `data-drop-invalid` a partir
+  de `state` (o módulo não escreve atributo em elemento registrado); a tecla
+  que **abre** a sessão é da família; `Escape` é tomado em `window` na fase de
+  captura e não chega a `dismissable-layer`.
+
 - `side-navigation` — itens e grupos aninhados, `expanded` e `selected`, ícone
   opcional, `badge`, modo compacto. A seleção deriva da rota e a expansão é
   independente dela. Em tela estreita vira `drawer` e devolve o foco ao gatilho.

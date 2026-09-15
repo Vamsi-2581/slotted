@@ -5,13 +5,27 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { operatorsFor, setFilter } from '@slotted/core/filter';
-import type { NumberFilter, SetFilter, TextFilter } from '@slotted/core/filter';
+import type {
+  DateFilter,
+  DateTimeFilter,
+  NumberFilter,
+  SetFilter,
+  TextFilter,
+  TimeFilter,
+} from '@slotted/core/filter';
 import type { ChangeRequest } from '@slotted/core/state';
 import { SlTable } from './table';
 import { SlTableContent } from './table-content';
 import { provideTableDefaults, TABLE_LABELS } from './table-defaults';
 import type { TableSortDescriptor } from './table-defaults';
-import { SlTableNumberFilter, SlTableSetFilter, SlTableTextFilter } from './table-filter';
+import {
+  SlTableDateFilter,
+  SlTableDateTimeFilter,
+  SlTableNumberFilter,
+  SlTableSetFilter,
+  SlTableTextFilter,
+  SlTableTimeFilter,
+} from './table-filter';
 import {
   SlTableBody,
   SlTableCaption,
@@ -450,6 +464,86 @@ class TypedFilterHost {
   readonly amount = signal<NumberFilter | null>(null);
 }
 
+/**
+ * The three operands the panel could not draw on 10 September: a time and a
+ * date-time picker, one range picker for a date `between`, and the set typed
+ * as chips.
+ */
+@Component({
+  standalone: true,
+  imports: [
+    SlTable,
+    SlTableBody,
+    SlTableColumnActions,
+    SlTableColumnHeader,
+    SlTableContent,
+    SlTableDateFilter,
+    SlTableDateTimeFilter,
+    SlTableHead,
+    SlTableRow,
+    SlTableSetFilter,
+    SlTableTimeFilter,
+  ],
+  template: `<div slTable [columns]="1">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader column="amount">
+            Amount
+            <span slTableColumnActions>
+              @switch (kind()) {
+                @case ('time') {
+                  <span slTableTimeFilter columnLabel="amount" [(value)]="time"></span>
+                }
+                @case ('datetime') {
+                  <span slTableDateTimeFilter columnLabel="amount" [(value)]="dateTime"></span>
+                }
+                @case ('date') {
+                  <span slTableDateFilter columnLabel="amount" [(value)]="date"></span>
+                }
+                @case ('tags') {
+                  <span
+                    slTableSetFilter
+                    columnLabel="amount"
+                    operand="tags"
+                    [options]="options"
+                    [(value)]="chosen"
+                  ></span>
+                }
+              }
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody></tbody>
+    </div>
+  </div>`,
+})
+class OperandFilterHost {
+  readonly kind = signal<'date' | 'datetime' | 'tags' | 'time'>('time');
+  readonly time = signal<TimeFilter | null>({
+    conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],
+    join: 'and',
+    kind: 'time',
+  });
+  readonly dateTime = signal<DateTimeFilter | null>({
+    conditions: [{ operator: 'after', value: '2026-09-14T09:00' }],
+    join: 'and',
+    kind: 'datetime',
+  });
+  readonly date = signal<DateFilter | null>({
+    conditions: [{ end: '2026-09-30', operator: 'between', value: '2026-09-01' }],
+    join: 'and',
+    kind: 'date',
+  });
+  readonly chosen = signal<SetFilter | null>(null);
+  readonly options = [
+    { count: 2, value: 'Paid' },
+    { count: 1, value: 'Overdue' },
+    { value: 'Draft' },
+  ];
+}
+
 describe('where a cell sits in its row', () => {
   it('centres by default, and lets a table and a cell each say otherwise', async () => {
     await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
@@ -629,6 +723,128 @@ describe('the column filter', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.chosen()).toBeNull();
+  });
+
+  async function openOperand(kind: 'date' | 'datetime' | 'tags' | 'time') {
+    await TestBed.configureTestingModule({ imports: [OperandFilterHost] }).compileComponents();
+    const fixture = TestBed.createComponent(OperandFilterHost);
+    fixture.componentInstance.kind.set(kind);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector('[data-part="filter"]') as HTMLElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    return {
+      fixture,
+      operand: document.querySelector('[data-part="filter-operand"]') as HTMLElement,
+    };
+  }
+
+  /**
+   * The two kinds the date chain supplied. The operand is the whole picker,
+   * and what the picker writes back is ISO text at its own granularity — so a
+   * stepped hour reaches the descriptor as `HH:MM`, never as a `PlainTime`.
+   */
+  it('draws a time picker per operand, and writes the ISO text at its granularity', async () => {
+    const { fixture, operand } = await openOperand('time');
+
+    expect(operand.getAttribute('data-kind')).toBe('time');
+    expect(operand.hasAttribute('data-range')).toBe(false);
+    expect(operand.querySelectorAll('[data-ui="time-picker"]').length).toBe(2);
+
+    const hour = operand.querySelector('[role="spinbutton"]') as HTMLElement;
+    hour.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowUp' }));
+    fixture.detectChanges();
+    panelButton('Apply').click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.time()).toEqual({
+      conditions: [{ end: '02:00', operator: 'between', value: '23:00' }],
+      join: 'and',
+      kind: 'time',
+    });
+  });
+
+  it('draws a date-time picker, and offers the operators of a day', async () => {
+    const { fixture, operand } = await openOperand('datetime');
+
+    expect(operand.querySelectorAll('[data-ui="datetime-picker"]').length).toBe(1);
+
+    (
+      document.querySelector('[data-part="filter-operator"] [role="combobox"]') as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const offered = [...document.querySelectorAll('[role="option"]')].map((option) =>
+      (option.textContent ?? '').trim(),
+    );
+    expect(offered).toEqual(
+      operatorsFor('datetime').map((operator) => TABLE_LABELS.filterOperators[operator]),
+    );
+  });
+
+  /**
+   * One control for both ends of a date range rather than two pickers, and
+   * the operand grid is told so a single child is not left in the first of two
+   * columns. Every other operator keeps the one picker it had.
+   */
+  it('draws one range picker for a date between, and one date picker otherwise', async () => {
+    const { fixture, operand } = await openOperand('date');
+
+    expect(operand.getAttribute('data-range')).toBe('');
+    expect(operand.querySelectorAll('[data-ui="date-range-picker"]').length).toBe(1);
+
+    (
+      document.querySelector('[data-part="filter-operator"] [role="combobox"]') as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    (
+      [...document.querySelectorAll('[role="option"]')].find(
+        (option) => (option.textContent ?? '').trim() === 'Is',
+      ) as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const single = document.querySelector('[data-part="filter-operand"]') as HTMLElement;
+    expect(single.hasAttribute('data-range')).toBe(false);
+    expect(single.querySelectorAll('[data-ui="date-picker"]').length).toBe(1);
+  });
+
+  /**
+   * A list too long to tick is typed instead. The chips hold the same list the
+   * checkboxes held, and the options are a datalist of suggestions and the set
+   * a typed value must belong to.
+   */
+  it('types the set as chips, and refuses a value the column does not hold', async () => {
+    const { fixture, operand } = await openOperand('tags');
+
+    expect(operand.getAttribute('data-operand')).toBe('tags');
+    expect(operand.querySelector('[data-ui="tags-input"]')).not.toBeNull();
+    expect(document.querySelector('[data-part="filter-list"]')).toBeNull();
+    expect(operand.querySelectorAll('datalist option').length).toBe(3);
+
+    const input = operand.querySelector('[data-part="input"]') as HTMLInputElement;
+    expect(input.getAttribute('list')).toBe(operand.querySelector('datalist')?.id);
+
+    const type = (text: string) => {
+      input.value = text;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+      fixture.detectChanges();
+    };
+    type('Paid');
+    expect(operand.querySelectorAll('[data-ui="tag"]').length).toBe(1);
+    type('Nope');
+    expect(operand.querySelectorAll('[data-ui="tag"]').length).toBe(1);
+    expect(fixture.componentInstance.chosen()).toBeNull();
+
+    panelButton('Apply').click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.chosen()).toEqual(setFilter(['Paid']));
   });
 });
 

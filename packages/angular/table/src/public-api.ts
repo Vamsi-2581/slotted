@@ -25,11 +25,13 @@ export { SlTableContent } from './table-content';
 export {
   SlTableBooleanFilter,
   SlTableDateFilter,
+  SlTableDateTimeFilter,
   SlTableFilterBase,
   SlTableFilterShell,
   SlTableNumberFilter,
   SlTableSetFilter,
   SlTableTextFilter,
+  SlTableTimeFilter,
 } from './table-filter';
 export type { TableFilterOperandContext } from './table-filter';
 export type { TableFilterOption, TableFilterReason } from './table-filter';

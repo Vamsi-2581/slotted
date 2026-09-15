@@ -1,6 +1,15 @@
 import { createFilter } from '@slotted/core/collection';
-import { isPlainDate, parseISODate, toISODate } from '@slotted/core/date';
-import type { PlainDate } from '@slotted/core/date';
+import {
+  isPlainDate,
+  isPlainDateTime,
+  isPlainTime,
+  parseISODate,
+  parseISODateTime,
+  parseISOTime,
+  toISODate,
+  toISOTime,
+} from '@slotted/core/date';
+import type { PlainDate, PlainDateTime, PlainTime, TimeGranularity } from '@slotted/core/date';
 import {
   defaultOperator as kindDefaultOperator,
   describeFilter,
@@ -17,6 +26,7 @@ import {
 import type {
   BooleanFilter,
   DateFilter,
+  DateTimeFilter,
   FilterCondition,
   FilterDescriptor,
   FilterJoin,
@@ -25,6 +35,7 @@ import type {
   NumberFilter,
   SetFilter,
   TextFilter,
+  TimeFilter,
 } from '@slotted/core/filter';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
@@ -49,6 +60,8 @@ import {
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlDatePicker } from '@slotted/angular/date-picker';
+import { SlDateRangePicker, SlDateRangePickerPresets } from '@slotted/angular/date-range-picker';
+import { SlDateTimePicker } from '@slotted/angular/datetime-picker';
 import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
 import {
   SlPopover,
@@ -58,7 +71,9 @@ import {
 } from '@slotted/angular/popover';
 import { SlRadio, SlRadioGroup } from '@slotted/angular/radio-group';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
+import { SlTagsInput } from '@slotted/angular/tags-input';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
+import { SlTimePicker } from '@slotted/angular/time-picker';
 
 import { SlTable } from './table';
 import { SlTableColumnHeader } from './table-parts';
@@ -89,6 +104,12 @@ export interface TableFilterOperandContext {
   label: (slot: 0 | 1) => string;
   /** Writes one operand back into the draft. */
   set: (slot: 0 | 1, value: unknown) => void;
+  /**
+   * Writes both operands of a range at once, for a control that holds both.
+   * Two calls to `set` from one event would each read the draft the other did
+   * not write.
+   */
+  setBoth: (value: unknown, end: unknown) => void;
   /** Which operands this operator takes: none, the first, or both. */
   slots: readonly (0 | 1)[];
 }
@@ -216,6 +237,25 @@ export abstract class SlTableFilterBase {
 
   readonly hasSecond = computed(() => this.rows().length === 2);
 
+  /**
+   * Whether the operand template draws one control for both ends of a range,
+   * written as `data-range` on `filter-operand` so the two-column operand grid
+   * collapses to one. The date filter says yes; nothing else does yet.
+   */
+  protected rangeOperand(): boolean {
+    return false;
+  }
+
+  /** Which of a kind's operands is drawn, written as `data-operand`. */
+  operandName(): string | null {
+    return null;
+  }
+
+  /** `data-range`, for the condition whose operator takes two operands. */
+  rangeMark(condition: Condition): '' | null {
+    return this.rangeOperand() && this.slotsOf(condition).length === 2 ? '' : null;
+  }
+
   slotsOf(condition: Condition): readonly (0 | 1)[] {
     const operands = operandCount(condition.operator as FilterOperator);
     return operands === 0 ? [] : operands === 1 ? [0] : [0, 1];
@@ -234,6 +274,7 @@ export abstract class SlTableFilterBase {
       condition,
       label: (slot) => this.operandLabel(condition, slot),
       set: (slot, value) => this.setOperand(index, slot, value),
+      setBoth: (value, end) => this.setOperands(index, value, end),
       slots: this.slotsOf(condition),
     };
   }
@@ -288,6 +329,17 @@ export abstract class SlTableFilterBase {
     const wasActive = isConditionActive(this.kind, condition);
     const next: Condition =
       slot === 0 ? { ...condition, value: operand } : { ...condition, end: operand };
+
+    this.draft.set(withCondition(this.draft(), index, next as never));
+    if (index === 0 && this.allowed() >= 2 && !wasActive && isConditionActive(this.kind, next)) {
+      this.announce(this.labels().filterConditionAdded);
+    }
+  }
+
+  setOperands(index: number, value: unknown, end: unknown) {
+    const condition = this.rows()[index] ?? { operator: this.start() };
+    const wasActive = isConditionActive(this.kind, condition);
+    const next: Condition = { ...condition, value, end };
 
     this.draft.set(withCondition(this.draft(), index, next as never));
     if (index === 0 && this.allowed() >= 2 && !wasActive && isConditionActive(this.kind, next)) {
@@ -436,7 +488,12 @@ export abstract class SlTableFilterBase {
               </div>
 
               @if (owner().slotsOf(row).length > 0) {
-                <div data-part="filter-operand" [attr.data-kind]="owner().kind">
+                <div
+                  data-part="filter-operand"
+                  [attr.data-kind]="owner().kind"
+                  [attr.data-operand]="owner().operandName()"
+                  [attr.data-range]="owner().rangeMark(row)"
+                >
                   <ng-container
                     [ngTemplateOutlet]="operand()"
                     [ngTemplateOutletContext]="{ $implicit: owner().context($index) }"
@@ -563,22 +620,48 @@ export class SlTableNumberFilter extends SlTableFilterBase {
  * panel's layer, which `dismissable-layer` already stacks for the operator
  * chooser beside it.
  *
- * The descriptor holds the ISO day the picker produces, never a `Date`.
+ * `between` is one `date-range-picker` rather than two pickers: it says the
+ * run's length while it is drawn, takes the ends in either order and carries
+ * the application's own presets. The descriptor holds the ISO days the
+ * pickers produce, never a `Date`, and is the same object either way.
  */
 @Component({
   selector: 'span[slTableDateFilter]',
   exportAs: 'slTableDateFilter',
-  imports: [SlTableFilterShell, SlDatePicker],
+  imports: [
+    NgTemplateOutlet,
+    SlTableFilterShell,
+    SlDatePicker,
+    SlDateRangePicker,
+    SlDateRangePickerPresets,
+  ],
   template: `<span [slTableFilterShell]="this" [operand]="operand"></span>
     <ng-template #operand let-context>
-      @for (slot of context.slots; track slot) {
+      @if (context.slots.length === 2) {
+        <div
+          slDateRangePicker
+          size="sm"
+          [locale]="locale()"
+          [startLabel]="context.label(0)"
+          [endLabel]="context.label(1)"
+          [value]="range(context.condition)"
+          (valueChange)="context.setBoth(iso($event.value?.start), iso($event.value?.end))"
+          (keydown.enter)="context.apply()"
+        >
+          @if (presets(); as presetsTemplate) {
+            <div slDateRangePickerPresets>
+              <ng-container [ngTemplateOutlet]="presetsTemplate" />
+            </div>
+          }
+        </div>
+      } @else {
         <div
           slDatePicker
           size="sm"
           [locale]="locale()"
-          [value]="day($any(slot === 0 ? context.condition.value : context.condition.end))"
-          [attr.aria-label]="context.label(slot)"
-          (valueChange)="context.set(slot, iso($event.value))"
+          [value]="day(context.condition.value)"
+          [attr.aria-label]="context.label(0)"
+          (valueChange)="context.set(0, iso($event.value))"
           (keydown.enter)="context.apply()"
         ></div>
       }
@@ -592,6 +675,16 @@ export class SlTableDateFilter extends SlTableFilterBase {
   readonly value = model<DateFilter | null>(null);
   /** BCP 47. Decides the operand's field order and separators. */
   readonly locale = input<string | undefined>(undefined);
+  /**
+   * The application's own ranges — this week, this month — as
+   * `slDateRangePickerPreset` buttons in a template, offered inside the range
+   * picker `between` draws. The descriptor still receives two ISO days.
+   */
+  readonly presets = input<TemplateRef<unknown> | undefined>(undefined);
+
+  protected override rangeOperand() {
+    return true;
+  }
 
   /** The descriptor's ISO day as the field's own value, and back. */
   day(value: unknown): PlainDate | null {
@@ -602,12 +695,178 @@ export class SlTableDateFilter extends SlTableFilterBase {
     return isPlainDate(value) ? toISODate(value) : null;
   }
 
+  range(condition: Condition): { start: PlainDate | null; end: PlainDate | null } {
+    return { start: this.day(condition.value), end: this.day(condition.end) };
+  }
+
   protected override readValue() {
     return this.value();
   }
 
   protected override writeValue(next: FilterDescriptor | null) {
     this.value.set(next as DateFilter | null);
+  }
+}
+
+/** `HH` and `HH:MM` are prefixes the engine accepts and the field cannot read. */
+function timeOf(text: unknown): PlainTime | null {
+  if (!text) return null;
+  const written = String(text);
+  return parseISOTime(/^\d{2}$/.test(written) ? `${written}:00` : written);
+}
+
+/** A day, or a day and an hour, padded to the `T…:MM` the field reads. */
+function dateTimeOf(text: unknown): PlainDateTime | null {
+  if (!text) return null;
+  const written = String(text);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(written)) return parseISODateTime(`${written}T00:00`);
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}$/.test(written)) return parseISODateTime(`${written}:00`);
+  return parseISODateTime(written);
+}
+
+/**
+ * A column of times of day. The operand is `time-picker` — the segmented field
+ * and the list behind it — at the column's own granularity, which decides the
+ * precision the descriptor is written at and the engine compares at: a picker
+ * writing minutes produces `09:14`, and `is 09:14` then matches every second
+ * of that minute.
+ */
+@Component({
+  selector: 'span[slTableTimeFilter]',
+  exportAs: 'slTableTimeFilter',
+  imports: [SlTableFilterShell, SlTimePicker],
+  template: `<span [slTableFilterShell]="this" [operand]="operand"></span>
+    <ng-template #operand let-context>
+      @for (slot of context.slots; track slot) {
+        <div
+          slTimePicker
+          size="sm"
+          [locale]="locale()"
+          [hourCycle]="hourCycle()"
+          [granularity]="granularity()"
+          [step]="step()"
+          [options]="options()"
+          [min]="timeOf(min())"
+          [max]="timeOf(max())"
+          [value]="timeOf(slot === 0 ? context.condition.value : context.condition.end)"
+          [attr.aria-label]="context.label(slot)"
+          (valueChange)="context.set(slot, iso($event.value))"
+          (keydown.enter)="context.apply()"
+        ></div>
+      }
+    </ng-template>`,
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+})
+export class SlTableTimeFilter extends SlTableFilterBase {
+  override readonly kind = 'time' as const;
+  readonly value = model<TimeFilter | null>(null);
+  /** BCP 47. Decides the operand's hour cycle and separators. */
+  readonly locale = input<string | undefined>(undefined);
+  /** Twelve or twenty-four hours, overriding what the locale says. */
+  readonly hourCycle = input<12 | 24 | undefined>(undefined);
+  /** The last unit the operand writes. Minute unless stated. */
+  readonly granularity = input<TimeGranularity | undefined>(undefined);
+  /** The list's step, in seconds. */
+  readonly step = input<number | undefined, unknown>(undefined, {
+    transform: (given) => (given === undefined ? undefined : numberAttribute(given)),
+  });
+  /** The list's own entries, replacing the step. */
+  readonly options = input<readonly PlainTime[] | undefined>(undefined);
+  /** The earliest time the operand accepts, as ISO time text. */
+  readonly min = input<string | undefined>(undefined);
+  /** The latest, as ISO time text. */
+  readonly max = input<string | undefined>(undefined);
+
+  timeOf(value: unknown): PlainTime | undefined {
+    return timeOf(value) ?? undefined;
+  }
+
+  iso(value: unknown) {
+    return isPlainTime(value) ? toISOTime(value, this.granularity() ?? 'minute') : null;
+  }
+
+  protected override readValue() {
+    return this.value();
+  }
+
+  protected override writeValue(next: FilterDescriptor | null) {
+    this.value.set(next as TimeFilter | null);
+  }
+}
+
+/**
+ * A column of dates with times. The operand is `datetime-picker`, the
+ * seven-segment field and the two surfaces behind it. A value with one half
+ * missing reaches the draft as no operand at all, so the condition stays
+ * inactive until both halves exist — the engine's one rule for a missing
+ * operand, and the reason Apply reports nothing for a date without a time.
+ */
+@Component({
+  selector: 'span[slTableDateTimeFilter]',
+  exportAs: 'slTableDateTimeFilter',
+  imports: [SlTableFilterShell, SlDateTimePicker],
+  template: `<span [slTableFilterShell]="this" [operand]="operand"></span>
+    <ng-template #operand let-context>
+      @for (slot of context.slots; track slot) {
+        <div
+          slDateTimePicker
+          size="sm"
+          [locale]="locale()"
+          [timeZone]="timeZone()"
+          [hourCycle]="hourCycle()"
+          [granularity]="granularity()"
+          [step]="step()"
+          [min]="dateTimeOf(min())"
+          [max]="dateTimeOf(max())"
+          [value]="dateTimeOf(slot === 0 ? context.condition.value : context.condition.end)"
+          [attr.aria-label]="context.label(slot)"
+          (valueChange)="context.set(slot, iso($event.value))"
+          (keydown.enter)="context.apply()"
+        ></div>
+      }
+    </ng-template>`,
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+})
+export class SlTableDateTimeFilter extends SlTableFilterBase {
+  override readonly kind = 'datetime' as const;
+  readonly value = model<DateTimeFilter | null>(null);
+  /** BCP 47. Decides the operand's field order and separators. */
+  readonly locale = input<string | undefined>(undefined);
+  /** The zone "now" is read in. Defaults to the runtime's. */
+  readonly timeZone = input<string | undefined>(undefined);
+  /** Twelve or twenty-four hours, overriding what the locale says. */
+  readonly hourCycle = input<12 | 24 | undefined>(undefined);
+  /** The last unit the operand writes. Minute unless stated. */
+  readonly granularity = input<TimeGranularity | undefined>(undefined);
+  /** The list's step, in seconds. */
+  readonly step = input<number | undefined, unknown>(undefined, {
+    transform: (given) => (given === undefined ? undefined : numberAttribute(given)),
+  });
+  /** The earliest date-time the operand accepts, as ISO date-time text. */
+  readonly min = input<string | undefined>(undefined);
+  /** The latest, as ISO date-time text. */
+  readonly max = input<string | undefined>(undefined);
+
+  dateTimeOf(value: unknown): PlainDateTime | undefined {
+    return dateTimeOf(value) ?? undefined;
+  }
+
+  iso(value: unknown) {
+    return isPlainDateTime(value)
+      ? `${toISODate(value.date)}T${toISOTime(value.time, this.granularity() ?? 'minute')}`
+      : null;
+  }
+
+  protected override readValue() {
+    return this.value();
+  }
+
+  protected override writeValue(next: FilterDescriptor | null) {
+    this.value.set(next as DateTimeFilter | null);
   }
 }
 
@@ -667,54 +926,86 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
 @Component({
   selector: 'span[slTableSetFilter]',
   exportAs: 'slTableSetFilter',
-  imports: [SlTableFilterShell, SlCheckbox, SlTextField, SlTextFieldInput],
-  template: `<span [slTableFilterShell]="this" [operand]="operand"></span>
-    <ng-template #operand let-context>
-      @if (searching()) {
-        <div data-part="filter-search">
-          <div slTextField size="sm" clearable>
-            <input
-              slTextFieldInput
-              [value]="query()"
-              [attr.aria-label]="searchLabel() ?? labels().filterSearch"
-              [attr.placeholder]="searchLabel() ?? labels().filterSearch"
-              (input)="search($event)"
-            />
-          </div>
-        </div>
-      }
-
-      @if (shown().length === 0) {
-        <p data-part="filter-empty">{{ emptyLabel() ?? labels().filterEmpty }}</p>
+  imports: [SlTableFilterShell, SlCheckbox, SlTagsInput, SlTextField, SlTextFieldInput],
+  template: `<span [slTableFilterShell]="this" [operand]="operandTemplate"></span>
+    <!-- The template is not named operand: that is the input that says which
+         of the two operands is drawn, and a template variable of the same name
+         would shadow it in every binding below. -->
+    <ng-template #operandTemplate let-context>
+      @if (operand() === 'tags') {
+        <!-- The chosen values as chips, for a list too long to tick. With
+             options, a typed value outside them is refused and announced by
+             tags-input's own validation, and the options are a datalist:
+             native completion in every engine, with no second listbox inside
+             the panel. Enter with pending text commits a chip, which is
+             tags-input's key; Enter on an empty field applies, which is the
+             panel's. -->
+        <sl-tags-input
+          size="sm"
+          [fullWidth]="true"
+          [attr.aria-label]="context.label(0)"
+          [formatLabel]="optionLabel"
+          [list]="constrained() ? listId : undefined"
+          [validateValue]="constrained() ? known : undefined"
+          [invalidValues]="constrained() ? 'refuse' : undefined"
+          [value]="chosen(context)"
+          (valueChange)="context.set(0, $event)"
+          (keydown.enter)="applyOnEmpty($event, context)"
+        ></sl-tags-input>
+        @if (constrained()) {
+          <datalist [id]="listId">
+            @for (option of options(); track option.value) {
+              <option [value]="option.value">{{ option.label ?? option.value }}</option>
+            }
+          </datalist>
+        }
       } @else {
-        <div data-part="filter-list">
-          <div data-part="filter-option" data-covering>
-            <span
-              slCheckbox
-              [checked]="allCovered(context)"
-              [indeterminate]="someCovered(context)"
-              (checkedChange)="coverAll(context, !allCovered(context))"
-            >
-              {{ selectAllLabel() ?? labels().filterSelectAll }}
-            </span>
-            <span data-count>{{ shown().length }}</span>
+        @if (searching()) {
+          <div data-part="filter-search">
+            <div slTextField size="sm" clearable>
+              <input
+                slTextFieldInput
+                [value]="query()"
+                [attr.aria-label]="searchLabel() ?? labels().filterSearch"
+                [attr.placeholder]="searchLabel() ?? labels().filterSearch"
+                (input)="search($event)"
+              />
+            </div>
           </div>
+        }
 
-          @for (option of shown(); track option.value) {
-            <div data-part="filter-option">
+        @if (shown().length === 0) {
+          <p data-part="filter-empty">{{ emptyLabel() ?? labels().filterEmpty }}</p>
+        } @else {
+          <div data-part="filter-list">
+            <div data-part="filter-option" data-covering>
               <span
                 slCheckbox
-                [checked]="chosen(context).includes(option.value)"
-                (checkedChange)="hold(context, option.value, $event.value)"
+                [checked]="allCovered(context)"
+                [indeterminate]="someCovered(context)"
+                (checkedChange)="coverAll(context, !allCovered(context))"
               >
-                {{ option.label ?? option.value }}
+                {{ selectAllLabel() ?? labels().filterSelectAll }}
               </span>
-              @if (option.count !== undefined) {
-                <span data-count>{{ option.count }}</span>
-              }
+              <span data-count>{{ shown().length }}</span>
             </div>
-          }
-        </div>
+
+            @for (option of shown(); track option.value) {
+              <div data-part="filter-option">
+                <span
+                  slCheckbox
+                  [checked]="chosen(context).includes(option.value)"
+                  (checkedChange)="hold(context, option.value, $event.value)"
+                >
+                  {{ option.label ?? option.value }}
+                </span>
+                @if (option.count !== undefined) {
+                  <span data-count>{{ option.count }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
       }
     </ng-template>`,
   standalone: true,
@@ -724,7 +1015,19 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
 export class SlTableSetFilter extends SlTableFilterBase {
   override readonly kind = 'set' as const;
   readonly value = model<SetFilter | null>(null);
-  /** The values this column can be filtered to, and optionally their counts. */
+  /**
+   * How the values are chosen. `list` is the search, the covering checkbox and
+   * the values; `tags` is `tags-input`, for a list too long to tick — the
+   * chosen values are chips, and `options` become a datalist of suggestions
+   * and the set a typed value must belong to. The descriptor is the same list
+   * either way.
+   */
+  readonly operand = input<'list' | 'tags'>('list');
+  /**
+   * The values this column can be filtered to, and optionally their counts.
+   * Optional with `tags`, where a column may hold more values than a page
+   * knows; without it any typed value is admitted.
+   */
   readonly options = input<readonly TableFilterOption[]>([]);
   /** The word shown when the search matches nothing. */
   readonly emptyLabel = input<string | undefined>(undefined);
@@ -743,6 +1046,27 @@ export class SlTableSetFilter extends SlTableFilterBase {
   readonly searchThreshold = input(8, { transform: numberAttribute });
 
   readonly query = signal('');
+  readonly listId = `sl-table-filter-options-${Math.random().toString(36).slice(2, 8)}`;
+
+  override operandName() {
+    return this.operand();
+  }
+
+  /** Whether a typed value has to be one of the options. */
+  readonly constrained = computed(() => this.operand() === 'tags' && this.options().length > 0);
+
+  private readonly byValue = computed(
+    () => new Map(this.options().map((option) => [option.value, option])),
+  );
+
+  /** The chip's text for a value, and the judgement on a typed one. */
+  readonly optionLabel = (value: string) => this.byValue().get(value)?.label ?? value;
+  readonly known = (text: string) => this.byValue().has(text);
+
+  applyOnEmpty(event: Event, context: TableFilterOperandContext) {
+    const input = event.target as HTMLInputElement | null;
+    if (!event.defaultPrevented && input?.value === '') context.apply();
+  }
 
   /**
    * The collator `combobox` filters its own options with, rather than a fold
@@ -821,7 +1145,9 @@ export class SlTableSetFilter extends SlTableFilterBase {
 export type {
   BooleanOperator,
   DateOperator,
+  DateTimeOperator,
   NumberOperator,
   SetOperator,
   TextOperator,
+  TimeOperator,
 } from '@slotted/core/filter';

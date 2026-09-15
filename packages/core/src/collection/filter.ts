@@ -123,3 +123,60 @@ export function splitByMatch(
   if (cursor < label.length) runs.push({ text: label.slice(cursor), matched: false });
   return runs;
 }
+
+/**
+ * How well a label and its keywords answer a query, or `null` when they do not.
+ *
+ * A filter says yes or no; a command palette has to say which of thirty yeses
+ * goes first, and `docs/component-features.md` §5 asks that the ranking be an
+ * adapter with a default. The default is here rather than in the family for
+ * the reason `createFilter` is: the comparison is the reader's locale's, made
+ * by the same collator, so an item cannot pass the ranker and show no mark.
+ *
+ * Four strengths, strongest first — the whole label, a prefix of it, the start
+ * of a word inside it, a run inside a word — and a keyword answers one step
+ * below the weakest of those. A tie is the caller's to break, by the order the
+ * consumer wrote the items in; the score never encodes that order. cmdk's
+ * `command-score` and kbar's `match-sorter` both fold to ASCII first, which is
+ * how `résumé` fails to answer `resume` in either.
+ *
+ * `packages/core/src/typeahead` is not this: it matches a growing prefix with
+ * a reset window and a cycle, and it does not score.
+ */
+export type Ranker = (query: string, label: string, keywords: readonly string[]) => number | null;
+
+export const RANK_EXACT = 5;
+export const RANK_PREFIX = 4;
+export const RANK_WORD = 3;
+export const RANK_SUBSTRING = 2;
+export const RANK_KEYWORD = 1;
+
+const WORD_START = /[\p{Letter}\p{Number}]+/gu;
+
+function strength(collator: Intl.Collator, text: string, query: string): number | null {
+  if (collator.compare(text, query) === 0) return RANK_EXACT;
+  const found = scan(collator, text, query, false);
+  if (found === null) return null;
+  if (found[0] === 0) return RANK_PREFIX;
+  for (const word of text.matchAll(WORD_START)) {
+    if (word.index === found[0]) return RANK_WORD;
+  }
+  return RANK_SUBSTRING;
+}
+
+export function createRanker({ locale, sensitivity = 'base' }: FilterOptions = {}): Ranker {
+  const collator = new Intl.Collator(locale, { sensitivity, usage: 'search' });
+
+  return (query, label, keywords) => {
+    const trimmed = query.trim();
+    if (trimmed === '') return 0;
+
+    const own = strength(collator, label, trimmed);
+    if (own !== null) return own;
+
+    for (const keyword of keywords) {
+      if (strength(collator, keyword, trimmed) !== null) return RANK_KEYWORD;
+    }
+    return null;
+  };
+}

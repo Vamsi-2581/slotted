@@ -7,8 +7,18 @@ export type {
   VirtualWindow,
   VirtualWindowInput,
 } from './collection';
-export { createFilter, matchRanges, splitByMatch } from './filter';
-export type { Filter, FilterOptions } from './filter';
+export {
+  createFilter,
+  createRanker,
+  matchRanges,
+  RANK_EXACT,
+  RANK_KEYWORD,
+  RANK_PREFIX,
+  RANK_SUBSTRING,
+  RANK_WORD,
+  splitByMatch,
+} from './filter';
+export type { Filter, FilterOptions, Ranker } from './filter';
 export { createCollection } from './items';
 export type {
   Collection,

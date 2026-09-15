@@ -317,3 +317,112 @@ export function resolveShortcut(keys: string, options: ShortcutOptions): Resolve
     thenLabel: options.thenLabel ?? 'then',
   };
 }
+
+/** The DOM `key` value a token in the vocabulary arrives as. */
+const DOM_KEYS: Readonly<Record<string, string>> = {
+  enter: 'enter',
+  escape: 'escape',
+  tab: 'tab',
+  space: ' ',
+  backspace: 'backspace',
+  delete: 'delete',
+  capslock: 'capslock',
+  pageup: 'pageup',
+  pagedown: 'pagedown',
+  home: 'home',
+  end: 'end',
+  plus: '+',
+  up: 'arrowup',
+  down: 'arrowdown',
+  left: 'arrowleft',
+  right: 'arrowright',
+};
+
+const MODIFIER_TOKENS = new Set(['mod', 'meta', 'ctrl', 'alt', 'shift']);
+
+/**
+ * Whether one keyboard event is the shortcut written.
+ *
+ * The header of this module says nothing here binds a key, and that is still
+ * true: this answers a question about an event and registers nothing. The
+ * family that opens on a shortcut asks it from its own listener, and the
+ * consumer who binds an item's shortcut asks it from theirs. What is decided
+ * here once is what `mod` means on the reader's platform — `Meta` on a Mac
+ * and `Control` elsewhere — and that every modifier the event carries has to
+ * have been asked for: `Ctrl+Shift+K` is not `Ctrl+K`.
+ *
+ * A sequence — `g` then `i` — is two events, and a question about one event
+ * cannot answer it; it is `false` rather than a guess.
+ */
+export function matchesShortcut(
+  event: KeyboardEvent,
+  keys: string,
+  platform: KbdPlatform,
+): boolean {
+  const steps = parseShortcut(keys);
+  const step = steps[0];
+  if (steps.length !== 1 || step === undefined) return false;
+
+  const wanted = { meta: false, ctrl: false, alt: false, shift: false };
+  let key: string | undefined;
+
+  for (const token of step) {
+    const canonical = resolveKey(token, { platform }).token ?? token.toLowerCase();
+    if (canonical === 'mod') {
+      if (platform === 'mac') wanted.meta = true;
+      else wanted.ctrl = true;
+    } else if (MODIFIER_TOKENS.has(canonical)) {
+      wanted[canonical as 'meta' | 'ctrl' | 'alt' | 'shift'] = true;
+    } else {
+      key = DOM_KEYS[canonical] ?? canonical;
+    }
+  }
+
+  if (key === undefined) return false;
+  if (wanted.meta !== (event.metaKey === true) || wanted.ctrl !== (event.ctrlKey === true)) {
+    return false;
+  }
+  if (wanted.alt !== (event.altKey === true) || wanted.shift !== (event.shiftKey === true)) {
+    return false;
+  }
+  return (event.key ?? '').toLowerCase() === key;
+}
+
+const TEXT_INPUT_TYPES = new Set([
+  'text',
+  'search',
+  'url',
+  'tel',
+  'email',
+  'password',
+  'number',
+  'date',
+  'datetime-local',
+  'month',
+  'week',
+  'time',
+  '',
+]);
+
+/**
+ * Whether the event landed on something the reader types into.
+ *
+ * `docs/component-features.md` §5 asks that a global shortcut not fire inside
+ * an editable field without explicit intent; a bare `/` typed into a comment
+ * is a character and not a command. A chord with a modifier is intent, and
+ * the caller decides whether to ask this at all.
+ */
+export function isEditableTarget(event: KeyboardEvent): boolean {
+  const target = event.target as {
+    tagName?: string;
+    type?: string;
+    isContentEditable?: boolean;
+    readOnly?: boolean;
+  } | null;
+  if (target === null || typeof target !== 'object') return false;
+  if (target.isContentEditable === true) return true;
+  const tag = target.tagName?.toUpperCase();
+  if (tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (tag === 'INPUT') return TEXT_INPUT_TYPES.has((target.type ?? '').toLowerCase());
+  return false;
+}

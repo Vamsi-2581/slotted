@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createFilter, matchRanges, splitByMatch } from './index';
+import { createFilter, createRanker, matchRanges, splitByMatch } from './index';
 
 describe('createFilter', () => {
   const filter = createFilter();
@@ -76,5 +76,44 @@ describe('splitByMatch', () => {
 
   it('never emits an empty run', () => {
     for (const run of splitByMatch('Blueberry', 'Blueberry')) expect(run.text).not.toBe('');
+  });
+});
+
+describe('createRanker', () => {
+  const rank = createRanker();
+
+  it('answers null when nothing in the label or the keywords holds the query', () => {
+    expect(rank('deploy', 'Open settings', [])).toBeNull();
+    expect(rank('deploy', 'Open settings', ['preferences'])).toBeNull();
+  });
+
+  it('scores a prefix of the label above the start of a later word', () => {
+    expect(rank('set', 'Settings', [])).toBeGreaterThan(rank('set', 'Open settings', []) ?? 0);
+  });
+
+  it('scores the start of a word above a substring inside one', () => {
+    expect(rank('set', 'Open settings', [])).toBeGreaterThan(rank('set', 'Reset', []) ?? 0);
+  });
+
+  it('scores a substring of the label above a keyword', () => {
+    expect(rank('set', 'Reset', [])).toBeGreaterThan(rank('set', 'Preferences', ['settings']) ?? 0);
+  });
+
+  it('answers a keyword with the lowest score above nothing', () => {
+    expect(rank('prefs', 'Settings', ['prefs', 'options'])).toBeGreaterThan(0);
+  });
+
+  /** §2.9: the comparison is the locale's, not an English fold. */
+  it('reads an accent and a capital as the same letter', () => {
+    expect(rank('resume', 'Résumé', [])).toBe(rank('Resume', 'Resume', []));
+  });
+
+  it('treats an empty query as a match of no particular strength', () => {
+    expect(rank('', 'Anything', [])).toBe(0);
+    expect(rank('   ', 'Anything', [])).toBe(0);
+  });
+
+  it('ranks a whole word above a prefix of a longer one', () => {
+    expect(rank('go', 'Go', [])).toBeGreaterThan(rank('go', 'Google', []) ?? 0);
   });
 });

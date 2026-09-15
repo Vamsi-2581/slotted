@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { KBD_KEYS, parseShortcut, resolveKey, resolvePlatform, resolveShortcut } from './keys';
+import {
+  isEditableTarget,
+  KBD_KEYS,
+  matchesShortcut,
+  parseShortcut,
+  resolveKey,
+  resolvePlatform,
+  resolveShortcut,
+} from './keys';
 
 const legendsOf = (keys: string, platform: Parameters<typeof resolveShortcut>[1]['platform']) =>
   resolveShortcut(keys, { platform }).steps.map((step) => step.map((key) => key.legend));
@@ -256,5 +264,59 @@ describe('KBD_KEYS', () => {
       expect(resolved.legend.length).toBeGreaterThan(0);
       expect(resolved.name?.length ?? 0).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('matchesShortcut', () => {
+  const press = (init: Partial<KeyboardEvent>) => init as KeyboardEvent;
+
+  it('reads mod as Meta on a Mac and as Control elsewhere', () => {
+    expect(matchesShortcut(press({ key: 'k', metaKey: true }), 'mod+k', 'mac')).toBe(true);
+    expect(matchesShortcut(press({ key: 'k', ctrlKey: true }), 'mod+k', 'mac')).toBe(false);
+    expect(matchesShortcut(press({ key: 'k', ctrlKey: true }), 'mod+k', 'windows')).toBe(true);
+    expect(matchesShortcut(press({ key: 'k', metaKey: true }), 'mod+k', 'linux')).toBe(false);
+  });
+
+  it('refuses a modifier the shortcut did not ask for', () => {
+    expect(
+      matchesShortcut(press({ key: 'k', ctrlKey: true, shiftKey: true }), 'mod+k', 'windows'),
+    ).toBe(false);
+    expect(
+      matchesShortcut(press({ key: 'K', ctrlKey: true, shiftKey: true }), 'mod+shift+k', 'windows'),
+    ).toBe(true);
+  });
+
+  it('compares the key without regard to case or the order the tokens were written in', () => {
+    expect(matchesShortcut(press({ key: 'K', metaKey: true }), 'k+mod', 'mac')).toBe(true);
+  });
+
+  it('reads a named key by its DOM name', () => {
+    expect(matchesShortcut(press({ key: 'Escape' }), 'esc', 'linux')).toBe(true);
+    expect(matchesShortcut(press({ key: 'ArrowDown', altKey: true }), 'alt+down', 'linux')).toBe(
+      true,
+    );
+    expect(matchesShortcut(press({ key: '/' }), '/', 'mac')).toBe(true);
+  });
+
+  /** A sequence has no single event to match, so it never matches one. */
+  it('answers false for a sequence', () => {
+    expect(matchesShortcut(press({ key: 'g' }), 'g i', 'mac')).toBe(false);
+  });
+});
+
+describe('isEditableTarget', () => {
+  const target = (init: Record<string, unknown>) => ({ target: init }) as unknown as KeyboardEvent;
+
+  it('names a text input, a textarea, a select and an editable region', () => {
+    expect(isEditableTarget(target({ tagName: 'INPUT', type: 'text' }))).toBe(true);
+    expect(isEditableTarget(target({ tagName: 'TEXTAREA' }))).toBe(true);
+    expect(isEditableTarget(target({ tagName: 'SELECT' }))).toBe(true);
+    expect(isEditableTarget(target({ tagName: 'DIV', isContentEditable: true }))).toBe(true);
+  });
+
+  it('leaves a button, a checkbox and the page itself alone', () => {
+    expect(isEditableTarget(target({ tagName: 'BUTTON' }))).toBe(false);
+    expect(isEditableTarget(target({ tagName: 'INPUT', type: 'checkbox' }))).toBe(false);
+    expect(isEditableTarget({ target: null } as unknown as KeyboardEvent)).toBe(false);
   });
 });

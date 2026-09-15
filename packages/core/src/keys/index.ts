@@ -1,4 +1,12 @@
-export { KBD_KEYS, parseShortcut, resolveKey, resolvePlatform, resolveShortcut } from './keys';
+export {
+  isEditableTarget,
+  KBD_KEYS,
+  matchesShortcut,
+  parseShortcut,
+  resolveKey,
+  resolvePlatform,
+  resolveShortcut,
+} from './keys';
 export type {
   KbdPlatform,
   KbdPlatformInput,

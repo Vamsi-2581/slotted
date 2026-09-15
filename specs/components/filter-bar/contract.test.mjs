@@ -129,7 +129,7 @@ test('folds behind one button below the narrow breakpoint, and the builder is a 
     contract.responsive.container,
     /^filter-bar, inline-size, on the root; the grid is on frame/,
   );
-  assert.match(contract.responsive.narrow, /40rem/);
+  assert.match(contract.responsive.narrow, /36rem/);
   assert.match(contract.responsive.wide, /64rem/);
   assert.ok(filterBar.parts.includes('frame'));
   assert.match(contract.surfaces.builder, /drawer/);
@@ -158,8 +158,8 @@ test('names the owner of every declined capability', () => {
   }
 });
 
-test('names the twenty-nine parts a filter bar is made of', () => {
-  assert.equal(filterBar.parts.length, 29);
+test('names the thirty-two parts a filter bar is made of', () => {
+  assert.equal(filterBar.parts.length, 32);
   for (const part of [
     'search',
     'bar',
@@ -170,6 +170,9 @@ test('names the twenty-nine parts a filter bar is made of', () => {
     'chip',
     'count',
     'builder',
+    /* The builder's rows: the joining word before each rule or nested group. */
+    'rules',
+    'conjunction',
   ]) {
     assert.ok(filterBar.parts.includes(part), part);
   }

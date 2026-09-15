@@ -1,0 +1,1218 @@
+<!--
+  The bar above an orders listing, as the React and Angular bindings render
+  it: the search, the toolbar of pinned pills, the grid of chips, the count.
+  The builder is photographed on its own, as the drawer would hold it.
+-->
+
+<!-- An orders listing with two pinned fields, one of them filled, two applied
+     chips from unpinned fields and one chip folded behind "+1". -->
+<section data-scene="default">
+  <div
+    data-ui="filter-bar"
+    data-part="root"
+    data-size="md"
+    data-apply="live"
+    role="search"
+    aria-label="Filter orders"
+  >
+    <div data-part="frame">
+      <div data-part="search">
+        <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+          <span data-part="start" aria-hidden="true"><span data-part="search-icon"></span></span>
+          <input
+            data-part="input"
+            type="search"
+            placeholder="Search orders"
+            aria-label="Search orders"
+          />
+        </div>
+      </div>
+      <div data-part="bar" role="toolbar" aria-label="Filters">
+        <button
+          data-part="pill"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          data-filtered
+          tabindex="0"
+        >
+          <span>Status</span><span>paid, refunded</span>
+        </button>
+        <button
+          data-part="pill"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          tabindex="-1"
+        >
+          <span>Owner</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="add"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+          aria-haspopup="menu"
+          tabindex="-1"
+        >
+          <span data-part="start" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </span>
+          <span data-part="label">Add filter</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="clear"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+          tabindex="-1"
+        >
+          <span data-part="label">Clear all</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="summary"
+          data-tone="secondary"
+          data-variant="outline"
+          data-size="md"
+          type="button"
+          aria-haspopup="dialog"
+          tabindex="-1"
+        >
+          <span data-part="label"><span>Filters</span> <span>(3)</span></span>
+        </button>
+      </div>
+      <div data-part="end">
+        <div data-part="preset">
+          <div data-ui="select" data-part="root" data-size="md" data-variant="outline">
+            <button
+              data-part="trigger"
+              type="button"
+              role="combobox"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-label="Saved view"
+              tabindex="-1"
+            >
+              <span data-part="value">Overdue this month</span>
+            </button>
+            <span data-part="arrow"></span>
+          </div>
+        </div>
+      </div>
+      <p data-part="count" aria-live="polite">128 of 3,412 orders</p>
+      <div data-part="chips" role="grid" aria-label="Applied filters">
+        <div role="row" style="display: contents">
+          <div data-part="chip" role="gridcell">
+            <span
+              data-ui="tag"
+              data-part="root"
+              data-size="sm"
+              data-tone="secondary"
+              data-variant="soft"
+              data-shape="pill"
+            >
+              <button
+                data-part="body"
+                type="button"
+                tabindex="0"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span data-part="label"
+                  ><span>Amount</span> <span>greater than R$ 100,00</span></span
+                >
+              </button>
+              <button
+                data-part="remove"
+                type="button"
+                tabindex="-1"
+                aria-label="Remove Amount filter"
+              ></button>
+            </span>
+          </div>
+          <div data-part="chip" role="gridcell">
+            <span
+              data-ui="tag"
+              data-part="root"
+              data-size="sm"
+              data-tone="secondary"
+              data-variant="soft"
+              data-shape="pill"
+            >
+              <button
+                data-part="body"
+                type="button"
+                tabindex="-1"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span data-part="label"
+                  ><span>Created</span> <span>between 01/09/2026 and 14/09/2026</span></span
+                >
+              </button>
+              <button
+                data-part="remove"
+                type="button"
+                tabindex="-1"
+                aria-label="Remove Created filter"
+              ></button>
+            </span>
+          </div>
+          <div data-part="chip" role="gridcell" data-folded>
+            <span
+              data-ui="tag"
+              data-part="root"
+              data-size="sm"
+              data-tone="secondary"
+              data-variant="soft"
+              data-shape="pill"
+            >
+              <button
+                data-part="body"
+                type="button"
+                tabindex="-1"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span data-part="label"><span>Channel</span> <span>any of web, app</span></span>
+              </button>
+              <button
+                data-part="remove"
+                type="button"
+                tabindex="-1"
+                aria-label="Remove Channel filter"
+              ></button>
+            </span>
+          </div>
+          <button data-part="more" type="button" tabindex="-1" aria-expanded="false">
+            +1 more
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The chip row revealed: the folded chip is back on the row, and the control reads the other way. -->
+<section data-scene="revealed">
+  <div
+    data-ui="filter-bar"
+    data-part="root"
+    data-size="md"
+    data-apply="live"
+    role="search"
+    aria-label="Filter orders"
+  >
+    <div data-part="frame">
+      <div data-part="search">
+        <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+          <input
+            data-part="input"
+            type="search"
+            placeholder="Search orders"
+            aria-label="Search orders"
+          />
+        </div>
+      </div>
+      <div data-part="bar" role="toolbar" aria-label="Filters">
+        <button
+          data-ui="button"
+          data-part="add"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+          aria-haspopup="menu"
+          tabindex="0"
+        >
+          <span data-part="label">Add filter</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="clear"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+          tabindex="-1"
+        >
+          <span data-part="label">Clear all</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="summary"
+          data-tone="secondary"
+          data-variant="outline"
+          data-size="md"
+          type="button"
+          aria-haspopup="dialog"
+          tabindex="-1"
+        >
+          <span data-part="label"><span>Filters</span> <span>(3)</span></span>
+        </button>
+      </div>
+      <p data-part="count" aria-live="polite">41 of 3,412 orders</p>
+      <div data-part="chips" role="grid" aria-label="Applied filters" data-revealed>
+        <div role="row" style="display: contents">
+          <div data-part="chip" role="gridcell">
+            <span
+              data-ui="tag"
+              data-part="root"
+              data-size="sm"
+              data-tone="secondary"
+              data-variant="soft"
+              data-shape="pill"
+            >
+              <button
+                data-part="body"
+                type="button"
+                tabindex="0"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span data-part="label"
+                  ><span>Amount</span> <span>greater than R$ 100,00</span></span
+                >
+              </button>
+              <button
+                data-part="remove"
+                type="button"
+                tabindex="-1"
+                aria-label="Remove Amount filter"
+              ></button>
+            </span>
+          </div>
+          <div data-part="chip" role="gridcell">
+            <span
+              data-ui="tag"
+              data-part="root"
+              data-size="sm"
+              data-tone="secondary"
+              data-variant="soft"
+              data-shape="pill"
+            >
+              <button
+                data-part="body"
+                type="button"
+                tabindex="-1"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span data-part="label"
+                  ><span>Created</span> <span>between 01/09/2026 and 14/09/2026</span></span
+                >
+              </button>
+              <button
+                data-part="remove"
+                type="button"
+                tabindex="-1"
+                aria-label="Remove Created filter"
+              ></button>
+            </span>
+          </div>
+          <div data-part="chip" role="gridcell" data-folded>
+            <span
+              data-ui="tag"
+              data-part="root"
+              data-size="sm"
+              data-tone="secondary"
+              data-variant="soft"
+              data-shape="pill"
+            >
+              <button
+                data-part="body"
+                type="button"
+                tabindex="-1"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span data-part="label"><span>Channel</span> <span>any of web, app</span></span>
+              </button>
+              <button
+                data-part="remove"
+                type="button"
+                tabindex="-1"
+                aria-label="Remove Channel filter"
+              ></button>
+            </span>
+          </div>
+          <div data-part="chip" role="gridcell" data-invalid>
+            <span
+              data-ui="tag"
+              data-part="root"
+              data-size="sm"
+              data-tone="secondary"
+              data-variant="soft"
+              data-shape="pill"
+            >
+              <button
+                data-part="body"
+                type="button"
+                tabindex="-1"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span data-part="label"><span>region</span> <span>any of south</span></span>
+              </button>
+              <button
+                data-part="remove"
+                type="button"
+                tabindex="-1"
+                aria-label="Remove region filter"
+              ></button>
+            </span>
+          </div>
+          <button data-part="more" type="button" tabindex="-1" aria-expanded="true">
+            Show less
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- apply=manual with a dirty draft: the two actions appear, the root says it is dirty. A required
+     field — Company — without a value refuses to apply and says so on its pill. -->
+<section data-scene="manual">
+  <div
+    data-ui="filter-bar"
+    data-part="root"
+    data-size="md"
+    data-apply="manual"
+    data-dirty
+    role="search"
+    aria-label="Filter invoices"
+  >
+    <div data-part="frame">
+      <div data-part="search">
+        <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+          <span data-part="start" aria-hidden="true"><span data-part="search-icon"></span></span>
+          <input data-part="input" type="search" value="nota fiscal" aria-label="Search invoices" />
+          <button data-part="clear" type="button" aria-label="Clear search"></button>
+        </div>
+      </div>
+      <div data-part="bar" role="toolbar" aria-label="Filters">
+        <button
+          data-part="pill"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          data-invalid
+          aria-invalid="true"
+          tabindex="0"
+        >
+          <span>Company</span>
+        </button>
+        <button
+          data-part="pill"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="true"
+          data-open
+          data-filtered
+          tabindex="-1"
+        >
+          <span>Period</span><span>September 2026</span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="add"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="md"
+          type="button"
+          aria-haspopup="menu"
+          tabindex="-1"
+        >
+          <span data-part="start" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </span>
+          <span data-part="label">Add filter</span>
+        </button>
+        <div data-part="actions">
+          <button
+            data-ui="button"
+            data-part="reset"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+          >
+            <span data-part="label">Reset</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="apply"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+        <button
+          data-ui="button"
+          data-part="summary"
+          data-tone="secondary"
+          data-variant="outline"
+          data-size="md"
+          type="button"
+          aria-haspopup="dialog"
+          tabindex="-1"
+        >
+          <span data-part="label"><span>Filters</span> <span>(1)</span></span>
+        </button>
+      </div>
+      <p data-part="count" aria-live="polite">3,412 invoices</p>
+    </div>
+  </div>
+</section>
+
+<!-- Disabled, and loading: the bar keeps its width in both. -->
+<section data-scene="states">
+  <div style="display: grid; gap: var(--slotted-space-6)">
+    <div
+      data-ui="filter-bar"
+      data-part="root"
+      data-size="md"
+      data-apply="live"
+      data-disabled
+      role="search"
+      aria-label="Filter orders"
+    >
+      <div data-part="frame">
+        <div data-part="search">
+          <div
+            data-ui="text-field"
+            data-part="root"
+            data-size="md"
+            data-variant="outline"
+            data-disabled
+          >
+            <input
+              data-part="input"
+              type="search"
+              placeholder="Search orders"
+              aria-label="Search orders"
+              disabled
+            />
+          </div>
+        </div>
+        <div data-part="bar" role="toolbar" aria-label="Filters">
+          <button
+            data-part="pill"
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            data-filtered
+            disabled
+            tabindex="0"
+          >
+            <span>Status</span><span>paid</span>
+          </button>
+          <button
+            data-part="pill"
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            disabled
+            tabindex="-1"
+          >
+            <span>Owner</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="add"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="md"
+            data-disabled
+            type="button"
+            disabled
+            tabindex="-1"
+          >
+            <span data-part="label">Add filter</span>
+          </button>
+        </div>
+        <p data-part="count" aria-live="polite">3,412 orders</p>
+      </div>
+    </div>
+    <div
+      data-ui="filter-bar"
+      data-part="root"
+      data-size="md"
+      data-apply="live"
+      data-loading
+      role="search"
+      aria-label="Filter orders"
+    >
+      <div data-part="frame">
+        <div data-part="search">
+          <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
+            <input data-part="input" type="search" value="ana" aria-label="Search orders" />
+          </div>
+        </div>
+        <div data-part="bar" role="toolbar" aria-label="Filters">
+          <button
+            data-part="pill"
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+            data-filtered
+            tabindex="0"
+          >
+            <span>Status</span><span>paid</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="add"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="md"
+            type="button"
+            tabindex="-1"
+          >
+            <span data-part="label">Add filter</span>
+          </button>
+        </div>
+        <p data-part="count" aria-live="polite" aria-busy="true">
+          <span
+            data-ui="spinner"
+            data-part="root"
+            data-size="sm"
+            role="progressbar"
+            aria-label="Loading"
+          ></span>
+          <span>Counting…</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The builder, as the drawer holds it: the root group with two rules and a nested group. -->
+<!--
+  The rule a pill opens: one editor alone inside a popover surface. The popover
+  shrink-wraps, so the editor states its own width; the root's container rule
+  must not reach it (it measured zero and wrapped one word per line).
+-->
+<section data-scene="editor">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: max-content;
+      max-inline-size: 100%;
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Status">
+      <div data-part="body">
+        <div data-ui="filter-bar" data-part="rule" data-kind="set">
+          <div data-part="operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="md"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Operator"
+              >
+                <span data-part="value">any of</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="operand">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="md"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Value"
+              >
+                <span data-part="value">Paid, Refunded</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="actions">
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="ghost"
+              data-tone="secondary"
+              data-size="sm"
+              type="button"
+            >
+              <span data-part="label">Clear</span>
+            </button>
+            <button
+              data-ui="button"
+              data-part="root"
+              data-variant="solid"
+              data-tone="accent"
+              data-size="sm"
+              type="button"
+            >
+              <span data-part="label">Done</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--
+  The builder: the header says what the group does, every row starts with the
+  word that joins it to the one above, and a nested group is a box on the
+  sunken surface with its own header and remove.
+-->
+<section data-scene="builder">
+  <div data-ui="filter-bar" data-part="builder" style="max-inline-size: 36rem">
+    <fieldset data-part="group" data-depth="0">
+      <legend>Match All of the following</legend>
+      <div data-part="join">
+        <span>Match</span>
+        <div
+          data-ui="segmented-control"
+          data-part="root"
+          data-size="sm"
+          data-orientation="horizontal"
+          data-condense="none"
+          role="radiogroup"
+          aria-label="Match of the following"
+          aria-orientation="horizontal"
+          style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
+        >
+          <span data-part="indicator" aria-hidden="true"></span>
+          <label data-part="item" data-checked
+            ><input data-part="control" type="radio" name="join-0" value="and" checked /><span
+              data-part="label"
+              >All</span
+            ></label
+          >
+          <label data-part="item"
+            ><input data-part="control" type="radio" name="join-0" value="or" /><span
+              data-part="label"
+              >Any</span
+            ></label
+          >
+        </div>
+        <span>of the following</span>
+      </div>
+      <div data-part="rules">
+        <span data-part="conjunction">Where</span>
+        <div data-part="rule" data-kind="set" data-operands="1">
+          <div data-part="field">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Field"
+              >
+                <span data-part="value">Status</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Operator"
+              >
+                <span data-part="value">any of</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="operand">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Value"
+              >
+                <span data-part="value">Paid, Refunded</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <button data-part="remove" type="button" aria-label="Remove rule"></button>
+        </div>
+        <span data-part="conjunction">and</span>
+        <div data-part="rule" data-kind="number" data-operands="2">
+          <div data-part="field">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Field"
+              >
+                <span data-part="value">Amount</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Operator"
+              >
+                <span data-part="value">between</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="operand">
+            <div
+              data-ui="number-field"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-stepper="stacked"
+            >
+              <input
+                data-part="input"
+                type="text"
+                role="spinbutton"
+                aria-label="From"
+                value="100"
+                aria-valuenow="100"
+              />
+            </div>
+            <div
+              data-ui="number-field"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-stepper="stacked"
+            >
+              <input
+                data-part="input"
+                type="text"
+                role="spinbutton"
+                aria-label="To"
+                value="1000"
+                aria-valuenow="1000"
+              />
+            </div>
+          </div>
+          <button data-part="remove" type="button" aria-label="Remove rule"></button>
+        </div>
+        <span data-part="conjunction">and</span>
+        <fieldset data-part="group" data-depth="1">
+          <legend>Match Any of the following</legend>
+          <div data-part="join">
+            <span>Match</span>
+            <div
+              data-ui="segmented-control"
+              data-part="root"
+              data-size="sm"
+              data-orientation="horizontal"
+              data-condense="none"
+              role="radiogroup"
+              aria-label="Match of the following"
+              aria-orientation="horizontal"
+              style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 1"
+            >
+              <span data-part="indicator" aria-hidden="true"></span>
+              <label data-part="item"
+                ><input data-part="control" type="radio" name="join-1" value="and" /><span
+                  data-part="label"
+                  >All</span
+                ></label
+              >
+              <label data-part="item" data-checked
+                ><input data-part="control" type="radio" name="join-1" value="or" checked /><span
+                  data-part="label"
+                  >Any</span
+                ></label
+              >
+            </div>
+            <span>of the following</span
+            ><button
+              data-ui="button"
+              data-part="remove-group"
+              data-tone="secondary"
+              data-variant="ghost"
+              data-size="sm"
+              type="button"
+            >
+              <span data-part="label">Remove group</span>
+            </button>
+          </div>
+          <div data-part="rules">
+            <span data-part="conjunction">Where</span>
+            <div data-part="rule" data-kind="text" data-operands="1">
+              <div data-part="field">
+                <div
+                  data-ui="select"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-full-width
+                >
+                  <button
+                    data-part="trigger"
+                    type="button"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-label="Field"
+                  >
+                    <span data-part="value">Customer</span>
+                  </button>
+                  <span data-part="arrow"></span>
+                </div>
+              </div>
+              <div data-part="operator">
+                <div
+                  data-ui="select"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-full-width
+                >
+                  <button
+                    data-part="trigger"
+                    type="button"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-label="Operator"
+                  >
+                    <span data-part="value">contains</span>
+                  </button>
+                  <span data-part="arrow"></span>
+                </div>
+              </div>
+              <div data-part="operand">
+                <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
+                  <input data-part="input" type="text" aria-label="Value" value="ana" />
+                </div>
+              </div>
+              <button data-part="remove" type="button" aria-label="Remove rule"></button>
+            </div>
+            <span data-part="conjunction">or</span>
+            <div data-part="rule" data-kind="boolean" data-operands="0">
+              <div data-part="field">
+                <div
+                  data-ui="select"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-full-width
+                >
+                  <button
+                    data-part="trigger"
+                    type="button"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-label="Field"
+                  >
+                    <span data-part="value">Priority</span>
+                  </button>
+                  <span data-part="arrow"></span>
+                </div>
+              </div>
+              <div data-part="operator">
+                <div
+                  data-ui="select"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-full-width
+                >
+                  <button
+                    data-part="trigger"
+                    type="button"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-label="Operator"
+                  >
+                    <span data-part="value">is</span>
+                  </button>
+                  <span data-part="arrow"></span>
+                </div>
+              </div>
+              <div data-part="operand"></div>
+              <button data-part="remove" type="button" aria-label="Remove rule"></button>
+            </div>
+            <span data-part="conjunction">or</span>
+            <fieldset data-part="group" data-depth="2">
+              <legend>Match All of the following</legend>
+              <div data-part="join">
+                <span>Match</span>
+                <div
+                  data-ui="segmented-control"
+                  data-part="root"
+                  data-size="sm"
+                  data-orientation="horizontal"
+                  data-condense="none"
+                  role="radiogroup"
+                  aria-label="Match of the following"
+                  aria-orientation="horizontal"
+                  style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
+                >
+                  <span data-part="indicator" aria-hidden="true"></span
+                  ><label data-part="item" data-checked
+                    ><input
+                      data-part="control"
+                      type="radio"
+                      name="join-2"
+                      value="and"
+                      checked
+                    /><span data-part="label">All</span></label
+                  ><label data-part="item"
+                    ><input data-part="control" type="radio" name="join-2" value="or" /><span
+                      data-part="label"
+                      >Any</span
+                    ></label
+                  >
+                </div>
+                <span>of the following</span
+                ><button
+                  data-ui="button"
+                  data-part="remove-group"
+                  data-tone="secondary"
+                  data-variant="ghost"
+                  data-size="sm"
+                  type="button"
+                >
+                  <span data-part="label">Remove group</span>
+                </button>
+              </div>
+              <div data-part="rules">
+                <span data-part="conjunction">Where</span>
+                <div data-part="rule" data-kind="date" data-operands="1">
+                  <div data-part="field">
+                    <div
+                      data-ui="select"
+                      data-part="root"
+                      data-size="sm"
+                      data-variant="outline"
+                      data-full-width
+                    >
+                      <button
+                        data-part="trigger"
+                        type="button"
+                        role="combobox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Field"
+                      >
+                        <span data-part="value">Created</span></button
+                      ><span data-part="arrow"></span>
+                    </div>
+                  </div>
+                  <div data-part="operator">
+                    <div
+                      data-ui="select"
+                      data-part="root"
+                      data-size="sm"
+                      data-variant="outline"
+                      data-full-width
+                    >
+                      <button
+                        data-part="trigger"
+                        type="button"
+                        role="combobox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Operator"
+                      >
+                        <span data-part="value">after</span></button
+                      ><span data-part="arrow"></span>
+                    </div>
+                  </div>
+                  <div data-part="operand">
+                    <div
+                      data-ui="text-field"
+                      data-part="root"
+                      data-size="sm"
+                      data-variant="outline"
+                    >
+                      <input data-part="input" type="text" aria-label="Value" value="2026-09-01" />
+                    </div>
+                  </div>
+                  <button data-part="remove" type="button" aria-label="Remove rule"></button>
+                </div>
+              </div>
+              <div data-part="actions">
+                <button
+                  data-ui="button"
+                  data-part="add-rule"
+                  data-tone="secondary"
+                  data-variant="ghost"
+                  data-size="sm"
+                  type="button"
+                >
+                  <span data-part="label">Add rule</span></button
+                ><button
+                  data-ui="button"
+                  data-part="add-group"
+                  data-tone="secondary"
+                  data-variant="ghost"
+                  data-size="sm"
+                  type="button"
+                >
+                  <span data-part="label">Add group</span>
+                </button>
+              </div>
+            </fieldset>
+          </div>
+          <div data-part="actions">
+            <button
+              data-ui="button"
+              data-part="add-rule"
+              data-tone="secondary"
+              data-variant="ghost"
+              data-size="sm"
+              type="button"
+            >
+              <span data-part="label">Add rule</span></button
+            ><button
+              data-ui="button"
+              data-part="add-group"
+              data-tone="secondary"
+              data-variant="ghost"
+              data-size="sm"
+              type="button"
+            >
+              <span data-part="label">Add group</span>
+            </button>
+          </div>
+        </fieldset>
+      </div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="add-rule"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Add rule</span></button
+        ><button
+          data-ui="button"
+          data-part="add-group"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Add group</span>
+        </button>
+
+        <button
+          data-ui="button"
+          data-part="save-preset"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="sm"
+          type="button"
+        >
+          <span data-part="label">Save as view…</span>
+        </button>
+      </div>
+    </fieldset>
+  </div>
+</section>

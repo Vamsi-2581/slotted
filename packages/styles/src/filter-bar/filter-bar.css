@@ -1,0 +1,784 @@
+@layer slotted.components {
+  /**
+   * A bar above a listing that edits one value: a tree of conditions over the
+   * listing's fields, whose leaves are the descriptor `table` edits in a
+   * column header. The bar draws the tree's first level — a search field, a
+   * pill per pinned field, a chip per applied rule — and opens a drawer on the
+   * whole tree.
+   *
+   * Three tab stops however many fields a product declares: the search, the
+   * toolbar of pills, the grid of chips. The root is a `search` landmark and
+   * not a toolbar, because the search field needs the arrow keys a toolbar
+   * takes.
+   *
+   * Every control reads the control scale — height, inline padding, glyph,
+   * gap — so a theme that retunes a text field retunes this bar with it, and
+   * the three densities move every control together.
+   */
+  [data-ui='filter-bar'] {
+    --_gap: var(--slotted-filter-bar-gap, var(--slotted-control-gap-md, 8px));
+    --_gap-sm: var(--slotted-control-gap-sm, 6px);
+    --_height: var(--slotted-control-height-md, 34px);
+    --_font-size: var(--slotted-control-font-size-md, 13px);
+    --_pad: var(--slotted-control-padding-inline-md, 13px);
+    --_icon: var(--slotted-control-icon-size-md, 16px);
+    --_radius: var(--slotted-filter-bar-pill-radius, var(--slotted-radius-full, 9999px));
+    --_control-radius: var(--slotted-control-radius, var(--slotted-radius-sm, 4px));
+    --_ink: var(--slotted-filter-bar-color, var(--slotted-text, CanvasText));
+    --_muted: var(--slotted-filter-bar-color-muted, var(--slotted-text-muted, GrayText));
+    --_edge: var(
+      --slotted-filter-bar-pill-border,
+      var(--slotted-control-border-color, ButtonBorder)
+    );
+    --_surface: var(--slotted-filter-bar-surface, var(--slotted-surface, Canvas));
+    --_hover: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
+    --_active: var(--slotted-tone-secondary-subtle-active, ButtonFace);
+    /**
+     * A pill that holds a rule is a chosen state, and the foundation carries
+     * one as a pair: the accent border at the non-text ratio against the page
+     * and against the ground it encloses, and the accent surface tinting what
+     * the border encloses.
+     */
+    --_filtered-edge: var(--slotted-tone-accent-border, Highlight);
+    --_filtered-surface: var(--slotted-tone-accent-surface, Canvas);
+    --_filtered-ink: var(--slotted-tone-accent-text, CanvasText);
+    --_filtered-hover: var(--slotted-tone-accent-subtle-hover, ButtonFace);
+    --_filtered-active: var(--slotted-tone-accent-subtle-active, ButtonFace);
+    --_invalid: var(--slotted-tone-danger-border, GrayText);
+    --_duration: var(--slotted-control-transition-duration, var(--slotted-duration-short));
+    --_easing: var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+    /* The hit area a glyph-only control grows to, and gives back to the line. */
+    --_hit: calc((var(--slotted-target-min, 24px) - var(--_icon)) / 2);
+
+    box-sizing: border-box;
+    color: var(--_ink);
+    font-family: var(--slotted-filter-bar-font-family, var(--slotted-font-family-sans, inherit));
+    font-size: var(--_font-size);
+    line-height: var(--slotted-line-height-md, 1.5);
+    min-inline-size: 0;
+  }
+
+  /**
+   * The builder is a part that leaves the root: it renders inside a drawer,
+   * which `portal` moves to the end of the document, so it carries `data-ui`
+   * of its own and the block above gives it the same locals.
+   *
+   * The root is the query container and the frame is the grid, because a
+   * container query cannot restyle the element it measures — the split
+   * `stepper` and `description-list` already carry, recorded in the briefing.
+   *
+   * A bar spans the listing it filters, so its inline size is its parent's:
+   * inline-size containment gives a container no intrinsic width, and a
+   * start-justified grid or flex parent measured the root at zero pixels and
+   * drew every pill and chip outside it.
+   */
+  [data-ui='filter-bar'][data-part='root'] {
+    container-name: slotted-filter-bar;
+    container-type: inline-size;
+    display: block;
+    inline-size: 100%;
+  }
+
+  /**
+   * The editor a pill opens: one rule alone in a popover, so it carries the
+   * family's `data-ui` like the builder does. A column — the operator, the
+   * operand or the pair, then Clear and Done at the end — at a width of its
+   * own, because a popover shrink-wraps and a select shrink-wrapped to its
+   * value is a control that changes width when the value does.
+   */
+  [data-ui='filter-bar'][data-part='rule'] {
+    display: grid;
+    gap: var(--_gap);
+    inline-size: var(--slotted-filter-bar-editor-size, 18rem);
+    max-inline-size: 100%;
+  }
+
+  [data-ui='filter-bar'][data-part='rule'] > [data-part='operand'] {
+    display: grid;
+    gap: var(--_gap-sm);
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'][data-part='rule'][data-kind='boolean'] > [data-part='operand']:empty {
+    display: none;
+  }
+
+  [data-ui='filter-bar'][data-part='rule'] > [data-part='actions'] {
+    align-items: center;
+    display: flex;
+    gap: var(--_gap-sm);
+    justify-content: flex-end;
+  }
+
+  [data-ui='filter-bar'][data-part='rule'][data-invalid] > [data-part='operator'] {
+    --slotted-select-border-color: var(--_invalid);
+  }
+
+  /* ── Composition ──────────────────────────────────────────────────────
+   *
+   * Three compositions, chosen by the bar's own width and not the viewport's.
+   *
+   * Wide, from 64rem: one line — the search, the toolbar, the consumer's
+   * controls, the count — and the chips under it.
+   *
+   * Medium, 36 to 64rem: the search shares its line with the consumer's
+   * controls and the count; the toolbar takes a line of its own, so the pills
+   * never wrap around a half-width search; the chips under both.
+   *
+   * Narrow, under 36rem: the search alone, then one control that says how many
+   * rules are applied beside the consumer's controls, then the count. The
+   * chips fold behind that control, which opens the builder. The line sits at
+   * 36rem and not at 40rem because the medium composition already holds two
+   * pills, the add control and the clear control on their own line at that
+   * width, and because a reference page's stage is 39rem wide: at 40rem every
+   * demonstration on the page showed the fold and none showed a pill.
+   */
+  [data-ui='filter-bar'] > [data-part='frame'] {
+    align-items: center;
+    column-gap: var(--_gap);
+    display: grid;
+    grid-template-areas:
+      'search end count'
+      'bar bar bar'
+      'chips chips chips';
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    row-gap: var(--_gap);
+  }
+
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='search'] {
+    grid-area: search;
+    max-inline-size: var(--slotted-filter-bar-search-max, 28rem);
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='bar'] {
+    grid-area: bar;
+  }
+
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='end'] {
+    grid-area: end;
+  }
+
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='count'] {
+    grid-area: count;
+    justify-self: end;
+  }
+
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='chips'] {
+    grid-area: chips;
+  }
+
+  /** A row whose every member is absent collapses: the grid's row gap is what would remain, and it is taken away. */
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='chips']:empty,
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='end']:empty {
+    display: none;
+  }
+
+  @container slotted-filter-bar (min-width: 64rem) {
+    [data-ui='filter-bar'] > [data-part='frame'] {
+      grid-template-areas:
+        'search bar end count'
+        'chips chips chips chips';
+      grid-template-columns: minmax(12rem, 22rem) minmax(0, 1fr) auto auto;
+    }
+  }
+
+  [data-ui='filter-bar'][data-size='sm'] {
+    --_height: var(--slotted-control-height-sm, 30px);
+    --_font-size: var(--slotted-control-font-size-sm, 12px);
+    --_pad: var(--slotted-control-padding-inline-sm, 10px);
+    --_icon: var(--slotted-control-icon-size-sm, 14px);
+    --_gap: var(--slotted-filter-bar-gap, var(--slotted-control-gap-sm, 6px));
+    --_gap-sm: var(--slotted-control-gap-sm, 4px);
+  }
+
+  [data-ui='filter-bar'][data-size='lg'] {
+    --_height: var(--slotted-control-height-lg, 38px);
+    --_font-size: var(--slotted-control-font-size-lg, 14px);
+    --_pad: var(--slotted-control-padding-inline-lg, 16px);
+    --_icon: var(--slotted-control-icon-size-lg, 18px);
+    --_gap: var(--slotted-filter-bar-gap, var(--slotted-control-gap-lg, 8px));
+  }
+
+  /**
+   * The search, the preset, a rule's field and operator are other families'
+   * roots — `text-field` and `select` select their own root part — so each
+   * one sits inside a part of this family's and fills it.
+   */
+  /** The glyph before the query, drawn at the size the field gives its adornments. */
+  [data-ui='filter-bar'] [data-part='search-icon'] {
+    background-color: currentcolor;
+    block-size: var(--slotted-icon-size, var(--_icon));
+    display: inline-block;
+    inline-size: var(--slotted-icon-size, var(--_icon));
+    mask-image: var(--slotted-filter-bar-search-icon, var(--slotted-icon-search));
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  [data-ui='filter-bar'] [data-part='search'] > [data-ui='text-field'],
+  [data-ui='filter-bar'] [data-part='preset'] > [data-ui='select'],
+  [data-ui='filter-bar'] :is([data-part='field'], [data-part='operator']) > [data-ui='select'] {
+    inline-size: 100%;
+  }
+
+  [data-ui='filter-bar'] [data-part='bar'] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--_gap);
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'] [data-part='end'] {
+    align-items: center;
+    display: flex;
+    gap: var(--_gap);
+  }
+
+  /** The count is the answer to the filters, and it takes the far end of its line — PatternFly's rule for an item count. */
+  [data-ui='filter-bar'] [data-part='count'] {
+    color: var(--_muted);
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  /* ── The pill ───────────────────────────────────────────────────────────
+   *
+   * A pinned field, filled or empty. It is one element in two states — a
+   * pinned field with a rule draws its pill filled and no chip — so a field is
+   * never drawn twice. The chevron says a panel opens here, which is what the
+   * chevron says on every other control in the library.
+   */
+  [data-ui='filter-bar'] [data-part='pill'] {
+    align-items: center;
+    appearance: none;
+    background-color: var(--_surface);
+    block-size: var(--_height);
+    border: var(--slotted-control-border-width, 1px) solid var(--_edge);
+    border-radius: var(--_radius);
+    box-shadow: var(--slotted-control-shadow, none);
+    box-sizing: border-box;
+    color: var(--_ink);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-weight: var(--slotted-font-weight-medium, 500);
+    gap: var(--_gap-sm);
+    line-height: var(--slotted-control-line-height, 1);
+    max-inline-size: var(--slotted-filter-bar-chip-max, 18rem);
+    /* The chevron carries its own air, so the end inset is one step short. */
+    padding-block: 0;
+    padding-inline: var(--_pad) calc(var(--_pad) - var(--_gap-sm));
+    transition:
+      background-color var(--_duration) var(--_easing),
+      border-color var(--_duration) var(--_easing),
+      color var(--_duration) var(--_easing);
+    white-space: nowrap;
+  }
+
+  [data-ui='filter-bar'] [data-part='pill'] > span {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    unicode-bidi: isolate;
+  }
+
+  /** The sentence after the field's name reads lighter, so the name stays the anchor. */
+  [data-ui='filter-bar'] [data-part='pill'] > span + span {
+    font-weight: var(--slotted-font-weight-regular, 400);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill']::after {
+    background-color: currentcolor;
+    block-size: var(--_icon);
+    content: '';
+    display: block;
+    flex: none;
+    inline-size: var(--_icon);
+    mask-image: var(--slotted-filter-bar-pill-icon, var(--slotted-icon-chevron-down));
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+    transition: transform var(--_duration) var(--_easing);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill'][aria-expanded='true']::after {
+    transform: rotate(180deg);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill'][data-filtered] {
+    background-color: var(--_filtered-surface);
+    border-color: var(--_filtered-edge);
+    color: var(--_filtered-ink);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill'][data-invalid] {
+    border-color: var(--_invalid);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill']:enabled:not([data-disabled]):hover {
+    background-color: var(--_hover);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill'][data-filtered]:enabled:not([data-disabled]):hover {
+    background-color: var(--_filtered-hover);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill']:enabled:not([data-disabled]):active,
+  [data-ui='filter-bar'] [data-part='pill']:enabled:not([data-disabled])[aria-expanded='true'] {
+    background-color: var(--_active);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill'][data-filtered]:enabled:not([data-disabled]):active,
+  [data-ui='filter-bar']
+    [data-part='pill'][data-filtered]:enabled:not([data-disabled])[aria-expanded='true'] {
+    background-color: var(--_filtered-active);
+  }
+
+  [data-ui='filter-bar'] [data-part='pill']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /* ── The chips ──────────────────────────────────────────────────────────
+   *
+   * One per applied first-level rule of an unpinned field, a `tag` worn as
+   * `data-ui` inside a grid cell of this family's. The row wraps and then
+   * folds: past `chipLimit` a chip is folded behind the `more` control until
+   * the row is revealed.
+   */
+  [data-ui='filter-bar'] [data-part='chips'] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--_gap-sm);
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'] [data-part='chip'] {
+    display: inline-flex;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'] [data-part='chip'] > [data-ui='tag'] {
+    max-inline-size: var(--slotted-filter-bar-chip-max, 18rem);
+  }
+
+  /** The field's name and its sentence are two isolated runs, so a right-to-left name beside an ISO date reorders nothing. */
+  [data-ui='filter-bar'] [data-part='chip'] [data-part='label'] > span {
+    unicode-bidi: isolate;
+  }
+
+  [data-ui='filter-bar'] [data-part='chip'] [data-part='label'] > span:first-child {
+    font-weight: var(--slotted-font-weight-medium, 500);
+  }
+
+  [data-ui='filter-bar'] [data-part='chip'] [data-part='label'] > span + span {
+    font-weight: var(--slotted-font-weight-regular, 400);
+  }
+
+  [data-ui='filter-bar'] [data-part='chip'][data-invalid] > [data-ui='tag'] {
+    --slotted-tag-border-color: var(--_invalid);
+    box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px) var(--_invalid);
+  }
+
+  [data-ui='filter-bar'] [data-part='chip'][data-folded] {
+    display: none;
+    visibility: hidden;
+  }
+
+  [data-ui='filter-bar'] [data-part='chips'][data-revealed] [data-part='chip'][data-folded] {
+    display: inline-flex;
+    visibility: visible;
+  }
+
+  /* ── Glyph-only and text controls of the family's own ───────────────── */
+
+  [data-ui='filter-bar'] [data-part='more'],
+  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove'] {
+    align-items: center;
+    appearance: none;
+    background: none;
+    border: 0;
+    border-radius: var(--_control-radius);
+    color: var(--_muted);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    justify-content: center;
+    transition:
+      background-color var(--_duration) var(--_easing),
+      color var(--_duration) var(--_easing);
+  }
+
+  [data-ui='filter-bar'] [data-part='more'] {
+    block-size: var(--slotted-target-min, 24px);
+    border-radius: var(--_radius);
+    font-weight: var(--slotted-font-weight-medium, 500);
+    padding-inline: var(--_gap);
+    white-space: nowrap;
+  }
+
+  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove'] {
+    block-size: var(--slotted-target-min, 24px);
+    inline-size: var(--slotted-target-min, 24px);
+  }
+
+  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove']::after {
+    background-color: currentcolor;
+    block-size: var(--_icon);
+    content: '';
+    display: block;
+    inline-size: var(--_icon);
+    mask-image: var(--slotted-filter-bar-remove-icon, var(--slotted-icon-x));
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  [data-ui='filter-bar']
+    :is([data-part='more'], [data-part='rule'] > [data-part='remove']):enabled:hover {
+    background-color: var(--_hover);
+    color: var(--_ink);
+  }
+
+  [data-ui='filter-bar']
+    :is([data-part='more'], [data-part='rule'] > [data-part='remove']):enabled:active {
+    background-color: var(--_active);
+  }
+
+  [data-ui='filter-bar']
+    :is([data-part='more'], [data-part='rule'] > [data-part='remove']):focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /* ── The summary, drawn only when the bar is narrow ─────────────────── */
+
+  [data-ui='filter-bar'] [data-part='summary'] {
+    display: none;
+    visibility: hidden;
+  }
+
+  [data-ui='filter-bar'] [data-part='summary'] > span + span {
+    /* The count after the word is a figure, and figures line up. */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── The actions under apply=manual ─────────────────────────────────── */
+
+  /**
+   * Apply and Reset close the toolbar line from its end. Pushed there rather
+   * than placed after the clear control, because a manual bar at a medium
+   * width wraps the pair onto a line of its own, and a line that starts with
+   * Reset reads as a third row of pills.
+   */
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='bar'] > [data-part='actions'] {
+    align-items: center;
+    display: flex;
+    gap: var(--_gap-sm);
+    margin-inline-start: auto;
+  }
+
+  /* ── States of the whole bar ────────────────────────────────────────── */
+
+  [data-ui='filter-bar'][data-disabled] {
+    --_ink: var(--slotted-disabled-foreground, GrayText);
+    --_muted: var(--slotted-disabled-foreground, GrayText);
+    --_edge: var(--slotted-disabled-border, GrayText);
+    --_surface: var(--slotted-disabled-background, Canvas);
+  }
+
+  [data-ui='filter-bar'][data-disabled] [data-part='pill'] {
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* A filled pill loses the accent with the rest of the bar: a disabled control
+     drawn in the accent reads as the one control that still works. */
+  [data-ui='filter-bar'][data-disabled] [data-part='pill'][data-filtered] {
+    background-color: var(--_surface);
+    border-color: var(--_edge);
+    color: var(--_ink);
+  }
+
+  /** A loading bar keeps its width and its controls, and says so in the count's place. */
+  [data-ui='filter-bar'][data-loading] [data-part='count'] {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--_gap-sm);
+  }
+
+  /* ── Sticky ─────────────────────────────────────────────────────────────
+   *
+   * The bar sticks under the page chrome, reading the property `page`
+   * publishes and never measuring the header itself. It then adds its own
+   * height to the number for what follows: the binding measures the root and
+   * writes the sum as `--slotted-page-sticky-top` on the element that holds
+   * the bar and the listing — the rule `section` established for its body —
+   * and writes the value it read back on the root itself, so the bar keeps
+   * sticking where it did while everything after it stops under the bar.
+   */
+  [data-ui='filter-bar'][data-sticky] {
+    background-color: var(--_surface);
+    inset-block-start: var(--slotted-page-sticky-top, 0px);
+    padding-block: var(--slotted-space-3, 0.375rem);
+    position: sticky;
+    z-index: var(--slotted-z-index-sticky, 100);
+  }
+
+  /* ── The builder ────────────────────────────────────────────────────────
+   *
+   * The whole tree, in a drawer, laid out the way Notion, Airtable and AG
+   * Grid's advanced filter lay a query out: a group opens with "Match [All |
+   * Any] of the following", every row under it starts with the word that
+   * joins it to the row above — "Where" on the first, "and" or "or" after —
+   * and a group inside a group is a box on a sunken ground with the same
+   * header and its own remove. A rule is one row: field, operator, operand,
+   * remove; it stacks when the drawer is narrow, and the leading word stays.
+   */
+  [data-ui='filter-bar'][data-part='builder'] {
+    --_join-col: var(--slotted-filter-bar-join-size, 3.5rem);
+    --_group-surface: var(
+      --slotted-filter-bar-group-surface,
+      var(--slotted-surface-sunken, Canvas)
+    );
+    --_group-edge: var(--slotted-filter-bar-group-border, var(--slotted-border-subtle, GrayText));
+
+    container-name: slotted-filter-bar-builder;
+    container-type: inline-size;
+    display: grid;
+    gap: var(--slotted-space-5, 0.75rem);
+  }
+
+  /**
+   * Every group is a container of the same name as the builder, so a rule
+   * stacks against the width its own group has left, not the drawer's: two
+   * levels in, the gutter, the box padding and the border have taken nine
+   * rems, and a row measured against the drawer overflowed its box.
+   */
+  [data-ui='filter-bar'][data-part='builder'] [data-part='group'] {
+    border: 0;
+    container-name: slotted-filter-bar-builder;
+    container-type: inline-size;
+    display: grid;
+    gap: var(--_gap);
+    margin: 0;
+    min-inline-size: 0;
+    padding: 0;
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='group']:not([data-depth='0']) {
+    background-color: var(--_group-surface);
+    border: var(--slotted-border-width-thin, 1px) solid var(--_group-edge);
+    border-radius: var(--slotted-radius-md, 6px);
+    padding: var(--slotted-space-5, 0.75rem);
+  }
+
+  /* A box inside a box alternates its ground, so the third level reads as a level and not as a border. */
+  [data-ui='filter-bar'][data-part='builder']
+    [data-part='group']:is([data-depth='2'], [data-depth='4'], [data-depth='6']) {
+    background-color: var(--_surface);
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='group'] > legend {
+    /* The legend names the group to a reader and draws nothing. */
+    block-size: 1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    inline-size: 1px;
+  }
+
+  /** The header: the words, the All | Any control between them, and, in a nested group, its remove at the end. */
+  [data-ui='filter-bar'][data-part='builder'] [data-part='join'] {
+    align-items: center;
+    color: var(--_ink);
+    display: flex;
+    flex-wrap: wrap;
+    font-weight: var(--slotted-font-weight-medium, 500);
+    gap: var(--_gap-sm);
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='join'] > [data-part='remove-group'] {
+    margin-inline-start: auto;
+  }
+
+  /**
+   * The rows: a two-column grid, the joining word then the rule or the group,
+   * so every field lines up under the first whatever word stands before it.
+   */
+  [data-ui='filter-bar'][data-part='builder'] [data-part='rules'] {
+    align-items: start;
+    column-gap: var(--_gap-sm);
+    display: grid;
+    grid-template-columns: var(--_join-col) minmax(0, 1fr);
+    min-inline-size: 0;
+    row-gap: var(--_gap);
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='conjunction'] {
+    color: var(--_muted);
+    /* Centred on the first control of its row, whatever the row stacks to. */
+    line-height: var(--_height);
+    overflow: hidden;
+    text-align: end;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] {
+    align-items: center;
+    display: grid;
+    gap: var(--_gap-sm);
+    grid-template-columns:
+      minmax(7rem, 1fr) minmax(8rem, 1fr) minmax(10rem, 2fr)
+      auto;
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > * {
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'][data-part='builder']
+    [data-part='rule'][data-operands='0']
+    > [data-part='operand'] {
+    display: none;
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-operands='0'] {
+    grid-template-columns: minmax(7rem, 1fr) minmax(8rem, 2fr) auto;
+  }
+
+  [data-ui='filter-bar'][data-part='builder'] [data-part='operand'] {
+    display: grid;
+    gap: var(--_gap-sm);
+    min-inline-size: 0;
+  }
+
+  [data-ui='filter-bar'][data-part='builder']
+    [data-part='rule'][data-operands='2']
+    > [data-part='operand'] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  [data-ui='filter-bar'][data-part='builder']
+    [data-part='rule'][data-invalid]
+    > [data-part='field'] {
+    --slotted-select-border-color: var(--_invalid);
+  }
+
+  /** The group's own controls, under its rows and aligned with them. */
+  [data-ui='filter-bar'][data-part='builder'] [data-part='group'] > [data-part='actions'] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--_gap-sm);
+    padding-inline-start: calc(var(--_join-col) + var(--_gap-sm));
+  }
+
+  /* Add rule and Add group say so with the plus the bar's own add control carries. */
+  [data-ui='filter-bar'][data-part='builder']
+    :is([data-part='add-rule'], [data-part='add-group'])::before {
+    background-color: currentcolor;
+    block-size: var(--_icon);
+    content: '';
+    display: inline-block;
+    flex: 0 0 auto;
+    inline-size: var(--_icon);
+    mask-image: var(--slotted-filter-bar-add-icon, var(--slotted-icon-plus));
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  @container slotted-filter-bar-builder (max-width: 30rem) {
+    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'],
+    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-operands='0'] {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > [data-part='field'] {
+      grid-column: 1;
+    }
+
+    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > [data-part='remove'] {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    [data-ui='filter-bar'][data-part='builder']
+      [data-part='rule']
+      > :is([data-part='operator'], [data-part='operand']) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* ── Narrow ─────────────────────────────────────────────────────────────
+   *
+   * Below the breakpoint the pills and the chips fold behind one control that
+   * says how many rules are applied and opens the builder. The search stays,
+   * because a query is the one thing a reader on a phone types first, and the
+   * count stays, because it is the answer.
+   */
+  @container slotted-filter-bar (max-width: 36rem) {
+    [data-ui='filter-bar'] > [data-part='frame'] {
+      grid-template-areas:
+        'search search'
+        'bar end'
+        'count count';
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    [data-ui='filter-bar'] > [data-part='frame'] > [data-part='search'] {
+      max-inline-size: none;
+    }
+
+    [data-ui='filter-bar']
+      [data-part='bar']
+      > :is([data-part='pill'], [data-part='add'], [data-part='clear'], [data-part='actions']),
+    [data-ui='filter-bar'] [data-part='chips'] {
+      display: none;
+      visibility: hidden;
+    }
+
+    [data-ui='filter-bar'] [data-part='summary'] {
+      display: inline-flex;
+      visibility: visible;
+    }
+
+    [data-ui='filter-bar'] > [data-part='frame'] > [data-part='count'] {
+      justify-self: start;
+    }
+  }
+
+  @media (forced-colors: active) {
+    /*
+     * A masked glyph is painted with a background, and forced colours replace
+     * a background that is not one of the system's own colours: the mark goes
+     * and the box it sat in stays. `forced-color-adjust: none` keeps
+     * `currentcolor`, which is the host's ink, already forced to the right
+     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
+     */
+    [data-ui='filter-bar'] [data-part='pill']::after,
+    [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove']::after,
+    [data-ui='filter-bar'] [data-part='search-icon'],
+    [data-ui='filter-bar'][data-part='builder'] [data-part='add-rule']::before,
+    [data-ui='filter-bar'][data-part='builder'] [data-part='add-group']::before {
+      forced-color-adjust: none;
+    }
+
+    /* A filled pill loses its tint there and keeps its edge, which is the state's other half. */
+    [data-ui='filter-bar'] [data-part='pill'][data-filtered] {
+      border-width: var(--slotted-border-width-thick, 2px);
+    }
+  }
+
+  @media print {
+    [data-ui='filter-bar'][data-sticky] {
+      position: static;
+    }
+  }
+}

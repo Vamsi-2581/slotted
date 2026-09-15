@@ -61,8 +61,8 @@
   "responsive": {
     "container": "filter-bar, inline-size, on the root; the grid is on frame, one element in, because a container query cannot restyle the element it measures",
     "wide": "64rem and up: search, toolbar, the consumer's controls and the count on one line, the chips under it",
-    "medium": "40rem to 64rem: the search shares its line with the consumer's controls and the count; the toolbar takes a line of its own; the chips under both",
-    "narrow": "40rem, literal by rule 4 of the token foundation: the search alone, then summary beside the consumer's controls, then the count; pills and chips hidden"
+    "medium": "36rem to 64rem: the search shares its line with the consumer's controls and the count; the toolbar takes a line of its own; the chips under both",
+    "narrow": "36rem, literal by rule 4 of the token foundation: the search alone, then summary beside the consumer's controls, then the count; pills and chips hidden"
   },
   "sticky": {
     "axis": "sticky, off by default",
@@ -140,13 +140,7 @@
     "presetLifecycle": "saving, renaming and deleting a preset are the application's; onPresetSave is the one request"
   },
   "provides": {
-    "filterBarDefaults": [
-      "labels",
-      "apply",
-      "queryDelay",
-      "chipLimit",
-      "shortcut"
-    ]
+    "filterBarDefaults": ["labels", "apply", "queryDelay", "chipLimit", "shortcut"]
   },
   "labels": [
     "bar",
@@ -156,6 +150,7 @@
     "search",
     "add",
     "clear",
+    "clearRule",
     "apply",
     "reset",
     "done",
@@ -171,6 +166,9 @@
     "removeGroup",
     "and",
     "or",
+    "matchAll",
+    "matchAny",
+    "where",
     "field",
     "operator",
     "value",
@@ -183,51 +181,18 @@
     "unknownField",
     "operators"
   ],
-  "imperative": [
-    "focusSearch()",
-    "open(path?)"
-  ],
+  "imperative": ["focusSearch()", "open(path?)"],
   "axes": {
-    "apply": [
-      "live",
-      "manual"
-    ],
-    "sticky": [
-      "false",
-      "true"
-    ],
-    "size": [
-      "sm",
-      "md",
-      "lg"
-    ]
+    "apply": ["live", "manual"],
+    "sticky": ["false", "true"],
+    "size": ["sm", "md", "lg"]
   },
   "resolution": {
-    "apply": [
-      "prop",
-      "defaults",
-      "live"
-    ],
-    "queryDelay": [
-      "prop",
-      "defaults",
-      "320"
-    ],
-    "chipLimit": [
-      "prop",
-      "defaults",
-      "6"
-    ],
-    "shortcut": [
-      "prop",
-      "defaults",
-      "none"
-    ],
-    "size": [
-      "prop",
-      "defaults",
-      "md"
-    ]
+    "apply": ["prop", "defaults", "live"],
+    "queryDelay": ["prop", "defaults", "320"],
+    "chipLimit": ["prop", "defaults", "6"],
+    "shortcut": ["prop", "defaults", "none"],
+    "size": ["prop", "defaults", "md"]
   },
   "stateAttributes": {
     "disabled": "data-disabled",
@@ -250,36 +215,19 @@
       "controlled": "value",
       "uncontrolled": "defaultValue",
       "request": "onValueChange",
-      "reasons": [
-        "pointer",
-        "keyboard",
-        "clear",
-        "remove",
-        "select",
-        "submit",
-        "programmatic"
-      ]
+      "reasons": ["pointer", "keyboard", "clear", "remove", "select", "submit", "programmatic"]
     },
     "value": {
       "controlled": "query",
       "uncontrolled": "defaultQuery",
       "request": "onQueryChange",
-      "reasons": [
-        "keyboard",
-        "clear",
-        "submit",
-        "programmatic"
-      ]
+      "reasons": ["keyboard", "clear", "submit", "programmatic"]
     },
     "selection": {
       "controlled": "preset",
       "uncontrolled": "defaultPreset",
       "request": "onPresetChange",
-      "reasons": [
-        "select",
-        "clear",
-        "programmatic"
-      ]
+      "reasons": ["select", "clear", "programmatic"]
     },
     "open": {
       "controlled": "open",
@@ -299,16 +247,13 @@
       "controlled": "revealed",
       "uncontrolled": "defaultRevealed",
       "request": "onRevealedChange",
-      "reasons": [
-        "pointer",
-        "keyboard",
-        "programmatic"
-      ]
+      "reasons": ["pointer", "keyboard", "programmatic"]
     }
   },
   "literals": {
     "--slotted-filter-bar-chip-max": "18rem: no scale holds a measure, and container owns the page's",
-    "narrow breakpoint": "40rem, inside @container, where a custom property is invalid"
+    "--slotted-filter-bar-editor-size": "18rem: the width of the rule a pill opens, because a popover shrink-wraps",
+    "narrow breakpoint": "36rem, inside @container, where a custom property is invalid"
   },
   "members": {
     "filterBar": {
@@ -335,8 +280,7 @@
         "size",
         "disabled",
         "loading",
-        "wiring",
-        "invalid"
+        "wiring"
       ],
       "states": [
         "default",
@@ -353,6 +297,7 @@
         "root",
         "frame",
         "search",
+        "search-icon",
         "bar",
         "pill",
         "add",
@@ -370,6 +315,8 @@
         "builder",
         "group",
         "join",
+        "rules",
+        "conjunction",
         "rule",
         "field",
         "operator",

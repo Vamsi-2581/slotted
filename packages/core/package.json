@@ -41,6 +41,10 @@
       "types": "./dist/types/dismissable-layer/index.d.ts",
       "import": "./dist/dismissable-layer.js"
     },
+    "./drag": {
+      "types": "./dist/types/drag/index.d.ts",
+      "import": "./dist/drag.js"
+    },
     "./extent": {
       "types": "./dist/types/extent/index.d.ts",
       "import": "./dist/extent.js"
@@ -132,6 +136,10 @@
     "./tags": {
       "types": "./dist/types/tags/index.d.ts",
       "import": "./dist/tags.js"
+    },
+    "./text": {
+      "types": "./dist/types/text/index.d.ts",
+      "import": "./dist/text.js"
     },
     "./timeline": {
       "types": "./dist/types/timeline/index.d.ts",

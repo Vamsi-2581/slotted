@@ -1619,3 +1619,915 @@
     </div>
   </div>
 </section>
+
+<!--
+  The three operands the panel could not draw on 10 September, each supplied by
+  a family built since. `filter-time` and `filter-datetime` are two kinds; the
+  `between` of each is still two pickers, because `time-range-picker` and
+  `datetime-range-picker` are wave 8. `filter-range` is the date kind's
+  `between` as one `date-range-picker`, marked `data-range` so the operand grid
+  collapses to one column. `filter-tags` is the set kind typed as chips.
+-->
+<section data-scene="filter-time">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Opens at">
+      <div data-ui="table" data-part="filter-panel" data-kind="time">
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Is</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="time">
+            <div
+              data-ui="time-picker"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-granularity="minute"
+            >
+              <div data-part="control">
+                <div
+                  data-ui="time-field"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-cycle="24"
+                  data-granularity="minute"
+                >
+                  <div data-part="segments" role="group" aria-label="Value, 09:00">
+                    <div
+                      data-part="segment"
+                      data-field="hour"
+                      role="spinbutton"
+                      tabindex="0"
+                      aria-label="hour"
+                      aria-valuenow="9"
+                      aria-valuemin="0"
+                      aria-valuemax="23"
+                      aria-valuetext="09"
+                    >
+                      09
+                    </div>
+                    <span data-part="literal" aria-hidden="true">:</span>
+                    <div
+                      data-part="segment"
+                      data-field="minute"
+                      role="spinbutton"
+                      tabindex="-1"
+                      aria-label="minute"
+                      aria-valuenow="0"
+                      aria-valuemin="0"
+                      aria-valuemax="59"
+                      aria-valuetext="00"
+                    >
+                      00
+                    </div>
+                  </div>
+                  <span data-part="end"
+                    ><button
+                      data-part="trigger"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-label="Change time, 09:00"
+                    ></button
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Shift">
+      <div data-ui="table" data-part="filter-panel" data-kind="time">
+        <div data-part="filter-condition" data-operands="2">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Between</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="time">
+            <div
+              data-ui="time-picker"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-granularity="minute"
+            >
+              <div data-part="control">
+                <div
+                  data-ui="time-field"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-cycle="24"
+                  data-granularity="minute"
+                >
+                  <div data-part="segments" role="group" aria-label="From, 22:00">
+                    <div
+                      data-part="segment"
+                      data-field="hour"
+                      role="spinbutton"
+                      tabindex="0"
+                      aria-label="hour"
+                      aria-valuenow="22"
+                      aria-valuemin="0"
+                      aria-valuemax="23"
+                      aria-valuetext="22"
+                    >
+                      22
+                    </div>
+                    <span data-part="literal" aria-hidden="true">:</span>
+                    <div
+                      data-part="segment"
+                      data-field="minute"
+                      role="spinbutton"
+                      tabindex="-1"
+                      aria-label="minute"
+                      aria-valuenow="0"
+                      aria-valuemin="0"
+                      aria-valuemax="59"
+                      aria-valuetext="00"
+                    >
+                      00
+                    </div>
+                  </div>
+                  <span data-part="end"
+                    ><button
+                      data-part="trigger"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-label="Change time, 22:00"
+                    ></button
+                  ></span>
+                </div>
+              </div>
+            </div>
+            <div
+              data-ui="time-picker"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-granularity="minute"
+            >
+              <div data-part="control">
+                <div
+                  data-ui="time-field"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-cycle="24"
+                  data-granularity="minute"
+                >
+                  <div data-part="segments" role="group" aria-label="To, 02:00">
+                    <div
+                      data-part="segment"
+                      data-field="hour"
+                      role="spinbutton"
+                      tabindex="0"
+                      aria-label="hour"
+                      aria-valuenow="2"
+                      aria-valuemin="0"
+                      aria-valuemax="23"
+                      aria-valuetext="02"
+                    >
+                      02
+                    </div>
+                    <span data-part="literal" aria-hidden="true">:</span>
+                    <div
+                      data-part="segment"
+                      data-field="minute"
+                      role="spinbutton"
+                      tabindex="-1"
+                      aria-label="minute"
+                      aria-valuenow="0"
+                      aria-valuemin="0"
+                      aria-valuemax="59"
+                      aria-valuetext="00"
+                    >
+                      00
+                    </div>
+                  </div>
+                  <span data-part="end"
+                    ><button
+                      data-part="trigger"
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-label="Change time, 02:00"
+                    ></button
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="filter-datetime">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Created">
+      <div data-ui="table" data-part="filter-panel" data-kind="datetime">
+        <div data-part="filter-condition" data-operands="2">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Between</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="datetime">
+            <div
+              data-ui="datetime-picker"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-granularity="minute"
+            >
+              <div data-part="control">
+                <div
+                  data-ui="datetime-field"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-cycle="24"
+                  data-granularity="minute"
+                >
+                  <div data-part="segments" role="group" aria-label="From, 14/09/2026 09:00">
+                    <span data-part="half" data-half="date">
+                      <div
+                        data-part="segment"
+                        data-field="day"
+                        data-half="date"
+                        role="spinbutton"
+                        tabindex="0"
+                        aria-label="day"
+                        aria-valuenow="14"
+                        aria-valuemin="1"
+                        aria-valuemax="30"
+                        aria-valuetext="14"
+                      >
+                        14
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="month"
+                        data-half="date"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="month"
+                        aria-valuenow="9"
+                        aria-valuemin="1"
+                        aria-valuemax="12"
+                        aria-valuetext="September"
+                      >
+                        09
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="year"
+                        data-half="date"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="year"
+                        aria-valuenow="2026"
+                        aria-valuetext="2026"
+                      >
+                        2026
+                      </div>
+                      <span data-part="literal" data-boundary aria-hidden="true">,</span>
+                    </span>
+                    <span data-part="half" data-half="time">
+                      <div
+                        data-part="segment"
+                        data-field="hour"
+                        data-half="time"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="hour"
+                        aria-valuenow="9"
+                        aria-valuemin="0"
+                        aria-valuemax="23"
+                        aria-valuetext="09"
+                      >
+                        09
+                      </div>
+                      <span data-part="literal" aria-hidden="true">:</span>
+                      <div
+                        data-part="segment"
+                        data-field="minute"
+                        data-half="time"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="minute"
+                        aria-valuenow="0"
+                        aria-valuemin="0"
+                        aria-valuemax="59"
+                        aria-valuetext="00"
+                      >
+                        00
+                      </div>
+                    </span>
+                  </div>
+                  <span data-part="end"
+                    ><button
+                      data-part="trigger"
+                      type="button"
+                      aria-haspopup="dialog"
+                      aria-expanded="false"
+                      aria-label="Change date and time, 14/09/2026 09:00"
+                    ></button
+                  ></span>
+                </div>
+              </div>
+            </div>
+            <div
+              data-ui="datetime-picker"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-granularity="minute"
+            >
+              <div data-part="control">
+                <div
+                  data-ui="datetime-field"
+                  data-part="root"
+                  data-size="sm"
+                  data-variant="outline"
+                  data-cycle="24"
+                  data-granularity="minute"
+                  data-incomplete
+                >
+                  <div data-part="segments" role="group" aria-label="To, 14/09/2026, time missing">
+                    <span data-part="half" data-half="date">
+                      <div
+                        data-part="segment"
+                        data-field="day"
+                        data-half="date"
+                        role="spinbutton"
+                        tabindex="0"
+                        aria-label="day"
+                        aria-valuenow="14"
+                        aria-valuemin="1"
+                        aria-valuemax="30"
+                        aria-valuetext="14"
+                      >
+                        14
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="month"
+                        data-half="date"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="month"
+                        aria-valuenow="9"
+                        aria-valuemin="1"
+                        aria-valuemax="12"
+                        aria-valuetext="September"
+                      >
+                        09
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="year"
+                        data-half="date"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="year"
+                        aria-valuenow="2026"
+                        aria-valuetext="2026"
+                      >
+                        2026
+                      </div>
+                      <span data-part="literal" data-boundary aria-hidden="true">,</span>
+                    </span>
+                    <span data-part="half" data-half="time">
+                      <div
+                        data-part="segment"
+                        data-field="hour"
+                        data-half="time"
+                        data-placeholder
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="hour"
+                        aria-valuemin="0"
+                        aria-valuemax="23"
+                        aria-valuetext="empty"
+                      >
+                        ––
+                      </div>
+                      <span data-part="literal" aria-hidden="true">:</span>
+                      <div
+                        data-part="segment"
+                        data-field="minute"
+                        data-half="time"
+                        data-placeholder
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="minute"
+                        aria-valuemin="0"
+                        aria-valuemax="59"
+                        aria-valuetext="empty"
+                      >
+                        ––
+                      </div>
+                    </span>
+                  </div>
+                  <span data-part="end"
+                    ><button
+                      data-part="trigger"
+                      type="button"
+                      aria-haspopup="dialog"
+                      aria-expanded="false"
+                      aria-label="Choose date and time"
+                    ></button
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="filter-range">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter Due">
+      <div data-ui="table" data-part="filter-panel" data-kind="date">
+        <div data-part="filter-condition" data-operands="2">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Between</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="date" data-range>
+            <div
+              data-ui="date-range-picker"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-count="days"
+              data-calendar="gregory"
+            >
+              <div data-part="control">
+                <div data-part="start" data-current>
+                  <div data-ui="date-field" data-part="root" data-size="sm" data-variant="plain">
+                    <div data-part="segments" role="group" aria-label="From, 1 September 2026">
+                      <div
+                        data-part="segment"
+                        data-field="day"
+                        role="spinbutton"
+                        tabindex="0"
+                        aria-label="day"
+                        aria-valuenow="1"
+                        aria-valuetext="1"
+                      >
+                        01
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="month"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="month"
+                        aria-valuenow="9"
+                        aria-valuetext="September"
+                      >
+                        09
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="year"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="year"
+                        aria-valuenow="2026"
+                        aria-valuetext="2026"
+                      >
+                        2026
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <span data-part="separator" aria-hidden="true">–</span>
+                <div data-part="end">
+                  <div data-ui="date-field" data-part="root" data-size="sm" data-variant="plain">
+                    <div data-part="segments" role="group" aria-label="To, 30 September 2026">
+                      <div
+                        data-part="segment"
+                        data-field="day"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="day"
+                        aria-valuenow="30"
+                        aria-valuetext="30"
+                      >
+                        30
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="month"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="month"
+                        aria-valuenow="9"
+                        aria-valuetext="September"
+                      >
+                        09
+                      </div>
+                      <span data-part="literal" aria-hidden="true">/</span>
+                      <div
+                        data-part="segment"
+                        data-field="year"
+                        role="spinbutton"
+                        tabindex="-1"
+                        aria-label="year"
+                        aria-valuenow="2026"
+                        aria-valuetext="2026"
+                      >
+                        2026
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  data-part="trigger"
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                  aria-label="Change period, 1 September 2026 – 30 September 2026, 30 days"
+                ></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-scene="filter-tags">
+  <div
+    data-ui="popover"
+    data-part="root"
+    data-side="bottom"
+    data-align="start"
+    data-size="md"
+    data-width="auto"
+    data-open
+    style="
+      position: relative;
+      inline-size: min(22rem, 100%);
+      --slotted-positioner-available-width: 100%;
+    "
+  >
+    <div data-part="content" role="dialog" tabindex="-1" aria-label="Filter SKU">
+      <div data-ui="table" data-part="filter-panel" data-kind="set">
+        <div data-part="filter-condition" data-operands="1">
+          <div data-part="filter-operator">
+            <div
+              data-ui="select"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <button
+                data-part="trigger"
+                type="button"
+                role="combobox"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-label="Condition"
+              >
+                <span data-part="value">Is any of</span>
+              </button>
+              <span data-part="arrow"></span>
+            </div>
+          </div>
+          <div data-part="filter-operand" data-kind="set" data-operand="tags">
+            <div
+              data-ui="tags-input"
+              data-part="root"
+              data-size="sm"
+              data-variant="outline"
+              data-full-width
+            >
+              <div data-part="control" role="grid" aria-label="Value, 3 values">
+                <div data-part="chips" role="row" aria-describedby="filter-tags-hint">
+                  <span
+                    data-ui="tag"
+                    data-part="root"
+                    data-size="sm"
+                    data-variant="soft"
+                    data-value="SKU-1042"
+                    role="gridcell"
+                    tabindex="-1"
+                  >
+                    <span data-part="body"><span data-part="label">SKU-1042</span></span>
+                    <button
+                      data-part="remove"
+                      type="button"
+                      tabindex="-1"
+                      aria-label="Remove SKU-1042"
+                    ></button>
+                  </span>
+                  <span
+                    data-ui="tag"
+                    data-part="root"
+                    data-size="sm"
+                    data-variant="soft"
+                    data-value="SKU-2210"
+                    role="gridcell"
+                    tabindex="-1"
+                  >
+                    <span data-part="body"><span data-part="label">SKU-2210</span></span>
+                    <button
+                      data-part="remove"
+                      type="button"
+                      tabindex="-1"
+                      aria-label="Remove SKU-2210"
+                    ></button>
+                  </span>
+                  <span
+                    data-ui="tag"
+                    data-part="root"
+                    data-size="sm"
+                    data-variant="soft"
+                    data-value="SKU-3391"
+                    role="gridcell"
+                    tabindex="-1"
+                  >
+                    <span data-part="body"><span data-part="label">SKU-3391</span></span>
+                    <button
+                      data-part="remove"
+                      type="button"
+                      tabindex="-1"
+                      aria-label="Remove SKU-3391"
+                    ></button>
+                  </span>
+                  <span data-part="field" role="gridcell">
+                    <input
+                      data-part="input"
+                      type="text"
+                      aria-label="Value"
+                      list="filter-tags-options"
+                      placeholder="Add a value"
+                    />
+                    <datalist id="filter-tags-options">
+                      <option value="SKU-1042"></option>
+                      <option value="SKU-2210"></option>
+                      <option value="SKU-3391"></option>
+                      <option value="SKU-4470"></option>
+                    </datalist>
+                  </span>
+                </div>
+              </div>
+              <span data-part="hint" id="filter-tags-hint">Press Delete to remove a value.</span>
+            </div>
+          </div>
+        </div>
+        <div data-part="filter-actions">
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="secondary"
+            data-variant="ghost"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Clear</span>
+          </button>
+          <button
+            data-ui="button"
+            data-part="root"
+            data-tone="accent"
+            data-variant="solid"
+            data-size="sm"
+            type="button"
+          >
+            <span data-part="label">Apply</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

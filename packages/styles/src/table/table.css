@@ -1104,6 +1104,33 @@
   }
 
   /**
+   * Three operands that are one control wide, whatever the operator's count.
+   *
+   * `data-range` is a `between` drawn as one `date-range-picker`: the grid
+   * above would put the single child in the first of its two columns and
+   * leave the second empty. A date-time field is seven segments wide, so two
+   * of them side by side at the panel's floor are two fields nobody can read;
+   * a range of date-times stacks, as a range of numbers did at fifteen rem.
+   * The chips of a set typed as tags wrap inside one field, and the field
+   * takes the panel's width so the wrapping has somewhere to go.
+   */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-range],
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-kind='datetime'],
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-operand='tags'] {
+    grid-template-columns: 1fr;
+  }
+
+  /**
+   * A time field is narrower than a date field — `09:00` against
+   * `14/09/2026` — but the trigger beside it is the same width, so two of them
+   * on one row want eight rem each rather than seven. At the floor the two
+   * stack; a panel given two rem more puts them side by side.
+   */
+  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-kind='time'] {
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  }
+
+  /**
    * The join between two conditions. It is a rule with a word on it: the two
    * conditions are separate boxes and the reader has to see where the first ends
    * before being asked how the second joins it.

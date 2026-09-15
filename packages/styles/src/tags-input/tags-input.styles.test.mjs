@@ -21,18 +21,22 @@ const css = readFileSync(new URL('./tags-input.css', import.meta.url), 'utf8').r
 test('lays the chips out and paints none of them', () => {
   assert.doesNotMatch(css, /\[data-ui='tag'\]/, 'reaches into the tag sheet');
   assert.doesNotMatch(css, /--_inset-block|--_border\b|--_surface|--_text\b/, 'writes a tag hook');
-  assert.match(css, /--slotted-tag-inset-block:\s*var\(--_chip-inset\)/);
+  assert.match(css, /--slotted-control-inner-size:\s*var\(--_inner-size\)/);
   assert.match(css, /--slotted-tag-border-color:/);
 });
 
 /**
  * A control holding one row of chips is the height of an empty one beside it
- * at every density, and the chip never touches the frame: the chip's inset
- * yields to the room the frame has, and the air is kept.
+ * at every density, and the chip never touches the frame: a row is the
+ * foundation's inner size for the control's step, which is the frame less two
+ * steps of air, and the chip takes that height through the property the row
+ * writes.
  */
-test('keeps two pixels of air around a chip at every density', () => {
+test('sizes a row of chips to the inner size of the control at every density', () => {
   assert.match(css, /--_row-air:\s*var\(--slotted-space-1/);
-  assert.match(css, /--_chip-inset:\s*clamp\(\s*0px/);
-  assert.match(css, /--_row-size:\s*calc\(var\(--_chip-line\) \+ 2 \* var\(--_chip-inset\)\)/);
+  assert.match(css, /--_inner-size:\s*var\(--slotted-control-inner-size-md/);
+  assert.match(css, /--_inner-size:\s*var\(--slotted-control-inner-size-sm/);
+  assert.match(css, /--_inner-size:\s*var\(--slotted-control-inner-size-lg/);
+  assert.match(css, /--_row-size:\s*var\(--_inner-size\)/);
   assert.doesNotMatch(css, /--_row-size:\s*var\(--slotted-target-min/);
 });

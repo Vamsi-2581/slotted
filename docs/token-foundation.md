@@ -21,7 +21,7 @@ convention.
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 106    |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 100    |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 103    |
 | `component` | One family adjusting a semantic value for itself.              | 27     |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -673,6 +673,21 @@ rebuilt, and nothing aliases it now.
 | `--slotted-control-gap-sm`            | `6px`       | `4px`   | `4px`  |
 | `--slotted-control-gap-md`            | `8px`       | `6px`   | `4px`  |
 | `--slotted-control-gap-lg`            | `8px`       | `6px`   | `6px`  |
+| `--slotted-control-inner-size-sm`     | `22px`      | `18px`  | `16px` |
+| `--slotted-control-inner-size-md`     | `24px`      | `20px`  | `18px` |
+| `--slotted-control-inner-size-lg`     | `28px`      | `24px`  | `22px` |
+
+`--slotted-control-inner-size-*` is the block size of anything that stands
+inside a control: a key in a search field, a chip in a multi-select, the clear
+mark of a field. Every step is the control's height less two steps of air —
+five pixels a side at comfortable, four at compact, four at dense — so the
+inside shrinks with the outside. It exists because the inside did not: a key
+and a chip derive their height from the control type, which drops one pixel
+between comfortable and dense while the control drops eight, and at dense a
+24-pixel key sat in a 26-pixel field. A family drawn inside a control reads
+this scale when its container states it (`text-field` writes
+`--slotted-control-inner-size` on its adornments the way it writes
+`--slotted-icon-size`); on its own it keeps the height its own type gives it.
 
 ## Avatar size
 

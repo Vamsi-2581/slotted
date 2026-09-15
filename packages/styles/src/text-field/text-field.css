@@ -31,6 +31,7 @@
      */
     --_icon-floor: var(--slotted-text-field-icon-size-min, 14px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
 
     /**
      * The drawn button, and only the drawn button. It is sized by its glyph —
@@ -136,6 +137,10 @@
     /* The intrinsic width of an `input` is about twenty characters, and a flex
        item refuses to shrink below it without this. */
     min-inline-size: 0;
+    /* The user agent pins a text control to `start`. Read from the box around
+       it instead, so a `plain` control in a numeric cell sits where the
+       cell's numbers do. */
+    text-align: inherit;
     text-overflow: ellipsis;
   }
 
@@ -183,6 +188,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
+    --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
   [data-ui='text-field'][data-part='root'][data-size='md'] {
@@ -191,6 +197,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
   [data-ui='text-field'][data-part='root'][data-size='lg'] {
@@ -199,6 +206,7 @@
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_gap: var(--slotted-control-gap-lg, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-lg, 18px));
+    --_inner-size: var(--slotted-control-inner-size-lg, 28px);
   }
 
   /* ── Variant: how much frame the control shows ────────────────────────
@@ -222,11 +230,13 @@
     );
   }
 
-  /* No edge, no lift and no ground of its own: the row it sits in is the
-     ground, and the resting shadow would draw the cell where there is none. */
+  /* No edge, no lift, no ground and no corner of its own: the cell it sits in
+     is the box, the row is the ground, a cell has no corner, and the resting
+     shadow would draw the cell where there is none. */
   [data-ui='text-field'][data-part='root'][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
+    border-radius: var(--slotted-radius-none, 0px);
     box-shadow: none;
   }
 
@@ -304,6 +314,9 @@
   [data-ui='text-field'] > [data-part='start'],
   [data-ui='text-field'] > [data-part='end'] {
     --slotted-icon-size: var(--_icon-size);
+    /* And a key or a chip placed there is the height the inside of this
+       control has, from the foundation's scale for it. */
+    --slotted-control-inner-size: var(--_inner-size);
   }
 
   [data-ui='text-field'] > [data-part='start'] > svg,
@@ -490,6 +503,20 @@
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
+  }
+
+  /**
+   * The ring of a control whose box is not its own is drawn inside that box,
+   * the way the clear button draws its ring inside the frame: two pixels past
+   * the control is two pixels over the next row's rule. No lift either — a
+   * shadow that appears only under focus is a cell that changes size when it
+   * is used.
+   */
+  [data-ui='text-field'][data-part='root'][data-variant='plain']:has(
+      > [data-part='input']:focus-visible
+    ) {
+    box-shadow: none;
+    outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   /**

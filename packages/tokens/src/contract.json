@@ -1509,6 +1509,27 @@
       "root": true
     },
     {
+      "name": "--slotted-control-inner-size-sm",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-control-inner-size-md",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
+      "name": "--slotted-control-inner-size-lg",
+      "layer": "semantic",
+      "axis": "density",
+      "type": "length",
+      "root": true
+    },
+    {
       "name": "--slotted-upload-kind-pdf",
       "layer": "component",
       "axis": "scheme",

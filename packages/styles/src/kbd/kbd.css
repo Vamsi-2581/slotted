@@ -47,10 +47,20 @@
     --_edge-width: var(--slotted-kbd-border-width, var(--slotted-border-width-thin, 1px));
     --_base-width: var(--_edge-width);
 
-    --_block-size: calc(
+    --_own-size: calc(
       var(--_font-size) * var(--_line-height) + 2 * var(--_inset-block) + var(--_edge-width) +
         var(--_base-width)
     );
+    /**
+     * Inside a control — a shortcut hint at the end of a search field — the
+     * cap is the height the foundation gives the inside of a control,
+     * `--slotted-control-inner-size`, which the field writes on its adornment
+     * from its own size step. The legend is centred in the cell whatever the
+     * cap's height, so nothing else changes. On its own the cap keeps the
+     * height its type gives it. A 24-pixel cap sat in a 26-pixel field at
+     * dense before this (`docs/token-foundation.md`, Control geometry).
+     */
+    --_block-size: var(--slotted-control-inner-size, var(--_own-size));
 
     /**
      * The ground, the rim and the ink. `raised` is the default, and it reads
@@ -103,7 +113,8 @@
     line-height: 1;
     min-inline-size: var(--_block-size);
     place-items: center;
-    padding-block: var(--_inset-block);
+    /* The inset only ever counted in the cap's own height; the cell centres the legend. */
+    padding-block: 0;
     padding-inline: var(--_inset-inline);
     /**
      * A key label is never truncated. Half a key name is a wrong instruction,

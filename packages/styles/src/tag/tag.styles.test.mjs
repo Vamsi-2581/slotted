@@ -117,7 +117,14 @@ test('gives the remove control its target on both axes', () => {
   );
   assert.match(
     rule(root),
-    /--_block-size:calc\(var\(--_font-size\) \* var\(--_line-height\) \+ 2 \* var\(--_inset-block\) \+ 2 \* var\(--_edge-width\)\)/,
+    /--_own-size:calc\(var\(--_font-size\) \* var\(--_line-height\) \+ 2 \* var\(--_inset-block\) \+ 2 \* var\(--_edge-width\)\)/,
+  );
+  /* Inside a control the chip is the foundation's inner size, and its line and
+     inset are derived from that height; alone, the derivations return its own. */
+  assert.match(rule(root), /--_block-size:var\(--slotted-control-inner-size,var\(--_own-size\)\)/);
+  assert.match(
+    rule(root),
+    /--_inset:max\(0px,calc\(\(var\(--_block-size\) - var\(--_line\) - 2 \* var\(--_edge-width\)\) \/ 2\)\)/,
   );
   assert.match(
     rule(`${ui} [data-part='remove']`),

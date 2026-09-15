@@ -73,10 +73,12 @@ test('names the family and the part together, so the combination is never a key'
 test('takes its height from the type it holds, and no height token', () => {
   assert.ok(!declarations.includes('--slotted-kbd-height'), 'the family invents a height scale');
   const base = rule(ui);
-  assert.ok(base.includes('--_block-size:calc('));
+  assert.ok(base.includes('--_own-size:calc('));
   assert.ok(base.includes('var(--_font-size) * var(--_line-height)'));
   assert.ok(base.includes('2 * var(--_inset-block)'));
   assert.ok(base.includes('var(--_edge-width) + var(--_base-width)'));
+  /* Inside a control the cap is the foundation's inner size; alone, its own. */
+  assert.ok(base.includes('--_block-size:var(--slotted-control-inner-size,var(--_own-size))'));
 
   const cap = rule(root);
   assert.ok(cap.includes('block-size:var(--_block-size)'), 'the height follows the legend');

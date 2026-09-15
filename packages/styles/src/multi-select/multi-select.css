@@ -106,30 +106,18 @@
      * `tags-input`'s release gate. The geometry below is `tags-input.css`'s.
      */
     --_row-air: var(--slotted-space-1, 0.125rem);
-    /* The chip's own line: the small step of the control type scale at the
-       tag's own line height, plus the tag's edge — `tag.css`'s arithmetic for
-       its `sm` size, repeated because the row's cap has to count in it. */
-    --_chip-line: calc(
-      var(--slotted-control-font-size-sm, 12px) * var(--slotted-line-height-xs, 1.4) + 2 *
-        var(--slotted-tag-border-width, var(--slotted-border-width-thin, 1px))
-    );
-    /* The chip's block inset: `tag`'s own step where the frame has room for
-       it, and whatever room is left where it has not. The type stays 12px and
-       the remove control keeps its 24-pixel target through `tag`'s own halo. */
-    --_chip-inset: clamp(
-      0px,
-      calc(
-        (
-            var(--_height) - 2 * var(--slotted-control-border-width, 1px) - 2 * var(--_row-air) -
-              var(--_chip-line)
-          ) /
-          2
-      ),
-      var(--slotted-space-1, 0.125rem)
-    );
-    /* One row's height: exactly the chip's, so three rows plus their gaps
-       divide the cap below with no sliver of a fourth. */
-    --_row-size: calc(var(--_chip-line) + 2 * var(--_chip-inset));
+    /**
+     * One row's height is the height the foundation gives the inside of a
+     * control at this size step, `--slotted-control-inner-size-*`: the chip
+     * takes it through the property the row writes below, so a `dense` frame
+     * of 26 pixels holds an 18-pixel chip with four pixels of air a side, and
+     * three rows plus their gaps divide the cap below with no sliver of a
+     * fourth. The type stays 12px; the chip's line and inset are derived from
+     * the height in `tag.css`, and the remove control keeps its 24-pixel target
+     * through `tag`'s own halo.
+     */
+    --_inner-size: var(--slotted-control-inner-size-md, 24px);
+    --_row-size: var(--_inner-size);
     --_row-gap: var(--slotted-space-2, 0.25rem);
 
     align-items: center;
@@ -312,13 +300,13 @@
   }
 
   /**
-   * The chip takes the inset the frame has room for, through the token `tag`
-   * reads for it. Set on the row, inherited by every chip, and no rule of this
-   * sheet names `[data-ui='tag']`: the host stands beside the tag sheet and
-   * never reaches into it.
+   * The chip takes the height the inside of this control has, through the
+   * property `tag` reads for it. Set on the row, inherited by every chip, and
+   * no rule of this sheet names `[data-ui='tag']`: the host stands beside the
+   * tag sheet and never reaches into it.
    */
   [data-ui='multi-select'] [data-part='chips'] {
-    --slotted-tag-inset-block: var(--_chip-inset);
+    --slotted-control-inner-size: var(--_inner-size);
   }
 
   /**
@@ -540,6 +528,7 @@
   [data-ui='multi-select'][data-part='root'][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
+    --_inner-size: var(--slotted-control-inner-size-sm, 22px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
@@ -556,6 +545,7 @@
   [data-ui='multi-select'][data-part='root'][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
+    --_inner-size: var(--slotted-control-inner-size-lg, 28px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_gap: var(--slotted-control-gap-lg, 8px);
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-lg, 18px));

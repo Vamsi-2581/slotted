@@ -251,6 +251,41 @@ other families stand on. Justify it at the gate before writing it.
   collapsing because the reader scrolled past it is a change the consumer did
   not make and may refuse; `specs/contract.schema.mjs` names the reason, so a
   handler can tell a scroll from a click without inspecting an event.
+- **A `plain` control is a control whose box belongs to something else, and it
+  paints nothing past that box.** A cell, a row, another control's frame. The
+  variant already gave up its edge, its ground and its lift at rest; it kept a
+  corner radius, an outward focus ring and the recoloured lift under focus, and
+  a `plain` text field focused in a table cell was a rounded pill floating two
+  pixels past the row's rule. So, in `packages/styles/src/plain-variant.test.mjs`:
+  `border-radius` is `--slotted-radius-none`, because a cell has no corner; the
+  focus ring is drawn inward, `outline-offset: calc(var(--slotted-focus-ring-offset) * -1)`,
+  the way every inner control already draws it; and focus adds no shadow. The
+  hover wash and the invalid edge stay, square. What the variant does not decide
+  is the inset: a host that gives a cell to a `plain` control gives up the cell's
+  own padding and hands it to the control through `--slotted-control-padding-inline-*`,
+  as `date-range-picker` does for its two `date-field`s and `table` does for its
+  sort control; that rule is written in the host's stylesheet. The corner is
+  the host's as well: a rounded box whose children reach its edge clips them —
+  `table`'s framed variant already does, with `overflow: clip`, because a row's
+  ground is square — and a `plain` control does not inherit a radius, since
+  `inherit` rounds all four corners of a control that touches one or none. Decided in wave 8
+  across the eleven root-framed field families and `date-range-picker`'s control;
+  `table`'s cell rule is pending in its scope.
+- **What stands inside a control is the height the foundation gives the inside
+  of a control, `--slotted-control-inner-size-{sm,md,lg}`, and the container
+  says so.** A key in a search field, a chip in a multi-select, a chip in a
+  tags input: each took its height from its own type, which drops one pixel
+  between comfortable and dense while the control around it drops eight, and at
+  dense a 24-pixel key sat in a 26-pixel field. The scale is the control's
+  height less two steps of air per density (`docs/token-foundation.md`, Control
+  geometry). A container that holds such a thing writes
+  `--slotted-control-inner-size` from its own size step — `text-field` on its
+  adornments beside `--slotted-icon-size`, `multi-select` and `tags-input` on
+  their row of chips — and `kbd` and `tag` read it as their block size,
+  deriving line and inset from it; on their own they keep the height their type
+  gives them. `--slotted-tag-inset-block` stays as the standalone inset. Decided
+  in wave 8 at `filter-bar`'s release gate; the R2 inner controls (clear, reveal,
+  steppers) still take glyph plus a step of air and are pending in the foundation's scope.
 
 ## Working beside another session
 

@@ -91,9 +91,26 @@
      * answer R2 gives for every inner control. A chip is the height of what it
      * says.
      */
-    --_block-size: calc(
+    --_own-size: calc(
       var(--_font-size) * var(--_line-height) + 2 * var(--_inset-block) + 2 * var(--_edge-width)
     );
+    /**
+     * Inside a control the chip is the height the foundation gives the inside
+     * of a control — `--slotted-control-inner-size`, which the host writes on
+     * the row of chips from its own size step — and its line and its inset
+     * are derived from that height rather than the other way round. On its own
+     * the two derivations return exactly the type-and-inset height above, so a
+     * chip in running text is unchanged. The scale exists because a chip whose
+     * height followed its type shrank one pixel between comfortable and dense
+     * while the control around it shrank eight (`docs/token-foundation.md`,
+     * Control geometry).
+     */
+    --_block-size: var(--slotted-control-inner-size, var(--_own-size));
+    --_line: min(
+      calc(var(--_font-size) * var(--_line-height)),
+      calc(var(--_block-size) - 2 * var(--_edge-width))
+    );
+    --_inset: max(0px, calc((var(--_block-size) - var(--_line) - 2 * var(--_edge-width)) / 2));
 
     align-items: stretch;
     border: var(--_edge-width) solid transparent;
@@ -103,7 +120,7 @@
     font-family: var(--slotted-tag-font-family, var(--slotted-control-font-family, sans-serif));
     font-size: var(--_font-size);
     font-weight: var(--slotted-tag-font-weight, var(--slotted-font-weight-medium, 500));
-    line-height: var(--_line-height);
+    line-height: var(--_line);
     /**
      * One line, always, and no wider than what it is given. A tag holds a
      * name; a tag that reflows into a paragraph has stopped being one. The
@@ -272,7 +289,7 @@
     /* What lets a long chip shrink below its content, which is the condition
        `text-overflow` needs to have anything to do. */
     min-inline-size: 0;
-    padding-block: var(--_inset-block);
+    padding-block: var(--_inset);
     padding-inline: var(--_inset-inline);
     text-align: start;
     /* A body that renders as an anchor keeps the chip's shape as its

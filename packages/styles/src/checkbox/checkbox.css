@@ -528,7 +528,7 @@
       --slotted-checkbox-readonly-background,
       /**
        * The ground `textarea` already gives a read-only value, and not the
-       * sunken surface: at the `light` scheme the sunken step is #f6f8fb
+       * sunken surface: at the `light` scheme the sunken step is #f8fafd
        * against a white surface, a difference a reader cannot see, so the state
        * existed in the accessibility tree and nowhere on screen.
        */

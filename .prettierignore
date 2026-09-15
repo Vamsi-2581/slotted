@@ -1,3 +1,7 @@
+# A session's own checkpoint, written by the component skill and never
+# committed. It is a working artefact like the design documents below, and
+# gating `format:check` on one lane's scratch file fails the other lane's run.
+.claude/progress
 .turbo
 coverage
 dist

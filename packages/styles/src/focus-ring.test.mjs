@@ -137,3 +137,33 @@ test('a family that moves its ring suppresses the one the browser would draw', (
     `A focused element the browser will ring as well:\n  ${offenders.join('\n  ')}`,
   );
 });
+
+/**
+ * A chip inside a control's chip row draws its ring inside its own box.
+ *
+ * The row scrolls (`overflow-y: auto`) or clips (`overflow: hidden` under
+ * `overflow='collapse'`), and either way it cuts at its padding edge, two
+ * pixels past the chip. A ring at the theme's offset reaches four pixels past
+ * the chip, and its outer two were cut on every side in every density. The
+ * ring is drawn one width inside the chip instead — the same answer `listbox`
+ * gives an option inside a scrolling list — so the whole of it is visible
+ * whatever the density, and the frame keeps its lift as the second signal.
+ */
+test('a chip in a scrolling chip row draws its ring inside its own box', () => {
+  const inset = /outline-offset:\s*calc\(\s*-1\s*\*\s*var\(--slotted-focus-ring-width, 2px\)\s*\)/;
+  const offenders = [];
+  for (const family of ['tags-input', 'multi-select']) {
+    const css = withoutForcedColors(
+      stripComments(readFileSync(join(source, family, `${family}.css`), 'utf8')),
+    ).replace(/\s+/g, ' ');
+    const rule = new RegExp(
+      `\\[data-ui='${family}'\\] \\[data-part='chips'\\] > :not\\(\\[data-part='field'\\]\\):focus-visible \\{([^}]*)\\}`,
+    ).exec(css);
+    if (!rule) {
+      offenders.push(`${family}: no ring rule for a focused chip`);
+      continue;
+    }
+    if (!inset.test(rule[1])) offenders.push(`${family}: ${rule[1].trim()}`);
+  }
+  assert.deepEqual(offenders, [], `A chip ring the row would cut:\n  ${offenders.join('\n  ')}`);
+});

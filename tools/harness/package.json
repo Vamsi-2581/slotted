@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test build.test.mjs audit.test.mjs",
+    "test": "node --test build.test.mjs audit.test.mjs core.test.mjs",
     "verify": "pnpm test"
+  },
+  "devDependencies": {
+    "vite": "8.2.2"
   }
 }

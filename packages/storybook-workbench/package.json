@@ -16,8 +16,8 @@
     "verify": "pnpm test && pnpm typecheck"
   },
   "dependencies": {
-    "@fontsource-variable/inter": "5.3.0",
-    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
     "@storybook/addon-docs": "10.5.10",
     "react": "19.2.8",
     "storybook": "10.5.10"

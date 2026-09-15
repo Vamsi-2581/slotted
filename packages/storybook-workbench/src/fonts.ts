@@ -10,7 +10,7 @@
  * in a proportional one and reports a monospaced `font-family` while doing it.
  * Concrete families answer for each platform, and the generic keyword is last.
  */
-export const WORKBENCH_FONT_SANS = '"Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif';
+export const WORKBENCH_FONT_SANS = '"Geist Variable", Geist, ui-sans-serif, system-ui, sans-serif';
 
 export const WORKBENCH_FONT_CODE =
-  '"JetBrains Mono Variable", "JetBrains Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
+  '"Geist Mono Variable", "Geist Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';

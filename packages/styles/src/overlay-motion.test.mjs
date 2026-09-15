@@ -36,6 +36,12 @@ const LAYERS = [
   { family: 'menu', layer: "[data-ui='menu']", lateral: 'slide' },
   { family: 'popover', layer: "[data-ui='popover']", lateral: 'fade' },
   { family: 'tooltip', layer: "[data-ui='tooltip']", lateral: 'fade' },
+  /** The flyout beside a rail is placed at the row's inline end, so it slides like a submenu. */
+  {
+    family: 'side-navigation',
+    layer: "[data-ui='side-navigation'][data-part='flyout']",
+    lateral: 'slide',
+  },
 ];
 
 const DISTANCE = 'var(--_enter-distance)';

@@ -96,7 +96,7 @@ Create `tools/nexora-benchmark/package.json` with these exact scripts and versio
   "scripts": {
     "build": "vite build",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit --pretty false && tsc -p tsconfig.worker.json --noEmit --pretty false",
+    "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
     "verify": "pnpm test && pnpm typecheck && pnpm build",
     "benchmark:smoke": "node scripts/calibrate.mjs --mode=smoke --profile=smoke --samples=1",
     "benchmark:record": "node scripts/calibrate.mjs --mode=record --profile=canonical,enterprise --samples=3",
@@ -126,7 +126,7 @@ Add these root scripts to `package.json`:
 }
 ```
 
-Create repository-conventional TypeScript and Vitest configs. Keep worker globals in `tsconfig.worker.json`; exclude `src/browser/worker.ts` from the Node/test config. Configure Vite to build `index.html` without a framework plugin.
+Create repository-conventional TypeScript and Vitest configs. Keep worker globals in `tsconfig.worker.json`; exclude `src/browser/worker.ts` from the Node/test config. The worker project is added to the `typecheck` script in Task 4, after its first source file exists. Configure Vite to build `index.html` without a framework plugin.
 
 Run: `pnpm install`
 
@@ -178,7 +178,7 @@ describe('Nexora calibration scale profiles', () => {
 
 - [ ] **Step 3: Run the tests and observe the missing module failure**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/profiles.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/profiles.test.ts`
 
 Expected: FAIL because `./profiles` does not exist.
 
@@ -230,7 +230,7 @@ Use `nexora-calibration-v1` and `2026-09-15T15:00:00.000Z` for every profile. Fr
 
 - [ ] **Step 5: Run focused and package checks**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/profiles.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/profiles.test.ts`
 
 Expected: PASS with 2 tests.
 
@@ -299,7 +299,7 @@ Define `collectSmoke`, `firstIds`, `withSalesOrders`, `countTables`, and `valida
 
 - [ ] **Step 2: Run the generator test and verify red state**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/generate.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/generate.test.ts`
 
 Expected: FAIL because the generator modules do not exist.
 
@@ -333,7 +333,7 @@ Assign each record a stable namespace-derived ID and a monthly partition key. De
 
 - [ ] **Step 5: Run focused tests and typecheck**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/generate.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/generate.test.ts`
 
 Expected: PASS with determinism, namespace isolation, exact-count, relationship, chronology, and bounded-batch tests.
 
@@ -422,7 +422,7 @@ Define `prepareSmoke`, `waitForComplete`, and `referenceDigest` as local contrac
 
 - [ ] **Step 2: Run the strategy contract and verify red state**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/strategies/contract.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/strategies/contract.test.ts`
 
 Expected: FAIL because the strategy factory and query contract do not exist.
 
@@ -451,7 +451,7 @@ Every candidate returns `operational` and `complete` only when the readiness def
 
 - [ ] **Step 5: Prove shared correctness**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/strategies/contract.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/strategies/contract.test.ts`
 
 Expected: PASS for all four strategies and all five probes.
 
@@ -499,7 +499,7 @@ it('rejects events belonging to another run', () => {
 
 - [ ] **Step 2: Run the browser protocol test and verify red state**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/browser/entry.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/browser/entry.test.ts`
 
 Expected: FAIL because the browser protocol is absent.
 
@@ -519,9 +519,17 @@ Collect:
 
 The HTML contains no product UI. It imports `entry.ts` and exposes a readiness promise so the runner never races module initialization.
 
+Extend the package's `typecheck` script at this point:
+
+```json
+{
+  "typecheck": "tsc -p tsconfig.json --noEmit --pretty false && tsc -p tsconfig.worker.json --noEmit --pretty false"
+}
+```
+
 - [ ] **Step 4: Run tests, typechecks, and bundle build**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- src/browser/entry.test.ts`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/browser/entry.test.ts`
 
 Expected: PASS.
 
@@ -578,7 +586,7 @@ Define `strategyAggregate` as a local test fixture builder that starts from one 
 
 - [ ] **Step 2: Run report tests and verify red state**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- scripts/report.test.mjs`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run scripts/report.test.mjs`
 
 Expected: FAIL because `report.mjs` does not exist.
 
@@ -610,7 +618,7 @@ For qualified strategies, calculate per-browser median and nearest-rank p95. `de
 
 - [ ] **Step 5: Run report tests and CLI argument tests**
 
-Run: `pnpm --filter @slotted/nexora-benchmark test -- scripts/report.test.mjs`
+Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run scripts/report.test.mjs`
 
 Expected: PASS.
 

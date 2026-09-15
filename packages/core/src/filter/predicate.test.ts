@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { emptyFilter, setFilter } from './descriptor';
-import type { DateFilter, NumberFilter, TextFilter } from './descriptor';
+import type {
+  DateFilter,
+  DateTimeFilter,
+  NumberFilter,
+  TextFilter,
+  TimeFilter,
+} from './descriptor';
 import { createFilterPredicate, createRowPredicate, matchesFilter } from './predicate';
 
 const text = (
@@ -18,6 +24,16 @@ const date = (
   conditions: DateFilter['conditions'],
   join: DateFilter['join'] = 'and',
 ): DateFilter => ({ kind: 'date', join, conditions });
+
+const time = (
+  conditions: TimeFilter['conditions'],
+  join: TimeFilter['join'] = 'and',
+): TimeFilter => ({ kind: 'time', join, conditions });
+
+const dateTime = (
+  conditions: DateTimeFilter['conditions'],
+  join: DateTimeFilter['join'] = 'and',
+): DateTimeFilter => ({ kind: 'datetime', join, conditions });
 
 describe('the empty condition', () => {
   it('matches everything, because there is nothing to match against', () => {
@@ -125,6 +141,128 @@ describe('date', () => {
   it('calls an unreadable date blank rather than throwing', () => {
     expect(matchesFilter(date([{ operator: 'empty' }]), 'not a date')).toBe(true);
     expect(matchesFilter(date([{ operator: 'is', value: '2026-09-10' }]), 'not a date')).toBe(
+      false,
+    );
+  });
+});
+
+describe('time', () => {
+  it('compares a time of day, whatever the row value is made of', () => {
+    const filter = time([{ operator: 'is', value: '09:14' }]);
+    expect(matchesFilter(filter, '09:14')).toBe(true);
+    expect(matchesFilter(filter, '09:14:30')).toBe(true);
+    expect(matchesFilter(filter, { hour: 9, minute: 14, second: 0 })).toBe(true);
+    expect(
+      matchesFilter(filter, {
+        date: { year: 2026, month: 9, day: 14 },
+        time: { hour: 9, minute: 14, second: 5 },
+      }),
+    ).toBe(true);
+    expect(matchesFilter(filter, '2026-09-14T09:14:59')).toBe(true);
+    expect(matchesFilter(filter, new Date(2026, 8, 14, 9, 14, 30))).toBe(true);
+    expect(matchesFilter(filter, '09:15')).toBe(false);
+  });
+
+  it('compares at the precision the operand was written at, for every operator', () => {
+    expect(matchesFilter(time([{ operator: 'is', value: '09' }]), '09:59:59')).toBe(true);
+    expect(matchesFilter(time([{ operator: 'is', value: '09:14:30' }]), '09:14:31')).toBe(false);
+    expect(matchesFilter(time([{ operator: 'after', value: '09:14' }]), '09:14:30')).toBe(false);
+    expect(matchesFilter(time([{ operator: 'after', value: '09:14' }]), '09:15:00')).toBe(true);
+    expect(matchesFilter(time([{ operator: 'before', value: '09:14' }]), '09:13:59')).toBe(true);
+    expect(matchesFilter(time([{ operator: 'before', value: '09:14' }]), '09:14:00')).toBe(false);
+    const range = time([{ operator: 'between', value: '09:00', end: '09:14' }]);
+    expect(matchesFilter(range, '09:14:59')).toBe(true);
+    expect(matchesFilter(range, '09:15:00')).toBe(false);
+    expect(matchesFilter(range, '08:59:59')).toBe(false);
+  });
+
+  it('reads a range whose start is later than its end as a window across midnight', () => {
+    const night = time([{ operator: 'between', value: '22:00', end: '02:00' }]);
+    expect(
+      ['23:00', '01:59', '22:00', '02:00:59'].map((value) => matchesFilter(night, value)),
+    ).toEqual([true, true, true, true]);
+    expect(['02:01', '12:00', '21:59'].map((value) => matchesFilter(night, value))).toEqual([
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it('reads a Date as wall-clock time in the stated zone, never as an instant', () => {
+    const filter = time([{ operator: 'is', value: '09:14' }]);
+    const instant = new Date(Date.UTC(2026, 8, 14, 12, 14));
+    expect(matchesFilter(filter, instant, { timeZone: 'America/Sao_Paulo' })).toBe(true);
+    expect(matchesFilter(filter, instant, { timeZone: 'UTC' })).toBe(false);
+    const midnight = new Date(Date.UTC(2026, 8, 14, 0, 0));
+    expect(
+      matchesFilter(time([{ operator: 'is', value: '00:00' }]), midnight, { timeZone: 'UTC' }),
+    ).toBe(true);
+  });
+
+  it('calls an unreadable time blank rather than throwing', () => {
+    expect(matchesFilter(time([{ operator: 'empty' }]), 'noon')).toBe(true);
+    expect(matchesFilter(time([{ operator: 'empty' }]), null)).toBe(true);
+    expect(matchesFilter(time([{ operator: 'notEmpty' }]), '09:14')).toBe(true);
+    expect(matchesFilter(time([{ operator: 'is', value: 'noon' }]), '09:14')).toBe(false);
+  });
+});
+
+describe('datetime', () => {
+  it('compares a date and a time, whatever the row value is made of', () => {
+    const filter = dateTime([{ operator: 'is', value: '2026-09-14T09:14' }]);
+    expect(matchesFilter(filter, '2026-09-14T09:14')).toBe(true);
+    expect(matchesFilter(filter, '2026-09-14T09:14:30')).toBe(true);
+    expect(
+      matchesFilter(filter, {
+        date: { year: 2026, month: 9, day: 14 },
+        time: { hour: 9, minute: 14, second: 5 },
+      }),
+    ).toBe(true);
+    expect(matchesFilter(filter, new Date(2026, 8, 14, 9, 14, 30))).toBe(true);
+    expect(matchesFilter(filter, '2026-09-14T09:15')).toBe(false);
+    expect(matchesFilter(filter, '2026-09-15T09:14')).toBe(false);
+  });
+
+  it('compares at the precision the operand was written at, a day included', () => {
+    expect(
+      matchesFilter(dateTime([{ operator: 'is', value: '2026-09-14' }]), '2026-09-14T23:59:59'),
+    ).toBe(true);
+    expect(
+      matchesFilter(dateTime([{ operator: 'is', value: '2026-09-14' }]), {
+        year: 2026,
+        month: 9,
+        day: 14,
+      }),
+    ).toBe(true);
+    expect(
+      matchesFilter(dateTime([{ operator: 'after', value: '2026-09-14T09' }]), '2026-09-14T09:59'),
+    ).toBe(false);
+    expect(
+      matchesFilter(dateTime([{ operator: 'after', value: '2026-09-14T09' }]), '2026-09-14T10:00'),
+    ).toBe(true);
+    const range = dateTime([{ operator: 'between', value: '2026-09-14', end: '2026-09-14T12:00' }]);
+    expect(matchesFilter(range, '2026-09-14T00:00:00')).toBe(true);
+    expect(matchesFilter(range, '2026-09-14T12:00:59')).toBe(true);
+    expect(matchesFilter(range, '2026-09-14T12:01:00')).toBe(false);
+  });
+
+  it('orders a range a reader typed backwards, because a date-time pair has an order', () => {
+    const range = dateTime([{ operator: 'between', value: '2026-09-20', end: '2026-09-10' }]);
+    expect(matchesFilter(range, '2026-09-15T08:00')).toBe(true);
+    expect(matchesFilter(range, '2026-09-25T08:00')).toBe(false);
+  });
+
+  it('reads a Date as wall-clock in the stated zone, never as an instant', () => {
+    const filter = dateTime([{ operator: 'is', value: '2026-09-14T00:30' }]);
+    const instant = new Date(Date.UTC(2026, 8, 14, 3, 30));
+    expect(matchesFilter(filter, instant, { timeZone: 'America/Sao_Paulo' })).toBe(true);
+    expect(matchesFilter(filter, instant, { timeZone: 'UTC' })).toBe(false);
+  });
+
+  it('calls an unreadable date-time blank rather than throwing', () => {
+    expect(matchesFilter(dateTime([{ operator: 'empty' }]), 'yesterday')).toBe(true);
+    expect(matchesFilter(dateTime([{ operator: 'notEmpty' }]), '2026-09-14')).toBe(true);
+    expect(matchesFilter(dateTime([{ operator: 'is', value: 'yesterday' }]), '2026-09-14')).toBe(
       false,
     );
   });

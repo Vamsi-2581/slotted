@@ -12,7 +12,7 @@
  * Nothing here touches the DOM or a framework.
  */
 
-export type FilterKind = 'text' | 'number' | 'date' | 'boolean' | 'set';
+export type FilterKind = 'text' | 'number' | 'date' | 'time' | 'datetime' | 'boolean' | 'set';
 
 export type TextOperator =
   | 'contains'
@@ -42,6 +42,15 @@ export type NumberOperator =
  */
 export type DateOperator = 'is' | 'isNot' | 'before' | 'after' | 'between' | 'empty' | 'notEmpty';
 
+/**
+ * A time and a date-time say the sentence a day says — "starts at 09:00",
+ * "created before 14 September at 10:00" — so they take the day's operators
+ * rather than a vocabulary of their own. The two names exist so a consumer can
+ * write the narrow type without learning that the three are one.
+ */
+export type TimeOperator = DateOperator;
+export type DateTimeOperator = DateOperator;
+
 export type BooleanOperator = 'is' | 'empty' | 'notEmpty';
 
 export type SetOperator = 'anyOf' | 'noneOf';
@@ -54,11 +63,21 @@ export interface FilterOperatorsByKind {
   text: readonly TextOperator[];
   number: readonly NumberOperator[];
   date: readonly DateOperator[];
+  time: readonly TimeOperator[];
+  datetime: readonly DateTimeOperator[];
   boolean: readonly BooleanOperator[];
   set: readonly SetOperator[];
 }
 
-export const FILTER_KINDS = ['text', 'number', 'date', 'boolean', 'set'] as const;
+export const FILTER_KINDS = [
+  'text',
+  'number',
+  'date',
+  'time',
+  'datetime',
+  'boolean',
+  'set',
+] as const;
 
 const OPERATORS: FilterOperatorsByKind = {
   text: Object.freeze([
@@ -83,6 +102,16 @@ const OPERATORS: FilterOperatorsByKind = {
     'notEmpty',
   ] as const),
   date: Object.freeze(['is', 'isNot', 'before', 'after', 'between', 'empty', 'notEmpty'] as const),
+  time: Object.freeze(['is', 'isNot', 'before', 'after', 'between', 'empty', 'notEmpty'] as const),
+  datetime: Object.freeze([
+    'is',
+    'isNot',
+    'before',
+    'after',
+    'between',
+    'empty',
+    'notEmpty',
+  ] as const),
   boolean: Object.freeze(['is', 'empty', 'notEmpty'] as const),
   set: Object.freeze(['anyOf', 'noneOf'] as const),
 };
@@ -95,6 +124,8 @@ const DEFAULTS = {
   text: 'contains',
   number: 'equals',
   date: 'is',
+  time: 'is',
+  datetime: 'is',
   boolean: 'is',
   set: 'anyOf',
 } as const;

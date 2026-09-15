@@ -14,6 +14,7 @@
  */
 
 import {
+  isISOOperand,
   normalizeFilter,
   type FilterCondition,
   type FilterDescriptor,
@@ -75,6 +76,9 @@ function readOperand(kind: FilterKind, text: string): unknown {
     }
     case 'date':
       return ISO_DAY.test(value) ? value : null;
+    case 'time':
+    case 'datetime':
+      return isISOOperand(kind, value) ? value : null;
     case 'boolean':
       return value === 'true' ? true : value === 'false' ? false : null;
     default:

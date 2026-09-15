@@ -109,12 +109,14 @@ test('ships the filter itself, and still leaves the query to the consumer', () =
  * word invented per family would be three families disagreeing about one
  * object — the argument that put `sort` in the shared schema.
  */
-test('names five kinds, their operators and the component each one ships as', () => {
+test('names seven kinds, their operators and the component each one ships as', () => {
   assert.equal(contract.filter.engine, '@slotted/core/filter');
   assert.deepEqual(Object.keys(contract.filter.kinds), [
     'text',
     'number',
     'date',
+    'time',
+    'datetime',
     'boolean',
     'set',
   ]);
@@ -142,6 +144,10 @@ test('names five kinds, their operators and the component each one ships as', ()
       'notEmpty',
     ],
     date: ['is', 'isNot', 'before', 'after', 'between', 'empty', 'notEmpty'],
+    /* A time and a date-time say the same sentence a day says, so they take
+       the day's operators rather than a vocabulary of their own. */
+    time: ['is', 'isNot', 'before', 'after', 'between', 'empty', 'notEmpty'],
+    datetime: ['is', 'isNot', 'before', 'after', 'between', 'empty', 'notEmpty'],
     boolean: ['is', 'empty', 'notEmpty'],
     set: ['anyOf', 'noneOf'],
   };
@@ -169,6 +175,33 @@ test('states the two conditions, the join between them and what the shape says',
   assert.deepEqual(contract.filter.operands, { none: ['empty', 'notEmpty'], two: ['between'] });
   assert.match(contract.filter.announces, /operand/);
   assert.match(contract.filter.emptyCondition, /matches every/);
+});
+
+/**
+ * Three controls the filter could not draw on 10 September, each supplied by a
+ * family that did not exist then. The descriptor is unchanged by all three:
+ * what changes is the control inside `filter-operand`, which is the part the
+ * family already lets a consumer replace. The two rules that reach past this
+ * family — a comparison at the operand's own precision, and a time window that
+ * wraps at midnight — are stated here because `filter-bar` and `data-grid`
+ * evaluate the same descriptor.
+ */
+test('draws the operands the date chain and tags-input supply, and states the two rules that bind other families', () => {
+  assert.match(contract.filter.kinds.time.operand, /time-picker/);
+  assert.match(contract.filter.kinds.datetime.operand, /datetime-picker/);
+  assert.match(contract.filter.kinds.date.operand, /date-range-picker/);
+  assert.match(contract.filter.kinds.set.operand, /tags-input/);
+  assert.deepEqual(contract.filter.kinds.set.operands, ['list', 'tags']);
+  assert.deepEqual(contract.filter.attributes, ['data-range', 'data-operand']);
+  assert.match(contract.filter.precision, /operand/);
+  assert.match(contract.filter.wrap, /midnight/);
+  assert.match(
+    contract.filter.composition,
+    /time-picker.*datetime-picker.*date-range-picker.*tags-input/,
+  );
+  for (const scenario of ['filter-time', 'filter-datetime', 'filter-range', 'filter-tags']) {
+    assert.ok(contract.scenarios.table.includes(scenario), `${scenario} is not a scenario`);
+  }
 });
 
 /**

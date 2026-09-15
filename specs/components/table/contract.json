@@ -148,9 +148,23 @@
       "date": {
         "operators": ["is", "isNot", "before", "after", "between", "empty", "notEmpty"],
         "default": "is",
-        "operand": "date-picker — the segmented field and the calendar behind it, because a reader who has to type a date they could have pointed at is what a date filter exists to spare them. The descriptor holds the ISO day it produces.",
+        "operand": "date-picker — the segmented field and the calendar behind it, because a reader who has to type a date they could have pointed at is what a date filter exists to spare them. The descriptor holds the ISO day it produces. between draws one date-range-picker rather than two pickers: it says the run's length while it is drawn, takes the ends in either order, and takes the application's presets — this week, this month — which write the same two ISO days.",
         "react": "TableDateFilter",
         "angular": "slTableDateFilter"
+      },
+      "time": {
+        "operators": ["is", "isNot", "before", "after", "between", "empty", "notEmpty"],
+        "default": "is",
+        "operand": "time-picker — the segmented field and the list behind it, at the column's own granularity, hour cycle and step. The descriptor holds ISO time text at the precision the picker writes: HH:MM at a minute, HH:MM:SS at a second.",
+        "react": "TableTimeFilter",
+        "angular": "slTableTimeFilter"
+      },
+      "datetime": {
+        "operators": ["is", "isNot", "before", "after", "between", "empty", "notEmpty"],
+        "default": "is",
+        "operand": "datetime-picker — the seven-segment field and the two surfaces behind it. The descriptor holds ISO date-time text at the precision the picker writes, and a condition whose operand has one half missing is inactive until both halves exist.",
+        "react": "TableDateTimeFilter",
+        "angular": "slTableDateTimeFilter"
       },
       "boolean": {
         "operators": ["is", "empty", "notEmpty"],
@@ -162,7 +176,8 @@
       "set": {
         "operators": ["anyOf", "noneOf"],
         "default": "anyOf",
-        "operand": "the search, the covering checkbox and the values with their counts",
+        "operand": "list: the search, the covering checkbox and the values with their counts. tags: tags-input holding the chosen values as chips, for a list too long to tick — with options, a typed value outside them is refused and the options are a datalist of suggestions; without options any value is admitted. The descriptor is the same list either way, so a saved view written by one operand is read by the other.",
+        "operands": ["list", "tags"],
         "conditions": 1,
         "conditionsReason": "Two set conditions say nothing new: anyOf A and anyOf B is anyOf (A intersect B), and or is the union. Every pair collapses to one list, which is why AG Grid's own set filter has no conditions either.",
         "react": "TableSetFilter",
@@ -180,6 +195,10 @@
       "none": ["empty", "notEmpty"],
       "two": ["between"]
     },
+    "attributes": ["data-range", "data-operand"],
+    "attributesReason": "Both sit on filter-operand beside data-kind. data-range says one control holds both operands of a between, so the two-column operand grid collapses to one; data-operand says which of a set's two operands is drawn. Neither is a state a consumer moves: each is the shape the panel took.",
+    "precision": "A time or date-time operand is compared at its own precision: the row value is reduced to the operand's unit before every operator, so is 09:14 matches every second of that minute and after 09:14 starts at 09:15. It is the rule the date kind already applies to a timestamp, extended to every unit the ISO text can name, and it binds filter-bar and data-grid because they evaluate the same descriptor. MUI X zeroes the seconds on both sides and PrimeReact compares a day for is and a millisecond for before; here the reader decides the unit by what they write.",
+    "wrap": "A time between whose start is later than its end is a window that crosses midnight: between 22:00 and 02:00 matches 23:00 and 01:00. The number, date and datetime kinds order the pair, because 100 then 10 has one sensible reading; 22:00 then 02:00 is the overnight shift. The summary writes the pair in the order given, so the trigger's name shows a reader what was applied.",
     "emptyCondition": "A condition missing an operand its operator needs is inactive, an inactive condition is dropped before the join, and a filter with no active condition matches every value. The third clause is the one that has to be written down: under or, an always-true condition would make the whole filter match everything, so an unfinished condition is not a condition at all.",
     "value": "the descriptor the engine evaluates: { kind, join, conditions }, where a condition is { operator, value, end }. Every field is JSON, so a query string carries it and a server reads it.",
     "break": {
@@ -197,7 +216,7 @@
     "summary": "describeFilter in the engine composes the operator names and operands the family gives it into one sentence — 'contains ana or starts with b'. Section 12 asks a filter builder for a readable text expression, and writing it in the engine means filter-bar's chips and this family's announcement say the same sentence.",
     "serialization": "serializeFilter and parseFilter round-trip a filter through a query string, and toFilterParams and fromFilterParams do it for a whole listing. Parsing is total: an unknown kind, an unknown operator or a malformed operand gives null, so a bookmark written by an older version of an application degrades to no filter rather than to an error on first paint. None of the six surveyed implementations ships one.",
     "empty": "a word when the search matches nothing, so the panel is never a blank box.",
-    "composition": "popover holds the surface, select holds the operator chooser, radio-group holds the join, text-field, number-field, date-picker and checkbox hold the operands, and button holds the two actions. This family holds the place, the draft, the announcements and the wiring; the engine holds the vocabulary.",
+    "composition": "popover holds the surface, select holds the operator chooser, radio-group holds the join, text-field, number-field, date-picker, time-picker, datetime-picker, date-range-picker, tags-input and checkbox hold the operands, and button holds the two actions. This family holds the place, the draft, the announcements and the wiring; the engine holds the vocabulary.",
     "replaceable": "the operand area, and only it. A column whose values need a control the library does not have — a currency, a duration, a tag picker — takes a render prop in React and a projected template in Angular, and keeps the draft, the operator chooser, the join, the actions and the announcements. It is why Ant has filterDropdown and AG Grid a custom filter component.",
     "reason": "Four of the six surveyed implementations ship an operator per column type, two conditions and a join: AG Grid, MUI X, PrimeReact and Excel. The version of this family that shipped a checkbox list and nothing else was a set filter calling itself a filter. The vocabulary is the engine's rather than this family's because data-grid and filter-bar hold the same descriptor in wave 8."
   },
@@ -661,6 +680,10 @@
       "filter",
       "filter-types",
       "filter-conditions",
+      "filter-time",
+      "filter-datetime",
+      "filter-range",
+      "filter-tags",
       "selection",
       "expansion",
       "sticky",

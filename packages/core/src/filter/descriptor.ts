@@ -18,11 +18,13 @@ import {
   operandCount,
   type BooleanOperator,
   type DateOperator,
+  type DateTimeOperator,
   type FilterKind,
   type FilterOperator,
   type NumberOperator,
   type SetOperator,
   type TextOperator,
+  type TimeOperator,
 } from './operators';
 
 export type FilterJoin = 'and' | 'or';
@@ -49,17 +51,30 @@ export type NumberFilter = FilterShape<'number', NumberOperator, number>;
  * the serialised form are then the same text.
  */
 export type DateFilter = FilterShape<'date', DateOperator, string>;
+/**
+ * ISO text at the precision the reader wrote: `HH`, `HH:MM` or `HH:MM:SS` for
+ * a time, and `YYYY-MM-DD` followed by any of those after a `T` for a
+ * date-time. Each accepted form is a prefix of the full one cut at a field, and
+ * the predicate compares the row value cut to the operand's own length — so
+ * `is 09:14` matches every second of that minute, the way `is 2026-09-14`
+ * matches every hour of that day. `isISOOperand` is the grammar.
+ */
+export type TimeFilter = FilterShape<'time', TimeOperator, string>;
+export type DateTimeFilter = FilterShape<'datetime', DateTimeOperator, string>;
 export type BooleanFilter = FilterShape<'boolean', BooleanOperator, boolean>;
 /** The chosen values are one operand, not many conditions — see `setFilter`. */
 export type SetFilter = FilterShape<'set', SetOperator, readonly string[]>;
 
-export type FilterDescriptor = TextFilter | NumberFilter | DateFilter | BooleanFilter | SetFilter;
+export type FilterDescriptor =
+  TextFilter | NumberFilter | DateFilter | TimeFilter | DateTimeFilter | BooleanFilter | SetFilter;
 
 /** The descriptor each kind is, so a generic caller keeps the narrow type. */
 export interface FilterByKind {
   text: TextFilter;
   number: NumberFilter;
   date: DateFilter;
+  time: TimeFilter;
+  datetime: DateTimeFilter;
   boolean: BooleanFilter;
   set: SetFilter;
 }
@@ -69,8 +84,23 @@ export interface FilterValueByKind {
   text: string;
   number: number;
   date: string;
+  time: string;
+  datetime: string;
   boolean: boolean;
   set: readonly string[];
+}
+
+const TIME_OPERAND = /^\d{2}(?::\d{2}(?::\d{2})?)?$/;
+const DATE_TIME_OPERAND = /^\d{4}-\d{2}-\d{2}(?:T\d{2}(?::\d{2}(?::\d{2})?)?)?$/;
+
+/**
+ * Whether the text is a time or a date-time operand: a prefix of the canonical
+ * ISO form cut at a field boundary. A fraction, an offset, a `Z` or a space
+ * where the `T` goes is refused, because each would make the text something
+ * other than the wall-clock value this library holds.
+ */
+export function isISOOperand(kind: 'time' | 'datetime', text: string): boolean {
+  return (kind === 'time' ? TIME_OPERAND : DATE_TIME_OPERAND).test(text);
 }
 
 /**

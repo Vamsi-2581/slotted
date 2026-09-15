@@ -43,6 +43,12 @@ describe('operatorsFor', () => {
     expect(operatorsFor('boolean')).toEqual(['is', 'empty', 'notEmpty']);
   });
 
+  it('gives a time and a date-time the operators of a day, because the sentence is the same', () => {
+    expect(operatorsFor('time')).toEqual(operatorsFor('date'));
+    expect(operatorsFor('datetime')).toEqual(operatorsFor('date'));
+    expect(FILTER_KINDS).toEqual(['text', 'number', 'date', 'time', 'datetime', 'boolean', 'set']);
+  });
+
   it('gives a set the two directions and no more', () => {
     expect(operatorsFor('set')).toEqual(['anyOf', 'noneOf']);
   });
@@ -58,6 +64,8 @@ describe('defaultOperator', () => {
     expect(defaultOperator('text')).toBe('contains');
     expect(defaultOperator('number')).toBe('equals');
     expect(defaultOperator('date')).toBe('is');
+    expect(defaultOperator('time')).toBe('is');
+    expect(defaultOperator('datetime')).toBe('is');
     expect(defaultOperator('boolean')).toBe('is');
     expect(defaultOperator('set')).toBe('anyOf');
   });

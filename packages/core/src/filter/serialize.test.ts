@@ -81,6 +81,20 @@ describe('parseFilter', () => {
         ],
       },
       { kind: 'date', join: 'and', conditions: [{ operator: 'before', value: '2026-09-10' }] },
+      /* The colon the format uses as its operand separator is also the one ISO
+         time is written with, and it has to survive both ways. */
+      {
+        kind: 'time',
+        join: 'and',
+        conditions: [{ operator: 'between', value: '22:00', end: '02:00' }],
+      },
+      { kind: 'time', join: 'or', conditions: [{ operator: 'is', value: '09' }] },
+      {
+        kind: 'datetime',
+        join: 'and',
+        conditions: [{ operator: 'after', value: '2026-09-14T10:30:15' }],
+      },
+      { kind: 'datetime', join: 'and', conditions: [{ operator: 'is', value: '2026-09-14' }] },
       { kind: 'boolean', join: 'and', conditions: [{ operator: 'is', value: false }] },
       setFilter(['paid', 'a,b'], 'noneOf'),
     ];
@@ -98,11 +112,35 @@ describe('parseFilter', () => {
       'text~and~contains',
       'number~and~equals:ten',
       'date~and~is:10/09/2026',
+      'time~and~is:9%3A14',
+      'time~and~is:09%3A14%3A30.500',
+      'time~and~before:2026-09-14T09%3A14',
+      'datetime~and~is:2026-09-14T9',
+      'datetime~and~is:2026-09-14 09%3A14',
+      'datetime~and~is:2026-09-14T09%3A14%3A30Z',
       'boolean~and~is:maybe',
       'number~and~between:1',
       'text~and~contains:a~contains:b~contains:c',
     ]) {
       expect(parseFilter(text)).toBeNull();
+    }
+  });
+
+  it('reads every prefix of the canonical time and date-time text cut at a field', () => {
+    for (const value of ['09', '09:14', '09:14:30']) {
+      expect(parseFilter(`time~and~is:${encodeURIComponent(value)}`)?.conditions[0]?.value).toBe(
+        value,
+      );
+    }
+    for (const value of [
+      '2026-09-14',
+      '2026-09-14T09',
+      '2026-09-14T09:14',
+      '2026-09-14T09:14:30',
+    ]) {
+      expect(
+        parseFilter(`datetime~and~is:${encodeURIComponent(value)}`)?.conditions[0]?.value,
+      ).toBe(value);
     }
   });
 

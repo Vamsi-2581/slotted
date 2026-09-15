@@ -335,6 +335,54 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'filter-time',
+    title: 'A time column, and a window that crosses midnight',
+    note: 'slTableTimeFilter draws the time picker and holds ISO text at the column granularity — 22:00 at a minute, 22:00:00 at a second — which is the precision the engine compares at. A between whose start is later than its end is the overnight window, not an empty set: 22:00 to 02:00 keeps 23:30 and 01:15.',
+    snippet: defineSnippet({
+      id: 'table-angular-filter-time',
+      language: 'angular',
+      label: 'A time filter, and the rows it keeps',
+      source:
+        '<span slTableTimeFilter columnLabel="cut-off" granularity="minute" [(value)]="cutoff"></span>',
+    }),
+  },
+  {
+    id: 'filter-datetime',
+    title: 'A date-time column, at the precision you wrote',
+    note: 'slTableDateTimeFilter draws the date-time picker and holds 2026-09-14T09:00 as text. Compared at the operand own precision, so after 2026-09-14T09 starts at ten o clock and is 2026-09-14 matches the whole day. A condition with one half missing is inactive until both halves exist, and Apply reports nothing for it.',
+    snippet: defineSnippet({
+      id: 'table-angular-filter-datetime',
+      language: 'angular',
+      label: 'A date-time filter over a wall-clock column',
+      source:
+        '<span\n  slTableDateTimeFilter\n  columnLabel="scheduled"\n  timeZone="Europe/Lisbon"\n  [(value)]="scheduled"\n></span>',
+    }),
+  },
+  {
+    id: 'filter-range',
+    title: 'Between two dates, as one range picker',
+    note: 'The between of a date column is one date-range-picker rather than two pickers: it says the run length while it is drawn, takes the ends in either order and carries your presets as a template of slDateRangePickerPreset buttons. The descriptor is unchanged — between, an ISO day and another — so a saved view written with two pickers opens in the range picker.',
+    snippet: defineSnippet({
+      id: 'table-angular-filter-range',
+      language: 'angular',
+      label: 'A date filter with the application own periods',
+      source:
+        '<ng-template #presets>\n  <button slDateRangePickerPreset [range]="september">September</button>\n  <button slDateRangePickerPreset [range]="quarter">Q4</button>\n</ng-template>\n<span slTableDateFilter columnLabel="due" [presets]="presets" [(value)]="dueAt"></span>',
+    }),
+  },
+  {
+    id: 'filter-tags',
+    title: 'A set typed as chips',
+    note: 'operand of tags draws tags-input where the checkbox list stood, for a list too long to tick. With options, they are a native datalist of suggestions and a typed value outside them is refused; without options any value is admitted. The chips hold the same readonly string[] the list held, so the operator stays anyOf or noneOf and a saved view is read by either operand.',
+    snippet: defineSnippet({
+      id: 'table-angular-filter-tags',
+      language: 'angular',
+      label: 'Chips held to the column values, and chips free of them',
+      source:
+        '<span\n  slTableSetFilter\n  columnLabel="client"\n  operand="tags"\n  [options]="clients"\n  [(value)]="client"\n></span>\n<span slTableSetFilter columnLabel="invoice" operand="tags" [(value)]="invoice"></span>',
+    }),
+  },
+  {
     id: 'selection',
     title: 'Choosing records, and what all means',
     note: 'Hold Shift and press a second checkbox to take everything between. The header checkbox covers the rows in the DOM and says how many in its own name — a selection over a whole result set is a decision only your query can make.',
@@ -616,13 +664,34 @@ export const ANGULAR_TABLE_DOCS = {
       [
         'options',
         'readonly TableFilterOption[]',
-        '—',
+        '[]',
         'slTableSetFilter',
-        'The values the column can be filtered to, each with an optional count of its own',
+        'The values the column can be filtered to, each with an optional count of its own. With operand tags they are a datalist and the set a typed value must belong to; without them any value is admitted.',
+      ],
+      [
+        'operand',
+        "'list' | 'tags'",
+        'list',
+        'slTableSetFilter',
+        'How the values are chosen: the search, the covering checkbox and the list, or sl-tags-input holding the chosen values as chips. The descriptor is the same list either way.',
+      ],
+      [
+        'presets',
+        'TemplateRef',
+        '—',
+        'slTableDateFilter',
+        'A template of slDateRangePickerPreset buttons offered inside the range picker between draws. The descriptor still receives two ISO days.',
+      ],
+      [
+        'granularity',
+        "'hour' | 'minute' | 'second'",
+        'minute',
+        'slTableTimeFilter, slTableDateTimeFilter',
+        'The last unit the picker writes, and the precision the engine compares at: a minute-precision operand matches every second of its minute.',
       ],
       [
         'value',
-        'TextFilter | NumberFilter | DateFilter | BooleanFilter | SetFilter | null',
+        'TextFilter | NumberFilter | DateFilter | TimeFilter | DateTimeFilter | BooleanFilter | SetFilter | null',
         'null',
         'slTable*Filter',
         'The descriptor the column is filtered by, typed as its own kind. Two-way through [(value)], and valueChangeRequest carries the reason; both fire once, on Apply.',

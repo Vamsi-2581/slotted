@@ -1,5 +1,13 @@
+import { plainDate } from '@slotted/core/date';
 import { createFilterPredicate, createRowPredicate, setFilter } from '@slotted/core/filter';
-import type { FilterDescriptor, NumberFilter, SetFilter } from '@slotted/core/filter';
+import type {
+  DateFilter,
+  DateTimeFilter,
+  FilterDescriptor,
+  NumberFilter,
+  SetFilter,
+  TimeFilter,
+} from '@slotted/core/filter';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
@@ -7,6 +15,7 @@ import { useMemo, useState } from 'react';
 
 import { Avatar } from '../avatar';
 import { IconButton } from '../button';
+import { DateRangePickerPreset } from '../date-range-picker';
 import { Link } from '../link';
 import { NumberField } from '../number-field';
 import { ProgressBar } from '../progress-indicator';
@@ -21,9 +30,11 @@ import { Table } from './table';
 import {
   TableBooleanFilter,
   TableDateFilter,
+  TableDateTimeFilter,
   TableNumberFilter,
   TableSetFilter,
   TableTextFilter,
+  TableTimeFilter,
 } from './table-filter';
 import { TableContent } from './table-content';
 import { TableDefaultsProvider } from './table-defaults';
@@ -64,6 +75,10 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     filter: Filter,
     'filter-types': FilterTypes,
     'filter-conditions': FilterConditions,
+    'filter-time': FilterTime,
+    'filter-datetime': FilterDateTime,
+    'filter-range': FilterRange,
+    'filter-tags': FilterTags,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -843,6 +858,298 @@ export const FilterConditions: Story = {
         note="conditions={1} is AG Grid's maxNumConditions, and it removes the join and the reveal together. Past two conditions a rule set needs an expression tree and an editor for it, which is Filter Bar in wave 8."
       >
         <SetFilterDemo columnLabel="status" heading="Status" options={STATUSES} />
+      </Scene>
+    </div>
+  ),
+};
+
+/**
+ * The dispatch desk: every invoice has a pickup cut-off and a scheduled slot,
+ * which is what a time column and a date-time column are for. Four of the
+ * cut-offs fall in the night, so the overnight window has rows to keep.
+ */
+const CUTOFFS = ['08:00', '12:30', '17:45', '22:00', '23:30', '01:15', '06:00', '15:00'];
+const DELIVERIES = INVOICES.map((invoice, index) => ({
+  ...invoice,
+  cutoff: CUTOFFS[index % CUTOFFS.length] as string,
+  scheduledAt: `${invoice.dueAt}T${CUTOFFS[(index + 2) % CUTOFFS.length] as string}`,
+}));
+const SLOT = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+
+function TimeFilterDemo() {
+  const [cutoff, setCutoff] = useState<TimeFilter | null>({
+    conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],
+    join: 'and',
+    kind: 'time',
+  });
+  const keep = useMemo(() => createFilterPredicate(cutoff), [cutoff]);
+  const rows = DELIVERIES.filter((delivery) => keep(delivery.cutoff));
+
+  return (
+    <Table columns={3} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Cut-off
+              <TableColumnActions>
+                <TableTimeFilter columnLabel="cut-off" onValueChange={setCutoff} value={cutoff} />
+              </TableColumnActions>
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableEmpty>
+                <ResultState status="no-results" title="No pickups in this window" />
+              </TableEmpty>
+            </TableRow>
+          ) : (
+            rows.map((delivery) => (
+              <TableRow key={delivery.id} value={delivery.id}>
+                <TableRowHeader text="nowrap">{delivery.id}</TableRowHeader>
+                <TableCell text="nowrap">{delivery.client}</TableCell>
+                <TableCell text="nowrap">{delivery.cutoff}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+export const FilterTime: Story = {
+  parameters: scenario('filter-time'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="A time column, filtered to the overnight window"
+        note="The operand is the time picker, and the descriptor holds the ISO text it writes at the column's granularity — 22:00, not a PlainTime. A between whose start is later than its end wraps at midnight: 22:00 to 02:00 keeps 23:30 and 01:15 and drops 08:00. Compared at the operand's own precision, so is 09:00 matches every second of that minute."
+      >
+        <TimeFilterDemo />
+      </Scene>
+    </div>
+  ),
+};
+
+function DateTimeFilterDemo() {
+  const [scheduled, setScheduled] = useState<DateTimeFilter | null>({
+    conditions: [{ operator: 'after', value: '2026-09-14T09:00' }],
+    join: 'and',
+    kind: 'datetime',
+  });
+  const keep = useMemo(() => createFilterPredicate(scheduled), [scheduled]);
+  const rows = DELIVERIES.filter((delivery) => keep(delivery.scheduledAt));
+
+  return (
+    <Table columns={3} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Scheduled
+              <TableColumnActions>
+                <TableDateTimeFilter
+                  columnLabel="scheduled"
+                  onValueChange={setScheduled}
+                  value={scheduled}
+                />
+              </TableColumnActions>
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableEmpty>
+                <ResultState status="no-results" title="Nothing scheduled after that" />
+              </TableEmpty>
+            </TableRow>
+          ) : (
+            rows.map((delivery) => (
+              <TableRow key={delivery.id} value={delivery.id}>
+                <TableRowHeader text="nowrap">{delivery.id}</TableRowHeader>
+                <TableCell text="nowrap">{delivery.client}</TableCell>
+                <TableCell text="nowrap">{SLOT.format(new Date(delivery.scheduledAt))}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+export const FilterDateTime: Story = {
+  parameters: scenario('filter-datetime'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="A date-time column, filtered after a moment"
+        note="The operand is the date-time picker — seven segments and two surfaces — and the descriptor holds 2026-09-14T09:00 as text. A condition whose operand has one half missing is inactive until both halves exist, so Apply reports nothing for a date without a time. Between draws two pickers until datetime-range-picker lands."
+      >
+        <DateTimeFilterDemo />
+      </Scene>
+    </div>
+  ),
+};
+
+/** The range picker's presets: the application's own periods, in its own words. */
+const SEPTEMBER = { end: plainDate(2026, 9, 30), start: plainDate(2026, 9, 1) };
+const FOURTH_QUARTER = { end: plainDate(2026, 12, 31), start: plainDate(2026, 10, 1) };
+
+function RangeFilterDemo() {
+  const [due, setDue] = useState<DateFilter | null>({
+    conditions: [{ end: '2026-09-30', operator: 'between', value: '2026-09-01' }],
+    join: 'and',
+    kind: 'date',
+  });
+  const keep = useMemo(() => createFilterPredicate(due), [due]);
+  const rows = INVOICES.filter((invoice) => keep(invoice.dueAt));
+
+  return (
+    <Table columns={3} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader text="nowrap">Invoice</TableColumnHeader>
+            <TableColumnHeader text="nowrap">Client</TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Due
+              <TableColumnActions>
+                <TableDateFilter
+                  columnLabel="due"
+                  onValueChange={setDue}
+                  presets={
+                    <>
+                      <DateRangePickerPreset value={SEPTEMBER}>September</DateRangePickerPreset>
+                      <DateRangePickerPreset value={FOURTH_QUARTER}>Q4</DateRangePickerPreset>
+                    </>
+                  }
+                  value={due}
+                />
+              </TableColumnActions>
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableEmpty>
+                <ResultState status="no-results" title="Nothing due in this period" />
+              </TableEmpty>
+            </TableRow>
+          ) : (
+            rows.map((invoice) => (
+              <TableRow key={invoice.id} value={invoice.id}>
+                <TableRowHeader text="nowrap">{invoice.id}</TableRowHeader>
+                <TableCell text="nowrap">{invoice.client}</TableCell>
+                <TableCell text="nowrap">{invoice.due}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+export const FilterRange: Story = {
+  parameters: scenario('filter-range'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="Between two dates, drawn as one range picker"
+        note="Where two date pickers stood, one date-range-picker: it says the run's length while it is drawn, takes the ends in either order, and carries the application's presets — September and Q4 here. The descriptor is unchanged: between, an ISO day and another, whichever control produced them."
+      >
+        <RangeFilterDemo />
+      </Scene>
+    </div>
+  ),
+};
+
+function TagsFilterDemo({ constrained }: { constrained: boolean }) {
+  const [chosen, setChosen] = useState<SetFilter | null>(
+    constrained ? setFilter(['Northwind Trading', 'Bright Harbor Media']) : null,
+  );
+  const keep = useMemo(() => createFilterPredicate(chosen), [chosen]);
+  const rows = INVOICES.filter((invoice) => keep(constrained ? invoice.client : invoice.id));
+
+  return (
+    <Table columns={3} variant="framed">
+      <TableContent>
+        <TableHead>
+          <TableRow>
+            <TableColumnHeader text="nowrap">
+              Invoice
+              {constrained ? null : (
+                <TableColumnActions>
+                  <TableSetFilter columnLabel="invoice" onValueChange={setChosen} operand="tags" />
+                </TableColumnActions>
+              )}
+            </TableColumnHeader>
+            <TableColumnHeader text="nowrap">
+              Client
+              {constrained ? (
+                <TableColumnActions>
+                  <TableSetFilter
+                    columnLabel="client"
+                    onValueChange={setChosen}
+                    operand="tags"
+                    options={CLIENTS}
+                    value={chosen}
+                  />
+                </TableColumnActions>
+              ) : null}
+            </TableColumnHeader>
+            <TableColumnHeader numeric text="nowrap">
+              Amount
+            </TableColumnHeader>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow>
+              <TableEmpty>
+                <ResultState status="no-results" title="No invoices match" />
+              </TableEmpty>
+            </TableRow>
+          ) : (
+            rows.map((invoice) => (
+              <TableRow key={invoice.id} value={invoice.id}>
+                <TableRowHeader text="nowrap">{invoice.id}</TableRowHeader>
+                <TableCell text="nowrap">{invoice.client}</TableCell>
+                <TableCell numeric>{MONEY.format(invoice.amount)}</TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </TableContent>
+    </Table>
+  );
+}
+
+export const FilterTags: Story = {
+  parameters: scenario('filter-tags'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="A set typed as chips, held to the column's values"
+        note='operand="tags" draws tags-input where the checkbox list stood: for a list too long to tick. With options, the values are a native datalist of suggestions and a typed value outside them is refused and announced; the chips hold the same list the checkboxes held, so a saved view is read by either. Enter with text adds a chip; Enter on the empty field applies.'
+      >
+        <TagsFilterDemo constrained />
+      </Scene>
+      <Scene
+        label="Without options, any value is admitted"
+        note="A column of identifiers is often a list the page does not hold in full — an invoice number, an SKU, an e-mail. Without options the field takes whatever is typed or pasted, split on commas and line breaks, and the query decides what matches."
+      >
+        <TagsFilterDemo constrained={false} />
       </Scene>
     </div>
   ),

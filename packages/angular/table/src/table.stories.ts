@@ -1,14 +1,18 @@
+import { plainDate } from '@slotted/core/date';
 import { createFilterPredicate, createRowPredicate, setFilter } from '@slotted/core/filter';
 import type {
   BooleanFilter,
   DateFilter,
+  DateTimeFilter,
   NumberFilter,
   SetFilter,
   TextFilter,
+  TimeFilter,
 } from '@slotted/core/filter';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlIconButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
+import { SlDateRangePickerPreset } from '@slotted/angular/date-range-picker';
 import { SlLink } from '@slotted/angular/link';
 import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
 import {
@@ -45,9 +49,11 @@ import { SlTableContent } from './table-content';
 import {
   SlTableBooleanFilter,
   SlTableDateFilter,
+  SlTableDateTimeFilter,
   SlTableNumberFilter,
   SlTableSetFilter,
   SlTableTextFilter,
+  SlTableTimeFilter,
 } from './table-filter';
 import { SL_TABLE_PARTS } from './table-parts';
 import { ANGULAR_TABLE_DOCS, ANGULAR_TABLE_TOKENS } from './table.docs';
@@ -68,6 +74,10 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     filter: Filter,
     'filter-types': FilterTypes,
     'filter-conditions': FilterConditions,
+    'filter-time': FilterTime,
+    'filter-datetime': FilterDateTime,
+    'filter-range': FilterRange,
+    'filter-tags': FilterTags,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -93,11 +103,14 @@ const meta: Meta<TableStoryArgs> = {
         SlTable,
         SlTableContent,
         ...SL_TABLE_PARTS,
+        SlDateRangePickerPreset,
         SlTableBooleanFilter,
         SlTableDateFilter,
+        SlTableDateTimeFilter,
         SlTableNumberFilter,
         SlTableSetFilter,
         SlTableTextFilter,
+        SlTableTimeFilter,
         SlLink,
         SlPagination,
         SlPaginationItems,
@@ -853,6 +866,341 @@ export const FilterConditions: Story = {
     'One condition only',
     'conditions of 1 is AG Grid maxNumConditions, and it removes the join and the reveal together. Past two conditions a rule set needs an expression tree and an editor for it, which is Filter Bar in wave 8.',
     ONE_CONDITION,
+  )}
+</div>`,
+  }),
+};
+
+/**
+ * The dispatch desk: every invoice has a pickup cut-off and a scheduled slot,
+ * which is what a time column and a date-time column are for. Four of the
+ * cut-offs fall in the night, so the overnight window has rows to keep.
+ */
+const CUTOFFS = ['08:00', '12:30', '17:45', '22:00', '23:30', '01:15', '06:00', '15:00'];
+const DELIVERIES = INVOICES.map((invoice, index) => ({
+  ...invoice,
+  cutoff: CUTOFFS[index % CUTOFFS.length] as string,
+  scheduledAt: `${invoice.dueAt}T${CUTOFFS[(index + 2) % CUTOFFS.length] as string}`,
+}));
+const SLOT = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+
+function timeProps() {
+  return {
+    cutoff: {
+      conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],
+      join: 'and',
+      kind: 'time',
+    } as TimeFilter | null,
+    visible(this: { cutoff: TimeFilter | null }) {
+      const keep = createFilterPredicate(this.cutoff);
+      return DELIVERIES.filter((row) => keep(row.cutoff));
+    },
+  };
+}
+
+const TIME = `
+  <div slTable [columns]="3" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader text="nowrap">
+            Cut-off
+            <span slTableColumnActions>
+              <span slTableTimeFilter columnLabel="cut-off" [(value)]="cutoff"></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (row of visible(); track row.id) {
+          <tr slTableRow [value]="row.id">
+            <th slTableRowHeader text="nowrap">{{ row.id }}</th>
+            <td slTableCell text="nowrap">{{ row.client }}</td>
+            <td slTableCell text="nowrap">{{ row.cutoff }}</td>
+          </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>No pickups in this window</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+export const FilterTime: Story = {
+  parameters: scenario('filter-time'),
+  render: () => ({
+    props: timeProps(),
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'A time column, filtered to the overnight window',
+    "The operand is the time picker, and the descriptor holds the ISO text it writes at the column's granularity — 22:00, not a PlainTime. A between whose start is later than its end wraps at midnight: 22:00 to 02:00 keeps 23:30 and 01:15 and drops 08:00. Compared at the operand's own precision, so is 09:00 matches every second of that minute.",
+    TIME,
+  )}
+</div>`,
+  }),
+};
+
+function dateTimeProps() {
+  return {
+    scheduled: {
+      conditions: [{ operator: 'after', value: '2026-09-14T09:00' }],
+      join: 'and',
+      kind: 'datetime',
+    } as DateTimeFilter | null,
+    slot: (value: string) => SLOT.format(new Date(value)),
+    visible(this: { scheduled: DateTimeFilter | null }) {
+      const keep = createFilterPredicate(this.scheduled);
+      return DELIVERIES.filter((row) => keep(row.scheduledAt));
+    },
+  };
+}
+
+const DATE_TIME = `
+  <div slTable [columns]="3" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader text="nowrap">
+            Scheduled
+            <span slTableColumnActions>
+              <span slTableDateTimeFilter columnLabel="scheduled" [(value)]="scheduled"></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (row of visible(); track row.id) {
+          <tr slTableRow [value]="row.id">
+            <th slTableRowHeader text="nowrap">{{ row.id }}</th>
+            <td slTableCell text="nowrap">{{ row.client }}</td>
+            <td slTableCell text="nowrap">{{ slot(row.scheduledAt) }}</td>
+          </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>Nothing scheduled after that</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+export const FilterDateTime: Story = {
+  parameters: scenario('filter-datetime'),
+  render: () => ({
+    props: dateTimeProps(),
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'A date-time column, filtered after a moment',
+    'The operand is the date-time picker — seven segments and two surfaces — and the descriptor holds 2026-09-14T09:00 as text. A condition whose operand has one half missing is inactive until both halves exist, so Apply reports nothing for a date without a time. Between draws two pickers until datetime-range-picker lands.',
+    DATE_TIME,
+  )}
+</div>`,
+  }),
+};
+
+function rangeProps() {
+  return {
+    dueAt: {
+      conditions: [{ end: '2026-09-30', operator: 'between', value: '2026-09-01' }],
+      join: 'and',
+      kind: 'date',
+    } as DateFilter | null,
+    /** The range picker's presets: the application's own periods, in its own words. */
+    september: { end: plainDate(2026, 9, 30), start: plainDate(2026, 9, 1) },
+    quarter: { end: plainDate(2026, 12, 31), start: plainDate(2026, 10, 1) },
+    visible(this: { dueAt: DateFilter | null }) {
+      const keep = createFilterPredicate(this.dueAt);
+      return INVOICES.filter((row) => keep(row.dueAt));
+    },
+  };
+}
+
+const RANGE = `
+  <ng-template #presets>
+    <button slDateRangePickerPreset [range]="september">September</button>
+    <button slDateRangePickerPreset [range]="quarter">Q4</button>
+  </ng-template>
+  <div slTable [columns]="3" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader text="nowrap">
+            Due
+            <span slTableColumnActions>
+              <span slTableDateFilter columnLabel="due" [presets]="presets" [(value)]="dueAt"></span>
+            </span>
+          </th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (row of visible(); track row.id) {
+          <tr slTableRow [value]="row.id">
+            <th slTableRowHeader text="nowrap">{{ row.id }}</th>
+            <td slTableCell text="nowrap">{{ row.client }}</td>
+            <td slTableCell text="nowrap">{{ row.due }}</td>
+          </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>Nothing due in this period</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+export const FilterRange: Story = {
+  parameters: scenario('filter-range'),
+  render: () => ({
+    props: rangeProps(),
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'Between two dates, drawn as one range picker',
+    "Where two date pickers stood, one date-range-picker: it says the run's length while it is drawn, takes the ends in either order, and carries the application's presets — September and Q4 here, as a template of slDateRangePickerPreset buttons. The descriptor is unchanged: between, an ISO day and another, whichever control produced them.",
+    RANGE,
+  )}
+</div>`,
+  }),
+};
+
+function tagsProps() {
+  return {
+    client: setFilter(['Northwind Trading', 'Bright Harbor Media']) as SetFilter | null,
+    clients: CLIENTS,
+    invoice: null as SetFilter | null,
+    byClient(this: { client: SetFilter | null }) {
+      const keep = createFilterPredicate(this.client);
+      return INVOICES.filter((row) => keep(row.client));
+    },
+    byInvoice(this: { invoice: SetFilter | null }) {
+      const keep = createFilterPredicate(this.invoice);
+      return INVOICES.filter((row) => keep(row.id));
+    },
+  };
+}
+
+const TAGS = `
+  <div slTable [columns]="3" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">Invoice</th>
+          <th slTableColumnHeader text="nowrap">
+            Client
+            <span slTableColumnActions>
+              <span
+                slTableSetFilter
+                columnLabel="client"
+                operand="tags"
+                [options]="clients"
+                [(value)]="client"
+              ></span>
+            </span>
+          </th>
+          <th slTableColumnHeader numeric text="nowrap">Amount</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (row of byClient(); track row.id) {
+          <tr slTableRow [value]="row.id">
+            <th slTableRowHeader text="nowrap">{{ row.id }}</th>
+            <td slTableCell text="nowrap">{{ row.client }}</td>
+            <td slTableCell numeric>{{ row.amount }}</td>
+          </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>No invoices match</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+const FREE_TAGS = `
+  <div slTable [columns]="3" variant="framed">
+    <div slTableContent>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">
+            Invoice
+            <span slTableColumnActions>
+              <span slTableSetFilter columnLabel="invoice" operand="tags" [(value)]="invoice"></span>
+            </span>
+          </th>
+          <th slTableColumnHeader text="nowrap">Client</th>
+          <th slTableColumnHeader numeric text="nowrap">Amount</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (row of byInvoice(); track row.id) {
+          <tr slTableRow [value]="row.id">
+            <th slTableRowHeader text="nowrap">{{ row.id }}</th>
+            <td slTableCell text="nowrap">{{ row.client }}</td>
+            <td slTableCell numeric>{{ row.amount }}</td>
+          </tr>
+        } @empty {
+          <tr slTableRow>
+            <td slTableEmpty>
+              <section slResultState status="no-results">
+                <div slResultStateContent>
+                  <h3 slResultStateTitle>No invoices match</h3>
+                </div>
+              </section>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </div>`;
+
+export const FilterTags: Story = {
+  parameters: scenario('filter-tags'),
+  render: () => ({
+    props: tagsProps(),
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    "A set typed as chips, held to the column's values",
+    'operand of tags draws tags-input where the checkbox list stood: for a list too long to tick. With options, the values are a native datalist of suggestions and a typed value outside them is refused and announced; the chips hold the same list the checkboxes held, so a saved view is read by either. Enter with text adds a chip; Enter on the empty field applies.',
+    TAGS,
+  )}
+  ${scene(
+    'Without options, any value is admitted',
+    'A column of identifiers is often a list the page does not hold in full — an invoice number, an SKU, an e-mail. Without options the field takes whatever is typed or pasted, split on commas and line breaks, and the query decides what matches.',
+    FREE_TAGS,
   )}
 </div>`,
   }),

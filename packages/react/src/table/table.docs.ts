@@ -332,6 +332,54 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'filter-time',
+    title: 'A time column, and a window that crosses midnight',
+    note: 'TableTimeFilter draws the time picker and holds ISO text at the column granularity — 22:00 at a minute, 22:00:00 at a second — which is the precision the engine compares at. A between whose start is later than its end is the overnight window, not an empty set: 22:00 to 02:00 keeps 23:30 and 01:15.',
+    snippet: defineSnippet({
+      id: 'table-react-filter-time',
+      language: 'tsx',
+      label: 'A time filter, and the rows it keeps',
+      source:
+        "const [cutoff, setCutoff] = useState<TimeFilter | null>({\n  conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],\n  join: 'and',\n  kind: 'time',\n});\nconst keep = useMemo(() => createFilterPredicate(cutoff), [cutoff]);\nconst rows = deliveries.filter((row) => keep(row.cutoff));\n\n<TableTimeFilter\n  columnLabel=\"cut-off\"\n  granularity=\"minute\"\n  onValueChange={setCutoff}\n  value={cutoff}\n/>;",
+    }),
+  },
+  {
+    id: 'filter-datetime',
+    title: 'A date-time column, at the precision you wrote',
+    note: 'TableDateTimeFilter draws the date-time picker and holds 2026-09-14T09:00 as text. Compared at the operand own precision, so after 2026-09-14T09 starts at ten o clock and is 2026-09-14 matches the whole day. A condition with one half missing is inactive until both halves exist, and Apply reports nothing for it.',
+    snippet: defineSnippet({
+      id: 'table-react-filter-datetime',
+      language: 'tsx',
+      label: 'A date-time filter over a wall-clock column',
+      source:
+        'const [scheduled, setScheduled] = useState<DateTimeFilter | null>(null);\nconst keep = useMemo(\n  () => createFilterPredicate(scheduled, { timeZone: \'Europe/Lisbon\' }),\n  [scheduled],\n);\n\n<TableDateTimeFilter columnLabel="scheduled" onValueChange={setScheduled} value={scheduled} />;',
+    }),
+  },
+  {
+    id: 'filter-range',
+    title: 'Between two dates, as one range picker',
+    note: 'The between of a date column is one date-range-picker rather than two pickers: it says the run length while it is drawn, takes the ends in either order and carries your presets through the presets prop. The descriptor is unchanged — between, an ISO day and another — so a saved view written with two pickers opens in the range picker.',
+    snippet: defineSnippet({
+      id: 'table-react-filter-range',
+      language: 'tsx',
+      label: 'A date filter with the application own periods',
+      source:
+        '<TableDateFilter\n  columnLabel="due"\n  onValueChange={setDue}\n  presets={\n    <>\n      <DateRangePickerPreset value={september}>September</DateRangePickerPreset>\n      <DateRangePickerPreset value={quarter}>Q4</DateRangePickerPreset>\n    </>\n  }\n  value={due}\n/>;',
+    }),
+  },
+  {
+    id: 'filter-tags',
+    title: 'A set typed as chips',
+    note: 'operand tags draws tags-input where the checkbox list stood, for a list too long to tick. With options, they are a native datalist of suggestions and a typed value outside them is refused; without options any value is admitted. The chips hold the same readonly string[] the list held, so the operator stays anyOf or noneOf and a saved view is read by either operand.',
+    snippet: defineSnippet({
+      id: 'table-react-filter-tags',
+      language: 'tsx',
+      label: 'Chips held to the column values, and chips free of them',
+      source:
+        '<TableSetFilter columnLabel="client" onValueChange={setClient} operand="tags" options={clients} />;\n<TableSetFilter columnLabel="invoice" onValueChange={setInvoice} operand="tags" />;',
+    }),
+  },
+  {
     id: 'selection',
     title: 'Choosing records, and what all means',
     note: 'Hold Shift and press a second checkbox to take everything between. The header checkbox covers the rows in the DOM and says how many in its own name — a selection over a whole result set is a decision only your query can make.',
@@ -598,13 +646,34 @@ export const REACT_TABLE_DOCS = {
       [
         'options',
         'readonly TableFilterOption[]',
-        '—',
+        '[]',
         'TableSetFilter',
-        'The values the column can be filtered to, each with an optional count of its own',
+        'The values the column can be filtered to, each with an optional count of its own. With operand tags they are a datalist and the set a typed value must belong to; without them any value is admitted.',
+      ],
+      [
+        'operand',
+        "'list' | 'tags'",
+        'list',
+        'TableSetFilter',
+        'How the values are chosen: the search, the covering checkbox and the list, or tags-input holding the chosen values as chips. The descriptor is the same list either way.',
+      ],
+      [
+        'presets',
+        'ReactNode',
+        '—',
+        'TableDateFilter',
+        'DateRangePickerPreset buttons offered inside the range picker between draws. The descriptor still receives two ISO days.',
+      ],
+      [
+        'granularity',
+        "'hour' | 'minute' | 'second'",
+        'minute',
+        'TableTimeFilter, TableDateTimeFilter',
+        'The last unit the picker writes, and the precision the engine compares at: a minute-precision operand matches every second of its minute.',
       ],
       [
         'value',
-        'TextFilter | NumberFilter | DateFilter | BooleanFilter | SetFilter | null',
+        'TextFilter | NumberFilter | DateFilter | TimeFilter | DateTimeFilter | BooleanFilter | SetFilter | null',
         'null',
         'Table*Filter',
         'The descriptor the column is filtered by, typed as its own kind. Controlled when stated; defaultValue is the uncontrolled form, and onValueChange fires once, on Apply.',

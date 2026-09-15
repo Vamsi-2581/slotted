@@ -93,15 +93,25 @@ root                       div[data-ui=filter-bar]  role=search, aria-label
 │  └─ more                 button  "+n", reveals the folded chips
 ├─ count                   p  aria-live=polite
 └─ builder                 drawer  the tree editor
-   └─ group*               fieldset
-      ├─ join              segmented-control  and / or
-      ├─ rule*             div
-      │  ├─ field          select
-      │  ├─ operator       select
-      │  ├─ operand        the kind's control, replaceable
-      │  └─ remove         button
-      └─ add-rule, add-group, remove-group   button
+   └─ group*               fieldset  a box on the sunken surface from depth 1
+      ├─ join              div  "Match [All | Any] of the following", remove-group at the end when nested
+      ├─ rules             div  a two-column grid: the joining word, then the row
+      │  ├─ conjunction*   span  "Where" on the first row, "and" / "or" after
+      │  └─ rule* | group* div | fieldset
+      │     ├─ field       select
+      │     ├─ operator    select
+      │     ├─ operand     the kind's control, replaceable
+      │     └─ remove      button
+      └─ add-rule, add-group   button, with the plus glyph
 ```
+
+The builder is laid out the way Notion, Airtable and AG Grid's advanced filter
+lay a query out, because that is the shape a reader already knows: the header
+says what the group does in words, every row starts with the word that joins it
+to the row above, and a nested group is a box rather than a rail, so its own
+header and remove read as its own. "and | or" as the segments, with "of the
+following" after them, read as a fragment; "Match [All | Any] of the following"
+is a sentence.
 
 `root` is a `search` landmark, not a `toolbar`: the APG toolbar pattern asks
 that a toolbar avoid "controls whose operation requires the pair of arrow keys
@@ -252,7 +262,7 @@ foundation states for a chosen state.
 Family tokens fall back to the foundation and nothing else: the pill's radius
 to `--slotted-radius-full`, the gap to `--slotted-control-gap-md`, the chip's
 maximum to `18rem`, recorded as a literal because no scale holds a measure and
-`container` owns the page's. The narrow breakpoint is `40rem`, literal by rule
+`container` owns the page's. The narrow breakpoint is `36rem`, literal by rule
 4 of the token foundation.
 
 ## 14. What a wrong answer costs

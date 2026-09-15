@@ -21,6 +21,10 @@
       "types": "./dist/types/collection/index.d.ts",
       "import": "./dist/collection.js"
     },
+    "./commands": {
+      "types": "./dist/types/commands/index.d.ts",
+      "import": "./dist/commands.js"
+    },
     "./count": {
       "types": "./dist/types/count/index.d.ts",
       "import": "./dist/count.js"

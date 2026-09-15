@@ -1,0 +1,1434 @@
+<!--
+  The DOM the two bindings write, by hand. Every part the contract declares
+  appears at least once, and every state is staged: current, expanded, open
+  (the flyout), disabled. The marks are Lucide paths inlined, because the
+  family ships no icon of its own and a consumer's SVG is what a mark is.
+
+  The column stands in a box the width of the shell's medium region (15rem)
+  because that is the room a product gives it; the rail scene gives it the
+  shell's rail (50px) and nothing else, which is how `mode="auto"` is read.
+-->
+
+<section data-scene="default">
+  <div style="max-inline-size: 15rem">
+    <nav
+      data-ui="side-navigation"
+      data-part="root"
+      data-mode="auto"
+      data-truncate="end"
+      data-size="md"
+      data-guides=""
+      aria-label="Navegação"
+    >
+      <div data-part="section">
+        <div data-part="section-label">Operações</div>
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#painel" aria-current="page" data-current="">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg
+              ></span>
+              <span data-part="label">Painel</span>
+            </a>
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#cargas">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m7.5 4.27 9 5.15" />
+                  <path
+                    d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"
+                  />
+                  <path d="m3.3 7 8.7 5 8.7-5" />
+                  <path d="M12 22V12" /></svg
+              ></span>
+              <span data-part="label">Cargas</span>
+              <span data-part="count">12</span>
+            </a>
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#rotas">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+                  />
+                  <circle cx="12" cy="10" r="3" /></svg
+              ></span>
+              <span data-part="label">Rotas</span>
+            </a>
+          </li>
+          <li data-part="item" data-expanded="">
+            <button
+              data-part="trigger"
+              type="button"
+              aria-expanded="true"
+              aria-controls="h-entregas"
+            >
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path
+                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
+                  />
+                  <circle cx="17" cy="18" r="2" />
+                  <circle cx="7" cy="18" r="2" /></svg
+              ></span>
+              <span data-part="label">Entregas</span>
+              <span data-part="count">38</span>
+              <span data-part="indicator" aria-hidden="true"></span>
+            </button>
+            <ul data-part="group" id="h-entregas">
+              <li data-part="item">
+                <a data-part="link" href="#hoje"><span data-part="label">Hoje</span></a>
+              </li>
+              <li data-part="item">
+                <a data-part="link" href="#atrasadas"
+                  ><span data-part="label">Atrasadas</span
+                  ><span data-part="end"
+                    ><span
+                      data-ui="badge"
+                      data-part="root"
+                      data-tone="danger"
+                      data-variant="soft"
+                      data-size="sm"
+                      data-shape="pill"
+                      ><span data-part="label">3</span></span
+                    ></span
+                  ></a
+                >
+              </li>
+              <li data-part="item">
+                <a data-part="link" href="#concluidas"><span data-part="label">Concluídas</span></a>
+              </li>
+            </ul>
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#clientes">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg
+              ></span>
+              <span data-part="label">Clientes</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div data-part="section">
+        <div data-part="section-label">Administração</div>
+        <ul data-part="list">
+          <li data-part="item">
+            <button
+              data-part="trigger"
+              type="button"
+              aria-expanded="false"
+              aria-controls="h-config"
+            >
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                  />
+                  <circle cx="12" cy="12" r="3" /></svg
+              ></span>
+              <span data-part="label">Configurações</span>
+              <span data-part="indicator" aria-hidden="true"></span>
+            </button>
+            <ul data-part="group" id="h-config">
+              <li data-part="item">
+                <a data-part="link" href="#org"><span data-part="label">Organização</span></a>
+              </li>
+              <li data-part="item">
+                <a data-part="link" href="#users"><span data-part="label">Utilizadores</span></a>
+              </li>
+            </ul>
+          </li>
+          <li data-part="divider" role="separator"></li>
+          <li data-part="item" data-disabled="">
+            <a data-part="link" href="#faturacao" aria-disabled="true">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="14" x="2" y="5" rx="2" />
+                  <line x1="2" x2="22" y1="10" y2="10" /></svg
+              ></span>
+              <span data-part="label">Faturação</span>
+              <span data-part="description">Disponível no plano Equipa</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<!-- A destination that is also a parent: the APG hybrid example's row. -->
+<section data-scene="hybrid">
+  <div style="max-inline-size: 15rem">
+    <nav
+      data-ui="side-navigation"
+      data-part="root"
+      data-mode="auto"
+      data-truncate="end"
+      data-size="md"
+      data-guides=""
+      aria-label="Navegação"
+    >
+      <ul data-part="list">
+        <li data-part="item" data-expanded="">
+          <a data-part="link" href="#relatorios">
+            <span data-part="icon"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                <path d="M18 17V9" />
+                <path d="M13 17V5" />
+                <path d="M8 17v-3" /></svg
+            ></span>
+            <span data-part="label" id="h-rel-label">Relatórios</span>
+          </a>
+          <button
+            data-part="trigger"
+            type="button"
+            aria-expanded="true"
+            aria-controls="h-rel"
+            aria-labelledby="h-rel-label"
+          >
+            <span data-part="indicator" aria-hidden="true"></span>
+          </button>
+          <ul data-part="group" id="h-rel">
+            <li data-part="item">
+              <a data-part="link" href="#mensal" aria-current="page" data-current=""
+                ><span data-part="label">Mensal</span></a
+              >
+            </li>
+            <li data-part="item" data-expanded="">
+              <button
+                data-part="trigger"
+                type="button"
+                aria-expanded="true"
+                aria-controls="h-rel-frota"
+              >
+                <span data-part="label">Por frota</span>
+                <span data-part="indicator" aria-hidden="true"></span>
+              </button>
+              <ul data-part="group" id="h-rel-frota">
+                <li data-part="item">
+                  <a data-part="link" href="#pesados"><span data-part="label">Pesados</span></a>
+                </li>
+                <li data-part="item">
+                  <a data-part="link" href="#ligeiros"><span data-part="label">Ligeiros</span></a>
+                </li>
+              </ul>
+            </li>
+            <li data-part="item">
+              <a data-part="link" href="#anual"><span data-part="label">Anual</span></a>
+            </li>
+          </ul>
+        </li>
+        <li data-part="item" data-current="">
+          <button data-part="trigger" type="button" aria-expanded="false" aria-controls="h-fin">
+            <span data-part="icon"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <line x1="2" x2="22" y1="10" y2="10" /></svg
+            ></span>
+            <span data-part="label">Financeiro</span>
+            <span data-part="indicator" aria-hidden="true"></span>
+          </button>
+          <ul data-part="group" id="h-fin">
+            <li data-part="item">
+              <a data-part="link" href="#faturas" aria-current="page" data-current=""
+                ><span data-part="label">Faturas</span></a
+              >
+            </li>
+          </ul>
+        </li>
+        <li data-part="item">
+          <a data-part="link" href="#equipa">
+            <span data-part="icon"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg
+            ></span>
+            <span data-part="label">Equipa</span>
+          </a>
+          <div data-part="actions">
+            <button
+              type="button"
+              aria-label="Adicionar membro"
+              style="
+                appearance: none;
+                border: 0;
+                background: transparent;
+                inline-size: 24px;
+                block-size: 24px;
+                border-radius: 4px;
+                color: inherit;
+                display: grid;
+                place-items: center;
+                cursor: pointer;
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+            </button>
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</section>
+
+<!-- The rail: the same column at fifty pixels, read by the root's own width. -->
+<section data-scene="compact">
+  <div style="display: flex; gap: var(--slotted-space-8); align-items: flex-start">
+    <div style="inline-size: 50px">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="end"
+        data-size="md"
+        data-guides=""
+        data-compact=""
+        aria-label="Navegação"
+      >
+        <div data-part="section">
+          <div data-part="section-label">Operações</div>
+          <ul data-part="list">
+            <li data-part="item">
+              <a data-part="link" href="#painel"
+                ><span data-part="icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" /></svg></span
+                ><span data-part="label">Painel</span></a
+              >
+            </li>
+            <li data-part="item">
+              <a data-part="link" href="#cargas" aria-current="page" data-current=""
+                ><span data-part="icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m7.5 4.27 9 5.15" />
+                    <path
+                      d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"
+                    />
+                    <path d="m3.3 7 8.7 5 8.7-5" />
+                    <path d="M12 22V12" /></svg></span
+                ><span data-part="label">Cargas</span><span data-part="count">12</span></a
+              >
+            </li>
+            <li data-part="item">
+              <button
+                data-part="trigger"
+                type="button"
+                aria-expanded="false"
+                aria-controls="c-entregas"
+              >
+                <span data-part="icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                    <path d="M15 18H9" />
+                    <path
+                      d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
+                    />
+                    <circle cx="17" cy="18" r="2" />
+                    <circle cx="7" cy="18" r="2" /></svg></span
+                ><span data-part="label">Entregas</span><span data-part="count">38</span
+                ><span data-part="indicator" aria-hidden="true"></span>
+              </button>
+              <ul data-part="group" id="c-entregas">
+                <li data-part="item">
+                  <a data-part="link" href="#hoje"><span data-part="label">Hoje</span></a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div data-part="section">
+          <div data-part="section-label">Administração</div>
+          <ul data-part="list">
+            <li data-part="item" data-current="">
+              <button
+                data-part="trigger"
+                type="button"
+                aria-expanded="false"
+                aria-controls="c-config"
+              >
+                <span data-part="icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                    />
+                    <circle cx="12" cy="12" r="3" /></svg></span
+                ><span data-part="label">Configurações</span
+                ><span data-part="indicator" aria-hidden="true"></span>
+              </button>
+              <ul data-part="group" id="c-config">
+                <li data-part="item">
+                  <a data-part="link" href="#org" aria-current="page" data-current=""
+                    ><span data-part="label">Organização</span></a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li data-part="item" data-disabled="">
+              <a data-part="link" href="#faturacao" aria-disabled="true"
+                ><span data-part="icon"
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect width="20" height="14" x="2" y="5" rx="2" />
+                    <line x1="2" x2="22" y1="10" y2="10" /></svg></span
+                ><span data-part="label">Faturação</span></a
+              >
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+    <!-- mode="compact", forced at any width: the same picture without the box. -->
+    <div style="max-inline-size: 15rem; flex: 1 1 auto">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="compact"
+        data-truncate="end"
+        data-size="md"
+        data-guides=""
+        data-compact=""
+        aria-label="Navegação"
+      >
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#painel" aria-current="page" data-current=""
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg></span
+              ><span data-part="label">Painel</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#rotas"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+                  />
+                  <circle cx="12" cy="10" r="3" /></svg></span
+              ><span data-part="label">Rotas</span></a
+            >
+          </li>
+          <li data-part="skeleton" aria-hidden="true">
+            <span data-part="icon"
+              ><span
+                data-ui="skeleton"
+                data-part="root"
+                data-shape="square"
+                data-size="xs"
+                data-animation="shimmer"
+                data-loading=""
+              ></span></span
+            ><span data-part="label"
+              ><span
+                data-ui="skeleton"
+                data-part="root"
+                data-shape="text"
+                data-size="md"
+                data-animation="shimmer"
+                data-loading=""
+                style="--slotted-skeleton-inline-size: 60%"
+              ></span
+            ></span>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!--
+  The flyout beside the rail, written open where the positioner would have put
+  it: `data-positioned`, `data-side="right"`, `left` and `top` are what the
+  script writes, and a static scene writes them by hand.
+-->
+<section data-scene="flyout" data-fixed>
+  <div style="position: relative; display: flex; align-items: flex-start; min-block-size: 200px">
+    <div style="inline-size: 50px">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="end"
+        data-size="md"
+        data-guides=""
+        data-compact=""
+        aria-label="Navegação"
+      >
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#painel"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg></span
+              ><span data-part="label">Painel</span></a
+            >
+          </li>
+          <li data-part="item" data-open="" data-current="">
+            <button
+              data-part="trigger"
+              type="button"
+              aria-expanded="true"
+              aria-controls="f-entregas"
+            >
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path
+                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
+                  />
+                  <circle cx="17" cy="18" r="2" />
+                  <circle cx="7" cy="18" r="2" /></svg></span
+              ><span data-part="label">Entregas</span
+              ><span data-part="indicator" aria-hidden="true"></span>
+            </button>
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#clientes"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span
+              ><span data-part="label">Clientes</span></a
+            >
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div
+      data-ui="side-navigation"
+      data-part="flyout"
+      data-size="md"
+      data-guides=""
+      data-open=""
+      data-positioned=""
+      data-side="right"
+      style="left: 50px; top: 36px"
+    >
+      <ul data-part="group" id="f-entregas">
+        <li data-part="item">
+          <a data-part="link" href="#hoje"><span data-part="label">Hoje</span></a>
+        </li>
+        <li data-part="item">
+          <a data-part="link" href="#atrasadas" aria-current="page" data-current=""
+            ><span data-part="label">Atrasadas</span
+            ><span data-part="end"
+              ><span
+                data-ui="badge"
+                data-part="root"
+                data-tone="danger"
+                data-variant="soft"
+                data-size="sm"
+                data-shape="pill"
+                ><span data-part="label">3</span></span
+              ></span
+            ></a
+          >
+        </li>
+        <li data-part="item">
+          <a data-part="link" href="#concluidas"><span data-part="label">Concluídas</span></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Five levels: the first indent under a mark, a constant step below it. -->
+<section data-scene="depth">
+  <div style="max-inline-size: 15rem">
+    <nav
+      data-ui="side-navigation"
+      data-part="root"
+      data-mode="auto"
+      data-truncate="end"
+      data-size="md"
+      data-guides=""
+      aria-label="Navegação"
+    >
+      <ul data-part="list">
+        <li data-part="item" data-expanded="">
+          <button data-part="trigger" type="button" aria-expanded="true" aria-controls="d-1">
+            <span data-part="icon"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                <path d="M18 17V9" />
+                <path d="M13 17V5" />
+                <path d="M8 17v-3" /></svg
+            ></span>
+            <span data-part="label">Relatórios</span>
+            <span data-part="count">128</span>
+            <span data-part="indicator" aria-hidden="true"></span>
+          </button>
+          <ul data-part="group" id="d-1">
+            <li data-part="item">
+              <a data-part="link" href="#d-a"
+                ><span data-part="label">Resumo</span><span data-part="count">4</span></a
+              >
+            </li>
+            <li data-part="item" data-expanded="">
+              <button data-part="trigger" type="button" aria-expanded="true" aria-controls="d-2">
+                <span data-part="label">Por região</span
+                ><span data-part="indicator" aria-hidden="true"></span>
+              </button>
+              <ul data-part="group" id="d-2">
+                <li data-part="item">
+                  <a data-part="link" href="#d-b"><span data-part="label">Norte</span></a>
+                </li>
+                <li data-part="item" data-expanded="">
+                  <button
+                    data-part="trigger"
+                    type="button"
+                    aria-expanded="true"
+                    aria-controls="d-3"
+                  >
+                    <span data-part="label">Sudeste</span
+                    ><span data-part="indicator" aria-hidden="true"></span>
+                  </button>
+                  <ul data-part="group" id="d-3">
+                    <li data-part="item">
+                      <a data-part="link" href="#d-c"
+                        ><span data-part="label">São Paulo</span
+                        ><span data-part="count">36</span></a
+                      >
+                    </li>
+                    <li data-part="item" data-expanded="">
+                      <button
+                        data-part="trigger"
+                        type="button"
+                        aria-expanded="true"
+                        aria-controls="d-4"
+                      >
+                        <span data-part="label">Minas Gerais</span
+                        ><span data-part="indicator" aria-hidden="true"></span>
+                      </button>
+                      <ul data-part="group" id="d-4">
+                        <li data-part="item">
+                          <a data-part="link" href="#d-d" aria-current="page" data-current=""
+                            ><span data-part="label">Belo Horizonte</span
+                            ><span data-part="count">12</span></a
+                          >
+                        </li>
+                        <li data-part="item">
+                          <a data-part="link" href="#d-e"
+                            ><span data-part="label">Uberlândia e Triângulo Mineiro</span></a
+                          >
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li data-part="item">
+                  <button
+                    data-part="trigger"
+                    type="button"
+                    aria-expanded="false"
+                    aria-controls="d-5"
+                  >
+                    <span data-part="label">Sul</span
+                    ><span data-part="indicator" aria-hidden="true"></span>
+                  </button>
+                  <ul data-part="group" id="d-5">
+                    <li data-part="item">
+                      <a data-part="link" href="#d-f"><span data-part="label">Curitiba</span></a>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</section>
+
+<!-- Content the family did not choose: long, translated, unbroken, two-line. -->
+<!-- Content the family did not choose: long, translated, unbroken, two-line. Wrapping by default; truncating on request. -->
+<section data-scene="content">
+  <div style="display: flex; gap: var(--slotted-space-6); align-items: flex-start; flex-wrap: wrap">
+    <div style="inline-size: 15rem; flex: none">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="end"
+        data-size="md"
+        data-guides=""
+        aria-label="Navegação"
+      >
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#a"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg></span
+              ><span data-part="label">Configurações da organização e das integrações</span
+              ><span data-part="count">120</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#b"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+                  />
+                  <circle cx="12" cy="10" r="3" /></svg></span
+              ><span data-part="label"
+                >https://aurora.example/relatorios/2026/mensal/setembro</span
+              ></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#c"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span
+              ><span data-part="label">العملاء</span><span data-part="count">٤</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#d" aria-current="page" data-current=""
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m7.5 4.27 9 5.15" />
+                  <path
+                    d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"
+                  />
+                  <path d="m3.3 7 8.7 5 8.7-5" />
+                  <path d="M12 22V12" /></svg></span
+              ><span data-part="label">Cargas</span
+              ><span data-part="description">14 a aguardar despacho no armazém</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#e"><span data-part="label">Sem marca</span></a>
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#f"
+              ><span data-part="label">Sem marca, com descrição</span
+              ><span data-part="description">Uma segunda linha sob a primeira</span></a
+            >
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div style="inline-size: 15rem; flex: none">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="none"
+        data-truncate="end"
+        data-size="md"
+        data-guides=""
+        aria-label="Navegação"
+      >
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#a"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg></span
+              ><span data-part="label">Configurações da organização e das integrações</span
+              ><span data-part="count">120</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#b"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"
+                  />
+                  <circle cx="12" cy="10" r="3" /></svg></span
+              ><span data-part="label"
+                >https://aurora.example/relatorios/2026/mensal/setembro</span
+              ></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#c"
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span
+              ><span data-part="label">العملاء</span><span data-part="count">٤</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#d" aria-current="page" data-current=""
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m7.5 4.27 9 5.15" />
+                  <path
+                    d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"
+                  />
+                  <path d="m3.3 7 8.7 5 8.7-5" />
+                  <path d="M12 22V12" /></svg></span
+              ><span data-part="label">Cargas</span
+              ><span data-part="description">14 a aguardar despacho no armazém</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#e"><span data-part="label">Sem marca</span></a>
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#f"
+              ><span data-part="label">Sem marca, com descrição</span
+              ><span data-part="description">Uma segunda linha sob a primeira</span></a
+            >
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!-- truncate="middle": the binding fits the cut to the box; a static scene writes the fitted string by hand. -->
+    <div style="inline-size: 15rem; flex: none">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="middle"
+        data-size="md"
+        data-guides=""
+        aria-label="Navegação"
+      >
+        <ul data-part="list">
+          <li data-part="item" data-clipped="">
+            <a
+              data-part="link"
+              href="#m1"
+              aria-label="Relatório mensal de operações · setembro"
+              aria-current="page"
+              data-current=""
+              ><span data-part="label">Relatório mensal d… setembro</span
+              ><span data-part="count">12</span></a
+            >
+          </li>
+          <li data-part="item" data-clipped="">
+            <a data-part="link" href="#m2" aria-label="Relatório mensal de operações · outubro"
+              ><span data-part="label">Relatório mensal de… outubro</span
+              ><span data-part="count">4</span></a
+            >
+          </li>
+          <li data-part="item">
+            <a data-part="link" href="#m3"><span data-part="label">Relatório anual</span></a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- The three sizes beside each other. -->
+<section data-scene="sizes">
+  <div style="display: flex; gap: var(--slotted-space-6); align-items: flex-start; flex-wrap: wrap">
+    <div style="inline-size: 12rem">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="end"
+        data-size="sm"
+        data-guides=""
+        aria-label="Pequena"
+      >
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#1" aria-current="page" data-current=""
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg></span
+              ><span data-part="label">Painel</span></a
+            >
+          </li>
+          <li data-part="item" data-expanded="">
+            <button data-part="trigger" type="button" aria-expanded="true" aria-controls="s-1">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path
+                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
+                  />
+                  <circle cx="17" cy="18" r="2" />
+                  <circle cx="7" cy="18" r="2" /></svg></span
+              ><span data-part="label">Entregas</span
+              ><span data-part="indicator" aria-hidden="true"></span>
+            </button>
+            <ul data-part="group" id="s-1">
+              <li data-part="item">
+                <a data-part="link" href="#1a"><span data-part="label">Hoje</span></a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div style="inline-size: 12rem">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="end"
+        data-size="md"
+        data-guides=""
+        aria-label="Média"
+      >
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#2" aria-current="page" data-current=""
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg></span
+              ><span data-part="label">Painel</span></a
+            >
+          </li>
+          <li data-part="item" data-expanded="">
+            <button data-part="trigger" type="button" aria-expanded="true" aria-controls="s-2">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path
+                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
+                  />
+                  <circle cx="17" cy="18" r="2" />
+                  <circle cx="7" cy="18" r="2" /></svg></span
+              ><span data-part="label">Entregas</span
+              ><span data-part="indicator" aria-hidden="true"></span>
+            </button>
+            <ul data-part="group" id="s-2">
+              <li data-part="item">
+                <a data-part="link" href="#2a"><span data-part="label">Hoje</span></a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div style="inline-size: 12rem">
+      <nav
+        data-ui="side-navigation"
+        data-part="root"
+        data-mode="auto"
+        data-truncate="end"
+        data-size="lg"
+        data-guides=""
+        aria-label="Grande"
+      >
+        <ul data-part="list">
+          <li data-part="item">
+            <a data-part="link" href="#3" aria-current="page" data-current=""
+              ><span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <path d="M18 17V9" />
+                  <path d="M13 17V5" />
+                  <path d="M8 17v-3" /></svg></span
+              ><span data-part="label">Painel</span></a
+            >
+          </li>
+          <li data-part="item" data-expanded="">
+            <button data-part="trigger" type="button" aria-expanded="true" aria-controls="s-3">
+              <span data-part="icon"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path
+                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
+                  />
+                  <circle cx="17" cy="18" r="2" />
+                  <circle cx="7" cy="18" r="2" /></svg></span
+              ><span data-part="label">Entregas</span
+              ><span data-part="indicator" aria-hidden="true"></span>
+            </button>
+            <ul data-part="group" id="s-3">
+              <li data-part="item">
+                <a data-part="link" href="#3a"><span data-part="label">Hoje</span></a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- A column still arriving: the skeleton rows, in the geometry of the rows they stand for. -->
+<section data-scene="loading">
+  <div style="max-inline-size: 15rem">
+    <nav
+      data-ui="side-navigation"
+      data-part="root"
+      data-mode="auto"
+      data-truncate="end"
+      data-size="md"
+      data-guides=""
+      aria-label="Navegação"
+      aria-busy="true"
+    >
+      <ul data-part="list">
+        <li data-part="item">
+          <a data-part="link" href="#painel" aria-current="page" data-current=""
+            ><span data-part="icon"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                <path d="M18 17V9" />
+                <path d="M13 17V5" />
+                <path d="M8 17v-3" /></svg></span
+            ><span data-part="label">Painel</span></a
+          >
+        </li>
+        <li data-part="skeleton" aria-hidden="true">
+          <span data-part="icon"
+            ><span
+              data-ui="skeleton"
+              data-part="root"
+              data-shape="square"
+              data-size="xs"
+              data-animation="shimmer"
+              data-loading=""
+            ></span></span
+          ><span data-part="label"
+            ><span
+              data-ui="skeleton"
+              data-part="root"
+              data-shape="text"
+              data-size="md"
+              data-animation="shimmer"
+              data-loading=""
+              style="--slotted-skeleton-inline-size: 55%"
+            ></span
+          ></span>
+        </li>
+        <li data-part="skeleton" aria-hidden="true">
+          <span data-part="icon"
+            ><span
+              data-ui="skeleton"
+              data-part="root"
+              data-shape="square"
+              data-size="xs"
+              data-animation="shimmer"
+              data-loading=""
+            ></span></span
+          ><span data-part="label"
+            ><span
+              data-ui="skeleton"
+              data-part="root"
+              data-shape="text"
+              data-size="md"
+              data-animation="shimmer"
+              data-loading=""
+              style="--slotted-skeleton-inline-size: 70%"
+            ></span
+          ></span>
+        </li>
+        <li data-part="skeleton" aria-hidden="true">
+          <span data-part="icon"
+            ><span
+              data-ui="skeleton"
+              data-part="root"
+              data-shape="square"
+              data-size="xs"
+              data-animation="shimmer"
+              data-loading=""
+            ></span></span
+          ><span data-part="label"
+            ><span
+              data-ui="skeleton"
+              data-part="root"
+              data-shape="text"
+              data-size="md"
+              data-animation="shimmer"
+              data-loading=""
+              style="--slotted-skeleton-inline-size: 45%"
+            ></span
+          ></span>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</section>

@@ -50,6 +50,7 @@ export default defineConfig({
         'scroll-area': resolve(import.meta.dirname, 'src/scroll-area/index.ts'),
         section: resolve(import.meta.dirname, 'src/section/index.ts'),
         select: resolve(import.meta.dirname, 'src/select/index.ts'),
+        'side-navigation': resolve(import.meta.dirname, 'src/side-navigation/index.ts'),
         skeleton: resolve(import.meta.dirname, 'src/skeleton/index.ts'),
         stack: resolve(import.meta.dirname, 'src/stack/index.ts'),
         table: resolve(import.meta.dirname, 'src/table/index.ts'),

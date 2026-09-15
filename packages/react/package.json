@@ -200,6 +200,10 @@
       "types": "./dist/types/select/index.d.ts",
       "import": "./dist/select.js"
     },
+    "./side-navigation": {
+      "types": "./dist/types/side-navigation/index.d.ts",
+      "import": "./dist/side-navigation.js"
+    },
     "./skeleton": {
       "types": "./dist/types/skeleton/index.d.ts",
       "import": "./dist/skeleton.js"

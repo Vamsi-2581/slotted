@@ -56,6 +56,7 @@ export * from './scroll-area';
 export * from './section';
 export * from './segmented-control';
 export * from './select';
+export * from './side-navigation';
 export * from './skeleton';
 export * from './slider';
 export * from './stack';

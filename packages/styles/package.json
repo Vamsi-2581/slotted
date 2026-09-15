@@ -125,6 +125,8 @@
     "./segmented-control/tokens.json": "./src/segmented-control/segmented-control.tokens.json",
     "./select/select.css": "./src/select/select.css",
     "./select/tokens.json": "./src/select/select.tokens.json",
+    "./side-navigation/side-navigation.css": "./src/side-navigation/side-navigation.css",
+    "./side-navigation/tokens.json": "./src/side-navigation/side-navigation.tokens.json",
     "./skeleton/skeleton.css": "./src/skeleton/skeleton.css",
     "./skeleton/tokens.json": "./src/skeleton/skeleton.tokens.json",
     "./slider/slider.css": "./src/slider/slider.css",

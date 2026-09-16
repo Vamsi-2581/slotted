@@ -127,7 +127,8 @@ const anatomy: AnatomyRow[] = [
     part: 'match',
     element: 'mark',
     required: false,
-    purpose: 'The run of the label the query matched, worn as data-ui="highlight".',
+    purpose:
+      'The run of the label the query matched: the match part of the highlight family, whose root sits inside label.',
   },
   {
     part: 'description',

@@ -1,6 +1,7 @@
 import { bindScenes, createReferencePage, isolated, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlAvatar } from '@slotted/angular/avatar';
+import { SlHighlight } from '@slotted/angular/highlight';
 import { SlButton } from '@slotted/angular/button';
 import { SlKbd } from '@slotted/angular/kbd';
 import { SlPopover } from '@slotted/angular/popover';
@@ -188,6 +189,7 @@ export const COMMAND_PALETTE_IMPORTS = [
   SlCommandPaletteEmpty,
   SlAvatar,
   SlButton,
+  SlHighlight,
   SlKbd,
   SlPopover,
   SlPopoverTrigger,
@@ -593,17 +595,9 @@ export const Composition: Story = {
               Search people <kbd slKbd size="sm">⌘K</kbd>
             </button>
             <sl-command-palette #p="slCommandPalette" label="People" inputLabel="Search people" placeholder="Search people…" [container]="pictured ? box : undefined" [open]="pictured" [items]="teams">
-              <ng-template slCommandPaletteItem let-item let-runs="runs">
+              <ng-template slCommandPaletteItem let-item let-query="query">
                 <span data-part="icon"><span slAvatar [name]="item.label" size="xs"></span></span>
-                <span data-part="label">
-                  @for (run of runs; track $index) {
-                    @if (run.matched) {
-                      <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
-                    } @else {
-                      <span>{{ run.text }}</span>
-                    }
-                  }
-                </span>
+                <span data-part="label"><span slHighlight [text]="item.label" [query]="query"></span></span>
                 @if (item.description) {
                   <span data-part="description">{{ item.description }}</span>
                 }

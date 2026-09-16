@@ -85,18 +85,22 @@ describe('Combobox', () => {
   });
 
   /**
-   * R6/CB6: the mark is the shared one. It wears `data-ui='highlight'` beside
-   * this family's own part, so one sheet paints the span every list a reader
-   * types into found.
+   * R6/CB6: the mark is the `highlight` family's. Its root sits inside this
+   * family's label and the `mark` is its part, so one sheet paints the span
+   * every list a reader types into found.
    */
-  it('wears the shared highlight identifier on the span it marked', async () => {
+  it('renders the highlight family inside the label it marked', async () => {
     render(<Basic />);
     input().focus();
     type('berr');
     await screen.findByRole('listbox');
-    const mark = optionNamed('Blueberry').querySelector("[data-part='match']");
+    const root = optionNamed('Blueberry').querySelector(
+      "[data-part='label'] > [data-ui='highlight']",
+    );
+    expect(root).toHaveAttribute('data-part', 'root');
+    const mark = root?.querySelector("[data-part='match']");
     expect(mark?.tagName).toBe('MARK');
-    expect(mark).toHaveAttribute('data-ui', 'highlight');
+    expect(mark).not.toHaveAttribute('data-ui');
   });
 
   /** §2.9: the comparison is the reader's locale's, not an English fold. */

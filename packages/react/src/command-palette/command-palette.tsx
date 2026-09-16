@@ -1,9 +1,8 @@
 import '@slotted/styles/command-palette/command-palette.css';
-import '@slotted/styles/highlight/highlight.css';
 import '@slotted/styles/skeleton/skeleton.css';
 import '@slotted/styles/spinner/spinner.css';
 
-import { moveIndex, splitByMatch } from '@slotted/core/collection';
+import { moveIndex } from '@slotted/core/collection';
 import { createCommandRanker, pushRecent, resolveCommands } from '@slotted/core/commands';
 import type { CommandRanker, CommandSection } from '@slotted/core/commands';
 import { isEditableTarget, matchesShortcut, parseShortcut, resolveKey } from '@slotted/core/keys';
@@ -26,6 +25,7 @@ import type { KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 
 import { Dialog, DialogContent, DialogTrigger } from '../dialog';
 import type { DialogChangeRequest } from '../dialog';
+import { Highlight } from '../highlight';
 import { Shortcut } from '../kbd';
 import { useResolvedPlatform } from '../kbd/kbd-defaults';
 import { useCommandPaletteDefaults } from './command-palette-defaults';
@@ -670,19 +670,14 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
     const isDisabled = item.disabled === true;
     const isPending = pending.has(item.id);
     const id = domId(base, item.id);
-    const runs =
-      resolved.highlightMatch && currentQuery.trim() !== ''
-        ? splitByMatch(item.label, currentQuery, { locale })
-        : [{ text: item.label, matched: false }];
-    const labelNode = runs.map((run, index) =>
-      run.matched ? (
-        <mark data-part="match" data-ui="highlight" key={index}>
-          {run.text}
-        </mark>
+    /* The spans the query matched, from the same collator the ranker used,
+       drawn by the `highlight` family inside this family's label. */
+    const labelNode =
+      resolved.highlightMatch && currentQuery.trim() !== '' ? (
+        <Highlight locale={locale} query={currentQuery} text={item.label} />
       ) : (
-        <span key={index}>{run.text}</span>
-      ),
-    );
+        item.label
+      );
     const shortcut = item.children === undefined ? item.shortcut : undefined;
 
     const content =

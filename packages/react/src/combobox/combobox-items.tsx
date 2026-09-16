@@ -1,7 +1,8 @@
-import { splitByMatch } from '@slotted/core/collection';
-import { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { matchRanges } from '@slotted/core/highlight';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 
+import { Highlight } from '../highlight';
 import { useCombobox } from './combobox';
 import type { ComboboxGroupProps, ComboboxItemProps } from './combobox.types';
 
@@ -45,28 +46,20 @@ export function ComboboxItem({
   }, [combobox, node, text, value]);
 
   /**
-   * The label, split into the runs the query matched and the runs it did not,
-   * from the same collator the filter used. An `indexOf` beside a
-   * locale-sensitive filter marks nothing on the row it has just matched, and
-   * the reader is left asking why an option with no visible match is in the
-   * list.
+   * The spans the query matched, from the same collator the filter used, drawn
+   * by the `highlight` family inside this family's label. An `indexOf` beside
+   * a locale-sensitive filter marks nothing on the row it has just matched,
+   * and the reader is left asking why an option with no visible match is in
+   * the list.
    */
   const marked = useMemo((): ReactNode => {
     if (!combobox.highlightMatch || combobox.query === '' || text === undefined) return children;
-    const runs = splitByMatch(text, combobox.query, { locale: combobox.locale });
-    /* `some(matched)` rather than a length check: a query that matches the whole
-       label returns exactly one run, and reading "one run" as "no match" left
-       the option a reader had typed in full as the only one with no mark. */
-    if (!runs.some((run) => run.matched)) return children;
-    return runs.map((run, index) =>
-      run.matched ? (
-        <mark data-part="match" data-ui="highlight" key={index}>
-          {run.text}
-        </mark>
-      ) : (
-        <Fragment key={index}>{run.text}</Fragment>
-      ),
-    );
+    const ranges = matchRanges(text, combobox.query, { locale: combobox.locale });
+    /* An option the query did not touch — a server-filtered list, or
+       `autocomplete="none"` — keeps whatever the consumer wrote, which may be
+       more than its text. */
+    if (ranges.length === 0) return children;
+    return <Highlight ranges={ranges} text={text} />;
   }, [children, combobox.highlightMatch, combobox.locale, combobox.query, text]);
 
   /* The filter cannot judge an option whose label is not text, so it keeps it. */

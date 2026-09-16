@@ -24,6 +24,7 @@ import {
 
 import { SlDialog, SlDialogTitle } from '@slotted/angular/dialog';
 import type { DialogChangeRequest, DialogDismissPolicy } from '@slotted/angular/dialog';
+import { SlHighlight } from '@slotted/angular/highlight';
 import { injectKbdPlatform, SlShortcut } from '@slotted/angular/kbd';
 import { moveIndex, splitByMatch } from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
@@ -126,10 +127,9 @@ export class SlCommandPaletteEmpty {
   exportAs: 'slCommandPalette',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [NgTemplateOutlet, SlDialog, SlDialogTitle, SlShortcut],
+  imports: [NgTemplateOutlet, SlDialog, SlDialogTitle, SlHighlight, SlShortcut],
   styleUrls: [
     '../../../styles/src/command-palette/command-palette.css',
-    '../../../styles/src/highlight/highlight.css',
     '../../../styles/src/skeleton/skeleton.css',
     '../../../styles/src/spinner/spinner.css',
   ],
@@ -373,12 +373,10 @@ export class SlCommandPaletteEmpty {
       } @else {
         <span data-part="icon"></span>
         <span data-part="label">
-          @for (run of runsOf(item); track $index) {
-            @if (run.matched) {
-              <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
-            } @else {
-              <span>{{ run.text }}</span>
-            }
+          @if (marking()) {
+            <span slHighlight [text]="item.label" [query]="query()" [locale]="locale()"></span>
+          } @else {
+            {{ item.label }}
           }
         </span>
         @if (item.description; as description) {
@@ -827,6 +825,16 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
     return section.recent ? (this.recentLabel() ?? this.defaults.recentLabel) : section.label;
   }
 
+  /** Whether the rows mark the query: the family's own switch, and a query to mark. */
+  protected readonly marking = computed(
+    () => this.resolvedHighlightMatch() && this.query().trim() !== '',
+  );
+
+  /**
+   * The runs of a row's label, handed to a consumer's own row template as
+   * `runs`. The default row renders the `highlight` family instead; the
+   * context keeps the runs for a template written before wave 10.
+   */
   protected runsOf(item: Item) {
     const query = this.query();
     if (!this.resolvedHighlightMatch() || query.trim() === '') {

@@ -129,7 +129,8 @@ const anatomy: AnatomyRow[] = [
     part: 'match',
     element: 'mark',
     required: false,
-    purpose: 'The run of the label the query matched, worn as data-ui="highlight".',
+    purpose:
+      'The run of the label the query matched: the match part of the highlight family, whose root sits inside label.',
   },
   {
     part: 'description',
@@ -411,7 +412,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'Your trigger, your rows',
       source:
-        '<button slButton tone="secondary" variant="outline" [slCommandPaletteTrigger]="palette">\n  Search people <kbd slKbd size="sm">⌘K</kbd>\n</button>\n<sl-command-palette #palette="slCommandPalette" [items]="people">\n  <ng-template slCommandPaletteItem let-item let-runs="runs">\n    <span data-part="icon"><sl-avatar [name]="item.label" size="xs" /></span>\n    <span data-part="label">\n      @for (run of runs; track $index) {\n        @if (run.matched) {\n          <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>\n        } @else {\n          {{ run.text }}\n        }\n      }\n    </span>\n  </ng-template>\n</sl-command-palette>',
+        '<button slButton tone="secondary" variant="outline" [slCommandPaletteTrigger]="palette">\n  Search people <kbd slKbd size="sm">⌘K</kbd>\n</button>\n<sl-command-palette #palette="slCommandPalette" [items]="people">\n  <ng-template slCommandPaletteItem let-item let-query="query">\n    <span data-part="icon"><sl-avatar [name]="item.label" size="xs" /></span>\n    <span data-part="label">\n      <span slHighlight [text]="item.label" [query]="query"></span>\n    </span>\n  </ng-template>\n</sl-command-palette>',
     }),
   },
   {

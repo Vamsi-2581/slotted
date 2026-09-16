@@ -13,7 +13,9 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 
-import { splitByMatch } from '@slotted/core/collection';
+import { matchRanges } from '@slotted/core/highlight';
+
+import { SlHighlight } from '@slotted/angular/highlight';
 
 import { SlSelect } from './select';
 import type { SelectOptionValue } from './select-defaults';
@@ -36,6 +38,7 @@ import type { SelectOptionValue } from './select-defaults';
   exportAs: 'slSelectItem',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  imports: [SlHighlight],
   host: {
     'data-part': 'item',
     role: 'option',
@@ -60,12 +63,10 @@ import type { SelectOptionValue } from './select-defaults';
     }
     <span data-part="label">
       @if (label(); as text) {
-        @for (run of runs(text); track $index) {
-          @if (run.matched) {
-            <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
-          } @else {
-            <ng-container>{{ run.text }}</ng-container>
-          }
+        @if (ranges(text).length > 0) {
+          <span slHighlight [text]="text" [ranges]="ranges(text)"></span>
+        } @else {
+          {{ text }}
         }
       } @else {
         <ng-content />
@@ -135,16 +136,14 @@ export class SlSelectItem {
   });
 
   /**
-   * The label split into the runs the query matched and the runs it did not,
-   * from the same collator the filter used. An `indexOf` beside a
-   * locale-sensitive filter marks nothing on the row it has just matched.
+   * The spans the query matched, from the same collator the filter used, drawn
+   * by the `highlight` family inside this family's label. An `indexOf` beside
+   * a locale-sensitive filter marks nothing on the row it has just matched.
    */
-  runs(text: string) {
+  ranges(text: string) {
     const query = this.select.query();
-    if (!this.select.resolvedHighlightMatch() || query === '') {
-      return [{ text, matched: false }];
-    }
-    return splitByMatch(text, query, { locale: this.select.locale() });
+    if (!this.select.resolvedHighlightMatch() || query === '') return [];
+    return matchRanges(text, query, { locale: this.select.locale() });
   }
 
   constructor() {

@@ -161,10 +161,7 @@ function sameKeys(a: readonly string[], b: readonly string[]) {
   standalone: true,
   exportAs: 'slListbox',
   imports: [NgTemplateOutlet, SlListboxGroup, SlListboxOption],
-  styleUrls: [
-    '../../../styles/src/listbox/listbox.css',
-    '../../../styles/src/highlight/highlight.css',
-  ],
+  styleUrls: ['../../../styles/src/listbox/listbox.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [

@@ -136,7 +136,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'match',
-    element: 'mark with data-ui="highlight"',
+    element: 'mark, the match part of the highlight family, whose root sits inside label',
     required: false,
     purpose:
       'The span of a label the query matched, found by the same collator the filter used — an indexOf beside a locale-sensitive filter marks nothing on the row it has just matched. The mark is the shared highlight sheet\u2019s, so every list a reader types into says the same thing about the same span, and it changes no metric of the text around it.',

@@ -1,7 +1,8 @@
-import { splitByMatch } from '@slotted/core/collection';
-import { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { matchRanges } from '@slotted/core/highlight';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 
+import { Highlight } from '../highlight';
 import { useMultiSelect } from './multi-select';
 import type { MultiSelectGroupProps, MultiSelectItemProps } from './multi-select.types';
 
@@ -46,17 +47,11 @@ export function MultiSelectItem({
   const marked = useMemo((): ReactNode => {
     if (!multiSelect.highlightMatch || multiSelect.query === '' || text === undefined)
       return children;
-    const runs = splitByMatch(text, multiSelect.query, { locale: multiSelect.locale });
-    if (!runs.some((run) => run.matched)) return children;
-    return runs.map((run, index) =>
-      run.matched ? (
-        <mark data-part="match" data-ui="highlight" key={index}>
-          {run.text}
-        </mark>
-      ) : (
-        <Fragment key={index}>{run.text}</Fragment>
-      ),
-    );
+    const ranges = matchRanges(text, multiSelect.query, { locale: multiSelect.locale });
+    /* An option the query did not touch — a server-filtered list — keeps
+       whatever the consumer wrote, which may be more than its text. */
+    if (ranges.length === 0) return children;
+    return <Highlight ranges={ranges} text={text} />;
   }, [children, multiSelect.highlightMatch, multiSelect.locale, multiSelect.query, text]);
 
   /* The filter cannot judge an option whose label is not text, so it keeps it. */

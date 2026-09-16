@@ -120,17 +120,17 @@ const pressOption = (fixture: ComponentFixture<unknown>, target: HTMLElement) =>
 
 describe('SlCombobox', () => {
   /**
-   * R6/CB6: the span the query found is the shared mark. It wears
-   * `data-ui='highlight'` beside this family's own part, so one sheet paints
-   * what every list a reader types into found, and the same element is written
-   * here, in React, and in the harness fragment.
+   * R6/CB6: the span the query found is the `highlight` family's. Its root
+   * sits inside this family's label and the `mark` is its part, so one sheet
+   * paints what every list a reader types into found, and the same anatomy is
+   * written here, in React, and in the harness fragment.
    */
   describe('the marked span', () => {
     beforeEach(async () => {
       await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
     });
 
-    it('wears the shared highlight identifier', async () => {
+    it('renders the highlight family inside the label', async () => {
       const fixture = TestBed.createComponent(Host);
       fixture.detectChanges();
       field().focus();
@@ -143,7 +143,9 @@ describe('SlCombobox', () => {
       expect(marks().length).toBeGreaterThan(0);
       for (const mark of marks()) {
         expect(mark.tagName).toBe('MARK');
-        expect(mark.getAttribute('data-ui')).toBe('highlight');
+        expect(mark.hasAttribute('data-ui')).toBe(false);
+        expect(mark.parentElement?.getAttribute('data-ui')).toBe('highlight');
+        expect(mark.parentElement?.parentElement?.getAttribute('data-part')).toBe('label');
       }
     });
   });

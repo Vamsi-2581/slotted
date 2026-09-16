@@ -588,7 +588,10 @@ describe('Select', () => {
       await waitFor(() => expect(labels()).toEqual(['Blueberry', 'Raspberry']));
       const marks = screen.getAllByText('berr');
       expect(marks).toHaveLength(2);
-      for (const mark of marks) expect(mark).toHaveAttribute('data-ui', 'highlight');
+      for (const mark of marks) {
+        expect(mark).toHaveAttribute('data-part', 'match');
+        expect(mark.parentElement).toHaveAttribute('data-ui', 'highlight');
+      }
     });
 
     /** The reader typed four characters and pressed Enter; they mean the first row they can see. */

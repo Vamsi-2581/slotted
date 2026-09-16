@@ -165,7 +165,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'match',
-    element: 'mark with data-ui="highlight"',
+    element: 'mark, the match part of the highlight family, whose root sits inside label',
     required: false,
     purpose:
       'The span the query found, painted by the shared highlight sheet so every list a reader types into says the same thing about the same span.',

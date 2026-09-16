@@ -9,7 +9,6 @@
  */
 import '@slotted/styles/multi-select/multi-select.css';
 import '@slotted/styles/tag/tag.css';
-import '@slotted/styles/highlight/highlight.css';
 import '@slotted/styles/spinner/spinner.css';
 import '@slotted/styles/skeleton/skeleton.css';
 

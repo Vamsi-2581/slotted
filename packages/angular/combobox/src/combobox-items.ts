@@ -1,4 +1,4 @@
-import { splitByMatch } from '@slotted/core/collection';
+import { matchRanges } from '@slotted/core/highlight';
 import {
   afterRenderEffect,
   booleanAttribute,
@@ -13,6 +13,8 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+
+import { SlHighlight } from '@slotted/angular/highlight';
 
 import { SlCombobox } from './combobox';
 import type { ComboboxOptionValue } from './combobox-defaults';
@@ -36,6 +38,7 @@ import type { ComboboxOptionValue } from './combobox-defaults';
   exportAs: 'slComboboxItem',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  imports: [SlHighlight],
   host: {
     'data-part': 'item',
     role: 'option',
@@ -59,12 +62,10 @@ import type { ComboboxOptionValue } from './combobox-defaults';
       <span data-part="icon">{{ icon() }}</span>
     }
     <span data-part="label">
-      @for (run of runs(); track $index) {
-        @if (run.matched) {
-          <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
-        } @else {
-          <ng-container>{{ run.text }}</ng-container>
-        }
+      @if (ranges().length > 0) {
+        <span slHighlight [text]="label()" [ranges]="ranges()"></span>
+      } @else {
+        {{ label() }}
       }
     </span>
     @if (description()) {
@@ -94,16 +95,14 @@ export class SlComboboxItem {
   readonly visible = computed(() => this.combobox.matches(this.label()));
 
   /**
-   * The label split into the runs the query matched and the runs it did not,
-   * from the same collator the filter used. An `indexOf` beside a
-   * locale-sensitive filter marks nothing on the row it has just matched.
+   * The spans the query matched, from the same collator the filter used, drawn
+   * by the `highlight` family inside this family's label. An `indexOf` beside
+   * a locale-sensitive filter marks nothing on the row it has just matched.
    */
-  readonly runs = computed(() => {
+  readonly ranges = computed(() => {
     const query = this.combobox.query();
-    if (!this.combobox.resolvedHighlightMatch() || query === '') {
-      return [{ text: this.label(), matched: false }];
-    }
-    return splitByMatch(this.label(), query, { locale: this.combobox.locale() });
+    if (!this.combobox.resolvedHighlightMatch() || query === '') return [];
+    return matchRanges(this.label(), query, { locale: this.combobox.locale() });
   });
 
   constructor() {

@@ -138,7 +138,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'match',
-    element: 'mark with data-ui="highlight"',
+    element: 'mark, the match part of the highlight family, whose root sits inside label',
     required: false,
     purpose:
       'The span of a label the query matched, found by the same collator the filter used. It is drawn only for an option given a label input: a split needs the text before the view exists, and Angular cannot read projected content that has not been created.',

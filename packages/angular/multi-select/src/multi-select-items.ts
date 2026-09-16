@@ -1,4 +1,4 @@
-import { splitByMatch } from '@slotted/core/collection';
+import { matchRanges } from '@slotted/core/highlight';
 import {
   afterRenderEffect,
   booleanAttribute,
@@ -13,6 +13,8 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+
+import { SlHighlight } from '@slotted/angular/highlight';
 
 import { SlMultiSelect } from './multi-select';
 import type { MultiSelectOptionValue } from './multi-select-defaults';
@@ -39,6 +41,7 @@ import type { MultiSelectOptionValue } from './multi-select-defaults';
   exportAs: 'slMultiSelectItem',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  imports: [SlHighlight],
   host: {
     'data-part': 'item',
     role: 'option',
@@ -62,12 +65,10 @@ import type { MultiSelectOptionValue } from './multi-select-defaults';
       <span data-part="icon">{{ icon() }}</span>
     }
     <span data-part="label">
-      @for (run of runs(); track $index) {
-        @if (run.matched) {
-          <mark data-part="match" data-ui="highlight">{{ run.text }}</mark>
-        } @else {
-          <ng-container>{{ run.text }}</ng-container>
-        }
+      @if (ranges().length > 0) {
+        <span slHighlight [text]="label()" [ranges]="ranges()"></span>
+      } @else {
+        {{ label() }}
       }
     </span>
     @if (description()) {
@@ -105,12 +106,15 @@ export class SlMultiSelectItem {
       !(this.selected() && this.multiSelect.resolvedChosenOptions() === 'hide'),
   );
 
-  readonly runs = computed(() => {
+  /**
+   * The spans the query matched, from the same collator the filter used, drawn
+   * by the `highlight` family inside this family's label. An `indexOf` beside
+   * a locale-sensitive filter marks nothing on the row it has just matched.
+   */
+  readonly ranges = computed(() => {
     const query = this.multiSelect.query();
-    if (!this.multiSelect.resolvedHighlightMatch() || query === '') {
-      return [{ text: this.label(), matched: false }];
-    }
-    return splitByMatch(this.label(), query, { locale: this.multiSelect.locale() });
+    if (!this.multiSelect.resolvedHighlightMatch() || query === '') return [];
+    return matchRanges(this.label(), query, { locale: this.multiSelect.locale() });
   });
 
   constructor() {

@@ -529,7 +529,9 @@ describe('SlSelect, searching', () => {
     ]);
     const marks = [...document.querySelectorAll("[data-part='match']")];
     expect(marks).toHaveLength(2);
-    expect(marks.every((mark) => mark.getAttribute('data-ui') === 'highlight')).toBe(true);
+    expect(marks.every((mark) => mark.parentElement?.getAttribute('data-ui') === 'highlight')).toBe(
+      true,
+    );
   });
 
   it('moves the highlight onto the first surviving option as the query changes', () => {

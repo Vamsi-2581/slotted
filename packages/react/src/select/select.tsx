@@ -1,5 +1,4 @@
 import '@slotted/styles/select/select.css';
-import '@slotted/styles/highlight/highlight.css';
 
 import { createFilter } from '@slotted/core/collection';
 import { createControllable } from '@slotted/core/state';

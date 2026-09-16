@@ -127,7 +127,6 @@ const same = (a: readonly string[], b: readonly string[]) =>
   styleUrls: [
     '../../../styles/src/multi-select/multi-select.css',
     '../../../styles/src/tag/tag.css',
-    '../../../styles/src/highlight/highlight.css',
     '../../../styles/src/spinner/spinner.css',
     '../../../styles/src/skeleton/skeleton.css',
   ],

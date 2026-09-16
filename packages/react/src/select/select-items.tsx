@@ -1,7 +1,8 @@
-import { splitByMatch } from '@slotted/core/collection';
-import { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { matchRanges } from '@slotted/core/highlight';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 
+import { Highlight } from '../highlight';
 import { useSelect } from './select';
 import type { SelectGroupProps, SelectItemProps } from './select.types';
 
@@ -65,27 +66,18 @@ export function SelectItem({
    * by the same collator the filter used. An `indexOf` beside a
    * locale-sensitive filter marks nothing on the row it has just matched, and
    * the reader is left asking why an option with no visible match is in the
-   * list. The mark itself is `highlight/highlight.css`'s, worn as `data-ui`
-   * beside this family's own part, so every list a reader types into says the
-   * same thing about the same span.
+   * list. The mark itself is the `highlight` family's, rendered inside this
+   * family's label, so every list a reader types into says the same thing
+   * about the same span.
    */
   const marked = useMemo((): ReactNode => {
     if (!select.search || !select.highlightMatch) return children;
     if (select.query === '' || text === undefined) return children;
-    const runs = splitByMatch(text, select.query, { locale: select.locale });
-    /* `some(matched)` rather than a length check: a query matching the whole
-       label returns exactly one run, and reading "one run" as "no match" left
-       the option a reader had typed in full as the only one with no mark. */
-    if (!runs.some((run) => run.matched)) return children;
-    return runs.map((run, index) =>
-      run.matched ? (
-        <mark data-part="match" data-ui="highlight" key={index}>
-          {run.text}
-        </mark>
-      ) : (
-        <Fragment key={index}>{run.text}</Fragment>
-      ),
-    );
+    const ranges = matchRanges(text, select.query, { locale: select.locale });
+    /* An option the query did not touch — a server-filtered list — keeps
+       whatever the consumer wrote, which may be more than its text. */
+    if (ranges.length === 0) return children;
+    return <Highlight ranges={ranges} text={text} />;
   }, [children, select.highlightMatch, select.locale, select.query, select.search, text]);
 
   /* The filter cannot judge an option whose label is not text, so it keeps it. */

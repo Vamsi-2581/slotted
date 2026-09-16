@@ -1,5 +1,4 @@
 import '@slotted/styles/listbox/listbox.css';
-import '@slotted/styles/highlight/highlight.css';
 
 import {
   createCollection,

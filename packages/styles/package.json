@@ -51,6 +51,8 @@
     "./currency-field/tokens.json": "./src/currency-field/currency-field.tokens.json",
     "./date-field/date-field.css": "./src/date-field/date-field.css",
     "./date-field/tokens.json": "./src/date-field/date-field.tokens.json",
+    "./data-grid/data-grid.css": "./src/data-grid/data-grid.css",
+    "./data-grid/tokens.json": "./src/data-grid/data-grid.tokens.json",
     "./date-picker/date-picker.css": "./src/date-picker/date-picker.css",
     "./date-picker/tokens.json": "./src/date-picker/date-picker.tokens.json",
     "./date-range-picker/date-range-picker.css": "./src/date-range-picker/date-range-picker.css",

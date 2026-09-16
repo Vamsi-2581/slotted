@@ -41,6 +41,8 @@
     "./collapsible/tokens.json": "./src/collapsible/collapsible.tokens.json",
     "./combobox/combobox.css": "./src/combobox/combobox.css",
     "./combobox/tokens.json": "./src/combobox/combobox.tokens.json",
+    "./command-palette/command-palette.css": "./src/command-palette/command-palette.css",
+    "./command-palette/tokens.json": "./src/command-palette/command-palette.tokens.json",
     "./container/container.css": "./src/container/container.css",
     "./container/tokens.json": "./src/container/container.tokens.json",
     "./currency-field/currency-field.css": "./src/currency-field/currency-field.css",

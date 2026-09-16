@@ -1,0 +1,695 @@
+<!--
+  The DOM the two bindings write, by hand. Every part the contract declares
+  appears at least once, and every state is staged: current, open (a section,
+  the panel, the search), disabled, and the three steps the bar folds at. The
+  logo is an inline SVG because a consumer's mark is what a mark is; every mark
+  the family draws itself — the chevron, the ellipsis, the magnifier, the
+  question, the bell — is a mask from the glyph scale.
+
+  The default scene declares two widths above the ones the page ships, because
+  the first step folds at 1024 and the three defaults all sit under it.
+-->
+
+<section data-scene="default" data-widths="240 420 720 1024 1280">
+  <header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
+    <a data-part="skip" href="#conteudo">Saltar para o conteúdo</a>
+    <div data-part="brand">
+      <a data-part="home" href="#inicio">
+        <span data-part="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect
+              x="3"
+              y="3"
+              width="18"
+              height="18"
+              rx="5"
+              fill="var(--slotted-tone-accent-solid)"
+            />
+            <path
+              d="M7 15.5 12 7l5 8.5"
+              stroke="var(--slotted-tone-accent-on-solid)"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <span data-part="name">Aurora Logística</span>
+      </a>
+    </div>
+    <div data-part="context">
+      <span data-ui="badge" data-part="root" data-tone="warning" data-variant="soft" data-size="xs"
+        >Homologação</span
+      >
+    </div>
+    <nav data-part="nav" aria-label="Navegação">
+      <ul data-part="list">
+        <li data-part="item" data-priority="high" data-current="">
+          <a data-part="link" href="#painel" aria-current="page" data-current="">Painel</a>
+        </li>
+        <li data-part="item" data-priority="high">
+          <a data-part="link" href="#cargas">Cargas</a>
+        </li>
+        <li data-part="item" data-priority="medium">
+          <a data-part="link" href="#rotas">Rotas</a>
+        </li>
+        <li data-part="item" data-priority="medium">
+          <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+            Frota<span data-part="indicator" aria-hidden="true"></span>
+          </button>
+        </li>
+        <li data-part="item" data-priority="low">
+          <a data-part="link" href="#relatorios">Relatórios</a>
+        </li>
+        <li data-part="item" data-priority="low">
+          <a data-part="link" href="#faturacao">Faturação</a>
+        </li>
+        <li data-part="item">
+          <button
+            data-part="more"
+            type="button"
+            aria-label="Mais"
+            aria-expanded="false"
+            aria-controls="tn-panel"
+          ></button>
+        </li>
+      </ul>
+    </nav>
+    <div data-part="panel" id="tn-panel">
+      <ul data-part="panel-list"></ul>
+    </div>
+    <div data-part="search">
+      <div data-ui="text-field" data-part="root" data-size="md" data-variant="subtle">
+        <span data-part="start" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4.5 4.5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <input data-part="input" type="search" placeholder="Procurar cargas, clientes, rotas…" />
+        <span data-part="end" aria-hidden="true">
+          <kbd data-ui="kbd" data-part="root" data-key="mod" data-size="xs" data-variant="soft">
+            <span data-part="legend" aria-hidden="true" data-legend="symbol">⌘</span
+            ><span data-part="name">Command</span></kbd
+          ><kbd data-ui="kbd" data-part="root" data-key="k" data-size="xs" data-variant="soft">
+            <span data-part="legend" aria-hidden="true">K</span><span data-part="name">K</span>
+          </kbd>
+        </span>
+      </div>
+      <button data-part="search-close" type="button" aria-label="Fechar procura"></button>
+    </div>
+    <div data-part="actions">
+      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+      <a data-part="help" href="#ajuda">Ajuda</a>
+      <button data-part="notifications" type="button" aria-haspopup="dialog">
+        <span data-part="count">3</span>
+      </button>
+      <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+        <span
+          data-ui="avatar"
+          data-part="root"
+          data-size="xs"
+          data-shape="circle"
+          data-tone="accent"
+          data-variant="soft"
+          data-status="idle"
+          ><span data-part="fallback">AB</span></span
+        >
+      </button>
+    </div>
+  </header>
+</section>
+
+<!--
+  The panel open at a width where every destination has folded, plus the
+  context and the help: what the script moves is written where it lands. The
+  scene is `data-fixed` because the panel hangs below the bar.
+-->
+<section data-scene="panel" data-fixed>
+  <div style="block-size: 20rem">
+    <header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
+      <div data-part="brand">
+        <a data-part="home" href="#inicio">
+          <span data-part="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="5"
+                fill="var(--slotted-tone-accent-solid)"
+              />
+              <path
+                d="M7 15.5 12 7l5 8.5"
+                stroke="var(--slotted-tone-accent-on-solid)"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span data-part="name">Aurora Logística</span>
+        </a>
+      </div>
+      <nav data-part="nav" aria-label="Navegação">
+        <ul data-part="list">
+          <li data-part="item">
+            <button
+              data-part="more"
+              type="button"
+              aria-label="Mais, 6 destinos"
+              aria-expanded="true"
+              aria-controls="tn-panel-open"
+              data-overflow="6"
+              data-current=""
+              data-open=""
+            ></button>
+          </li>
+        </ul>
+      </nav>
+      <div data-part="panel" id="tn-panel-open" data-open="">
+        <div data-part="context">
+          <span
+            data-ui="badge"
+            data-part="root"
+            data-tone="warning"
+            data-variant="soft"
+            data-size="xs"
+            >Homologação</span
+          >
+        </div>
+        <ul data-part="panel-list">
+          <li data-part="item" data-priority="high" data-collapsed="" data-current="">
+            <a data-part="link" href="#painel" aria-current="page" data-current="">Painel</a>
+          </li>
+          <li data-part="item" data-priority="high" data-collapsed="">
+            <a data-part="link" href="#cargas">Cargas</a>
+          </li>
+          <li data-part="item" data-priority="medium" data-collapsed="">
+            <a data-part="link" href="#rotas">Rotas</a>
+          </li>
+          <li data-part="item" data-priority="medium" data-collapsed="">
+            <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+              Frota<span data-part="indicator" aria-hidden="true"></span>
+            </button>
+          </li>
+          <li data-part="item" data-priority="low" data-collapsed="">
+            <a data-part="link" href="#relatorios">Relatórios</a>
+          </li>
+          <li data-part="item" data-priority="low" data-collapsed="" data-disabled="">
+            <a data-part="link" href="#faturacao" aria-disabled="true">Faturação</a>
+          </li>
+        </ul>
+        <a data-part="help" href="#ajuda">Ajuda</a>
+      </div>
+      <div data-part="actions">
+        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+        <button data-part="notifications" type="button" aria-haspopup="dialog">
+          <span data-part="count">12</span>
+        </button>
+        <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+          <span
+            data-ui="avatar"
+            data-part="root"
+            data-size="xs"
+            data-shape="circle"
+            data-tone="accent"
+            data-variant="soft"
+            data-status="idle"
+            ><span data-part="fallback">AB</span></span
+          >
+        </button>
+      </div>
+    </header>
+  </div>
+</section>
+
+<!-- The search open below 768 pixels: the field takes the bar and the close stands at its end. -->
+<section data-scene="search">
+  <header data-ui="top-navigation" data-part="root" data-size="md" data-frame data-search-open="">
+    <div data-part="brand">
+      <a data-part="home" href="#inicio">
+        <span data-part="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect
+              x="3"
+              y="3"
+              width="18"
+              height="18"
+              rx="5"
+              fill="var(--slotted-tone-accent-solid)"
+            />
+          </svg>
+        </span>
+        <span data-part="name">Aurora Logística</span>
+      </a>
+    </div>
+    <nav data-part="nav" aria-label="Navegação">
+      <ul data-part="list">
+        <li data-part="item" data-priority="high">
+          <a data-part="link" href="#painel">Painel</a>
+        </li>
+        <li data-part="item">
+          <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+        </li>
+      </ul>
+    </nav>
+    <div data-part="search">
+      <div data-ui="text-field" data-part="root" data-size="md" data-variant="subtle">
+        <span data-part="start" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="m16 16 4.5 4.5" stroke-linecap="round" />
+          </svg>
+        </span>
+        <input data-part="input" type="search" value="Lisboa → Porto" />
+      </div>
+      <button data-part="search-close" type="button" aria-label="Fechar procura"></button>
+    </div>
+    <div data-part="actions">
+      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+      <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+        <span
+          data-ui="avatar"
+          data-part="root"
+          data-size="xs"
+          data-shape="circle"
+          data-tone="accent"
+          data-variant="soft"
+          data-status="idle"
+          ><span data-part="fallback">AB</span></span
+        >
+      </button>
+    </div>
+  </header>
+</section>
+
+<!--
+  The states a destination can be in, side by side, at every width: current,
+  a section open, disabled, and `more` carrying the current mark because the
+  destination it holds is folded.
+-->
+<section data-scene="states" data-widths="240 420 720 1280">
+  <header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
+    <div data-part="brand">
+      <span data-part="home">
+        <span data-part="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect
+              x="3"
+              y="3"
+              width="18"
+              height="18"
+              rx="5"
+              fill="var(--slotted-tone-accent-solid)"
+            />
+          </svg>
+        </span>
+        <span data-part="name">Cadence</span>
+      </span>
+    </div>
+    <nav data-part="nav" aria-label="Navegação">
+      <ul data-part="list">
+        <li data-part="item" data-priority="high" data-current="">
+          <a data-part="link" href="#corrente" aria-current="page" data-current="">Corrente</a>
+        </li>
+        <li data-part="item" data-priority="high">
+          <button
+            data-part="trigger"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="true"
+            data-open=""
+          >
+            Aberta<span data-part="indicator" aria-hidden="true"></span>
+          </button>
+        </li>
+        <li data-part="item" data-priority="high" data-disabled="">
+          <a data-part="link" href="#desativada" aria-disabled="true">Desativada</a>
+        </li>
+        <li data-part="item" data-priority="high">
+          <button
+            data-part="trigger"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            disabled
+          >
+            Secção desativada<span data-part="indicator" aria-hidden="true"></span>
+          </button>
+        </li>
+        <li data-part="item" data-priority="low">
+          <a data-part="link" href="#dobrada">Dobrada</a>
+        </li>
+        <li data-part="item">
+          <button
+            data-part="more"
+            type="button"
+            aria-label="Mais, 1 destino"
+            aria-expanded="false"
+            data-overflow="1"
+            data-current=""
+          ></button>
+        </li>
+      </ul>
+    </nav>
+    <div data-part="actions">
+      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+      <button data-part="help" type="button" aria-haspopup="dialog" data-open="">Ajuda</button>
+      <button data-part="notifications" type="button" aria-haspopup="dialog">
+        <span data-part="count">128</span>
+      </button>
+      <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta" disabled>
+        <span
+          data-ui="avatar"
+          data-part="root"
+          data-size="xs"
+          data-shape="circle"
+          data-tone="secondary"
+          data-variant="soft"
+          data-status="idle"
+          ><span data-part="fallback">JR</span></span
+        >
+      </button>
+    </div>
+  </header>
+</section>
+
+<!-- Inside the shell: a div in the banner, no frame, the brand on the shell's row inset over the column's marks. -->
+<section data-scene="shell" data-widths="240 420 720 1024">
+  <div style="block-size: 12rem; border: 1px dashed var(--slotted-border-strong)">
+    <div
+      data-ui="app-shell"
+      data-part="root"
+      data-primary="banner"
+      data-canvas="inset"
+      data-nav-mode="inline"
+      data-nav-side="start"
+      data-nav-size="md"
+      data-collapsed-to="rail"
+      data-scroll="content"
+      data-dividers
+      data-open
+      style="block-size: 100%"
+    >
+      <header data-part="banner">
+        <div data-ui="top-navigation" data-part="root" data-size="md">
+          <div data-part="brand">
+            <button
+              data-part="nav-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="tn-shell-nav"
+              aria-label="Fechar navegação"
+            ></button>
+            <a data-part="home" href="#inicio">
+              <span data-part="mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="5"
+                    fill="var(--slotted-tone-accent-solid)"
+                  />
+                  <path
+                    d="M7 15.5 12 7l5 8.5"
+                    stroke="var(--slotted-tone-accent-on-solid)"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              <span data-part="name">Aurora Logística</span>
+            </a>
+          </div>
+          <nav data-part="nav" aria-label="Navegação">
+            <ul data-part="list">
+              <li data-part="item" data-priority="high" data-current="">
+                <a data-part="link" href="#painel" aria-current="page" data-current="">Painel</a>
+              </li>
+              <li data-part="item" data-priority="medium">
+                <a data-part="link" href="#cargas">Cargas</a>
+              </li>
+              <li data-part="item" data-priority="low">
+                <a data-part="link" href="#relatorios">Relatórios</a>
+              </li>
+              <li data-part="item">
+                <button
+                  data-part="more"
+                  type="button"
+                  aria-label="Mais"
+                  aria-expanded="false"
+                ></button>
+              </li>
+            </ul>
+          </nav>
+          <div data-part="search">
+            <div data-ui="text-field" data-part="root" data-size="md" data-variant="subtle">
+              <span data-part="start" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="11" cy="11" r="6.5" />
+                  <path d="m16 16 4.5 4.5" stroke-linecap="round" />
+                </svg>
+              </span>
+              <input data-part="input" type="search" placeholder="Procurar…" />
+            </div>
+            <button data-part="search-close" type="button" aria-label="Fechar procura"></button>
+          </div>
+          <div data-part="actions">
+            <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+            <a data-part="help" href="#ajuda">Ajuda</a>
+            <button data-part="notifications" type="button" aria-haspopup="dialog">
+              <span data-part="count">3</span>
+            </button>
+            <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
+              <span
+                data-ui="avatar"
+                data-part="root"
+                data-size="xs"
+                data-shape="circle"
+                data-tone="accent"
+                data-variant="soft"
+                data-status="idle"
+                ><span data-part="fallback">AB</span></span
+              >
+            </button>
+          </div>
+        </div>
+      </header>
+      <nav data-part="nav" id="tn-shell-nav" aria-label="Navegação principal">
+        <div data-part="nav-body"></div>
+      </nav>
+      <main data-part="main" id="conteudo" tabindex="-1"></main>
+    </div>
+  </div>
+</section>
+
+<!-- Three sizes, one bar each, at the width where nothing folds. -->
+<section data-scene="sizes" data-widths="240 420 720 1280">
+  <div data-ui="stack" data-part="root" data-gap="4">
+    <header data-ui="top-navigation" data-part="root" data-size="xs" data-frame>
+      <div data-part="brand">
+        <a data-part="home" href="#inicio">
+          <span data-part="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="5"
+                fill="var(--slotted-tone-accent-solid)"
+              />
+            </svg>
+          </span>
+          <span data-part="name">Pequena</span>
+        </a>
+      </div>
+      <nav data-part="nav" aria-label="Navegação">
+        <ul data-part="list">
+          <li data-part="item" data-priority="high" data-current="">
+            <a data-part="link" href="#a" aria-current="page" data-current="">Painel</a>
+          </li>
+          <li data-part="item" data-priority="high"><a data-part="link" href="#b">Cargas</a></li>
+          <li data-part="item">
+            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+          </li>
+        </ul>
+      </nav>
+      <div data-part="actions">
+        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+        <button data-part="notifications" type="button"><span data-part="count">3</span></button>
+        <button data-part="account" type="button" aria-label="Conta">
+          <span
+            data-ui="avatar"
+            data-part="root"
+            data-size="xs"
+            data-shape="circle"
+            data-tone="accent"
+            data-variant="soft"
+            data-status="idle"
+            ><span data-part="fallback">AB</span></span
+          >
+        </button>
+      </div>
+    </header>
+    <header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
+      <div data-part="brand">
+        <a data-part="home" href="#inicio">
+          <span data-part="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="5"
+                fill="var(--slotted-tone-accent-solid)"
+              />
+            </svg>
+          </span>
+          <span data-part="name">Média</span>
+        </a>
+      </div>
+      <nav data-part="nav" aria-label="Navegação">
+        <ul data-part="list">
+          <li data-part="item" data-priority="high" data-current="">
+            <a data-part="link" href="#a" aria-current="page" data-current="">Painel</a>
+          </li>
+          <li data-part="item" data-priority="high"><a data-part="link" href="#b">Cargas</a></li>
+          <li data-part="item">
+            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+          </li>
+        </ul>
+      </nav>
+      <div data-part="actions">
+        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+        <button data-part="notifications" type="button"><span data-part="count">3</span></button>
+        <button data-part="account" type="button" aria-label="Conta">
+          <span
+            data-ui="avatar"
+            data-part="root"
+            data-size="xs"
+            data-shape="circle"
+            data-tone="accent"
+            data-variant="soft"
+            data-status="idle"
+            ><span data-part="fallback">AB</span></span
+          >
+        </button>
+      </div>
+    </header>
+    <header data-ui="top-navigation" data-part="root" data-size="lg" data-frame>
+      <div data-part="brand">
+        <a data-part="home" href="#inicio">
+          <span data-part="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="5"
+                fill="var(--slotted-tone-accent-solid)"
+              />
+            </svg>
+          </span>
+          <span data-part="name">Grande</span>
+        </a>
+      </div>
+      <nav data-part="nav" aria-label="Navegação">
+        <ul data-part="list">
+          <li data-part="item" data-priority="high" data-current="">
+            <a data-part="link" href="#a" aria-current="page" data-current="">Painel</a>
+          </li>
+          <li data-part="item" data-priority="high"><a data-part="link" href="#b">Cargas</a></li>
+          <li data-part="item">
+            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+          </li>
+        </ul>
+      </nav>
+      <div data-part="actions">
+        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+        <button data-part="notifications" type="button"><span data-part="count">3</span></button>
+        <button data-part="account" type="button" aria-label="Conta">
+          <span
+            data-ui="avatar"
+            data-part="root"
+            data-size="md"
+            data-shape="circle"
+            data-tone="accent"
+            data-variant="soft"
+            data-status="idle"
+            ><span data-part="fallback">AB</span></span
+          >
+        </button>
+      </div>
+    </header>
+  </div>
+</section>
+
+<!-- Content the family did not choose: a long name, long labels, the account with a name beside the avatar. -->
+<section data-scene="content" data-widths="240 420 720 1280">
+  <header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
+    <div data-part="brand">
+      <a data-part="home" href="#inicio">
+        <span data-part="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect
+              x="3"
+              y="3"
+              width="18"
+              height="18"
+              rx="5"
+              fill="var(--slotted-tone-accent-solid)"
+            />
+          </svg>
+        </span>
+        <span data-part="name"
+          >Plataforma Integrada de Gestão de Operações Logísticas Internacionais</span
+        >
+      </a>
+    </div>
+    <nav data-part="nav" aria-label="Navegação">
+      <ul data-part="list">
+        <li data-part="item" data-priority="high" data-current="">
+          <a data-part="link" href="#a" aria-current="page" data-current=""
+            >Acompanhamento de encomendas</a
+          >
+        </li>
+        <li data-part="item" data-priority="medium">
+          <a data-part="link" href="#b">Planeamento de rotas</a>
+        </li>
+        <li data-part="item" data-priority="low">
+          <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+            Relatórios e indicadores<span data-part="indicator" aria-hidden="true"></span>
+          </button>
+        </li>
+        <li data-part="item">
+          <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+        </li>
+      </ul>
+    </nav>
+    <div data-part="actions">
+      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+      <button data-part="notifications" type="button"><span data-part="count">99+</span></button>
+      <button data-part="account" type="button" aria-haspopup="menu">
+        <span
+          data-ui="avatar"
+          data-part="root"
+          data-size="xs"
+          data-shape="circle"
+          data-tone="accent"
+          data-variant="soft"
+          data-status="idle"
+          ><span data-part="fallback">MB</span></span
+        >
+        <span>Maria Bartolomeu</span>
+      </button>
+    </div>
+  </header>
+</section>

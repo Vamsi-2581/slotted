@@ -175,6 +175,8 @@
     "./tree/tree.css": "./src/tree/tree.css",
     "./typography/tokens.json": "./src/typography/typography.tokens.json",
     "./typography/typography.css": "./src/typography/typography.css",
+    "./top-navigation/tokens.json": "./src/top-navigation/top-navigation.tokens.json",
+    "./top-navigation/top-navigation.css": "./src/top-navigation/top-navigation.css",
     "./upload/tokens.json": "./src/upload/upload.tokens.json",
     "./upload/upload.css": "./src/upload/upload.css",
     "./visually-hidden/tokens.json": "./src/visually-hidden/visually-hidden.tokens.json",

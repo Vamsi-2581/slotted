@@ -69,6 +69,10 @@
       "types": "./dist/types/focus/index.d.ts",
       "import": "./dist/focus.js"
     },
+    "./highlight": {
+      "types": "./dist/types/highlight/index.d.ts",
+      "import": "./dist/highlight.js"
+    },
     "./identity": {
       "types": "./dist/types/identity/index.d.ts",
       "import": "./dist/identity.js"

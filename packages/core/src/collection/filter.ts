@@ -15,6 +15,9 @@
  * Nothing here touches the DOM or a framework.
  */
 
+import { findMatch, highlightRuns, matchRanges as allRanges } from '../highlight';
+import type { HighlightRange } from '../highlight';
+
 export interface FilterOptions {
   /**
    * BCP 47. Undefined asks the runtime, which is what a component with no
@@ -39,27 +42,13 @@ export interface Filter {
 }
 
 /**
- * `Intl.Collator` compares two whole strings and cannot be asked whether one
- * appears inside the other, so a substring search is a scan of every window of
- * the query's length. Two strings can also differ in length and still be equal
- * to the collator — `ß` against `ss` at base sensitivity — so windows one
- * shorter and one longer are tried as well. The alternative, folding both
- * strings with `normalize('NFD')` and stripping combining marks, is an English
- * answer wearing a Unicode one: it turns `ø` into `ø` and leaves `ß` alone.
+ * The window scan lives in `../highlight` since wave 10, because the mark is
+ * the consumer that exists without a collection — a paragraph under a find
+ * bar — and the filter and the mark have to be decided by one scan: an option
+ * that passes here shows the span found there.
  */
-function scan(collator: Intl.Collator, label: string, query: string, anchored: boolean) {
-  const span = query.length;
-  const last = anchored ? 0 : label.length - span;
-  for (let start = 0; start <= Math.max(last, 0); start += 1) {
-    for (const width of [span, span - 1, span + 1]) {
-      if (width <= 0 || start + width > label.length) continue;
-      if (collator.compare(label.slice(start, start + width), query) === 0) {
-        return [start, start + width] as const;
-      }
-    }
-  }
-  return null;
-}
+const scan = (collator: Intl.Collator, label: string, query: string, anchored: boolean) =>
+  findMatch(collator, label, query, anchored);
 
 export function createFilter({ locale, sensitivity = 'base' }: FilterOptions = {}): Filter {
   const collator = new Intl.Collator(locale, { sensitivity, usage: 'search' });
@@ -73,55 +62,37 @@ export function createFilter({ locale, sensitivity = 'base' }: FilterOptions = {
 
 /**
  * The spans of `label` that `query` matched, in the label's own code units, so
- * a caller can mark them.
+ * a caller can mark them. Every occurrence since wave 10, which is what the
+ * `highlight` family marks by default; a caller wanting one span per query
+ * asks `@slotted/core/highlight` for `occurrences: 'first'`.
  *
  * The same collator finds them, which is the point: an `indexOf` beside a
  * locale-sensitive filter marks nothing on the row it just matched, and the
  * reader is left asking why an option with no visible match is in the list.
- *
- * One span per query, not one per word: a query is what the reader typed, and
- * splitting it into words would mark spans the filter never matched on.
  */
 export function matchRanges(
   label: string,
   query: string,
   options: FilterOptions = {},
-): readonly (readonly [number, number])[] {
-  const trimmed = query.trim();
-  if (trimmed === '' || label === '') return [];
-  const collator = new Intl.Collator(options.locale, {
-    sensitivity: options.sensitivity ?? 'base',
-    usage: 'search',
-  });
-  const found = scan(collator, label, trimmed, false);
-  return found === null ? [] : [found];
+): readonly HighlightRange[] {
+  return allRanges(label, query, options);
 }
 
 /**
  * The label split into the runs a caller renders: the ones the query matched
- * and the ones it did not, in order, with no empty run between them.
- *
- * A caller that walked the ranges itself would decide the boundaries again,
- * differently, in each of the two bindings — and the boundary is the whole of
- * what this returns.
+ * and the ones it did not, in order, with no empty run between them. It is
+ * `highlightRuns` from `@slotted/core/highlight` under the name the hosts
+ * knew it by, kept so a consumer that imported it here still resolves.
  */
 export function splitByMatch(
   label: string,
   query: string,
   options: FilterOptions = {},
 ): readonly { text: string; matched: boolean }[] {
-  const ranges = matchRanges(label, query, options);
-  if (ranges.length === 0) return [{ text: label, matched: false }];
-
-  const runs: { text: string; matched: boolean }[] = [];
-  let cursor = 0;
-  for (const [start, end] of ranges) {
-    if (start > cursor) runs.push({ text: label.slice(cursor, start), matched: false });
-    runs.push({ text: label.slice(start, end), matched: true });
-    cursor = end;
-  }
-  if (cursor < label.length) runs.push({ text: label.slice(cursor), matched: false });
-  return runs;
+  return highlightRuns(label, { ...options, query }).map(({ text, matched }) => ({
+    text,
+    matched,
+  }));
 }
 
 /**

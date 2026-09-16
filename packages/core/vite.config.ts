@@ -21,6 +21,7 @@ export default defineConfig({
         filter: resolve(import.meta.dirname, 'src/filter/index.ts'),
         form: resolve(import.meta.dirname, 'src/form/index.ts'),
         focus: resolve(import.meta.dirname, 'src/focus/index.ts'),
+        highlight: resolve(import.meta.dirname, 'src/highlight/index.ts'),
         identity: resolve(import.meta.dirname, 'src/identity/index.ts'),
         keys: resolve(import.meta.dirname, 'src/keys/index.ts'),
         'live-announcer': resolve(import.meta.dirname, 'src/live-announcer/index.ts'),

@@ -50,6 +50,7 @@ export default defineConfig({
         'list-item': resolve(import.meta.dirname, 'src/list-item/index.ts'),
         listbox: resolve(import.meta.dirname, 'src/listbox/index.ts'),
         'multi-select': resolve(import.meta.dirname, 'src/multi-select/index.ts'),
+        'otp-input': resolve(import.meta.dirname, 'src/otp-input/index.ts'),
         page: resolve(import.meta.dirname, 'src/page/index.ts'),
         'page-header': resolve(import.meta.dirname, 'src/page-header/index.ts'),
         popover: resolve(import.meta.dirname, 'src/popover/index.ts'),

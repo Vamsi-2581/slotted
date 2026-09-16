@@ -196,6 +196,10 @@
       "types": "./dist/types/multi-select/index.d.ts",
       "import": "./dist/multi-select.js"
     },
+    "./otp-input": {
+      "types": "./dist/types/otp-input/index.d.ts",
+      "import": "./dist/otp-input.js"
+    },
     "./page": {
       "types": "./dist/types/page/index.d.ts",
       "import": "./dist/page.js"

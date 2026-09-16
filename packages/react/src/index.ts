@@ -51,6 +51,7 @@ export * from './menu';
 export * from './menubar';
 export * from './multi-select';
 export * from './number-field';
+export * from './otp-input';
 export * from './page';
 export * from './page-header';
 export * from './pagination';

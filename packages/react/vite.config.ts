@@ -19,6 +19,7 @@ export default defineConfig({
         card: resolve(import.meta.dirname, 'src/card/index.ts'),
         'code-block': resolve(import.meta.dirname, 'src/code-block/index.ts'),
         combobox: resolve(import.meta.dirname, 'src/combobox/index.ts'),
+        'command-palette': resolve(import.meta.dirname, 'src/command-palette/index.ts'),
         container: resolve(import.meta.dirname, 'src/container/index.ts'),
         'date-field': resolve(import.meta.dirname, 'src/date-field/index.ts'),
         'date-picker': resolve(import.meta.dirname, 'src/date-picker/index.ts'),

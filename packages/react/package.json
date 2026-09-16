@@ -64,6 +64,10 @@
       "types": "./dist/types/combobox/index.d.ts",
       "import": "./dist/combobox.js"
     },
+    "./command-palette": {
+      "types": "./dist/types/command-palette/index.d.ts",
+      "import": "./dist/command-palette.js"
+    },
     "./container": {
       "types": "./dist/types/container/index.d.ts",
       "import": "./dist/container.js"

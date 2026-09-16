@@ -15,6 +15,7 @@ export * from './checkbox-group';
 export * from './code-block';
 export * from './collapsible';
 export * from './combobox';
+export * from './command-palette';
 export * from './container';
 export * from './currency-field';
 export * from './date-field';

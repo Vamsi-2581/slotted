@@ -1,0 +1,1011 @@
+import '@slotted/styles/command-palette/command-palette.css';
+import '@slotted/styles/highlight/highlight.css';
+import '@slotted/styles/skeleton/skeleton.css';
+import '@slotted/styles/spinner/spinner.css';
+
+import { moveIndex, splitByMatch } from '@slotted/core/collection';
+import { createCommandRanker, pushRecent, resolveCommands } from '@slotted/core/commands';
+import type { CommandRanker, CommandSection } from '@slotted/core/commands';
+import { isEditableTarget, matchesShortcut, parseShortcut, resolveKey } from '@slotted/core/keys';
+import type { KbdPlatform } from '@slotted/core/keys';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
+import { createPortalRoot } from '@slotted/core/portal';
+import { createControllable } from '@slotted/core/state';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import type { KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
+
+import { Dialog, DialogContent, DialogTrigger } from '../dialog';
+import type { DialogChangeRequest } from '../dialog';
+import { Shortcut } from '../kbd';
+import { useResolvedPlatform } from '../kbd/kbd-defaults';
+import { useCommandPaletteDefaults } from './command-palette-defaults';
+import type {
+  CommandPaletteHighlightReason,
+  CommandPaletteItem,
+  CommandPaletteOpenReason,
+  CommandPalettePagesReason,
+  CommandPalettePresentation,
+  CommandPaletteProps,
+  CommandPaletteQueryReason,
+  CommandPaletteSelectReason,
+  CommandPaletteSelectRequest,
+  CommandPaletteTriggerProps,
+} from './command-palette.types';
+
+/**
+ * A search that executes.
+ *
+ * The family is a `combobox` whose `listbox` popup is always visible, inside
+ * a `dialog` — or in line, inside whatever the consumer put it in. DOM focus
+ * stays on the input for the whole interaction and the list is walked with
+ * `aria-activedescendant`, which is the pattern's own note and the model
+ * `combobox` already uses. The layer, the scrim, the focus containment and
+ * the Escape that closes are the dialog family's; what this owns is the
+ * field, the list, the ranking, the pages and the recents.
+ *
+ * Which rows are drawn, in which order, is `@slotted/core/commands`: the
+ * Angular binding asks the same function, so the two cannot disagree.
+ */
+
+interface CommandPaletteContextValue {
+  presentation: CommandPalettePresentation;
+  disabled: boolean;
+}
+
+const CommandPaletteContext = createContext<CommandPaletteContextValue | undefined>(undefined);
+
+function compose<E extends { defaultPrevented: boolean }>(
+  theirs: ((event: E) => void) | undefined,
+  ours: (event: E) => void,
+) {
+  return (event: E) => {
+    theirs?.(event);
+    if (!event.defaultPrevented) ours(event);
+  };
+}
+
+const ARIA_MODIFIERS: Record<string, string> = {
+  alt: 'Alt',
+  ctrl: 'Control',
+  meta: 'Meta',
+  shift: 'Shift',
+};
+
+/**
+ * The shortcut as `aria-keyshortcuts` states it, as `menu` writes it. A
+ * sequence has no syntax in the attribute and is drawn only.
+ */
+function announceShortcut(keys: string, platform: KbdPlatform): string | undefined {
+  const steps = parseShortcut(keys);
+  if (steps.length !== 1) return undefined;
+  return steps[0]
+    ?.map((token) => {
+      const canonical = resolveKey(token, { platform }).token;
+      if (canonical === 'mod') return platform === 'mac' ? 'Meta' : 'Control';
+      if (canonical !== undefined && canonical in ARIA_MODIFIERS) {
+        return ARIA_MODIFIERS[canonical] as string;
+      }
+      const word = canonical ?? token;
+      return word.length === 1 ? word.toUpperCase() : `${word[0]?.toUpperCase()}${word.slice(1)}`;
+    })
+    .join('+');
+}
+
+/** A DOM id from an item id, which may hold anything. */
+function domId(base: string, id: string) {
+  return `${base}-${id.replace(/[^\w-]/g, (character) => `_${character.charCodeAt(0).toString(16)}`)}`;
+}
+
+function fill(template: string, values: Record<string, string | number>) {
+  return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+    key in values ? String(values[key]) : match,
+  );
+}
+
+export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteItem>({
+  autoHighlight,
+  backLabel,
+  children,
+  className,
+  clearLabel,
+  clearOnClose,
+  closeOnSelect,
+  container,
+  countLabel,
+  defaultHighlightedId,
+  defaultOpen,
+  defaultPages,
+  defaultQuery,
+  defaultRecent,
+  disabled,
+  empty,
+  emptyLabel,
+  errorLabel,
+  footer,
+  groups,
+  highlightMatch,
+  highlightedId,
+  hintBack,
+  hintClose,
+  hintNavigate,
+  hintSelect,
+  hotkey,
+  inputLabel,
+  inputProps,
+  items,
+  label,
+  limit,
+  loading,
+  loadingLabel,
+  locale,
+  loop,
+  onHighlightedIdChange,
+  onOpenChange,
+  onPagesChange,
+  onQueryChange,
+  onRecentChange,
+  onSelect,
+  open,
+  outsidePress,
+  pages,
+  placeholder,
+  presentation,
+  query,
+  rank,
+  recent,
+  recentLabel,
+  recentLimit,
+  ref,
+  renderItem,
+  size,
+  style,
+  ...nativeProps
+}: CommandPaletteProps<Item>) {
+  const defaults = useCommandPaletteDefaults();
+  const resolved = {
+    presentation: presentation ?? defaults.presentation,
+    size: size ?? defaults.size,
+    outsidePress: outsidePress ?? defaults.outsidePress,
+    loop: loop ?? defaults.loop,
+    autoHighlight: autoHighlight ?? defaults.autoHighlight,
+    closeOnSelect: closeOnSelect ?? defaults.closeOnSelect,
+    clearOnClose: clearOnClose ?? defaults.clearOnClose,
+    highlightMatch: highlightMatch ?? defaults.highlightMatch,
+    hotkey: hotkey === undefined ? defaults.hotkey : hotkey,
+    recentLimit: recentLimit ?? defaults.recentLimit,
+    loading: loading ?? false,
+    disabled: disabled ?? false,
+    label: label ?? defaults.label,
+    inputLabel: inputLabel ?? defaults.inputLabel,
+    placeholder: placeholder ?? defaults.placeholder,
+    emptyLabel: emptyLabel ?? defaults.emptyLabel,
+    loadingLabel: loadingLabel ?? defaults.loadingLabel,
+    errorLabel: errorLabel ?? defaults.errorLabel,
+    countLabel: countLabel ?? defaults.countLabel,
+    recentLabel: recentLabel ?? defaults.recentLabel,
+    clearLabel: clearLabel ?? defaults.clearLabel,
+    backLabel: backLabel ?? defaults.backLabel,
+    hintNavigate: hintNavigate ?? defaults.hintNavigate,
+    hintSelect: hintSelect ?? defaults.hintSelect,
+    hintClose: hintClose ?? defaults.hintClose,
+    hintBack: hintBack ?? defaults.hintBack,
+  };
+  const inline = resolved.presentation === 'inline';
+  const platform = useResolvedPlatform(undefined);
+
+  const base = useId();
+  const listId = `${base}-list`;
+
+  /* ── The five values ──────────────────────────────────────────────────── */
+
+  const [ownOpen, setOwnOpen] = useState(defaultOpen ?? false);
+  const [ownQuery, setOwnQuery] = useState(defaultQuery ?? '');
+  const [ownHighlighted, setOwnHighlighted] = useState<string | null>(defaultHighlightedId ?? null);
+  const [ownPages, setOwnPages] = useState<readonly string[]>(defaultPages ?? []);
+  const [ownRecent, setOwnRecent] = useState<readonly string[]>(defaultRecent ?? []);
+
+  const currentOpen = inline ? true : (open ?? ownOpen);
+  const currentQuery = query ?? ownQuery;
+  const currentHighlighted = highlightedId === undefined ? ownHighlighted : highlightedId;
+  const currentPages = pages ?? ownPages;
+  const currentRecent = recent ?? ownRecent;
+
+  const latest = useRef({
+    currentHighlighted,
+    currentOpen,
+    currentPages,
+    currentQuery,
+    currentRecent,
+    highlightedId,
+    onHighlightedIdChange,
+    onOpenChange,
+    onPagesChange,
+    onQueryChange,
+    onRecentChange,
+    open,
+    pages,
+    query,
+    recent,
+  });
+  latest.current = {
+    currentHighlighted,
+    currentOpen,
+    currentPages,
+    currentQuery,
+    currentRecent,
+    highlightedId,
+    onHighlightedIdChange,
+    onOpenChange,
+    onPagesChange,
+    onQueryChange,
+    onRecentChange,
+    open,
+    pages,
+    query,
+    recent,
+  };
+
+  const setHighlighted = useCallback(
+    (next: string | null, reason: CommandPaletteHighlightReason, source?: unknown) => {
+      const state = latest.current;
+      if (next === state.currentHighlighted) return;
+      const controllable = createControllable<string | null>({
+        controlled: state.highlightedId,
+        initial: state.currentHighlighted,
+        onRequest: (request) => state.onHighlightedIdChange?.(request.value, request),
+      });
+      if (controllable.request(next, reason, source)) setOwnHighlighted(next);
+    },
+    [],
+  );
+
+  const setQuery = useCallback(
+    (next: string, reason: CommandPaletteQueryReason, source?: unknown) => {
+      const state = latest.current;
+      if (next === state.currentQuery) return;
+      const controllable = createControllable<string>({
+        controlled: state.query,
+        initial: state.currentQuery,
+        onRequest: (request) => state.onQueryChange?.(request.value, request),
+      });
+      if (controllable.request(next, reason, source)) setOwnQuery(next);
+    },
+    [],
+  );
+
+  const setPages = useCallback(
+    (next: readonly string[], reason: CommandPalettePagesReason, source?: unknown) => {
+      const state = latest.current;
+      if (
+        next.length === state.currentPages.length &&
+        next.every((id, index) => id === state.currentPages[index])
+      ) {
+        return;
+      }
+      const controllable = createControllable<readonly string[]>({
+        controlled: state.pages,
+        initial: state.currentPages,
+        onRequest: (request) => state.onPagesChange?.(request.value, request),
+        equals: () => false,
+      });
+      if (controllable.request(next, reason, source)) setOwnPages(next);
+    },
+    [],
+  );
+
+  const setRecent = useCallback((next: readonly string[], source?: unknown) => {
+    const state = latest.current;
+    const controllable = createControllable<readonly string[]>({
+      controlled: state.recent,
+      initial: state.currentRecent,
+      onRequest: (request) => state.onRecentChange?.(request.value, request),
+      equals: (a, b) => a.length === b.length && a.every((id, index) => id === b[index]),
+    });
+    if (controllable.request(next, 'select', source)) setOwnRecent(next);
+  }, []);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const setOpen = useCallback(
+    (next: boolean, reason: CommandPaletteOpenReason, source?: unknown) => {
+      const state = latest.current;
+      if (inline || next === state.currentOpen) return;
+      const controllable = createControllable<boolean>({
+        controlled: state.open,
+        initial: state.currentOpen,
+        onRequest: (request) => state.onOpenChange?.(request.value, request),
+      });
+      if (!controllable.request(next, reason, source)) return;
+      setOwnOpen(next);
+    },
+    [inline],
+  );
+
+  /* Closing puts the palette back where it started, each value by its own
+     request, so a consumer owning one of them hears about it. */
+  const wasOpen = useRef(currentOpen);
+  useEffect(() => {
+    if (wasOpen.current && !currentOpen && resolved.clearOnClose) {
+      setQuery('', 'programmatic');
+      setPages([], 'programmatic');
+      setHighlighted(null, 'programmatic');
+    }
+    wasOpen.current = currentOpen;
+  }, [currentOpen, resolved.clearOnClose, setHighlighted, setPages, setQuery]);
+
+  /* ── The rows ─────────────────────────────────────────────────────────── */
+
+  const ranker = useMemo<CommandRanker<Item> | null>(
+    () => (rank === undefined ? createCommandRanker<Item>({ locale }) : rank),
+    [locale, rank],
+  );
+
+  const model = useMemo(
+    () =>
+      resolveCommands<Item>({
+        items,
+        query: currentQuery,
+        pages: currentPages,
+        recent: currentRecent,
+        groups,
+        rank: ranker,
+        limit,
+      }),
+    [currentPages, currentQuery, currentRecent, groups, items, limit, ranker],
+  );
+
+  const rowIds = useMemo(() => model.rows.map((item) => item.id), [model]);
+  const enabled = useMemo(() => model.rows.map((item) => item.disabled !== true), [model]);
+
+  /**
+   * Where the highlight stands once the rows have changed: on the row it was
+   * on, on the first enabled row with `autoHighlight`, and nowhere otherwise.
+   */
+  useEffect(() => {
+    if (!currentOpen) return;
+    const at = currentHighlighted === null ? -1 : rowIds.indexOf(currentHighlighted);
+    if (at !== -1 && enabled[at] === true) return;
+    const first = resolved.autoHighlight
+      ? moveIndex({ enabled, from: -1, intent: 'first', loop: false })
+      : -1;
+    setHighlighted(first === -1 ? null : (rowIds[first] ?? null), 'programmatic');
+  }, [currentHighlighted, currentOpen, enabled, resolved.autoHighlight, rowIds, setHighlighted]);
+
+  /* The row the highlight is on scrolls into view; it is not focused, so the
+     browser will not do it. */
+  const listRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (currentHighlighted === null) return;
+    const node = listRef.current?.querySelector<HTMLElement>(
+      `#${CSS.escape(domId(base, currentHighlighted))}`,
+    );
+    if (typeof node?.scrollIntoView === 'function') node.scrollIntoView({ block: 'nearest' });
+  }, [base, currentHighlighted]);
+
+  /* ── Executing ────────────────────────────────────────────────────────── */
+
+  const [pending, setPending] = useState<ReadonlySet<string>>(() => new Set());
+  const [error, setError] = useState<string | null>(null);
+
+  const execution = useRef({ onSelect, resolved, setOpen, setPages, setQuery, setRecent });
+  execution.current = { onSelect, resolved, setOpen, setPages, setQuery, setRecent };
+
+  const execute = useCallback(
+    (item: Item, reason: CommandPaletteSelectReason, source: unknown) => {
+      const {
+        onSelect: notify,
+        resolved: settings,
+        setOpen: close,
+        setPages: push,
+      } = execution.current;
+      if (item.disabled === true) return;
+      if (pending.has(item.id)) return;
+
+      if (item.children !== undefined) {
+        push(
+          [...latest.current.currentPages, item.id],
+          reason === 'pointer' ? 'pointer' : 'select',
+          source,
+        );
+        execution.current.setQuery('', 'select', source);
+        return;
+      }
+
+      let keep = false;
+      const request: CommandPaletteSelectRequest<Item> = {
+        item,
+        reason,
+        source,
+        keepOpen: () => {
+          keep = true;
+        },
+      };
+
+      const finish = () => {
+        execution.current.setRecent(
+          pushRecent(latest.current.currentRecent, item.id, settings.recentLimit),
+          source,
+        );
+        notify?.(item, request);
+        if (settings.closeOnSelect && !keep) close(false, 'select', source);
+      };
+
+      let outcome: unknown;
+      try {
+        outcome = item.onSelect?.(request);
+      } catch (thrown) {
+        setError(thrown instanceof Error ? thrown.message : String(thrown));
+        return;
+      }
+
+      if (outcome instanceof Promise) {
+        setError(null);
+        setPending((previous) => new Set(previous).add(item.id));
+        void outcome.then(
+          () => {
+            setPending((previous) => {
+              const next = new Set(previous);
+              next.delete(item.id);
+              return next;
+            });
+            finish();
+          },
+          (thrown: unknown) => {
+            setPending((previous) => {
+              const next = new Set(previous);
+              next.delete(item.id);
+              return next;
+            });
+            setError(thrown instanceof Error ? thrown.message : String(thrown));
+          },
+        );
+        return;
+      }
+
+      finish();
+    },
+    [pending],
+  );
+
+  const rowFor = useCallback(
+    (id: string | null) => (id === null ? undefined : model.rows.find((item) => item.id === id)),
+    [model],
+  );
+
+  /* ── Keys ─────────────────────────────────────────────────────────────── */
+
+  const move = (intent: Parameters<typeof moveIndex>[0]['intent'], event: KeyboardEvent) => {
+    const from = currentHighlighted === null ? -1 : rowIds.indexOf(currentHighlighted);
+    const paged = intent === 'pageDown' || intent === 'pageUp';
+    const next = moveIndex({ enabled, from, intent, loop: resolved.loop && !paged });
+    event.preventDefault();
+    if (next === -1) return;
+    setHighlighted(rowIds[next] ?? null, 'keyboard', event);
+  };
+
+  const onInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.nativeEvent.isComposing) return;
+    switch (event.key) {
+      case 'ArrowDown':
+        move('next', event);
+        return;
+      case 'ArrowUp':
+        move('previous', event);
+        return;
+      case 'PageDown':
+        move('pageDown', event);
+        return;
+      case 'PageUp':
+        move('pageUp', event);
+        return;
+      case 'Home':
+        if (event.ctrlKey) move('first', event);
+        return;
+      case 'End':
+        if (event.ctrlKey) move('last', event);
+        return;
+      case 'Enter': {
+        const item = rowFor(currentHighlighted);
+        if (item === undefined) return;
+        /* A link follows itself under the browser's own modifiers. */
+        if (item.href !== undefined && (event.metaKey || event.ctrlKey || event.shiftKey)) {
+          const node = listRef.current?.querySelector<HTMLAnchorElement>(
+            `#${CSS.escape(domId(base, item.id))}`,
+          );
+          if (node !== null && node !== undefined) {
+            node.dispatchEvent(
+              new globalThis.MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                metaKey: event.metaKey,
+                ctrlKey: event.ctrlKey,
+                shiftKey: event.shiftKey,
+              }),
+            );
+          }
+          event.preventDefault();
+          return;
+        }
+        event.preventDefault();
+        if (item.href !== undefined) {
+          const node = listRef.current?.querySelector<HTMLAnchorElement>(
+            `#${CSS.escape(domId(base, item.id))}`,
+          );
+          execute(item, 'keyboard', event);
+          node?.click();
+          return;
+        }
+        execute(item, 'keyboard', event);
+        return;
+      }
+      case 'Escape':
+        if (currentQuery !== '') {
+          event.preventDefault();
+          event.stopPropagation();
+          setQuery('', 'clear', event);
+          return;
+        }
+        if (currentPages.length > 0) {
+          event.preventDefault();
+          event.stopPropagation();
+          setPages(currentPages.slice(0, -1), 'keyboard', event);
+          return;
+        }
+        if (!inline) {
+          event.preventDefault();
+          setOpen(false, 'escape', event);
+        }
+        return;
+      case 'Backspace':
+        if (currentQuery === '' && currentPages.length > 0) {
+          event.preventDefault();
+          setPages(currentPages.slice(0, -1), 'keyboard', event);
+        }
+        return;
+      default:
+        return;
+    }
+  };
+
+  /* ── The hotkey ───────────────────────────────────────────────────────── */
+
+  const focusInput = useCallback(() => {
+    const node = inputRef.current;
+    if (node === null) return;
+    node.focus();
+    node.select();
+  }, []);
+
+  useEffect(() => {
+    const keys = resolved.hotkey;
+    if (keys === null || inline || resolved.disabled) return;
+    const bare = parseShortcut(keys)[0]?.every(
+      (token) =>
+        !['mod', 'meta', 'ctrl', 'alt'].includes(resolveKey(token, { platform }).token ?? ''),
+    );
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (!matchesShortcut(event, keys, platform)) return;
+      if (bare === true && isEditableTarget(event)) return;
+      event.preventDefault();
+      if (latest.current.currentOpen) {
+        focusInput();
+        return;
+      }
+      setOpen(true, 'keyboard', event);
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [focusInput, inline, platform, resolved.disabled, resolved.hotkey, setOpen]);
+
+  /* ── Announcing ───────────────────────────────────────────────────────── */
+
+  const status = resolved.loading
+    ? resolved.loadingLabel
+    : error !== null
+      ? fill(resolved.errorLabel, { message: error })
+      : fill(resolved.countLabel, { count: model.count });
+
+  useEffect(() => {
+    if (!currentOpen) return;
+    getLiveAnnouncer(inputRef.current?.ownerDocument).announce(status);
+  }, [currentOpen, status]);
+
+  useEffect(() => {
+    setError(null);
+  }, [currentQuery, currentPages]);
+
+  /* ── The handle ───────────────────────────────────────────────────────── */
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: () => setOpen(true, 'programmatic'),
+      close: () => setOpen(false, 'programmatic'),
+      toggle: () => setOpen(!latest.current.currentOpen, 'programmatic'),
+      focus: focusInput,
+      setQuery: (next) => setQuery(next, 'programmatic'),
+      scrollToId: (id) => setHighlighted(id, 'programmatic'),
+      get input() {
+        return inputRef.current;
+      },
+    }),
+    [focusInput, setHighlighted, setOpen, setQuery],
+  );
+
+  /* ── The layer's origin ───────────────────────────────────────────────── */
+
+  /**
+   * Where the layer is written, and what it inherits once it has moved. A
+   * palette opened by its hotkey has no trigger, and a dialog with no origin
+   * lands at the end of the document with none of the region's theme. The
+   * marker is the node the layer is written beside — `upload-viewer`'s answer
+   * — unless the consumer named a container.
+   */
+  const [origin, setOrigin] = useState<HTMLElement | null>(null);
+  const [ownContainer, setOwnContainer] = useState<Element | null>(null);
+  useEffect(() => {
+    if (origin === null || container !== undefined || inline) return;
+    const layer = createPortalRoot({ origin });
+    setOwnContainer(layer.container);
+    return () => {
+      setOwnContainer(null);
+      layer.release();
+    };
+  }, [container, inline, origin]);
+
+  /* ── Rendering ────────────────────────────────────────────────────────── */
+
+  const renderRow = (item: Item) => {
+    const current = currentHighlighted === item.id;
+    const isDisabled = item.disabled === true;
+    const isPending = pending.has(item.id);
+    const id = domId(base, item.id);
+    const runs =
+      resolved.highlightMatch && currentQuery.trim() !== ''
+        ? splitByMatch(item.label, currentQuery, { locale })
+        : [{ text: item.label, matched: false }];
+    const labelNode = runs.map((run, index) =>
+      run.matched ? (
+        <mark data-part="match" data-ui="highlight" key={index}>
+          {run.text}
+        </mark>
+      ) : (
+        <span key={index}>{run.text}</span>
+      ),
+    );
+    const shortcut = item.children === undefined ? item.shortcut : undefined;
+
+    const content =
+      renderItem === undefined ? (
+        <>
+          <span data-part="icon">{item.icon}</span>
+          <span data-part="label">{labelNode}</span>
+          {item.description === undefined ? null : (
+            <span data-part="description">{item.description}</span>
+          )}
+          {item.meta === undefined ? null : (
+            <span aria-hidden="true" data-part="meta">
+              {item.meta}
+            </span>
+          )}
+          {shortcut === undefined ? null : (
+            <span aria-hidden="true" data-part="shortcut">
+              {/* Keycaps, and nothing drawn between them: `Ctrl` `Shift` `D`
+                  is how Linear and Raycast write a chord outside a Mac, and
+                  the caps say "keys" where plain text says "a word". */}
+              <Shortcut keys={shortcut} separator="" size="inherit" variant="outline" />
+            </span>
+          )}
+          {item.children === undefined ? null : <span aria-hidden="true" data-part="arrow" />}
+          {isPending ? <span aria-hidden="true" data-part="busy" data-ui="spinner" /> : null}
+        </>
+      ) : (
+        renderItem(item, {
+          current,
+          disabled: isDisabled,
+          pending: isPending,
+          label: labelNode,
+          query: currentQuery,
+        })
+      );
+
+    const shared = {
+      'aria-disabled': isDisabled ? true : undefined,
+      'aria-busy': isPending ? true : undefined,
+      'aria-keyshortcuts':
+        shortcut === undefined ? undefined : announceShortcut(shortcut, platform),
+      'aria-selected': current,
+      'data-part': 'item',
+      ...(current ? { 'data-current': '' } : {}),
+      ...(isDisabled ? { 'data-disabled': '' } : {}),
+      ...(isPending ? { 'data-loading': '' } : {}),
+      ...(item.children === undefined ? {} : { 'data-page': '' }),
+      id,
+      role: 'option',
+      title: item.label,
+      onPointerMove: (event: PointerEvent) => {
+        if (isDisabled) return;
+        setHighlighted(item.id, 'pointer', event);
+      },
+      onClick: (event: MouseEvent) => {
+        if (isDisabled || isPending) {
+          event.preventDefault();
+          return;
+        }
+        /* A link with a modifier is the browser's: a new tab, a download. */
+        if (item.href !== undefined && (event.metaKey || event.ctrlKey || event.shiftKey)) return;
+        execute(item, 'pointer', event);
+      },
+    };
+
+    return item.href === undefined ? (
+      <div key={item.id} {...shared}>
+        {content}
+      </div>
+    ) : (
+      <a key={item.id} {...shared} href={item.href} target={item.target}>
+        {content}
+      </a>
+    );
+  };
+
+  const renderSection = (section: CommandSection<Item>, index: number) => {
+    const heading = section.recent ? resolved.recentLabel : section.label;
+    const rows = section.items.map(renderRow);
+    const separator =
+      index === 0 ? null : <div data-part="separator" key={`sep-${index}`} role="separator" />;
+    if (heading === undefined) {
+      return [separator, ...rows];
+    }
+    const labelId = `${base}-group-${index}`;
+    return [
+      separator,
+      <div aria-labelledby={labelId} data-part="group" key={`group-${index}`} role="group">
+        <div data-part="group-label" id={labelId} role="presentation">
+          {heading}
+        </div>
+        {rows}
+      </div>,
+    ];
+  };
+
+  const hints: ReactNode =
+    footer === null ? null : (
+      <div aria-hidden="true" data-part="footer">
+        {footer !== undefined ? (
+          footer
+        ) : (
+          <>
+            <span data-part="hint">
+              <Shortcut keys="up" separator="" size="inherit" variant="outline" />
+              <Shortcut keys="down" separator="" size="inherit" variant="outline" />
+              <span>{resolved.hintNavigate}</span>
+            </span>
+            <span data-part="hint">
+              <Shortcut keys="enter" separator="" size="inherit" variant="outline" />
+              <span>{resolved.hintSelect}</span>
+            </span>
+            {currentPages.length === 0 ? null : (
+              <span data-part="hint">
+                <Shortcut keys="backspace" separator="" size="inherit" variant="outline" />
+                <span>{resolved.hintBack}</span>
+              </span>
+            )}
+            {inline ? null : (
+              <span data-part="hint">
+                <Shortcut keys="escape" separator="" size="inherit" variant="outline" />
+                <span>{resolved.hintClose}</span>
+              </span>
+            )}
+          </>
+        )}
+      </div>
+    );
+
+  const {
+    onChange: theirOnChange,
+    onKeyDown: theirOnKeyDown,
+    ref: theirInputRef,
+    ...restInput
+  } = inputProps ?? {};
+
+  const isEmpty = !resolved.loading && model.count === 0;
+
+  const panel = (
+    <div
+      {...nativeProps}
+      className={className}
+      data-ui="command-palette"
+      data-part="root"
+      data-presentation={resolved.presentation}
+      data-size={resolved.size}
+      {...(currentOpen ? { 'data-open': '' } : {})}
+      {...(resolved.loading ? { 'data-loading': '' } : {})}
+      {...(resolved.disabled ? { 'data-disabled': '' } : {})}
+      {...(currentQuery === '' ? {} : { 'data-query': '' })}
+      {...(isEmpty ? { 'data-empty': '' } : {})}
+      style={style}
+    >
+      <div data-part="header">
+        {resolved.loading ? (
+          <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+        ) : (
+          <span aria-hidden="true" data-part="search" />
+        )}
+        {model.trail.length === 0 ? null : (
+          <ol aria-label={resolved.backLabel} data-part="pages">
+            {model.trail.map((entry, index) => (
+              <li key={entry.id}>
+                <button
+                  data-part="page"
+                  onClick={(event) => setPages(currentPages.slice(0, index + 1), 'pointer', event)}
+                  type="button"
+                >
+                  <span>{entry.label}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        )}
+        <input
+          {...restInput}
+          aria-activedescendant={
+            currentHighlighted === null ? undefined : domId(base, currentHighlighted)
+          }
+          aria-autocomplete="list"
+          aria-controls={listId}
+          aria-expanded="true"
+          aria-label={restInput['aria-label'] ?? resolved.inputLabel}
+          autoComplete="off"
+          data-part="input"
+          disabled={resolved.disabled}
+          onChange={compose(theirOnChange, (event) =>
+            setQuery(event.target.value, 'keyboard', event),
+          )}
+          onKeyDown={compose(theirOnKeyDown, onInputKeyDown)}
+          placeholder={resolved.placeholder}
+          ref={(node) => {
+            inputRef.current = node;
+            if (typeof theirInputRef === 'function') theirInputRef(node);
+            else if (theirInputRef !== undefined && theirInputRef !== null) {
+              theirInputRef.current = node;
+            }
+          }}
+          role="combobox"
+          spellCheck={false}
+          type="text"
+          value={currentQuery}
+        />
+        <button
+          aria-label={resolved.clearLabel}
+          data-part="clear"
+          onClick={(event) => {
+            setQuery('', 'clear', event);
+            inputRef.current?.focus();
+          }}
+          tabIndex={-1}
+          type="button"
+        />
+      </div>
+      <div
+        aria-busy={resolved.loading ? true : undefined}
+        aria-label={resolved.inputLabel}
+        data-part="list"
+        {...(resolved.loading ? { 'data-loading': '' } : {})}
+        id={listId}
+        ref={listRef}
+        role="listbox"
+      >
+        {resolved.loading && model.count === 0 ? (
+          <div aria-hidden="true" data-part="placeholder">
+            {[0, 1, 2].map((row) => (
+              <div key={row}>
+                <span data-loading data-part="root" data-shape="text" data-ui="skeleton" />
+              </div>
+            ))}
+          </div>
+        ) : null}
+        {isEmpty ? <div data-part="empty">{empty ?? resolved.emptyLabel}</div> : null}
+        {model.sections.flatMap(renderSection)}
+      </div>
+      <div data-part="status" role="status">
+        {status}
+      </div>
+      {hints}
+    </div>
+  );
+
+  const context: CommandPaletteContextValue = {
+    presentation: resolved.presentation,
+    disabled: resolved.disabled,
+  };
+
+  if (inline) {
+    return (
+      <CommandPaletteContext.Provider value={context}>
+        {children}
+        {panel}
+      </CommandPaletteContext.Provider>
+    );
+  }
+
+  const marker = container === undefined ? <span hidden ref={setOrigin} /> : null;
+  const layerContainer = container === undefined ? ownContainer : container;
+
+  return (
+    <CommandPaletteContext.Provider value={context}>
+      {marker}
+      <Dialog
+        container={layerContainer}
+        escape="none"
+        fullScreen="narrow"
+        initialFocus={inputRef}
+        onOpenChange={(next, request: DialogChangeRequest) => {
+          const reason: CommandPaletteOpenReason =
+            request.reason === 'outsidePress' || request.reason === 'escape'
+              ? request.reason
+              : request.reason === 'pointer' || request.reason === 'keyboard'
+                ? request.reason
+                : 'dismiss';
+          const state = latest.current;
+          const controllable = createControllable<boolean>({
+            controlled: state.open,
+            initial: state.currentOpen,
+            onRequest: (own) => state.onOpenChange?.(own.value, own),
+          });
+          if (!controllable.request(next, reason, request.source)) {
+            request.cancel();
+            return;
+          }
+          setOwnOpen(next);
+        }}
+        open={currentOpen}
+        outsidePress={resolved.outsidePress}
+        placement="top"
+        size={resolved.size}
+        surface="plain"
+      >
+        {children}
+        <DialogContent aria-label={resolved.label}>{panel}</DialogContent>
+      </Dialog>
+    </CommandPaletteContext.Provider>
+  );
+}
+
+/**
+ * The control that opens the palette, composed over the dialog family's
+ * trigger: `render` substitutes the element — a real application's trigger is
+ * a `Button` with a `Kbd` in it — and the ref the dialog hands over is the
+ * layer's focus origin, so it is attached beside the consumer's own.
+ * Renders nothing under `presentation="inline"`, where there is nothing to open.
+ */
+export function CommandPaletteTrigger({
+  children,
+  render,
+  ...nativeProps
+}: CommandPaletteTriggerProps) {
+  const palette = useContext(CommandPaletteContext);
+  if (palette === undefined) {
+    throw new Error('CommandPaletteTrigger must be rendered inside CommandPalette.');
+  }
+  if (palette.presentation === 'inline') return null;
+  return (
+    <DialogTrigger
+      {...nativeProps}
+      disabled={nativeProps.disabled ?? (palette.disabled ? true : undefined)}
+      {...(render === undefined ? {} : { render })}
+    >
+      {children}
+    </DialogTrigger>
+  );
+}

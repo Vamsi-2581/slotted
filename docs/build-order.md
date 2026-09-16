@@ -358,6 +358,20 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   máscara opcional. Uma parada de foco lógica: o input real é um só, oculto, e
   as caixas são pintura; erro e leitura por leitor de tela descrevem um campo.
   `field` para rótulo e mensagem; `ControlValueAccessor` e `name`.
+
+  Entregue em 2026-09-16. Inventário em
+  `docs/superpowers/specs/2026-09-16-otp-input-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-otp-input-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-16-otp-input-self-assessment.md`. Partes
+  `root`, `input`, `group`, `separator`, `slot`; `length`, `type`, `pattern`,
+  `transform`, `groups`, `attached`, `placeholder`, `mask` (o input passa a
+  `type="password"`), `autoSubmit`, `webOtp` (opt-in), `onComplete`,
+  `onRejected`; seleção normalizada a um carácter, toda a tecla nativa; a fila
+  é sempre LTR. Motor puro em `@slotted/core/otp` (`sanitize`,
+  `normalizeSelection`, `currentSlots`, `spreadPlaceholder`). Angular:
+  `[slOtpInput]` + `input[slOtpInputControl]` com `ControlValueAccessor`.
+
 - `highlight` — a folha partilhada em `packages/styles/src/highlight` vira
   família com binding: recebe `ranges` ou um `matcher` substituível, preserva o
   texto original e diacríticos, não injeta HTML e não marca quando a query é

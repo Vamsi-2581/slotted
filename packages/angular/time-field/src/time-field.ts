@@ -144,7 +144,7 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
         data-part="segments"
         role="group"
         [attr.id]="controlId()"
-        [attr.aria-label]="writtenLabel"
+        [attr.aria-label]="label() ?? writtenLabel"
         [attr.aria-labelledby]="labelledBy()"
         [attr.aria-describedby]="describedBy()"
         [attr.aria-invalid]="ariaInvalid()"
@@ -274,6 +274,14 @@ export class SlTimeField implements ControlValueAccessor, Validator, OnInit {
    * originating event and `cancel()`. There is no `[(value)]`, because a
    * two-way binding has one slot and can carry none of those.
    */
+  /**
+   * The accessible name, when it is bound rather than written: a static
+   * `aria-label` is read once from the host, and a family naming this field
+   * from its own input — `time-range-picker` names its two ends — has no
+   * static attribute to write.
+   */
+  readonly label = input<string | undefined>(undefined);
+
   readonly valueChange = output<TimeFieldChangeRequest>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -413,7 +421,7 @@ export class SlTimeField implements ControlValueAccessor, Validator, OnInit {
     () => this.writtenId ?? this.field?.ids().control ?? null,
   );
   protected readonly labelledBy = computed(() => {
-    if (this.writtenLabel !== null) return null;
+    if (this.label() !== undefined || this.writtenLabel !== null) return null;
     const merged = [this.writtenLabelledBy ?? this.field?.ids().label, this.valueTextId].filter(
       Boolean,
     );
@@ -455,7 +463,14 @@ export class SlTimeField implements ControlValueAccessor, Validator, OnInit {
     effect(() => {
       const next = this.value();
       if (next === undefined) return;
-      if (isSameTime(timeOf(this.segments(), this.format()), next)) return;
+      const segments = this.segments();
+      /* A run of digits still being typed is not a value the consumer refused:
+         with a controlled `null`, the first minute digit after a whole hour
+         read as a time the consumer had not written back, and the segments
+         were reset under the reader's fingers. Found by `time-range-picker`,
+         which binds the field to its work. */
+      if (segments.typing !== null) return;
+      if (isSameTime(timeOf(segments, this.format()), next)) return;
       this.segments.set(segmentsOfTime(next, this.format()));
     });
 

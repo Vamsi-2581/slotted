@@ -374,7 +374,11 @@ export class SlDateField implements ControlValueAccessor, Validator, OnInit {
     effect(() => {
       const next = this.value();
       if (next === undefined) return;
-      if (isSameDate(dateOf(this.segments()), next)) return;
+      const segments = this.segments();
+      /* A run of digits still being typed is not a value the consumer refused;
+         the guard `time-field` records, taken here for the same reason. */
+      if (segments.typing !== null) return;
+      if (isSameDate(dateOf(segments), next)) return;
       this.segments.set(segmentsOf(next));
     });
   }

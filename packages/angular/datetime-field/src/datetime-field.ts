@@ -167,7 +167,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
         data-part="segments"
         role="group"
         [attr.id]="controlId()"
-        [attr.aria-label]="writtenLabel"
+        [attr.aria-label]="label() ?? writtenLabel"
         [attr.aria-labelledby]="labelledBy()"
         [attr.aria-describedby]="describedBy()"
         [attr.aria-invalid]="ariaInvalid()"
@@ -330,6 +330,14 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
    * event and `cancel()`. There is no `[(value)]`, because a two-way binding
    * has one slot and can carry none of those.
    */
+  /**
+   * The accessible name, when it is bound rather than written: a static
+   * `aria-label` is read once from the host, and a family naming this field
+   * from its own input — `datetime-range-picker` names its two ends — has no
+   * static attribute to write.
+   */
+  readonly label = input<string | undefined>(undefined);
+
   readonly valueChange = output<DateTimeFieldChangeRequest>();
 
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
@@ -506,7 +514,7 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
     () => this.writtenId ?? this.field?.ids().control ?? null,
   );
   protected readonly labelledBy = computed(() => {
-    if (this.writtenLabel !== null) return null;
+    if (this.label() !== undefined || this.writtenLabel !== null) return null;
     const merged = [this.writtenLabelledBy ?? this.field?.ids().label, this.valueTextId].filter(
       Boolean,
     );
@@ -548,7 +556,14 @@ export class SlDateTimeField implements ControlValueAccessor, Validator, OnInit 
     effect(() => {
       const next = this.value();
       if (next === undefined) return;
-      if (isSameDateTime(dateTimeOf(this.segments(), this.format()), next)) return;
+      const segments = this.segments();
+      /* A run of digits still being typed is not a value the consumer refused:
+         with a controlled `null`, the first minute digit after a whole hour
+         read as a time the consumer had not written back, and the segments
+         were reset under the reader's fingers. Found by `time-range-picker`,
+         which binds the field to its work. */
+      if (segments.typing !== null) return;
+      if (isSameDateTime(dateTimeOf(segments, this.format()), next)) return;
       this.segments.set(segmentsOfDateTime(next, this.format()));
     });
 

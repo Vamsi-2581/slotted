@@ -114,6 +114,29 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-segmented-control-count',
   '--slotted-segmented-control-index',
   /**
+   * `data-grid` — the geometry only the binding knows. The template is one
+   * track per visible column in the state's order, at the widths the reader
+   * left them; the column index places a cell in it explicitly, because with
+   * column virtualisation the cells that are not there would move the ones
+   * that are; the pin offset is the summed width of the pinned columns
+   * before this one; the level is how deep a group row sits; the drop
+   * offset is where the reorder indicator stands; the window start and total
+   * are the virtualiser's offset of the first mounted row and the height of
+   * every row. None of the seven is a value a theme can hold.
+   *
+   * Named one by one rather than by a `--slotted-data-grid-` prefix, because
+   * the family owns theme tokens under that prefix — its row height, its
+   * grounds, its radius — and a prefix would file every one of them as a
+   * value no theme can retune.
+   */
+  '--slotted-data-grid-template',
+  '--slotted-data-grid-column',
+  '--slotted-data-grid-pin-offset',
+  '--slotted-data-grid-level',
+  '--slotted-data-grid-drop-offset',
+  '--slotted-data-grid-window-start',
+  '--slotted-data-grid-window-total',
+  /**
    * `upload` — how many rows of the file list are shown before the rest is
    * scrolled to. It is `maxRows`, stated per instance, and no theme can hold
    * it: a form that takes one avatar and a page that takes a folder of four

@@ -746,14 +746,23 @@ describe('the column filter', () => {
    * and what the picker writes back is ISO text at its own granularity — so a
    * stepped hour reaches the descriptor as `HH:MM`, never as a `PlainTime`.
    */
-  it('draws a time picker per operand, and writes the ISO text at its granularity', async () => {
+  it('draws one range picker for a time between, and writes the ISO text at its granularity', async () => {
     const { fixture, operand } = await openOperand('time');
 
     expect(operand.getAttribute('data-kind')).toBe('time');
-    expect(operand.hasAttribute('data-range')).toBe(false);
-    expect(operand.querySelectorAll('[data-ui="time-picker"]').length).toBe(2);
+    expect(operand.getAttribute('data-range')).toBe('');
+    expect(operand.querySelectorAll('[data-ui="time-range-picker"]').length).toBe(1);
+    expect(operand.querySelectorAll('[data-ui="time-picker"]').length).toBe(0);
 
-    const hour = operand.querySelector('[role="spinbutton"]') as HTMLElement;
+    /* The picker's frame is a button: `Enter` on it opens the picker and
+       applies nothing. The start field is in the surface it opens. */
+    const frame = operand.querySelector('[data-part="trigger"]') as HTMLElement;
+    frame.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter' }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector('[data-part="filter-panel"]')).not.toBeNull();
+
+    const hour = document.querySelector('[data-part="start"] [role="spinbutton"]') as HTMLElement;
     hour.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowUp' }));
     fixture.detectChanges();
     panelButton('Apply').click();
@@ -764,6 +773,34 @@ describe('the column filter', () => {
       join: 'and',
       kind: 'time',
     });
+  });
+
+  /**
+   * `between` on a date-time is one `datetime-range-picker`, and every other
+   * operator keeps the one picker it had.
+   */
+  it('draws one range picker for a date-time between, and one date-time picker otherwise', async () => {
+    const { fixture, operand } = await openOperand('datetime');
+    expect(operand.hasAttribute('data-range')).toBe(false);
+    expect(operand.querySelectorAll('[data-ui="datetime-picker"]').length).toBe(1);
+
+    (
+      document.querySelector('[data-part="filter-operator"] [role="combobox"]') as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    (
+      [...document.querySelectorAll('[role="option"]')].find(
+        (option) => (option.textContent ?? '').trim() === 'Between',
+      ) as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const range = document.querySelector('[data-part="filter-operand"]') as HTMLElement;
+    expect(range.getAttribute('data-range')).toBe('');
+    expect(range.querySelectorAll('[data-ui="datetime-range-picker"]').length).toBe(1);
+    expect(range.querySelectorAll('[data-ui="datetime-picker"]').length).toBe(0);
   });
 
   it('draws a date-time picker, and offers the operators of a day', async () => {

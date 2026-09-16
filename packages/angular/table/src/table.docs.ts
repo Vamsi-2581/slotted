@@ -337,25 +337,25 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'filter-time',
     title: 'A time column, and a window that crosses midnight',
-    note: 'slTableTimeFilter draws the time picker and holds ISO text at the column granularity — 22:00 at a minute, 22:00:00 at a second — which is the precision the engine compares at. A between whose start is later than its end is the overnight window, not an empty set: 22:00 to 02:00 keeps 23:30 and 01:15.',
+    note: 'slTableTimeFilter draws the time picker, and one time range picker for between, and holds ISO text at the column granularity — 22:00 at a minute, 22:00:00 at a second — which is the precision the engine compares at. A between whose start is later than its end is the overnight window, not an empty set: 22:00 to 02:00 keeps 23:30 and 01:15. The range picker marks that pair out of order until its wrap capability lands; the filter applies it as the window either way. Your shifts go in through presets.',
     snippet: defineSnippet({
       id: 'table-angular-filter-time',
       language: 'angular',
       label: 'A time filter, and the rows it keeps',
       source:
-        '<span slTableTimeFilter columnLabel="cut-off" granularity="minute" [(value)]="cutoff"></span>',
+        '<ng-template #shifts>\n  <button slTimeRangePickerPreset [range]="morning">Morning</button>\n</ng-template>\n<span\n  slTableTimeFilter\n  columnLabel="cut-off"\n  granularity="minute"\n  [presets]="shifts"\n  [(value)]="cutoff"\n></span>',
     }),
   },
   {
     id: 'filter-datetime',
     title: 'A date-time column, at the precision you wrote',
-    note: 'slTableDateTimeFilter draws the date-time picker and holds 2026-09-14T09:00 as text. Compared at the operand own precision, so after 2026-09-14T09 starts at ten o clock and is 2026-09-14 matches the whole day. A condition with one half missing is inactive until both halves exist, and Apply reports nothing for it.',
+    note: 'slTableDateTimeFilter draws the date-time picker, and one date-time range picker for between, and holds 2026-09-14T09:00 as text. Compared at the operand own precision, so after 2026-09-14T09 starts at ten o clock and is 2026-09-14 matches the whole day. A condition with one half missing is inactive until both halves exist, and Apply reports nothing for it. Your windows go in through presets.',
     snippet: defineSnippet({
       id: 'table-angular-filter-datetime',
       language: 'angular',
       label: 'A date-time filter over a wall-clock column',
       source:
-        '<span\n  slTableDateTimeFilter\n  columnLabel="scheduled"\n  timeZone="Europe/Lisbon"\n  [(value)]="scheduled"\n></span>',
+        '<ng-template #windows>\n  <button slDateTimeRangePickerPreset [range]="earlyOctober">Early October</button>\n</ng-template>\n<span\n  slTableDateTimeFilter\n  columnLabel="scheduled"\n  timeZone="Europe/Lisbon"\n  [presets]="windows"\n  [(value)]="scheduled"\n></span>',
     }),
   },
   {
@@ -380,6 +380,18 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Chips held to the column values, and chips free of them',
       source:
         '<span\n  slTableSetFilter\n  columnLabel="client"\n  operand="tags"\n  [options]="clients"\n  [(value)]="client"\n></span>\n<span slTableSetFilter columnLabel="invoice" operand="tags" [(value)]="invoice"></span>',
+    }),
+  },
+  {
+    id: 'editing',
+    title: 'A plain control in a cell',
+    note: 'A cell whose child is a plain control gives up its inset: padding goes to zero and the control reads the cell padding and the row height through the control tokens, so the edited value stands where the read value stood and the row does not grow. The rule names the fourteen plain field families and nothing else. The control width is its own, as in a form.',
+    snippet: defineSnippet({
+      id: 'table-angular-editing',
+      language: 'angular',
+      label: 'A count corrected in place',
+      source:
+        '<tr slTableRow [value]="item.sku">\n  <th slTableRowHeader>{{ item.sku }}</th>\n  <td slTableCell>\n    <div slTextField size="sm" variant="plain">\n      <input slTextFieldInput aria-label="Description" [value]="item.description" />\n    </div>\n  </td>\n  <td slTableCell numeric>\n    <div slNumberField size="sm" stepper="none" variant="plain">\n      <input slNumberFieldInput aria-label="Counted" [value]="item.counted" />\n    </div>\n  </td>\n</tr>',
     }),
   },
   {
@@ -679,8 +691,8 @@ export const ANGULAR_TABLE_DOCS = {
         'presets',
         'TemplateRef',
         '—',
-        'slTableDateFilter',
-        'A template of slDateRangePickerPreset buttons offered inside the range picker between draws. The descriptor still receives two ISO days.',
+        'slTableDateFilter, slTableTimeFilter, slTableDateTimeFilter',
+        'A template of slDateRangePickerPreset, slTimeRangePickerPreset or slDateTimeRangePickerPreset buttons offered inside the range picker between draws. The descriptor still receives two ISO values.',
       ],
       [
         'granularity',

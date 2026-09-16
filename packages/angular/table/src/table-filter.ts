@@ -62,6 +62,10 @@ import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlDatePicker } from '@slotted/angular/date-picker';
 import { SlDateRangePicker, SlDateRangePickerPresets } from '@slotted/angular/date-range-picker';
 import { SlDateTimePicker } from '@slotted/angular/datetime-picker';
+import {
+  SlDateTimeRangePicker,
+  SlDateTimeRangePickerPresets,
+} from '@slotted/angular/datetime-range-picker';
 import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
 import {
   SlPopover,
@@ -74,6 +78,7 @@ import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import { SlTagsInput } from '@slotted/angular/tags-input';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlTimePicker } from '@slotted/angular/time-picker';
+import { SlTimeRangePicker, SlTimeRangePickerPresets } from '@slotted/angular/time-range-picker';
 
 import { SlTable } from './table';
 import { SlTableColumnHeader } from './table-parts';
@@ -240,7 +245,7 @@ export abstract class SlTableFilterBase {
   /**
    * Whether the operand template draws one control for both ends of a range,
    * written as `data-range` on `filter-operand` so the two-column operand grid
-   * collapses to one. The date filter says yes; nothing else does yet.
+   * collapses to one. The date, time and date-time filters say yes.
    */
   protected rangeOperand(): boolean {
     return false;
@@ -730,14 +735,51 @@ function dateTimeOf(text: unknown): PlainDateTime | null {
  * precision the descriptor is written at and the engine compares at: a picker
  * writing minutes produces `09:14`, and `is 09:14` then matches every second
  * of that minute.
+ *
+ * `between` is one `time-range-picker` rather than two pickers: it says the
+ * run's length while it is drawn, its end list refuses the times before the
+ * start, and it carries the application's presets. The descriptor is
+ * unchanged. A pair whose start is later than its end is the overnight window
+ * to the engine and `order` to the picker; the pair reaches the descriptor
+ * either way, and the picker's `wrap`, pending in `docs/build-order.md`, is
+ * what lifts the mark. No `(keydown.enter)` on the range picker: its frame
+ * is a button, and `Enter` on it opens the picker.
  */
 @Component({
   selector: 'span[slTableTimeFilter]',
   exportAs: 'slTableTimeFilter',
-  imports: [SlTableFilterShell, SlTimePicker],
+  imports: [
+    NgTemplateOutlet,
+    SlTableFilterShell,
+    SlTimePicker,
+    SlTimeRangePicker,
+    SlTimeRangePickerPresets,
+  ],
   template: `<span [slTableFilterShell]="this" [operand]="operand"></span>
     <ng-template #operand let-context>
-      @for (slot of context.slots; track slot) {
+      @if (context.slots.length === 2) {
+        <div
+          slTimeRangePicker
+          size="sm"
+          [locale]="locale()"
+          [hourCycle]="hourCycle()"
+          [granularity]="granularity()"
+          [step]="step()"
+          [options]="options()"
+          [min]="timeOf(min())"
+          [max]="timeOf(max())"
+          [startLabel]="context.label(0)"
+          [endLabel]="context.label(1)"
+          [value]="range(context.condition)"
+          (valueChange)="context.setBoth(iso($event.value?.start), iso($event.value?.end))"
+        >
+          @if (presets(); as presetsTemplate) {
+            <div slTimeRangePickerPresets>
+              <ng-container [ngTemplateOutlet]="presetsTemplate" />
+            </div>
+          }
+        </div>
+      } @else {
         <div
           slTimePicker
           size="sm"
@@ -748,9 +790,9 @@ function dateTimeOf(text: unknown): PlainDateTime | null {
           [options]="options()"
           [min]="timeOf(min())"
           [max]="timeOf(max())"
-          [value]="timeOf(slot === 0 ? context.condition.value : context.condition.end)"
-          [attr.aria-label]="context.label(slot)"
-          (valueChange)="context.set(slot, iso($event.value))"
+          [value]="timeOf(context.condition.value)"
+          [attr.aria-label]="context.label(0)"
+          (valueChange)="context.set(0, iso($event.value))"
           (keydown.enter)="context.apply()"
         ></div>
       }
@@ -778,6 +820,16 @@ export class SlTableTimeFilter extends SlTableFilterBase {
   readonly min = input<string | undefined>(undefined);
   /** The latest, as ISO time text. */
   readonly max = input<string | undefined>(undefined);
+  /**
+   * The application's own windows — the morning shift, the night shift — as
+   * `slTimeRangePickerPreset` buttons in a template, offered inside the range
+   * picker `between` draws. The descriptor still receives two ISO times.
+   */
+  readonly presets = input<TemplateRef<unknown> | undefined>(undefined);
+
+  protected override rangeOperand() {
+    return true;
+  }
 
   timeOf(value: unknown): PlainTime | undefined {
     return timeOf(value) ?? undefined;
@@ -785,6 +837,10 @@ export class SlTableTimeFilter extends SlTableFilterBase {
 
   iso(value: unknown) {
     return isPlainTime(value) ? toISOTime(value, this.granularity() ?? 'minute') : null;
+  }
+
+  range(condition: Condition): { start: PlainTime | null; end: PlainTime | null } {
+    return { start: timeOf(condition.value), end: timeOf(condition.end) };
   }
 
   protected override readValue() {
@@ -802,14 +858,47 @@ export class SlTableTimeFilter extends SlTableFilterBase {
  * missing reaches the draft as no operand at all, so the condition stays
  * inactive until both halves exist — the engine's one rule for a missing
  * operand, and the reason Apply reports nothing for a date without a time.
+ *
+ * `between` is one `datetime-range-picker`: the run's length said while it is
+ * drawn, the dates ordered with each time kept on its end, and the
+ * application's presets. No `(keydown.enter)` on it: the frame is a button,
+ * and `Enter` on it opens the picker.
  */
 @Component({
   selector: 'span[slTableDateTimeFilter]',
   exportAs: 'slTableDateTimeFilter',
-  imports: [SlTableFilterShell, SlDateTimePicker],
+  imports: [
+    NgTemplateOutlet,
+    SlTableFilterShell,
+    SlDateTimePicker,
+    SlDateTimeRangePicker,
+    SlDateTimeRangePickerPresets,
+  ],
   template: `<span [slTableFilterShell]="this" [operand]="operand"></span>
     <ng-template #operand let-context>
-      @for (slot of context.slots; track slot) {
+      @if (context.slots.length === 2) {
+        <div
+          slDateTimeRangePicker
+          size="sm"
+          [locale]="locale()"
+          [timeZone]="timeZone()"
+          [hourCycle]="hourCycle()"
+          [granularity]="granularity()"
+          [step]="step()"
+          [min]="dateTimeOf(min())"
+          [max]="dateTimeOf(max())"
+          [startLabel]="context.label(0)"
+          [endLabel]="context.label(1)"
+          [value]="range(context.condition)"
+          (valueChange)="context.setBoth(iso($event.value?.start), iso($event.value?.end))"
+        >
+          @if (presets(); as presetsTemplate) {
+            <div slDateTimeRangePickerPresets>
+              <ng-container [ngTemplateOutlet]="presetsTemplate" />
+            </div>
+          }
+        </div>
+      } @else {
         <div
           slDateTimePicker
           size="sm"
@@ -820,9 +909,9 @@ export class SlTableTimeFilter extends SlTableFilterBase {
           [step]="step()"
           [min]="dateTimeOf(min())"
           [max]="dateTimeOf(max())"
-          [value]="dateTimeOf(slot === 0 ? context.condition.value : context.condition.end)"
-          [attr.aria-label]="context.label(slot)"
-          (valueChange)="context.set(slot, iso($event.value))"
+          [value]="dateTimeOf(context.condition.value)"
+          [attr.aria-label]="context.label(0)"
+          (valueChange)="context.set(0, iso($event.value))"
           (keydown.enter)="context.apply()"
         ></div>
       }
@@ -850,9 +939,24 @@ export class SlTableDateTimeFilter extends SlTableFilterBase {
   readonly min = input<string | undefined>(undefined);
   /** The latest, as ISO date-time text. */
   readonly max = input<string | undefined>(undefined);
+  /**
+   * The application's own windows — the last 24 hours, this week — as
+   * `slDateTimeRangePickerPreset` buttons in a template, offered inside the
+   * range picker `between` draws. The descriptor still receives two ISO
+   * date-times.
+   */
+  readonly presets = input<TemplateRef<unknown> | undefined>(undefined);
+
+  protected override rangeOperand() {
+    return true;
+  }
 
   dateTimeOf(value: unknown): PlainDateTime | undefined {
     return dateTimeOf(value) ?? undefined;
+  }
+
+  range(condition: Condition): { start: PlainDateTime | null; end: PlainDateTime | null } {
+    return { start: dateTimeOf(condition.value), end: dateTimeOf(condition.end) };
   }
 
   iso(value: unknown) {

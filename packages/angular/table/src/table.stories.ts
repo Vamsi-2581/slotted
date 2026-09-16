@@ -1,4 +1,4 @@
-import { plainDate } from '@slotted/core/date';
+import { plainDate, plainDateTime, plainTime } from '@slotted/core/date';
 import { createFilterPredicate, createRowPredicate, setFilter } from '@slotted/core/filter';
 import type {
   BooleanFilter,
@@ -13,8 +13,10 @@ import { SlAvatar } from '@slotted/angular/avatar';
 import { SlIconButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlDateRangePickerPreset } from '@slotted/angular/date-range-picker';
+import { SlDateTimeRangePickerPreset } from '@slotted/angular/datetime-range-picker';
 import { SlLink } from '@slotted/angular/link';
 import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
+import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import {
   SlPagination,
   SlPaginationItems,
@@ -38,6 +40,7 @@ import { SlStatusIndicator } from '@slotted/angular/status-indicator';
 import { SlSwitch } from '@slotted/angular/switch';
 import { SlTag, SlTagBody } from '@slotted/angular/tag';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
+import { SlTimeRangePickerPreset } from '@slotted/angular/time-range-picker';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -78,6 +81,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     'filter-datetime': FilterDateTime,
     'filter-range': FilterRange,
     'filter-tags': FilterTags,
+    editing: Editing,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -104,6 +108,10 @@ const meta: Meta<TableStoryArgs> = {
         SlTableContent,
         ...SL_TABLE_PARTS,
         SlDateRangePickerPreset,
+        SlDateTimeRangePickerPreset,
+        SlTimeRangePickerPreset,
+        SlSelect,
+        SlSelectItem,
         SlTableBooleanFilter,
         SlTableDateFilter,
         SlTableDateTimeFilter,
@@ -891,6 +899,9 @@ function timeProps() {
       join: 'and',
       kind: 'time',
     } as TimeFilter | null,
+    /** The range picker's presets: the desk's own shifts, in its own words. */
+    morning: { end: plainTime(14), start: plainTime(6) },
+    afternoon: { end: plainTime(22), start: plainTime(14) },
     visible(this: { cutoff: TimeFilter | null }) {
       const keep = createFilterPredicate(this.cutoff);
       return DELIVERIES.filter((row) => keep(row.cutoff));
@@ -899,6 +910,10 @@ function timeProps() {
 }
 
 const TIME = `
+  <ng-template #shifts>
+    <button slTimeRangePickerPreset [range]="morning">Morning</button>
+    <button slTimeRangePickerPreset [range]="afternoon">Afternoon</button>
+  </ng-template>
   <div slTable [columns]="3" variant="framed">
     <div slTableContent>
       <thead slTableHead>
@@ -908,7 +923,13 @@ const TIME = `
           <th slTableColumnHeader text="nowrap">
             Cut-off
             <span slTableColumnActions>
-              <span slTableTimeFilter columnLabel="cut-off" [(value)]="cutoff"></span>
+              <span
+                slTableTimeFilter
+                columnLabel="cut-off"
+                [hourCycle]="24"
+                [presets]="shifts"
+                [(value)]="cutoff"
+              ></span>
             </span>
           </th>
         </tr>
@@ -943,7 +964,7 @@ export const FilterTime: Story = {
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'A time column, filtered to the overnight window',
-    "The operand is the time picker, and the descriptor holds the ISO text it writes at the column's granularity — 22:00, not a PlainTime. A between whose start is later than its end wraps at midnight: 22:00 to 02:00 keeps 23:30 and 01:15 and drops 08:00. Compared at the operand's own precision, so is 09:00 matches every second of that minute.",
+    "The operand is the time picker, and between is one time range picker with the desk's shifts as presets; the descriptor holds the ISO text either writes at the column's granularity — 22:00, not a PlainTime. A between whose start is later than its end wraps at midnight: 22:00 to 02:00 keeps 23:30 and 01:15 and drops 08:00. The range picker marks that pair as out of order until its wrap capability lands; the filter applies it as the window. Compared at the operand's own precision, so is 09:00 matches every second of that minute.",
     TIME,
   )}
 </div>`,
@@ -953,10 +974,14 @@ export const FilterTime: Story = {
 function dateTimeProps() {
   return {
     scheduled: {
-      conditions: [{ operator: 'after', value: '2026-09-14T09:00' }],
+      conditions: [{ end: '2026-10-15T18:00', operator: 'between', value: '2026-10-01T08:00' }],
       join: 'and',
       kind: 'datetime',
     } as DateTimeFilter | null,
+    earlyOctober: {
+      end: plainDateTime(plainDate(2026, 10, 15), plainTime(18)),
+      start: plainDateTime(plainDate(2026, 10, 1), plainTime(8)),
+    },
     slot: (value: string) => SLOT.format(new Date(value)),
     visible(this: { scheduled: DateTimeFilter | null }) {
       const keep = createFilterPredicate(this.scheduled);
@@ -966,6 +991,9 @@ function dateTimeProps() {
 }
 
 const DATE_TIME = `
+  <ng-template #windows>
+    <button slDateTimeRangePickerPreset [range]="earlyOctober">Early October</button>
+  </ng-template>
   <div slTable [columns]="3" variant="framed">
     <div slTableContent>
       <thead slTableHead>
@@ -975,7 +1003,13 @@ const DATE_TIME = `
           <th slTableColumnHeader text="nowrap">
             Scheduled
             <span slTableColumnActions>
-              <span slTableDateTimeFilter columnLabel="scheduled" [(value)]="scheduled"></span>
+              <span
+                slTableDateTimeFilter
+                columnLabel="scheduled"
+                [hourCycle]="24"
+                [presets]="windows"
+                [(value)]="scheduled"
+              ></span>
             </span>
           </th>
         </tr>
@@ -1009,8 +1043,8 @@ export const FilterDateTime: Story = {
     template: `
 <div class="slotted-demo-grid" data-columns="1">
   ${scene(
-    'A date-time column, filtered after a moment',
-    'The operand is the date-time picker — seven segments and two surfaces — and the descriptor holds 2026-09-14T09:00 as text. A condition whose operand has one half missing is inactive until both halves exist, so Apply reports nothing for a date without a time. Between draws two pickers until datetime-range-picker lands.',
+    'A date-time column, filtered to the first half of October',
+    "The operand is the date-time picker — seven segments and two surfaces — and between is one date-time range picker: a month beside two lists, the run's length said while it is drawn, and the desk's own fortnight as a preset. The descriptor holds 2026-10-01T08:00 as text either way. A condition whose operand has one half missing is inactive until both halves exist, so Apply reports nothing for a date without a time.",
     DATE_TIME,
   )}
 </div>`,
@@ -1587,6 +1621,79 @@ export const Density: Story = {
     <div data-density="comfortable">${table('variant="framed"')}</div>
     <div data-density="compact">${table('variant="framed"')}</div>
     <div data-density="dense">${table('variant="framed"')}</div>
+  </div>`,
+  )}
+</div>`,
+  }),
+};
+
+/**
+ * The stock take: every row is a count a reader corrects in place. A `plain`
+ * control in a cell takes the cell's own inset and the row's own height, so
+ * the corrected value stands where the read value stood and the row does not
+ * grow when it is edited.
+ */
+function editingProps() {
+  return {
+    aisles: ['Aisle 4', 'Aisle 7', 'Aisle 12'],
+    stock: [
+      { counted: 1200, description: 'Hex bolt M8', location: 'Aisle 4', sku: 'PRD-0412' },
+      { counted: 3400, description: 'Flat washer M8', location: 'Aisle 4', sku: 'PRD-0413' },
+      { counted: 0, description: '', location: 'Aisle 7', sku: 'PRD-0414' },
+      { counted: 860, description: 'Spring washer M8', location: 'Aisle 7', sku: 'PRD-0415' },
+    ],
+    describe(item: { description: string }, event: Event) {
+      item.description = (event.target as HTMLInputElement).value;
+    },
+  };
+}
+
+export const Editing: Story = {
+  parameters: scenario('editing'),
+  render: () => ({
+    props: editingProps(),
+    template: `
+<div class="slotted-demo-grid" data-columns="1">
+  ${scene(
+    'A plain control in a cell',
+    'A text field, a number field and a select, each variant="plain", each standing in a body cell. The cell gives up its inset and the control takes it, so the edited value sits under the column\'s name where the read value sat; the control is the row\'s height, so a row being edited is as tall as the rows around it. The invalid edge stays, square.',
+    `
+  <div slTable [columns]="4" variant="ruled">
+    <div slTableContent>
+      <caption slTableCaption>Stock take</caption>
+      <thead slTableHead>
+        <tr slTableRow>
+          <th slTableColumnHeader text="nowrap">SKU</th>
+          <th slTableColumnHeader>Description</th>
+          <th slTableColumnHeader numeric>Counted</th>
+          <th slTableColumnHeader>Location</th>
+        </tr>
+      </thead>
+      <tbody slTableBody>
+        @for (item of stock; track item.sku) {
+          <tr slTableRow [value]="item.sku">
+            <th slTableRowHeader text="nowrap">{{ item.sku }}</th>
+            <td slTableCell>
+              <div slTextField size="sm" variant="plain">
+                <input slTextFieldInput placeholder="Required" [invalid]="item.description === ''" [value]="item.description" [attr.aria-label]="'Description of ' + item.sku" (input)="describe(item, $event)" />
+              </div>
+            </td>
+            <td slTableCell numeric>
+              <div slNumberField size="sm" variant="plain" stepper="none">
+                <input slNumberFieldInput min="0" [value]="item.counted" [attr.aria-label]="'Counted for ' + item.sku" />
+              </div>
+            </td>
+            <td slTableCell>
+              <sl-select size="sm" variant="plain" [(value)]="item.location" [attr.aria-label]="'Location of ' + item.sku">
+                @for (aisle of aisles; track aisle) {
+                  <sl-select-item [value]="aisle">{{ aisle }}</sl-select-item>
+                }
+              </sl-select>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </div>
   </div>`,
   )}
 </div>`,

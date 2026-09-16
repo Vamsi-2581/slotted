@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 5,
+  "family": "sparkline",
+  "ui": "sparkline",
+  "axes": {
+    "type": ["line", "bar"],
+    "size": ["sm", "md", "lg"],
+    "curve": ["linear", "monotone"],
+    "tone": ["neutral", "accent", "secondary", "success", "warning", "danger"],
+    "series": ["1", "2", "3", "4", "5", "6", "7", "8"]
+  },
+  "nominalSize": {
+    "sm": { "width": 96, "height": 20 },
+    "md": { "width": 96, "height": 32 },
+    "lg": { "width": 96, "height": 48 }
+  },
+  "members": {
+    "sparkline": {
+      "nativeElement": "span",
+      "defaults": {
+        "type": "line",
+        "size": "md",
+        "curve": "linear",
+        "area": false,
+        "marker": true
+      },
+      "capabilities": ["appearance", "size", "measurement", "content"],
+      "states": ["default"],
+      "parts": ["root", "plot", "area", "line", "bar", "reference", "ring", "marker"]
+    }
+  },
+  "stateAttributes": {},
+  "scenarios": {
+    "sparkline": [
+      "playground",
+      "types",
+      "sizes",
+      "tone",
+      "series",
+      "reference",
+      "gaps",
+      "extremes",
+      "in-table",
+      "accessibility"
+    ]
+  }
+}

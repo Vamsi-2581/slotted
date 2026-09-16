@@ -1,0 +1,244 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import test from 'node:test';
+
+const contract = JSON.parse(
+  readFileSync(
+    new URL('../../../../specs/components/stat-card/contract.json', import.meta.url),
+    'utf8',
+  ),
+);
+const css = readFileSync(new URL('./stat-card.css', import.meta.url), 'utf8');
+const fragment = readFileSync(new URL('./stat-card.harness.html', import.meta.url), 'utf8');
+const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
+const normalized = declarations
+  .replace(/\s+/g, ' ')
+  .replace(/\s*([{};,:])\s*/g, '$1')
+  .replace(/\(\s+/g, '(')
+  .replace(/\s+\)/g, ')');
+
+const ui = `[data-ui='${contract.ui}']`;
+const { parts } = contract.members['stat-card'];
+
+/** Every innermost rule, with the at-rule it sits in. */
+function collectRules(sheet) {
+  const collected = [];
+  const stack = [];
+  let selector = '';
+  for (let index = 0; index < sheet.length; index += 1) {
+    const character = sheet[index];
+    if (character === '}') {
+      stack.pop();
+      selector = '';
+      continue;
+    }
+    if (character !== '{') {
+      selector += character;
+      continue;
+    }
+    const close = sheet.indexOf('}', index);
+    const nested = sheet.indexOf('{', index + 1);
+    if (nested === -1 || nested > close) {
+      collected.push({
+        selector: selector.trim(),
+        body: sheet.slice(index + 1, close),
+        scope:
+          stack.find((frame) => frame.startsWith('@media') || frame.startsWith('@container')) ?? '',
+      });
+      index = close;
+      selector = '';
+    } else {
+      stack.push(selector.trim());
+      selector = '';
+    }
+  }
+  return collected;
+}
+
+const rules = collectRules(normalized);
+const rule = (selector, scope = '') =>
+  rules.find((entry) => entry.selector === selector && entry.scope === scope);
+const body = (selector, scope) => rule(selector, scope)?.body ?? '';
+
+test('lives in the component layer', () => {
+  assert.match(css, /^@layer slotted\.components \{/m);
+});
+
+test('is selected by the identifier the contract declares', () => {
+  assert.ok(rule(ui));
+});
+
+test('styles every part the contract declares, and the harness renders each', () => {
+  for (const part of parts) {
+    if (part === 'root') continue;
+    assert.ok(normalized.includes(`[data-part='${part}']`), `${part} is never painted`);
+    assert.ok(fragment.includes(`data-part="${part}"`), `${part} never appears in the harness`);
+  }
+});
+
+/**
+ * The root is the query container and the body is the grid, one element in.
+ * `container-type: inline-size` makes an element a container for its
+ * descendants and not for itself (`docs/build-briefing.md`).
+ */
+test('measures itself on the root and lays out one element in', () => {
+  const root = body(ui);
+  assert.ok(root.includes('container-type:inline-size'));
+  assert.ok(root.includes('container-name:stat-card'));
+  assert.ok(root.includes('display:flex'));
+  assert.ok(root.includes('flex-direction:column'));
+  assert.ok(body(`${ui} [data-part='body']`).includes('display:grid'));
+  assert.ok(body(`${ui} [data-part='body']`).includes('flex:1 1 auto'));
+});
+
+/**
+ * The figure's column is floored at its min-content and the trend's column
+ * shrinks to nothing: a value is never broken to make room for a chart, and
+ * the trend gives way instead.
+ */
+test('gives the value its width and lets the trend give way', () => {
+  const grid = body(`${ui} [data-part='body']`);
+  assert.ok(
+    grid.includes('grid-template-columns:minmax(min-content,1fr) minmax(0,var(--_trend-size))'),
+  );
+  assert.ok(body(`${ui} [data-part='value']`).includes('overflow-wrap:break-word'));
+  assert.doesNotMatch(body(`${ui} [data-part='value']`), /anywhere/);
+});
+
+/**
+ * The figure sits at the top of the row that grows and the trend at the
+ * bottom when stacked, so a row of cards stretched to one height keeps its
+ * values level at the top and its charts level at the bottom.
+ */
+test('levels a row of cards: figures at the top, stacked trends at the bottom', () => {
+  assert.ok(
+    body(`${ui} [data-part='body']`).includes('grid-template-rows:auto minmax(0,1fr) auto'),
+  );
+  assert.ok(body(`${ui} [data-part='figure']`).includes('align-self:start'));
+  assert.ok(body(`${ui} [data-part='trend']`).includes('align-self:center'));
+  assert.ok(body(`${ui}[data-layout='stacked'] [data-part='trend']`).includes('align-self:end'));
+});
+
+test('stacks the trend under the figure below 220 pixels, and steps the value down', () => {
+  const scope = '@container stat-card (max-width:219px)';
+  assert.ok(body(`${ui} [data-part='body']`, scope).includes("'trend'"));
+  assert.ok(body(`${ui} [data-part='trend']`, scope).includes('align-self:end'));
+  assert.ok(
+    body(`${ui} [data-part='value']`, scope).includes('font-size:var(--_value-size-narrow)'),
+  );
+});
+
+/** A trend narrower than forty pixels is a smear, and the region hides it. */
+test('hides a trend that was left no room', () => {
+  const trend = body(`${ui} [data-part='trend']`);
+  assert.ok(trend.includes('container-type:inline-size'));
+  assert.equal(
+    body(`${ui} [data-part='trend'] > *`, '@container stat-card-trend (max-width:39px)'),
+    'visibility:hidden;',
+  );
+});
+
+test('answers every fill, and lets plain give up its frame and its inset', () => {
+  for (const fill of contract.axes.fill) {
+    if (fill === 'outline') continue;
+    assert.ok(rule(`${ui}[data-fill='${fill}']`), `${fill}`);
+  }
+  const plain = body(`${ui}[data-fill='plain']`);
+  assert.ok(plain.includes('--_surface:transparent'));
+  assert.ok(plain.includes('--_edge:transparent'));
+  assert.ok(plain.includes('--_inset-inline:0'));
+});
+
+test('scales the figure by size, reaching the new 4xl step at lg', () => {
+  assert.ok(body(`${ui}[data-size='sm']`).includes('--slotted-font-size-2xl'));
+  assert.ok(body(ui).includes('--slotted-font-size-3xl'));
+  assert.ok(body(`${ui}[data-size='lg']`).includes('--slotted-font-size-4xl'));
+});
+
+/**
+ * The delta wears the tone's text role and nothing else: no chip, no fill.
+ * The mark is one glyph turned over for a fall and `minus` for no change.
+ */
+test('paints the delta in the tone it earned and turns one glyph for the fall', () => {
+  for (const tone of contract.axes.tone) {
+    assert.ok(rule(`${ui} [data-part='delta'][data-tone='${tone}']`), tone);
+  }
+  const indicator = body(`${ui} [data-part='indicator']`);
+  assert.ok(indicator.includes('mask-image:var(--slotted-icon-trending-up)'));
+  assert.ok(indicator.includes('background-color:currentcolor'));
+  assert.equal(
+    body(`${ui} [data-part='delta'][data-trend='down'] [data-part='indicator']`),
+    '--_flip-y:-1;',
+  );
+  assert.equal(
+    body(`${ui} [data-part='delta'][data-trend='flat'] [data-part='indicator']`),
+    'mask-image:var(--slotted-icon-minus);',
+  );
+  assert.equal(body(`${ui} [data-part='indicator']:dir(rtl)`), '--_flip-x:-1;');
+  assert.doesNotMatch(body(`${ui} [data-part='delta']`), /background/);
+});
+
+/** A signed number in a right-to-left document keeps its sign in front. */
+test('lays the value and the delta out by their own content', () => {
+  assert.ok(body(`${ui} [data-part='value']`).includes('unicode-bidi:plaintext'));
+  assert.ok(body(`${ui} [data-part='delta']`).includes('unicode-bidi:plaintext'));
+});
+
+/**
+ * The trend region hands the card's tone to the sparkline inside it through
+ * the property the sparkline reads when it has no tone of its own, and hands
+ * it the card's ground for the marker's ring.
+ */
+test('hands its tone and its ground to the sparkline in its trend', () => {
+  for (const tone of ['success', 'danger', 'warning', 'accent', 'secondary']) {
+    assert.equal(
+      body(`${ui}[data-tone='${tone}'] [data-part='trend']`),
+      `--slotted-sparkline-color:var(--slotted-tone-${tone}-text);`,
+    );
+  }
+  assert.ok(!rule(`${ui}[data-tone='neutral'] [data-part='trend']`), 'neutral hands nothing');
+  assert.ok(
+    body(`${ui} [data-part='trend']`).includes('--slotted-sparkline-ring-color:var(--_surface)'),
+  );
+});
+
+test('keeps the trend the height of the sparkline while it loads', () => {
+  assert.ok(
+    body(`${ui}[data-loading] [data-part='trend']`).includes('--slotted-skeleton-block-size:'),
+  );
+  assert.ok(rule(`${ui}[data-loading][data-size='sm'] [data-part='trend']`));
+  assert.ok(rule(`${ui}[data-loading][data-size='lg'] [data-part='trend']`));
+});
+
+test('says a failed value in the danger tone and a missing one in the muted step', () => {
+  assert.equal(
+    body(`${ui}[data-status='error'] [data-part='message']`),
+    'color:var(--slotted-tone-danger-text);',
+  );
+  assert.ok(
+    rule(
+      `${ui}[data-status='empty'] [data-part='value'],${ui}[data-status='error'] [data-part='value']`,
+    ),
+  );
+});
+
+test('keeps the indicator under forced colours', () => {
+  assert.equal(
+    body(`${ui} [data-part='indicator']`, '@media (forced-colors:active)'),
+    'forced-color-adjust:none;',
+  );
+});
+
+test('exercises every axis value, the loading state and both statuses', () => {
+  for (const [axis, values] of Object.entries(contract.axes)) {
+    for (const value of values) {
+      const attribute = axis === 'goodWhen' ? 'good-when' : axis;
+      assert.ok(
+        fragment.includes(`data-${attribute}="${value}"`),
+        `${axis}=${value} is never shown`,
+      );
+    }
+  }
+  assert.ok(fragment.includes('data-loading=""'));
+  assert.ok(fragment.includes('data-ui="skeleton" data-part="region"'), 'one region per card');
+});

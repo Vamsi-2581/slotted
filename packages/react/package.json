@@ -72,6 +72,10 @@
       "types": "./dist/types/container/index.d.ts",
       "import": "./dist/container.js"
     },
+    "./context-menu": {
+      "types": "./dist/types/context-menu/index.d.ts",
+      "import": "./dist/context-menu.js"
+    },
     "./date-field": {
       "types": "./dist/types/date-field/index.d.ts",
       "import": "./dist/date-field.js"
@@ -135,6 +139,10 @@
     "./highlight": {
       "types": "./dist/types/highlight/index.d.ts",
       "import": "./dist/highlight.js"
+    },
+    "./hover-card": {
+      "types": "./dist/types/hover-card/index.d.ts",
+      "import": "./dist/hover-card.js"
     },
     "./icon": {
       "types": "./dist/types/icon/index.d.ts",

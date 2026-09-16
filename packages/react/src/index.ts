@@ -33,6 +33,7 @@ export * from './field-group';
 export * from './filter-bar';
 export * from './form';
 export * from './grid';
+export * from './highlight';
 export * from './icon';
 export * from './inline';
 export * from './inline-message';

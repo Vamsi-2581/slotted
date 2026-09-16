@@ -132,6 +132,10 @@
       "types": "./dist/types/grid/index.d.ts",
       "import": "./dist/grid.js"
     },
+    "./highlight": {
+      "types": "./dist/types/highlight/index.d.ts",
+      "import": "./dist/highlight.js"
+    },
     "./icon": {
       "types": "./dist/types/icon/index.d.ts",
       "import": "./dist/icon.js"

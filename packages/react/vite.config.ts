@@ -34,6 +34,7 @@ export default defineConfig({
         divider: resolve(import.meta.dirname, 'src/divider/index.ts'),
         'filter-bar': resolve(import.meta.dirname, 'src/filter-bar/index.ts'),
         grid: resolve(import.meta.dirname, 'src/grid/index.ts'),
+        highlight: resolve(import.meta.dirname, 'src/highlight/index.ts'),
         icon: resolve(import.meta.dirname, 'src/icon/index.ts'),
         inline: resolve(import.meta.dirname, 'src/inline/index.ts'),
         'inline-message': resolve(import.meta.dirname, 'src/inline-message/index.ts'),

@@ -101,6 +101,10 @@
       "types": "./dist/types/number/index.d.ts",
       "import": "./dist/number.js"
     },
+    "./otp": {
+      "types": "./dist/types/otp/index.d.ts",
+      "import": "./dist/otp.js"
+    },
     "./pointer-intent": {
       "types": "./dist/types/pointer-intent/index.d.ts",
       "import": "./dist/pointer-intent.js"

@@ -28,6 +28,7 @@ export default defineConfig({
         loading: resolve(import.meta.dirname, 'src/loading/index.ts'),
         measure: resolve(import.meta.dirname, 'src/measure/index.ts'),
         number: resolve(import.meta.dirname, 'src/number/index.ts'),
+        otp: resolve(import.meta.dirname, 'src/otp/index.ts'),
         overflow: resolve(import.meta.dirname, 'src/overflow/index.ts'),
         'pointer-intent': resolve(import.meta.dirname, 'src/pointer-intent/index.ts'),
         portal: resolve(import.meta.dirname, 'src/portal/index.ts'),

@@ -115,6 +115,8 @@
     "./multi-select/tokens.json": "./src/multi-select/multi-select.tokens.json",
     "./number-field/number-field.css": "./src/number-field/number-field.css",
     "./number-field/tokens.json": "./src/number-field/number-field.tokens.json",
+    "./otp-input/otp-input.css": "./src/otp-input/otp-input.css",
+    "./otp-input/tokens.json": "./src/otp-input/otp-input.tokens.json",
     "./page/page.css": "./src/page/page.css",
     "./page/tokens.json": "./src/page/page.tokens.json",
     "./page-header/page-header.css": "./src/page-header/page-header.css",

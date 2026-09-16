@@ -33,29 +33,16 @@ append-only são escritos.
 
 ## Tarefa em curso
 
-Passo 14 — gate de release.
-
-## Próximo passo executável
-
-Após o gate, passo 15: um commit por passo, caminhos explícitos:
-
-- contratos: `specs/components/context-menu/*`, `specs/components/hover-card/*`
-- estilos: `packages/styles/src/context-menu/*`, `packages/styles/src/hover-card/*`,
-  `packages/styles/package.json` (só as quatro linhas)
-- React: `packages/react/src/context-menu/*`, `packages/react/src/hover-card/*`,
-  `packages/react/package.json`, `packages/react/vite.config.ts`,
-  `packages/react/src/index.ts` (só as linhas das duas famílias)
-- Angular: `packages/angular/context-menu/**`, `packages/angular/hover-card/**`
-- docs: `docs/superpowers/specs/2026-09-16-context-menu-hover-card-*.md`,
-  `docs/build-order.md` (só os hunks destas famílias),
-  `.claude/progress/context-menu-hover-card.md`
-
-Os registros partilhados têm linhas de outras sessões: `git diff` e
-`git apply --cached` com o patch filtrado, nunca `git add` do arquivo inteiro.
+Nenhuma. Gate de release aprovado ("finalize"); passo 15 fechado em cinco
+commits: `e466bbd` (specs), `b58c8fa` (styles), `379031b` (react), `6b0e4d8`
+(angular), `0c2baab` (docs). Núcleo antes: `a7da316` (menu), `f20042e`
+(popover). Depois do gate, a marca `open` do alvo passou a `::after`
+sobreposto (só os cantos apareciam sob um card) e os tiles das páginas são o
+próprio alvo.
 
 ## Git
 
-Branch `review/implementation-pass-1`, HEAD `f20042e` (+ commits alheios).
+Branch `review/implementation-pass-1`, HEAD `0c2baab`. Nada desta família fora do índice.
 
 ## Problemas conhecidos
 

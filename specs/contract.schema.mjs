@@ -344,6 +344,23 @@ export const KNOWN_CAPABILITIES = [
    * an upload list, a background-job tray — reads the same word.
    */
   'queue',
+  /**
+   * The reader's own arrangement of a grid's columns — their order, their
+   * widths, which are hidden and which are pinned to either edge. It is
+   * mutable and a consumer can own it: a saved view restores it, and
+   * `column-manager` edits it in a panel of its own.
+   *
+   * The vocabulary had four words that look like this one and are not.
+   * `arrangement` and `size` are deliberately immutable, a consumer's choice
+   * of how children are laid out; `extent` is the share of a layer one panel
+   * takes; `value` is the text a control holds. None of them says "these
+   * columns, in this order, at these widths, and the reader moved them".
+   *
+   * `data-grid` found the gap: `table` declined resizing, reordering and
+   * pinning by name and deferred all three to it. `tree-grid`, `pivot-grid`
+   * and `column-manager` hold or edit the same object later.
+   */
+  'columns',
 ];
 
 /** Capabilities that hold state a consumer can own, and therefore need a model. */
@@ -363,6 +380,7 @@ export const MUTABLE_CAPABILITIES = [
   'validity',
   'queue',
   'extent',
+  'columns',
 ];
 
 export function strongestState(states) {

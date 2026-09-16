@@ -78,7 +78,6 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
 
-
 ## Onda 9 — o que a onda 8 deixou
 
 Famílias listadas na onda 8 do passe 1 e não construídas, mais a infraestrutura

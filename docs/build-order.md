@@ -384,6 +384,21 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   `alt`, `fit`, `position`, `loading`, fallback e estado de erro. Zoom e
   pré-visualização são capacidade separada (`dialog`). `avatar` e `upload`
   passam a ler `image` quando forem reabertos; não muda nada nesta sessão.
+
+  Entregue em 2026-09-16. Inventário em
+  `docs/superpowers/specs/2026-09-16-aspect-ratio-image-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-aspect-ratio-image-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-16-aspect-ratio-image-self-assessment.md`.
+  `aspect-ratio` é `aspect-ratio` nativo com cinco nomes (`square`,
+  `landscape`, `portrait`, `video`, `wide`) e número ou par; a moldura cresce
+  quando o conteúdo não cabe e ajusta filho substituído com `contain`. `image`
+  renderiza a raiz de `aspect-ratio` dentro da sua quando há `ratio`; três
+  layouts (`intrinsic`, `fill`, `framed`); `status` derivado sem modelo;
+  `fallbackSrc` antes de `error`; `sources` para `<picture>`; glifo novo
+  `--slotted-icon-image-off`. `card` lê `image` na sua parte `media` quando
+  for reaberto.
+
 - `stat-card sparkline` — uma sessão: `stat-card` com rótulo, valor, unidade,
   delta, período, tendência, comparação, status e ação de detalhe; o tom deriva
   da semântica da métrica e não do sinal matemático (`goodWhen: up | down`).

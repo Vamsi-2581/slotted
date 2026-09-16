@@ -91,6 +91,37 @@ async function settle(fixture: ComponentFixture<Host>) {
   await fixture.whenStable();
 }
 
+@Component({
+  standalone: true,
+  imports: [SlPopover, SlPopoverTrigger, SlPopoverLayer, SlPopoverContent],
+  template: `
+    <ng-container slPopover [open]="true">
+      <button slPopoverTrigger type="button">Preview</button>
+      <ng-template slPopoverLayer>
+        <div slPopoverContent role="presentation">Preview</div>
+      </ng-template>
+    </ng-container>
+  `,
+})
+class RoleHost {}
+
+/**
+ * The consumer's explicit value wins, as `frameworks.md` requires of every
+ * family: `slHoverCard` writes `presentation` on a card nothing can enter.
+ */
+describe('SlPopoverContent role', () => {
+  it('lets the consumer\u2019s role win over dialog', async () => {
+    await TestBed.configureTestingModule({ imports: [RoleHost] }).compileComponents();
+    const fixture = TestBed.createComponent(RoleHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector('[data-part="content"]')?.getAttribute('role')).toBe(
+      'presentation',
+    );
+    fixture.destroy();
+  });
+});
+
 describe('SlPopover', () => {
   let fixture: ComponentFixture<Host>;
 

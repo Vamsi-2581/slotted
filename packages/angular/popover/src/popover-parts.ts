@@ -336,8 +336,8 @@ export class SlPopoverLayer {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'content',
-    role: 'dialog',
     tabindex: '-1',
+    '[attr.role]': 'role()',
     '[attr.id]': 'popover.contentId',
     '[attr.aria-labelledby]': 'labelledBy()',
     '[attr.aria-describedby]': 'describedBy()',
@@ -346,7 +346,10 @@ export class SlPopoverLayer {
 export class SlPopoverContent {
   protected readonly popover = inject(SlPopover);
   private readonly writtenLabel = inject(new HostAttributeToken('aria-label'), { optional: true });
+  private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
 
+  /* The consumer's own `role` wins; the popover decides the rest. */
+  protected readonly role = computed(() => this.writtenRole ?? this.popover.contentRole());
   protected readonly labelledBy = computed(() =>
     this.popover.hasTitle() && this.writtenLabel === null ? this.popover.titleId : null,
   );

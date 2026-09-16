@@ -73,6 +73,25 @@ describe('Popover', () => {
     expect(arrow?.parentElement).toBe(layer());
   });
 
+  /**
+   * The consumer's explicit value wins, as `frameworks.md` requires of every
+   * family: `hover-card` writes `presentation` on a card nothing can enter.
+   */
+  it('lets the consumer\u2019s role win over dialog', async () => {
+    render(
+      <Popover defaultOpen>
+        <PopoverTrigger>Filters</PopoverTrigger>
+        <PopoverLayer>
+          <PopoverContent role="presentation">Preview</PopoverContent>
+        </PopoverLayer>
+      </Popover>,
+    );
+    await waitFor(() => expect(layer()).not.toBeNull());
+    expect(document.querySelector('[data-part="content"]')?.getAttribute('role')).toBe(
+      'presentation',
+    );
+  });
+
   it('builds nothing until it is opened', () => {
     render(<Basic />);
     expect(layer()).toBeNull();

@@ -147,6 +147,12 @@ export class SlPopover {
   readonly resolvedAutoFocus = computed(
     () => (this.autoFocus() ?? this.defaults.autoFocus) === true,
   );
+  /**
+   * The role the panel carries when the consumer wrote none. A family that
+   * provides itself as this one — `slHoverCard` — decides it here: a card
+   * nothing can enter is `presentation`, not a dialog nobody is told about.
+   */
+  readonly contentRole = computed<string>(() => 'dialog');
   readonly resolvedCloseOnEscape = computed(
     () => (this.closeOnEscape() ?? this.defaults.closeOnEscape) === true,
   );

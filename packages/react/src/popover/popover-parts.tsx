@@ -389,7 +389,9 @@ export function PopoverContent({ children, ref, render, ...nativeProps }: Popove
     ...(popover.hasDescription ? { 'aria-describedby': popover.descriptionId } : {}),
     'data-part': 'content',
     id: popover.contentId,
-    role: 'dialog',
+    /* The consumer's explicit role wins: a hover card that nothing can enter
+       is `presentation`, not a dialog nobody is told about. */
+    role: nativeProps.role ?? 'dialog',
     tabIndex: -1,
   };
 

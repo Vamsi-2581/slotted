@@ -1,5 +1,5 @@
 import type { ChangeRequest } from '@slotted/core/state';
-import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
+import type { AriaRole, ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
 /** The width and type step the panel sits at. */
 export type PopoverSize = 'sm' | 'md' | 'lg';
@@ -159,7 +159,8 @@ export interface PopoverContentRootProps extends HTMLAttributes<HTMLElement> {
   'aria-labelledby'?: string | undefined;
   'data-part': string;
   id: string;
-  role: 'dialog';
+  /** `dialog` unless the consumer wrote one — `hover-card` writes `presentation`. */
+  role: AriaRole;
   tabIndex: -1;
 }
 

@@ -61,6 +61,7 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | Família                         | O que entra                                                                                                                                                                                                                                          | Depois de                                 | Registro                                                                   |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------- |
 | `table`                         | `time-range-picker` e `datetime-range-picker` como operando único de `between` nas espécies `time` e `datetime`                                                                                                                                      | `time-range-picker datetime-range-picker` | `docs/archive/build-order-pass-1.md`, onda 8                               |
+| `date-range-picker`             | a moldura de uma linha de `time-range-picker` (`summary`, campos na banda do painel): dois campos na moldura quebram-na em duas linhas numa coluna de formulário e contrariam a altura partilhada dos controlos                                      | —                                         | `docs/superpowers/specs/2026-09-15-time-range-design.md`                   |
 | `table`                         | célula com controle `plain` cede a inserção ao controle (`padding-inline: 0` na célula, `--slotted-control-padding-inline-*` no controle)                                                                                                            | —                                         | `docs/archive/build-order-pass-1.md`, onda 7; `docs/build-briefing.md`     |
 | `multi-select`                  | ler `splitValues`, `admitValues` e `constraintVerdict` de `@slotted/core/tags` no lugar das duas cópias locais; `commitOnBlur` com três valores                                                                                                      | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                               |
 | `prose`, `table`, `tabs`        | substituir a medida de rolagem própria por `scroll-area`                                                                                                                                                                                             | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                               |
@@ -205,6 +206,25 @@ que três autoavaliações pediram.
   `@slotted/core/date` (`date-range.ts` estendido a `PlainTime` e
   `PlainDateTime`). A reabertura de `table` que substitui os dois pickers do
   `between` é uma sessão separada, na onda 10.
+  Entregue em 2026-09-16. Inventário em
+  `docs/superpowers/specs/2026-09-15-time-range-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-15-time-range-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-15-time-range-self-assessment.md`. Vinte e
+  seis / vinte e oito partes; três modelos (`value`, `open`, `current` como
+  conjunto `position` + `highlighted`). A moldura é uma linha na altura de
+  controlo — `summary` com o valor em texto, `clear`, dois `hidden-input` —
+  e o painel é uma ponta de cada vez: duas abas (Início / Fim), o campo da
+  ponta corrente (só em ponteiro fino), `hint` com o que falta ou o que está
+  errado, e a lista dessa ponta (**[DT]** ao lado da grelha em modo
+  intervalo); escolher uma ponta leva à outra, a segunda fecha, `done` é a
+  saída da folha. As duas listas lado a lado da primeira volta foram
+  recusadas no gate de lançamento. A duração em cada linha
+  (`option-duration`; **[DT]** só no mesmo dia). Motor em `@slotted/core/date/time-range.ts`
+  (`timeRangeProblems`, `dateTimeRangeProblems`, `durationLabel`,
+  `runRefusal`, `openingIndex`). Aditivo fora da família: `label` em
+  `time-field` e `datetime-field` Angular; os três campos Angular não repõem
+  os segmentos durante uma sequência de dígitos.
 - `data-grid` — a família que **aplica** o descritor de `@slotted/core/filter`:
   possui o modelo de dados e chama `createFilterPredicate`; `table` reporta e o
   consumidor filtra. Herda as quatro capacidades que `table` recusou pelo papel

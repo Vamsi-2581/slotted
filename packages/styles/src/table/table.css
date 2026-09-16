@@ -316,6 +316,60 @@
     vertical-align: bottom;
   }
 
+  /**
+   * ── A control in a cell ────────────────────────────────────────────────
+   *
+   * A cell holding a `plain` control gives its inset to the control, the way
+   * the header gives its inset to `sort`: `padding-inline: 0` here, and the
+   * control's own padding tokens set to the cell's inset, so the edited value
+   * stands where the read value stood, under the column's name. With both
+   * insets kept, the value sat one inset in from the header — the picture the
+   * `in-a-row` scene of `text-field` showed. `--_pad-inline` resolves on the
+   * root and is inherited resolved, so redefining the token it reads does not
+   * feed back into it.
+   *
+   * The block inset moves too, and it moves into the control's height: the
+   * control is exactly the row's minimum block size, whatever size step the
+   * consumer wrote, so a row with a control in it is as tall as a row without
+   * one. Read with the block padding kept, a `sm` control stood in a
+   * comfortable row ten pixels taller than the rows around it — the reflow
+   * the `plain` variant exists to avoid. The control's width stays the
+   * control's own, as in a form.
+   *
+   * The selector names the fourteen `plain` field families
+   * `plain-variant.test.mjs` holds, and no other: a `kbd`, a `listbox`, a
+   * `timeline` or a nested table has a `plain` variant of its own and is not a
+   * control. `table.styles.test.mjs` holds the two lists against each other.
+   */
+  [data-ui='table']
+    :is([data-part='cell'], [data-part='row-header']):has(
+      > [data-part='root'][data-variant='plain']:is(
+          [data-ui='select'],
+          [data-ui='combobox'],
+          [data-ui='multi-select'],
+          [data-ui='text-field'],
+          [data-ui='textarea'],
+          [data-ui='number-field'],
+          [data-ui='currency-field'],
+          [data-ui='date-field'],
+          [data-ui='time-field'],
+          [data-ui='datetime-field'],
+          [data-ui='tags-input'],
+          [data-ui='date-range-picker'],
+          [data-ui='time-range-picker'],
+          [data-ui='datetime-range-picker']
+        )
+    ) {
+    --slotted-control-padding-inline-sm: var(--_pad-inline);
+    --slotted-control-padding-inline-md: var(--_pad-inline);
+    --slotted-control-padding-inline-lg: var(--_pad-inline);
+    --slotted-control-height-sm: var(--_row-min-block);
+    --slotted-control-height-md: var(--_row-min-block);
+    --slotted-control-height-lg: var(--_row-min-block);
+
+    padding: 0;
+  }
+
   /* A row header names the record, so it carries the weight one step above the
      values beside it and nothing else. It states no colour of its own: read
      against the row's ink, a selected record's name stayed the page's black
@@ -1106,13 +1160,15 @@
   /**
    * Three operands that are one control wide, whatever the operator's count.
    *
-   * `data-range` is a `between` drawn as one `date-range-picker`: the grid
-   * above would put the single child in the first of its two columns and
-   * leave the second empty. A date-time field is seven segments wide, so two
-   * of them side by side at the panel's floor are two fields nobody can read;
-   * a range of date-times stacks, as a range of numbers did at fifteen rem.
-   * The chips of a set typed as tags wrap inside one field, and the field
-   * takes the panel's width so the wrapping has somewhere to go.
+   * `data-range` is a `between` drawn as one range picker — `date-range-picker`
+   * on a date, `time-range-picker` on a time, `datetime-range-picker` on a
+   * date-time: the grid above would put the single child in the first of its
+   * two columns and leave the second empty. A date-time field is seven
+   * segments wide, so two of them side by side at the panel's floor are two
+   * fields nobody can read; a range of date-times stacks, as a range of
+   * numbers did at fifteen rem. The chips of a set typed as tags wrap inside
+   * one field, and the field takes the panel's width so the wrapping has
+   * somewhere to go.
    */
   [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-range],
   [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-kind='datetime'],
@@ -1124,9 +1180,13 @@
    * A time field is narrower than a date field — `09:00` against
    * `14/09/2026` — but the trigger beside it is the same width, so two of them
    * on one row want eight rem each rather than seven. At the floor the two
-   * stack; a panel given two rem more puts them side by side.
+   * stack; a panel given two rem more puts them side by side. The rule is for
+   * a consumer's own `renderOperand` drawing two time pickers: the family's
+   * `between` is one range picker, marked `data-range`, and this rule stands
+   * after the one above, so it steps aside for that mark.
    */
-  [data-ui='table'][data-part='filter-panel'] [data-part='filter-operand'][data-kind='time'] {
+  [data-ui='table'][data-part='filter-panel']
+    [data-part='filter-operand'][data-kind='time']:not([data-range]) {
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
   }
 

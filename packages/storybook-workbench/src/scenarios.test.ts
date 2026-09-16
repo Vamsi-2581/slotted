@@ -184,9 +184,23 @@ describe('workbench scenario metadata', () => {
       ]),
     ).toEqual([]);
     expect(apiMetadataErrors({ capabilities: ['measurement'], defaults: {} }, [])).toEqual([
-      'missing API value or data',
+      'missing API value or data or ratio',
       'missing API max',
     ]);
+  });
+
+  /** A proportion is a measurement with no extent, so `ratio` owes no `max`. */
+  it('lets a measured proportion be called ratio, and asks it for no extent', () => {
+    expect(
+      apiMetadataErrors({ capabilities: ['measurement'], defaults: {} }, [
+        { name: 'ratio', defaultValue: '—' },
+      ]),
+    ).toEqual([]);
+    expect(
+      apiMetadataErrors({ capabilities: ['measurement'], defaults: {} }, [
+        { name: 'value', defaultValue: '0' },
+      ]),
+    ).toEqual(['missing API max']);
   });
 
   it('reports duplicate API rows before checking capability rows or defaults', () => {

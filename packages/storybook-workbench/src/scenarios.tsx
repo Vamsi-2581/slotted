@@ -126,8 +126,13 @@ const capabilityApi = {
    * it, and a `value` that held an array would be the one prop in the family
    * named for what it is not. Either word answers, and `max` is required of
    * both because both draw against an extent.
+   *
+   * `aspect-ratio` states a proportion and calls it `ratio`, which is what
+   * every surveyed implementation calls it. A proportion is a quantity the
+   * consumer states and the family draws, and it has no extent: there is no
+   * `max` a ratio is measured against, so a page for it is not asked for one.
    */
-  measurement: [['value', 'data'], 'max'],
+  measurement: [['value', 'data', 'ratio']],
   /**
    * Nothing, for the reason `content` asks for nothing. `alert` names the axis
    * `live` because the box itself becomes a live region; `toast` names it
@@ -324,6 +329,10 @@ export function apiMetadataErrors(
       if (!alternatives.some((candidate) => names.includes(candidate))) {
         errors.push(`missing API ${alternatives.join(' or ')}`);
       }
+    }
+    /* A value or a series is drawn against an extent; a ratio is not. */
+    if (capability === 'measurement' && !names.includes('ratio') && !names.includes('max')) {
+      errors.push('missing API max');
     }
   }
   for (const [name, value] of Object.entries(member.defaults)) {

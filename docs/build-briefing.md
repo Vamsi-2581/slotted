@@ -318,6 +318,17 @@ other families stand on. Justify it at the gate before writing it.
   back, a bounce on the row the reader had just pressed. `align-content:
 start` on the grid is the fix, and `collapsible` never met it because its
   animated track is alone in its grid.
+- **A demonstration whose picture depends on its width is laid out in a room
+  of a stated width, never in the docs column.** The docs column measures 676
+  pixels at 1280 and 1030 at 1920, and a grid of two columns halves it: every
+  scene of `top-navigation` — a bar whose widest step is 1024 — was squeezed
+  into a picture the family never paints. `.slotted-demo-room[data-room]` in
+  `packages/storybook-workbench` gives a scene `desktop` (1024), `laptop`
+  (900), `tablet` (640) or `phone` (375) pixels, one room per column, and
+  scrolls sideways when the column is narrower than the room. The room's
+  child measures the room's width as content box, so a container query inside
+  reads the stated number. The test in `workbench.styles.test.mjs` holds the
+  four widths.
 
 ## Working beside another session
 

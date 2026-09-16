@@ -58,17 +58,18 @@ Cada linha é uma volta a uma família entregue, registrada no escopo do passe 1
 ou numa autoavaliação. Não são defeitos: são capacidades adiadas até existir a
 família de que dependem. A coluna "depois de" nomeia a barreira.
 
-| Família                         | O que entra                                                                                                                                     | Depois de                                 | Registro                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------ |
-| `table`                         | `time-range-picker` e `datetime-range-picker` como operando único de `between` nas espécies `time` e `datetime`                                 | `time-range-picker datetime-range-picker` | `docs/archive/build-order-pass-1.md`, onda 8                             |
-| `table`                         | célula com controle `plain` cede a inserção ao controle (`padding-inline: 0` na célula, `--slotted-control-padding-inline-*` no controle)       | —                                         | `docs/archive/build-order-pass-1.md`, onda 7; `docs/build-briefing.md`   |
-| `multi-select`                  | ler `splitValues`, `admitValues` e `constraintVerdict` de `@slotted/core/tags` no lugar das duas cópias locais; `commitOnBlur` com três valores | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                             |
-| `prose`, `table`, `tabs`        | substituir a medida de rolagem própria por `scroll-area`                                                                                        | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                             |
-| `scroll-area`                   | véu por `animation-timeline: scroll()`                                                                                                          | —                                         | `2026-09-13-scroll-area-design.md` §5                                    |
-| `listbox`, `tree`, `tags-input` | reordenar por arrasto                                                                                                                           | `drag-and-drop`                           | inventários de `listbox` (l. 125), `tree` (l. 101), `tags-input` (l. 90) |
-| `tags-input`, `multi-select`    | o `Alt`+seta passa a `moveBy` de `@slotted/core/drag`, emitindo o mesmo evento que o arrasto                                                    | —                                         | `2026-09-15-drag-design.md` §1                                           |
-| `dialog`                        | `sl-dialog` aceitar `ariaLabel` como input; o `aria-label` do host é estático e `command-palette` nomeia o diálogo por um `h2` oculto           | —                                         | `2026-09-15-command-palette-self-assessment.md` §8                       |
-| `combobox`                      | adotar `createRanker` de `@slotted/core/collection` como ordenação padrão, no lugar de `filter` mais a ordem do consumidor                      | —                                         | `2026-09-15-command-palette-design.md` §2                                |
+| Família                         | O que entra                                                                                                                                                                        | Depois de                                 | Registro                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------- |
+| `table`                         | `time-range-picker` e `datetime-range-picker` como operando único de `between` nas espécies `time` e `datetime`                                                                    | `time-range-picker datetime-range-picker` | `docs/archive/build-order-pass-1.md`, onda 8                               |
+| `table`                         | célula com controle `plain` cede a inserção ao controle (`padding-inline: 0` na célula, `--slotted-control-padding-inline-*` no controle)                                          | —                                         | `docs/archive/build-order-pass-1.md`, onda 7; `docs/build-briefing.md`     |
+| `multi-select`                  | ler `splitValues`, `admitValues` e `constraintVerdict` de `@slotted/core/tags` no lugar das duas cópias locais; `commitOnBlur` com três valores                                    | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                               |
+| `prose`, `table`, `tabs`        | substituir a medida de rolagem própria por `scroll-area`                                                                                                                           | —                                         | `docs/archive/build-order-pass-1.md`, onda 8                               |
+| `scroll-area`                   | véu por `animation-timeline: scroll()`                                                                                                                                             | —                                         | `2026-09-13-scroll-area-design.md` §5                                      |
+| `listbox`, `tree`, `tags-input` | reordenar por arrasto                                                                                                                                                              | `drag-and-drop`                           | inventários de `listbox` (l. 125), `tree` (l. 101), `tags-input` (l. 90)   |
+| `tags-input`, `multi-select`    | o `Alt`+seta passa a `moveBy` de `@slotted/core/drag`, emitindo o mesmo evento que o arrasto                                                                                       | —                                         | `2026-09-15-drag-design.md` §1                                             |
+| `app-shell`                     | `[data-ui='app-shell'] [data-part='brand']` passa a `> [data-part='banner'] > [data-part='brand']`: o seletor descendente alcança o `brand` de `top-navigation` dentro do `banner` | —                                         | `2026-09-15-top-navigation-design.md` §9; `top-navigation.styles.test.mjs` |
+| `dialog`                        | `sl-dialog` aceitar `ariaLabel` como input; o `aria-label` do host é estático e `command-palette` nomeia o diálogo por um `<h2 slDialogTitle hidden>`                              | —                                         | `2026-09-15-command-palette-self-assessment.md` §8                         |
+| `combobox`                      | adotar `createRanker` de `@slotted/core/collection` como ordenação padrão, no lugar de `filter` mais a ordem do consumidor                                                         | —                                         | `2026-09-15-command-palette-design.md` §2                                  |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -147,6 +148,26 @@ que três autoavaliações pediram.
   região `header` de `app-shell`. Landmarks e skip link; a barra não é um
   `toolbar` com uma parada de tabulação por região. Compõe `text-field`,
   `avatar`, `menu` e `badge`; não define nenhum deles.
+
+  Entregue em 2026-09-15. Inventário em
+  `docs/superpowers/specs/2026-09-15-top-navigation-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-15-top-navigation-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-15-top-navigation-self-assessment.md`. Vinte
+  e quatro partes; três modelos (`moreOpen`, `searchOpen`, `value`); o colapso
+  em três degraus literais (`collapseAt`: 1024, 768, 480) sobre `priority` por
+  item, decidido pela folha antes do script; o painel de `more` é Disclosure
+  dentro da raiz, com o mesmo DOM movido (Angular) ou portado (React); a
+  procura vira gatilho abaixo de 768 e toma a barra aberta; `context` recolhe
+  para o painel abaixo de 768 e `help` abaixo de 480, `notifications` e
+  `account` nunca;
+  `frame` e `landmark` resolvidos pelo contexto da casca; o glifo
+  `--slotted-icon-bell` entra na escala. Recusado por escrito: `sticky`
+  (duas linhas do consumidor), resultados de procura (`combobox`,
+  `command-palette`), switcher próprio (`menu`), `display: stack`
+  (`page-header`), `menubar` (a advertência do APG), ações extra recolhíveis
+  (reabertura se um produto pedir).
+
 - `command-palette` — `dialog` com `combobox` + `listbox` dentro. Itens com
   `id`, `label`, `keywords`, `group`, `disabled` e handler ou destino; `query`
   controlável; `loading` e `empty`; atalhos, histórico, ações assíncronas e

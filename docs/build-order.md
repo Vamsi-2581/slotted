@@ -73,6 +73,8 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `combobox`                      | adotar `createRanker` de `@slotted/core/collection` como ordenação padrão, no lugar de `filter` mais a ordem do consumidor                                                                                                                           | —                                         | `2026-09-15-command-palette-design.md` §2                                  |
 | `time-range-picker`             | `wrap`: um turno que atravessa a meia-noite não é `order`; a duração conta pela meia-noite e a lista de fim não risca as horas antes do início. `table` passa-o no `between` da espécie `time`, cujo motor já lê `22:00 – 02:00` como janela noturna | —                                         | `2026-09-16-table-range-operands-design.md` §1                             |
 | `number-field`                  | `text-align: inherit` no `input` (fora da guarda `:dir(rtl)`), para um campo `plain` numa célula numérica alinhar os dígitos ao fim como `text-field` já faz                                                                                         | —                                         | `2026-09-16-table-range-operands-design.md` §2                             |
+| `popover`, `tooltip`            | seta com `--slotted-border-width-medium` (1,5 px): a aresta de 1 px do quadrado rodado 45° é antialiasada em dois meios-pixels e lê-se mais fina que a borda do painel; o `hover-card` a expõe ao lado de um link e não a altera                     | —                                         | gate visual de `context-menu hover-card`, 2026-09-16                       |
+| `positioner`                    | `inline`: um link que quebra em duas linhas mede como a caixa em volta das duas, e um `hover-card` pode apontar para o vão entre elas; o middleware `inline()` do Floating UI responde e o módulo não o expõe                                        | —                                         | `2026-09-16-context-menu-hover-card-capability-inventory.md` §6            |
 | `typography`                    | ler o passo `4xl` (`--slotted-font-size-4xl`, `--slotted-line-height-4xl`) que `stat-card` abriu para `size="lg"`                                                                                                                                    | —                                         | `2026-09-16-stat-card-sparkline-design.md` §2                              |
 | `chart`                         | a rampa sequencial e o par divergente que a escala de dados não tem; a textura como segundo canal sob `forced-colors`; tooltip e realce por ponto que `sparkline` recusou                                                                            | `chart` (onda 12)                         | `2026-09-16-stat-card-sparkline-design.md` §1; inventário §2               |
 | `menu`                          | deixar de importar `highlight/highlight.css` (React e Angular): a família importa a sua folha e um `mark` num item vem de `Highlight` / `[slHighlight]`; o arquivo estava em edição por `context-menu hover-card` na mesma rodada                    | —                                         | `2026-09-16-highlight-design.md` §5                                        |
@@ -314,11 +316,34 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   virtual do `positioner` (inventário de `tooltip`, l. 71). Devolve o foco ao
   alvo. As ações também existem por outro caminho: a família documenta o
   requisito e a página de referência o mostra.
+
+  Entregue em 2026-09-16, numa sessão com `hover-card`. Inventário em
+  `docs/superpowers/specs/2026-09-16-context-menu-hover-card-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-context-menu-hover-card-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-16-context-menu-hover-card-self-assessment.md`.
+  A raiz é o alvo (`div`, `render` para uma linha); a superfície é `menu` sem
+  reexportar nada, como `menubar`. `menu` ganhou `anchor` e `finalFocus`, que
+  o seu inventário (l. 117) e o seu contrato (`focus.finalFocus`) prometiam.
+  Abre por `contextmenu`, long press (500 ms, limiar 10 px) e `Shift+F10`/
+  `ContextMenu` ancorado ao alvo; o foco volta ao elemento focado na abertura.
+
 - `hover-card` — pré-visualização de link ou entidade que abre em hover e foco
   com atraso e área de tolerância; o gatilho continua um `link` ou elemento
   focável; conteúdo navegável opcional. Toque abre por clique. `tooltip` recusou
   `openOnHover` para esta família (inventário, l. 116). Compõe `popover` com
   `positioner` e `presence`; não substitui `dialog`.
+
+  Entregue em 2026-09-16, na sessão de `context-menu` (mesmos três documentos).
+  A raiz é o gatilho (`a`, `render` para `Link`); a superfície é `popover` sem
+  reexportar nada, com `autoFocus` desligado e `sideOffset` 4 px por
+  `overrides` do contrato. `popover` passou a honrar o `role` explícito do
+  consumidor: o painel é `presentation` até `navigable`, quando vira `dialog`
+  e o link recebe `aria-haspopup`. Atrasos 600/300 ms, grace por
+  `pointer-intent`, foco abre sem atraso em `:focus-visible`, toque abre no
+  primeiro tap. Reaberturas registradas acima: seta de `popover`/`tooltip` e
+  `inline` no `positioner`.
+
 - `split-button` — ação principal e menu de alternativas; partes `primary` e
   `menu-trigger` com nomes acessíveis distintos. Compõe `button`, `button-group`
   (variante unida) e `menu`. A escolha no menu só atualiza a ação principal sob

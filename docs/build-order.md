@@ -44,7 +44,7 @@ Famílias do guia entregues dentro de outra: `alert-dialog` em `dialog`;
 binding.
 
 Módulos de `packages/core` entregues: `clipboard`, `code`, `collection`,
-`count`, `currency`, `date`, `disclosure`, `dismissable-layer`, `drag` (onda
+`commands` (onda 9), `count`, `currency`, `date`, `disclosure`, `dismissable-layer`, `drag` (onda
 9), `extent`, `files`, `filter`, `focus`, `form`, `identity`, `keys`,
 `live-announcer`,
 `loading`, `measure`, `number`, `overflow`, `pagination`, `pointer-intent`,
@@ -67,6 +67,8 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `scroll-area`                   | véu por `animation-timeline: scroll()`                                                                                                          | —                                         | `2026-09-13-scroll-area-design.md` §5                                    |
 | `listbox`, `tree`, `tags-input` | reordenar por arrasto                                                                                                                           | `drag-and-drop`                           | inventários de `listbox` (l. 125), `tree` (l. 101), `tags-input` (l. 90) |
 | `tags-input`, `multi-select`    | o `Alt`+seta passa a `moveBy` de `@slotted/core/drag`, emitindo o mesmo evento que o arrasto                                                    | —                                         | `2026-09-15-drag-design.md` §1                                           |
+| `dialog`                        | `sl-dialog` aceitar `ariaLabel` como input; o `aria-label` do host é estático e `command-palette` nomeia o diálogo por um `h2` oculto           | —                                         | `2026-09-15-command-palette-self-assessment.md` §8                       |
+| `combobox`                      | adotar `createRanker` de `@slotted/core/collection` como ordenação padrão, no lugar de `filter` mais a ordem do consumidor                      | —                                         | `2026-09-15-command-palette-design.md` §2                                |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -152,6 +154,24 @@ que três autoavaliações pediram.
   o padrão é o `typeahead` de `packages/core`. Não executa item `disabled`;
   anuncia o número de resultados pelo `live-announcer`. Recusa registrada em
   `menu` (inventário, l. 119): um menu filtrado por texto é esta família.
+
+  Entregue em 2026-09-16. Inventário em
+  `docs/superpowers/specs/2026-09-15-command-palette-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-15-command-palette-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-15-command-palette-self-assessment.md`.
+  Vinte e seis partes; cinco modelos (`open`, `query`, `current` como
+  conjunto `item` + `page`, `recent` sob `queue`). Compõe a família `dialog`
+  (`surface="plain"`, `placement="top"`, `escape="none"`) e `kbd` (keycaps
+  `outline` em `inherit`); `presentation="inline"` é o menu filtrado que
+  `menu` recusou. A ordem da lista é `@slotted/core/commands`
+  (`resolveCommands`, `createCommandRanker`), sobre o novo `createRanker` de
+  `collection/filter` — o `typeahead` que o escopo nomeava não pontua; o
+  atalho de abertura usa os novos `matchesShortcut` e `isEditableTarget` de
+  `keys`. Recusado por escrito: parte `close` (scrim e `Escape`), atalhos por
+  item ligados pela família (`matchesShortcut` no consumidor), modos por
+  prefixo (composição), virtualização (`collection`), `vimBindings`.
+
 - `time-range-picker datetime-range-picker` — uma sessão: dois `time-picker`,
   ou dois `datetime-picker`, com o `max` de um ligado ao `min` do outro, atrás
   de um gatilho. Herdam de `date-range-picker` a banda com o comprimento dito

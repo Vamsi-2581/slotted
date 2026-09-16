@@ -21,6 +21,7 @@ export * from './portal';
 export * from './positioner';
 export * from './presence';
 export * from './slider';
+export * from './sparkline';
 export * from './state';
 export * from './steps';
 export * from './timeline';

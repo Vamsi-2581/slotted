@@ -125,6 +125,10 @@
       "types": "./dist/types/slider/index.d.ts",
       "import": "./dist/slider.js"
     },
+    "./sparkline": {
+      "types": "./dist/types/sparkline/index.d.ts",
+      "import": "./dist/sparkline.js"
+    },
     "./state": {
       "types": "./dist/types/state/index.d.ts",
       "import": "./dist/state.js"

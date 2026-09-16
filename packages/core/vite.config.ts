@@ -35,6 +35,7 @@ export default defineConfig({
         progress: resolve(import.meta.dirname, 'src/progress/index.ts'),
         pagination: resolve(import.meta.dirname, 'src/pagination/index.ts'),
         slider: resolve(import.meta.dirname, 'src/slider/index.ts'),
+        sparkline: resolve(import.meta.dirname, 'src/sparkline/index.ts'),
         state: resolve(import.meta.dirname, 'src/state/index.ts'),
         'sticky-header': resolve(import.meta.dirname, 'src/sticky-header/index.ts'),
         steps: resolve(import.meta.dirname, 'src/steps/index.ts'),

@@ -95,6 +95,11 @@
     "state": "none. The family owns the place and the geometry; a filter that stands in the slot owns its own descriptor, and the vocabulary that descriptor is written in belongs to @slotted/core/filter rather than to the slot.",
     "reason": "Ant, PatternFly and Carbon all put a filter or a menu in the column header, and a listing screen is where every one of them is used. Declining the slot would have sent a consumer past the family for a button that has to sit inside a cell the family lays out: the sort control filled the header, and there was no room left for a second target. Found at the visual gate, on the question a listing screen asks first."
   },
+  "cellControl": {
+    "inset": "a cell whose direct child is a plain control root gives its inset to the control: padding-inline: 0 on the cell, and --slotted-control-padding-inline-sm, -md and -lg set to the cell's own --_pad-inline on the same cell, which the control reads as its inline padding. The edited value stands where the read value stood, under the column's name. The block inset moves into the control's height: --slotted-control-height-sm, -md and -lg are set to the row's minimum block size on the same cell, so a row with a control in it is as tall as a row without one, whatever size step the consumer wrote. The control's width is the control's own.",
+    "families": "the fourteen plain field families plain-variant.test.mjs holds, named by data-ui in the selector; table.styles.test.mjs holds the two lists against each other. A kbd, a listbox, a timeline or a nested table with a plain variant of its own is not a control and keeps the cell's inset.",
+    "reason": "the rule the header already applies to sort: the cell gives up its inset and the control takes it, so one target fills the cell rather than standing one inset inside it. AG Grid, MUI X, DevExtreme, Kendo and PrimeReact each zero the editing cell's padding and hand it to the editor; Ant keeps both, and its own editable example shows the value shifted in by one inset. Pending since wave 7, decided in the plain-variant rule in docs/build-briefing.md."
+  },
   "filter": {
     "engine": "@slotted/core/filter",
     "parts": [
@@ -155,14 +160,14 @@
       "time": {
         "operators": ["is", "isNot", "before", "after", "between", "empty", "notEmpty"],
         "default": "is",
-        "operand": "time-picker — the segmented field and the list behind it, at the column's own granularity, hour cycle and step. The descriptor holds ISO time text at the precision the picker writes: HH:MM at a minute, HH:MM:SS at a second.",
+        "operand": "time-picker — the segmented field and the list behind it, at the column's own granularity, hour cycle and step. The descriptor holds ISO time text at the precision the picker writes: HH:MM at a minute, HH:MM:SS at a second. between draws one time-range-picker rather than two pickers: it says the run's length while it is drawn, its end list refuses the times before the start, and it takes the application's presets — the morning shift, the night shift — which write the same two ISO times.",
         "react": "TableTimeFilter",
         "angular": "slTableTimeFilter"
       },
       "datetime": {
         "operators": ["is", "isNot", "before", "after", "between", "empty", "notEmpty"],
         "default": "is",
-        "operand": "datetime-picker — the seven-segment field and the two surfaces behind it. The descriptor holds ISO date-time text at the precision the picker writes, and a condition whose operand has one half missing is inactive until both halves exist.",
+        "operand": "datetime-picker — the seven-segment field and the two surfaces behind it. The descriptor holds ISO date-time text at the precision the picker writes, and a condition whose operand has one half missing is inactive until both halves exist. between draws one datetime-range-picker rather than two pickers: it says the run's length while it is drawn, orders the two dates and keeps each time on its end, and takes the application's presets — the last 24 hours, this week — which write the same two ISO date-times.",
         "react": "TableDateTimeFilter",
         "angular": "slTableDateTimeFilter"
       },
@@ -198,7 +203,8 @@
     "attributes": ["data-range", "data-operand"],
     "attributesReason": "Both sit on filter-operand beside data-kind. data-range says one control holds both operands of a between, so the two-column operand grid collapses to one; data-operand says which of a set's two operands is drawn. Neither is a state a consumer moves: each is the shape the panel took.",
     "precision": "A time or date-time operand is compared at its own precision: the row value is reduced to the operand's unit before every operator, so is 09:14 matches every second of that minute and after 09:14 starts at 09:15. It is the rule the date kind already applies to a timestamp, extended to every unit the ISO text can name, and it binds filter-bar and data-grid because they evaluate the same descriptor. MUI X zeroes the seconds on both sides and PrimeReact compares a day for is and a millisecond for before; here the reader decides the unit by what they write.",
-    "wrap": "A time between whose start is later than its end is a window that crosses midnight: between 22:00 and 02:00 matches 23:00 and 01:00. The number, date and datetime kinds order the pair, because 100 then 10 has one sensible reading; 22:00 then 02:00 is the overnight shift. The summary writes the pair in the order given, so the trigger's name shows a reader what was applied.",
+    "wrap": "A time between whose start is later than its end is a window that crosses midnight: between 22:00 and 02:00 matches 23:00 and 01:00. The number, date and datetime kinds order the pair, because 100 then 10 has one sensible reading; 22:00 then 02:00 is the overnight shift. The summary writes the pair in the order given, so the trigger's name shows a reader what was applied. time-range-picker names the same pair order invalid, because a PlainTime has no day; the pair still reaches the descriptor unchanged, and the end field is marked invalid while it is typed. The contradiction is resolved on the picker's side: time-range-picker takes a wrap capability in a reopening recorded in docs/build-order.md, and this filter passes it — dropping the engine's rule instead would change filter-bar and data-grid, which evaluate the same descriptor.",
+    "enter": "Enter in a single picker's field applies the draft, which is what AG Grid does and what a reader who has just typed a value expects; the consumer's own handler runs first. Enter on a range picker's trigger opens the picker and applies nothing, because that frame is a button, and Enter inside the picker's surface is the picker's own key.",
     "emptyCondition": "A condition missing an operand its operator needs is inactive, an inactive condition is dropped before the join, and a filter with no active condition matches every value. The third clause is the one that has to be written down: under or, an always-true condition would make the whole filter match everything, so an unfinished condition is not a condition at all.",
     "value": "the descriptor the engine evaluates: { kind, join, conditions }, where a condition is { operator, value, end }. Every field is JSON, so a query string carries it and a server reads it.",
     "break": {
@@ -216,7 +222,7 @@
     "summary": "describeFilter in the engine composes the operator names and operands the family gives it into one sentence — 'contains ana or starts with b'. Section 12 asks a filter builder for a readable text expression, and writing it in the engine means filter-bar's chips and this family's announcement say the same sentence.",
     "serialization": "serializeFilter and parseFilter round-trip a filter through a query string, and toFilterParams and fromFilterParams do it for a whole listing. Parsing is total: an unknown kind, an unknown operator or a malformed operand gives null, so a bookmark written by an older version of an application degrades to no filter rather than to an error on first paint. None of the six surveyed implementations ships one.",
     "empty": "a word when the search matches nothing, so the panel is never a blank box.",
-    "composition": "popover holds the surface, select holds the operator chooser, radio-group holds the join, text-field, number-field, date-picker, time-picker, datetime-picker, date-range-picker, tags-input and checkbox hold the operands, and button holds the two actions. This family holds the place, the draft, the announcements and the wiring; the engine holds the vocabulary.",
+    "composition": "popover holds the surface, select holds the operator chooser, radio-group holds the join, text-field, number-field, date-picker, time-picker, datetime-picker, date-range-picker, time-range-picker, datetime-range-picker, tags-input and checkbox hold the operands, and button holds the two actions. This family holds the place, the draft, the announcements and the wiring; the engine holds the vocabulary.",
     "replaceable": "the operand area, and only it. A column whose values need a control the library does not have — a currency, a duration, a tag picker — takes a render prop in React and a projected template in Angular, and keeps the draft, the operator chooser, the join, the actions and the announcements. It is why Ant has filterDropdown and AG Grid a custom filter component.",
     "reason": "Four of the six surveyed implementations ship an operator per column type, two conditions and a join: AG Grid, MUI X, PrimeReact and Excel. The version of this family that shipped a checkbox list and nothing else was a set filter calling itself a filter. The vocabulary is the engine's rather than this family's because data-grid and filter-bar hold the same descriptor in wave 8."
   },
@@ -684,6 +690,7 @@
       "filter-datetime",
       "filter-range",
       "filter-tags",
+      "editing",
       "selection",
       "expansion",
       "sticky",

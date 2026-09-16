@@ -197,11 +197,44 @@ test('draws the operands the date chain and tags-input supply, and states the tw
   assert.match(contract.filter.wrap, /midnight/);
   assert.match(
     contract.filter.composition,
-    /time-picker.*datetime-picker.*date-range-picker.*tags-input/,
+    /time-picker.*datetime-picker.*date-range-picker.*time-range-picker.*datetime-range-picker.*tags-input/,
   );
   for (const scenario of ['filter-time', 'filter-datetime', 'filter-range', 'filter-tags']) {
     assert.ok(contract.scenarios.table.includes(scenario), `${scenario} is not a scenario`);
   }
+});
+
+/**
+ * The second reopening, wave 10. `between` on a time or a date-time is one
+ * range picker, as it already is on a date: the run's length is said while it
+ * is drawn and the end list refuses what the start rules out. The engine and
+ * the picker disagree about a time pair whose start is later than its end —
+ * the overnight window to one, `order` to the other — and the contract says
+ * which side gives way, because `filter-bar` and `data-grid` read the same
+ * `wrap` rule and would otherwise inherit the disagreement.
+ */
+test('draws between on a time and on a date-time as one range picker, and says where the overnight window is resolved', () => {
+  assert.match(contract.filter.kinds.time.operand, /between.*time-range-picker/);
+  assert.match(contract.filter.kinds.datetime.operand, /between.*datetime-range-picker/);
+  assert.match(contract.filter.kinds.time.operand, /presets/);
+  assert.match(contract.filter.kinds.datetime.operand, /presets/);
+  assert.match(contract.filter.wrap, /time-range-picker.*wrap/);
+  assert.match(contract.filter.enter, /trigger/);
+});
+
+/**
+ * The cell rule pending since wave 7: a cell holding a `plain` control gives
+ * its inset to the control, as the header gives its inset to `sort`, so the
+ * edited value stands where the read value stood. The rule names the fourteen
+ * `plain` field families and nothing else, because a `kbd` or a `listbox` with
+ * a `plain` variant of its own is not a control.
+ */
+test('gives a cell holding a plain control its inset, and names the families the rule reaches', () => {
+  assert.match(contract.cellControl.inset, /padding-inline: 0/);
+  assert.match(contract.cellControl.inset, /--slotted-control-padding-inline/);
+  assert.match(contract.cellControl.families, /plain-variant\.test\.mjs/);
+  assert.match(contract.cellControl.reason, /sort/);
+  assert.ok(contract.scenarios.table.includes('editing'));
 });
 
 /**

@@ -119,7 +119,15 @@ const capabilityApi = {
    */
   size: [],
   shape: ['shape'],
-  measurement: ['value', 'max'],
+  /**
+   * A measured quantity is one number or a series of them. `progress-indicator`
+   * states one and calls it `value`; `sparkline` states a series and calls it
+   * `data`, which is what every surveyed implementation of a sparkline calls
+   * it, and a `value` that held an array would be the one prop in the family
+   * named for what it is not. Either word answers, and `max` is required of
+   * both because both draw against an extent.
+   */
+  measurement: [['value', 'data'], 'max'],
   /**
    * Nothing, for the reason `content` asks for nothing. `alert` names the axis
    * `live` because the box itself becomes a live region; `toast` names it
@@ -312,7 +320,10 @@ export function apiMetadataErrors(
         ])
       : (capabilityApi[capability as keyof typeof capabilityApi] ?? []);
     for (const name of required) {
-      if (!names.includes(name)) errors.push(`missing API ${name}`);
+      const alternatives = Array.isArray(name) ? name : [name];
+      if (!alternatives.some((candidate) => names.includes(candidate))) {
+        errors.push(`missing API ${alternatives.join(' or ')}`);
+      }
     }
   }
   for (const [name, value] of Object.entries(member.defaults)) {

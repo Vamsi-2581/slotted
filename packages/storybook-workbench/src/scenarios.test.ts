@@ -175,6 +175,20 @@ describe('workbench scenario metadata', () => {
     ]);
   });
 
+  /** A series is a measurement too, and no sparkline in the field calls it `value`. */
+  it('lets a measured series be called data', () => {
+    expect(
+      apiMetadataErrors({ capabilities: ['measurement'], defaults: {} }, [
+        { name: 'data', defaultValue: '[]' },
+        { name: 'max', defaultValue: '—' },
+      ]),
+    ).toEqual([]);
+    expect(apiMetadataErrors({ capabilities: ['measurement'], defaults: {} }, [])).toEqual([
+      'missing API value or data',
+      'missing API max',
+    ]);
+  });
+
   it('reports duplicate API rows before checking capability rows or defaults', () => {
     expect(
       apiMetadataErrors({ capabilities: ['appearance'], defaults: { variant: 'accent' } }, [

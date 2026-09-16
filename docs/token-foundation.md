@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 106    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 107    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 103    |
 | `component` | One family adjusting a semantic value for itself.              | 27     |
 
@@ -273,6 +273,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-file-type`        | `file-type`            | stroke 2   |
 | `--slotted-icon-presentation`     | `presentation`         | stroke 2   |
 | `--slotted-icon-text-wrap`        | `text-wrap`            | stroke 2   |
+| `--slotted-icon-bell`             | `bell`                 | stroke 2   |
 
 A component-owned icon is a mask from a glyph token; a character is never an
 icon.
@@ -382,6 +383,15 @@ lines — the one mark a reader has learnt for "wrap" from every editor — and
 nothing in the scale stands in for it: `chevron-down` says a list opens, and
 the arrows say where the reader goes. Docusaurus draws the same mark on the
 same control.
+
+`--slotted-icon-bell` is the mark on the control that opens an application's
+notifications, and it was added for `top-navigation`. Carbon and UI5 both draw
+a bell there, and nothing in the scale stands in for it: `inbox` says
+_received_, and a dot on a mark says _something is here_ without saying what.
+It is the second glyph, after `calendar` and `clock`, that names a kind of
+thing rather than an action — what waits behind the control is a list of
+notifications, and the reader has learnt the bell for it from every product
+they use.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph

@@ -49,5 +49,6 @@
   "--slotted-icon-file-archive": { "icon": "file-archive" },
   "--slotted-icon-file-type": { "icon": "file-type" },
   "--slotted-icon-presentation": { "icon": "presentation" },
-  "--slotted-icon-text-wrap": { "icon": "text-wrap" }
+  "--slotted-icon-text-wrap": { "icon": "text-wrap" },
+  "--slotted-icon-bell": { "icon": "bell" }
 }

@@ -40,6 +40,7 @@ import { Checkbox } from '../checkbox';
 import { DatePicker } from '../date-picker';
 import { DateRangePicker } from '../date-range-picker';
 import { DateTimePicker } from '../datetime-picker';
+import { DateTimeRangePicker } from '../datetime-range-picker';
 import { NumberField } from '../number-field';
 import { Popover, PopoverContent, PopoverLayer, PopoverTrigger } from '../popover';
 import { Radio, RadioGroup } from '../radio-group';
@@ -47,6 +48,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { TagsInput } from '../tags-input';
 import { TextField } from '../text-field';
 import { TimePicker } from '../time-picker';
+import { TimeRangePicker } from '../time-range-picker';
 import { useTable } from './table';
 import { useTableColumn } from './table-parts';
 import type {
@@ -610,44 +612,56 @@ function dateTimeOf(text: unknown): PlainDateTime | null {
  * every second of that minute.
  */
 export function TableTimeFilter(props: TableTimeFilterProps) {
-  const { granularity, hourCycle, locale, max, min, options, step } = props;
+  const { granularity, hourCycle, locale, max, min, options, presets, step } = props;
   const iso = (value: unknown) =>
     isPlainTime(value) ? toISOTime(value, granularity ?? 'minute') : null;
+  const bounds = {
+    ...(granularity === undefined ? {} : { granularity }),
+    ...(hourCycle === undefined ? {} : { hourCycle }),
+    ...(locale === undefined ? {} : { locale }),
+    ...(options === undefined ? {} : { options }),
+    ...(step === undefined ? {} : { step }),
+    ...(timeOf(min) ? { min: timeOf(min) as PlainTime } : {}),
+    ...(timeOf(max) ? { max: timeOf(max) as PlainTime } : {}),
+  };
 
   return (
     <TableFilterShell
-      body={({ apply, condition, labels, setOperand }) => (
-        <>
-          {([0, 1] as const)
-            .slice(0, operandCount(condition.operator as FilterOperator))
-            .map((slot) => (
-              <TimePicker
-                aria-label={
-                  operandCount(condition.operator as FilterOperator) === 2
-                    ? slot === 0
-                      ? labels.filterFrom
-                      : labels.filterTo
-                    : labels.filterValue
-                }
-                key={slot}
-                onKeyDown={applyOnEnter(apply)}
-                onValueChange={(next) => setOperand(slot, iso(next))}
-                size="sm"
-                value={timeOf(slot === 0 ? condition.value : condition.end)}
-                {...(granularity === undefined ? {} : { granularity })}
-                {...(hourCycle === undefined ? {} : { hourCycle })}
-                {...(locale === undefined ? {} : { locale })}
-                {...(options === undefined ? {} : { options })}
-                {...(step === undefined ? {} : { step })}
-                {...(timeOf(min) ? { min: timeOf(min) as PlainTime } : {})}
-                {...(timeOf(max) ? { max: timeOf(max) as PlainTime } : {})}
-              />
-            ))}
-        </>
-      )}
+      body={({ apply, condition, labels, setOperand, setOperands }) =>
+        operandCount(condition.operator as FilterOperator) === 2 ? (
+          /* `between` is one `time-range-picker`: it says the run's length
+             while it is drawn, its end list refuses the times before the
+             start, and it carries the application's presets. The descriptor
+             is unchanged. A pair whose start is later than its end is the
+             overnight window to the engine and `order` to the picker; the
+             pair reaches the descriptor either way, and the picker's `wrap`,
+             pending in `docs/build-order.md`, is what lifts the mark. No
+             `applyOnEnter`: the frame is a button, and `Enter` on it opens
+             the picker. */
+          <TimeRangePicker
+            endLabel={labels.filterTo}
+            onValueChange={(next) => setOperands(iso(next?.start), iso(next?.end))}
+            size="sm"
+            startLabel={labels.filterFrom}
+            value={{ start: timeOf(condition.value), end: timeOf(condition.end) }}
+            {...bounds}
+            {...(presets === undefined ? {} : { presets })}
+          />
+        ) : (
+          <TimePicker
+            aria-label={labels.filterValue}
+            onKeyDown={applyOnEnter(apply)}
+            onValueChange={(next) => setOperand(0, iso(next))}
+            size="sm"
+            value={timeOf(condition.value)}
+            {...bounds}
+          />
+        )
+      }
       kind="time"
       operators={narrowed('time', props.operators)}
       props={props as never}
+      rangeOperand
       {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
     />
   );
@@ -661,46 +675,54 @@ export function TableTimeFilter(props: TableTimeFilterProps) {
  * operand, and the reason Apply reports nothing for a date without a time.
  */
 export function TableDateTimeFilter(props: TableDateTimeFilterProps) {
-  const { granularity, hourCycle, locale, max, min, step, timeZone } = props;
+  const { granularity, hourCycle, locale, max, min, presets, step, timeZone } = props;
   const iso = (value: unknown) =>
     isPlainDateTime(value)
       ? `${toISODate(value.date)}T${toISOTime(value.time, granularity ?? 'minute')}`
       : null;
+  const bounds = {
+    ...(granularity === undefined ? {} : { granularity }),
+    ...(hourCycle === undefined ? {} : { hourCycle }),
+    ...(locale === undefined ? {} : { locale }),
+    ...(step === undefined ? {} : { step }),
+    ...(timeZone === undefined ? {} : { timeZone }),
+    ...(dateTimeOf(min) ? { min: dateTimeOf(min) as PlainDateTime } : {}),
+    ...(dateTimeOf(max) ? { max: dateTimeOf(max) as PlainDateTime } : {}),
+  };
 
   return (
     <TableFilterShell
-      body={({ apply, condition, labels, setOperand }) => (
-        <>
-          {([0, 1] as const)
-            .slice(0, operandCount(condition.operator as FilterOperator))
-            .map((slot) => (
-              <DateTimePicker
-                aria-label={
-                  operandCount(condition.operator as FilterOperator) === 2
-                    ? slot === 0
-                      ? labels.filterFrom
-                      : labels.filterTo
-                    : labels.filterValue
-                }
-                key={slot}
-                onKeyDown={applyOnEnter(apply)}
-                onValueChange={(next) => setOperand(slot, iso(next))}
-                size="sm"
-                value={dateTimeOf(slot === 0 ? condition.value : condition.end)}
-                {...(granularity === undefined ? {} : { granularity })}
-                {...(hourCycle === undefined ? {} : { hourCycle })}
-                {...(locale === undefined ? {} : { locale })}
-                {...(step === undefined ? {} : { step })}
-                {...(timeZone === undefined ? {} : { timeZone })}
-                {...(dateTimeOf(min) ? { min: dateTimeOf(min) as PlainDateTime } : {})}
-                {...(dateTimeOf(max) ? { max: dateTimeOf(max) as PlainDateTime } : {})}
-              />
-            ))}
-        </>
-      )}
+      body={({ apply, condition, labels, setOperand, setOperands }) =>
+        operandCount(condition.operator as FilterOperator) === 2 ? (
+          /* `between` is one `datetime-range-picker`: the run's length said
+             while it is drawn, the dates ordered with each time kept on its
+             end, and the application's presets. An end still open reaches the
+             draft as no operand, so the condition stays inactive until both
+             exist. No `applyOnEnter`: the frame is a button. */
+          <DateTimeRangePicker
+            endLabel={labels.filterTo}
+            onValueChange={(next) => setOperands(iso(next?.start), iso(next?.end))}
+            size="sm"
+            startLabel={labels.filterFrom}
+            value={{ start: dateTimeOf(condition.value), end: dateTimeOf(condition.end) }}
+            {...bounds}
+            {...(presets === undefined ? {} : { presets })}
+          />
+        ) : (
+          <DateTimePicker
+            aria-label={labels.filterValue}
+            onKeyDown={applyOnEnter(apply)}
+            onValueChange={(next) => setOperand(0, iso(next))}
+            size="sm"
+            value={dateTimeOf(condition.value)}
+            {...bounds}
+          />
+        )
+      }
       kind="datetime"
       operators={narrowed('datetime', props.operators)}
       props={props as never}
+      rangeOperand
       {...(props.conditions === undefined ? {} : { conditions: props.conditions })}
     />
   );

@@ -305,6 +305,12 @@ export interface TableTimeFilterProps extends TableConditionFilterProps<
   min?: string | undefined;
   /** The latest, as ISO time text. */
   max?: string | undefined;
+  /**
+   * The application's own windows — the morning shift, the night shift — as
+   * `TimeRangePickerPreset`s, offered inside the range picker `between` draws.
+   * The descriptor still receives two ISO times.
+   */
+  presets?: ReactNode | undefined;
 }
 
 /**
@@ -331,6 +337,12 @@ export interface TableDateTimeFilterProps extends TableConditionFilterProps<
   max?: string | undefined;
   /** The zone "now" is read in. Defaults to the runtime's. */
   timeZone?: string | undefined;
+  /**
+   * The application's own windows — the last 24 hours, this week — as
+   * `DateTimeRangePickerPreset`s, offered inside the range picker `between`
+   * draws. The descriptor still receives two ISO date-times.
+   */
+  presets?: ReactNode | undefined;
 }
 
 export interface TableBooleanFilterProps extends TableConditionFilterProps<

@@ -1,4 +1,4 @@
-import { plainDate } from '@slotted/core/date';
+import { plainDate, plainDateTime, plainTime } from '@slotted/core/date';
 import { createFilterPredicate, createRowPredicate, setFilter } from '@slotted/core/filter';
 import type {
   DateFilter,
@@ -16,12 +16,15 @@ import { useMemo, useState } from 'react';
 import { Avatar } from '../avatar';
 import { IconButton } from '../button';
 import { DateRangePickerPreset } from '../date-range-picker';
+import { DateTimeRangePickerPreset } from '../datetime-range-picker';
 import { Link } from '../link';
 import { NumberField } from '../number-field';
 import { ProgressBar } from '../progress-indicator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { StatusIndicator } from '../status-indicator';
 import { Switch } from '../switch';
 import { TextField } from '../text-field';
+import { TimeRangePickerPreset } from '../time-range-picker';
 import { Pagination, PaginationItems, PaginationNext, PaginationPrevious } from '../pagination';
 import { ResultState, ResultStateContent, ResultStateTitle } from '../result-state';
 import { Tag } from '../tag';
@@ -79,6 +82,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     'filter-datetime': FilterDateTime,
     'filter-range': FilterRange,
     'filter-tags': FilterTags,
+    editing: Editing,
     selection: Selection,
     expansion: Expansion,
     sticky: Sticky,
@@ -876,6 +880,14 @@ const DELIVERIES = INVOICES.map((invoice, index) => ({
 }));
 const SLOT = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
 
+/** The range pickers' presets: the desk's own shifts and windows, in its own words. */
+const MORNING_SHIFT = { end: plainTime(14), start: plainTime(6) };
+const AFTERNOON_SHIFT = { end: plainTime(22), start: plainTime(14) };
+const EARLY_OCTOBER = {
+  end: plainDateTime(plainDate(2026, 10, 15), plainTime(18)),
+  start: plainDateTime(plainDate(2026, 10, 1), plainTime(8)),
+};
+
 function TimeFilterDemo() {
   const [cutoff, setCutoff] = useState<TimeFilter | null>({
     conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],
@@ -895,7 +907,20 @@ function TimeFilterDemo() {
             <TableColumnHeader text="nowrap">
               Cut-off
               <TableColumnActions>
-                <TableTimeFilter columnLabel="cut-off" onValueChange={setCutoff} value={cutoff} />
+                <TableTimeFilter
+                  columnLabel="cut-off"
+                  hourCycle={24}
+                  onValueChange={setCutoff}
+                  presets={
+                    <>
+                      <TimeRangePickerPreset value={MORNING_SHIFT}>Morning</TimeRangePickerPreset>
+                      <TimeRangePickerPreset value={AFTERNOON_SHIFT}>
+                        Afternoon
+                      </TimeRangePickerPreset>
+                    </>
+                  }
+                  value={cutoff}
+                />
               </TableColumnActions>
             </TableColumnHeader>
           </TableRow>
@@ -928,7 +953,7 @@ export const FilterTime: Story = {
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label="A time column, filtered to the overnight window"
-        note="The operand is the time picker, and the descriptor holds the ISO text it writes at the column's granularity — 22:00, not a PlainTime. A between whose start is later than its end wraps at midnight: 22:00 to 02:00 keeps 23:30 and 01:15 and drops 08:00. Compared at the operand's own precision, so is 09:00 matches every second of that minute."
+        note="The operand is the time picker, and between is one time range picker with the desk's shifts as presets; the descriptor holds the ISO text either writes at the column's granularity — 22:00, not a PlainTime. A between whose start is later than its end wraps at midnight: 22:00 to 02:00 keeps 23:30 and 01:15 and drops 08:00. The range picker marks that pair as out of order until its wrap capability lands; the filter applies it as the window. Compared at the operand's own precision, so is 09:00 matches every second of that minute."
       >
         <TimeFilterDemo />
       </Scene>
@@ -938,7 +963,7 @@ export const FilterTime: Story = {
 
 function DateTimeFilterDemo() {
   const [scheduled, setScheduled] = useState<DateTimeFilter | null>({
-    conditions: [{ operator: 'after', value: '2026-09-14T09:00' }],
+    conditions: [{ end: '2026-10-15T18:00', operator: 'between', value: '2026-10-01T08:00' }],
     join: 'and',
     kind: 'datetime',
   });
@@ -957,7 +982,13 @@ function DateTimeFilterDemo() {
               <TableColumnActions>
                 <TableDateTimeFilter
                   columnLabel="scheduled"
+                  hourCycle={24}
                   onValueChange={setScheduled}
+                  presets={
+                    <DateTimeRangePickerPreset value={EARLY_OCTOBER}>
+                      Early October
+                    </DateTimeRangePickerPreset>
+                  }
                   value={scheduled}
                 />
               </TableColumnActions>
@@ -991,8 +1022,8 @@ export const FilterDateTime: Story = {
   render: () => (
     <div className="slotted-demo-grid" data-columns="1">
       <Scene
-        label="A date-time column, filtered after a moment"
-        note="The operand is the date-time picker — seven segments and two surfaces — and the descriptor holds 2026-09-14T09:00 as text. A condition whose operand has one half missing is inactive until both halves exist, so Apply reports nothing for a date without a time. Between draws two pickers until datetime-range-picker lands."
+        label="A date-time column, filtered to the first half of October"
+        note="The operand is the date-time picker — seven segments and two surfaces — and between is one date-time range picker: a month beside two lists, the run's length said while it is drawn, and the desk's own fortnight as a preset. The descriptor holds 2026-10-01T08:00 as text either way. A condition whose operand has one half missing is inactive until both halves exist, so Apply reports nothing for a date without a time."
       >
         <DateTimeFilterDemo />
       </Scene>
@@ -1610,6 +1641,104 @@ export const Density: Story = {
             </div>
           ))}
         </div>
+      </Scene>
+    </div>
+  ),
+};
+
+/**
+ * The stock take: every row is a count a reader corrects in place. A `plain`
+ * control in a cell takes the cell's own inset and the row's own height, so
+ * the corrected value stands where the read value stood and the row does not
+ * grow when it is edited.
+ */
+const AISLES = ['Aisle 4', 'Aisle 7', 'Aisle 12'];
+const STOCK = [
+  { counted: 1200, description: 'Hex bolt M8', location: 'Aisle 4', sku: 'PRD-0412' },
+  { counted: 3400, description: 'Flat washer M8', location: 'Aisle 4', sku: 'PRD-0413' },
+  { counted: 0, description: '', location: 'Aisle 7', sku: 'PRD-0414' },
+  { counted: 860, description: 'Spring washer M8', location: 'Aisle 7', sku: 'PRD-0415' },
+];
+
+function StockRow({ item }: { item: (typeof STOCK)[number] }) {
+  const [description, setDescription] = useState(item.description);
+  const [counted, setCounted] = useState<number | null>(item.counted);
+  const [location, setLocation] = useState(item.location);
+
+  return (
+    <TableRow value={item.sku}>
+      <TableRowHeader text="nowrap">{item.sku}</TableRowHeader>
+      <TableCell>
+        <TextField
+          aria-label={`Description of ${item.sku}`}
+          invalid={description === ''}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="Required"
+          size="sm"
+          value={description}
+          variant="plain"
+        />
+      </TableCell>
+      <TableCell numeric>
+        <NumberField
+          aria-label={`Counted for ${item.sku}`}
+          min={0}
+          onValueChange={setCounted}
+          size="sm"
+          stepper="none"
+          value={counted}
+          variant="plain"
+        />
+      </TableCell>
+      <TableCell>
+        <Select
+          onValueChange={(next) => setLocation(next as string)}
+          size="sm"
+          value={location}
+          variant="plain"
+        >
+          <SelectTrigger aria-label={`Location of ${item.sku}`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {AISLES.map((aisle) => (
+              <SelectItem key={aisle} value={aisle}>
+                {aisle}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+export const Editing: Story = {
+  parameters: scenario('editing'),
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      <Scene
+        label="A plain control in a cell"
+        note="A text field, a number field and a select, each variant=&quot;plain&quot;, each standing in a body cell. The cell gives up its inset and the control takes it, so the edited value sits under the column's name where the read value sat; the control is the row's height, so a row being edited is as tall as the rows around it. The invalid edge stays, square."
+      >
+        <Table columns={4} variant="ruled">
+          <TableContent>
+            <TableCaption>Stock take</TableCaption>
+            <TableHead>
+              <TableRow>
+                <TableColumnHeader text="nowrap">SKU</TableColumnHeader>
+                <TableColumnHeader>Description</TableColumnHeader>
+                <TableColumnHeader numeric>Counted</TableColumnHeader>
+                <TableColumnHeader>Location</TableColumnHeader>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {STOCK.map((item) => (
+                <StockRow item={item} key={item.sku} />
+              ))}
+            </TableBody>
+          </TableContent>
+        </Table>
       </Scene>
     </div>
   ),

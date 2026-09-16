@@ -623,7 +623,7 @@ describe('the column filter', () => {
    * operand's own precision — so a value that came in as text goes back out
    * unchanged, whatever the picker showed in between.
    */
-  it('draws a time picker per operand, and writes the ISO text at its granularity', async () => {
+  it('draws one range picker for a time between, and writes the ISO text at its granularity', async () => {
     const onValueChange = vi.fn();
     const night = {
       conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],
@@ -641,13 +641,27 @@ describe('the column filter', () => {
       expect(found).not.toBeNull();
       return found as HTMLElement;
     });
-    expect(operand.querySelectorAll('[data-ui="time-picker"]').length).toBe(2);
-    expect(operand).not.toHaveAttribute('data-range');
+    expect(operand).toHaveAttribute('data-range', '');
+    expect(operand.querySelectorAll('[data-ui="time-range-picker"]').length).toBe(1);
+    expect(operand.querySelectorAll('[data-ui="time-picker"]').length).toBe(0);
 
-    /* The first picker's hour segment, stepped once: the picker writes the
+    /* The picker's frame is a button: `Enter` on it opens the picker and
+       applies nothing, where `Enter` in a single picker's field applies. */
+    const frame = screen.getByRole('button', { name: /^Change range, 10:00 PM/ });
+    fireEvent.keyDown(frame, { key: 'Enter' });
+    expect(onValueChange).not.toHaveBeenCalled();
+    const start = await waitFor(() => {
+      const found = document.querySelector('[data-part="start"] [role="spinbutton"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(screen.getByRole('listbox', { name: 'From' })).toBeInTheDocument();
+    expect(screen.getByRole('listbox', { name: 'To' })).toBeInTheDocument();
+
+    /* The start field's hour segment, stepped once: the picker writes the
        minute it is set to, and the descriptor receives `HH:MM` rather than a
        `PlainTime` or a padded second. */
-    const hour = operand.querySelectorAll('[role="spinbutton"]')[0] as HTMLElement;
+    const hour = start;
     fireEvent.keyDown(hour, { key: 'ArrowUp' });
     fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
 
@@ -655,6 +669,23 @@ describe('the column filter', () => {
       { ...night, conditions: [{ end: '02:00', operator: 'between', value: '23:00' }] },
       expect.objectContaining({ reason: 'pointer' }),
     );
+  });
+
+  it('draws one time picker for every other time operator', async () => {
+    render(
+      <Typed
+        kind="time"
+        value={{ conditions: [{ operator: 'after', value: '09:00' }], join: 'and', kind: 'time' }}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /^Filter amount: After 09:00/ }));
+    const operand = await waitFor(() => {
+      const found = document.querySelector('[data-part="filter-operand"][data-kind="time"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(operand).not.toHaveAttribute('data-range');
+    expect(operand.querySelectorAll('[data-ui="time-picker"]').length).toBe(1);
   });
 
   it('draws a date-time picker, and offers the operators of a day', async () => {
@@ -684,6 +715,45 @@ describe('the column filter', () => {
     expect(offered).toEqual(
       operatorsFor('datetime').map((operator) => DEFAULT_TABLE_LABELS.filterOperators[operator]),
     );
+  });
+
+  /**
+   * `between` on a date-time is one `datetime-range-picker`. An end still open
+   * reaches the draft as no operand, so the condition stays inactive and
+   * Apply reports nothing for it — the engine's one rule for a missing operand.
+   */
+  it('draws one range picker for a date-time between, and holds an open end as no operand', async () => {
+    const onValueChange = vi.fn();
+    render(
+      <Typed
+        kind="datetime"
+        onValueChange={onValueChange}
+        value={{
+          conditions: [{ operator: 'between', value: '2026-09-14T09:00' }],
+          join: 'and',
+          kind: 'datetime',
+        }}
+      />,
+    );
+
+    /* One end is no filter: the trigger is not marked and carries no summary. */
+    const trigger = screen.getByRole('button', { name: 'Filter amount' });
+    expect(trigger).not.toHaveAttribute('data-filtered');
+    fireEvent.click(trigger);
+
+    const operand = await waitFor(() => {
+      const found = document.querySelector('[data-part="filter-operand"][data-kind="datetime"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(operand).toHaveAttribute('data-range', '');
+    expect(operand.querySelectorAll('[data-ui="datetime-range-picker"]').length).toBe(1);
+    expect(operand.querySelectorAll('[data-ui="datetime-picker"]').length).toBe(0);
+    expect(operand.querySelector('[data-part="summary"]')).toHaveTextContent(/9:00 AM –$/);
+
+    /* Applied as it stands, the condition is inactive and nothing changes. */
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+    expect(onValueChange).not.toHaveBeenCalled();
   });
 
   /**

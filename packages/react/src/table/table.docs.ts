@@ -334,25 +334,25 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'filter-time',
     title: 'A time column, and a window that crosses midnight',
-    note: 'TableTimeFilter draws the time picker and holds ISO text at the column granularity — 22:00 at a minute, 22:00:00 at a second — which is the precision the engine compares at. A between whose start is later than its end is the overnight window, not an empty set: 22:00 to 02:00 keeps 23:30 and 01:15.',
+    note: 'TableTimeFilter draws the time picker, and one time range picker for between, and holds ISO text at the column granularity — 22:00 at a minute, 22:00:00 at a second — which is the precision the engine compares at. A between whose start is later than its end is the overnight window, not an empty set: 22:00 to 02:00 keeps 23:30 and 01:15. The range picker marks that pair out of order until its wrap capability lands; the filter applies it as the window either way. Your shifts go in through presets.',
     snippet: defineSnippet({
       id: 'table-react-filter-time',
       language: 'tsx',
       label: 'A time filter, and the rows it keeps',
       source:
-        "const [cutoff, setCutoff] = useState<TimeFilter | null>({\n  conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],\n  join: 'and',\n  kind: 'time',\n});\nconst keep = useMemo(() => createFilterPredicate(cutoff), [cutoff]);\nconst rows = deliveries.filter((row) => keep(row.cutoff));\n\n<TableTimeFilter\n  columnLabel=\"cut-off\"\n  granularity=\"minute\"\n  onValueChange={setCutoff}\n  value={cutoff}\n/>;",
+        "const [cutoff, setCutoff] = useState<TimeFilter | null>({\n  conditions: [{ end: '02:00', operator: 'between', value: '22:00' }],\n  join: 'and',\n  kind: 'time',\n});\nconst keep = useMemo(() => createFilterPredicate(cutoff), [cutoff]);\nconst rows = deliveries.filter((row) => keep(row.cutoff));\n\n<TableTimeFilter\n  columnLabel=\"cut-off\"\n  granularity=\"minute\"\n  onValueChange={setCutoff}\n  presets={<TimeRangePickerPreset value={MORNING_SHIFT}>Morning</TimeRangePickerPreset>}\n  value={cutoff}\n/>;",
     }),
   },
   {
     id: 'filter-datetime',
     title: 'A date-time column, at the precision you wrote',
-    note: 'TableDateTimeFilter draws the date-time picker and holds 2026-09-14T09:00 as text. Compared at the operand own precision, so after 2026-09-14T09 starts at ten o clock and is 2026-09-14 matches the whole day. A condition with one half missing is inactive until both halves exist, and Apply reports nothing for it.',
+    note: 'TableDateTimeFilter draws the date-time picker, and one date-time range picker for between, and holds 2026-09-14T09:00 as text. Compared at the operand own precision, so after 2026-09-14T09 starts at ten o clock and is 2026-09-14 matches the whole day. A condition with one half missing is inactive until both halves exist, and Apply reports nothing for it. Your windows go in through presets.',
     snippet: defineSnippet({
       id: 'table-react-filter-datetime',
       language: 'tsx',
       label: 'A date-time filter over a wall-clock column',
       source:
-        'const [scheduled, setScheduled] = useState<DateTimeFilter | null>(null);\nconst keep = useMemo(\n  () => createFilterPredicate(scheduled, { timeZone: \'Europe/Lisbon\' }),\n  [scheduled],\n);\n\n<TableDateTimeFilter columnLabel="scheduled" onValueChange={setScheduled} value={scheduled} />;',
+        'const [scheduled, setScheduled] = useState<DateTimeFilter | null>(null);\nconst keep = useMemo(\n  () => createFilterPredicate(scheduled, { timeZone: \'Europe/Lisbon\' }),\n  [scheduled],\n);\n\n<TableDateTimeFilter\n  columnLabel="scheduled"\n  onValueChange={setScheduled}\n  presets={<DateTimeRangePickerPreset value={EARLY_OCTOBER}>Early October</DateTimeRangePickerPreset>}\n  value={scheduled}\n/>;',
     }),
   },
   {
@@ -377,6 +377,18 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Chips held to the column values, and chips free of them',
       source:
         '<TableSetFilter columnLabel="client" onValueChange={setClient} operand="tags" options={clients} />;\n<TableSetFilter columnLabel="invoice" onValueChange={setInvoice} operand="tags" />;',
+    }),
+  },
+  {
+    id: 'editing',
+    title: 'A plain control in a cell',
+    note: 'A cell whose child is a plain control gives up its inset: padding goes to zero and the control reads the cell padding and the row height through the control tokens, so the edited value stands where the read value stood and the row does not grow. The rule names the fourteen plain field families and nothing else. The control width is its own, as in a form.',
+    snippet: defineSnippet({
+      id: 'table-react-editing',
+      language: 'tsx',
+      label: 'A count corrected in place',
+      source:
+        '<TableRow value={item.sku}>\n  <TableRowHeader>{item.sku}</TableRowHeader>\n  <TableCell>\n    <TextField aria-label="Description" size="sm" value={description} variant="plain" />\n  </TableCell>\n  <TableCell numeric>\n    <NumberField aria-label="Counted" size="sm" stepper="none" value={counted} variant="plain" />\n  </TableCell>\n</TableRow>;',
     }),
   },
   {
@@ -661,8 +673,8 @@ export const REACT_TABLE_DOCS = {
         'presets',
         'ReactNode',
         '—',
-        'TableDateFilter',
-        'DateRangePickerPreset buttons offered inside the range picker between draws. The descriptor still receives two ISO days.',
+        'TableDateFilter, TableTimeFilter, TableDateTimeFilter',
+        'DateRangePickerPreset, TimeRangePickerPreset or DateTimeRangePickerPreset buttons offered inside the range picker between draws. The descriptor still receives two ISO values.',
       ],
       [
         'granularity',

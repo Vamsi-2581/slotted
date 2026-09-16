@@ -205,6 +205,46 @@ describe('Menu', () => {
   });
 
   /**
+   * The escape hatch the contract promised under `focus.finalFocus`: a trigger
+   * that is gone, or one that never held focus — a context menu's target —
+   * names where focus goes instead.
+   */
+  it('gives focus to finalFocus instead of the trigger when it is named', async () => {
+    const elsewhere = { current: null as Element | null };
+    render(
+      <>
+        <button type="button" ref={(node) => void (elsewhere.current = node)}>
+          Elsewhere
+        </button>
+        <Basic finalFocus={elsewhere} />
+      </>,
+    );
+    await open();
+    await waitFor(() => expect(item('Duplicate')).toHaveFocus());
+
+    press('Escape');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    expect(screen.getByRole('button', { name: 'Elsewhere' })).toHaveFocus();
+  });
+
+  /**
+   * An anchor that is not the trigger: the layer is measured against it, and
+   * the trigger keeps every other duty — here, the element focus returns to.
+   */
+  it('positions against a given anchor and still returns focus to the trigger', async () => {
+    const anchor = { getBoundingClientRect: () => new DOMRect(40, 60, 0, 0) };
+    render(<Basic anchor={anchor} />);
+    await open();
+    await waitFor(() => expect(item('Duplicate')).toHaveFocus());
+
+    press('Escape');
+
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    expect(screen.getByRole('button', { name: 'Document' })).toHaveFocus();
+  });
+
+  /**
    * The pattern binds Tab itself: it closes every menu and moves focus out.
    * `popover` needed two focus guards for the same question because its layer
    * does not bind the key.

@@ -16,6 +16,7 @@ import { useMenuDefaults } from './menu-defaults';
 import type {
   MenuContextValue,
   MenuEntry,
+  MenuFocusTarget,
   MenuOpenReason,
   MenuProps,
   MenuSurfaceValue,
@@ -74,9 +75,18 @@ export function useMenu(): MenuContextValue {
  * bar's menus, and the bar — not this component — holds which one is open,
  * because a bar has at most one and a boolean on each could represent two.
  */
+/** The element a focus target names, or `null`. */
+function resolveFocus(target: MenuFocusTarget | undefined, scope: HTMLElement | null) {
+  if (target === undefined) return null;
+  if (typeof target === 'string') return scope?.querySelector<HTMLElement>(target) ?? null;
+  if (target instanceof Element) return target as HTMLElement;
+  return (target.current as HTMLElement | null) ?? null;
+}
+
 export function Menu({
   align,
   alignOffset,
+  anchor,
   children,
   closeOnEscape,
   closeOnOutsidePress,
@@ -84,6 +94,7 @@ export function Menu({
   collisionPadding,
   defaultOpen,
   disabled,
+  finalFocus,
   flip,
   hideWhenDetached,
   loop,
@@ -141,7 +152,9 @@ export function Menu({
   const entry = useRef<MenuEntry>('first');
 
   const latest = useRef({
+    contentNode,
     current,
+    finalFocus,
     identity,
     menubar,
     onBar,
@@ -150,7 +163,18 @@ export function Menu({
     parent,
     triggerNode,
   });
-  latest.current = { current, identity, menubar, onBar, onOpenChange, open, parent, triggerNode };
+  latest.current = {
+    contentNode,
+    current,
+    finalFocus,
+    identity,
+    menubar,
+    onBar,
+    onOpenChange,
+    open,
+    parent,
+    triggerNode,
+  };
 
   const toggle = useCallback((next: boolean, reason: MenuOpenReason, source?: unknown) => {
     const state = latest.current;
@@ -181,7 +205,8 @@ export function Menu({
      * somewhere else, in which case taking it back would fight them.
      */
     if (!next && reason !== 'outsidePress' && reason !== 'programmatic') {
-      state.triggerNode?.focus({ preventScroll: true });
+      const target = resolveFocus(state.finalFocus, state.contentNode) ?? state.triggerNode;
+      target?.focus({ preventScroll: true });
     }
   }, []);
 
@@ -207,6 +232,7 @@ export function Menu({
   const context: MenuContextValue = {
     align: align ?? (parent !== null ? 'start' : defaults.align),
     alignOffset: alignOffset ?? defaults.alignOffset,
+    anchor: anchor ?? null,
     closeOnEscape: closeOnEscape ?? defaults.closeOnEscape,
     closeOnOutsidePress: closeOnOutsidePress ?? defaults.closeOnOutsidePress,
     closeOnSelect: closeOnSelect ?? defaults.closeOnSelect,

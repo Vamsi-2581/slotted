@@ -5,7 +5,7 @@ import type { ArrowNavigationHandle } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
 import { createPositioner, submenuOffsets } from '@slotted/core/positioner';
-import type { PositionerHandle } from '@slotted/core/positioner';
+import type { PositionerAnchor, PositionerHandle } from '@slotted/core/positioner';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
@@ -181,6 +181,21 @@ export class SlMenu {
 
   /** The control that opens this menu, given by `slMenuTrigger`. */
   readonly trigger = signal<HTMLElement | null>(null);
+  /**
+   * What the layer is positioned against when it is not the trigger: a row the
+   * menu hangs from, or the point a context menu was opened at, which
+   * `slContextMenuTriggerFor` writes here. Positioning only — the trigger stays
+   * the portal origin, the branch of the layer and the element focus returns
+   * to. Written by a directive, as `trigger` is, rather than bound in a
+   * template.
+   */
+  readonly anchor = signal<PositionerAnchor | null>(null);
+  /**
+   * Where focus lands when the surface closes, for a trigger that is gone by
+   * then or one that never held focus — a context menu's target. `null` means
+   * the trigger.
+   */
+  readonly finalFocus = signal<HTMLElement | null>(null);
   /** Where focus lands when the surface opens. */
   readonly entry: { current: 'first' | 'last' | 'trigger' } = { current: 'first' };
 
@@ -243,6 +258,16 @@ export class SlMenu {
       untracked(() => (open ? this.show() : this.hide()));
     });
 
+    /* A context menu opened again at a new point moves rather than closing and
+       reopening: the anchor changed while the surface is open, so it is
+       measured again. */
+    effect(() => {
+      this.anchor();
+      untracked(() => {
+        if (this.isOpen()) this.position();
+      });
+    });
+
     afterNextRender(() => {
       if (this.resolvedMount() === 'eager' && !this.isOpen()) this.build();
     });
@@ -280,7 +305,7 @@ export class SlMenu {
     /* Focus goes back to whatever opened the surface, unless the reader pressed
        somewhere else — taking it back then would fight them. */
     if (!next && reason !== 'outsidePress' && reason !== 'programmatic') {
-      this.trigger()?.focus({ preventScroll: true });
+      (this.finalFocus() ?? this.trigger())?.focus({ preventScroll: true });
     }
   }
 
@@ -345,7 +370,8 @@ export class SlMenu {
 
   private position() {
     if (this.layerNode === null) return;
-    const anchor = this.trigger();
+    const trigger = this.trigger();
+    const anchor = this.anchor() ?? trigger;
     if (anchor === null) return;
 
     /* A submenu is anchored to its item and placed from the parent's edge: the
@@ -353,10 +379,10 @@ export class SlMenu {
        inset above its first item is taken off along the alignment, so the
        first item lines up with the item that opened it (M2). */
     const submenu =
-      this.parent !== null && this.surfaceNode !== null
+      this.parent !== null && this.surfaceNode !== null && trigger !== null
         ? submenuOffsets({
             parentSurface: this.parent.surface(),
-            item: anchor,
+            item: trigger,
             surface: this.surfaceNode,
           })
         : { sideOffset: 0, alignOffset: 0 };

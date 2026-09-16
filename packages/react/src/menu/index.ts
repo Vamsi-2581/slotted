@@ -34,6 +34,7 @@ export type {
   MenuDefaultsProviderProps,
   MenuEntry,
   MenuEmptyProps,
+  MenuFocusTarget,
   MenuGroupLabelProps,
   MenuGroupProps,
   MenuHandle,

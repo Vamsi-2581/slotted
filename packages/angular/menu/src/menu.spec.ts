@@ -237,6 +237,41 @@ describe('SlMenu', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  /**
+   * The escape hatch the contract promises under `focus.finalFocus`, written
+   * as a signal a trigger directive sets: a context menu's target never held
+   * focus, and names what did.
+   */
+  it('gives focus to finalFocus instead of the control when one is set', async () => {
+    const after = fixture.nativeElement.querySelector('button[type="button"]') as HTMLElement;
+    const menu = fixture.debugElement.query((node) => node.name === 'sl-menu')
+      .componentInstance as SlMenu;
+    menu.finalFocus.set(after);
+    await open();
+
+    press('Escape');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(surface()).toBeNull();
+    expect(document.activeElement).toBe(after);
+  });
+
+  /** An anchor that is not the control positions the layer and changes nothing else. */
+  it('positions against a given anchor and still returns focus to the control', async () => {
+    const menu = fixture.debugElement.query((node) => node.name === 'sl-menu')
+      .componentInstance as SlMenu;
+    menu.anchor.set({ getBoundingClientRect: () => new DOMRect(40, 60, 0, 0) });
+    await open();
+    expect(document.activeElement).toBe(item('Duplicate'));
+
+    press('Escape');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(document.activeElement).toBe(trigger);
+  });
+
   it('closes on Tab and moves focus past the control', async () => {
     await open();
 

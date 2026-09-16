@@ -365,8 +365,12 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     strategy,
   } = menu;
 
+  /* The anchor is the trigger unless the menu was given one: a row, or the
+     point a context menu was opened at. */
+  const anchor = menu.anchor ?? menu.triggerNode;
+
   useEffect(() => {
-    if (layerNode === null || menu.triggerNode === null) return;
+    if (layerNode === null || anchor === null) return;
     let live = true;
 
     /* A submenu is anchored to its item and placed from the parent's edge: the
@@ -374,7 +378,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
        inset above its first item is taken off along the alignment, so the
        first item lines up with the item that opened it (M2). */
     const submenu =
-      menu.parent !== null && surfaceNode !== null
+      menu.parent !== null && surfaceNode !== null && menu.triggerNode !== null
         ? submenuOffsets({
             parentSurface: menu.parent.node,
             item: menu.triggerNode,
@@ -382,7 +386,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
           })
         : { sideOffset: 0, alignOffset: 0 };
 
-    const handle = createPositioner(menu.triggerNode, layerNode, {
+    const handle = createPositioner(anchor, layerNode, {
       align,
       alignOffset: alignOffset + submenu.alignOffset,
       boundaryPadding: collisionPadding,
@@ -406,6 +410,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
   }, [
     align,
     alignOffset,
+    anchor,
     collisionPadding,
     flip,
     hideWhenDetached,

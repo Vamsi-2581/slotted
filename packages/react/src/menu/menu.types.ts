@@ -1,3 +1,4 @@
+import type { PositionerAnchor } from '@slotted/core/positioner';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref, RefObject } from 'react';
 
@@ -57,6 +58,12 @@ export interface MenuValueChangeRequest extends ChangeRequest<string> {
 /** Where focus goes when a surface opens. */
 export type MenuEntry = 'first' | 'last' | 'trigger';
 
+/**
+ * An element, a ref to one, or a selector inside the surface — the shape
+ * `popover` declares for the same two escape hatches.
+ */
+export type MenuFocusTarget = Element | { current: Element | null } | string;
+
 /** The imperative actions a consumer cannot express declaratively. */
 export interface MenuHandle {
   /** Opens the surface, carrying `programmatic`. */
@@ -115,6 +122,19 @@ export interface MenuProps extends Partial<MenuDefaults> {
   /** The value an uncontrolled menu starts from, read once. */
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean, request: MenuChangeRequest) => void;
+  /**
+   * What the surface is positioned against instead of the trigger: a row the
+   * menu hangs from, or a rectangle at the pointer — `context-menu` passes the
+   * point the reader pressed. Positioning only: the trigger stays the portal
+   * origin, the branch of the layer and the element focus returns to.
+   */
+  anchor?: PositionerAnchor | null | undefined;
+  /**
+   * Where focus lands when the surface closes, for a trigger that is gone by
+   * then — the row-actions menu whose Delete removed its own row — or one that
+   * never held focus, which is a context menu's target. Defaults to the trigger.
+   */
+  finalFocus?: MenuFocusTarget | undefined;
   ref?: Ref<MenuHandle>;
 }
 
@@ -248,6 +268,8 @@ export interface MenuItemShortcutProps extends ComponentPropsWithRef<'span'> {
 export interface MenuContextValue {
   align: MenuAlign;
   alignOffset: number;
+  /** What the layer is measured against when it is not the trigger. */
+  anchor: PositionerAnchor | null;
   closeOnEscape: boolean;
   closeOnOutsidePress: boolean;
   closeOnSelect: boolean;

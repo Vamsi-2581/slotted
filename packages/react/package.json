@@ -216,6 +216,10 @@
       "types": "./dist/types/splitter/index.d.ts",
       "import": "./dist/splitter.js"
     },
+    "./sparkline": {
+      "types": "./dist/types/sparkline/index.d.ts",
+      "import": "./dist/sparkline.js"
+    },
     "./stack": {
       "types": "./dist/types/stack/index.d.ts",
       "import": "./dist/stack.js"
@@ -223,6 +227,10 @@
     "./stepper": {
       "types": "./dist/types/stepper/index.d.ts",
       "import": "./dist/stepper.js"
+    },
+    "./stat-card": {
+      "types": "./dist/types/stat-card/index.d.ts",
+      "import": "./dist/stat-card.js"
     },
     "./switch": {
       "types": "./dist/types/switch/index.d.ts",

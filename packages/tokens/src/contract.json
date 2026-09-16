@@ -237,6 +237,13 @@
       "root": true
     },
     {
+      "name": "--slotted-font-size-4xl",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "length",
+      "root": true
+    },
+    {
       "name": "--slotted-line-height-xs",
       "layer": "primitive",
       "axis": "base",
@@ -280,6 +287,13 @@
     },
     {
       "name": "--slotted-line-height-3xl",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "number",
+      "root": true
+    },
+    {
+      "name": "--slotted-line-height-4xl",
       "layer": "primitive",
       "axis": "base",
       "type": "number",
@@ -753,6 +767,13 @@
     },
     {
       "name": "--slotted-icon-bell",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-trending-up",
       "layer": "primitive",
       "axis": "base",
       "type": "image",
@@ -1409,6 +1430,70 @@
       "type": "color",
       "root": true,
       "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-1",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-2",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-3",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-4",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-5",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-6",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-7",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-8",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
     },
     {
       "name": "--slotted-control-height-sm",

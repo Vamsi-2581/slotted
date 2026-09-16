@@ -293,13 +293,21 @@ test('documents each scheme colour in all three schemes', () => {
    * under **Avatar size**, and listing it here would say a family's palette is
    * something every family may read.
    */
+  /*
+   * The data scale is semantic and is not a surface, a text or a border: it is
+   * what a series is painted with, and `chart` reads it as a set rather than
+   * one token at a time. It has its own table under **Data** so that the
+   * order — which is the scale's colour-vision argument — is read as a list.
+   */
   assertSchemeTable(
     'Semantic colour',
     (token) =>
       token.type !== 'shadow' &&
       token.layer !== 'component' &&
-      !token.name.startsWith('--slotted-tone-'),
+      !token.name.startsWith('--slotted-tone-') &&
+      !token.name.startsWith('--slotted-data-'),
   );
+  assertSchemeTable('Data', (token) => token.name.startsWith('--slotted-data-'));
 });
 
 test('documents what forced colours replace each scheme token with', () => {

@@ -339,3 +339,52 @@ test('gives every code scope a colour of its own in every scheme', () => {
     assert.equal(new Set(painted).size, painted.length, `${scheme} paints two scopes alike`);
   }
 });
+
+/**
+ * The data scale is the first palette in the semantic layer: eight hues in a
+ * fixed order, and the order is a measured fact rather than a preference —
+ * `docs/superpowers/specs/2026-09-16-stat-card-sparkline-design.md` records
+ * the enumeration, and the colour-vision separation it holds is measured by
+ * the `dataviz` validator, not here. What is measured here is the one thing
+ * the theme promises every mark: a line, a bar or a dot in any slot separates
+ * from every surface a chart can be drawn on, at the non-text ratio.
+ */
+test('keeps every data slot legible against every surface a chart is drawn on', () => {
+  const slots = contract.tokens
+    .filter((token) => token.name.startsWith('--slotted-data-'))
+    .map((token) => token.name);
+
+  assert.deepEqual(
+    slots,
+    Array.from({ length: 8 }, (_, index) => `--slotted-data-${index + 1}`),
+    'the scale changed shape without this test noticing',
+  );
+
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const floor = scheme === 'high-contrast' ? 4.5 : 3;
+    for (const slot of slots) {
+      const ink = values[slot];
+      assert.ok(ink, `${scheme} ${slot} is missing`);
+      for (const surface of [
+        '--slotted-surface',
+        '--slotted-surface-raised',
+        '--slotted-surface-sunken',
+      ]) {
+        assert.ok(
+          contrast(ink, values[surface]) >= floor,
+          `${scheme} ${slot} is ${contrast(ink, values[surface]).toFixed(2)}:1 against ${surface}`,
+        );
+      }
+    }
+  }
+});
+
+/** Eight series a reader tells apart; two slots painted alike are one series drawn twice. */
+test('gives every data slot a colour of its own in every scheme', () => {
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    const painted = contract.tokens
+      .filter((token) => token.name.startsWith('--slotted-data-'))
+      .map((token) => values[token.name]);
+    assert.equal(new Set(painted).size, painted.length, `${scheme} paints two slots alike`);
+  }
+});

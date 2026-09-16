@@ -50,5 +50,6 @@
   "--slotted-icon-file-type": { "icon": "file-type" },
   "--slotted-icon-presentation": { "icon": "presentation" },
   "--slotted-icon-text-wrap": { "icon": "text-wrap" },
-  "--slotted-icon-bell": { "icon": "bell" }
+  "--slotted-icon-bell": { "icon": "bell" },
+  "--slotted-icon-trending-up": { "icon": "trending-up" }
 }

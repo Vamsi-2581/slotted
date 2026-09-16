@@ -20,8 +20,8 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 107    |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 103    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 110    |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 111    |
 | `component` | One family adjusting a semantic value for itself.              | 27     |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -96,6 +96,7 @@ This scale answers what text size a component needs.
 | `--slotted-font-size-xl`  | `1.125rem`    |
 | `--slotted-font-size-2xl` | `1.25rem`     |
 | `--slotted-font-size-3xl` | `1.5rem`      |
+| `--slotted-font-size-4xl` | `2rem`        |
 
 ## Line height
 
@@ -110,6 +111,15 @@ This scale answers how much vertical rhythm a text size needs.
 | `--slotted-line-height-xl`  | `1.45`        |
 | `--slotted-line-height-2xl` | `1.4`         |
 | `--slotted-line-height-3xl` | `1.3`         |
+| `--slotted-line-height-4xl` | `1.2`         |
+
+`4xl` was added for `stat-card`, and it is the first step above the size of a
+heading. The scale stopped at `3xl`, which is what an `h2` is set in; the
+value a dashboard's key figure is read at is 30 to 32 pixels in Tremor,
+Vercel and Stripe, and a card at `size="lg"` had nowhere in the scale to get
+it. Its line height continues the series the scale already runs — tighter as
+the type grows — because a figure is one line and needs no room for a second.
+`typography` does not read the step yet; it takes it when it is next opened.
 
 ## Font weight
 
@@ -274,6 +284,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-presentation`     | `presentation`         | stroke 2   |
 | `--slotted-icon-text-wrap`        | `text-wrap`            | stroke 2   |
 | `--slotted-icon-bell`             | `bell`                 | stroke 2   |
+| `--slotted-icon-trending-up`      | `trending-up`          | stroke 2   |
 
 A component-owned icon is a mask from a glyph token; a character is never an
 icon.
@@ -392,6 +403,17 @@ It is the second glyph, after `calendar` and `clock`, that names a kind of
 thing rather than an action — what waits behind the control is a list of
 notifications, and the reader has learnt the bell for it from every product
 they use.
+
+`--slotted-icon-trending-up` is the mark beside a delta, and it was added for
+`stat-card`. It is one artwork for two directions: Lucide's `trending-down` is
+`trending-up` reflected across the horizontal axis, stroke for stroke, so the
+family draws the one glyph and turns it — `scaleY(-1)` — for a fall, the way
+every chevron in the scale is mirrored by the family that draws it rather than
+held twice. A flat delta draws `--slotted-icon-minus`, which the scale already
+held. The mark is a line with a rise in it rather than an arrow, because an
+arrow beside a number says _go there_ — `arrow-left` takes the reader back,
+`external` takes them out — and this one says _it went this way_. shadcn's
+dashboard draws the same pair on the same badge.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph
@@ -584,6 +606,65 @@ one role every scheme keeps legible over the surface. `--slotted-selection-halo-
 does this for the pointer halo (CK7) and `--slotted-highlight-tint-opacity`
 for the band behind a matched span (CB10).
 
+## Data
+
+This scale answers what a series of data is painted with: a line, a bar, a
+dot, an area. It is the first palette in the semantic layer, and it is there
+rather than in the component layer because two families read it as one
+object — `sparkline` opens it in wave 10 and `chart` reads it as a set in
+wave 12 — and a palette two families share is what a value is _for_, not one
+family's adjustment.
+
+| Token              | Light     | Dark      | High contrast |
+| ------------------ | --------- | --------- | ------------- |
+| `--slotted-data-1` | `#2563eb` | `#2563eb` | `#1d4ed8`     |
+| `--slotted-data-2` | `#ea580c` | `#ea580c` | `#c2410c`     |
+| `--slotted-data-3` | `#0891b2` | `#0891b2` | `#0e7490`     |
+| `--slotted-data-4` | `#dc2626` | `#ef4444` | `#b91c1c`     |
+| `--slotted-data-5` | `#7c3aed` | `#8b5cf6` | `#6d28d9`     |
+| `--slotted-data-6` | `#a16207` | `#d97706` | `#a16207`     |
+| `--slotted-data-7` | `#c026d3` | `#d946ef` | `#a21caf`     |
+| `--slotted-data-8` | `#16a34a` | `#16a34a` | `#15803d`     |
+
+The five tones cannot give it, for the reason they could not give **File
+kind**: a tone means something — `danger` is a failure — and a series means
+nothing but itself. A chart of eight regions painted from the tones would say
+that the fourth region had failed, and a sparkline of the error rate painted
+`danger` would say the same thing about every error rate, rising or falling.
+The slot says which series; the tone, where a family carries one, says how the
+series is doing.
+
+The order is the whole of the design. Slots are assigned in sequence and never
+cycled, so the pairs that sit beside each other in a stack or a legend are
+always the same pairs, and those pairs are the ones measured: blue, orange,
+cyan, red, violet, amber, magenta, green is the ordering of these eight hues
+that maximises the smallest separation between neighbours under simulated
+protanopia and deuteranopia, common to all three schemes, out of the 5040
+orderings enumerated. `docs/superpowers/specs/2026-09-16-stat-card-sparkline-design.md`
+records the measurement; the floor is ΔE 8 in OKLab and every scheme clears
+16, and the normal-vision floor of 15 is cleared at 26 or more. The first
+three slots also separate under every pairing, which is the series cap for a
+chart form where any two marks can touch — a scatter, a map, small multiples.
+
+Slot 1 is the theme's own blue: `--slotted-tone-accent-border` in `light` and
+`--slotted-tone-accent-solid` in `dark` hold the same value, so a sparkline
+that names no series is drawn in the colour the reader has already learnt
+means _this application_. `dark` takes the mid step of each hue so a mark
+separates from a near-black page, and `high-contrast` the deepest, as **File
+kind** does. Every slot clears 3:1 against `--slotted-surface`,
+`--slotted-surface-raised` and `--slotted-surface-sunken` in `light` and
+`dark`, and 4.5:1 in `high-contrast`;
+`packages/themes/default/test/default-theme.test.mjs` measures all of them.
+
+What the scale does not hold is a neutral and a sequence. A series that is
+there for comparison rather than identity — last period behind this one —
+is drawn in `--slotted-text-muted`, the step the page already uses for an
+aside; a reference line is `--slotted-border-strong`, the line between two
+surfaces at 3:1. A sequential ramp is `chart`'s to open, because no consumer
+of this wave reads one. Under forced colours the whole scale is `CanvasText`:
+one series, and identity is then said by shape, texture or label, which is
+`chart`'s decision to make.
+
 ## Shadow
 
 This scale answers what elevation a surface needs in each colour scheme.
@@ -632,6 +713,14 @@ that reads a semantic token keeps working without writing a rule of its own.
 | `--slotted-control-border-color`     | `ButtonBorder` |
 | `--slotted-control-shadow`           | `none`         |
 | `--slotted-scrim`                    | `Canvas`       |
+| `--slotted-data-1`                   | `CanvasText`   |
+| `--slotted-data-2`                   | `CanvasText`   |
+| `--slotted-data-3`                   | `CanvasText`   |
+| `--slotted-data-4`                   | `CanvasText`   |
+| `--slotted-data-5`                   | `CanvasText`   |
+| `--slotted-data-6`                   | `CanvasText`   |
+| `--slotted-data-7`                   | `CanvasText`   |
+| `--slotted-data-8`                   | `CanvasText`   |
 | `--slotted-upload-kind-pdf`          | `ButtonFace`   |
 | `--slotted-upload-kind-document`     | `ButtonFace`   |
 | `--slotted-upload-kind-spreadsheet`  | `ButtonFace`   |

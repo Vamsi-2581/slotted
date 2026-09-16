@@ -41,6 +41,8 @@ const FAMILIES = [
   { family: 'tags-input' },
   /* The frame is the `control` part, one element in from the root. */
   { family: 'date-range-picker', frame: " [data-part='control']" },
+  { family: 'time-range-picker', frame: " [data-part='control']" },
+  { family: 'datetime-range-picker', frame: " [data-part='control']" },
 ];
 
 const INWARD = 'calc(var(--slotted-focus-ring-offset, 2px) * -1)';

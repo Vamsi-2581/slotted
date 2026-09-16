@@ -1014,6 +1014,62 @@
 }
 
 /**
+ * The room a screen is read in, stated by the scene rather than taken from the
+ * page.
+ *
+ * A family that answers its own width cannot be demonstrated at whatever width
+ * the documentation column happens to be. `top-navigation` folds at three
+ * steps — 1024, 768 and 480 pixels — and the column is about a thousand pixels
+ * at a 1280 window with the sidebar open: the bar's widest step never showed,
+ * and inside a two- or three-column grid every step had folded, so the page
+ * demonstrated one picture eighteen times. The reviewer's words: nothing fits,
+ * everything is squeezed by the width.
+ *
+ * So the scene names the room — one of four a reader recognises — and the
+ * viewport inside takes that width whatever the page gives. Where the page is
+ * narrower than the room, the room scrolls sideways, which is what the matrix
+ * does with a table wider than the column; `tools/harness/audit.mjs` reads a
+ * box that scrolls as one that owns its overflow. The four widths are literal
+ * because they are what the rooms are, not steps of any family's scale: a
+ * family's own breakpoints stand in its stylesheet, and a scene picks the room
+ * that lands where it wants to be seen. The desktop is the narrowest desktop
+ * rather than the widest, because the page's column is about 1030 pixels at a
+ * 1920 window and a room the column cannot hold is a room the reader scrolls.
+ */
+.slotted-demo-room {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-block-end: 4px;
+  scrollbar-color: var(--slotted-workbench-border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.slotted-demo-room > .slotted-demo-viewport {
+  /* The stated width is the room the family gets, borders outside it: a bar
+     whose widest step is 1024 has to be 1024 in a room named 1024. */
+  box-sizing: content-box;
+  flex: none;
+  inline-size: var(--slotted-demo-room);
+}
+
+.slotted-demo-room[data-room='desktop'] {
+  --slotted-demo-room: 1024px;
+}
+
+.slotted-demo-room[data-room='laptop'] {
+  --slotted-demo-room: 900px;
+}
+
+.slotted-demo-room[data-room='tablet'] {
+  --slotted-demo-room: 640px;
+}
+
+.slotted-demo-room[data-room='phone'] {
+  --slotted-demo-room: 375px;
+}
+
+/**
  * One demonstration: caption, canvas, source. The three belong together and
  * are spaced as one unit, so a page of eight demonstrations reads as eight
  * things rather than twenty-four.

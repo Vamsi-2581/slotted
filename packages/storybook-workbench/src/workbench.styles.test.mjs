@@ -88,6 +88,35 @@ test('offers a box a sticky demonstration can be scrolled inside', () => {
   assert.match(rule, /block-size:/);
 });
 
+/**
+ * The primitive a family that answers its own width is demonstrated inside: a
+ * room of a stated width, one of four a reader recognises, that scrolls
+ * sideways where the page is narrower than it. Added when `top-navigation`'s
+ * page showed one folded picture eighteen times, because the documentation
+ * column is narrower than the bar's widest step and a grid column narrower
+ * than its narrowest.
+ */
+test('offers a room of a stated width for a family that answers its own', () => {
+  const room = /\.slotted-demo-room\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(room, /overflow-x:\s*auto/);
+  assert.match(room, /max-inline-size:\s*100%/);
+
+  const viewport =
+    /\.slotted-demo-room > \.slotted-demo-viewport\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+  assert.match(viewport, /inline-size:\s*var\(--slotted-demo-room\)/);
+  assert.match(viewport, /box-sizing:\s*content-box/);
+
+  const rooms = [...css.matchAll(/\.slotted-demo-room\[data-room='([a-z]+)'\]\s*\{([\s\S]*?)\}/g)];
+  assert.deepEqual(
+    rooms.map(([, name]) => name),
+    ['desktop', 'laptop', 'tablet', 'phone'],
+  );
+  const widths = rooms.map(([, , body]) =>
+    Number(/--slotted-demo-room:\s*(\d+)px/.exec(body)?.[1]),
+  );
+  assert.deepEqual(widths, [1024, 900, 640, 375]);
+});
+
 test('workbench CSS keeps the reference-sheet layout and accessibility invariants', () => {
   assert.match(css, /@import '@fontsource-variable\/geist';/);
   assert.match(css, /@import '@fontsource-variable\/geist-mono';/);

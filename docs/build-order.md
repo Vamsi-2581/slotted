@@ -39,9 +39,9 @@ arquivo lista o que foi entregue e começa o passe 2 na onda 9.
 | 8    | `splitter`, `scroll-area`, `toggle-group segmented-control`, `timeline`, `date-range-picker`, `tags-input`, `filter-bar code-block`; reabertura de `table` (operandos `time`, `datetime`, `date-range-picker`, `tags-input` no filtro por coluna) |
 
 Famílias do guia entregues dentro de outra: `alert-dialog` em `dialog`;
-`icon-button` em `button`; `filter-builder` em `filter-bar` (parte `builder`);
-`highlight` como folha partilhada em `packages/styles/src/highlight`, sem
-binding.
+`icon-button` em `button`; `filter-builder` em `filter-bar` (parte `builder`).
+`highlight` foi folha partilhada em `packages/styles/src/highlight` até a onda
+10, quando virou família.
 
 Módulos de `packages/core` entregues: `clipboard`, `code`, `collection`,
 `commands` (onda 9), `count`, `currency`, `date`, `disclosure`, `dismissable-layer`, `drag` (onda
@@ -75,6 +75,8 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `number-field`                  | `text-align: inherit` no `input` (fora da guarda `:dir(rtl)`), para um campo `plain` numa célula numérica alinhar os dígitos ao fim como `text-field` já faz                                                                                         | —                                         | `2026-09-16-table-range-operands-design.md` §2                             |
 | `typography`                    | ler o passo `4xl` (`--slotted-font-size-4xl`, `--slotted-line-height-4xl`) que `stat-card` abriu para `size="lg"`                                                                                                                                    | —                                         | `2026-09-16-stat-card-sparkline-design.md` §2                              |
 | `chart`                         | a rampa sequencial e o par divergente que a escala de dados não tem; a textura como segundo canal sob `forced-colors`; tooltip e realce por ponto que `sparkline` recusou                                                                            | `chart` (onda 12)                         | `2026-09-16-stat-card-sparkline-design.md` §1; inventário §2               |
+| `menu`                          | deixar de importar `highlight/highlight.css` (React e Angular): a família importa a sua folha e um `mark` num item vem de `Highlight` / `[slHighlight]`; o arquivo estava em edição por `context-menu hover-card` na mesma rodada                    | —                                         | `2026-09-16-highlight-design.md` §5                                        |
+| `tree`                          | o `<mark>` sem identificador da busca passa a `Highlight` / `[slHighlight]` dentro do rótulo, e a folha `highlight/highlight.css` deixa de ser importada                                                                                             | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -337,6 +339,21 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   vazia. `combobox`, `select`, `listbox` e `menu` passam a usar a família no
   lugar da folha. Motor: `@slotted/core/highlight` com a normalização que
   `typeahead` já faz.
+
+  Entregue em 2026-09-16. Inventário em
+  `docs/superpowers/specs/2026-09-16-highlight-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-highlight-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-16-highlight-self-assessment.md`. A raiz é
+  o elemento que segura o texto e a marca é `[data-part='match']` dentro dela;
+  todas as ocorrências por padrão (`occurrences`); `current` para localizar
+  na página, pintado com o par sólido do acento; `disabled` próprio ou herdado.
+  `@slotted/core/highlight` tem `findMatch`, `matchRanges`, `normalizeRanges`,
+  `splitRanges` e `highlightRuns`; `collection/filter` importa o scan daqui.
+  Migraram `combobox`, `select`, `multi-select` e `command-palette` nos dois
+  bindings e `listbox` deixou de importar a folha. `menu` e `tree` ficam
+  registrados acima.
+
 - `aspect-ratio image` — uma sessão: `aspect-ratio` reserva proporção antes da
   mídia carregar e não corta; `image` compõe sobre ela com `src`/`srcset`,
   `alt`, `fit`, `position`, `loading`, fallback e estado de erro. Zoom e

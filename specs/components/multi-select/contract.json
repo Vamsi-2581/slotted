@@ -740,9 +740,10 @@
     ]
   },
   "mark": {
-    "part": "match",
+    "family": "highlight",
     "ui": "highlight",
-    "stylesheet": "highlight/highlight.css",
-    "reason": "The span a query matched is the shared mark every list a reader types into draws, worn as data-ui beside this family's match part. combobox recorded the decision and the metric behind it: painting it here changed the width of the word, and the run moved on every keystroke."
+    "part": "match",
+    "inside": "label",
+    "reason": "The span a query matched is the `highlight` family, rendered inside this family's label part, as combobox records it. Every occurrence is marked since wave 10, which is the family's default."
   }
 }

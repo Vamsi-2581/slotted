@@ -219,16 +219,17 @@
     "removal": "A filter that removes the highlighted option moves the highlight to the option that took its index, then to the first, then to nothing."
   },
   "mark": {
+    "family": "highlight",
     "ui": "highlight",
     "part": "match",
-    "stylesheet": "highlight/highlight.css",
-    "reason": "The span a query found is drawn by one sheet for every list a reader types into, so `select` with a filter, `listbox` with a filter and `menu` with a search cannot answer it three other ways (R6). The element wears the shared identifier beside this family's own part, the way the ring `spinner` draws wears `data-ui='spinner'` beside a button's `indicator`. It changes no metric of the word it marks: at 600 weight and 0.1em of inline padding the label was 6.86px wider marked than plain, and the marked run moved on every keystroke (CB6)."
+    "inside": "label",
+    "reason": "The span a query found is the `highlight` family, rendered inside this family's label part: one root per option, one `mark` per contiguous span, from the same collator the filter used. Until wave 10 the mark was a shared sheet this contract declared (R6); it is now a family with a contract of its own, `specs/components/highlight/contract.json`, and this family only points at it. It changes no metric of the word it marks: at 600 weight and 0.1em of inline padding the label was 6.86px wider marked than plain, and the marked run moved on every keystroke (CB6)."
   },
   "filtering": {
     "default": "createFilter().contains, locale-sensitive at base sensitivity",
     "adapter": "filter: (item, query) => boolean",
     "off": "filter={null}, for a list the consumer has already filtered on a server",
-    "highlight": "matchRanges, and the match part that marks what it found",
+    "highlight": "the highlight family inside the label part, handed the query and the locale the filter used",
     "reason": "docs/component-features.md §6 requires that filtering, ranking and remote search be adapters and that the component assume neither contains nor English normalisation. The same collator finds the match and the mark, so an option cannot pass one comparison and show a mark from another."
   },
   "autocomplete": {
@@ -508,7 +509,7 @@
         "loadingLabel": "Loading…",
         "triggerLabel": "Show options",
         "countLabel": "{count} results",
-        "createLabel": "Create \u201c{query}\u201d"
+        "createLabel": "Create “{query}”"
       },
       "capabilities": [
         "value",

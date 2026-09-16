@@ -144,10 +144,8 @@ test('treats filtering as an adapter and ships a locale-sensitive default', () =
   assert.match(contract.filtering.default, /locale-sensitive/);
   assert.equal(contract.filtering.adapter, 'filter: (item, query) => boolean');
   assert.match(contract.filtering.off, /filter=\{null\}/);
-  assert.equal(
-    contract.filtering.highlight,
-    'matchRanges, and the match part that marks what it found',
-  );
+  assert.match(contract.filtering.highlight, /highlight family inside the label part/);
+  assert.equal(contract.mark.family, 'highlight');
   assert.ok(member.parts.includes('match'));
 });
 

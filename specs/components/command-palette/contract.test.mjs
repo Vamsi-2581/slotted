@@ -221,7 +221,7 @@ test('declares every part the anatomy draws, and no more', () => {
   ]);
   assert.equal(contract.waiting.busy.ui, 'spinner');
   assert.equal(contract.waiting.placeholder.ui, 'skeleton');
-  assert.equal(contract.mark.ui, 'highlight');
+  assert.equal(contract.mark.family, 'highlight');
 });
 
 /** Every default a reference page has to print, and every axis a provider sets once. */

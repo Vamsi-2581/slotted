@@ -278,7 +278,7 @@
     "input": "search-input",
     "list": "list",
     "filter": "createFilter from @slotted/core/collection, replaced by the filter prop and turned off by filter={null}",
-    "highlight": "splitByMatch, drawn as the match part, which is the mark element combobox already uses",
+    "highlight": "the highlight family inside the label part, handed the query and the locale the filter used",
     "focus": "moves to the search input as the popup opens and returns to the trigger as it closes, because the combobox pattern says a dialog popup does not support aria-activedescendant and DOM focus moves into it",
     "tabOrder": "tabbables() from @slotted/core/focus, read over the document with the layer's own subtree excluded, so Tab leaves the control for the element beside it rather than for the end of the document",
     "query": "transient. It is emptied when an option is committed and when the popup closes, it never becomes a value, and no request carries both it and the selection.",

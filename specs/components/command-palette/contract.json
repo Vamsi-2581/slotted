@@ -121,10 +121,11 @@
     }
   },
   "mark": {
+    "family": "highlight",
     "ui": "highlight",
     "part": "match",
-    "stylesheet": "highlight/highlight.css",
-    "reason": "As combobox records it: one sheet marks the run a query found in every list a reader types into."
+    "inside": "label",
+    "reason": "As combobox records it: the span a query found is the `highlight` family inside this family's label part, from the same collator the ranker used."
   },
   "announce": {
     "part": "status",

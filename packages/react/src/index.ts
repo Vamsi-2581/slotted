@@ -79,6 +79,7 @@ export * from './toolbar';
 export * from './tooltip';
 export * from './tree';
 export * from './typography';
+export * from './top-navigation';
 export * from './upload';
 export * from './visually-hidden';
 export * from './splitter';

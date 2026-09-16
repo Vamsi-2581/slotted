@@ -64,6 +64,7 @@ export default defineConfig({
         tooltip: resolve(import.meta.dirname, 'src/tooltip/index.ts'),
         typography: resolve(import.meta.dirname, 'src/typography/index.ts'),
         upload: resolve(import.meta.dirname, 'src/upload/index.ts'),
+        'top-navigation': resolve(import.meta.dirname, 'src/top-navigation/index.ts'),
         'visually-hidden': resolve(import.meta.dirname, 'src/visually-hidden/index.ts'),
       },
       formats: ['es'],

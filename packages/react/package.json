@@ -308,6 +308,10 @@
       "types": "./dist/types/upload/index.d.ts",
       "import": "./dist/upload.js"
     }
+    "./top-navigation": {
+      "types": "./dist/types/top-navigation/index.d.ts",
+      "import": "./dist/top-navigation.js"
+    },
   },
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json && node layer-order.build.mjs && node package-boundary.verify.mjs",

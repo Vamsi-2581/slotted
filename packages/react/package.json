@@ -23,6 +23,10 @@
       "types": "./dist/types/app-shell/index.d.ts",
       "import": "./dist/app-shell.js"
     },
+    "./aspect-ratio": {
+      "types": "./dist/types/aspect-ratio/index.d.ts",
+      "import": "./dist/aspect-ratio.js"
+    },
     "./avatar": {
       "types": "./dist/types/avatar/index.d.ts",
       "import": "./dist/avatar.js"
@@ -147,6 +151,10 @@
     "./icon": {
       "types": "./dist/types/icon/index.d.ts",
       "import": "./dist/icon.js"
+    },
+    "./image": {
+      "types": "./dist/types/image/index.d.ts",
+      "import": "./dist/image.js"
     },
     "./inline": {
       "types": "./dist/types/inline/index.d.ts",

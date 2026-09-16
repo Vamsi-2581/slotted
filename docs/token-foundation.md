@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 110    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 111    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 111    |
 | `component` | One family adjusting a semantic value for itself.              | 27     |
 
@@ -285,6 +285,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-text-wrap`        | `text-wrap`            | stroke 2   |
 | `--slotted-icon-bell`             | `bell`                 | stroke 2   |
 | `--slotted-icon-trending-up`      | `trending-up`          | stroke 2   |
+| `--slotted-icon-image-off`        | `image-off`            | stroke 2   |
 
 A component-owned icon is a mask from a glyph token; a character is never an
 icon.
@@ -414,6 +415,16 @@ held. The mark is a line with a rise in it rather than an arrow, because an
 arrow beside a number says _go there_ — `arrow-left` takes the reader back,
 `external` takes them out — and this one says _it went this way_. shadcn's
 dashboard draws the same pair on the same badge.
+
+`--slotted-icon-image-off` is the mark a picture leaves behind when it does
+not arrive, and it was added for `image`. The scale had `file-image`, which
+says _a file of this kind_ — it is the tile `upload` draws beside a name — and
+a broken thumbnail in a product grid is not a file, it is a hole where a
+photograph should be. Ant Design and Chakra v2 both paint a placeholder there;
+Lucide's `image-off` is the one drawing that says _a picture, and not here_,
+which is the same construction `eye-off` and `cloud-off` already use in this
+scale. It is drawn once, on the fallback part, after `fallbackSrc` has had its
+turn.
 
 `--slotted-icon-person` is the only glyph drawn as a filled silhouette rather
 than as strokes, because it is the only one that stands in for a photograph

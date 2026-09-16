@@ -92,6 +92,10 @@
       "types": "./dist/types/datetime-picker/index.d.ts",
       "import": "./dist/datetime-picker.js"
     },
+    "./datetime-range-picker": {
+      "types": "./dist/types/datetime-range-picker/index.d.ts",
+      "import": "./dist/datetime-range-picker.js"
+    },
     "./description-list": {
       "types": "./dist/types/description-list/index.d.ts",
       "import": "./dist/description-list.js"
@@ -264,6 +268,10 @@
       "types": "./dist/types/time-picker/index.d.ts",
       "import": "./dist/time-picker.js"
     },
+    "./time-range-picker": {
+      "types": "./dist/types/time-range-picker/index.d.ts",
+      "import": "./dist/time-range-picker.js"
+    },
     "./timeline": {
       "types": "./dist/types/timeline/index.d.ts",
       "import": "./dist/timeline.js"
@@ -315,11 +323,11 @@
     "./upload": {
       "types": "./dist/types/upload/index.d.ts",
       "import": "./dist/upload.js"
-    }
+    },
     "./top-navigation": {
       "types": "./dist/types/top-navigation/index.d.ts",
       "import": "./dist/top-navigation.js"
-    },
+    }
   },
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json && node layer-order.build.mjs && node package-boundary.verify.mjs",

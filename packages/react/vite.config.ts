@@ -8,6 +8,7 @@ export default defineConfig({
     lib: {
       cssFileName: 'styles',
       entry: {
+        'datetime-range-picker': resolve(import.meta.dirname, 'src/datetime-range-picker/index.ts'),
         index: resolve(import.meta.dirname, 'src/index.ts'),
         'action-bar': resolve(import.meta.dirname, 'src/action-bar/index.ts'),
         'app-shell': resolve(import.meta.dirname, 'src/app-shell/index.ts'),
@@ -59,6 +60,7 @@ export default defineConfig({
         'stat-card': resolve(import.meta.dirname, 'src/stat-card/index.ts'),
         tag: resolve(import.meta.dirname, 'src/tag/index.ts'),
         'tags-input': resolve(import.meta.dirname, 'src/tags-input/index.ts'),
+        'time-range-picker': resolve(import.meta.dirname, 'src/time-range-picker/index.ts'),
         timeline: resolve(import.meta.dirname, 'src/timeline/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         'time-field': resolve(import.meta.dirname, 'src/time-field/index.ts'),

@@ -3,17 +3,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 
-/**
- * The mark has no contract of its own: it is declared by the family that
- * renders it, as the shared identifier its `match` part wears and the sheet
- * that draws it, the way `spinner` is declared by `button` (R6/CB6).
- */
 const contract = JSON.parse(
   readFileSync(
-    new URL('../../../../specs/components/combobox/contract.json', import.meta.url),
+    new URL('../../../../specs/components/highlight/contract.json', import.meta.url),
     'utf8',
   ),
-).mark;
+);
 /** The package's source root, one level up: every family is a sibling. */
 const source = new URL('..', import.meta.url).pathname;
 const css = readFileSync(new URL('./highlight.css', import.meta.url), 'utf8');
@@ -25,6 +20,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 const ui = `[data-ui='${contract.ui}']`;
+const match = `${ui} [data-part='match']`;
+const disabled = `${ui}:is([data-disabled],[data-disabled] *) [data-part='match']`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -34,13 +31,22 @@ test('lives in the component layer', () => {
   assert.match(css, /@layer slotted\.components/);
 });
 
-test('is the sheet the contract names, under the identifier it names', () => {
+/**
+ * The family has a root now, and the root is the element that holds the text:
+ * the mark inside it is the one part painted, selected through the root so a
+ * `mark` a page wrote on its own is left alone. The root itself has no rule —
+ * it is inline and inherits everything — which the fragment proves by
+ * rendering it inside a host's `label` with nothing between the two.
+ */
+test('paints the match through the root, and the root not at all', () => {
   assert.equal(contract.ui, 'highlight');
-  assert.equal(contract.part, 'match');
-  assert.equal(contract.stylesheet, 'highlight/highlight.css');
-  assert.match(css, new RegExp(`\\[data-ui='${contract.ui}'\\]`));
-  assert.match(fragment, new RegExp(`data-ui="${contract.ui}"`));
-  assert.match(fragment, new RegExp(`data-part="${contract.part}"`));
+  assert.deepEqual(contract.members.highlight.parts, ['root', 'match']);
+  assert.notEqual(rule(match), '');
+  assert.equal(rule(ui), '');
+  assert.equal(rule(`${ui}[data-part='root']`), '');
+  assert.match(fragment, /data-ui="highlight" data-part="root"/);
+  assert.match(fragment, /<mark data-part="match">/);
+  assert.doesNotMatch(fragment, /<mark[^>]*data-ui=/);
 });
 
 /**
@@ -50,7 +56,7 @@ test('is the sheet the contract names, under the identifier it names', () => {
  * the mark changes is colour.
  */
 test('changes no metric of the word it marks', () => {
-  const mark = rule(ui);
+  const mark = rule(match);
   assert.match(mark, /font-weight:inherit/);
   assert.match(mark, /letter-spacing:inherit/);
   assert.match(mark, /padding:0/);
@@ -58,10 +64,11 @@ test('changes no metric of the word it marks', () => {
   assert.doesNotMatch(mark, /padding-(inline|block)/);
   assert.doesNotMatch(mark, /font-size/);
   assert.doesNotMatch(mark, /(?<![\w-])margin/);
+  assert.match(fragment, /data-scene="metric"/);
 });
 
 test('carries the mark on colour, with a rule of the accent under it', () => {
-  const mark = rule(ui);
+  const mark = rule(match);
   assert.match(
     mark,
     /background-color:var\(--slotted-highlight-background,color-mix\(in oklab,var\(--slotted-tone-accent-text\) calc\(var\(--slotted-highlight-tint-opacity,0\.075\) \* 100%\),transparent\)\)/,
@@ -78,35 +85,65 @@ test('carries the mark on colour, with a rule of the accent under it', () => {
 
 /**
  * The band is mixed from the tone's `text` role, not taken from its `surface`
- * role. A `*-surface` tone is a ground: `accent-surface` measured 1.220 |
- * 1.014 | 1.000:1 against the panel in the three schemes, so the band existed
- * in one of them (CB10). What the mix is worth is measured against the theme
- * in `packages/themes/default/test/default-theme.test.mjs`; what is held here
- * is that the sheet reaches for the tone that every scheme keeps legible.
+ * role, and the share is the foundation's. A sheet that named a surface here
+ * would paint no band in two schemes out of three.
  */
-test('mixes the band from the tone that every scheme keeps legible', () => {
-  const mark = rule(ui);
-  assert.match(mark, /color-mix\(in oklab,var\(--slotted-tone-accent-text\)/);
-  assert.doesNotMatch(mark, /--slotted-tone-accent-surface/);
-  assert.doesNotMatch(css, /--slotted-tone-accent-surface/);
+test('mixes the band from the accent text tone at the foundation share', () => {
+  assert.doesNotMatch(rule(match), /accent-surface/);
+  assert.match(rule(match), /--slotted-highlight-tint-opacity/);
 });
 
 /** A run that wraps is two boxes, and each of them is marked. */
 test('marks both halves of a run that wraps', () => {
-  assert.match(rule(ui), /box-decoration-break:clone/);
-  assert.match(rule(ui), /-webkit-box-decoration-break:clone/);
+  assert.match(rule(match), /box-decoration-break:clone/);
+  assert.match(rule(match), /-webkit-box-decoration-break:clone/);
   assert.match(fragment, /data-scene="wrapping"/);
 });
 
-/** A disabled row keeps the rule and gives up the tone. */
-test('steps the mark down inside a row that answers nothing', () => {
-  const disabled = rule(`[data-disabled] ${ui}`);
+/**
+ * The current match cannot take a stronger band by degrees — 0.075 is the cap
+ * the 7:1 promise sets in `high-contrast` — so it takes the accent's solid
+ * ground and the ink the theme pairs with it, and gives the rule up: drawn in
+ * that ink inside the fill it read as nothing. No outline: R3 reserves it for
+ * the focus ring. Nothing moves.
+ */
+test('fills the current match with the accent pair, and moves nothing', () => {
+  const current = rule(`${match}[data-current]`);
   assert.match(
-    disabled,
+    current,
+    /background-color:var\(--slotted-highlight-current-background,var\(--slotted-tone-accent-solid\)\)/,
+  );
+  assert.match(
+    current,
+    /color:var\(--slotted-highlight-current-color,var\(--slotted-tone-accent-on-solid\)\)/,
+  );
+  assert.match(current, /text-decoration-line:none/);
+  assert.doesNotMatch(current, /outline|padding|margin|font-|letter-spacing/);
+  assert.match(fragment, /data-scene="current"/);
+  assert.match(fragment, /<mark data-part="match" data-current>/);
+});
+
+/**
+ * A disabled row keeps the rule and gives up the tone. The state is read from
+ * the root and from any row above it, because the host's option is where the
+ * state already lives; and it outranks `current`, whose fill and ink it takes
+ * back, and whose rule it restores.
+ */
+test('steps the mark down inside a row that answers nothing, from the root or above it', () => {
+  const stepped = rule(disabled);
+  assert.match(
+    stepped,
     /background-color:var\(--slotted-highlight-disabled-background,transparent\)/,
   );
-  assert.match(disabled, /color:inherit/);
-  assert.doesNotMatch(disabled, /text-decoration/);
+  assert.match(stepped, /color:inherit/);
+  assert.match(stepped, /text-decoration-line:underline/);
+  assert.doesNotMatch(stepped, /text-decoration-(color|thickness)/);
+  assert.ok(
+    normalized.indexOf(`${match}[data-current]{`) < normalized.indexOf(`${disabled}{`),
+    'disabled is written after current, so it wins at equal specificity',
+  );
+  assert.match(fragment, /data-scene="disabled"/);
+  assert.match(fragment, /data-part="root" data-disabled/);
 });
 
 test('names the system pair forced colours would collapse', () => {
@@ -114,6 +151,10 @@ test('names the system pair forced colours would collapse', () => {
   assert.match(forced, /background-color:\s*Mark/);
   assert.match(forced, /color:\s*MarkText/);
   assert.match(forced, /forced-color-adjust:\s*none/);
+  assert.match(
+    forced,
+    /\[data-current\]\s*\{\s*background-color:\s*Highlight;\s*color:\s*HighlightText/,
+  );
 });
 
 /**
@@ -137,4 +178,26 @@ test('leaves no family painting the mark on its own', () => {
     }
   }
   assert.deepEqual(offenders, [], `${offenders.join(', ')} paints the mark instead of reading it`);
+});
+
+/**
+ * The hosts render the family's anatomy, not the sheet's old one: a `mark`
+ * wearing `data-ui='highlight'` itself is the shape wave 6 had, and a fragment
+ * still writing it would be a fragment the sheet no longer paints.
+ */
+test('finds no host fragment wearing the identifier on the mark itself', () => {
+  const offenders = [];
+  for (const entry of readdirSync(source, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name === 'highlight') continue;
+    for (const file of readdirSync(join(source, entry.name))) {
+      if (!file.endsWith('.harness.html')) continue;
+      const html = readFileSync(join(source, entry.name, file), 'utf8');
+      if (/<mark[^>]*data-ui=["']highlight["']/.test(html)) offenders.push(`${entry.name}/${file}`);
+    }
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `${offenders.join(', ')} renders the mark as the sheet's old shape`,
+  );
 });

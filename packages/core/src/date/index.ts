@@ -51,6 +51,24 @@ export type {
   DateRangeRules,
   DateRangeValue,
 } from './date-range';
+export {
+  dateTimeRangeProblems,
+  dateTimeRangeSeconds,
+  durationLabel,
+  firstUnavailableIndex,
+  openingIndex,
+  runRefusal,
+  timeRangeProblems,
+  timeRangeSeconds,
+} from './time-range';
+export type {
+  DateTimeRangeRules,
+  DateTimeRangeValue,
+  RangeProblem,
+  RunLengthRules,
+  TimeRangeRules,
+  TimeRangeValue,
+} from './time-range';
 export { createDateFormat, fieldRange } from './format';
 export type {
   DateFieldName,

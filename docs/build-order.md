@@ -73,6 +73,8 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `time-range-picker`             | `wrap`: um turno que atravessa a meia-noite não é `order`; a duração conta pela meia-noite e a lista de fim não risca as horas antes do início. `table` passa-o no `between` da espécie `time`, cujo motor já lê `22:00 – 02:00` como janela noturna | —                                         | `2026-09-16-table-range-operands-design.md` §1                             |
 | `number-field`                  | `text-align: inherit` no `input` (fora da guarda `:dir(rtl)`), para um campo `plain` numa célula numérica alinhar os dígitos ao fim como `text-field` já faz                                                                                         | —                                         | `2026-09-16-table-range-operands-design.md` §2                             |
 
+| `typography`                    | ler o passo `4xl` (`--slotted-font-size-4xl`, `--slotted-line-height-4xl`) que `stat-card` abriu para `size="lg"`                                                                                                                                    | —                                         | `2026-09-16-stat-card-sparkline-design.md` §2                              |
+| `chart`                         | a rampa sequencial e o par divergente que a escala de dados não tem; a textura como segundo canal sob `forced-colors`; tooltip e realce por ponto que `sparkline` recusou                                                                            | `chart` (onda 12)                         | `2026-09-16-stat-card-sparkline-design.md` §1; inventário §2               |
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
 
@@ -348,6 +350,20 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   ordenação, filtros e seleção do modelo de dados; não oferece navegação de
   grelha. Compõe `list-item` e `description-list`; `table` sob `wrap` continua
   a resposta para conjuntos que cabem.
+  Entregue em 2026-09-16. Inventário em
+  `docs/superpowers/specs/2026-09-16-stat-card-sparkline-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-stat-card-sparkline-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-16-stat-card-sparkline-self-assessment.md`.
+  A escala `--slotted-data-1…8` (semântica, ordem fixa medida nos três
+  esquemas), os passos `4xl` e o glifo `trending-up` entraram na fundação.
+  `sparkline`: oito partes, `type`, `size`, `curve`, `tone`, `series`,
+  `reference`, `min`/`max`, descrição gerada e localizada; geometria em
+  `@slotted/core/sparkline`, medida por `ResizeObserver`, marcador e anel como
+  traços de comprimento zero. `stat-card`: quinze partes, `goodWhen` que
+  deriva o tom do delta e o entrega ao `trend`, `fill` com `plain`, `layout`,
+  `status` com `message`, `loading` por `skeleton`, piso de 10 rem, grelha que
+  nivela filas. Sem estado mutável em nenhuma das duas.
 
 ## Onda 11 — Extended de custo médio
 

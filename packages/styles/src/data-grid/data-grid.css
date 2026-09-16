@@ -184,9 +184,38 @@
   [data-ui='data-grid'] [role='row'] {
     box-sizing: border-box;
     display: grid;
-    grid-template-columns: var(--slotted-data-grid-template, none);
+    /* The template, then a filler track that takes whatever the frame has
+       left. A row is as wide as the frame or as the template, whichever is
+       wider, and with no filler a template narrower than the frame left a
+       white strip beside the header band — read on the grouping scene. The
+       filler holds no cell; the row's own ground and rule cover it, which is
+       why both are painted on the row and not on its cells. */
+    grid-template-columns: var(--slotted-data-grid-template, none) minmax(0, 1fr);
     inline-size: max-content;
     min-inline-size: 100%;
+  }
+
+  /* The rules between rows are the rows' own: a row is a block box, unlike a
+     table row, so its border runs the whole width, filler included. */
+  [data-ui='data-grid'] [data-part='header-row'] {
+    background-color: var(--_head-surface);
+    border-block-end: var(--_rule-width) solid var(--_rule-strong);
+  }
+
+  /* A row of column groups stands above the row of names, and the rule
+     between the two is the lighter one; the strong rule is the last header
+     row's, over the values. */
+  [data-ui='data-grid'] [data-part='header-row']:not(:last-of-type) {
+    border-block-end-color: var(--_rule);
+  }
+
+  [data-ui='data-grid'][data-variant='plain'] [data-part='header-row'] {
+    background-color: transparent;
+  }
+
+  [data-ui='data-grid'] [data-part='filter-row'] {
+    background-color: var(--_band-surface);
+    border-block-end: var(--_rule-width) solid var(--_rule);
   }
 
   [data-ui='data-grid'] [role='row'] > * {
@@ -219,7 +248,6 @@
   [data-ui='data-grid'] [data-part='head'] [data-part='selection'] {
     align-items: center;
     background-color: var(--_head-surface);
-    border-block-end: var(--_rule-width) solid var(--_rule-strong);
     box-sizing: border-box;
     color: var(--_text);
     display: flex;
@@ -246,7 +274,6 @@
      the row of column names by the same rule that separates the names from
      the values, one step lighter. */
   [data-ui='data-grid'] [data-part='column-group'] {
-    border-block-end-color: var(--_rule);
     justify-content: center;
   }
 
@@ -576,7 +603,6 @@
   [data-ui='data-grid'] [data-part='filter-row'] > [data-part='filter-cell'] {
     align-items: center;
     background-color: var(--_band-surface);
-    border-block-end: var(--_rule-width) solid var(--_rule);
     box-sizing: border-box;
     display: flex;
     min-block-size: var(--_row-block);
@@ -702,7 +728,7 @@
   /* The first condition has no join: its operator starts in the second
      column. A set filter has one condition and no join at all. */
   [data-ui='data-grid'][data-part='filter-panel']
-    > [data-part='filter-condition']:not(:has(> [data-part='filter-join']))
+    > [data-part='filter-condition']:first-child
     > [data-part='filter-operator'] {
     grid-column: 2;
   }
@@ -789,15 +815,31 @@
     transition: background-color var(--_transition);
   }
 
-  /* A fixed-height row is exactly the row height and clips what does not fit;
-     an auto row is at least it and at most the cap. */
+  /**
+   * The row's height is its grid track, not its box. Stated as `block-size`
+   * on the row, the implicit track still sized itself to the tallest cell —
+   * a 30-pixel button in a 34-pixel row made every track 41 — and each row
+   * overflowed the seven pixels into the next, so a pinned cell painted over
+   * the top of the row below it and every ring drawn inward landed on the
+   * wrong row. Measured on the anatomy scene: cells 41 tall, rows 34 apart.
+   *
+   * `grid-auto-rows` fixes the track, and a cell taller than it overflows its
+   * own box evenly without moving anything. An auto row is at least the row
+   * height and at most the cap.
+   */
   [data-ui='data-grid'][data-rows='fixed'] [data-part='body'] > [data-part='row'] {
     block-size: var(--_row-block);
+    grid-auto-rows: var(--_row-block);
   }
 
   [data-ui='data-grid'][data-rows='auto'] [data-part='body'] > [data-part='row'] {
-    max-block-size: var(--_row-max-block);
-    min-block-size: var(--_row-block);
+    grid-auto-rows: minmax(var(--_row-block), var(--_row-max-block));
+  }
+
+  [data-ui='data-grid'] [data-part='head'] [role='row'],
+  [data-ui='data-grid'] [data-part='summary'] [role='row'],
+  [data-ui='data-grid'] [data-part='loader'] [role='row'] {
+    grid-auto-rows: minmax(var(--_row-block), auto);
   }
 
   [data-ui='data-grid'] [data-part='cell'],
@@ -836,18 +878,17 @@
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  /* The rule between two rows, drawn on the cells. */
+  /* The rule between two rows, on the row; the last gives its rule up so a
+     ruled grid does not end in a line with nothing under it. */
   [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
     [data-part='body']
-    > [role='row']
-    > * {
+    > [role='row'] {
     border-block-end: var(--_rule-width) solid var(--_rule);
   }
 
   [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
     [data-part='body']
-    > [role='row']:last-child
-    > * {
+    > [role='row']:last-child {
     border-block-end-color: transparent;
   }
 
@@ -928,7 +969,9 @@
   [data-ui='data-grid'] [data-part='cell'][data-range-edge]::before {
     border: 0 solid var(--_cursor);
     content: '';
-    inset: 0;
+    /* Past the cell's own bottom border, so a vertical edge runs unbroken
+       down the rectangle instead of stopping at every row rule. */
+    inset: 0 0 calc(var(--_rule-width) * -1);
     pointer-events: none;
     position: absolute;
   }
@@ -1019,7 +1062,7 @@
   /* A cell whose draft failed, or whose value changed under the reader. The
      mark is a corner in the danger ink, and the message is the control's own
      `aria-errormessage`; the cell keeps the draft. */
-  [data-ui='data-grid'] [data-part='cell'][data-invalid]::after {
+  [data-ui='data-grid'] [data-part='cell'][data-invalid]:not([data-editing])::after {
     border-block-start: var(--slotted-space-3, 0.375rem) solid var(--slotted-tone-danger-border);
     border-inline-start: var(--slotted-space-3, 0.375rem) solid transparent;
     content: '';
@@ -1128,9 +1171,14 @@
     background-color: var(--_rule);
     content: '';
     inline-size: var(--_rule-width);
-    inset-block: calc(var(--_rule-width) * -1) 0;
+    /* Past the row's own rule below, so the edge is one line down the body. */
+    inset-block: 0 calc(var(--_rule-width) * -1);
     position: absolute;
     z-index: 1;
+  }
+
+  [data-ui='data-grid'] [data-part='body'] > [role='row']:last-child > [data-pin-edge]::after {
+    inset-block-end: 0;
   }
 
   [data-ui='data-grid'] [data-pinned='start'][data-pin-edge]::after {
@@ -1166,12 +1214,47 @@
     padding-inline: 0;
   }
 
+  /**
+   * The chooser is always pinned to the start. It is the first column and its
+   * offset is zero, so pinning it costs nothing when no other column is
+   * pinned; and when one is, a chooser that scrolled away left a hole at the
+   * start of every row where the identifier beside it stayed. AG Grid and MUI
+   * X both pin it with the first pinned column; here it is pinned always, so a
+   * consumer never has to say it.
+   */
+  [data-ui='data-grid'] [data-part='selection'] {
+    background-color: inherit;
+    inset-inline-start: 0;
+    position: sticky;
+    z-index: var(--slotted-z-index-sticky, 100);
+  }
+
+  /* Restated for the head's chooser, whose header rule above made it
+     `relative` at a higher specificity: read scrolled, the select-all left
+     with the columns while every row's chooser stayed. */
+  [data-ui='data-grid'] [data-part='head'] [data-part='selection'] {
+    background-color: var(--_head-surface);
+    inset-inline-start: 0;
+    position: sticky;
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
+  }
+
+  [data-ui='data-grid']
+    [data-part='body']
+    > [data-part='row'][data-selected]
+    > [data-part='selection'] {
+    background-color: var(--_selected);
+  }
+
   [data-ui='data-grid'] [data-part='selection'] > [data-ui='checkbox'] {
     block-size: var(--_line);
   }
 
-  /* A cell holding nothing but the expander is a gutter. */
-  [data-ui='data-grid'] [data-part='cell']:has(> [data-part='expander']) {
+  /* A cell holding nothing but the expander is a gutter. The binding names
+     it rather than the stylesheet asking every cell what it holds: `:has()`
+     on every cell of a windowed body is a question asked a thousand times per
+     style pass. */
+  [data-ui='data-grid'] [data-part='cell'][data-kind='expander'] {
     justify-content: center;
     padding-inline: 0;
   }
@@ -1182,9 +1265,12 @@
    * One cell spanning every column, on the sunken ground, with the record's
    * own inset so what is inside reads as belonging to the row above.
    */
+  [data-ui='data-grid'] [data-part='detail'] {
+    background-color: var(--slotted-surface-sunken, Canvas);
+  }
+
   [data-ui='data-grid'] [data-part='detail'] > * {
     background-color: var(--slotted-surface-sunken, Canvas);
-    border-block-end: var(--_rule-width) solid var(--_rule);
     box-sizing: border-box;
     grid-column: 1 / -1;
     padding-block: var(--slotted-space-5, 0.75rem);
@@ -1269,9 +1355,13 @@
     position: static;
   }
 
-  [data-ui='data-grid'] [data-part='summary-cell'] {
+  [data-ui='data-grid'] [data-part='summary'] > [role='row'] {
     background-color: var(--_head-surface);
     border-block-start: var(--_rule-width) solid var(--_rule-strong);
+  }
+
+  [data-ui='data-grid'] [data-part='summary-cell'] {
+    background-color: var(--_head-surface);
     font-weight: var(--slotted-font-weight-semibold, 600);
     min-block-size: var(--_row-block);
   }
@@ -1301,13 +1391,55 @@
      its buttons. */
   [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] {
     align-items: center;
+    /* One line tall, whatever stands inside: the buttons are taller than the
+       line and overflow it evenly, so the row is still measured by its text
+       and the buttons sit on the value's own centre. */
+    block-size: var(--_line);
     display: inline-flex;
     gap: var(--slotted-space-1, 0.125rem);
-    /* The controls inside are one target tall and the row is one line: pulled
-       back onto the line, as the header controls are. */
-    margin-block: calc((var(--_line) - var(--slotted-target-min, 24px)) / 2);
     opacity: 0;
     transition: opacity var(--_transition);
+  }
+
+  /**
+   * The buttons are the family's, drawn to the header controls' geometry —
+   * one WCAG target, the row's hover ground, the family's glyph size for the
+   * artwork the consumer puts in. A library `button` at its smallest step is
+   * thirty pixels against a line of nineteen and a half: read on the anatomy
+   * scene, two of them stood five pixels proud of the row on both sides and
+   * grew its track. The consumer keeps the behaviour and the artwork.
+   */
+  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button {
+    align-items: center;
+    background-color: transparent;
+    block-size: var(--slotted-target-min, 24px);
+    border: 0;
+    border-radius: var(--slotted-data-grid-control-radius, var(--slotted-radius-sm, 4px));
+    color: var(--_muted);
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--slotted-target-min, 24px);
+    justify-content: center;
+    padding: 0;
+    transition:
+      background-color var(--_transition),
+      color var(--_transition);
+  }
+
+  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button :is(svg, img) {
+    block-size: var(--_icon-size);
+    inline-size: var(--_icon-size);
+  }
+
+  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button:not(:disabled):hover {
+    background-color: color-mix(in oklab, var(--slotted-text, CanvasText) 7%, transparent);
+    color: var(--_text);
+  }
+
+  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button:focus-visible {
+    outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
+    outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   [data-ui='data-grid']

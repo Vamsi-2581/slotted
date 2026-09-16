@@ -45,7 +45,10 @@ test('renders every part the contract declares, on the element and with the role
 test('lays every row out as a grid over the template the binding writes', () => {
   const row = rule("[data-ui='data-grid'] [role='row']");
   assert.match(row, /display:grid;/);
-  assert.match(row, /grid-template-columns:var\(--slotted-data-grid-template,none\);/);
+  assert.match(
+    row,
+    /grid-template-columns:var\(--slotted-data-grid-template,none\) minmax\(0,1fr\);/,
+  );
   const cell = rule("[data-ui='data-grid'] [role='row'] > *");
   assert.match(cell, /grid-column:var\(--slotted-data-grid-column,auto\);/);
 });

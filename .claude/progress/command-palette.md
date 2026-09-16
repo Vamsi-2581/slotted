@@ -42,10 +42,10 @@ criar. Inventário e desenho em
 
 ## Tarefa em curso
 
-Passo 14 — portão de release, segunda ronda. Página React lida e auditada
-(1280/620, light/dark). Angular por ler (6007 em baixo). Correções da ronda:
-uma coluna, `contain-intrinsic-inline-size`, cenas operadas sem canvas vazio,
-atalhos em caps sem separador, rodapé `outline`, espaço do ícone, `row-gap: 0`.
+Nenhuma. Família entregue: commits `5ffa6dd`, `ef80746`, `fb7c45b`,
+`43ba9ab`, `3e2f931`, `f51759b` (núcleo em `70ec5a7`, `c2a7fee`). Pendentes
+para outra sessão: página Angular por ler (6007 em baixo); reaberturas de
+`dialog` (`ariaLabel`) e `combobox` (`createRanker`) em `docs/build-order.md`.
 
 ## Git
 

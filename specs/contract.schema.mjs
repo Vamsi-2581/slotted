@@ -64,6 +64,15 @@ export const STATE_ATTRIBUTES = {
    * which is the responsive rule the consumer chose in advance.
    */
   fullscreen: 'data-fullscreen',
+  /**
+   * A notification the reader has seen. It is not `checked` and not
+   * `selected` — those are the reader's choice of a set — and not `complete`,
+   * which is a fact about the thing itself: a read notification is still
+   * pending whatever it is about. `notification-center` found the vocabulary
+   * had no word for the one state every inbox draws, and Knock, Novu, UI5 and
+   * GitHub all call it read.
+   */
+  read: 'data-read',
   'drop-target': 'data-drop-target',
   /**
    * A drag the region has already decided it will refuse.
@@ -270,6 +279,15 @@ export const KNOWN_CAPABILITIES = [
    * the desync `docs/state-and-events.md` exists to prevent.
    */
   'removable',
+  /**
+   * Marking a notification read or unread. It is deliberately not mutable,
+   * for the reason `removable` is not: the fact lives per item in the
+   * consumer's store, and a family that flipped it itself would show a
+   * notification as read while the server still held it unread. The family
+   * asks — with the keys, the value and a reason — and the consumer's items
+   * answer. `notification-center` found the gap.
+   */
+  'read',
   /**
    * Putting a value the component displays onto the clipboard. It is
    * deliberately not mutable: the clipboard belongs to the platform and the

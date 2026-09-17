@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import {
   lucideBell,
@@ -18,6 +18,7 @@ import { providePageHeaderDefaults } from '@slotted/angular/page-header';
 import { provideSideNavigationDefaults } from '@slotted/angular/side-navigation';
 
 import { provideNexoraBackend } from './core/backend/nexora-backend.provider';
+import { NexoraTitleStrategy } from './core/nav/title.strategy';
 
 import { routes } from './app.routes';
 
@@ -31,7 +32,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideNexoraBackend(),
-    provideRouter(routes),
+    provideRouter(routes, withComponentInputBinding()),
+    { provide: TitleStrategy, useClass: NexoraTitleStrategy },
     provideIcons({
       lucideBell,
       lucideBoxes,

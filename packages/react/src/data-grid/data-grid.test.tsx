@@ -104,7 +104,10 @@ describe('DataGrid, the pattern', () => {
     expect(root.querySelectorAll('[role="rowheader"]')).toHaveLength(4);
     expect(cell('S1', 'customer')).toHaveAttribute('aria-colindex', '2');
     expect(cell('S1', 'customer').closest('[role="row"]')).toHaveAttribute('aria-rowindex', '2');
-    expect(root.querySelectorAll('[tabindex="0"]')).toHaveLength(0);
+    /* One tab stop always: the header's first cell until the reader has been anywhere. */
+    const stops = root.querySelectorAll('[tabindex="0"]');
+    expect(stops).toHaveLength(1);
+    expect(stops[0]).toBe(header('id'));
   });
 
   it('declares every part the contract names on the elements it names', () => {

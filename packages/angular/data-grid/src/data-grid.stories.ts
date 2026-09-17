@@ -248,11 +248,11 @@ const STATUS_TEMPLATE = `
   </ng-template>`;
 
 /** One grid of shipments, framed, filling its viewport; `extra` adds bindings. */
-const grid = (extra = '', content = '') => `
+const grid = (extra = '', content = '', options: { grow?: boolean } = {}) => `
     <sl-data-grid
       label="Shipments"
       rowKey="id"
-      height="100%"
+      ${options.grow ? '' : 'height="100%"'}
       variant="framed"
       [columns]="columns"
       ${extra}
@@ -712,7 +712,7 @@ export const ColumnMenu: Story = {
         current: { row: 'header', column: 'carrier' },
       },
       template: screen(
-        grid('[rows]="rows" [current]="current" (manageColumns)="managing.set(true)"'),
+        grid('[rows]="rows" [current]="current" manageable (manageColumns)="managing.set(true)"'),
         {
           size: 'tall',
           before: note(
@@ -904,6 +904,9 @@ export const PaginationScene: Story = {
         <sl-pagination-items></sl-pagination-items>
         <button slPaginationNext type="button"></button>
       </nav>`,
+          /* A paged grid is as tall as its page: a frame taller than eight
+             rows left the room under them empty. */
+          { grow: true },
         ),
       ),
     };
@@ -946,7 +949,7 @@ export const EmptyAndLoading: Story = {
   render: () => ({
     props: { ...base(), none: [], filtered: { ...emptyQuery(), search: 'no such shipment' } },
     template: `
-<div class="slotted-demo-grid" data-columns="2">
+<div class="slotted-demo-grid" data-columns="1">
   ${scene(
     'Nothing yet',
     'A grid before the first shipment exists: the empty result-state under the header, held to the frame.',

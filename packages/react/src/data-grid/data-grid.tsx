@@ -46,6 +46,7 @@ import {
   type GridNode,
   type GridQuery,
   type GridRange,
+  type ResolvedGridColumn,
   type SortDirection,
 } from '@slotted/core/grid';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
@@ -69,7 +70,7 @@ import {
   ResultStateDescription,
   ResultStateTitle,
 } from '../result-state';
-import { DataGridBody, DataGridLoader, DataGridSummary } from './data-grid-body';
+import { DataGridBody, DataGridEmpty, DataGridLoader, DataGridSummary } from './data-grid-body';
 import {
   DataGridInternalContext,
   type DataGridInternal,
@@ -507,7 +508,13 @@ export function DataGrid<Row>({
   const selectedSet = useMemo(() => new Set(selectedList), [selectedList]);
   const anchor = useRef<string | undefined>(undefined);
   const isSelected = useCallback((key: string) => selectedSet.has(key), [selectedSet]);
-  const selectedCount = selectedList.filter((key) => selectableKeys.includes(key)).length;
+  const selectableSet = useMemo(() => new Set(selectableKeys), [selectableKeys]);
+  /* A set on both sides: `includes` over ten thousand keys for each of ten
+     thousand chosen ones was a hundred million steps on select-all. */
+  const selectedCount = useMemo(
+    () => selectedList.filter((key) => selectableSet.has(key)).length,
+    [selectedList, selectableSet],
+  );
   const allState: 'none' | 'some' | 'all' =
     selectedCount === 0 ? 'none' : selectedCount >= selectableKeys.length ? 'all' : 'some';
 
@@ -886,9 +893,50 @@ export function DataGrid<Row>({
   const draggables = useRef(new Map<string, () => void>());
   const swallowClick = useRef(false);
 
+  const headerNodes = useRef(new Map<string, HTMLElement>());
+  const attachNode = useCallback((node: HTMLElement | null, columnId: string) => {
+    const controller = drag.current;
+    const previous = draggables.current.get(columnId);
+    if (previous) {
+      previous();
+      draggables.current.delete(columnId);
+    }
+    if (!node || !controller) return;
+    const column = latest.current.resolved.find((entry) => entry.id === columnId);
+    if (!column || !column.reorderable) return;
+    const detach = controller.attachDraggable(node, {
+      container: 'columns',
+      key: columnId,
+      handle: () => node,
+      distance: 6,
+    });
+    draggables.current.set(columnId, detach);
+  }, []);
+  const attachDraggable = useCallback(
+    (node: HTMLElement | null, columnId: string) => {
+      if (node) headerNodes.current.set(columnId, node);
+      else headerNodes.current.delete(columnId);
+      attachNode(node, columnId);
+    },
+    [attachNode],
+  );
+  /* A header that appears after the controller exists, or is re-created for
+     a new layout, is attached then; the signature is the layout's, so a
+     render that moved nothing re-attaches nothing. */
+  const layoutSignature = resolved.map((column) => column.id).join('\u0000');
+  useEffect(() => {
+    for (const [columnId, node] of headerNodes.current) attachNode(node, columnId);
+  }, [layoutSignature, attachNode]);
+
   useEffect(() => {
     const element = root.current;
     if (!element) return;
+    /* One container for the whole header row: the three pin zones share the
+       row's box, and three containers registered over the same element
+       claimed the pointer in turn — the last one, an empty end zone, took
+       every drop as its root. The zone is enforced at the drop instead: a
+       column never leaves its zone, so a target past the zone's edge lands on
+       the edge. */
     const controller = createDragController({
       document: element.ownerDocument,
       preview: false,
@@ -898,8 +946,8 @@ export function DataGrid<Row>({
         const { resolved: list, effectiveState: state, requestState: request } = latest.current;
         const columnId = items[0]!;
         const zone = zoneOf(list, columnId);
-        const from = zone.indexOf(columnId);
-        const to = target.index > from ? target.index - 1 : target.index;
+        const to = zoneIndex(list, zone, columnId, target.index);
+        if (to === null) return;
         request(
           withColumnMoved(state, columnId, to, zone),
           'order',
@@ -908,23 +956,19 @@ export function DataGrid<Row>({
         );
       },
     });
-    const zoneItems = (zone: 'start' | 'middle' | 'end') => () =>
-      latest.current.resolved
-        .filter((column) => (zone === 'middle' ? column.pinned === null : column.pinned === zone))
-        .map((column) => column.id);
+    const allItems = () => latest.current.resolved.map((column) => column.id);
     const headerOf = (columnId: string) =>
       element.querySelector(`[data-part="column-header"][data-column="${CSS.escape(columnId)}"]`);
-    for (const zone of ['start', 'middle', 'end'] as const) {
-      controller.registerContainer({
-        key: zone,
-        items: zoneItems(zone),
-        orientation: 'horizontal',
-        element: () => element.querySelector('[data-part="header-row"]:last-of-type'),
-        itemElement: headerOf,
-        label: () => zone,
-        itemLabel: (columnId) => latest.current.labelOf(columnId),
-      });
-    }
+    controller.registerContainer({
+      key: 'columns',
+      items: allItems,
+      orientation: 'horizontal',
+      element: () =>
+        element.querySelector('[data-part="head"] > [data-part="header-row"]:last-of-type'),
+      itemElement: headerOf,
+      label: () => 'columns',
+      itemLabel: (columnId) => latest.current.labelOf(columnId),
+    });
     let wasDragging = false;
     const unsubscribe = controller.subscribe((state) => {
       if (state.status !== 'dragging') {
@@ -936,29 +980,43 @@ export function DataGrid<Row>({
         return;
       }
       wasDragging = true;
+      const dragging = state.items[0] ?? null;
       const target = state.target && state.target.kind === 'between' ? state.target : null;
       let offset: number | null = null;
       let over: string | null = null;
-      if (target) {
-        const zoneList = zoneItems(target.container as 'start' | 'middle' | 'end')();
+      if (target && dragging) {
+        const list = latest.current.resolved;
+        const zone = zoneOf(list, dragging);
+        const first = list.find((column) => column.id === zone[0]);
+        const last = list.find((column) => column.id === zone[zone.length - 1]);
+        /* The indicator is drawn where the drop would land: inside the zone. */
+        const boundary = Math.max(
+          first ? first.index - 1 : 0,
+          Math.min(last ? last.index : list.length, target.index),
+        );
         const scroller = scroll.current;
-        const first = zoneList[Math.min(target.index, zoneList.length - 1)];
-        const header = first ? headerOf(first) : null;
+        const ids = allItems();
+        const atEnd = boundary >= ids.length;
+        const anchor = ids[atEnd ? ids.length - 1 : boundary];
+        const header = anchor ? headerOf(anchor) : null;
         if (header && scroller) {
           const box = header.getBoundingClientRect();
           const origin = scroller.getBoundingClientRect();
-          const atEnd = target.index >= zoneList.length;
           const rtl = getComputedStyle(scroller).direction === 'rtl';
           const edge = atEnd !== rtl ? box.right : box.left;
           offset = rtl
             ? origin.right - edge + scroller.scrollLeft
             : edge - origin.left + scroller.scrollLeft;
-          over = zoneList[target.index] ?? null;
+          over = ids[boundary] ?? null;
         }
       }
-      setDragState({ dragging: state.items[0] ?? null, target: over, offset });
+      setDragState({ dragging, target: over, offset });
     });
     drag.current = controller;
+    /* The headers' ref callbacks ran in the commit before this effect, when
+       there was no controller to attach to: every header that reported itself
+       is attached now. Read live, no header could be dragged. */
+    for (const [columnId, node] of headerNodes.current) attachNode(node, columnId);
     const attached = draggables.current;
     return () => {
       unsubscribe();
@@ -967,26 +1025,6 @@ export function DataGrid<Row>({
       controller.destroy();
       drag.current = null;
     };
-  }, []);
-
-  const attachDraggable = useCallback((node: HTMLElement | null, columnId: string) => {
-    const controller = drag.current;
-    const previous = draggables.current.get(columnId);
-    if (previous) {
-      previous();
-      draggables.current.delete(columnId);
-    }
-    if (!node || !controller) return;
-    const column = latest.current.resolved.find((entry) => entry.id === columnId);
-    if (!column || !column.reorderable) return;
-    const zone = column.pinned ?? 'middle';
-    const detach = controller.attachDraggable(node, {
-      container: zone,
-      key: columnId,
-      handle: () => node,
-      distance: 6,
-    });
-    draggables.current.set(columnId, detach);
   }, []);
 
   /* ── Expansion ──────────────────────────────────────────────────────── */
@@ -1556,7 +1594,7 @@ export function DataGrid<Row>({
       if (
         insideWidget &&
         (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End') &&
-        target.matches('input, textarea')
+        target.matches('input:not([type="checkbox"]):not([type="radio"]), textarea')
       ) {
         return;
       }
@@ -1848,6 +1886,24 @@ export function DataGrid<Row>({
           ? 'no-results'
           : 'empty';
 
+  /* A first load draws as many skeleton rows as the frame shows, capped at
+     the page the query asks for: eight rows in a frame of twenty-five left
+     the rest of the frame empty and the page that arrived was a different
+     picture. An unmeasured frame draws the stated count. */
+  const skeletonCount = useMemo(() => {
+    const page = query.page?.size;
+    if (viewport.height === 0) return resolvedSkeleton;
+    return Math.max(1, Math.min(page ?? Infinity, Math.ceil(viewport.height / rowSize)));
+  }, [query.page?.size, viewport.height, rowSize, resolvedSkeleton]);
+
+  /* One tab stop always, as the pattern requires of a grid: the current cell
+     while there is one, and the first cell of the header until the reader
+     has been anywhere — without it a grid nobody had entered had no way in
+     from the keyboard and no focusable content for its scroller. */
+  const tabStop = useMemo<GridCell>(
+    () => current ?? { row: HEADER_ROW, column: columnIds[0] ?? '' },
+    [current, columnIds],
+  );
   const internal = useMemo<DataGridInternal<Row>>(
     () => ({
       id,
@@ -1875,6 +1931,7 @@ export function DataGrid<Row>({
       isDisabled,
       isExpandable,
       current,
+      tabStop,
       focused,
       setCurrent,
       isSelected,
@@ -1963,6 +2020,7 @@ export function DataGrid<Row>({
       isDisabled,
       isExpandable,
       current,
+      tabStop,
       focused,
       setCurrent,
       isSelected,
@@ -2126,11 +2184,10 @@ export function DataGrid<Row>({
         <div data-part="scroll" ref={scroll}>
           <DataGridHead<Row> columnGroups={columnGroups} headerRowCount={headerRowCount} />
           {status === 'loading' ? (
-            <DataGridLoader<Row> rows={resolvedSkeleton} />
+            <DataGridLoader<Row> rows={skeletonCount} />
           ) : (
             <DataGridBody<Row>
               bodyStyle={bodyStyle}
-              empty={emptyContent}
               firstIndex={windowsRows ? rowWindow.startIndex : 0}
               headerRowCount={headerRowCount}
               measureRow={autoRows || measuredRow === null ? measureRow : undefined}
@@ -2139,6 +2196,9 @@ export function DataGrid<Row>({
               allNodes={nodes}
             />
           )}
+          {emptyContent !== null && status !== 'loading' ? (
+            <DataGridEmpty>{emptyContent}</DataGridEmpty>
+          ) : null}
           {hasSummary && status === 'rows' ? (
             <DataGridSummary<Row>
               aggregates={result.aggregates}
@@ -2177,6 +2237,25 @@ export function DataGrid<Row>({
       </div>
     </DataGridInternalContext.Provider>
   );
+}
+
+/**
+ * Where a drop at a boundary of the whole row lands inside the source's zone:
+ * the index among the zone's members, or `null` when the column would not
+ * move. A boundary past the zone's edge lands on that edge.
+ */
+function zoneIndex<Row>(
+  list: readonly ResolvedGridColumn<Row>[],
+  zone: readonly string[],
+  columnId: string,
+  boundary: number,
+): number | null {
+  const first = list.findIndex((column) => column.id === zone[0]);
+  const clamped = Math.max(first, Math.min(first + zone.length, boundary));
+  const from = zone.indexOf(columnId);
+  const to = clamped - first;
+  const settled = to > from ? to - 1 : to;
+  return settled === from ? null : settled;
 }
 
 function isBodyRow(row: string): boolean {

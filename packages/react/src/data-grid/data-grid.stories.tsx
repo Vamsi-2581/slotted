@@ -853,6 +853,9 @@ const PaginationDemo = () => {
             <PaginationNext />
           </Pagination>
         }
+        /* A paged grid is as tall as its page: a frame taller than eight
+           rows left the room under them empty. */
+        height={undefined}
         onQueryChange={setQuery}
         query={query}
       />
@@ -899,7 +902,7 @@ export const LoadMore: Story = {
 export const EmptyAndLoading: Story = {
   parameters: scenario('empty-and-loading'),
   render: () => (
-    <div className="slotted-demo-grid" data-columns="2">
+    <div className="slotted-demo-grid" data-columns="1">
       <Scene
         label="Nothing yet"
         note="A grid before the first shipment exists: the empty result-state under the header, held to the frame."

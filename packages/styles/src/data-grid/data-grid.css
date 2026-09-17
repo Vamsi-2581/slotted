@@ -123,7 +123,14 @@
        drawn inward on both sides of it. */
     --_control: min(
       var(--slotted-target-min, 24px),
-      calc(var(--_row-block) - var(--_ring-width) * 2)
+      calc(var(--_row-block) - var(--_ring-width) * 2 - var(--slotted-space-1, 0.125rem) * 2)
+    );
+    /* Its glyph keeps two pixels of air inside the control's ground, so at
+       dense — a 17-pixel control in a 25-pixel track — the ground reads as a
+       button and not as a filled cell. */
+    --_control-icon: min(
+      var(--_icon-size),
+      calc(var(--_control) - var(--slotted-space-2, 0.25rem))
     );
     /* The track a body row lays its cells on: the row's height less the rule
        under it, so the cells end where the rule begins. Stated as the whole
@@ -168,7 +175,7 @@
    * Both axes. It is the window the virtualiser measures, so it takes the room
    * the frame leaves after the footer and scrolls what does not fit.
    */
-  [data-ui='data-grid'] [data-part='scroll'] {
+  [data-ui='data-grid'] > [data-part='scroll'] {
     /* The container a detail row, a group row and the empty state measure
        their width against: each spans every column of a template that may
        be wider than the frame, and `100cqi` is what holds it to the frame. */
@@ -184,7 +191,7 @@
     position: relative;
   }
 
-  [data-ui='data-grid'][data-sticky-to='page'] [data-part='scroll'] {
+  [data-ui='data-grid'][data-sticky-to='page'] > [data-part='scroll'] {
     overflow: visible;
   }
 
@@ -209,7 +216,8 @@
      chips are a `row` of a grid pattern — and a descendant selector laid its
      chips out on this grid's column template. */
   [data-ui='data-grid']
-    :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
+    > [data-part='scroll']
+    > :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
     > [role='row'] {
     box-sizing: border-box;
     display: grid;
@@ -248,7 +256,8 @@
   }
 
   [data-ui='data-grid']
-    :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
+    > [data-part='scroll']
+    > :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
     > [role='row']
     > * {
     grid-column: var(--slotted-data-grid-column, auto);
@@ -259,7 +268,8 @@
      which the page audit reads as a defect and a reader never sees. Sized to
      the rows, the only thing that scrolls is the scroller. */
   [data-ui='data-grid']
-    :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader']) {
+    > [data-part='scroll']
+    > :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader']) {
     inline-size: max-content;
     min-inline-size: 100%;
   }
@@ -275,19 +285,23 @@
    * `button` inside a `columnheader` would be a widget the cursor has to
    * enter.
    */
-  [data-ui='data-grid'] [data-part='head'] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] {
     inset-block-start: var(--slotted-data-grid-sticky-offset, 0);
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
   }
 
-  [data-ui='data-grid']:not([data-sticky-header]) [data-part='head'] {
+  [data-ui='data-grid']:not([data-sticky-header]) > [data-part='scroll'] > [data-part='head'] {
     position: static;
   }
 
   [data-ui='data-grid'] [data-part='column-header'],
   [data-ui='data-grid'] [data-part='column-group'],
-  [data-ui='data-grid'] [data-part='head'] [data-part='selection'] {
+  [data-ui='data-grid']
+    > [data-part='scroll']
+    > [data-part='head']
+    > [role='row']
+    > [data-part='selection'] {
     align-items: center;
     background-color: var(--_head-surface);
     box-sizing: border-box;
@@ -352,8 +366,8 @@
 
   /* A header, a filter cell and a summary cell are controls, not prose: a
      Shift-press that appends a sort key must not also select its name. */
-  [data-ui='data-grid'] [data-part='head'] > [role='row'] > *,
-  [data-ui='data-grid'] [data-part='summary'] > [role='row'] > * {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] > [role='row'] > *,
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'] > * {
     user-select: none;
   }
 
@@ -379,7 +393,7 @@
    * header can be sorted is the hand, the darker band and the menu it
    * reveals — the answer AG Grid gives.
    */
-  [data-ui='data-grid'] [data-part='sort'] {
+  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort'] {
     align-items: center;
     color: var(--_text);
     display: none;
@@ -390,7 +404,7 @@
     line-height: 1;
   }
 
-  [data-ui='data-grid'] [data-part='sort']::after {
+  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']::after {
     background-color: currentcolor;
     block-size: var(--_icon-size);
     content: '';
@@ -415,12 +429,12 @@
 
   /* The index of a key past the first, drawn only then: `aria-sort` cannot say
      which key came first, and the number is what says it. */
-  [data-ui='data-grid'] [data-part='sort']::before {
+  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']::before {
     content: attr(data-index);
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='data-grid'] [data-part='sort']:not([data-index])::before {
+  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']:not([data-index])::before {
     content: none;
   }
 
@@ -456,7 +470,7 @@
   }
 
   [data-ui='data-grid'] [data-part='column-menu'],
-  [data-ui='data-grid'] [data-part='filter'],
+  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],
   [data-ui='data-grid'] [data-part='expander'],
   [data-ui='data-grid'] [data-part='group-toggle'] {
     align-items: center;
@@ -481,7 +495,9 @@
     opacity: 0;
   }
 
-  [data-ui='data-grid'] [data-part='filter']:not([data-filtered], [data-open]) {
+  [data-ui='data-grid']
+    [data-part='column-header']
+    [data-part='filter']:not([data-filtered], [data-open]) {
     display: none;
   }
 
@@ -495,7 +511,7 @@
   }
 
   [data-ui='data-grid'] [data-part='column-menu']:not(:disabled):hover,
-  [data-ui='data-grid'] [data-part='filter']:not(:disabled):hover,
+  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']:not(:disabled):hover,
   [data-ui='data-grid'] [data-part='group-toggle']:not(:disabled):hover {
     background-color: var(--_head-surface-hover);
     color: var(--_text);
@@ -507,7 +523,7 @@
   }
 
   [data-ui='data-grid'] [data-part='column-menu']:focus-visible,
-  [data-ui='data-grid'] [data-part='filter']:focus-visible,
+  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']:focus-visible,
   [data-ui='data-grid'] [data-part='expander']:focus-visible,
   [data-ui='data-grid'] [data-part='group-toggle']:focus-visible {
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
@@ -518,12 +534,12 @@
   [data-ui='data-grid'] [data-part='expander']::after,
   [data-ui='data-grid'] [data-part='group-toggle']::after {
     background-color: currentcolor;
-    block-size: var(--_icon-size);
+    block-size: var(--_control-icon);
     content: '';
-    inline-size: var(--_icon-size);
+    inline-size: var(--_control-icon);
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: var(--_icon-size) var(--_icon-size);
+    mask-size: var(--_control-icon) var(--_control-icon);
   }
 
   [data-ui='data-grid'] [data-part='column-menu']::after {
@@ -534,23 +550,25 @@
      filtered, in the accent ink. `--slotted-icon-funnel` joined the glyph
      scale for this family: `table` takes the artwork from the consumer, and a
      control this family draws itself owes its glyph to a token. */
-  [data-ui='data-grid'] [data-part='filter']::after {
+  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']::after {
     background-color: currentcolor;
-    block-size: var(--_icon-size);
+    block-size: var(--_control-icon);
     content: '';
-    inline-size: var(--_icon-size);
+    inline-size: var(--_control-icon);
     mask-image: var(--slotted-icon-funnel);
     mask-position: center;
     mask-repeat: no-repeat;
-    mask-size: var(--_icon-size) var(--_icon-size);
+    mask-size: var(--_control-icon) var(--_control-icon);
   }
 
-  [data-ui='data-grid'] [data-part='filter'][data-filtered],
-  [data-ui='data-grid'] [data-part='filter'][data-open] {
+  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'][data-filtered],
+  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'][data-open] {
     color: var(--slotted-tone-accent-text, CanvasText);
   }
 
-  [data-ui='data-grid'] [data-part='filter'][data-filtered]:not(:disabled):hover {
+  [data-ui='data-grid']
+    [data-part='column-header']
+    [data-part='filter'][data-filtered]:not(:disabled):hover {
     background-color: var(--slotted-tone-accent-surface, Canvas);
   }
 
@@ -715,7 +733,10 @@
   /* The plain control inside takes what the trace leaves of the row's
      height and a short inset after the operator, the rule every cell
      holding a plain control applies. */
-  [data-ui='data-grid'] [data-part='filter-cell'] [data-part='root'][data-variant='plain'] {
+  [data-ui='data-grid']
+    [data-part='filter-cell']
+    [data-part='filter-operand']
+    > [data-part='root'][data-variant='plain'] {
     --slotted-control-padding-inline-sm: var(--slotted-space-3, 0.375rem);
     --slotted-control-height-sm: calc(var(--_row-block) - var(--_ring-width) * 2);
 
@@ -953,7 +974,7 @@
   /**
    * ── Rows and cells ─────────────────────────────────────────────────────
    */
-  [data-ui='data-grid'] [data-part='body'] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='body'] {
     box-sizing: border-box;
     /* The virtual window: the body is as tall as every row and its padding is
        the offset of the first mounted one, so the mounted rows stand where the
@@ -980,29 +1001,55 @@
    * own box evenly without moving anything. An auto row is at least the row
    * height and at most the cap.
    */
-  [data-ui='data-grid'][data-rows='fixed'] [data-part='body'] > [data-part='row'] {
+  [data-ui='data-grid'][data-rows='fixed']
+    > [data-part='scroll']
+    > [data-part='body']
+    > [data-part='row'] {
     block-size: var(--_row-block);
     grid-auto-rows: var(--_track);
   }
 
-  [data-ui='data-grid'][data-rows='auto'] [data-part='body'] > [data-part='row'] {
+  [data-ui='data-grid'][data-rows='auto']
+    > [data-part='scroll']
+    > [data-part='body']
+    > [data-part='row'] {
     grid-auto-rows: minmax(var(--_track), var(--_row-max-block));
   }
 
-  [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed']) [data-part='body'] {
+  /* A row that grows to its text aligns its cells to the top: a one-line
+     value centred beside a four-line one floats in the middle of nothing,
+     and the eye reads a row from its first line. Fixed rows stay centred. */
+  [data-ui='data-grid'][data-rows='auto']
+    [data-part='body']
+    > [data-part='row']
+    > [role='gridcell'],
+  [data-ui='data-grid'][data-rows='auto']
+    [data-part='body']
+    > [data-part='row']
+    > [role='rowheader'] {
+    align-items: start;
+  }
+
+  [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
+    > [data-part='scroll']
+    > [data-part='body'] {
     --_track: calc(var(--_row-block) - var(--_rule-width));
   }
 
-  [data-ui='data-grid'] [data-part='head'] > [role='row'],
-  [data-ui='data-grid'] [data-part='summary'] > [role='row'],
-  [data-ui='data-grid'] [data-part='loader'] > [role='row'] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] > [role='row'],
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'],
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [role='row'] {
     grid-auto-rows: minmax(var(--_row-block), auto);
   }
 
   [data-ui='data-grid'] [data-part='cell'],
   [data-ui='data-grid'] [data-part='row-header'],
   [data-ui='data-grid'] [data-part='summary-cell'],
-  [data-ui='data-grid'] [data-part='body'] [data-part='selection'] {
+  [data-ui='data-grid']
+    > [data-part='scroll']
+    > [data-part='body']
+    > [role='row']
+    > [data-part='selection'] {
     align-items: center;
     box-sizing: border-box;
     display: flex;
@@ -1022,12 +1069,20 @@
      keeps its own direction: an identifier, an email or a price in a
      right-to-left document is left-to-right text, and read in `dir="rtl"`
      "Bloom & Co." had its full stop moved to the front. */
-  [data-ui='data-grid'] [data-part='cell'] > span:first-child,
-  [data-ui='data-grid'] [data-part='row-header'] > span:first-child,
-  [data-ui='data-grid'] [data-part='summary-cell'] > span:first-child {
+  [data-ui='data-grid'] [data-part='cell'] > span:first-child:not([data-ui]),
+  [data-ui='data-grid'] [data-part='row-header'] > span:first-child:not([data-ui]),
+  [data-ui='data-grid'] [data-part='summary-cell'] > span:first-child:not([data-ui]) {
     flex: 1 1 auto;
     min-inline-size: 0;
     unicode-bidi: plaintext;
+  }
+
+  /* A family drawn in a cell by a renderer — a badge, a tag — keeps its own
+     size: read on the status column, a badge filled the cell's whole width
+     because it was a span standing where the value stands. */
+  [data-ui='data-grid'] [data-part='cell'] > [data-ui]:first-child {
+    flex: 0 0 auto;
+    max-inline-size: 100%;
   }
 
   /* A row header names the record and carries one step of weight. */
@@ -1050,7 +1105,10 @@
   }
 
   /* The stripe, declared before every state. */
-  [data-ui='data-grid'][data-striped] [data-part='body'] > [data-part='row']:nth-child(even) {
+  [data-ui='data-grid'][data-striped]
+    > [data-part='scroll']
+    > [data-part='body']
+    > [data-part='row']:nth-child(even) {
     background-color: var(--_stripe);
   }
 
@@ -1059,11 +1117,17 @@
    *
    * In the order `STATE_PRECEDENCE` declares them, weakest last.
    */
-  [data-ui='data-grid'] [data-part='body'] > [data-part='row']:not([data-disabled]):hover {
+  [data-ui='data-grid']
+    > [data-part='scroll']
+    > [data-part='body']
+    > [data-part='row']:not([data-disabled]):hover {
     background-color: var(--_hover);
   }
 
-  [data-ui='data-grid'] [data-part='body'] > [data-part='row'][data-selected] {
+  [data-ui='data-grid']
+    > [data-part='scroll']
+    > [data-part='body']
+    > [data-part='row'][data-selected] {
     background-color: var(--_selected);
     color: var(--_selected-text);
   }
@@ -1223,7 +1287,7 @@
     text-align: end;
   }
 
-  [data-ui='data-grid'] [data-part='editor'] {
+  [data-ui='data-grid'] [data-part='cell'] > [data-part='editor'] {
     display: flex;
     flex: 1 1 auto;
     /* Inside the cell's trace, at every density. */
@@ -1231,7 +1295,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'] [data-part='editor'] > [data-part='root'] {
+  [data-ui='data-grid'] [data-part='cell'] > [data-part='editor'] > [data-part='root'] {
     flex: 1 1 auto;
     min-inline-size: 0;
   }
@@ -1334,7 +1398,7 @@
   }
 
   /* The corner: a header cell that is also pinned takes the step above both. */
-  [data-ui='data-grid'] [data-part='head'] [data-pinned] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] [data-pinned] {
     background-color: var(--_head-surface);
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
@@ -1343,7 +1407,11 @@
     background-color: var(--_band-surface);
   }
 
-  [data-ui='data-grid'] [data-part='body'] > [data-part='row'][data-selected] > [data-pinned] {
+  [data-ui='data-grid']
+    > [data-part='scroll']
+    > [data-part='body']
+    > [data-part='row'][data-selected]
+    > [data-pinned] {
     background-color: var(--_selected);
   }
 
@@ -1360,7 +1428,11 @@
     z-index: 1;
   }
 
-  [data-ui='data-grid'] [data-part='body'] > [role='row']:last-child > [data-pin-edge]::after {
+  [data-ui='data-grid']
+    > [data-part='scroll']
+    > [data-part='body']
+    > [role='row']:last-child
+    > [data-pin-edge]::after {
     inset-block-end: 0;
   }
 
@@ -1442,7 +1514,7 @@
    * The cell is the family's and the control is `checkbox`'s. The width is
    * stated so a column pinned beside it has a length to state.
    */
-  [data-ui='data-grid'] [data-part='selection'] {
+  [data-ui='data-grid'] [role='row'] > [data-part='selection'] {
     --slotted-selection-halo-opacity: 0;
 
     justify-content: center;
@@ -1457,7 +1529,7 @@
    * X both pin it with the first pinned column; here it is pinned always, so a
    * consumer never has to say it.
    */
-  [data-ui='data-grid'] [data-part='selection'] {
+  [data-ui='data-grid'] [role='row'] > [data-part='selection'] {
     background-color: inherit;
     inset-inline-start: 0;
     position: sticky;
@@ -1467,7 +1539,11 @@
   /* Restated for the head's chooser, whose header rule above made it
      `relative` at a higher specificity: read scrolled, the select-all left
      with the columns while every row's chooser stayed. */
-  [data-ui='data-grid'] [data-part='head'] [data-part='selection'] {
+  [data-ui='data-grid']
+    > [data-part='scroll']
+    > [data-part='head']
+    > [role='row']
+    > [data-part='selection'] {
     background-color: var(--_head-surface);
     inset-inline-start: 0;
     position: sticky;
@@ -1481,7 +1557,7 @@
     background-color: var(--_selected);
   }
 
-  [data-ui='data-grid'] [data-part='selection'] > [data-ui='checkbox'] {
+  [data-ui='data-grid'] [role='row'] > [data-part='selection'] > [data-ui='checkbox'] {
     block-size: var(--_line);
   }
 
@@ -1580,17 +1656,17 @@
    * The aggregates of the whole query, pinned to the end of the scroller, on
    * the band with a strong rule above — the header of the other end.
    */
-  [data-ui='data-grid'] [data-part='summary'] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] {
     inset-block-end: var(--slotted-data-grid-sticky-offset-end, 0);
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
   }
 
-  [data-ui='data-grid']:not([data-sticky-header]) [data-part='summary'] {
+  [data-ui='data-grid']:not([data-sticky-header]) > [data-part='scroll'] > [data-part='summary'] {
     position: static;
   }
 
-  [data-ui='data-grid'] [data-part='summary'] > [role='row'] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'] {
     background-color: var(--_head-surface);
     border-block-start: var(--_rule-width) solid var(--_rule-strong);
   }
@@ -1601,7 +1677,7 @@
     min-block-size: var(--_row-block);
   }
 
-  [data-ui='data-grid'] [data-part='summary'] [data-pinned] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] [data-pinned] {
     background-color: var(--_head-surface);
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
@@ -1647,14 +1723,14 @@
   [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button {
     align-items: center;
     background-color: transparent;
-    block-size: var(--slotted-target-min, 24px);
+    block-size: var(--_control);
     border: 0;
     border-radius: var(--slotted-data-grid-control-radius, var(--slotted-radius-sm, 4px));
     color: var(--_muted);
     cursor: pointer;
     display: inline-flex;
     flex: none;
-    inline-size: var(--slotted-target-min, 24px);
+    inline-size: var(--_control);
     justify-content: center;
     padding: 0;
     transition:
@@ -1663,8 +1739,8 @@
   }
 
   [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button :is(svg, img) {
-    block-size: var(--_icon-size);
-    inline-size: var(--_icon-size);
+    block-size: var(--_control-icon);
+    inline-size: var(--_control-icon);
   }
 
   [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button:not(:disabled):hover {
@@ -1690,7 +1766,7 @@
   @media (pointer: coarse) {
     [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'],
     [data-ui='data-grid'] [data-part='column-menu'],
-    [data-ui='data-grid'] [data-part='filter'] {
+    [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'] {
       opacity: 1;
     }
   }
@@ -1698,20 +1774,23 @@
   /**
    * ── Empty, and loading ─────────────────────────────────────────────────
    */
-  [data-ui='data-grid'] [data-part='empty'] {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty'] {
     align-items: center;
     display: flex;
-    /* Wide as the frame and tall as the room left, so the result-state stands
-       in the middle of the box rather than in the corner of a template. */
+    /* Wide as the frame's viewport and pinned to its start, so the message
+       stands in the middle of what the reader sees whatever the columns'
+       width and however far the grid is scrolled sideways: laid out over the
+       columns, the middle of a wide template was off screen. */
+    inline-size: 100cqi;
     inset-inline-start: 0;
     justify-content: center;
-    max-inline-size: 100cqi;
     min-block-size: calc(var(--_row-block) * 6);
     padding: var(--slotted-space-8, 1.5rem);
     position: sticky;
+    position: sticky;
   }
 
-  [data-ui='data-grid'] [data-part='loader'] > [data-part='row'] > * {
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [data-part='row'] > * {
     align-items: center;
     box-sizing: border-box;
     display: flex;
@@ -1721,7 +1800,7 @@
     padding-inline: var(--_pad-inline);
   }
 
-  [data-ui='data-grid'][aria-busy='true'] [data-part='body'] {
+  [data-ui='data-grid'][aria-busy='true'] > [data-part='scroll'] > [data-part='body'] {
     opacity: 0.55;
     pointer-events: none;
     transition: opacity var(--_transition);
@@ -1736,7 +1815,7 @@
    * `pagination` answers its own inline size and contributes no intrinsic
    * width.
    */
-  [data-ui='data-grid'] [data-part='footer'] {
+  [data-ui='data-grid'] > [data-part='footer'] {
     align-items: center;
     border-block-start: var(--_rule-width) solid var(--_rule);
     box-sizing: border-box;
@@ -1751,12 +1830,12 @@
     padding-inline: var(--_pad-inline);
   }
 
-  [data-ui='data-grid'] [data-part='footer'] > :last-child {
+  [data-ui='data-grid'] > [data-part='footer'] > :last-child {
     flex: 1 1 auto;
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'] [data-part='footer'] [data-range] {
+  [data-ui='data-grid'] > [data-part='footer'] [data-range] {
     color: var(--_muted);
     flex: none;
     font-variant-numeric: tabular-nums;
@@ -1783,9 +1862,9 @@
 
     /* A mask painted `currentcolor` keeps the ink the system forced; the
        adjustment would otherwise remove the mark and leave its box. */
-    [data-ui='data-grid'] [data-part='sort']::after,
+    [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']::after,
     [data-ui='data-grid'] [data-part='column-menu']::after,
-    [data-ui='data-grid'] [data-part='filter']::after,
+    [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']::after,
     [data-ui='data-grid'] [data-part='expander']::after,
     [data-ui='data-grid'] [data-part='group-toggle']::after,
     [data-ui='data-grid'] [data-part='resizer']::after {
@@ -1798,12 +1877,12 @@
       block-size: auto;
     }
 
-    [data-ui='data-grid'] [data-part='scroll'] {
+    [data-ui='data-grid'] > [data-part='scroll'] {
       overflow: visible;
     }
 
-    [data-ui='data-grid'] [data-part='head'],
-    [data-ui='data-grid'] [data-part='summary'],
+    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'],
+    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'],
     [data-ui='data-grid'] [data-pinned] {
       position: static;
     }

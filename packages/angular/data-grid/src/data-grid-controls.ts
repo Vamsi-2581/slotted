@@ -201,6 +201,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
       @case ('set') {
         <sl-multi-select
           size="sm"
+          width="content"
           overflow="collapse"
           [variant]="variant()"
           [fullWidth]="true"

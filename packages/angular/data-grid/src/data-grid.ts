@@ -199,6 +199,25 @@ function sameRange(a: GridRange | null, b: GridRange | null) {
   if (!a || !b) return a === b;
   return sameCell(a.anchor, b.anchor) && sameCell(a.focus, b.focus);
 }
+/**
+ * Where a drop at a boundary of the whole row lands inside the source's zone:
+ * the index among the zone's members, or `null` when the column would not
+ * move. A boundary past the zone's edge lands on that edge.
+ */
+function zoneIndex<Row>(
+  list: readonly ResolvedGridColumn<Row>[],
+  zone: readonly string[],
+  columnId: string,
+  boundary: number,
+): number | null {
+  const first = list.findIndex((column) => column.id === zone[0]);
+  const clamped = Math.max(first, Math.min(first + zone.length, boundary));
+  const from = zone.indexOf(columnId);
+  const to = clamped - first;
+  const settled = to > from ? to - 1 : to;
+  return settled === from ? null : settled;
+}
+
 function isBodyRow(row: string) {
   return row !== HEADER_ROW && row !== FILTER_ROW && row !== SUMMARY_ROW && !isGroupCursorRow(row);
 }
@@ -273,7 +292,7 @@ function isBodyRow(row: string) {
               role="gridcell"
               aria-colindex="1"
               [attr.data-column]="SELECTION"
-              [attr.tabindex]="isCurrent(HEADER, SELECTION) ? 0 : -1"
+              [attr.tabindex]="isTabStop(HEADER, SELECTION) ? 0 : -1"
               [attr.data-current]="isCurrent(HEADER, SELECTION) ? '' : null"
               [style.--slotted-data-grid-column]="1"
               (focus)="onCellFocus({ row: HEADER, column: SELECTION }, $event)"
@@ -331,7 +350,7 @@ function isBodyRow(row: string) {
                 [attr.data-dragging]="dragState().dragging === column.id ? '' : null"
                 [attr.data-drop-target]="dragState().target === column.id ? '' : null"
                 [attr.data-resizing]="resizing() === column.id ? '' : null"
-                [attr.tabindex]="isCurrent(HEADER, column.id) ? 0 : -1"
+                [attr.tabindex]="isTabStop(HEADER, column.id) ? 0 : -1"
                 [style.--slotted-data-grid-column]="indexOf(column.id)"
                 [style.--slotted-data-grid-pin-offset]="
                   column.pinned ? column.pinOffset + 'px' : null
@@ -446,9 +465,11 @@ function isBodyRow(row: string) {
                     @if (column.hideable) {
                       <button slMenuItem (select)="hide(column.id, $event)">{{ t().hide }}</button>
                     }
-                    <button slMenuItem (select)="manageColumns.emit()">
-                      {{ t().manageColumns }}…
-                    </button>
+                    @if (manageable()) {
+                      <button slMenuItem (select)="manageColumns.emit()">
+                        {{ t().manageColumns }}…
+                      </button>
+                    }
                   </sl-menu>
                 </span>
                 @if (column.resizable) {
@@ -571,52 +592,6 @@ function isBodyRow(row: string) {
             windowsRows() ? rowWindow().startOffset + 'px' : null
           "
         >
-          @if (status() !== 'rows') {
-            <div data-part="empty" [style.--slotted-data-grid-column]="'1 / -1'">
-              @if (emptyTemplate(); as template) {
-                <ng-container
-                  [ngTemplateOutlet]="template.template"
-                  [ngTemplateOutletContext]="{ $implicit: status(), status: status() }"
-                />
-              } @else {
-                <section slResultState reach="section" tabindex="-1" [status]="resultStatus()">
-                  <div slResultStateContent>
-                    <div slResultStateTitle>{{ emptyTitle() }}</div>
-                    @if (status() === 'error' && error()) {
-                      <p slResultStateDescription>{{ error() }}</p>
-                    }
-                  </div>
-                  @if (status() === 'no-results') {
-                    <div slResultStateActions>
-                      <button
-                        slButton
-                        type="button"
-                        size="sm"
-                        tone="secondary"
-                        variant="outline"
-                        (click)="clearFilters($event)"
-                      >
-                        {{ t().clearFilters }}
-                      </button>
-                    </div>
-                  } @else if (status() === 'error') {
-                    <div slResultStateActions>
-                      <button
-                        slButton
-                        type="button"
-                        size="sm"
-                        tone="secondary"
-                        variant="outline"
-                        (click)="retry.emit()"
-                      >
-                        {{ t().retry }}
-                      </button>
-                    </div>
-                  }
-                </section>
-              }
-            </div>
-          }
           @for (entry of mountedEntries(); track entry.node.key) {
             @if (entry.node.kind === 'group') {
               <div
@@ -903,6 +878,52 @@ function isBodyRow(row: string) {
         </div>
       }
 
+      @if (status() !== 'rows' && status() !== 'loading') {
+        <div data-part="empty">
+          @if (emptyTemplate(); as template) {
+            <ng-container
+              [ngTemplateOutlet]="template.template"
+              [ngTemplateOutletContext]="{ $implicit: status(), status: status() }"
+            />
+          } @else {
+            <section slResultState reach="section" tabindex="-1" [status]="resultStatus()">
+              <div slResultStateContent>
+                <div slResultStateTitle>{{ emptyTitle() }}</div>
+                @if (status() === 'error' && error()) {
+                  <p slResultStateDescription>{{ error() }}</p>
+                }
+              </div>
+              @if (status() === 'no-results') {
+                <div slResultStateActions>
+                  <button
+                    slButton
+                    type="button"
+                    size="sm"
+                    tone="secondary"
+                    variant="outline"
+                    (click)="clearFilters($event)"
+                  >
+                    {{ t().clearFilters }}
+                  </button>
+                </div>
+              } @else if (status() === 'error') {
+                <div slResultStateActions>
+                  <button
+                    slButton
+                    type="button"
+                    size="sm"
+                    tone="secondary"
+                    variant="outline"
+                    (click)="retry.emit()"
+                  >
+                    {{ t().retry }}
+                  </button>
+                </div>
+              }
+            </section>
+          }
+        </div>
+      }
       @if (hasSummary() && status() === 'rows') {
         <div data-part="summary" role="rowgroup">
           <div role="row" [attr.data-row]="SUMMARY" [attr.aria-rowindex]="summaryRowIndex()">
@@ -1075,6 +1096,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly loadMoreThreshold = input<number | undefined>(undefined);
   readonly skeletonRows = input<number | undefined>(undefined);
   readonly activatable = input(false, { transform: booleanAttribute });
+  /**
+   * Whether the column menu offers Manage columns. The grid has no manager of
+   * its own — `column-manager` edits `columnState` — so the item is drawn only
+   * for an application that answers `manageColumns`, the way React draws it
+   * only when `onManageColumns` is given.
+   */
+  readonly manageable = input(false, { transform: booleanAttribute });
   readonly expandable = input<boolean | ((row: Row) => boolean) | undefined>(undefined);
   readonly height = input<string | number | undefined>(undefined);
   readonly label = input<string | undefined>(undefined);
@@ -1295,9 +1323,19 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly summaryRowIndex = computed(
     () => this.headerRowCount() + (this.total() ?? this.nodes().length) + 1,
   );
-  protected readonly skeletonRowsList = computed(() =>
-    Array.from({ length: this.resolvedSkeleton() }, (_unused, index) => index),
-  );
+  /* A first load draws as many skeleton rows as the frame shows, capped at
+     the page the query asks for: eight rows in a frame of twenty-five left
+     the rest of the frame empty and the page that arrived was a different
+     picture. An unmeasured frame draws the stated count. */
+  protected readonly skeletonRowsList = computed(() => {
+    const page = this.query().page?.size;
+    const height = this.viewport().height;
+    const count =
+      height === 0
+        ? this.resolvedSkeleton()
+        : Math.max(1, Math.min(page ?? Infinity, Math.ceil(height / this.rowSize())));
+    return Array.from({ length: count }, (_unused, index) => index);
+  });
   protected skeletonWidth(index: number) {
     return `${[70, 55, 80, 40, 60][index % 5]}%`;
   }
@@ -1422,8 +1460,11 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   isSelected(key: string) {
     return this.selectedSet().has(key);
   }
+  private readonly selectableSet = computed(() => new Set(this.selectableKeys()));
+  /* A set on both sides: `includes` over ten thousand keys for each of ten
+     thousand chosen ones was a hundred million steps on select-all. */
   protected readonly selectedCount = computed(
-    () => this.selectedList().filter((key) => this.selectableKeys().includes(key)).length,
+    () => this.selectedList().filter((key) => this.selectableSet().has(key)).length,
   );
   protected readonly allState = computed<'none' | 'some' | 'all'>(() => {
     const count = this.selectedCount();
@@ -1538,6 +1579,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   isCurrent(row: string, column: string) {
     const current = this.current();
     return current !== null && current.row === row && current.column === column;
+  }
+  /* One tab stop always, as the pattern requires of a grid: the current cell
+     while there is one, and the header's first cell until the reader has been
+     anywhere — without it a grid nobody had entered had no way in from the
+     keyboard and no focusable content for its scroller. */
+  protected isTabStop(row: string, column: string) {
+    if (this.current() !== null) return this.isCurrent(row, column);
+    return row === HEADER_ROW && column === this.columnIds()[0];
   }
   private requestCurrent(next: GridCell | null, reason: ChangeReason, source?: unknown) {
     const state = createControllable<GridCell | null>({
@@ -1865,6 +1914,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   });
   private drag: DragController | null = null;
   private readonly draggables = new Map<string, () => void>();
+  private readonly draggableNodes = new Map<string, HTMLElement>();
 
   /* ── Expansion ──────────────────────────────────────────────────────── */
   private readonly expandedSet = computed(() => new Set(this.expanded()));
@@ -2403,6 +2453,12 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
 
   private wireDrag() {
     const element = this.host.nativeElement;
+    /* One container for the whole header row: the three pin zones share the
+       row's box, and three containers registered over the same element
+       claimed the pointer in turn — the last one, an empty end zone, took
+       every drop as its root. The zone is enforced at the drop instead: a
+       column never leaves its zone, so a target past the zone's edge lands on
+       the edge. */
     const controller = createDragController({
       document: element.ownerDocument,
       preview: false,
@@ -2410,9 +2466,10 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       onDrop: ({ items, target, reason, event }) => {
         if (target.kind !== 'between') return;
         const columnId = items[0]!;
-        const zone = zoneOf(this.resolved(), columnId);
-        const from = zone.indexOf(columnId);
-        const to = target.index > from ? target.index - 1 : target.index;
+        const list = this.resolved();
+        const zone = zoneOf(list, columnId);
+        const to = zoneIndex(list, zone, columnId, target.index);
+        if (to === null) return;
         this.requestState(
           withColumnMoved(this.effectiveState(), columnId, to, zone),
           'order',
@@ -2421,23 +2478,19 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         );
       },
     });
-    const zoneItems = (zone: 'start' | 'middle' | 'end') => () =>
-      this.resolved()
-        .filter((column) => (zone === 'middle' ? column.pinned === null : column.pinned === zone))
-        .map((column) => column.id);
+    const allItems = () => this.resolved().map((column) => column.id);
     const headerOf = (columnId: string) =>
       element.querySelector(`[data-part="column-header"][data-column="${CSS.escape(columnId)}"]`);
-    for (const zone of ['start', 'middle', 'end'] as const) {
-      controller.registerContainer({
-        key: zone,
-        items: zoneItems(zone),
-        orientation: 'horizontal',
-        element: () => element.querySelector('[data-part="header-row"]:last-of-type'),
-        itemElement: headerOf,
-        label: () => zone,
-        itemLabel: (columnId) => this.labelOf(columnId),
-      });
-    }
+    controller.registerContainer({
+      key: 'columns',
+      items: allItems,
+      orientation: 'horizontal',
+      element: () =>
+        element.querySelector('[data-part="head"] > [data-part="header-row"]:last-of-type'),
+      itemElement: headerOf,
+      label: () => 'columns',
+      itemLabel: (columnId) => this.labelOf(columnId),
+    });
     let wasDragging = false;
     controller.subscribe((state) => {
       if (state.status !== 'dragging') {
@@ -2449,27 +2502,37 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         return;
       }
       wasDragging = true;
+      const dragging = state.items[0] ?? null;
       const target = state.target && state.target.kind === 'between' ? state.target : null;
       let offset: number | null = null;
       let over: string | null = null;
-      if (target) {
-        const zoneList = zoneItems(target.container as 'start' | 'middle' | 'end')();
+      if (target && dragging) {
+        const list = this.resolved();
+        const zone = zoneOf(list, dragging);
+        const first = list.find((column) => column.id === zone[0]);
+        const last = list.find((column) => column.id === zone[zone.length - 1]);
+        /* The indicator is drawn where the drop would land: inside the zone. */
+        const boundary = Math.max(
+          first ? first.index - 1 : 0,
+          Math.min(last ? last.index : list.length, target.index),
+        );
         const scroller = this.scrollRef()?.nativeElement;
-        const first = zoneList[Math.min(target.index, zoneList.length - 1)];
-        const header = first ? headerOf(first) : null;
+        const ids = allItems();
+        const atEnd = boundary >= ids.length;
+        const anchor = ids[atEnd ? ids.length - 1 : boundary];
+        const header = anchor ? headerOf(anchor) : null;
         if (header && scroller) {
           const box = header.getBoundingClientRect();
           const origin = scroller.getBoundingClientRect();
-          const atEnd = target.index >= zoneList.length;
           const rtl = getComputedStyle(scroller).direction === 'rtl';
           const edge = atEnd !== rtl ? box.right : box.left;
           offset = rtl
             ? origin.right - edge + scroller.scrollLeft
             : edge - origin.left + scroller.scrollLeft;
-          over = zoneList[target.index] ?? null;
+          over = ids[boundary] ?? null;
         }
       }
-      this.dragState.set({ dragging: state.items[0] ?? null, target: over, offset });
+      this.dragState.set({ dragging, target: over, offset });
     });
     this.drag = controller;
     this.attachDraggables();
@@ -2485,23 +2548,25 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       );
       if (!node || !column.reorderable) continue;
       seen.add(column.id);
+      /* A node already attached stays attached: detaching it between two
+         renders would throw away a press in progress. */
       const previous = this.draggables.get(column.id);
-      if (previous && (node as HTMLElement & { __slDrag?: string }).__slDrag === column.pinned)
-        continue;
+      if (previous && this.draggableNodes.get(column.id) === node) continue;
       previous?.();
       const detach = controller.attachDraggable(node, {
-        container: column.pinned ?? 'middle',
+        container: 'columns',
         key: column.id,
         handle: () => node,
         distance: 6,
       });
-      (node as HTMLElement & { __slDrag?: string | null }).__slDrag = column.pinned;
+      this.draggableNodes.set(column.id, node);
       this.draggables.set(column.id, detach);
     }
     for (const [columnId, detach] of this.draggables) {
       if (!seen.has(columnId)) {
         detach();
         this.draggables.delete(columnId);
+        this.draggableNodes.delete(columnId);
       }
     }
   }
@@ -2810,7 +2875,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     if (
       insideWidget &&
       (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End') &&
-      target.matches('input, textarea')
+      target.matches('input:not([type="checkbox"]):not([type="radio"]), textarea')
     ) {
       return;
     }

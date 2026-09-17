@@ -70,6 +70,8 @@ export interface DataGridInternal<Row> {
 
   /* cursor */
   readonly current: GridCell | null;
+  /** The one cell in the tab sequence: the current one, or the header's first. */
+  readonly tabStop: GridCell;
   readonly focused: boolean;
   readonly setCurrent: (cell: GridCell, reason: DataGridReason, source?: unknown) => void;
 

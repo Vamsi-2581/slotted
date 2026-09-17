@@ -566,6 +566,7 @@ class ShipmentsPage {
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
+  manageable
   (manageColumns)="manager.set(true)"
 />`,
     }),
@@ -958,6 +959,13 @@ const api = apiRows([
     'A double press or Enter on a text cell emits activate with the row.',
   ],
   ['filterRow', 'boolean', 'false', 'sl-data-grid', 'The row of operands under the header.'],
+  [
+    'manageable',
+    'boolean',
+    'false',
+    'sl-data-grid',
+    'Draws Manage columns in the column menu, for an application that answers manageColumns with its column-manager.',
+  ],
   [
     'filterDebounce',
     'number',

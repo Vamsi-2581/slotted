@@ -25,7 +25,6 @@ interface BodyProps<Row> {
   firstIndex: number;
   headerRowCount: number;
   bodyStyle: CSSProperties | undefined;
-  empty: ReactNode;
   measureRow: ((index: number, node: HTMLElement | null) => void) | undefined;
   pinnedRows: readonly string[];
 }
@@ -33,7 +32,6 @@ interface BodyProps<Row> {
 export function DataGridBody<Row>({
   allNodes,
   bodyStyle,
-  empty,
   firstIndex,
   headerRowCount,
   measureRow,
@@ -49,11 +47,6 @@ export function DataGridBody<Row>({
 
   return (
     <div data-part="body" role="rowgroup" style={bodyStyle}>
-      {empty !== null ? (
-        <div data-part="empty" style={{ '--slotted-data-grid-column': '1 / -1' } as CSSProperties}>
-          {empty}
-        </div>
-      ) : null}
       {[...nodes, ...extra].map((node, offset) => {
         const index = firstIndex + offset;
         const rowIndex = headerRowCount + 1 + (node.kind === 'row' ? node.index : index);
@@ -71,6 +64,17 @@ export function DataGridBody<Row>({
       })}
     </div>
   );
+}
+
+/**
+ * The result-state for no rows, no results or an error. A sibling of the
+ * body rather than a child of it: a body with nothing in it is only as wide
+ * as the message, and the message could not stay in view while the header's
+ * columns scrolled sideways; against the scroller's own width it sticks to
+ * the start and stands in the middle of what the reader sees.
+ */
+export function DataGridEmpty({ children }: { children: ReactNode }) {
+  return <div data-part="empty">{children}</div>;
 }
 
 interface RowProps<Row> {

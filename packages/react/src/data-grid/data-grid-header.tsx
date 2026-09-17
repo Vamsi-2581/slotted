@@ -1,6 +1,7 @@
 import {
   FILTER_ROW,
   HEADER_ROW,
+  sameCell,
   type GridColumnGroup,
   type ResolvedGridColumn,
 } from '@slotted/core/grid';
@@ -162,7 +163,7 @@ function SelectAllCell() {
       data-part="selection"
       role="gridcell"
       style={{ '--slotted-data-grid-column': '1' } as CSSProperties}
-      tabIndex={current ? 0 : -1}
+      tabIndex={current || sameCell(cell, grid.tabStop) ? 0 : -1}
       onFocus={() => grid.onCellFocus(cell)}
       onKeyDown={(event) => grid.onCellKeyDown(event, cell)}
       onPointerDown={(event) => grid.onCellPointerDown(event, cell)}
@@ -193,13 +194,22 @@ function ColumnHeader<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
   const multiSort = grid.query.sort.length > 1;
   const menuOpen = grid.menuOpen === column.id;
   const attachDraggable = grid.attachDraggable;
-  const attach = useCallback(
-    (node: HTMLDivElement | null, anchor: (node: HTMLElement | null) => void) => {
-      anchor(node);
-      attachDraggable(node, column.id);
-    },
-    [attachDraggable, column.id],
-  );
+  /* One ref for the node's life. A ref callback written inline is a new
+     function every render, and React answers a new ref by calling the old one
+     with null and the new one with the node: the header was detached from the
+     drag controller and re-attached on every render — including the render
+     the press itself caused, which threw the press away before it could
+     travel. Read live: no header could be dragged with a pointer. */
+  const anchorRef = useRef<(node: HTMLElement | null) => void>(() => undefined);
+  const nodeRef = useRef<HTMLDivElement | null>(null);
+  const setNode = useCallback((node: HTMLDivElement | null) => {
+    nodeRef.current = node;
+    anchorRef.current(node);
+  }, []);
+  useEffect(() => {
+    attachDraggable(nodeRef.current, column.id);
+    return () => attachDraggable(null, column.id);
+  }, [attachDraggable, column.id]);
 
   const content = grid.renderHeaderContent
     ? grid.renderHeaderContent({
@@ -213,45 +223,50 @@ function ColumnHeader<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
 
   return (
     <DataGridFilterPanel<Row> column={column}>
-      {(anchor) => (
-        <div
-          {...columnAttributes(column)}
-          aria-colindex={index}
-          aria-sort={sort && sort.index === 1 ? sort.direction : undefined}
-          data-part="column-header"
-          role="columnheader"
-          style={cellStyle(column, index)}
-          tabIndex={current ? 0 : -1}
-          onClick={(event) => grid.onCellClick(event, cell)}
-          onFocus={(event) => {
-            if (event.target === event.currentTarget) grid.onCellFocus(cell);
-          }}
-          onKeyDown={(event) => grid.onCellKeyDown(event, cell)}
-          onPointerDown={(event) => grid.onCellPointerDown(event, cell)}
-          ref={(node) => attach(node, anchor)}
-          {...(column.sortable ? { 'data-sortable': '' } : {})}
-          {...(sort ? { 'data-sorted': sort.direction } : {})}
-          {...(filtered ? { 'data-filtered': '' } : {})}
-          {...(current ? { 'data-current': '' } : {})}
-          {...(grid.dragging === column.id ? { 'data-dragging': '' } : {})}
-          {...(grid.dropTarget === column.id ? { 'data-drop-target': '' } : {})}
-          {...(grid.resizing === column.id ? { 'data-resizing': '' } : {})}
-        >
-          <span>{content}</span>
-          {sort ? (
-            <span
-              aria-hidden
-              data-part="sort"
-              {...(multiSort ? { 'data-index': String(sort.index) } : {})}
-            />
-          ) : null}
-          <span data-part="column-actions">
-            {column.filterable ? <FilterTrigger<Row> column={column} filtered={filtered} /> : null}
-            <ColumnMenu<Row> column={column} open={menuOpen} />
-          </span>
-          {column.resizable ? <Resizer<Row> column={column} /> : null}
-        </div>
-      )}
+      {(anchor) => {
+        anchorRef.current = anchor;
+        return (
+          <div
+            {...columnAttributes(column)}
+            aria-colindex={index}
+            aria-sort={sort && sort.index === 1 ? sort.direction : undefined}
+            data-part="column-header"
+            role="columnheader"
+            style={cellStyle(column, index)}
+            tabIndex={current || sameCell(cell, grid.tabStop) ? 0 : -1}
+            onClick={(event) => grid.onCellClick(event, cell)}
+            onFocus={(event) => {
+              if (event.target === event.currentTarget) grid.onCellFocus(cell);
+            }}
+            onKeyDown={(event) => grid.onCellKeyDown(event, cell)}
+            onPointerDown={(event) => grid.onCellPointerDown(event, cell)}
+            ref={setNode}
+            {...(column.sortable ? { 'data-sortable': '' } : {})}
+            {...(sort ? { 'data-sorted': sort.direction } : {})}
+            {...(filtered ? { 'data-filtered': '' } : {})}
+            {...(current ? { 'data-current': '' } : {})}
+            {...(grid.dragging === column.id ? { 'data-dragging': '' } : {})}
+            {...(grid.dropTarget === column.id ? { 'data-drop-target': '' } : {})}
+            {...(grid.resizing === column.id ? { 'data-resizing': '' } : {})}
+          >
+            <span>{content}</span>
+            {sort ? (
+              <span
+                aria-hidden
+                data-part="sort"
+                {...(multiSort ? { 'data-index': String(sort.index) } : {})}
+              />
+            ) : null}
+            <span data-part="column-actions">
+              {column.filterable ? (
+                <FilterTrigger<Row> column={column} filtered={filtered} />
+              ) : null}
+              <ColumnMenu<Row> column={column} open={menuOpen} />
+            </span>
+            {column.resizable ? <Resizer<Row> column={column} /> : null}
+          </div>
+        );
+      }}
     </DataGridFilterPanel>
   );
 }

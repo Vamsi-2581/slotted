@@ -292,6 +292,7 @@ function Operand<Row>({
           size="sm"
           value={chosen}
           variant={variant}
+          width="content"
           {...(locale === undefined ? {} : { locale })}
         >
           <MultiSelectControl

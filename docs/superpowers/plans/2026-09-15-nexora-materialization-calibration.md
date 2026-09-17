@@ -83,7 +83,7 @@ tools/nexora-benchmark/reports/materialization-decision.md generated architectur
 - Produces: `ScaleProfile`, `ScaleCounts`, `StrategyName`, `ReadinessState`, `ProbeName`, `ProbeResult`, `StrategyMetrics`, `CalibrationRun`, and `CalibrationBudget`.
 - Produces: `SCALE_PROFILES.smoke`, `SCALE_PROFILES.canonical`, and `SCALE_PROFILES.enterprise` as deeply readonly values.
 
-- [ ] **Step 1: Create the private package configuration**
+- [x] **Step 1: Create the private package configuration**
 
 Create `tools/nexora-benchmark/package.json` with these exact scripts and versions:
 
@@ -132,7 +132,7 @@ Run: `pnpm install`
 
 Expected: the workspace package resolves and `pnpm-lock.yaml` records only the declared exact dependencies.
 
-- [ ] **Step 2: Write the failing profile tests**
+- [x] **Step 2: Write the failing profile tests**
 
 Create `src/profiles.test.ts`:
 
@@ -176,13 +176,13 @@ describe('Nexora calibration scale profiles', () => {
 });
 ```
 
-- [ ] **Step 3: Run the tests and observe the missing module failure**
+- [x] **Step 3: Run the tests and observe the missing module failure**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/profiles.test.ts`
 
 Expected: FAIL because `./profiles` does not exist.
 
-- [ ] **Step 4: Implement the contracts and profiles**
+- [x] **Step 4: Implement the contracts and profiles**
 
 Define the contracts with exact string unions and readonly fields:
 
@@ -228,7 +228,7 @@ export interface ProbeResult {
 
 Use `nexora-calibration-v1` and `2026-09-15T15:00:00.000Z` for every profile. Freeze the top-level profile and nested counts objects.
 
-- [ ] **Step 5: Run focused and package checks**
+- [x] **Step 5: Run focused and package checks**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/profiles.test.ts`
 
@@ -238,7 +238,7 @@ Run: `pnpm --filter @slotted/nexora-benchmark typecheck`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit the package foundation**
+- [x] **Step 6: Commit the package foundation**
 
 ```bash
 git add package.json pnpm-lock.yaml tools/nexora-benchmark
@@ -261,7 +261,7 @@ git commit -m "test(nexora): establish scale calibration profiles"
 - `GenerationSummary` contains the exact emitted count per `RecordTable`, the maximum emitted batch size, and the first/last timestamp.
 - `generateCalibrationBatches` returns `Generator<RecordBatch, GenerationSummary>` and never retains all generated records.
 
-- [ ] **Step 1: Write failing tests for determinism, counts, relationships, and chronology**
+- [x] **Step 1: Write failing tests for determinism, counts, relationships, and chronology**
 
 The tests must assert all of these behaviors:
 
@@ -297,19 +297,19 @@ Use a smoke profile of 64 customers, 128 contacts, 32 suppliers, 256 SKUs, 400 o
 
 Define `collectSmoke`, `firstIds`, `withSalesOrders`, `countTables`, and `validateRelationshipsAndChronology` as local test helpers in `generate.test.ts`. They must consume the public generator rather than reaching into generator internals; `withSalesOrders` returns a copied frozen profile with only `salesOrders` changed.
 
-- [ ] **Step 2: Run the generator test and verify red state**
+- [x] **Step 2: Run the generator test and verify red state**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/generate.test.ts`
 
 Expected: FAIL because the generator modules do not exist.
 
-- [ ] **Step 3: Implement a namespaced PRNG and representative record union**
+- [x] **Step 3: Implement a namespaced PRNG and representative record union**
 
 Implement a stable 64-bit seed hash plus SplitMix64 stream using `bigint`. Expose only `nextFloat()`, `integer(min, max)`, `pick(values)`, and `fork(namespace)`. `fork` hashes the root seed and full namespace rather than consuming the parent stream.
 
 Define specific record interfaces for customer, contact, supplier, SKU, sales order, sales order line, stock movement, purchase order, invoice, payment, and support ticket. Each interface includes realistic indexed fields, foreign keys, ISO timestamps, status, monetary/quantity fields, and enough synthetic text to approximate final serialized record size. `CalibrationRecord` is their discriminated union; do not replace it with a generic key/value row.
 
-- [ ] **Step 4: Implement causal streaming generation**
+- [x] **Step 4: Implement causal streaming generation**
 
 Generate tables in this order:
 
@@ -331,7 +331,7 @@ export const GENERATION_ORDER = [
 
 Assign each record a stable namespace-derived ID and a monthly partition key. Derive child timestamps at or after their parent timestamp and no later than `profile.demoTime`. Use deterministic weighted statuses and skewed references so a small stable cohort of customers and SKUs receives most transactions. The generator is a calibration model, so document every approximation in `records.ts` and do not export it as Nexora product data.
 
-- [ ] **Step 5: Run focused tests and typecheck**
+- [x] **Step 5: Run focused tests and typecheck**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/generate.test.ts`
 
@@ -341,7 +341,7 @@ Run: `pnpm --filter @slotted/nexora-benchmark typecheck`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit deterministic generation**
+- [x] **Step 6: Commit deterministic generation**
 
 ```bash
 git add tools/nexora-benchmark/src
@@ -394,7 +394,7 @@ export interface ReadinessSnapshot {
 }
 ```
 
-- [ ] **Step 1: Write a parameterized failing contract suite**
+- [x] **Step 1: Write a parameterized failing contract suite**
 
 Run every strategy against a fresh fake IndexedDB database and require:
 
@@ -420,13 +420,13 @@ Add explicit tests for monotonic readiness, bounded batch size, stable paginatio
 
 Define `prepareSmoke`, `waitForComplete`, and `referenceDigest` as local contract-suite helpers. `referenceDigest` is calculated from a completed `full` smoke session once per test run; it is not a handwritten digest and is not imported by implementation code.
 
-- [ ] **Step 2: Run the strategy contract and verify red state**
+- [x] **Step 2: Run the strategy contract and verify red state**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/strategies/contract.test.ts`
 
 Expected: FAIL because the strategy factory and query contract do not exist.
 
-- [ ] **Step 3: Implement the Dexie calibration schema and query probes**
+- [x] **Step 3: Implement the Dexie calibration schema and query probes**
 
 Create one table per representative record family plus metadata and partitions. Index stable IDs, partition keys, parent foreign keys, common status/filter keys, and chronological sort keys. Generate a unique database name from strategy, profile, browser-run ID, and sample number.
 
@@ -440,7 +440,7 @@ Implement exactly five probes:
 
 `correctnessDigest` hashes sorted probe outputs, exact table counts, and representative first/middle/last IDs. It does not hash physical storage order.
 
-- [ ] **Step 4: Implement the four candidates**
+- [x] **Step 4: Implement the four candidates**
 
 - `full` collects each complete table then writes it in one declared transaction;
 - `partitioned` consumes bounded generator batches and commits monthly partitions independently;
@@ -449,7 +449,7 @@ Implement exactly five probes:
 
 Every candidate returns `operational` and `complete` only when the readiness definitions are true. Background work is cancellable through `dispose` and cannot continue writing after disposal.
 
-- [ ] **Step 5: Prove shared correctness**
+- [x] **Step 5: Prove shared correctness**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/strategies/contract.test.ts`
 
@@ -459,7 +459,7 @@ Run: `pnpm --filter @slotted/nexora-benchmark test`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit storage candidates**
+- [x] **Step 6: Commit storage candidates**
 
 ```bash
 git add tools/nexora-benchmark/src
@@ -484,7 +484,7 @@ git commit -m "feat(nexora): compare materialization strategies"
 - Produces: `CalibrationWorkerRequest` and `CalibrationWorkerEvent` discriminated unions.
 - Produces: pure `createRunState(runId)` and `reduceWorkerEvent(state, event)` functions used by the browser entry and its unit tests.
 
-- [ ] **Step 1: Write failing protocol and readiness tests**
+- [x] **Step 1: Write failing protocol and readiness tests**
 
 Test exact message correlation, invalid request rejection, progress monotonicity, worker cancellation, and failure serialization:
 
@@ -497,13 +497,13 @@ it('rejects events belonging to another run', () => {
 });
 ```
 
-- [ ] **Step 2: Run the browser protocol test and verify red state**
+- [x] **Step 2: Run the browser protocol test and verify red state**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/browser/entry.test.ts`
 
 Expected: FAIL because the browser protocol is absent.
 
-- [ ] **Step 3: Implement the worker protocol and scenario entry**
+- [x] **Step 3: Implement the worker protocol and scenario entry**
 
 The request contains scenario ID, run ID, profile ID, strategy, sample number, and explicit timeout. The worker emits progress, readiness, per-probe metrics, storage estimate, digest, completion, or a serialized failure. Reject any scenario ID other than `nexora-materialization-calibration-v1`.
 
@@ -527,7 +527,7 @@ Extend the package's `typecheck` script at this point:
 }
 ```
 
-- [ ] **Step 4: Run tests, typechecks, and bundle build**
+- [x] **Step 4: Run tests, typechecks, and bundle build**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run src/browser/entry.test.ts`
 
@@ -541,7 +541,7 @@ Run: `pnpm --filter @slotted/nexora-benchmark build`
 
 Expected: PASS and a Vite bundle under `tools/nexora-benchmark/dist`.
 
-- [ ] **Step 5: Commit the browser laboratory**
+- [x] **Step 5: Commit the browser laboratory**
 
 ```bash
 git add tools/nexora-benchmark
@@ -562,7 +562,7 @@ git commit -m "feat(nexora): run calibration work off main thread"
 - Produces: `aggregateRuns`, `qualifyStrategy`, `recommendMaterialization`, `deriveDurationBudget`, and `deriveBudgets` from `report.mjs`.
 - Produces: CLI modes `smoke`, `record`, and `verify`.
 
-- [ ] **Step 1: Write failing aggregation and recommendation tests**
+- [x] **Step 1: Write failing aggregation and recommendation tests**
 
 Cover median, nearest-rank p95, correctness rejection, main-thread rejection, deterministic ranking, and 25% regression headroom:
 
@@ -584,13 +584,13 @@ Use this ranking priority after hard qualification: correctness, readiness truth
 
 Define `strategyAggregate` as a local test fixture builder that starts from one complete, digest-matching, 10 ms aggregate and applies the supplied field overrides. Production code must not export it.
 
-- [ ] **Step 2: Run report tests and verify red state**
+- [x] **Step 2: Run report tests and verify red state**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run scripts/report.test.mjs`
 
 Expected: FAIL because `report.mjs` does not exist.
 
-- [ ] **Step 3: Implement report aggregation and qualification**
+- [x] **Step 3: Implement report aggregation and qualification**
 
 Hard-reject a strategy when:
 
@@ -601,7 +601,7 @@ Hard-reject a strategy when:
 
 For qualified strategies, calculate per-browser median and nearest-rank p95. `deriveBudgets` takes the worse p95 across recorded engines, multiplies by 1.25, and rounds duration values upward to 10 ms and byte values upward to 1 MiB. Environment metadata records OS, architecture, CPU model, logical cores, memory, Node, Playwright, browser versions, profile, seed, sample count, and git commit.
 
-- [ ] **Step 4: Implement the Playwright runner**
+- [x] **Step 4: Implement the Playwright runner**
 
 `calibrate.mjs` must:
 
@@ -616,7 +616,7 @@ For qualified strategies, calculate per-browser median and nearest-rank p95. `de
 9. compare with checked-in budgets without rewriting files in `verify` mode;
 10. run only Chromium, smoke profile, and one sample in `smoke` mode.
 
-- [ ] **Step 5: Run report tests and CLI argument tests**
+- [x] **Step 5: Run report tests and CLI argument tests**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec vitest run scripts/report.test.mjs`
 
@@ -626,7 +626,7 @@ Run: `pnpm --filter @slotted/nexora-benchmark typecheck`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit measurement and reporting**
+- [x] **Step 6: Commit measurement and reporting**
 
 ```bash
 git add tools/nexora-benchmark/scripts tools/nexora-benchmark/package.json
@@ -647,35 +647,35 @@ git commit -m "feat(nexora): report scale calibration evidence"
 - Consumes: completed benchmark runner and report logic.
 - Produces: recorded evidence used by the next Nexora data/persistence plan.
 
-- [ ] **Step 1: Install the three pinned Playwright engines**
+- [x] **Step 1: Install the three pinned Playwright engines**
 
 Run: `pnpm --filter @slotted/nexora-benchmark exec playwright install chromium firefox webkit`
 
 Expected: Chromium, Firefox, and WebKit for Playwright 1.63.0 install successfully.
 
-- [ ] **Step 2: Run a smoke scenario before the expensive calibration**
+- [x] **Step 2: Run a smoke scenario before the expensive calibration**
 
 Run: `pnpm benchmark:nexora:smoke`
 
 Expected: PASS for all four strategies in Chromium, with identical correctness digests and no batch or heartbeat gap above 50 ms.
 
-- [ ] **Step 3: Record canonical and Enterprise evidence**
+- [x] **Step 3: Record canonical and Enterprise evidence**
 
 Run: `pnpm benchmark:nexora:record`
 
 Expected: PASS after three clean samples per strategy, profile, and engine. The command creates the three declared evidence files. The Markdown report names qualified and rejected candidates, includes rejection evidence, selects the highest-ranked qualified strategy or composition, and records exact partition/batch parameters for the next persistence plan.
 
-- [ ] **Step 4: Prove the recorded budgets are enforceable without mutation**
+- [x] **Step 4: Prove the recorded budgets are enforceable without mutation**
 
 Run: `pnpm benchmark:nexora:verify`
 
 Expected: PASS against `budgets/reference.json`; `git status --short` shows no benchmark output changes from verify mode.
 
-- [ ] **Step 5: Add the dedicated workflow**
+- [x] **Step 5: Add the dedicated workflow**
 
 Create `.github/workflows/nexora-benchmark.yml` with `workflow_dispatch` only. Reuse the repository's checkout, pnpm, and Node setup action majors. Install dependencies with `pnpm install --frozen-lockfile`, install all three Playwright engines with `--with-deps`, run `pnpm benchmark:nexora:verify`, and append `reports/materialization-decision.md` to `$GITHUB_STEP_SUMMARY`. Do not add this expensive run to the normal `pull_request` CI job.
 
-- [ ] **Step 6: Run the tool and repository verification gates**
+- [x] **Step 6: Run the tool and repository verification gates**
 
 Run: `pnpm --filter @slotted/nexora-benchmark verify`
 
@@ -685,7 +685,7 @@ Run: `pnpm check:full`
 
 Expected: PASS. This full gate is required because the task adds a workspace tool, root scripts, lockfile entries, and a workflow.
 
-- [ ] **Step 7: Commit the calibration evidence and workflow**
+- [x] **Step 7: Commit the calibration evidence and workflow**
 
 ```bash
 git add .github/workflows/nexora-benchmark.yml tools/nexora-benchmark/baselines tools/nexora-benchmark/budgets tools/nexora-benchmark/reports

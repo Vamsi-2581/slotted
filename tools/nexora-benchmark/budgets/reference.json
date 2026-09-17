@@ -1,0 +1,40 @@
+{
+  "scenario": "nexora-materialization-calibration-v1",
+  "sourceCommit": "866f0733d229d180a143be93c37b1f6525e85778",
+  "benchmarkSourceDirty": true,
+  "recommendation": "on-demand",
+  "budgets": [
+    {
+      "profile": "canonical",
+      "strategy": "on-demand",
+      "operationalReadyMs": 310,
+      "completeReadyMs": 310,
+      "maxWorkerBatchMs": 40,
+      "maxMainThreadGapMs": 50,
+      "storageBytes": 1048576,
+      "probeP95Ms": {
+        "orders-page": 60,
+        "customer-360": 20520,
+        "inventory-ledger": 8930,
+        "finance-summary": 16760,
+        "historical-point-lookup": 30
+      }
+    },
+    {
+      "profile": "enterprise",
+      "strategy": "on-demand",
+      "operationalReadyMs": 140,
+      "completeReadyMs": 140,
+      "maxWorkerBatchMs": 30,
+      "maxMainThreadGapMs": 60,
+      "storageBytes": 1048576,
+      "probeP95Ms": {
+        "orders-page": 40,
+        "customer-360": 100660,
+        "inventory-ledger": 45610,
+        "finance-summary": 83410,
+        "historical-point-lookup": 20
+      }
+    }
+  ]
+}

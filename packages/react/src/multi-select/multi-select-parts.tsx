@@ -345,6 +345,10 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
               onChange={compose(nativeProps.onChange, onChange)}
               onKeyDown={compose(nativeProps.onKeyDown, onKeyDown)}
               onPaste={compose(nativeProps.onPaste, onPaste)}
+              /* The placeholder names what an empty control takes; beside a
+                 chosen value it is a second phrase on the line, and in a frame
+                 too narrow for a chip it was a sliver of a word. */
+              placeholder={multiSelect.value.length === 0 ? nativeProps.placeholder : undefined}
               readOnly={multiSelect.readOnly}
               ref={setInput}
               required={multiSelect.required && multiSelect.value.length === 0}

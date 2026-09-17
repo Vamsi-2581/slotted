@@ -232,7 +232,7 @@ const same = (a: readonly string[], b: readonly string[]) =>
             [disabled]="resolvedDisabled()"
             [readOnly]="resolvedReadOnly()"
             [required]="resolvedRequired() && value().length === 0"
-            [placeholder]="placeholder()"
+            [placeholder]="value().length === 0 ? placeholder() : ''"
             [attr.aria-expanded]="isOpen()"
             [attr.aria-controls]="isOpen() ? contentId : null"
             [attr.aria-activedescendant]="activeDescendant()"

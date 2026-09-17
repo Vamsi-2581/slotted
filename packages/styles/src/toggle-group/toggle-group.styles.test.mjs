@@ -19,16 +19,6 @@ const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
  */
 const dense = rules.replace(/\s+/g, '');
 
-/** Every selector in the sheet, one entry per comma-separated selector. */
-function selectors() {
-  return [...rules.matchAll(/(^|\})([^{}]+)\{/g)]
-    .map(([, , selector]) => selector.trim())
-    .filter((selector) => selector.length > 0 && !selector.startsWith('@'))
-    .flatMap((selector) => selector.split(','))
-    .map((selector) => selector.replace(/\s+/g, ' ').trim())
-    .filter((selector) => selector.length > 0);
-}
-
 test('paints every part the contract declares, and no part it does not', () => {
   const painted = new Set(
     [...rules.matchAll(/\[data-part=['"]([a-z-]+)['"]\]/g)].map(([, part]) => part),

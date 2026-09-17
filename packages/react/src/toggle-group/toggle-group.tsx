@@ -3,7 +3,6 @@ import '@slotted/styles/toggle-group/toggle-group.css';
 import { createRovingTabindex } from '@slotted/core/focus';
 import { createControllable } from '@slotted/core/state';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
 
 import { useToggleGroupDefaults } from './toggle-group-defaults';
 import type {

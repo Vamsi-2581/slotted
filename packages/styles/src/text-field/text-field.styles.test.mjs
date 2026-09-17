@@ -116,9 +116,11 @@ test('takes every step from the control scales rather than stating one', () => {
  */
 test('draws both buttons inside the frame and keeps the target minimum', () => {
   const frame = rule(root);
-  assert.match(frame, /--_action-size:var\(--slotted-text-field-action-size,min\(/);
-  assert.match(frame, /calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2/);
-  assert.match(frame, /calc\(var\(--_height\) - var\(--slotted-control-border-width,1px\) \* 2 - /);
+  assert.match(frame, /--_inner-size:var\(--slotted-control-inner-size-md,24px\)/);
+  assert.match(
+    frame,
+    /--_action-size:var\(--slotted-text-field-action-size,min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
+  );
 
   const action = rule(`${ui}>[data-part='clear'],${ui}>[data-part='reveal']`);
   assert.match(action, /inline-size:var\(--_action-size\)/);

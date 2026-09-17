@@ -329,8 +329,8 @@ export class SlActionBar {
       const trigger = this.trigger();
       if (container === null || !this.ready() || this.stacked()) return;
 
-      const sync = () => {
-        const collapsed = new Set(handle.collapsed());
+      const sync = (collapsedUnits: readonly HTMLElement[]) => {
+        const collapsed = new Set(collapsedUnits);
         const held = [...container.children].filter(
           (child): child is HTMLElement =>
             child instanceof HTMLElement &&
@@ -357,7 +357,7 @@ export class SlActionBar {
         collapsible: (unit) => priorityOf(unit) !== 'pinned',
         divides: (unit) => unit.getAttribute('data-part') === 'separator',
         onChange: (units) => {
-          sync();
+          sync(units);
           this.overflowChange.emit(
             units.filter((unit) => unit.hasAttribute(ACTION_BAR_UNIT_ATTRIBUTE)).length,
           );
@@ -372,7 +372,7 @@ export class SlActionBar {
       });
 
       this.collapse = handle;
-      sync();
+      sync(handle.collapsed());
 
       /**
        * An action arriving or leaving invalidates the measurement — a bar that
@@ -381,7 +381,7 @@ export class SlActionBar {
        */
       const observer = new MutationObserver(() => {
         handle.refresh();
-        sync();
+        sync(handle.collapsed());
       });
       observer.observe(container, { childList: true, subtree: true });
 

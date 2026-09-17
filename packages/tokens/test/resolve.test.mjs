@@ -23,7 +23,7 @@ const theme = JSON.parse(
  * framed control gained a shadow, so `none` is no longer what it resolves to.
  */
 const UNCHANGED = {
-  '--slotted-control-font-family': 'ui-sans-serif, system-ui, sans-serif',
+  '--slotted-control-font-family': "'Geist Variable', ui-sans-serif, system-ui, sans-serif",
   '--slotted-control-font-weight': '600',
   '--slotted-control-line-height': '1',
   '--slotted-control-letter-spacing': '0',

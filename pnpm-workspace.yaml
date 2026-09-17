@@ -1,5 +1,6 @@
 packages:
   - apps/*
+  - apps/demos/*
   - packages/*
   - packages/themes/*
   - tools/*

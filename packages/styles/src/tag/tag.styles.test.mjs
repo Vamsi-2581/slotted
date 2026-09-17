@@ -128,7 +128,7 @@ test('gives the remove control its target on both axes', () => {
   );
   assert.match(
     rule(`${ui} [data-part='remove']`),
-    /inline-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,
+    /inline-size:max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
   );
   assert.match(rule(`${ui} [data-part='remove']`), /position:relative/);
   const halo = rule(`${ui} [data-part='remove']::after`);

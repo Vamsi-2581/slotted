@@ -73,16 +73,16 @@ test('truncates against the trail rather than against a measure it chose', () =>
  * exception to rule 3 of `docs/token-foundation.md` that this control used to
  * take is closed (BC2). The box still keeps the trail's own type, because
  * `1lh` is the trail's line and that is what puts the control on the crumbs'
- * line (BC1). It is the control glyph plus a step of air wide (R2), and a real
- * target in both axes — the halo around the paint completes the minimum where
- * the line is shorter than it.
+ * line (BC1). It is the control glyph plus a step of air wide, capped at the
+ * inner-control size (R2), and a real target in both axes — the halo around
+ * the paint completes the minimum where the line is shorter than it.
  */
 test('sets the ellipsis on the crumbs’ line, with a whole target and a glyph', () => {
   const ellipsis = normalized.slice(normalized.indexOf("[data-part='ellipsis']{"));
   assert.ok(ellipsis.includes('block-size:1lh;'));
   assert.ok(
     ellipsis.includes(
-      'inline-size:max(var(--slotted-target-min,24px),calc(var(--_icon-size)+2*var(--slotted-space-2,0.25rem)))',
+      'inline-size:max(var(--slotted-target-min,24px),min(calc(var(--_icon-size)+2*var(--slotted-space-2,0.25rem)),var(--_inner-size)))',
     ),
   );
   assert.ok(ellipsis.includes('font:inherit;'), 'the box keeps the trail’s own line');

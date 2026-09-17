@@ -148,14 +148,14 @@ test('scales its type and its dismiss glyph with density, through the control sc
 
 /**
  * R2 and WCAG 2.2 2.5.8. The dismiss control is an inner control, not a
- * button: its box is the glyph plus a step of air on each side, floored at
- * `--slotted-target-min` rather than at a control height — a literal here
+ * button: its box is the glyph plus a step of air on each side, capped at the
+ * inner-control size and floored at `--slotted-target-min` — a literal here
  * would be correct today and unhittable on a touch screen.
  */
 test('sizes the dismiss control from its glyph, floored at the target minimum', () => {
   assert.match(
     rule(root),
-    /--_dismiss-size:var\(--slotted-alert-dismiss-size,max\(var\(--slotted-target-min,24px\),calc\(var\(--_glyph-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)\)/,
+    /--_dismiss-size:var\(--slotted-alert-dismiss-size,max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_glyph-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)\)/,
   );
   const dismiss = rule(`${ui}>[data-part='dismiss']`);
   assert.match(dismiss, /block-size:var\(--_dismiss-size\)/);

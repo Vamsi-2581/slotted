@@ -177,18 +177,19 @@ test('holds hover and press back for a disabled control and for the selected tab
  * twenty-four WCAG 2.2 SC 2.5.8 asks for. The box around it is the target.
  */
 test('gives the two glyph controls the target their glyphs are too small to be', () => {
-  /* Both are inner controls (R2): the mark with a step of air around it, never
-     below the minimum target. The paging control is as tall as the row it
-     pages and that wide; the closing control is that square. */
+  /* Both are inner controls (R2): the mark with a step of air around it,
+     capped at the inner-control size and never below the minimum target. The
+     paging control is as tall as the row it pages and that wide; the closing
+     control is that square. */
   const scroll = rule(part('scroll'));
   assert.match(
     scroll,
-    /inline-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,
+    /inline-size:max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
   );
   assert.match(scroll, /min-block-size:var\(--_height\)/);
   assert.match(
     rule(ui),
-    /--_dismiss-size:max\(var\(--slotted-target-min,24px\),calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\)\)/,
+    /--_dismiss-size:max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
   );
   const dismiss = rule(part('dismiss'));
   assert.match(dismiss, /inline-size:var\(--_dismiss-size\)/);

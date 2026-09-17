@@ -113,12 +113,14 @@ describe('SlSection', () => {
 
     it('writes the header height on the root while sticky, and follows a resize', () => {
       const header = root().querySelector(':scope > [data-part="header"]') as HTMLElement;
-      Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 48 });
+      const bounds = vi
+        .spyOn(header, 'getBoundingClientRect')
+        .mockReturnValue({ height: 48 } as DOMRect);
       host.sticky.set(true);
       fixture.detectChanges();
       expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('48px');
 
-      Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 72 });
+      bounds.mockReturnValue({ height: 72 } as DOMRect);
       FakeResizeObserver.callbacks.at(-1)?.([], {} as ResizeObserver);
       expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('72px');
 

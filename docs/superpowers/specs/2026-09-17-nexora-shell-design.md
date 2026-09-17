@@ -1,25 +1,20 @@
 # Nexora Operations — Shell: desenho
 
 Fonte normativa do domínio: `docs/nexora-op-demo-domain.md` (referências `§n`
-abaixo). Este documento fixa o que a primeira fatia do produto constrói: os
-pacotes `@nexora/*` no recorte que o Shell exige e o Shell do cliente Angular.
+abaixo). Backend: `@slotted/demo-nexora-operations` (§2). Este documento fixa
+o Shell do cliente Angular sobre esse backend.
 
-Decisões que divergem do documento de domínio:
-
-- O cliente canónico desta fase é Angular 22 (§84 fixa React). O cliente React
-  entra depois como paridade em `apps/react`.
-- Papéis canónicos: 13, a lista do §55.5 (§75.1 escreve 12). A lista é
-  normativa; a contagem é corrigida.
-- `Read-only User` (§7) não é seeded: Auditor cobre o caso.
+Decisão que diverge do documento de domínio: o cliente canónico desta fase é
+Angular 22 (§84 fixa React). O cliente React entra depois como paridade em
+`apps/demos/nexora-react`.
 
 ## 1. Escopo
 
 Entra:
 
-- monorepo do produto em `apps/demos/nexora`;
-- `@nexora/domain`, `@nexora/data`, `@nexora/api` com identidade, autorização,
-  armazéns, notificações, tarefas, aprovações, pesquisa, sessão, cenários,
-  relógio, persistência e simulação de transporte;
+- a app Angular `@slotted/demo-nexora-angular` em `apps/demos/nexora-angular`,
+  membro do workspace da biblioteca, consumindo `@slotted/*` por tarball do
+  canal beta e o backend simulado por `workspace:*`;
 - Shell: banner, navegação, conteúdo, painel de demonstração, menu de
   utilizador, preferências, notificações, pesquisa e command palette, ecrã de
   sign-in, estados de espera, erro e acesso negado;
@@ -27,309 +22,117 @@ Entra:
   áreas ainda não construídas;
 - Dashboard mínimo: cabeçalho de página e os contadores da sessão.
 
-Não entra: qualquer módulo de negócio (CRM, Sales, …), o motor de aprovações
-completo (§79), idempotência de mutações (§73.9), IndexedDB com Dexie (adapter
-próprio, ver §4.4), analytics.
+Não entra: qualquer módulo de negócio (CRM, Sales, …), analytics, alterações
+ao backend simulado.
 
-## 2. Estrutura
+## 2. Backend
 
-```
-apps/demos/nexora/
-  pnpm-workspace.yaml          packages/*, apps/*
-  package.json                 scripts: build, test, typecheck, start
-  packages/domain/             @nexora/domain
-  packages/data/               @nexora/data
-  packages/api/                @nexora/api
-  apps/angular/                @nexora/angular   (a app atual, movida de apps/demos/nexora-operations)
-```
+O backend é `@slotted/demo-nexora-operations` (`apps/demos/nexora-operations`,
+vindo da branch `feat/nexora-materialization-calibration`): domínio, seed,
+projeções, comandos, aprovações, cenários e latência do documento de domínio,
+com API tipada in-process — `createNexoraBackend({ scale, latency, persona,
+scenario })`. O Shell consome desta superfície:
 
-Dependência: `domain ← data ← api ← angular`. `domain` não importa browser,
-Angular, `@slotted/*` nem `data`. `@slotted/*` continua a entrar em
-`apps/angular` por tarball de `apps/demos/.registry`; `@nexora/*` entram por
-`workspace:*`. Os três pacotes são TypeScript puro compilados por `tsc`
-(`dist/` com `exports` por subpath), testados com `vitest` em Node.
-De `apps/angular`, o registo é `../../../.registry`.
+| Superfície | Uso no Shell |
+| --- | --- |
+| `session.get()` → `SessionInfo { user, roles, teams, permissions, warehouseIds: string[] \| 'all', organization, demo: { scenarioId, demoClock, today, … }, personas, unreadNotifications, pendingApprovals }` | sessão, gating por permissão, contagens do banner, personas do sign-in |
+| `inventory.warehouses()` | nomes dos armazéns do contexto do banner |
+| `notifications.list({ includeArchived, page, pageSize })`, `notifications.markRead(id)`, `notifications.markAllRead()`, `notifications.archive(id)` | popover e página de notificações |
+| `tasks.list({ mine: true })` | popover de tarefas |
+| `approvals.list()` | popover de aprovações |
+| `search(q)` → `{ query, groups: { type, hits }[] }` | command palette |
+| `activity.list()` | Dashboard |
+| `demo.setPersona(keyOrUserId)`, `demo.setScenario(id)`, `demo.reset(scenario?)`, `demo.advanceClock(hours)`, `demo.setLatency('none' \| 'normal' \| 'degraded')`, `demo.scenarios()` | painel de demonstração |
 
-## 3. `@nexora/domain`
+Erros: `NexoraApiError { status, code, retryable, correlationId, fieldErrors? }`.
 
-Subpaths: `common`, `identity`, `warehouses`, `activity`, `approvals`,
-`search`, `session`, `permissions`.
+Propriedades do backend que o Shell absorve sem o alterar:
 
-### 3.1 `common`
+- estado em memória: uma recarga da página recomeça do seed; a persona ativa,
+  o cenário e as preferências de aparência são guardados pelo cliente em
+  `localStorage` e reaplicados no arranque (`createNexoraBackend({ persona,
+  scenario })`);
+- sem preferências de utilizador no backend: `UserPreferences` (§8) vive só no
+  cliente;
+- `Notification` sem `route`: o cliente deriva a rota de `entityType` +
+  `entityId`;
+- seed síncrono (`light` ≈ 2,6 s no browser, `demo` ≈ 11 s): o backend é
+  criado depois do primeiro paint, com o Shell em esqueleto; `scale` por
+  `?scale=demo` na URL, `light` por defeito;
+- sign-out não existe: o cliente limpa a persona guardada e mostra `/sign-in`,
+  onde escolher uma persona chama `demo.setPersona`.
 
-`EntityMetadata` (§53.3), `Money`, `Quantity`, `CurrencyCode`, ids
-`<prefix>_<6 dígitos>` (§53.2) com `makeId(prefix, sequence)` e `parseId`,
-`Instant` (UTC ISO-8601) e `BusinessDate` (`YYYY-MM-DD`), `DomainError` com os
-códigos do §81 que este recorte usa (`FORBIDDEN`, `NOT_FOUND`,
-`INVALID_STATE_TRANSITION`).
-
-### 3.2 `identity`
-
-`Organization` (§89.2), `User` (§89.3), `UserStatus` (§55.1), `Team` (§89.4),
-`TeamMembership` (§55.2), `Role`, `PermissionGrant` (§89.5), `RoleAssignment`
-(§89.6), `PermissionScope` (§55.3).
-
-### 3.3 `permissions`
-
-`PERMISSION_CATALOG`: o catálogo do §55.4 como `as const`; `Permission` é a
-união dos seus valores. `ROLE_GRANTS`: os 13 papéis do §55.5, cada um como
-lista de `PermissionGrant`. `authorize(session, permission, resource?)`:
-
-1. falha quando a permissão não está em `session.permissions`;
-2. quando `resource` é dado, falha quando nenhum `scope` da sessão para essa
-   permissão cobre o recurso: `all` cobre tudo; `own` exige
-   `resource.ownerId === session.user.id`; `team` exige interseção entre
-   `resource.teamIds` e `scope.teamIds`; `warehouse` exige
-   `resource.warehouseId ∈ scope.warehouseIds`.
-
-Devolve `{ allowed: true } | { allowed: false; reason: 'missing' | 'scope' }`.
-
-### 3.4 `warehouses`
-
-`Warehouse { id, organizationId, code, name, timezone, status, metadata }`.
-
-### 3.5 `activity`
-
-`Notification` (§70.3), `Task` (§70.4), `ActivityEvent` (§70.1).
-
-### 3.6 `approvals`
-
-`ApprovalRequest { id, organizationId, type: 'sales_order' | 'quote' |
-'purchase_order' | 'credit_limit', entityType, entityId, businessNumber,
-subject, amount?: Money, requestedBy, requiredPermission: Permission, status:
-'pending' | 'approved' | 'rejected', createdAt, decidedAt?, decidedBy?,
-metadata }`. Uma aprovação é "minha" quando `authorize(session,
-requiredPermission)` permite e `status === 'pending'`. O motor completo (§79)
-substitui esta forma sem mudar o que o Shell lê: um contador e uma lista.
-
-### 3.7 `search`
-
-`SearchEntityType` = `customer | contact | product | sales_order | quote |
-invoice | supplier | purchase_order | ticket`. `SearchDocument { type, id,
-businessNumber?, title, subtitle?, route, terms: string[], requiredPermission
-}`. `SearchHit = SearchDocument & { score }`. `search(index, query, session)`:
-mínimo 2 caracteres, case-insensitive, prefixo em `terms`, filtra por
-`authorize`, agrupa por tipo, 8 por grupo (§71.2), ordem dos grupos fixa.
-
-### 3.8 `session`
-
-```ts
-interface Session {
-  organization: Organization;
-  user: User;
-  roles: Role[];
-  teams: Team[];
-  permissions: Permission[];
-  scopes: Partial<Record<Permission, PermissionScope[]>>;
-  warehouses: Warehouse[];          // os acessíveis: todos, ou os do escopo
-  now: Instant;                     // demoClock.now()
-  businessDate: BusinessDate;       // em America/Chicago
-  scenario: ScenarioId;
-  transportProfile: 'normal' | 'system_degraded';
-  preferences: UserPreferences;
-}
-
-interface UserPreferences {
-  scheme: 'light' | 'dark' | 'system';
-  density: 'comfortable' | 'compact' | 'dense';
-  startRoute: string;               // '/dashboard' por defeito
-  notifications: User['notificationPreferences'];
-}
-```
-
-`ScenarioId`: os nove estruturais do §74.6.
-
-## 4. `@nexora/data`
-
-Subpaths: `seed`, `scenarios`, `clock`, `persistence`, `store`.
-
-### 4.1 `seed`
-
-Determinístico: um PRNG (`mulberry32`) semeado por `seedVersion = 'nexora-v1'`
-e pelo nome da coleção. Duas execuções produzem estruturas iguais
-(`deepEqual`).
-
-- `organization`: `org_000001`, Asteron Industrial Supply (§53.1, §89.2),
-  `timezone America/Chicago`, moedas `USD, EUR, GBP`, regiões
-  `Midwest, South, Northeast, Mountain`.
-- `warehouses`: os cinco do §75.1.1.
-- `teams` (14): Enterprise Sales, SMB Sales, Inside Sales, Field Operations,
-  Finance, Accounting, Procurement, Customer Support, Warehouse Chicago,
-  Warehouse Dallas, Warehouse Atlanta, Warehouse Denver, Executive, IT
-  Administration; `type` conforme §89.4.
-- `roles` (13): §55.5 com `grants` de `ROLE_GRANTS`; `isSystem: true`.
-- `users` (205 = 170 active + 20 invited + 10 suspended + 5 deactivated): as
-  nove personas do §55.6 com ids fixos (`usr_000001` Maya Chen … `usr_000009`
-  Owen Price), e-mail `<first>.<last>@asteron.example`, título, departamento,
-  equipa, gestor; os restantes gerados com nomes de listas fixas, distribuídos
-  pelas equipas e papéis. Jordan Wells: `RoleAssignment` com escopo
-  `{ type: 'warehouse', warehouseIds: ['wh_000001'] }`; Noah Bennett: escopo
-  `team` para as mutações, `all` para leitura (§55.5). Cada persona tem
-  `lastActiveAt` relativo ao instante canónico.
-- `curated`: os registos do §76 que o Shell referencia sem os módulos
-  existirem — Meridian Controls Group `cus_010428 / CUS-010428`,
-  `ord_018420 / SO-2026-01842`, `inv_028910 / INV-2026-02891`,
-  `sku_000240 / MX-240 Servo Motor`, `shp_009841 / SHP-009841`,
-  `tck_010492 / TCK-10492`, mais 40 clientes, 30 produtos, 12 fornecedores, 20
-  ordens, 20 faturas, 10 ordens de compra, 12 tickets e 25 contactos nomeados
-  — o corpus mínimo para a pesquisa ter resultados agrupados. Cada um vira um
-  `SearchDocument`. Quando um módulo for construído, o seu gerador substitui a
-  lista curada e continua a produzir os ids do §76.
-- `approvals`: pendentes por persona — Sofia: 6 (incluindo `SO-2026-01842`,
-  `$86,420`); Priya: 4 (`credit_limit` de Meridian entre elas); Marcus: 0;
-  Procurement Manager: 3 `purchase_order`.
-- `tasks`: 3 a 8 por persona, `dueDate` relativo ao relógio, uma vencida.
-- `notifications`: 12 a 30 por persona, dos quatro tipos, `createdAt` entre
-  −21 dias e −5 minutos; as do §17 (`Approval required for SO-2026-01842`,
-  `Invoice INV-2026-02891 is 14 days overdue`, `Stock for MX-240 fell below
-  safety level`, `Ticket TCK-10492 breached first-response SLA`) atribuídas às
-  personas cujo papel as recebe; 30 % lidas.
-- `activity`: 40 eventos globais para o Dashboard.
-
-### 4.2 `clock`
-
-`DemoClock { now(): Instant; businessDate(timezone): BusinessDate;
-advance(duration) }`, instante canónico `2026-09-04T15:00:00Z` (§53.6). O
-avanço persiste (§4.4). Toda a data relativa nos pacotes e no cliente é
-calculada a partir dele; `Date.now()` não é chamado fora do `clock`.
-
-### 4.3 `scenarios`
-
-`applyScenario(seed, scenarioId) → SeedState`. Neste recorte:
-
-- `healthy`: seed sem alteração; persona por defeito Sofia Ramirez.
-- `restricted_user`: persona Jordan Wells, escopo `CHI-01`, `inventory.adjust`
-  removido (§77.8).
-- `new_tenant`: 3 utilizadores ativos (Maya, Sofia, Noah), 1 armazém, corpus
-  de pesquisa reduzido a 14 clientes e 24 produtos, notificações de
-  onboarding, aprovações e tarefas vazias.
-- `month_end`: `businessDate` = último dia útil do mês do instante canónico;
-  aprovações ×1.8; notificações de finanças elevadas.
-- `inventory_crisis`, `collections_pressure`, `support_incident`: só o que o
-  Shell mostra — notificações e aprovações adicionais coerentes com §77.6,
-  §77.7, §77.9.
-- `enterprise_scale`, `heavy_data`: sem efeito neste recorte; registados para
-  não falhar a troca.
-
-`system_degraded` não é estrutural: é `transportProfile` (§74.6) e não faz
-reset.
-
-### 4.4 `persistence`
-
-`Persistence { read(collection, id), list(collection), write(collection,
-record), remove(collection, id), readMetadata(), writeMetadata(), clear() }`.
-Dois adaptadores: `IndexedDbPersistence` (nome `nexora`, uma object store por
-coleção, `DemoDatabaseMetadata` §74.1 em `metadata`) e
-`MemoryPersistence` para testes. Coleções mutáveis: `notifications`,
-`tasks`, `approvals`, `preferences`, `demo` (persona ativa, cenário, relógio,
-perfil de transporte). O seed não é persistido: é recalculado ao arrancar e as
-coleções mutáveis sobrepõem-se por id.
-
-### 4.5 `store`
-
-`Store` junta seed, cenário, relógio e persistência: `open()` lê os metadados,
-recalcula o seed, aplica o cenário, carrega as coleções mutáveis;
-`reset(scenarioId)` executa §74.5; `switchScenario(id)` faz `reset` (§74.6);
-`setPersona(userId)` exige `status === 'active'` (§55.1). Um `schemaVersion` ou
-`seedVersion` diferente do persistido apaga a base e recomeça (§74.2).
-
-## 5. `@nexora/api`
-
-Subpaths: `.` (`createApi(store, options)`), `transport`, `simulation`.
-
-### 5.1 Transporte
-
-```ts
-interface ApiRequest  { method: 'GET' | 'POST' | 'PATCH'; path: string; query: URLSearchParams; headers: Record<string, string>; body?: unknown }
-interface ApiResponse { status: number; headers: Record<string, string>; body: unknown }
-interface Api { handle(request: ApiRequest): Promise<ApiResponse> }
-```
-
-Base `/api/v1` (§73.2). Respostas `{ data }` e `ListResponse` (§73.3, §73.4).
-Erros `ApiError` (§73.10) com os códigos do §73.11; `correlationId` é
-`req_<6 dígitos>` sequencial por sessão de browser.
-
-### 5.2 Rotas
+## 3. Estrutura
 
 ```
-GET   /session                          → { data: Session }
-PATCH /me/preferences                   → { data: UserPreferences }
-GET   /notifications?view=all|unread|archived&page&size
-POST  /notifications/:id/read
-POST  /notifications/:id/unread
-POST  /notifications/:id/archive
-POST  /notifications/read-all
-GET   /notifications/count             → { data: { unread } }
-GET   /tasks?assignee=me&status=open
-GET   /approvals?assignee=me            → pendentes cobertas por authorize
-GET   /approvals/count                  → { data: { pending } }
-GET   /search?q=                        → { data: SearchGroup[] }
-GET   /activity?page&size
-GET   /demo                             → { data: { personas, scenarios, clock, transportProfile } }
-POST  /demo/persona   { userId }
-POST  /demo/sign-out
-POST  /demo/scenario  { scenarioId }
-POST  /demo/clock/advance { days }
-POST  /demo/reset
-POST  /demo/transport { profile }
+apps/demos/
+  .registry/                    tarballs do canal beta (git-ignored)
+  nexora-operations/            @slotted/demo-nexora-operations — backend simulado
+  nexora-angular/               @slotted/demo-nexora-angular — este Shell
 ```
 
-`personas` em `GET /demo` são as nove do §55.6 com papel e contexto; a troca
-aceita qualquer utilizador ativo.
+`apps/demos/*` está em `pnpm-workspace.yaml`; a app declara `@slotted/angular`,
+`@slotted/core` e `@slotted/theme-default` por `file:../.registry/*.tgz` e
+`@slotted/demo-nexora-operations` por `workspace:*`. O backend expõe fonte
+TypeScript; o `serve` exclui-o do prebundle do Vite
+(`angular.json` › `serve.options.prebundle.exclude`).
 
-### 5.3 Autorização
+## 4. Cliente Angular — infraestrutura
 
-Cada handler chama `authorize` antes de ler ou escrever (§55.3: esconder na UI
-não é autorização). `403 FORBIDDEN` leva `details.permission` para o cliente
-nomear o que falta. Notificações, tarefas e preferências são sempre do
-utilizador da sessão; um id de outro utilizador responde `404`.
+### 4.1 Backend no cliente
 
-### 5.4 Simulação
+`provideNexoraBackend()` regista `NEXORA_BACKEND: InjectionToken<BackendHandle>`.
+`BackendHandle` expõe `api: Signal<NexoraApi | null>`, `status: Signal<'idle' |
+'seeding' | 'ready'>`, `create(options)` e `recreate(options)`. A criação corre
+em `setTimeout(0)` depois do primeiro paint, com `scale` lido de `?scale=` (por
+defeito `light`), `persona` e `scenario` lidos de `localStorage`
+(`nexora:demo`). Os stores esperam `status() === 'ready'` antes do primeiro
+pedido. Nos testes, `provideTestBackend()` cria o backend de forma síncrona com
+`scale: 'light'` e `latency: 'none'` (uma instância por ficheiro de teste,
+partilhada entre os `it`, porque o seed custa 3 s).
 
-`normal` (§78.1): leitura 120–450 ms, escrita 180–650 ms, pesquisa 180–500
-ms, jitter determinístico por hash de `method+path+query`. `system_degraded`
-(§77.10): base 700 ms + jitter 0–900 ms, `GET /activity` 15 % `503`, mutações
-5 % `503` com `retryable: true`. Uma opção `latency: 'none'` para testes.
+Erros chegam como `NexoraApiError`; `isApiError(error, code?)` é o único
+teste que o cliente faz sobre eles.
 
-## 6. Cliente Angular — infraestrutura
-
-### 6.1 Transporte
-
-`provideNexoraApi()` regista um `HttpInterceptorFn` que intercepta
-`/api/v1/*`, converte `HttpRequest` em `ApiRequest`, chama `api.handle` e
-devolve `HttpResponse` ou `HttpErrorResponse`. Os serviços usam `HttpClient`
-como contra um servidor. Um `ApiErrorPipe`/`parseApiError(error)` extrai
-`ApiError` de `HttpErrorResponse`.
-
-### 6.2 Estado
+### 4.2 Estado
 
 Serviços `providedIn: 'root'`, estado em signals:
 
-- `SessionStore`: `session`, `status: 'loading' | 'ready' | 'error'`,
-  `load()`, `can(permission, resource?)` (o mesmo `authorize` do domínio sobre
-  a sessão carregada), `reload()`.
-- `PreferencesStore`: escreve `data-slotted-scheme`, `data-slotted-density`
-  no `html`; `scheme: 'system'` segue `prefers-color-scheme`; persiste via
-  `PATCH /me/preferences`.
-- `NotificationsStore`: contagem, lista por vista, ações; recarrega a contagem
-  após cada mutação e quando o painel abre.
-- `ApprovalsStore`, `TasksStore`: contagens e listas.
+- `SessionStore`: `session: Signal<SessionInfo | null>`, `status: 'idle' |
+  'loading' | 'ready' | 'error' | 'unauthenticated'`, `load()`, `reload()`,
+  `can(permission)`, `canAny(...permissions)` (sobre `session.permissions`;
+  o escopo por registo é decidido pelo backend), `warehouses:
+  Signal<Warehouse[]>` (de `inventory.warehouses()` filtrado por
+  `warehouseIds`). `unauthenticated` quando não há persona guardada e o
+  utilizador fez sign-out nesta sessão de browser.
+- `PreferencesStore`: `preferences: Signal<UserPreferences>` por utilizador
+  em `localStorage` (`nexora:preferences:<userId>`); `update(patch)`; escreve
+  `data-slotted-scheme`, `data-slotted-density` no `html`; `scheme: 'system'`
+  segue `prefers-color-scheme`.
+- `NotificationsStore`: `unread` (de `session.unreadNotifications`, recarregado
+  por `SessionStore.reload()`), lista por vista (`all` = não arquivadas,
+  `unread`, `archived` = `includeArchived: true` filtrado no cliente), ações
+  `markRead`, `markAllRead`, `archive`; `routeFor(notification)` deriva a
+  rota de `entityType`/`entityId`.
+- `ApprovalsStore`, `TasksStore`: contagens (`session.pendingApprovals`,
+  `tasks.list({ mine: true }).page.totalItems`) e listas.
 - `SearchService`: `search(q)` com debounce 150 ms e cancelamento; `recent`
   (últimos 8 documentos abertos, `localStorage`, por utilizador).
-- `DemoStore`: `GET /demo`, ações; após persona, cenário ou reset: `SessionStore.reload()`,
-  navegação para `session.preferences.startRoute`, toast de confirmação.
-- `ClockService`: `now()` a partir de `session.now` mais o tempo decorrido
-  desde o carregamento; `relative(instant)` ("14 minutes ago", "in 3 days")
-  e formatação em `America/Chicago`; `Intl` com `en-US`.
+- `DemoStore`: `session.personas`, `demo.scenarios()`, ações; após persona,
+  cenário ou reset: grava `nexora:demo`, `SessionStore.reload()`, navegação
+  para `preferences.startRoute`, toast.
+- `ClockService`: `now()` a partir de `session.demo.demoClock` mais o tempo
+  decorrido desde o carregamento; `relative(instant)` ("14 minutes ago", "in
+  3 days") e formatação em `organization.timezone`; `Intl` com `en-US`.
 
-### 6.3 Roteamento
+### 4.3 Roteamento
 
 `/sign-in` fora do Shell. Tudo o resto sob `ShellLayout` com `canMatch`
-`sessionReady` (carrega a sessão; sem persona ativa redireciona para
-`/sign-in`). Cada módulo do Apêndice A é um `loadChildren` lazy com
-`canActivate: requirePermission(...)`. Acesso negado não redireciona: a rota
-renderiza `ForbiddenPage` no lugar, com a permissão em falta e um link para o
-Dashboard. Rotas desconhecidas: `NotFoundPage`.
+`sessionReady` (carrega a sessão; `unauthenticated` redireciona para
+`/sign-in`). Cada rota do Apêndice A é um `PermissionGate` com a página e as
+permissões em `data`. Acesso negado não redireciona: a rota renderiza
+`ForbiddenPage` no lugar, com a permissão em falta e um link para o Dashboard.
+Rotas desconhecidas: `NotFoundPage`.
 
 Mapa módulo → permissão → destinos:
 
@@ -357,13 +160,13 @@ Páginas de espera: `PlaceholderPage` recebe título e módulo, renderiza
 not built yet" com a fatia em que entra. A rota existe, o URL é estável e o
 título do documento é `<Página> · Nexora`.
 
-## 7. Shell
+## 5. Shell
 
 `ShellLayout` compõe `slAppShell` com `primary="banner"`, `canvas="inset"`,
 `navMode="auto"`, `collapsedTo="rail"`, `scroll="content"`. Estado
 `navOpen` persistido por utilizador em `localStorage`.
 
-### 7.1 Banner — `top-navigation`
+### 5.1 Banner — `top-navigation`
 
 `header[slAppShellBanner]` contém um `slTopNavigation`:
 
@@ -388,7 +191,7 @@ título do documento é `<Página> · Nexora`.
 Contagens vêm dos stores e atualizam depois de cada mutação. Cada botão tem
 `aria-label` com a contagem ("Notifications, 4 unread").
 
-### 7.2 Navegação — `side-navigation`
+### 5.2 Navegação — `side-navigation`
 
 `nav[slAppShellNav]`:
 
@@ -416,7 +219,7 @@ Contagens vêm dos stores e atualizam depois de cada mutação. Cada botão tem
   normal" ou "Degraded" quando `transportProfile === 'system_degraded'` ou
   após um `503` nos últimos 60 s.
 
-### 7.3 Conteúdo
+### 5.3 Conteúdo
 
 `main[slAppShellMain]` com `<router-outlet>`. Cada página é `slPage` com
 `slPageHeader`; o Shell não desenha cabeçalhos. Enquanto a sessão carrega, o
@@ -425,7 +228,7 @@ cabeçalho e três blocos no conteúdo). Falha ao carregar a sessão: página
 inteira com `slResultState` "Nexora is unavailable", a mensagem do erro, botão
 Retry.
 
-### 7.4 Painel de demonstração — `drawer`
+### 5.4 Painel de demonstração — `drawer`
 
 `sl-drawer` à direita, título "Demo controls", descrição "Simulated Asteron
 environment. Nothing here exists in the product.". Secções:
@@ -444,14 +247,14 @@ environment. Nothing here exists in the product.". Secções:
 
 Atalho `mod+shift+d`. O drawer e as ações estão também no command palette.
 
-### 7.5 Atalhos
+### 5.5 Atalhos
 
 `mod+k` pesquisa, `mod+shift+d` demo, `?` (fora de campos) diálogo de
 atalhos, `g` seguido de `h/c/s/i/f` navega para Home/CRM/Sales/Inventory/
 Finance (só para módulos visíveis), `esc` fecha o que estiver aberto. O
 diálogo de atalhos lista-os com `kbd[slShortcut]`.
 
-## 8. Menu de utilizador e preferências
+## 6. Menu de utilizador e preferências
 
 `sl-menu` aberto por `button[slTopNavigationAccount]`:
 
@@ -463,8 +266,8 @@ diálogo de atalhos lista-os com `kbd[slShortcut]`.
   `PreferencesStore.scheme`; efeito imediato);
 - `sl-menu-radio-group` "Density": Comfortable / Compact / Dense;
 - Keyboard shortcuts (abre o diálogo);
-- separador; Sign out → `POST /demo/sign-out` (limpa a persona ativa) e
-  navegação para `/sign-in`.
+- separador; Sign out → limpa `nexora:demo` e marca a sessão
+  `unauthenticated`; navegação para `/sign-in`.
 
 `/profile`: `slPage` com `slPageHeader` (avatar grande, nome, título,
 departamento, equipas com `slBadge`, papel), `slDescriptionList` com e-mail,
@@ -475,15 +278,15 @@ gestor, fuso, último acesso, e a lista das permissões efetivas agrupadas por
 page (`sl-select` dos destinos visíveis), Notification preferences (§89.3:
 `emailApprovals`, `emailMentions`, `inAppOperationalAlerts` editáveis;
 `inAppApprovals` e `inAppMentions` fixas e mostradas desativadas). Guardar →
-`PATCH /me/preferences`, toast.
+`PreferencesStore.update`, toast.
 
 `/sign-in`: fora do Shell, centrado: marca, "Sign in to Asteron Industrial
 Supply", e "Accounts on this device" — as nove personas como cartões
-(`slCard` clicável) com avatar, nome, papel. Escolher → `POST /demo/persona`,
+(`slCard` clicável) com avatar, nome, papel. Escolher → `demo.setPersona(key)`,
 `SessionStore.load()`, navegação para `startRoute`. É a forma que a
 demonstração dá a um sign-in; não há palavra-passe.
 
-## 9. Notificações
+## 7. Notificações
 
 Popover (`slPopover`, `placement="bottom-end"`, largura 400 px) aberto pelo
 sino:
@@ -506,7 +309,7 @@ A família `notification-center` da biblioteca está em desenho e não está no
 beta consumido; quando entrar num beta, esta página e o popover passam a
 compor-se com ela e este parágrafo é removido.
 
-## 10. Pesquisa e command palette
+## 8. Pesquisa e command palette
 
 `sl-command-palette` único, aberto pelo campo do banner ou por `mod+k`:
 
@@ -529,7 +332,7 @@ compor-se com ela e este parágrafo é removido.
 
 Abrir um resultado regista-o em `recent`.
 
-## 11. Marca
+## 9. Marca
 
 - Marca gráfica: SVG inline de 24×24 — um hexágono de traço 2 com três nós
   ligados ao centro (um "nexus"); cor `currentColor`. Usada em
@@ -543,7 +346,7 @@ Abrir um resultado regista-o em `recent`.
   utilizador: iniciais, `tone` derivado do id (seis tons, hash estável), sem
   imagens.
 
-## 12. Estados
+## 10. Estados
 
 | Situação | Comportamento |
 | --- | --- |
@@ -557,30 +360,23 @@ Abrir um resultado regista-o em `recent`.
 | Sem notificações / tarefas / aprovações | estado vazio compacto em cada popover |
 | Sem persona ativa | `/sign-in` |
 
-## 13. Testes
+## 11. Testes
 
-- `@nexora/domain`: `authorize` por escopo (`all`, `own`, `team`,
-  `warehouse`), catálogo completo, `search` (mínimo, limite, agrupamento,
-  filtro por permissão).
-- `@nexora/data`: determinismo (dois seeds iguais), contagens do §75.1 e
-  §55.6, `restricted_user` remove `inventory.adjust`, `reset` reproduz o seed,
-  `MemoryPersistence` e `IndexedDbPersistence` com a mesma suíte (`fake-indexeddb`).
-- `@nexora/api`: cada rota com persona certa e errada (`403` com
-  `details.permission`), `404` para notificação de outro utilizador,
-  paginação, `system_degraded` determinístico com `latency: 'none'`.
-- `@nexora/angular` (`vitest` + `@angular/build:unit-test`): interceptor
-  (pedido → `handle` → resposta e erro), `SessionStore.can`, `ShellLayout`
-  renderiza módulos por persona (Sofia vê Sales; Jordan não vê Finance),
-  contagens no banner, menu de utilizador aplica o esquema ao `html`, popover
-  de notificações marca lida e atualiza a contagem, command palette agrupa e
-  filtra por permissão, guarda de rota renderiza `ForbiddenPage`, atalhos.
+- `@slotted/demo-nexora-angular` (`vitest` + `@angular/build:unit-test`):
+  `provideTestBackend` (backend em memória, `latency: 'none'`),
+  `SessionStore.can`, `ShellLayout` renderiza módulos por persona (Sofia vê
+  Sales; Jordan não vê Finance), contagens no banner, menu de utilizador
+  aplica o esquema ao `html`, popover de notificações marca lida e atualiza a
+  contagem, command palette agrupa e filtra por permissão, `PermissionGate`
+  renderiza `ForbiddenPage`, atalhos. O backend tem a sua própria suíte em
+  `apps/demos/nexora-operations`.
 - Verificação visual: screenshots light/dark em 1280 e 420 px pelo mesmo
   método usado nesta sessão (Chrome headless via CDP), guardados em
-  `apps/demos/nexora/apps/angular/screenshots/` e não commitados.
+  `apps/demos/nexora-angular/screenshots/` e não commitados.
 
-## 14. Reconciliação com a biblioteca
+## 12. Reconciliação com a biblioteca
 
 Cada fricção encontrada ao construir o Shell é registada em
-`apps/demos/nexora/LIBRARY-FEEDBACK.md`: família, o que faltou ou custou, a
+`apps/demos/nexora-angular/LIBRARY-FEEDBACK.md`: família, o que faltou ou custou, a
 versão beta em causa. O documento alimenta a avaliação da API pública; nada
 na biblioteca é alterado a partir da demo.

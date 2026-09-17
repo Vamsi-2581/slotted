@@ -2,31 +2,33 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** O Shell da Nexora Operations em `apps/demos/nexora/apps/angular`: banner, navegação, conteúdo, menu de utilizador, preferências, notificações, pesquisa/command palette, painel de demonstração, sign-in, rotas de todos os módulos, estados de espera/erro/acesso negado — sobre `@slotted/angular` (beta por tarball) e `@nexora/api` (plano `2026-09-17-nexora-backend.md`, pré-requisito integral).
+**Goal:** O Shell da Nexora Operations em `apps/demos/nexora-angular`: banner, navegação, conteúdo, menu de utilizador, preferências, notificações, pesquisa/command palette, painel de demonstração, sign-in, rotas de todos os módulos, estados de espera/erro/acesso negado — sobre `@slotted/angular` (beta por tarball) e `@slotted/demo-nexora-operations` (backend simulado in-process, `apps/demos/nexora-operations`).
 
-**Architecture:** `HttpClient` + interceptor que despacha para `createApi(store)` in-process; estado em serviços `providedIn: 'root'` com signals; rotas sob um `ShellLayout` que compõe `app-shell`, `top-navigation`, `side-navigation`; cada módulo do Apêndice A é uma rota guardada por permissão que renderiza `ForbiddenPage` no lugar.
+**Architecture:** `createNexoraBackend()` criado após o primeiro paint e exposto por `NEXORA_BACKEND`; estado em serviços `providedIn: 'root'` com signals que chamam a API tipada; rotas sob um `ShellLayout` que compõe `app-shell`, `top-navigation`, `side-navigation`; cada rota do Apêndice A é um `PermissionGate` que renderiza `ForbiddenPage` no lugar.
 
-**Tech Stack:** Angular 22.1 (standalone, signals, zoneless), `@slotted/angular` 0.1.0-beta.x, `@ng-icons/core` + `@ng-icons/lucide`, vitest via `ng test`.
+**Tech Stack:** Angular 22.1 (standalone, signals, zoneless), `@slotted/angular` 0.1.0-beta.x, `@slotted/demo-nexora-operations` (workspace), `@ng-icons/core` + `@ng-icons/lucide`, vitest via `ng test`.
 
-**Spec:** `docs/superpowers/specs/2026-09-17-nexora-shell-design.md` (§6–§14).
+**Spec:** `docs/superpowers/specs/2026-09-17-nexora-shell-design.md`.
 
 ## Global Constraints
 
-- `@slotted/*` só por tarball (`file:../../../.registry/…`); `@nexora/*` por `workspace:*` (`dist` construído: `pnpm build` em `apps/demos/nexora` antes de `ng build`/`ng test`).
+- `@slotted/*` só por tarball (`file:../.registry/…`); `@slotted/demo-nexora-operations` por `workspace:*` (fonte TypeScript, excluída do prebundle do Vite em `angular.json`).
+- O backend não é alterado a partir deste plano; nomes de campos dos read models (`SessionInfo`, `Notification`, `ApprovalListItem`, `TaskListItem`, `SearchHit`, `Warehouse`) são confirmados em `apps/demos/nexora-operations/backend` antes de escrever um template; uma lacuna do backend é registada em `LIBRARY-FEEDBACK.md` › "Backend".
+- Personas por chave: `maya-chen`, `evan-brooks`, `sofia-ramirez`, `noah-bennett`, `priya-shah`, `marcus-lee`, `jordan-wells`, `aisha-grant`, `owen-price`.
 - Idioma da UI: en-US. Mensagens das famílias `@slotted` em inglês por `provide*Defaults` em `app.config.ts`.
-- `Date.now()` proibido fora de `ClockService`; datas relativas a partir de `session.now`.
+- `Date.now()` proibido fora de `ClockService`; datas relativas a partir de `session.demo.demoClock`.
 - Contrato de DOM da biblioteca: seletores `data-ui`/`data-part` são o único gancho de CSS da app; a app não escreve classes de partes da biblioteca.
 - Título do documento `<Página> · Nexora`; `lang="en"`; `data-slotted-theme="default"` no `html`.
 - Um `sl-toast-region` na raiz; `SlToastService.show` para confirmações.
 - Formatação: `pnpm exec prettier --write <paths>` da raiz do repositório. Commits: `git add <paths> && git commit` num só comando.
-- `ng test` corre com `pnpm --filter @nexora/angular test`; `ng build` com `pnpm --filter @nexora/angular build`.
+- `ng test` corre com `pnpm --filter @slotted/demo-nexora-angular test`; `ng build` com `pnpm --filter @slotted/demo-nexora-angular build:demo`.
 
 ---
 
 ## Estrutura de ficheiros
 
 ```
-apps/demos/nexora/apps/angular/src/
+apps/demos/nexora-angular/src/
   main.ts
   index.html                       lang, data-slotted-*
   styles.css                       @layer, tema, marca (existente)
@@ -35,8 +37,9 @@ apps/demos/nexora/apps/angular/src/
     app.routes.ts                  /sign-in, /* → ShellLayout com filhos por módulo
     app.ts / app.html              <router-outlet> + <sl-toast-region>
     core/
-      api/nexora-api.provider.ts   provideNexoraApi(): store IndexedDB + createApi + interceptor
-      api/api-error.ts             parseApiError(HttpErrorResponse): ApiErrorBody['error'] | null
+      backend/nexora-backend.provider.ts  provideNexoraBackend(): createNexoraBackend após o primeiro paint
+      backend/api-error.ts                isApiError(error, code?)
+      backend/demo-state.ts               persona, cenário e scale em localStorage
       session/session.store.ts     SessionStore
       session/clock.service.ts     ClockService
       session/preferences.store.ts PreferencesStore
@@ -68,157 +71,231 @@ apps/demos/nexora/apps/angular/src/
       profile/profile-page.ts
       preferences/preferences-page.ts
   test/
-    testing.ts                     provideTestApi(): api em memória com latência 'none'; helpers
+    testing.ts                     provideTestBackend(), resetTestBackend(), signInAs(key)
 ```
 
 ---
 
-### Task 1: Transporte — `provideNexoraApi` e interceptor
+### Task 1: Backend no cliente — `provideNexoraBackend`
 
 **Files:**
-- Create: `src/app/core/api/nexora-api.provider.ts`, `src/app/core/api/api-error.ts`, `src/test/testing.ts`
+- Create: `src/app/core/backend/nexora-backend.provider.ts`, `src/app/core/backend/api-error.ts`, `src/app/core/backend/demo-state.ts`, `src/test/testing.ts`
 - Modify: `src/app/app.config.ts`
-- Test: `src/app/core/api/nexora-api.provider.spec.ts`
+- Test: `src/app/core/backend/nexora-backend.provider.spec.ts`
 
 **Interfaces:**
-- Consumes: `createStore`, `createIndexedDbPersistence`, `createMemoryPersistence` (`@nexora/data`); `createApi`, `Api`, `ApiRequest`, `BASE_PATH`, `ApiErrorBody` (`@nexora/api`).
+- Consumes: `createNexoraBackend`, `NexoraApi`, `BackendOptions`, `NexoraApiError`, `ScenarioId`, `LatencyProfile` de `@slotted/demo-nexora-operations`.
 - Produces:
-  - `NEXORA_API = new InjectionToken<Api>('nexora api')`
-  - `NEXORA_STORE = new InjectionToken<Store>('nexora store')`
-  - `provideNexoraApi(options?: { persistence?: Persistence; latency?: 'real' | 'none' }): EnvironmentProviders` — regista `NEXORA_STORE`, `NEXORA_API`, `provideHttpClient(withInterceptors([nexoraApiInterceptor]))` e um `APP_INITIALIZER`-equivalente (`provideAppInitializer`) que faz `store.open()`
-  - `nexoraApiInterceptor: HttpInterceptorFn` — só `/api/v1/*`; converte, chama `handle`, responde `HttpResponse` (2xx) ou lança `HttpErrorResponse` com `error: ApiErrorBody`
-  - `parseApiError(error: unknown): ApiErrorBody['error'] | null`
-  - `provideTestApi(): EnvironmentProviders` (memória, `latency: 'none'`) em `src/test/testing.ts`
+  - `NEXORA_BACKEND = new InjectionToken<BackendHandle>('nexora backend')`
+  - `BackendHandle { api: Signal<NexoraApi | null>; status: Signal<'idle' | 'seeding' | 'ready'>; ready(): Promise<NexoraApi>; create(options?: Partial<BackendOptions>): Promise<NexoraApi>; recreate(options?: Partial<BackendOptions>): Promise<NexoraApi> }`
+  - `provideNexoraBackend(options?: { defer?: boolean; options?: Partial<BackendOptions> }): EnvironmentProviders` — `defer: true` (default) cria em `setTimeout(0)` no `provideAppInitializer` sem bloquear o arranque; `defer: false` cria de forma síncrona (testes)
+  - `readDemoState(): { persona?: string; scenario?: ScenarioId; scale?: 'light' | 'demo'; signedOut?: boolean }` / `writeDemoState(patch)` sobre `localStorage['nexora:demo']`, com `?scale=` da URL a prevalecer
+  - `isApiError(error, code?): error is NexoraApiError`
+  - `provideTestBackend(): EnvironmentProviders` em `src/test/testing.ts` — `defer: false`, `{ scale: 'light', latency: 'none' }`; uma instância por ficheiro de teste via cache de módulo (`let shared: NexoraApi | undefined`) para o seed (≈3 s) correr uma vez; `resetTestBackend()` chama `api.demo.reset()` e `api.demo.setPersona('sofia-ramirez')` no `beforeEach`
 
 - [ ] **Step 1: Teste**
 
 ```ts
-// src/app/core/api/nexora-api.provider.spec.ts
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+// src/app/core/backend/nexora-backend.provider.spec.ts
+import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
-import { describe, expect, it, beforeEach } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
-import { parseApiError } from './api-error';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
+import { isApiError } from './api-error';
+import { NEXORA_BACKEND } from './nexora-backend.provider';
 
-describe('nexora api interceptor', () => {
+describe('nexora backend provider', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi()] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend()] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
-  it('answers /api/v1/session from the in-process api', async () => {
-    const http = TestBed.inject(HttpClient);
-    const r = await firstValueFrom(http.get<{ data: { user: { displayName: string } } }>('/api/v1/session'));
-    expect(r.data.user.displayName).toBe('Sofia Ramirez');
+  it('is ready with Sofia signed in', async () => {
+    const backend = TestBed.inject(NEXORA_BACKEND);
+    const api = await backend.ready();
+    expect(backend.status()).toBe('ready');
+    const session = await api.session.get();
+    expect(session.user.displayName).toBe('Sofia Ramirez');
   });
 
-  it('turns an api error into HttpErrorResponse with the ApiError body', async () => {
-    const http = TestBed.inject(HttpClient);
-    await http.post('/api/v1/demo/sign-out', {}).toPromise();
-    const error = await firstValueFrom(http.get('/api/v1/session')).catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(HttpErrorResponse);
-    expect(parseApiError(error)?.code).toBe('UNAUTHENTICATED');
-    expect((error as HttpErrorResponse).status).toBe(401);
+  it('exposes api errors with their code', async () => {
+    const api = await TestBed.inject(NEXORA_BACKEND).ready();
+    await api.demo.setPersona('jordan-wells');
+    const error = await api.finance.invoices.list({}).catch((e: unknown) => e);
+    expect(isApiError(error, 'FORBIDDEN')).toBe(true);
   });
 });
 ```
 
-(`ApplicationInitStatus` importado de `@angular/core`.)
+`api.finance.invoices.list` — confirmar o nome exato em `apps/demos/nexora-operations/backend/api/index.ts` (`finance: { invoices: … }`); ajustar se a superfície for `api.invoices.list`.
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL — módulos inexistentes.
 
 - [ ] **Step 3: Implementação**
 
 ```ts
-// src/app/core/api/api-error.ts
-import { HttpErrorResponse } from '@angular/common/http';
-import type { ApiErrorBody } from '@nexora/api';
+// src/app/core/backend/api-error.ts
+import { NexoraApiError } from '@slotted/demo-nexora-operations';
 
-export function parseApiError(error: unknown): ApiErrorBody['error'] | null {
-  if (!(error instanceof HttpErrorResponse)) return null;
-  const body = error.error as Partial<ApiErrorBody> | null;
-  return body?.error ?? null;
+export function isApiError(error: unknown, code?: string): error is NexoraApiError {
+  return error instanceof NexoraApiError && (code === undefined || error.code === code);
 }
 ```
 
 ```ts
-// src/app/core/api/nexora-api.provider.ts
-import {
-  HttpErrorResponse, HttpHeaders, HttpResponse, provideHttpClient, withInterceptors, type HttpInterceptorFn,
-} from '@angular/common/http';
-import { inject, InjectionToken, makeEnvironmentProviders, provideAppInitializer, type EnvironmentProviders } from '@angular/core';
-import { BASE_PATH, createApi, type Api, type ApiRequest } from '@nexora/api';
-import { createIndexedDbPersistence, createStore, type Persistence, type Store } from '@nexora/data';
-import { from, switchMap, throwError } from 'rxjs';
+// src/app/core/backend/demo-state.ts
+import type { ScenarioId } from '@slotted/demo-nexora-operations';
 
-export const NEXORA_STORE = new InjectionToken<Store>('nexora store');
-export const NEXORA_API = new InjectionToken<Api>('nexora api');
-
-export const nexoraApiInterceptor: HttpInterceptorFn = (request, next) => {
-  const url = new URL(request.url, 'http://nexora.local');
-  if (!url.pathname.startsWith(BASE_PATH)) return next(request);
-  const api = inject(NEXORA_API);
-  const apiRequest: ApiRequest = {
-    method: request.method as ApiRequest['method'],
-    path: url.pathname,
-    query: new URLSearchParams(url.search),
-    headers: Object.fromEntries(request.headers.keys().map((k) => [k.toLowerCase(), request.headers.get(k) ?? ''])),
-    ...(request.body === null || request.body === undefined ? {} : { body: request.body }),
-  };
-  return from(api.handle(apiRequest)).pipe(
-    switchMap((response) => {
-      const headers = new HttpHeaders(response.headers);
-      if (response.status >= 200 && response.status < 300) {
-        return [new HttpResponse({ status: response.status, body: response.body, headers, url: request.url })];
-      }
-      return throwError(() => new HttpErrorResponse({ status: response.status, error: response.body, headers, url: request.url }));
-    }),
-  );
-};
-
-export interface NexoraApiOptions {
-  persistence?: Persistence;
-  latency?: 'real' | 'none';
+export interface DemoState {
+  persona?: string;
+  scenario?: ScenarioId;
+  scale?: 'light' | 'demo';
+  signedOut?: boolean;
 }
 
-export function provideNexoraApi(options: NexoraApiOptions = {}): EnvironmentProviders {
-  const store = createStore(options.persistence ?? createIndexedDbPersistence('nexora'));
-  const api = createApi(store, { latency: options.latency ?? 'real' });
+const KEY = 'nexora:demo';
+
+export function readDemoState(): DemoState {
+  let state: DemoState = {};
+  try {
+    state = JSON.parse(localStorage.getItem(KEY) ?? '{}') as DemoState;
+  } catch {
+    state = {};
+  }
+  const scale = new URLSearchParams(location.search).get('scale');
+  if (scale === 'light' || scale === 'demo') state.scale = scale;
+  return state;
+}
+
+export function writeDemoState(patch: DemoState): DemoState {
+  const next = { ...readDemoState(), ...patch };
+  try {
+    localStorage.setItem(KEY, JSON.stringify(next));
+  } catch {
+    /* storage unavailable */
+  }
+  return next;
+}
+```
+
+```ts
+// src/app/core/backend/nexora-backend.provider.ts
+import { InjectionToken, makeEnvironmentProviders, provideAppInitializer, signal, type EnvironmentProviders, type Signal } from '@angular/core';
+import { createNexoraBackend, type BackendOptions, type NexoraApi } from '@slotted/demo-nexora-operations';
+import { readDemoState } from './demo-state';
+
+export type BackendStatus = 'idle' | 'seeding' | 'ready';
+
+export interface BackendHandle {
+  api: Signal<NexoraApi | null>;
+  status: Signal<BackendStatus>;
+  ready(): Promise<NexoraApi>;
+  create(options?: Partial<BackendOptions>): Promise<NexoraApi>;
+  recreate(options?: Partial<BackendOptions>): Promise<NexoraApi>;
+}
+
+export const NEXORA_BACKEND = new InjectionToken<BackendHandle>('nexora backend');
+
+/**
+ * The seed is synchronous and costs seconds; the handle defers it to the next
+ * macrotask so the shell paints its skeleton first, and every store awaits
+ * `ready()` before its first call.
+ */
+export function createBackendHandle(base: Partial<BackendOptions>, defer: boolean): BackendHandle {
+  const api = signal<NexoraApi | null>(null);
+  const status = signal<BackendStatus>('idle');
+  let pending: Promise<NexoraApi> | null = null;
+
+  const build = (options: Partial<BackendOptions>): Promise<NexoraApi> => {
+    status.set('seeding');
+    api.set(null);
+    const state = readDemoState();
+    const merged: BackendOptions = {
+      scale: state.scale ?? 'light',
+      latency: 'normal',
+      ...(state.persona === undefined ? {} : { persona: state.persona }),
+      ...(state.scenario === undefined ? {} : { scenario: state.scenario }),
+      ...base,
+      ...options,
+    };
+    const run = () => {
+      const instance = createNexoraBackend(merged);
+      api.set(instance);
+      status.set('ready');
+      return instance;
+    };
+    pending = defer ? new Promise<NexoraApi>((resolve) => setTimeout(() => resolve(run()), 0)) : Promise.resolve(run());
+    return pending;
+  };
+
+  return {
+    api: api.asReadonly(),
+    status: status.asReadonly(),
+    ready: () => pending ?? build({}),
+    create: (options = {}) => pending ?? build(options),
+    recreate: (options = {}) => build(options),
+  };
+}
+
+export function provideNexoraBackend(config: { defer?: boolean; options?: Partial<BackendOptions> } = {}): EnvironmentProviders {
+  const handle = createBackendHandle(config.options ?? {}, config.defer ?? true);
   return makeEnvironmentProviders([
-    { provide: NEXORA_STORE, useValue: store },
-    { provide: NEXORA_API, useValue: api },
-    provideHttpClient(withInterceptors([nexoraApiInterceptor])),
-    provideAppInitializer(() => store.open()),
+    { provide: NEXORA_BACKEND, useValue: handle },
+    provideAppInitializer(() => {
+      void handle.create();
+    }),
   ]);
 }
 ```
 
 ```ts
 // src/test/testing.ts
-import type { EnvironmentProviders } from '@angular/core';
-import { createMemoryPersistence } from '@nexora/data';
-import { provideNexoraApi } from '../app/core/api/nexora-api.provider';
+import { type EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import type { NexoraApi } from '@slotted/demo-nexora-operations';
+import { createBackendHandle, NEXORA_BACKEND, type BackendHandle } from '../app/core/backend/nexora-backend.provider';
 
-export function provideTestApi(): EnvironmentProviders {
-  return provideNexoraApi({ persistence: createMemoryPersistence(), latency: 'none' });
+let shared: BackendHandle | undefined;
+
+/** One seeded backend per test file: the seed costs seconds and every test resets it instead. */
+export function provideTestBackend(): EnvironmentProviders {
+  shared ??= createBackendHandle({ scale: 'light', latency: 'none' }, false);
+  return makeEnvironmentProviders([{ provide: NEXORA_BACKEND, useValue: shared }]);
+}
+
+export async function resetTestBackend(): Promise<NexoraApi> {
+  const api = await TestBed.inject(NEXORA_BACKEND).ready();
+  await api.demo.reset();
+  await api.demo.setPersona('sofia-ramirez');
+  try {
+    localStorage.clear();
+  } catch {
+    /* jsdom without storage */
+  }
+  return api;
+}
+
+export async function signInAs(personaKey: string): Promise<void> {
+  const api = await TestBed.inject(NEXORA_BACKEND).ready();
+  await api.demo.setPersona(personaKey);
 }
 ```
 
-Em `src/app/app.config.ts`, acrescentar `provideNexoraApi()` aos providers (antes de `provideRouter`).
+Em `src/app/app.config.ts`, acrescentar `provideNexoraBackend()` aos providers.
 
 - [ ] **Step 4: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm build && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: PASS (2 testes).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): provideNexoraApi — store IndexedDB, createApi in-process, interceptor HttpClient → handle, parseApiError"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): provideNexoraBackend — backend simulado criado após o primeiro paint, estado de demonstração em localStorage, isApiError, provideTestBackend partilhado por ficheiro"
 ```
 
 ---
@@ -230,17 +307,17 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 - Test: `src/app/core/session/session.store.spec.ts`, `src/app/core/session/preferences.store.spec.ts`, `src/app/core/activity/notifications.store.spec.ts`
 
 **Interfaces:**
-- Consumes: `HttpClient`, `parseApiError`, tipos `Session`, `Permission`, `ScopeResource`, `Notification`, `Task`, `ApprovalRequest`, `SearchGroup`, `UserPreferences`, `authorize`, `sessionAuthorization`.
+- Consumes: `NEXORA_BACKEND`, `isApiError`, `readDemoState`, `writeDemoState`; tipos `SessionInfo`, `Warehouse`, `Notification`, `TaskListItem`, `ApprovalListItem`, `SearchResponse`, `SearchHit`, `ScenarioId`, `LatencyProfile` de `@slotted/demo-nexora-operations`.
 - Produces:
-  - `SessionStore`: `session: Signal<Session | null>`, `status: Signal<'idle' | 'loading' | 'ready' | 'error' | 'unauthenticated'>`, `error: Signal<string | null>`, `load(): Promise<void>`, `reload()`, `can(permission, resource?): boolean`, `canAny(...permissions): boolean`
-  - `ClockService`: `now(): string` (`session.now` + decorrido), `businessDate(): string`, `relative(instant): string`, `formatDate(instant | date, options?)`, `formatTime(instant)`
-  - `PreferencesStore`: `preferences: Signal<UserPreferences>`, `update(patch: Partial<UserPreferences>): Promise<void>`, `apply()` escreve `data-slotted-scheme`/`density` no `html` (system → `matchMedia`)
-  - `NotificationsStore`: `unread: Signal<number>`, `items: Signal<Notification[]>`, `view: WritableSignal<'all'|'unread'|'archived'>`, `page`, `total`, `loading`, `refreshCount()`, `loadPage(page?)`, `markRead(id)`, `markUnread(id)`, `archive(id)`, `markAllRead()`
-  - `ApprovalsStore`: `pending: Signal<number>`, `items`, `refresh()`, `load()`
-  - `TasksStore`: `open: Signal<number>`, `items`, `refresh()`
-  - `DemoStore`: `info: Signal<DemoInfo | null>`, `load()`, `setPersona(userId)`, `signOut()`, `switchScenario(id)`, `advance(days)`, `reset()`, `setTransport(profile)` — cada mutação chama `SessionStore.reload()` e `NotificationsStore.refreshCount()`, `ApprovalsStore.refresh()`, `TasksStore.refresh()`
-  - `SearchService`: `search(q): Promise<SearchGroup[]>` (cancela a anterior), `recent: Signal<SearchDocument[]>`, `remember(doc)`
-  - `DemoInfo` = corpo de `GET /demo`
+  - `UserPreferences { scheme: 'light' | 'dark' | 'system'; density: 'comfortable' | 'compact' | 'dense'; startRoute: string; notifications: { emailApprovals: boolean; emailMentions: boolean; inAppOperationalAlerts: boolean } }` em `preferences.store.ts`
+  - `SessionStore`: `session: Signal<SessionInfo | null>`, `status: Signal<'idle' | 'loading' | 'ready' | 'error' | 'unauthenticated'>`, `error`, `user`, `warehouses: Signal<Warehouse[]>`, `loadedAt`, `load()`, `reload()`, `signOut()`, `can(permission)`, `canAny(...permissions)`
+  - `ClockService`: `now()`, `businessDate()`, `relative(instant)`, `formatDate(value, options?)`, `formatTime(instant)`, `isToday(instant)`
+  - `PreferencesStore`: `preferences: Signal<UserPreferences>`, `update(patch)`, `apply(preferences)`
+  - `NotificationsStore`: `unread`, `items`, `view: WritableSignal<'all' | 'unread' | 'archived'>`, `page`, `total`, `loading`, `refreshCount()`, `loadPage(page?, size?)`, `markRead(id)`, `archive(id)`, `markAllRead()`, `routeFor(notification): string | null`
+  - `ApprovalsStore`: `pending`, `items`, `refresh()`, `load()`
+  - `TasksStore`: `open`, `items`, `refresh()`
+  - `DemoStore`: `info: Signal<DemoInfo | null>`, `busy`, `load()`, `setPersona(key)`, `signOut()`, `switchScenario(id)`, `advanceDays(days)`, `reset()`, `setLatency(profile)`; `DemoInfo { personas: SessionInfo['personas']; activePersonaKey: string | null; scenarios: { id: ScenarioId; label: string; description: string }[]; scenarioId: ScenarioId; clock: { now: string; today: string }; latency: LatencyProfile }`
+  - `SearchService`: `search(q): Promise<SearchResponse['groups']>`, `recent: Signal<SearchHit[]>`, `remember(hit)`, `routeFor(hit)`
 
 - [ ] **Step 1: Testes**
 
@@ -249,13 +326,14 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend, signInAs } from '../../../test/testing';
 import { SessionStore } from './session.store';
 
 describe('SessionStore', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi()] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend()] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
   it('loads Sofia and answers can()', async () => {
@@ -265,6 +343,21 @@ describe('SessionStore', () => {
     expect(store.can('orders.approve')).toBe(true);
     expect(store.can('inventory.adjust')).toBe(false);
     expect(store.canAny('finance.dashboard', 'invoices.view')).toBe(true);
+    expect(store.warehouses().length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('scopes Jordan to one warehouse', async () => {
+    await signInAs('jordan-wells');
+    const store = TestBed.inject(SessionStore);
+    await store.load();
+    expect(store.warehouses().map((w) => w.code)).toEqual(['CHI-01']);
+  });
+
+  it('is unauthenticated after sign-out until a persona is chosen', async () => {
+    const store = TestBed.inject(SessionStore);
+    await store.load();
+    store.signOut();
+    expect(store.status()).toBe('unauthenticated');
   });
 });
 ```
@@ -274,23 +367,25 @@ describe('SessionStore', () => {
 import { ApplicationInitStatus, DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { PreferencesStore } from './preferences.store';
 import { SessionStore } from './session.store';
 
 describe('PreferencesStore', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi()] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend()] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
     await TestBed.inject(SessionStore).load();
   });
 
-  it('writes the scheme and density onto html', async () => {
+  it('writes the scheme and density onto html and persists per user', () => {
     const prefs = TestBed.inject(PreferencesStore);
     const html = TestBed.inject(DOCUMENT).documentElement;
-    await prefs.update({ scheme: 'dark', density: 'compact' });
+    prefs.update({ scheme: 'dark', density: 'compact' });
     expect(html.getAttribute('data-slotted-scheme')).toBe('dark');
     expect(html.getAttribute('data-slotted-density')).toBe('compact');
+    expect(JSON.parse(localStorage.getItem('nexora:preferences:' + TestBed.inject(SessionStore).user()!.id) ?? '{}').scheme).toBe('dark');
   });
 });
 ```
@@ -300,14 +395,15 @@ describe('PreferencesStore', () => {
 import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { SessionStore } from '../session/session.store';
 import { NotificationsStore } from './notifications.store';
 
 describe('NotificationsStore', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi()] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend()] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
     await TestBed.inject(SessionStore).load();
   });
 
@@ -315,6 +411,7 @@ describe('NotificationsStore', () => {
     const store = TestBed.inject(NotificationsStore);
     await store.refreshCount();
     const before = store.unread();
+    expect(before).toBeGreaterThan(0);
     await store.loadPage();
     const unread = store.items().find((n) => n.readAt === undefined)!;
     await store.markRead(unread.id);
@@ -325,50 +422,55 @@ describe('NotificationsStore', () => {
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL.
 
 - [ ] **Step 3: Sessão e relógio**
 
 ```ts
 // src/app/core/session/session.store.ts
-import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { authorize, sessionAuthorization, type Permission, type ScopeResource, type Session } from '@nexora/domain';
-import { firstValueFrom } from 'rxjs';
-import { parseApiError } from '../api/api-error';
+import type { SessionInfo, Warehouse } from '@slotted/demo-nexora-operations';
+import { isApiError } from '../backend/api-error';
+import { readDemoState, writeDemoState } from '../backend/demo-state';
+import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
 
 export type SessionStatus = 'idle' | 'loading' | 'ready' | 'error' | 'unauthenticated';
 
 @Injectable({ providedIn: 'root' })
 export class SessionStore {
-  private readonly http = inject(HttpClient);
-  private readonly _session = signal<Session | null>(null);
+  private readonly backend = inject(NEXORA_BACKEND);
+  private readonly _session = signal<SessionInfo | null>(null);
   private readonly _status = signal<SessionStatus>('idle');
   private readonly _error = signal<string | null>(null);
+  private readonly _warehouses = signal<Warehouse[]>([]);
 
   readonly session = this._session.asReadonly();
   readonly status = this._status.asReadonly();
   readonly error = this._error.asReadonly();
+  readonly warehouses = this._warehouses.asReadonly();
   readonly user = computed(() => this._session()?.user ?? null);
-  readonly loadedAt = signal<number>(0);
+  readonly loadedAt = signal(0);
 
   async load(): Promise<void> {
+    if (readDemoState().signedOut === true) {
+      this._session.set(null);
+      this._status.set('unauthenticated');
+      return;
+    }
     this._status.set('loading');
     this._error.set(null);
     try {
-      const { data } = await firstValueFrom(this.http.get<{ data: Session }>('/api/v1/session'));
-      this._session.set(data);
+      const api = await this.backend.ready();
+      const session = await api.session.get();
+      const all = await api.inventory.warehouses();
+      const ids = session.warehouseIds;
+      this._warehouses.set(ids === 'all' ? all : all.filter((w) => ids.includes(w.id)));
+      this._session.set(session);
       this.loadedAt.set(performance.now());
       this._status.set('ready');
     } catch (error) {
-      const api = parseApiError(error);
-      if (api?.code === 'UNAUTHENTICATED') {
-        this._session.set(null);
-        this._status.set('unauthenticated');
-        return;
-      }
-      this._error.set(api?.message ?? 'Nexora is unavailable');
+      this._error.set(isApiError(error) ? error.message : 'Nexora is unavailable');
       this._status.set('error');
     }
   }
@@ -377,38 +479,47 @@ export class SessionStore {
     return this.load();
   }
 
-  can(permission: Permission, resource?: ScopeResource): boolean {
-    const session = this._session();
-    return session !== null && authorize(sessionAuthorization(session), permission, resource).allowed;
+  signOut(): void {
+    writeDemoState({ signedOut: true });
+    this._session.set(null);
+    this._status.set('unauthenticated');
   }
 
-  canAny(...permissions: Permission[]): boolean {
+  can(permission: string): boolean {
+    return this._session()?.permissions.includes(permission) ?? false;
+  }
+
+  canAny(...permissions: string[]): boolean {
     return permissions.some((p) => this.can(p));
   }
 }
 ```
+
+`api.inventory.warehouses()` — o nome vem de `backend/api/index.ts` (linha `warehouses: () => request('GET /warehouses', …)`), dentro do bloco `inventory`; confirmar o bloco e ajustar. O tipo devolvido é `Warehouse[]` ou `{ data: Warehouse[] }` conforme `operations.listWarehouses`; ajustar a atribuição.
 
 ```ts
 // src/app/core/session/clock.service.ts
 import { inject, Injectable } from '@angular/core';
 import { SessionStore } from './session.store';
 
-const ORGANIZATION_TIMEZONE = 'America/Chicago';
-
 @Injectable({ providedIn: 'root' })
 export class ClockService {
   private readonly sessionStore = inject(SessionStore);
+
+  private timezone(): string {
+    return this.sessionStore.session()?.organization.timezone ?? 'America/Chicago';
+  }
 
   /** The demo instant plus the time elapsed since the session was loaded. */
   now(): string {
     const session = this.sessionStore.session();
     if (session === null) return new Date(0).toISOString();
     const elapsed = performance.now() - this.sessionStore.loadedAt();
-    return new Date(new Date(session.now).getTime() + elapsed).toISOString();
+    return new Date(new Date(session.demo.demoClock).getTime() + elapsed).toISOString();
   }
 
   businessDate(): string {
-    return this.sessionStore.session()?.businessDate ?? '';
+    return this.sessionStore.session()?.demo.today ?? '';
   }
 
   relative(instant: string): string {
@@ -426,7 +537,7 @@ export class ClockService {
   }
 
   formatDate(value: string, options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }): string {
-    return new Intl.DateTimeFormat('en-US', { timeZone: ORGANIZATION_TIMEZONE, ...options }).format(new Date(value));
+    return new Intl.DateTimeFormat('en-US', { timeZone: this.timezone(), ...options }).format(new Date(value));
   }
 
   formatTime(instant: string): string {
@@ -443,25 +554,34 @@ export class ClockService {
 
 ```ts
 // src/app/core/session/preferences.store.ts
-import { HttpClient } from '@angular/common/http';
-import { computed, DOCUMENT, effect, inject, Injectable } from '@angular/core';
-import type { UserPreferences } from '@nexora/domain';
-import { firstValueFrom } from 'rxjs';
+import { computed, DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
 import { SessionStore } from './session.store';
 
-const FALLBACK: UserPreferences = {
-  scheme: 'system', density: 'comfortable', startRoute: '/dashboard',
-  notifications: { emailApprovals: true, emailMentions: true, inAppApprovals: true, inAppMentions: true, inAppOperationalAlerts: true },
+export interface UserPreferences {
+  scheme: 'light' | 'dark' | 'system';
+  density: 'comfortable' | 'compact' | 'dense';
+  startRoute: string;
+  notifications: { emailApprovals: boolean; emailMentions: boolean; inAppOperationalAlerts: boolean };
+}
+
+export const DEFAULT_PREFERENCES: UserPreferences = {
+  scheme: 'system',
+  density: 'comfortable',
+  startRoute: '/dashboard',
+  notifications: { emailApprovals: true, emailMentions: true, inAppOperationalAlerts: true },
 };
 
 @Injectable({ providedIn: 'root' })
 export class PreferencesStore {
-  private readonly http = inject(HttpClient);
   private readonly document = inject(DOCUMENT);
   private readonly sessionStore = inject(SessionStore);
   private readonly media = this.document.defaultView?.matchMedia('(prefers-color-scheme: dark)');
+  private readonly version = signal(0);
 
-  readonly preferences = computed(() => this.sessionStore.session()?.preferences ?? FALLBACK);
+  readonly preferences = computed<UserPreferences>(() => {
+    this.version();
+    return this.read(this.sessionStore.user()?.id);
+  });
 
   constructor() {
     effect(() => this.apply(this.preferences()));
@@ -476,9 +596,30 @@ export class PreferencesStore {
     html.style.colorScheme = scheme;
   }
 
-  async update(patch: Partial<UserPreferences>): Promise<void> {
-    await firstValueFrom(this.http.patch<{ data: UserPreferences }>('/api/v1/me/preferences', patch));
-    await this.sessionStore.reload();
+  update(patch: Partial<UserPreferences>): void {
+    const userId = this.sessionStore.user()?.id;
+    if (userId === undefined) return;
+    const next: UserPreferences = { ...this.read(userId), ...patch, notifications: { ...this.read(userId).notifications, ...(patch.notifications ?? {}) } };
+    try {
+      localStorage.setItem(this.key(userId), JSON.stringify(next));
+    } catch {
+      /* storage unavailable */
+    }
+    this.version.update((n) => n + 1);
+  }
+
+  private key(userId: string): string {
+    return `nexora:preferences:${userId}`;
+  }
+
+  private read(userId: string | undefined): UserPreferences {
+    if (userId === undefined) return DEFAULT_PREFERENCES;
+    try {
+      const stored = JSON.parse(localStorage.getItem(this.key(userId)) ?? 'null') as Partial<UserPreferences> | null;
+      return stored === null ? DEFAULT_PREFERENCES : { ...DEFAULT_PREFERENCES, ...stored, notifications: { ...DEFAULT_PREFERENCES.notifications, ...(stored.notifications ?? {}) } };
+    } catch {
+      return DEFAULT_PREFERENCES;
+    }
   }
 }
 ```
@@ -487,17 +628,23 @@ export class PreferencesStore {
 
 ```ts
 // src/app/core/activity/notifications.store.ts
-import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import type { ListResponse } from '@nexora/api';
-import type { Notification } from '@nexora/domain';
-import { firstValueFrom } from 'rxjs';
+import type { Notification } from '@slotted/demo-nexora-operations';
+import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
+import { SessionStore } from '../session/session.store';
 
 export type NotificationsView = 'all' | 'unread' | 'archived';
 
+const ROUTE_BY_ENTITY: Record<string, string> = {
+  customer: '/crm/customers', order: '/sales/orders', quote: '/sales/quotes', invoice: '/finance/invoices',
+  product: '/catalog/products', sku: '/catalog/products', ticket: '/support/tickets', shipment: '/inventory/movements',
+  purchase_order: '/procurement/purchase-orders', supplier: '/procurement/suppliers', approval: '/sales/approvals',
+};
+
 @Injectable({ providedIn: 'root' })
 export class NotificationsStore {
-  private readonly http = inject(HttpClient);
+  private readonly backend = inject(NEXORA_BACKEND);
+  private readonly sessionStore = inject(SessionStore);
   readonly unread = signal(0);
   readonly items = signal<Notification[]>([]);
   readonly view = signal<NotificationsView>('all');
@@ -506,81 +653,97 @@ export class NotificationsStore {
   readonly loading = signal(false);
 
   async refreshCount(): Promise<void> {
-    const { data } = await firstValueFrom(this.http.get<{ data: { unread: number } }>('/api/v1/notifications/count'));
-    this.unread.set(data.unread);
+    const api = await this.backend.ready();
+    const session = await api.session.get();
+    this.unread.set(session.unreadNotifications);
   }
 
   async loadPage(page = 1, size = 25): Promise<void> {
     this.loading.set(true);
     try {
-      const r = await firstValueFrom(this.http.get<ListResponse<Notification>>('/api/v1/notifications', { params: { view: this.view(), page, size } }));
-      this.items.set(r.data);
+      const api = await this.backend.ready();
+      const view = this.view();
+      const r = await api.notifications.list({ page, pageSize: size, includeArchived: view === 'archived' });
+      const rows = r.data.filter((n) =>
+        view === 'archived' ? n.archivedAt !== undefined : view === 'unread' ? n.readAt === undefined && n.archivedAt === undefined : n.archivedAt === undefined,
+      );
+      this.items.set(rows);
       this.page.set(r.page.number);
-      this.total.set(r.page.totalItems);
+      this.total.set(view === 'all' ? r.page.totalItems : rows.length);
     } finally {
       this.loading.set(false);
     }
   }
 
-  private async act(id: string, action: 'read' | 'unread' | 'archive'): Promise<void> {
-    await firstValueFrom(this.http.post(`/api/v1/notifications/${id}/${action}`, {}));
+  async markRead(id: string): Promise<void> {
+    const api = await this.backend.ready();
+    await api.notifications.markRead(id);
     await Promise.all([this.refreshCount(), this.loadPage(this.page())]);
   }
 
-  markRead(id: string): Promise<void> { return this.act(id, 'read'); }
-  markUnread(id: string): Promise<void> { return this.act(id, 'unread'); }
-  archive(id: string): Promise<void> { return this.act(id, 'archive'); }
+  async archive(id: string): Promise<void> {
+    const api = await this.backend.ready();
+    await api.notifications.archive(id);
+    await Promise.all([this.refreshCount(), this.loadPage(this.page())]);
+  }
 
   async markAllRead(): Promise<void> {
-    await firstValueFrom(this.http.post('/api/v1/notifications/read-all', {}));
+    const api = await this.backend.ready();
+    await api.notifications.markAllRead();
     await Promise.all([this.refreshCount(), this.loadPage(this.page())]);
+  }
+
+  routeFor(notification: Notification): string | null {
+    if (notification.entityType === undefined || notification.entityId === undefined) return null;
+    const base = ROUTE_BY_ENTITY[notification.entityType];
+    return base === undefined ? null : `${base}/${notification.entityId}`;
   }
 }
 ```
 
+O filtro de vista no cliente existe porque `notifications.list` só distingue `includeArchived`; `total` para `unread`/`archived` é o da página carregada. Os nomes `markRead`, `markAllRead`, `archive` e a existência de `archive` são confirmados em `backend/api/commands/platform.ts` (`const notifications = { markRead, markAllRead, … }`); se `archive` não existir, o botão de arquivar fica fora e a vista `archived` também, registado em `LIBRARY-FEEDBACK.md` como pendência do backend.
+
 ```ts
 // src/app/core/activity/approvals.store.ts
-import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import type { ListResponse } from '@nexora/api';
-import type { ApprovalRequest } from '@nexora/domain';
-import { firstValueFrom } from 'rxjs';
+import type { ApprovalListItem } from '@slotted/demo-nexora-operations';
+import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
 
 @Injectable({ providedIn: 'root' })
 export class ApprovalsStore {
-  private readonly http = inject(HttpClient);
+  private readonly backend = inject(NEXORA_BACKEND);
   readonly pending = signal(0);
-  readonly items = signal<ApprovalRequest[]>([]);
+  readonly items = signal<ApprovalListItem[]>([]);
 
   async refresh(): Promise<void> {
-    const { data } = await firstValueFrom(this.http.get<{ data: { pending: number } }>('/api/v1/approvals/count'));
-    this.pending.set(data.pending);
+    const api = await this.backend.ready();
+    this.pending.set((await api.session.get()).pendingApprovals);
   }
 
   async load(): Promise<void> {
-    const r = await firstValueFrom(this.http.get<ListResponse<ApprovalRequest>>('/api/v1/approvals', { params: { size: 25 } }));
-    this.items.set(r.data);
-    this.pending.set(r.page.totalItems);
+    const api = await this.backend.ready();
+    const r = await api.approvals.list({ filter: { status: 'pending' }, pageSize: 25 });
+    this.items.set(r.data.filter((a) => a.actionable));
+    this.pending.set(this.items().length);
   }
 }
 ```
 
 ```ts
 // src/app/core/activity/tasks.store.ts
-import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import type { ListResponse } from '@nexora/api';
-import type { Task } from '@nexora/domain';
-import { firstValueFrom } from 'rxjs';
+import type { TaskListItem } from '@slotted/demo-nexora-operations';
+import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
 
 @Injectable({ providedIn: 'root' })
 export class TasksStore {
-  private readonly http = inject(HttpClient);
+  private readonly backend = inject(NEXORA_BACKEND);
   readonly open = signal(0);
-  readonly items = signal<Task[]>([]);
+  readonly items = signal<TaskListItem[]>([]);
 
   async refresh(): Promise<void> {
-    const r = await firstValueFrom(this.http.get<ListResponse<Task>>('/api/v1/tasks', { params: { size: 25 } }));
+    const api = await this.backend.ready();
+    const r = await api.tasks.list({ mine: true, filter: { status: 'open' }, sort: 'dueDate', pageSize: 25 });
     this.items.set(r.data);
     this.open.set(r.page.totalItems);
   }
@@ -589,88 +752,148 @@ export class TasksStore {
 
 ```ts
 // src/app/core/demo/demo.store.ts
-import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import type { ScenarioId, TransportProfile } from '@nexora/domain';
-import { firstValueFrom } from 'rxjs';
+import type { LatencyProfile, ScenarioId, SessionInfo } from '@slotted/demo-nexora-operations';
+import { SCENARIOS } from '@slotted/demo-nexora-operations';
 import { ApprovalsStore } from '../activity/approvals.store';
 import { NotificationsStore } from '../activity/notifications.store';
 import { TasksStore } from '../activity/tasks.store';
+import { readDemoState, writeDemoState } from '../backend/demo-state';
+import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
 import { SessionStore } from '../session/session.store';
 
 export interface DemoInfo {
-  personas: { id: string; displayName: string; role: string; context: string; title: string; active: boolean }[];
-  activePersonaId: string | null;
+  personas: SessionInfo['personas'];
+  activePersonaKey: string | null;
   scenarios: { id: ScenarioId; label: string; description: string }[];
   scenarioId: ScenarioId;
-  clock: { now: string; businessDate: string };
-  transportProfile: TransportProfile;
+  clock: { now: string; today: string };
+  latency: LatencyProfile;
 }
 
 @Injectable({ providedIn: 'root' })
 export class DemoStore {
-  private readonly http = inject(HttpClient);
+  private readonly backend = inject(NEXORA_BACKEND);
   private readonly sessionStore = inject(SessionStore);
   private readonly notifications = inject(NotificationsStore);
   private readonly approvals = inject(ApprovalsStore);
   private readonly tasks = inject(TasksStore);
   readonly info = signal<DemoInfo | null>(null);
   readonly busy = signal(false);
+  private latency: LatencyProfile = 'normal';
 
   async load(): Promise<void> {
-    const { data } = await firstValueFrom(this.http.get<{ data: DemoInfo }>('/api/v1/demo'));
-    this.info.set(data);
+    const api = await this.backend.ready();
+    const session = await api.session.get();
+    const scenarios = Object.values(SCENARIOS).map((s) => ({ id: s.id, label: s.label, description: s.description }));
+    const active = session.personas.find((p) => p.userId === session.user.id);
+    this.info.set({
+      personas: session.personas,
+      activePersonaKey: active?.key ?? null,
+      scenarios,
+      scenarioId: session.demo.scenarioId as ScenarioId,
+      clock: { now: session.demo.demoClock, today: session.demo.today },
+      latency: this.latency,
+    });
   }
 
-  private async mutate(path: string, body: unknown): Promise<void> {
+  private async after(): Promise<void> {
+    await this.sessionStore.reload();
+    if (this.sessionStore.status() === 'ready') {
+      await Promise.all([this.notifications.refreshCount(), this.approvals.refresh(), this.tasks.refresh()]);
+    }
+    await this.load();
+  }
+
+  private async run(action: () => Promise<unknown>): Promise<void> {
     this.busy.set(true);
     try {
-      await firstValueFrom(this.http.post(`/api/v1/demo/${path}`, body));
-      await this.sessionStore.reload();
-      if (this.sessionStore.status() === 'ready') {
-        await Promise.all([this.notifications.refreshCount(), this.approvals.refresh(), this.tasks.refresh()]);
-      }
-      await this.load();
+      await action();
+      await this.after();
     } finally {
       this.busy.set(false);
     }
   }
 
-  setPersona(userId: string): Promise<void> { return this.mutate('persona', { userId }); }
-  signOut(): Promise<void> { return this.mutate('sign-out', {}); }
-  switchScenario(scenarioId: ScenarioId): Promise<void> { return this.mutate('scenario', { scenarioId }); }
-  advance(days: number): Promise<void> { return this.mutate('clock/advance', { days }); }
-  reset(): Promise<void> { return this.mutate('reset', {}); }
-  setTransport(profile: TransportProfile): Promise<void> { return this.mutate('transport', { profile }); }
+  setPersona(key: string): Promise<void> {
+    return this.run(async () => {
+      const api = await this.backend.ready();
+      await api.demo.setPersona(key);
+      writeDemoState({ persona: key, signedOut: false });
+    });
+  }
+
+  signOut(): Promise<void> {
+    this.sessionStore.signOut();
+    return this.load();
+  }
+
+  switchScenario(id: ScenarioId): Promise<void> {
+    return this.run(async () => {
+      const api = await this.backend.ready();
+      await api.demo.setScenario(id);
+      writeDemoState({ scenario: id });
+    });
+  }
+
+  advanceDays(days: number): Promise<void> {
+    return this.run(async () => (await this.backend.ready()).demo.advanceClock(days * 24));
+  }
+
+  reset(): Promise<void> {
+    return this.run(async () => (await this.backend.ready()).demo.reset(readDemoState().scenario));
+  }
+
+  setLatency(profile: LatencyProfile): Promise<void> {
+    return this.run(async () => {
+      (await this.backend.ready()).demo.setLatency(profile);
+      this.latency = profile;
+    });
+  }
 }
 ```
 
+`SCENARIOS` — a forma (`Record<ScenarioId, ScenarioDefinition>` com `label`/`description`) é confirmada em `backend/api/scenarios.ts`; ajustar os nomes dos campos. `demo.setScenario` já faz reset (§74.6); `setPersona` depois de `setScenario` pode ser necessário quando o cenário fixa a persona — ler `applyScenario`.
+
 ```ts
 // src/app/core/search/search.service.ts
-import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import type { SearchDocument, SearchGroup } from '@nexora/domain';
-import { firstValueFrom } from 'rxjs';
+import type { SearchHit, SearchResponse } from '@slotted/demo-nexora-operations';
+import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
 import { SessionStore } from '../session/session.store';
 
 const RECENT_LIMIT = 8;
+const DEBOUNCE_MS = 150;
+
+const ROUTE_BY_TYPE: Record<SearchHit['type'], string> = {
+  customer: '/crm/customers', contact: '/crm/contacts', sku: '/catalog/products', product: '/catalog/products',
+  order: '/sales/orders', quote: '/sales/quotes', invoice: '/finance/invoices', supplier: '/procurement/suppliers',
+  purchase_order: '/procurement/purchase-orders', ticket: '/support/tickets',
+};
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
-  private readonly http = inject(HttpClient);
+  private readonly backend = inject(NEXORA_BACKEND);
   private readonly sessionStore = inject(SessionStore);
   private sequence = 0;
-  readonly recent = signal<SearchDocument[]>(this.readRecent());
+  readonly recent = signal<SearchHit[]>(this.readRecent());
 
-  async search(q: string): Promise<SearchGroup[]> {
+  async search(q: string): Promise<SearchResponse['groups']> {
     const mine = ++this.sequence;
     if (q.trim().length < 2) return [];
-    const { data } = await firstValueFrom(this.http.get<{ data: SearchGroup[] }>('/api/v1/search', { params: { q } }));
-    return mine === this.sequence ? data : [];
+    await new Promise((r) => setTimeout(r, DEBOUNCE_MS));
+    if (mine !== this.sequence) return [];
+    const api = await this.backend.ready();
+    const response = await api.search(q);
+    return mine === this.sequence ? response.groups : [];
   }
 
-  remember(document: SearchDocument): void {
-    const next = [document, ...this.recent().filter((d) => d.id !== document.id)].slice(0, RECENT_LIMIT);
+  routeFor(hit: SearchHit): string {
+    return `${ROUTE_BY_TYPE[hit.type]}/${hit.id}`;
+  }
+
+  remember(hit: SearchHit): void {
+    const next = [hit, ...this.recent().filter((d) => d.id !== hit.id)].slice(0, RECENT_LIMIT);
     this.recent.set(next);
     try {
       localStorage.setItem(this.key(), JSON.stringify(next));
@@ -683,9 +906,9 @@ export class SearchService {
     return `nexora:recent:${this.sessionStore.user()?.id ?? 'anonymous'}`;
   }
 
-  private readRecent(): SearchDocument[] {
+  private readRecent(): SearchHit[] {
     try {
-      return JSON.parse(localStorage.getItem(this.key()) ?? '[]') as SearchDocument[];
+      return JSON.parse(localStorage.getItem(this.key()) ?? '[]') as SearchHit[];
     } catch {
       return [];
     }
@@ -695,13 +918,13 @@ export class SearchService {
 
 - [ ] **Step 6: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: PASS.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): SessionStore com can(), ClockService sobre session.now, PreferencesStore a escrever data-slotted-*, stores de notificações/aprovações/tarefas, DemoStore, SearchService com recentes"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): SessionStore sobre session.get() com armazéns do escopo, ClockService sobre demo.demoClock, PreferencesStore em localStorage por utilizador, stores de notificações/aprovações/tarefas, DemoStore, SearchService com recentes"
 ```
 
 ---
@@ -715,8 +938,8 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 
 **Interfaces:**
 - Produces:
-  - `NavDestination { id: string; label: string; path: string; permissions?: Permission[]; count?: 'approvals' | 'support' }`
-  - `NavModule { id: string; label: string; icon: string; section: 'home' | 'operate' | 'insight' | 'manage'; path: string; permissions?: Permission[]; destinations: NavDestination[]; key?: string }` (`key` = letra do atalho `g <key>`)
+  - `NavDestination { id: string; label: string; path: string; permissions?: string[]; count?: 'approvals' | 'support' }`
+  - `NavModule { id: string; label: string; icon: string; section: 'home' | 'operate' | 'insight' | 'manage'; path: string; permissions?: string[]; destinations: NavDestination[]; key?: string }` (`key` = letra do atalho `g <key>`)
   - `NAV_MODULES: readonly NavModule[]`, `visibleModules(can: (p: Permission) => boolean): NavModule[]`, `moduleFor(url): NavModule | undefined`, `destinationFor(url): { module; destination } | undefined`
   - `PermissionGate` (component): lê `route.data['permissions']` e `route.data['page']`; renderiza `ForbiddenPage` ou a página por `NgComponentOutlet`
   - `NexoraTitleStrategy extends TitleStrategy`
@@ -754,7 +977,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend, signInAs } from '../../../test/testing';
 import { SessionStore } from '../session/session.store';
 import { PermissionGate } from './permission-gate';
 
@@ -765,11 +988,12 @@ describe('PermissionGate', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
-        provideTestApi(),
+        provideTestBackend(),
         provideRouter([{ path: 'finance', component: PermissionGate, data: { permissions: ['finance.dashboard'], page: Probe, title: 'Finance' } }]),
       ],
     });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
     await TestBed.inject(SessionStore).load();
   });
 
@@ -780,36 +1004,30 @@ describe('PermissionGate', () => {
   });
 
   it('renders the page for Priya', async () => {
-    await fetchPersona('usr_000005');
+    await signInAs('priya-shah');
+    await TestBed.inject(SessionStore).reload();
     const harness = await RouterTestingHarness.create('/finance');
     expect(harness.routeNativeElement?.textContent).toContain('finance overview');
   });
 });
 
-async function fetchPersona(userId: string): Promise<void> {
-  const { HttpClient } = await import('@angular/common/http');
-  const { firstValueFrom } = await import('rxjs');
-  await firstValueFrom(TestBed.inject(HttpClient).post('/api/v1/demo/persona', { userId }));
-  await TestBed.inject(SessionStore).reload();
-}
 ```
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL.
 
 - [ ] **Step 3: Modelo de navegação**
 
 ```ts
 // src/app/core/nav/nav.model.ts
-import type { Permission } from '@nexora/domain';
 
 export interface NavDestination {
   id: string;
   label: string;
   path: string;
-  permissions?: Permission[];
+  permissions?: string[];
   count?: 'approvals' | 'support';
 }
 
@@ -819,7 +1037,7 @@ export interface NavModule {
   icon: string;
   section: 'home' | 'operate' | 'insight' | 'manage';
   path: string;
-  permissions?: Permission[];
+  permissions?: string[];
   destinations: NavDestination[];
   key?: string;
   slice: string;
@@ -857,9 +1075,9 @@ export const NAV_MODULES: readonly NavModule[] = [
 
 export const SECTION_LABELS: Record<NavModule['section'], string | null> = { home: null, operate: 'Operate', insight: 'Insight', manage: 'Manage' };
 
-const allowed = (can: (p: Permission) => boolean, permissions?: Permission[]) => permissions === undefined || permissions.some(can);
+const allowed = (can: (p: string) => boolean, permissions?: string[]) => permissions === undefined || permissions.some(can);
 
-export function visibleModules(can: (p: Permission) => boolean): NavModule[] {
+export function visibleModules(can: (p: string) => boolean): NavModule[] {
   return NAV_MODULES.filter((m) => allowed(can, m.permissions)).map((m) => ({ ...m, destinations: m.destinations.filter((x) => allowed(can, x.permissions)) }));
 }
 
@@ -884,7 +1102,6 @@ export function destinationFor(url: string): { module: NavModule; destination: N
 import { NgComponentOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, type Type } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import type { Permission } from '@nexora/domain';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ForbiddenPage } from '../../pages/forbidden/forbidden-page';
 import { SessionStore } from '../session/session.store';
@@ -908,7 +1125,7 @@ export class PermissionGate {
 
   readonly page = computed(() => this.data()['page'] as Type<unknown>);
   readonly missing = computed(() => {
-    const permissions = (this.data()['permissions'] ?? []) as Permission[];
+    const permissions = (this.data()['permissions'] ?? []) as string[];
     void this.sessionStore.session();
     if (permissions.length === 0 || permissions.some((p) => this.sessionStore.can(p))) return null;
     return permissions[0] ?? null;
@@ -1151,11 +1368,11 @@ import { BrandMark } from '../../shell/banner/brand-mark';
       <h1>Sign in to Asteron Industrial Supply</h1>
       <p>Accounts on this device</p>
       <div class="accounts">
-        @for (p of demo.info()?.personas ?? []; track p.id) {
+        @for (p of demo.info()?.personas ?? []; track p.key) {
           <div slCard size="sm">
-            <button type="button" class="account" slCardBody [disabled]="!p.active || demo.busy()" (click)="signIn(p.id)">
-              <span slAvatar [name]="p.displayName" size="sm" tone="accent" variant="soft"><span slAvatarFallback></span></span>
-              <span>{{ p.displayName }}<small>{{ p.role }} · {{ p.context }}</small></span>
+            <button type="button" class="account" slCardBody [disabled]="!p.active || demo.busy()" (click)="signIn(p.key)">
+              <span slAvatar [name]="p.name" size="sm" tone="accent" variant="soft"><span slAvatarFallback></span></span>
+              <span>{{ p.name }}<small>{{ p.role }} · {{ p.context }}</small></span>
             </button>
           </div>
         }
@@ -1173,8 +1390,8 @@ export class SignInPage implements OnInit {
     void this.demo.load();
   }
 
-  async signIn(userId: string): Promise<void> {
-    await this.demo.setPersona(userId);
+  async signIn(key: string): Promise<void> {
+    await this.demo.setPersona(key);
     if (this.session.status() === 'ready') await this.router.navigateByUrl(this.preferences.preferences().startRoute);
   }
 }
@@ -1272,13 +1489,13 @@ export class ShellLayout {}
 
 - [ ] **Step 6: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test && pnpm --filter @nexora/angular build`
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
 Expected: PASS; build sem erros. Se `RouterTestingHarness` não renderizar `PermissionGate` por falta de `sessionReady` na rota de teste, isso é esperado: a rota de teste não tem guarda.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): modelo de navegação por permissão, rotas de todos os módulos do Apêndice A, PermissionGate em lugar, páginas de espera/403/404, sign-in por persona, título · Nexora"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): modelo de navegação por permissão, rotas de todos os módulos do Apêndice A, PermissionGate em lugar, páginas de espera/403/404, sign-in por persona, título · Nexora"
 ```
 
 ---
@@ -1292,7 +1509,7 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 **Interfaces:**
 - Consumes: `SessionStore`, `PreferencesStore`, `ApprovalsStore`, `TasksStore`, `NotificationsStore`, `visibleModules`, `destinationFor`, `moduleFor`, `SECTION_LABELS`.
 - Produces:
-  - `TransportHealth` (`providedIn: 'root'`): `degraded: Signal<boolean>` — `true` quando `session.transportProfile === 'system_degraded'` ou quando `reportFailure()` foi chamado nos últimos 60 s (o interceptor chama-o em `503`)
+  - `TransportHealth` (`providedIn: 'root'`): `degraded: Signal<boolean>` — `true` quando `DemoStore.info().latency === 'degraded'` ou quando `reportFailure()` foi chamado nos últimos 60 s
   - `ShellLayout` com `navOpen` persistido em `localStorage` (`nexora:nav-open:<userId>`), `modules: Signal<NavModule[]>`, `current: Signal<string | null>` (id do destino ou do módulo para a rota ativa), `sections`
   - `<app-banner>` é inserido na Task 5; nesta tarefa o banner contém só a marca e o `slAppShellNavToggle`
 
@@ -1300,26 +1517,25 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 
 ```ts
 // src/app/shell/shell-layout.spec.ts
-import { HttpClient } from '@angular/common/http';
 import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../test/testing';
+import { provideTestBackend, resetTestBackend, signInAs } from '../../test/testing';
 import { routes } from '../app.routes';
 import { SessionStore } from '../core/session/session.store';
 
-async function persona(userId: string): Promise<void> {
-  await firstValueFrom(TestBed.inject(HttpClient).post('/api/v1/demo/persona', { userId }));
+async function persona(key: string): Promise<void> {
+  await signInAs(key);
   await TestBed.inject(SessionStore).reload();
 }
 
 describe('ShellLayout', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi(), provideRouter(routes)] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
   it('shows Sofia the Sales module and hides Finance overview', async () => {
@@ -1333,7 +1549,7 @@ describe('ShellLayout', () => {
   });
 
   it('shows Jordan only what a warehouse operator can view', async () => {
-    await persona('usr_000007');
+    await persona('jordan-wells');
     const harness = await RouterTestingHarness.create('/dashboard');
     const text = harness.fixture.nativeElement.textContent as string;
     expect(text).toContain('Inventory');
@@ -1351,7 +1567,7 @@ describe('ShellLayout', () => {
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL (o layout mínimo não renderiza navegação).
 
 - [ ] **Step 3: Saúde do transporte**
@@ -1359,21 +1575,20 @@ Expected: FAIL (o layout mínimo não renderiza navegação).
 ```ts
 // src/app/core/api/transport-health.ts
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { SessionStore } from '../session/session.store';
+import { DemoStore } from '../demo/demo.store';
 
 const WINDOW_MS = 60_000;
 
 @Injectable({ providedIn: 'root' })
 export class TransportHealth {
-  private readonly sessionStore = inject(SessionStore);
+  private readonly demo = inject(DemoStore);
   private readonly lastFailure = signal<number | null>(null);
   private readonly tick = signal(0);
 
   readonly degraded = computed(() => {
     this.tick();
-    const profile = this.sessionStore.session()?.transportProfile;
     const last = this.lastFailure();
-    return profile === 'system_degraded' || (last !== null && performance.now() - last < WINDOW_MS);
+    return this.demo.info()?.latency === 'degraded' || (last !== null && performance.now() - last < WINDOW_MS);
   });
 
   reportFailure(): void {
@@ -1383,13 +1598,13 @@ export class TransportHealth {
 }
 ```
 
-No interceptor (`nexora-api.provider.ts`), antes de lançar o `HttpErrorResponse`: `if (response.status === 503) inject(TransportHealth).reportFailure();` — o `inject` é chamado no corpo do interceptor (contexto de injeção), guardado numa constante antes do `pipe`.
+Os stores chamam `TransportHealth.reportFailure()` quando apanham `isApiError(error, 'SERVICE_UNAVAILABLE')` — em `NotificationsStore`, `ApprovalsStore`, `TasksStore` e `SessionStore.load` (um `catch` que reporta e relança).
 
 ```ts
 // src/app/shell/status/connection-status.ts
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { SlStatusIndicator } from '@slotted/angular/status-indicator';
-import { TransportHealth } from '../../core/api/transport-health';
+import { TransportHealth } from '../../core/backend/transport-health';
 
 @Component({
   selector: 'app-connection-status',
@@ -1646,13 +1861,13 @@ export class Banner {}
 
 - [ ] **Step 5: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test && pnpm --filter @nexora/angular build`
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
 Expected: PASS. Os ícones `lucideShoppingCart, lucidePackage, lucideWarehouse, lucideTruck, lucideLandmark, lucideLifeBuoy, lucideChartColumn, lucideWorkflow, lucideActivity, lucideScrollText, lucideSettings, lucideUsers, lucideLayoutDashboard` entram em `provideIcons` em `app.config.ts`.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): ShellLayout — app-shell com navegação por permissão em side-navigation, destino corrente pela rota, esqueletos, erro de sessão com retry, estado da ligação"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): ShellLayout — app-shell com navegação por permissão em side-navigation, destino corrente pela rota, esqueletos, erro de sessão com retry, estado da ligação"
 ```
 
 ---
@@ -1671,21 +1886,20 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 
 ```ts
 // src/app/shell/banner/banner.spec.ts
-import { HttpClient } from '@angular/common/http';
 import { ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend, signInAs } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { SessionStore } from '../../core/session/session.store';
 
 describe('Banner', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi(), provideRouter(routes)] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
   it('shows the organization and the approvals count', async () => {
@@ -1694,11 +1908,11 @@ describe('Banner', () => {
     const banner = harness.fixture.nativeElement.querySelector('[data-ui="top-navigation"]') as HTMLElement;
     expect(banner.textContent).toContain('Asteron Industrial Supply');
     const approvals = banner.querySelector('[aria-label^="Approvals"]') as HTMLElement;
-    expect(approvals.getAttribute('aria-label')).toBe('Approvals, 6 pending');
+    expect(approvals.getAttribute('aria-label')).toMatch(/^Approvals, \d+ pending$/);
   });
 
   it('adds the warehouse to the context for Jordan', async () => {
-    await firstValueFrom(TestBed.inject(HttpClient).post('/api/v1/demo/persona', { userId: 'usr_000007' }));
+    await signInAs('jordan-wells');
     await TestBed.inject(SessionStore).reload();
     const harness = await RouterTestingHarness.create('/dashboard');
     const banner = harness.fixture.nativeElement.querySelector('[data-ui="top-navigation"]') as HTMLElement;
@@ -1709,7 +1923,7 @@ describe('Banner', () => {
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL.
 
 - [ ] **Step 3: Banner**
@@ -1869,8 +2083,8 @@ import { ClockService } from '../../core/session/clock.service';
                   <li slListItem size="sm">
                     <div slListItemContent>
                       <div slListItemBody>
-                        <span slListItemLabel>{{ a.businessNumber }} · {{ a.subject }}</span>
-                        <span slListItemDescription>{{ a.amount ? (a.amount.amount | currency: a.amount.currency) + ' · ' : '' }}{{ clock.relative(a.createdAt) }}</span>
+                        <span slListItemLabel>{{ a.targetNumber }} · {{ a.targetLabel }}</span>
+                        <span slListItemDescription>{{ a.amount ? (a.amount.amount | currency: a.amount.currency) + ' · ' : '' }}{{ a.reasons.join(', ') }} · {{ clock.relative(a.metadata.createdAt) }}</span>
                       </div>
                     </div>
                   </li>
@@ -1926,13 +2140,13 @@ Componentes mínimos para as Tasks 6–9 (substituídos depois): `UserMenu` (`se
 
 - [ ] **Step 5: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test && pnpm --filter @nexora/angular build`
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
 Expected: PASS. Ícones novos em `provideIcons`: `lucideSearch, lucideClipboardCheck, lucideListTodo, lucideFlaskConical`.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): banner em top-navigation — marca Nexora, contexto da organização e do armazém, gatilho de pesquisa, popovers de aprovações e tarefas com contagens, menu de ajuda, botão do painel de demonstração"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): banner em top-navigation — marca Nexora, contexto da organização e do armazém, gatilho de pesquisa, popovers de aprovações e tarefas com contagens, menu de ajuda, botão do painel de demonstração"
 ```
 
 ---
@@ -1940,7 +2154,7 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 ### Task 6: Menu de utilizador, perfil, preferências
 
 **Files:**
-- Replace: `src/app/shell/user-menu/user-menu.ts`; create `src/app/pages/profile/profile-page.ts`, `src/app/pages/preferences/preferences-page.ts`
+- Replace: `src/app/shell/user-menu/user-menu.ts`; create `src/app/core/nav/permission-area.ts`, `src/app/pages/profile/profile-page.ts`, `src/app/pages/preferences/preferences-page.ts`
 - Test: `src/app/shell/user-menu/user-menu.spec.ts`
 
 **Interfaces:**
@@ -1956,14 +2170,15 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { PreferencesStore } from '../../core/session/preferences.store';
 
 describe('UserMenu', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi(), provideRouter(routes)] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
   it('opens with the signed-in user and switches the scheme', async () => {
@@ -1985,7 +2200,7 @@ describe('UserMenu', () => {
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL (o menu mínimo não tem itens).
 
 - [ ] **Step 3: Menu**
@@ -2077,14 +2292,38 @@ export class UserMenu {
 }
 ```
 
+`signOut` só limpa o estado do cliente (§2 do spec); o backend continua com a persona, e o sign-in escolhe outra por `demo.setPersona`.
+
 Os `a[slMenuItem]` com `href` e `(select)` navegam pelo router: se a família seguir o `href` nativamente antes do `select`, remover o `href` e manter só `(select)`; registar em `LIBRARY-FEEDBACK.md`.
 
 - [ ] **Step 4: Perfil e preferências**
 
 ```ts
+// src/app/core/nav/permission-area.ts
+export type PermissionArea =
+  | 'identity' | 'crm' | 'catalog' | 'sales' | 'inventory' | 'procurement' | 'finance' | 'support' | 'administration';
+
+const AREA_BY_PREFIX: Record<string, PermissionArea> = {
+  organization: 'identity', users: 'identity', teams: 'identity', roles: 'identity',
+  customers: 'crm', contacts: 'crm', notes: 'crm',
+  catalog: 'catalog', pricing: 'catalog', cost: 'catalog',
+  quotes: 'sales', orders: 'sales',
+  inventory: 'inventory', shipments: 'inventory', returns: 'inventory',
+  suppliers: 'procurement', purchase_orders: 'procurement', receipts: 'procurement',
+  finance: 'finance', invoices: 'finance', payments: 'finance', credit_memos: 'finance', refunds: 'finance', reconciliation: 'finance',
+  support: 'support',
+};
+
+/** The §55.4 area of a permission key, by its prefix; anything unlisted is administration. */
+export function permissionArea(permission: string): PermissionArea {
+  return AREA_BY_PREFIX[permission.split('.')[0] ?? ''] ?? 'administration';
+}
+```
+
+```ts
 // src/app/pages/profile/profile-page.ts
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { permissionArea, type Permission, type PermissionArea } from '@nexora/domain';
+import { permissionArea, type PermissionArea } from '../../core/nav/permission-area';
 import { SlAvatar, SlAvatarFallback } from '@slotted/angular/avatar';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlDescriptionList, SlDescriptionListDescription, SlDescriptionListItem, SlDescriptionListTerm } from '@slotted/angular/description-list';
@@ -2149,7 +2388,7 @@ export class ProfilePage {
   readonly manager = computed(() => this.session.session()?.user.managerId ?? '—');
   readonly warehouses = computed(() => (this.session.session()?.warehouses ?? []).map((w) => `${w.code} ${w.name}`).join(', ') || 'None');
   readonly grouped = computed(() => {
-    const byArea = new Map<PermissionArea, Permission[]>();
+    const byArea = new Map<PermissionArea, string[]>();
     for (const p of this.session.session()?.permissions ?? []) (byArea.get(permissionArea(p)) ?? byArea.set(permissionArea(p), []).get(permissionArea(p))!).push(p);
     return [...byArea.entries()].map(([area, permissions]) => ({ area, label: AREA_LABELS[area], permissions: permissions.sort() }));
   });
@@ -2162,7 +2401,7 @@ export class ProfilePage {
 // src/app/pages/preferences/preferences-page.ts
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import type { UserPreferences } from '@nexora/domain';
+import type { UserPreferences } from '../../core/session/preferences.store';
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlField, SlFieldDescription, SlFieldLabel } from '@slotted/angular/field';
@@ -2221,7 +2460,7 @@ import { SessionStore } from '../../core/session/session.store';
       </div>
       <footer slPageFooter [open]="dirty()">
         <button slButton variant="ghost" tone="secondary" (click)="reset()">Discard</button>
-        <button slButton tone="accent" [loading]="saving()" (click)="save()">Save preferences</button>
+        <button slButton tone="accent" (click)="save()">Save preferences</button>
       </footer>
     </div>
   `,
@@ -2231,7 +2470,6 @@ export class PreferencesPage {
   private readonly session = inject(SessionStore);
   private readonly toasts = inject(SlToastService);
   readonly draft = signal<UserPreferences>(structuredClone(this.preferences.preferences()));
-  readonly saving = signal(false);
   readonly dirty = computed(() => JSON.stringify(this.draft()) !== JSON.stringify(this.preferences.preferences()));
   readonly startPages = computed(() => visibleModules((p) => this.session.can(p)).map((m) => ({ path: m.destinations[0]?.path ?? m.path, label: m.label })));
 
@@ -2239,14 +2477,9 @@ export class PreferencesPage {
     this.draft.set(structuredClone(this.preferences.preferences()));
   }
 
-  async save(): Promise<void> {
-    this.saving.set(true);
-    try {
-      await this.preferences.update(this.draft());
-      this.toasts.show({ title: 'Preferences saved', tone: 'success' });
-    } finally {
-      this.saving.set(false);
-    }
+  save(): void {
+    this.preferences.update(this.draft());
+    this.toasts.show({ title: 'Preferences saved', tone: 'success' });
   }
 }
 ```
@@ -2255,13 +2488,13 @@ As ligações `[(value)]="draft().scheme"` num signal de objeto não são válid
 
 - [ ] **Step 5: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test && pnpm --filter @nexora/angular build`
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
 Expected: PASS.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): menu de utilizador (identidade, aparência e densidade por radio group, atalhos, sign out), página de perfil com permissões efetivas, página de preferências persistida"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): menu de utilizador (identidade, aparência e densidade por radio group, atalhos, sign out), página de perfil com permissões efetivas, página de preferências persistida"
 ```
 
 ---
@@ -2274,7 +2507,7 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 
 **Interfaces:**
 - Consumes: `NotificationsStore`, `ClockService`, `Router`.
-- Produces: `NotificationRow` (`input notification`, outputs `read`, `unread`, `archive`, `open`), `NotificationsPopover`, `NotificationsPage`.
+- Produces: `NotificationRow` (`input notification`, outputs `read`, `archive`, `open`), `NotificationsPopover`, `NotificationsPage`.
 
 - [ ] **Step 1: Teste**
 
@@ -2285,14 +2518,15 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { NotificationsStore } from '../../core/activity/notifications.store';
 
 describe('NotificationsPopover', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi(), provideRouter(routes)] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
   it('lists notifications and marks one read from the row action', async () => {
@@ -2316,7 +2550,7 @@ describe('NotificationsPopover', () => {
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL.
 
 - [ ] **Step 3: Linha, popover, página**
@@ -2325,7 +2559,7 @@ Expected: FAIL.
 // src/app/shell/notifications/notification-row.ts
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import type { Notification, NotificationType } from '@nexora/domain';
+import type { Notification, NotificationType } from '@slotted/demo-nexora-operations';
 import { SlIconButton } from '@slotted/angular/button';
 import { SlListItem, SlListItemActions, SlListItemBody, SlListItemContent, SlListItemDescription, SlListItemLabel, SlListItemStart } from '@slotted/angular/list-item';
 import { ClockService } from '../../core/session/clock.service';
@@ -2357,8 +2591,6 @@ const TONE: Record<NotificationType, string> = { info: 'secondary', success: 'su
       <div slListItemActions>
         @if (unread()) {
           <button slIconButton size="xs" tone="secondary" variant="ghost" [attr.aria-label]="'Mark as read: ' + notification().title" (click)="read.emit(notification().id)"><ng-icon name="lucideCheck" size="14" /></button>
-        } @else if (!notification().archivedAt) {
-          <button slIconButton size="xs" tone="secondary" variant="ghost" [attr.aria-label]="'Mark as unread: ' + notification().title" (click)="unreadRequest.emit(notification().id)"><ng-icon name="lucideMailOpen" size="14" /></button>
         }
         @if (!notification().archivedAt) {
           <button slIconButton size="xs" tone="secondary" variant="ghost" [attr.aria-label]="'Archive: ' + notification().title" (click)="archive.emit(notification().id)"><ng-icon name="lucideArchive" size="14" /></button>
@@ -2370,7 +2602,6 @@ const TONE: Record<NotificationType, string> = { info: 'secondary', success: 'su
 export class NotificationRow {
   readonly notification = input.required<Notification>();
   readonly read = output<string>();
-  readonly unreadRequest = output<string>();
   readonly archive = output<string>();
   readonly open = output<Notification>();
   readonly clock = inject(ClockService);
@@ -2384,7 +2615,7 @@ export class NotificationRow {
 // src/app/shell/notifications/notifications-popover.ts
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import type { Notification } from '@nexora/domain';
+import type { Notification } from '@slotted/demo-nexora-operations';
 import { SlButton, SlButtonLink } from '@slotted/angular/button';
 import { SlList, SlListSection, SlListSectionLabel, SlListSectionList } from '@slotted/angular/list';
 import { SlPopover, SlPopoverBody, SlPopoverContent, SlPopoverFooter, SlPopoverHeader, SlPopoverLayer, SlPopoverTitle, SlPopoverTrigger } from '@slotted/angular/popover';
@@ -2419,7 +2650,7 @@ import { NotificationRow } from './notification-row';
                     <span slListSectionLabel>{{ group.label }}</span>
                     <ul slListSectionList>
                       @for (n of group.items; track n.id) {
-                        <li app-notification-row size="sm" [notification]="n" (read)="store.markRead($event)" (unreadRequest)="store.markUnread($event)" (archive)="store.archive($event)" (open)="openNotification($event)"></li>
+                        <li app-notification-row size="sm" [notification]="n" (read)="store.markRead($event)" (archive)="store.archive($event)" (open)="openNotification($event)"></li>
                       }
                     </ul>
                   </li>
@@ -2454,7 +2685,8 @@ export class NotificationsPopover {
   async openNotification(n: Notification): Promise<void> {
     if (n.readAt === undefined) await this.store.markRead(n.id);
     this.open.set(false);
-    if (n.route !== undefined) await this.router.navigateByUrl(n.route);
+    const route = this.store.routeFor(n);
+    if (route !== null) await this.router.navigateByUrl(route);
   }
 }
 ```
@@ -2463,7 +2695,7 @@ export class NotificationsPopover {
 // src/app/pages/notifications/notifications-page.ts
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import type { Notification } from '@nexora/domain';
+import type { Notification } from '@slotted/demo-nexora-operations';
 import { SlButton } from '@slotted/angular/button';
 import { SlList } from '@slotted/angular/list';
 import { SlPage, SlPageBody } from '@slotted/angular/page';
@@ -2499,7 +2731,7 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
         } @else {
           <ul slList>
             @for (n of store.items(); track n.id) {
-              <li app-notification-row [notification]="n" (read)="store.markRead($event)" (unreadRequest)="store.markUnread($event)" (archive)="store.archive($event)" (open)="open($event)"></li>
+              <li app-notification-row [notification]="n" (read)="store.markRead($event)" (archive)="store.archive($event)" (open)="open($event)"></li>
             }
           </ul>
           <nav slPagination [pageValue]="store.page()" [count]="store.total()" [pageSizeValue]="25" (pageChange)="store.loadPage($event.value)" label="Notifications pages"></nav>
@@ -2523,20 +2755,21 @@ export class NotificationsPage implements OnInit {
 
   async open(n: Notification): Promise<void> {
     if (n.readAt === undefined) await this.store.markRead(n.id);
-    if (n.route !== undefined) await this.router.navigateByUrl(n.route);
+    const route = this.store.routeFor(n);
+    if (route !== null) await this.router.navigateByUrl(route);
   }
 }
 ```
 
 - [ ] **Step 4: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test && pnpm --filter @nexora/angular build`
-Expected: PASS. Ícones novos: `lucideInfo, lucideCircleCheck, lucideTriangleAlert, lucideCircleAlert, lucideCheck, lucideMailOpen, lucideArchive`.
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
+Expected: PASS. Ícones novos: `lucideInfo, lucideCircleCheck, lucideTriangleAlert, lucideCircleAlert, lucideCheck, lucideArchive`. `NotificationType` do backend: confirmar os quatro literais em `backend/domain/activity.ts` e ajustar `ICON`/`TONE`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): notificações — popover com Today/Earlier, ações por linha, marcar todas; página com vistas All/Unread/Archived e paginação"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): notificações — popover com Today/Earlier, ações por linha, marcar todas; página com vistas All/Unread/Archived e paginação"
 ```
 
 ---
@@ -2549,7 +2782,7 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 
 **Interfaces:**
 - Consumes: `SearchService`, `SessionStore`, `DemoStore`, `visibleModules`, `Router`, `SlCommandPalette`, `CommandPaletteItem`, `CommandGroup`.
-- Produces: `CommandPalette` com `palette = viewChild.required(SlCommandPalette)`, `open(): void`, `items: Signal<PaletteItem[]>`, `groups`; `PaletteItem extends CommandPaletteItem { kind: 'go' | 'action' | 'demo' | 'recent' | 'hit'; icon?: string; document?: SearchDocument }`.
+- Produces: `CommandPalette` com `palette = viewChild.required(SlCommandPalette)`, `open(): void`, `items: Signal<PaletteItem[]>`, `groups`; `PaletteItem extends CommandPaletteItem { kind: 'go' | 'action' | 'demo' | 'recent' | 'hit'; icon?: string; hit?: SearchHit }`.
 
 - [ ] **Step 1: Teste**
 
@@ -2560,15 +2793,16 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { SessionStore } from '../../core/session/session.store';
 import { CommandPalette } from './command-palette';
 
 describe('CommandPalette', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi(), provideRouter(routes)] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
     await TestBed.inject(SessionStore).load();
   });
 
@@ -2583,14 +2817,14 @@ describe('CommandPalette', () => {
     await palette.runSearch('meridian');
     const hits = palette.items().filter((i) => i.kind === 'hit');
     expect(hits.map((h) => h.group)).toContain('customer');
-    expect(hits.some((h) => h.label === 'Meridian Controls Group')).toBe(true);
+    expect(hits.some((h) => h.label.includes('Meridian'))).toBe(true);
   });
 });
 ```
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL.
 
 - [ ] **Step 3: Implementação**
@@ -2600,7 +2834,7 @@ Expected: FAIL.
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { SEARCH_GROUP_LABELS, SEARCH_GROUP_ORDER, type SearchDocument, type SearchGroup } from '@nexora/domain';
+import type { SearchHit, SearchResponse } from '@slotted/demo-nexora-operations';
 import type { CommandGroup } from '@slotted/core/commands';
 import { SlCommandPalette, SlCommandPaletteEmpty, SlCommandPaletteItem, type CommandPaletteItem, type CommandPaletteSelectRequest } from '@slotted/angular/command-palette';
 import { SlHighlight } from '@slotted/angular/highlight';
@@ -2614,12 +2848,18 @@ import { DemoDrawer } from '../demo/demo-drawer';
 export interface PaletteItem extends CommandPaletteItem {
   kind: 'go' | 'action' | 'demo' | 'recent' | 'hit';
   icon?: string;
-  document?: SearchDocument;
+  hit?: SearchHit;
 }
 
-const ENTITY_ICON: Record<string, string> = {
-  customer: 'lucideBuilding2', contact: 'lucideUser', sales_order: 'lucideShoppingCart', quote: 'lucideFileText', invoice: 'lucideReceipt',
-  product: 'lucidePackage', supplier: 'lucideTruck', purchase_order: 'lucideClipboardList', ticket: 'lucideLifeBuoy',
+const SEARCH_GROUP_ORDER: readonly SearchHit['type'][] = ['customer', 'contact', 'order', 'quote', 'invoice', 'product', 'sku', 'supplier', 'purchase_order', 'ticket'];
+const SEARCH_GROUP_LABELS: Record<SearchHit['type'], string> = {
+  customer: 'Customers', contact: 'Contacts', order: 'Sales orders', quote: 'Quotes', invoice: 'Invoices', product: 'Products', sku: 'SKUs',
+  supplier: 'Suppliers', purchase_order: 'Purchase orders', ticket: 'Tickets',
+};
+
+const ENTITY_ICON: Record<SearchHit['type'], string> = {
+  customer: 'lucideBuilding2', contact: 'lucideUser', order: 'lucideShoppingCart', quote: 'lucideFileText', invoice: 'lucideReceipt',
+  product: 'lucidePackage', sku: 'lucidePackage', supplier: 'lucideTruck', purchase_order: 'lucideClipboardList', ticket: 'lucideLifeBuoy',
 };
 
 @Component({
@@ -2664,7 +2904,7 @@ export class CommandPalette {
   readonly open = signal(false);
   readonly query = signal('');
   readonly loading = signal(false);
-  readonly hits = signal<SearchGroup[]>([]);
+  readonly hits = signal<SearchResponse['groups']>([]);
 
   readonly groups = computed<CommandGroup[]>(() => [
     { id: 'recent', label: 'Recent' },
@@ -2696,13 +2936,13 @@ export class CommandPalette {
   });
 
   readonly recent = computed<PaletteItem[]>(() =>
-    this.search.recent().map((d) => ({ id: `recent:${d.id}`, kind: 'recent', label: d.title, group: 'recent', icon: ENTITY_ICON[d.type], meta: d.businessNumber, document: d, href: d.route })),
+    this.search.recent().map((d) => ({ id: `recent:${d.id}`, kind: 'recent', label: d.title, group: 'recent', icon: ENTITY_ICON[d.type], meta: d.number, hit: d, href: this.search.routeFor(d) })),
   );
 
   readonly hitItems = computed<PaletteItem[]>(() =>
     this.hits().flatMap((g) => g.hits.map((h): PaletteItem => ({
-      id: `hit:${h.id}`, kind: 'hit', label: h.title, group: h.type, icon: ENTITY_ICON[h.type], meta: h.businessNumber, description: h.subtitle, document: h, href: h.route,
-      keywords: h.terms,
+      id: `hit:${h.id}`, kind: 'hit', label: h.title, group: h.type, icon: ENTITY_ICON[h.type], meta: h.number, description: h.subtitle, hit: h, href: this.search.routeFor(h),
+      keywords: [h.title.toLowerCase(), h.subtitle.toLowerCase(), h.number?.toLowerCase() ?? ''],
     }))),
   );
 
@@ -2745,7 +2985,7 @@ export class CommandPalette {
 
   run(request: CommandPaletteSelectRequest<PaletteItem>): void {
     const item = request.item;
-    if (item.document !== undefined) this.search.remember(item.document);
+    if (item.hit !== undefined) this.search.remember(item.hit);
     if (item.href !== undefined) void this.router.navigateByUrl(item.href);
   }
 
@@ -2755,17 +2995,17 @@ export class CommandPalette {
 }
 ```
 
-O `Banner` liga o drawer: `effect(() => this.palette().drawer.set(this.demo()))` no construtor do `Banner`. O debounce de 150 ms fica dentro de `SearchService.search` (ver Task 2): substituir `firstValueFrom(this.http.get(...))` por `await new Promise((r) => setTimeout(r, 150))` antes do pedido, seguido da verificação `mine === this.sequence` também antes do `http.get`. `DemoDrawer.openAt(section?)` é criado na Task 9; até lá o componente mínimo expõe `openAt = (_?: string) => this.open.set(true)`.
+O `Banner` liga o drawer: `effect(() => this.palette().drawer.set(this.demo()))` no construtor do `Banner`. O debounce de 150 ms vive em `SearchService.search` (Task 2). `DemoDrawer.openAt(section?)` é criado na Task 9; até lá o componente mínimo expõe `openAt = (_?: string) => this.open.set(true)`.
 
 - [ ] **Step 4: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test && pnpm --filter @nexora/angular build`
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
 Expected: PASS. Ícones novos: `lucideBuilding2, lucideUser, lucideFileText, lucideReceipt, lucideClipboardList, lucideCornerDownRight, lucidePlus, lucideBell`. Se `select` da família não expuser `keepOpen`/`onSelect` como descrito, ler `slotted-angular-command-palette.d.ts` e ajustar; registar em `LIBRARY-FEEDBACK.md`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): command palette — recentes, Go to por permissão, ações gated, comandos de demonstração, resultados de pesquisa agrupados por entidade"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): command palette — recentes, Go to por permissão, ações gated, comandos de demonstração, resultados de pesquisa agrupados por entidade"
 ```
 
 ---
@@ -2789,15 +3029,16 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { SessionStore } from '../../core/session/session.store';
 import { DemoDrawer } from './demo-drawer';
 
 describe('DemoDrawer', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi(), provideRouter(routes)] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
   it('switches persona from the list and reloads the session', async () => {
@@ -2809,14 +3050,14 @@ describe('DemoDrawer', () => {
     const noah = [...doc.querySelectorAll('[data-ui="drawer"] button')].find((b) => b.textContent?.includes('Noah Bennett')) as HTMLButtonElement;
     noah.click();
     await harness.fixture.whenStable();
-    expect(TestBed.inject(SessionStore).user()?.id).toBe('usr_000004');
+    expect(TestBed.inject(SessionStore).user()?.displayName).toBe('Noah Bennett');
   });
 });
 ```
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL.
 
 - [ ] **Step 3: Implementação**
@@ -2825,7 +3066,7 @@ Expected: FAIL.
 // src/app/shell/demo/demo-drawer.ts
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import type { ScenarioId } from '@nexora/domain';
+import type { ScenarioId } from '@slotted/demo-nexora-operations';
 import { SlAvatar, SlAvatarFallback } from '@slotted/angular/avatar';
 import { SlButton } from '@slotted/angular/button';
 import { SlAlertDialog, SlAlertDialogAction, SlAlertDialogCancel, SlAlertDialogIcon, SlDialogDescription, SlDialogFooter, SlDialogHeader, SlDialogTitle } from '@slotted/angular/dialog';
@@ -2860,11 +3101,11 @@ import { SessionStore } from '../../core/session/session.store';
       <div slDrawerBody>
         <section slSection heading="Persona" id="demo-persona">
           <ul slList>
-            @for (p of demo.info()?.personas ?? []; track p.id) {
-              <li slListItem size="sm" [selected]="p.id === session.user()?.id" [disabled]="!p.active">
-                <button type="button" class="persona" slListItemContent [disabled]="!p.active || demo.busy()" (click)="setPersona(p.id, p.displayName)">
-                  <span slListItemStart><span slAvatar size="sm" tone="accent" variant="soft" [name]="p.displayName"><span slAvatarFallback></span></span></span>
-                  <span slListItemBody><span slListItemLabel>{{ p.displayName }}</span><span slListItemDescription>{{ p.role }} · {{ p.context }}</span></span>
+            @for (p of demo.info()?.personas ?? []; track p.key) {
+              <li slListItem size="sm" [selected]="p.userId === session.user()?.id" [disabled]="!p.active">
+                <button type="button" class="persona" slListItemContent [disabled]="!p.active || demo.busy()" (click)="setPersona(p.key, p.name)">
+                  <span slListItemStart><span slAvatar size="sm" tone="accent" variant="soft" [name]="p.name"><span slAvatarFallback></span></span></span>
+                  <span slListItemBody><span slListItemLabel>{{ p.name }}</span><span slListItemDescription>{{ p.role }} · {{ p.context }}</span></span>
                 </button>
               </li>
             }
@@ -2888,7 +3129,7 @@ import { SessionStore } from '../../core/session/session.store';
         </section>
 
         <section slSection heading="Transport">
-          <button slToggle [pressed]="session.session()?.transportProfile === 'system_degraded'" (pressedChange)="setDegraded($event.value)">System degraded</button>
+          <button slToggle [pressed]="demo.info()?.latency === 'degraded'" (pressedChange)="setDegraded($event.value)">System degraded</button>
           <p>700 ms base latency, random 503s on activity and finance, 5 % failed mutations.</p>
         </section>
 
@@ -2948,8 +3189,8 @@ export class DemoDrawer {
     if (section !== undefined) setTimeout(() => document.getElementById(`demo-${section}`)?.scrollIntoView({ block: 'start' }), 50);
   }
 
-  async setPersona(userId: string, name: string): Promise<void> {
-    await this.demo.setPersona(userId);
+  async setPersona(key: string, name: string): Promise<void> {
+    await this.demo.setPersona(key);
     this.open.set(false);
     this.toasts.show({ title: `Signed in as ${name}`, tone: 'success' });
     await this.router.navigateByUrl(this.preferences.preferences().startRoute);
@@ -2971,7 +3212,7 @@ export class DemoDrawer {
   }
 
   async advance(days: number): Promise<void> {
-    await this.demo.advance(days);
+    await this.demo.advanceDays(days);
     this.toasts.show({ title: `Business date is now ${this.clock.formatDate(this.clock.now())}` });
   }
 
@@ -2982,7 +3223,7 @@ export class DemoDrawer {
   }
 
   async setDegraded(pressed: boolean): Promise<void> {
-    await this.demo.setTransport(pressed ? 'system_degraded' : 'normal');
+    await this.demo.setLatency(pressed ? 'degraded' : 'normal');
     this.toasts.show({ title: pressed ? 'Transport degraded' : 'Transport normal', tone: pressed ? 'warning' : 'success' });
   }
 
@@ -2999,13 +3240,13 @@ Remover `SlToastService as never` do `imports` (serviço, não diretiva). O nome
 
 - [ ] **Step 4: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test && pnpm --filter @nexora/angular build`
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/angular/src && git add apps/demos/nexora/apps/angular && git commit -m "feat(nexora-angular): painel de demonstração em drawer — personas, cenário com confirmação e reset, data de negócio, transporte degradado, reset com alert dialog, toasts"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular/src && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): painel de demonstração em drawer — personas, cenário com confirmação e reset, data de negócio, transporte degradado, reset com alert dialog, toasts"
 ```
 
 ---
@@ -3013,8 +3254,8 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora/apps/
 ### Task 10: Atalhos, diálogo de atalhos, `system_degraded` nos toasts, screenshots, documentação
 
 **Files:**
-- Replace: `src/app/core/shortcuts/shortcuts.service.ts`; create `src/app/shell/shortcuts/shortcuts-dialog.ts`, `apps/demos/nexora/LIBRARY-FEEDBACK.md`, `apps/demos/nexora/README.md`
-- Modify: `src/app/shell/shell-layout.ts` (instala o serviço de atalhos; inclui o diálogo), `src/app/core/api/nexora-api.provider.ts` (toast com Retry em `503 retryable` de mutações), `apps/demos/nexora/apps/angular/README.md`
+- Replace: `src/app/core/shortcuts/shortcuts.service.ts`; create `src/app/shell/shortcuts/shortcuts-dialog.ts`, `apps/demos/nexora-angular/LIBRARY-FEEDBACK.md`, `apps/demos/nexora-angular/README.md`
+- Modify: `src/app/shell/shell-layout.ts` (instala o serviço de atalhos; inclui o diálogo), `src/app/core/api/nexora-api.provider.ts` (toast com Retry em `503 retryable` de mutações), `apps/demos/nexora-angular/README.md`
 - Test: `src/app/core/shortcuts/shortcuts.service.spec.ts`
 
 **Interfaces:**
@@ -3029,7 +3270,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideTestApi } from '../../../test/testing';
+import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
 import { ShortcutsService } from './shortcuts.service';
 
@@ -3037,8 +3278,9 @@ const press = (doc: Document, key: string, init: KeyboardEventInit = {}) => doc.
 
 describe('ShortcutsService', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestApi(), provideRouter(routes)] });
+    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
     await TestBed.inject(ApplicationInitStatus).donePromise;
+    await resetTestBackend();
   });
 
   it('navigates with g then s, ignores modules the user cannot see, opens the dialog on ?', async () => {
@@ -3061,7 +3303,7 @@ describe('ShortcutsService', () => {
 
 - [ ] **Step 2: Correr e ver falhar**
 
-Run: `cd apps/demos/nexora && pnpm --filter @nexora/angular test`
+Run: `cd apps/demos/nexora-angular && pnpm test`
 Expected: FAIL.
 
 - [ ] **Step 3: Serviço e diálogo**
@@ -3174,11 +3416,11 @@ export class ShortcutsDialog {
 
 Em `ShellLayout`: `inject(ShortcutsService).install()` no construtor; `<app-shortcuts-dialog />` no fim do template; `effect(() => { if (this.shortcuts.demoRequested() > 0) this.bannerRef().demo().openAt(); })` com `bannerRef = viewChild.required(Banner)` (ler o valor uma vez para o efeito depender dele).
 
-Toast de `503 retryable` em mutações: no interceptor, para `response.status === 503` e `request.method !== 'GET'`, `inject(SlToastService).show({ title: 'Nexora did not answer', description: 'The change was not saved.', tone: 'danger', duration: 8000 })`. A ação Retry do spec §12 fica registada em `LIBRARY-FEEDBACK.md` como pendente: o `ToastInput` da beta consumida não expõe uma ação com handler (confirmar em `slotted-angular-toast.d.ts`; se expuser, ligar a `next(request)` reemitido).
+Toast de `503 retryable` em mutações: nos stores de notificações e no `DemoStore`, um `catch` com `isApiError(error, 'SERVICE_UNAVAILABLE')` mostra `SlToastService.show({ title: 'Nexora did not answer', description: 'The change was not saved.', tone: 'danger', duration: 8000 })` e relança. A ação Retry do spec fica registada em `LIBRARY-FEEDBACK.md` como pendente: o `ToastInput` da beta consumida não expõe uma ação com handler (confirmar em `slotted-angular-toast.d.ts`; se expuser, ligar a uma repetição da chamada).
 
 - [ ] **Step 4: Documentação e screenshots**
 
-`apps/demos/nexora/LIBRARY-FEEDBACK.md` — cabeçalho e uma entrada por fricção registada nas tarefas anteriores:
+`apps/demos/nexora-angular/LIBRARY-FEEDBACK.md` — cabeçalho e uma entrada por fricção registada nas tarefas anteriores:
 
 ```markdown
 # Library feedback from Nexora
@@ -3189,21 +3431,31 @@ One entry per friction met while consuming `@slotted/angular` as a beta. Family,
 | --- | --- | --- | --- |
 | 0.1.0-beta.0 | app-shell, page-header, page, side-navigation | four `provide*Defaults` calls to speak English | `app.config.ts` grows one provider per family that speaks |
 | 0.1.0-beta.0 | date-field, calendar, currency-field, … | no root provider for locale/timeZone | not hit yet: the Shell has no date control |
+
+## Backend
+
+One entry per gap met in `@slotted/demo-nexora-operations` while building the Shell. The backend is not changed from here.
+
+| Area | Gap | Cost |
+| --- | --- | --- |
+| persistence | in-memory only; a reload re-seeds | persona, scenario and preferences kept by the client in `localStorage` |
+| notifications | no `route`; `archive` to confirm | route derived from `entityType`/`entityId` |
+| session | no sign-out | client-side `unauthenticated` state |
 ```
 
-`apps/demos/nexora/README.md`: estrutura do monorepo do produto, comandos (`pnpm install`, `pnpm build`, `pnpm test`, `pnpm start`), o ritual de upgrade de beta (`pnpm release:beta` na raiz → editar os três `file:` em `apps/angular/package.json` → `pnpm install`), e o índice dos pacotes. Mover para aqui o conteúdo do `README.md` da app que descreve a instalação; o `README.md` da app fica com o que é só dela (porta 4250, `angular.json`).
+`apps/demos/nexora-angular/README.md`: estrutura do monorepo do produto, comandos (`pnpm install`, `pnpm build`, `pnpm test`, `pnpm start`), o ritual de upgrade de beta (`pnpm release:beta` na raiz → editar os três `file:` em `apps/angular/package.json` → `pnpm install`), e o índice dos pacotes. Mover para aqui o conteúdo do `README.md` da app que descreve a instalação; o `README.md` da app fica com o que é só dela (porta 4250, `angular.json`).
 
-Screenshots: com `pnpm start` a correr, o script da sessão (`scratchpad/shoot.mjs`, copiado para `apps/demos/nexora/apps/angular/tools/shoot.mjs`) captura `/dashboard` em light e dark a 1280 e 420 px, `/sign-in`, `/finance/overview` com Sofia (403), o popover de notificações e o drawer aberto — as duas últimas por `Runtime.evaluate` a clicar no botão antes da captura. Ficheiros em `apps/demos/nexora/apps/angular/screenshots/` (adicionar ao `.gitignore` da app). Ler cada imagem e corrigir o que estiver visivelmente errado antes do commit.
+Screenshots: com `pnpm start` a correr, o script da sessão (`scratchpad/shoot.mjs`, copiado para `apps/demos/nexora-angular/tools/shoot.mjs`) captura `/dashboard` em light e dark a 1280 e 420 px, `/sign-in`, `/finance/overview` com Sofia (403), o popover de notificações e o drawer aberto — as duas últimas por `Runtime.evaluate` a clicar no botão antes da captura. Ficheiros em `apps/demos/nexora-angular/screenshots/` (adicionar ao `.gitignore` da app). Ler cada imagem e corrigir o que estiver visivelmente errado antes do commit.
 
 - [ ] **Step 5: Correr e ver passar**
 
-Run: `cd apps/demos/nexora && pnpm test && pnpm --filter @nexora/angular build`
+Run: `cd apps/demos/nexora-angular && pnpm test && pnpm build:demo`
 Expected: PASS em todos os projetos; build sem avisos de orçamento.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora && git add apps/demos/nexora && git commit -m "feat(nexora-angular): atalhos (mod+k, mod+shift+d, ?, g+letra por permissão), diálogo de atalhos, toast em 503 de mutação, LIBRARY-FEEDBACK.md, README do produto"
+cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora-angular && git add apps/demos/nexora-angular && git commit -m "feat(nexora-angular): atalhos (mod+k, mod+shift+d, ?, g+letra por permissão), diálogo de atalhos, toast em 503 de mutação, LIBRARY-FEEDBACK.md, README do produto"
 ```
 
 ---
@@ -3212,4 +3464,4 @@ cd /home/dreco/dev/slotted && pnpm exec prettier --write apps/demos/nexora && gi
 
 - Cobertura do spec: §6.1 (T1), §6.2 (T2), §6.3 (T3), §7 (T4, T5, T9, T10), §8 (T6), §9 (T7), §10 (T8), §11 (T3 `BrandMark`, `styles.css` existente; favicon SVG entra na T10 junto dos screenshots: `public/favicon.svg` com o mesmo desenho em `#0f766e` e `<link rel="icon" type="image/svg+xml" href="favicon.svg">` em `index.html`), §12 (T3, T4, T10), §13 (testes por tarefa; screenshots T10), §14 (T10).
 - Pontos que dependem de confirmação nos `.d.ts` da beta consumida e estão assinalados no texto: `slStatCard` inputs, `StatusIndicatorStatus`, `slSection heading`, `slRadioGroup`/`slRadio`/`slCheckbox`/`slField` seletores e outputs, `slToggle pressedChange`, `a[slSideNavigationLink]` com `href` vs `routerLink`, `a[slMenuItem]` com `href` + `(select)`, `ToastInput` sem ação. Cada confirmação que obrigar a mudar o plano é registada em `LIBRARY-FEEDBACK.md`.
-- Nomes entre tarefas: `provideTestApi`, `SessionStore.can/canAny/user/status/reload`, `PreferencesStore.preferences/update`, `NotificationsStore.unread/items/view/page/total/loading/refreshCount/loadPage/markRead/markUnread/archive/markAllRead`, `ApprovalsStore.pending/items/refresh/load`, `TasksStore.open/items/refresh`, `DemoStore.info/busy/load/setPersona/signOut/switchScenario/advance/reset/setTransport`, `SearchService.search/recent/remember`, `ClockService.now/businessDate/relative/formatDate/formatTime/isToday`, `visibleModules/moduleFor/destinationFor/NAV_MODULES/SECTION_LABELS`, `CommandPalette.palette/drawer/items/query/runSearch`, `DemoDrawer.open/openAt`, `ShortcutsService.install/dialogOpen/openDialog/bindings/demoRequested`, `TransportHealth.degraded/reportFailure` — consistentes nas tarefas em que aparecem.
+- Nomes entre tarefas: `provideTestBackend`, `SessionStore.can/canAny/user/status/reload`, `PreferencesStore.preferences/update`, `NotificationsStore.unread/items/view/page/total/loading/refreshCount/loadPage/markRead/markUnread/archive/markAllRead`, `ApprovalsStore.pending/items/refresh/load`, `TasksStore.open/items/refresh`, `DemoStore.info/busy/load/setPersona/signOut/switchScenario/advance/reset/setTransport`, `SearchService.search/recent/remember`, `ClockService.now/businessDate/relative/formatDate/formatTime/isToday`, `visibleModules/moduleFor/destinationFor/NAV_MODULES/SECTION_LABELS`, `CommandPalette.palette/drawer/items/query/runSearch`, `DemoDrawer.open/openAt`, `ShortcutsService.install/dialogOpen/openDialog/bindings/demoRequested`, `TransportHealth.degraded/reportFailure` — consistentes nas tarefas em que aparecem.

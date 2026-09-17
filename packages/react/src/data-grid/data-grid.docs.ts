@@ -251,26 +251,16 @@ const anatomy: AnatomyRow[] = [
   },
 ];
 
-const scene = (
-  id: string,
-  title: string,
-  note: string,
-  label: string,
-  source: string,
-): ReferenceSceneMeta => ({
-  id,
-  title,
-  note,
-  snippet: defineSnippet({ id: `data-grid-react-${id}`, language: 'tsx', label, source }),
-});
-
 const scenes: ReferenceSceneMeta[] = [
-  scene(
-    'playground',
-    'Playground',
-    'Every capability on one listing of shipments: sort with a press and Shift, filter from the funnel or the row, select with the checkboxes, edit a cell with Enter, pin and resize from the header. The toolbar switches scheme, density and direction.',
-    'A grid of shipments',
-    `<DataGrid
+  {
+    id: 'playground',
+    title: 'Playground',
+    note: 'Every capability on one listing of shipments: sort with a press and Shift, filter from the funnel or the row, select with the checkboxes, edit a cell with Enter, pin and resize from the header. The toolbar switches scheme, density and direction.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-playground',
+      language: 'tsx',
+      label: 'A grid of shipments',
+      source: `<DataGrid
   columns={columns}
   height="100%"
   label="Shipments"
@@ -278,13 +268,17 @@ const scenes: ReferenceSceneMeta[] = [
   rows={shipments}
   selectionMode="multiple"
 />;`,
-  ),
-  scene(
-    'columns',
-    'Columns',
-    'Each column declares its kind, and the kind decides the comparator, the operators, the editor and the alignment: a number column sits its digits at the end in tabular figures, a date column formats the ISO day in the reader’s locale, a set column names its values.',
-    'A column per kind',
-    `const columns: GridColumn<Shipment>[] = [
+    }),
+  },
+  {
+    id: 'columns',
+    title: 'Columns',
+    note: 'Each column declares its kind, and the kind decides the comparator, the operators, the editor and the alignment: a number column sits its digits at the end in tabular figures, a date column formats the ISO day in the reader’s locale, a set column names its values.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-columns',
+      language: 'tsx',
+      label: 'A column per kind',
+      source: `const columns: GridColumn<Shipment>[] = [
   { id: 'id', label: 'Tracking', rowHeader: true, width: 132 },
   { id: 'customer', label: 'Customer', width: 200 },
   { id: 'carrier', label: 'Carrier', kind: 'set', options: carriers },
@@ -292,13 +286,17 @@ const scenes: ReferenceSceneMeta[] = [
   { id: 'shipped', label: 'Shipped', kind: 'date' },
   { id: 'priority', label: 'Priority', kind: 'boolean' },
 ];`,
-  ),
-  scene(
-    'column-groups',
-    'Column groups',
-    'A second header row above the columns: each group spans the columns it names, wherever the reader has laid them out, and a column no group names spans itself.',
-    'Groups over the columns',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'column-groups',
+    title: 'Column groups',
+    note: 'A second header row above the columns: each group spans the columns it names, wherever the reader has laid them out, and a column no group names spans itself.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-column-groups',
+      language: 'tsx',
+      label: 'Groups over the columns',
+      source: `<DataGrid
   columnGroups={[
     { id: 'shipment', label: 'Shipment', columns: ['id', 'customer', 'destination'] },
     { id: 'timing', label: 'Timing', columns: ['shipped', 'eta'] },
@@ -307,13 +305,17 @@ const scenes: ReferenceSceneMeta[] = [
   rowKey="id"
   rows={shipments}
 />;`,
-  ),
-  scene(
-    'sorting',
-    'Sorting',
-    'A press on a header sorts ascending, a second descending, a third removes the key; Shift with the press appends the column to the order instead, and the second and third keys carry their index beside the mark. Enter on the header does the same from the keyboard.',
-    'The order is in the query',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'sorting',
+    title: 'Sorting',
+    note: 'A press on a header sorts ascending, a second descending, a third removes the key; Shift with the press appends the column to the order instead, and the second and third keys carry their index beside the mark. Enter on the header does the same from the keyboard.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-sorting',
+      language: 'tsx',
+      label: 'The order is in the query',
+      source: `<DataGrid
   defaultQuery={{
     ...emptyQuery(),
     sort: [
@@ -323,13 +325,17 @@ const scenes: ReferenceSceneMeta[] = [
   }}
   onQueryChange={(query, request) => log(request.change, query.sort)}
 />;`,
-  ),
-  scene(
-    'filter-panel',
-    'The filter panel',
-    'Ctrl+Enter on a header or its menu opens the panel: one line per condition — operator and operand in sm — the join as two words on the second line once the first is complete, Clear and Apply at the end. Nothing reaches the query until Apply.',
-    'A rule per column, in the query',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'filter-panel',
+    title: 'The filter panel',
+    note: 'Ctrl+Enter on a header or its menu opens the panel: one line per condition — operator and operand in sm — the join as two words on the second line once the first is complete, Clear and Apply at the end. Nothing reaches the query until Apply.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-filter-panel',
+      language: 'tsx',
+      label: 'A rule per column, in the query',
+      source: `<DataGrid
   defaultQuery={
     withColumnFilter(emptyQuery(), 'customer', {
       kind: 'text',
@@ -341,20 +347,28 @@ const scenes: ReferenceSceneMeta[] = [
     }).query
   }
 />;`,
-  ),
-  scene(
-    'filter-row',
-    'The filter row',
-    'With filterRow the row under the header holds one operand per column, plain, with the operator as a symbol at its start — press it for the names in full. Text and number apply after the debounce and on Enter; a set, a boolean and a date apply on change. The cursor walks the row.',
-    'The densest form a wide listing has',
-    `<DataGrid columns={columns} filterRow rowKey="id" rows={shipments} />;`,
-  ),
-  scene(
-    'filter-bar',
-    'With a filter bar',
-    'One descriptor, two families: the bar above edits query.filter and the grid evaluates it, nested groups included. A rule written in a column header appears as a chip in the bar, and a chip removed in the bar clears the header’s funnel.',
-    'The same FilterGroup in both',
-    `<>
+    }),
+  },
+  {
+    id: 'filter-row',
+    title: 'The filter row',
+    note: 'With filterRow the row under the header holds one operand per column, plain, with the operator as a symbol at its start — press it for the names in full. Text and number apply after the debounce and on Enter; a set, a boolean and a date apply on change. The cursor walks the row.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-filter-row',
+      language: 'tsx',
+      label: 'The densest form a wide listing has',
+      source: `<DataGrid columns={columns} filterRow rowKey="id" rows={shipments} />;`,
+    }),
+  },
+  {
+    id: 'filter-bar',
+    title: 'With a filter bar',
+    note: 'One descriptor, two families: the bar above edits query.filter and the grid evaluates it, nested groups included. A rule written in a column header appears as a chip in the bar, and a chip removed in the bar clears the header’s funnel.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-filter-bar',
+      language: 'tsx',
+      label: 'The same FilterGroup in both',
+      source: `<>
   <FilterBar
     fields={fields}
     onValueChange={(filter) => setQuery(withFilter(query, filter).query)}
@@ -362,64 +376,88 @@ const scenes: ReferenceSceneMeta[] = [
   />
   <DataGrid columns={columns} onQueryChange={setQuery} query={query} rowKey="id" rows={shipments} />
 </>;`,
-  ),
-  scene(
-    'search',
-    'Search',
-    'One condition that belongs to no column: query.search is matched against the text of every searchable column through the locale collator, so "agua" finds "Água". The field that writes it is the consumer’s own text-field.',
-    'Search is part of the query',
-    `<>
+    }),
+  },
+  {
+    id: 'search',
+    title: 'Search',
+    note: 'One condition that belongs to no column: query.search is matched against the text of every searchable column through the locale collator, so "agua" finds "Água". The field that writes it is the consumer’s own text-field.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-search',
+      language: 'tsx',
+      label: 'Search is part of the query',
+      source: `<>
   <TextField
     onValueChange={(text) => setQuery(withSearch(query, text).query)}
     value={query.search}
   />
   <DataGrid columns={columns} onQueryChange={setQuery} query={query} rowKey="id" rows={shipments} />
 </>;`,
-  ),
-  scene(
-    'selection',
-    'Row selection',
-    'single chooses one row with a press; multiple draws the checkbox column, pinned to the start: Shift extends from the anchor, Shift+Space toggles the row from any cell, Ctrl+A and the header checkbox cover every row the query left and say so in their name.',
-    'The selection is the reader’s own',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'selection',
+    title: 'Row selection',
+    note: 'single chooses one row with a press; multiple draws the checkbox column, pinned to the start: Shift extends from the anchor, Shift+Space toggles the row from any cell, Ctrl+A and the header checkbox cover every row the query left and say so in their name.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-selection',
+      language: 'tsx',
+      label: 'The selection is the reader’s own',
+      source: `<DataGrid
   onValueChange={(value, request) => log(request.reason, value)}
   selectionMode="multiple"
   value={selected}
 />;`,
-  ),
-  scene(
-    'range',
-    'Cell range',
-    'range selects a rectangle of cells: Shift with the arrows extends it from the anchor, Shift with a press sets it, a drag paints it, Ctrl+Space takes the column and Shift+Space the row. Ctrl+C copies it as tab-separated text; Escape clears it.',
-    'A rectangle, copied',
-    `<DataGrid onRangeChange={(range) => log(range)} range={range} selectionMode="range" />;`,
-  ),
-  scene(
-    'editing',
-    'Editing a cell',
-    'Enter, F2, a double press or a typed key open the cell’s editor — the field family of its kind, plain, filling the cell. Enter commits and moves one row down, Tab commits and moves to the next editable cell, Escape cancels. The commit may return a promise; the cell dims until it settles.',
-    'The value is the column’s own',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'range',
+    title: 'Cell range',
+    note: 'range selects a rectangle of cells: Shift with the arrows extends it from the anchor, Shift with a press sets it, a drag paints it, Ctrl+Space takes the column and Shift+Space the row. Ctrl+C copies it as tab-separated text; Escape clears it.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-range',
+      language: 'tsx',
+      label: 'A rectangle, copied',
+      source: `<DataGrid onRangeChange={(range) => log(range)} range={range} selectionMode="range" />;`,
+    }),
+  },
+  {
+    id: 'editing',
+    title: 'Editing a cell',
+    note: 'Enter, F2, a double press or a typed key open the cell’s editor — the field family of its kind, plain, filling the cell. Enter commits and moves one row down, Tab commits and moves to the next editable cell, Escape cancels. The commit may return a promise; the cell dims until it settles.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-editing',
+      language: 'tsx',
+      label: 'The value is the column’s own',
+      source: `<DataGrid
   columns={[
     { id: 'customer', label: 'Customer', editable: true },
     { id: 'weight', label: 'Weight', kind: 'number', editable: true },
   ]}
   onEditCommit={async ({ key, column, value }) => save(key, { [column]: value })}
 />;`,
-  ),
-  scene(
-    'editing-row',
-    'Editing a row',
-    'editMode="row" opens every editable cell of the row at once: Tab moves between them, Enter commits the row with every change in one request, Escape cancels them all.',
-    'One request per row',
-    `<DataGrid editMode="row" onEditCommit={({ key, changes }) => save(key, changes)} />;`,
-  ),
-  scene(
-    'validation',
-    'Validation, failure and conflict',
-    'A column’s validate refuses a draft with a message: the cell turns invalid and keeps what was typed. A commit that rejects reopens the editor with the draft and the error. A row that changes under an open editor is a conflict, said in the same place.',
-    'An error never discards the draft',
-    `const columns = [
+    }),
+  },
+  {
+    id: 'editing-row',
+    title: 'Editing a row',
+    note: 'editMode="row" opens every editable cell of the row at once: Tab moves between them, Enter commits the row with every change in one request, Escape cancels them all.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-editing-row',
+      language: 'tsx',
+      label: 'One request per row',
+      source: `<DataGrid editMode="row" onEditCommit={({ key, changes }) => save(key, changes)} />;`,
+    }),
+  },
+  {
+    id: 'validation',
+    title: 'Validation, failure and conflict',
+    note: 'A column’s validate refuses a draft with a message: the cell turns invalid and keeps what was typed. A commit that rejects reopens the editor with the draft and the error. A row that changes under an open editor is a conflict, said in the same place.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-validation',
+      language: 'tsx',
+      label: 'An error never discards the draft',
+      source: `const columns = [
   {
     id: 'weight',
     label: 'Weight',
@@ -429,51 +467,75 @@ const scenes: ReferenceSceneMeta[] = [
   },
 ];
 <DataGrid columns={columns} onEditCommit={() => Promise.reject(new Error('Offline'))} />;`,
-  ),
-  scene(
-    'activation',
-    'Row activation',
-    'activatable turns a double press or Enter on a text cell into onActivate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor.',
-    'Open the record',
-    `<DataGrid activatable onActivate={({ key }) => navigate(\`/shipments/\${key}\`)} />;`,
-  ),
-  scene(
-    'pinning',
-    'Pinned columns',
-    'A column pinned to the start or the end stays while the others scroll; the checkbox column is always pinned. Pin from the column menu or the state; the last column of each zone draws the edge, darker while something is hidden under it.',
-    'Pinned through the state',
-    `<DataGrid defaultColumnState={{ pinned: { start: ['id'], end: ['actions'] } }} />;`,
-  ),
-  scene(
-    'resize',
-    'Resizing',
-    'Drag the handle on a column’s trailing edge; Escape during the drag restores the width. From the keyboard, Ctrl+Shift+ArrowRight widens by eight pixels and announces the width; Ctrl+Shift+Enter and a double press on the handle fit the column to its mounted cells.',
-    'Widths are in the column state',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'activation',
+    title: 'Row activation',
+    note: 'activatable turns a double press or Enter on a text cell into onActivate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-activation',
+      language: 'tsx',
+      label: 'Open the record',
+      source: `<DataGrid activatable onActivate={({ key }) => navigate(\`/shipments/\${key}\`)} />;`,
+    }),
+  },
+  {
+    id: 'pinning',
+    title: 'Pinned columns',
+    note: 'A column pinned to the start or the end stays while the others scroll; the checkbox column is always pinned. Pin from the column menu or the state; the last column of each zone draws the edge, darker while something is hidden under it.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-pinning',
+      language: 'tsx',
+      label: 'Pinned through the state',
+      source: `<DataGrid defaultColumnState={{ pinned: { start: ['id'], end: ['actions'] } }} />;`,
+    }),
+  },
+  {
+    id: 'resize',
+    title: 'Resizing',
+    note: 'Drag the handle on a column’s trailing edge; Escape during the drag restores the width. From the keyboard, Ctrl+Shift+ArrowRight widens by eight pixels and announces the width; Ctrl+Shift+Enter and a double press on the handle fit the column to its mounted cells.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-resize',
+      language: 'tsx',
+      label: 'Widths are in the column state',
+      source: `<DataGrid
   columnState={state}
   onColumnStateChange={(next, request) => request.change === 'width' && setState(next)}
 />;`,
-  ),
-  scene(
-    'reorder',
-    'Reordering',
-    'Drag a header along the row: the drop indicator shows the boundary it lands on, and a column never leaves its pin zone. Alt+ArrowLeft and Alt+ArrowRight move the column one place from the keyboard. Every move is announced.',
-    'The order is in the column state',
-    `<DataGrid defaultColumnState={{ order: ['customer', 'id', 'carrier'] }} />;`,
-  ),
-  scene(
-    'column-menu',
-    'The column menu',
-    'Revealed by the pointer and by the cursor, opened with Ctrl+Enter: sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content; hide; and manage columns, which hands over to the application’s column-manager.',
-    'One menu, every column operation',
-    `<DataGrid onManageColumns={() => setManagerOpen(true)} />;`,
-  ),
-  scene(
-    'column-state',
-    'Saving a view',
-    'order, widths, hidden and pinned are one object: serializeColumnState writes it to text, parseColumnState reads it back, and normalizeColumnState drops a column the model no longer has. The same for the query, through toGridParams and fromGridParams.',
-    'A view is two strings',
-    `const [state, setState] = useState(() => parseColumnState(localStorage.getItem('view')));
+    }),
+  },
+  {
+    id: 'reorder',
+    title: 'Reordering',
+    note: 'Drag a header along the row: the drop indicator shows the boundary it lands on, and a column never leaves its pin zone. Alt+ArrowLeft and Alt+ArrowRight move the column one place from the keyboard. Every move is announced.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-reorder',
+      language: 'tsx',
+      label: 'The order is in the column state',
+      source: `<DataGrid defaultColumnState={{ order: ['customer', 'id', 'carrier'] }} />;`,
+    }),
+  },
+  {
+    id: 'column-menu',
+    title: 'The column menu',
+    note: 'Revealed by the pointer and by the cursor, opened with Ctrl+Enter: sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content; hide; and manage columns, which hands over to the application’s column-manager.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-column-menu',
+      language: 'tsx',
+      label: 'One menu, every column operation',
+      source: `<DataGrid onManageColumns={() => setManagerOpen(true)} />;`,
+    }),
+  },
+  {
+    id: 'column-state',
+    title: 'Saving a view',
+    note: 'order, widths, hidden and pinned are one object: serializeColumnState writes it to text, parseColumnState reads it back, and normalizeColumnState drops a column the model no longer has. The same for the query, through toGridParams and fromGridParams.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-column-state',
+      language: 'tsx',
+      label: 'A view is two strings',
+      source: `const [state, setState] = useState(() => parseColumnState(localStorage.getItem('view')));
 <DataGrid
   columnState={state}
   onColumnStateChange={(next) => {
@@ -481,57 +543,81 @@ const scenes: ReferenceSceneMeta[] = [
     localStorage.setItem('view', serializeColumnState(next, columns));
   }}
 />;`,
-  ),
-  scene(
-    'grouping',
-    'Grouping',
-    'query.group names the columns the rows are grouped by, outermost first. A group row carries its level, its count and the aggregates of its rows; ArrowLeft closes it and ArrowRight opens it. expandedGroups is the set of open groups, all by default.',
-    'Grouped in the query',
-    `<DataGrid defaultQuery={{ ...emptyQuery(), group: ['carrier', 'status'] }} />;`,
-  ),
-  scene(
-    'summary',
-    'Aggregates',
-    'A column with aggregate — sum, avg, min, max, count or a function — draws the summary row, pinned to the end of the scroller, over every row the query kept; a grouped grid draws the same aggregate on each group row.',
-    'The summary is the columns’ own',
-    `const columns = [
+    }),
+  },
+  {
+    id: 'grouping',
+    title: 'Grouping',
+    note: 'query.group names the columns the rows are grouped by, outermost first. A group row carries its level, its count and the aggregates of its rows; ArrowLeft closes it and ArrowRight opens it. expandedGroups is the set of open groups, all by default.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-grouping',
+      language: 'tsx',
+      label: 'Grouped in the query',
+      source: `<DataGrid defaultQuery={{ ...emptyQuery(), group: ['carrier', 'status'] }} />;`,
+    }),
+  },
+  {
+    id: 'summary',
+    title: 'Aggregates',
+    note: 'A column with aggregate — sum, avg, min, max, count or a function — draws the summary row, pinned to the end of the scroller, over every row the query kept; a grouped grid draws the same aggregate on each group row.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-summary',
+      language: 'tsx',
+      label: 'The summary is the columns’ own',
+      source: `const columns = [
   { id: 'weight', label: 'Weight', kind: 'number', aggregate: 'sum' },
   { id: 'cost', label: 'Cost', kind: 'number', aggregate: 'sum', format: money },
 ];`,
-  ),
-  scene(
-    'detail',
-    'Row detail',
-    'renderDetail gives a row a detail: the expander column appears, ArrowRight on it opens the detail under the row as one cell spanning every column and held to the frame, ArrowLeft closes it. expanded is the set of open rows.',
-    'A detail under the row',
-    `<DataGrid renderDetail={(row) => <ShipmentTimeline shipment={row} />} />;`,
-  ),
-  scene(
-    'virtualization',
-    'Ten thousand rows',
-    'Above a hundred rows the grid windows them: the body is as tall as every row and only the ones in view, plus the overscan, are in the DOM. Scroll, or jump with Ctrl+End — the last row is mounted and focused. Above twenty middle columns the same happens sideways.',
-    'Windowed by default',
-    `<DataGrid height={480} rowHeight={34} rows={tenThousandShipments} virtualize="auto" />;`,
-  ),
-  scene(
-    'server',
-    'Server mode',
-    'With totalCount or hasMore the grid draws the rows it is given and reports the query instead of applying it: sorting, filtering, searching and paging all arrive as one request saying what changed, and a server answers with the page.',
-    'One request per change',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'detail',
+    title: 'Row detail',
+    note: 'renderDetail gives a row a detail: the expander column appears, ArrowRight on it opens the detail under the row as one cell spanning every column and held to the frame, ArrowLeft closes it. expanded is the set of open rows.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-detail',
+      language: 'tsx',
+      label: 'A detail under the row',
+      source: `<DataGrid renderDetail={(row) => <ShipmentTimeline shipment={row} />} />;`,
+    }),
+  },
+  {
+    id: 'virtualization',
+    title: 'Ten thousand rows',
+    note: 'Above a hundred rows the grid windows them: the body is as tall as every row and only the ones in view, plus the overscan, are in the DOM. Scroll, or jump with Ctrl+End — the last row is mounted and focused. Above twenty middle columns the same happens sideways.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-virtualization',
+      language: 'tsx',
+      label: 'Windowed by default',
+      source: `<DataGrid height={480} rowHeight={34} rows={tenThousandShipments} virtualize="auto" />;`,
+    }),
+  },
+  {
+    id: 'server',
+    title: 'Server mode',
+    note: 'With totalCount or hasMore the grid draws the rows it is given and reports the query instead of applying it: sorting, filtering, searching and paging all arrive as one request saying what changed, and a server answers with the page.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-server',
+      language: 'tsx',
+      label: 'One request per change',
+      source: `<DataGrid
   loading={pending}
   onQueryChange={(next, request) => fetchPage(next, request.change)}
   query={query}
   rows={page.rows}
   totalCount={page.total}
 />;`,
-  ),
-  scene(
-    'pagination',
-    'Pagination',
-    'query.page carries the index and the size; the footer states the range, and the pagination family in the footer moves the page. A change of filter, search or group puts the page back at the start in the same request.',
-    'The page is in the query',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'pagination',
+    title: 'Pagination',
+    note: 'query.page carries the index and the size; the footer states the range, and the pagination family in the footer moves the page. A change of filter, search or group puts the page back at the start in the same request.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-pagination',
+      language: 'tsx',
+      label: 'The page is in the query',
+      source: `<DataGrid
   footer={
     <Pagination
       onPageChange={(index) => setQuery(withPageIndex(query, index).query)}
@@ -541,74 +627,107 @@ const scenes: ReferenceSceneMeta[] = [
   }
   query={query}
 />;`,
-  ),
-  scene(
-    'load-more',
-    'Load more',
-    'With an unknown total the footer states the range without one and offers Load more; when the grid windows its rows, onLoadMore is called on its own as the window nears the end.',
-    'A cursor, no total',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'load-more',
+    title: 'Load more',
+    note: 'With an unknown total the footer states the range without one and offers Load more; when the grid windows its rows, onLoadMore is called on its own as the window nears the end.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-load-more',
+      language: 'tsx',
+      label: 'A cursor, no total',
+      source: `<DataGrid
   hasMore={hasMore}
   onLoadMore={fetchMore}
   query={{ ...emptyQuery(), page: { cursor, size: 50 } }}
   rows={rows}
 />;`,
-  ),
-  scene(
-    'empty-and-loading',
-    'Empty, no results, error, loading',
-    'Three states a body can hold instead of rows, each a result-state: nothing at all; nothing after the filter, with Clear filters; and a failed load, with Try again. A first load draws skeleton rows; a refresh over rows already shown dims them and moves nothing.',
-    'The grid knows which of the three it is',
-    `<DataGrid error={error} loading={loading} onRetry={reload} rows={rows} />;`,
-  ),
-  scene(
-    'variant',
-    'Variants',
-    'plain draws no rules and no band; ruled draws a rule between rows; framed adds the border, the radius and the footer inside. striped tints every second row under every state.',
-    'Three variants and the stripe',
-    `<DataGrid striped variant="framed" />;`,
-  ),
-  scene(
-    'text',
-    'Long values',
-    'truncate is the default — a column has a width — and keeps the whole value in the cell’s title; wrap breaks an unbroken token rather than widening the column; nowrap keeps a code on one line. A value keeps its own direction in a right-to-left grid.',
-    'Per column',
-    `const columns = [
+    }),
+  },
+  {
+    id: 'empty-and-loading',
+    title: 'Empty, no results, error, loading',
+    note: 'Three states a body can hold instead of rows, each a result-state: nothing at all; nothing after the filter, with Clear filters; and a failed load, with Try again. A first load draws skeleton rows; a refresh over rows already shown dims them and moves nothing.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-empty-and-loading',
+      language: 'tsx',
+      label: 'The grid knows which of the three it is',
+      source: `<DataGrid error={error} loading={loading} onRetry={reload} rows={rows} />;`,
+    }),
+  },
+  {
+    id: 'variant',
+    title: 'Variants',
+    note: 'plain draws no rules and no band; ruled draws a rule between rows; framed adds the border, the radius and the footer inside. striped tints every second row under every state.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-variant',
+      language: 'tsx',
+      label: 'Three variants and the stripe',
+      source: `<DataGrid striped variant="framed" />;`,
+    }),
+  },
+  {
+    id: 'text',
+    title: 'Long values',
+    note: 'truncate is the default — a column has a width — and keeps the whole value in the cell’s title; wrap breaks an unbroken token rather than widening the column; nowrap keeps a code on one line. A value keeps its own direction in a right-to-left grid.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-text',
+      language: 'tsx',
+      label: 'Per column',
+      source: `const columns = [
   { id: 'customer', label: 'Customer', text: 'wrap' },
   { id: 'hash', label: 'Hash', text: 'nowrap' },
 ];`,
-  ),
-  scene(
-    'density',
-    'Density',
-    'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Switch density in the toolbar and read the same grid at each.',
-    'No axis of its own',
-    `<DataGrid columns={columns} rowKey="id" rows={shipments} />;`,
-  ),
-  scene(
-    'content',
-    'Content the family did not choose',
-    'A hundred-character customer name, an unbroken identifier, a right-to-left name, a disabled row, an empty cell in a numeric column and a value with a dash: each holds where the family says it holds.',
-    'Real content',
-    `<DataGrid disabledKeys={['SHP-20492']} rows={awkwardShipments} />;`,
-  ),
-  scene(
-    'keyboard',
-    'Keyboard',
-    'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
-    'One tab stop',
-    `<DataGrid
+    }),
+  },
+  {
+    id: 'density',
+    title: 'Density',
+    note: 'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Switch density in the toolbar and read the same grid at each.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-density',
+      language: 'tsx',
+      label: 'No axis of its own',
+      source: `<DataGrid columns={columns} rowKey="id" rows={shipments} />;`,
+    }),
+  },
+  {
+    id: 'content',
+    title: 'Content the family did not choose',
+    note: 'A hundred-character customer name, an unbroken identifier, a right-to-left name, a disabled row, an empty cell in a numeric column and a value with a dash: each holds where the family says it holds.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-content',
+      language: 'tsx',
+      label: 'Real content',
+      source: `<DataGrid disabledKeys={['SHP-20492']} rows={awkwardShipments} />;`,
+    }),
+  },
+  {
+    id: 'keyboard',
+    title: 'Keyboard',
+    note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-keyboard',
+      language: 'tsx',
+      label: 'One tab stop',
+      source: `<DataGrid
   defaultCurrent={{ row: 'SHP-20481', column: 'customer' }}
   onCurrentChange={(cell) => log(cell)}
 />;`,
-  ),
-  scene(
-    'accessibility',
-    'What a reader hears',
-    'A grid named by label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
-    'Name, counts and announcements',
-    `<DataGrid label="Shipments" labels={{ selectAllFiltered: 'Select all {count} shipments' }} />;`,
-  ),
+    }),
+  },
+  {
+    id: 'accessibility',
+    title: 'What a reader hears',
+    note: 'A grid named by label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-accessibility',
+      language: 'tsx',
+      label: 'Name, counts and announcements',
+      source: `<DataGrid label="Shipments" labels={{ selectAllFiltered: 'Select all {count} shipments' }} />;`,
+    }),
+  },
 ];
 
 const api = apiRows([

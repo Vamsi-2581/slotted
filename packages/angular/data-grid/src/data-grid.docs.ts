@@ -6,7 +6,6 @@ import type {
   EventRow,
   ReferenceImport,
   ReferenceSceneMeta,
-  SnippetLanguage,
 } from '@slotted/storybook-workbench';
 
 type ApiTuple = readonly [string, string, string, string, string];
@@ -264,28 +263,16 @@ const anatomy: AnatomyRow[] = [
   },
 ];
 
-const scene = (
-  id: string,
-  title: string,
-  note: string,
-  language: SnippetLanguage,
-  label: string,
-  source: string,
-): ReferenceSceneMeta => ({
-  id,
-  title,
-  note,
-  snippet: defineSnippet({ id: `data-grid-angular-${id}`, language, label, source }),
-});
-
 const scenes: ReferenceSceneMeta[] = [
-  scene(
-    'playground',
-    'Playground',
-    'Every capability on one listing of shipments: sort with a press and Shift, filter from the funnel or the row, select with the checkboxes, edit a cell with Enter, pin and resize from the header. The toolbar switches scheme, density and direction.',
-    'angular',
-    'A grid of shipments',
-    `<sl-data-grid
+  {
+    id: 'playground',
+    title: 'Playground',
+    note: 'Every capability on one listing of shipments: sort with a press and Shift, filter from the funnel or the row, select with the checkboxes, edit a cell with Enter, pin and resize from the header. The toolbar switches scheme, density and direction.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-playground',
+      language: 'angular',
+      label: 'A grid of shipments',
+      source: `<sl-data-grid
   label="Shipments"
   rowKey="id"
   height="100%"
@@ -293,14 +280,17 @@ const scenes: ReferenceSceneMeta[] = [
   [rows]="shipments()"
   [columns]="columns"
 />`,
-  ),
-  scene(
-    'columns',
-    'Columns',
-    'Each column declares its kind, and the kind decides the comparator, the operators, the editor and the alignment: a number column sits its digits at the end in tabular figures, a date column formats the ISO day in the reader’s locale, a set column names its values.',
-    'ts',
-    'A column per kind',
-    `const columns: GridColumn<Shipment>[] = [
+    }),
+  },
+  {
+    id: 'columns',
+    title: 'Columns',
+    note: 'Each column declares its kind, and the kind decides the comparator, the operators, the editor and the alignment: a number column sits its digits at the end in tabular figures, a date column formats the ISO day in the reader’s locale, a set column names its values.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-columns',
+      language: 'ts',
+      label: 'A column per kind',
+      source: `const columns: GridColumn<Shipment>[] = [
   { id: 'id', label: 'Tracking', rowHeader: true, width: 132 },
   { id: 'customer', label: 'Customer', width: 200 },
   { id: 'carrier', label: 'Carrier', kind: 'set', options: carriers },
@@ -308,36 +298,45 @@ const scenes: ReferenceSceneMeta[] = [
   { id: 'shipped', label: 'Shipped', kind: 'date' },
   { id: 'priority', label: 'Priority', kind: 'boolean' },
 ];`,
-  ),
-  scene(
-    'column-groups',
-    'Column groups',
-    'A second header row above the columns: each group spans the columns it names, wherever the reader has laid them out, and a column no group names spans itself.',
-    'angular',
-    'Groups over the columns',
-    `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [columnGroups]="groups" />`,
-  ),
-  scene(
-    'sorting',
-    'Sorting',
-    'A press on a header sorts ascending, a second descending, a third removes the key; Shift with the press appends the column to the order instead, and the second and third keys carry their index beside the mark. Enter on the header does the same from the keyboard.',
-    'angular',
-    'The order is in the query',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'column-groups',
+    title: 'Column groups',
+    note: 'A second header row above the columns: each group spans the columns it names, wherever the reader has laid them out, and a column no group names spans itself.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-column-groups',
+      language: 'angular',
+      label: 'Groups over the columns',
+      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [columnGroups]="groups" />`,
+    }),
+  },
+  {
+    id: 'sorting',
+    title: 'Sorting',
+    note: 'A press on a header sorts ascending, a second descending, a third removes the key; Shift with the press appends the column to the order instead, and the second and third keys carry their index beside the mark. Enter on the header does the same from the keyboard.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-sorting',
+      language: 'angular',
+      label: 'The order is in the query',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   [(query)]="query"
   (queryChangeRequest)="log($event.change, $event.value.sort)"
 />`,
-  ),
-  scene(
-    'filter-panel',
-    'The filter panel',
-    'Ctrl+Enter on a header or its menu opens the panel: one line per condition — operator and operand in sm — the join as two words on the second line once the first is complete, Clear and Apply at the end. Nothing reaches the query until Apply.',
-    'ts',
-    'A rule per column, in the query',
-    `const query = signal(
+    }),
+  },
+  {
+    id: 'filter-panel',
+    title: 'The filter panel',
+    note: 'Ctrl+Enter on a header or its menu opens the panel: one line per condition — operator and operand in sm — the join as two words on the second line once the first is complete, Clear and Apply at the end. Nothing reaches the query until Apply.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-filter-panel',
+      language: 'ts',
+      label: 'A rule per column, in the query',
+      source: `const query = signal(
   withColumnFilter(emptyQuery(), 'customer', {
     kind: 'text',
     join: 'or',
@@ -347,36 +346,45 @@ const scenes: ReferenceSceneMeta[] = [
     ],
   }).query,
 );`,
-  ),
-  scene(
-    'filter-row',
-    'The filter row',
-    'With filterRow the row under the header holds one operand per column, plain, with the operator as a symbol at its start — press it for the names in full. Text and number apply after the debounce and on Enter; a set, a boolean and a date apply on change. The cursor walks the row.',
-    'angular',
-    'The densest form a wide listing has',
-    `<sl-data-grid rowKey="id" filterRow [rows]="shipments()" [columns]="columns" />`,
-  ),
-  scene(
-    'filter-bar',
-    'With a filter bar',
-    'One descriptor, two families: the bar above edits query.filter and the grid evaluates it, nested groups included. A rule written in a column header appears as a chip in the bar, and a chip removed in the bar clears the header’s funnel.',
-    'angular',
-    'The same FilterGroup in both',
-    `<div
+    }),
+  },
+  {
+    id: 'filter-row',
+    title: 'The filter row',
+    note: 'With filterRow the row under the header holds one operand per column, plain, with the operator as a symbol at its start — press it for the names in full. Text and number apply after the debounce and on Enter; a set, a boolean and a date apply on change. The cursor walks the row.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-filter-row',
+      language: 'angular',
+      label: 'The densest form a wide listing has',
+      source: `<sl-data-grid rowKey="id" filterRow [rows]="shipments()" [columns]="columns" />`,
+    }),
+  },
+  {
+    id: 'filter-bar',
+    title: 'With a filter bar',
+    note: 'One descriptor, two families: the bar above edits query.filter and the grid evaluates it, nested groups included. A rule written in a column header appears as a chip in the bar, and a chip removed in the bar clears the header’s funnel.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-filter-bar',
+      language: 'angular',
+      label: 'The same FilterGroup in both',
+      source: `<div
   slFilterBar
   [fields]="fields"
   [value]="query().filter"
   (valueChange)="query.set(withFilter(query(), $event).query)"
 ></div>
 <sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [(query)]="query" />`,
-  ),
-  scene(
-    'search',
-    'Search',
-    'One condition that belongs to no column: query.search is matched against the text of every searchable column through the locale collator, so "agua" finds "Água". The field that writes it is the consumer’s own text-field.',
-    'angular',
-    'Search is part of the query',
-    `<div slTextField>
+    }),
+  },
+  {
+    id: 'search',
+    title: 'Search',
+    note: 'One condition that belongs to no column: query.search is matched against the text of every searchable column through the locale collator, so "agua" finds "Água". The field that writes it is the consumer’s own text-field.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-search',
+      language: 'angular',
+      label: 'Search is part of the query',
+      source: `<div slTextField>
   <input
     slTextFieldInput
     aria-label="Search shipments"
@@ -385,14 +393,17 @@ const scenes: ReferenceSceneMeta[] = [
   />
 </div>
 <sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [(query)]="query" />`,
-  ),
-  scene(
-    'selection',
-    'Row selection',
-    'single chooses one row with a press; multiple draws the checkbox column, pinned to the start: Shift extends from the anchor, Shift+Space toggles the row from any cell, Ctrl+A and the header checkbox cover every row the query left and say so in their name.',
-    'angular',
-    'The selection is the reader’s own',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'selection',
+    title: 'Row selection',
+    note: 'single chooses one row with a press; multiple draws the checkbox column, pinned to the start: Shift extends from the anchor, Shift+Space toggles the row from any cell, Ctrl+A and the header checkbox cover every row the query left and say so in their name.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-selection',
+      language: 'angular',
+      label: 'The selection is the reader’s own',
+      source: `<sl-data-grid
   rowKey="id"
   selectionMode="multiple"
   [rows]="shipments()"
@@ -400,55 +411,67 @@ const scenes: ReferenceSceneMeta[] = [
   [(value)]="selected"
   (valueChangeRequest)="log($event.reason, $event.value)"
 />`,
-  ),
-  scene(
-    'range',
-    'Cell range',
-    'range selects a rectangle of cells: Shift with the arrows extends it from the anchor, Shift with a press sets it, a drag paints it, Ctrl+Space takes the column and Shift+Space the row. Ctrl+C copies it as tab-separated text; Escape clears it.',
-    'angular',
-    'A rectangle, copied',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'range',
+    title: 'Cell range',
+    note: 'range selects a rectangle of cells: Shift with the arrows extends it from the anchor, Shift with a press sets it, a drag paints it, Ctrl+Space takes the column and Shift+Space the row. Ctrl+C copies it as tab-separated text; Escape clears it.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-range',
+      language: 'angular',
+      label: 'A rectangle, copied',
+      source: `<sl-data-grid
   rowKey="id"
   selectionMode="range"
   [rows]="shipments()"
   [columns]="columns"
   [(range)]="range"
 />`,
-  ),
-  scene(
-    'editing',
-    'Editing a cell',
-    'Enter, F2, a double press or a typed key open the cell’s editor — the field family of its kind, plain, filling the cell. Enter commits and moves one row down, Tab commits and moves to the next editable cell, Escape cancels. The commit may hand back a promise through wait(); the cell dims until it settles.',
-    'angular',
-    'The value is the column’s own',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'editing',
+    title: 'Editing a cell',
+    note: 'Enter, F2, a double press or a typed key open the cell’s editor — the field family of its kind, plain, filling the cell. Enter commits and moves one row down, Tab commits and moves to the next editable cell, Escape cancels. The commit may hand back a promise through wait(); the cell dims until it settles.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-editing',
+      language: 'angular',
+      label: 'The value is the column’s own',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   (editCommit)="$event.wait(save($event.key, $event.changes))"
 />`,
-  ),
-  scene(
-    'editing-row',
-    'Editing a row',
-    'editMode="row" opens every editable cell of the row at once: Tab moves between them, Enter commits the row with every change in one request, Escape cancels them all.',
-    'angular',
-    'One request per row',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'editing-row',
+    title: 'Editing a row',
+    note: 'editMode="row" opens every editable cell of the row at once: Tab moves between them, Enter commits the row with every change in one request, Escape cancels them all.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-editing-row',
+      language: 'angular',
+      label: 'One request per row',
+      source: `<sl-data-grid
   rowKey="id"
   editMode="row"
   [rows]="shipments()"
   [columns]="columns"
   (editCommit)="save($event.key, $event.changes)"
 />`,
-  ),
-  scene(
-    'validation',
-    'Validation, failure and conflict',
-    'A column’s validate refuses a draft with a message: the cell turns invalid and keeps what was typed. A commit whose promise rejects reopens the editor with the draft and the error. A row that changes under an open editor is a conflict, said in the same place.',
-    'ts',
-    'An error never discards the draft',
-    `const columns: GridColumn<Shipment>[] = [
+    }),
+  },
+  {
+    id: 'validation',
+    title: 'Validation, failure and conflict',
+    note: 'A column’s validate refuses a draft with a message: the cell turns invalid and keeps what was typed. A commit whose promise rejects reopens the editor with the draft and the error. A row that changes under an open editor is a conflict, said in the same place.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-validation',
+      language: 'ts',
+      label: 'An error never discards the draft',
+      source: `const columns: GridColumn<Shipment>[] = [
   {
     id: 'weight',
     label: 'Weight',
@@ -463,81 +486,99 @@ class ShipmentsPage {
     commit.wait(Promise.reject(new Error('Offline')));
   }
 }`,
-  ),
-  scene(
-    'activation',
-    'Row activation',
-    'activatable turns a double press or Enter on a text cell into activate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor.',
-    'angular',
-    'Open the record',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'activation',
+    title: 'Row activation',
+    note: 'activatable turns a double press or Enter on a text cell into activate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-activation',
+      language: 'angular',
+      label: 'Open the record',
+      source: `<sl-data-grid
   rowKey="id"
   activatable
   [rows]="shipments()"
   [columns]="columns"
   (activate)="router.navigate(['/shipments', $event.key])"
 />`,
-  ),
-  scene(
-    'pinning',
-    'Pinned columns',
-    'A column pinned to the start or the end stays while the others scroll; the checkbox column is always pinned. Pin from the column menu or the state; the last column of each zone draws the edge, darker while something is hidden under it.',
-    'angular',
-    'Pinned through the state',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'pinning',
+    title: 'Pinned columns',
+    note: 'A column pinned to the start or the end stays while the others scroll; the checkbox column is always pinned. Pin from the column menu or the state; the last column of each zone draws the edge, darker while something is hidden under it.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-pinning',
+      language: 'angular',
+      label: 'Pinned through the state',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   [columnState]="{ pinned: { start: ['id'], end: ['actions'] } }"
 />`,
-  ),
-  scene(
-    'resize',
-    'Resizing',
-    'Drag the handle on a column’s trailing edge; Escape during the drag restores the width. From the keyboard, Ctrl+Shift+ArrowRight widens by eight pixels and announces the width; Ctrl+Shift+Enter and a double press on the handle fit the column to its mounted cells.',
-    'angular',
-    'Widths are in the column state',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'resize',
+    title: 'Resizing',
+    note: 'Drag the handle on a column’s trailing edge; Escape during the drag restores the width. From the keyboard, Ctrl+Shift+ArrowRight widens by eight pixels and announces the width; Ctrl+Shift+Enter and a double press on the handle fit the column to its mounted cells.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-resize',
+      language: 'angular',
+      label: 'Widths are in the column state',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   [(columnState)]="state"
   (columnStateChangeRequest)="$event.change === 'width' && log($event.value.widths)"
 />`,
-  ),
-  scene(
-    'reorder',
-    'Reordering',
-    'Drag a header along the row: the drop indicator shows the boundary it lands on, and a column never leaves its pin zone. Alt+ArrowLeft and Alt+ArrowRight move the column one place from the keyboard. Every move is announced.',
-    'angular',
-    'The order is in the column state',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'reorder',
+    title: 'Reordering',
+    note: 'Drag a header along the row: the drop indicator shows the boundary it lands on, and a column never leaves its pin zone. Alt+ArrowLeft and Alt+ArrowRight move the column one place from the keyboard. Every move is announced.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-reorder',
+      language: 'angular',
+      label: 'The order is in the column state',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   [columnState]="{ order: ['customer', 'id', 'carrier'] }"
 />`,
-  ),
-  scene(
-    'column-menu',
-    'The column menu',
-    'Revealed by the pointer and by the cursor, opened with Ctrl+Enter: sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content; hide; and manage columns, which hands over to the application’s column-manager.',
-    'angular',
-    'One menu, every column operation',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'column-menu',
+    title: 'The column menu',
+    note: 'Revealed by the pointer and by the cursor, opened with Ctrl+Enter: sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content; hide; and manage columns, which hands over to the application’s column-manager.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-column-menu',
+      language: 'angular',
+      label: 'One menu, every column operation',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   (manageColumns)="manager.set(true)"
 />`,
-  ),
-  scene(
-    'column-state',
-    'Saving a view',
-    'order, widths, hidden and pinned are one object: serializeColumnState writes it to text, parseColumnState reads it back, and normalizeColumnState drops a column the model no longer has. The same for the query, through toGridParams and fromGridParams.',
-    'ts',
-    'A view is two strings',
-    `class ShipmentsPage {
+    }),
+  },
+  {
+    id: 'column-state',
+    title: 'Saving a view',
+    note: 'order, widths, hidden and pinned are one object: serializeColumnState writes it to text, parseColumnState reads it back, and normalizeColumnState drops a column the model no longer has. The same for the query, through toGridParams and fromGridParams.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-column-state',
+      language: 'ts',
+      label: 'A view is two strings',
+      source: `class ShipmentsPage {
   readonly state = signal(parseColumnState(localStorage.getItem('view')));
 
   onColumnState(next: GridColumnState) {
@@ -545,50 +586,62 @@ class ShipmentsPage {
     localStorage.setItem('view', serializeColumnState(next, columns));
   }
 }`,
-  ),
-  scene(
-    'grouping',
-    'Grouping',
-    'query.group names the columns the rows are grouped by, outermost first. A group row carries its level, its count and the aggregates of its rows; ArrowLeft closes it and ArrowRight opens it. expandedGroups is the set of open groups, all by default.',
-    'angular',
-    'Grouped in the query',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'grouping',
+    title: 'Grouping',
+    note: 'query.group names the columns the rows are grouped by, outermost first. A group row carries its level, its count and the aggregates of its rows; ArrowLeft closes it and ArrowRight opens it. expandedGroups is the set of open groups, all by default.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-grouping',
+      language: 'angular',
+      label: 'Grouped in the query',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   [query]="{ ...emptyQuery(), group: ['carrier', 'status'] }"
 />`,
-  ),
-  scene(
-    'summary',
-    'Aggregates',
-    'A column with aggregate — sum, avg, min, max, count or a function — draws the summary row, pinned to the end of the scroller, over every row the query kept; a grouped grid draws the same aggregate on each group row.',
-    'ts',
-    'The summary is the columns’ own',
-    `const columns: GridColumn<Shipment>[] = [
+    }),
+  },
+  {
+    id: 'summary',
+    title: 'Aggregates',
+    note: 'A column with aggregate — sum, avg, min, max, count or a function — draws the summary row, pinned to the end of the scroller, over every row the query kept; a grouped grid draws the same aggregate on each group row.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-summary',
+      language: 'ts',
+      label: 'The summary is the columns’ own',
+      source: `const columns: GridColumn<Shipment>[] = [
   { id: 'weight', label: 'Weight', kind: 'number', aggregate: 'sum' },
   { id: 'cost', label: 'Cost', kind: 'number', aggregate: 'sum', format: money },
 ];`,
-  ),
-  scene(
-    'detail',
-    'Row detail',
-    'An ng-template with slDataGridDetail gives a row a detail: the expander column appears, ArrowRight on it opens the detail under the row as one cell spanning every column and held to the frame, ArrowLeft closes it. expanded is the set of open rows.',
-    'angular',
-    'A detail under the row',
-    `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [(expanded)]="expanded">
+    }),
+  },
+  {
+    id: 'detail',
+    title: 'Row detail',
+    note: 'An ng-template with slDataGridDetail gives a row a detail: the expander column appears, ArrowRight on it opens the detail under the row as one cell spanning every column and held to the frame, ArrowLeft closes it. expanded is the set of open rows.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-detail',
+      language: 'angular',
+      label: 'A detail under the row',
+      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [(expanded)]="expanded">
   <ng-template slDataGridDetail let-shipment>
     <app-shipment-timeline [shipment]="shipment" />
   </ng-template>
 </sl-data-grid>`,
-  ),
-  scene(
-    'virtualization',
-    'Ten thousand rows',
-    'Above a hundred rows the grid windows them: the body is as tall as every row and only the ones in view, plus the overscan, are in the DOM. Scroll, or jump with Ctrl+End — the last row is mounted and focused. Above twenty middle columns the same happens sideways.',
-    'angular',
-    'Windowed by default',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'virtualization',
+    title: 'Ten thousand rows',
+    note: 'Above a hundred rows the grid windows them: the body is as tall as every row and only the ones in view, plus the overscan, are in the DOM. Scroll, or jump with Ctrl+End — the last row is mounted and focused. Above twenty middle columns the same happens sideways.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-virtualization',
+      language: 'angular',
+      label: 'Windowed by default',
+      source: `<sl-data-grid
   #grid="slDataGrid"
   rowKey="id"
   virtualize="auto"
@@ -598,14 +651,17 @@ class ShipmentsPage {
   [columns]="columns"
 />
 <button slButton (click)="grid.scrollToRow('SHP-25480', 'center')">Row 5,000</button>`,
-  ),
-  scene(
-    'server',
-    'Server mode',
-    'With totalCount or hasMore the grid draws the rows it is given and reports the query instead of applying it: sorting, filtering, searching and paging all arrive as one request saying what changed, and a server answers with the page.',
-    'angular',
-    'One request per change',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'server',
+    title: 'Server mode',
+    note: 'With totalCount or hasMore the grid draws the rows it is given and reports the query instead of applying it: sorting, filtering, searching and paging all arrive as one request saying what changed, and a server answers with the page.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-server',
+      language: 'angular',
+      label: 'One request per change',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="page().rows"
   [columns]="columns"
@@ -614,14 +670,17 @@ class ShipmentsPage {
   [(query)]="query"
   (queryChangeRequest)="fetchPage($event.value, $event.change)"
 />`,
-  ),
-  scene(
-    'pagination',
-    'Pagination',
-    'query.page carries the index and the size; the footer states the range, and the pagination family projected with slDataGridFooter moves the page. A change of filter, search or group puts the page back at the start in the same request.',
-    'angular',
-    'The page is in the query',
-    `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [(query)]="query">
+    }),
+  },
+  {
+    id: 'pagination',
+    title: 'Pagination',
+    note: 'query.page carries the index and the size; the footer states the range, and the pagination family projected with slDataGridFooter moves the page. A change of filter, search or group puts the page back at the start in the same request.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-pagination',
+      language: 'angular',
+      label: 'The page is in the query',
+      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [(query)]="query">
   <nav
     slDataGridFooter
     slPagination
@@ -635,14 +694,17 @@ class ShipmentsPage {
     <button slPaginationNext></button>
   </nav>
 </sl-data-grid>`,
-  ),
-  scene(
-    'load-more',
-    'Load more',
-    'With an unknown total the footer states the range without one and offers Load more; when the grid windows its rows, loadMore is emitted on its own as the window nears the end.',
-    'angular',
-    'A cursor, no total',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'load-more',
+    title: 'Load more',
+    note: 'With an unknown total the footer states the range without one and offers Load more; when the grid windows its rows, loadMore is emitted on its own as the window nears the end.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-load-more',
+      language: 'angular',
+      label: 'A cursor, no total',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="rows()"
   [columns]="columns"
@@ -650,14 +712,17 @@ class ShipmentsPage {
   [query]="{ ...emptyQuery(), page: { cursor: cursor(), size: 50 } }"
   (loadMore)="fetchMore()"
 />`,
-  ),
-  scene(
-    'empty-and-loading',
-    'Empty, no results, error, loading',
-    'Three states a body can hold instead of rows, each a result-state: nothing at all; nothing after the filter, with Clear filters; and a failed load, with Try again. A first load draws skeleton rows; a refresh over rows already shown dims them and moves nothing.',
-    'angular',
-    'The grid knows which of the three it is',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'empty-and-loading',
+    title: 'Empty, no results, error, loading',
+    note: 'Three states a body can hold instead of rows, each a result-state: nothing at all; nothing after the filter, with Clear filters; and a failed load, with Try again. A first load draws skeleton rows; a refresh over rows already shown dims them and moves nothing.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-empty-and-loading',
+      language: 'angular',
+      label: 'The grid knows which of the three it is',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="rows()"
   [columns]="columns"
@@ -665,70 +730,89 @@ class ShipmentsPage {
   [error]="error()"
   (retry)="reload()"
 />`,
-  ),
-  scene(
-    'variant',
-    'Variants',
-    'plain draws no rules and no band; ruled draws a rule between rows; framed adds the border, the radius and the footer inside. striped tints every second row under every state.',
-    'angular',
-    'Three variants and the stripe',
-    `<sl-data-grid rowKey="id" variant="framed" striped [rows]="shipments()" [columns]="columns" />`,
-  ),
-  scene(
-    'text',
-    'Long values',
-    'truncate is the default — a column has a width — and keeps the whole value in the cell’s title; wrap breaks an unbroken token rather than widening the column; nowrap keeps a code on one line. A value keeps its own direction in a right-to-left grid.',
-    'ts',
-    'Per column',
-    `const columns: GridColumn<Shipment>[] = [
+    }),
+  },
+  {
+    id: 'variant',
+    title: 'Variants',
+    note: 'plain draws no rules and no band; ruled draws a rule between rows; framed adds the border, the radius and the footer inside. striped tints every second row under every state.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-variant',
+      language: 'angular',
+      label: 'Three variants and the stripe',
+      source: `<sl-data-grid rowKey="id" variant="framed" striped [rows]="shipments()" [columns]="columns" />`,
+    }),
+  },
+  {
+    id: 'text',
+    title: 'Long values',
+    note: 'truncate is the default — a column has a width — and keeps the whole value in the cell’s title; wrap breaks an unbroken token rather than widening the column; nowrap keeps a code on one line. A value keeps its own direction in a right-to-left grid.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-text',
+      language: 'ts',
+      label: 'Per column',
+      source: `const columns: GridColumn<Shipment>[] = [
   { id: 'customer', label: 'Customer', text: 'wrap' },
   { id: 'hash', label: 'Hash', text: 'nowrap' },
 ];`,
-  ),
-  scene(
-    'density',
-    'Density',
-    'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Switch density in the toolbar and read the same grid at each.',
-    'angular',
-    'No axis of its own',
-    `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" />`,
-  ),
-  scene(
-    'content',
-    'Content the family did not choose',
-    'A hundred-character customer name, an unbroken identifier, a right-to-left name, a disabled row, an empty cell in a numeric column and a value with a dash: each holds where the family says it holds.',
-    'angular',
-    'Real content',
-    `<sl-data-grid rowKey="id" [rows]="awkward" [columns]="columns" [disabledKeys]="['SHP-20492']" />`,
-  ),
-  scene(
-    'keyboard',
-    'Keyboard',
-    'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
-    'angular',
-    'One tab stop',
-    `<sl-data-grid
+    }),
+  },
+  {
+    id: 'density',
+    title: 'Density',
+    note: 'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Switch density in the toolbar and read the same grid at each.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-density',
+      language: 'angular',
+      label: 'No axis of its own',
+      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" />`,
+    }),
+  },
+  {
+    id: 'content',
+    title: 'Content the family did not choose',
+    note: 'A hundred-character customer name, an unbroken identifier, a right-to-left name, a disabled row, an empty cell in a numeric column and a value with a dash: each holds where the family says it holds.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-content',
+      language: 'angular',
+      label: 'Real content',
+      source: `<sl-data-grid rowKey="id" [rows]="awkward" [columns]="columns" [disabledKeys]="['SHP-20492']" />`,
+    }),
+  },
+  {
+    id: 'keyboard',
+    title: 'Keyboard',
+    note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-keyboard',
+      language: 'angular',
+      label: 'One tab stop',
+      source: `<sl-data-grid
   rowKey="id"
   [rows]="shipments()"
   [columns]="columns"
   [(current)]="cell"
   (currentChangeRequest)="log($event.value, $event.reason)"
 />`,
-  ),
-  scene(
-    'accessibility',
-    'What a reader hears',
-    'A grid named by label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
-    'ts',
-    'Name, counts and announcements',
-    `bootstrapApplication(App, {
+    }),
+  },
+  {
+    id: 'accessibility',
+    title: 'What a reader hears',
+    note: 'A grid named by label; every row with its index in the whole set and every cell with its column index; aria-sort on the first key and the rest announced; the selection’s size in the header checkbox’s name; a resize as a width; a filter as its sentence. Inspect the tree with a screen reader.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-accessibility',
+      language: 'ts',
+      label: 'Name, counts and announcements',
+      source: `bootstrapApplication(App, {
   providers: [
     provideDataGridDefaults({
       labels: { selectAllFiltered: 'Select all {count} shipments', grid: 'Shipments' },
     }),
   ],
 });`,
-  ),
+    }),
+  },
 ];
 
 const api = apiRows([
@@ -1245,7 +1329,7 @@ const code = defineSnippet({
 });
 
 const theming = defineSnippet({
-  id: 'data-grid-angular-theming',
+  id: 'data-grid-theming',
   language: 'css',
   label: 'What an application retunes',
   source: `[data-ui='data-grid'] {

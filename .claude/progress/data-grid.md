@@ -83,7 +83,20 @@ sessão pode escrever).
     (contrato, React, Angular) com avatar + miniatura e dez mil linhas de
     56 px; `--slotted-data-grid-drop-scroll` como propriedade de runtime.
 
+14. Extensões (desenho em
+    `docs/superpowers/specs/2026-09-17-data-grid-extensions-design.md`),
+    onda 1, fatia 1 (commits `10deddd`, `458d516`, `a9b6780`): autofit total
+    num só pedido e medido por Range; `highlightChanges` com cena `realtime`;
+    vista persistida (`core/grid/view.ts`, `usePersistedGridView`,
+    `persistedGridView`) na cena `column-state`.
+
 ## Tarefa em curso
+
+Onda 1, peça 4 — exportação: `toCsv` em `core/grid`, `handle.exportCsv`
+(React) e `exportCsv()` (Angular), `@media print` na folha, cena `export`
+(contrato + docs nas duas bindings). Depois onda 2 (tree data, row
+reordering) e onda 3 (row pinning, data source), cada uma com desenho
+detalhado antes do código.
 
 Refino contínuo da data-grid em sessão própria. Ferramentas de sessão em
 `/tmp/claude-1000/-home-dreco-dev-slotted/388c36de-ad51-41c7-a63e-41147be23922/scratchpad/`
@@ -157,6 +170,14 @@ não resolve; ficheiro de outra família, por reportar.
 - A página Angular (6007) continua por ler renderizada.
 
 ## Próxima ação
+
+Peça 4: escrever `packages/core/src/grid/export.ts` com `toCsv(rows, columns,
+options)` (RFC 4180, texto pelo formatador da coluna e do tipo — ver
+`textOf` em `apply.ts`), teste em `grid.test.ts`; depois `exportCsv` no
+handle React (`data-grid.types.ts`, `data-grid.tsx`) e no `SlDataGrid`;
+`@media print` em `data-grid.css`; cena `export` em `contract.json`,
+histórias e docs.
+
 
 Na nova sessão: ler este ficheiro, `git log --oneline -12`, e a lista acima;
 abrir 6006 (`http://localhost:6006/iframe.html?viewMode=story&id=components-data-grid--<cena>`)

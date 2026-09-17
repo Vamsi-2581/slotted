@@ -7,6 +7,7 @@
 
 import type { Point } from '../pointer-intent';
 import type { Rect } from '../pointer-intent';
+import type { WritingDirection } from './keys';
 import type { DragOrientation, DropTarget, DropTargetKind } from './types';
 
 export type { Point, Rect };
@@ -19,6 +20,8 @@ export interface MeasuredContainer {
   readonly rects: readonly (Rect | null)[];
   readonly targets: readonly DropTargetKind[];
   readonly orientation?: DragOrientation;
+  /** The container's writing direction: a right-to-left row's first item is its rightmost. Default `ltr`. */
+  readonly direction?: WritingDirection;
 }
 
 export function contains(rect: Rect, point: Point): boolean {
@@ -30,13 +33,17 @@ export function contains(rect: Rect, point: Point): boolean {
 /** The band of an item that is the item itself rather than one of its edges. */
 const ON_BAND = 0.25;
 
-function alongAxis(orientation: DragOrientation, rect: Rect, point: Point) {
-  const vertical = orientation === 'vertical';
-  return {
-    start: vertical ? rect.top : rect.left,
-    end: vertical ? rect.bottom : rect.right,
-    at: vertical ? point.y : point.x,
-  };
+/* The inline axis of a right-to-left row is mirrored: the arithmetic on
+   start, end and the point is the same once every x is negated. */
+function alongAxis(
+  orientation: DragOrientation,
+  rect: Rect,
+  point: Point,
+  direction: WritingDirection = 'ltr',
+) {
+  if (orientation === 'vertical') return { start: rect.top, end: rect.bottom, at: point.y };
+  if (direction === 'rtl') return { start: -rect.right, end: -rect.left, at: -point.x };
+  return { start: rect.left, end: rect.right, at: point.x };
 }
 
 function resolveWithin(
@@ -44,7 +51,7 @@ function resolveWithin(
   container: MeasuredContainer,
   orientation: DragOrientation,
 ): DropTarget {
-  const { key, items, rects, targets } = container;
+  const { key, items, rects, targets, direction } = container;
   if (items.length === 0) return { kind: 'root', container: key };
 
   const gaps = targets.includes('between');
@@ -69,7 +76,7 @@ function resolveWithin(
     for (let index = 0; index < items.length; index += 1) {
       const rect = rects[index];
       if (rect === null || rect === undefined) continue;
-      const { end, at } = alongAxis(orientation, rect, point);
+      const { end, at } = alongAxis(orientation, rect, point, direction);
       if (at <= end) {
         candidate = index;
         break;
@@ -90,7 +97,7 @@ function resolveWithin(
   }
 
   const axis = orientation === 'grid' ? 'horizontal' : orientation;
-  const { start, end, at } = alongAxis(axis, rect, point);
+  const { start, end, at } = alongAxis(axis, rect, point, direction);
   const size = end - start;
   const fraction = size > 0 ? (at - start) / size : 0.5;
 

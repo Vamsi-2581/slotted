@@ -134,6 +134,36 @@ describe('resolvePoint', () => {
     });
   });
 
+  it('reads a right-to-left row from its right', () => {
+    /* `a` is the first item and sits on the right. */
+    const chips = [box(50, 0, 50, 20), box(0, 0, 50, 20)];
+    const containers = [
+      {
+        key: 'row',
+        rect: box(0, 0, 100, 20),
+        items: ['a', 'b'],
+        rects: chips,
+        targets: ['between'] as const,
+        direction: 'rtl' as const,
+      },
+    ];
+    expect(resolvePoint({ x: 20, y: 10 }, containers, 'horizontal')).toEqual({
+      kind: 'between',
+      container: 'row',
+      index: 2,
+    });
+    expect(resolvePoint({ x: 40, y: 10 }, containers, 'horizontal')).toEqual({
+      kind: 'between',
+      container: 'row',
+      index: 1,
+    });
+    expect(resolvePoint({ x: 90, y: 10 }, containers, 'horizontal')).toEqual({
+      kind: 'between',
+      container: 'row',
+      index: 0,
+    });
+  });
+
   it('takes the nearest cell of a grid and decides on the inline axis', () => {
     const cells = [box(0, 0, 50, 50), box(50, 0, 50, 50), box(0, 50, 50, 50), box(50, 50, 50, 50)];
     const containers = [

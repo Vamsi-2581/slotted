@@ -668,8 +668,11 @@
 
   [data-ui='data-grid'] [data-part='drop-indicator'] {
     background-color: var(--_cursor);
+    /* Absolute in the scroller: its box is the content's, so the line is
+       moved down by the scrolled distance to span the viewport. */
+    block-size: 100%;
     inline-size: var(--slotted-border-width-thick, 2px);
-    inset-block: 0;
+    inset-block-start: var(--slotted-data-grid-drop-scroll, 0px);
     inset-inline-start: calc(
       var(--slotted-data-grid-drop-offset, 0px) - var(--slotted-border-width-thick, 2px) / 2
     );

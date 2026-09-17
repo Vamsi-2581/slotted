@@ -98,6 +98,16 @@ test('keeps the row still as the digits grow', () => {
   assert.ok(normalized.includes('min-inline-size:var(--_target)'));
 });
 
+test("keeps the air around the two sentences, and resets only the paragraph's block margin", () => {
+  /* `status` is a `<p>`: resetting its whole margin after the text-gap rule
+     took the inline air away, and "1–8 of 50" stood against the trigger. */
+  const reset = css.slice(
+    css.indexOf("[data-ui='pagination'] :is([data-part='status'], [data-part='summary']) {"),
+  );
+  assert.match(reset.slice(0, reset.indexOf('}')), /margin-block: 0;/);
+  assert.doesNotMatch(reset.slice(0, reset.indexOf('}')), /\n\s*margin: 0;/);
+});
+
 test('draws one chevron for a step and two for an end', () => {
   assert.ok(
     normalized.includes(

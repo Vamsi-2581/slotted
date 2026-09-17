@@ -83,6 +83,15 @@
     margin-inline-end: 0;
   }
 
+  /* Two sentences side by side share one step of air, not two: the page
+     size's label and the range read eighteen pixels apart while the range
+     and the trigger read ten. */
+  [data-ui='pagination']
+    :is([data-part='status'], [data-part='summary'], [data-part='page-size-label'])
+    + :is([data-part='status'], [data-part='summary'], [data-part='page-size-label']) {
+    margin-inline-start: 0;
+  }
+
   [data-ui='pagination']
     :is(
       [data-part='page'],
@@ -326,7 +335,11 @@
   [data-ui='pagination'] :is([data-part='status'], [data-part='summary']) {
     color: var(--_muted);
     font-variant-numeric: tabular-nums;
-    margin: 0;
+    /* Only the paragraph's own block margin: the inline air between the
+       sentences and the triggers is stated above and stays. Read live, a
+       `margin: 0` here came after that rule and won, and "1–8 of 50" stood
+       two pixels from the previous-page trigger. */
+    margin-block: 0;
   }
 
   /**

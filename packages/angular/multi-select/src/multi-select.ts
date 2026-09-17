@@ -1262,7 +1262,12 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
       collapsible: () => this.resolvedOverflow() === 'collapse',
       onChange: (units) => this.hiddenCount.set(Math.max(units.length, 1)),
       trigger: () => this.countRef()?.nativeElement ?? null,
-      units: () => [...row.querySelectorAll<HTMLElement>(CHIP_SELECTOR)],
+      /* The counting chip is the trigger, never a unit: measured as one, it
+         counted itself and stood one too high, and was collapsed into itself. */
+      units: () =>
+        [...row.querySelectorAll<HTMLElement>(CHIP_SELECTOR)].filter(
+          (unit) => !unit.hasAttribute('data-count'),
+        ),
     });
   }
 

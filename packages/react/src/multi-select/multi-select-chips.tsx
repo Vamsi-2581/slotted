@@ -270,7 +270,12 @@ export function ChipRow({ children }: ChipRowProps) {
       collapsible: () => true,
       onChange: (units) => setHidden(units.length),
       trigger: () => overflow.current,
-      units: () => [...container.querySelectorAll<HTMLElement>(CHIP_SELECTOR)],
+      /* The counting chip is the trigger, never a unit: measured as one, it
+         counted itself and stood one too high, and was collapsed into itself. */
+      units: () =>
+        [...container.querySelectorAll<HTMLElement>(CHIP_SELECTOR)].filter(
+          (unit) => !unit.hasAttribute('data-count'),
+        ),
     });
 
     collapse.current = handle;

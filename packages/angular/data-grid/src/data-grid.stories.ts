@@ -266,6 +266,10 @@ const grid = (extra = '', content = '', options: { grow?: boolean } = {}) => `
 
 const note = (text: string) => `<p slText size="sm" tone="muted">${text}</p>`;
 
+/* A story's props are written onto the grid instance by Storybook's Angular
+   renderer, inputs or not: a prop named after a member of `SlDataGrid` —
+   `status`, `setFilter` — replaced that member. Read live, the server scene
+   drew "No rows" under its rows. Story props take names the grid has not. */
 const base = () => ({ columns, statusTone, rows: FIFTY });
 
 /* ── Stories ───────────────────────────────────────────────────────────── */
@@ -565,7 +569,7 @@ export const WithFilterBar: Story = {
         ...base(),
         query,
         fields: FIELDS,
-        setFilter: (filter: FilterGroup | null | undefined) =>
+        applyFilter: (filter: FilterGroup | null | undefined) =>
           query.set(withFilter(query(), filter ?? null).query),
         setSearch: (text: string | undefined) => query.set(withSearch(query(), text ?? '').query),
       },
@@ -576,7 +580,7 @@ export const WithFilterBar: Story = {
     [fields]="fields"
     [value]="query().filter"
     [query]="query().search"
-    (valueChange)="setFilter($event)"
+    (valueChange)="applyFilter($event)"
     (queryChange)="setSearch($event)"
   ></div>`,
       }),
@@ -670,7 +674,7 @@ const editing = (editMode: 'cell' | 'row') => {
       rows,
       editMode,
       current: { row: 'SHP-20481', column: 'customer' },
-      status: () => (log().length === 0 ? 'Nothing committed yet' : log().slice(-3).join(' · ')),
+      summary: () => (log().length === 0 ? 'Nothing committed yet' : log().slice(-3).join(' · ')),
       commit: (event: DataGridEditCommit<Shipment>) =>
         event.wait(
           new Promise<void>((resolve) => {
@@ -691,7 +695,7 @@ const editing = (editMode: 'cell' | 'row') => {
       grid(
         '[rows]="rows()" [editMode]="editMode" [current]="current" (editCommit)="commit($event)"',
       ),
-      { size: 'tall', before: note('{{ status() }}') },
+      { size: 'tall', before: note('{{ summary() }}') },
     ),
   };
 };
@@ -945,7 +949,7 @@ export const Server: Story = {
       props: {
         ...base(),
         server,
-        status: () =>
+        summary: () =>
           server.pending()
             ? 'Fetching…'
             : `${server.page().total.toLocaleString('en-US')} shipments on the server`,
@@ -954,7 +958,7 @@ export const Server: Story = {
         grid(
           `[rows]="server.page().rows" selectionMode="multiple" [query]="server.query()" (queryChange)="server.setQuery($event)" [totalCount]="server.page().total" [loading]="server.pending()" [error]="server.failing() ? 'The shipments service timed out' : null" (retry)="server.retry()"`,
         ),
-        { before: note('{{ status() }}') },
+        { before: note('{{ summary() }}') },
       ),
     };
   },

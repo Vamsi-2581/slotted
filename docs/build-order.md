@@ -80,7 +80,6 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `menu`                          | deixar de importar `highlight/highlight.css` (React e Angular): a família importa a sua folha e um `mark` num item vem de `Highlight` / `[slHighlight]`; o arquivo estava em edição por `context-menu hover-card` na mesma rodada                    | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `tree`                          | o `<mark>` sem identificador da busca passa a `Highlight` / `[slHighlight]` dentro do rótulo, e a folha `highlight/highlight.css` deixa de ser importada                                                                                             | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `toggle-group`                  | o `item` passa a ser a família `toggle` deferindo ao contexto do grupo (a forma de Base UI); a pintura do item, escrita em `toggle-group.css` e em `toggle.css` sob dois prefixos, sai de uma das duas; o grupo continua o único dono do valor       | —                                         | `2026-09-16-split-button-toggle-design.md` §2                              |
-| `menu`                          | `cursor: pointer` no `item` (`menu.css` l. 372): a seta entrou sem levantamento e a razão em `select.css` l. 1139 (menus da plataforma) não vale para um `div` na página; alinha com `button` e com as listas de `select` e `combobox`               | —                                         | sessão de `split-button toggle`, 2026-09-17                                |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -370,7 +369,10 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   `@slotted/angular/button` passou a exportar `BUTTON_WAIT`, `resolveInertness`,
   `resolveLoadingIndicator`, `stateAttribute` e `blockActivation`, para uma
   família estender um membro sem alcançar a sua fonte; o gatilho Angular
-  hospeda `slMenuTriggerFor` por `hostDirectives`.
+  hospeda `slMenuTriggerFor` por `hostDirectives`. Na mesma sessão, `menu`
+  passou a desenhar a mão nos itens (`cursor: pointer`; `not-allowed` no item
+  indisponível): a seta seguia os menus da plataforma, e a superfície é um
+  `div` na página como a de `select`.
 
 - `toggle` — um `button` com `aria-pressed` fora de grupo. O item que
   `toggle-group` já desenha, publicado como família própria para a barra de

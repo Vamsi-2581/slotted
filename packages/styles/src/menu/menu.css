@@ -361,6 +361,13 @@
    *
    * `min-block-size` rather than a height, because an item with a description
    * is two lines tall and still has to clear the target minimum.
+   *
+   * The hand, as on every button in the library and on every list row of
+   * `select`, `combobox`, `listbox` and `command-palette`. The arrow it wore
+   * before followed Radix, Base UI and Ark, which follow the operating
+   * system's own menus; this surface is a `div` on the page, and the argument
+   * `select` used to take the hand for its options holds here unchanged. An
+   * unavailable item keeps the hand and refuses the press, as `button` does.
    */
   [data-ui='menu'] [data-part='item'] {
     appearance: none;
@@ -369,7 +376,7 @@
     border-radius: var(--_item-radius);
     box-sizing: border-box;
     color: inherit;
-    cursor: default;
+    cursor: pointer;
     display: grid;
     font: inherit;
     grid-column: 1 / -1;
@@ -446,6 +453,7 @@
    */
   [data-ui='menu'] [data-part='item'][data-disabled] {
     color: var(--slotted-disabled-foreground, #64748b);
+    cursor: not-allowed;
   }
 
   [data-ui='menu'] [data-part='item'][data-disabled]:focus {

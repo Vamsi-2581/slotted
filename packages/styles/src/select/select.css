@@ -1139,9 +1139,10 @@
      * The hand (SL11). Nine of the twelve implementations surveyed draw it;
      * the three that draw an arrow are the three that follow the native
      * `select`, whose popup the operating system paints. A row that commits a
-     * value and closes the surface is a press, and `menu` keeps the arrow
-     * because a menu item is a command in a surface that follows the
-     * platform's own menus.
+     * value and closes the surface is a press. `menu` kept the arrow for a
+     * while on the argument that a menu item follows the platform's own
+     * menus, and dropped it: its surface is a `div` on the page as much as
+     * this one is.
      */
     cursor: pointer;
     display: grid;

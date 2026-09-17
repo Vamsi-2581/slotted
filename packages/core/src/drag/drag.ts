@@ -624,6 +624,7 @@ export function createDragController(options: DragControllerOptions = {}): DragC
     if (options.autoScroll === false || !doc || !view) return;
     const threshold = options.autoScroll?.threshold ?? DEFAULT_AUTO_SCROLL_THRESHOLD;
     const speed = options.autoScroll?.speed ?? DEFAULT_AUTO_SCROLL_SPEED;
+    const axis = options.autoScroll?.axis ?? 'both';
 
     const tick = () => {
       pointer.frame = null;
@@ -642,8 +643,8 @@ export function createDragController(options: DragControllerOptions = {}): DragC
           : toRect(node);
         if (rect === null || !contains(rect, point)) continue;
         const delta = autoScrollDelta(point, rect, threshold, speed);
-        const canX = delta.x !== 0 && (isRoot || isScrollable(node, 'x', view));
-        const canY = delta.y !== 0 && (isRoot || isScrollable(node, 'y', view));
+        const canX = axis !== 'y' && delta.x !== 0 && (isRoot || isScrollable(node, 'x', view));
+        const canY = axis !== 'x' && delta.y !== 0 && (isRoot || isScrollable(node, 'y', view));
         if (!canX && !canY) continue;
         const target = isRoot ? (doc.scrollingElement ?? doc.documentElement) : node;
         const beforeX = target.scrollLeft;

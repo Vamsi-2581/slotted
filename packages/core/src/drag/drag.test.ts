@@ -693,6 +693,27 @@ describe('the pointer', () => {
     expect(container.scrollTop).toBe(22);
   });
 
+  it('scrolls only the axis it was given', () => {
+    const { drag, list } = scene({ autoScroll: { threshold: 40, speed: 12, axis: 'x' } });
+    list('todo');
+    const container = document.getElementById('todo')!;
+    container.style.overflowY = 'auto';
+    container.style.overflowX = 'auto';
+    Object.defineProperty(container, 'scrollHeight', { value: 900, configurable: true });
+    Object.defineProperty(container, 'clientHeight', { value: 90, configurable: true });
+    Object.defineProperty(container, 'scrollWidth', { value: 900, configurable: true });
+    Object.defineProperty(container, 'clientWidth', { value: 200, configurable: true });
+    document.elementFromPoint = () => document.getElementById('todo-c');
+    drag.attachDraggable(document.getElementById('todo-b')!, { container: 'todo', key: 'b' });
+
+    /* At the bottom-right corner: both edges are near, one axis moves. */
+    down(document.getElementById('todo-b')!, 10, 135);
+    moveTo(195, 185);
+    vi.advanceTimersToNextFrame();
+    expect(container.scrollTop).toBe(0);
+    expect(container.scrollLeft).toBeGreaterThan(0);
+  });
+
   it('detaches, and destroy detaches everything', () => {
     const { drag, list } = scene();
     list('todo');

@@ -188,6 +188,12 @@ export interface DragPreviewOptions {
 }
 
 export interface DragAutoScrollOptions {
+  /**
+   * The axes scrolled. A row of headers drags along one axis with the pointer
+   * held at the scroller's top edge the whole time, so a drag along `x` must
+   * not read that edge as a request to scroll up. Default `both`.
+   */
+  readonly axis?: 'x' | 'y' | 'both';
   /** Pixels from an edge inside which scrolling starts. Default 40. */
   readonly threshold?: number;
   /** Pixels per frame at the edge. Default 12. */

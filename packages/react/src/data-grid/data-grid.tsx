@@ -948,7 +948,10 @@ export function DataGrid<Row>({
     const controller = createDragController({
       document: element.ownerDocument,
       preview: false,
-      autoScroll: false,
+      /* The scroller moves sideways when a header is dragged to its edge, so a
+         column can reach a place past the viewport; never up or down — the
+         pointer is at the scroller's top edge for the whole drag. */
+      autoScroll: { axis: 'x' },
       onDrop: ({ items, target, reason, event }) => {
         if (target.kind !== 'between') return;
         const { resolved: list, effectiveState: state, requestState: request } = latest.current;

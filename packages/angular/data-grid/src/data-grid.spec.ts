@@ -108,6 +108,7 @@ const COLUMNS: GridColumn<Shipment>[] = [
       [selectionMode]="selectionMode()"
       [filterRow]="filterRow()"
       [filterDebounce]="10"
+      [rowHeight]="rowHeight()"
       [activatable]="activatable()"
       [loading]="loading()"
       [error]="error()"
@@ -140,6 +141,7 @@ class Host {
   readonly grid = viewChild.required(SlDataGrid);
   readonly columns = COLUMNS;
   readonly rows = signal<readonly Shipment[]>(ROWS);
+  readonly rowHeight = signal<number | 'auto' | undefined>(undefined);
   readonly selectionMode = signal<DataGridSelectionMode>('none');
   readonly filterRow = signal(false);
   readonly activatable = signal(false);
@@ -727,6 +729,15 @@ class Provided {
 }
 
 describe('SlDataGrid, defaults', () => {
+  it('writes a numeric row height to the frame, so the drawn row is the windowed row', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.rowHeight.set(56);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    expect(root.style.getPropertyValue('--slotted-data-grid-row-block-size')).toBe('56px');
+  });
+
   it('reads defaults from the provider, an explicit input winning', async () => {
     await TestBed.configureTestingModule({ imports: [Provided] }).compileComponents();
     const fixture = TestBed.createComponent(Provided);

@@ -31,6 +31,7 @@
   "--slotted-data-grid-font-family",
   "--slotted-data-grid-font-size",
   "--slotted-data-grid-gap",
+  "--slotted-data-grid-head-block-size",
   "--slotted-data-grid-header-surface",
   "--slotted-data-grid-header-surface-hover",
   "--slotted-data-grid-icon-size",

@@ -713,6 +713,29 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'media',
+    title: 'Pictures in cells',
+    note: 'A renderer draws anything: an avatar beside the name, a thumbnail in a custom column. A stated rowHeight is the drawn row as well as the windowed one, so ten thousand rows of 56 pixels scroll to the right place. A cell with a picture and a name is one flex row of the renderer’s own; the grid lays out the renderer’s first element as the value.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-media',
+      language: 'tsx',
+      label: 'An avatar and a thumbnail',
+      source: `<DataGrid
+  cellRenderers={{
+    customer: ({ row }) => (
+      <span className="customer">
+        <Avatar name={row.customer} size="sm" />
+        <span>{row.customer}</span>
+      </span>
+    ),
+    photo: ({ row }) => <Image alt="" radius="sm" ratio="landscape" src={row.photo} />,
+  }}
+  columns={[...columns, { id: 'photo', label: 'Cargo', kind: 'custom', sortable: false }]}
+  rowHeight={56}
+/>;`,
+    }),
+  },
+  {
     id: 'keyboard',
     title: 'Keyboard',
     note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',

@@ -20,7 +20,12 @@
     /* Geometry. Every value is the control scale's, so one theme decision
        retunes the rows, the buttons and the fields together, and
        `@media (pointer: coarse)` grows all three at once. */
-    --_row-block: var(--slotted-data-grid-row-block-size, var(--slotted-control-height-md, 34px));
+    /* The head, the filter row, the summary and the footer are the control's
+       height at every density; a body row is that too unless the consumer
+       states one — a row of avatars is taller than a row of text, and the
+       head over it is not. */
+    --_head-block: var(--slotted-data-grid-head-block-size, var(--slotted-control-height-md, 34px));
+    --_row-block: var(--slotted-data-grid-row-block-size, var(--_head-block));
     --_row-max-block: var(--slotted-data-grid-row-max-block-size, calc(var(--_row-block) * 4));
     --_font-size: var(--slotted-data-grid-font-size, var(--slotted-control-font-size-md, 13px));
     --_icon-size: var(--slotted-data-grid-icon-size, var(--slotted-control-icon-size-md, 16px));
@@ -29,14 +34,16 @@
       --slotted-data-grid-cell-padding-inline,
       var(--slotted-control-padding-inline-md, 13px)
     );
-    /* What is left of the row around one line of text, so a one-line row is
-       exactly the control height at every density. A floor of one space step
-       keeps a wrapped row from losing its inset. */
+    /* What is left of the control's height around one line of text, so a
+       one-line row is exactly the control height at every density. A floor of
+       one space step keeps a wrapped row from losing its inset. Derived from
+       the head's height, not the row's: a stated row height centres its cells
+       and pads nothing. */
     --_pad-block: var(
       --slotted-data-grid-cell-padding-block,
       max(
         var(--slotted-space-2, 0.25rem),
-        calc((var(--_row-block) - var(--_font-size) * var(--slotted-line-height-md, 1.5)) / 2)
+        calc((var(--_head-block) - var(--_font-size) * var(--slotted-line-height-md, 1.5)) / 2)
       )
     );
     --_line: calc(var(--_font-size) * var(--slotted-line-height-md, 1.5));
@@ -123,7 +130,10 @@
        drawn inward on both sides of it. */
     --_control: min(
       var(--slotted-target-min, 24px),
-      calc(var(--_row-block) - var(--_ring-width) * 2 - var(--slotted-space-1, 0.125rem) * 2)
+      calc(
+        min(var(--_row-block), var(--_head-block)) - var(--_ring-width) * 2 -
+          var(--slotted-space-1, 0.125rem) * 2
+      )
     );
     /* Its glyph keeps two pixels of air inside the control's ground, so at
        dense — a 17-pixel control in a 25-pixel track — the ground reads as a
@@ -309,7 +319,7 @@
     display: flex;
     font-weight: var(--slotted-font-weight-semibold, 600);
     gap: var(--slotted-space-2, 0.25rem);
-    min-block-size: var(--_row-block);
+    min-block-size: var(--_head-block);
     min-inline-size: 0;
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
@@ -704,7 +714,7 @@
     background-color: var(--_band-surface);
     box-sizing: border-box;
     display: flex;
-    min-block-size: var(--_row-block);
+    min-block-size: var(--_head-block);
     min-inline-size: 0;
     padding: 0;
     position: relative;
@@ -741,7 +751,7 @@
     [data-part='filter-operand']
     > [data-part='root'][data-variant='plain'] {
     --slotted-control-padding-inline-sm: var(--slotted-space-3, 0.375rem);
-    --slotted-control-height-sm: calc(var(--_row-block) - var(--_ring-width) * 2);
+    --slotted-control-height-sm: calc(var(--_head-block) - var(--_ring-width) * 2);
 
     flex: 1 1 auto;
     min-inline-size: 0;
@@ -1042,7 +1052,7 @@
   [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] > [role='row'],
   [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'],
   [data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [role='row'] {
-    grid-auto-rows: minmax(var(--_row-block), auto);
+    grid-auto-rows: minmax(var(--_head-block), auto);
   }
 
   [data-ui='data-grid'] [data-part='cell'],
@@ -1677,7 +1687,7 @@
   [data-ui='data-grid'] [data-part='summary-cell'] {
     background-color: var(--_head-surface);
     font-weight: var(--slotted-font-weight-semibold, 600);
-    min-block-size: var(--_row-block);
+    min-block-size: var(--_head-block);
   }
 
   [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] [data-pinned] {
@@ -1797,7 +1807,7 @@
     align-items: center;
     box-sizing: border-box;
     display: flex;
-    min-block-size: var(--_row-block);
+    min-block-size: var(--_head-block);
     min-inline-size: 0;
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
@@ -1830,7 +1840,7 @@
        column: read at 240 pixels, `pagination` stacked its three parts. */
     flex-wrap: wrap;
     gap: var(--_gap);
-    min-block-size: calc(var(--_row-block) + var(--_pad-block) * 2);
+    min-block-size: calc(var(--_head-block) + var(--_pad-block) * 2);
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
   }

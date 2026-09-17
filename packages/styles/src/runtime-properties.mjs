@@ -134,6 +134,7 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-data-grid-pin-offset',
   '--slotted-data-grid-level',
   '--slotted-data-grid-drop-offset',
+  '--slotted-data-grid-drop-scroll',
   '--slotted-data-grid-window-start',
   '--slotted-data-grid-window-total',
   /**

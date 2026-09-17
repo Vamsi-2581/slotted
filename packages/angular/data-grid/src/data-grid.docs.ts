@@ -790,6 +790,27 @@ class ShipmentsPage {
     }),
   },
   {
+    id: 'media',
+    title: 'Pictures in cells',
+    note: 'A cell template draws anything: an avatar beside the name, a thumbnail in a custom column. A stated rowHeight is the drawn row as well as the windowed one, so ten thousand rows of 56 pixels scroll to the right place. A cell with a picture and a name is one flex row of the template’s own; the grid lays out the template’s first element as the value.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-media',
+      language: 'angular',
+      label: 'An avatar and a thumbnail',
+      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [rowHeight]="56">
+  <ng-template slDataGridCell="customer" let-row="row">
+    <span class="customer">
+      <span slAvatar [name]="row.customer" size="sm"></span>
+      <span>{{ row.customer }}</span>
+    </span>
+  </ng-template>
+  <ng-template slDataGridCell="photo" let-row="row">
+    <div slImage alt="" radius="sm" ratio="landscape" [src]="row.photo"></div>
+  </ng-template>
+</sl-data-grid>`,
+    }),
+  },
+  {
     id: 'keyboard',
     title: 'Keyboard',
     note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',

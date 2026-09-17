@@ -20,8 +20,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { Avatar } from '../avatar';
 import { Badge } from '../badge';
 import { Button } from '../button';
+import { Image } from '../image';
 import { FilterBar } from '../filter-bar';
 import {
   Pagination,
@@ -1037,6 +1039,61 @@ export const Content: Story = {
   render: () => (
     <Screen size="tall">
       <Shipments disabledKeys={['SHP-20492']} rows={AWKWARD} selectionMode="multiple" />
+    </Screen>
+  ),
+};
+
+/* ── Media ─────────────────────────────────────────────────────────────── */
+
+/* A picture per shipment, drawn on the spot: a crate in the carrier's hue,
+   so the scene needs no network and a window that mounts the row again draws
+   the same one. */
+const photoOf = (row: Shipment) => {
+  const hue = (CARRIERS.indexOf(row.carrier) * 67 + Number(row.id.slice(4))) % 360;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64"><rect width="96" height="64" fill="hsl(${hue} 40% 38%)"/><rect x="20" y="14" width="56" height="40" rx="3" fill="hsl(${hue} 45% 62%)"/><path d="M20 26h56M48 14v40" stroke="hsl(${hue} 40% 30%)" stroke-width="3"/></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+/* A cell with a picture and a name is one flex row of its own: the grid
+   lays a renderer's first element out as the value, and what follows it
+   would not share the line. */
+const CustomerCell = ({ row }: { row: Shipment }) => (
+  <span style={{ alignItems: 'center', display: 'flex', gap: 8, minWidth: 0 }}>
+    <Avatar name={row.customer} size="sm" />
+    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      {row.customer}
+    </span>
+  </span>
+);
+
+const PhotoCell = ({ row }: { row: Shipment }) => (
+  <Image alt="" radius="sm" ratio="landscape" src={photoOf(row)} style={{ inlineSize: 48 }} />
+);
+
+const mediaColumns: GridColumn<Shipment>[] = [
+  columns[0]!,
+  { id: 'photo', label: 'Cargo', kind: 'custom', width: 96, sortable: false, resizable: false },
+  { id: 'customer', label: 'Customer', width: 240 },
+  ...columns.filter((column) => ['destination', 'carrier', 'status', 'cost'].includes(column.id)),
+];
+
+const mediaRenderers = {
+  ...withStatusBadges,
+  customer: ({ row }: { row: Shipment }) => <CustomerCell row={row} />,
+  photo: ({ row }: { row: Shipment }) => <PhotoCell row={row} />,
+};
+
+export const Media: Story = {
+  parameters: scenario('media'),
+  render: () => (
+    <Screen size="tall">
+      <Shipments
+        cellRenderers={mediaRenderers}
+        columns={mediaColumns}
+        rowHeight={56}
+        rows={TEN_THOUSAND}
+        selectionMode="multiple"
+      />
     </Screen>
   ),
 };

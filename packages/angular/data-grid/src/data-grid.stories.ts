@@ -17,8 +17,10 @@ import {
 } from '@slotted/core/grid';
 import type { ChangeRequest } from '@slotted/core/state';
 import { signal } from '@angular/core';
+import { SlAvatar } from '@slotted/angular/avatar';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButton } from '@slotted/angular/button';
+import { SlImage } from '@slotted/angular/image';
 import { SlFilterBar } from '@slotted/angular/filter-bar';
 import type { FilterBarField } from '@slotted/angular/filter-bar';
 import {
@@ -322,9 +324,11 @@ const meta: Meta<DataGridStoryArgs> = {
         SlDataGridCellTemplate,
         SlDataGridDetailTemplate,
         SlDataGridFooter,
+        SlAvatar,
         SlBadge,
         SlButton,
         SlFilterBar,
+        SlImage,
         SlPagination,
         SlPaginationNext,
         SlPaginationPageSize,
@@ -1056,6 +1060,48 @@ export const Content: Story = {
     template: screen(grid('[rows]="rows" selectionMode="multiple" [disabledKeys]="disabled"'), {
       size: 'tall',
     }),
+  }),
+};
+
+/* A picture per shipment, drawn on the spot: a crate in the carrier's hue,
+   so the scene needs no network and a window that mounts the row again draws
+   the same one. */
+const photoOf = (row: Shipment) => {
+  const hue = (CARRIERS.indexOf(row.carrier) * 67 + Number(row.id.slice(4))) % 360;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 64"><rect width="96" height="64" fill="hsl(${hue} 40% 38%)"/><rect x="20" y="14" width="56" height="40" rx="3" fill="hsl(${hue} 45% 62%)"/><path d="M20 26h56M48 14v40" stroke="hsl(${hue} 40% 30%)" stroke-width="3"/></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+const mediaColumns: GridColumn<Shipment>[] = [
+  columns[0]!,
+  { id: 'photo', label: 'Cargo', kind: 'custom', width: 96, sortable: false, resizable: false },
+  { id: 'customer', label: 'Customer', width: 240 },
+  ...columns.filter((column) => ['destination', 'carrier', 'status', 'cost'].includes(column.id)),
+];
+
+export const Media: Story = {
+  parameters: scenario('media'),
+  render: () => ({
+    props: { ...base(), columns: mediaColumns, rows: TEN_THOUSAND, photoOf },
+    /* A cell with a picture and a name is one flex row of its own: the grid
+       lays a template's first element out as the value, and what follows it
+       would not share the line. */
+    template: screen(
+      grid(
+        '[rows]="rows" [rowHeight]="56" selectionMode="multiple"',
+        `
+      <ng-template slDataGridCell="customer" let-row="row">
+        <span style="align-items: center; display: flex; gap: 8px; min-width: 0">
+          <span slAvatar [name]="row.customer" size="sm"></span>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ row.customer }}</span>
+        </span>
+      </ng-template>
+      <ng-template slDataGridCell="photo" let-row="row">
+        <div slImage alt="" radius="sm" ratio="landscape" [src]="photoOf(row)" style="inline-size: 48px"></div>
+      </ng-template>`,
+      ),
+      { size: 'tall' },
+    ),
   }),
 };
 

@@ -2,9 +2,11 @@ import '@angular/compiler';
 import { Component } from '@angular/core';
 import type { Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { SlAvatar } from '@slotted/angular/avatar';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButton } from '@slotted/angular/button';
 import { SlFilterBar } from '@slotted/angular/filter-bar';
+import { SlImage } from '@slotted/angular/image';
 import {
   SlPagination,
   SlPaginationNext,
@@ -33,9 +35,11 @@ const STORY_IMPORTS = [
   SlDataGridCellTemplate,
   SlDataGridDetailTemplate,
   SlDataGridFooter,
+  SlAvatar,
   SlBadge,
   SlButton,
   SlFilterBar,
+  SlImage,
   SlPagination,
   SlPaginationNext,
   SlPaginationPageSize,

@@ -2102,6 +2102,12 @@ export function DataGrid<Row>({
     ...(height === undefined
       ? {}
       : { '--slotted-data-grid-block-size': typeof height === 'number' ? `${height}px` : height }),
+    /* A stated row height is the drawn row as well as the windowed one: the
+       window's offsets are computed from it, and a row drawn at the density's
+       height under a taller estimate drifted away from its own place. */
+    ...(typeof resolvedRowHeight === 'number'
+      ? { '--slotted-data-grid-row-block-size': `${resolvedRowHeight}px` }
+      : {}),
   } as CSSProperties;
   const bodyStyle = windowsRows
     ? ({

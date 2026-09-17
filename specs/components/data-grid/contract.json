@@ -938,6 +938,7 @@
       "text",
       "density",
       "content",
+      "media",
       "keyboard",
       "accessibility"
     ]

@@ -674,6 +674,13 @@ describe('DataGrid, the rest', () => {
     expect(screen.getByTestId('shipments')).toHaveAttribute('id', 'grid-1');
   });
 
+  it('writes a numeric row height to the frame, so the drawn row is the windowed row', () => {
+    render(<Shipments data-testid="shipments" rowHeight={56} />);
+    expect(
+      screen.getByTestId('shipments').style.getPropertyValue('--slotted-data-grid-row-block-size'),
+    ).toBe('56px');
+  });
+
   it('offers load more when the total is unknown and more exists', () => {
     const onLoadMore = vi.fn();
     render(

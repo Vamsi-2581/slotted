@@ -1021,6 +1021,7 @@ function isBodyRow(row: string) {
     '[attr.data-rows]': "autoRows() ? 'auto' : 'fixed'",
     '[style.--slotted-data-grid-template]': 'template()',
     '[style.--slotted-data-grid-block-size]': 'blockSize()',
+    '[style.--slotted-data-grid-row-block-size]': 'rowBlockSize()',
     '(keydown)': 'onRootKeyDown($event)',
     '(focusout)': 'onRootFocusOut($event)',
   },
@@ -1176,6 +1177,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly blockSize = computed(() => {
     const height = this.height();
     return height === undefined ? null : typeof height === 'number' ? `${height}px` : height;
+  });
+  /* A stated row height is the drawn row as well as the windowed one: the
+     window's offsets are computed from it, and a row drawn at the density's
+     height under a taller estimate drifted away from its own place. */
+  protected readonly rowBlockSize = computed(() => {
+    const height = this.resolvedRowHeight();
+    return typeof height === 'number' ? `${height}px` : null;
   });
   protected readonly autoRows = computed(() => this.resolvedRowHeight() === 'auto');
 

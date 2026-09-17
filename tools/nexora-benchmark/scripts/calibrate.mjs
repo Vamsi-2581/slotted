@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -26,6 +27,89 @@ const STRATEGIES = ['full', 'partitioned', 'on-demand', 'hybrid'];
 const BROWSER_TYPES = { chromium, firefox, webkit };
 const require = createRequire(import.meta.url);
 const PROGRESS_FILE = path.join(REPOSITORY_ROOT, '.codex/progress/nexora-calibration-runs.json');
+const MATERIALIZER_MEMORY_FLOOR = 8 * 1024 * 1024 * 1024;
+const LOCATOR_MEMORY_FLOOR = 4 * 1024 * 1024 * 1024;
+const HOST_SWAP_FLOOR = 256 * 1024 * 1024;
+const BENCHMARK_SOURCE_PATHS = [
+  'tools/nexora-benchmark/package.json',
+  'tools/nexora-benchmark/scripts',
+  'tools/nexora-benchmark/src',
+  'tools/nexora-benchmark/tsconfig.json',
+  'tools/nexora-benchmark/tsconfig.worker.json',
+  'tools/nexora-benchmark/vite.config.ts',
+  'tools/nexora-benchmark/vitest.config.ts',
+];
+
+class HostMemoryCeilingError extends Error {
+  constructor(runId, observed) {
+    super(
+      `${runId} reached the host memory safety ceiling (${observed.availableMemoryBytes} available bytes, ${observed.swapFreeBytes} swap bytes)`,
+    );
+    this.name = 'HostMemoryCeilingError';
+    this.observed = observed;
+  }
+}
+
+export function classifyResourceFailure(error) {
+  if (error instanceof HostMemoryCeilingError) {
+    return {
+      kind: 'host-memory-ceiling',
+      message: error.message,
+      observed: error.observed,
+    };
+  }
+  if (
+    error instanceof Error &&
+    (error.name === 'QuotaExceededError' || /QuotaExceededError/i.test(error.message))
+  ) {
+    return { kind: 'indexeddb-quota-exceeded', message: error.message };
+  }
+  if (error instanceof Error && /\bCalibration \S+ timed out\b/.test(error.message)) {
+    return { kind: 'calibration-timeout', message: error.message };
+  }
+  return null;
+}
+
+export function parseMemoryInfo(contents) {
+  const values = Object.fromEntries(
+    contents
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const match = /^(MemAvailable|SwapFree):\s+(\d+)\s+kB$/.exec(line.trim());
+        return match ? [match[1], Number(match[2]) * 1024] : [];
+      })
+      .filter((entry) => entry.length === 2),
+  );
+  if (!Number.isFinite(values.MemAvailable) || !Number.isFinite(values.SwapFree)) {
+    throw new Error('Unable to parse MemAvailable and SwapFree from /proc/meminfo');
+  }
+  return {
+    availableMemoryBytes: values.MemAvailable,
+    swapFreeBytes: values.SwapFree,
+  };
+}
+
+export function memoryFloorForStrategy(strategy) {
+  return strategy === 'on-demand' ? LOCATOR_MEMORY_FLOOR : MATERIALIZER_MEMORY_FLOOR;
+}
+
+function hostMemoryGuard(runId, strategy) {
+  const availableMemoryFloor = memoryFloorForStrategy(strategy);
+  let interval;
+  const promise = new Promise((_, reject) => {
+    interval = setInterval(() => {
+      const observed = parseMemoryInfo(readFileSync('/proc/meminfo', 'utf8'));
+      if (
+        observed.availableMemoryBytes < availableMemoryFloor &&
+        observed.swapFreeBytes < HOST_SWAP_FLOOR
+      ) {
+        reject(new HostMemoryCeilingError(runId, observed));
+      }
+    }, 1_000);
+  });
+  return { promise, stop: () => clearInterval(interval) };
+}
 
 function option(arguments_, name) {
   return arguments_.find((argument) => argument.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -79,23 +163,30 @@ function timeoutFor(profile) {
 
 async function runPageScenario(browser, baseUrl, request) {
   const context = await browser.newContext();
+  let memoryGuard;
   let pageFailure;
   const failed = new Promise((_, reject) => {
     pageFailure = reject;
   });
   try {
     const page = await context.newPage();
+    memoryGuard = hostMemoryGuard(request.runId, request.strategy);
     page.on('pageerror', (error) => pageFailure(error));
     page.on('console', (message) => {
       if (message.type() === 'error') {
         pageFailure(new Error(`Browser console error: ${message.text()}`));
       }
     });
-    await Promise.race([page.goto(baseUrl, { waitUntil: 'load' }), failed]);
-    await Promise.race([page.evaluate(() => globalThis.nexoraCalibrationReady), failed]);
+    await Promise.race([page.goto(baseUrl, { waitUntil: 'load' }), failed, memoryGuard.promise]);
+    await Promise.race([
+      page.evaluate(() => globalThis.nexoraCalibrationReady),
+      failed,
+      memoryGuard.promise,
+    ]);
     const run = await Promise.race([
       page.evaluate((value) => globalThis.runNexoraCalibration(value), request),
       failed,
+      memoryGuard.promise,
     ]);
     const leakedDatabase = await page.evaluate(async (databaseName) => {
       if (!globalThis.indexedDB.databases) return false;
@@ -105,7 +196,8 @@ async function runPageScenario(browser, baseUrl, request) {
     }, `nexora-${request.runId}`);
     return { ...run, leakedDatabase, backgroundActive: false };
   } finally {
-    await context.close();
+    memoryGuard?.stop();
+    await context.close().catch(() => {});
   }
 }
 
@@ -160,48 +252,76 @@ export async function runCalibrationMatrix(configuration) {
   const browserVersions = { ...(configuration.existingBrowserVersions ?? {}) };
   const references = new Map();
   for (const run of runs) {
-    if (run.strategy === 'full') references.set(`${run.profile}\u0000${run.browser}`, run);
+    if (!run.failed && !references.has(`${run.profile}\u0000${run.browser}`)) {
+      references.set(`${run.profile}\u0000${run.browser}`, run);
+    }
   }
   const laboratory = await startLaboratory();
   try {
     for (const browserName of configuration.browsers) {
-      const browser = await BROWSER_TYPES[browserName].launch({ headless: true });
-      browserVersions[browserName] = browser.version();
-      try {
-        for (const profile of configuration.profiles) {
-          for (const strategy of strategies) {
-            for (let sample = 1; sample <= configuration.samples; sample += 1) {
-              const runId = `${profile}-${browserName}-${strategy}-${sample}`;
-              if (runs.some((run) => run.runId === runId)) {
-                console.log(`[skip] ${runId}`);
-                continue;
+      for (const profile of configuration.profiles) {
+        for (const strategy of strategies) {
+          for (let sample = 1; sample <= configuration.samples; sample += 1) {
+            const runId = `${profile}-${browserName}-${strategy}-${sample}`;
+            if (runs.some((run) => run.runId === runId)) {
+              console.log(`[skip] ${runId}`);
+              continue;
+            }
+            console.log(`[start] ${runId}`);
+            const request = {
+              type: 'start',
+              scenario: 'nexora-materialization-calibration-v1',
+              runId,
+              profile,
+              strategy,
+              browser: browserName,
+              sample,
+              timeoutMs: timeoutFor(profile),
+            };
+            const browser = await BROWSER_TYPES[browserName].launch({ headless: true });
+            browserVersions[browserName] = browser.version();
+            let run;
+            try {
+              try {
+                run = await runPageScenario(browser, laboratory.url, request);
+              } catch (error) {
+                const failure = classifyResourceFailure(error);
+                if (!failure) throw error;
+                run = {
+                  scenario: request.scenario,
+                  runId,
+                  profile,
+                  strategy,
+                  browser: browserName,
+                  sample,
+                  failed: true,
+                  failure: {
+                    kind: failure.kind,
+                    message: failure.message,
+                  },
+                };
+                if (failure.observed) run.observed = failure.observed;
               }
-              console.log(`[start] ${runId}`);
-              const request = {
-                type: 'start',
-                scenario: 'nexora-materialization-calibration-v1',
-                runId,
-                profile,
-                strategy,
-                browser: browserName,
-                sample,
-                timeoutMs: timeoutFor(profile),
-              };
-              const run = await runPageScenario(browser, laboratory.url, request);
-              const referenceKey = `${profile}\u0000${browserName}`;
-              const reference = references.get(referenceKey);
+            } finally {
+              await browser.close();
+            }
+            const referenceKey = `${profile}\u0000${browserName}`;
+            const reference = references.get(referenceKey);
+            if (!run.failed) {
               assertCorrectness(run, reference);
-              if (strategy === 'full' && !reference) references.set(referenceKey, run);
-              runs.push(run);
-              await configuration.onRun?.({ runs, browserVersions });
+              if (!reference) references.set(referenceKey, run);
+            }
+            runs.push(run);
+            await configuration.onRun?.({ runs, browserVersions });
+            if (run.failed) {
+              console.log(`[reject] ${runId} ${run.failure.message}`);
+            } else {
               console.log(
                 `[done] ${runId} operational=${run.metrics.operationalReadyMs.toFixed(1)}ms complete=${run.metrics.completeReadyMs.toFixed(1)}ms`,
               );
             }
           }
         }
-      } finally {
-        await browser.close();
       }
     }
   } finally {
@@ -218,6 +338,19 @@ function gitCommit() {
     cwd: REPOSITORY_ROOT,
     encoding: 'utf8',
   }).trim();
+}
+
+function benchmarkSourceDirty() {
+  return (
+    execFileSync(
+      'git',
+      ['status', '--porcelain', '--untracked-files=no', '--', ...BENCHMARK_SOURCE_PATHS],
+      {
+        cwd: REPOSITORY_ROOT,
+        encoding: 'utf8',
+      },
+    ).trim().length > 0
+  );
 }
 
 async function resumableConfiguration(configuration) {
@@ -273,21 +406,25 @@ function environmentFor(configuration, browserVersions) {
     seed: 'nexora-calibration-v1',
     samples: configuration.samples,
     gitCommit: gitCommit(),
+    benchmarkSourceDirty: benchmarkSourceDirty(),
   };
 }
 
 function printSummary(aggregates) {
+  const fixed = (value) => (value === null ? '—' : value.toFixed(1));
   console.table(
     aggregates.map((item) => ({
       profile: item.profile,
       browser: item.browser,
       strategy: item.strategy,
       result: qualifyStrategy(item).qualified ? 'qualified' : 'rejected',
-      operationalP95: item.operationalReadyMs.p95.toFixed(1),
-      completeP95: item.completeReadyMs.p95.toFixed(1),
-      queryP95: Math.max(...Object.values(item.probeP95Ms)).toFixed(1),
-      workerMax: item.maxWorkerBatchMs.toFixed(1),
-      mainGapMax: item.maxMainThreadGapMs.toFixed(1),
+      operationalP95: fixed(item.operationalReadyMs.p95),
+      completeP95: fixed(item.completeReadyMs.p95),
+      queryP95: fixed(
+        item.samples === item.failedRuns ? null : Math.max(...Object.values(item.probeP95Ms)),
+      ),
+      workerMax: fixed(item.maxWorkerBatchMs),
+      mainGapMax: fixed(item.maxMainThreadGapMs),
       bytesP95: item.storageBytes.p95,
       reasons: qualifyStrategy(item).reasons.join('; '),
     })),
@@ -324,6 +461,7 @@ async function writeRecordedEvidence({ runs, aggregates, recommendation, budgets
         {
           scenario: 'nexora-materialization-calibration-v1',
           sourceCommit: environment.gitCommit,
+          benchmarkSourceDirty: environment.benchmarkSourceDirty,
           recommendation: recommendation.strategy,
           budgets,
         },
@@ -333,15 +471,40 @@ async function writeRecordedEvidence({ runs, aggregates, recommendation, budgets
     ),
     writeFile(
       path.join(reportDirectory, 'materialization-decision.md'),
-      renderDecisionReport({ environment, aggregates, recommendation }),
+      renderDecisionReport({ environment, runs, aggregates, recommendation }),
     ),
   ]);
 }
 
+export function selectApplicableBudgets(budgets, profiles) {
+  const requested = new Set(profiles);
+  return budgets.filter((budget) => requested.has(budget.profile));
+}
+
+export function strategiesForBudgets(budgets) {
+  return [...new Set(budgets.map((budget) => budget.strategy))].sort();
+}
+
 async function main() {
   const configuration = parseArguments(process.argv.slice(2));
-  const executionConfiguration =
-    configuration.mode === 'record' ? await resumableConfiguration(configuration) : configuration;
+  let recorded;
+  let applicableBudgets;
+  let executionConfiguration = configuration;
+  if (configuration.mode === 'record') {
+    executionConfiguration = await resumableConfiguration(configuration);
+  } else if (configuration.mode === 'verify') {
+    recorded = JSON.parse(
+      await readFile(path.join(PACKAGE_ROOT, 'budgets/reference.json'), 'utf8'),
+    );
+    applicableBudgets = selectApplicableBudgets(recorded.budgets, configuration.profiles);
+    if (applicableBudgets.length === 0) {
+      throw new Error(`No recorded budgets apply to ${configuration.profiles.join(', ')}`);
+    }
+    executionConfiguration = {
+      ...configuration,
+      strategies: strategiesForBudgets(applicableBudgets),
+    };
+  }
   const measured = await runCalibrationMatrix(executionConfiguration);
   const aggregates = aggregateRuns(measured.runs);
   const recommendation = recommendMaterialization(aggregates);
@@ -366,20 +529,17 @@ async function main() {
     return;
   }
 
-  const recorded = JSON.parse(
-    await readFile(path.join(PACKAGE_ROOT, 'budgets/reference.json'), 'utf8'),
-  );
   const qualificationFailures = aggregates
     .filter(
       (item) =>
-        recorded.budgets.some(
+        applicableBudgets.some(
           (budget) => budget.profile === item.profile && budget.strategy === item.strategy,
         ) && !qualifyStrategy(item).qualified,
     )
     .map((item) => `${item.profile}/${item.browser}/${item.strategy} failed hard qualification`);
   const failures = [
     ...qualificationFailures,
-    ...verifyAgainstBudgets(aggregates, recorded.budgets),
+    ...verifyAgainstBudgets(aggregates, applicableBudgets),
   ];
   if (failures.length > 0) throw new Error(`Calibration budget failures:\n${failures.join('\n')}`);
 }

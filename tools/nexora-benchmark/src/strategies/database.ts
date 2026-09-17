@@ -8,7 +8,13 @@ import type {
   StrategyName,
 } from '../contracts';
 import { digestValue } from '../digest';
-import { generateCalibrationBatches, GENERATION_ORDER, representativeRecordId } from '../generate';
+import {
+  calibrationRecordAt,
+  generateCalibrationTableBatches,
+  GENERATION_ORDER,
+  representativeRecordId,
+  scanStockMovementLocatorBatches,
+} from '../generate';
 import type {
   CalibrationRecord,
   CustomerRecord,
@@ -271,94 +277,135 @@ export async function executeStoredProbe(
   }
 }
 
-export function executeVirtualProbe(profile: ScaleProfile, name: ProbeName): ProbeResult {
+export async function executeVirtualProbe(
+  profile: ScaleProfile,
+  name: ProbeName,
+  batchSize = 512,
+  onBatch?: StrategyObserver['onBatch'],
+): Promise<ProbeResult> {
   const customerId = representativeRecordId(profile, 'customers', 0);
   const skuId = representativeRecordId(profile, 'skus', 0);
-  const movementId = representativeRecordId(
-    profile,
-    'stockMovements',
-    Math.floor(profile.counts.stockMovements / 2),
-  );
-  let customer: CustomerRecord | undefined;
+  const yieldEveryBatches = batchSize <= 4 ? 8 : batchSize <= 8 ? 64 : 256;
+  let batchesSinceYield = 0;
+  const observe = async (records: number, started: number): Promise<void> => {
+    onBatch?.({ records, durationMs: now() - started });
+    batchesSinceYield += 1;
+    if (batchesSinceYield === yieldEveryBatches) {
+      batchesSinceYield = 0;
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
+  };
+
+  if (name === 'orders-page') {
+    const orders: SalesOrderRecord[] = [];
+    let chunkRecords = 0;
+    let chunkStarted = now();
+    for (let index = profile.counts.salesOrders - 1; index >= 0 && orders.length < 50; index -= 1) {
+      const order = calibrationRecordAt(profile, 'salesOrders', index) as SalesOrderRecord;
+      chunkRecords += 1;
+      if (order.status === 'shipped') orders.push(order);
+      if (chunkRecords === batchSize) {
+        await observe(chunkRecords, chunkStarted);
+        chunkRecords = 0;
+        chunkStarted = now();
+      }
+    }
+    if (chunkRecords > 0) await observe(chunkRecords, chunkStarted);
+    return completeResult(
+      name,
+      orders.map((record) => record.id),
+      profile.counts.salesOrders,
+    );
+  }
+
+  if (name === 'historical-point-lookup') {
+    const started = now();
+    const historical = calibrationRecordAt(
+      profile,
+      'stockMovements',
+      Math.floor(profile.counts.stockMovements / 2),
+    ) as StockMovementRecord;
+    await observe(1, started);
+    return completeResult(name, [historical.id], 1);
+  }
+
+  if (name === 'inventory-ledger') {
+    const matchingIndices: number[] = [];
+    let matchingCount = 0;
+    const batches = scanStockMovementLocatorBatches(profile, skuId, 'wh-sp-01', 512);
+    for (;;) {
+      const started = now();
+      const next = batches.next();
+      if (next.done) break;
+      matchingCount += next.value.matchingIndices.length;
+      for (const index of next.value.matchingIndices) {
+        matchingIndices.push(index);
+        if (matchingIndices.length > 50) matchingIndices.shift();
+      }
+      onBatch?.({ records: next.value.scannedRecords, durationMs: now() - started });
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
+    const visible = matchingIndices
+      .reverse()
+      .map(
+        (index) =>
+          (calibrationRecordAt(profile, 'stockMovements', index) as StockMovementRecord).id,
+      );
+    return completeResult(name, visible, matchingCount);
+  }
+
+  const customer =
+    name === 'customer-360'
+      ? (calibrationRecordAt(profile, 'customers', 0) as CustomerRecord)
+      : undefined;
   const customerRelated: CalibrationRecord[] = [];
-  const orders: SalesOrderRecord[] = [];
-  const movements: StockMovementRecord[] = [];
-  let orderCount = 0;
   let customerRelatedCount = 0;
-  let movementCount = 0;
   let invoiceCount = 0;
   let paymentCount = 0;
   let invoiceTotal = 0;
   let invoiceBalance = 0;
   let paymentTotal = 0;
-  let historical: StockMovementRecord | undefined;
+  const tables: readonly RecordTable[] =
+    name === 'customer-360'
+      ? ['contacts', 'salesOrders', 'supportTickets']
+      : ['invoices', 'payments'];
 
-  const lastRequiredTable: Record<ProbeName, RecordTable> = {
-    'orders-page': 'salesOrders',
-    'customer-360': 'supportTickets',
-    'inventory-ledger': 'stockMovements',
-    'finance-summary': 'payments',
-    'historical-point-lookup': 'stockMovements',
-  };
-  const lastRequiredIndex = GENERATION_ORDER.indexOf(lastRequiredTable[name]);
-
-  for (const batch of generateCalibrationBatches(profile, 512)) {
-    if (GENERATION_ORDER.indexOf(batch.table) > lastRequiredIndex) break;
-    for (const record of batch.records) {
-      if (name === 'orders-page' && record.table === 'salesOrders') {
-        orderCount += 1;
-        if (record.status === 'shipped') retainRecent(orders, record);
-      }
-      if (name === 'customer-360') {
-        if (record.table === 'customers' && record.id === customerId) customer = record;
-        if (
-          (record.table === 'contacts' ||
-            record.table === 'salesOrders' ||
-            record.table === 'supportTickets') &&
-          record.customerId === customerId
-        ) {
-          customerRelatedCount += 1;
-          retainRecent(customerRelated, record);
+  for (const table of tables) {
+    const batches = generateCalibrationTableBatches(profile, table, batchSize);
+    for (;;) {
+      const started = now();
+      const next = batches.next();
+      if (next.done) break;
+      const batch = next.value;
+      for (const record of batch.records) {
+        if (name === 'customer-360') {
+          if (
+            (record.table === 'contacts' ||
+              record.table === 'salesOrders' ||
+              record.table === 'supportTickets') &&
+            record.customerId === customerId
+          ) {
+            customerRelatedCount += 1;
+            retainRecent(customerRelated, record);
+          }
+        }
+        if (name === 'finance-summary') {
+          if (record.table === 'invoices') {
+            invoiceCount += 1;
+            invoiceTotal += record.totalMinor;
+            invoiceBalance += record.balanceMinor;
+          }
+          if (record.table === 'payments') {
+            paymentCount += 1;
+            paymentTotal += record.amountMinor;
+          }
         }
       }
-      if (
-        name === 'inventory-ledger' &&
-        record.table === 'stockMovements' &&
-        record.skuId === skuId &&
-        record.warehouseId === 'wh-sp-01'
-      ) {
-        movementCount += 1;
-        retainRecent(movements, record);
-      }
-      if (name === 'finance-summary') {
-        if (record.table === 'invoices') {
-          invoiceCount += 1;
-          invoiceTotal += record.totalMinor;
-          invoiceBalance += record.balanceMinor;
-        }
-        if (record.table === 'payments') {
-          paymentCount += 1;
-          paymentTotal += record.amountMinor;
-        }
-      }
-      if (
-        name === 'historical-point-lookup' &&
-        record.table === 'stockMovements' &&
-        record.id === movementId
-      ) {
-        historical = record;
-      }
+      await observe(batch.records.length, started);
     }
   }
 
   switch (name) {
-    case 'orders-page': {
-      return completeResult(
-        name,
-        orders.map((record) => record.id),
-        orderCount,
-      );
-    }
     case 'customer-360': {
       return completeResult(
         name,
@@ -368,12 +415,6 @@ export function executeVirtualProbe(profile: ScaleProfile, name: ProbeName): Pro
         (customer ? 1 : 0) + customerRelatedCount,
       );
     }
-    case 'inventory-ledger':
-      return completeResult(
-        name,
-        movements.map((record) => record.id),
-        movementCount,
-      );
     case 'finance-summary':
       return completeResult(
         name,
@@ -384,8 +425,6 @@ export function executeVirtualProbe(profile: ScaleProfile, name: ProbeName): Pro
         ],
         invoiceCount + paymentCount,
       );
-    case 'historical-point-lookup':
-      return completeResult(name, historical ? [historical.id] : [], historical ? 1 : 0);
   }
 }
 
@@ -398,7 +437,9 @@ export abstract class DatabaseStrategySession implements StrategySession {
   protected disposed = false;
   private state: ReadinessState = 'empty';
   private background: Promise<void> | undefined;
+  private backgroundError: unknown;
   private storedBytes = 0;
+  private readonly storedAuxiliaryBytes = new Map<string, number>();
   private pendingPartitions = 0;
 
   constructor(
@@ -413,9 +454,21 @@ export abstract class DatabaseStrategySession implements StrategySession {
 
   async open(): Promise<void> {
     await this.database.open();
-    await this.database.metadata.put({ key: 'strategy', value: this.name });
-    await this.database.metadata.put({ key: 'profile', value: this.profile.id });
+    await this.writeMetadata('strategy', this.name);
+    await this.writeMetadata('profile', this.profile.id);
     this.observer.onReadiness(this.snapshot());
+  }
+
+  protected async writeMetadata(key: string, value: string): Promise<void> {
+    const row = { key, value };
+    await this.database.metadata.put(row);
+    this.trackAuxiliaryRow(`metadata:${key}`, row);
+  }
+
+  private trackAuxiliaryRow(key: string, row: MetadataRow | PartitionRow): void {
+    const bytes = JSON.stringify(row).length;
+    this.storedBytes += bytes - (this.storedAuxiliaryBytes.get(key) ?? 0);
+    this.storedAuxiliaryBytes.set(key, bytes);
   }
 
   protected snapshot(): ReadinessSnapshot {
@@ -428,6 +481,11 @@ export abstract class DatabaseStrategySession implements StrategySession {
   }
 
   async readiness(): Promise<ReadinessSnapshot> {
+    if (this.state === 'failed' && this.backgroundError !== undefined) {
+      throw this.backgroundError instanceof Error
+        ? this.backgroundError
+        : new Error(String(this.backgroundError));
+    }
     return this.snapshot();
   }
 
@@ -474,14 +532,16 @@ export abstract class DatabaseStrategySession implements StrategySession {
     const partitionCount = (this.partitionCounts.get(partitionId) ?? 0) + batch.records.length;
     this.partitionCounts.set(partitionId, partitionCount);
     this.storedBytes += JSON.stringify(batch.records).length;
-    const partitionWrite = this.database.partitions.put({
+    const partitionRow = {
       id: partitionId,
       table: batch.table,
       partition: batch.partition,
       records: partitionCount,
-    });
+    };
+    const partitionWrite = this.database.partitions.put(partitionRow);
     blockingDurationMs = Math.max(blockingDurationMs, now() - finalizeStarted);
     await partitionWrite;
+    this.trackAuxiliaryRow(`partition:${partitionId}`, partitionRow);
     this.observer.onBatch({ records: batch.records.length, durationMs: blockingDurationMs });
   }
 
@@ -499,7 +559,8 @@ export abstract class DatabaseStrategySession implements StrategySession {
 
   protected startBackground(task: () => Promise<void>): Promise<void> {
     const execution = task();
-    this.background = execution.catch(() => {
+    this.background = execution.catch((error: unknown) => {
+      this.backgroundError = error;
       if (!this.disposed) this.setReadiness('failed');
     });
     return execution;

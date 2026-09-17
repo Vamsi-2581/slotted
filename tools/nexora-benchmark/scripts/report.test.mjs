@@ -2,7 +2,14 @@ import assert from 'node:assert/strict';
 
 import { describe, test } from 'vitest';
 
-import { parseArguments } from './calibrate.mjs';
+import {
+  classifyResourceFailure,
+  memoryFloorForStrategy,
+  parseArguments,
+  parseMemoryInfo,
+  selectApplicableBudgets,
+  strategiesForBudgets,
+} from './calibrate.mjs';
 import {
   aggregateRuns,
   deriveBudgets,
@@ -11,6 +18,7 @@ import {
   nearestRankP95,
   qualifyStrategy,
   recommendMaterialization,
+  renderDecisionReport,
 } from './report.mjs';
 
 const probes = [
@@ -68,6 +76,7 @@ function strategyAggregate(overrides = {}) {
     queryDigestsMatch: true,
     readinessTruthful: true,
     failedRuns: 0,
+    failureReasons: [],
     leakedDatabases: 0,
     backgroundActive: 0,
     operationalReadyMs: { median: 10, p95: 10 },
@@ -76,6 +85,24 @@ function strategyAggregate(overrides = {}) {
     maxMainThreadGapMs: 10,
     storageBytes: { median: 10, p95: 10 },
     probeP95Ms: Object.fromEntries(probes.map((probe) => [probe, 10])),
+    ...overrides,
+  };
+}
+
+function failedRun(overrides = {}) {
+  return {
+    scenario: 'nexora-materialization-calibration-v1',
+    runId: 'enterprise-chromium-full-1',
+    profile: 'enterprise',
+    strategy: 'full',
+    browser: 'chromium',
+    sample: 1,
+    failed: true,
+    failure: {
+      kind: 'host-memory-ceiling',
+      message: 'host memory safety ceiling reached',
+    },
+    observed: { availableMemoryBytes: 4_000_000_000, swapFreeBytes: 0 },
     ...overrides,
   };
 }
@@ -95,6 +122,22 @@ describe('report statistics', () => {
     assert.equal(aggregates.length, 1);
     assert.deepEqual(aggregates[0].operationalReadyMs, { median: 20, p95: 90 });
     assert.equal(aggregates[0].probeP95Ms['orders-page'], 90);
+  });
+
+  test('retains a resource-rejected candidate without inventing performance metrics', () => {
+    const [aggregate] = aggregateRuns([
+      failedRun(),
+      run({ profile: 'enterprise', strategy: 'partitioned' }),
+    ]);
+    assert.equal(aggregate.strategy, 'full');
+    assert.equal(aggregate.failedRuns, 1);
+    assert.equal(aggregate.operationalReadyMs.p95, null);
+    assert.deepEqual(qualifyStrategy(aggregate), {
+      qualified: false,
+      reasons: [
+        'one or more calibration runs failed: host-memory-ceiling (1/1 runs) — host memory safety ceiling reached',
+      ],
+    });
   });
 });
 
@@ -144,6 +187,55 @@ describe('budget derivation', () => {
     assert.equal(budgets[0].operationalReadyMs, 110);
     assert.equal(budgets[0].storageBytes, 2 * 1024 * 1024);
   });
+
+  test('does not publish a budget for a strategy rejected by any recorded engine', () => {
+    const budgets = deriveBudgets([
+      strategyAggregate({ browser: 'chromium', strategy: 'full' }),
+      strategyAggregate({
+        browser: 'firefox',
+        strategy: 'full',
+        failedRuns: 1,
+        failureReasons: ['host-memory-ceiling (1/1 runs) — limit reached'],
+      }),
+    ]);
+
+    assert.deepEqual(budgets, []);
+  });
+});
+
+describe('decision report', () => {
+  test('records the selected locator-first parameters instead of hybrid defaults', () => {
+    const aggregate = strategyAggregate({ strategy: 'on-demand' });
+    const report = renderDecisionReport({
+      environment: {
+        gitCommit: 'abc123',
+        benchmarkSourceDirty: true,
+        os: 'linux',
+        arch: 'x64',
+        node: 'v24',
+        playwright: '1.63.0',
+        seed: 'seed',
+        samples: 3,
+        cpu: 'cpu',
+        logicalCores: 4,
+        memoryBytes: 1,
+        browserVersions: { chromium: '1' },
+      },
+      runs: [{ strategy: 'on-demand' }, { strategy: 'on-demand' }, { strategy: 'full' }],
+      aggregates: [aggregate],
+      recommendation: recommendMaterialization([aggregate]),
+    });
+
+    assert.match(report, /Git HEAD marker.*`abc123`/);
+    assert.match(report, /tracked benchmark source changes: yes/);
+    assert.match(report, /Selected-strategy samples: 2/);
+    assert.match(report, /Non-selected candidate samples retained: 1/);
+    assert.match(report, /locator-first/);
+    assert.match(report, /32-record.*Chromium and Firefox/);
+    assert.match(report, /4-record.*WebKit/);
+    assert.doesNotMatch(report, /12-month hybrid operational window/);
+    assert.doesNotMatch(report, /Recorded from commit/);
+  });
 });
 
 describe('calibration CLI arguments', () => {
@@ -167,5 +259,55 @@ describe('calibration CLI arguments', () => {
       /Unsupported browser: edge/,
     );
     assert.throws(() => parseArguments(['--mode=record', '--samples=0']), /positive safe integer/);
+  });
+
+  test('parses Linux available and swap memory for the resource guard', () => {
+    assert.deepEqual(parseMemoryInfo('MemAvailable:    5242880 kB\nSwapFree:         65536 kB\n'), {
+      availableMemoryBytes: 5_368_709_120,
+      swapFreeBytes: 67_108_864,
+    });
+  });
+
+  test('keeps an 8 GiB floor for materializers and a 4 GiB floor for locator-first reads', () => {
+    assert.equal(memoryFloorForStrategy('full'), 8 * 1024 ** 3);
+    assert.equal(memoryFloorForStrategy('partitioned'), 8 * 1024 ** 3);
+    assert.equal(memoryFloorForStrategy('hybrid'), 8 * 1024 ** 3);
+    assert.equal(memoryFloorForStrategy('on-demand'), 4 * 1024 ** 3);
+  });
+
+  test('classifies quota exhaustion but leaves unrelated browser errors terminal', () => {
+    const quota = new Error('AbortError: QuotaExceededError');
+    quota.name = 'AbortError';
+    assert.deepEqual(classifyResourceFailure(quota), {
+      kind: 'indexeddb-quota-exceeded',
+      message: 'AbortError: QuotaExceededError',
+    });
+    assert.equal(classifyResourceFailure(new TypeError('page crashed')), null);
+  });
+
+  test('classifies the laboratory deadline without swallowing unrelated timeouts', () => {
+    assert.deepEqual(
+      classifyResourceFailure(
+        new Error('page.evaluate: Calibration canonical-firefox-partitioned-1 timed out'),
+      ),
+      {
+        kind: 'calibration-timeout',
+        message: 'page.evaluate: Calibration canonical-firefox-partitioned-1 timed out',
+      },
+    );
+    assert.equal(classifyResourceFailure(new Error('navigation timed out')), null);
+  });
+
+  test('verifies only requested-profile strategies that have recorded budgets', () => {
+    const budgets = [
+      { profile: 'canonical', strategy: 'on-demand' },
+      { profile: 'canonical', strategy: 'on-demand' },
+      { profile: 'enterprise', strategy: 'on-demand' },
+      { profile: 'enterprise', strategy: 'hybrid' },
+    ];
+    const applicable = selectApplicableBudgets(budgets, ['canonical']);
+
+    assert.deepEqual(applicable, budgets.slice(0, 2));
+    assert.deepEqual(strategiesForBudgets(applicable), ['on-demand']);
   });
 });

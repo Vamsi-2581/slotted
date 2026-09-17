@@ -537,6 +537,119 @@ function makeRecord(
   }
 }
 
+function randomDrawOffset(profile: ScaleProfile, table: RecordTable, index: number): number {
+  switch (table) {
+    case 'customers':
+      return index * 6;
+    case 'contacts':
+    case 'suppliers':
+    case 'skus':
+      return index * 5;
+    case 'salesOrders':
+      return index * 2;
+    case 'salesOrderLines':
+      return 0;
+    case 'stockMovements':
+    case 'supportTickets':
+      return index * 4;
+    case 'purchaseOrders':
+      return index * 6;
+    case 'invoices':
+      return index + Math.max(0, index - profile.counts.payments);
+    case 'payments':
+      return index;
+  }
+}
+
+export function calibrationRecordAt(
+  profile: ScaleProfile,
+  table: RecordTable,
+  index: number,
+): CalibrationRecord {
+  const count = tableCount(profile.counts, table);
+  if (!Number.isSafeInteger(index) || index < 0 || index >= count) {
+    throw new RangeError(`Record index ${index} is outside ${table} count ${count}`);
+  }
+  const context = createContext(profile);
+  const random = context.random.fork(`table/${table}`);
+  random.skip(randomDrawOffset(profile, table, index));
+  return makeRecord(context, table, index, random);
+}
+
+export function* generateCalibrationTableBatches(
+  profile: ScaleProfile,
+  table: RecordTable,
+  batchSize: number,
+): Generator<RecordBatch> {
+  if (!Number.isSafeInteger(batchSize) || batchSize <= 0) {
+    throw new RangeError(`Batch size must be a positive safe integer, received ${batchSize}`);
+  }
+  const context = createContext(profile);
+  const random = context.random.fork(`table/${table}`);
+  let pending: CalibrationRecord[] = [];
+  let pendingPartition = '';
+
+  const flush = (): RecordBatch | undefined => {
+    if (pending.length === 0) return undefined;
+    const batch = { table, partition: pendingPartition, records: pending } satisfies RecordBatch;
+    pending = [];
+    return batch;
+  };
+
+  for (let index = 0; index < tableCount(profile.counts, table); index += 1) {
+    const record = makeRecord(context, table, index, random);
+    if (
+      pending.length > 0 &&
+      (pending.length === batchSize || record.partition !== pendingPartition)
+    ) {
+      const batch = flush();
+      if (batch) yield batch;
+    }
+    if (pending.length === 0) pendingPartition = record.partition;
+    pending.push(record);
+  }
+
+  const batch = flush();
+  if (batch) yield batch;
+}
+
+export interface StockMovementLocatorBatch {
+  readonly scannedRecords: number;
+  readonly matchingIndices: readonly number[];
+}
+
+export function* scanStockMovementLocatorBatches(
+  profile: ScaleProfile,
+  skuId: string,
+  warehouseId: string,
+  batchSize: number,
+): Generator<StockMovementLocatorBatch> {
+  if (!Number.isSafeInteger(batchSize) || batchSize <= 0) {
+    throw new RangeError(`Batch size must be a positive safe integer, received ${batchSize}`);
+  }
+  const context = createContext(profile);
+  const random = context.random.fork('table/stockMovements');
+  let scannedRecords = 0;
+  let matchingIndices: number[] = [];
+
+  for (let index = 0; index < profile.counts.stockMovements; index += 1) {
+    const movementSkuId = idFor(context, 'skus', weightedIndex(random, profile.counts.skus));
+    const movementWarehouseId = random.pick(WAREHOUSES);
+    random.skip(2);
+    scannedRecords += 1;
+    if (movementSkuId === skuId && movementWarehouseId === warehouseId) {
+      matchingIndices.push(index);
+    }
+    if (scannedRecords === batchSize) {
+      yield { scannedRecords, matchingIndices };
+      scannedRecords = 0;
+      matchingIndices = [];
+    }
+  }
+
+  if (scannedRecords > 0) yield { scannedRecords, matchingIndices };
+}
+
 export function* generateCalibrationBatches(
   profile: ScaleProfile,
   batchSize: number,

@@ -28,12 +28,16 @@ async function runNexoraCalibration(request: CalibrationStartRequest): Promise<C
   let state = createRunState(validated.runId);
   let lastHeartbeat = performance.now();
   let maxMainThreadGapMs = 0;
-  const heartbeatMs = 10;
-  const heartbeat = window.setInterval(() => {
+  let heartbeatActive = true;
+  const heartbeat = new MessageChannel();
+  heartbeat.port1.onmessage = () => {
+    if (!heartbeatActive) return;
     const current = performance.now();
-    maxMainThreadGapMs = Math.max(maxMainThreadGapMs, current - lastHeartbeat - heartbeatMs);
+    maxMainThreadGapMs = Math.max(maxMainThreadGapMs, current - lastHeartbeat);
     lastHeartbeat = current;
-  }, heartbeatMs);
+    heartbeat.port2.postMessage(undefined);
+  };
+  heartbeat.port2.postMessage(undefined);
 
   return new Promise<CalibrationRun>((resolve, reject) => {
     let settled = false;
@@ -41,7 +45,9 @@ async function runNexoraCalibration(request: CalibrationStartRequest): Promise<C
       if (settled) return;
       settled = true;
       window.clearTimeout(timeout);
-      window.clearInterval(heartbeat);
+      heartbeatActive = false;
+      heartbeat.port1.close();
+      heartbeat.port2.close();
       worker.terminate();
       callback();
     };

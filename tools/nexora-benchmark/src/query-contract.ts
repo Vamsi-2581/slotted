@@ -39,6 +39,7 @@ export interface MaterializationStrategy {
 export interface StrategyOptions {
   readonly databaseName: string;
   readonly batchSize?: number;
+  readonly virtualBatchSize?: number;
   readonly pauseAfterOperational?: boolean;
 }
 

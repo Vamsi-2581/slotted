@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ScaleProfile } from './contracts';
-import { generateCalibrationBatches } from './generate';
+import {
+  calibrationRecordAt,
+  generateCalibrationBatches,
+  generateCalibrationTableBatches,
+  GENERATION_ORDER,
+  scanStockMovementLocatorBatches,
+} from './generate';
 import { SCALE_PROFILES } from './profiles';
 import { createNamespacedRandom } from './random';
 import type { CalibrationRecord, RecordTable } from './records';
@@ -124,6 +130,53 @@ describe('calibration data generation', () => {
     const first = collect(SCALE_PROFILES.smoke);
     const second = collect(SCALE_PROFILES.smoke);
     expect(second).toEqual(first);
+  });
+
+  it('resolves any stable record directly without replaying earlier rows', () => {
+    const generated = collect(SCALE_PROFILES.smoke).records;
+    const byTable = new Map(
+      GENERATION_ORDER.map((table) => [
+        table,
+        generated.filter((record) => record.table === table),
+      ]),
+    );
+
+    for (const table of GENERATION_ORDER) {
+      const records = byTable.get(table)!;
+      for (const index of new Set([0, Math.floor(records.length / 2), records.length - 1])) {
+        expect(calibrationRecordAt(SCALE_PROFILES.smoke, table, index)).toEqual(records[index]);
+      }
+    }
+  });
+
+  it('streams one table without replaying unrelated tables', () => {
+    const generated = collect(SCALE_PROFILES.smoke).records;
+
+    for (const table of GENERATION_ORDER) {
+      const actual = [...generateCalibrationTableBatches(SCALE_PROFILES.smoke, table, 37)].flatMap(
+        (batch) => batch.records,
+      );
+      expect(actual).toEqual(generated.filter((record) => record.table === table));
+    }
+  });
+
+  it('finds stock coordinates without materializing unrelated movement payloads', () => {
+    const movements = collect(SCALE_PROFILES.smoke).records.filter(
+      (record) => record.table === 'stockMovements',
+    );
+    const skuId = collect(SCALE_PROFILES.smoke).records.find(
+      (record) => record.table === 'skus',
+    )!.id;
+    const expected = movements
+      .filter((record) => record.skuId === skuId && record.warehouseId === 'wh-sp-01')
+      .map((record) => record.id);
+    const indices = [
+      ...scanStockMovementLocatorBatches(SCALE_PROFILES.smoke, skuId, 'wh-sp-01', 37),
+    ].flatMap((batch) => batch.matchingIndices);
+
+    expect(
+      indices.map((index) => calibrationRecordAt(SCALE_PROFILES.smoke, 'stockMovements', index).id),
+    ).toEqual(expected);
   });
 
   it('does not shift customers when transaction counts change', () => {

@@ -80,7 +80,7 @@ class HybridSession extends DatabaseStrategySession {
     }
     const cached = this.virtualCache.get(name);
     if (cached) return cached;
-    const result = executeVirtualProbe(this.profile, name);
+    const result = await executeVirtualProbe(this.profile, name);
     this.virtualCache.set(name, result);
     return result;
   }

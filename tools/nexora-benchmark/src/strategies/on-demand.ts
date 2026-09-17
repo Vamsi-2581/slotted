@@ -1,30 +1,32 @@
 import type { ProbeName, ProbeResult, ScaleProfile } from '../contracts';
 import { executeVirtualProbe, DatabaseStrategySession } from './database';
-import { generateCalibrationBatches, GENERATION_ORDER } from '../generate';
+import { GENERATION_ORDER } from '../generate';
 import type { MaterializationStrategy, StrategyObserver, StrategyOptions } from '../query-contract';
-
-const MASTER_TABLES = new Set(['customers', 'contacts', 'suppliers', 'skus'] as const);
 
 export class OnDemandSession extends DatabaseStrategySession {
   private readonly probeCache = new Map<ProbeName, ProbeResult>();
 
+  constructor(
+    name: 'on-demand',
+    profile: ScaleProfile,
+    observer: StrategyObserver,
+    databaseName: string,
+    batchSize: number,
+    private readonly virtualBatchSize: number,
+  ) {
+    super(name, profile, observer, databaseName, batchSize);
+  }
+
   async initialize(): Promise<void> {
     await this.open();
-    for (const batch of generateCalibrationBatches(this.profile, this.batchSize)) {
-      if (
-        !MASTER_TABLES.has(batch.table as typeof MASTER_TABLES extends Set<infer T> ? T : never)
-      ) {
-        break;
-      }
-      await this.writeBatch(batch);
-      if (this.committedCounts[batch.table] === this.profile.counts[batch.table]) {
-        this.markTableComplete(batch.table);
-      }
-    }
-    await this.database.metadata.put({
-      key: 'deterministic-locator',
-      value: JSON.stringify({ seed: this.profile.seed, counts: this.profile.counts }),
-    });
+    await this.writeMetadata(
+      'deterministic-locator',
+      JSON.stringify({
+        seed: this.profile.seed,
+        counts: this.profile.counts,
+        materialization: 'locator-first',
+      }),
+    );
     for (const table of GENERATION_ORDER) this.markTableAvailable(table);
     this.setReadiness('operational');
     this.setReadiness('complete');
@@ -33,9 +35,14 @@ export class OnDemandSession extends DatabaseStrategySession {
   override async runProbe(name: ProbeName): Promise<ProbeResult> {
     const cached = this.probeCache.get(name);
     if (cached) return cached;
-    const result = executeVirtualProbe(this.profile, name);
+    const result = await executeVirtualProbe(
+      this.profile,
+      name,
+      this.virtualBatchSize,
+      this.observer.onBatch,
+    );
     this.probeCache.set(name, result);
-    await this.database.metadata.put({ key: `probe:${name}`, value: JSON.stringify(result) });
+    await this.writeMetadata(`probe:${name}`, JSON.stringify(result));
     return result;
   }
 }
@@ -50,6 +57,7 @@ export function createOnDemandStrategy(options: StrategyOptions): Materializatio
         observer,
         options.databaseName,
         options.batchSize ?? 512,
+        options.virtualBatchSize ?? options.batchSize ?? 512,
       );
       await session.initialize();
       return session;

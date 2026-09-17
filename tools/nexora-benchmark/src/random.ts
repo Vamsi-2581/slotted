@@ -23,6 +23,7 @@ export interface NamespacedRandom {
   integer(min: number, max: number): number;
   pick<T>(values: readonly T[]): T;
   fork(namespace: string): NamespacedRandom;
+  skip(draws: number): void;
 }
 
 class SplitMix64Random implements NamespacedRandom {
@@ -60,6 +61,13 @@ class SplitMix64Random implements NamespacedRandom {
   fork(namespace: string): NamespacedRandom {
     if (namespace.length === 0) throw new RangeError('A random namespace cannot be empty');
     return new SplitMix64Random(this.rootSeed, `${this.namespace}/${namespace}`);
+  }
+
+  skip(draws: number): void {
+    if (!Number.isSafeInteger(draws) || draws < 0) {
+      throw new RangeError(`Random draws to skip must be a non-negative safe integer: ${draws}`);
+    }
+    this.state = (this.state + SPLITMIX_INCREMENT * BigInt(draws)) & MASK_64;
   }
 }
 

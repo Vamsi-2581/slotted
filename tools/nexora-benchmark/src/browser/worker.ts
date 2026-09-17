@@ -19,6 +19,9 @@ const PROBES: readonly ProbeName[] = [
   'historical-point-lookup',
 ];
 const WORKER_BATCH_SIZE = 32;
+function virtualBatchSize(browser: string): number {
+  return browser === 'webkit' ? 4 : 32;
+}
 
 interface ActiveRun {
   readonly runId: string;
@@ -68,18 +71,21 @@ async function execute(request: CalibrationStartRequest, run: ActiveRun): Promis
   let processedRecords = 0;
   let maxWorkerBatchMs = 0;
   let nextProgress = Math.max(1, Math.ceil(totalRecords / 100));
+  let materializationActive = true;
 
   const strategy = createStrategy(request.strategy, {
     databaseName: `nexora-${request.runId}`,
     batchSize: WORKER_BATCH_SIZE,
+    virtualBatchSize: virtualBatchSize(request.browser),
   });
   run.session = await strategy.prepare(profile, {
     onBatch(sample) {
-      processedRecords = Math.min(totalRecords, processedRecords + sample.records);
       if (sample.durationMs > maxWorkerBatchMs) {
         maxWorkerBatchMs = sample.durationMs;
         emit({ type: 'batch', runId: request.runId, ...sample });
       }
+      if (!materializationActive) return;
+      processedRecords = Math.min(totalRecords, processedRecords + sample.records);
       if (processedRecords >= nextProgress) {
         emit({
           type: 'progress',
@@ -103,6 +109,7 @@ async function execute(request: CalibrationStartRequest, run: ActiveRun): Promis
     },
   });
   await waitForComplete(request, run, started);
+  materializationActive = false;
   emit({
     type: 'progress',
     runId: request.runId,

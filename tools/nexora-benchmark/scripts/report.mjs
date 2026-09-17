@@ -24,7 +24,12 @@ export function nearestRankP95(values) {
 }
 
 function distribution(values) {
+  if (values.length === 0) return { median: null, p95: null };
   return { median: median(values), p95: nearestRankP95(values) };
+}
+
+function maximum(values) {
+  return values.length === 0 ? null : Math.max(...values);
 }
 
 function readinessIsTruthful(run) {
@@ -57,9 +62,30 @@ function groupRuns(runs) {
 function referenceFor(runs, profile, browser) {
   return (
     runs.find(
-      (run) => run.profile === profile && run.browser === browser && run.strategy === 'full',
-    ) ?? runs.find((run) => run.profile === profile && run.browser === browser)
+      (run) =>
+        !run.failed &&
+        run.profile === profile &&
+        run.browser === browser &&
+        run.strategy === 'full',
+    ) ?? runs.find((run) => !run.failed && run.profile === profile && run.browser === browser)
   );
+}
+
+function summarizeFailures(group) {
+  const byKind = new Map();
+  for (const run of group.filter((item) => item.failed)) {
+    const summary = byKind.get(run.failure.kind) ?? {
+      count: 0,
+      message: run.failure.message.split('\n', 1)[0],
+    };
+    summary.count += 1;
+    byKind.set(run.failure.kind, summary);
+  }
+  return [...byKind]
+    .map(
+      ([kind, summary]) => `${kind} (${summary.count}/${group.length} runs) — ${summary.message}`,
+    )
+    .sort();
 }
 
 export function aggregateRuns(runs) {
@@ -67,6 +93,7 @@ export function aggregateRuns(runs) {
   const aggregates = [];
   for (const group of groupRuns(runs).values()) {
     const first = group[0];
+    const successful = group.filter((run) => !run.failed);
     const reference = referenceFor(runs, first.profile, first.browser);
     if (!reference) throw new Error(`Missing reference for ${first.profile}/${first.browser}`);
     const referenceProbes = new Map(
@@ -77,29 +104,32 @@ export function aggregateRuns(runs) {
       browser: first.browser,
       strategy: first.strategy,
       samples: group.length,
-      digestMatches: group.every((run) => run.digest === reference.digest),
-      queryDigestsMatch: group.every((run) =>
+      digestMatches: successful.every((run) => run.digest === reference.digest),
+      queryDigestsMatch: successful.every((run) =>
         run.metrics.probes.every(
           (probe) => referenceProbes.get(probe.probe) === probe.result.digest,
         ),
       ),
-      readinessTruthful: group.every(readinessIsTruthful),
+      readinessTruthful: successful.every(readinessIsTruthful),
       failedRuns: group.filter((run) => run.failed).length,
+      failureReasons: summarizeFailures(group),
       leakedDatabases: group.filter((run) => run.leakedDatabase).length,
       backgroundActive: group.filter((run) => run.backgroundActive).length,
-      operationalReadyMs: distribution(group.map((run) => run.metrics.operationalReadyMs)),
-      completeReadyMs: distribution(group.map((run) => run.metrics.completeReadyMs)),
-      maxWorkerBatchMs: Math.max(...group.map((run) => run.metrics.maxWorkerBatchMs)),
-      maxMainThreadGapMs: Math.max(...group.map((run) => run.metrics.maxMainThreadGapMs)),
-      storageBytes: distribution(group.map((run) => run.metrics.storageBytes)),
+      operationalReadyMs: distribution(successful.map((run) => run.metrics.operationalReadyMs)),
+      completeReadyMs: distribution(successful.map((run) => run.metrics.completeReadyMs)),
+      maxWorkerBatchMs: maximum(successful.map((run) => run.metrics.maxWorkerBatchMs)),
+      maxMainThreadGapMs: maximum(successful.map((run) => run.metrics.maxMainThreadGapMs)),
+      storageBytes: distribution(successful.map((run) => run.metrics.storageBytes)),
       probeP95Ms: Object.fromEntries(
         PROBES.map((probe) => [
           probe,
-          nearestRankP95(
-            group.map(
-              (run) => run.metrics.probes.find((metric) => metric.probe === probe).durationMs,
-            ),
-          ),
+          successful.length === 0
+            ? null
+            : nearestRankP95(
+                successful.map(
+                  (run) => run.metrics.probes.find((metric) => metric.probe === probe).durationMs,
+                ),
+              ),
         ]),
       ),
     });
@@ -127,7 +157,9 @@ export function qualifyStrategy(aggregate) {
   if (aggregate.maxMainThreadGapMs > 50) {
     reasons.push('main-thread heartbeat gap exceeded 50ms');
   }
-  if (aggregate.failedRuns > 0) reasons.push('one or more calibration runs failed');
+  if (aggregate.failedRuns > 0) {
+    reasons.push(`one or more calibration runs failed: ${aggregate.failureReasons.join('; ')}`);
+  }
   if (aggregate.leakedDatabases > 0) reasons.push('one or more calibration databases leaked');
   if (aggregate.backgroundActive > 0) reasons.push('background work remained active');
   return { qualified: reasons.length === 0, reasons };
@@ -190,9 +222,14 @@ function deriveByteBudget(p95) {
 }
 
 export function deriveBudgets(aggregates) {
+  const globallyQualified = new Set(
+    strategySummaries(aggregates)
+      .filter((summary) => summary.qualified)
+      .map((summary) => summary.strategy),
+  );
   const groups = new Map();
   for (const aggregate of aggregates) {
-    if (!qualifyStrategy(aggregate).qualified) continue;
+    if (!globallyQualified.has(aggregate.strategy)) continue;
     const key = `${aggregate.profile}\u0000${aggregate.strategy}`;
     const group = groups.get(key) ?? [];
     group.push(aggregate);
@@ -229,10 +266,10 @@ export function deriveBudgets(aggregates) {
 }
 
 function milliseconds(value) {
-  return `${value.toFixed(1)} ms`;
+  return value === null ? '—' : `${value.toFixed(1)} ms`;
 }
 
-export function renderDecisionReport({ environment, aggregates, recommendation }) {
+export function renderDecisionReport({ environment, runs = [], aggregates, recommendation }) {
   const rows = aggregates
     .map((item) => {
       const qualification = qualifyStrategy(item);
@@ -244,13 +281,19 @@ export function renderDecisionReport({ environment, aggregates, recommendation }
         .map((item) => `- **${item.strategy}:** ${item.reasons.join('; ')}`)
         .join('\n')
     : '- None.';
+  const selectedParameters =
+    recommendation.strategy === 'on-demand'
+      ? 'The selected locator-first composition persists deterministic locator metadata rather than eager domain rows, uses 32-record virtual batches in Chromium and Firefox, 4-record virtual batches in WebKit, and retains cooperative yields plus indexed/direct probe plans.'
+      : 'The next persistence plan must retain the exact partition, batch, and readiness parameters recorded for the selected strategy.';
+  const selectedSamples = runs.filter((run) => run.strategy === recommendation.strategy).length;
+  const retainedSamples = runs.length - selectedSamples;
   return `# Nexora materialization calibration decision
 
-Recorded from commit \`${environment.gitCommit}\` on ${environment.os}/${environment.arch}, Node ${environment.node}, Playwright ${environment.playwright}.
+Git HEAD marker captured during recording: \`${environment.gitCommit}\` on ${environment.os}/${environment.arch}, Node ${environment.node}, Playwright ${environment.playwright}; tracked benchmark source changes: ${environment.benchmarkSourceDirty ? 'yes' : 'no'}.
 
 ## Recommendation
 
-**${recommendation.strategy ?? 'No strategy qualified'}** is the highest-ranked candidate under the recorded hard gates and lexicographic performance priorities. The next persistence plan must retain the recorded 32-record worker batch and 12-month hybrid operational window when hybrid is selected.
+**${recommendation.strategy ?? 'No strategy qualified'}** is the highest-ranked candidate under the recorded hard gates and lexicographic performance priorities. ${selectedParameters}
 
 ## Measured evidence
 
@@ -261,6 +304,12 @@ ${rows}
 ## Rejected candidates
 
 ${rejected}
+
+## Evidence provenance
+
+- Selected-strategy samples: ${selectedSamples}; each executes the locator-first composition described above.
+- Non-selected candidate samples retained: ${retainedSamples}; failed trials remain explicit failures rather than imputed measurements.
+- The Git marker identifies the HEAD observed by the runner. The checked-in implementation and evidence changeset is the reproducible source of truth when tracked benchmark source changes are reported above.
 
 ## Reproducibility
 

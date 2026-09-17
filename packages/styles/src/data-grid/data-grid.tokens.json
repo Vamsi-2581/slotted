@@ -87,6 +87,7 @@
   "--slotted-text",
   "--slotted-text-muted",
   "--slotted-tone-accent-border",
+  "--slotted-tone-accent-solid",
   "--slotted-tone-accent-subtle-hover",
   "--slotted-tone-accent-surface",
   "--slotted-tone-accent-text",

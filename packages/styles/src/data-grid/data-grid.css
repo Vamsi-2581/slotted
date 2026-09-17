@@ -122,9 +122,12 @@
       transparent
     );
     --_range: var(--slotted-data-grid-range-surface, var(--slotted-tone-accent-surface, Canvas));
+    /* The accent's solid ink at a quarter, over whatever the row is: the
+       accent's own surfaces are a step from the page in the dark scheme and
+       read as nothing on a row. */
     --_changed: var(
       --slotted-data-grid-changed-surface,
-      var(--slotted-tone-accent-subtle-hover, Highlight)
+      color-mix(in oklab, var(--slotted-tone-accent-solid, Highlight) 24%, transparent)
     );
     --_ring-width: var(--slotted-focus-ring-width, 2px);
     /* A control drawn by the family — the column menu, the filter trigger, the
@@ -1339,21 +1342,25 @@
   }
 
   @keyframes slotted-data-grid-changed-a {
-    from {
+    /* Held for a third of the time, so the eye can land on it, then gone. */
+    0%,
+    35% {
       background-color: var(--_changed);
     }
 
-    to {
+    100% {
       background-color: transparent;
     }
   }
 
   @keyframes slotted-data-grid-changed-b {
-    from {
+    /* Held for a third of the time, so the eye can land on it, then gone. */
+    0%,
+    35% {
       background-color: var(--_changed);
     }
 
-    to {
+    100% {
       background-color: transparent;
     }
   }
@@ -1927,6 +1934,12 @@
 
     [data-ui='data-grid'] [data-part='drop-indicator'] {
       background-color: Highlight;
+    }
+
+    [data-ui='data-grid'] [data-part='cell'][data-changed] {
+      animation: none;
+      background-color: Highlight;
+      color: HighlightText;
     }
 
     /* A mask painted `currentcolor` keeps the ink the system forced; the

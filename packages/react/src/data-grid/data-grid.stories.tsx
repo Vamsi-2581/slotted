@@ -6,6 +6,7 @@ import {
   withColumnFilter,
   withFilter,
   withPageIndex,
+  withPageSize,
   withSearch,
   type GridCell,
   type GridColumn,
@@ -22,7 +23,13 @@ import type { ReactNode } from 'react';
 import { Badge } from '../badge';
 import { Button } from '../button';
 import { FilterBar } from '../filter-bar';
-import { Pagination, PaginationItems, PaginationNext, PaginationPrevious } from '../pagination';
+import {
+  Pagination,
+  PaginationNext,
+  PaginationPageSize,
+  PaginationPrevious,
+  PaginationStatus,
+} from '../pagination';
 import { Text } from '../typography';
 import { TextField } from '../text-field';
 import { DataGrid } from './data-grid';
@@ -836,20 +843,25 @@ export const Server: Story = { parameters: scenario('server'), render: () => <Se
 
 const PaginationDemo = () => {
   const [query, setQuery] = useState<GridQuery>(emptyQuery({ index: 0, size: 8 }));
-  const pageCount = Math.ceil(FIFTY.length / 8);
-  void pageCount;
+  const page = query.page && 'index' in query.page ? query.page : { index: 0, size: 8 };
   return (
     <Screen>
       <Shipments
+        /* The bar a table carries: a page size, the range and the two
+           triggers, at the inline end. The status states the range, so the
+           grid's own is off. */
         footer={
           <Pagination
             count={FIFTY.length}
-            onPageChange={(page) => setQuery(withPageIndex(query, page - 1).query)}
-            page={(query.page && 'index' in query.page ? query.page.index : 0) + 1}
-            pageSize={8}
+            onPageChange={(index) => setQuery(withPageIndex(query, index - 1).query)}
+            onPageSizeChange={(size) => setQuery(withPageSize(query, size).query)}
+            page={page.index + 1}
+            pageSize={page.size}
+            pageSizeOptions={[8, 16, 32]}
           >
+            <PaginationPageSize />
+            <PaginationStatus />
             <PaginationPrevious />
-            <PaginationItems />
             <PaginationNext />
           </Pagination>
         }
@@ -858,6 +870,7 @@ const PaginationDemo = () => {
         height={undefined}
         onQueryChange={setQuery}
         query={query}
+        showRange={false}
       />
     </Screen>
   );

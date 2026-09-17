@@ -7,9 +7,10 @@ import { SlButton } from '@slotted/angular/button';
 import { SlFilterBar } from '@slotted/angular/filter-bar';
 import {
   SlPagination,
-  SlPaginationItems,
   SlPaginationNext,
+  SlPaginationPageSize,
   SlPaginationPrevious,
+  SlPaginationStatus,
 } from '@slotted/angular/pagination';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
@@ -36,9 +37,10 @@ const STORY_IMPORTS = [
   SlButton,
   SlFilterBar,
   SlPagination,
-  SlPaginationItems,
   SlPaginationNext,
+  SlPaginationPageSize,
   SlPaginationPrevious,
+  SlPaginationStatus,
   SlText,
   SlTextField,
   SlTextFieldInput,

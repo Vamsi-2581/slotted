@@ -1814,9 +1814,11 @@
    *
    * The bar under the grid and inside the frame: pagination, the range, load
    * more. A sibling of the scroller, so a grid scrolled sideways does not take
-   * its paging with it. The last item gets the room that is left, because
-   * `pagination` answers its own inline size and contributes no intrinsic
-   * width.
+   * its paging with it. The range reads at the start and the pager sits at
+   * the end — the controls of a table close its inline end, the same edge the
+   * numbers align to. The last item takes the room that is left and aligns
+   * its own content to the end: `pagination` is an inline-size container and
+   * contributes no intrinsic width, so it cannot be sized by its content.
    */
   [data-ui='data-grid'] > [data-part='footer'] {
     align-items: center;
@@ -1834,7 +1836,9 @@
   }
 
   [data-ui='data-grid'] > [data-part='footer'] > :last-child {
+    display: flex;
     flex: 1 1 auto;
+    justify-content: flex-end;
     min-inline-size: 0;
   }
 

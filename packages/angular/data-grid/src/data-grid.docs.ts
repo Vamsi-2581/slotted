@@ -676,22 +676,31 @@ class ShipmentsPage {
   {
     id: 'pagination',
     title: 'Pagination',
-    note: 'query.page carries the index and the size; the footer states the range, and the pagination family projected with slDataGridFooter moves the page. A change of filter, search or group puts the page back at the start in the same request.',
+    note: 'query.page carries the index and the size; the pagination family projected with slDataGridFooter moves both, in the bar a table carries: a page size, the range and the two triggers, at the inline end. The status states the range, so showRange is off. A change of filter, search or group puts the page back at the start in the same request.',
     snippet: defineSnippet({
       id: 'data-grid-angular-pagination',
       language: 'angular',
       label: 'The page is in the query',
-      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" [(query)]="query">
+      source: `<sl-data-grid
+  rowKey="id"
+  [rows]="shipments()"
+  [columns]="columns"
+  [(query)]="query"
+  [showRange]="false"
+>
   <nav
     slDataGridFooter
     slPagination
-    [count]="shipments().length"
-    [pageSize]="8"
+    [count]="total()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[25, 50, 100]"
     [page]="pageIndex() + 1"
-    (pageChange)="query.set(withPageIndex(query(), $event - 1).query)"
+    (pageChange)="query.set(withPageIndex(query(), $event.value - 1).query)"
+    (pageSizeChange)="query.set(withPageSize(query(), $event.value).query)"
   >
+    <sl-pagination-page-size></sl-pagination-page-size>
+    <p slPaginationStatus></p>
     <button slPaginationPrevious></button>
-    <div slPaginationItems></div>
     <button slPaginationNext></button>
   </nav>
 </sl-data-grid>`,

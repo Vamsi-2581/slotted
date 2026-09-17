@@ -612,7 +612,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'pagination',
     title: 'Pagination',
-    note: 'query.page carries the index and the size; the footer states the range, and the pagination family in the footer moves the page. A change of filter, search or group puts the page back at the start in the same request.',
+    note: 'query.page carries the index and the size; the pagination family in the footer moves both, in the bar a table carries: a page size, the range and the two triggers, at the inline end. The status states the range, so showRange is off. A change of filter, search or group puts the page back at the start in the same request.',
     snippet: defineSnippet({
       id: 'data-grid-react-pagination',
       language: 'tsx',
@@ -620,12 +620,21 @@ const scenes: ReferenceSceneMeta[] = [
       source: `<DataGrid
   footer={
     <Pagination
-      onPageChange={(index) => setQuery(withPageIndex(query, index).query)}
-      page={query.page.index}
-      pageCount={pageCount}
-    />
+      count={total}
+      onPageChange={(page) => setQuery(withPageIndex(query, page - 1).query)}
+      onPageSizeChange={(size) => setQuery(withPageSize(query, size).query)}
+      page={query.page.index + 1}
+      pageSize={query.page.size}
+      pageSizeOptions={[25, 50, 100]}
+    >
+      <PaginationPageSize />
+      <PaginationStatus />
+      <PaginationPrevious />
+      <PaginationNext />
+    </Pagination>
   }
   query={query}
+  showRange={false}
 />;`,
     }),
   },

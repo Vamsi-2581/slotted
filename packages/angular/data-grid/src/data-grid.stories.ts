@@ -7,6 +7,7 @@ import {
   withColumnFilter,
   withFilter,
   withPageIndex,
+  withPageSize,
   withSearch,
   type GridCell,
   type GridColumn,
@@ -22,9 +23,10 @@ import { SlFilterBar } from '@slotted/angular/filter-bar';
 import type { FilterBarField } from '@slotted/angular/filter-bar';
 import {
   SlPagination,
-  SlPaginationItems,
   SlPaginationNext,
+  SlPaginationPageSize,
   SlPaginationPrevious,
+  SlPaginationStatus,
 } from '@slotted/angular/pagination';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
@@ -324,9 +326,10 @@ const meta: Meta<DataGridStoryArgs> = {
         SlButton,
         SlFilterBar,
         SlPagination,
-        SlPaginationItems,
         SlPaginationNext,
+        SlPaginationPageSize,
         SlPaginationPrevious,
+        SlPaginationStatus,
         SlText,
         SlTextField,
         SlTextFieldInput,
@@ -892,16 +895,35 @@ export const PaginationScene: Story = {
           const held = query().page;
           return (held && 'index' in held ? held.index : 0) + 1;
         },
+        pageSize: () => {
+          const held = query().page;
+          return held && 'index' in held ? held.size : 8;
+        },
         setPage: (request: ChangeRequest<number>) =>
           query.set(withPageIndex(query(), request.value - 1).query),
+        setPageSize: (request: ChangeRequest<number>) =>
+          query.set(withPageSize(query(), request.value).query),
       },
+      /* The bar a table carries: a page size, the range and the two
+         triggers, at the inline end. The status states the range, so the
+         grid's own is off. */
       template: screen(
         grid(
-          '[rows]="rows" [(query)]="query"',
+          '[rows]="rows" [(query)]="query" [showRange]="false"',
           `
-      <nav slDataGridFooter slPagination [count]="count" [pageSize]="8" [page]="page()" (pageChange)="setPage($event)">
+      <nav
+        slDataGridFooter
+        slPagination
+        [count]="count"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[8, 16, 32]"
+        [page]="page()"
+        (pageChange)="setPage($event)"
+        (pageSizeChange)="setPageSize($event)"
+      >
+        <sl-pagination-page-size></sl-pagination-page-size>
+        <p slPaginationStatus></p>
         <button slPaginationPrevious type="button"></button>
-        <sl-pagination-items></sl-pagination-items>
         <button slPaginationNext type="button"></button>
       </nav>`,
           /* A paged grid is as tall as its page: a frame taller than eight

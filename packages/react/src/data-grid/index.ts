@@ -1,0 +1,34 @@
+export { DataGrid } from './data-grid';
+export {
+  DataGridDefaultsProvider,
+  DEFAULT_DATA_GRID_LABELS,
+  resolveLabels as resolveDataGridLabels,
+  useDataGridDefaults,
+} from './data-grid-defaults';
+export { EXPANDER_COLUMN, SELECTION_COLUMN } from './data-grid-constants';
+export type {
+  DataGridActivateEvent,
+  DataGridCellContext,
+  DataGridColumnStateRequest,
+  DataGridDefaults,
+  DataGridDefaultsProviderProps,
+  DataGridEditCommit,
+  DataGridEditMode,
+  DataGridEditorContext,
+  DataGridExpandedGroups,
+  DataGridFilterOperandContext,
+  DataGridGroupContext,
+  DataGridHandle,
+  DataGridHeaderContext,
+  DataGridLabels,
+  DataGridMode,
+  DataGridProps,
+  DataGridQueryRequest,
+  DataGridReason,
+  DataGridResolvedLabels,
+  DataGridRowHeight,
+  DataGridSelectionMode,
+  DataGridStickyTo,
+  DataGridVariant,
+  DataGridVirtualize,
+} from './data-grid.types';

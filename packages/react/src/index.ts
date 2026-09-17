@@ -20,6 +20,7 @@ export * from './command-palette';
 export * from './container';
 export * from './context-menu';
 export * from './currency-field';
+export * from './data-grid';
 export * from './date-field';
 export * from './date-picker';
 export * from './date-range-picker';

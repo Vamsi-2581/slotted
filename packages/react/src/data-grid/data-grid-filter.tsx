@@ -1,0 +1,641 @@
+import {
+  defaultOperator,
+  describeFilter,
+  emptyFilter,
+  isConditionActive,
+  isFilterActive,
+  normalizeFilter,
+  operandCount,
+  operatorsFor,
+  serializeFilter,
+  withCondition,
+  withJoin,
+} from '@slotted/core/filter';
+import type {
+  FilterCondition,
+  FilterDescriptor,
+  FilterJoin,
+  FilterKind,
+  FilterOperator,
+} from '@slotted/core/filter';
+import {
+  isPlainDate,
+  isPlainDateTime,
+  isPlainTime,
+  toISODate,
+  toISODateTime,
+  toISOTime,
+} from '@slotted/core/date';
+import { FILTER_ROW, type ResolvedGridColumn } from '@slotted/core/grid';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
+
+import { Button } from '../button';
+import { DateField } from '../date-field';
+import { DateTimeField } from '../datetime-field';
+import { Menu, MenuContent, MenuItem, MenuTrigger } from '../menu';
+import { NumberField } from '../number-field';
+import { Popover, PopoverAnchor, PopoverContent, PopoverLayer } from '../popover';
+import { Segment, SegmentedControl } from '../segmented-control';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
+import { TextField } from '../text-field';
+import { TimeField } from '../time-field';
+import { useDataGridInternal } from './data-grid-context';
+import { fill } from './data-grid-defaults';
+import { dateOf, dateTimeOf, timeOf } from './data-grid-editors';
+import { cellStyle, columnAttributes } from './data-grid-constants';
+import type { DataGridResolvedLabels } from './data-grid.types';
+
+type Condition = FilterCondition<string, unknown>;
+
+const FILTER_KINDS: readonly string[] = [
+  'text',
+  'number',
+  'date',
+  'time',
+  'datetime',
+  'boolean',
+  'set',
+];
+
+export function filterKindOf<Row>(column: ResolvedGridColumn<Row>): FilterKind | null {
+  return FILTER_KINDS.includes(column.kind) ? (column.kind as FilterKind) : null;
+}
+
+function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
+  return serializeFilter(a) === serializeFilter(b);
+}
+
+/* ── One operand control ─────────────────────────────────────────────── */
+
+interface OperandProps<Row> {
+  column: ResolvedGridColumn<Row>;
+  kind: FilterKind;
+  operator: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onKeyDown?: ((event: KeyboardEvent<HTMLElement>) => void) | undefined;
+  label: string;
+  variant: 'plain' | 'outline';
+  labels: DataGridResolvedLabels;
+  locale: string | undefined;
+  counts?: ReadonlyMap<string, number> | undefined;
+  placeholder?: string | undefined;
+  autoFocus?: boolean | undefined;
+}
+
+/**
+ * The control an operand of a kind is edited in. One family per kind, all
+ * at `sm`; `plain` in the filter row and `outline` in the panel.
+ */
+function Operand<Row>({
+  autoFocus,
+  column,
+  counts,
+  kind,
+  label,
+  labels,
+  locale,
+  onChange,
+  onKeyDown,
+  placeholder,
+  value,
+  variant,
+}: OperandProps<Row>) {
+  const shared = {
+    'aria-label': label,
+    size: 'sm' as const,
+    variant,
+    ...(autoFocus ? { autoFocus: true } : {}),
+    ...(onKeyDown ? { onKeyDown } : {}),
+    ...(locale === undefined ? {} : { locale }),
+  };
+  switch (kind) {
+    case 'number':
+      return (
+        <NumberField
+          {...shared}
+          onValueChange={(next) => onChange(next)}
+          placeholder={placeholder ?? label}
+          value={typeof value === 'number' ? value : null}
+        />
+      );
+    case 'date':
+      return (
+        <DateField
+          {...shared}
+          onValueChange={(next) => onChange(isPlainDate(next) ? toISODate(next) : null)}
+          value={dateOf(value)}
+        />
+      );
+    case 'time':
+      return (
+        <TimeField
+          {...shared}
+          onValueChange={(next) => onChange(isPlainTime(next) ? toISOTime(next, 'minute') : null)}
+          value={timeOf(value)}
+        />
+      );
+    case 'datetime':
+      return (
+        <DateTimeField
+          {...shared}
+          onValueChange={(next) => onChange(isPlainDateTime(next) ? toISODateTime(next) : null)}
+          value={dateTimeOf(value)}
+        />
+      );
+    case 'boolean':
+      return (
+        <Select
+          fullWidth
+          items={[
+            { label: labels.filterYes, value: 'true' },
+            { label: labels.filterNo, value: 'false' },
+          ]}
+          onValueChange={(next) =>
+            onChange(next === 'true' ? true : next === 'false' ? false : null)
+          }
+          size="sm"
+          value={value === true ? 'true' : value === false ? 'false' : null}
+          variant={variant}
+        >
+          <SelectTrigger aria-label={label} {...(autoFocus ? { autoFocus: true } : {})}>
+            <SelectValue placeholder={labels.filterAny} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">{labels.filterYes}</SelectItem>
+            <SelectItem value="false">{labels.filterNo}</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    case 'set': {
+      const known = column.column.options ?? [];
+      const seen = new Set(known.map((option) => option.value));
+      const extra = counts
+        ? [...counts.keys()]
+            .filter((key) => !seen.has(key))
+            .map((key) => ({ value: key, label: key }))
+        : [];
+      const options = [...known, ...extra];
+      const chosen = Array.isArray(value) ? (value as readonly string[]) : [];
+      return (
+        <Select
+          fullWidth
+          items={options.map((option) => ({ label: option.label, value: option.value }))}
+          multiple
+          onValueChange={(next) =>
+            onChange(Array.isArray(next) ? next : next === null ? [] : [next])
+          }
+          size="sm"
+          value={chosen}
+          variant={variant}
+        >
+          <SelectTrigger aria-label={label} {...(autoFocus ? { autoFocus: true } : {})}>
+            <SelectValue placeholder={labels.filterAny} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+                {counts?.has(option.value) ? ` (${counts.get(option.value)})` : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+    default:
+      return (
+        <TextField
+          {...shared}
+          onValueChange={(next) => onChange(next)}
+          placeholder={placeholder ?? label}
+          value={value === null || value === undefined ? '' : String(value)}
+        />
+      );
+  }
+}
+
+/* ── The panel ───────────────────────────────────────────────────────── */
+
+interface PanelProps<Row> {
+  column: ResolvedGridColumn<Row>;
+  children: (anchorRef: (node: HTMLElement | null) => void) => ReactNode;
+}
+
+/**
+ * The compact panel: one line per condition — `[operator] [operand]` in
+ * `sm` — the join as two words in the first column of the second line, and
+ * Clear and Apply at the trailing edge. It edits a draft: nothing reaches the
+ * query until Apply, and closing restores what the panel opened with.
+ */
+export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) {
+  const grid = useDataGridInternal<Row>();
+  const kind = filterKindOf(column);
+  const open = grid.filterOpen === column.id && kind !== null;
+  const committed = grid.filterOf(column.id);
+  const labels = grid.labels;
+  const anchor = useRef<HTMLElement | null>(null);
+  const setAnchor = useCallback((node: HTMLElement | null) => {
+    anchor.current = node;
+  }, []);
+
+  const blank = useCallback(() => (kind ? (emptyFilter(kind) as FilterDescriptor) : null), [kind]);
+  const [draft, setDraft] = useState<FilterDescriptor | null>(committed ?? blank());
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open && !wasOpen.current) setDraft(committed ?? blank());
+    wasOpen.current = open;
+  }, [open, committed, blank]);
+
+  if (!kind) return <>{children(setAnchor)}</>;
+
+  const panelKind: FilterKind = kind;
+  const name = column.column.label;
+  const format = {
+    join: (join: FilterJoin) => labels.filterJoins[join],
+    operator: (operator: FilterOperator) => labels.filterOperators[operator] ?? operator,
+  };
+  const operators = operatorsFor(kind) as readonly string[];
+  const allowed = kind === 'set' ? 1 : 2;
+  const current = draft ?? blank()!;
+  const conditionAt = (index: number): Condition =>
+    current.conditions[index] ?? { operator: defaultOperator(kind) as string };
+  const showsSecond = allowed === 2 && isConditionActive(kind, conditionAt(0));
+
+  function close() {
+    grid.setFilterOpen(null);
+  }
+  function apply(source: unknown, reason: 'pointer' | 'keyboard') {
+    const next = normalizeFilter(current);
+    if (!sameFilter(next, committed)) grid.setFilter(column.id, next, reason, source);
+    grid.announce(
+      next
+        ? `${labels.filter} ${name}: ${describeFilter(next, format)}`
+        : `${labels.filter} ${name}, ${labels.filterCleared}`,
+    );
+    close();
+  }
+  function clear(source: unknown) {
+    setDraft(blank());
+    if (committed) grid.setFilter(column.id, null, 'clear', source);
+    grid.announce(`${labels.filter} ${name}, ${labels.filterCleared}`);
+    close();
+  }
+  function setOperator(index: number, operator: string) {
+    const condition = conditionAt(index);
+    const before = operandCount(condition.operator as FilterOperator);
+    const after = operandCount(operator as FilterOperator);
+    const next: Condition = {
+      operator,
+      ...(after >= 1 && before >= 1 ? { value: condition.value } : {}),
+      ...(after === 2 && before === 2 ? { end: condition.end } : {}),
+    };
+    setDraft(withCondition(current, index, next as never));
+  }
+  function setOperand(index: number, slot: 0 | 1, operand: unknown) {
+    const condition = conditionAt(index);
+    const next: Condition =
+      slot === 0 ? { ...condition, value: operand } : { ...condition, end: operand };
+    setDraft(withCondition(current, index, next as never));
+  }
+  const applyOnEnter = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Enter' && !event.defaultPrevented) {
+      event.preventDefault();
+      apply(event, 'keyboard');
+    }
+  };
+
+  function renderCondition(index: 0 | 1) {
+    const condition = conditionAt(index);
+    const operands = operandCount(condition.operator as FilterOperator);
+    const custom = grid.renderFilterOperand;
+    return (
+      <div data-operands={operands} data-part="filter-condition" key={index}>
+        {index === 1 ? (
+          <div data-part="filter-join">
+            <SegmentedControl
+              aria-label={labels.filterJoin}
+              onValueChange={(join) => setDraft(withJoin(current, join as FilterJoin))}
+              size="sm"
+              value={current.join}
+            >
+              <Segment value="and">{format.join('and')}</Segment>
+              <Segment value="or">{format.join('or')}</Segment>
+            </SegmentedControl>
+          </div>
+        ) : null}
+        <div data-part="filter-operator">
+          <Select
+            fullWidth
+            items={operators.map((operator) => ({
+              label: format.operator(operator as FilterOperator),
+              value: operator,
+            }))}
+            onValueChange={(next) => setOperator(index, next as string)}
+            size="sm"
+            value={condition.operator}
+          >
+            <SelectTrigger
+              aria-label={labels.filterOperator}
+              {...(index === 0 ? { autoFocus: true } : {})}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {operators.map((operator) => (
+                <SelectItem key={operator} value={operator}>
+                  {format.operator(operator as FilterOperator)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div
+          data-kind={panelKind}
+          data-part="filter-operand"
+          {...(operands === 2 ? { 'data-range': '' } : {})}
+        >
+          {operands === 0
+            ? null
+            : ([0, 1] as const).slice(0, operands).map((slot) => {
+                const label =
+                  operands === 2
+                    ? slot === 0
+                      ? labels.filterFrom
+                      : labels.filterTo
+                    : labels.filterValue;
+                const value = (slot === 0 ? condition.value : condition.end) ?? null;
+                if (custom) {
+                  return (
+                    <span key={slot}>
+                      {custom({
+                        column: column.id,
+                        operator: condition.operator,
+                        value,
+                        setValue: (next) => setOperand(index, slot, next),
+                        apply: () => apply(null, 'keyboard'),
+                        label,
+                      })}
+                    </span>
+                  );
+                }
+                return (
+                  <Operand<Row>
+                    column={column}
+                    counts={panelKind === 'set' ? grid.countsFor(column.id) : undefined}
+                    key={slot}
+                    kind={panelKind}
+                    label={label}
+                    labels={labels}
+                    locale={grid.locale}
+                    onChange={(next) => setOperand(index, slot, next)}
+                    onKeyDown={applyOnEnter}
+                    operator={condition.operator}
+                    value={value}
+                    variant="outline"
+                  />
+                );
+              })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Popover
+      finalFocus={anchor}
+      onOpenChange={(next) => {
+        if (!next) close();
+      }}
+      open={open}
+      side="bottom"
+      align="start"
+      size="sm"
+    >
+      <PopoverAnchor
+        render={({ ref }) => (
+          <>
+            {children((node) => {
+              setAnchor(node);
+              if (typeof ref === 'function') ref(node);
+              else if (ref) (ref as { current: HTMLElement | null }).current = node;
+            })}
+          </>
+        )}
+      />
+      {open ? (
+        <PopoverLayer>
+          <PopoverContent aria-label={`${labels.filter} ${name}`}>
+            <div data-kind={panelKind} data-part="filter-panel" data-ui="data-grid">
+              {renderCondition(0)}
+              {showsSecond ? renderCondition(1) : null}
+              <div data-part="filter-actions">
+                <Button
+                  disabled={!isFilterActive(current) && committed === null}
+                  onClick={(event) => clear(event)}
+                  size="sm"
+                  tone="secondary"
+                  variant="ghost"
+                >
+                  {labels.filterClear}
+                </Button>
+                <Button onClick={(event) => apply(event, 'pointer')} size="sm">
+                  {labels.filterApply}
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </PopoverLayer>
+      ) : null}
+    </Popover>
+  );
+}
+
+/* ── The filter row ──────────────────────────────────────────────────── */
+
+/**
+ * One cell of the filter row: the operand of the kind, `plain`, filling the
+ * cell, with the operator as a symbol button at its start. Text and number
+ * apply after the debounce and on Enter; the others on change.
+ */
+export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
+  const grid = useDataGridInternal<Row>();
+  const kind = filterKindOf(column);
+  const index = grid.columnIds.indexOf(column.id) + 1;
+  const cell = { row: FILTER_ROW, column: column.id };
+  const current =
+    grid.current !== null && grid.current.row === FILTER_ROW && grid.current.column === column.id;
+  const committed = grid.filterOf(column.id);
+  const labels = grid.labels;
+  const condition: Condition | null = committed?.conditions[0] ?? null;
+  const [operator, setOperator] = useState<string>(
+    condition?.operator ?? (kind ? (defaultOperator(kind) as string) : 'contains'),
+  );
+  const [draft, setDraftValue] = useState<{ value: unknown; end: unknown }>({
+    value: condition?.value ?? null,
+    end: condition?.end ?? null,
+  });
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const committedText = serializeFilter(committed);
+  const seen = useRef(committedText);
+  useEffect(() => {
+    if (seen.current === committedText) return;
+    seen.current = committedText;
+    const next = committed?.conditions[0];
+    if (next) {
+      setOperator(next.operator);
+      setDraftValue({ value: next.value ?? null, end: next.end ?? null });
+    } else setDraftValue({ value: null, end: null });
+  }, [committedText, committed]);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  if (!kind || !column.filterable) {
+    return (
+      <div
+        {...columnAttributes(column)}
+        aria-colindex={index}
+        data-part="filter-cell"
+        role="gridcell"
+        style={cellStyle(column, index)}
+        tabIndex={current ? 0 : -1}
+        onFocus={(event) => {
+          if (event.target === event.currentTarget) grid.onCellFocus(cell);
+        }}
+        onKeyDown={(event) => grid.onCellKeyDown(event, cell)}
+        onPointerDown={(event) => grid.onCellPointerDown(event, cell)}
+        {...(current ? { 'data-current': '' } : {})}
+      />
+    );
+  }
+
+  const filterKind: FilterKind = kind;
+  const operators = operatorsFor(kind) as readonly string[];
+  const operands = operandCount(operator as FilterOperator);
+
+  function commit(
+    next: { operator: string; value: unknown; end: unknown },
+    reason: 'pointer' | 'keyboard',
+  ) {
+    const descriptor = normalizeFilter({
+      kind: filterKind,
+      join: 'and',
+      conditions: [{ operator: next.operator, value: next.value, end: next.end }],
+    } as FilterDescriptor);
+    if (!sameFilter(descriptor, committed))
+      grid.setFilter(column.id, descriptor, reason, undefined);
+  }
+  function schedule(next: { value: unknown; end: unknown }, immediate: boolean) {
+    setDraftValue(next);
+    clearTimeout(timer.current);
+    const run = () => commit({ operator, ...next }, 'keyboard');
+    if (immediate || (kind !== 'text' && kind !== 'number')) run();
+    else timer.current = setTimeout(run, grid.filterDebounce);
+  }
+  function chooseOperator(next: string) {
+    setOperator(next);
+    const after = operandCount(next as FilterOperator);
+    const kept = { value: after >= 1 ? draft.value : null, end: after === 2 ? draft.end : null };
+    setDraftValue(kept);
+    commit({ operator: next, ...kept }, 'pointer');
+  }
+  const applyOnEnter = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Enter' && !event.defaultPrevented) {
+      event.preventDefault();
+      clearTimeout(timer.current);
+      commit({ operator, ...draft }, 'keyboard');
+    }
+  };
+  const symbol = labels.filterSymbols[operator as FilterOperator] ?? '=';
+  const custom = grid.renderFilterOperand;
+
+  return (
+    <div
+      {...columnAttributes(column)}
+      aria-colindex={index}
+      data-part="filter-cell"
+      role="gridcell"
+      style={cellStyle(column, index)}
+      tabIndex={current ? 0 : -1}
+      onFocus={(event) => {
+        if (event.target === event.currentTarget) grid.onCellFocus(cell);
+      }}
+      onKeyDown={(event) => grid.onCellKeyDown(event, cell)}
+      onPointerDown={(event) => grid.onCellPointerDown(event, cell)}
+      {...(committed ? { 'data-filtered': '' } : {})}
+      {...(current ? { 'data-current': '' } : {})}
+    >
+      <div
+        data-kind={kind}
+        data-part="filter-operand"
+        {...(operands === 2 ? { 'data-range': '' } : {})}
+      >
+        <div data-part="filter-operator">
+          <Menu size="sm">
+            <MenuTrigger
+              render={(props) => (
+                <button
+                  {...props}
+                  aria-label={`${labels.filterOperator}: ${labels.filterOperators[operator as FilterOperator] ?? operator}`}
+                  tabIndex={-1}
+                  type="button"
+                >
+                  {symbol}
+                </button>
+              )}
+            />
+            <MenuContent>
+              {operators.map((entry) => (
+                <MenuItem key={entry} onSelect={() => chooseOperator(entry)}>
+                  {labels.filterOperators[entry as FilterOperator]}
+                </MenuItem>
+              ))}
+            </MenuContent>
+          </Menu>
+        </div>
+        {operands === 0
+          ? null
+          : ([0, 1] as const).slice(0, operands).map((slot) => {
+              const label = `${labels.filter} ${column.column.label}${operands === 2 ? `, ${slot === 0 ? labels.filterFrom : labels.filterTo}` : ''}`;
+              const value = slot === 0 ? draft.value : draft.end;
+              const write = (next: unknown, immediate = false) =>
+                schedule(
+                  slot === 0 ? { ...draft, value: next } : { ...draft, end: next },
+                  immediate,
+                );
+              if (custom) {
+                return (
+                  <span key={slot}>
+                    {custom({
+                      column: column.id,
+                      operator,
+                      value,
+                      setValue: (next) => write(next, true),
+                      apply: () => commit({ operator, ...draft }, 'keyboard'),
+                      label,
+                    })}
+                  </span>
+                );
+              }
+              return (
+                <Operand<Row>
+                  column={column}
+                  counts={kind === 'set' ? grid.countsFor(column.id) : undefined}
+                  key={slot}
+                  kind={kind}
+                  label={label}
+                  labels={labels}
+                  locale={grid.locale}
+                  onChange={(next) => write(next, kind !== 'text' && kind !== 'number')}
+                  onKeyDown={applyOnEnter}
+                  operator={operator}
+                  placeholder={fill(labels.filter, {})}
+                  value={value}
+                  variant="plain"
+                />
+              );
+            })}
+      </div>
+    </div>
+  );
+}

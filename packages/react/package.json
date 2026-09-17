@@ -80,6 +80,10 @@
       "types": "./dist/types/context-menu/index.d.ts",
       "import": "./dist/context-menu.js"
     },
+    "./data-grid": {
+      "types": "./dist/types/data-grid/index.d.ts",
+      "import": "./dist/data-grid.js"
+    },
     "./date-field": {
       "types": "./dist/types/date-field/index.d.ts",
       "import": "./dist/date-field.js"

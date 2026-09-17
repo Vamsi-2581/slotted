@@ -23,6 +23,7 @@ export default defineConfig({
         combobox: resolve(import.meta.dirname, 'src/combobox/index.ts'),
         'command-palette': resolve(import.meta.dirname, 'src/command-palette/index.ts'),
         container: resolve(import.meta.dirname, 'src/container/index.ts'),
+        'data-grid': resolve(import.meta.dirname, 'src/data-grid/index.ts'),
         'context-menu': resolve(import.meta.dirname, 'src/context-menu/index.ts'),
         'date-field': resolve(import.meta.dirname, 'src/date-field/index.ts'),
         'date-picker': resolve(import.meta.dirname, 'src/date-picker/index.ts'),

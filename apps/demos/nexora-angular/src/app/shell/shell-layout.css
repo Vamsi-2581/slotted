@@ -20,3 +20,9 @@
   gap: var(--slotted-space-4);
   padding: var(--slotted-space-6);
 }
+
+/* The rail: the mark stays, the words go. `data-open` is absent when the column is collapsed. */
+[data-ui='app-shell'][data-nav-mode='inline']:not([data-open]) .org,
+[data-ui='app-shell'][data-nav-mode='inline']:not([data-open]) app-connection-status {
+  display: none;
+}

@@ -11,6 +11,7 @@ import { NotificationsStore } from '../activity/notifications.store';
 import { TasksStore } from '../activity/tasks.store';
 import { readDemoState, writeDemoState } from '../backend/demo-state';
 import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
+import { TransportHealth } from '../backend/transport-health';
 import { SessionStore } from '../session/session.store';
 
 export interface DemoInfo {
@@ -29,6 +30,7 @@ export class DemoStore {
   private readonly notifications = inject(NotificationsStore);
   private readonly approvals = inject(ApprovalsStore);
   private readonly tasks = inject(TasksStore);
+  private readonly health = inject(TransportHealth);
   readonly info = signal<DemoInfo | null>(null);
   readonly busy = signal(false);
   private latency: LatencyProfile = 'normal';
@@ -102,6 +104,7 @@ export class DemoStore {
     return this.run(async () => {
       (await this.backend.ready()).demo.setLatency(profile);
       this.latency = profile;
+      this.health.profile.set(profile);
     });
   }
 }

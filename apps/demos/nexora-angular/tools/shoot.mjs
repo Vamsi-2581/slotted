@@ -1,0 +1,22 @@
+import { spawn } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+// usage: node tools/shoot.mjs <url> <out.png> [light|dark] [width]
+const [url, out, scheme, widthArg] = process.argv.slice(2);
+const width = Number(widthArg ?? 1280);
+const chrome = spawn('google-chrome', ['--headless=new','--no-sandbox','--disable-gpu','--hide-scrollbars','--window-size=1280,600','--remote-debugging-port=9333','about:blank'], { stdio: 'ignore' });
+await new Promise((r) => setTimeout(r, 1500));
+const targets = await (await fetch('http://127.0.0.1:9333/json')).json();
+const ws = new WebSocket(targets.find((t) => t.type === 'page').webSocketDebuggerUrl);
+let id = 0; const pending = new Map();
+const send = (method, params = {}) => new Promise((resolve) => { const i = ++id; pending.set(i, resolve); ws.send(JSON.stringify({ id: i, method, params })); });
+ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m.result); pending.delete(m.id); } };
+await new Promise((r) => (ws.onopen = r));
+await send('Page.enable');
+await send('Emulation.setDeviceMetricsOverride', { width, height: width < 800 ? 860 : 800, deviceScaleFactor: 1, mobile: width < 800 });
+await send('Page.navigate', { url });
+await new Promise((r) => setTimeout(r, 12000));
+if (scheme) await send('Runtime.evaluate', { expression: `document.documentElement.setAttribute('data-slotted-scheme','${scheme}')` });
+await new Promise((r) => setTimeout(r, 800));
+const shot = await send('Page.captureScreenshot', { format: 'png' });
+writeFileSync(out, Buffer.from(shot.data, 'base64'));
+ws.close(); chrome.kill();

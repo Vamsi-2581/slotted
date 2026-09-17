@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, type OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+  type OnInit,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -50,7 +59,9 @@ import {
   type NavModule,
 } from '../core/nav/nav.model';
 import { SessionStore } from '../core/session/session.store';
+import { ShortcutsService } from '../core/shortcuts/shortcuts.service';
 import { Banner } from './banner/banner';
+import { ShortcutsDialog } from './shortcuts/shortcuts-dialog';
 import { ConnectionStatus } from './status/connection-status';
 
 interface Section {
@@ -67,6 +78,7 @@ interface Section {
     NgIcon,
     Banner,
     ConnectionStatus,
+    ShortcutsDialog,
     SlAppShell,
     SlAppShellBanner,
     SlAppShellMain,
@@ -108,6 +120,8 @@ export class ShellLayout implements OnInit {
   readonly tasks = inject(TasksStore);
   readonly notifications = inject(NotificationsStore);
   private readonly router = inject(Router);
+  private readonly shortcuts = inject(ShortcutsService);
+  private readonly banner = viewChild(Banner);
 
   readonly navOpen = signal(this.readNavOpen());
   readonly url = toSignal(
@@ -143,9 +157,16 @@ export class ShellLayout implements OnInit {
   readonly organization = computed(() => this.session.session()?.organization ?? null);
 
   constructor() {
+    this.shortcuts.install();
     effect(() => {
+      if (this.shortcuts.demoRequested() > 0) this.banner()?.demo().openAt();
+    });
+    effect(() => {
+      const open = this.navOpen();
+      // Overlay mode closes the column on every navigation; that is not a preference.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) return;
       try {
-        localStorage.setItem(this.navKey(), String(this.navOpen()));
+        localStorage.setItem(this.navKey(), String(open));
       } catch {
         /* storage unavailable */
       }

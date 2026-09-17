@@ -26,3 +26,10 @@
 :host {
   display: contents;
 }
+
+/* Under 720px the bar keeps the mark, the search and the actions; the organization goes. */
+@media (max-width: 720px) {
+  [slTopNavigationContext] {
+    display: none;
+  }
+}

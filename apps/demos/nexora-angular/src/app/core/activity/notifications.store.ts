@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import type { Notification } from '@slotted/demo-nexora-operations';
 
 import { NEXORA_BACKEND } from '../backend/nexora-backend.provider';
+import { TransportHealth } from '../backend/transport-health';
 
 export type NotificationsView = 'all' | 'unread' | 'archived';
 
@@ -22,6 +23,7 @@ const ROUTE_BY_ENTITY: Record<string, string> = {
 @Injectable({ providedIn: 'root' })
 export class NotificationsStore {
   private readonly backend = inject(NEXORA_BACKEND);
+  private readonly health = inject(TransportHealth);
   readonly unread = signal(0);
   readonly items = signal<Notification[]>([]);
   readonly view = signal<NotificationsView>('all');
@@ -63,17 +65,17 @@ export class NotificationsStore {
   }
 
   async markRead(id: string): Promise<void> {
-    await (await this.backend.ready()).notifications.markRead(id);
+    await this.health.mutation(async () => (await this.backend.ready()).notifications.markRead(id));
     await this.after();
   }
 
   async archive(id: string): Promise<void> {
-    await (await this.backend.ready()).notifications.archive(id);
+    await this.health.mutation(async () => (await this.backend.ready()).notifications.archive(id));
     await this.after();
   }
 
   async markAllRead(): Promise<void> {
-    await (await this.backend.ready()).notifications.markAllRead();
+    await this.health.mutation(async () => (await this.backend.ready()).notifications.markAllRead());
     await this.after();
   }
 

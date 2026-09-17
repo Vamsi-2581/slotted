@@ -69,7 +69,7 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `listbox`, `tree`, `tags-input` | reordenar por arrasto                                                                                                                                                                                                                                | `drag-and-drop`                           | inventários de `listbox` (l. 125), `tree` (l. 101), `tags-input` (l. 90)   |
 | `tags-input`, `multi-select`    | o `Alt`+seta passa a `moveBy` de `@slotted/core/drag`, emitindo o mesmo evento que o arrasto                                                                                                                                                         | —                                         | `2026-09-15-drag-design.md` §1                                             |
 | `app-shell`                     | `[data-ui='app-shell'] [data-part='brand']` passa a `> [data-part='banner'] > [data-part='brand']`: o seletor descendente alcança o `brand` de `top-navigation` dentro do `banner`                                                                   | —                                         | `2026-09-15-top-navigation-design.md` §9; `top-navigation.styles.test.mjs` |
-| `dialog`                        | `sl-dialog` aceitar `ariaLabel` como input; o `aria-label` do host é estático e `command-palette` nomeia o diálogo por um `<h2 slDialogTitle hidden>`                                                                                                | —                                         | `2026-09-15-command-palette-self-assessment.md` §8                         |
+| `dialog`                        | `sl-dialog` aceitar `ariaLabel` como input; hoje o `aria-label` do host é estático e `command-palette` nomeia o diálogo por um `<h2 slDialogTitle hidden>`                                                                                           | —                                         | `2026-09-15-command-palette-self-assessment.md` §8                         |
 | `combobox`                      | adotar `createRanker` de `@slotted/core/collection` como ordenação padrão, no lugar de `filter` mais a ordem do consumidor                                                                                                                           | —                                         | `2026-09-15-command-palette-design.md` §2                                  |
 | `time-range-picker`             | `wrap`: um turno que atravessa a meia-noite não é `order`; a duração conta pela meia-noite e a lista de fim não risca as horas antes do início. `table` passa-o no `between` da espécie `time`, cujo motor já lê `22:00 – 02:00` como janela noturna | —                                         | `2026-09-16-table-range-operands-design.md` §1                             |
 | `number-field`                  | `text-align: inherit` no `input` (fora da guarda `:dir(rtl)`), para um campo `plain` numa célula numérica alinhar os dígitos ao fim como `text-field` já faz                                                                                         | —                                         | `2026-09-16-table-range-operands-design.md` §2                             |
@@ -83,6 +83,8 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `menu`                          | deixar de importar `highlight/highlight.css` (React e Angular): a família importa a sua folha e um `mark` num item vem de `Highlight` / `[slHighlight]`; o arquivo estava em edição por `context-menu hover-card` na mesma rodada                    | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `tree`                          | o `<mark>` sem identificador da busca passa a `Highlight` / `[slHighlight]` dentro do rótulo, e a folha `highlight/highlight.css` deixa de ser importada                                                                                             | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `toggle-group`                  | o `item` passa a ser a família `toggle` deferindo ao contexto do grupo (a forma de Base UI); a pintura do item, escrita em `toggle-group.css` e em `toggle.css` sob dois prefixos, sai de uma das duas; o grupo continua o único dono do valor       | —                                         | `2026-09-16-split-button-toggle-design.md` §2                              |
+| `prose`                         | `scroll-margin-block-start` dos headings soma `--slotted-page-sticky-top` ao ar de `_flow`, como `section` lê a propriedade: um salto nativo (`#id` na URL) aterra sob a chrome de `page`; `table-of-contents` compensa ao rolar por si              | —                                         | `2026-09-16-table-of-contents-design.md` §5                                |
+| `page-header`, `section`        | `deferTo: "anchor-nav"` nos três ponteiros dos contratos passa a `table-of-contents`, o nome com que a família foi entregue                                                                                                                          | —                                         | `2026-09-16-table-of-contents-capability-inventory.md` §5                  |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -250,8 +252,6 @@ que três autoavaliações pediram.
   detalhe. Exportação, gráficos e pivot ficam fora. O gerenciador de colunas
   como painel é `column-manager`, onda 10; a grelha expõe o modelo que ele
   edita.
-
-## Onda 10 — composições Core em falta e Extended sobre o que existe
   Entregue em 2026-09-17. Inventário em
   `docs/superpowers/specs/2026-09-16-data-grid-capability-inventory.md`,
   decisões em `docs/superpowers/specs/2026-09-16-data-grid-design.md`,
@@ -267,6 +267,8 @@ que três autoavaliações pediram.
   é a que `table` e `filter-bar` herdam (reabertura). O glifo
   `--slotted-icon-funnel` entra no tema. Angular: `sl-data-grid` com
   `model()` para os sete valores e `ControlValueAccessor` na seleção.
+
+## Onda 10 — composições Core em falta e Extended sobre o que existe
 
 Cada família compõe famílias entregues. Nenhuma traz motor novo em
 `packages/core`, exceto onde o escopo diz.
@@ -494,6 +496,30 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   atualização de URL opcional. Foco após navegação; reduced motion respeitado.
   Em tela estreita colapsa em `select` ou `popover`. Responde à capacidade que
   `page` adiou (inventário, l. 154).
+
+  Entregue em 2026-09-17. Inventário em
+  `docs/superpowers/specs/2026-09-16-table-of-contents-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-table-of-contents-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-17-table-of-contents-self-assessment.md`.
+  Doze partes, três layouts (`vertical`, `horizontal` para a vaga `tabs` de
+  `page-header`, `collapsed` com gatilho e camada por `dismissable-layer`),
+  `items`, `source` (headings lidos por `@slotted/core/outline`, `id` escrito
+  nos que não têm), `sticky`, `history` (`push`, `replace`, `none`),
+  `numbered`, `levels`, `offset`, `loading`, vazio escondido. Modelos `current`
+  (`value`, razões `scroll`, `pointer`, `keyboard`, `programmatic`) e `open`.
+  `@slotted/core/scroll-spy`: corrente por geometria com `IntersectionObserver`
+  e `scroll` coalescido, último alvo no fim do rolador, primeiro no início;
+  `landOn` lê `--slotted-page-sticky-top` do rolador e soma a
+  `scroll-margin` menor do que a chrome; `focusTarget`. A rolagem é conduzida
+  pela família e a URL escrita por `history.pushState`/`replaceState`: `:target`
+  e `hashchange` não respondem. O colapso é uma camada em fluxo sob o gatilho,
+  sem `select`. Duas reaberturas ficam registradas acima: `prose`
+  (`scroll-margin` com a chrome) e os ponteiros `anchor-nav` de `page-header` e
+  `section`. Defeito partilhado corrigido: a tabela de API do workbench
+  chaveava linhas pelo nome e perdia a segunda de duas props homónimas em
+  partes diferentes.
+
 - `selection-toolbar` — aparece quando existe seleção: contagem, select-all do
   conjunto filtrado, limpar, ações permitidas. Distingue "itens desta página" de
   "todos os resultados"; ação destrutiva confirma o escopo por `alert-dialog`.
@@ -561,6 +587,30 @@ de outra da mesma onda.
   histórico (`timeline`). Abre em página, `drawer` ou `master-detail` conforme
   a profundidade; URL e foco tornam a abertura compartilhável e reversível. Não
   hospeda fluxo longo de edição.
+
+  Entregue em 2026-09-17. Inventário em
+  `docs/superpowers/specs/2026-09-17-detail-panel-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-17-detail-panel-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-17-detail-panel-self-assessment.md`. Um
+  `article` cujo topo é `page-header` sem invólucro; partes `root`, `body`,
+  `banner`, `columns`, `main`, `section`, `section-actions`, `aside`,
+  `message`, `footer`. Eixos `layout` (`stacked` | `tabs`), `aside` (`end` |
+  `start` | `none`), `level`, `size`, `scroll` (`ancestor` | `self`), `mount`,
+  `status` (`ready` | `not-found` | `error`); estado `loading`; modelo `current`
+  (`section` / `defaultSection` / `onSectionChange` com `pointer`, `keyboard`,
+  `programmatic`). A faixa é `tabs` só com a lista, no slot do cabeçalho; as
+  secções são os tabpanels ligados por id (o injector do Angular é a razão). O
+  painel fornece os defaults de `page-header` (`level`, `size`) à sua
+  subárvore; `recordKey` muda e o foco vai ao heading. Sem `close` (drawer),
+  sem aside fixo ou escondido; scroll-spy diferido a `table-of-contents`.
+  React: `DetailPanel` (`footer`), `DetailPanelBody` (`banner`, `aside`,
+  `message`), `DetailPanelSection`, `DetailPanelTabs`. Angular:
+  `[slDetailPanel]`, `[slDetailPanelBody]`, `ng-template[slDetailPanelSection]`,
+  `[slDetailPanelTabs]` (host directive `slPageHeaderTabs`),
+  `aside[slDetailPanelAside]`, `[slDetailPanelBanner]`, `[slDetailPanelMessage]`,
+  `footer[slDetailPanelFooter]`.
+
 - `notification-center` — lista persistente com lido/não lido, grupos, filtros,
   marcar tudo, ações e paginação incremental. `badge`, `popover` e página
   completa compartilham o modelo; atualizações ao vivo não roubam foco nem

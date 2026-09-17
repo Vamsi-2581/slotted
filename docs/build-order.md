@@ -77,6 +77,9 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `positioner`                    | `inline`: um link que quebra em duas linhas mede como a caixa em volta das duas, e um `hover-card` pode apontar para o vão entre elas; o middleware `inline()` do Floating UI responde e o módulo não o expõe                                        | —                                         | `2026-09-16-context-menu-hover-card-capability-inventory.md` §6            |
 | `typography`                    | ler o passo `4xl` (`--slotted-font-size-4xl`, `--slotted-line-height-4xl`) que `stat-card` abriu para `size="lg"`                                                                                                                                    | —                                         | `2026-09-16-stat-card-sparkline-design.md` §2                              |
 | `chart`                         | a rampa sequencial e o par divergente que a escala de dados não tem; a textura como segundo canal sob `forced-colors`; tooltip e realce por ponto que `sparkline` recusou                                                                            | `chart` (onda 12)                         | `2026-09-16-stat-card-sparkline-design.md` §1; inventário §2               |
+| `table`, `filter-bar`           | a forma compacta do filtro de `data-grid`: painel de 24 rem, uma condição por linha (operador de 7 rem e operando, em `sm`), o join segmentado na segunda linha, Clear/Apply em `sm`; `set` como `select` `multiple`; o operador em símbolo na linha | —                                         | `2026-09-16-data-grid-design.md` §5                                        |
+| `column-manager`                | edita `columnState` de `data-grid` (`order`, `widths`, `hidden`, `pinned`, um objeto) e responde a `onManageColumns` / `manageColumns`, a saída do menu de coluna que hoje só avisa o consumidor                                                     | `column-manager` (onda 10)                | `2026-09-16-data-grid-design.md` §9                                        |
+| `data-grid`                     | vista de impressão: uma folha `@media print` que desliga a janela virtual, a moldura e a altura, e imprime as linhas que a query deixou                                                                                                              | —                                         | `2026-09-16-data-grid-self-assessment.md` §1 (9)                           |
 | `menu`                          | deixar de importar `highlight/highlight.css` (React e Angular): a família importa a sua folha e um `mark` num item vem de `Highlight` / `[slHighlight]`; o arquivo estava em edição por `context-menu hover-card` na mesma rodada                    | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `tree`                          | o `<mark>` sem identificador da busca passa a `Highlight` / `[slHighlight]` dentro do rótulo, e a folha `highlight/highlight.css` deixa de ser importada                                                                                             | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `toggle-group`                  | o `item` passa a ser a família `toggle` deferindo ao contexto do grupo (a forma de Base UI); a pintura do item, escrita em `toggle-group.css` e em `toggle.css` sob dois prefixos, sai de uma das duas; o grupo continua o único dono do valor       | —                                         | `2026-09-16-split-button-toggle-design.md` §2                              |
@@ -249,6 +252,21 @@ que três autoavaliações pediram.
   edita.
 
 ## Onda 10 — composições Core em falta e Extended sobre o que existe
+  Entregue em 2026-09-17. Inventário em
+  `docs/superpowers/specs/2026-09-16-data-grid-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-data-grid-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-16-data-grid-self-assessment.md`. Trinta e
+  seis partes; `role="grid"` em `div`, cada linha um `display: grid` sobre a
+  template que o binding escreve; sete modelos (`query` partilhado por `sort`
+  e `filter`, `columnState` na capacidade nova `columns`, `value` e `range`
+  para a seleção, `current`, `expanded` e `expandedGroups`) e a edição como
+  sessão pelo handle. Motor em `@slotted/core/grid` (`applyQuery`, cursor,
+  colunas, query serializável). A forma compacta do filtro — painel de 24 rem
+  com uma condição por linha e a linha de filtro com o operador em símbolo —
+  é a que `table` e `filter-bar` herdam (reabertura). O glifo
+  `--slotted-icon-funnel` entra no tema. Angular: `sl-data-grid` com
+  `model()` para os sete valores e `ControlValueAccessor` na seleção.
 
 Cada família compõe famílias entregues. Nenhuma traz motor novo em
 `packages/core`, exceto onde o escopo diz.

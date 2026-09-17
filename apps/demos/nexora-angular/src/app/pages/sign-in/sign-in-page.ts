@@ -4,6 +4,7 @@ import { SlAvatar } from '@slotted/angular/avatar';
 import { SlCard, SlCardBody } from '@slotted/angular/card';
 
 import { DemoStore } from '../../core/demo/demo.store';
+import { roleLabel } from '../../core/nav/permission-area';
 import { PreferencesStore } from '../../core/session/preferences.store';
 import { SessionStore } from '../../core/session/session.store';
 import { BrandMark } from '../../shell/banner/brand-mark';
@@ -73,13 +74,13 @@ import { BrandMark } from '../../shell/banner/brand-mark';
               type="button"
               class="account"
               slCardBody
-              [disabled]="!p.active || demo.busy()"
+              [disabled]="demo.busy()"
               (click)="signIn(p.key)"
             >
               <span slAvatar [name]="p.name" size="sm" tone="accent" variant="soft"></span>
               <span>
                 {{ p.name }}
-                <small>{{ p.role }} · {{ p.context }}</small>
+                <small>{{ roleLabel(p.role) }} · {{ p.context }}</small>
               </span>
             </button>
           </div>
@@ -90,6 +91,7 @@ import { BrandMark } from '../../shell/banner/brand-mark';
 })
 export class SignInPage implements OnInit {
   readonly demo = inject(DemoStore);
+  readonly roleLabel = roleLabel;
   private readonly session = inject(SessionStore);
   private readonly preferences = inject(PreferencesStore);
   private readonly router = inject(Router);

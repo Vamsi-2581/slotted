@@ -53,3 +53,9 @@ export const AREA_LABELS: Record<PermissionArea, string> = {
 export function permissionArea(permission: string): PermissionArea {
   return AREA_BY_PREFIX[permission.split('.')[0] ?? ''] ?? 'administration';
 }
+
+/** `sales_manager` → `Sales manager`: the persona list carries the role key, not its name. */
+export function roleLabel(key: string): string {
+  const words = key.replace(/_/g, ' ');
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}

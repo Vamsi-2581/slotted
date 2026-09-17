@@ -669,7 +669,7 @@ export const Pinning: Story = {
   }),
 };
 
-const columnState = (initial: Partial<GridColumnState>) => {
+const columnState = (initial: Partial<GridColumnState>, fit = false) => {
   const state = signal<Partial<GridColumnState> | undefined>(initial);
   const last = signal('');
   return {
@@ -686,13 +686,20 @@ const columnState = (initial: Partial<GridColumnState>) => {
     },
     template: screen(
       grid(
-        '[rows]="rows" [(columnState)]="state" [current]="current" (columnStateChangeRequest)="report($event)"',
+        '#grid="slDataGrid" [rows]="rows" [(columnState)]="state" [current]="current" (columnStateChangeRequest)="report($event)"',
       ),
       {
         size: 'tall',
-        before: note(
-          `{{ last() || 'Drag a handle, or a header; or use the keyboard on the header cell' }}`,
-        ),
+        before: `<div class="slotted-demo-row">
+    ${note(`{{ last() || 'Drag a handle, or a header; or use the keyboard on the header cell' }}`)}
+    ${
+      fit
+        ? `<button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="grid.autofit()">
+      Fit columns
+    </button>`
+        : ''
+    }
+  </div>`,
       },
     ),
   };
@@ -700,7 +707,7 @@ const columnState = (initial: Partial<GridColumnState>) => {
 
 export const Resize: Story = {
   parameters: scenario('resize'),
-  render: () => columnState({ widths: { customer: 260 } }),
+  render: () => columnState({ widths: { customer: 260 } }, true),
 };
 export const Reorder: Story = {
   parameters: scenario('reorder'),

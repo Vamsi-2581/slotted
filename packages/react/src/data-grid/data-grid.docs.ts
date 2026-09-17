@@ -1161,7 +1161,7 @@ const api = apiRows([
     'RefObject<DataGridHandle>',
     '—',
     'DataGrid',
-    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit, getVisibleRows, selectAll, clearSelection, element.',
+    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (one column, or every resizable column as one request), getVisibleRows, selectAll, clearSelection, element.',
   ],
   [
     'align',

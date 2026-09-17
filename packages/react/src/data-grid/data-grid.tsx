@@ -130,6 +130,31 @@ function sameSelection(a: string | readonly string[] | null, b: string | readonl
  * rows, applies the query, walks the cells with one cursor, edits in place,
  * and lets the reader arrange the columns.
  */
+/** The room a cell's content asks for: the value's laid-out width, the boxes beside it, the gaps, the padding and the border. */
+function contentWidth(cell: HTMLElement): number {
+  const style = getComputedStyle(cell);
+  const frame =
+    cell.offsetWidth -
+    cell.clientWidth +
+    parseFloat(style.paddingInlineStart) +
+    parseFloat(style.paddingInlineEnd);
+  const gap = parseFloat(style.columnGap) || 0;
+  let width = 0;
+  let count = 0;
+  for (const child of cell.children) {
+    if (!(child instanceof HTMLElement) || getComputedStyle(child).display === 'none') continue;
+    count += 1;
+    if (count === 1 && child.dataset['ui'] === undefined) {
+      const range = cell.ownerDocument.createRange();
+      range.selectNodeContents(child);
+      width += range.getBoundingClientRect().width;
+    } else {
+      width += child.getBoundingClientRect().width;
+    }
+  }
+  return width + Math.max(0, count - 1) * gap + frame;
+}
+
 export function DataGrid<Row>({
   activatable,
   cellRenderers,
@@ -833,30 +858,46 @@ export function DataGrid<Row>({
     },
     [resolvedById, resizeTo],
   );
+  /* The widest content the column has on screen, plus the cell's own padding
+     and border. The content is measured by a Range over the value, never by
+     `scrollWidth`: a value that truncates lays its text out at full width
+     under the clip, and one that does not fills its cell — `scrollWidth` gave
+     the cell's box either way, so a column only ever grew. A header is its
+     name plus what sits beside it (the sort mark, the actions slot) and the
+     gaps between. `null` for a column with nothing mounted. */
+  const measureFit = useCallback((columnId: string): number | null => {
+    const element = root.current;
+    if (!element) return null;
+    let widest = 0;
+    for (const cell of element.querySelectorAll<HTMLElement>(
+      `[data-column="${CSS.escape(columnId)}"]`,
+    )) {
+      widest = Math.max(widest, contentWidth(cell));
+    }
+    return widest > 0 ? Math.ceil(widest) : null;
+  }, []);
   const autofit = useCallback(
     (columnId: string, source?: unknown) => {
-      const element = root.current;
-      const column = resolvedById.get(columnId);
-      if (!element || !column) return;
-      let widest = 0;
-      for (const cell of element.querySelectorAll<HTMLElement>(
-        `[data-column="${CSS.escape(columnId)}"]`,
-      )) {
-        const inner = cell.firstElementChild as HTMLElement | null;
-        const width = inner ? inner.scrollWidth : cell.scrollWidth;
-        const padding =
-          cell.offsetWidth -
-          cell.clientWidth +
-          parseFloat(getComputedStyle(cell).paddingInlineStart) +
-          parseFloat(getComputedStyle(cell).paddingInlineEnd);
-        widest = Math.max(
-          widest,
-          width + padding + (cell.getAttribute('role') === 'columnheader' ? 32 : 0),
-        );
-      }
-      if (widest > 0) resizeTo(columnId, Math.ceil(widest), 'keyboard', source);
+      if (!resolvedById.has(columnId)) return;
+      const width = measureFit(columnId);
+      if (width !== null) resizeTo(columnId, width, 'keyboard', source);
     },
-    [resolvedById, resizeTo],
+    [resolvedById, measureFit, resizeTo],
+  );
+  /* Every resizable column at once, as one request: measured first, then
+     folded into one state. Read live, one request per column started from
+     the same state and only the last column kept its width. */
+  const autofitAll = useCallback(
+    (source?: unknown) => {
+      let next = effectiveState;
+      for (const column of resolved) {
+        if (!column.resizable) continue;
+        const width = measureFit(column.id);
+        if (width !== null) next = withColumnWidth(next, column.column, width);
+      }
+      if (next !== effectiveState) requestState(next, 'width', 'programmatic', source);
+    },
+    [effectiveState, resolved, measureFit, requestState],
   );
   const moveColumn = useCallback(
     (columnId: string, direction: -1 | 1, source?: unknown) => {
@@ -1850,10 +1891,7 @@ export function DataGrid<Row>({
       },
       stopEdit: (options) =>
         options?.commit === false ? cancelEdit() : commitEdit('programmatic'),
-      autofit: (columnId) => {
-        for (const column of columnId ? [columnId] : resolved.map((entry) => entry.id))
-          autofit(column);
-      },
+      autofit: (columnId) => (columnId ? autofit(columnId) : autofitAll()),
       getVisibleRows: () => (resolvedMode === 'client' ? result.rows : rows),
       selectAll: () => commitSelection(selectableKeys, 'programmatic', undefined),
       clearSelection: () => commitSelection([], 'programmatic', undefined),
@@ -1868,8 +1906,8 @@ export function DataGrid<Row>({
       startEdit,
       cancelEdit,
       commitEdit,
-      resolved,
       autofit,
+      autofitAll,
       resolvedMode,
       result.rows,
       rows,

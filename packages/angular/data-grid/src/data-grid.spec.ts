@@ -729,6 +729,41 @@ class Provided {
 }
 
 describe('SlDataGrid, defaults', () => {
+  it('fits every column in one request, each to its own content', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    const widths: Record<string, number> = {
+      id: 60,
+      customer: 140,
+      carrier: 90,
+      weight: 70,
+      shipped: 100,
+      priority: 50,
+    };
+    /* jsdom lays nothing out: the value's measured width is the column's. */
+    /* jsdom's Range has no geometry at all; the method is defined for the test. */
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
+      configurable: true,
+      value(this: Range) {
+        const cell = (this.startContainer as Element).closest<HTMLElement>('[data-column]');
+        const width = cell ? (widths[cell.dataset['column']!] ?? 0) : 0;
+        return { width, height: 0, x: 0, y: 0, top: 0, left: 0, right: width, bottom: 0 };
+      },
+    });
+    const requests = fixture.componentInstance.stateRequests;
+    fixture.componentInstance.grid().autofit();
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toEqual(
+      expect.objectContaining({ change: 'width', reason: 'programmatic' }),
+    );
+    expect(requests[0]!.value.widths).toEqual(
+      Object.fromEntries(Object.entries(widths).map(([id, width]) => [id, width])),
+    );
+    delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
+  });
+
   it('writes a numeric row height to the frame, so the drawn row is the windowed row', async () => {
     await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
     const fixture = TestBed.createComponent(Host);

@@ -639,6 +639,46 @@ describe('DataGrid, the rest', () => {
     expect(cell('S3', 'customer')).toHaveAttribute('data-editing');
   });
 
+  it('fits every column in one request, each to its own content', () => {
+    const onColumnStateChange = vi.fn();
+    function Handled() {
+      const handle = useRef<DataGridHandle | null>(null);
+      return (
+        <>
+          <button onClick={() => handle.current?.autofit()}>fit</button>
+          <Shipments handle={handle} onColumnStateChange={onColumnStateChange} />
+        </>
+      );
+    }
+    render(<Handled />);
+    const widths: Record<string, number> = {
+      id: 60,
+      customer: 140,
+      carrier: 90,
+      weight: 70,
+      shipped: 100,
+      priority: 50,
+    };
+    /* jsdom lays nothing out: the value's measured width is the column's. */
+    /* jsdom's Range has no geometry at all; the method is defined for the test. */
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
+      configurable: true,
+      value(this: Range) {
+        const cell = (this.startContainer as Element).closest<HTMLElement>('[data-column]');
+        const width = cell ? (widths[cell.dataset['column']!] ?? 0) : 0;
+        return { width, height: 0, x: 0, y: 0, top: 0, left: 0, right: width, bottom: 0 };
+      },
+    });
+    fireEvent.click(screen.getByText('fit'));
+    expect(onColumnStateChange).toHaveBeenCalledTimes(1);
+    const [state, request] = onColumnStateChange.mock.calls[0]!;
+    expect(request).toEqual(expect.objectContaining({ change: 'width', reason: 'programmatic' }));
+    expect(state.widths).toEqual(
+      Object.fromEntries(Object.entries(widths).map(([id, width]) => [id, width])),
+    );
+    delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
+  });
+
   it('draws the loading, empty and error states', () => {
     const { rerender } = render(<Shipments loading rows={[]} />);
     expect(grid().querySelector('[data-part="loader"]')).not.toBeNull();

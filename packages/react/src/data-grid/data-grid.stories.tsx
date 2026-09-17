@@ -621,18 +621,32 @@ const ColumnStateDemo = ({ scenarioId }: { scenarioId: string }) => {
       : { widths: { customer: 260 } },
   );
   const [last, setLast] = useState('');
+  const handle = useRef<DataGridHandle | null>(null);
   return (
     <Screen
       size="tall"
       before={
-        <Text size="sm" tone="muted">
-          {last || 'Drag a handle, or a header; or use the keyboard on the header cell'}
-        </Text>
+        <div className="slotted-demo-row">
+          <Text size="sm" tone="muted">
+            {last || 'Drag a handle, or a header; or use the keyboard on the header cell'}
+          </Text>
+          {scenarioId === 'resize' ? (
+            <Button
+              onClick={() => handle.current?.autofit()}
+              size="sm"
+              tone="secondary"
+              variant="outline"
+            >
+              Fit columns
+            </Button>
+          ) : null}
+        </div>
       }
     >
       <Shipments
         columnState={state as GridColumnState}
         defaultCurrent={{ row: 'header', column: 'customer' }}
+        handle={handle}
         onColumnStateChange={(next, request) => {
           setState(next);
           setLast(`${request.change} by ${request.reason}: ${serializeColumnState(next, columns)}`);

@@ -227,6 +227,31 @@ function isBodyRow(row: string) {
  * rows, applies the query, walks the cells with one cursor, edits in place,
  * and lets the reader arrange the columns. Its selection is a form value.
  */
+/** The room a cell's content asks for: the value's laid-out width, the boxes beside it, the gaps, the padding and the border. */
+function contentWidth(cell: HTMLElement): number {
+  const style = getComputedStyle(cell);
+  const frame =
+    cell.offsetWidth -
+    cell.clientWidth +
+    parseFloat(style.paddingInlineStart) +
+    parseFloat(style.paddingInlineEnd);
+  const gap = parseFloat(style.columnGap) || 0;
+  let width = 0;
+  let count = 0;
+  for (const child of cell.children) {
+    if (!(child instanceof HTMLElement) || getComputedStyle(child).display === 'none') continue;
+    count += 1;
+    if (count === 1 && child.dataset['ui'] === undefined) {
+      const range = cell.ownerDocument.createRange();
+      range.selectNodeContents(child);
+      width += range.getBoundingClientRect().width;
+    } else {
+      width += child.getBoundingClientRect().width;
+    }
+  }
+  return width + Math.max(0, count - 1) * gap + frame;
+}
+
 @Component({
   selector: 'sl-data-grid',
   standalone: true,
@@ -1847,23 +1872,38 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     if (!column || !column.resizable) return;
     this.resizeTo(columnId, column.width + delta, 'keyboard', source);
   }
-  autofit(columnId: string, source?: unknown) {
-    const column = this.resolvedById().get(columnId);
-    if (!column) return;
+  /* The widest content the column has on screen, plus the cell's own padding
+     and border. The content is measured by a Range over the value, never by
+     `scrollWidth`: a value that truncates lays its text out at full width
+     under the clip, and one that does not fills its cell — `scrollWidth` gave
+     the cell's box either way, so a column only ever grew. A header is its
+     name plus what sits beside it (the sort mark, the actions slot) and the
+     gaps between. `null` for a column with nothing mounted. */
+  private measureFit(columnId: string): number | null {
     let widest = 0;
     for (const cell of this.host.nativeElement.querySelectorAll<HTMLElement>(
       `[data-column="${CSS.escape(columnId)}"]`,
     )) {
-      const inner = cell.firstElementChild as HTMLElement | null;
-      const width = inner ? inner.scrollWidth : cell.scrollWidth;
-      const style = getComputedStyle(cell);
-      const padding = parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd);
-      widest = Math.max(
-        widest,
-        width + padding + (cell.getAttribute('role') === 'columnheader' ? 32 : 0),
-      );
+      widest = Math.max(widest, contentWidth(cell));
     }
-    if (widest > 0) this.resizeTo(columnId, Math.ceil(widest), 'keyboard', source);
+    return widest > 0 ? Math.ceil(widest) : null;
+  }
+  /** One column to its content; without an id, every resizable column at once, as one request. */
+  autofit(columnId?: string, source?: unknown) {
+    if (columnId !== undefined) {
+      if (!this.resolvedById().has(columnId)) return;
+      const width = this.measureFit(columnId);
+      if (width !== null) this.resizeTo(columnId, width, 'keyboard', source);
+      return;
+    }
+    const state = this.effectiveState();
+    let next = state;
+    for (const column of this.resolved()) {
+      if (!column.resizable) continue;
+      const width = this.measureFit(column.id);
+      if (width !== null) next = withColumnWidth(next, column.column, width);
+    }
+    if (next !== state) this.requestState(next, 'width', 'programmatic', source);
   }
   moveColumn(columnId: string, direction: -1 | 1, source?: unknown) {
     const column = this.resolvedById().get(columnId);

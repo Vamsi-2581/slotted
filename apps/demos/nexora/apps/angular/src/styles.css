@@ -1,0 +1,47 @@
+/*
+ * The application's cascade, declared once and before any stylesheet that
+ * mentions `slotted`: the library's layer first, the application's after it.
+ */
+@layer slotted, app;
+
+@import '@fontsource-variable/geist/index.css';
+@import '@fontsource-variable/geist-mono/index.css';
+@import '@slotted/theme-default/styles.css';
+
+@layer app {
+  /*
+   * Brand: the accent tone retuned on the theme scope, once per scheme.
+   * Every family under it reads the new values; no library selector is named.
+   * The nine names are the theme's accent vocabulary; a subset leaves two
+   * blues and one teal on the same screen.
+   */
+  [data-slotted-theme='default'][data-slotted-scheme='light'] {
+    --slotted-tone-accent-solid: #0f766e;
+    --slotted-tone-accent-solid-hover: #0d9488;
+    --slotted-tone-accent-solid-active: #115e59;
+    --slotted-tone-accent-on-solid: #ffffff;
+    --slotted-tone-accent-surface: #ccfbf1;
+    --slotted-tone-accent-border: #0d9488;
+    --slotted-tone-accent-text: #0f766e;
+    --slotted-tone-accent-subtle-hover: #f0fdfa;
+    --slotted-tone-accent-subtle-active: #ccfbf1;
+  }
+
+  [data-slotted-theme='default'][data-slotted-scheme='dark'] {
+    --slotted-tone-accent-solid: #14b8a6;
+    --slotted-tone-accent-solid-hover: #2dd4bf;
+    --slotted-tone-accent-solid-active: #0d9488;
+    --slotted-tone-accent-on-solid: #042f2e;
+    --slotted-tone-accent-surface: #132724;
+    --slotted-tone-accent-border: #2dd4bf;
+    --slotted-tone-accent-text: #5eead4;
+    --slotted-tone-accent-subtle-hover: #0f1f1d;
+    --slotted-tone-accent-subtle-active: #132724;
+  }
+
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+  }
+}

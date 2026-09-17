@@ -1,7 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { probeSession } from './backend-probe';
 import {
   SlAppShell,
   SlAppShellActions,
@@ -94,10 +93,6 @@ export class App {
 
   protected readonly current = signal('dashboard');
   protected readonly navOpen = signal(true);
-  protected readonly sessionUser = signal('…');
-  constructor() {
-    probeSession((text) => this.sessionUser.set(text));
-  }
   protected readonly scheme = signal<Scheme>('light');
 
   protected readonly operations: readonly Destination[] = [

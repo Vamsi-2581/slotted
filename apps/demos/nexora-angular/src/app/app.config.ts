@@ -17,6 +17,8 @@ import { providePageDefaults } from '@slotted/angular/page';
 import { providePageHeaderDefaults } from '@slotted/angular/page-header';
 import { provideSideNavigationDefaults } from '@slotted/angular/side-navigation';
 
+import { provideNexoraBackend } from './core/backend/nexora-backend.provider';
+
 import { routes } from './app.routes';
 
 /**
@@ -28,6 +30,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideNexoraBackend(),
     provideRouter(routes),
     provideIcons({
       lucideBell,

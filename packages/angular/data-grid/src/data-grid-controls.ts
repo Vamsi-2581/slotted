@@ -52,13 +52,19 @@ import type { TemplateRef } from '@angular/core';
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
 import { SlDateField } from '@slotted/angular/date-field';
+import { SlDatePicker } from '@slotted/angular/date-picker';
+import { SlDateRangePicker } from '@slotted/angular/date-range-picker';
 import { SlDateTimeField } from '@slotted/angular/datetime-field';
+import { SlDateTimePicker } from '@slotted/angular/datetime-picker';
+import { SlDateTimeRangePicker } from '@slotted/angular/datetime-range-picker';
 import { SlMenu, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
 import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
 import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-control';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlTimeField } from '@slotted/angular/time-field';
+import { SlTimePicker } from '@slotted/angular/time-picker';
+import { SlTimeRangePicker } from '@slotted/angular/time-range-picker';
 import type { DataGridFilterOperandContext, DataGridLabels } from './data-grid-defaults';
 
 type Condition = FilterCondition<string, unknown>;
@@ -101,26 +107,29 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
 
 /**
  * The control an operand of a kind is edited in: one family per kind, all at
- * `sm`; `plain` in the filter row and `outline` in the panel.
+ * `sm`; `plain` in the filter row and `outline` in the panel. A date, a time
+ * and a date-time are pickers — the field with the control that opens the
+ * calendar or the list beside it — because a reader who does not type dates
+ * still has to filter by one.
  */
 @Component({
   selector: 'sl-data-grid-operand',
   standalone: true,
   imports: [
-    SlDateField,
-    SlDateTimeField,
+    SlDatePicker,
+    SlDateTimePicker,
     SlNumberField,
     SlNumberFieldInput,
     SlSelect,
     SlSelectItem,
     SlTextField,
     SlTextFieldInput,
-    SlTimeField,
+    SlTimePicker,
   ],
   template: `
     @switch (kind()) {
       @case ('number') {
-        <div slNumberField size="sm" [variant]="variant()">
+        <div slNumberField size="sm" stepper="none" [variant]="variant()">
           <input
             slNumberFieldInput
             [value]="numberValue()"
@@ -134,7 +143,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
       }
       @case ('date') {
         <div
-          slDateField
+          slDatePicker
           size="sm"
           [variant]="variant()"
           [value]="dateValue()"
@@ -146,7 +155,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
       }
       @case ('time') {
         <div
-          slTimeField
+          slTimePicker
           size="sm"
           [variant]="variant()"
           [value]="timeValue()"
@@ -158,7 +167,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
       }
       @case ('datetime') {
         <div
-          slDateTimeField
+          slDateTimePicker
           size="sm"
           [variant]="variant()"
           [value]="dateTimeValue()"
@@ -171,6 +180,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
       @case ('boolean') {
         <sl-select
           size="sm"
+          width="content"
           [variant]="variant()"
           [fullWidth]="true"
           [items]="truths()"
@@ -188,6 +198,7 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
       @case ('set') {
         <sl-select
           size="sm"
+          width="content"
           multiple
           [variant]="variant()"
           [fullWidth]="true"
@@ -285,6 +296,114 @@ export class SlDataGridOperand {
   }
 }
 
+/** The kinds whose `between` is one range picker rather than two fields. */
+const RANGE_PICKER_KINDS: readonly string[] = ['date', 'time', 'datetime'];
+
+/** Whether the operator's two operands are edited in one control. */
+export function isRangeOperand(kind: FilterKind, operator: string) {
+  return operandCount(operator as FilterOperator) === 2 && RANGE_PICKER_KINDS.includes(kind);
+}
+
+/**
+ * A `between` on a date, a time or a date-time is one range picker: one
+ * frame that says the run while it is drawn, takes the ends in either order
+ * and fits a column's width, where two fields side by side broke into two
+ * lines at the widths a filter row has. The rule `table` took in its second
+ * reopening. The descriptor is unchanged: two ISO operands.
+ */
+@Component({
+  selector: 'sl-data-grid-range-operand',
+  standalone: true,
+  imports: [SlDateRangePicker, SlDateTimeRangePicker, SlTimeRangePicker],
+  template: `
+    @switch (kind()) {
+      @case ('time') {
+        <div
+          slTimeRangePicker
+          size="sm"
+          [variant]="variant()"
+          [locale]="locale()"
+          [startLabel]="labels().filterFrom"
+          [endLabel]="labels().filterTo"
+          [value]="timeRange()"
+          (valueChange)="
+            rangeChange.emit({
+              start: isoTime($event.value?.start),
+              end: isoTime($event.value?.end),
+            })
+          "
+        ></div>
+      }
+      @case ('datetime') {
+        <div
+          slDateTimeRangePicker
+          size="sm"
+          [variant]="variant()"
+          [locale]="locale()"
+          [startLabel]="labels().filterFrom"
+          [endLabel]="labels().filterTo"
+          [value]="dateTimeRange()"
+          (valueChange)="
+            rangeChange.emit({
+              start: isoDateTime($event.value?.start),
+              end: isoDateTime($event.value?.end),
+            })
+          "
+        ></div>
+      }
+      @default {
+        <div
+          slDateRangePicker
+          size="sm"
+          [variant]="variant()"
+          [locale]="locale()"
+          [startLabel]="labels().filterFrom"
+          [endLabel]="labels().filterTo"
+          [value]="dateRange()"
+          (valueChange)="
+            rangeChange.emit({ start: isoDay($event.value?.start), end: isoDay($event.value?.end) })
+          "
+        ></div>
+      }
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: { style: 'display: contents' },
+})
+export class SlDataGridRangeOperand {
+  readonly kind = input.required<FilterKind>();
+  readonly start = input<unknown>(null);
+  readonly end = input<unknown>(null);
+  readonly labels = input.required<DataGridLabels>();
+  readonly variant = input<'plain' | 'outline'>('outline');
+  readonly locale = input<string | undefined>(undefined);
+  readonly rangeChange = output<{ start: string | null; end: string | null }>();
+
+  protected readonly dateRange = computed(() => ({
+    start: dateOf(this.start()),
+    end: dateOf(this.end()),
+  }));
+  protected readonly timeRange = computed(() => ({
+    start: timeOf(this.start()),
+    end: timeOf(this.end()),
+  }));
+  protected readonly dateTimeRange = computed(() => ({
+    start: dateTimeOf(this.start()),
+    end: dateTimeOf(this.end()),
+  }));
+
+  protected isoDay(value: unknown) {
+    return isPlainDate(value) ? toISODate(value) : null;
+  }
+  protected isoTime(value: unknown) {
+    return isPlainTime(value) ? toISOTime(value, 'minute') : null;
+  }
+  protected isoDateTime(value: unknown) {
+    return isPlainDateTime(value) ? toISODateTime(value) : null;
+  }
+}
+
 /**
  * The compact panel: one line per condition, the join as two words on the
  * second, Clear and Apply at the end. It edits a draft; nothing reaches the
@@ -297,6 +416,7 @@ export class SlDataGridOperand {
     NgTemplateOutlet,
     SlButton,
     SlDataGridOperand,
+    SlDataGridRangeOperand,
     SlSegment,
     SlSegmentedControl,
     SlSelect,
@@ -323,6 +443,7 @@ export class SlDataGridOperand {
           <div data-part="filter-operator">
             <sl-select
               size="sm"
+              width="content"
               [fullWidth]="true"
               [items]="operatorItems()"
               [attr.aria-label]="labels().filterOperator"
@@ -337,29 +458,41 @@ export class SlDataGridOperand {
           <div
             data-part="filter-operand"
             [attr.data-kind]="kind()"
-            [attr.data-range]="operandsOf(index) === 2 ? '' : null"
+            [attr.data-range]="operandsOf(index) === 2 && !rangeAt(index) ? '' : null"
           >
-            @for (slot of slotsOf(index); track slot) {
-              @if (customTemplate(); as custom) {
-                <span>
-                  <ng-container
-                    [ngTemplateOutlet]="custom"
-                    [ngTemplateOutletContext]="context(index, slot)"
+            @if (rangeAt(index) && !customTemplate()) {
+              <sl-data-grid-range-operand
+                [kind]="kind()"
+                [start]="operandOf(index, 0)"
+                [end]="operandOf(index, 1)"
+                [labels]="labels()"
+                [locale]="locale()"
+                variant="outline"
+                (rangeChange)="setOperands(index, $event.start, $event.end)"
+              />
+            } @else {
+              @for (slot of slotsOf(index); track slot) {
+                @if (customTemplate(); as custom) {
+                  <span>
+                    <ng-container
+                      [ngTemplateOutlet]="custom"
+                      [ngTemplateOutletContext]="context(index, slot)"
+                    />
+                  </span>
+                } @else {
+                  <sl-data-grid-operand
+                    [kind]="kind()"
+                    [column]="column().column"
+                    [value]="operandOf(index, slot)"
+                    [label]="operandLabel(index, slot)"
+                    [labels]="labels()"
+                    [locale]="locale()"
+                    [counts]="counts()"
+                    variant="outline"
+                    (valueChange)="setOperand(index, slot, $event)"
+                    (applyRequest)="apply('keyboard')"
                   />
-                </span>
-              } @else {
-                <sl-data-grid-operand
-                  [kind]="kind()"
-                  [column]="column().column"
-                  [value]="operandOf(index, slot)"
-                  [label]="operandLabel(index, slot)"
-                  [labels]="labels()"
-                  [locale]="locale()"
-                  [counts]="counts()"
-                  variant="outline"
-                  (valueChange)="setOperand(index, slot, $event)"
-                  (applyRequest)="apply('keyboard')"
-                />
+                }
               }
             }
           </div>
@@ -489,6 +622,13 @@ export class SlDataGridFilterPanel {
       slot === 0 ? { ...condition, value: operand } : { ...condition, end: operand };
     this.draft.set(withCondition(this.draft(), index, next as never));
   }
+  protected setOperands(index: number, start: unknown, end: unknown) {
+    const next: Condition = { ...this.conditionAt(index), value: start, end };
+    this.draft.set(withCondition(this.draft(), index, next as never));
+  }
+  protected rangeAt(index: number) {
+    return isRangeOperand(this.kind(), this.conditionAt(index).operator);
+  }
   protected apply(reason: 'pointer' | 'keyboard') {
     const next = normalizeFilter(this.draft());
     const labels = this.labels();
@@ -525,12 +665,19 @@ export class SlDataGridFilterPanel {
 @Component({
   selector: 'sl-data-grid-filter-row-operand',
   standalone: true,
-  imports: [NgTemplateOutlet, SlDataGridOperand, SlMenu, SlMenuItem, SlMenuTrigger],
+  imports: [
+    NgTemplateOutlet,
+    SlDataGridOperand,
+    SlDataGridRangeOperand,
+    SlMenu,
+    SlMenuItem,
+    SlMenuTrigger,
+  ],
   template: `
     <div
       data-part="filter-operand"
       [attr.data-kind]="kind()"
-      [attr.data-range]="operands() === 2 ? '' : null"
+      [attr.data-range]="operands() === 2 && !range() ? '' : null"
     >
       <div data-part="filter-operator">
         <button
@@ -547,25 +694,37 @@ export class SlDataGridFilterPanel {
           }
         </sl-menu>
       </div>
-      @for (slot of slots(); track slot) {
-        @if (customTemplate(); as custom) {
-          <span>
-            <ng-container [ngTemplateOutlet]="custom" [ngTemplateOutletContext]="context(slot)" />
-          </span>
-        } @else {
-          <sl-data-grid-operand
-            [kind]="kind()"
-            [column]="column().column"
-            [value]="slot === 0 ? draft().value : draft().end"
-            [label]="operandLabel(slot)"
-            [labels]="labels()"
-            [locale]="locale()"
-            [counts]="counts()"
-            [placeholder]="labels().filter"
-            variant="plain"
-            (valueChange)="write(slot, $event)"
-            (applyRequest)="applyNow()"
-          />
+      @if (range() && !customTemplate()) {
+        <sl-data-grid-range-operand
+          [kind]="kind()"
+          [start]="draft().value"
+          [end]="draft().end"
+          [labels]="labels()"
+          [locale]="locale()"
+          variant="plain"
+          (rangeChange)="writeBoth($event.start, $event.end)"
+        />
+      } @else {
+        @for (slot of slots(); track slot) {
+          @if (customTemplate(); as custom) {
+            <span>
+              <ng-container [ngTemplateOutlet]="custom" [ngTemplateOutletContext]="context(slot)" />
+            </span>
+          } @else {
+            <sl-data-grid-operand
+              [kind]="kind()"
+              [column]="column().column"
+              [value]="slot === 0 ? draft().value : draft().end"
+              [label]="operandLabel(slot)"
+              [labels]="labels()"
+              [locale]="locale()"
+              [counts]="counts()"
+              [placeholder]="rowPlaceholder(slot)"
+              variant="plain"
+              (valueChange)="write(slot, $event)"
+              (applyRequest)="applyNow()"
+            />
+          }
         }
       }
     </div>
@@ -615,9 +774,21 @@ export class SlDataGridFilterRowOperand {
   protected readonly symbol = computed(
     () => this.labels().filterSymbols[this.operator() as FilterOperator] ?? '=',
   );
+  protected readonly range = computed(() => isRangeOperand(this.kind(), this.operator()));
 
   protected operatorName(operator: string) {
     return this.labels().filterOperators[operator as FilterOperator] ?? operator;
+  }
+  /* An amount in a filter is typed, never spun (`stepper="none"` above): the
+     steppers took a third of a filter cell and a `between` had room for one
+     digit. The two ends of a `between` are named From and To. */
+  protected rowPlaceholder(slot: 0 | 1) {
+    const labels = this.labels();
+    return this.operands() === 2
+      ? slot === 0
+        ? labels.filterFrom
+        : labels.filterTo
+      : labels.filter;
   }
   protected operandLabel(slot: 0 | 1) {
     const labels = this.labels();
@@ -659,6 +830,12 @@ export class SlDataGridFilterRowOperand {
     const kind = this.kind();
     if (immediate || (kind !== 'text' && kind !== 'number')) run();
     else this.timer = setTimeout(run, this.debounce());
+  }
+  protected writeBoth(start: unknown, end: unknown) {
+    const draft = { value: start, end };
+    this.draft.set(draft);
+    clearTimeout(this.timer);
+    this.commit(this.operator(), draft, 'keyboard');
   }
   protected applyNow() {
     clearTimeout(this.timer);

@@ -31,15 +31,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 
 import { Button } from '../button';
-import { DateField } from '../date-field';
-import { DateTimeField } from '../datetime-field';
+import { DatePicker } from '../date-picker';
+import { DateRangePicker } from '../date-range-picker';
+import { DateTimePicker } from '../datetime-picker';
+import { DateTimeRangePicker } from '../datetime-range-picker';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../menu';
 import { NumberField } from '../number-field';
 import { Popover, PopoverAnchor, PopoverContent, PopoverLayer } from '../popover';
 import { Segment, SegmentedControl } from '../segmented-control';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { TextField } from '../text-field';
-import { TimeField } from '../time-field';
+import { TimePicker } from '../time-picker';
+import { TimeRangePicker } from '../time-range-picker';
 import { useDataGridInternal } from './data-grid-context';
 import { fill } from './data-grid-defaults';
 import { dateOf, dateTimeOf, timeOf } from './data-grid-editors';
@@ -84,9 +87,98 @@ interface OperandProps<Row> {
   autoFocus?: boolean | undefined;
 }
 
+/** The kinds whose `between` is one range picker rather than two fields. */
+const RANGE_PICKER_KINDS: readonly string[] = ['date', 'time', 'datetime'];
+
+/** Whether the operator's two operands are edited in one control. */
+function isRangeOperand(kind: FilterKind, operator: string) {
+  return operandCount(operator as FilterOperator) === 2 && RANGE_PICKER_KINDS.includes(kind);
+}
+
+interface RangeOperandProps {
+  kind: FilterKind;
+  start: unknown;
+  end: unknown;
+  onChange: (start: unknown, end: unknown) => void;
+  labels: DataGridResolvedLabels;
+  locale: string | undefined;
+  variant: 'plain' | 'outline';
+  autoFocus?: boolean | undefined;
+}
+
+/**
+ * A `between` on a date, a time or a date-time is one range picker: one
+ * frame that says the run while it is drawn, takes the ends in either order
+ * and fits a column's width, where two fields side by side broke into two
+ * lines at the widths a filter row has. The rule `table` took in its second
+ * reopening. The descriptor is unchanged: two ISO operands.
+ */
+function RangeOperand({
+  kind,
+  start,
+  end,
+  onChange,
+  labels,
+  locale,
+  variant,
+  autoFocus,
+}: RangeOperandProps) {
+  const shared = {
+    endLabel: labels.filterTo,
+    size: 'sm' as const,
+    startLabel: labels.filterFrom,
+    variant,
+    ...(autoFocus ? { autoFocus: true } : {}),
+    ...(locale === undefined ? {} : { locale }),
+  };
+  if (kind === 'time') {
+    return (
+      <TimeRangePicker
+        {...shared}
+        onValueChange={(next) =>
+          onChange(
+            isPlainTime(next?.start) ? toISOTime(next.start, 'minute') : null,
+            isPlainTime(next?.end) ? toISOTime(next.end, 'minute') : null,
+          )
+        }
+        value={{ start: timeOf(start), end: timeOf(end) }}
+      />
+    );
+  }
+  if (kind === 'datetime') {
+    return (
+      <DateTimeRangePicker
+        {...shared}
+        onValueChange={(next) =>
+          onChange(
+            isPlainDateTime(next?.start) ? toISODateTime(next.start) : null,
+            isPlainDateTime(next?.end) ? toISODateTime(next.end) : null,
+          )
+        }
+        value={{ start: dateTimeOf(start), end: dateTimeOf(end) }}
+      />
+    );
+  }
+  return (
+    <DateRangePicker
+      {...shared}
+      onValueChange={(next) =>
+        onChange(
+          isPlainDate(next?.start) ? toISODate(next.start) : null,
+          isPlainDate(next?.end) ? toISODate(next.end) : null,
+        )
+      }
+      value={{ start: dateOf(start), end: dateOf(end) }}
+    />
+  );
+}
+
 /**
  * The control an operand of a kind is edited in. One family per kind, all
- * at `sm`; `plain` in the filter row and `outline` in the panel.
+ * at `sm`; `plain` in the filter row and `outline` in the panel. A date, a
+ * time and a date-time are pickers — the field with the control that opens
+ * the calendar or the list beside it — because a reader who does not type
+ * dates still has to filter by one.
  */
 function Operand<Row>({
   autoFocus,
@@ -117,12 +209,15 @@ function Operand<Row>({
           {...shared}
           onValueChange={(next) => onChange(next)}
           placeholder={placeholder ?? label}
+          /* An amount in a filter is typed, never spun: the steppers took a
+             third of a filter cell and a `between` had room for one digit. */
+          stepper="none"
           value={typeof value === 'number' ? value : null}
         />
       );
     case 'date':
       return (
-        <DateField
+        <DatePicker
           {...shared}
           onValueChange={(next) => onChange(isPlainDate(next) ? toISODate(next) : null)}
           value={dateOf(value)}
@@ -130,7 +225,7 @@ function Operand<Row>({
       );
     case 'time':
       return (
-        <TimeField
+        <TimePicker
           {...shared}
           onValueChange={(next) => onChange(isPlainTime(next) ? toISOTime(next, 'minute') : null)}
           value={timeOf(value)}
@@ -138,7 +233,7 @@ function Operand<Row>({
       );
     case 'datetime':
       return (
-        <DateTimeField
+        <DateTimePicker
           {...shared}
           onValueChange={(next) => onChange(isPlainDateTime(next) ? toISODateTime(next) : null)}
           value={dateTimeOf(value)}
@@ -148,6 +243,7 @@ function Operand<Row>({
       return (
         <Select
           fullWidth
+          width="content"
           items={[
             { label: labels.filterYes, value: 'true' },
             { label: labels.filterNo, value: 'false' },
@@ -181,6 +277,7 @@ function Operand<Row>({
       return (
         <Select
           fullWidth
+          width="content"
           items={options.map((option) => ({ label: option.label, value: option.value }))}
           multiple
           onValueChange={(next) =>
@@ -328,6 +425,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
         <div data-part="filter-operator">
           <Select
             fullWidth
+            width="content"
             items={operators.map((operator) => ({
               label: format.operator(operator as FilterOperator),
               value: operator,
@@ -354,49 +452,65 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
         <div
           data-kind={panelKind}
           data-part="filter-operand"
-          {...(operands === 2 ? { 'data-range': '' } : {})}
+          {...(operands === 2 && !isRangeOperand(panelKind, condition.operator)
+            ? { 'data-range': '' }
+            : {})}
         >
-          {operands === 0
-            ? null
-            : ([0, 1] as const).slice(0, operands).map((slot) => {
-                const label =
-                  operands === 2
-                    ? slot === 0
-                      ? labels.filterFrom
-                      : labels.filterTo
-                    : labels.filterValue;
-                const value = (slot === 0 ? condition.value : condition.end) ?? null;
-                if (custom) {
-                  return (
-                    <span key={slot}>
-                      {custom({
-                        column: column.id,
-                        operator: condition.operator,
-                        value,
-                        setValue: (next) => setOperand(index, slot, next),
-                        apply: () => apply(null, 'keyboard'),
-                        label,
-                      })}
-                    </span>
-                  );
-                }
+          {operands === 0 ? null : !custom && isRangeOperand(panelKind, condition.operator) ? (
+            <RangeOperand
+              end={condition.end ?? null}
+              kind={panelKind}
+              labels={labels}
+              locale={grid.locale}
+              onChange={(start, end) =>
+                setDraft(
+                  withCondition(current, index, { ...condition, value: start, end } as never),
+                )
+              }
+              start={condition.value ?? null}
+              variant="outline"
+            />
+          ) : (
+            ([0, 1] as const).slice(0, operands).map((slot) => {
+              const label =
+                operands === 2
+                  ? slot === 0
+                    ? labels.filterFrom
+                    : labels.filterTo
+                  : labels.filterValue;
+              const value = (slot === 0 ? condition.value : condition.end) ?? null;
+              if (custom) {
                 return (
-                  <Operand<Row>
-                    column={column}
-                    counts={panelKind === 'set' ? grid.countsFor(column.id) : undefined}
-                    key={slot}
-                    kind={panelKind}
-                    label={label}
-                    labels={labels}
-                    locale={grid.locale}
-                    onChange={(next) => setOperand(index, slot, next)}
-                    onKeyDown={applyOnEnter}
-                    operator={condition.operator}
-                    value={value}
-                    variant="outline"
-                  />
+                  <span key={slot}>
+                    {custom({
+                      column: column.id,
+                      operator: condition.operator,
+                      value,
+                      setValue: (next) => setOperand(index, slot, next),
+                      apply: () => apply(null, 'keyboard'),
+                      label,
+                    })}
+                  </span>
                 );
-              })}
+              }
+              return (
+                <Operand<Row>
+                  column={column}
+                  counts={panelKind === 'set' ? grid.countsFor(column.id) : undefined}
+                  key={slot}
+                  kind={panelKind}
+                  label={label}
+                  labels={labels}
+                  locale={grid.locale}
+                  onChange={(next) => setOperand(index, slot, next)}
+                  onKeyDown={applyOnEnter}
+                  operator={condition.operator}
+                  value={value}
+                  variant="outline"
+                />
+              );
+            })
+          )}
         </div>
       </div>
     );
@@ -568,7 +682,7 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
       <div
         data-kind={kind}
         data-part="filter-operand"
-        {...(operands === 2 ? { 'data-range': '' } : {})}
+        {...(operands === 2 && !isRangeOperand(kind, operator) ? { 'data-range': '' } : {})}
       >
         <div data-part="filter-operator">
           <Menu size="sm">
@@ -593,48 +707,61 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
             </MenuContent>
           </Menu>
         </div>
-        {operands === 0
-          ? null
-          : ([0, 1] as const).slice(0, operands).map((slot) => {
-              const label = `${labels.filter} ${column.column.label}${operands === 2 ? `, ${slot === 0 ? labels.filterFrom : labels.filterTo}` : ''}`;
-              const value = slot === 0 ? draft.value : draft.end;
-              const write = (next: unknown, immediate = false) =>
-                schedule(
-                  slot === 0 ? { ...draft, value: next } : { ...draft, end: next },
-                  immediate,
-                );
-              if (custom) {
-                return (
-                  <span key={slot}>
-                    {custom({
-                      column: column.id,
-                      operator,
-                      value,
-                      setValue: (next) => write(next, true),
-                      apply: () => commit({ operator, ...draft }, 'keyboard'),
-                      label,
-                    })}
-                  </span>
-                );
-              }
+        {operands === 0 ? null : !custom && isRangeOperand(kind, operator) ? (
+          <RangeOperand
+            end={draft.end}
+            kind={kind}
+            labels={labels}
+            locale={grid.locale}
+            onChange={(start, end) => schedule({ value: start, end }, true)}
+            start={draft.value}
+            variant="plain"
+          />
+        ) : (
+          ([0, 1] as const).slice(0, operands).map((slot) => {
+            const label = `${labels.filter} ${column.column.label}${operands === 2 ? `, ${slot === 0 ? labels.filterFrom : labels.filterTo}` : ''}`;
+            const value = slot === 0 ? draft.value : draft.end;
+            const write = (next: unknown, immediate = false) =>
+              schedule(slot === 0 ? { ...draft, value: next } : { ...draft, end: next }, immediate);
+            if (custom) {
               return (
-                <Operand<Row>
-                  column={column}
-                  counts={kind === 'set' ? grid.countsFor(column.id) : undefined}
-                  key={slot}
-                  kind={kind}
-                  label={label}
-                  labels={labels}
-                  locale={grid.locale}
-                  onChange={(next) => write(next, kind !== 'text' && kind !== 'number')}
-                  onKeyDown={applyOnEnter}
-                  operator={operator}
-                  placeholder={fill(labels.filter, {})}
-                  value={value}
-                  variant="plain"
-                />
+                <span key={slot}>
+                  {custom({
+                    column: column.id,
+                    operator,
+                    value,
+                    setValue: (next) => write(next, true),
+                    apply: () => commit({ operator, ...draft }, 'keyboard'),
+                    label,
+                  })}
+                </span>
               );
-            })}
+            }
+            return (
+              <Operand<Row>
+                column={column}
+                counts={kind === 'set' ? grid.countsFor(column.id) : undefined}
+                key={slot}
+                kind={kind}
+                label={label}
+                labels={labels}
+                locale={grid.locale}
+                onChange={(next) => write(next, kind !== 'text' && kind !== 'number')}
+                onKeyDown={applyOnEnter}
+                operator={operator}
+                placeholder={
+                  operands === 2
+                    ? slot === 0
+                      ? labels.filterFrom
+                      : labels.filterTo
+                    : fill(labels.filter, {})
+                }
+                value={value}
+                variant="plain"
+              />
+            );
+          })
+        )}
       </div>
     </div>
   );

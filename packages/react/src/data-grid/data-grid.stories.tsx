@@ -161,8 +161,8 @@ const columns: GridColumn<Shipment>[] = [
     width: 130,
     options: STATUSES.map((value) => ({ value, label: value })),
   },
-  { id: 'shipped', label: 'Shipped', kind: 'date', width: 130 },
-  { id: 'eta', label: 'ETA', kind: 'datetime', width: 170 },
+  { id: 'shipped', label: 'Shipped', kind: 'date', width: 150 },
+  { id: 'eta', label: 'ETA', kind: 'datetime', width: 210 },
   { id: 'cost', label: 'Cost', kind: 'number', width: 130, format: money, aggregate: 'sum' },
   { id: 'priority', label: 'Priority', kind: 'boolean', width: 100 },
 ];

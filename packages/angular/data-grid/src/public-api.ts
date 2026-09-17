@@ -4,7 +4,9 @@ export {
   SlDataGridFilterPanel,
   SlDataGridFilterRowOperand,
   SlDataGridOperand,
+  SlDataGridRangeOperand,
   filterKindOf,
+  isRangeOperand,
 } from './data-grid-controls';
 export {
   SlDataGridCellTemplate,

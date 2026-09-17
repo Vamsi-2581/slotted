@@ -1,0 +1,28 @@
+.search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--slotted-space-2);
+  inline-size: 100%;
+  min-inline-size: 16rem;
+  padding-block: var(--slotted-space-1);
+  padding-inline: var(--slotted-space-3);
+  border: var(--slotted-border-width-thin) solid var(--slotted-border-subtle);
+  border-radius: var(--slotted-radius-md);
+  background: transparent;
+  color: var(--slotted-text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.search-trigger:focus-visible {
+  outline: 2px solid var(--slotted-focus-ring-color);
+  outline-offset: 2px;
+}
+.search-placeholder {
+  flex: 1;
+  text-align: start;
+}
+
+/* The bar has to be the banner's direct child: the host steps out of the box tree. */
+:host {
+  display: contents;
+}

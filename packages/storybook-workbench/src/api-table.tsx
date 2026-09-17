@@ -53,7 +53,14 @@ export function ApiTable({ rows }: { rows: readonly ApiRow[] }) {
       </thead>
       <tbody>
         {rows.map((row) => (
-          <tr key={row.name}>
+          /**
+           * A row is one prop **on one part**, as `apiMetadataErrors` already
+           * holds: `select` documents a `value` on its root and one on each
+           * option, and `table-of-contents` a `value` on its root and one on
+           * each item. Keyed by the name alone, React warned of two children
+           * with the same key on every such page and dropped one of the rows.
+           */
+          <tr key={`${row.appliesTo ?? ''}.${row.name}`}>
             <td>
               <code>{row.name}</code>
             </td>

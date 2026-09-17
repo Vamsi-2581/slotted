@@ -29,6 +29,22 @@ describe('workbench data tables', () => {
     ).toThrow('Matrix row "Solid" must provide one non-empty demonstration per column');
   });
 
+  /** `select` and `table-of-contents` each document a `value` on two parts. */
+  it('renders two rows that share a name on different parts, and keys neither by the name alone', () => {
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => {});
+    render(
+      <ApiTable
+        rows={[
+          { name: 'value', type: 'string', defaultValue: '—', appliesTo: 'Root', description: 'A' },
+          { name: 'value', type: 'string', defaultValue: '—', appliesTo: 'Item', description: 'B' },
+        ]}
+      />,
+    );
+    expect(screen.getAllByRole('row')).toHaveLength(3);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
   it('makes API and token overflow regions named and keyboard focusable', () => {
     const Page = createReferencePage({
       accessibility: [],

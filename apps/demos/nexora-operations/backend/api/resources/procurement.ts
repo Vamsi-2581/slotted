@@ -11,7 +11,13 @@ import {
   type SupplierPerformance,
   type SupplierSkuMapping,
 } from '../../domain';
-import { fields, runListQuery, type ListQuery, type ListResponse, type ResourceDefinition } from '../query';
+import {
+  fields,
+  runListQuery,
+  type ListQuery,
+  type ListResponse,
+  type ResourceDefinition,
+} from '../query';
 import type { ApiRuntime } from '../runtime';
 
 export interface SupplierListItem extends Supplier {
@@ -50,14 +56,23 @@ export const supplierResource: ResourceDefinition<SupplierListItem> = {
     tags: ['array', (item) => item.tags],
     updatedAt: ['datetime', (item) => item.metadata.updatedAt],
   }),
-  search: (item) => [item.displayName, item.legalName, item.supplierNumber, item.primaryContactName],
+  search: (item) => [
+    item.displayName,
+    item.legalName,
+    item.supplierNumber,
+    item.primaryContactName,
+  ],
   defaultSort: 'displayName',
 };
 
-export function listSuppliers(runtime: ApiRuntime, query: ListQuery): ListResponse<SupplierListItem> {
+export function listSuppliers(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<SupplierListItem> {
   runtime.require('suppliers.view');
   const items: SupplierListItem[] = [];
-  for (const supplier of runtime.store.dataset.suppliers.values()) items.push(supplierListItem(runtime, supplier));
+  for (const supplier of runtime.store.dataset.suppliers.values())
+    items.push(supplierListItem(runtime, supplier));
   return runListQuery(items, supplierResource, query);
 }
 
@@ -75,7 +90,11 @@ export function getSupplier(runtime: ApiRuntime, id: string): SupplierDetail {
     supplier: supplierListItem(runtime, supplier),
     mappings: runtime.indexes.mappingsBySupplier.get(id).map((mapping) => {
       const sku = runtime.store.dataset.skus.get(mapping.skuId);
-      return { ...mapping, skuCode: sku?.sku ?? mapping.skuId, skuName: sku?.name ?? mapping.skuId };
+      return {
+        ...mapping,
+        skuCode: sku?.sku ?? mapping.skuId,
+        skuName: sku?.name ?? mapping.skuId,
+      };
     }),
     recentPurchaseOrders: runtime.indexes.purchaseOrdersBySupplier
       .get(id)
@@ -94,21 +113,29 @@ export interface PurchaseOrderListItem extends PurchaseOrder {
   daysLate: number;
 }
 
-export function purchaseOrderListItem(runtime: ApiRuntime, po: PurchaseOrder): PurchaseOrderListItem {
+export function purchaseOrderListItem(
+  runtime: ApiRuntime,
+  po: PurchaseOrder,
+): PurchaseOrderListItem {
   const { dataset } = runtime.store;
   const lines = runtime.indexes.poLinesByPo.get(po.id);
   let ordered = 0;
   let received = 0;
   for (const line of lines) {
     ordered += quantityToMilli(line.orderedQuantity);
-    received += quantityToMilli(line.receivedAcceptedQuantity) + quantityToMilli(line.receivedDamagedQuantity) + quantityToMilli(line.rejectedQuantity);
+    received +=
+      quantityToMilli(line.receivedAcceptedQuantity) +
+      quantityToMilli(line.receivedDamagedQuantity) +
+      quantityToMilli(line.rejectedQuantity);
   }
-  const open = po.status === 'sent' || po.status === 'acknowledged' || po.status === 'partially_received';
+  const open =
+    po.status === 'sent' || po.status === 'acknowledged' || po.status === 'partially_received';
   return {
     ...po,
     supplierName: dataset.suppliers.get(po.supplierId)?.displayName ?? po.supplierId,
     buyerName: dataset.users.get(po.buyerId)?.displayName ?? po.buyerId,
-    warehouseCode: dataset.warehouses.get(po.destinationWarehouseId)?.code ?? po.destinationWarehouseId,
+    warehouseCode:
+      dataset.warehouses.get(po.destinationWarehouseId)?.code ?? po.destinationWarehouseId,
     lineCount: lines.length,
     receivedShareBps: ordered === 0 ? 0 : Math.round((received / ordered) * 10_000),
     daysLate: open ? Math.max(0, diffDays(runtime.store.today, po.expectedDate)) : 0,
@@ -139,10 +166,14 @@ export const purchaseOrderResource: ResourceDefinition<PurchaseOrderListItem> = 
   defaultSort: '-createdBusinessDate',
 };
 
-export function listPurchaseOrders(runtime: ApiRuntime, query: ListQuery): ListResponse<PurchaseOrderListItem> {
+export function listPurchaseOrders(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<PurchaseOrderListItem> {
   runtime.require('purchase_orders.view');
   const items: PurchaseOrderListItem[] = [];
-  for (const po of runtime.store.dataset.purchaseOrders.values()) items.push(purchaseOrderListItem(runtime, po));
+  for (const po of runtime.store.dataset.purchaseOrders.values())
+    items.push(purchaseOrderListItem(runtime, po));
   return runListQuery(items, purchaseOrderResource, query);
 }
 
@@ -161,21 +192,50 @@ export function getPurchaseOrder(runtime: ApiRuntime, id: string): PurchaseOrder
   if (!po) throw notFound('Purchase order', id);
   const supplier = dataset.suppliers.get(po.supplierId);
   if (!supplier) throw notFound('Supplier', po.supplierId);
-  const approval = po.approvalRequestId ? dataset.approvalRequests.get(po.approvalRequestId) : undefined;
+  const approval = po.approvalRequestId
+    ? dataset.approvalRequests.get(po.approvalRequestId)
+    : undefined;
   return {
     purchaseOrder: purchaseOrderListItem(runtime, po),
-    lines: runtime.indexes.poLinesByPo.get(id).slice().sort((a, b) => a.lineNumber - b.lineNumber).map((line) => {
-      const sku = dataset.skus.get(line.skuId);
-      const open = quantityToMilli(line.orderedQuantity) - quantityToMilli(line.receivedAcceptedQuantity) - quantityToMilli(line.receivedDamagedQuantity) - quantityToMilli(line.rejectedQuantity);
-      return { ...line, skuCode: sku?.sku ?? line.skuId, skuName: sku?.name ?? line.description, openQuantity: String(Math.max(0, open) / 1000) };
-    }),
+    lines: runtime.indexes.poLinesByPo
+      .get(id)
+      .slice()
+      .sort((a, b) => a.lineNumber - b.lineNumber)
+      .map((line) => {
+        const sku = dataset.skus.get(line.skuId);
+        const open =
+          quantityToMilli(line.orderedQuantity) -
+          quantityToMilli(line.receivedAcceptedQuantity) -
+          quantityToMilli(line.receivedDamagedQuantity) -
+          quantityToMilli(line.rejectedQuantity);
+        return {
+          ...line,
+          skuCode: sku?.sku ?? line.skuId,
+          skuName: sku?.name ?? line.description,
+          openQuantity: String(Math.max(0, open) / 1000),
+        };
+      }),
     supplier,
-    receipts: runtime.indexes.receiptsByPo.get(id).map((receipt) => ({ ...receipt, lineCount: runtime.indexes.receiptLinesByReceipt.get(receipt.id).length, receivedByName: dataset.users.get(receipt.receivedBy)?.displayName ?? receipt.receivedBy })),
+    receipts: runtime.indexes.receiptsByPo.get(id).map((receipt) => ({
+      ...receipt,
+      lineCount: runtime.indexes.receiptLinesByReceipt.get(receipt.id).length,
+      receivedByName: dataset.users.get(receipt.receivedBy)?.displayName ?? receipt.receivedBy,
+    })),
     ...(approval ? { approval } : {}),
   };
 }
 
-export function getGoodsReceipt(runtime: ApiRuntime, id: string): { receipt: GoodsReceipt & { supplierName: string; purchaseOrderNumber: string; warehouseCode: string }; lines: (GoodsReceiptLine & { skuCode: string; skuName: string })[] } {
+export function getGoodsReceipt(
+  runtime: ApiRuntime,
+  id: string,
+): {
+  receipt: GoodsReceipt & {
+    supplierName: string;
+    purchaseOrderNumber: string;
+    warehouseCode: string;
+  };
+  lines: (GoodsReceiptLine & { skuCode: string; skuName: string })[];
+} {
   runtime.require('receipts.view');
   const { dataset } = runtime.store;
   const receipt = dataset.goodsReceipts.get(id);
@@ -184,7 +244,9 @@ export function getGoodsReceipt(runtime: ApiRuntime, id: string): { receipt: Goo
     receipt: {
       ...receipt,
       supplierName: dataset.suppliers.get(receipt.supplierId)?.displayName ?? receipt.supplierId,
-      purchaseOrderNumber: dataset.purchaseOrders.get(receipt.purchaseOrderId)?.purchaseOrderNumber ?? receipt.purchaseOrderId,
+      purchaseOrderNumber:
+        dataset.purchaseOrders.get(receipt.purchaseOrderId)?.purchaseOrderNumber ??
+        receipt.purchaseOrderId,
       warehouseCode: dataset.warehouses.get(receipt.warehouseId)?.code ?? receipt.warehouseId,
     },
     lines: runtime.indexes.receiptLinesByReceipt.get(id).map((line) => {

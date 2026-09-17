@@ -1,13 +1,7 @@
 import type { EntityMetadata } from './common';
 
 export type TicketStatus =
-  | 'new'
-  | 'open'
-  | 'pending_customer'
-  | 'pending_internal'
-  | 'escalated'
-  | 'resolved'
-  | 'closed';
+  'new' | 'open' | 'pending_customer' | 'pending_internal' | 'escalated' | 'resolved' | 'closed';
 
 export type TicketPriority = 'low' | 'normal' | 'high' | 'urgent';
 export type TicketChannel = 'email' | 'phone' | 'portal' | 'chat' | 'internal';
@@ -95,7 +89,10 @@ export interface SupportMacro {
 }
 
 /** Section 68.3 targets in business minutes. */
-export const SLA_TARGETS: Record<TicketPriority, { firstResponseMinutes: number; resolutionMinutes: number }> = {
+export const SLA_TARGETS: Record<
+  TicketPriority,
+  { firstResponseMinutes: number; resolutionMinutes: number }
+> = {
   low: { firstResponseMinutes: 8 * 60, resolutionMinutes: 5 * 10 * 60 },
   normal: { firstResponseMinutes: 4 * 60, resolutionMinutes: 2 * 10 * 60 },
   high: { firstResponseMinutes: 60, resolutionMinutes: 8 * 60 },

@@ -97,12 +97,7 @@ export interface InventoryReservation {
 }
 
 export type TransferStatus =
-  | 'draft'
-  | 'ready'
-  | 'in_transit'
-  | 'partially_received'
-  | 'received'
-  | 'cancelled';
+  'draft' | 'ready' | 'in_transit' | 'partially_received' | 'received' | 'cancelled';
 
 export interface InventoryTransfer {
   id: string;
@@ -163,8 +158,4 @@ export interface CycleCountLine {
 }
 
 export type AdjustmentReasonCode =
-  | 'count_correction'
-  | 'damage'
-  | 'found_stock'
-  | 'data_correction'
-  | 'other';
+  'count_correction' | 'damage' | 'found_stock' | 'data_correction' | 'other';

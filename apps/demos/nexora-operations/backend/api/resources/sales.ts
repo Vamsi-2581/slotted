@@ -18,7 +18,13 @@ import {
 } from '../../domain';
 import { yearlyNumber } from '../../data/seed/orders';
 import type { InventoryPosition } from '../projections';
-import { fields, runListQuery, type ListQuery, type ListResponse, type ResourceDefinition } from '../query';
+import {
+  fields,
+  runListQuery,
+  type ListQuery,
+  type ListResponse,
+  type ResourceDefinition,
+} from '../query';
 import type { ApiRuntime } from '../runtime';
 
 export interface OrderListItem {
@@ -60,7 +66,13 @@ export interface OrderLineView extends SalesOrderLine {
 }
 
 export interface OrderDetail {
-  order: SalesOrder & { historical: boolean; customerName: string; ownerName: string; contactName?: string; warehouseCode: string };
+  order: SalesOrder & {
+    historical: boolean;
+    customerName: string;
+    ownerName: string;
+    contactName?: string;
+    warehouseCode: string;
+  };
   lines: OrderLineView[];
   customer: Customer;
   customerSummary: CustomerFinancialSummary;
@@ -75,9 +87,30 @@ export interface OrderDetail {
   inventory: InventoryPosition[];
 }
 
-const HISTORICAL_STATUS: Record<string, { status: SalesOrder['status']; fulfillment: SalesOrder['fulfillmentStatus']; invoice: SalesOrder['invoiceStatus']; payment: SalesOrder['paymentStatus']; allocation: SalesOrder['allocationStatus'] }> = {
-  normal: { status: 'closed', fulfillment: 'fulfilled', invoice: 'invoiced', payment: 'paid', allocation: 'allocated' },
-  cancelled: { status: 'cancelled', fulfillment: 'unfulfilled', invoice: 'not_invoiced', payment: 'not_invoiced', allocation: 'unallocated' },
+const HISTORICAL_STATUS: Record<
+  string,
+  {
+    status: SalesOrder['status'];
+    fulfillment: SalesOrder['fulfillmentStatus'];
+    invoice: SalesOrder['invoiceStatus'];
+    payment: SalesOrder['paymentStatus'];
+    allocation: SalesOrder['allocationStatus'];
+  }
+> = {
+  normal: {
+    status: 'closed',
+    fulfillment: 'fulfilled',
+    invoice: 'invoiced',
+    payment: 'paid',
+    allocation: 'allocated',
+  },
+  cancelled: {
+    status: 'cancelled',
+    fulfillment: 'unfulfilled',
+    invoice: 'not_invoiced',
+    payment: 'not_invoiced',
+    allocation: 'unallocated',
+  },
 };
 
 export class SalesReadModels {
@@ -89,7 +122,10 @@ export class SalesReadModels {
     });
   }
 
-  private names(customerId: string, ownerId: string): { customerName: string; customerSegment: Customer['segment']; ownerName: string } {
+  private names(
+    customerId: string,
+    ownerId: string,
+  ): { customerName: string; customerSegment: Customer['segment']; ownerName: string } {
     const { dataset } = this.runtime.store;
     const customer = dataset.customers.get(customerId);
     return {
@@ -123,7 +159,9 @@ export class SalesReadModels {
       updatedAt: order.metadata.updatedAt,
       version: order.metadata.version,
       historical: false,
-      ...(order.requestedDeliveryDate ? { requestedDeliveryDate: order.requestedDeliveryDate } : {}),
+      ...(order.requestedDeliveryDate
+        ? { requestedDeliveryDate: order.requestedDeliveryDate }
+        : {}),
       ...(order.customerPoNumber ? { customerPoNumber: order.customerPoNumber } : {}),
       ...(order.sourceQuoteId ? { sourceQuoteId: order.sourceQuoteId } : {}),
     };
@@ -140,11 +178,18 @@ export class SalesReadModels {
       if (!skeleton) continue;
       const customer = store.dataset.customers.get(summary.customerId);
       const year = Number(summary.orderDate.slice(0, 4));
-      const derived = HISTORICAL_STATUS[summary.kind === 'cancelled' ? 'cancelled' : 'normal'] as (typeof HISTORICAL_STATUS)[string];
+      const derived = HISTORICAL_STATUS[
+        summary.kind === 'cancelled' ? 'cancelled' : 'normal'
+      ] as (typeof HISTORICAL_STATUS)[string];
       const ownerId = customer?.accountOwnerId ?? '';
       rows.push({
         id: store.historicalOrderId(summary.index),
-        orderNumber: yearlyNumber(environment, 'salesOrder', year, summary.index - (environment.firstIndexOfYear.get(year) ?? 0) + 1),
+        orderNumber: yearlyNumber(
+          environment,
+          'salesOrder',
+          year,
+          summary.index - (environment.firstIndexOfYear.get(year) ?? 0) + 1,
+        ),
         customerId: summary.customerId,
         ...this.names(summary.customerId, ownerId),
         ownerId,
@@ -152,7 +197,8 @@ export class SalesReadModels {
         orderDate: summary.orderDate,
         defaultWarehouseId: skeleton.warehouseId,
         status: derived.status,
-        approvalStatus: summary.subtotalMinor + summary.freightMinor >= 5_000_000 ? 'approved' : 'not_required',
+        approvalStatus:
+          summary.subtotalMinor + summary.freightMinor >= 5_000_000 ? 'approved' : 'not_required',
         allocationStatus: derived.allocation,
         fulfillmentStatus: derived.fulfillment,
         invoiceStatus: derived.invoice,
@@ -160,7 +206,12 @@ export class SalesReadModels {
         riskFlags: [],
         subtotal: usd(summary.subtotalMinor),
         total: usd(summary.totalMinor),
-        grossMarginBps: summary.subtotalMinor === 0 ? 0 : Math.round(((summary.subtotalMinor - summary.costMinor) / summary.subtotalMinor) * 10_000),
+        grossMarginBps:
+          summary.subtotalMinor === 0
+            ? 0
+            : Math.round(
+                ((summary.subtotalMinor - summary.costMinor) / summary.subtotalMinor) * 10_000,
+              ),
         lineCount: summary.lineCount,
         updatedAt: `${summary.orderDate}T12:00:00Z`,
         version: 1,
@@ -172,7 +223,8 @@ export class SalesReadModels {
   }
 
   *allOrderRows(): Iterable<OrderListItem> {
-    for (const order of this.runtime.store.dataset.salesOrders.values()) yield this.orderListItem(order);
+    for (const order of this.runtime.store.dataset.salesOrders.values())
+      yield this.orderListItem(order);
     yield* this.historicalOrderRows();
   }
 }
@@ -210,19 +262,34 @@ export const orderResource: ResourceDefinition<OrderListItem> = {
   defaultSort: '-orderDate,-orderNumber',
 };
 
-export function listOrders(runtime: ApiRuntime, models: SalesReadModels, query: ListQuery): ListResponse<OrderListItem> {
+export function listOrders(
+  runtime: ApiRuntime,
+  models: SalesReadModels,
+  query: ListQuery,
+): ListResponse<OrderListItem> {
   runtime.require('orders.view');
-  return runListQuery(models.allOrderRows(), orderResource, query, { historicalTier: runtime.store.history.summaries.length });
+  return runListQuery(models.allOrderRows(), orderResource, query, {
+    historicalTier: runtime.store.history.summaries.length,
+  });
 }
 
 export function orderLineView(runtime: ApiRuntime, line: SalesOrderLine): OrderLineView {
   const sku = runtime.store.dataset.skus.get(line.skuId);
   const position = runtime.projections.inventoryAt(line.skuId, line.preferredWarehouseId);
   const toMilli = (value: string): number => Math.round(Number(value) * 1000);
-  const open = toMilli(line.orderedQuantity) - toMilli(line.cancelledQuantity) - toMilli(line.fulfilledQuantity);
+  const open =
+    toMilli(line.orderedQuantity) -
+    toMilli(line.cancelledQuantity) -
+    toMilli(line.fulfilledQuantity);
   const backordered = Math.max(0, open - toMilli(line.reservedQuantity));
   const render = (milli: number): string => String(milli / 1000);
-  return { ...line, skuName: sku?.name ?? line.description, openQuantity: render(open), backorderedQuantity: render(backordered), available: position.available };
+  return {
+    ...line,
+    skuName: sku?.name ?? line.description,
+    openQuantity: render(open),
+    backorderedQuantity: render(backordered),
+    available: position.available,
+  };
 }
 
 export function getOrder(runtime: ApiRuntime, models: SalesReadModels, id: string): OrderDetail {
@@ -237,7 +304,8 @@ export function getOrder(runtime: ApiRuntime, models: SalesReadModels, id: strin
   let graphReturns: Return[] | undefined;
   let graphQuote: Quote | undefined;
   let graphApproval: ApprovalRequest | undefined;
-  let shipmentLineCount = (shipmentId: string): number => indexes.shipmentLinesByShipment.get(shipmentId).length;
+  let shipmentLineCount = (shipmentId: string): number =>
+    indexes.shipmentLinesByShipment.get(shipmentId).length;
   if (!order) {
     const graph = store.isHistoricalOrderId(id) ? store.expandHistoricalOrderById(id) : undefined;
     if (!graph) throw notFound('Order', id);
@@ -250,17 +318,29 @@ export function getOrder(runtime: ApiRuntime, models: SalesReadModels, id: strin
     graphReturns = graph.returns;
     graphQuote = graph.quote;
     graphApproval = graph.approval;
-    shipmentLineCount = (shipmentId) => graph.shipmentLines.filter((line) => line.shipmentId === shipmentId).length;
+    shipmentLineCount = (shipmentId) =>
+      graph.shipmentLines.filter((line) => line.shipmentId === shipmentId).length;
   }
   const customer = store.dataset.customers.get(order.customerId);
   if (!customer) throw notFound('Customer', order.customerId);
-  const lines = (graphLines ?? indexes.linesByOrder.get(order.id)).slice().sort((a, b) => a.lineNumber - b.lineNumber);
+  const lines = (graphLines ?? indexes.linesByOrder.get(order.id))
+    .slice()
+    .sort((a, b) => a.lineNumber - b.lineNumber);
   const contact = store.dataset.contacts.get(order.contactId);
   const warehouse = store.dataset.warehouses.get(order.defaultWarehouseId);
-  const quote = graphQuote ?? (order.sourceQuoteId ? store.dataset.quotes.get(order.sourceQuoteId) : undefined);
-  const approval = graphApproval ?? (order.approvalRequestId ? store.dataset.approvalRequests.get(order.approvalRequestId) : undefined);
+  const quote =
+    graphQuote ?? (order.sourceQuoteId ? store.dataset.quotes.get(order.sourceQuoteId) : undefined);
+  const approval =
+    graphApproval ??
+    (order.approvalRequestId
+      ? store.dataset.approvalRequests.get(order.approvalRequestId)
+      : undefined);
   const inventory = new Map<string, InventoryPosition>();
-  for (const line of lines) inventory.set(`${line.skuId}:${line.preferredWarehouseId}`, runtime.projections.inventoryAt(line.skuId, line.preferredWarehouseId));
+  for (const line of lines)
+    inventory.set(
+      `${line.skuId}:${line.preferredWarehouseId}`,
+      runtime.projections.inventoryAt(line.skuId, line.preferredWarehouseId),
+    );
   void models;
   return {
     order: {
@@ -275,10 +355,19 @@ export function getOrder(runtime: ApiRuntime, models: SalesReadModels, id: strin
     customer,
     customerSummary: runtime.projections.customerSummary(customer.id),
     reservations: graphReservations ?? indexes.reservationsByOrder.get(order.id),
-    shipments: (graphShipments ?? indexes.shipmentsByOrder.get(order.id)).map((shipment) => ({ ...shipment, lineCount: shipmentLineCount(shipment.id) })),
+    shipments: (graphShipments ?? indexes.shipmentsByOrder.get(order.id)).map((shipment) => ({
+      ...shipment,
+      lineCount: shipmentLineCount(shipment.id),
+    })),
     invoices: graphInvoices ?? indexes.invoicesByOrder.get(order.id),
     returns: graphReturns ?? indexes.returnsByOrder.get(order.id),
-    tickets: indexes.ticketsByOrder.get(order.id).map((ticket) => ({ id: ticket.id, ticketNumber: ticket.ticketNumber, subject: ticket.subject, status: ticket.status, priority: ticket.priority })),
+    tickets: indexes.ticketsByOrder.get(order.id).map((ticket) => ({
+      id: ticket.id,
+      ticketNumber: ticket.ticketNumber,
+      subject: ticket.subject,
+      status: ticket.status,
+      priority: ticket.priority,
+    })),
     inventory: [...inventory.values()],
     ...(contact ? { contact } : {}),
     ...(quote ? { quote } : {}),
@@ -342,7 +431,8 @@ export const quoteResource: ResourceDefinition<QuoteListItem> = {
 export function listQuotes(runtime: ApiRuntime, query: ListQuery): ListResponse<QuoteListItem> {
   runtime.require('quotes.view');
   const items: QuoteListItem[] = [];
-  for (const quote of runtime.store.dataset.quotes.values()) items.push(quoteListItem(runtime, quote));
+  for (const quote of runtime.store.dataset.quotes.values())
+    items.push(quoteListItem(runtime, quote));
   return runListQuery(items, quoteResource, query);
 }
 
@@ -354,14 +444,34 @@ export function getQuote(runtime: ApiRuntime, id: string): QuoteDetail {
   const customer = dataset.customers.get(quote.customerId);
   if (!customer) throw notFound('Customer', quote.customerId);
   const contact = dataset.contacts.get(quote.contactId);
-  const approval = quote.approvalRequestId ? dataset.approvalRequests.get(quote.approvalRequestId) : undefined;
-  const converted = quote.convertedOrderId ? dataset.salesOrders.get(quote.convertedOrderId) : undefined;
+  const approval = quote.approvalRequestId
+    ? dataset.approvalRequests.get(quote.approvalRequestId)
+    : undefined;
+  const converted = quote.convertedOrderId
+    ? dataset.salesOrders.get(quote.convertedOrderId)
+    : undefined;
   return {
     quote: quoteListItem(runtime, quote),
-    lines: runtime.indexes.quoteLinesByQuote.get(id).slice().sort((a, b) => a.lineNumber - b.lineNumber).map((line) => ({ ...line, skuName: dataset.skus.get(line.skuId)?.name ?? line.description })),
+    lines: runtime.indexes.quoteLinesByQuote
+      .get(id)
+      .slice()
+      .sort((a, b) => a.lineNumber - b.lineNumber)
+      .map((line) => ({
+        ...line,
+        skuName: dataset.skus.get(line.skuId)?.name ?? line.description,
+      })),
     customer,
     ...(contact ? { contact } : {}),
     ...(approval ? { approval } : {}),
-    ...(converted ? { convertedOrder: { id: converted.id, orderNumber: converted.orderNumber, status: converted.status, total: converted.total } } : {}),
+    ...(converted
+      ? {
+          convertedOrder: {
+            id: converted.id,
+            orderNumber: converted.orderNumber,
+            status: converted.status,
+            total: converted.total,
+          },
+        }
+      : {}),
   };
 }

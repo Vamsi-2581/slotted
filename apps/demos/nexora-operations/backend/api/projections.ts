@@ -44,7 +44,18 @@ export interface InventoryPosition extends InventoryBalance {
 export class Projections {
   private inventoryCache: Map<string, InventoryPosition> | undefined;
   private summaryCache = new Map<string, CustomerFinancialSummary>();
-  private historyByCustomer: Map<string, { lifetimeNet: number; lifetimeCost: number; orders12: number; value12: number; orders: number }> | undefined;
+  private historyByCustomer:
+    | Map<
+        string,
+        {
+          lifetimeNet: number;
+          lifetimeCost: number;
+          orders12: number;
+          value12: number;
+          orders: number;
+        }
+      >
+    | undefined;
   private supplierCache = new Map<string, SupplierPerformance>();
 
   constructor(
@@ -56,20 +67,25 @@ export class Projections {
         case 'reservations':
         case 'stockMovements': {
           const record = entity as { skuId?: string; warehouseId?: string } | undefined;
-          if (record?.skuId && record.warehouseId) this.refreshInventoryKey(`${record.skuId}:${record.warehouseId}`);
+          if (record?.skuId && record.warehouseId)
+            this.refreshInventoryKey(`${record.skuId}:${record.warehouseId}`);
           else this.inventoryCache = undefined;
           break;
         }
         case 'salesOrderLines': {
           const line = entity as { skuId?: string; preferredWarehouseId?: string } | undefined;
-          if (line?.skuId && line.preferredWarehouseId) this.refreshInventoryKey(`${line.skuId}:${line.preferredWarehouseId}`);
+          if (line?.skuId && line.preferredWarehouseId)
+            this.refreshInventoryKey(`${line.skuId}:${line.preferredWarehouseId}`);
           else this.inventoryCache = undefined;
           break;
         }
         case 'purchaseOrderLines': {
           const line = entity as { skuId?: string; purchaseOrderId?: string } | undefined;
-          const po = line?.purchaseOrderId ? this.store.dataset.purchaseOrders.get(line.purchaseOrderId) : undefined;
-          if (line?.skuId && po) this.refreshInventoryKey(`${line.skuId}:${po.destinationWarehouseId}`);
+          const po = line?.purchaseOrderId
+            ? this.store.dataset.purchaseOrders.get(line.purchaseOrderId)
+            : undefined;
+          if (line?.skuId && po)
+            this.refreshInventoryKey(`${line.skuId}:${po.destinationWarehouseId}`);
           else this.inventoryCache = undefined;
           break;
         }
@@ -78,13 +94,31 @@ export class Projections {
         case 'transferLines':
         case 'skus':
         case 'salesOrders':
-          if (kind !== 'invalidate' || collection !== 'salesOrders') this.inventoryCache = undefined;
+          if (kind !== 'invalidate' || collection !== 'salesOrders')
+            this.inventoryCache = undefined;
           break;
         default:
           break;
       }
-      if (['invoices', 'payments', 'paymentAllocations', 'creditMemos', 'creditMemoApplications', 'salesOrders', 'tickets', 'customers'].includes(collection)) this.summaryCache.clear();
-      if (['purchaseOrders', 'goodsReceiptLines', 'purchaseOrderLines', 'goodsReceipts'].includes(collection)) this.supplierCache.clear();
+      if (
+        [
+          'invoices',
+          'payments',
+          'paymentAllocations',
+          'creditMemos',
+          'creditMemoApplications',
+          'salesOrders',
+          'tickets',
+          'customers',
+        ].includes(collection)
+      )
+        this.summaryCache.clear();
+      if (
+        ['purchaseOrders', 'goodsReceiptLines', 'purchaseOrderLines', 'goodsReceipts'].includes(
+          collection,
+        )
+      )
+        this.supplierCache.clear();
     });
   }
 
@@ -115,13 +149,23 @@ export class Projections {
     for (const reservation of this.indexes.reservationsBySkuWarehouse.get(key)) {
       if (reservation.status !== 'active') continue;
       any = true;
-      reserved += quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
+      reserved +=
+        quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
     }
     for (const line of this.indexes.poLinesBySku.get(skuId)) {
       const po = this.store.dataset.purchaseOrders.get(line.purchaseOrderId);
       if (!po || po.destinationWarehouseId !== warehouseId) continue;
-      if (po.status !== 'sent' && po.status !== 'acknowledged' && po.status !== 'partially_received') continue;
-      const open = quantityToMilli(line.orderedQuantity) - quantityToMilli(line.receivedAcceptedQuantity) - quantityToMilli(line.receivedDamagedQuantity) - quantityToMilli(line.rejectedQuantity);
+      if (
+        po.status !== 'sent' &&
+        po.status !== 'acknowledged' &&
+        po.status !== 'partially_received'
+      )
+        continue;
+      const open =
+        quantityToMilli(line.orderedQuantity) -
+        quantityToMilli(line.receivedAcceptedQuantity) -
+        quantityToMilli(line.receivedDamagedQuantity) -
+        quantityToMilli(line.rejectedQuantity);
       if (open > 0) {
         any = true;
         inbound += open;
@@ -140,7 +184,10 @@ export class Projections {
     for (const line of this.indexes.linesBySkuWarehouse.get(key)) {
       const order = this.store.dataset.salesOrders.get(line.orderId);
       if (!order || (order.status !== 'confirmed' && order.status !== 'on_hold')) continue;
-      const open = quantityToMilli(line.orderedQuantity) - quantityToMilli(line.cancelledQuantity) - quantityToMilli(line.fulfilledQuantity);
+      const open =
+        quantityToMilli(line.orderedQuantity) -
+        quantityToMilli(line.cancelledQuantity) -
+        quantityToMilli(line.fulfilledQuantity);
       const uncovered = open - quantityToMilli(line.reservedQuantity);
       if (uncovered > 0) {
         any = true;
@@ -148,17 +195,39 @@ export class Projections {
       }
     }
     if (!any) return undefined;
-    return this.describePosition(skuId, warehouseId, { onHand, damaged, quarantine, reserved, inbound, demand });
+    return this.describePosition(skuId, warehouseId, {
+      onHand,
+      damaged,
+      quarantine,
+      reserved,
+      inbound,
+      demand,
+    });
   }
 
-  private describePosition(skuId: string, warehouseId: string, entry: { onHand: number; damaged: number; quarantine: number; reserved: number; inbound: number; demand: number }): InventoryPosition {
+  private describePosition(
+    skuId: string,
+    warehouseId: string,
+    entry: {
+      onHand: number;
+      damaged: number;
+      quarantine: number;
+      reserved: number;
+      inbound: number;
+      demand: number;
+    },
+  ): InventoryPosition {
     const { dataset } = this.store;
     const sku = dataset.skus.get(skuId);
     const precision = sku?.quantityPrecision ?? 0;
     const sellable = entry.onHand - entry.damaged - entry.quarantine;
     const available = Math.max(0, sellable - entry.reserved);
-    const reorderPoint = sku?.reorderPolicy.reorderPoint ? quantityToMilli(sku.reorderPolicy.reorderPoint) : 0;
-    const safetyStock = sku?.reorderPolicy.safetyStock ? quantityToMilli(sku.reorderPolicy.safetyStock) : 0;
+    const reorderPoint = sku?.reorderPolicy.reorderPoint
+      ? quantityToMilli(sku.reorderPolicy.reorderPoint)
+      : 0;
+    const safetyStock = sku?.reorderPolicy.safetyStock
+      ? quantityToMilli(sku.reorderPolicy.safetyStock)
+      : 0;
     const maxStock = sku?.reorderPolicy.maxStock ? quantityToMilli(sku.reorderPolicy.maxStock) : 0;
     const inventoryPosition = available + entry.inbound;
     const minMax = sku?.reorderPolicy.mode === 'min_max';
@@ -181,7 +250,10 @@ export class Projections {
       belowReorderPoint: minMax && available <= reorderPoint,
       belowSafetyStock: minMax && available < safetyStock,
       reorderSuggested,
-      suggestedQuantity: milliToQuantity(reorderSuggested ? Math.max(0, maxStock - inventoryPosition) : 0, precision),
+      suggestedQuantity: milliToQuantity(
+        reorderSuggested ? Math.max(0, maxStock - inventoryPosition) : 0,
+        precision,
+      ),
       backordered: milliToQuantity(entry.demand, precision),
     };
   }
@@ -191,7 +263,17 @@ export class Projections {
 
   private buildInventory(): Map<string, InventoryPosition> {
     const { dataset } = this.store;
-    const positions = new Map<string, { onHand: number; damaged: number; quarantine: number; reserved: number; inbound: number; demand: number }>();
+    const positions = new Map<
+      string,
+      {
+        onHand: number;
+        damaged: number;
+        quarantine: number;
+        reserved: number;
+        inbound: number;
+        demand: number;
+      }
+    >();
     const position = (key: string) => {
       let entry = positions.get(key);
       if (!entry) {
@@ -208,12 +290,22 @@ export class Projections {
     }
     for (const reservation of dataset.reservations.values()) {
       if (reservation.status !== 'active') continue;
-      position(`${reservation.skuId}:${reservation.warehouseId}`).reserved += quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
+      position(`${reservation.skuId}:${reservation.warehouseId}`).reserved +=
+        quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
     }
     for (const po of dataset.purchaseOrders.values()) {
-      if (po.status !== 'sent' && po.status !== 'acknowledged' && po.status !== 'partially_received') continue;
+      if (
+        po.status !== 'sent' &&
+        po.status !== 'acknowledged' &&
+        po.status !== 'partially_received'
+      )
+        continue;
       for (const line of this.indexes.poLinesByPo.get(po.id)) {
-        const open = quantityToMilli(line.orderedQuantity) - quantityToMilli(line.receivedAcceptedQuantity) - quantityToMilli(line.receivedDamagedQuantity) - quantityToMilli(line.rejectedQuantity);
+        const open =
+          quantityToMilli(line.orderedQuantity) -
+          quantityToMilli(line.receivedAcceptedQuantity) -
+          quantityToMilli(line.receivedDamagedQuantity) -
+          quantityToMilli(line.rejectedQuantity);
         if (open > 0) position(`${line.skuId}:${po.destinationWarehouseId}`).inbound += open;
       }
     }
@@ -227,9 +319,13 @@ export class Projections {
     for (const order of dataset.salesOrders.values()) {
       if (order.status !== 'confirmed' && order.status !== 'on_hold') continue;
       for (const line of this.indexes.linesByOrder.get(order.id)) {
-        const open = quantityToMilli(line.orderedQuantity) - quantityToMilli(line.cancelledQuantity) - quantityToMilli(line.fulfilledQuantity);
+        const open =
+          quantityToMilli(line.orderedQuantity) -
+          quantityToMilli(line.cancelledQuantity) -
+          quantityToMilli(line.fulfilledQuantity);
         const uncovered = open - quantityToMilli(line.reservedQuantity);
-        if (uncovered > 0) position(`${line.skuId}:${line.preferredWarehouseId}`).demand += uncovered;
+        if (uncovered > 0)
+          position(`${line.skuId}:${line.preferredWarehouseId}`).demand += uncovered;
       }
     }
     const result = new Map<string, InventoryPosition>();
@@ -267,7 +363,9 @@ export class Projections {
       sellableOnHand: zero,
       inventoryPosition: zero,
       belowReorderPoint: sku?.reorderPolicy.mode === 'min_max',
-      belowSafetyStock: sku?.reorderPolicy.mode === 'min_max' && quantityToMilli(sku.reorderPolicy.safetyStock ?? '0') > 0,
+      belowSafetyStock:
+        sku?.reorderPolicy.mode === 'min_max' &&
+        quantityToMilli(sku.reorderPolicy.safetyStock ?? '0') > 0,
       reorderSuggested: sku?.reorderPolicy.mode === 'min_max',
       suggestedQuantity: sku?.reorderPolicy.maxStock ?? zero,
       backordered: zero,
@@ -305,7 +403,9 @@ export class Projections {
     for (const line of lines) {
       let reserved = 0;
       for (const reservation of this.indexes.reservationsByLine.get(line.id)) {
-        if (reservation.status === 'active') reserved += quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
+        if (reservation.status === 'active')
+          reserved +=
+            quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
       }
       const next = milliToQuantity(reserved);
       if (next !== line.reservedQuantity) {
@@ -317,11 +417,24 @@ export class Projections {
     order.fulfillmentStatus = fulfillmentStatusOf(lines);
     order.invoiceStatus = invoiceStatusOf(lines);
     order.paymentStatus = paymentStatusOf(this.indexes.invoicesByOrder.get(order.id));
-    const shortage = lines.some((line) => quantityToMilli(line.orderedQuantity) - quantityToMilli(line.cancelledQuantity) - quantityToMilli(line.fulfilledQuantity) - quantityToMilli(line.reservedQuantity) > 0);
+    const shortage = lines.some(
+      (line) =>
+        quantityToMilli(line.orderedQuantity) -
+          quantityToMilli(line.cancelledQuantity) -
+          quantityToMilli(line.fulfilledQuantity) -
+          quantityToMilli(line.reservedQuantity) >
+        0,
+    );
     const flags = new Set(order.riskFlags);
-    if (shortage && (order.status === 'confirmed' || order.status === 'on_hold')) flags.add('inventory_shortage');
+    if (shortage && (order.status === 'confirmed' || order.status === 'on_hold'))
+      flags.add('inventory_shortage');
     else flags.delete('inventory_shortage');
-    if (order.requestedDeliveryDate && shortage && compareDates(order.requestedDeliveryDate, this.store.today) < 0) flags.add('requested_date_at_risk');
+    if (
+      order.requestedDeliveryDate &&
+      shortage &&
+      compareDates(order.requestedDeliveryDate, this.store.today) < 0
+    )
+      flags.add('requested_date_at_risk');
     else flags.delete('requested_date_at_risk');
     order.riskFlags = [...flags];
   }
@@ -329,14 +442,21 @@ export class Projections {
   /** Recomputes paid/outstanding/settlement/collection for an invoice. */
   recalculateInvoice(invoice: Invoice): void {
     let paid = 0;
-    for (const allocation of this.indexes.allocationsByInvoice.get(invoice.id)) if (allocation.status === 'active') paid += allocation.amount.minor;
-    for (const application of this.indexes.applicationsByInvoice.get(invoice.id)) if (application.status === 'active') paid += application.amount.minor;
+    for (const allocation of this.indexes.allocationsByInvoice.get(invoice.id))
+      if (allocation.status === 'active') paid += allocation.amount.minor;
+    for (const application of this.indexes.applicationsByInvoice.get(invoice.id))
+      if (application.status === 'active') paid += application.amount.minor;
     invoice.paidAmount = { currency: invoice.currency, minor: paid };
     const outstanding = Math.max(0, invoice.total.minor - paid - invoice.writtenOffAmount.minor);
     invoice.outstanding = { currency: invoice.currency, minor: outstanding };
     invoice.settlement = outstanding === 0 ? 'paid' : paid > 0 ? 'partially_paid' : 'unpaid';
     if (invoice.collectionState !== 'disputed') {
-      invoice.collectionState = invoice.lifecycle === 'open' && outstanding > 0 && compareDates(this.store.today, invoice.dueDate) > 0 ? 'overdue' : 'current';
+      invoice.collectionState =
+        invoice.lifecycle === 'open' &&
+        outstanding > 0 &&
+        compareDates(this.store.today, invoice.dueDate) > 0
+          ? 'overdue'
+          : 'current';
     }
   }
 
@@ -344,7 +464,8 @@ export class Projections {
   refreshCollectionStates(): void {
     for (const invoice of this.store.dataset.invoices.values()) {
       if (invoice.lifecycle !== 'open' || invoice.collectionState === 'disputed') continue;
-      const overdue = invoice.outstanding.minor > 0 && compareDates(this.store.today, invoice.dueDate) > 0;
+      const overdue =
+        invoice.outstanding.minor > 0 && compareDates(this.store.today, invoice.dueDate) > 0;
       invoice.collectionState = overdue ? 'overdue' : 'current';
     }
     this.summaryCache.clear();
@@ -353,9 +474,21 @@ export class Projections {
   // ---------------------------------------------------------------------------
   // Customers (section 56.3)
 
-  private historyAggregates(): Map<string, { lifetimeNet: number; lifetimeCost: number; orders12: number; value12: number; orders: number }> {
+  private historyAggregates(): Map<
+    string,
+    { lifetimeNet: number; lifetimeCost: number; orders12: number; value12: number; orders: number }
+  > {
     if (this.historyByCustomer) return this.historyByCustomer;
-    const map = new Map<string, { lifetimeNet: number; lifetimeCost: number; orders12: number; value12: number; orders: number }>();
+    const map = new Map<
+      string,
+      {
+        lifetimeNet: number;
+        lifetimeCost: number;
+        orders12: number;
+        value12: number;
+        orders: number;
+      }
+    >();
     const cutoff = addDays(this.store.today, -365);
     for (const summary of this.store.history.summaries) {
       if (summary.kind === 'cancelled' || summary.kind === 'draft') continue;
@@ -397,10 +530,12 @@ export class Projections {
           }
         }
       }
-      if (invoice.lifecycle === 'open' || invoice.lifecycle === 'written_off') lifetimeNet += invoice.subtotal.minor + invoice.freight.minor;
+      if (invoice.lifecycle === 'open' || invoice.lifecycle === 'written_off')
+        lifetimeNet += invoice.subtotal.minor + invoice.freight.minor;
     }
     let unapplied = 0;
-    for (const payment of this.indexes.paymentsByCustomer.get(customerId)) if (payment.status === 'posted') unapplied += payment.unappliedAmount.minor;
+    for (const payment of this.indexes.paymentsByCustomer.get(customerId))
+      if (payment.status === 'posted') unapplied += payment.unappliedAmount.minor;
     for (const memo of this.indexes.creditMemosByCustomer.get(customerId)) {
       if (memo.lifecycle === 'open') {
         unapplied += memo.unappliedAmount.minor;
@@ -412,13 +547,21 @@ export class Projections {
     let orders12 = 0;
     let value12 = 0;
     for (const order of this.indexes.ordersByCustomer.get(customerId)) {
-      if ((order.status === 'confirmed' || order.status === 'on_hold') && (order.approvalStatus === 'approved' || order.approvalStatus === 'not_required')) {
+      if (
+        (order.status === 'confirmed' || order.status === 'on_hold') &&
+        (order.approvalStatus === 'approved' || order.approvalStatus === 'not_required')
+      ) {
         openOrders += 1;
         let invoiced = 0;
-        for (const invoice of this.indexes.invoicesByOrder.get(order.id)) if (invoice.lifecycle !== 'voided') invoiced += invoice.total.minor;
+        for (const invoice of this.indexes.invoicesByOrder.get(order.id))
+          if (invoice.lifecycle !== 'voided') invoiced += invoice.total.minor;
         openOrderExposure += Math.max(0, order.total.minor - invoiced);
       }
-      if (order.status !== 'cancelled' && order.status !== 'draft' && compareDates(order.orderDate, cutoff) >= 0) {
+      if (
+        order.status !== 'cancelled' &&
+        order.status !== 'draft' &&
+        compareDates(order.orderDate, cutoff) >= 0
+      ) {
         orders12 += 1;
         value12 += order.subtotal.minor + order.freight.minor;
       }
@@ -430,7 +573,8 @@ export class Projections {
       value12 += history.value12;
     }
     let openTickets = 0;
-    for (const ticket of this.indexes.ticketsByCustomer.get(customerId)) if (ticket.status !== 'closed' && ticket.status !== 'resolved') openTickets += 1;
+    for (const ticket of this.indexes.ticketsByCustomer.get(customerId))
+      if (ticket.status !== 'closed' && ticket.status !== 'resolved') openTickets += 1;
     const customer = this.store.dataset.customers.get(customerId);
     const creditExposure = gross + openOrderExposure;
     const creditLimit = customer?.creditLimit.minor ?? 0;
@@ -441,7 +585,12 @@ export class Projections {
       netReceivables: usd(Math.max(0, gross - unapplied)),
       openOrderExposure: usd(openOrderExposure),
       creditExposure: usd(creditExposure),
-      creditUtilizationBps: creditLimit === 0 ? (creditExposure > 0 ? 10_000 : 0) : ratioBps(creditExposure, creditLimit),
+      creditUtilizationBps:
+        creditLimit === 0
+          ? creditExposure > 0
+            ? 10_000
+            : 0
+          : ratioBps(creditExposure, creditLimit),
       overdueReceivables: usd(overdue),
       lifetimeRevenue: usd(lifetimeNet),
       ordersLast12Months: orders12,
@@ -466,8 +615,16 @@ export class Projections {
     let csatSum = 0;
     let csatCount = 0;
     for (const ticket of this.indexes.ticketsByCustomer.get(customer.id)) {
-      if ((ticket.priority === 'urgent' || ticket.priority === 'high') && ticket.status === 'escalated' && diffDays(today, ticket.metadata.createdAt.slice(0, 10)) > 2) urgentEscalationOld = true;
-      if (ticket.satisfactionScore !== undefined && diffDays(today, ticket.metadata.createdAt.slice(0, 10)) <= 90) {
+      if (
+        (ticket.priority === 'urgent' || ticket.priority === 'high') &&
+        ticket.status === 'escalated' &&
+        diffDays(today, ticket.metadata.createdAt.slice(0, 10)) > 2
+      )
+        urgentEscalationOld = true;
+      if (
+        ticket.satisfactionScore !== undefined &&
+        diffDays(today, ticket.metadata.createdAt.slice(0, 10)) <= 90
+      ) {
         csatSum += ticket.satisfactionScore;
         csatCount += 1;
       }
@@ -476,13 +633,18 @@ export class Projections {
     let delayedActive = 0;
     for (const order of this.indexes.ordersByCustomer.get(customer.id)) {
       if (order.status === 'cancelled' || order.status === 'draft') continue;
-      const delayed = order.riskFlags.includes('requested_date_at_risk') || (order.status === 'confirmed' && order.fulfillmentStatus !== 'fulfilled' && diffDays(today, order.orderDate) > 14);
+      const delayed =
+        order.riskFlags.includes('requested_date_at_risk') ||
+        (order.status === 'confirmed' &&
+          order.fulfillmentStatus !== 'fulfilled' &&
+          diffDays(today, order.orderDate) > 14);
       if (!delayed) continue;
       if (order.status === 'confirmed' || order.status === 'on_hold') delayedActive += 1;
       if (diffDays(today, order.orderDate) <= 30) delayedOrders30 += 1;
     }
     if (overdueShare > 0.25 || urgentEscalationOld || delayedOrders30 >= 2) return 'at_risk';
-    if (overdueShare > 0.1 || delayedActive >= 1 || (csatCount > 0 && csatSum / csatCount < 3.5)) return 'watch';
+    if (overdueShare > 0.1 || delayedActive >= 1 || (csatCount > 0 && csatSum / csatCount < 3.5))
+      return 'watch';
     return 'healthy';
   }
 
@@ -503,7 +665,12 @@ export class Projections {
     let open = 0;
     let spend = 0;
     for (const po of this.indexes.purchaseOrdersBySupplier.get(supplierId)) {
-      if (po.status === 'sent' || po.status === 'acknowledged' || po.status === 'partially_received') open += 1;
+      if (
+        po.status === 'sent' ||
+        po.status === 'acknowledged' ||
+        po.status === 'partially_received'
+      )
+        open += 1;
       if (po.status === 'cancelled' || po.status === 'draft') continue;
       if (compareDates(po.createdBusinessDate, cutoff) >= 0) spend += po.total.minor;
       for (const line of this.indexes.poLinesByPo.get(po.id)) {
@@ -518,7 +685,8 @@ export class Projections {
           let firstReceipt: string | undefined;
           for (const receiptLine of this.indexes.receiptLinesByPoLine.get(line.id)) {
             const receipt = this.store.dataset.goodsReceipts.get(receiptLine.goodsReceiptId);
-            if (receipt && (!firstReceipt || receipt.receivedAt < firstReceipt)) firstReceipt = receipt.receivedAt;
+            if (receipt && (!firstReceipt || receipt.receivedAt < firstReceipt))
+              firstReceipt = receipt.receivedAt;
           }
           if (firstReceipt) {
             const receivedDate = firstReceipt.slice(0, 10);
@@ -558,7 +726,10 @@ export class Projections {
     let dueSoon = 0;
     let revenue30 = 0;
     let revenue90 = 0;
-    const aging = new Map<FinanceOverview['aging'][number]['bucket'], { amount: number; count: number }>([
+    const aging = new Map<
+      FinanceOverview['aging'][number]['bucket'],
+      { amount: number; count: number }
+    >([
       ['current', { amount: 0, count: 0 }],
       ['1-30', { amount: 0, count: 0 }],
       ['31-60', { amount: 0, count: 0 }],
@@ -572,7 +743,8 @@ export class Projections {
       if (invoice.lifecycle === 'open' || invoice.lifecycle === 'written_off') {
         if (compareDates(invoice.issueDate, cutoff90) >= 0) {
           revenue90 += invoice.subtotal.minor + invoice.freight.minor;
-          if (compareDates(invoice.issueDate, cutoff30) >= 0) revenue30 += invoice.subtotal.minor + invoice.freight.minor;
+          if (compareDates(invoice.issueDate, cutoff30) >= 0)
+            revenue30 += invoice.subtotal.minor + invoice.freight.minor;
         }
       }
       if (invoice.lifecycle !== 'open' || invoice.outstanding.minor <= 0) continue;
@@ -581,14 +753,26 @@ export class Projections {
       if (invoice.collectionState === 'disputed') disputedCount += 1;
       const daysPastDue = diffDays(today, invoice.dueDate);
       if (daysPastDue >= -5 && daysPastDue <= 0) dueSoon += 1;
-      const bucket = daysPastDue <= 0 ? 'current' : daysPastDue <= 30 ? '1-30' : daysPastDue <= 60 ? '31-60' : daysPastDue <= 90 ? '61-90' : '90+';
+      const bucket =
+        daysPastDue <= 0
+          ? 'current'
+          : daysPastDue <= 30
+            ? '1-30'
+            : daysPastDue <= 60
+              ? '31-60'
+              : daysPastDue <= 90
+                ? '61-90'
+                : '90+';
       const entry = aging.get(bucket) as { amount: number; count: number };
       entry.amount += invoice.outstanding.minor;
       entry.count += 1;
       if (invoice.collectionState === 'overdue') {
         overdue += invoice.outstanding.minor;
         overdueCount += 1;
-        overdueByCustomer.set(invoice.customerId, (overdueByCustomer.get(invoice.customerId) ?? 0) + invoice.outstanding.minor);
+        overdueByCustomer.set(
+          invoice.customerId,
+          (overdueByCustomer.get(invoice.customerId) ?? 0) + invoice.outstanding.minor,
+        );
       }
     }
     for (const memo of dataset.creditMemos.values()) {
@@ -599,13 +783,29 @@ export class Projections {
       }
     }
     let unapplied = 0;
-    for (const payment of dataset.payments.values()) if (payment.status === 'posted') unapplied += payment.unappliedAmount.minor;
-    for (const memo of dataset.creditMemos.values()) if (memo.lifecycle === 'open') unapplied += memo.unappliedAmount.minor;
+    for (const payment of dataset.payments.values())
+      if (payment.status === 'posted') unapplied += payment.unappliedAmount.minor;
+    for (const memo of dataset.creditMemos.values())
+      if (memo.lifecycle === 'open') unapplied += memo.unappliedAmount.minor;
     let unmatched = 0;
-    for (const transaction of dataset.bankTransactions.values()) if (transaction.status === 'unmatched' || transaction.status === 'suggested' || transaction.status === 'needs_review') unmatched += 1;
+    for (const transaction of dataset.bankTransactions.values())
+      if (
+        transaction.status === 'unmatched' ||
+        transaction.status === 'suggested' ||
+        transaction.status === 'needs_review'
+      )
+        unmatched += 1;
     let pendingApprovals = 0;
-    for (const request of dataset.approvalRequests.values()) if (request.status === 'pending') pendingApprovals += 1;
-    const topOverdue = [...overdueByCustomer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([customerId, amount]) => ({ customerId, displayName: dataset.customers.get(customerId)?.displayName ?? customerId, overdue: usd(amount) }));
+    for (const request of dataset.approvalRequests.values())
+      if (request.status === 'pending') pendingApprovals += 1;
+    const topOverdue = [...overdueByCustomer.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([customerId, amount]) => ({
+        customerId,
+        displayName: dataset.customers.get(customerId)?.displayName ?? customerId,
+        overdue: usd(amount),
+      }));
     return {
       asOf: this.store.now,
       receivables: usd(receivables),
@@ -620,7 +820,11 @@ export class Projections {
       invoicesDueWithin5Days: dueSoon,
       unmatchedBankTransactions: unmatched,
       pendingApprovals,
-      aging: [...aging.entries()].map(([bucket, entry]) => ({ bucket, amount: usd(entry.amount), count: entry.count })),
+      aging: [...aging.entries()].map(([bucket, entry]) => ({
+        bucket,
+        amount: usd(entry.amount),
+        count: entry.count,
+      })),
       topOverdueCustomers: topOverdue,
     };
   }

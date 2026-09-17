@@ -77,7 +77,10 @@ describe('pricing', () => {
       customerOnHold: false,
     });
     expect(result.required).toBe(true);
-    expect(result.steps.map((step) => step.requiredRole)).toEqual(['sales_manager', 'finance_manager']);
+    expect(result.steps.map((step) => step.requiredRole)).toEqual([
+      'sales_manager',
+      'finance_manager',
+    ]);
     expect(taxRateBpsFor('IL', { type: 'taxable' })).toBe(825);
     expect(taxRateBpsFor('IL', { type: 'exempt' })).toBe(0);
   });

@@ -32,15 +32,16 @@ export function createCommands(runtime: ApiRuntime, models: SalesReadModels) {
 
   /** Section 69.5 and 68.5 — time-derived transitions evaluated when the demo clock moves. */
   const onClockAdvanced = (): { expiredQuotes: number; closedTickets: number } => {
-    let expiredQuotes = 0;
-    let closedTickets = 0;
+    let expiredQuotes: number;
+    let closedTickets: number;
     runtime.projections.refreshCollectionStates();
     const tx = new Transaction(runtime, runtime.actor, runtime.correlationId());
     try {
       expiredQuotes = sales.quotes.expire(tx);
       closedTickets = support.autoClose(tx);
       for (const order of runtime.store.dataset.salesOrders.values()) {
-        if (order.status === 'confirmed' || order.status === 'on_hold') runtime.projections.recalculateOrder(order);
+        if (order.status === 'confirmed' || order.status === 'on_hold')
+          runtime.projections.recalculateOrder(order);
       }
       runtime.store.invalidate('salesOrders');
     } catch (error) {
@@ -56,7 +57,11 @@ export function createCommands(runtime: ApiRuntime, models: SalesReadModels) {
     orders: sales.orders,
     shipments: fulfillment.shipments,
     returns: fulfillment.returns,
-    inventory: { adjust: inventory.adjust, transfers: inventory.transfers, cycleCounts: inventory.cycleCounts },
+    inventory: {
+      adjust: inventory.adjust,
+      transfers: inventory.transfers,
+      cycleCounts: inventory.cycleCounts,
+    },
     suppliers: procurement.suppliers,
     purchaseOrders: procurement.purchaseOrders,
     invoices: finance.invoices,

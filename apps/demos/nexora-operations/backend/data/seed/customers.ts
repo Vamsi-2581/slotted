@@ -36,8 +36,36 @@ import {
   type CityRecord,
 } from '../vocabulary';
 
-const CENTRAL_STATES = new Set(['IL', 'WI', 'MN', 'IA', 'MO', 'NE', 'KS', 'SD', 'IN', 'MI', 'OH', 'KY']);
-const EAST_STATES = new Set(['NJ', 'PA', 'NY', 'CT', 'MA', 'RI', 'MD', 'VA', 'NC', 'SC', 'GA', 'FL', 'TN', 'AL']);
+const CENTRAL_STATES = new Set([
+  'IL',
+  'WI',
+  'MN',
+  'IA',
+  'MO',
+  'NE',
+  'KS',
+  'SD',
+  'IN',
+  'MI',
+  'OH',
+  'KY',
+]);
+const EAST_STATES = new Set([
+  'NJ',
+  'PA',
+  'NY',
+  'CT',
+  'MA',
+  'RI',
+  'MD',
+  'VA',
+  'NC',
+  'SC',
+  'GA',
+  'FL',
+  'TN',
+  'AL',
+]);
 
 export interface FlagshipCustomerSpec {
   key: string;
@@ -60,12 +88,105 @@ export interface FlagshipCustomerSpec {
 
 /** Section 46 and 76 — flagship customers. */
 export const FLAGSHIP_CUSTOMERS: FlagshipCustomerSpec[] = [
-  { key: 'meridian', displayName: 'Meridian Controls Group', legalName: 'Meridian Controls Group, Inc.', accountNumber: 'CUS-010428', segment: 'enterprise', status: 'active', health: 'at_risk', industry: 'Industrial Machinery', city: 'Naperville', region: 'IL', creditLimit: 500_000, paymentTerms: 'NET_45', customerSince: '2019-04-12', employeeBand: '1,001-5,000', ownerPersona: 'noah-bennett', tags: ['key-account', 'renewal-q4', 'contract-pricing', 'multi-site'] },
-  { key: 'helios', displayName: 'Helios Manufacturing', legalName: 'Helios Manufacturing Co.', segment: 'mid_market', status: 'active', health: 'healthy', industry: 'Metal Fabrication', city: 'Milwaukee', region: 'WI', creditLimit: 150_000, paymentTerms: 'NET_30', customerSince: '2021-02-03', employeeBand: '201-500', ownerPersona: 'noah-bennett', tags: ['repeat', 'portal-user'] },
-  { key: 'northstar', displayName: 'Northstar Process Systems', legalName: 'Northstar Process Systems LLC', segment: 'strategic', status: 'active', health: 'healthy', industry: 'Chemical Processing', city: 'Houston', region: 'TX', creditLimit: 1_200_000, paymentTerms: 'NET_60', customerSince: '2017-09-18', employeeBand: '5,000+', tags: ['key-account', 'contract-pricing', 'multi-site'] },
-  { key: 'redline', displayName: 'Redline Packaging', legalName: 'Redline Packaging Corp.', segment: 'smb', status: 'active', health: 'watch', industry: 'Packaging', city: 'Atlanta', region: 'GA', creditLimit: 40_000, paymentTerms: 'NET_30', customerSince: '2023-06-27', employeeBand: '51-200', tags: ['seasonal'] },
-  { key: 'cascade', displayName: 'Cascade Energy Services', legalName: 'Cascade Energy Services, Inc.', segment: 'enterprise', status: 'on_hold', health: 'at_risk', industry: 'Oil & Gas Services', city: 'Denver', region: 'CO', creditLimit: 350_000, paymentTerms: 'NET_45', customerSince: '2018-11-05', employeeBand: '501-1,000', tags: ['key-account'] },
-  { key: 'vantage', displayName: 'Vantage Motion Labs', legalName: 'Vantage Motion Labs LLC', segment: 'mid_market', status: 'prospect', health: 'healthy', industry: 'Electronics Assembly', city: 'Edison', region: 'NJ', creditLimit: 75_000, paymentTerms: 'NET_30', customerSince: '2026-07-14', employeeBand: '51-200', tags: ['net-new-2026', 'referral'] },
+  {
+    key: 'meridian',
+    displayName: 'Meridian Controls Group',
+    legalName: 'Meridian Controls Group, Inc.',
+    accountNumber: 'CUS-010428',
+    segment: 'enterprise',
+    status: 'active',
+    health: 'at_risk',
+    industry: 'Industrial Machinery',
+    city: 'Naperville',
+    region: 'IL',
+    creditLimit: 500_000,
+    paymentTerms: 'NET_45',
+    customerSince: '2019-04-12',
+    employeeBand: '1,001-5,000',
+    ownerPersona: 'noah-bennett',
+    tags: ['key-account', 'renewal-q4', 'contract-pricing', 'multi-site'],
+  },
+  {
+    key: 'helios',
+    displayName: 'Helios Manufacturing',
+    legalName: 'Helios Manufacturing Co.',
+    segment: 'mid_market',
+    status: 'active',
+    health: 'healthy',
+    industry: 'Metal Fabrication',
+    city: 'Milwaukee',
+    region: 'WI',
+    creditLimit: 150_000,
+    paymentTerms: 'NET_30',
+    customerSince: '2021-02-03',
+    employeeBand: '201-500',
+    ownerPersona: 'noah-bennett',
+    tags: ['repeat', 'portal-user'],
+  },
+  {
+    key: 'northstar',
+    displayName: 'Northstar Process Systems',
+    legalName: 'Northstar Process Systems LLC',
+    segment: 'strategic',
+    status: 'active',
+    health: 'healthy',
+    industry: 'Chemical Processing',
+    city: 'Houston',
+    region: 'TX',
+    creditLimit: 1_200_000,
+    paymentTerms: 'NET_60',
+    customerSince: '2017-09-18',
+    employeeBand: '5,000+',
+    tags: ['key-account', 'contract-pricing', 'multi-site'],
+  },
+  {
+    key: 'redline',
+    displayName: 'Redline Packaging',
+    legalName: 'Redline Packaging Corp.',
+    segment: 'smb',
+    status: 'active',
+    health: 'watch',
+    industry: 'Packaging',
+    city: 'Atlanta',
+    region: 'GA',
+    creditLimit: 40_000,
+    paymentTerms: 'NET_30',
+    customerSince: '2023-06-27',
+    employeeBand: '51-200',
+    tags: ['seasonal'],
+  },
+  {
+    key: 'cascade',
+    displayName: 'Cascade Energy Services',
+    legalName: 'Cascade Energy Services, Inc.',
+    segment: 'enterprise',
+    status: 'on_hold',
+    health: 'at_risk',
+    industry: 'Oil & Gas Services',
+    city: 'Denver',
+    region: 'CO',
+    creditLimit: 350_000,
+    paymentTerms: 'NET_45',
+    customerSince: '2018-11-05',
+    employeeBand: '501-1,000',
+    tags: ['key-account'],
+  },
+  {
+    key: 'vantage',
+    displayName: 'Vantage Motion Labs',
+    legalName: 'Vantage Motion Labs LLC',
+    segment: 'mid_market',
+    status: 'prospect',
+    health: 'healthy',
+    industry: 'Electronics Assembly',
+    city: 'Edison',
+    region: 'NJ',
+    creditLimit: 75_000,
+    paymentTerms: 'NET_30',
+    customerSince: '2026-07-14',
+    employeeBand: '51-200',
+    tags: ['net-new-2026', 'referral'],
+  },
 ];
 
 export interface CustomerSeedResult {
@@ -124,20 +245,28 @@ function termsFor(random: import('../random').Random, segment: CustomerSegment):
   }
 }
 
-export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, catalog: CatalogSeedResult): CustomerSeedResult {
+export function seedCustomers(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  catalog: CatalogSeedResult,
+): CustomerSeedResult {
   const { dataset, scale } = context;
   const random = context.random('customers');
-  const historyStartInstant = businessDateToInstant(addDays(context.today, -365 * 7), 9);
 
   // Sales reps per team code.
   const salesRepsByTeam = new Map<string, string[]>();
   const salesRepRole = tenant.roleIdsByKey.get('sales_representative');
-  const repUserIds = new Set([...dataset.roleAssignments.values()].filter((assignment) => assignment.roleId === salesRepRole).map((assignment) => assignment.userId));
+  const repUserIds = new Set(
+    [...dataset.roleAssignments.values()]
+      .filter((assignment) => assignment.roleId === salesRepRole)
+      .map((assignment) => assignment.userId),
+  );
   for (const membership of dataset.teamMemberships) {
     const team = dataset.teams.get(membership.teamId);
     if (!team || team.type !== 'sales') continue;
     const user = dataset.users.get(membership.userId);
-    if (!user || user.status !== 'active' || (!repUserIds.has(user.id) && !membership.isLead)) continue;
+    if (!user || user.status !== 'active' || (!repUserIds.has(user.id) && !membership.isLead))
+      continue;
     const bucket = salesRepsByTeam.get(team.code) ?? [];
     bucket.push(user.id);
     salesRepsByTeam.set(team.code, bucket);
@@ -150,8 +279,19 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
   };
 
   const priceListFor = (segment: CustomerSegment): string => {
-    const name = segment === 'smb' ? 'SMB' : segment === 'mid_market' ? (random.chance(0.4) ? 'Standard' : 'SMB') : segment === 'enterprise' ? 'Enterprise' : 'Strategic Accounts';
-    return tenant.priceListIdsByName.get(name) ?? (tenant.priceListIdsByName.get('Standard') as string);
+    const name =
+      segment === 'smb'
+        ? 'SMB'
+        : segment === 'mid_market'
+          ? random.chance(0.4)
+            ? 'Standard'
+            : 'SMB'
+          : segment === 'enterprise'
+            ? 'Enterprise'
+            : 'Strategic Accounts';
+    return (
+      tenant.priceListIdsByName.get(name) ?? (tenant.priceListIdsByName.get('Standard') as string)
+    );
   };
 
   const customerIds: string[] = [];
@@ -164,10 +304,16 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
   const usedAccountNumbers = new Set<string>();
 
   // Account numbers start above 10,000 so the flagship CUS-010428 sits inside the range.
-  for (let sequence = 1; sequence <= 10_000; sequence += 1) context.sequences.reserveBusinessNumber(`CUS-${String(sequence).padStart(6, '0')}`);
-  for (const flagship of FLAGSHIP_CUSTOMERS) if (flagship.accountNumber) context.sequences.reserveBusinessNumber(flagship.accountNumber);
+  for (let sequence = 1; sequence <= 10_000; sequence += 1)
+    context.sequences.reserveBusinessNumber(`CUS-${String(sequence).padStart(6, '0')}`);
+  for (const flagship of FLAGSHIP_CUSTOMERS)
+    if (flagship.accountNumber) context.sequences.reserveBusinessNumber(flagship.accountNumber);
 
-  const makeContacts = (customer: Customer, count: number, options: { noPhone?: boolean } = {}): Contact[] => {
+  const makeContacts = (
+    customer: Customer,
+    count: number,
+    options: { noPhone?: boolean } = {},
+  ): Contact[] => {
     const domain = `${customer.displayName.toLowerCase().replace(/[^a-z0-9]+/g, '')}.example`;
     const contacts: Contact[] = [];
     const roles: [string, string][] = [
@@ -200,10 +346,18 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
         isPrimary: index === 0,
         status: index > 0 && random.chance(0.08) ? 'inactive' : 'active',
         metadata: context.metadata(addDays(customer.metadata.createdAt, random.int(0, 400))),
-        ...(hasPhone ? { phone: `(${random.int(201, 989)}) ${random.int(200, 999)}-${random.digits(4)}` } : {}),
-        ...(hasPhone && random.chance(0.4) ? { mobile: `(${random.int(201, 989)}) ${random.int(200, 999)}-${random.digits(4)}` } : {}),
-        ...(random.chance(0.6) ? { preferredContactMethod: hasPhone && random.chance(0.3) ? 'phone' : 'email' } : {}),
-        ...(random.chance(0.7) ? { lastContactedAt: addMinutes(context.now, -random.int(60, 60 * 24 * 120)) } : {}),
+        ...(hasPhone
+          ? { phone: `(${random.int(201, 989)}) ${random.int(200, 999)}-${random.digits(4)}` }
+          : {}),
+        ...(hasPhone && random.chance(0.4)
+          ? { mobile: `(${random.int(201, 989)}) ${random.int(200, 999)}-${random.digits(4)}` }
+          : {}),
+        ...(random.chance(0.6)
+          ? { preferredContactMethod: hasPhone && random.chance(0.3) ? 'phone' : 'email' }
+          : {}),
+        ...(random.chance(0.7)
+          ? { lastContactedAt: addMinutes(context.now, -random.int(60, 60 * 24 * 120)) }
+          : {}),
       } as Contact);
       dataset.contacts.set(contact.id, contact);
       contacts.push(contact);
@@ -213,9 +367,19 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
     return contacts;
   };
 
-  const makeAddresses = (customer: Customer, city: CityRecord, count: number, options: { noDefaultShipping?: boolean } = {}): Address[] => {
+  const makeAddresses = (
+    customer: Customer,
+    city: CityRecord,
+    count: number,
+    options: { noDefaultShipping?: boolean } = {},
+  ): Address[] => {
     const addresses: Address[] = [];
-    const add = (type: Address['type'], isDefault: boolean, label?: string, cityRecord: CityRecord = city): Address => {
+    const add = (
+      type: Address['type'],
+      isDefault: boolean,
+      label?: string,
+      cityRecord: CityRecord = city,
+    ): Address => {
       const address: Address = withId({
         id: context.nextId('address'),
         organizationId: ORGANIZATION_ID,
@@ -230,8 +394,20 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
         isDefault,
         metadata: context.metadata(customer.metadata.createdAt),
         ...(label ? { label } : {}),
-        ...(random.chance(0.25) ? { line2: random.pick(['Suite 200', 'Building B', 'Dock 4', 'Unit 12', 'Floor 3']) } : {}),
-        ...(type === 'shipping' && random.chance(0.35) ? { deliveryInstructions: random.pick(['Deliver to rear dock; call 30 minutes ahead.', 'Receiving hours 7:00–15:00.', 'Lift gate required.', 'No deliveries on Fridays after noon.', 'Check in at guard shack.']) } : {}),
+        ...(random.chance(0.25)
+          ? { line2: random.pick(['Suite 200', 'Building B', 'Dock 4', 'Unit 12', 'Floor 3']) }
+          : {}),
+        ...(type === 'shipping' && random.chance(0.35)
+          ? {
+              deliveryInstructions: random.pick([
+                'Deliver to rear dock; call 30 minutes ahead.',
+                'Receiving hours 7:00–15:00.',
+                'Lift gate required.',
+                'No deliveries on Fridays after noon.',
+                'Check in at guard shack.',
+              ]),
+            }
+          : {}),
       });
       dataset.addresses.set(address.id, address);
       addresses.push(address);
@@ -249,7 +425,19 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
     }
     for (let index = addresses.length; index < count; index += 1) {
       const otherCity = random.chance(0.5) ? random.pick(US_CITIES) : city;
-      add(random.chance(0.8) ? 'shipping' : 'service_location', false, random.pick(['Plant 2', 'North site', 'Distribution center', 'Service depot', 'Satellite facility', 'Line 4 receiving']), otherCity);
+      add(
+        random.chance(0.8) ? 'shipping' : 'service_location',
+        false,
+        random.pick([
+          'Plant 2',
+          'North site',
+          'Distribution center',
+          'Service depot',
+          'Satellite facility',
+          'Line 4 receiving',
+        ]),
+        otherCity,
+      );
     }
     addressesByCustomer.set(customer.id, addresses);
     return addresses;
@@ -298,7 +486,8 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
     flagship?: boolean;
   }): Customer => {
     const teamCode = teamCodeFor(spec.city.region, spec.segment);
-    const reps = salesRepsByTeam.get(teamCode) ?? [...salesRepsByTeam.values()][0] ?? [tenant.personaUserIds.get('noah-bennett') as string];
+    const reps = salesRepsByTeam.get(teamCode) ??
+      [...salesRepsByTeam.values()][0] ?? [tenant.personaUserIds.get('noah-bennett') as string];
     const ownerId = spec.ownerId ?? random.pick(reps);
     const createdAt = businessDateToInstant(spec.customerSince, random.int(8, 16));
     const customer: Customer = withId({
@@ -317,17 +506,35 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
       paymentTermsCode: spec.paymentTerms,
       creditLimit: usd(spec.creditLimit * 100),
       priceListId: priceListFor(spec.segment),
-      taxProfile: random.chance(0.08) ? { type: 'exempt', exemptionReason: random.pick(['Resale certificate on file', 'Manufacturing exemption', 'Non-profit']) } : { type: 'taxable' },
+      taxProfile: random.chance(0.08)
+        ? {
+            type: 'exempt',
+            exemptionReason: random.pick([
+              'Resale certificate on file',
+              'Manufacturing exemption',
+              'Non-profit',
+            ]),
+          }
+        : { type: 'taxable' },
       preferredCurrency: 'USD',
       customerSince: spec.customerSince,
       annualRevenueEstimate: usd(roundHalfUp(spec.creditLimit * random.float(6, 30)) * 100),
       health: spec.health,
       tags: spec.tags,
-      metadata: context.metadata(createdAt, ownerId, addMinutes(context.now, -random.int(60, 60 * 24 * 200)), ownerId),
+      metadata: context.metadata(
+        createdAt,
+        ownerId,
+        addMinutes(context.now, -random.int(60, 60 * 24 * 200)),
+        ownerId,
+      ),
     });
     if (spec.status === 'on_hold') customer.holdReason = random.pick(HOLD_REASONS);
     if (spec.status === 'closed' || spec.status === 'inactive') {
-      if (random.chance(0.5)) customer.metadata.archivedAt = addMinutes(context.now, -random.int(60 * 24 * 30, 60 * 24 * 400));
+      if (random.chance(0.5))
+        customer.metadata.archivedAt = addMinutes(
+          context.now,
+          -random.int(60 * 24 * 30, 60 * 24 * 400),
+        );
     }
     usedAccountNumbers.add(customer.accountNumber);
     dataset.customers.set(customer.id, customer);
@@ -338,10 +545,18 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
 
   // Flagship customers
   for (const flagship of FLAGSHIP_CUSTOMERS) {
-    const city = US_CITIES.find((record) => record.city === flagship.city) ?? (US_CITIES[0] as CityRecord);
-    const ownerId = flagship.ownerPersona ? tenant.personaUserIds.get(flagship.ownerPersona) : undefined;
+    const city =
+      US_CITIES.find((record) => record.city === flagship.city) ?? (US_CITIES[0] as CityRecord);
+    const ownerId = flagship.ownerPersona
+      ? tenant.personaUserIds.get(flagship.ownerPersona)
+      : undefined;
     usedNames.add(flagship.displayName);
-    const customer = createCustomer({ ...flagship, city, ...(ownerId ? { ownerId } : {}), flagship: true });
+    const customer = createCustomer({
+      ...flagship,
+      city,
+      ...(ownerId ? { ownerId } : {}),
+      flagship: true,
+    });
     flagshipCustomerIds.set(flagship.key, customer.id);
     makeContacts(customer, flagship.key === 'meridian' ? 6 : random.int(2, 4));
     makeAddresses(customer, city, flagship.key === 'meridian' ? 5 : random.int(2, 3));
@@ -384,10 +599,15 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
     const city = random.pick(US_CITIES);
     const sinceDays = status === 'prospect' ? random.int(5, 120) : random.int(120, 365 * 7);
     const creditLimit = creditLimitFor(random, segment);
-    const legalName = suffix ? `${displayName}${suffix === 'Group' ? ' Group' : `, ${suffix}`}` : displayName;
+    const legalName = suffix
+      ? `${displayName}${suffix === 'Group' ? ' Group' : `, ${suffix}`}`
+      : displayName;
     const customer = createCustomer({
       displayName,
-      legalName: generatedIndex === 7 ? `${displayName} of North America Holdings and Subsidiaries, ${suffix || 'Inc.'}` : legalName,
+      legalName:
+        generatedIndex === 7
+          ? `${displayName} of North America Holdings and Subsidiaries, ${suffix || 'Inc.'}`
+          : legalName,
       segment,
       status,
       health,
@@ -396,24 +616,57 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
       creditLimit,
       paymentTerms: termsFor(random, segment),
       customerSince: addDays(context.today, -sinceDays),
-      employeeBand: EMPLOYEE_BANDS[Math.min(EMPLOYEE_BANDS.length - 1, (segment === 'smb' ? 0 : segment === 'mid_market' ? 2 : segment === 'enterprise' ? 4 : 5) + random.int(0, 1))] as string,
+      employeeBand: EMPLOYEE_BANDS[
+        Math.min(
+          EMPLOYEE_BANDS.length - 1,
+          (segment === 'smb'
+            ? 0
+            : segment === 'mid_market'
+              ? 2
+              : segment === 'enterprise'
+                ? 4
+                : 5) + random.int(0, 1),
+        )
+      ] as string,
       tags: random.chance(0.45) ? random.sample(CUSTOMER_TAGS, random.int(1, 3)) : [],
     });
-    const contactCount = Math.max(1, Math.round(scale.contactsPerCustomer - 0.4 + random.normal(0, 1.0) + (segment === 'enterprise' || segment === 'strategic' ? 1.5 : 0)));
+    const contactCount = Math.max(
+      1,
+      Math.round(
+        scale.contactsPerCustomer -
+          0.4 +
+          random.normal(0, 1.0) +
+          (segment === 'enterprise' || segment === 'strategic' ? 1.5 : 0),
+      ),
+    );
     const noPhone = generatedIndex === 3;
     makeContacts(customer, generatedIndex === 11 ? 28 : contactCount, { noPhone });
-    const addressCount = Math.max(1, Math.round(scale.addressesPerCustomer + random.normal(0, 0.6) + (segment === 'strategic' ? 2 : 0)));
-    makeAddresses(customer, city, generatedIndex === 5 ? 7 : addressCount, { noDefaultShipping: generatedIndex === 4 });
+    const addressCount = Math.max(
+      1,
+      Math.round(
+        scale.addressesPerCustomer + random.normal(0, 0.6) + (segment === 'strategic' ? 2 : 0),
+      ),
+    );
+    makeAddresses(customer, city, generatedIndex === 5 ? 7 : addressCount, {
+      noDefaultShipping: generatedIndex === 4,
+    });
     if (random.chance(0.3)) makeNotes(customer, random.int(1, 3));
     if (generatedIndex === 3) dataset.fixtures.set('edge.customer.no_phone', customer.id);
-    if (generatedIndex === 4) dataset.fixtures.set('edge.customer.no_shipping_address', customer.id);
+    if (generatedIndex === 4)
+      dataset.fixtures.set('edge.customer.no_shipping_address', customer.id);
     if (generatedIndex === 5) dataset.fixtures.set('edge.customer.many_addresses', customer.id);
     if (generatedIndex === 7) dataset.fixtures.set('edge.customer.long_name', customer.id);
     if (generatedIndex === 11) dataset.fixtures.set('edge.customer.many_contacts', customer.id);
     generatedIndex += 1;
   }
   // Edge fixtures must be active customers.
-  for (const key of ['edge.customer.no_phone', 'edge.customer.no_shipping_address', 'edge.customer.many_addresses', 'edge.customer.long_name', 'edge.customer.many_contacts']) {
+  for (const key of [
+    'edge.customer.no_phone',
+    'edge.customer.no_shipping_address',
+    'edge.customer.many_addresses',
+    'edge.customer.long_name',
+    'edge.customer.many_contacts',
+  ]) {
     const customer = dataset.customers.get(dataset.fixtures.get(key) ?? '');
     if (customer) {
       customer.status = 'active';
@@ -423,25 +676,38 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
     }
   }
   dataset.fixtures.set('edge.customer.on_hold', flagshipCustomerIds.get('cascade') as string);
-  dataset.fixtures.set('edge.customer.prospect_accepted_quote', flagshipCustomerIds.get('vantage') as string);
+  dataset.fixtures.set(
+    'edge.customer.prospect_accepted_quote',
+    flagshipCustomerIds.get('vantage') as string,
+  );
   dataset.fixtures.set('flagship.customer.meridian', flagshipCustomerIds.get('meridian') as string);
 
   // Contract prices for high-value customers.
   const eligible = customerIds.filter((id) => {
     const customer = dataset.customers.get(id) as Customer;
-    return customer.status === 'active' && (customer.segment === 'enterprise' || customer.segment === 'strategic' || random.chance(0.05));
+    return (
+      customer.status === 'active' &&
+      (customer.segment === 'enterprise' || customer.segment === 'strategic' || random.chance(0.05))
+    );
   });
   const contractCustomerCount = Math.round(customerIds.length * scale.contractPriceCustomersShare);
-  const contractCustomers = new Set([flagshipCustomerIds.get('meridian') as string, flagshipCustomerIds.get('northstar') as string, ...random.sample(eligible, contractCustomerCount)]);
+  const contractCustomers = new Set([
+    flagshipCustomerIds.get('meridian') as string,
+    flagshipCustomerIds.get('northstar') as string,
+    ...random.sample(eligible, contractCustomerCount),
+  ]);
   for (const customerId of contractCustomers) {
     const customer = dataset.customers.get(customerId) as Customer;
     const count = customerId === flagshipCustomerIds.get('meridian') ? 12 : random.int(3, 20);
     const chosen = new Set<string>();
-    if (customerId === flagshipCustomerIds.get('meridian')) chosen.add(catalog.flagshipSkuIds.get('Servo Motor MX-240') as string);
+    if (customerId === flagshipCustomerIds.get('meridian'))
+      chosen.add(catalog.flagshipSkuIds.get('Servo Motor MX-240') as string);
     while (chosen.size < count) chosen.add(pickDemandSku(random, catalog));
     const prices: ContractPrice[] = [];
     for (const skuId of chosen) {
-      const standard = catalog.entriesByList.get(tenant.priceListIdsByName.get('Standard') as string)?.get(skuId);
+      const standard = catalog.entriesByList
+        .get(tenant.priceListIdsByName.get('Standard') as string)
+        ?.get(skuId);
       if (!standard) continue;
       const validFrom = addDays(context.today, -random.int(30, 400));
       const price: ContractPrice = withId({
@@ -454,7 +720,9 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
         validFrom,
         validTo: addDays(validFrom, random.pick([365, 365, 540, 730])),
         metadata: context.metadata(businessDateToInstant(validFrom, 10), customer.accountOwnerId),
-        ...(random.chance(0.4) ? { minimumQuantity: quantity(random.pick([5, 10, 25, 50, 100])) } : {}),
+        ...(random.chance(0.4)
+          ? { minimumQuantity: quantity(random.pick([5, 10, 25, 50, 100])) }
+          : {}),
       });
       dataset.contractPrices.set(price.id, price);
       prices.push(price);
@@ -467,10 +735,29 @@ export function seedCustomers(context: SeedContext, tenant: TenantSeedResult, ca
   for (const id of customerIds) {
     const customer = dataset.customers.get(id) as Customer;
     if (customer.status === 'prospect' || customer.status === 'closed') continue;
-    const base = customer.segment === 'strategic' ? 26 : customer.segment === 'enterprise' ? 12 : customer.segment === 'mid_market' ? 4 : 1;
-    const weight = Math.max(1, Math.round(base * random.logNormal(1, 0.5) * (customer.status === 'inactive' ? 0.15 : 1)));
+    const base =
+      customer.segment === 'strategic'
+        ? 26
+        : customer.segment === 'enterprise'
+          ? 12
+          : customer.segment === 'mid_market'
+            ? 4
+            : 1;
+    const weight = Math.max(
+      1,
+      Math.round(base * random.logNormal(1, 0.5) * (customer.status === 'inactive' ? 0.15 : 1)),
+    );
     for (let index = 0; index < weight; index += 1) orderWeightedCustomerIds.push(id);
   }
 
-  return { customerIds, orderWeightedCustomerIds, flagshipCustomerIds, contactsByCustomer, addressesByCustomer, salesRepsByTeam, contractPricesByCustomer, cityByCustomer };
+  return {
+    customerIds,
+    orderWeightedCustomerIds,
+    flagshipCustomerIds,
+    contactsByCustomer,
+    addressesByCustomer,
+    salesRepsByTeam,
+    contractPricesByCustomer,
+    cityByCustomer,
+  };
 }

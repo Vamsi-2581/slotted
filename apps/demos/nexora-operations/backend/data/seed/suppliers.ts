@@ -10,20 +10,74 @@ import {
   type Supplier,
   type SupplierSkuMapping,
 } from '../../domain';
-import type { CatalogSeedResult } from './catalog';
 import { withId, type SeedContext } from './context';
-import { COMPANY_STEMS, FIRST_NAMES, LAST_NAMES, STREET_NAMES, SUPPLIER_CATEGORIES, SUPPLIER_TAGS, US_CITIES } from '../vocabulary';
+import {
+  COMPANY_STEMS,
+  FIRST_NAMES,
+  LAST_NAMES,
+  STREET_NAMES,
+  SUPPLIER_CATEGORIES,
+  SUPPLIER_TAGS,
+  US_CITIES,
+} from '../vocabulary';
 
 /** Section 46 — flagship suppliers; their names double as product brands. */
-export const FLAGSHIP_SUPPLIERS: { name: string; category: string; tier: Supplier['relationshipTier']; brands: string[] }[] = [
-  { name: 'Arcwell Components', category: 'Electrical Components', tier: 'preferred', brands: ['Arcwell Components'] },
-  { name: 'Kestrel Automation', category: 'Motion & Drives', tier: 'preferred', brands: ['Kestrel Automation'] },
-  { name: 'Promethean Drives', category: 'Motion & Drives', tier: 'preferred', brands: ['Promethean Drives'] },
-  { name: 'Vertex Sensor Technologies', category: 'Sensors & Instrumentation', tier: 'preferred', brands: ['Vertex Sensor Technologies'] },
-  { name: 'DeltaForge Industrial', category: 'Fasteners & Hardware', tier: 'standard', brands: ['DeltaForge Industrial'] },
+export const FLAGSHIP_SUPPLIERS: {
+  name: string;
+  category: string;
+  tier: Supplier['relationshipTier'];
+  brands: string[];
+}[] = [
+  {
+    name: 'Arcwell Components',
+    category: 'Electrical Components',
+    tier: 'preferred',
+    brands: ['Arcwell Components'],
+  },
+  {
+    name: 'Kestrel Automation',
+    category: 'Motion & Drives',
+    tier: 'preferred',
+    brands: ['Kestrel Automation'],
+  },
+  {
+    name: 'Promethean Drives',
+    category: 'Motion & Drives',
+    tier: 'preferred',
+    brands: ['Promethean Drives'],
+  },
+  {
+    name: 'Vertex Sensor Technologies',
+    category: 'Sensors & Instrumentation',
+    tier: 'preferred',
+    brands: ['Vertex Sensor Technologies'],
+  },
+  {
+    name: 'DeltaForge Industrial',
+    category: 'Fasteners & Hardware',
+    tier: 'standard',
+    brands: ['DeltaForge Industrial'],
+  },
 ];
 
-const SUPPLIER_DESCRIPTORS = ['Components', 'Automation', 'Drives', 'Sensor Technologies', 'Industrial', 'Controls', 'Manufacturing', 'Fasteners', 'Tooling', 'Electric', 'Pneumatics', 'Bearings', 'Supply', 'Technologies', 'Systems', 'Products'];
+const SUPPLIER_DESCRIPTORS = [
+  'Components',
+  'Automation',
+  'Drives',
+  'Sensor Technologies',
+  'Industrial',
+  'Controls',
+  'Manufacturing',
+  'Fasteners',
+  'Tooling',
+  'Electric',
+  'Pneumatics',
+  'Bearings',
+  'Supply',
+  'Technologies',
+  'Systems',
+  'Products',
+];
 
 const CATEGORY_BY_ROOT: Record<string, string> = {
   'Motion Control': 'Motion & Drives',
@@ -50,7 +104,7 @@ export interface SupplierSeedResult {
   supplierAddress: Map<string, Address>;
 }
 
-export function seedSuppliers(context: SeedContext, catalog: CatalogSeedResult): SupplierSeedResult {
+export function seedSuppliers(context: SeedContext): SupplierSeedResult {
   const { dataset, scale } = context;
   const random = context.random('suppliers');
   const createdAt = businessDateToInstant(addDays(context.today, -365 * 5), 9);
@@ -60,7 +114,12 @@ export function seedSuppliers(context: SeedContext, catalog: CatalogSeedResult):
   const supplierAddress = new Map<string, Address>();
   const usedNames = new Set<string>();
 
-  const createSupplier = (name: string, category: string, tier: Supplier['relationshipTier'], flagship: boolean): Supplier => {
+  const createSupplier = (
+    name: string,
+    category: string,
+    tier: Supplier['relationshipTier'],
+    flagship: boolean,
+  ): Supplier => {
     const status: Supplier['status'] = flagship
       ? 'active'
       : random.weighted([
@@ -68,7 +127,9 @@ export function seedSuppliers(context: SeedContext, catalog: CatalogSeedResult):
           { value: 'on_hold', weight: 5 },
           { value: 'inactive', weight: 7 },
         ]);
-    const currencies = random.chance(0.14) ? (['USD', random.pick(['EUR', 'GBP'])] as Supplier['supportedCurrencies']) : (['USD'] as Supplier['supportedCurrencies']);
+    const currencies = random.chance(0.14)
+      ? (['USD', random.pick(['EUR', 'GBP'])] as Supplier['supportedCurrencies'])
+      : (['USD'] as Supplier['supportedCurrencies']);
     const contactFirst = random.pick(FIRST_NAMES);
     const contactLast = random.pick(LAST_NAMES);
     const domain = `${name.toLowerCase().replace(/[^a-z0-9]+/g, '')}.example`;
@@ -91,7 +152,12 @@ export function seedSuppliers(context: SeedContext, catalog: CatalogSeedResult):
         { value: 'DUE_ON_RECEIPT', weight: 3 },
       ]),
       supportedCurrencies: currencies,
-      preferredShippingTerms: random.pick(['FOB Origin', 'FOB Destination', 'Prepaid & Add', 'Collect']),
+      preferredShippingTerms: random.pick([
+        'FOB Origin',
+        'FOB Destination',
+        'Prepaid & Add',
+        'Collect',
+      ]),
       tags: random.sample(SUPPLIER_TAGS, random.int(0, 3)),
       metadata: context.metadata(addDays(createdAt, random.int(0, 1_500))),
     });
@@ -196,5 +262,11 @@ export function seedSuppliers(context: SeedContext, catalog: CatalogSeedResult):
     mappingsBySku.set(sku.id, mappings);
   }
 
-  return { supplierIdsByCategory, flagshipSupplierIds, preferredMappingBySku, mappingsBySku, supplierAddress };
+  return {
+    supplierIdsByCategory,
+    flagshipSupplierIds,
+    preferredMappingBySku,
+    mappingsBySku,
+    supplierAddress,
+  };
 }

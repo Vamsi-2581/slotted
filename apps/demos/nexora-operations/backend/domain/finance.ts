@@ -102,10 +102,7 @@ export interface PaymentAllocation {
 }
 
 export type CreditMemoReason =
-  | 'return'
-  | 'pricing_correction'
-  | 'service_recovery'
-  | 'manual_adjustment';
+  'return' | 'pricing_correction' | 'service_recovery' | 'manual_adjustment';
 export type CreditMemoLifecycle = 'draft' | 'open' | 'fully_applied' | 'voided';
 
 export interface CreditMemo {
@@ -167,7 +164,8 @@ export interface Refund {
   metadata: EntityMetadata;
 }
 
-export type BankTransactionStatus = 'unmatched' | 'suggested' | 'matched' | 'needs_review' | 'ignored';
+export type BankTransactionStatus =
+  'unmatched' | 'suggested' | 'matched' | 'needs_review' | 'ignored';
 
 export interface BankMatchCandidate {
   paymentId?: string;

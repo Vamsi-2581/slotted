@@ -39,7 +39,13 @@ interface Position {
   reserved: number;
 }
 
-export function seedInventory(context: SeedContext, tenant: TenantSeedResult, catalog: CatalogSeedResult, procurement: ProcurementSeedResult, options: { forcedShortages?: Map<string, number> } = {}): InventorySeedResult {
+export function seedInventory(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  catalog: CatalogSeedResult,
+  procurement: ProcurementSeedResult,
+  options: { forcedShortages?: Map<string, number> } = {},
+): InventorySeedResult {
   const { dataset, today, operationalStart } = context;
   const random = context.random('inventory');
   const positions = new Map<string, Position>();
@@ -60,7 +66,8 @@ export function seedInventory(context: SeedContext, tenant: TenantSeedResult, ca
   }
   for (const reservation of dataset.reservations.values()) {
     if (reservation.status !== 'active') continue;
-    position(`${reservation.skuId}:${reservation.warehouseId}`).reserved += quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
+    position(`${reservation.skuId}:${reservation.warehouseId}`).reserved +=
+      quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
   }
 
   const warehouses = [...dataset.warehouses.values()];
@@ -72,7 +79,12 @@ export function seedInventory(context: SeedContext, tenant: TenantSeedResult, ca
   const systemActor = 'usr_system';
   let openingCounter = 0;
 
-  const stockIn = (skuId: string, warehouseId: string, milli: number, locationId: string | undefined): void => {
+  const stockIn = (
+    skuId: string,
+    warehouseId: string,
+    milli: number,
+    locationId: string | undefined,
+  ): void => {
     if (milli <= 0) return;
     openingCounter += 1;
     const movement: StockMovement = {
@@ -92,7 +104,10 @@ export function seedInventory(context: SeedContext, tenant: TenantSeedResult, ca
       ...(locationId ? { locationId } : {}),
     };
     dataset.stockMovements.set(movement.id, movement);
-    openingMilli.set(`${skuId}:${warehouseId}`, (openingMilli.get(`${skuId}:${warehouseId}`) ?? 0) + milli);
+    openingMilli.set(
+      `${skuId}:${warehouseId}`,
+      (openingMilli.get(`${skuId}:${warehouseId}`) ?? 0) + milli,
+    );
   };
 
   const forced = options.forcedShortages ?? new Map<string, number>();
@@ -102,18 +117,25 @@ export function seedInventory(context: SeedContext, tenant: TenantSeedResult, ca
 
   for (const sku of skus) {
     if (sku.status === 'discontinued' && random.chance(0.7)) continue;
-    const unitScale = sku.unitOfMeasure === 'FT' || sku.unitOfMeasure === 'M' ? 100 : sku.unitOfMeasure === 'PK' ? 4 : 1;
+    const unitScale =
+      sku.unitOfMeasure === 'FT' || sku.unitOfMeasure === 'M'
+        ? 100
+        : sku.unitOfMeasure === 'PK'
+          ? 4
+          : 1;
     const rank = demandRank.get(sku.id) ?? skus.length;
     const stockedWarehouses = new Set<string>();
     for (const warehouse of warehouses) {
       const key = `${sku.id}:${warehouse.id}`;
       const activity = positions.get(key);
-      if (activity && (activity.shipped > 0 || activity.reserved > 0 || activity.received > 0)) stockedWarehouses.add(warehouse.id);
+      if (activity && (activity.shipped > 0 || activity.reserved > 0 || activity.received > 0))
+        stockedWarehouses.add(warehouse.id);
     }
     if (stockedWarehouses.size === 0) {
       // Stock the primary warehouse for most active SKUs, and a second site for popular ones.
       if (rank < skus.length * 0.6 || random.chance(0.5)) stockedWarehouses.add(primaryWarehouse);
-      if (rank < skus.length * 0.15 && random.chance(0.6)) stockedWarehouses.add(random.pick(warehouses).id);
+      if (rank < skus.length * 0.15 && random.chance(0.6))
+        stockedWarehouses.add(random.pick(warehouses).id);
     } else if (rank < skus.length * 0.1 && random.chance(0.35)) {
       stockedWarehouses.add(random.pick(warehouses).id);
     }
@@ -122,14 +144,26 @@ export function seedInventory(context: SeedContext, tenant: TenantSeedResult, ca
       const activity = positions.get(key) ?? { shipped: 0, received: 0, returned: 0, reserved: 0 };
       const dailyDemand = activity.shipped / windowDays;
       const coverDays = random.float(12, 60);
-      const reorderPoint = sku.reorderPolicy.reorderPoint ? quantityToMilli(sku.reorderPolicy.reorderPoint) : 5_000 * unitScale;
-      let buffer = Math.round(dailyDemand * coverDays) + (activity.shipped === 0 ? Math.round(random.logNormal(reorderPoint * 1.5, 0.6)) : Math.round(reorderPoint * random.float(0.2, 1.2)));
+      const reorderPoint = sku.reorderPolicy.reorderPoint
+        ? quantityToMilli(sku.reorderPolicy.reorderPoint)
+        : 5_000 * unitScale;
+      let buffer =
+        Math.round(dailyDemand * coverDays) +
+        (activity.shipped === 0
+          ? Math.round(random.logNormal(reorderPoint * 1.5, 0.6))
+          : Math.round(reorderPoint * random.float(0.2, 1.2)));
       // Low-stock tail: a share of positions sit at or below the reorder point.
       if (random.chance(0.07)) buffer = Math.round(reorderPoint * random.float(0, 0.6));
       const forcedShortage = forced.get(key);
-      let opening = activity.shipped - activity.received - activity.returned + activity.reserved + buffer;
+      let opening =
+        activity.shipped - activity.received - activity.returned + activity.reserved + buffer;
       if (forcedShortage !== undefined) {
-        opening = activity.shipped - activity.received - activity.returned + activity.reserved - forcedShortage;
+        opening =
+          activity.shipped -
+          activity.received -
+          activity.returned +
+          activity.reserved -
+          forcedShortage;
         shortageSkuIds.push(sku.id);
       } else if (random.chance(0.006) && (procurement.inboundMilli.get(key) ?? 0) > 0) {
         opening = activity.shipped - activity.received - activity.returned + activity.reserved;
@@ -151,22 +185,42 @@ export function seedInventory(context: SeedContext, tenant: TenantSeedResult, ca
 function warehouseActors(context: SeedContext, warehouseId: string, fallback: string): string[] {
   const actors: string[] = [];
   for (const assignment of context.dataset.roleAssignments.values()) {
-    if (assignment.scope.type !== 'warehouse' || !assignment.scope.warehouseIds.includes(warehouseId)) continue;
-    if (context.dataset.users.get(assignment.userId)?.status === 'active') actors.push(assignment.userId);
+    if (
+      assignment.scope.type !== 'warehouse' ||
+      !assignment.scope.warehouseIds.includes(warehouseId)
+    )
+      continue;
+    if (context.dataset.users.get(assignment.userId)?.status === 'active')
+      actors.push(assignment.userId);
   }
   return actors.length > 0 ? actors : [fallback];
 }
 
-function seedAdjustments(context: SeedContext, tenant: TenantSeedResult, random: ReturnType<SeedContext['random']>): void {
+function seedAdjustments(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  random: ReturnType<SeedContext['random']>,
+): void {
   const { dataset, today, operationalStart } = context;
   const fallback = tenant.personaUserIds.get('jordan-wells') as string;
-  const stocked = [...dataset.stockMovements.values()].filter((movement) => movement.sourceEntityType === 'opening_balance');
+  const stocked = [...dataset.stockMovements.values()].filter(
+    (movement) => movement.sourceEntityType === 'opening_balance',
+  );
   const count = Math.min(stocked.length, Math.round(diffDays(today, operationalStart) * 0.6));
-  const reasons: AdjustmentReasonCode[] = ['count_correction', 'damage', 'found_stock', 'data_correction', 'other'];
+  const reasons: AdjustmentReasonCode[] = [
+    'count_correction',
+    'damage',
+    'found_stock',
+    'data_correction',
+    'other',
+  ];
   for (let index = 0; index < count; index += 1) {
     const source = random.pick(stocked);
     const sku = dataset.skus.get(source.skuId) as Sku;
-    const date = addDays(operationalStart, random.int(1, Math.max(1, diffDays(today, operationalStart))));
+    const date = addDays(
+      operationalStart,
+      random.int(1, Math.max(1, diffDays(today, operationalStart))),
+    );
     const reason = random.pick(reasons);
     const magnitude = Math.max(1, Math.round(random.logNormal(3, 0.8)));
     const positive = reason === 'found_stock' || (reason !== 'damage' && random.chance(0.45));
@@ -177,7 +231,10 @@ function seedAdjustments(context: SeedContext, tenant: TenantSeedResult, random:
       type: reason === 'damage' ? 'damage' : positive ? 'adjustment_in' : 'adjustment_out',
       skuId: sku.id,
       warehouseId: source.warehouseId,
-      onHandDelta: reason === 'damage' ? '0' : quantity(positive ? magnitude : -magnitude, sku.quantityPrecision),
+      onHandDelta:
+        reason === 'damage'
+          ? '0'
+          : quantity(positive ? magnitude : -magnitude, sku.quantityPrecision),
       damagedDelta: reason === 'damage' ? quantity(magnitude, sku.quantityPrecision) : '0',
       quarantineDelta: '0',
       sourceEntityType: 'manual_adjustment',
@@ -191,20 +248,32 @@ function seedAdjustments(context: SeedContext, tenant: TenantSeedResult, random:
   }
 }
 
-function seedTransfers(context: SeedContext, tenant: TenantSeedResult, random: ReturnType<SeedContext['random']>, openingMilli: Map<string, number>): void {
+function seedTransfers(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  random: ReturnType<SeedContext['random']>,
+  openingMilli: Map<string, number>,
+): void {
   const { dataset, today, operationalStart } = context;
   const warehouses = [...dataset.warehouses.values()];
   if (warehouses.length < 2) return;
   const fallback = tenant.personaUserIds.get('jordan-wells') as string;
-  const stockedKeys = [...openingMilli.entries()].filter(([, milli]) => milli >= 20_000).map(([key]) => key);
+  const stockedKeys = [...openingMilli.entries()]
+    .filter(([, milli]) => milli >= 20_000)
+    .map(([key]) => key);
   if (stockedKeys.length === 0) return;
   const count = Math.round(diffDays(today, operationalStart) * 0.35);
   for (let index = 0; index < count; index += 1) {
     const sourceKey = random.pick(stockedKeys);
     const [skuId, sourceWarehouseId] = sourceKey.split(':') as [string, string];
-    const destination = random.pick(warehouses.filter((warehouse) => warehouse.id !== sourceWarehouseId));
+    const destination = random.pick(
+      warehouses.filter((warehouse) => warehouse.id !== sourceWarehouseId),
+    );
     if (!destination) continue;
-    const requestedDate = addDays(operationalStart, random.int(0, Math.max(1, diffDays(today, operationalStart))));
+    const requestedDate = addDays(
+      operationalStart,
+      random.int(0, Math.max(1, diffDays(today, operationalStart))),
+    );
     const age = diffDays(today, requestedDate);
     const requestedBy = random.pick(warehouseActors(context, sourceWarehouseId, fallback));
     const createdAt = instantOn(requestedDate, random);
@@ -221,8 +290,14 @@ function seedTransfers(context: SeedContext, tenant: TenantSeedResult, random: R
       if (key.endsWith(`:${sourceWarehouseId}`)) skuIds.add(key.split(':')[0] as string);
       else break;
     }
-    const shippedAt = stage >= 2 && status !== 'cancelled' ? instantOn(addDays(requestedDate, 1), random) : undefined;
-    const receivedAt = stage >= 3 && status !== 'cancelled' ? instantOn(addDays(requestedDate, random.int(2, 5)), random) : undefined;
+    const shippedAt =
+      stage >= 2 && status !== 'cancelled'
+        ? instantOn(addDays(requestedDate, 1), random)
+        : undefined;
+    const receivedAt =
+      stage >= 3 && status !== 'cancelled'
+        ? instantOn(addDays(requestedDate, random.int(2, 5)), random)
+        : undefined;
     const transfer: InventoryTransfer = {
       id: transferId,
       organizationId: ORGANIZATION_ID,
@@ -232,10 +307,25 @@ function seedTransfers(context: SeedContext, tenant: TenantSeedResult, random: R
       status,
       requestedBy,
       requestedDate,
-      metadata: metadataAt(createdAt, requestedBy, receivedAt ?? shippedAt ?? createdAt, requestedBy, 1 + stage),
+      metadata: metadataAt(
+        createdAt,
+        requestedBy,
+        receivedAt ?? shippedAt ?? createdAt,
+        requestedBy,
+        1 + stage,
+      ),
       ...(shippedAt ? { shippedAt } : {}),
       ...(receivedAt ? { receivedAt } : {}),
-      ...(random.chance(0.3) ? { notes: random.pick(['Rebalance for regional demand.', 'Backorder relief for east-coast customers.', 'Consolidating slow movers.', 'Requested by branch manager.']) } : {}),
+      ...(random.chance(0.3)
+        ? {
+            notes: random.pick([
+              'Rebalance for regional demand.',
+              'Backorder relief for east-coast customers.',
+              'Consolidating slow movers.',
+              'Requested by branch manager.',
+            ]),
+          }
+        : {}),
     };
     dataset.transfers.set(transferId, transfer);
     let lineNumber = 0;
@@ -245,7 +335,11 @@ function seedTransfers(context: SeedContext, tenant: TenantSeedResult, random: R
       const requested = Math.max(1, Math.round(random.logNormal(12, 0.7)));
       const shipped = shippedAt ? requested : 0;
       const damaged = receivedAt && random.chance(0.08) ? 1 : 0;
-      const received = receivedAt ? (status === 'partially_received' ? Math.max(0, shipped - random.int(1, Math.max(1, shipped - 1))) : shipped) : 0;
+      const received = receivedAt
+        ? status === 'partially_received'
+          ? Math.max(0, shipped - random.int(1, Math.max(1, shipped - 1)))
+          : shipped
+        : 0;
       const line: InventoryTransferLine = {
         id: formatId('transferLine', index * 10 + lineNumber),
         organizationId: ORGANIZATION_ID,
@@ -294,7 +388,12 @@ function seedTransfers(context: SeedContext, tenant: TenantSeedResult, random: R
   }
 }
 
-function seedCycleCounts(context: SeedContext, tenant: TenantSeedResult, random: ReturnType<SeedContext['random']>, openingMilli: Map<string, number>): void {
+function seedCycleCounts(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  random: ReturnType<SeedContext['random']>,
+  openingMilli: Map<string, number>,
+): void {
   const { dataset, today, operationalStart } = context;
   const fallback = tenant.personaUserIds.get('jordan-wells') as string;
   const byWarehouse = new Map<string, string[]>();
@@ -309,15 +408,33 @@ function seedCycleCounts(context: SeedContext, tenant: TenantSeedResult, random:
     const warehouseId = random.pick([...byWarehouse.keys()]);
     const skus = byWarehouse.get(warehouseId) ?? [];
     if (skus.length === 0) continue;
-    const plannedDate = nextBusinessDayOnOrAfter(addDays(operationalStart, random.int(0, Math.max(1, diffDays(today, operationalStart) + 10))));
+    const plannedDate = nextBusinessDayOnOrAfter(
+      addDays(operationalStart, random.int(0, Math.max(1, diffDays(today, operationalStart) + 10))),
+    );
     const age = diffDays(today, plannedDate);
     const actors = warehouseActors(context, warehouseId, fallback);
-    let status: CycleCount['status'] = age < 0 ? 'planned' : age === 0 ? 'in_progress' : age <= 2 ? random.pick(['in_progress', 'submitted']) : 'completed';
+    let status: CycleCount['status'] =
+      age < 0
+        ? 'planned'
+        : age === 0
+          ? 'in_progress'
+          : age <= 2
+            ? random.pick(['in_progress', 'submitted'])
+            : 'completed';
     if (age > 2 && random.chance(0.05)) status = 'cancelled';
     const createdAt = instantOn(addDays(plannedDate, -random.int(1, 7)), random);
-    const startedAt = status !== 'planned' && status !== 'cancelled' ? instantOn(plannedDate, random, 7, 9) : undefined;
-    const submittedAt = status === 'submitted' || status === 'completed' ? addMs(startedAt as string, random.int(2, 7) * 3_600_000) : undefined;
-    const completedAt = status === 'completed' ? addMs(submittedAt as string, random.int(1, 30) * 3_600_000) : undefined;
+    const startedAt =
+      status !== 'planned' && status !== 'cancelled'
+        ? instantOn(plannedDate, random, 7, 9)
+        : undefined;
+    const submittedAt =
+      status === 'submitted' || status === 'completed'
+        ? addMs(startedAt as string, random.int(2, 7) * 3_600_000)
+        : undefined;
+    const completedAt =
+      status === 'completed'
+        ? addMs(submittedAt as string, random.int(1, 30) * 3_600_000)
+        : undefined;
     const cycleCountId = formatId('cycleCount', index + 1);
     const cycleCount: CycleCount = {
       id: cycleCountId,
@@ -327,7 +444,13 @@ function seedCycleCounts(context: SeedContext, tenant: TenantSeedResult, random:
       status,
       assignedToIds: random.sample(actors, Math.min(actors.length, random.int(1, 2))),
       plannedDate,
-      metadata: metadataAt(createdAt, actors[0] as string, completedAt ?? submittedAt ?? startedAt ?? createdAt, actors[0] as string, status === 'completed' ? 4 : status === 'submitted' ? 3 : startedAt ? 2 : 1),
+      metadata: metadataAt(
+        createdAt,
+        actors[0] as string,
+        completedAt ?? submittedAt ?? startedAt ?? createdAt,
+        actors[0] as string,
+        status === 'completed' ? 4 : status === 'submitted' ? 3 : startedAt ? 2 : 1,
+      ),
       ...(startedAt ? { startedAt } : {}),
       ...(submittedAt ? { submittedAt } : {}),
       ...(completedAt ? { completedAt } : {}),
@@ -337,7 +460,8 @@ function seedCycleCounts(context: SeedContext, tenant: TenantSeedResult, random:
     for (const [position, skuId] of random.sample(skus, random.int(4, 14)).entries()) {
       const sku = dataset.skus.get(skuId) as Sku;
       const systemOnHand = openingMilli.get(`${skuId}:${warehouseId}`) ?? 0;
-      const varianceMilli = startedAt && random.chance(0.22) ? random.pick([-3, -2, -1, 1, 2]) * 1000 : 0;
+      const varianceMilli =
+        startedAt && random.chance(0.22) ? random.pick([-3, -2, -1, 1, 2]) * 1000 : 0;
       const line: CycleCountLine = {
         id: formatId('cycleCountLine', index * 20 + position + 1),
         organizationId: ORGANIZATION_ID,
@@ -345,7 +469,15 @@ function seedCycleCounts(context: SeedContext, tenant: TenantSeedResult, random:
         skuId,
         locationId: locations ? random.pick(locations.storage) : '',
         systemOnHand: milliToQuantity(systemOnHand, sku.quantityPrecision),
-        ...(startedAt ? { countedOnHand: milliToQuantity(Math.max(0, systemOnHand + varianceMilli), sku.quantityPrecision), variance: milliToQuantity(varianceMilli, sku.quantityPrecision) } : {}),
+        ...(startedAt
+          ? {
+              countedOnHand: milliToQuantity(
+                Math.max(0, systemOnHand + varianceMilli),
+                sku.quantityPrecision,
+              ),
+              variance: milliToQuantity(varianceMilli, sku.quantityPrecision),
+            }
+          : {}),
       };
       dataset.cycleCountLines.set(line.id, line);
       if (status === 'completed' && varianceMilli !== 0) {

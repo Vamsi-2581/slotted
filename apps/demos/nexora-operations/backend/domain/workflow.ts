@@ -63,12 +63,7 @@ export interface Workflow {
 }
 
 export type WorkflowRunStatus =
-  | 'queued'
-  | 'running'
-  | 'succeeded'
-  | 'partially_failed'
-  | 'failed'
-  | 'skipped';
+  'queued' | 'running' | 'succeeded' | 'partially_failed' | 'failed' | 'skipped';
 
 export interface WorkflowRun {
   id: string;

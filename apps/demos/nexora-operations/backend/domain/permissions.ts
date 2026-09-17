@@ -134,7 +134,9 @@ function withPrefix(prefixes: readonly string[]): Permission[] {
 
 const VIEW_PERMISSIONS = PERMISSIONS.filter(
   (permission) =>
-    permission.endsWith('.view') || permission === 'finance.dashboard' || permission === 'cost.view',
+    permission.endsWith('.view') ||
+    permission === 'finance.dashboard' ||
+    permission === 'cost.view',
 );
 
 const PERSONAL_PERMISSIONS: Permission[] = ['notifications.manage_own', 'saved_views.manage_own'];
@@ -172,7 +174,8 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
   {
     key: 'executive',
     name: 'Executive',
-    description: 'Read-only access to all business data plus analytics, finance dashboard and audit.',
+    description:
+      'Read-only access to all business data plus analytics, finance dashboard and audit.',
     grants: grants([...VIEW_PERMISSIONS, 'analytics.view', 'audit.view', ...PERSONAL_PERMISSIONS]),
   },
   {
@@ -201,7 +204,8 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
   {
     key: 'sales_representative',
     name: 'Sales Representative',
-    description: 'Customer and order workflow for owned accounts; read access to all customers and orders.',
+    description:
+      'Customer and order workflow for owned accounts; read access to all customers and orders.',
     grants: [
       ...grants(['customers.view', 'orders.view', 'quotes.view', 'contacts.view', 'notes.view']),
       ...grants(
@@ -273,7 +277,8 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
   {
     key: 'accountant',
     name: 'Accountant',
-    description: 'Operational invoicing, payments and reconciliation without credit or approval authority.',
+    description:
+      'Operational invoicing, payments and reconciliation without credit or approval authority.',
     grants: grants([
       'finance.dashboard',
       'invoices.view',
@@ -342,7 +347,8 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
   {
     key: 'warehouse_manager',
     name: 'Warehouse Manager',
-    description: 'Inventory, transfers, cycle counts, shipments and return receipts for assigned warehouses.',
+    description:
+      'Inventory, transfers, cycle counts, shipments and return receipts for assigned warehouses.',
     grants: [
       ...grants(
         [
@@ -413,7 +419,8 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
   {
     key: 'support_agent',
     name: 'Support Agent',
-    description: 'Support operations with customer, contact and related order, invoice and product read access.',
+    description:
+      'Support operations with customer, contact and related order, invoice and product read access.',
     grants: grants([
       'support.view',
       'support.create',
@@ -462,15 +469,88 @@ export interface PersonaDefinition {
 
 /** Section 55.6 — switchable demo personas. */
 export const PERSONAS: readonly PersonaDefinition[] = [
-  { key: 'maya-chen', firstName: 'Maya', lastName: 'Chen', role: 'administrator', title: 'Head of Business Systems', department: 'Administration', context: 'System administration' },
-  { key: 'evan-brooks', firstName: 'Evan', lastName: 'Brooks', role: 'executive', title: 'Chief Operating Officer', department: 'Executive', context: 'Executive dashboards' },
-  { key: 'sofia-ramirez', firstName: 'Sofia', lastName: 'Ramirez', role: 'sales_manager', title: 'Director of Sales', department: 'Sales', context: 'Sales approvals and portfolio' },
-  { key: 'noah-bennett', firstName: 'Noah', lastName: 'Bennett', role: 'sales_representative', title: 'Account Executive', department: 'Sales', context: 'Customer/order workflow' },
-  { key: 'priya-shah', firstName: 'Priya', lastName: 'Shah', role: 'finance_manager', title: 'Finance Manager', department: 'Finance', context: 'AR and credit' },
-  { key: 'marcus-lee', firstName: 'Marcus', lastName: 'Lee', role: 'buyer', title: 'Senior Buyer', department: 'Procurement', context: 'Procurement' },
-  { key: 'jordan-wells', firstName: 'Jordan', lastName: 'Wells', role: 'warehouse_operator', title: 'Warehouse Associate', department: 'Warehouse', context: 'Chicago warehouse', warehouseCodes: ['CHI-01'] },
-  { key: 'aisha-grant', firstName: 'Aisha', lastName: 'Grant', role: 'support_agent', title: 'Customer Support Specialist', department: 'Support', context: 'Support inbox' },
-  { key: 'owen-price', firstName: 'Owen', lastName: 'Price', role: 'auditor', title: 'Internal Auditor', department: 'Finance', context: 'Read-only/audit' },
+  {
+    key: 'maya-chen',
+    firstName: 'Maya',
+    lastName: 'Chen',
+    role: 'administrator',
+    title: 'Head of Business Systems',
+    department: 'Administration',
+    context: 'System administration',
+  },
+  {
+    key: 'evan-brooks',
+    firstName: 'Evan',
+    lastName: 'Brooks',
+    role: 'executive',
+    title: 'Chief Operating Officer',
+    department: 'Executive',
+    context: 'Executive dashboards',
+  },
+  {
+    key: 'sofia-ramirez',
+    firstName: 'Sofia',
+    lastName: 'Ramirez',
+    role: 'sales_manager',
+    title: 'Director of Sales',
+    department: 'Sales',
+    context: 'Sales approvals and portfolio',
+  },
+  {
+    key: 'noah-bennett',
+    firstName: 'Noah',
+    lastName: 'Bennett',
+    role: 'sales_representative',
+    title: 'Account Executive',
+    department: 'Sales',
+    context: 'Customer/order workflow',
+  },
+  {
+    key: 'priya-shah',
+    firstName: 'Priya',
+    lastName: 'Shah',
+    role: 'finance_manager',
+    title: 'Finance Manager',
+    department: 'Finance',
+    context: 'AR and credit',
+  },
+  {
+    key: 'marcus-lee',
+    firstName: 'Marcus',
+    lastName: 'Lee',
+    role: 'buyer',
+    title: 'Senior Buyer',
+    department: 'Procurement',
+    context: 'Procurement',
+  },
+  {
+    key: 'jordan-wells',
+    firstName: 'Jordan',
+    lastName: 'Wells',
+    role: 'warehouse_operator',
+    title: 'Warehouse Associate',
+    department: 'Warehouse',
+    context: 'Chicago warehouse',
+    warehouseCodes: ['CHI-01'],
+  },
+  {
+    key: 'aisha-grant',
+    firstName: 'Aisha',
+    lastName: 'Grant',
+    role: 'support_agent',
+    title: 'Customer Support Specialist',
+    department: 'Support',
+    context: 'Support inbox',
+  },
+  {
+    key: 'owen-price',
+    firstName: 'Owen',
+    lastName: 'Price',
+    role: 'auditor',
+    title: 'Internal Auditor',
+    department: 'Finance',
+    context: 'Read-only/audit',
+  },
 ];
 
 export const DEFAULT_PERSONA_KEY = 'sofia-ramirez';

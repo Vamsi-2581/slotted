@@ -209,7 +209,10 @@ export interface ChildIndex<T> {
   byParent: Map<string, T[]>;
 }
 
-export function indexBy<T>(values: Iterable<T>, key: (value: T) => string | undefined): Map<string, T[]> {
+export function indexBy<T>(
+  values: Iterable<T>,
+  key: (value: T) => string | undefined,
+): Map<string, T[]> {
   const index = new Map<string, T[]>();
   for (const value of values) {
     const parent = key(value);

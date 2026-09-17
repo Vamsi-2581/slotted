@@ -27,7 +27,14 @@ export interface SalesSeedResult {
   firstOperationalIndex: number;
 }
 
-export function createOrderEnvironment(context: SeedContext, tenant: TenantSeedResult, catalog: CatalogSeedResult, customers: CustomerSeedResult, skeletons: OrderSkeleton[], overrides?: Map<number, OrderOverride>): OrderEnvironment {
+export function createOrderEnvironment(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  catalog: CatalogSeedResult,
+  customers: CustomerSeedResult,
+  skeletons: OrderSkeleton[],
+  overrides?: Map<number, OrderOverride>,
+): OrderEnvironment {
   const { dataset } = context;
   const warehouseActors = new Map<string, string[]>();
   const operatorRole = tenant.roleIdsByKey.get('warehouse_operator');
@@ -43,9 +50,16 @@ export function createOrderEnvironment(context: SeedContext, tenant: TenantSeedR
       warehouseActors.set(warehouseId, bucket);
     }
   }
-  const financeRoles = new Set([tenant.roleIdsByKey.get('accountant'), tenant.roleIdsByKey.get('finance_manager')]);
+  const financeRoles = new Set([
+    tenant.roleIdsByKey.get('accountant'),
+    tenant.roleIdsByKey.get('finance_manager'),
+  ]);
   const financeActors = [...dataset.roleAssignments.values()]
-    .filter((assignment) => financeRoles.has(assignment.roleId) && dataset.users.get(assignment.userId)?.status === 'active')
+    .filter(
+      (assignment) =>
+        financeRoles.has(assignment.roleId) &&
+        dataset.users.get(assignment.userId)?.status === 'active',
+    )
     .map((assignment) => assignment.userId);
   const reservedNumbers = new Set<string>();
   if (overrides) {
@@ -64,11 +78,18 @@ export function createOrderEnvironment(context: SeedContext, tenant: TenantSeedR
     tenant,
     catalog,
     customers,
-    pricing: new PricingResolver(dataset, catalog, tenant.priceListIdsByName.get('Standard') as string),
+    pricing: new PricingResolver(
+      dataset,
+      catalog,
+      tenant.priceListIdsByName.get('Standard') as string,
+    ),
     reservedNumbers,
     firstIndexOfYear: firstIndexesByYear(skeletons),
     warehouseActors,
-    financeActors: financeActors.length > 0 ? financeActors : [tenant.personaUserIds.get('priya-shah') as string],
+    financeActors:
+      financeActors.length > 0
+        ? financeActors
+        : [tenant.personaUserIds.get('priya-shah') as string],
     ...(overrides ? { overrides } : {}),
   };
 }
@@ -80,45 +101,72 @@ export function addGraphToDataset(context: SeedContext, graph: OrderGraph): void
   if (graph.quote) dataset.quotes.set(graph.quote.id, graph.quote);
   for (const line of graph.quoteLines) dataset.quoteLines.set(line.id, line);
   if (graph.approval) dataset.approvalRequests.set(graph.approval.id, graph.approval);
-  for (const reservation of graph.reservations) dataset.reservations.set(reservation.id, reservation);
+  for (const reservation of graph.reservations)
+    dataset.reservations.set(reservation.id, reservation);
   for (const shipment of graph.shipments) dataset.shipments.set(shipment.id, shipment);
   for (const line of graph.shipmentLines) dataset.shipmentLines.set(line.id, line);
   for (const movement of graph.movements) dataset.stockMovements.set(movement.id, movement);
   for (const invoice of graph.invoices) dataset.invoices.set(invoice.id, invoice);
   for (const line of graph.invoiceLines) dataset.invoiceLines.set(line.id, line);
   for (const payment of graph.payments) dataset.payments.set(payment.id, payment);
-  for (const allocation of graph.allocations) dataset.paymentAllocations.set(allocation.id, allocation);
+  for (const allocation of graph.allocations)
+    dataset.paymentAllocations.set(allocation.id, allocation);
   for (const ret of graph.returns) dataset.returns.set(ret.id, ret);
   for (const line of graph.returnLines) dataset.returnLines.set(line.id, line);
   for (const memo of graph.creditMemos) dataset.creditMemos.set(memo.id, memo);
   for (const line of graph.creditMemoLines) dataset.creditMemoLines.set(line.id, line);
-  for (const application of graph.creditMemoApplications) dataset.creditMemoApplications.set(application.id, application);
+  for (const application of graph.creditMemoApplications)
+    dataset.creditMemoApplications.set(application.id, application);
 }
 
 /** Assigns index-derived business numbers to an expanded historical graph. */
 export function numberHistoricalGraph(env: OrderEnvironment, graph: OrderGraph): void {
-  const index = graph.order.metadata.id ? Number(graph.order.id.slice(4)) - 1 : Number(graph.order.id.slice(4)) - 1;
+  const index = graph.order.metadata.id
+    ? Number(graph.order.id.slice(4)) - 1
+    : Number(graph.order.id.slice(4)) - 1;
   for (const [position, shipment] of graph.shipments.entries()) {
-    if (!shipment.shipmentNumber) shipment.shipmentNumber = plainNumber(env, 'shipment', index + 1 + position * 1_000_000);
+    if (!shipment.shipmentNumber)
+      shipment.shipmentNumber = plainNumber(env, 'shipment', index + 1 + position * 1_000_000);
   }
   for (const [position, invoice] of graph.invoices.entries()) {
     if (!invoice.invoiceNumber) {
       const year = Number(invoice.issueDate.slice(0, 4));
-      invoice.invoiceNumber = yearlyNumber(env, 'invoice', year, index - (env.firstIndexOfYear.get(year) ?? 0) + 1 + position * 100_000);
+      invoice.invoiceNumber = yearlyNumber(
+        env,
+        'invoice',
+        year,
+        index - (env.firstIndexOfYear.get(year) ?? 0) + 1 + position * 100_000,
+      );
     }
   }
   for (const [position, payment] of graph.payments.entries()) {
-    if (!payment.paymentNumber) payment.paymentNumber = plainNumber(env, 'payment', index + 1 + position * 1_000_000);
+    if (!payment.paymentNumber)
+      payment.paymentNumber = plainNumber(env, 'payment', index + 1 + position * 1_000_000);
   }
-  for (const ret of graph.returns) if (!ret.returnNumber) ret.returnNumber = plainNumber(env, 'return', index + 1);
-  for (const memo of graph.creditMemos) if (!memo.creditMemoNumber) memo.creditMemoNumber = plainNumber(env, 'creditMemo', index + 1);
+  for (const ret of graph.returns)
+    if (!ret.returnNumber) ret.returnNumber = plainNumber(env, 'return', index + 1);
+  for (const memo of graph.creditMemos)
+    if (!memo.creditMemoNumber) memo.creditMemoNumber = plainNumber(env, 'creditMemo', index + 1);
 }
 
-export function seedSales(context: SeedContext, tenant: TenantSeedResult, catalog: CatalogSeedResult, customers: CustomerSeedResult, curate?: (skeletons: OrderSkeleton[]) => Map<number, OrderOverride>): SalesSeedResult {
+export function seedSales(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  catalog: CatalogSeedResult,
+  customers: CustomerSeedResult,
+  curate?: (skeletons: OrderSkeleton[]) => Map<number, OrderOverride>,
+): SalesSeedResult {
   const { dataset, today, operationalStart } = context;
   const skeletons = buildOrderSkeletons(context, tenant, customers);
   const overrides = curate?.(skeletons);
-  const environment = createOrderEnvironment(context, tenant, catalog, customers, skeletons, overrides);
+  const environment = createOrderEnvironment(
+    context,
+    tenant,
+    catalog,
+    customers,
+    skeletons,
+    overrides,
+  );
 
   let firstOperationalIndex = skeletons.length;
   for (const skeleton of skeletons) {
@@ -158,10 +206,15 @@ export function seedSales(context: SeedContext, tenant: TenantSeedResult, catalo
  * Materialized documents receive sequential numbers in creation order,
  * continuing after the index-derived numbers used by the historical tier.
  */
-function assignOperationalNumbers(env: OrderEnvironment, firstOperationalIndex: number, materialized: Set<number>): void {
+function assignOperationalNumbers(
+  env: OrderEnvironment,
+  firstOperationalIndex: number,
+  materialized: Set<number>,
+): void {
   const { dataset } = env.context;
   const historyCount = firstOperationalIndex;
-  const byTime = <T extends { metadata: { createdAt: string } }>(values: Iterable<T>): T[] => [...values].sort((a, b) => a.metadata.createdAt.localeCompare(b.metadata.createdAt));
+  const byTime = <T extends { metadata: { createdAt: string } }>(values: Iterable<T>): T[] =>
+    [...values].sort((a, b) => a.metadata.createdAt.localeCompare(b.metadata.createdAt));
 
   let shipmentSequence = historyCount;
   for (const shipment of byTime(dataset.shipments.values())) {
@@ -172,11 +225,15 @@ function assignOperationalNumbers(env: OrderEnvironment, firstOperationalIndex: 
 
   const invoiceSequenceByYear = new Map<number, number>();
   for (const [year, firstIndex] of env.firstIndexOfYear) {
-    const nextYearFirst = [...env.firstIndexOfYear.entries()].find(([candidate]) => candidate === year + 1)?.[1] ?? Number.POSITIVE_INFINITY;
+    const nextYearFirst =
+      [...env.firstIndexOfYear.entries()].find(([candidate]) => candidate === year + 1)?.[1] ??
+      Number.POSITIVE_INFINITY;
     const historyInYear = Math.max(0, Math.min(historyCount, nextYearFirst) - firstIndex);
     invoiceSequenceByYear.set(year, historyInYear);
   }
-  for (const invoice of [...dataset.invoices.values()].sort((a, b) => (a.openedAt ?? a.metadata.createdAt).localeCompare(b.openedAt ?? b.metadata.createdAt))) {
+  for (const invoice of [...dataset.invoices.values()].sort((a, b) =>
+    (a.openedAt ?? a.metadata.createdAt).localeCompare(b.openedAt ?? b.metadata.createdAt),
+  )) {
     if (invoice.invoiceNumber) continue;
     const year = Number(invoice.issueDate.slice(0, 4));
     const next = (invoiceSequenceByYear.get(year) ?? 0) + 1;

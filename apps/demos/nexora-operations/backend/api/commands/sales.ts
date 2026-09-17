@@ -22,7 +22,17 @@ import type { ApiRuntime, MutationOptions, Transaction } from '../runtime';
 import type { SalesReadModels } from '../resources/sales';
 import { getOrder, getQuote, type OrderDetail, type QuoteDetail } from '../resources/sales';
 import { cancelApproval, createApprovalRequest, type ApprovalDecisionHooks } from './approvals';
-import { dollars, domainError, finalize, load, metadata, open, transition, trimmed, Validator } from './helpers';
+import {
+  dollars,
+  domainError,
+  finalize,
+  load,
+  metadata,
+  open,
+  transition,
+  trimmed,
+  Validator,
+} from './helpers';
 import { priceLines, type LineInput, type PricedLineInput } from './pricing';
 
 export interface QuoteInput {
@@ -47,16 +57,56 @@ export interface OrderInput {
   notes?: string;
 }
 
-function shippingRegion(runtime: ApiRuntime, customer: Customer, addressId?: string): { region: string; snapshot: SalesOrder['shippingAddress']; billing: SalesOrder['billingAddress'] } {
+function shippingRegion(
+  runtime: ApiRuntime,
+  customer: Customer,
+  addressId?: string,
+): {
+  region: string;
+  snapshot: SalesOrder['shippingAddress'];
+  billing: SalesOrder['billingAddress'];
+} {
   const { dataset } = runtime.store;
-  const shipping = (addressId ? dataset.addresses.get(addressId) : undefined) ?? (customer.defaultShippingAddressId ? dataset.addresses.get(customer.defaultShippingAddressId) : undefined);
-  const billing = customer.billingAddressId ? dataset.addresses.get(customer.billingAddressId) : shipping;
-  const snap = (address: typeof shipping, name: string) => (address ? { name, line1: address.line1, city: address.city, region: address.region, postalCode: address.postalCode, countryCode: address.countryCode, ...(address.line2 ? { line2: address.line2 } : {}) } : { name, line1: 'Address on file', city: 'Chicago', region: 'IL', postalCode: '60609', countryCode: 'US' });
-  return { region: shipping?.region ?? billing?.region ?? 'IL', snapshot: snap(shipping, customer.displayName), billing: snap(billing, customer.legalName) };
+  const shipping =
+    (addressId ? dataset.addresses.get(addressId) : undefined) ??
+    (customer.defaultShippingAddressId
+      ? dataset.addresses.get(customer.defaultShippingAddressId)
+      : undefined);
+  const billing = customer.billingAddressId
+    ? dataset.addresses.get(customer.billingAddressId)
+    : shipping;
+  const snap = (address: typeof shipping, name: string) =>
+    address
+      ? {
+          name,
+          line1: address.line1,
+          city: address.city,
+          region: address.region,
+          postalCode: address.postalCode,
+          countryCode: address.countryCode,
+          ...(address.line2 ? { line2: address.line2 } : {}),
+        }
+      : {
+          name,
+          line1: 'Address on file',
+          city: 'Chicago',
+          region: 'IL',
+          postalCode: '60609',
+          countryCode: 'US',
+        };
+  return {
+    region: shipping?.region ?? billing?.region ?? 'IL',
+    snapshot: snap(shipping, customer.displayName),
+    billing: snap(billing, customer.legalName),
+  };
 }
 
 export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels) {
-  const quoteLinesFrom = (tx: Transaction, quoteId: string, lines: PricedLineInput[]): QuoteLine[] =>
+  const quoteLinesFrom = (
+    tx: Transaction,
+    quoteId: string,
+    lines: PricedLineInput[],
+  ): QuoteLine[] =>
     lines.map((line, index) => ({
       id: runtime.store.nextId('quoteLine'),
       organizationId: runtime.store.dataset.organization.id,
@@ -77,7 +127,12 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       totalAmount: line.priced.totalAmount,
     }));
 
-  const orderLinesFrom = (orderId: string, lines: PricedLineInput[], warehouseId: string, orderDate: string): SalesOrderLine[] =>
+  const orderLinesFrom = (
+    orderId: string,
+    lines: PricedLineInput[],
+    warehouseId: string,
+    orderDate: string,
+  ): SalesOrderLine[] =>
     lines.map((line, index) => ({
       id: runtime.store.nextId('salesOrderLine'),
       organizationId: runtime.store.dataset.organization.id,
@@ -102,10 +157,15 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       taxAmount: line.priced.taxAmount,
       totalAmount: line.priced.totalAmount,
       preferredWarehouseId: line.preferredWarehouseId ?? warehouseId,
-      promisedDate: line.promisedDate ?? addBusinessDays(orderDate, Math.max(2, Math.min(15, line.sku.leadTimeDays))),
+      promisedDate:
+        line.promisedDate ??
+        addBusinessDays(orderDate, Math.max(2, Math.min(15, line.sku.leadTimeDays))),
     }));
 
-  const applyTotals = (target: SalesOrder | Quote, totals: ReturnType<ReturnType<typeof priceLines>['totals']>): void => {
+  const applyTotals = (
+    target: SalesOrder | Quote,
+    totals: ReturnType<ReturnType<typeof priceLines>['totals']>,
+  ): void => {
     target.subtotal = totals.subtotal;
     target.discountTotal = totals.discountTotal;
     target.taxTotal = totals.taxTotal;
@@ -116,16 +176,33 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     target.grossMarginBps = totals.grossMarginBps;
   };
 
-  const maxDiscount = (lines: { discountBps: number }[]): number => lines.reduce((max, line) => Math.max(max, line.discountBps), 0);
+  const maxDiscount = (lines: { discountBps: number }[]): number =>
+    lines.reduce((max, line) => Math.max(max, line.discountBps), 0);
 
   // ---------------------------------------------------------------------------
   // Reservations (section 60.4–60.6)
 
-  const reserveLine = (tx: Transaction, order: SalesOrder, line: SalesOrderLine, requestedMilli: number, expectedAvailable?: string): InventoryReservation | undefined => {
+  const reserveLine = (
+    tx: Transaction,
+    order: SalesOrder,
+    line: SalesOrderLine,
+    requestedMilli: number,
+    expectedAvailable?: string,
+  ): InventoryReservation | undefined => {
     const position = runtime.projections.inventoryAt(line.skuId, line.preferredWarehouseId);
     const availableMilli = quantityToMilli(position.available);
     if (expectedAvailable !== undefined && quantityToMilli(expectedAvailable) !== availableMilli) {
-      throw new NexoraApiError('INVENTORY_CHANGED', `Availability for ${line.skuCode} changed to ${position.available} since it was read`, { details: { skuId: line.skuId, warehouseId: line.preferredWarehouseId, available: position.available } });
+      throw new NexoraApiError(
+        'INVENTORY_CHANGED',
+        `Availability for ${line.skuCode} changed to ${position.available} since it was read`,
+        {
+          details: {
+            skuId: line.skuId,
+            warehouseId: line.preferredWarehouseId,
+            available: position.available,
+          },
+        },
+      );
     }
     const quantity = Math.min(requestedMilli, availableMilli);
     if (quantity <= 0) return undefined;
@@ -145,9 +222,17 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     return reservation;
   };
 
-  const openMilli = (line: SalesOrderLine): number => quantityToMilli(line.orderedQuantity) - quantityToMilli(line.cancelledQuantity) - quantityToMilli(line.fulfilledQuantity);
+  const openMilli = (line: SalesOrderLine): number =>
+    quantityToMilli(line.orderedQuantity) -
+    quantityToMilli(line.cancelledQuantity) -
+    quantityToMilli(line.fulfilledQuantity);
 
-  const allocateOrder = (tx: Transaction, order: SalesOrder, lineIds?: string[], expectedAvailable?: Record<string, string>): { reserved: number; shortages: string[] } => {
+  const allocateOrder = (
+    tx: Transaction,
+    order: SalesOrder,
+    lineIds?: string[],
+    expectedAvailable?: Record<string, string>,
+  ): { reserved: number; shortages: string[] } => {
     let reserved = 0;
     const shortages: string[] = [];
     for (const line of runtime.indexes.linesByOrder.get(order.id)) {
@@ -186,7 +271,8 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
   const evaluateOrder = (order: SalesOrder, lines: SalesOrderLine[], customer: Customer) => {
     const summary = runtime.projections.customerSummary(customer.id);
     const exposureAfter = summary.creditExposure.minor + order.total.minor;
-    const creditLimitExceeded = customer.creditLimit.minor > 0 && exposureAfter > customer.creditLimit.minor;
+    const creditLimitExceeded =
+      customer.creditLimit.minor > 0 && exposureAfter > customer.creditLimit.minor;
     const evaluation = evaluateOrderApproval({
       approvalValueUsdMinor: order.subtotal.minor + order.freight.minor,
       grossMarginBps: order.grossMarginBps,
@@ -211,23 +297,59 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       tx.dirty('customers');
     }
     const result = allocateOrder(tx, order);
-    tx.activityEvent({ type: 'order.confirmed', subjectType: 'sales_order', subjectId: order.id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: order.id, summary: `Order ${order.orderNumber} confirmed (${dollars(order.total.minor)})${result.shortages.length > 0 ? ` — ${result.shortages.length} line(s) short` : ''}` });
-    if (result.shortages.length > 0) tx.notify(order.ownerId, 'warning', `${order.orderNumber} has an inventory shortage`, `${result.shortages.length} line(s) could not be fully allocated.`, { type: 'sales_order', id: order.id });
+    tx.activityEvent({
+      type: 'order.confirmed',
+      subjectType: 'sales_order',
+      subjectId: order.id,
+      subjectLabel: order.orderNumber,
+      customerId: order.customerId,
+      orderId: order.id,
+      summary: `Order ${order.orderNumber} confirmed (${dollars(order.total.minor)})${result.shortages.length > 0 ? ` — ${result.shortages.length} line(s) short` : ''}`,
+    });
+    if (result.shortages.length > 0)
+      tx.notify(
+        order.ownerId,
+        'warning',
+        `${order.orderNumber} has an inventory shortage`,
+        `${result.shortages.length} line(s) could not be fully allocated.`,
+        { type: 'sales_order', id: order.id },
+      );
   };
 
   const submitOrder = (tx: Transaction, order: SalesOrder): void => {
     const customer = load(runtime, 'customers', order.customerId, 'Customer');
     const lines = runtime.indexes.linesByOrder.get(order.id);
-    if (lines.length === 0) throw domainError('VALIDATION_FAILED', 'An order needs at least one line before submission');
-    if (customer.status === 'inactive' || customer.status === 'closed') throw domainError('CUSTOMER_INACTIVE', `${customer.displayName} is ${customer.status} and cannot receive orders`, 409);
+    if (lines.length === 0)
+      throw domainError('VALIDATION_FAILED', 'An order needs at least one line before submission');
+    if (customer.status === 'inactive' || customer.status === 'closed')
+      throw domainError(
+        'CUSTOMER_INACTIVE',
+        `${customer.displayName} is ${customer.status} and cannot receive orders`,
+        409,
+      );
     const { evaluation, flags } = evaluateOrder(order, lines, customer);
     order.riskFlags = flags;
     if (evaluation.required) {
-      const request = createApprovalRequest(tx, { targetType: 'sales_order', targetId: order.id, targetNumber: order.orderNumber, evaluation, requestedBy: tx.actor.id, amount: usd(order.subtotal.minor + order.freight.minor) });
+      const request = createApprovalRequest(tx, {
+        targetType: 'sales_order',
+        targetId: order.id,
+        targetNumber: order.orderNumber,
+        evaluation,
+        requestedBy: tx.actor.id,
+        amount: usd(order.subtotal.minor + order.freight.minor),
+      });
       order.status = 'pending_approval';
       order.approvalStatus = 'pending';
       order.approvalRequestId = request.id;
-      tx.activityEvent({ type: 'order.submitted', subjectType: 'sales_order', subjectId: order.id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: order.id, summary: `Order ${order.orderNumber} submitted for approval — ${evaluation.reasons.join('; ')}` });
+      tx.activityEvent({
+        type: 'order.submitted',
+        subjectType: 'sales_order',
+        subjectId: order.id,
+        subjectLabel: order.orderNumber,
+        customerId: order.customerId,
+        orderId: order.id,
+        summary: `Order ${order.orderNumber} submitted for approval — ${evaluation.reasons.join('; ')}`,
+      });
     } else {
       order.approvalStatus = 'not_required';
       confirmOrder(tx, order, customer);
@@ -242,7 +364,10 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       order.approvalStatus = 'approved';
       const customer = load(runtime, 'customers', order.customerId, 'Customer');
       confirmOrder(tx, order, customer);
-      finalize(tx, 'salesOrders', order, 'order.confirmed', 'sales_order', ['status', 'approvalStatus']);
+      finalize(tx, 'salesOrders', order, 'order.confirmed', 'sales_order', [
+        'status',
+        'approvalStatus',
+      ]);
     },
     onRejected: (tx, request, reason) => {
       const order = load(runtime, 'salesOrders', request.targetId, 'Order');
@@ -250,8 +375,19 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       order.status = 'draft';
       order.approvalStatus = 'rejected';
       order.notes = `${order.notes ? `${order.notes}\n` : ''}Approval rejected: ${reason}`;
-      finalize(tx, 'salesOrders', order, 'order.approval_rejected', 'sales_order', ['status', 'approvalStatus']);
-      tx.activityEvent({ type: 'order.rejected', subjectType: 'sales_order', subjectId: order.id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: order.id, summary: `Order ${order.orderNumber} approval rejected — ${reason}` });
+      finalize(tx, 'salesOrders', order, 'order.approval_rejected', 'sales_order', [
+        'status',
+        'approvalStatus',
+      ]);
+      tx.activityEvent({
+        type: 'order.rejected',
+        subjectType: 'sales_order',
+        subjectId: order.id,
+        subjectLabel: order.orderNumber,
+        customerId: order.customerId,
+        orderId: order.id,
+        summary: `Order ${order.orderNumber} approval rejected — ${reason}`,
+      });
     },
     onChangesRequested: (tx, request, reason) => {
       const order = load(runtime, 'salesOrders', request.targetId, 'Order');
@@ -260,7 +396,10 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       order.approvalStatus = 'not_required';
       delete order.approvalRequestId;
       order.notes = `${order.notes ? `${order.notes}\n` : ''}Changes requested: ${reason}`;
-      finalize(tx, 'salesOrders', order, 'order.changes_requested', 'sales_order', ['status', 'approvalStatus']);
+      finalize(tx, 'salesOrders', order, 'order.changes_requested', 'sales_order', [
+        'status',
+        'approvalStatus',
+      ]);
     },
   };
 
@@ -292,15 +431,35 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     create: (input: QuoteInput, options?: MutationOptions): Promise<QuoteDetail> =>
       runtime.command('POST /quotes', options, input, (tx) => {
         const customer = load(runtime, 'customers', input.customerId, 'Customer');
-        const actor = runtime.require('quotes.create', { ownerId: customer.accountOwnerId, teamId: customer.salesTeamId, customerId: customer.id });
-        if (customer.status === 'inactive' || customer.status === 'closed') throw domainError('CUSTOMER_INACTIVE', `${customer.displayName} cannot receive quotes while ${customer.status}`, 409);
-        const contact = input.contactId ? load(runtime, 'contacts', input.contactId, 'Contact') : runtime.indexes.contactsByCustomer.get(customer.id).find((entry) => entry.isPrimary && entry.status === 'active');
-        if (!contact) throw domainError('PRIMARY_CONTACT_REQUIRED', `${customer.displayName} has no active contact for the quote`);
+        const actor = runtime.require('quotes.create', {
+          ownerId: customer.accountOwnerId,
+          teamId: customer.salesTeamId,
+          customerId: customer.id,
+        });
+        if (customer.status === 'inactive' || customer.status === 'closed')
+          throw domainError(
+            'CUSTOMER_INACTIVE',
+            `${customer.displayName} cannot receive quotes while ${customer.status}`,
+            409,
+          );
+        const contact = input.contactId
+          ? load(runtime, 'contacts', input.contactId, 'Contact')
+          : runtime.indexes.contactsByCustomer
+              .get(customer.id)
+              .find((entry) => entry.isPrimary && entry.status === 'active');
+        if (!contact)
+          throw domainError(
+            'PRIMARY_CONTACT_REQUIRED',
+            `${customer.displayName} has no active contact for the quote`,
+          );
         const today = runtime.store.today;
         const expiration = input.expirationDate ?? addDays(today, 30);
-        if (compareDates(expiration, today) < 0) throw domainError('VALIDATION_FAILED', 'expirationDate must be on or after today');
+        if (compareDates(expiration, today) < 0)
+          throw domainError('VALIDATION_FAILED', 'expirationDate must be on or after today');
         const region = shippingRegion(runtime, customer).region;
-        const priced = priceLines(runtime, customer, input.lines, region, today, { allowOverride: runtime.can('orders.override_price') });
+        const priced = priceLines(runtime, customer, input.lines, region, today, {
+          allowOverride: runtime.can('orders.override_price'),
+        });
         const totals = priced.totals(usd(input.freightMinor ?? 0));
         const id = runtime.store.nextId('quote');
         const quote: Quote = {
@@ -330,20 +489,40 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         tx.create('quotes', quote);
         for (const line of quoteLinesFrom(tx, id, priced.lines)) tx.create('quoteLines', line);
         tx.audit('quote.created', 'quote', id, { nextVersion: 1 });
-        tx.activityEvent({ type: 'quote.created', subjectType: 'quote', subjectId: id, subjectLabel: quote.quoteNumber, customerId: customer.id, summary: `Quote ${quote.quoteNumber} drafted for ${customer.displayName} (${dollars(quote.total.minor)})` });
+        tx.activityEvent({
+          type: 'quote.created',
+          subjectType: 'quote',
+          subjectId: id,
+          subjectLabel: quote.quoteNumber,
+          customerId: customer.id,
+          summary: `Quote ${quote.quoteNumber} drafted for ${customer.displayName} (${dollars(quote.total.minor)})`,
+        });
         return getQuote(runtime, id);
       }),
 
-    update: (id: string, input: Partial<QuoteInput>, options?: MutationOptions): Promise<QuoteDetail> =>
+    update: (
+      id: string,
+      input: Partial<QuoteInput>,
+      options?: MutationOptions,
+    ): Promise<QuoteDetail> =>
       runtime.command('PATCH /quotes/:id', options, { id, input }, (tx) => {
         const quote = load(runtime, 'quotes', id, 'Quote');
         const customer = load(runtime, 'customers', quote.customerId, 'Customer');
-        runtime.require('quotes.edit', { ownerId: quote.ownerId, teamId: customer.salesTeamId, customerId: customer.id });
-        if (quote.status !== 'draft' && quote.status !== 'approved') throw transition('Quote', quote.status, 'be edited');
+        runtime.require('quotes.edit', {
+          ownerId: quote.ownerId,
+          teamId: customer.salesTeamId,
+          customerId: customer.id,
+        });
+        if (quote.status !== 'draft' && quote.status !== 'approved')
+          throw transition('Quote', quote.status, 'be edited');
         open(tx, 'quotes', id, 'Quote', options);
         const changed: string[] = [];
         if (input.expirationDate) {
-          if (compareDates(input.expirationDate, quote.createdBusinessDate) < 0) throw domainError('VALIDATION_FAILED', 'expirationDate must be on or after the quote date');
+          if (compareDates(input.expirationDate, quote.createdBusinessDate) < 0)
+            throw domainError(
+              'VALIDATION_FAILED',
+              'expirationDate must be on or after the quote date',
+            );
           quote.expirationDate = input.expirationDate;
           changed.push('expirationDate');
         }
@@ -362,10 +541,19 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         const priceSensitive = input.lines !== undefined || input.freightMinor !== undefined;
         if (priceSensitive) {
           const region = shippingRegion(runtime, customer).region;
-          const lineInputs = input.lines ?? runtime.indexes.quoteLinesByQuote.get(id).map((line) => ({ skuId: line.skuId, quantity: line.quantity, discountBps: line.discountBps }));
-          const priced = priceLines(runtime, customer, lineInputs, region, runtime.store.today, { allowOverride: runtime.can('orders.override_price') });
+          const lineInputs =
+            input.lines ??
+            runtime.indexes.quoteLinesByQuote.get(id).map((line) => ({
+              skuId: line.skuId,
+              quantity: line.quantity,
+              discountBps: line.discountBps,
+            }));
+          const priced = priceLines(runtime, customer, lineInputs, region, runtime.store.today, {
+            allowOverride: runtime.can('orders.override_price'),
+          });
           if (input.lines) {
-            for (const line of runtime.indexes.quoteLinesByQuote.get(id)) tx.remove('quoteLines', line.id);
+            for (const line of runtime.indexes.quoteLinesByQuote.get(id))
+              tx.remove('quoteLines', line.id);
             for (const line of quoteLinesFrom(tx, id, priced.lines)) tx.create('quoteLines', line);
             changed.push('lines');
           }
@@ -373,7 +561,11 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           changed.push('totals');
           if (quote.status === 'approved') {
             cancelApproval(tx, quote.approvalRequestId, 'Quote edited after approval');
-            const evaluation = evaluateQuoteApproval({ approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor, grossMarginBps: quote.grossMarginBps, maxLineDiscountBps: maxDiscount(priced.lines.map((line) => line.priced)) });
+            const evaluation = evaluateQuoteApproval({
+              approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor,
+              grossMarginBps: quote.grossMarginBps,
+              maxLineDiscountBps: maxDiscount(priced.lines.map((line) => line.priced)),
+            });
             quote.status = evaluation.required ? 'draft' : 'approved';
             delete quote.approvalRequestId;
             changed.push('status');
@@ -387,14 +579,30 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       runtime.command('POST /quotes/:id/submit', options, { id }, (tx) => {
         const quote = load(runtime, 'quotes', id, 'Quote');
         const customer = load(runtime, 'customers', quote.customerId, 'Customer');
-        runtime.require('quotes.edit', { ownerId: quote.ownerId, teamId: customer.salesTeamId, customerId: customer.id });
+        runtime.require('quotes.edit', {
+          ownerId: quote.ownerId,
+          teamId: customer.salesTeamId,
+          customerId: customer.id,
+        });
         if (quote.status !== 'draft') throw transition('Quote', quote.status, 'be submitted');
         const lines = runtime.indexes.quoteLinesByQuote.get(id);
-        if (lines.length === 0) throw domainError('QUOTE_EMPTY', 'A quote needs at least one line before submission');
+        if (lines.length === 0)
+          throw domainError('QUOTE_EMPTY', 'A quote needs at least one line before submission');
         open(tx, 'quotes', id, 'Quote', options);
-        const evaluation = evaluateQuoteApproval({ approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor, grossMarginBps: quote.grossMarginBps, maxLineDiscountBps: maxDiscount(lines) });
+        const evaluation = evaluateQuoteApproval({
+          approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor,
+          grossMarginBps: quote.grossMarginBps,
+          maxLineDiscountBps: maxDiscount(lines),
+        });
         if (evaluation.required) {
-          const request = createApprovalRequest(tx, { targetType: 'quote', targetId: id, targetNumber: quote.quoteNumber, evaluation, requestedBy: tx.actor.id, amount: usd(quote.subtotal.minor + quote.freight.minor) });
+          const request = createApprovalRequest(tx, {
+            targetType: 'quote',
+            targetId: id,
+            targetNumber: quote.quoteNumber,
+            evaluation,
+            requestedBy: tx.actor.id,
+            amount: usd(quote.subtotal.minor + quote.freight.minor),
+          });
           quote.status = 'pending_approval';
           quote.approvalRequestId = request.id;
         } else quote.status = 'approved';
@@ -406,18 +614,39 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       runtime.command('POST /quotes/:id/send', options, { id }, (tx) => {
         const quote = load(runtime, 'quotes', id, 'Quote');
         const customer = load(runtime, 'customers', quote.customerId, 'Customer');
-        runtime.require('quotes.send', { ownerId: quote.ownerId, teamId: customer.salesTeamId, customerId: customer.id });
+        runtime.require('quotes.send', {
+          ownerId: quote.ownerId,
+          teamId: customer.salesTeamId,
+          customerId: customer.id,
+        });
         if (quote.status === 'draft') {
           const lines = runtime.indexes.quoteLinesByQuote.get(id);
-          if (lines.length === 0) throw domainError('QUOTE_EMPTY', 'A quote needs at least one line before sending');
-          const evaluation = evaluateQuoteApproval({ approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor, grossMarginBps: quote.grossMarginBps, maxLineDiscountBps: maxDiscount(lines) });
-          if (evaluation.required) throw domainError('APPROVAL_REQUIRED', `Quote ${quote.quoteNumber} requires approval before it can be sent: ${evaluation.reasons.join('; ')}`, 409);
+          if (lines.length === 0)
+            throw domainError('QUOTE_EMPTY', 'A quote needs at least one line before sending');
+          const evaluation = evaluateQuoteApproval({
+            approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor,
+            grossMarginBps: quote.grossMarginBps,
+            maxLineDiscountBps: maxDiscount(lines),
+          });
+          if (evaluation.required)
+            throw domainError(
+              'APPROVAL_REQUIRED',
+              `Quote ${quote.quoteNumber} requires approval before it can be sent: ${evaluation.reasons.join('; ')}`,
+              409,
+            );
         } else if (quote.status !== 'approved') throw transition('Quote', quote.status, 'be sent');
         open(tx, 'quotes', id, 'Quote', options);
         quote.status = 'sent';
         quote.sentAt = tx.occurredAt;
         finalize(tx, 'quotes', quote, 'quote.sent', 'quote', ['status', 'sentAt']);
-        tx.activityEvent({ type: 'quote.sent', subjectType: 'quote', subjectId: id, subjectLabel: quote.quoteNumber, customerId: customer.id, summary: `Quote ${quote.quoteNumber} sent to ${customer.displayName}` });
+        tx.activityEvent({
+          type: 'quote.sent',
+          subjectType: 'quote',
+          subjectId: id,
+          subjectLabel: quote.quoteNumber,
+          customerId: customer.id,
+          summary: `Quote ${quote.quoteNumber} sent to ${customer.displayName}`,
+        });
         return getQuote(runtime, id);
       }),
 
@@ -435,22 +664,40 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       runtime.command('POST /quotes/:id/accept', options, { id }, (tx) => {
         const quote = load(runtime, 'quotes', id, 'Quote');
         runtime.require('quotes.convert', { ownerId: quote.ownerId, customerId: quote.customerId });
-        if (quote.status !== 'sent' && quote.status !== 'viewed') throw transition('Quote', quote.status, 'be accepted');
-        if (compareDates(runtime.store.today, quote.expirationDate) > 0) throw domainError('QUOTE_EXPIRED', `Quote ${quote.quoteNumber} expired on ${quote.expirationDate}`, 409);
+        if (quote.status !== 'sent' && quote.status !== 'viewed')
+          throw transition('Quote', quote.status, 'be accepted');
+        if (compareDates(runtime.store.today, quote.expirationDate) > 0)
+          throw domainError(
+            'QUOTE_EXPIRED',
+            `Quote ${quote.quoteNumber} expired on ${quote.expirationDate}`,
+            409,
+          );
         open(tx, 'quotes', id, 'Quote', options);
         quote.status = 'accepted';
         quote.acceptedAt = tx.occurredAt;
         finalize(tx, 'quotes', quote, 'quote.accepted', 'quote', ['status', 'acceptedAt']);
-        tx.activityEvent({ type: 'quote.accepted', subjectType: 'quote', subjectId: id, subjectLabel: quote.quoteNumber, customerId: quote.customerId, summary: `Quote ${quote.quoteNumber} accepted by the customer` });
+        tx.activityEvent({
+          type: 'quote.accepted',
+          subjectType: 'quote',
+          subjectId: id,
+          subjectLabel: quote.quoteNumber,
+          customerId: quote.customerId,
+          summary: `Quote ${quote.quoteNumber} accepted by the customer`,
+        });
         return getQuote(runtime, id);
       }),
 
-    reject: (id: string, input: { reason: string }, options?: MutationOptions): Promise<QuoteDetail> =>
+    reject: (
+      id: string,
+      input: { reason: string },
+      options?: MutationOptions,
+    ): Promise<QuoteDetail> =>
       runtime.command('POST /quotes/:id/reject', options, { id, input }, (tx) => {
         new Validator().required('reason', input.reason).throwIfAny();
         const quote = load(runtime, 'quotes', id, 'Quote');
         runtime.require('quotes.edit', { ownerId: quote.ownerId, customerId: quote.customerId });
-        if (quote.status !== 'sent' && quote.status !== 'viewed') throw transition('Quote', quote.status, 'be rejected by the customer');
+        if (quote.status !== 'sent' && quote.status !== 'viewed')
+          throw transition('Quote', quote.status, 'be rejected by the customer');
         open(tx, 'quotes', id, 'Quote', options);
         quote.status = 'rejected';
         quote.rejectionReason = input.reason.trim();
@@ -462,7 +709,8 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       runtime.command('POST /quotes/:id/cancel', options, { id }, (tx) => {
         const quote = load(runtime, 'quotes', id, 'Quote');
         runtime.require('quotes.edit', { ownerId: quote.ownerId, customerId: quote.customerId });
-        if (quote.status === 'converted' || quote.status === 'cancelled') throw transition('Quote', quote.status, 'be cancelled');
+        if (quote.status === 'converted' || quote.status === 'cancelled')
+          throw transition('Quote', quote.status, 'be cancelled');
         open(tx, 'quotes', id, 'Quote', options);
         cancelApproval(tx, quote.approvalRequestId, 'Quote cancelled');
         quote.status = 'cancelled';
@@ -471,17 +719,35 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       }),
 
     /** Section 58.4 — converts an accepted quote into a draft order with snapshotted values, then submits it. */
-    convert: (id: string, input: { defaultWarehouseId?: string; requestedDeliveryDate?: string; customerPoNumber?: string } = {}, options?: MutationOptions): Promise<OrderDetail> =>
+    convert: (
+      id: string,
+      input: {
+        defaultWarehouseId?: string;
+        requestedDeliveryDate?: string;
+        customerPoNumber?: string;
+      } = {},
+      options?: MutationOptions,
+    ): Promise<OrderDetail> =>
       runtime.command('POST /quotes/:id/convert', options, { id, input }, (tx) => {
         const quote = load(runtime, 'quotes', id, 'Quote');
         const customer = load(runtime, 'customers', quote.customerId, 'Customer');
-        const actor = runtime.require('quotes.convert', { ownerId: quote.ownerId, teamId: customer.salesTeamId, customerId: customer.id });
+        const actor = runtime.require('quotes.convert', {
+          ownerId: quote.ownerId,
+          teamId: customer.salesTeamId,
+          customerId: customer.id,
+        });
         if (quote.status !== 'accepted') throw transition('Quote', quote.status, 'be converted');
-        if (quote.convertedOrderId) throw domainError('QUOTE_ALREADY_CONVERTED', `Quote ${quote.quoteNumber} was already converted`, 409);
+        if (quote.convertedOrderId)
+          throw domainError(
+            'QUOTE_ALREADY_CONVERTED',
+            `Quote ${quote.quoteNumber} was already converted`,
+            409,
+          );
         open(tx, 'quotes', id, 'Quote', options);
         const today = runtime.store.today;
         const addresses = shippingRegion(runtime, customer);
-        const warehouseId = input.defaultWarehouseId ?? [...runtime.store.dataset.warehouses.values()][0]?.id ?? '';
+        const warehouseId =
+          input.defaultWarehouseId ?? [...runtime.store.dataset.warehouses.values()][0]?.id ?? '';
         const orderId = runtime.store.nextId('salesOrder');
         const order: SalesOrder = {
           id: orderId,
@@ -515,11 +781,18 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           grossMargin: quote.grossMargin,
           grossMarginBps: quote.grossMarginBps,
           metadata: metadata(tx, orderId),
-          ...(input.requestedDeliveryDate ? { requestedDeliveryDate: input.requestedDeliveryDate } : {}),
-          ...(trimmed(input.customerPoNumber) ? { customerPoNumber: trimmed(input.customerPoNumber) as string } : {}),
+          ...(input.requestedDeliveryDate
+            ? { requestedDeliveryDate: input.requestedDeliveryDate }
+            : {}),
+          ...(trimmed(input.customerPoNumber)
+            ? { customerPoNumber: trimmed(input.customerPoNumber) as string }
+            : {}),
         };
         tx.create('salesOrders', order);
-        for (const quoteLine of runtime.indexes.quoteLinesByQuote.get(id).slice().sort((a, b) => a.lineNumber - b.lineNumber)) {
+        for (const quoteLine of runtime.indexes.quoteLinesByQuote
+          .get(id)
+          .slice()
+          .sort((a, b) => a.lineNumber - b.lineNumber)) {
           const sku = runtime.store.dataset.skus.get(quoteLine.skuId);
           tx.create('salesOrderLines', {
             id: runtime.store.nextId('salesOrderLine'),
@@ -554,7 +827,15 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         tx.audit('order.created', 'sales_order', orderId, { nextVersion: 1 });
         submitOrder(tx, order);
         tx.dirty('salesOrders');
-        tx.activityEvent({ type: 'order.created', subjectType: 'sales_order', subjectId: orderId, subjectLabel: order.orderNumber, customerId: customer.id, orderId, summary: `Order ${order.orderNumber} created from quote ${quote.quoteNumber}` });
+        tx.activityEvent({
+          type: 'order.created',
+          subjectType: 'sales_order',
+          subjectId: orderId,
+          subjectLabel: order.orderNumber,
+          customerId: customer.id,
+          orderId,
+          summary: `Order ${order.orderNumber} created from quote ${quote.quoteNumber}`,
+        });
         return getOrder(runtime, models, orderId);
       }),
 
@@ -563,7 +844,10 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       let count = 0;
       const today = runtime.store.today;
       for (const quote of runtime.store.dataset.quotes.values()) {
-        if ((quote.status === 'sent' || quote.status === 'viewed') && compareDates(today, quote.expirationDate) > 0) {
+        if (
+          (quote.status === 'sent' || quote.status === 'viewed') &&
+          compareDates(today, quote.expirationDate) > 0
+        ) {
           tx.touch('quotes', quote);
           quote.status = 'expired';
           finalize(tx, 'quotes', quote, 'quote.expired', 'quote', ['status']);
@@ -578,14 +862,31 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     create: (input: OrderInput, options?: MutationOptions): Promise<OrderDetail> =>
       runtime.command('POST /orders', options, input, (tx) => {
         const customer = load(runtime, 'customers', input.customerId, 'Customer');
-        const actor = runtime.require('orders.create', { ownerId: customer.accountOwnerId, teamId: customer.salesTeamId, customerId: customer.id });
-        if (customer.status !== 'active' && customer.status !== 'on_hold') throw domainError(customer.status === 'prospect' ? 'CUSTOMER_INACTIVE' : 'CUSTOMER_INACTIVE', `${customer.displayName} is ${customer.status}; orders require an active customer (prospects convert through an accepted quote)`, 409);
-        const contact = input.contactId ? load(runtime, 'contacts', input.contactId, 'Contact') : runtime.indexes.contactsByCustomer.get(customer.id).find((entry) => entry.isPrimary && entry.status === 'active');
+        const actor = runtime.require('orders.create', {
+          ownerId: customer.accountOwnerId,
+          teamId: customer.salesTeamId,
+          customerId: customer.id,
+        });
+        if (customer.status !== 'active' && customer.status !== 'on_hold')
+          throw domainError(
+            customer.status === 'prospect' ? 'CUSTOMER_INACTIVE' : 'CUSTOMER_INACTIVE',
+            `${customer.displayName} is ${customer.status}; orders require an active customer (prospects convert through an accepted quote)`,
+            409,
+          );
+        const contact = input.contactId
+          ? load(runtime, 'contacts', input.contactId, 'Contact')
+          : runtime.indexes.contactsByCustomer
+              .get(customer.id)
+              .find((entry) => entry.isPrimary && entry.status === 'active');
         const today = runtime.store.today;
         const addresses = shippingRegion(runtime, customer, input.shippingAddressId);
-        const warehouseId = input.defaultWarehouseId ?? [...runtime.store.dataset.warehouses.values()][0]?.id ?? '';
-        if (!runtime.store.dataset.warehouses.has(warehouseId)) throw domainError('VALIDATION_FAILED', `Warehouse ${warehouseId} does not exist`);
-        const priced = priceLines(runtime, customer, input.lines, addresses.region, today, { allowOverride: runtime.can('orders.override_price') });
+        const warehouseId =
+          input.defaultWarehouseId ?? [...runtime.store.dataset.warehouses.values()][0]?.id ?? '';
+        if (!runtime.store.dataset.warehouses.has(warehouseId))
+          throw domainError('VALIDATION_FAILED', `Warehouse ${warehouseId} does not exist`);
+        const priced = priceLines(runtime, customer, input.lines, addresses.region, today, {
+          allowOverride: runtime.can('orders.override_price'),
+        });
         const totals = priced.totals(usd(input.freightMinor ?? 0));
         const id = runtime.store.nextId('salesOrder');
         const order: SalesOrder = {
@@ -619,27 +920,63 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           grossMargin: totals.grossMargin,
           grossMarginBps: totals.grossMarginBps,
           metadata: metadata(tx, id),
-          ...(input.requestedDeliveryDate ? { requestedDeliveryDate: input.requestedDeliveryDate } : {}),
-          ...(trimmed(input.customerPoNumber) ? { customerPoNumber: trimmed(input.customerPoNumber) as string } : {}),
+          ...(input.requestedDeliveryDate
+            ? { requestedDeliveryDate: input.requestedDeliveryDate }
+            : {}),
+          ...(trimmed(input.customerPoNumber)
+            ? { customerPoNumber: trimmed(input.customerPoNumber) as string }
+            : {}),
           ...(trimmed(input.notes) ? { notes: trimmed(input.notes) as string } : {}),
         };
         tx.create('salesOrders', order);
-        for (const line of orderLinesFrom(id, priced.lines, warehouseId, today)) tx.create('salesOrderLines', line);
+        for (const line of orderLinesFrom(id, priced.lines, warehouseId, today))
+          tx.create('salesOrderLines', line);
         tx.audit('order.created', 'sales_order', id, { nextVersion: 1 });
-        tx.activityEvent({ type: 'order.created', subjectType: 'sales_order', subjectId: id, subjectLabel: order.orderNumber, customerId: customer.id, orderId: id, summary: `Order ${order.orderNumber} drafted for ${customer.displayName} (${dollars(order.total.minor)})` });
+        tx.activityEvent({
+          type: 'order.created',
+          subjectType: 'sales_order',
+          subjectId: id,
+          subjectLabel: order.orderNumber,
+          customerId: customer.id,
+          orderId: id,
+          summary: `Order ${order.orderNumber} drafted for ${customer.displayName} (${dollars(order.total.minor)})`,
+        });
         return getOrder(runtime, models, id);
       }),
 
-    update: (id: string, input: Partial<OrderInput> & { lineQuantities?: Record<string, string> }, options?: MutationOptions): Promise<OrderDetail> =>
+    update: (
+      id: string,
+      input: Partial<OrderInput> & { lineQuantities?: Record<string, string> },
+      options?: MutationOptions,
+    ): Promise<OrderDetail> =>
       runtime.command('PATCH /orders/:id', options, { id, input }, (tx) => {
         const order = load(runtime, 'salesOrders', id, 'Order');
         const customer = load(runtime, 'customers', order.customerId, 'Customer');
         const draft = order.status === 'draft';
-        if (draft) runtime.require('orders.edit_draft', { ownerId: order.ownerId, teamId: order.salesTeamId, customerId: customer.id });
-        else if (order.status === 'confirmed' || order.status === 'pending_approval' || order.status === 'on_hold') runtime.require('orders.edit_confirmed');
+        if (draft)
+          runtime.require('orders.edit_draft', {
+            ownerId: order.ownerId,
+            teamId: order.salesTeamId,
+            customerId: customer.id,
+          });
+        else if (
+          order.status === 'confirmed' ||
+          order.status === 'pending_approval' ||
+          order.status === 'on_hold'
+        )
+          runtime.require('orders.edit_confirmed');
         else throw transition('Order', order.status, 'be edited');
         const lines = runtime.indexes.linesByOrder.get(id);
-        if (!draft && lines.some((line) => quantityToMilli(line.fulfilledQuantity) > 0) && (input.lines || input.lineQuantities)) throw domainError('ORDER_HAS_FULFILLED_QUANTITY', 'Lines with shipped quantity cannot be changed', 409);
+        if (
+          !draft &&
+          lines.some((line) => quantityToMilli(line.fulfilledQuantity) > 0) &&
+          (input.lines || input.lineQuantities)
+        )
+          throw domainError(
+            'ORDER_HAS_FULFILLED_QUANTITY',
+            'Lines with shipped quantity cannot be changed',
+            409,
+          );
         open(tx, 'salesOrders', id, 'Order', options);
         const changed: string[] = [];
         if (input.requestedDeliveryDate !== undefined) {
@@ -655,23 +992,45 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           changed.push('notes');
         }
         if (input.defaultWarehouseId && input.defaultWarehouseId !== order.defaultWarehouseId) {
-          if (!runtime.store.dataset.warehouses.has(input.defaultWarehouseId)) throw domainError('VALIDATION_FAILED', `Warehouse ${input.defaultWarehouseId} does not exist`);
+          if (!runtime.store.dataset.warehouses.has(input.defaultWarehouseId))
+            throw domainError(
+              'VALIDATION_FAILED',
+              `Warehouse ${input.defaultWarehouseId} does not exist`,
+            );
           order.defaultWarehouseId = input.defaultWarehouseId;
-          for (const line of lines) tx.touch('salesOrderLines', line).preferredWarehouseId = input.defaultWarehouseId;
+          for (const line of lines)
+            tx.touch('salesOrderLines', line).preferredWarehouseId = input.defaultWarehouseId;
           changed.push('defaultWarehouseId');
         }
         const region = shippingRegion(runtime, customer, input.shippingAddressId).region;
         let priceSensitive = false;
         if (input.lines) {
-          const priced = priceLines(runtime, customer, input.lines, region, order.orderDate, { allowOverride: runtime.can('orders.override_price') });
+          const priced = priceLines(runtime, customer, input.lines, region, order.orderDate, {
+            allowOverride: runtime.can('orders.override_price'),
+          });
           for (const line of lines) tx.remove('salesOrderLines', line.id);
-          for (const line of orderLinesFrom(id, priced.lines, order.defaultWarehouseId, order.orderDate)) tx.create('salesOrderLines', line);
+          for (const line of orderLinesFrom(
+            id,
+            priced.lines,
+            order.defaultWarehouseId,
+            order.orderDate,
+          ))
+            tx.create('salesOrderLines', line);
           applyTotals(order, priced.totals(usd(input.freightMinor ?? order.freight.minor)));
           priceSensitive = true;
           changed.push('lines');
         } else if (input.lineQuantities || input.freightMinor !== undefined) {
-          const lineInputs = lines.map((line) => ({ skuId: line.skuId, quantity: input.lineQuantities?.[line.id] ?? line.orderedQuantity, discountBps: line.discountBps, unitPriceMinor: line.listUnitPrice.minor, preferredWarehouseId: line.preferredWarehouseId }));
-          const priced = priceLines(runtime, customer, lineInputs, region, order.orderDate, { allowOverride: true, historicalDiscontinuedOk: true });
+          const lineInputs = lines.map((line) => ({
+            skuId: line.skuId,
+            quantity: input.lineQuantities?.[line.id] ?? line.orderedQuantity,
+            discountBps: line.discountBps,
+            unitPriceMinor: line.listUnitPrice.minor,
+            preferredWarehouseId: line.preferredWarehouseId,
+          }));
+          const priced = priceLines(runtime, customer, lineInputs, region, order.orderDate, {
+            allowOverride: true,
+            historicalDiscontinuedOk: true,
+          });
           for (const [index, line] of lines.entries()) {
             const next = priced.lines[index];
             if (!next) continue;
@@ -691,10 +1050,21 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           releaseReservations(tx, order);
           cancelApproval(tx, order.approvalRequestId, 'Order edited after submission');
           delete order.approvalRequestId;
-          const { evaluation, flags } = evaluateOrder(order, runtime.indexes.linesByOrder.get(id), customer);
+          const { evaluation, flags } = evaluateOrder(
+            order,
+            runtime.indexes.linesByOrder.get(id),
+            customer,
+          );
           order.riskFlags = flags;
           if (evaluation.required) {
-            const request = createApprovalRequest(tx, { targetType: 'sales_order', targetId: id, targetNumber: order.orderNumber, evaluation, requestedBy: tx.actor.id, amount: usd(order.subtotal.minor + order.freight.minor) });
+            const request = createApprovalRequest(tx, {
+              targetType: 'sales_order',
+              targetId: id,
+              targetNumber: order.orderNumber,
+              evaluation,
+              requestedBy: tx.actor.id,
+              amount: usd(order.subtotal.minor + order.freight.minor),
+            });
             order.status = 'pending_approval';
             order.approvalStatus = 'pending';
             order.approvalRequestId = request.id;
@@ -713,26 +1083,56 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     submit: (id: string, options?: MutationOptions): Promise<OrderDetail> =>
       runtime.command('POST /orders/:id/submit', options, { id }, (tx) => {
         const order = load(runtime, 'salesOrders', id, 'Order');
-        runtime.require('orders.submit', { ownerId: order.ownerId, teamId: order.salesTeamId, customerId: order.customerId });
+        runtime.require('orders.submit', {
+          ownerId: order.ownerId,
+          teamId: order.salesTeamId,
+          customerId: order.customerId,
+        });
         if (order.status !== 'draft') throw transition('Order', order.status, 'be submitted');
         open(tx, 'salesOrders', id, 'Order', options);
         submitOrder(tx, order);
         const confirmed = (order.status as SalesOrder['status']) === 'confirmed';
-        finalize(tx, 'salesOrders', order, confirmed ? 'order.confirmed' : 'order.submitted', 'sales_order', ['status', 'approvalStatus']);
+        finalize(
+          tx,
+          'salesOrders',
+          order,
+          confirmed ? 'order.confirmed' : 'order.submitted',
+          'sales_order',
+          ['status', 'approvalStatus'],
+        );
         return getOrder(runtime, models, id);
       }),
 
-    hold: (id: string, input: { reason: string }, options?: MutationOptions): Promise<OrderDetail> =>
+    hold: (
+      id: string,
+      input: { reason: string },
+      options?: MutationOptions,
+    ): Promise<OrderDetail> =>
       runtime.command('POST /orders/:id/hold', options, { id, input }, (tx) => {
         new Validator().required('reason', input.reason).throwIfAny();
         runtime.require('orders.hold');
         const order = open(tx, 'salesOrders', id, 'Order', options);
-        if (order.status !== 'confirmed' && order.status !== 'pending_approval') throw transition('Order', order.status, 'be placed on hold');
+        if (order.status !== 'confirmed' && order.status !== 'pending_approval')
+          throw transition('Order', order.status, 'be placed on hold');
         order.status = 'on_hold';
         order.holdReason = input.reason.trim();
         finalize(tx, 'salesOrders', order, 'order.held', 'sales_order', ['status', 'holdReason']);
-        tx.activityEvent({ type: 'order.held', subjectType: 'sales_order', subjectId: id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: id, summary: `Order ${order.orderNumber} placed on hold — ${input.reason.trim()}` });
-        tx.notify(order.ownerId, 'warning', `${order.orderNumber} placed on hold`, input.reason.trim(), { type: 'sales_order', id });
+        tx.activityEvent({
+          type: 'order.held',
+          subjectType: 'sales_order',
+          subjectId: id,
+          subjectLabel: order.orderNumber,
+          customerId: order.customerId,
+          orderId: id,
+          summary: `Order ${order.orderNumber} placed on hold — ${input.reason.trim()}`,
+        });
+        tx.notify(
+          order.ownerId,
+          'warning',
+          `${order.orderNumber} placed on hold`,
+          input.reason.trim(),
+          { type: 'sales_order', id },
+        );
         return getOrder(runtime, models, id);
       }),
 
@@ -747,24 +1147,57 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           order.status = 'confirmed';
           allocateOrder(tx, order);
         }
-        finalize(tx, 'salesOrders', order, 'order.hold_released', 'sales_order', ['status', 'holdReason']);
-        tx.activityEvent({ type: 'order.hold_released', subjectType: 'sales_order', subjectId: id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: id, summary: `Order ${order.orderNumber} released from hold` });
+        finalize(tx, 'salesOrders', order, 'order.hold_released', 'sales_order', [
+          'status',
+          'holdReason',
+        ]);
+        tx.activityEvent({
+          type: 'order.hold_released',
+          subjectType: 'sales_order',
+          subjectId: id,
+          subjectLabel: order.orderNumber,
+          customerId: order.customerId,
+          orderId: id,
+          summary: `Order ${order.orderNumber} released from hold`,
+        });
         return getOrder(runtime, models, id);
       }),
 
-    cancel: (id: string, input: { reason: string }, options?: MutationOptions): Promise<OrderDetail> =>
+    cancel: (
+      id: string,
+      input: { reason: string },
+      options?: MutationOptions,
+    ): Promise<OrderDetail> =>
       runtime.command('POST /orders/:id/cancel', options, { id, input }, (tx) => {
         new Validator().required('reason', input.reason).throwIfAny();
         const order = load(runtime, 'salesOrders', id, 'Order');
-        runtime.require('orders.cancel', { ownerId: order.ownerId, teamId: order.salesTeamId, customerId: order.customerId });
-        if (order.status === 'cancelled') throw new NexoraApiError('ORDER_ALREADY_CANCELLED', `Order ${order.orderNumber} is already cancelled`);
+        runtime.require('orders.cancel', {
+          ownerId: order.ownerId,
+          teamId: order.salesTeamId,
+          customerId: order.customerId,
+        });
+        if (order.status === 'cancelled')
+          throw new NexoraApiError(
+            'ORDER_ALREADY_CANCELLED',
+            `Order ${order.orderNumber} is already cancelled`,
+          );
         if (order.status === 'closed') throw transition('Order', order.status, 'be cancelled');
         const lines = runtime.indexes.linesByOrder.get(id);
-        if (lines.some((line) => quantityToMilli(line.fulfilledQuantity) > 0)) throw domainError('ORDER_HAS_FULFILLED_QUANTITY', `Order ${order.orderNumber} has shipped quantity; cancel the remaining quantities instead`, 409);
+        if (lines.some((line) => quantityToMilli(line.fulfilledQuantity) > 0))
+          throw domainError(
+            'ORDER_HAS_FULFILLED_QUANTITY',
+            `Order ${order.orderNumber} has shipped quantity; cancel the remaining quantities instead`,
+            409,
+          );
         open(tx, 'salesOrders', id, 'Order', options);
         releaseReservations(tx, order, false);
         for (const shipment of runtime.indexes.shipmentsByOrder.get(id)) {
-          if (shipment.status === 'pending' || shipment.status === 'picking' || shipment.status === 'packed' || shipment.status === 'ready_to_ship') {
+          if (
+            shipment.status === 'pending' ||
+            shipment.status === 'picking' ||
+            shipment.status === 'packed' ||
+            shipment.status === 'ready_to_ship'
+          ) {
             tx.touch('shipments', shipment).status = 'cancelled';
             shipment.metadata.updatedAt = tx.occurredAt;
           }
@@ -772,7 +1205,9 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         tx.dirty('shipments');
         for (const line of lines) {
           tx.touch('salesOrderLines', line);
-          line.cancelledQuantity = milliToQuantity(quantityToMilli(line.orderedQuantity) - quantityToMilli(line.fulfilledQuantity));
+          line.cancelledQuantity = milliToQuantity(
+            quantityToMilli(line.orderedQuantity) - quantityToMilli(line.fulfilledQuantity),
+          );
           line.reservedQuantity = '0';
           tx.dirty('salesOrderLines', line);
         }
@@ -782,17 +1217,38 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         order.cancellationReason = input.reason.trim();
         if (order.approvalStatus === 'pending') order.approvalStatus = 'cancelled';
         runtime.projections.recalculateOrder(order);
-        finalize(tx, 'salesOrders', order, 'order.cancelled', 'sales_order', ['status', 'cancelledAt', 'cancellationReason']);
-        tx.activityEvent({ type: 'order.cancelled', subjectType: 'sales_order', subjectId: id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: id, summary: `Order ${order.orderNumber} cancelled — ${input.reason.trim()}` });
+        finalize(tx, 'salesOrders', order, 'order.cancelled', 'sales_order', [
+          'status',
+          'cancelledAt',
+          'cancellationReason',
+        ]);
+        tx.activityEvent({
+          type: 'order.cancelled',
+          subjectType: 'sales_order',
+          subjectId: id,
+          subjectLabel: order.orderNumber,
+          customerId: order.customerId,
+          orderId: id,
+          summary: `Order ${order.orderNumber} cancelled — ${input.reason.trim()}`,
+        });
         return getOrder(runtime, models, id);
       }),
 
-    cancelRemaining: (id: string, input: { reason: string; lineIds?: string[] }, options?: MutationOptions): Promise<OrderDetail> =>
+    cancelRemaining: (
+      id: string,
+      input: { reason: string; lineIds?: string[] },
+      options?: MutationOptions,
+    ): Promise<OrderDetail> =>
       runtime.command('POST /orders/:id/cancel-remaining', options, { id, input }, (tx) => {
         new Validator().required('reason', input.reason).throwIfAny();
         const order = load(runtime, 'salesOrders', id, 'Order');
-        runtime.require('orders.cancel', { ownerId: order.ownerId, teamId: order.salesTeamId, customerId: order.customerId });
-        if (order.status !== 'confirmed' && order.status !== 'on_hold') throw transition('Order', order.status, 'cancel remaining quantities');
+        runtime.require('orders.cancel', {
+          ownerId: order.ownerId,
+          teamId: order.salesTeamId,
+          customerId: order.customerId,
+        });
+        if (order.status !== 'confirmed' && order.status !== 'on_hold')
+          throw transition('Order', order.status, 'cancel remaining quantities');
         open(tx, 'salesOrders', id, 'Order', options);
         let cancelled = 0;
         for (const line of runtime.indexes.linesByOrder.get(id)) {
@@ -800,7 +1256,9 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           const remaining = openMilli(line);
           if (remaining <= 0) continue;
           tx.touch('salesOrderLines', line);
-          line.cancelledQuantity = milliToQuantity(quantityToMilli(line.cancelledQuantity) + remaining);
+          line.cancelledQuantity = milliToQuantity(
+            quantityToMilli(line.cancelledQuantity) + remaining,
+          );
           cancelled += remaining;
           for (const reservation of runtime.indexes.reservationsByLine.get(line.id)) {
             if (reservation.status !== 'active') continue;
@@ -814,32 +1272,69 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           }
           tx.dirty('salesOrderLines', line);
         }
-        if (cancelled === 0) throw domainError('VALIDATION_FAILED', 'No open quantity remains to cancel');
+        if (cancelled === 0)
+          throw domainError('VALIDATION_FAILED', 'No open quantity remains to cancel');
         runtime.projections.recalculateOrder(order);
         order.notes = `${order.notes ? `${order.notes}\n` : ''}Remaining quantities cancelled: ${input.reason.trim()}`;
         closeIfEligible(tx, order);
         finalize(tx, 'salesOrders', order, 'order.remaining_cancelled', 'sales_order', ['lines']);
-        tx.activityEvent({ type: 'order.remaining_cancelled', subjectType: 'sales_order', subjectId: id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: id, summary: `Remaining quantities on ${order.orderNumber} cancelled — ${input.reason.trim()}` });
+        tx.activityEvent({
+          type: 'order.remaining_cancelled',
+          subjectType: 'sales_order',
+          subjectId: id,
+          subjectLabel: order.orderNumber,
+          customerId: order.customerId,
+          orderId: id,
+          summary: `Remaining quantities on ${order.orderNumber} cancelled — ${input.reason.trim()}`,
+        });
         return getOrder(runtime, models, id);
       }),
 
-    allocate: (id: string, input: { lineIds?: string[]; expectedAvailable?: Record<string, string> } = {}, options?: MutationOptions): Promise<OrderDetail> =>
+    allocate: (
+      id: string,
+      input: { lineIds?: string[]; expectedAvailable?: Record<string, string> } = {},
+      options?: MutationOptions,
+    ): Promise<OrderDetail> =>
       runtime.command('POST /orders/:id/allocate', options, { id, input }, (tx) => {
         const order = load(runtime, 'salesOrders', id, 'Order');
         runtime.require('inventory.allocate', { warehouseId: order.defaultWarehouseId });
         if (order.status !== 'confirmed') throw transition('Order', order.status, 'be allocated');
         open(tx, 'salesOrders', id, 'Order', options);
-        if (runtime.store.dataset.fixtures.get('edge.conflict.inventory_changed') === id && runtime.fireConflictOnce(`allocate:${id}`)) {
-          throw new NexoraApiError('INVENTORY_CHANGED', 'Availability changed while the allocation was being prepared. Refresh the order and retry.');
+        if (
+          runtime.store.dataset.fixtures.get('edge.conflict.inventory_changed') === id &&
+          runtime.fireConflictOnce(`allocate:${id}`)
+        ) {
+          throw new NexoraApiError(
+            'INVENTORY_CHANGED',
+            'Availability changed while the allocation was being prepared. Refresh the order and retry.',
+          );
         }
         const result = allocateOrder(tx, order, input.lineIds, input.expectedAvailable);
-        if (result.reserved === 0 && result.shortages.length > 0) throw domainError('INSUFFICIENT_AVAILABILITY', 'No available stock could be reserved for the requested lines', 409, { shortages: result.shortages });
+        if (result.reserved === 0 && result.shortages.length > 0)
+          throw domainError(
+            'INSUFFICIENT_AVAILABILITY',
+            'No available stock could be reserved for the requested lines',
+            409,
+            { shortages: result.shortages },
+          );
         finalize(tx, 'salesOrders', order, 'order.allocated', 'sales_order', ['allocationStatus']);
-        tx.activityEvent({ type: 'order.allocated', subjectType: 'sales_order', subjectId: id, subjectLabel: order.orderNumber, customerId: order.customerId, orderId: id, summary: `${milliToQuantity(result.reserved)} unit(s) reserved for ${order.orderNumber}${result.shortages.length > 0 ? `; ${result.shortages.length} line(s) still short` : ''}` });
+        tx.activityEvent({
+          type: 'order.allocated',
+          subjectType: 'sales_order',
+          subjectId: id,
+          subjectLabel: order.orderNumber,
+          customerId: order.customerId,
+          orderId: id,
+          summary: `${milliToQuantity(result.reserved)} unit(s) reserved for ${order.orderNumber}${result.shortages.length > 0 ? `; ${result.shortages.length} line(s) still short` : ''}`,
+        });
         return getOrder(runtime, models, id);
       }),
 
-    deallocate: (id: string, input: { lineIds?: string[] } = {}, options?: MutationOptions): Promise<OrderDetail> =>
+    deallocate: (
+      id: string,
+      input: { lineIds?: string[] } = {},
+      options?: MutationOptions,
+    ): Promise<OrderDetail> =>
       runtime.command('POST /orders/:id/deallocate', options, { id, input }, (tx) => {
         const order = load(runtime, 'salesOrders', id, 'Order');
         runtime.require('inventory.deallocate', { warehouseId: order.defaultWarehouseId });
@@ -859,9 +1354,16 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           tx.dirty('reservations', reservation);
           released += remaining;
         }
-        if (released === 0) throw domainError('RESERVATION_CONSUMED', 'No unconsumed reservation quantity to release', 409);
+        if (released === 0)
+          throw domainError(
+            'RESERVATION_CONSUMED',
+            'No unconsumed reservation quantity to release',
+            409,
+          );
         runtime.projections.recalculateOrder(order);
-        finalize(tx, 'salesOrders', order, 'order.deallocated', 'sales_order', ['allocationStatus']);
+        finalize(tx, 'salesOrders', order, 'order.deallocated', 'sales_order', [
+          'allocationStatus',
+        ]);
         return getOrder(runtime, models, id);
       }),
   };
@@ -871,8 +1373,14 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     runtime.projections.recalculateOrder(order);
     const lines = runtime.indexes.linesByOrder.get(order.id);
     const allDone = lines.every((line) => openMilli(line) <= 0);
-    const invoiced = order.invoiceStatus === 'invoiced' || lines.every((line) => quantityToMilli(line.fulfilledQuantity) === 0);
-    const paid = order.paymentStatus === 'paid' || order.paymentStatus === 'refunded' || (order.paymentStatus === 'not_invoiced' && lines.every((line) => quantityToMilli(line.fulfilledQuantity) === 0));
+    const invoiced =
+      order.invoiceStatus === 'invoiced' ||
+      lines.every((line) => quantityToMilli(line.fulfilledQuantity) === 0);
+    const paid =
+      order.paymentStatus === 'paid' ||
+      order.paymentStatus === 'refunded' ||
+      (order.paymentStatus === 'not_invoiced' &&
+        lines.every((line) => quantityToMilli(line.fulfilledQuantity) === 0));
     if (order.status === 'confirmed' && allDone && invoiced && paid) {
       tx.touch('salesOrders', order);
       order.status = 'closed';
@@ -882,7 +1390,15 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     return false;
   }
 
-  return { quotes, orders, hooks: { sales_order: orderHooks, quote: quoteHooks }, closeIfEligible, allocateOrder, openMilli, shippingRegion: (customer: Customer) => shippingRegion(runtime, customer) };
+  return {
+    quotes,
+    orders,
+    hooks: { sales_order: orderHooks, quote: quoteHooks },
+    closeIfEligible,
+    allocateOrder,
+    openMilli,
+    shippingRegion: (customer: Customer) => shippingRegion(runtime, customer),
+  };
 }
 
 export type SalesCommands = ReturnType<typeof createSalesCommands>;

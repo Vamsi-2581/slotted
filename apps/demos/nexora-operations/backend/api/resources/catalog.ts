@@ -1,6 +1,21 @@
-import { notFound, quantityToMilli, type Category, type PriceList, type PriceListEntry, type Product, type Sku, type SupplierSkuMapping } from '../../domain';
+import {
+  notFound,
+  quantityToMilli,
+  type Category,
+  type PriceList,
+  type PriceListEntry,
+  type Product,
+  type Sku,
+  type SupplierSkuMapping,
+} from '../../domain';
 import type { InventoryPosition } from '../projections';
-import { fields, runListQuery, type ListQuery, type ListResponse, type ResourceDefinition } from '../query';
+import {
+  fields,
+  runListQuery,
+  type ListQuery,
+  type ListResponse,
+  type ResourceDefinition,
+} from '../query';
 import type { ApiRuntime } from '../runtime';
 
 export interface ProductListItem extends Product {
@@ -34,7 +49,18 @@ export interface SkuDetail {
   supplierMappings: (SupplierSkuMapping & { supplierName: string; supplierStatus: string })[];
   inventory: InventoryPosition[];
   reorderSuggestions: InventoryPosition[];
-  recentMovements: { id: string; type: string; warehouseId: string; onHandDelta: string; damagedDelta: string; quarantineDelta: string; occurredAt: string; sourceEntityType: string; sourceEntityId: string; reason?: string }[];
+  recentMovements: {
+    id: string;
+    type: string;
+    warehouseId: string;
+    onHandDelta: string;
+    damagedDelta: string;
+    quarantineDelta: string;
+    occurredAt: string;
+    sourceEntityType: string;
+    sourceEntityId: string;
+    reason?: string;
+  }[];
 }
 
 export interface ProductDetail {
@@ -54,40 +80,90 @@ export function categoryPath(runtime: ApiRuntime, categoryId: string): Category[
   return path;
 }
 
-function aggregateInventory(runtime: ApiRuntime, skuId: string): { onHand: number; available: number; reserved: number; inbound: number; backordered: number; belowReorderPoint: boolean } {
-  let onHand = 0;
-  let available = 0;
-  let reserved = 0;
-  let inbound = 0;
-  let backordered = 0;
-  let below = false;
-  for (const position of runtime.projections.inventoryForSku(skuId)) {
-    onHand += quantityToMilli(position.onHand);
-    available += quantityToMilli(position.available);
-    reserved += quantityToMilli(position.reserved);
-    inbound += quantityToMilli(position.inbound);
-    backordered += quantityToMilli(position.backordered);
-    below = below || position.belowReorderPoint;
+interface InventoryAggregate {
+  onHand: number;
+  available: number;
+  reserved: number;
+  inbound: number;
+  backordered: number;
+  belowReorderPoint: boolean;
+}
+
+const EMPTY_AGGREGATE: InventoryAggregate = {
+  onHand: 0,
+  available: 0,
+  reserved: 0,
+  inbound: 0,
+  backordered: 0,
+  belowReorderPoint: false,
+};
+
+/** One pass over the inventory projection; reused across a whole list call. */
+export function aggregateInventoryBySku(runtime: ApiRuntime): Map<string, InventoryAggregate> {
+  const map = new Map<string, InventoryAggregate>();
+  for (const position of runtime.projections.inventory().values()) {
+    let entry = map.get(position.skuId);
+    if (!entry) {
+      entry = { ...EMPTY_AGGREGATE };
+      map.set(position.skuId, entry);
+    }
+    entry.onHand += quantityToMilli(position.onHand);
+    entry.available += quantityToMilli(position.available);
+    entry.reserved += quantityToMilli(position.reserved);
+    entry.inbound += quantityToMilli(position.inbound);
+    entry.backordered += quantityToMilli(position.backordered);
+    entry.belowReorderPoint = entry.belowReorderPoint || position.belowReorderPoint;
   }
-  return { onHand, available, reserved, inbound, backordered, belowReorderPoint: below };
+  return map;
+}
+
+function aggregateInventory(
+  runtime: ApiRuntime,
+  skuId: string,
+  aggregates?: Map<string, InventoryAggregate>,
+): InventoryAggregate {
+  if (aggregates) return aggregates.get(skuId) ?? EMPTY_AGGREGATE;
+  const entry: InventoryAggregate = { ...EMPTY_AGGREGATE };
+  for (const position of runtime.projections.inventoryForSku(skuId)) {
+    entry.onHand += quantityToMilli(position.onHand);
+    entry.available += quantityToMilli(position.available);
+    entry.reserved += quantityToMilli(position.reserved);
+    entry.inbound += quantityToMilli(position.inbound);
+    entry.backordered += quantityToMilli(position.backordered);
+    entry.belowReorderPoint = entry.belowReorderPoint || position.belowReorderPoint;
+  }
+  return entry;
 }
 
 function quantityString(milli: number, precision: Sku['quantityPrecision']): string {
   const negative = milli < 0;
   const absolute = Math.abs(milli);
   const whole = Math.floor(absolute / 1000);
-  const fraction = String(absolute % 1000).padStart(3, '0').slice(0, precision).replace(/0+$/, '');
+  const fraction = String(absolute % 1000)
+    .padStart(3, '0')
+    .slice(0, precision)
+    .replace(/0+$/, '');
   return `${negative ? '-' : ''}${whole}${fraction ? `.${fraction}` : ''}`;
 }
 
-export function skuListItem(runtime: ApiRuntime, sku: Sku): SkuListItem {
+export function skuListItem(
+  runtime: ApiRuntime,
+  sku: Sku,
+  context?: { aggregates: Map<string, InventoryAggregate>; standardListId: string | undefined },
+): SkuListItem {
   const { dataset } = runtime.store;
   const product = dataset.products.get(sku.productId);
   const category = dataset.categories.get(sku.categoryId);
-  const standardListId = [...dataset.priceLists.values()].find((list) => list.name === 'Standard')?.id;
-  const entry = runtime.indexes.priceEntriesBySku.get(sku.id).find((candidate) => candidate.priceListId === standardListId);
-  const supplier = sku.preferredSupplierId ? dataset.suppliers.get(sku.preferredSupplierId) : undefined;
-  const inventory = aggregateInventory(runtime, sku.id);
+  const standardListId = context
+    ? context.standardListId
+    : [...dataset.priceLists.values()].find((list) => list.name === 'Standard')?.id;
+  const entry = runtime.indexes.priceEntriesBySku
+    .get(sku.id)
+    .find((candidate) => candidate.priceListId === standardListId);
+  const supplier = sku.preferredSupplierId
+    ? dataset.suppliers.get(sku.preferredSupplierId)
+    : undefined;
+  const inventory = aggregateInventory(runtime, sku.id, context?.aggregates);
   return {
     ...sku,
     productName: product?.name ?? sku.name,
@@ -130,7 +206,14 @@ export const skuResource: ResourceDefinition<SkuListItem> = {
     reorderMode: ['enum', (item) => item.reorderPolicy.mode],
     updatedAt: ['datetime', (item) => item.metadata.updatedAt],
   }),
-  search: (item) => [item.sku, item.name, item.manufacturerPartNumber, item.productName, item.brand, item.barcode],
+  search: (item) => [
+    item.sku,
+    item.name,
+    item.manufacturerPartNumber,
+    item.productName,
+    item.brand,
+    item.barcode,
+  ],
   defaultSort: 'sku',
 };
 
@@ -166,7 +249,8 @@ export function productListItem(runtime: ApiRuntime, product: Product): ProductL
 export function listProducts(runtime: ApiRuntime, query: ListQuery): ListResponse<ProductListItem> {
   runtime.require('catalog.view');
   const items: ProductListItem[] = [];
-  for (const product of runtime.store.dataset.products.values()) items.push(productListItem(runtime, product));
+  for (const product of runtime.store.dataset.products.values())
+    items.push(productListItem(runtime, product));
   return runListQuery(items, productResource, query);
 }
 
@@ -185,8 +269,15 @@ export function getProduct(runtime: ApiRuntime, id: string): ProductDetail {
 
 export function listSkus(runtime: ApiRuntime, query: ListQuery): ListResponse<SkuListItem> {
   runtime.require('catalog.view');
+  const context = {
+    aggregates: aggregateInventoryBySku(runtime),
+    standardListId: [...runtime.store.dataset.priceLists.values()].find(
+      (list) => list.name === 'Standard',
+    )?.id,
+  };
   const items: SkuListItem[] = [];
-  for (const sku of runtime.store.dataset.skus.values()) items.push(skuListItem(runtime, sku));
+  for (const sku of runtime.store.dataset.skus.values())
+    items.push(skuListItem(runtime, sku, context));
   return runListQuery(items, skuResource, query);
 }
 
@@ -208,11 +299,19 @@ export function getSku(runtime: ApiRuntime, id: string): SkuDetail {
     category: path[path.length - 1] as Category,
     categoryPath: path,
     priceEntries: canSeePricing
-      ? runtime.indexes.priceEntriesBySku.get(id).map((entry) => ({ ...entry, priceListName: dataset.priceLists.get(entry.priceListId)?.name ?? entry.priceListId }))
+      ? runtime.indexes.priceEntriesBySku.get(id).map((entry) => ({
+          ...entry,
+          priceListName: dataset.priceLists.get(entry.priceListId)?.name ?? entry.priceListId,
+        }))
       : [],
     supplierMappings: runtime.indexes.mappingsBySku.get(id).map((mapping) => {
       const supplier = dataset.suppliers.get(mapping.supplierId);
-      return { ...mapping, supplierName: supplier?.displayName ?? mapping.supplierId, supplierStatus: supplier?.status ?? 'inactive', ...(canSeeCost ? {} : { unitCost: { currency: 'USD' as const, minor: 0 } }) };
+      return {
+        ...mapping,
+        supplierName: supplier?.displayName ?? mapping.supplierId,
+        supplierStatus: supplier?.status ?? 'inactive',
+        ...(canSeeCost ? {} : { unitCost: { currency: 'USD' as const, minor: 0 } }),
+      };
     }),
     inventory: runtime.projections.inventoryForSku(id),
     reorderSuggestions: runtime.projections.reorderSuggestions(sku),
@@ -220,20 +319,41 @@ export function getSku(runtime: ApiRuntime, id: string): SkuDetail {
       .get(id)
       .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
       .slice(0, 25)
-      .map((movement) => ({ id: movement.id, type: movement.type, warehouseId: movement.warehouseId, onHandDelta: movement.onHandDelta, damagedDelta: movement.damagedDelta, quarantineDelta: movement.quarantineDelta, occurredAt: movement.occurredAt, sourceEntityType: movement.sourceEntityType, sourceEntityId: movement.sourceEntityId, ...(movement.reason ? { reason: movement.reason } : {}) })),
+      .map((movement) => ({
+        id: movement.id,
+        type: movement.type,
+        warehouseId: movement.warehouseId,
+        onHandDelta: movement.onHandDelta,
+        damagedDelta: movement.damagedDelta,
+        quarantineDelta: movement.quarantineDelta,
+        occurredAt: movement.occurredAt,
+        sourceEntityType: movement.sourceEntityType,
+        sourceEntityId: movement.sourceEntityId,
+        ...(movement.reason ? { reason: movement.reason } : {}),
+      })),
   };
 }
 
 export function listPriceLists(runtime: ApiRuntime): (PriceList & { entryCount: number })[] {
   runtime.require('pricing.view');
-  return [...runtime.store.dataset.priceLists.values()].map((list) => ({ ...list, entryCount: runtime.indexes.priceEntriesByList.get(list.id).length }));
+  return [...runtime.store.dataset.priceLists.values()].map((list) => ({
+    ...list,
+    entryCount: runtime.indexes.priceEntriesByList.get(list.id).length,
+  }));
 }
 
-export function listCategories(runtime: ApiRuntime): (Category & { depth: number; productCount: number })[] {
+export function listCategories(
+  runtime: ApiRuntime,
+): (Category & { depth: number; productCount: number })[] {
   runtime.require('catalog.view');
   const counts = new Map<string, number>();
-  for (const product of runtime.store.dataset.products.values()) counts.set(product.categoryId, (counts.get(product.categoryId) ?? 0) + 1);
+  for (const product of runtime.store.dataset.products.values())
+    counts.set(product.categoryId, (counts.get(product.categoryId) ?? 0) + 1);
   return [...runtime.store.dataset.categories.values()]
     .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((category) => ({ ...category, depth: categoryPath(runtime, category.id).length, productCount: counts.get(category.id) ?? 0 }));
+    .map((category) => ({
+      ...category,
+      depth: categoryPath(runtime, category.id).length,
+      productCount: counts.get(category.id) ?? 0,
+    }));
 }

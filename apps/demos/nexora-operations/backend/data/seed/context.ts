@@ -27,10 +27,19 @@ export interface SeedContext {
   sequences: SequenceAllocator;
   random(namespace: string): Random;
   nextId(entity: IdEntity): string;
-  metadata(createdAt: string, createdBy?: string, updatedAt?: string, updatedBy?: string): EntityMetadata;
+  metadata(
+    createdAt: string,
+    createdBy?: string,
+    updatedAt?: string,
+    updatedBy?: string,
+  ): EntityMetadata;
 }
 
-export function createSeedContext(seed: string, scale: ScaleProfile, now = CANONICAL_SEED_INSTANT): SeedContext {
+export function createSeedContext(
+  seed: string,
+  scale: ScaleProfile,
+  now = CANONICAL_SEED_INSTANT,
+): SeedContext {
   const today = businessDateOf(now);
   const sequences = new SequenceAllocator();
   const root = createRandom(seed, 'nexora');

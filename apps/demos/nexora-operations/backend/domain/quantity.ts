@@ -27,7 +27,8 @@ export function quantityToMilli(value: Quantity | SignedQuantity): number {
     let fractionDigits = 0;
     for (; index < value.length; index += 1) {
       const code = value.charCodeAt(index);
-      if (code < 48 || code > 57 || fractionDigits === 3) throw new RangeError(`Invalid quantity: ${JSON.stringify(value)}`);
+      if (code < 48 || code > 57 || fractionDigits === 3)
+        throw new RangeError(`Invalid quantity: ${JSON.stringify(value)}`);
       milli += (code - 48) * scale;
       scale /= 10;
       fractionDigits += 1;
@@ -43,7 +44,9 @@ export function milliToQuantity(milli: number, precision: QuantityPrecision = 3)
   const negative = milli < 0;
   const absolute = Math.abs(milli);
   const whole = Math.floor(absolute / 1000);
-  const fraction = String(absolute % 1000).padStart(3, '0').slice(0, precision);
+  const fraction = String(absolute % 1000)
+    .padStart(3, '0')
+    .slice(0, precision);
   const trimmed = fraction.replace(/0+$/, '');
   return `${negative && (whole !== 0 || trimmed !== '') ? '-' : ''}${whole}${trimmed ? `.${trimmed}` : ''}`;
 }

@@ -8,7 +8,14 @@ import {
 } from '../domain';
 import type { CollectionName, Dataset } from '../data/dataset';
 import type { SeedResult } from '../data/seed';
-import { buildOrderGraph, orderId, orderIndexFromId, type OrderGraph, type OrderSkeleton, type OrderSummary } from '../data/seed/orders';
+import {
+  buildOrderGraph,
+  orderId,
+  orderIndexFromId,
+  type OrderGraph,
+  type OrderSkeleton,
+  type OrderSummary,
+} from '../data/seed/orders';
 import { numberHistoricalGraph } from '../data/seed/sales';
 
 type Entity = { id: string };
@@ -68,10 +75,15 @@ class LazyIndex<T extends Entity> {
   }
 }
 
-export type StoreListener = (collection: CollectionName, entity: Entity | undefined, kind: 'put' | 'delete' | 'invalidate') => void;
+export type StoreListener = (
+  collection: CollectionName,
+  entity: Entity | undefined,
+  kind: 'put' | 'delete' | 'invalidate',
+) => void;
 
 /** Entity type stored in a dataset collection. */
-export type EntityOf<K extends CollectionName> = Dataset[K] extends Map<string, infer V> ? (V extends Entity ? V : never) : never;
+export type EntityOf<K extends CollectionName> =
+  Dataset[K] extends Map<string, infer V> ? (V extends Entity ? V : never) : never;
 
 export interface DemoDatabaseMetadata {
   schemaVersion: number;
@@ -106,7 +118,10 @@ export class Store {
   private readonly idSequences = new Map<IdEntity, number>();
   private readonly listeners = new Set<StoreListener>();
 
-  constructor(seed: SeedResult, options: { scenarioId?: string; activePersonaId: string; demoClock?: string }) {
+  constructor(
+    seed: SeedResult,
+    options: { scenarioId?: string; activePersonaId: string; demoClock?: string },
+  ) {
     this.seed = seed;
     this.dataset = seed.dataset;
     const summaryByIndex = new Map<number, OrderSummary>();
@@ -158,7 +173,8 @@ export class Store {
     const map = this.dataset[name] as Map<string, Entity>;
     const id = (entity as Entity).id;
     const previous = map.get(id);
-    if (previous && previous !== entity) for (const index of this.indexesByCollection.get(name) ?? []) index.remove(previous);
+    if (previous && previous !== entity)
+      for (const index of this.indexesByCollection.get(name) ?? []) index.remove(previous);
     map.set(id, entity as Entity);
     for (const index of this.indexesByCollection.get(name) ?? []) index.add(entity as Entity);
     for (const listener of this.listeners) listener(name, entity as Entity, 'put');
@@ -208,7 +224,10 @@ export class Store {
     let index = this.indexes.get(name);
     if (!index) {
       const map = this.dataset[collection] as Map<string, Entity>;
-      index = new LazyIndex<Entity>(() => map.values(), key as (value: Entity) => string | undefined);
+      index = new LazyIndex<Entity>(
+        () => map.values(),
+        key as (value: Entity) => string | undefined,
+      );
       this.indexes.set(name, index);
       const bucket = this.indexesByCollection.get(collection) ?? [];
       bucket.push(index);
@@ -258,11 +277,34 @@ export class Store {
     scan('contractPrice', 'contractPrices');
     // Child collections use a dedicated high range so they never collide with
     // the block-allocated ids of seeded graphs.
-    for (const entity of ['salesOrderLine', 'quoteLine', 'shipmentLine', 'invoiceLine', 'paymentAllocation', 'inventoryReservation', 'stockMovement', 'returnLine', 'creditMemoLine', 'creditMemoApplication', 'purchaseOrderLine', 'goodsReceiptLine', 'transferLine', 'cycleCountLine', 'conversationMessage', 'slaEvent', 'approvalStep', 'auditEvent', 'activityEvent'] as IdEntity[]) {
+    for (const entity of [
+      'salesOrderLine',
+      'quoteLine',
+      'shipmentLine',
+      'invoiceLine',
+      'paymentAllocation',
+      'inventoryReservation',
+      'stockMovement',
+      'returnLine',
+      'creditMemoLine',
+      'creditMemoApplication',
+      'purchaseOrderLine',
+      'goodsReceiptLine',
+      'transferLine',
+      'cycleCountLine',
+      'conversationMessage',
+      'slaEvent',
+      'approvalStep',
+      'auditEvent',
+      'activityEvent',
+    ] as IdEntity[]) {
       this.idSequences.set(entity, 500_000_000);
     }
     // Sales orders also continue after the last skeleton index.
-    this.idSequences.set('salesOrder', Math.max(this.idSequences.get('salesOrder') ?? 0, this.history.skeletons.length));
+    this.idSequences.set(
+      'salesOrder',
+      Math.max(this.idSequences.get('salesOrder') ?? 0, this.history.skeletons.length),
+    );
   }
 
   nextId(entity: IdEntity): string {
@@ -272,11 +314,54 @@ export class Store {
   }
 
   /** Next business number for a family, continuing after the highest seeded number. */
-  nextBusinessNumber(family: 'customer' | 'quote' | 'salesOrder' | 'shipment' | 'return' | 'purchaseOrder' | 'goodsReceipt' | 'invoice' | 'payment' | 'creditMemo' | 'refund' | 'transfer' | 'cycleCount' | 'ticket' | 'supplier'): string {
+  nextBusinessNumber(
+    family:
+      | 'customer'
+      | 'quote'
+      | 'salesOrder'
+      | 'shipment'
+      | 'return'
+      | 'purchaseOrder'
+      | 'goodsReceipt'
+      | 'invoice'
+      | 'payment'
+      | 'creditMemo'
+      | 'refund'
+      | 'transfer'
+      | 'cycleCount'
+      | 'ticket'
+      | 'supplier',
+  ): string {
     const year = Number(this.today.slice(0, 4));
-    const prefixes: Record<string, string> = { customer: 'CUS', quote: 'Q', salesOrder: 'SO', shipment: 'SHP', return: 'RMA', purchaseOrder: 'PO', goodsReceipt: 'GR', invoice: 'INV', payment: 'PAY', creditMemo: 'CM', refund: 'RF', transfer: 'TR', cycleCount: 'CC', ticket: 'TCK', supplier: 'SUP' };
-    const yearly = family === 'quote' || family === 'salesOrder' || family === 'purchaseOrder' || family === 'invoice';
-    const digits = family === 'salesOrder' || family === 'purchaseOrder' || family === 'invoice' || family === 'ticket' ? 5 : 6;
+    const prefixes: Record<string, string> = {
+      customer: 'CUS',
+      quote: 'Q',
+      salesOrder: 'SO',
+      shipment: 'SHP',
+      return: 'RMA',
+      purchaseOrder: 'PO',
+      goodsReceipt: 'GR',
+      invoice: 'INV',
+      payment: 'PAY',
+      creditMemo: 'CM',
+      refund: 'RF',
+      transfer: 'TR',
+      cycleCount: 'CC',
+      ticket: 'TCK',
+      supplier: 'SUP',
+    };
+    const yearly =
+      family === 'quote' ||
+      family === 'salesOrder' ||
+      family === 'purchaseOrder' ||
+      family === 'invoice';
+    const digits =
+      family === 'salesOrder' ||
+      family === 'purchaseOrder' ||
+      family === 'invoice' ||
+      family === 'ticket'
+        ? 5
+        : 6;
     const prefix = yearly ? `${prefixes[family]}-${year}-` : `${prefixes[family]}-`;
     const key = `number:${family}:${yearly ? year : ''}`;
     let max = this.numberSequences.get(key);
@@ -291,28 +376,60 @@ export class Store {
         }
       };
       switch (family) {
-        case 'customer': read(this.dataset.customers.values(), 'accountNumber'); break;
-        case 'quote': read(this.dataset.quotes.values(), 'quoteNumber'); break;
-        case 'salesOrder': read(this.dataset.salesOrders.values(), 'orderNumber'); break;
-        case 'shipment': read(this.dataset.shipments.values(), 'shipmentNumber'); break;
-        case 'return': read(this.dataset.returns.values(), 'returnNumber'); break;
-        case 'purchaseOrder': read(this.dataset.purchaseOrders.values(), 'purchaseOrderNumber'); break;
-        case 'goodsReceipt': read(this.dataset.goodsReceipts.values(), 'receiptNumber'); break;
-        case 'invoice': read(this.dataset.invoices.values(), 'invoiceNumber'); break;
-        case 'payment': read(this.dataset.payments.values(), 'paymentNumber'); break;
-        case 'creditMemo': read(this.dataset.creditMemos.values(), 'creditMemoNumber'); break;
-        case 'refund': read(this.dataset.refunds.values(), 'refundNumber'); break;
-        case 'transfer': read(this.dataset.transfers.values(), 'transferNumber'); break;
-        case 'cycleCount': read(this.dataset.cycleCounts.values(), 'cycleCountNumber'); break;
-        case 'ticket': read(this.dataset.tickets.values(), 'ticketNumber'); break;
-        case 'supplier': read(this.dataset.suppliers.values(), 'supplierNumber'); break;
+        case 'customer':
+          read(this.dataset.customers.values(), 'accountNumber');
+          break;
+        case 'quote':
+          read(this.dataset.quotes.values(), 'quoteNumber');
+          break;
+        case 'salesOrder':
+          read(this.dataset.salesOrders.values(), 'orderNumber');
+          break;
+        case 'shipment':
+          read(this.dataset.shipments.values(), 'shipmentNumber');
+          break;
+        case 'return':
+          read(this.dataset.returns.values(), 'returnNumber');
+          break;
+        case 'purchaseOrder':
+          read(this.dataset.purchaseOrders.values(), 'purchaseOrderNumber');
+          break;
+        case 'goodsReceipt':
+          read(this.dataset.goodsReceipts.values(), 'receiptNumber');
+          break;
+        case 'invoice':
+          read(this.dataset.invoices.values(), 'invoiceNumber');
+          break;
+        case 'payment':
+          read(this.dataset.payments.values(), 'paymentNumber');
+          break;
+        case 'creditMemo':
+          read(this.dataset.creditMemos.values(), 'creditMemoNumber');
+          break;
+        case 'refund':
+          read(this.dataset.refunds.values(), 'refundNumber');
+          break;
+        case 'transfer':
+          read(this.dataset.transfers.values(), 'transferNumber');
+          break;
+        case 'cycleCount':
+          read(this.dataset.cycleCounts.values(), 'cycleCountNumber');
+          break;
+        case 'ticket':
+          read(this.dataset.tickets.values(), 'ticketNumber');
+          break;
+        case 'supplier':
+          read(this.dataset.suppliers.values(), 'supplierNumber');
+          break;
       }
       // Historical (non-materialized) orders occupy the index-derived range.
       if (family === 'salesOrder' || family === 'quote' || family === 'invoice') {
         const firstOfYear = this.seed.sales.environment.firstIndexOfYear.get(year);
-        if (firstOfYear !== undefined) max = Math.max(max, this.history.skeletons.length - firstOfYear);
+        if (firstOfYear !== undefined)
+          max = Math.max(max, this.history.skeletons.length - firstOfYear);
       }
-      if (family === 'shipment' || family === 'payment') max = Math.max(max, this.history.skeletons.length);
+      if (family === 'shipment' || family === 'payment')
+        max = Math.max(max, this.history.skeletons.length);
     }
     const next = max + 1;
     this.numberSequences.set(key, next);
@@ -326,7 +443,12 @@ export class Store {
 
   isHistoricalOrderId(id: string): boolean {
     const index = orderIndexFromId(id);
-    return Number.isInteger(index) && index >= 0 && index < this.history.skeletons.length && !this.history.materializedIndexes.has(index);
+    return (
+      Number.isInteger(index) &&
+      index >= 0 &&
+      index < this.history.skeletons.length &&
+      !this.history.materializedIndexes.has(index)
+    );
   }
 
   /** Expands a historical order on demand; the graph is cached and read-only. */
@@ -354,7 +476,11 @@ export class Store {
   // Audit
 
   appendAudit(event: Omit<AuditEvent, 'id' | 'organizationId'>): AuditEvent {
-    const record: AuditEvent = { id: this.nextId('auditEvent'), organizationId: this.dataset.organization.id, ...event };
+    const record: AuditEvent = {
+      id: this.nextId('auditEvent'),
+      organizationId: this.dataset.organization.id,
+      ...event,
+    };
     this.dataset.auditEvents.set(record.id, record);
     this.invalidate('auditEvents');
     return record;

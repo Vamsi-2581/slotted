@@ -1,5 +1,13 @@
 import type { CurrencyCode, Money, PaymentTermsCode, Quantity, TaxProfile } from './common';
-import { addMoney, applyBps, multiplyMoneyByQuantity, ratioBps, roundHalfUp, subtractMoney, sumMoney } from './money';
+import {
+  addMoney,
+  applyBps,
+  multiplyMoneyByQuantity,
+  ratioBps,
+  roundHalfUp,
+  subtractMoney,
+  sumMoney,
+} from './money';
 import { addDays } from './time';
 
 /** Section 57.8 — deterministic demo sales-tax table by shipping region. */
@@ -12,7 +20,11 @@ const TAX_RATE_BPS_BY_REGION: Record<string, number> = {
 };
 export const DEFAULT_TAX_RATE_BPS = 500;
 
-export function taxRateBpsFor(region: string, taxProfile: TaxProfile, taxClass: 'standard' | 'reduced' | 'exempt' = 'standard'): number {
+export function taxRateBpsFor(
+  region: string,
+  taxProfile: TaxProfile,
+  taxClass: 'standard' | 'reduced' | 'exempt' = 'standard',
+): number {
   if (taxProfile.type === 'exempt' || taxClass === 'exempt') return 0;
   const base = TAX_RATE_BPS_BY_REGION[region] ?? DEFAULT_TAX_RATE_BPS;
   return taxClass === 'reduced' ? roundHalfUp(base / 2) : base;
@@ -81,7 +93,10 @@ export interface DocumentTotals {
 
 /** Section 91.2 — header totals are sums of rounded line values. */
 export function documentTotals(
-  lines: readonly Pick<PricedLine, 'quantity' | 'listUnitPrice' | 'netAmount' | 'taxAmount' | 'extendedCost'>[],
+  lines: readonly Pick<
+    PricedLine,
+    'quantity' | 'listUnitPrice' | 'netAmount' | 'taxAmount' | 'extendedCost'
+  >[],
   freight: Money,
   currency: CurrencyCode,
 ): DocumentTotals {
@@ -157,13 +172,39 @@ export function evaluateQuoteApproval(input: {
   maxLineDiscountBps: number;
 }): ApprovalEvaluation {
   const steps: ApprovalStepRequirement[] = [];
-  const { approvalValueUsdMinor: value, grossMarginBps: margin, maxLineDiscountBps: discount } = input;
-  if (value >= 5_000_000) steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'quote value at or above $50,000' });
-  if (value >= 10_000_000) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'quote value at or above $100,000' });
-  if (margin < 2_000) steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'gross margin below 20%' });
-  if (margin < 1_500) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'gross margin below 15%' });
-  if (discount >= 1_500) steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'line discount at or above 15%' });
-  if (discount >= 2_500) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'line discount at or above 25%' });
+  const {
+    approvalValueUsdMinor: value,
+    grossMarginBps: margin,
+    maxLineDiscountBps: discount,
+  } = input;
+  if (value >= 5_000_000)
+    steps.push({
+      sequence: 1,
+      requiredRole: 'sales_manager',
+      reason: 'quote value at or above $50,000',
+    });
+  if (value >= 10_000_000)
+    steps.push({
+      sequence: 2,
+      requiredRole: 'finance_manager',
+      reason: 'quote value at or above $100,000',
+    });
+  if (margin < 2_000)
+    steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'gross margin below 20%' });
+  if (margin < 1_500)
+    steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'gross margin below 15%' });
+  if (discount >= 1_500)
+    steps.push({
+      sequence: 1,
+      requiredRole: 'sales_manager',
+      reason: 'line discount at or above 15%',
+    });
+  if (discount >= 2_500)
+    steps.push({
+      sequence: 2,
+      requiredRole: 'finance_manager',
+      reason: 'line discount at or above 25%',
+    });
   const merged = dedupeSteps(steps);
   return {
     required: merged.length > 0,
@@ -182,15 +223,47 @@ export function evaluateOrderApproval(input: {
   customerOnHold: boolean;
 }): ApprovalEvaluation {
   const steps: ApprovalStepRequirement[] = [];
-  const { approvalValueUsdMinor: value, grossMarginBps: margin, maxLineDiscountBps: discount } = input;
-  if (value >= 5_000_000) steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'order value at or above $50,000' });
-  if (value >= 10_000_000) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'order value at or above $100,000' });
-  if (margin < 2_200) steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'gross margin below 22%' });
-  if (margin < 1_500) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'gross margin below 15%' });
-  if (discount >= 1_200) steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'line discount at or above 12%' });
-  if (discount >= 2_000) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'line discount at or above 20%' });
-  if (input.creditLimitExceeded) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'credit exposure exceeds credit limit' });
-  if (input.customerOnHold) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'customer is on hold' });
+  const {
+    approvalValueUsdMinor: value,
+    grossMarginBps: margin,
+    maxLineDiscountBps: discount,
+  } = input;
+  if (value >= 5_000_000)
+    steps.push({
+      sequence: 1,
+      requiredRole: 'sales_manager',
+      reason: 'order value at or above $50,000',
+    });
+  if (value >= 10_000_000)
+    steps.push({
+      sequence: 2,
+      requiredRole: 'finance_manager',
+      reason: 'order value at or above $100,000',
+    });
+  if (margin < 2_200)
+    steps.push({ sequence: 1, requiredRole: 'sales_manager', reason: 'gross margin below 22%' });
+  if (margin < 1_500)
+    steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'gross margin below 15%' });
+  if (discount >= 1_200)
+    steps.push({
+      sequence: 1,
+      requiredRole: 'sales_manager',
+      reason: 'line discount at or above 12%',
+    });
+  if (discount >= 2_000)
+    steps.push({
+      sequence: 2,
+      requiredRole: 'finance_manager',
+      reason: 'line discount at or above 20%',
+    });
+  if (input.creditLimitExceeded)
+    steps.push({
+      sequence: 2,
+      requiredRole: 'finance_manager',
+      reason: 'credit exposure exceeds credit limit',
+    });
+  if (input.customerOnHold)
+    steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'customer is on hold' });
   const merged = dedupeSteps(steps);
   return {
     required: merged.length > 0,
@@ -208,11 +281,36 @@ export function evaluatePurchaseOrderApproval(input: {
 }): ApprovalEvaluation {
   const steps: ApprovalStepRequirement[] = [];
   const value = input.approvalValueUsdMinor;
-  if (value >= 2_500_000) steps.push({ sequence: 1, requiredRole: 'procurement_manager', reason: 'purchase order value at or above $25,000' });
-  if (value >= 10_000_000) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'purchase order value at or above $100,000' });
-  if (input.supplierConditional) steps.push({ sequence: 1, requiredRole: 'procurement_manager', reason: 'supplier relationship tier is conditional' });
-  if (input.maxCostVarianceBps > 1_500) steps.push({ sequence: 1, requiredRole: 'procurement_manager', reason: 'unit cost variance above 15%' });
-  if (input.maxCostVarianceBps > 3_000) steps.push({ sequence: 2, requiredRole: 'finance_manager', reason: 'unit cost variance above 30%' });
+  if (value >= 2_500_000)
+    steps.push({
+      sequence: 1,
+      requiredRole: 'procurement_manager',
+      reason: 'purchase order value at or above $25,000',
+    });
+  if (value >= 10_000_000)
+    steps.push({
+      sequence: 2,
+      requiredRole: 'finance_manager',
+      reason: 'purchase order value at or above $100,000',
+    });
+  if (input.supplierConditional)
+    steps.push({
+      sequence: 1,
+      requiredRole: 'procurement_manager',
+      reason: 'supplier relationship tier is conditional',
+    });
+  if (input.maxCostVarianceBps > 1_500)
+    steps.push({
+      sequence: 1,
+      requiredRole: 'procurement_manager',
+      reason: 'unit cost variance above 15%',
+    });
+  if (input.maxCostVarianceBps > 3_000)
+    steps.push({
+      sequence: 2,
+      requiredRole: 'finance_manager',
+      reason: 'unit cost variance above 30%',
+    });
   const merged = dedupeSteps(steps);
   return {
     required: merged.length > 0,
@@ -223,7 +321,9 @@ export function evaluatePurchaseOrderApproval(input: {
 }
 
 /** Section 66.5 — write-off authority by outstanding amount (USD minor). */
-export function writeOffAuthority(outstandingUsdMinor: number): 'accountant' | 'finance_manager' | 'approval_request' {
+export function writeOffAuthority(
+  outstandingUsdMinor: number,
+): 'accountant' | 'finance_manager' | 'approval_request' {
   if (outstandingUsdMinor <= 50_000) return 'accountant';
   if (outstandingUsdMinor <= 500_000) return 'finance_manager';
   return 'approval_request';

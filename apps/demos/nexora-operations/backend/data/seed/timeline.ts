@@ -1,4 +1,11 @@
-import { addDays, compareDates, diffDays, parseBusinessDate, weekdayOf, type Customer } from '../../domain';
+import {
+  addDays,
+  compareDates,
+  diffDays,
+  parseBusinessDate,
+  weekdayOf,
+  type Customer,
+} from '../../domain';
 import type { Random } from '../random';
 import type { SeedContext } from './context';
 import type { CustomerSeedResult } from './customers';
@@ -6,11 +13,45 @@ import type { TenantSeedResult } from './tenant';
 import { decideOrderKind, type OrderKind, type OrderSkeleton } from './orders';
 
 const WAREHOUSE_BY_REGION: Record<string, string> = {
-  IL: 'CHI-01', WI: 'CHI-01', MN: 'CHI-01', IA: 'CHI-01', MO: 'CHI-01', NE: 'CHI-01', KS: 'CHI-01', SD: 'CHI-01', IN: 'CHI-01', MI: 'CHI-01', OH: 'CHI-01', KY: 'CHI-01',
-  TX: 'DAL-01', OK: 'DAL-01', LA: 'DAL-01', AR: 'DAL-01', NM: 'DAL-01',
-  GA: 'ATL-01', FL: 'ATL-01', AL: 'ATL-01', SC: 'ATL-01', NC: 'ATL-01', TN: 'ATL-01',
-  CO: 'DEN-01', UT: 'DEN-01', AZ: 'DEN-01', ID: 'DEN-01', NV: 'DEN-01', WA: 'DEN-01', OR: 'DEN-01', CA: 'DEN-01',
-  NJ: 'NJ-01', NY: 'NJ-01', PA: 'NJ-01', CT: 'NJ-01', MA: 'NJ-01', RI: 'NJ-01', MD: 'NJ-01', VA: 'NJ-01',
+  IL: 'CHI-01',
+  WI: 'CHI-01',
+  MN: 'CHI-01',
+  IA: 'CHI-01',
+  MO: 'CHI-01',
+  NE: 'CHI-01',
+  KS: 'CHI-01',
+  SD: 'CHI-01',
+  IN: 'CHI-01',
+  MI: 'CHI-01',
+  OH: 'CHI-01',
+  KY: 'CHI-01',
+  TX: 'DAL-01',
+  OK: 'DAL-01',
+  LA: 'DAL-01',
+  AR: 'DAL-01',
+  NM: 'DAL-01',
+  GA: 'ATL-01',
+  FL: 'ATL-01',
+  AL: 'ATL-01',
+  SC: 'ATL-01',
+  NC: 'ATL-01',
+  TN: 'ATL-01',
+  CO: 'DEN-01',
+  UT: 'DEN-01',
+  AZ: 'DEN-01',
+  ID: 'DEN-01',
+  NV: 'DEN-01',
+  WA: 'DEN-01',
+  OR: 'DEN-01',
+  CA: 'DEN-01',
+  NJ: 'NJ-01',
+  NY: 'NJ-01',
+  PA: 'NJ-01',
+  CT: 'NJ-01',
+  MA: 'NJ-01',
+  RI: 'NJ-01',
+  MD: 'NJ-01',
+  VA: 'NJ-01',
 };
 
 const WEEKDAY_FACTOR = [0.05, 1.05, 1.1, 1.1, 1.05, 0.95, 0.12];
@@ -19,18 +60,31 @@ const WEEKDAY_NORMALIZER = 7 / WEEKDAY_FACTOR.reduce((sum, factor) => sum + fact
 /** Mild seasonality by month (1–12). */
 const SEASONALITY = [0, 0.92, 0.98, 1.08, 1.04, 1.02, 1.0, 0.94, 1.0, 1.1, 1.06, 0.96, 0.82];
 
-export function dailyVolumeFactor(date: string, today: string, historyYears = 2, annualGrowth = 0.08): number {
+export function dailyVolumeFactor(
+  date: string,
+  today: string,
+  historyYears = 2,
+  annualGrowth = 0.08,
+): number {
   const { month } = parseBusinessDate(date);
   const weekday = weekdayOf(date);
   const yearsBack = diffDays(today, date) / 365;
   // Growth is centred on the history midpoint so the average daily rate is preserved.
   const growth = Math.pow(1 + annualGrowth, historyYears / 2 - yearsBack);
-  return (WEEKDAY_FACTOR[weekday] as number) * WEEKDAY_NORMALIZER * (SEASONALITY[month] as number) * growth;
+  return (
+    (WEEKDAY_FACTOR[weekday] as number) *
+    WEEKDAY_NORMALIZER *
+    (SEASONALITY[month] as number) *
+    growth
+  );
 }
 
 export function warehouseForRegion(tenant: TenantSeedResult, region: string): string {
   const code = WAREHOUSE_BY_REGION[region] ?? 'CHI-01';
-  return tenant.warehouseIdsByCode.get(code) ?? (tenant.warehouseIdsByCode.values().next().value as string);
+  return (
+    tenant.warehouseIdsByCode.get(code) ??
+    (tenant.warehouseIdsByCode.values().next().value as string)
+  );
 }
 
 /**
@@ -38,7 +92,11 @@ export function warehouseForRegion(tenant: TenantSeedResult, region: string): st
  * Skeleton decisions use only the order's own random stream, so an index can
  * be rebuilt in isolation later.
  */
-export function buildOrderSkeletons(context: SeedContext, tenant: TenantSeedResult, customers: CustomerSeedResult): OrderSkeleton[] {
+export function buildOrderSkeletons(
+  context: SeedContext,
+  tenant: TenantSeedResult,
+  customers: CustomerSeedResult,
+): OrderSkeleton[] {
   const { scale, today, historyStart, dataset } = context;
   const random = context.random('timeline/orders');
   const perDay = scale.ordersPerYear / 365;
@@ -46,7 +104,10 @@ export function buildOrderSkeletons(context: SeedContext, tenant: TenantSeedResu
   const weighted = customers.orderWeightedCustomerIds;
   for (let date = historyStart; compareDates(date, today) <= 0; date = addDays(date, 1)) {
     const expected = perDay * dailyVolumeFactor(date, today, scale.historyMonths / 12);
-    const count = Math.max(0, Math.round(expected + random.normal(0, Math.sqrt(Math.max(1, expected)))));
+    const count = Math.max(
+      0,
+      Math.round(expected + random.normal(0, Math.sqrt(Math.max(1, expected)))),
+    );
     for (let position = 0; position < count; position += 1) {
       const index = skeletons.length;
       const stream = context.random(`order/${index}/skeleton`);
@@ -65,13 +126,19 @@ export function buildOrderSkeletons(context: SeedContext, tenant: TenantSeedResu
   return skeletons;
 }
 
-function pickCustomerFor(random: Random, weighted: readonly string[], customersById: Map<string, Customer>, date: string): string | undefined {
+function pickCustomerFor(
+  random: Random,
+  weighted: readonly string[],
+  customersById: Map<string, Customer>,
+  date: string,
+): string | undefined {
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const candidate = random.pick(weighted);
     const customer = customersById.get(candidate);
     if (!customer) continue;
     if (customer.customerSince && compareDates(customer.customerSince, date) > 0) continue;
-    if (customer.status === 'inactive' && diffDays(customersLastActiveGuess(customer), date) < 0) continue;
+    if (customer.status === 'inactive' && diffDays(customersLastActiveGuess(customer), date) < 0)
+      continue;
     return candidate;
   }
   return undefined;

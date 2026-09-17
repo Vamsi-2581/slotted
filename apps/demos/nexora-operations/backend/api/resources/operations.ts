@@ -14,7 +14,13 @@ import {
   type WarehouseLocation,
 } from '../../domain';
 import type { InventoryPosition } from '../projections';
-import { fields, runListQuery, type ListQuery, type ListResponse, type ResourceDefinition } from '../query';
+import {
+  fields,
+  runListQuery,
+  type ListQuery,
+  type ListResponse,
+  type ResourceDefinition,
+} from '../query';
 import type { ApiRuntime } from '../runtime';
 
 // ---------------------------------------------------------------------------
@@ -31,7 +37,13 @@ export interface ShipmentListItem extends Shipment {
 export interface ShipmentDetail {
   shipment: ShipmentListItem;
   lines: (ShipmentLine & { skuCode: string; skuName: string; orderedQuantity: string })[];
-  order: { id: string; orderNumber: string; status: Shipment['status'] | string; customerId: string; shippingAddress: unknown };
+  order: {
+    id: string;
+    orderNumber: string;
+    status: Shipment['status'] | string;
+    customerId: string;
+    shippingAddress: unknown;
+  };
   warehouse: Warehouse;
   invoices: { id: string; invoiceNumber?: string; total: unknown; settlement: string }[];
 }
@@ -77,7 +89,10 @@ export const shipmentResource: ResourceDefinition<ShipmentListItem> = {
   defaultSort: '-createdAt',
 };
 
-export function listShipments(runtime: ApiRuntime, query: ListQuery): ListResponse<ShipmentListItem> {
+export function listShipments(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<ShipmentListItem> {
   const user = runtime.require('shipments.view');
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
   const items: ShipmentListItem[] = [];
@@ -89,7 +104,7 @@ export function listShipments(runtime: ApiRuntime, query: ListQuery): ListRespon
 }
 
 export function getShipment(runtime: ApiRuntime, id: string): ShipmentDetail {
-  const { dataset, } = runtime.store;
+  const { dataset } = runtime.store;
   const shipment = dataset.shipments.get(id);
   if (!shipment) throw notFound('Shipment', id);
   runtime.require('shipments.view', { warehouseId: shipment.warehouseId });
@@ -99,18 +114,38 @@ export function getShipment(runtime: ApiRuntime, id: string): ShipmentDetail {
   if (!warehouse) throw notFound('Warehouse', shipment.warehouseId);
   const invoiceIds = new Set<string>();
   for (const line of runtime.indexes.shipmentLinesByShipment.get(id)) {
-    for (const invoiceLine of runtime.indexes.invoiceLinesByOrderLine.get(line.orderLineId)) if (invoiceLine.shipmentLineId === line.id) invoiceIds.add(invoiceLine.invoiceId);
+    for (const invoiceLine of runtime.indexes.invoiceLinesByOrderLine.get(line.orderLineId))
+      if (invoiceLine.shipmentLineId === line.id) invoiceIds.add(invoiceLine.invoiceId);
   }
   return {
     shipment: shipmentListItem(runtime, shipment),
     lines: runtime.indexes.shipmentLinesByShipment.get(id).map((line) => {
       const sku = dataset.skus.get(line.skuId);
       const orderLine = dataset.salesOrderLines.get(line.orderLineId);
-      return { ...line, skuCode: sku?.sku ?? line.skuId, skuName: sku?.name ?? line.skuId, orderedQuantity: orderLine?.orderedQuantity ?? line.quantity };
+      return {
+        ...line,
+        skuCode: sku?.sku ?? line.skuId,
+        skuName: sku?.name ?? line.skuId,
+        orderedQuantity: orderLine?.orderedQuantity ?? line.quantity,
+      };
     }),
-    order: { id: order.id, orderNumber: order.orderNumber, status: order.status, customerId: order.customerId, shippingAddress: order.shippingAddress },
+    order: {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      customerId: order.customerId,
+      shippingAddress: order.shippingAddress,
+    },
     warehouse,
-    invoices: [...invoiceIds].map((invoiceId) => dataset.invoices.get(invoiceId)).filter((invoice) => invoice !== undefined).map((invoice) => ({ id: invoice.id, total: invoice.total, settlement: invoice.settlement, ...(invoice.invoiceNumber ? { invoiceNumber: invoice.invoiceNumber } : {}) })),
+    invoices: [...invoiceIds]
+      .map((invoiceId) => dataset.invoices.get(invoiceId))
+      .filter((invoice) => invoice !== undefined)
+      .map((invoice) => ({
+        id: invoice.id,
+        total: invoice.total,
+        settlement: invoice.settlement,
+        ...(invoice.invoiceNumber ? { invoiceNumber: invoice.invoiceNumber } : {}),
+      })),
   };
 }
 
@@ -159,7 +194,8 @@ export const returnResource: ResourceDefinition<ReturnListItem> = {
 export function listReturns(runtime: ApiRuntime, query: ListQuery): ListResponse<ReturnListItem> {
   runtime.require('returns.view');
   const items: ReturnListItem[] = [];
-  for (const ret of runtime.store.dataset.returns.values()) items.push(returnListItem(runtime, ret));
+  for (const ret of runtime.store.dataset.returns.values())
+    items.push(returnListItem(runtime, ret));
   return runListQuery(items, returnResource, query);
 }
 
@@ -175,7 +211,16 @@ export function getReturn(runtime: ApiRuntime, id: string): ReturnDetail {
       const sku = dataset.skus.get(line.skuId);
       return { ...line, skuCode: sku?.sku ?? line.skuId, skuName: sku?.name ?? line.skuId };
     }),
-    ...(memo ? { creditMemo: { id: memo.id, creditMemoNumber: memo.creditMemoNumber, total: memo.total, lifecycle: memo.lifecycle } } : {}),
+    ...(memo
+      ? {
+          creditMemo: {
+            id: memo.id,
+            creditMemoNumber: memo.creditMemoNumber,
+            total: memo.total,
+            lifecycle: memo.lifecycle,
+          },
+        }
+      : {}),
   };
 }
 
@@ -193,7 +238,10 @@ export interface InventoryListItem extends InventoryPosition {
   skuStatus: string;
 }
 
-export function inventoryListItem(runtime: ApiRuntime, position: InventoryPosition): InventoryListItem {
+export function inventoryListItem(
+  runtime: ApiRuntime,
+  position: InventoryPosition,
+): InventoryListItem {
   const { dataset } = runtime.store;
   const sku = dataset.skus.get(position.skuId);
   return {
@@ -203,7 +251,10 @@ export function inventoryListItem(runtime: ApiRuntime, position: InventoryPositi
     warehouseCode: dataset.warehouses.get(position.warehouseId)?.code ?? position.warehouseId,
     unitOfMeasure: sku?.unitOfMeasure ?? 'EA',
     standardCost: { currency: 'USD', minor: sku?.standardCost.minor ?? 0 },
-    onHandValue: { currency: 'USD', minor: Math.round(((sku?.standardCost.minor ?? 0) * quantityToMilli(position.onHand)) / 1000) },
+    onHandValue: {
+      currency: 'USD',
+      minor: Math.round(((sku?.standardCost.minor ?? 0) * quantityToMilli(position.onHand)) / 1000),
+    },
     categoryName: sku ? (dataset.categories.get(sku.categoryId)?.name ?? '') : '',
     skuStatus: sku?.status ?? 'active',
   };
@@ -236,7 +287,10 @@ export const inventoryResource: ResourceDefinition<InventoryListItem> = {
   defaultSort: 'skuCode,warehouseCode',
 };
 
-export function listInventory(runtime: ApiRuntime, query: ListQuery): ListResponse<InventoryListItem> {
+export function listInventory(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<InventoryListItem> {
   const user = runtime.require('inventory.view');
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
   const items: InventoryListItem[] = [];
@@ -247,15 +301,29 @@ export function listInventory(runtime: ApiRuntime, query: ListQuery): ListRespon
   return runListQuery(items, inventoryResource, query);
 }
 
-export function getInventoryForSku(runtime: ApiRuntime, skuId: string): { sku: { id: string; sku: string; name: string }; positions: InventoryListItem[]; movements: StockMovement[] } {
+export function getInventoryForSku(
+  runtime: ApiRuntime,
+  skuId: string,
+): {
+  sku: { id: string; sku: string; name: string };
+  positions: InventoryListItem[];
+  movements: StockMovement[];
+} {
   const user = runtime.require('inventory.view');
   const sku = runtime.store.dataset.skus.get(skuId);
   if (!sku) throw notFound('SKU', skuId);
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
   return {
     sku: { id: sku.id, sku: sku.sku, name: sku.name },
-    positions: runtime.projections.inventoryForSku(skuId).filter((position) => warehouses === 'all' || warehouses.includes(position.warehouseId)).map((position) => inventoryListItem(runtime, position)),
-    movements: runtime.indexes.movementsBySku.get(skuId).filter((movement) => warehouses === 'all' || warehouses.includes(movement.warehouseId)).sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)).slice(0, 100),
+    positions: runtime.projections
+      .inventoryForSku(skuId)
+      .filter((position) => warehouses === 'all' || warehouses.includes(position.warehouseId))
+      .map((position) => inventoryListItem(runtime, position)),
+    movements: runtime.indexes.movementsBySku
+      .get(skuId)
+      .filter((movement) => warehouses === 'all' || warehouses.includes(movement.warehouseId))
+      .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
+      .slice(0, 100),
   };
 }
 
@@ -284,7 +352,10 @@ export const movementResource: ResourceDefinition<MovementListItem> = {
   defaultSort: '-occurredAt',
 };
 
-export function listStockMovements(runtime: ApiRuntime, query: ListQuery): ListResponse<MovementListItem> {
+export function listStockMovements(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<MovementListItem> {
   const user = runtime.require('inventory.view');
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
   const { dataset } = runtime.store;
@@ -303,15 +374,24 @@ export function listStockMovements(runtime: ApiRuntime, query: ListQuery): ListR
   return runListQuery(items, movementResource, query);
 }
 
-export function listWarehouses(runtime: ApiRuntime): (Warehouse & { managerName: string; locationCount: number })[] {
+export function listWarehouses(
+  runtime: ApiRuntime,
+): (Warehouse & { managerName: string; locationCount: number })[] {
   runtime.require('inventory.view');
   const { dataset } = runtime.store;
-  return [...dataset.warehouses.values()].map((warehouse) => ({ ...warehouse, managerName: dataset.users.get(warehouse.managerId)?.displayName ?? warehouse.managerId, locationCount: runtime.indexes.locationsByWarehouse.get(warehouse.id).length }));
+  return [...dataset.warehouses.values()].map((warehouse) => ({
+    ...warehouse,
+    managerName: dataset.users.get(warehouse.managerId)?.displayName ?? warehouse.managerId,
+    locationCount: runtime.indexes.locationsByWarehouse.get(warehouse.id).length,
+  }));
 }
 
 export function listLocations(runtime: ApiRuntime, warehouseId: string): WarehouseLocation[] {
   runtime.require('inventory.view', { warehouseId });
-  return runtime.indexes.locationsByWarehouse.get(warehouseId).slice().sort((a, b) => a.code.localeCompare(b.code));
+  return runtime.indexes.locationsByWarehouse
+    .get(warehouseId)
+    .slice()
+    .sort((a, b) => a.code.localeCompare(b.code));
 }
 
 // ---------------------------------------------------------------------------
@@ -339,29 +419,49 @@ export const transferResource: ResourceDefinition<TransferListItem> = {
   defaultSort: '-requestedDate',
 };
 
-export function transferListItem(runtime: ApiRuntime, transfer: InventoryTransfer): TransferListItem {
+export function transferListItem(
+  runtime: ApiRuntime,
+  transfer: InventoryTransfer,
+): TransferListItem {
   const { dataset } = runtime.store;
   return {
     ...transfer,
-    sourceWarehouseCode: dataset.warehouses.get(transfer.sourceWarehouseId)?.code ?? transfer.sourceWarehouseId,
-    destinationWarehouseCode: dataset.warehouses.get(transfer.destinationWarehouseId)?.code ?? transfer.destinationWarehouseId,
+    sourceWarehouseCode:
+      dataset.warehouses.get(transfer.sourceWarehouseId)?.code ?? transfer.sourceWarehouseId,
+    destinationWarehouseCode:
+      dataset.warehouses.get(transfer.destinationWarehouseId)?.code ??
+      transfer.destinationWarehouseId,
     requestedByName: dataset.users.get(transfer.requestedBy)?.displayName ?? transfer.requestedBy,
     lineCount: runtime.indexes.transferLinesByTransfer.get(transfer.id).length,
   };
 }
 
-export function listTransfers(runtime: ApiRuntime, query: ListQuery): ListResponse<TransferListItem> {
+export function listTransfers(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<TransferListItem> {
   const user = runtime.require('inventory.view');
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
   const items: TransferListItem[] = [];
   for (const transfer of runtime.store.dataset.transfers.values()) {
-    if (warehouses !== 'all' && !warehouses.includes(transfer.sourceWarehouseId) && !warehouses.includes(transfer.destinationWarehouseId)) continue;
+    if (
+      warehouses !== 'all' &&
+      !warehouses.includes(transfer.sourceWarehouseId) &&
+      !warehouses.includes(transfer.destinationWarehouseId)
+    )
+      continue;
     items.push(transferListItem(runtime, transfer));
   }
   return runListQuery(items, transferResource, query);
 }
 
-export function getTransfer(runtime: ApiRuntime, id: string): { transfer: TransferListItem; lines: (InventoryTransferLine & { skuCode: string; skuName: string })[] } {
+export function getTransfer(
+  runtime: ApiRuntime,
+  id: string,
+): {
+  transfer: TransferListItem;
+  lines: (InventoryTransferLine & { skuCode: string; skuName: string })[];
+} {
   runtime.require('inventory.view');
   const transfer = runtime.store.dataset.transfers.get(id);
   if (!transfer) throw notFound('Transfer', id);
@@ -398,13 +498,19 @@ export function cycleCountListItem(runtime: ApiRuntime, count: CycleCount): Cycl
   const lines = runtime.indexes.cycleCountLinesByCount.get(count.id);
   return {
     ...count,
-    warehouseCode: runtime.store.dataset.warehouses.get(count.warehouseId)?.code ?? count.warehouseId,
+    warehouseCode:
+      runtime.store.dataset.warehouses.get(count.warehouseId)?.code ?? count.warehouseId,
     lineCount: lines.length,
-    varianceLineCount: lines.filter((line) => line.variance !== undefined && quantityToMilli(line.variance) !== 0).length,
+    varianceLineCount: lines.filter(
+      (line) => line.variance !== undefined && quantityToMilli(line.variance) !== 0,
+    ).length,
   };
 }
 
-export function listCycleCounts(runtime: ApiRuntime, query: ListQuery): ListResponse<CycleCountListItem> {
+export function listCycleCounts(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<CycleCountListItem> {
   const user = runtime.require('inventory.view');
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
   const items: CycleCountListItem[] = [];
@@ -415,7 +521,13 @@ export function listCycleCounts(runtime: ApiRuntime, query: ListQuery): ListResp
   return runListQuery(items, cycleCountResource, query);
 }
 
-export function getCycleCount(runtime: ApiRuntime, id: string): { cycleCount: CycleCountListItem; lines: (CycleCountLine & { skuCode: string; skuName: string; locationCode: string })[] } {
+export function getCycleCount(
+  runtime: ApiRuntime,
+  id: string,
+): {
+  cycleCount: CycleCountListItem;
+  lines: (CycleCountLine & { skuCode: string; skuName: string; locationCode: string })[];
+} {
   const count = runtime.store.dataset.cycleCounts.get(id);
   if (!count) throw notFound('Cycle count', id);
   runtime.require('inventory.view', { warehouseId: count.warehouseId });
@@ -423,7 +535,13 @@ export function getCycleCount(runtime: ApiRuntime, id: string): { cycleCount: Cy
     cycleCount: cycleCountListItem(runtime, count),
     lines: runtime.indexes.cycleCountLinesByCount.get(id).map((line) => {
       const sku = runtime.store.dataset.skus.get(line.skuId);
-      return { ...line, skuCode: sku?.sku ?? line.skuId, skuName: sku?.name ?? line.skuId, locationCode: runtime.store.dataset.warehouseLocations.get(line.locationId)?.code ?? line.locationId };
+      return {
+        ...line,
+        skuCode: sku?.sku ?? line.skuId,
+        skuName: sku?.name ?? line.skuId,
+        locationCode:
+          runtime.store.dataset.warehouseLocations.get(line.locationId)?.code ?? line.locationId,
+      };
     }),
   };
 }

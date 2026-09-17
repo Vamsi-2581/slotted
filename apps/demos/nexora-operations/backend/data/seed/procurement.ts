@@ -66,7 +66,11 @@ export interface ExtraPurchaseOrder extends PurchaseOrderOverride {
 export function seedProcurement(
   context: SeedContext,
   tenant: TenantSeedResult,
-  options: { overrides?: Map<number, PurchaseOrderOverride>; reservedNumbers?: Set<string>; extra?: ExtraPurchaseOrder[] } = {},
+  options: {
+    overrides?: Map<number, PurchaseOrderOverride>;
+    reservedNumbers?: Set<string>;
+    extra?: ExtraPurchaseOrder[];
+  } = {},
 ): ProcurementSeedResult {
   const { dataset, scale, today } = context;
   const random = context.random('timeline/purchase-orders');
@@ -75,9 +79,27 @@ export function seedProcurement(
   // Actors
   const buyerRole = tenant.roleIdsByKey.get('buyer');
   const procurementManagerRole = tenant.roleIdsByKey.get('procurement_manager');
-  const buyers = [...dataset.roleAssignments.values()].filter((assignment) => assignment.roleId === buyerRole && dataset.users.get(assignment.userId)?.status === 'active').map((assignment) => assignment.userId);
-  const procurementManagers = [...dataset.roleAssignments.values()].filter((assignment) => assignment.roleId === procurementManagerRole && dataset.users.get(assignment.userId)?.status === 'active').map((assignment) => assignment.userId);
-  const financeManagers = [...dataset.roleAssignments.values()].filter((assignment) => assignment.roleId === tenant.roleIdsByKey.get('finance_manager') && dataset.users.get(assignment.userId)?.status === 'active').map((assignment) => assignment.userId);
+  const buyers = [...dataset.roleAssignments.values()]
+    .filter(
+      (assignment) =>
+        assignment.roleId === buyerRole &&
+        dataset.users.get(assignment.userId)?.status === 'active',
+    )
+    .map((assignment) => assignment.userId);
+  const procurementManagers = [...dataset.roleAssignments.values()]
+    .filter(
+      (assignment) =>
+        assignment.roleId === procurementManagerRole &&
+        dataset.users.get(assignment.userId)?.status === 'active',
+    )
+    .map((assignment) => assignment.userId);
+  const financeManagers = [...dataset.roleAssignments.values()]
+    .filter(
+      (assignment) =>
+        assignment.roleId === tenant.roleIdsByKey.get('finance_manager') &&
+        dataset.users.get(assignment.userId)?.status === 'active',
+    )
+    .map((assignment) => assignment.userId);
   const receivers = new Map<string, string[]>();
   for (const assignment of dataset.roleAssignments.values()) {
     if (assignment.scope.type !== 'warehouse') continue;
@@ -92,7 +114,8 @@ export function seedProcurement(
   const fallbackBuyer = tenant.personaUserIds.get('marcus-lee') as string;
   if (buyers.length === 0) buyers.push(fallbackBuyer);
   if (procurementManagers.length === 0) procurementManagers.push(fallbackBuyer);
-  if (financeManagers.length === 0) financeManagers.push(tenant.personaUserIds.get('priya-shah') as string);
+  if (financeManagers.length === 0)
+    financeManagers.push(tenant.personaUserIds.get('priya-shah') as string);
 
   // Supplier pools
   const skusBySupplier = new Map<string, SupplierSkuMapping[]>();
@@ -106,20 +129,39 @@ export function seedProcurement(
   for (const supplier of dataset.suppliers.values()) {
     if (supplier.status !== 'active' || !skusBySupplier.has(supplier.id)) continue;
     const mappings = skusBySupplier.get(supplier.id)?.length ?? 0;
-    const weight = Math.max(1, Math.round(Math.sqrt(mappings) * (supplier.relationshipTier === 'preferred' ? 2.2 : supplier.relationshipTier === 'conditional' ? 0.5 : 1)));
+    const weight = Math.max(
+      1,
+      Math.round(
+        Math.sqrt(mappings) *
+          (supplier.relationshipTier === 'preferred'
+            ? 2.2
+            : supplier.relationshipTier === 'conditional'
+              ? 0.5
+              : 1),
+      ),
+    );
     for (let index = 0; index < weight; index += 1) weightedSuppliers.push(supplier.id);
   }
   const warehouses = [...dataset.warehouses.values()];
   const weightedWarehouses: Warehouse[] = [];
-  for (const warehouse of warehouses) for (let index = 0; index < Math.max(1, Math.round(warehouse.capacityCubicMeters / 8_000)); index += 1) weightedWarehouses.push(warehouse);
+  for (const warehouse of warehouses)
+    for (
+      let index = 0;
+      index < Math.max(1, Math.round(warehouse.capacityCubicMeters / 8_000));
+      index += 1
+    )
+      weightedWarehouses.push(warehouse);
 
-  // Skeleton: materialize the trailing 365 days (supplier performance uses a 12-month window) plus curated overrides.
-  const materializeStart = addDays(today, -Math.max(scale.operationalDays, 365));
+  // Skeleton: materialize twice the operational window (at least 180 days) for supplier performance, plus curated overrides.
+  const materializeStart = addDays(today, -Math.max(scale.operationalDays * 2, 180));
   const perDay = scale.purchaseOrdersPerYear / 365;
   const skeletons: PurchaseOrderSkeleton[] = [];
   for (let date = context.historyStart; compareDates(date, today) <= 0; date = addDays(date, 1)) {
     const expected = perDay * dailyVolumeFactor(date, today, scale.historyMonths / 12);
-    const count = Math.max(0, Math.round(expected + random.normal(0, Math.sqrt(Math.max(1, expected)))));
+    const count = Math.max(
+      0,
+      Math.round(expected + random.normal(0, Math.sqrt(Math.max(1, expected)))),
+    );
     for (let position = 0; position < count; position += 1) {
       const index = skeletons.length;
       const stream = context.random(`purchase-order/${index}/skeleton`);
@@ -165,7 +207,9 @@ export function seedProcurement(
       firstIndexOfYear,
       procurementManagers,
       financeManagers,
-      receivers: receivers.get(skeleton.warehouseId) ?? [tenant.personaUserIds.get('jordan-wells') as string],
+      receivers: receivers.get(skeleton.warehouseId) ?? [
+        tenant.personaUserIds.get('jordan-wells') as string,
+      ],
       inboundMilli,
       receiptsToNumber,
       lastAcceptedCost,
@@ -180,19 +224,43 @@ export function seedProcurement(
     const stream = context.random(`purchase-order/${extraIndex}`);
     const supplierId = extra.supplierId ?? stream.pick(weightedSuppliers);
     const supplier = dataset.suppliers.get(supplierId) as Supplier;
-    const skeleton: PurchaseOrderSkeleton = { index: extraIndex, createdDate: date, supplierId, warehouseId: extra.warehouseId ?? stream.pick(weightedWarehouses).id, buyerId: tenant.personaUserIds.get('marcus-lee') ?? stream.pick(buyers) };
-    buildPurchaseOrder(context, skeleton, stream, supplier, skusBySupplier.get(supplierId) ?? [], extra, {
-      poNumber: (year) => poNumber(year, skeletons.length - (firstIndexOfYear.get(year) ?? 0) + (skeleton.index - skeletons.length) + 1),
-      firstIndexOfYear,
-      procurementManagers,
-      financeManagers,
-      receivers: receivers.get(skeleton.warehouseId) ?? [tenant.personaUserIds.get('jordan-wells') as string],
-      inboundMilli,
-      receiptsToNumber,
-      lastAcceptedCost,
-      today,
-    });
-    if (extra.fixtureKey) dataset.fixtures.set(extra.fixtureKey, formatId('purchaseOrder', extraIndex + 1));
+    const skeleton: PurchaseOrderSkeleton = {
+      index: extraIndex,
+      createdDate: date,
+      supplierId,
+      warehouseId: extra.warehouseId ?? stream.pick(weightedWarehouses).id,
+      buyerId: tenant.personaUserIds.get('marcus-lee') ?? stream.pick(buyers),
+    };
+    buildPurchaseOrder(
+      context,
+      skeleton,
+      stream,
+      supplier,
+      skusBySupplier.get(supplierId) ?? [],
+      extra,
+      {
+        poNumber: (year) =>
+          poNumber(
+            year,
+            skeletons.length -
+              (firstIndexOfYear.get(year) ?? 0) +
+              (skeleton.index - skeletons.length) +
+              1,
+          ),
+        firstIndexOfYear,
+        procurementManagers,
+        financeManagers,
+        receivers: receivers.get(skeleton.warehouseId) ?? [
+          tenant.personaUserIds.get('jordan-wells') as string,
+        ],
+        inboundMilli,
+        receiptsToNumber,
+        lastAcceptedCost,
+        today,
+      },
+    );
+    if (extra.fixtureKey)
+      dataset.fixtures.set(extra.fixtureKey, formatId('purchaseOrder', extraIndex + 1));
     extraIndex += 1;
   }
 
@@ -234,27 +302,36 @@ function buildPurchaseOrder(
   const age = diffDays(today, skeleton.createdDate);
 
   // Lines
-  const lineCount = override?.skuIds?.length ?? random.weighted([
-    { value: 1, weight: 25 },
-    { value: 2, weight: 25 },
-    { value: 3, weight: 18 },
-    { value: random.int(4, 6), weight: 20 },
-    { value: random.int(7, 12), weight: 10 },
-    { value: random.int(13, 40), weight: 2 },
-  ]);
+  const lineCount =
+    override?.skuIds?.length ??
+    random.weighted([
+      { value: 1, weight: 25 },
+      { value: 2, weight: 25 },
+      { value: 3, weight: 18 },
+      { value: random.int(4, 6), weight: 20 },
+      { value: random.int(7, 12), weight: 10 },
+      { value: random.int(13, 40), weight: 2 },
+    ]);
   const chosen: SupplierSkuMapping[] = [];
   if (override?.skuIds) {
     for (const skuId of override.skuIds) {
-      const mapping = mappings.find((entry) => entry.skuId === skuId) ?? [...dataset.supplierSkuMappings.values()].find((entry) => entry.skuId === skuId);
+      const mapping =
+        mappings.find((entry) => entry.skuId === skuId) ??
+        [...dataset.supplierSkuMappings.values()].find((entry) => entry.skuId === skuId);
       if (mapping) chosen.push(mapping);
     }
   } else {
     const pool = mappings.length > 40 ? random.sample(mappings, 40) : mappings;
-    for (const mapping of random.sample(pool, Math.min(lineCount, pool.length))) chosen.push(mapping);
+    for (const mapping of random.sample(pool, Math.min(lineCount, pool.length)))
+      chosen.push(mapping);
   }
   if (chosen.length === 0) return;
-  const lead = Math.max(2, Math.round(chosen.reduce((sum, mapping) => sum + mapping.leadTimeDays, 0) / chosen.length));
-  const expectedDate = override?.expectedDate ?? addBusinessDays(skeleton.createdDate, lead + random.int(0, 5));
+  const lead = Math.max(
+    2,
+    Math.round(chosen.reduce((sum, mapping) => sum + mapping.leadTimeDays, 0) / chosen.length),
+  );
+  const expectedDate =
+    override?.expectedDate ?? addBusinessDays(skeleton.createdDate, lead + random.int(0, 5));
   const lines: PurchaseOrderLine[] = [];
   let subtotalMinor = 0;
   let maxVarianceBps = 0;
@@ -262,10 +339,28 @@ function buildPurchaseOrder(
     const sku = dataset.skus.get(mapping.skuId) as Sku;
     const pack = Math.max(1, quantityToMilli(mapping.packMultiple) / 1000);
     const minimum = Math.max(pack, quantityToMilli(mapping.minimumOrderQuantity) / 1000);
-    const base = override?.quantities?.[position] ?? Math.max(minimum, Math.round((random.logNormal(sku.unitOfMeasure === 'PK' ? 12 : sku.unitOfMeasure === 'FT' || sku.unitOfMeasure === 'M' ? 300 : 24, 0.9) / pack)) * pack);
+    const base =
+      override?.quantities?.[position] ??
+      Math.max(
+        minimum,
+        Math.round(
+          random.logNormal(
+            sku.unitOfMeasure === 'PK'
+              ? 12
+              : sku.unitOfMeasure === 'FT' || sku.unitOfMeasure === 'M'
+                ? 300
+                : 24,
+            0.9,
+          ) / pack,
+        ) * pack,
+      );
     const unitCostMinor = roundHalfUp(mapping.unitCost.minor * random.float(0.97, 1.05));
     const previous = deps.lastAcceptedCost.get(`${supplier.id}:${sku.id}`);
-    if (previous) maxVarianceBps = Math.max(maxVarianceBps, roundHalfUp(((unitCostMinor - previous) / previous) * 10_000));
+    if (previous)
+      maxVarianceBps = Math.max(
+        maxVarianceBps,
+        roundHalfUp(((unitCostMinor - previous) / previous) * 10_000),
+      );
     const lineTotal = roundHalfUp(unitCostMinor * base);
     subtotalMinor += lineTotal;
     lines.push({
@@ -287,18 +382,25 @@ function buildPurchaseOrder(
     });
   }
   const freightMinor = random.chance(0.45) ? 0 : roundHalfUp(random.float(40, 900)) * 100;
-  const evaluation = evaluatePurchaseOrderApproval({ approvalValueUsdMinor: subtotalMinor + freightMinor, supplierConditional: supplier.relationshipTier === 'conditional', maxCostVarianceBps: maxVarianceBps });
+  const evaluation = evaluatePurchaseOrderApproval({
+    approvalValueUsdMinor: subtotalMinor + freightMinor,
+    supplierConditional: supplier.relationshipTier === 'conditional',
+    maxCostVarianceBps: maxVarianceBps,
+  });
 
   // Lifecycle by timing
   const submittedAt = addMs(createdAt, random.int(10, 300) * 60_000);
-  const approvedAt = evaluation.required ? addMs(submittedAt, random.int(3, 48) * 3_600_000) : submittedAt;
+  const approvedAt = evaluation.required
+    ? addMs(submittedAt, random.int(3, 48) * 3_600_000)
+    : submittedAt;
   const sentAt = addMs(approvedAt, random.int(1, 24) * 3_600_000);
   const acknowledged = random.chance(0.7);
   const acknowledgedAt = acknowledged ? addMs(sentAt, random.int(4, 72) * 3_600_000) : undefined;
   let status: PurchaseOrder['status'];
   const forced = override?.status;
   if (forced) status = forced;
-  else if (age <= 3 && random.chance(0.35)) status = random.pick(['draft', 'pending_approval', 'approved', 'sent']);
+  else if (age <= 3 && random.chance(0.35))
+    status = random.pick(['draft', 'pending_approval', 'approved', 'sent']);
   else if (random.chance(0.03)) status = 'cancelled';
   else status = acknowledged ? 'acknowledged' : 'sent';
   if (status === 'pending_approval' && !evaluation.required) status = 'approved';
@@ -321,7 +423,11 @@ function buildPurchaseOrder(
     freight: usd(freightMinor),
     total: usd(subtotalMinor + freightMinor),
     metadata: metadataAt(createdAt, skeleton.buyerId, createdAt, skeleton.buyerId, 1),
-    ...(override?.notes ? { notes: override.notes } : random.chance(0.25) ? { notes: random.pick(PO_NOTES) } : {}),
+    ...(override?.notes
+      ? { notes: override.notes }
+      : random.chance(0.25)
+        ? { notes: random.pick(PO_NOTES) }
+        : {}),
   };
   dataset.purchaseOrders.set(id, po);
   for (const line of lines) dataset.purchaseOrderLines.set(line.id, line);
@@ -341,7 +447,8 @@ function buildPurchaseOrder(
       requestedAt: submittedAt,
       amount: usd(subtotalMinor + freightMinor),
       steps: evaluation.steps.map((step, position) => {
-        const pool = step.requiredRole === 'finance_manager' ? deps.financeManagers : deps.procurementManagers;
+        const pool =
+          step.requiredRole === 'finance_manager' ? deps.financeManagers : deps.procurementManagers;
         const approver = random.pick(pool);
         return {
           id: formatId('approvalStep', 1_000_000 + index * 4 + position + 1),
@@ -349,10 +456,27 @@ function buildPurchaseOrder(
           requiredRole: step.requiredRole,
           assignedUserId: approver,
           status: pending ? 'pending' : 'approved',
-          ...(pending ? {} : { decidedBy: approver, decidedAt: approvedAt, comment: random.pick(['Approved.', 'Approved — within budget.', 'OK, expedite.', 'Approved after supplier review.']) }),
+          ...(pending
+            ? {}
+            : {
+                decidedBy: approver,
+                decidedAt: approvedAt,
+                comment: random.pick([
+                  'Approved.',
+                  'Approved — within budget.',
+                  'OK, expedite.',
+                  'Approved after supplier review.',
+                ]),
+              }),
         };
       }),
-      metadata: metadataAt(submittedAt, skeleton.buyerId, pending ? submittedAt : approvedAt, skeleton.buyerId, pending ? 1 : 2),
+      metadata: metadataAt(
+        submittedAt,
+        skeleton.buyerId,
+        pending ? submittedAt : approvedAt,
+        skeleton.buyerId,
+        pending ? 1 : 2,
+      ),
       ...(pending ? {} : { decidedAt: approvedAt }),
     };
     dataset.approvalRequests.set(approval.id, approval);
@@ -383,15 +507,29 @@ function buildPurchaseOrder(
   if (status === 'sent') return;
 
   // Receipts (section 65.7). On-time probability depends on the supplier tier.
-  const onTimeProbability = supplier.relationshipTier === 'preferred' ? 0.88 : supplier.relationshipTier === 'conditional' ? 0.55 : 0.74;
+  const onTimeProbability =
+    supplier.relationshipTier === 'preferred'
+      ? 0.88
+      : supplier.relationshipTier === 'conditional'
+        ? 0.55
+        : 0.74;
   const onTime = !override?.delayed && random.chance(onTimeProbability);
   const slipDays = onTime ? random.int(-3, 0) : random.int(1, 21);
-  const plan = override?.receiptPlan ?? (random.chance(0.15) ? [{ fraction: random.float(0.35, 0.7), daysAfterExpected: slipDays }, { fraction: 1, daysAfterExpected: slipDays + random.int(3, 14) }] : [{ fraction: 1, daysAfterExpected: slipDays }]);
+  const plan =
+    override?.receiptPlan ??
+    (random.chance(0.15)
+      ? [
+          { fraction: random.float(0.35, 0.7), daysAfterExpected: slipDays },
+          { fraction: 1, daysAfterExpected: slipDays + random.int(3, 14) },
+        ]
+      : [{ fraction: 1, daysAfterExpected: slipDays }]);
   let receiptCounter = 0;
   const receivedMilli = new Map<string, number>();
   let anyOpen = false;
   for (const step of plan) {
-    const receiptDate = nextBusinessDayOnOrAfter(addDays(expectedDate, step.daysAfterExpected ?? 0));
+    const receiptDate = nextBusinessDayOnOrAfter(
+      addDays(expectedDate, step.daysAfterExpected ?? 0),
+    );
     if (compareDates(receiptDate, today) > 0) {
       anyOpen = true;
       break;
@@ -410,7 +548,16 @@ function buildPurchaseOrder(
       receivedBy: receiver,
       receivedAt,
       metadata: metadataAt(receivedAt, receiver, receivedAt, receiver, 1),
-      ...(random.chance(0.2) ? { notes: random.pick(['Two cartons showed forklift damage; logged as damaged.', 'Supplier packing list matched.', 'Short one carton — supplier notified.', 'Received at dock 3.']) } : {}),
+      ...(random.chance(0.2)
+        ? {
+            notes: random.pick([
+              'Two cartons showed forklift damage; logged as damaged.',
+              'Supplier packing list matched.',
+              'Short one carton — supplier notified.',
+              'Received at dock 3.',
+            ]),
+          }
+        : {}),
     };
     dataset.goodsReceipts.set(receiptId, receipt);
     deps.receiptsToNumber.push(receipt);
@@ -420,7 +567,8 @@ function buildPurchaseOrder(
       const targetMilli = Math.min(orderedMilli, Math.round(orderedMilli * step.fraction));
       const thisMilli = Math.max(0, targetMilli - alreadyMilli);
       if (thisMilli <= 0) continue;
-      const damagedShare = step.damagedFraction ?? (random.chance(0.04) ? random.float(0.05, 0.3) : 0);
+      const damagedShare =
+        step.damagedFraction ?? (random.chance(0.04) ? random.float(0.05, 0.3) : 0);
       const rejectedShare = random.chance(0.015) ? random.float(0.05, 0.2) : 0;
       const damagedMilli = Math.round(thisMilli * damagedShare);
       const rejectedMilli = Math.round(thisMilli * rejectedShare);
@@ -438,14 +586,24 @@ function buildPurchaseOrder(
       };
       dataset.goodsReceiptLines.set(receiptLine.id, receiptLine);
       receivedMilli.set(line.id, alreadyMilli + thisMilli);
-      line.receivedAcceptedQuantity = milliToQuantity(quantityToMilli(line.receivedAcceptedQuantity) + acceptedMilli);
-      line.receivedDamagedQuantity = milliToQuantity(quantityToMilli(line.receivedDamagedQuantity) + damagedMilli);
-      line.rejectedQuantity = milliToQuantity(quantityToMilli(line.rejectedQuantity) + rejectedMilli);
-      if (acceptedMilli > 0) deps.lastAcceptedCost.set(`${supplier.id}:${line.skuId}`, line.unitCost.minor);
+      line.receivedAcceptedQuantity = milliToQuantity(
+        quantityToMilli(line.receivedAcceptedQuantity) + acceptedMilli,
+      );
+      line.receivedDamagedQuantity = milliToQuantity(
+        quantityToMilli(line.receivedDamagedQuantity) + damagedMilli,
+      );
+      line.rejectedQuantity = milliToQuantity(
+        quantityToMilli(line.rejectedQuantity) + rejectedMilli,
+      );
+      if (acceptedMilli > 0)
+        deps.lastAcceptedCost.set(`${supplier.id}:${line.skuId}`, line.unitCost.minor);
       const physicalMilli = acceptedMilli + damagedMilli;
       if (physicalMilli > 0) {
         const movement: StockMovement = {
-          id: formatId('stockMovement', 40_000_000 + (index * 4 + receiptCounter - 1) * 50 + position + 1),
+          id: formatId(
+            'stockMovement',
+            40_000_000 + (index * 4 + receiptCounter - 1) * 50 + position + 1,
+          ),
           organizationId: ORGANIZATION_ID,
           type: 'receipt',
           skuId: line.skuId,
@@ -462,7 +620,10 @@ function buildPurchaseOrder(
         if (damagedMilli > 0) {
           const damage: StockMovement = {
             ...movement,
-            id: formatId('stockMovement', 60_000_000 + (index * 4 + receiptCounter - 1) * 50 + position + 1),
+            id: formatId(
+              'stockMovement',
+              60_000_000 + (index * 4 + receiptCounter - 1) * 50 + position + 1,
+            ),
             type: 'damage',
             onHandDelta: '0',
             damagedDelta: milliToQuantity(damagedMilli),
@@ -478,29 +639,46 @@ function buildPurchaseOrder(
 
   const fullyReceived = lines.every((line) => {
     const ordered = quantityToMilli(line.orderedQuantity);
-    const received = quantityToMilli(line.receivedAcceptedQuantity) + quantityToMilli(line.receivedDamagedQuantity) + quantityToMilli(line.rejectedQuantity);
+    const received =
+      quantityToMilli(line.receivedAcceptedQuantity) +
+      quantityToMilli(line.receivedDamagedQuantity) +
+      quantityToMilli(line.rejectedQuantity);
     return received >= ordered * 0.95;
   });
-  const anyReceived = lines.some((line) => quantityToMilli(line.receivedAcceptedQuantity) + quantityToMilli(line.receivedDamagedQuantity) > 0);
+  const anyReceived = lines.some(
+    (line) =>
+      quantityToMilli(line.receivedAcceptedQuantity) +
+        quantityToMilli(line.receivedDamagedQuantity) >
+      0,
+  );
   if (fullyReceived && !anyOpen) {
     po.status = 'received';
     if (age > 45 && random.chance(0.9)) {
       po.status = 'closed';
       po.closedAt = addMs(po.metadata.updatedAt, random.int(1, 10) * 24 * 3_600_000);
-      if (compareDates(businessDateOf(po.closedAt), today) > 0) po.closedAt = addMs(po.metadata.updatedAt, 3_600_000);
+      if (compareDates(businessDateOf(po.closedAt), today) > 0)
+        po.closedAt = addMs(po.metadata.updatedAt, 3_600_000);
       po.metadata.updatedAt = po.closedAt;
     }
   } else if (anyReceived) {
     po.status = 'partially_received';
   }
-  if ((po.status === 'sent' || po.status === 'acknowledged' || po.status === 'partially_received') && compareDates(expectedDate, today) < 0) {
+  if (
+    (po.status === 'sent' || po.status === 'acknowledged' || po.status === 'partially_received') &&
+    compareDates(expectedDate, today) < 0
+  ) {
     po.exceptionFlags.push('delayed');
   }
-  if (override?.delayed && !po.exceptionFlags.includes('delayed')) po.exceptionFlags.push('delayed');
+  if (override?.delayed && !po.exceptionFlags.includes('delayed'))
+    po.exceptionFlags.push('delayed');
   if (random.chance(0.02) && po.status !== 'closed') po.exceptionFlags.push('disputed');
   if (po.status === 'sent' || po.status === 'acknowledged' || po.status === 'partially_received') {
     for (const line of lines) {
-      const openMilli = quantityToMilli(line.orderedQuantity) - quantityToMilli(line.receivedAcceptedQuantity) - quantityToMilli(line.receivedDamagedQuantity) - quantityToMilli(line.rejectedQuantity);
+      const openMilli =
+        quantityToMilli(line.orderedQuantity) -
+        quantityToMilli(line.receivedAcceptedQuantity) -
+        quantityToMilli(line.receivedDamagedQuantity) -
+        quantityToMilli(line.rejectedQuantity);
       if (openMilli <= 0) continue;
       const key = `${line.skuId}:${skeleton.warehouseId}`;
       deps.inboundMilli.set(key, (deps.inboundMilli.get(key) ?? 0) + openMilli);

@@ -4,7 +4,19 @@ import { NexoraApiError, quantityToMilli, type Money } from '../domain';
  * List query semantics (sections 73.3, 73.5–73.7).
  */
 
-export type FilterOperator = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'not_in' | 'contains' | 'not_contains' | 'is_empty' | 'is_not_empty';
+export type FilterOperator =
+  | 'eq'
+  | 'neq'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'in'
+  | 'not_in'
+  | 'contains'
+  | 'not_contains'
+  | 'is_empty'
+  | 'is_not_empty';
 
 export type FilterClause = Partial<Record<FilterOperator, unknown>>;
 
@@ -30,7 +42,8 @@ export interface EntityResponse<T> {
   data: T;
 }
 
-export type FieldType = 'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'enum' | 'money' | 'quantity' | 'array';
+export type FieldType =
+  'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'enum' | 'money' | 'quantity' | 'array';
 
 export interface FieldDefinition<T> {
   type: FieldType;
@@ -84,39 +97,67 @@ function coerce(input: unknown, type: FieldType): number | string | boolean | nu
 
 function splitList(input: unknown): unknown[] {
   if (Array.isArray(input)) return input;
-  if (typeof input === 'string') return input.split(',').map((part) => part.trim()).filter((part) => part.length > 0);
+  if (typeof input === 'string')
+    return input
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
   return [input];
 }
 
 function normalizeClause(value: FilterValue, type: FieldType): FilterClause {
   if (value !== null && typeof value === 'object' && !Array.isArray(value)) return value;
   if (Array.isArray(value)) return { in: value };
-  if (typeof value === 'string' && value.includes(',') && (type === 'enum' || type === 'string')) return { in: splitList(value) };
+  if (typeof value === 'string' && value.includes(',') && (type === 'enum' || type === 'string'))
+    return { in: splitList(value) };
   return { eq: value };
 }
 
-function matches<T>(item: T, field: FieldDefinition<T>, clause: FilterClause, name: string): boolean {
+function matches<T>(
+  item: T,
+  field: FieldDefinition<T>,
+  clause: FilterClause,
+  name: string,
+): boolean {
   const raw = field.get(item);
   for (const [operator, expected] of Object.entries(clause) as [FilterOperator, unknown][]) {
     if (expected === undefined) continue;
     switch (operator) {
       case 'is_empty':
-        if (!(raw === undefined || raw === null || raw === '' || (Array.isArray(raw) && raw.length === 0))) return false;
+        if (!(
+          raw === undefined ||
+          raw === null ||
+          raw === '' ||
+          (Array.isArray(raw) && raw.length === 0)
+        ))
+          return false;
         break;
       case 'is_not_empty':
-        if (raw === undefined || raw === null || raw === '' || (Array.isArray(raw) && raw.length === 0)) return false;
+        if (
+          raw === undefined ||
+          raw === null ||
+          raw === '' ||
+          (Array.isArray(raw) && raw.length === 0)
+        )
+          return false;
         break;
       case 'contains':
       case 'not_contains': {
         const needle = String(expected).toLowerCase();
-        const found = Array.isArray(raw) ? raw.some((entry) => String(entry).toLowerCase() === needle) : String(raw ?? '').toLowerCase().includes(needle);
+        const found = Array.isArray(raw)
+          ? raw.some((entry) => String(entry).toLowerCase() === needle)
+          : String(raw ?? '')
+              .toLowerCase()
+              .includes(needle);
         if (operator === 'contains' ? !found : found) return false;
         break;
       }
       case 'in':
       case 'not_in': {
         const set = new Set(splitList(expected).map((entry) => String(coerce(entry, field.type))));
-        const hit = Array.isArray(raw) ? raw.some((entry) => set.has(String(entry))) : set.has(String(comparableValue(raw, field.type)));
+        const hit = Array.isArray(raw)
+          ? raw.some((entry) => set.has(String(entry)))
+          : set.has(String(comparableValue(raw, field.type)));
         if (operator === 'in' ? !hit : hit) return false;
         break;
       }
@@ -124,7 +165,9 @@ function matches<T>(item: T, field: FieldDefinition<T>, clause: FilterClause, na
       case 'neq': {
         const left = comparableValue(raw, field.type);
         const right = coerce(expected, field.type);
-        const equal = Array.isArray(raw) ? raw.some((entry) => String(entry) === String(right)) : left === right;
+        const equal = Array.isArray(raw)
+          ? raw.some((entry) => String(entry) === String(right))
+          : left === right;
         if (operator === 'eq' ? !equal : equal) return false;
         break;
       }
@@ -142,7 +185,10 @@ function matches<T>(item: T, field: FieldDefinition<T>, clause: FilterClause, na
         break;
       }
       default:
-        throw new NexoraApiError('INVALID_QUERY', `Unsupported filter operator ${String(operator)} on ${name}`);
+        throw new NexoraApiError(
+          'INVALID_QUERY',
+          `Unsupported filter operator ${String(operator)} on ${name}`,
+        );
     }
   }
   return true;
@@ -158,7 +204,11 @@ export function parseSort(sort: string | undefined, fallback: string): ParsedSor
     .split(',')
     .map((part) => part.trim())
     .filter((part) => part.length > 0)
-    .map((part) => (part.startsWith('-') ? { field: part.slice(1), direction: 'desc' as const } : { field: part, direction: 'asc' as const }));
+    .map((part) =>
+      part.startsWith('-')
+        ? { field: part.slice(1), direction: 'desc' as const }
+        : { field: part, direction: 'asc' as const },
+    );
 }
 
 function compareValues(a: unknown, b: unknown, type: FieldType): number {
@@ -173,27 +223,36 @@ function compareValues(a: unknown, b: unknown, type: FieldType): number {
 }
 
 /** Applies filters, search, sort and pagination to an in-memory collection. */
-export function runListQuery<T>(items: Iterable<T>, definition: ResourceDefinition<T>, query: ListQuery = {}, meta?: Record<string, unknown>): ListResponse<T> {
+export function runListQuery<T>(
+  items: Iterable<T>,
+  definition: ResourceDefinition<T>,
+  query: ListQuery = {},
+  meta?: Record<string, unknown>,
+): ListResponse<T> {
   const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
   if (!PAGE_SIZES.includes(pageSize as (typeof PAGE_SIZES)[number])) {
     throw new NexoraApiError('INVALID_QUERY', `pageSize must be one of ${PAGE_SIZES.join(', ')}`);
   }
   const page = query.page ?? 1;
-  if (!Number.isInteger(page) || page < 1) throw new NexoraApiError('INVALID_QUERY', 'page must be a positive integer');
+  if (!Number.isInteger(page) || page < 1)
+    throw new NexoraApiError('INVALID_QUERY', 'page must be a positive integer');
 
   const clauses: [string, FieldDefinition<T>, FilterClause][] = [];
   for (const [name, value] of Object.entries(query.filter ?? {})) {
     const field = definition.fields[name];
-    if (!field || field.filterable === false) throw new NexoraApiError('INVALID_QUERY', `Unknown or non-filterable field ${name}`);
+    if (!field || field.filterable === false)
+      throw new NexoraApiError('INVALID_QUERY', `Unknown or non-filterable field ${name}`);
     clauses.push([name, field, normalizeClause(value, field.type)]);
   }
   const sorts = parseSort(query.sort, definition.defaultSort).map((sort) => {
     const field = definition.fields[sort.field];
-    if (!field || field.sortable === false) throw new NexoraApiError('INVALID_SORT', `Unknown or non-sortable field ${sort.field}`);
+    if (!field || field.sortable === false)
+      throw new NexoraApiError('INVALID_SORT', `Unknown or non-sortable field ${sort.field}`);
     return { ...sort, definition: field };
   });
   const needle = query.q?.trim().toLowerCase();
-  if (needle !== undefined && needle.length > 0 && needle.length < 2) throw new NexoraApiError('INVALID_QUERY', 'q requires at least 2 characters');
+  if (needle !== undefined && needle.length > 0 && needle.length < 2)
+    throw new NexoraApiError('INVALID_QUERY', 'q requires at least 2 characters');
 
   const filtered: T[] = [];
   for (const item of items) {
@@ -207,13 +266,18 @@ export function runListQuery<T>(items: Iterable<T>, definition: ResourceDefiniti
     if (!keep) continue;
     if (needle && definition.search) {
       const haystack = definition.search(item);
-      if (!haystack.some((text) => text !== undefined && text.toLowerCase().includes(needle))) continue;
+      if (!haystack.some((text) => text !== undefined && text.toLowerCase().includes(needle)))
+        continue;
     }
     filtered.push(item);
   }
   filtered.sort((a, b) => {
     for (const sort of sorts) {
-      const result = compareValues(sort.definition.get(a), sort.definition.get(b), sort.definition.type);
+      const result = compareValues(
+        sort.definition.get(a),
+        sort.definition.get(b),
+        sort.definition.type,
+      );
       if (result !== 0) return sort.direction === 'asc' ? result : -result;
     }
     return 0;
@@ -230,7 +294,8 @@ export function runListQuery<T>(items: Iterable<T>, definition: ResourceDefiniti
 
 /** Parses HTTP-style query strings: `filter[status]=a,b`, `filter[orderDate][gte]=…`, `sort=-orderDate`, `page`, `pageSize`, `q`. */
 export function parseListQuery(params: URLSearchParams | Record<string, string>): ListQuery {
-  const entries = params instanceof URLSearchParams ? [...params.entries()] : Object.entries(params);
+  const entries =
+    params instanceof URLSearchParams ? [...params.entries()] : Object.entries(params);
   const query: ListQuery = {};
   const filter: Record<string, FilterValue> = {};
   for (const [key, value] of entries) {
@@ -244,7 +309,8 @@ export function parseListQuery(params: URLSearchParams | Record<string, string>)
       const [, field, operator] = match as unknown as [string, string, string | undefined];
       if (operator) {
         const existing = (filter[field] ?? {}) as FilterClause;
-        if (typeof existing !== 'object' || Array.isArray(existing)) throw new NexoraApiError('INVALID_QUERY', `Conflicting filters for ${field}`);
+        if (typeof existing !== 'object' || Array.isArray(existing))
+          throw new NexoraApiError('INVALID_QUERY', `Conflicting filters for ${field}`);
         (existing as Record<string, unknown>)[operator] = value;
         filter[field] = existing;
       } else {
@@ -257,10 +323,14 @@ export function parseListQuery(params: URLSearchParams | Record<string, string>)
 }
 
 /** Builds a field map from a plain object of getters and types. */
-export function fields<T>(spec: Record<string, [FieldType, (item: T) => unknown] | FieldDefinition<T>>): Record<string, FieldDefinition<T>> {
+export function fields<T>(
+  spec: Record<string, [FieldType, (item: T) => unknown] | FieldDefinition<T>>,
+): Record<string, FieldDefinition<T>> {
   const output: Record<string, FieldDefinition<T>> = {};
   for (const [name, definition] of Object.entries(spec)) {
-    output[name] = Array.isArray(definition) ? { type: definition[0], get: definition[1] } : definition;
+    output[name] = Array.isArray(definition)
+      ? { type: definition[0], get: definition[1] }
+      : definition;
   }
   return output;
 }

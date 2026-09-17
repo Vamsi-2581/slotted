@@ -4,7 +4,7 @@
  * materialized operational window derive from the same rates.
  */
 export interface ScaleProfile {
-  id: 'canonical' | 'new_tenant' | 'enterprise' | 'heavy_data' | 'smoke';
+  id: 'canonical' | 'demo' | 'light' | 'new_tenant' | 'enterprise' | 'heavy_data' | 'smoke';
   users: number;
   activeUsers: number;
   teams: number;
@@ -30,6 +30,54 @@ export interface ScaleProfile {
 }
 
 export const SCALE_PROFILES: Record<ScaleProfile['id'], ScaleProfile> = {
+  /** Canonical master data with a 45-day materialized window: the recommended browser default. */
+  demo: {
+    id: 'demo',
+    users: 205,
+    activeUsers: 170,
+    teams: 14,
+    warehouses: 5,
+    customers: 4_800,
+    contactsPerCustomer: 11_600 / 4_800,
+    addressesPerCustomer: 8_900 / 4_800,
+    suppliers: 1_200,
+    products: 9_400,
+    skus: 18_000,
+    supplierSkuMappings: 28_000,
+    contractPriceCustomersShare: 0.12,
+    historyMonths: 24,
+    operationalDays: 45,
+    ordersPerYear: 80_000,
+    quotesPerYear: 26_000,
+    purchaseOrdersPerYear: 15_000,
+    ticketsPerYear: 20_000,
+    bankTransactionsPerYear: 39_000,
+    linesPerOrderMedian: 3,
+  },
+  /** Reduced volume for fast local iteration (~2 s): same distributions and narrative. */
+  light: {
+    id: 'light',
+    users: 205,
+    activeUsers: 170,
+    teams: 14,
+    warehouses: 5,
+    customers: 1_200,
+    contactsPerCustomer: 11_600 / 4_800,
+    addressesPerCustomer: 8_900 / 4_800,
+    suppliers: 400,
+    products: 2_400,
+    skus: 4_500,
+    supplierSkuMappings: 7_000,
+    contractPriceCustomersShare: 0.12,
+    historyMonths: 24,
+    operationalDays: 30,
+    ordersPerYear: 20_000,
+    quotesPerYear: 6_500,
+    purchaseOrdersPerYear: 3_800,
+    ticketsPerYear: 5_000,
+    bankTransactionsPerYear: 9_800,
+    linesPerOrderMedian: 3,
+  },
   canonical: {
     id: 'canonical',
     users: 205,

@@ -7,7 +7,13 @@ import {
   type SupportMacro,
   type SupportTicket,
 } from '../../domain';
-import { fields, runListQuery, type ListQuery, type ListResponse, type ResourceDefinition } from '../query';
+import {
+  fields,
+  runListQuery,
+  type ListQuery,
+  type ListResponse,
+  type ResourceDefinition,
+} from '../query';
 import type { ApiRuntime } from '../runtime';
 
 export interface TicketListItem extends SupportTicket {
@@ -22,7 +28,12 @@ export interface TicketListItem extends SupportTicket {
   ageBusinessMinutes: number;
 }
 
-function slaState(minutesUsed: number, target: number, done: boolean, paused: boolean): SupportTicket['firstResponseSla'] {
+function slaState(
+  minutesUsed: number,
+  target: number,
+  done: boolean,
+  paused: boolean,
+): SupportTicket['firstResponseSla'] {
   if (done) return minutesUsed <= target ? 'met' : 'breached';
   if (paused) return 'paused';
   if (minutesUsed > target) return 'breached';
@@ -34,11 +45,27 @@ function slaState(minutesUsed: number, target: number, done: boolean, paused: bo
 export function refreshTicketSla(runtime: ApiRuntime, ticket: SupportTicket): void {
   const now = runtime.store.now;
   const targets = SLA_TARGETS[ticket.priority];
-  const firstUsed = businessMinutesBetween(ticket.metadata.createdAt, ticket.firstRespondedAt ?? now);
-  ticket.firstResponseSla = slaState(firstUsed, targets.firstResponseMinutes, ticket.firstRespondedAt !== undefined, false);
+  const firstUsed = businessMinutesBetween(
+    ticket.metadata.createdAt,
+    ticket.firstRespondedAt ?? now,
+  );
+  ticket.firstResponseSla = slaState(
+    firstUsed,
+    targets.firstResponseMinutes,
+    ticket.firstRespondedAt !== undefined,
+    false,
+  );
   const resolvedOrClosed = ticket.resolvedAt !== undefined || ticket.status === 'closed';
-  const resolutionUsed = businessMinutesBetween(ticket.metadata.createdAt, ticket.resolvedAt ?? (ticket.status === 'pending_customer' ? ticket.metadata.updatedAt : now));
-  ticket.resolutionSla = slaState(resolutionUsed, targets.resolutionMinutes, resolvedOrClosed, ticket.status === 'pending_customer');
+  const resolutionUsed = businessMinutesBetween(
+    ticket.metadata.createdAt,
+    ticket.resolvedAt ?? (ticket.status === 'pending_customer' ? ticket.metadata.updatedAt : now),
+  );
+  ticket.resolutionSla = slaState(
+    resolutionUsed,
+    targets.resolutionMinutes,
+    resolvedOrClosed,
+    ticket.status === 'pending_customer',
+  );
 }
 
 export function ticketListItem(runtime: ApiRuntime, ticket: SupportTicket): TicketListItem {
@@ -50,8 +77,14 @@ export function ticketListItem(runtime: ApiRuntime, ticket: SupportTicket): Tick
   const contact = ticket.contactId ? dataset.contacts.get(ticket.contactId) : undefined;
   const order = ticket.relatedOrderId ? dataset.salesOrders.get(ticket.relatedOrderId) : undefined;
   const age = businessMinutesBetween(ticket.metadata.createdAt, now);
-  const firstUsed = businessMinutesBetween(ticket.metadata.createdAt, ticket.firstRespondedAt ?? now);
-  const resolutionUsed = businessMinutesBetween(ticket.metadata.createdAt, ticket.resolvedAt ?? now);
+  const firstUsed = businessMinutesBetween(
+    ticket.metadata.createdAt,
+    ticket.firstRespondedAt ?? now,
+  );
+  const resolutionUsed = businessMinutesBetween(
+    ticket.metadata.createdAt,
+    ticket.resolvedAt ?? now,
+  );
   return {
     ...ticket,
     customerName: customer?.displayName ?? ticket.customerId,
@@ -91,7 +124,13 @@ export const ticketResource: ResourceDefinition<TicketListItem> = {
     createdAt: ['datetime', (item) => item.metadata.createdAt],
     updatedAt: ['datetime', (item) => item.metadata.updatedAt],
   }),
-  search: (item) => [item.ticketNumber, item.subject, item.customerName, item.relatedOrderNumber, item.contactName],
+  search: (item) => [
+    item.ticketNumber,
+    item.subject,
+    item.customerName,
+    item.relatedOrderNumber,
+    item.contactName,
+  ],
   defaultSort: '-createdAt',
 };
 
@@ -109,11 +148,28 @@ export interface TicketDetail {
   ticket: TicketListItem;
   messages: (ConversationMessage & { authorName: string })[];
   slaEvents: SlaEvent[];
-  customer: { id: string; displayName: string; segment: string; health: string; accountOwnerName: string };
+  customer: {
+    id: string;
+    displayName: string;
+    segment: string;
+    health: string;
+    accountOwnerName: string;
+  };
   relatedOrder?: { id: string; orderNumber: string; status: string; fulfillmentStatus: string };
-  relatedInvoice?: { id: string; invoiceNumber?: string; outstanding: unknown; collectionState: string };
+  relatedInvoice?: {
+    id: string;
+    invoiceNumber?: string;
+    outstanding: unknown;
+    collectionState: string;
+  };
   relatedSku?: { id: string; sku: string; name: string };
-  relatedShipment?: { id: string; shipmentNumber: string; status: string; carrier: string; trackingNumber?: string };
+  relatedShipment?: {
+    id: string;
+    shipmentNumber: string;
+    status: string;
+    carrier: string;
+    trackingNumber?: string;
+  };
   macros: SupportMacro[];
 }
 
@@ -127,9 +183,13 @@ export function getTicket(runtime: ApiRuntime, id: string): TicketDetail {
   if (!customer) throw notFound('Customer', ticket.customerId);
   const internalAllowed = runtime.can('support.reply') || runtime.can('support.manage');
   const order = ticket.relatedOrderId ? dataset.salesOrders.get(ticket.relatedOrderId) : undefined;
-  const invoice = ticket.relatedInvoiceId ? dataset.invoices.get(ticket.relatedInvoiceId) : undefined;
+  const invoice = ticket.relatedInvoiceId
+    ? dataset.invoices.get(ticket.relatedInvoiceId)
+    : undefined;
   const sku = ticket.relatedSkuId ? dataset.skus.get(ticket.relatedSkuId) : undefined;
-  const shipment = ticket.relatedShipmentId ? dataset.shipments.get(ticket.relatedShipmentId) : undefined;
+  const shipment = ticket.relatedShipmentId
+    ? dataset.shipments.get(ticket.relatedShipmentId)
+    : undefined;
   return {
     ticket: ticketListItem(runtime, ticket),
     messages: runtime.indexes.messagesByTicket
@@ -138,15 +198,61 @@ export function getTicket(runtime: ApiRuntime, id: string): TicketDetail {
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
       .map((message) => ({
         ...message,
-        authorName: message.authorType === 'system' ? 'Nexora' : message.authorUserId ? (dataset.users.get(message.authorUserId)?.displayName ?? 'Agent') : message.authorContactId ? (dataset.contacts.get(message.authorContactId)?.displayName ?? customer.displayName) : customer.displayName,
+        authorName:
+          message.authorType === 'system'
+            ? 'Nexora'
+            : message.authorUserId
+              ? (dataset.users.get(message.authorUserId)?.displayName ?? 'Agent')
+              : message.authorContactId
+                ? (dataset.contacts.get(message.authorContactId)?.displayName ??
+                  customer.displayName)
+                : customer.displayName,
       })),
-    slaEvents: runtime.indexes.slaEventsByTicket.get(id).slice().sort((a, b) => a.occurredAt.localeCompare(b.occurredAt)),
-    customer: { id: customer.id, displayName: customer.displayName, segment: customer.segment, health: customer.health, accountOwnerName: dataset.users.get(customer.accountOwnerId)?.displayName ?? customer.accountOwnerId },
+    slaEvents: runtime.indexes.slaEventsByTicket
+      .get(id)
+      .slice()
+      .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt)),
+    customer: {
+      id: customer.id,
+      displayName: customer.displayName,
+      segment: customer.segment,
+      health: customer.health,
+      accountOwnerName:
+        dataset.users.get(customer.accountOwnerId)?.displayName ?? customer.accountOwnerId,
+    },
     macros: [...dataset.supportMacros.values()].filter((macro) => macro.status === 'active'),
-    ...(order ? { relatedOrder: { id: order.id, orderNumber: order.orderNumber, status: order.status, fulfillmentStatus: order.fulfillmentStatus } } : {}),
-    ...(invoice ? { relatedInvoice: { id: invoice.id, outstanding: invoice.outstanding, collectionState: invoice.collectionState, ...(invoice.invoiceNumber ? { invoiceNumber: invoice.invoiceNumber } : {}) } } : {}),
+    ...(order
+      ? {
+          relatedOrder: {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            status: order.status,
+            fulfillmentStatus: order.fulfillmentStatus,
+          },
+        }
+      : {}),
+    ...(invoice
+      ? {
+          relatedInvoice: {
+            id: invoice.id,
+            outstanding: invoice.outstanding,
+            collectionState: invoice.collectionState,
+            ...(invoice.invoiceNumber ? { invoiceNumber: invoice.invoiceNumber } : {}),
+          },
+        }
+      : {}),
     ...(sku ? { relatedSku: { id: sku.id, sku: sku.sku, name: sku.name } } : {}),
-    ...(shipment ? { relatedShipment: { id: shipment.id, shipmentNumber: shipment.shipmentNumber, status: shipment.status, carrier: shipment.carrier, ...(shipment.trackingNumber ? { trackingNumber: shipment.trackingNumber } : {}) } } : {}),
+    ...(shipment
+      ? {
+          relatedShipment: {
+            id: shipment.id,
+            shipmentNumber: shipment.shipmentNumber,
+            status: shipment.status,
+            carrier: shipment.carrier,
+            ...(shipment.trackingNumber ? { trackingNumber: shipment.trackingNumber } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -166,7 +272,15 @@ export interface SupportMetrics {
 export function supportMetrics(runtime: ApiRuntime): SupportMetrics {
   runtime.require('support.view');
   const byPriority: SupportMetrics['byPriority'] = { low: 0, normal: 0, high: 0, urgent: 0 };
-  const byStatus: SupportMetrics['byStatus'] = { new: 0, open: 0, pending_customer: 0, pending_internal: 0, escalated: 0, resolved: 0, closed: 0 };
+  const byStatus: SupportMetrics['byStatus'] = {
+    new: 0,
+    open: 0,
+    pending_customer: 0,
+    pending_internal: 0,
+    escalated: 0,
+    resolved: 0,
+    closed: 0,
+  };
   let open = 0;
   let escalated = 0;
   let breached = 0;

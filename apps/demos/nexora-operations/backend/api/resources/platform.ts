@@ -14,7 +14,13 @@ import {
   type Workflow,
   type WorkflowRun,
 } from '../../domain';
-import { fields, runListQuery, type ListQuery, type ListResponse, type ResourceDefinition } from '../query';
+import {
+  fields,
+  runListQuery,
+  type ListQuery,
+  type ListResponse,
+  type ResourceDefinition,
+} from '../query';
 import type { ApiRuntime } from '../runtime';
 
 // ---------------------------------------------------------------------------
@@ -27,8 +33,21 @@ export interface SessionInfo {
   warehouseIds: string[] | 'all';
   teams: Pick<Team, 'id' | 'code' | 'name' | 'type'>[];
   organization: { id: string; displayName: string; legalName: string; timezone: string };
-  demo: { seedVersion: string; scenarioId: string; demoClock: string; today: string; schemaVersion: number };
-  personas: { key: string; userId: string; name: string; role: string; context: string; active: boolean }[];
+  demo: {
+    seedVersion: string;
+    scenarioId: string;
+    demoClock: string;
+    today: string;
+    schemaVersion: number;
+  };
+  personas: {
+    key: string;
+    userId: string;
+    name: string;
+    role: string;
+    context: string;
+    active: boolean;
+  }[];
   unreadNotifications: number;
   pendingApprovals: number;
 }
@@ -36,12 +55,28 @@ export interface SessionInfo {
 export function sessionInfo(runtime: ApiRuntime): SessionInfo {
   const { store, indexes } = runtime;
   const user = runtime.actor;
-  const roles = indexes.roleAssignmentsByUser.get(user.id).map((assignment) => store.dataset.roles.get(assignment.roleId)).filter((role) => role !== undefined).map((role) => ({ id: role.id, name: role.name }));
-  const teams = store.dataset.teamMemberships.filter((membership) => membership.userId === user.id).map((membership) => store.dataset.teams.get(membership.teamId)).filter((team) => team !== undefined).map((team) => ({ id: team.id, code: team.code, name: team.name, type: team.type }));
+  const roles = indexes.roleAssignmentsByUser
+    .get(user.id)
+    .map((assignment) => store.dataset.roles.get(assignment.roleId))
+    .filter((role) => role !== undefined)
+    .map((role) => ({ id: role.id, name: role.name }));
+  const teams = store.dataset.teamMemberships
+    .filter((membership) => membership.userId === user.id)
+    .map((membership) => store.dataset.teams.get(membership.teamId))
+    .filter((team) => team !== undefined)
+    .map((team) => ({ id: team.id, code: team.code, name: team.name, type: team.type }));
   let pendingApprovals = 0;
   for (const request of store.dataset.approvalRequests.values()) {
     if (request.status !== 'pending') continue;
-    if (request.steps.some((step) => step.status === 'pending' && (step.assignedUserId === user.id || runtime.authorization.hasRole(user.id, step.requiredRole)))) pendingApprovals += 1;
+    if (
+      request.steps.some(
+        (step) =>
+          step.status === 'pending' &&
+          (step.assignedUserId === user.id ||
+            runtime.authorization.hasRole(user.id, step.requiredRole)),
+      )
+    )
+      pendingApprovals += 1;
   }
   return {
     user,
@@ -49,13 +84,33 @@ export function sessionInfo(runtime: ApiRuntime): SessionInfo {
     permissions: [...runtime.authorization.effectivePermissions(user.id).keys()].sort(),
     warehouseIds: runtime.authorization.warehouseIdsFor(user.id),
     teams,
-    organization: { id: store.dataset.organization.id, displayName: store.dataset.organization.displayName, legalName: store.dataset.organization.legalName, timezone: store.dataset.organization.timezone },
-    demo: { seedVersion: store.metadata.seedVersion, scenarioId: store.metadata.scenarioId, demoClock: store.metadata.demoClock, today: store.today, schemaVersion: store.metadata.schemaVersion },
+    organization: {
+      id: store.dataset.organization.id,
+      displayName: store.dataset.organization.displayName,
+      legalName: store.dataset.organization.legalName,
+      timezone: store.dataset.organization.timezone,
+    },
+    demo: {
+      seedVersion: store.metadata.seedVersion,
+      scenarioId: store.metadata.scenarioId,
+      demoClock: store.metadata.demoClock,
+      today: store.today,
+      schemaVersion: store.metadata.schemaVersion,
+    },
     personas: PERSONAS.map((persona) => {
       const userId = store.seed.personaUserIds.get(persona.key) as string;
-      return { key: persona.key, userId, name: `${persona.firstName} ${persona.lastName}`, role: persona.role, context: persona.context, active: userId === user.id };
+      return {
+        key: persona.key,
+        userId,
+        name: `${persona.firstName} ${persona.lastName}`,
+        role: persona.role,
+        context: persona.context,
+        active: userId === user.id,
+      };
     }),
-    unreadNotifications: indexes.notificationsByUser.get(user.id).filter((notification) => !notification.readAt && !notification.archivedAt).length,
+    unreadNotifications: indexes.notificationsByUser
+      .get(user.id)
+      .filter((notification) => !notification.readAt && !notification.archivedAt).length,
     pendingApprovals,
   };
 }
@@ -98,7 +153,9 @@ export function listUsers(runtime: ApiRuntime, query: ListQuery): ListResponse<U
     const manager = user.managerId ? store.dataset.users.get(user.managerId) : undefined;
     items.push({
       ...user,
-      roleNames: indexes.roleAssignmentsByUser.get(user.id).map((assignment) => store.dataset.roles.get(assignment.roleId)?.name ?? assignment.roleId),
+      roleNames: indexes.roleAssignmentsByUser
+        .get(user.id)
+        .map((assignment) => store.dataset.roles.get(assignment.roleId)?.name ?? assignment.roleId),
       teamNames: teamsByUser.get(user.id) ?? [],
       ...(manager ? { managerName: manager.displayName } : {}),
     });
@@ -106,11 +163,15 @@ export function listUsers(runtime: ApiRuntime, query: ListQuery): ListResponse<U
   return runListQuery(items, userResource, query);
 }
 
-export function listTeams(runtime: ApiRuntime): (Team & { memberCount: number; leadName?: string })[] {
+export function listTeams(
+  runtime: ApiRuntime,
+): (Team & { memberCount: number; leadName?: string })[] {
   runtime.require('teams.view');
   const { store } = runtime;
   return [...store.dataset.teams.values()].map((team) => {
-    const members = store.dataset.teamMemberships.filter((membership) => membership.teamId === team.id);
+    const members = store.dataset.teamMemberships.filter(
+      (membership) => membership.teamId === team.id,
+    );
     const lead = members.find((membership) => membership.isLead);
     const leadName = lead ? store.dataset.users.get(lead.userId)?.displayName : undefined;
     return { ...team, memberCount: members.length, ...(leadName ? { leadName } : {}) };
@@ -120,8 +181,12 @@ export function listTeams(runtime: ApiRuntime): (Team & { memberCount: number; l
 export function listRoles(runtime: ApiRuntime): (Role & { userCount: number })[] {
   runtime.require('roles.view');
   const counts = new Map<string, number>();
-  for (const assignment of runtime.store.dataset.roleAssignments.values()) counts.set(assignment.roleId, (counts.get(assignment.roleId) ?? 0) + 1);
-  return [...runtime.store.dataset.roles.values()].map((role) => ({ ...role, userCount: counts.get(role.id) ?? 0 }));
+  for (const assignment of runtime.store.dataset.roleAssignments.values())
+    counts.set(assignment.roleId, (counts.get(assignment.roleId) ?? 0) + 1);
+  return [...runtime.store.dataset.roles.values()].map((role) => ({
+    ...role,
+    userCount: counts.get(role.id) ?? 0,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -139,9 +204,11 @@ export interface ApprovalListItem extends ApprovalRequest {
 export function approvalListItem(runtime: ApiRuntime, request: ApprovalRequest): ApprovalListItem {
   const { store } = runtime;
   const user = runtime.actor;
-  const lowestPending = request.steps.filter((step) => step.status === 'pending').sort((a, b) => a.sequence - b.sequence)[0];
+  const lowestPending = request.steps
+    .filter((step) => step.status === 'pending')
+    .sort((a, b) => a.sequence - b.sequence)[0];
   let customerName: string | undefined;
-  let targetLabel = request.targetNumber;
+  let targetLabel: string;
   if (request.targetType === 'sales_order') {
     const order = store.dataset.salesOrders.get(request.targetId);
     customerName = order ? store.dataset.customers.get(order.customerId)?.displayName : undefined;
@@ -159,10 +226,16 @@ export function approvalListItem(runtime: ApiRuntime, request: ApprovalRequest):
   } else {
     targetLabel = `Cycle count ${request.targetNumber}`;
   }
-  const actionable = request.status === 'pending' && lowestPending !== undefined && request.requestedBy !== user.id && (lowestPending.assignedUserId === user.id || runtime.authorization.hasRole(user.id, lowestPending.requiredRole));
+  const actionable =
+    request.status === 'pending' &&
+    lowestPending !== undefined &&
+    request.requestedBy !== user.id &&
+    (lowestPending.assignedUserId === user.id ||
+      runtime.authorization.hasRole(user.id, lowestPending.requiredRole));
   return {
     ...request,
-    requestedByName: store.dataset.users.get(request.requestedBy)?.displayName ?? request.requestedBy,
+    requestedByName:
+      store.dataset.users.get(request.requestedBy)?.displayName ?? request.requestedBy,
     targetLabel,
     actionable,
     ...(customerName ? { customerName } : {}),
@@ -189,13 +262,17 @@ export const approvalResource: ResourceDefinition<ApprovalListItem> = {
   defaultSort: '-requestedAt',
 };
 
-export function listApprovals(runtime: ApiRuntime, query: ListQuery): ListResponse<ApprovalListItem> {
+export function listApprovals(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<ApprovalListItem> {
   const items: ApprovalListItem[] = [];
   const canSeeSales = runtime.can('orders.view');
   const canSeePurchasing = runtime.can('purchase_orders.view');
   const canSeeFinance = runtime.can('invoices.view');
   for (const request of runtime.store.dataset.approvalRequests.values()) {
-    if ((request.targetType === 'sales_order' || request.targetType === 'quote') && !canSeeSales) continue;
+    if ((request.targetType === 'sales_order' || request.targetType === 'quote') && !canSeeSales)
+      continue;
     if (request.targetType === 'purchase_order' && !canSeePurchasing) continue;
     if (request.targetType === 'invoice_write_off' && !canSeeFinance) continue;
     items.push(approvalListItem(runtime, request));
@@ -238,25 +315,44 @@ export function workflowListItem(runtime: ApiRuntime, workflow: Workflow): Workf
   return {
     ...workflow,
     ownerName: runtime.store.dataset.users.get(workflow.ownerId)?.displayName ?? workflow.ownerId,
-    recentFailures: runtime.indexes.runsByWorkflow.get(workflow.id).filter((run) => run.status === 'failed' || run.status === 'partially_failed').length,
+    recentFailures: runtime.indexes.runsByWorkflow
+      .get(workflow.id)
+      .filter((run) => run.status === 'failed' || run.status === 'partially_failed').length,
   };
 }
 
-export function listWorkflows(runtime: ApiRuntime, query: ListQuery): ListResponse<WorkflowListItem> {
+export function listWorkflows(
+  runtime: ApiRuntime,
+  query: ListQuery,
+): ListResponse<WorkflowListItem> {
   runtime.require('workflows.view');
   const items: WorkflowListItem[] = [];
-  for (const workflow of runtime.store.dataset.workflows.values()) items.push(workflowListItem(runtime, workflow));
+  for (const workflow of runtime.store.dataset.workflows.values())
+    items.push(workflowListItem(runtime, workflow));
   return runListQuery(items, workflowResource, query);
 }
 
-export function getWorkflow(runtime: ApiRuntime, id: string): { workflow: WorkflowListItem; runs: WorkflowRun[] } {
+export function getWorkflow(
+  runtime: ApiRuntime,
+  id: string,
+): { workflow: WorkflowListItem; runs: WorkflowRun[] } {
   runtime.require('workflows.view');
   const workflow = runtime.store.dataset.workflows.get(id);
   if (!workflow) throw notFound('Workflow', id);
-  return { workflow: workflowListItem(runtime, workflow), runs: runtime.indexes.runsByWorkflow.get(id).slice().sort((a, b) => b.startedAt.localeCompare(a.startedAt)) };
+  return {
+    workflow: workflowListItem(runtime, workflow),
+    runs: runtime.indexes.runsByWorkflow
+      .get(id)
+      .slice()
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt)),
+  };
 }
 
-export function listWorkflowRuns(runtime: ApiRuntime, workflowId: string, query: ListQuery): ListResponse<WorkflowRun> {
+export function listWorkflowRuns(
+  runtime: ApiRuntime,
+  workflowId: string,
+  query: ListQuery,
+): ListResponse<WorkflowRun> {
   runtime.require('workflows.view');
   if (!runtime.store.dataset.workflows.has(workflowId)) throw notFound('Workflow', workflowId);
   const definition: ResourceDefinition<WorkflowRun> = {
@@ -274,7 +370,10 @@ export function listWorkflowRuns(runtime: ApiRuntime, workflowId: string, query:
 // ---------------------------------------------------------------------------
 // Notifications, tasks, saved views, imports
 
-export function listNotifications(runtime: ApiRuntime, query: ListQuery & { includeArchived?: boolean } = {}): ListResponse<Notification> {
+export function listNotifications(
+  runtime: ApiRuntime,
+  query: ListQuery & { includeArchived?: boolean } = {},
+): ListResponse<Notification> {
   const user = runtime.actor;
   const definition: ResourceDefinition<Notification> = {
     fields: fields<Notification>({
@@ -287,7 +386,9 @@ export function listNotifications(runtime: ApiRuntime, query: ListQuery & { incl
     search: (item) => [item.title, item.body],
     defaultSort: '-createdAt',
   };
-  const items = runtime.indexes.notificationsByUser.get(user.id).filter((notification) => query.includeArchived || !notification.archivedAt);
+  const items = runtime.indexes.notificationsByUser
+    .get(user.id)
+    .filter((notification) => query.includeArchived || !notification.archivedAt);
   return runListQuery(items, definition, query);
 }
 
@@ -297,7 +398,10 @@ export interface TaskListItem extends Task {
   overdue: boolean;
 }
 
-export function listTasks(runtime: ApiRuntime, query: ListQuery & { mine?: boolean } = {}): ListResponse<TaskListItem> {
+export function listTasks(
+  runtime: ApiRuntime,
+  query: ListQuery & { mine?: boolean } = {},
+): ListResponse<TaskListItem> {
   const user = runtime.actor;
   const today = runtime.store.today;
   const definition: ResourceDefinition<TaskListItem> = {
@@ -315,7 +419,10 @@ export function listTasks(runtime: ApiRuntime, query: ListQuery & { mine?: boole
     search: (item) => [item.title, item.description, item.assigneeName],
     defaultSort: 'dueDate,-priority',
   };
-  const source = query.mine === false ? [...runtime.store.dataset.tasks.values()] : runtime.indexes.tasksByAssignee.get(user.id);
+  const source =
+    query.mine === false
+      ? [...runtime.store.dataset.tasks.values()]
+      : runtime.indexes.tasksByAssignee.get(user.id);
   const items = source.map((task) => ({
     ...task,
     assigneeName: runtime.store.dataset.users.get(task.assigneeId)?.displayName ?? task.assigneeId,
@@ -327,7 +434,9 @@ export function listTasks(runtime: ApiRuntime, query: ListQuery & { mine?: boole
 
 export function listSavedViews(runtime: ApiRuntime, resource?: SavedView['resource']): SavedView[] {
   const user = runtime.actor;
-  return runtime.indexes.savedViewsByUser.get(user.id).filter((view) => !resource || view.resource === resource);
+  return runtime.indexes.savedViewsByUser
+    .get(user.id)
+    .filter((view) => !resource || view.resource === resource);
 }
 
 export function getImportJob(runtime: ApiRuntime, id: string): ImportJob {
@@ -353,7 +462,10 @@ export interface ActivityFeedQuery {
  * Activity feed (section 70.1): stored events from runtime mutations plus
  * events derived from seeded record timestamps, merged newest first.
  */
-export function listActivity(runtime: ApiRuntime, query: ActivityFeedQuery = {}): { data: (ActivityEvent & { actorName: string })[]; hasMore: boolean } {
+export function listActivity(
+  runtime: ApiRuntime,
+  query: ActivityFeedQuery = {},
+): { data: (ActivityEvent & { actorName: string })[]; hasMore: boolean } {
   const { store, indexes } = runtime;
   const limit = Math.min(200, query.limit ?? 50);
   const events: ActivityEvent[] = [];
@@ -367,48 +479,247 @@ export function listActivity(runtime: ApiRuntime, query: ActivityFeedQuery = {})
   };
   for (const event of store.dataset.activityEvents.values()) push(event);
 
-  const derive = (id: string, type: string, actorId: string, occurredAt: string, subjectType: string, subjectId: string, subjectLabel: string, summary: string, customerId?: string, orderId?: string): void => {
-    push({ id, organizationId: store.dataset.organization.id, type, actorId, occurredAt, subjectType, subjectId, subjectLabel, summary, ...(customerId ? { customerId } : {}), ...(orderId ? { orderId } : {}) });
+  const derive = (
+    id: string,
+    type: string,
+    actorId: string,
+    occurredAt: string,
+    subjectType: string,
+    subjectId: string,
+    subjectLabel: string,
+    summary: string,
+    customerId?: string,
+    orderId?: string,
+  ): void => {
+    push({
+      id,
+      organizationId: store.dataset.organization.id,
+      type,
+      actorId,
+      occurredAt,
+      subjectType,
+      subjectId,
+      subjectLabel,
+      summary,
+      ...(customerId ? { customerId } : {}),
+      ...(orderId ? { orderId } : {}),
+    });
   };
-  const orders = query.orderId ? [store.dataset.salesOrders.get(query.orderId)].filter((order) => order !== undefined) : query.customerId ? indexes.ordersByCustomer.get(query.customerId) : [...store.dataset.salesOrders.values()];
-  const scoped = query.customerId !== undefined || query.orderId !== undefined || query.subjectId !== undefined;
+  const orders = query.orderId
+    ? [store.dataset.salesOrders.get(query.orderId)].filter((order) => order !== undefined)
+    : query.customerId
+      ? indexes.ordersByCustomer.get(query.customerId)
+      : [...store.dataset.salesOrders.values()];
+  const scoped =
+    query.customerId !== undefined || query.orderId !== undefined || query.subjectId !== undefined;
   const orderSource = scoped ? orders : orders.slice(-3_000);
   for (const order of orderSource) {
     const customer = store.dataset.customers.get(order.customerId)?.displayName ?? order.customerId;
-    derive(`${order.id}:created`, 'order.created', order.metadata.createdBy, order.metadata.createdAt, 'sales_order', order.id, order.orderNumber, `Order ${order.orderNumber} created for ${customer}`, order.customerId, order.id);
-    if (order.confirmedAt) derive(`${order.id}:confirmed`, 'order.confirmed', order.ownerId, order.confirmedAt, 'sales_order', order.id, order.orderNumber, `Order ${order.orderNumber} confirmed (${(order.total.minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})`, order.customerId, order.id);
-    if (order.cancelledAt) derive(`${order.id}:cancelled`, 'order.cancelled', order.metadata.updatedBy, order.cancelledAt, 'sales_order', order.id, order.orderNumber, `Order ${order.orderNumber} cancelled — ${order.cancellationReason ?? 'no reason recorded'}`, order.customerId, order.id);
-    if (order.closedAt) derive(`${order.id}:closed`, 'order.closed', 'usr_system', order.closedAt, 'sales_order', order.id, order.orderNumber, `Order ${order.orderNumber} closed`, order.customerId, order.id);
+    derive(
+      `${order.id}:created`,
+      'order.created',
+      order.metadata.createdBy,
+      order.metadata.createdAt,
+      'sales_order',
+      order.id,
+      order.orderNumber,
+      `Order ${order.orderNumber} created for ${customer}`,
+      order.customerId,
+      order.id,
+    );
+    if (order.confirmedAt)
+      derive(
+        `${order.id}:confirmed`,
+        'order.confirmed',
+        order.ownerId,
+        order.confirmedAt,
+        'sales_order',
+        order.id,
+        order.orderNumber,
+        `Order ${order.orderNumber} confirmed (${(order.total.minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })})`,
+        order.customerId,
+        order.id,
+      );
+    if (order.cancelledAt)
+      derive(
+        `${order.id}:cancelled`,
+        'order.cancelled',
+        order.metadata.updatedBy,
+        order.cancelledAt,
+        'sales_order',
+        order.id,
+        order.orderNumber,
+        `Order ${order.orderNumber} cancelled — ${order.cancellationReason ?? 'no reason recorded'}`,
+        order.customerId,
+        order.id,
+      );
+    if (order.closedAt)
+      derive(
+        `${order.id}:closed`,
+        'order.closed',
+        'usr_system',
+        order.closedAt,
+        'sales_order',
+        order.id,
+        order.orderNumber,
+        `Order ${order.orderNumber} closed`,
+        order.customerId,
+        order.id,
+      );
     for (const shipment of indexes.shipmentsByOrder.get(order.id)) {
-      if (shipment.shippedAt) derive(`${shipment.id}:shipped`, 'shipment.shipped', shipment.metadata.updatedBy, shipment.shippedAt, 'shipment', shipment.id, shipment.shipmentNumber, `Shipment ${shipment.shipmentNumber} shipped via ${shipment.carrier}`, order.customerId, order.id);
-      if (shipment.deliveredAt) derive(`${shipment.id}:delivered`, 'shipment.delivered', 'usr_system', shipment.deliveredAt, 'shipment', shipment.id, shipment.shipmentNumber, `Shipment ${shipment.shipmentNumber} delivered`, order.customerId, order.id);
-      if (shipment.status === 'exception') derive(`${shipment.id}:exception`, 'shipment.exception', 'usr_system', shipment.metadata.updatedAt, 'shipment', shipment.id, shipment.shipmentNumber, `Shipment ${shipment.shipmentNumber}: ${shipment.exceptionMessage ?? 'carrier exception'}`, order.customerId, order.id);
+      if (shipment.shippedAt)
+        derive(
+          `${shipment.id}:shipped`,
+          'shipment.shipped',
+          shipment.metadata.updatedBy,
+          shipment.shippedAt,
+          'shipment',
+          shipment.id,
+          shipment.shipmentNumber,
+          `Shipment ${shipment.shipmentNumber} shipped via ${shipment.carrier}`,
+          order.customerId,
+          order.id,
+        );
+      if (shipment.deliveredAt)
+        derive(
+          `${shipment.id}:delivered`,
+          'shipment.delivered',
+          'usr_system',
+          shipment.deliveredAt,
+          'shipment',
+          shipment.id,
+          shipment.shipmentNumber,
+          `Shipment ${shipment.shipmentNumber} delivered`,
+          order.customerId,
+          order.id,
+        );
+      if (shipment.status === 'exception')
+        derive(
+          `${shipment.id}:exception`,
+          'shipment.exception',
+          'usr_system',
+          shipment.metadata.updatedAt,
+          'shipment',
+          shipment.id,
+          shipment.shipmentNumber,
+          `Shipment ${shipment.shipmentNumber}: ${shipment.exceptionMessage ?? 'carrier exception'}`,
+          order.customerId,
+          order.id,
+        );
     }
     for (const invoice of indexes.invoicesByOrder.get(order.id)) {
-      if (invoice.openedAt) derive(`${invoice.id}:opened`, 'invoice.opened', invoice.metadata.createdBy, invoice.openedAt, 'invoice', invoice.id, invoice.invoiceNumber ?? invoice.id, `Invoice ${invoice.invoiceNumber ?? ''} opened for ${(invoice.total.minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`, order.customerId, order.id);
+      if (invoice.openedAt)
+        derive(
+          `${invoice.id}:opened`,
+          'invoice.opened',
+          invoice.metadata.createdBy,
+          invoice.openedAt,
+          'invoice',
+          invoice.id,
+          invoice.invoiceNumber ?? invoice.id,
+          `Invoice ${invoice.invoiceNumber ?? ''} opened for ${(invoice.total.minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`,
+          order.customerId,
+          order.id,
+        );
       for (const allocation of indexes.allocationsByInvoice.get(invoice.id)) {
         const payment = store.dataset.payments.get(allocation.paymentId);
-        if (payment && allocation.status === 'active') derive(`${allocation.id}:paid`, 'payment.recorded', payment.recordedBy, allocation.createdAt, 'payment', payment.id, payment.paymentNumber, `Payment ${payment.paymentNumber} of ${(allocation.amount.minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} applied to ${invoice.invoiceNumber ?? 'invoice'}`, order.customerId, order.id);
+        if (payment && allocation.status === 'active')
+          derive(
+            `${allocation.id}:paid`,
+            'payment.recorded',
+            payment.recordedBy,
+            allocation.createdAt,
+            'payment',
+            payment.id,
+            payment.paymentNumber,
+            `Payment ${payment.paymentNumber} of ${(allocation.amount.minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} applied to ${invoice.invoiceNumber ?? 'invoice'}`,
+            order.customerId,
+            order.id,
+          );
       }
     }
-    for (const ret of indexes.returnsByOrder.get(order.id)) derive(`${ret.id}:requested`, 'return.requested', ret.metadata.createdBy, ret.requestedAt, 'return', ret.id, ret.returnNumber, `Return ${ret.returnNumber} requested`, order.customerId, order.id);
+    for (const ret of indexes.returnsByOrder.get(order.id))
+      derive(
+        `${ret.id}:requested`,
+        'return.requested',
+        ret.metadata.createdBy,
+        ret.requestedAt,
+        'return',
+        ret.id,
+        ret.returnNumber,
+        `Return ${ret.returnNumber} requested`,
+        order.customerId,
+        order.id,
+      );
   }
-  const tickets = query.customerId ? indexes.ticketsByCustomer.get(query.customerId) : query.orderId ? indexes.ticketsByOrder.get(query.orderId) : [...store.dataset.tickets.values()].slice(-1_000);
+  const tickets = query.customerId
+    ? indexes.ticketsByCustomer.get(query.customerId)
+    : query.orderId
+      ? indexes.ticketsByOrder.get(query.orderId)
+      : [...store.dataset.tickets.values()].slice(-1_000);
   for (const ticket of tickets) {
-    derive(`${ticket.id}:created`, 'ticket.created', ticket.metadata.createdBy, ticket.metadata.createdAt, 'support_ticket', ticket.id, ticket.ticketNumber, `Ticket ${ticket.ticketNumber} opened: ${ticket.subject}`, ticket.customerId, ticket.relatedOrderId);
-    if (ticket.status === 'escalated') derive(`${ticket.id}:escalated`, 'ticket.escalated', ticket.assigneeId ?? 'usr_system', ticket.metadata.updatedAt, 'support_ticket', ticket.id, ticket.ticketNumber, `Ticket ${ticket.ticketNumber} escalated — ${ticket.escalationReason ?? ''}`, ticket.customerId, ticket.relatedOrderId);
-    if (ticket.resolvedAt) derive(`${ticket.id}:resolved`, 'ticket.resolved', ticket.assigneeId ?? 'usr_system', ticket.resolvedAt, 'support_ticket', ticket.id, ticket.ticketNumber, `Ticket ${ticket.ticketNumber} resolved`, ticket.customerId, ticket.relatedOrderId);
+    derive(
+      `${ticket.id}:created`,
+      'ticket.created',
+      ticket.metadata.createdBy,
+      ticket.metadata.createdAt,
+      'support_ticket',
+      ticket.id,
+      ticket.ticketNumber,
+      `Ticket ${ticket.ticketNumber} opened: ${ticket.subject}`,
+      ticket.customerId,
+      ticket.relatedOrderId,
+    );
+    if (ticket.status === 'escalated')
+      derive(
+        `${ticket.id}:escalated`,
+        'ticket.escalated',
+        ticket.assigneeId ?? 'usr_system',
+        ticket.metadata.updatedAt,
+        'support_ticket',
+        ticket.id,
+        ticket.ticketNumber,
+        `Ticket ${ticket.ticketNumber} escalated — ${ticket.escalationReason ?? ''}`,
+        ticket.customerId,
+        ticket.relatedOrderId,
+      );
+    if (ticket.resolvedAt)
+      derive(
+        `${ticket.id}:resolved`,
+        'ticket.resolved',
+        ticket.assigneeId ?? 'usr_system',
+        ticket.resolvedAt,
+        'support_ticket',
+        ticket.id,
+        ticket.ticketNumber,
+        `Ticket ${ticket.ticketNumber} resolved`,
+        ticket.customerId,
+        ticket.relatedOrderId,
+      );
   }
   if (query.customerId) {
     for (const note of indexes.notesByCustomer.get(query.customerId)) {
       if (note.visibility === 'private' && note.authorId !== runtime.actor.id) continue;
-      derive(`${note.id}:note`, 'customer.note_added', note.authorId, note.metadata.createdAt, 'customer_note', note.id, 'Note', note.body.length > 140 ? `${note.body.slice(0, 137)}…` : note.body, query.customerId);
+      derive(
+        `${note.id}:note`,
+        'customer.note_added',
+        note.authorId,
+        note.metadata.createdAt,
+        'customer_note',
+        note.id,
+        'Note',
+        note.body.length > 140 ? `${note.body.slice(0, 137)}…` : note.body,
+        query.customerId,
+      );
     }
   }
   events.sort((a, b) => b.occurredAt.localeCompare(a.occurredAt) || a.id.localeCompare(b.id));
   const page = events.slice(0, limit);
   return {
-    data: page.map((event) => ({ ...event, actorName: store.dataset.users.get(event.actorId)?.displayName ?? event.actorId })),
+    data: page.map((event) => ({
+      ...event,
+      actorName: store.dataset.users.get(event.actorId)?.displayName ?? event.actorId,
+    })),
     hasMore: events.length > limit,
   };
 }
@@ -435,7 +746,11 @@ export const auditResource: ResourceDefinition<AuditListItem> = {
 export function listAudit(runtime: ApiRuntime, query: ListQuery): ListResponse<AuditListItem> {
   runtime.require('audit.view');
   const items: AuditListItem[] = [];
-  for (const event of runtime.store.dataset.auditEvents.values()) items.push({ ...event, actorName: runtime.store.dataset.users.get(event.actorId)?.displayName ?? event.actorId });
+  for (const event of runtime.store.dataset.auditEvents.values())
+    items.push({
+      ...event,
+      actorName: runtime.store.dataset.users.get(event.actorId)?.displayName ?? event.actorId,
+    });
   return runListQuery(items, auditResource, query);
 }
 
@@ -443,7 +758,17 @@ export function listAudit(runtime: ApiRuntime, query: ListQuery): ListResponse<A
 // Global search (section 71.2)
 
 export interface SearchHit {
-  type: 'customer' | 'contact' | 'sku' | 'product' | 'order' | 'quote' | 'invoice' | 'supplier' | 'purchase_order' | 'ticket';
+  type:
+    | 'customer'
+    | 'contact'
+    | 'sku'
+    | 'product'
+    | 'order'
+    | 'quote'
+    | 'invoice'
+    | 'supplier'
+    | 'purchase_order'
+    | 'ticket';
   id: string;
   title: string;
   subtitle: string;
@@ -461,8 +786,13 @@ export function globalSearch(runtime: ApiRuntime, rawQuery: string): SearchRespo
   const groups: SearchResponse['groups'] = [];
   if (needle.length < 2) return { query: rawQuery, groups };
   const { store } = runtime;
-  const matcher = (...values: (string | undefined)[]): boolean => values.some((value) => value !== undefined && value.toLowerCase().includes(needle));
-  const collect = (type: SearchHit['type'], permission: string, source: () => Iterable<SearchHit | undefined>): void => {
+  const matcher = (...values: (string | undefined)[]): boolean =>
+    values.some((value) => value !== undefined && value.toLowerCase().includes(needle));
+  const collect = (
+    type: SearchHit['type'],
+    permission: string,
+    source: () => Iterable<SearchHit | undefined>,
+  ): void => {
     if (!runtime.can(permission)) return;
     const hits: SearchHit[] = [];
     let total = 0;
@@ -474,31 +804,111 @@ export function globalSearch(runtime: ApiRuntime, rawQuery: string): SearchRespo
     if (total > 0) groups.push({ type, total, hits });
   };
   collect('customer', 'customers.view', function* () {
-    for (const customer of store.dataset.customers.values()) if (matcher(customer.displayName, customer.legalName, customer.accountNumber)) yield { type: 'customer', id: customer.id, title: customer.displayName, subtitle: `${customer.accountNumber} · ${customer.segment}`, number: customer.accountNumber, status: customer.status };
+    for (const customer of store.dataset.customers.values())
+      if (matcher(customer.displayName, customer.legalName, customer.accountNumber))
+        yield {
+          type: 'customer',
+          id: customer.id,
+          title: customer.displayName,
+          subtitle: `${customer.accountNumber} · ${customer.segment}`,
+          number: customer.accountNumber,
+          status: customer.status,
+        };
   });
   collect('contact', 'contacts.view', function* () {
-    for (const contact of store.dataset.contacts.values()) if (matcher(contact.displayName, contact.email)) yield { type: 'contact', id: contact.id, title: contact.displayName, subtitle: store.dataset.customers.get(contact.customerId)?.displayName ?? '', status: contact.status };
+    for (const contact of store.dataset.contacts.values())
+      if (matcher(contact.displayName, contact.email))
+        yield {
+          type: 'contact',
+          id: contact.id,
+          title: contact.displayName,
+          subtitle: store.dataset.customers.get(contact.customerId)?.displayName ?? '',
+          status: contact.status,
+        };
   });
   collect('sku', 'catalog.view', function* () {
-    for (const sku of store.dataset.skus.values()) if (matcher(sku.sku, sku.name, sku.manufacturerPartNumber)) yield { type: 'sku', id: sku.id, title: sku.name, subtitle: sku.sku, number: sku.sku, status: sku.status };
+    for (const sku of store.dataset.skus.values())
+      if (matcher(sku.sku, sku.name, sku.manufacturerPartNumber))
+        yield {
+          type: 'sku',
+          id: sku.id,
+          title: sku.name,
+          subtitle: sku.sku,
+          number: sku.sku,
+          status: sku.status,
+        };
   });
   collect('order', 'orders.view', function* () {
-    for (const order of store.dataset.salesOrders.values()) if (matcher(order.orderNumber, order.customerPoNumber)) yield { type: 'order', id: order.id, title: order.orderNumber, subtitle: store.dataset.customers.get(order.customerId)?.displayName ?? '', number: order.orderNumber, status: order.status };
+    for (const order of store.dataset.salesOrders.values())
+      if (matcher(order.orderNumber, order.customerPoNumber))
+        yield {
+          type: 'order',
+          id: order.id,
+          title: order.orderNumber,
+          subtitle: store.dataset.customers.get(order.customerId)?.displayName ?? '',
+          number: order.orderNumber,
+          status: order.status,
+        };
   });
   collect('quote', 'quotes.view', function* () {
-    for (const quote of store.dataset.quotes.values()) if (matcher(quote.quoteNumber)) yield { type: 'quote', id: quote.id, title: quote.quoteNumber, subtitle: store.dataset.customers.get(quote.customerId)?.displayName ?? '', number: quote.quoteNumber, status: quote.status };
+    for (const quote of store.dataset.quotes.values())
+      if (matcher(quote.quoteNumber))
+        yield {
+          type: 'quote',
+          id: quote.id,
+          title: quote.quoteNumber,
+          subtitle: store.dataset.customers.get(quote.customerId)?.displayName ?? '',
+          number: quote.quoteNumber,
+          status: quote.status,
+        };
   });
   collect('invoice', 'invoices.view', function* () {
-    for (const invoice of store.dataset.invoices.values()) if (matcher(invoice.invoiceNumber, invoice.customerPoNumber)) yield { type: 'invoice', id: invoice.id, title: invoice.invoiceNumber ?? invoice.id, subtitle: store.dataset.customers.get(invoice.customerId)?.displayName ?? '', status: invoice.lifecycle, ...(invoice.invoiceNumber ? { number: invoice.invoiceNumber } : {}) };
+    for (const invoice of store.dataset.invoices.values())
+      if (matcher(invoice.invoiceNumber, invoice.customerPoNumber))
+        yield {
+          type: 'invoice',
+          id: invoice.id,
+          title: invoice.invoiceNumber ?? invoice.id,
+          subtitle: store.dataset.customers.get(invoice.customerId)?.displayName ?? '',
+          status: invoice.lifecycle,
+          ...(invoice.invoiceNumber ? { number: invoice.invoiceNumber } : {}),
+        };
   });
   collect('supplier', 'suppliers.view', function* () {
-    for (const supplier of store.dataset.suppliers.values()) if (matcher(supplier.displayName, supplier.supplierNumber)) yield { type: 'supplier', id: supplier.id, title: supplier.displayName, subtitle: supplier.category, number: supplier.supplierNumber, status: supplier.status };
+    for (const supplier of store.dataset.suppliers.values())
+      if (matcher(supplier.displayName, supplier.supplierNumber))
+        yield {
+          type: 'supplier',
+          id: supplier.id,
+          title: supplier.displayName,
+          subtitle: supplier.category,
+          number: supplier.supplierNumber,
+          status: supplier.status,
+        };
   });
   collect('purchase_order', 'purchase_orders.view', function* () {
-    for (const po of store.dataset.purchaseOrders.values()) if (matcher(po.purchaseOrderNumber)) yield { type: 'purchase_order', id: po.id, title: po.purchaseOrderNumber, subtitle: store.dataset.suppliers.get(po.supplierId)?.displayName ?? '', number: po.purchaseOrderNumber, status: po.status };
+    for (const po of store.dataset.purchaseOrders.values())
+      if (matcher(po.purchaseOrderNumber))
+        yield {
+          type: 'purchase_order',
+          id: po.id,
+          title: po.purchaseOrderNumber,
+          subtitle: store.dataset.suppliers.get(po.supplierId)?.displayName ?? '',
+          number: po.purchaseOrderNumber,
+          status: po.status,
+        };
   });
   collect('ticket', 'support.view', function* () {
-    for (const ticket of store.dataset.tickets.values()) if (matcher(ticket.ticketNumber, ticket.subject)) yield { type: 'ticket', id: ticket.id, title: ticket.subject, subtitle: `${ticket.ticketNumber} · ${store.dataset.customers.get(ticket.customerId)?.displayName ?? ''}`, number: ticket.ticketNumber, status: ticket.status };
+    for (const ticket of store.dataset.tickets.values())
+      if (matcher(ticket.ticketNumber, ticket.subject))
+        yield {
+          type: 'ticket',
+          id: ticket.id,
+          title: ticket.subject,
+          subtitle: `${ticket.ticketNumber} · ${store.dataset.customers.get(ticket.customerId)?.displayName ?? ''}`,
+          number: ticket.ticketNumber,
+          status: ticket.status,
+        };
   });
   return { query: rawQuery, groups };
 }

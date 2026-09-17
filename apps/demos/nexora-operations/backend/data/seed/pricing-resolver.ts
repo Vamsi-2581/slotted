@@ -13,7 +13,10 @@ export interface PriceResolution {
  * default price list, then the Standard list.
  */
 export class PricingResolver {
-  private readonly contractByCustomerSku = new Map<string, { unitPrice: Money; validFrom: string; validTo: string }[]>();
+  private readonly contractByCustomerSku = new Map<
+    string,
+    { unitPrice: Money; validFrom: string; validTo: string }[]
+  >();
   private readonly customersWithContracts = new Set<string>();
 
   constructor(
@@ -24,14 +27,24 @@ export class PricingResolver {
     for (const price of dataset.contractPrices.values()) {
       const key = `${price.customerId}\u0000${price.skuId}`;
       const bucket = this.contractByCustomerSku.get(key) ?? [];
-      bucket.push({ unitPrice: price.unitPrice, validFrom: price.validFrom, validTo: price.validTo });
+      bucket.push({
+        unitPrice: price.unitPrice,
+        validFrom: price.validFrom,
+        validTo: price.validTo,
+      });
       this.contractByCustomerSku.set(key, bucket);
       this.customersWithContracts.add(price.customerId);
     }
   }
 
   /** Registers a contract price created after construction. */
-  addContractPrice(customerId: string, skuId: string, unitPrice: Money, validFrom: string, validTo: string): void {
+  addContractPrice(
+    customerId: string,
+    skuId: string,
+    unitPrice: Money,
+    validFrom: string,
+    validTo: string,
+  ): void {
     const key = `${customerId}\u0000${skuId}`;
     const bucket = this.contractByCustomerSku.get(key) ?? [];
     bucket.push({ unitPrice, validFrom, validTo });
@@ -40,7 +53,9 @@ export class PricingResolver {
   }
 
   resolve(customer: Customer, sku: Sku, businessDate: string): PriceResolution | undefined {
-    const contracts = this.customersWithContracts.has(customer.id) ? this.contractByCustomerSku.get(`${customer.id}\u0000${sku.id}`) : undefined;
+    const contracts = this.customersWithContracts.has(customer.id)
+      ? this.contractByCustomerSku.get(`${customer.id}\u0000${sku.id}`)
+      : undefined;
     if (contracts) {
       for (const contract of contracts) {
         if (contract.validFrom <= businessDate && businessDate <= contract.validTo) {
@@ -64,7 +79,14 @@ export class PricingResolver {
 
 export function snapshotAddress(address: Address | undefined, name: string): AddressSnapshot {
   if (!address) {
-    return { name, line1: 'Address on file', city: 'Chicago', region: 'IL', postalCode: '60609', countryCode: 'US' };
+    return {
+      name,
+      line1: 'Address on file',
+      city: 'Chicago',
+      region: 'IL',
+      postalCode: '60609',
+      countryCode: 'US',
+    };
   }
   return {
     name,

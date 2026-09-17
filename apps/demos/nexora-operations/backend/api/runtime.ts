@@ -58,7 +58,10 @@ export class Authorization {
       const role = this.store.dataset.roles.get(assignment.roleId);
       if (!role) continue;
       for (const grant of role.grants) {
-        const scope: PermissionScope = assignment.scope.type === 'all' || grant.defaultScope === 'all' ? { type: 'all' } : assignment.scope;
+        const scope: PermissionScope =
+          assignment.scope.type === 'all' || grant.defaultScope === 'all'
+            ? { type: 'all' }
+            : assignment.scope;
         const bucket = result.get(grant.permission) ?? [];
         bucket.push(scope);
         result.set(grant.permission, bucket);
@@ -81,7 +84,8 @@ export class Authorization {
         return true;
       case 'own':
         if (resource.ownerId !== undefined) return resource.ownerId === user.id;
-        if (resource.customerId !== undefined) return this.store.dataset.customers.get(resource.customerId)?.accountOwnerId === user.id;
+        if (resource.customerId !== undefined)
+          return this.store.dataset.customers.get(resource.customerId)?.accountOwnerId === user.id;
         return resource.teamId === undefined && resource.warehouseId === undefined;
       case 'team':
         if (resource.teamId !== undefined) return scope.teamIds.includes(resource.teamId);
@@ -91,7 +95,8 @@ export class Authorization {
         }
         return resource.ownerId === user.id;
       case 'warehouse':
-        if (resource.warehouseId !== undefined) return scope.warehouseIds.includes(resource.warehouseId);
+        if (resource.warehouseId !== undefined)
+          return scope.warehouseIds.includes(resource.warehouseId);
         return false;
     }
   }
@@ -112,7 +117,8 @@ export class Authorization {
     const ids = new Set<string>();
     let all = false;
     for (const assignment of this.indexes.roleAssignmentsByUser.get(userId)) {
-      if (assignment.scope.type === 'warehouse') for (const id of assignment.scope.warehouseIds) ids.add(id);
+      if (assignment.scope.type === 'warehouse')
+        for (const id of assignment.scope.warehouseIds) ids.add(id);
       else all = true;
     }
     return all ? 'all' : [...ids];
@@ -241,13 +247,20 @@ export class Transaction {
     const key = `${collection}:${id}`;
     if (!this.touched.has(key)) {
       this.touched.add(key);
-      this.snapshots.push({ collection, id, before: existing === undefined ? undefined : structuredClone(existing) });
+      this.snapshots.push({
+        collection,
+        id,
+        before: existing === undefined ? undefined : structuredClone(existing),
+      });
     }
     this.runtime.store.delete(collection, id);
   }
 
   /** Bumps version/updatedAt on an aggregate after a successful mutation. */
-  bump(metadata: EntityMetadata, changedFields?: string[]): { previousVersion: number; nextVersion: number; changedFields: string[] | undefined } {
+  bump(
+    metadata: EntityMetadata,
+    changedFields?: string[],
+  ): { previousVersion: number; nextVersion: number; changedFields: string[] | undefined } {
     const previousVersion = metadata.version;
     metadata.version += 1;
     metadata.updatedAt = this.occurredAt;
@@ -256,12 +269,28 @@ export class Transaction {
   }
 
   /** Section 53.11 — validates the client's last observed version. */
-  assertVersion(metadata: EntityMetadata, options: MutationOptions | undefined, entityLabel: string): void {
+  assertVersion(
+    metadata: EntityMetadata,
+    options: MutationOptions | undefined,
+    entityLabel: string,
+  ): void {
     if (options?.ifMatch === undefined) throw preconditionRequired(entityLabel);
-    if (options.ifMatch !== metadata.version) throw staleVersion(entityLabel, options.ifMatch, metadata.version);
+    if (options.ifMatch !== metadata.version)
+      throw staleVersion(entityLabel, options.ifMatch, metadata.version);
   }
 
-  audit(action: string, entityType: string, entityId: string, detail: { previousVersion?: number; nextVersion?: number; changedFields?: string[]; before?: unknown; after?: unknown } = {}): void {
+  audit(
+    action: string,
+    entityType: string,
+    entityId: string,
+    detail: {
+      previousVersion?: number;
+      nextVersion?: number;
+      changedFields?: string[];
+      before?: unknown;
+      after?: unknown;
+    } = {},
+  ): void {
     this.runtime.store.appendAudit({
       occurredAt: this.occurredAt,
       actorId: this.actor.id,
@@ -277,7 +306,18 @@ export class Transaction {
     });
   }
 
-  activityEvent(event: { type: string; subjectType: string; subjectId: string; summary: string; subjectLabel?: string | undefined; customerId?: string | undefined; orderId?: string | undefined; metadata?: Record<string, unknown> | undefined; actorId?: string | undefined; occurredAt?: string | undefined }): ActivityEvent {
+  activityEvent(event: {
+    type: string;
+    subjectType: string;
+    subjectId: string;
+    summary: string;
+    subjectLabel?: string | undefined;
+    customerId?: string | undefined;
+    orderId?: string | undefined;
+    metadata?: Record<string, unknown> | undefined;
+    actorId?: string | undefined;
+    occurredAt?: string | undefined;
+  }): ActivityEvent {
     const record: ActivityEvent = {
       id: this.runtime.store.nextId('activityEvent'),
       organizationId: this.runtime.store.dataset.organization.id,
@@ -297,7 +337,13 @@ export class Transaction {
     return record;
   }
 
-  notify(userId: string, type: Notification['type'], title: string, body: string, entity?: { type: string; id: string }): Notification {
+  notify(
+    userId: string,
+    type: Notification['type'],
+    title: string,
+    body: string,
+    entity?: { type: string; id: string },
+  ): Notification {
     const notification: Notification = {
       id: this.runtime.store.nextId('notification'),
       organizationId: this.runtime.store.dataset.organization.id,
@@ -363,20 +409,30 @@ export class ApiRuntime {
     const delay = this.latency.delayFor(kind, endpoint);
     if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
     if (this.latency.shouldFail(endpoint, kind, correlationId)) {
-      throw new NexoraApiError('SERVICE_UNAVAILABLE', 'The service is temporarily unavailable. Retry the request.', { retryable: true, correlationId });
+      throw new NexoraApiError(
+        'SERVICE_UNAVAILABLE',
+        'The service is temporarily unavailable. Retry the request.',
+        { retryable: true, correlationId },
+      );
     }
     try {
-      if (!this.store.dataset.users.has(this.store.metadata.activePersonaId)) throw new NexoraApiError('UNAUTHENTICATED', 'No active persona');
+      if (!this.store.dataset.users.has(this.store.metadata.activePersonaId))
+        throw new NexoraApiError('UNAUTHENTICATED', 'No active persona');
       return await work();
     } catch (error) {
       if (error instanceof NexoraApiError) throw error.withCorrelationId(correlationId);
-      throw new NexoraApiError('INTERNAL_ERROR', error instanceof Error ? error.message : String(error), { correlationId });
+      throw new NexoraApiError(
+        'INTERNAL_ERROR',
+        error instanceof Error ? error.message : String(error),
+        { correlationId },
+      );
     }
   }
 
   require(permission: string, resource?: ResourceScope): User {
     const user = this.actor;
-    if (!isPermission(permission)) throw new NexoraApiError('INTERNAL_ERROR', `Unknown permission ${permission}`);
+    if (!isPermission(permission))
+      throw new NexoraApiError('INTERNAL_ERROR', `Unknown permission ${permission}`);
     this.authorization.require(user, permission, resource);
     return user;
   }
@@ -389,13 +445,22 @@ export class ApiRuntime {
    * Runs a command atomically (section 74.3) with idempotency (section 73.9).
    * The work receives a transaction; errors roll every touched entity back.
    */
-  async command<T>(endpoint: string, options: MutationOptions | undefined, payloadFingerprint: unknown, work: (tx: Transaction) => T): Promise<T> {
+  async command<T>(
+    endpoint: string,
+    options: MutationOptions | undefined,
+    payloadFingerprint: unknown,
+    work: (tx: Transaction) => T,
+  ): Promise<T> {
     return this.request(endpoint, 'write', () => {
       const fingerprint = JSON.stringify(payloadFingerprint ?? null);
       if (options?.idempotencyKey) {
         const existing = this.idempotency.get(options.idempotencyKey);
         if (existing) {
-          if (existing.fingerprint !== fingerprint) throw new NexoraApiError('IDEMPOTENCY_KEY_REUSED', 'The idempotency key was already used with a different payload');
+          if (existing.fingerprint !== fingerprint)
+            throw new NexoraApiError(
+              'IDEMPOTENCY_KEY_REUSED',
+              'The idempotency key was already used with a different payload',
+            );
           return existing.result as T;
         }
       }
@@ -408,7 +473,12 @@ export class ApiRuntime {
         throw error;
       }
       if (options?.idempotencyKey) {
-        this.idempotency.set(options.idempotencyKey, { key: options.idempotencyKey, fingerprint, result: structuredClone(result), createdAt: this.store.now });
+        this.idempotency.set(options.idempotencyKey, {
+          key: options.idempotencyKey,
+          fingerprint,
+          result: structuredClone(result),
+          createdAt: this.store.now,
+        });
       }
       return result;
     });

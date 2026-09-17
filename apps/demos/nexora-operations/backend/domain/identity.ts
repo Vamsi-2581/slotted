@@ -43,13 +43,7 @@ export interface User {
 }
 
 export type TeamType =
-  | 'sales'
-  | 'finance'
-  | 'procurement'
-  | 'warehouse'
-  | 'support'
-  | 'executive'
-  | 'administration';
+  'sales' | 'finance' | 'procurement' | 'warehouse' | 'support' | 'executive' | 'administration';
 
 export interface Team {
   id: string;

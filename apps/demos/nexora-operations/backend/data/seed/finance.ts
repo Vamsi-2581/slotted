@@ -24,7 +24,11 @@ export interface FinanceSeedResult {
   bankTransactionCount: number;
 }
 
-function bankDescription(random: ReturnType<SeedContext['random']>, customer: Customer, payment: Payment): string {
+function bankDescription(
+  random: ReturnType<SeedContext['random']>,
+  customer: Customer,
+  payment: Payment,
+): string {
   const name = customer.legalName.toUpperCase().replace(/[.,]/g, '').slice(0, 22);
   switch (payment.method) {
     case 'ach':
@@ -43,12 +47,24 @@ function bankDescription(random: ReturnType<SeedContext['random']>, customer: Cu
 export function seedFinance(context: SeedContext, tenant: TenantSeedResult): FinanceSeedResult {
   const { dataset, today, operationalStart, now } = context;
   const random = context.random('finance');
-  const financeActors = [...dataset.roleAssignments.values()].filter((assignment) => (assignment.roleId === tenant.roleIdsByKey.get('accountant') || assignment.roleId === tenant.roleIdsByKey.get('finance_manager')) && dataset.users.get(assignment.userId)?.status === 'active').map((assignment) => assignment.userId);
-  if (financeActors.length === 0) financeActors.push(tenant.personaUserIds.get('priya-shah') as string);
+  const financeActors = [...dataset.roleAssignments.values()]
+    .filter(
+      (assignment) =>
+        (assignment.roleId === tenant.roleIdsByKey.get('accountant') ||
+          assignment.roleId === tenant.roleIdsByKey.get('finance_manager')) &&
+        dataset.users.get(assignment.userId)?.status === 'active',
+    )
+    .map((assignment) => assignment.userId);
+  if (financeActors.length === 0)
+    financeActors.push(tenant.personaUserIds.get('priya-shah') as string);
 
   // Bank transactions mirror posted payments; the newest few days stay unmatched.
   let bankCounter = 0;
-  const addBank = (transaction: Omit<BankTransaction, 'id' | 'organizationId' | 'candidates' | 'metadata'> & { createdAt: string }): BankTransaction => {
+  const addBank = (
+    transaction: Omit<BankTransaction, 'id' | 'organizationId' | 'candidates' | 'metadata'> & {
+      createdAt: string;
+    },
+  ): BankTransaction => {
     bankCounter += 1;
     const { createdAt, ...rest } = transaction;
     const record: BankTransaction = {
@@ -62,7 +78,9 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     return record;
   };
 
-  const payments = [...dataset.payments.values()].filter((payment) => payment.status === 'posted').sort((a, b) => a.receivedDate.localeCompare(b.receivedDate));
+  const payments = [...dataset.payments.values()]
+    .filter((payment) => payment.status === 'posted')
+    .sort((a, b) => a.receivedDate.localeCompare(b.receivedDate));
   for (const payment of payments) {
     if (payment.method === 'credit_card' && random.chance(0.5)) continue; // Card deposits arrive batched.
     const customer = dataset.customers.get(payment.customerId) as Customer;
@@ -88,7 +106,9 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   }
 
   // Unmatched deposits without a recorded payment (customer paid, AR not posted yet) and noise.
-  const openInvoices = [...dataset.invoices.values()].filter((invoice) => invoice.lifecycle === 'open' && invoice.outstanding.minor > 0);
+  const openInvoices = [...dataset.invoices.values()].filter(
+    (invoice) => invoice.lifecycle === 'open' && invoice.outstanding.minor > 0,
+  );
   const unmatchedCount = Math.max(3, Math.round(payments.length * 0.03));
   for (let index = 0; index < unmatchedCount && openInvoices.length > 0; index += 1) {
     const invoice = random.pick(openInvoices);
@@ -98,7 +118,11 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     addBank({
       postedDate,
       description: `${random.pick(['ACH CREDIT', 'FED WIRE IN', 'LOCKBOX DEPOSIT'])} ${customer.legalName.toUpperCase().replace(/[.,]/g, '').slice(0, 22)}${random.chance(0.5) ? ` ${invoice.invoiceNumber ?? ''}` : ''}`,
-      amount: usd(exact ? invoice.outstanding.minor : roundHalfUp(invoice.outstanding.minor * random.float(0.4, 1.1))),
+      amount: usd(
+        exact
+          ? invoice.outstanding.minor
+          : roundHalfUp(invoice.outstanding.minor * random.float(0.4, 1.1)),
+      ),
       status: exact ? 'suggested' : 'needs_review',
       createdAt: instantOn(postedDate, random, 6, 8),
       ...(random.chance(0.4) && invoice.invoiceNumber ? { reference: invoice.invoiceNumber } : {}),
@@ -108,7 +132,12 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     const postedDate = nextBusinessDayOnOrAfter(addDays(today, -random.int(0, 40)));
     addBank({
       postedDate,
-      description: random.pick(['MONTHLY SERVICE FEE', 'WIRE FEE OUTGOING', 'MERCHANT PROCESSING FEE', 'ANALYSIS CHARGE']),
+      description: random.pick([
+        'MONTHLY SERVICE FEE',
+        'WIRE FEE OUTGOING',
+        'MERCHANT PROCESSING FEE',
+        'ANALYSIS CHARGE',
+      ]),
       amount: usd(-roundHalfUp(random.float(15, 240) * 100)),
       status: 'ignored',
       ignoreReason: 'Bank fee — not a customer receipt',
@@ -117,10 +146,15 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   }
 
   // Unapplied payments (prepayments / overpayments).
-  const activeCustomers = [...dataset.customers.values()].filter((customer) => customer.status === 'active');
+  const activeCustomers = [...dataset.customers.values()].filter(
+    (customer) => customer.status === 'active',
+  );
   let paymentCounter = dataset.payments.size + 10_000;
   const unappliedCount = Math.max(2, Math.round(payments.length * 0.012));
-  const maxPaymentSequence = Math.max(0, ...[...dataset.payments.values()].map((payment) => Number(payment.paymentNumber.slice(4)) || 0));
+  const maxPaymentSequence = Math.max(
+    0,
+    ...[...dataset.payments.values()].map((payment) => Number(payment.paymentNumber.slice(4)) || 0),
+  );
   for (let index = 0; index < unappliedCount; index += 1) {
     const customer = random.pick(activeCustomers);
     const receivedDate = nextBusinessDayOnOrAfter(addDays(today, -random.int(1, 60)));
@@ -148,9 +182,21 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   }
 
   // Write-offs on old small balances (section 66.5, full remaining balance only).
-  const writeOffCandidates = [...dataset.invoices.values()].filter((invoice) => invoice.lifecycle === 'open' && invoice.outstanding.minor > 0 && invoice.outstanding.minor < 50_000 && diffDays(today, invoice.dueDate) > 75);
-  for (const invoice of random.sample(writeOffCandidates, Math.min(writeOffCandidates.length, 12))) {
-    const writtenOffAt = instantOn(nextBusinessDayOnOrAfter(addDays(today, -random.int(1, 30))), random);
+  const writeOffCandidates = [...dataset.invoices.values()].filter(
+    (invoice) =>
+      invoice.lifecycle === 'open' &&
+      invoice.outstanding.minor > 0 &&
+      invoice.outstanding.minor < 50_000 &&
+      diffDays(today, invoice.dueDate) > 75,
+  );
+  for (const invoice of random.sample(
+    writeOffCandidates,
+    Math.min(writeOffCandidates.length, 12),
+  )) {
+    const writtenOffAt = instantOn(
+      nextBusinessDayOnOrAfter(addDays(today, -random.int(1, 30))),
+      random,
+    );
     invoice.writtenOffAmount = usd(invoice.outstanding.minor);
     invoice.outstanding = usd(0);
     invoice.lifecycle = 'written_off';
@@ -162,15 +208,27 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   }
 
   // Manual credit memos (pricing corrections and service recovery).
-  const creditCandidates = [...dataset.invoices.values()].filter((invoice) => invoice.lifecycle === 'open' && diffDays(today, invoice.issueDate) < 90);
-  const maxCreditSequence = Math.max(0, ...[...dataset.creditMemos.values()].map((memo) => Number(memo.creditMemoNumber.slice(3)) || 0));
+  const creditCandidates = [...dataset.invoices.values()].filter(
+    (invoice) => invoice.lifecycle === 'open' && diffDays(today, invoice.issueDate) < 90,
+  );
+  const maxCreditSequence = Math.max(
+    0,
+    ...[...dataset.creditMemos.values()].map((memo) => Number(memo.creditMemoNumber.slice(3)) || 0),
+  );
   let creditCounter = dataset.creditMemos.size + 10_000;
-  for (const [index, invoice] of random.sample(creditCandidates, Math.min(creditCandidates.length, 24)).entries()) {
+  for (const [index, invoice] of random
+    .sample(creditCandidates, Math.min(creditCandidates.length, 24))
+    .entries()) {
     const issueDate = nextBusinessDayOnOrAfter(addDays(invoice.issueDate, random.int(2, 20)));
     if (compareDates(issueDate, today) > 0) continue;
     const issuedAt = instantOn(issueDate, random);
-    const amount = Math.min(invoice.total.minor, roundHalfUp(invoice.subtotal.minor * random.float(0.03, 0.2)));
-    const tax = roundHalfUp(amount * (invoice.subtotal.minor > 0 ? invoice.taxTotal.minor / invoice.subtotal.minor : 0));
+    const amount = Math.min(
+      invoice.total.minor,
+      roundHalfUp(invoice.subtotal.minor * random.float(0.03, 0.2)),
+    );
+    const tax = roundHalfUp(
+      amount * (invoice.subtotal.minor > 0 ? invoice.taxTotal.minor / invoice.subtotal.minor : 0),
+    );
     const total = amount + tax;
     const applied = invoice.outstanding.minor > 0 ? Math.min(total, invoice.outstanding.minor) : 0;
     creditCounter += 1;
@@ -197,7 +255,12 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
       id: `crl_${memo.id.slice(4)}`,
       organizationId: ORGANIZATION_ID,
       creditMemoId: memo.id,
-      description: memo.reason === 'pricing_correction' ? 'Pricing correction per contract' : memo.reason === 'service_recovery' ? 'Service recovery credit — delayed delivery' : 'Manual adjustment',
+      description:
+        memo.reason === 'pricing_correction'
+          ? 'Pricing correction per contract'
+          : memo.reason === 'service_recovery'
+            ? 'Service recovery credit — delayed delivery'
+            : 'Manual adjustment',
       amount: usd(amount),
       taxAmount: usd(tax),
     });
@@ -215,13 +278,18 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
       invoice.outstanding = usd(invoice.outstanding.minor - applied);
       invoice.settlement = invoice.outstanding.minor === 0 ? 'paid' : 'partially_paid';
       if (invoice.outstanding.minor === 0) invoice.collectionState = 'current';
-      if (index === 0 && invoice.settlement === 'paid') dataset.fixtures.set('edge.invoice.paid_with_credit_memo', invoice.id);
+      if (index === 0 && invoice.settlement === 'paid')
+        dataset.fixtures.set('edge.invoice.paid_with_credit_memo', invoice.id);
     }
   }
 
   // Refunds for customers holding unapplied credit.
-  const refundable = [...dataset.creditMemos.values()].filter((memo) => memo.lifecycle === 'open' && memo.unappliedAmount.minor > 0);
-  for (const [index, memo] of random.sample(refundable, Math.min(refundable.length, 10)).entries()) {
+  const refundable = [...dataset.creditMemos.values()].filter(
+    (memo) => memo.lifecycle === 'open' && memo.unappliedAmount.minor > 0,
+  );
+  for (const [index, memo] of random
+    .sample(refundable, Math.min(refundable.length, 10))
+    .entries()) {
     const postedDate = nextBusinessDayOnOrAfter(addDays(memo.issueDate, random.int(3, 15)));
     if (compareDates(postedDate, today) > 0) continue;
     const postedAt = instantOn(postedDate, random);
@@ -248,17 +316,28 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   }
 
   // Invoice edge fixtures (section 82): due today, zero-value, unusually large.
-  const dueToday = [...dataset.invoices.values()].find((invoice) => invoice.lifecycle === 'open' && invoice.outstanding.minor > 0 && invoice.dueDate === today);
+  const dueToday = [...dataset.invoices.values()].find(
+    (invoice) =>
+      invoice.lifecycle === 'open' && invoice.outstanding.minor > 0 && invoice.dueDate === today,
+  );
   if (dueToday) dataset.fixtures.set('edge.invoice.due_today', dueToday.id);
   else {
-    const candidate = [...dataset.invoices.values()].find((invoice) => invoice.lifecycle === 'open' && invoice.outstanding.minor > 0 && diffDays(today, invoice.dueDate) >= -3 && diffDays(today, invoice.dueDate) <= 3);
+    const candidate = [...dataset.invoices.values()].find(
+      (invoice) =>
+        invoice.lifecycle === 'open' &&
+        invoice.outstanding.minor > 0 &&
+        diffDays(today, invoice.dueDate) >= -3 &&
+        diffDays(today, invoice.dueDate) <= 3,
+    );
     if (candidate) {
       candidate.dueDate = today;
       candidate.collectionState = 'current';
       dataset.fixtures.set('edge.invoice.due_today', candidate.id);
     }
   }
-  const partiallyPaid = [...dataset.invoices.values()].find((invoice) => invoice.lifecycle === 'open' && invoice.settlement === 'partially_paid');
+  const partiallyPaid = [...dataset.invoices.values()].find(
+    (invoice) => invoice.lifecycle === 'open' && invoice.settlement === 'partially_paid',
+  );
   if (partiallyPaid) dataset.fixtures.set('edge.invoice.partially_paid', partiallyPaid.id);
   const largest = [...dataset.invoices.values()].sort((a, b) => b.total.minor - a.total.minor)[0];
   if (largest) dataset.fixtures.set('edge.invoice.large', largest.id);
@@ -278,7 +357,14 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     settlement: 'paid',
     paidAmount: usd(0),
     outstanding: usd(0),
-    billingAddress: { name: zeroCustomer.legalName, line1: 'Address on file', city: 'Chicago', region: 'IL', postalCode: '60609', countryCode: 'US' },
+    billingAddress: {
+      name: zeroCustomer.legalName,
+      line1: 'Address on file',
+      city: 'Chicago',
+      region: 'IL',
+      postalCode: '60609',
+      countryCode: 'US',
+    },
     paymentTermsCode: zeroCustomer.paymentTermsCode,
     subtotal: usd(0),
     taxTotal: usd(0),
@@ -290,8 +376,17 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     metadata: metadataAt(zeroAt, financeActors[0] as string, zeroAt, financeActors[0] as string, 2),
   };
   delete (zeroInvoice as { invoiceNumber?: string }).invoiceNumber;
-  const lastInvoiceNumber = Math.max(0, ...[...dataset.invoices.values()].filter((invoice) => invoice.invoiceNumber?.startsWith(`INV-${today.slice(0, 4)}`)).map((invoice) => Number(invoice.invoiceNumber?.slice(9)) || 0));
-  zeroInvoice.invoiceNumber = formatBusinessNumber('invoice', lastInvoiceNumber + 1, Number(today.slice(0, 4)));
+  const lastInvoiceNumber = Math.max(
+    0,
+    ...[...dataset.invoices.values()]
+      .filter((invoice) => invoice.invoiceNumber?.startsWith(`INV-${today.slice(0, 4)}`))
+      .map((invoice) => Number(invoice.invoiceNumber?.slice(9)) || 0),
+  );
+  zeroInvoice.invoiceNumber = formatBusinessNumber(
+    'invoice',
+    lastInvoiceNumber + 1,
+    Number(today.slice(0, 4)),
+  );
   dataset.invoices.set(zeroInvoice.id, zeroInvoice);
   dataset.invoiceLines.set('inl_99000001', {
     id: 'inl_99000001',

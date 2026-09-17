@@ -27,11 +27,56 @@ export interface FlagshipProductSpec {
 
 /** Section 46 — flagship products; the first SKU of each is the narrative SKU. */
 export const FLAGSHIP_PRODUCTS: FlagshipProductSpec[] = [
-  { name: 'Servo Motor MX-240', leaf: 'Servo Motors', brand: 'Promethean Drives', series: 'MX', number: 240, variants: ['NEMA 34', 'IEC 100'], listPrice: 1_890, cost: 1_128 },
-  { name: 'Inductive Sensor IS-18', leaf: 'Inductive Sensors', brand: 'Vertex Sensor Technologies', series: 'IS', number: 18, variants: ['8 mm', '12 mm', '4 mm'], listPrice: 86, cost: 41 },
-  { name: 'Variable Frequency Drive VX-7', leaf: 'Variable Frequency Drives', brand: 'Kestrel Automation', series: 'VX', number: 7, variants: ['5 HP', '10 HP', '20 HP'], listPrice: 2_340, cost: 1_450 },
-  { name: 'Safety Relay SR-420', leaf: 'Safety Relays', brand: 'Kestrel Automation', series: 'SR', number: 420, variants: ['3 N.O. + 1 N.C.', 'Dual channel'], listPrice: 312, cost: 176 },
-  { name: 'Industrial Controller IC-900', leaf: 'Industrial Controllers', brand: 'Kestrel Automation', series: 'IC', number: 900, variants: ['32 I/O', '64 I/O', '128 I/O'], listPrice: 4_120, cost: 2_560 },
+  {
+    name: 'Servo Motor MX-240',
+    leaf: 'Servo Motors',
+    brand: 'Promethean Drives',
+    series: 'MX',
+    number: 240,
+    variants: ['NEMA 34', 'IEC 100'],
+    listPrice: 1_890,
+    cost: 1_128,
+  },
+  {
+    name: 'Inductive Sensor IS-18',
+    leaf: 'Inductive Sensors',
+    brand: 'Vertex Sensor Technologies',
+    series: 'IS',
+    number: 18,
+    variants: ['8 mm', '12 mm', '4 mm'],
+    listPrice: 86,
+    cost: 41,
+  },
+  {
+    name: 'Variable Frequency Drive VX-7',
+    leaf: 'Variable Frequency Drives',
+    brand: 'Kestrel Automation',
+    series: 'VX',
+    number: 7,
+    variants: ['5 HP', '10 HP', '20 HP'],
+    listPrice: 2_340,
+    cost: 1_450,
+  },
+  {
+    name: 'Safety Relay SR-420',
+    leaf: 'Safety Relays',
+    brand: 'Kestrel Automation',
+    series: 'SR',
+    number: 420,
+    variants: ['3 N.O. + 1 N.C.', 'Dual channel'],
+    listPrice: 312,
+    cost: 176,
+  },
+  {
+    name: 'Industrial Controller IC-900',
+    leaf: 'Industrial Controllers',
+    brand: 'Kestrel Automation',
+    series: 'IC',
+    number: 900,
+    variants: ['32 I/O', '64 I/O', '128 I/O'],
+    listPrice: 4_120,
+    cost: 2_560,
+  },
 ];
 
 export interface CatalogSeedResult {
@@ -77,7 +122,12 @@ function priceMinor(dollars: number): number {
   return minor;
 }
 
-function describe(template: ProductTypeTemplate, brand: string, name: string, random: Random): string {
+function describe(
+  template: ProductTypeTemplate,
+  brand: string,
+  name: string,
+  random: Random,
+): string {
   const claims = [
     'Industrial-grade construction rated for continuous duty.',
     'Backed by a 24-month manufacturer warranty.',
@@ -103,7 +153,9 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
   };
 
   // Product allotment per leaf, proportional to summed type demand.
-  const leafWeights = leaves.map(([, definition]) => definition.types.reduce((sum, type) => sum + type.demand, 0));
+  const leafWeights = leaves.map(([, definition]) =>
+    definition.types.reduce((sum, type) => sum + type.demand, 0),
+  );
   const totalLeafWeight = leafWeights.reduce((sum, weight) => sum + weight, 0);
 
   const skuIds: string[] = [];
@@ -159,13 +211,24 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
     leafId: string,
     definition: LeafCategoryDefinition,
     template: ProductTypeTemplate,
-    spec: { brand: string; name: string; series: string; number: number; variants: string[]; listPrice?: number; cost?: number; flagship?: boolean },
+    spec: {
+      brand: string;
+      name: string;
+      series: string;
+      number: number;
+      variants: string[];
+      listPrice?: number;
+      cost?: number;
+      flagship?: boolean;
+    },
   ): Product => {
-    const status: Product['status'] = spec.flagship ? 'active' : random.weighted([
-      { value: 'active', weight: 93 },
-      { value: 'discontinued', weight: 5 },
-      { value: 'draft', weight: 2 },
-    ]);
+    const status: Product['status'] = spec.flagship
+      ? 'active'
+      : random.weighted([
+          { value: 'active', weight: 93 },
+          { value: 'discontinued', weight: 5 },
+          { value: 'draft', weight: 2 },
+        ]);
     const product: Product = withId({
       id: context.nextId('product'),
       organizationId: ORGANIZATION_ID,
@@ -175,19 +238,26 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
       brand: spec.brand,
       manufacturer: spec.brand,
       status,
-      tags: random.chance(0.3) ? random.sample(['best-seller', 'new', 'clearance', 'oem', 'made-in-usa', 'long-lead'], random.int(1, 2)) : [],
+      tags: random.chance(0.3)
+        ? random.sample(
+            ['best-seller', 'new', 'clearance', 'oem', 'made-in-usa', 'long-lead'],
+            random.int(1, 2),
+          )
+        : [],
       metadata: context.metadata(addDays(createdAt, random.int(0, 1_500))),
     });
     dataset.products.set(product.id, product);
 
     const rootCode = CATEGORY_CODES[rootNameOf(leafId)] ?? 'GEN';
-    const listPriceDollars = spec.listPrice ?? logUniform(random, template.priceMin, template.priceMax);
+    const listPriceDollars =
+      spec.listPrice ?? logUniform(random, template.priceMin, template.priceMax);
     const costRatio = random.float(template.costRatioMin, template.costRatioMax);
     for (const [index, variant] of spec.variants.entries()) {
       const serial = (serialByCategory.get(rootCode) ?? 0) + 1;
       serialByCategory.set(rootCode, serial);
       const variantPrice = priceMinor(listPriceDollars * (1 + index * random.float(0.04, 0.22)));
-      const costMinor = spec.cost && index === 0 ? spec.cost * 100 : roundHalfUp(variantPrice * costRatio);
+      const costMinor =
+        spec.cost && index === 0 ? spec.cost * 100 : roundHalfUp(variantPrice * costRatio);
       const skuStatus: Sku['status'] =
         product.status === 'discontinued'
           ? 'discontinued'
@@ -198,7 +268,8 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
                 { value: 'restricted', weight: 2 },
                 { value: 'discontinued', weight: 3 },
               ]);
-      const reorderPoint = template.unitOfMeasure === 'EA' ? random.int(4, 60) : random.int(50, 400);
+      const reorderPoint =
+        template.unitOfMeasure === 'EA' ? random.int(4, 60) : random.int(50, 400);
       const minMax = random.chance(0.72);
       const sku: Sku = withId({
         id: context.nextId('sku'),
@@ -228,12 +299,21 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
         ...(spec.variants.length > 1 ? { variantLabel: variant } : {}),
       });
       if (random.chance(0.6)) {
-        sku.dimensionsMm = { length: random.int(40, 900), width: random.int(30, 600), height: random.int(20, 500) };
+        sku.dimensionsMm = {
+          length: random.int(40, 900),
+          width: random.int(30, 600),
+          height: random.int(20, 500),
+        };
       }
       dataset.skus.set(sku.id, sku);
       skuIds.push(sku.id);
       skuCategoryLeaf.set(sku.id, definition.name);
-      demandWeights.push((spec.flagship ? 8 : 1) * template.demand * random.logNormal(1, 1.35) * (skuStatus === 'active' ? 1 : 0.05));
+      demandWeights.push(
+        (spec.flagship ? 8 : 1) *
+          template.demand *
+          random.logNormal(1, 1.35) *
+          (skuStatus === 'active' ? 1 : 0.05),
+      );
       addPriceEntries(sku, variantPrice, Boolean(spec.flagship));
       if (spec.flagship && index === 0) flagshipSkuIds.set(spec.name, sku.id);
     }
@@ -241,7 +321,8 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
     return product;
   };
 
-  const modelName = (template: ProductTypeTemplate, series: string, number: number): string => `${template.noun} ${series}-${number}`;
+  const modelName = (template: ProductTypeTemplate, series: string, number: number): string =>
+    `${template.noun} ${series}-${number}`;
 
   // Flagship products first so their ids are stable and low.
   for (const flagship of FLAGSHIP_PRODUCTS) {
@@ -255,7 +336,9 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
 
   // Generated products, round-robin through leaves proportionally to weight.
   const targetProducts = Math.max(scale.products, FLAGSHIP_PRODUCTS.length);
-  const allotments = leaves.map((_, index) => Math.max(1, Math.round((targetProducts * (leafWeights[index] as number)) / totalLeafWeight)));
+  const allotments = leaves.map((_, index) =>
+    Math.max(1, Math.round((targetProducts * (leafWeights[index] as number)) / totalLeafWeight)),
+  );
   let produced = dataset.products.size;
   for (const [leafIndex, [leafId, definition]] of leaves.entries()) {
     const allotment = allotments[leafIndex] as number;
@@ -279,7 +362,10 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
         { value: 3, weight: 20 },
         { value: 4, weight: 10 },
       ]);
-      const variants = random.sample(template.variants, Math.min(variantCount, template.variants.length));
+      const variants = random.sample(
+        template.variants,
+        Math.min(variantCount, template.variants.length),
+      );
       createProduct(leafId, definition, template, { brand, name, series, number, variants });
       produced += 1;
     }
@@ -289,7 +375,9 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
   // variants already lands near the section 75 SKU/product ratio.
 
   // Sort by demand so the top of the list is the head of the Pareto curve.
-  const order = skuIds.map((_, index) => index).sort((a, b) => (demandWeights[b] as number) - (demandWeights[a] as number));
+  const order = skuIds
+    .map((_, index) => index)
+    .sort((a, b) => (demandWeights[b] as number) - (demandWeights[a] as number));
   const sortedIds = order.map((index) => skuIds[index] as string);
   const cumulative = new Float64Array(sortedIds.length);
   let running = 0;

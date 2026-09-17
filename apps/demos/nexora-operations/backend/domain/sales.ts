@@ -73,22 +73,13 @@ export interface QuoteLine {
 }
 
 export type OrderStatus =
-  | 'draft'
-  | 'pending_approval'
-  | 'confirmed'
-  | 'on_hold'
-  | 'cancelled'
-  | 'closed';
+  'draft' | 'pending_approval' | 'confirmed' | 'on_hold' | 'cancelled' | 'closed';
 
 export type ApprovalStatus = 'not_required' | 'pending' | 'approved' | 'rejected' | 'cancelled';
 
 export type AllocationStatus = 'unallocated' | 'partially_allocated' | 'allocated';
 export type FulfillmentStatus =
-  | 'unfulfilled'
-  | 'partially_fulfilled'
-  | 'fulfilled'
-  | 'partially_returned'
-  | 'returned';
+  'unfulfilled' | 'partially_fulfilled' | 'fulfilled' | 'partially_returned' | 'returned';
 export type InvoiceStatusOfOrder = 'not_invoiced' | 'partially_invoiced' | 'invoiced';
 export type PaymentStatusOfOrder =
   | 'not_invoiced'
@@ -175,18 +166,10 @@ export interface SalesOrderLine {
 }
 
 export type ApprovalTargetType =
-  | 'quote'
-  | 'sales_order'
-  | 'purchase_order'
-  | 'invoice_write_off'
-  | 'cycle_count';
+  'quote' | 'sales_order' | 'purchase_order' | 'invoice_write_off' | 'cycle_count';
 
 export type ApprovalRequestStatus =
-  | 'pending'
-  | 'approved'
-  | 'rejected'
-  | 'changes_requested'
-  | 'cancelled';
+  'pending' | 'approved' | 'rejected' | 'changes_requested' | 'cancelled';
 
 export interface ApprovalStep {
   id: string;

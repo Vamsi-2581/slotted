@@ -49,7 +49,12 @@ import {
   type Sku,
   type StockMovement,
 } from '../../domain';
-import { allocationStatusOf, fulfillmentStatusOf, invoiceStatusOf, paymentStatusOf } from '../../domain/derived';
+import {
+  allocationStatusOf,
+  fulfillmentStatusOf,
+  invoiceStatusOf,
+  paymentStatusOf,
+} from '../../domain/derived';
 import type { Random } from '../random';
 import type { SeedContext } from './context';
 import type { CatalogSeedResult } from './catalog';
@@ -193,7 +198,12 @@ function lineId(index: number, lineNumber: number): string {
 }
 
 /** Numbering that skips curated reserved numbers (section 53.3 uniqueness). */
-export function yearlyNumber(env: OrderEnvironment, family: 'salesOrder' | 'quote' | 'invoice' | 'purchaseOrder', year: number, sequence: number): string {
+export function yearlyNumber(
+  env: OrderEnvironment,
+  family: 'salesOrder' | 'quote' | 'invoice' | 'purchaseOrder',
+  year: number,
+  sequence: number,
+): string {
   let candidate = sequence;
   for (let guard = 0; guard < 8; guard += 1) {
     const number = formatBusinessNumber(family, candidate, year);
@@ -203,7 +213,20 @@ export function yearlyNumber(env: OrderEnvironment, family: 'salesOrder' | 'quot
   return formatBusinessNumber(family, candidate, year);
 }
 
-export function plainNumber(env: OrderEnvironment, family: 'shipment' | 'payment' | 'return' | 'creditMemo' | 'goodsReceipt' | 'refund' | 'transfer' | 'cycleCount' | 'ticket', sequence: number): string {
+export function plainNumber(
+  env: OrderEnvironment,
+  family:
+    | 'shipment'
+    | 'payment'
+    | 'return'
+    | 'creditMemo'
+    | 'goodsReceipt'
+    | 'refund'
+    | 'transfer'
+    | 'cycleCount'
+    | 'ticket',
+  sequence: number,
+): string {
   let candidate = sequence;
   for (let guard = 0; guard < 8; guard += 1) {
     const number = formatBusinessNumber(family, candidate);
@@ -213,12 +236,29 @@ export function plainNumber(env: OrderEnvironment, family: 'shipment' | 'payment
   return formatBusinessNumber(family, candidate);
 }
 
-function metadataAt(createdAt: string, createdBy: string, updatedAt = createdAt, updatedBy = createdBy, version = 1): EntityMetadata {
-  return { id: '', organizationId: ORGANIZATION_ID, createdAt, createdBy, updatedAt, updatedBy, version };
+function metadataAt(
+  createdAt: string,
+  createdBy: string,
+  updatedAt = createdAt,
+  updatedBy = createdBy,
+  version = 1,
+): EntityMetadata {
+  return {
+    id: '',
+    organizationId: ORGANIZATION_ID,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    version,
+  };
 }
 
 function instantOn(date: string, random: Random, startHour = 8, endHour = 17): string {
-  return addMs(businessDateToInstant(date, random.int(startHour, endHour), random.int(0, 59)), random.int(0, 59_000));
+  return addMs(
+    businessDateToInstant(date, random.int(startHour, endHour), random.int(0, 59)),
+    random.int(0, 59_000),
+  );
 }
 
 function nextBusinessDayOnOrAfter(date: string): string {
@@ -228,8 +268,20 @@ function nextBusinessDayOnOrAfter(date: string): string {
 }
 
 /** Order value target (section 75.5) correlated with segment (section 75.6). */
-export function targetOrderTotalMinor(random: Random, customer: Customer, medianOverride?: number): number {
-  const median = medianOverride ?? (customer.segment === 'strategic' ? 4_400 : customer.segment === 'enterprise' ? 3_300 : customer.segment === 'mid_market' ? 2_200 : 1_400);
+export function targetOrderTotalMinor(
+  random: Random,
+  customer: Customer,
+  medianOverride?: number,
+): number {
+  const median =
+    medianOverride ??
+    (customer.segment === 'strategic'
+      ? 4_400
+      : customer.segment === 'enterprise'
+        ? 3_300
+        : customer.segment === 'mid_market'
+          ? 2_200
+          : 1_400);
   const dollars = Math.max(45, random.logNormal(median, medianOverride ? 0.9 : 1.6));
   return roundHalfUp(dollars * 100);
 }
@@ -240,14 +292,19 @@ export function lineCountFor(random: Random, override?: number): number {
   if (roll < 0.22) return 1;
   if (roll < 0.42) return 2;
   if (roll < 0.58) return 3;
-  if (roll < 0.70) return 4;
-  if (roll < 0.80) return 5;
-  if (roll < 0.90) return random.int(6, 9);
+  if (roll < 0.7) return 4;
+  if (roll < 0.8) return 5;
+  if (roll < 0.9) return random.int(6, 9);
   if (roll < 0.99) return random.int(10, 28);
   return random.int(29, 60);
 }
 
-function quantityFor(random: Random, sku: Sku, lineTargetMinor: number, unitPriceMinor: number): string {
+function quantityFor(
+  random: Random,
+  sku: Sku,
+  lineTargetMinor: number,
+  unitPriceMinor: number,
+): string {
   const raw = lineTargetMinor / Math.max(1, unitPriceMinor);
   let value: number;
   switch (sku.unitOfMeasure) {
@@ -256,7 +313,10 @@ function quantityFor(random: Random, sku: Sku, lineTargetMinor: number, unitPric
       value = Math.max(10, Math.round(raw / 10) * 10);
       break;
     case 'KG':
-      value = Math.max(1, Math.round(raw * (sku.quantityPrecision > 0 ? 2 : 1)) / (sku.quantityPrecision > 0 ? 2 : 1));
+      value = Math.max(
+        1,
+        Math.round(raw * (sku.quantityPrecision > 0 ? 2 : 1)) / (sku.quantityPrecision > 0 ? 2 : 1),
+      );
       break;
     case 'PK':
       value = Math.max(1, Math.round(raw));
@@ -275,7 +335,14 @@ interface BuiltLine {
   priceSource: 'contract' | 'customer_list' | 'standard';
 }
 
-function buildLines(env: OrderEnvironment, random: Random, customer: Customer, orderDate: string, shippingRegion: string, override: OrderOverride | undefined): BuiltLine[] {
+function buildLines(
+  env: OrderEnvironment,
+  random: Random,
+  customer: Customer,
+  orderDate: string,
+  shippingRegion: string,
+  override: OrderOverride | undefined,
+): BuiltLine[] {
   const { dataset } = env.context;
   if (override?.lineSpecs) {
     return override.lineSpecs.flatMap((spec) => {
@@ -288,11 +355,20 @@ function buildLines(env: OrderEnvironment, random: Random, customer: Customer, o
         taxRateBps: spec.taxRateBps ?? env.pricing.taxRateBps(customer, shippingRegion, sku),
         unitCost: sku.standardCost,
       });
-      return [{ sku, priced, quantityMilli: quantityToMilli(spec.quantity), priceSource: 'contract' as const }];
+      return [
+        {
+          sku,
+          priced,
+          quantityMilli: quantityToMilli(spec.quantity),
+          priceSource: 'contract' as const,
+        },
+      ];
     });
   }
   const lineCount = lineCountFor(random, override?.lineCount);
-  const targetTotal = override?.targetTotalMinor ?? targetOrderTotalMinor(random, customer, override?.targetMedianDollars);
+  const targetTotal =
+    override?.targetTotalMinor ??
+    targetOrderTotalMinor(random, customer, override?.targetMedianDollars);
   const weights: number[] = [];
   let weightSum = 0;
   for (let index = 0; index < lineCount; index += 1) {
@@ -318,7 +394,12 @@ function buildLines(env: OrderEnvironment, random: Random, customer: Customer, o
       if (!priceResolution) continue;
       // Small line budgets favour cheaper items (consumables), which keeps the
       // order-value distribution on target while leaving room for outliers.
-      if (!override?.skuIds && attempt < 8 && priceResolution.listUnitPrice.minor > lineTarget * 2.5) continue;
+      if (
+        !override?.skuIds &&
+        attempt < 8 &&
+        priceResolution.listUnitPrice.minor > lineTarget * 2.5
+      )
+        continue;
       sku = candidate;
       usedSkus.add(skuId);
       break;
@@ -336,7 +417,13 @@ function buildLines(env: OrderEnvironment, random: Random, customer: Customer, o
           ]));
     let unitCost = sku.standardCost;
     if (override?.marginTargetBps !== undefined) {
-      unitCost = usd(roundHalfUp(priceResolution.listUnitPrice.minor * (1 - discountBps / 10_000) * (1 - override.marginTargetBps / 10_000)));
+      unitCost = usd(
+        roundHalfUp(
+          priceResolution.listUnitPrice.minor *
+            (1 - discountBps / 10_000) *
+            (1 - override.marginTargetBps / 10_000),
+        ),
+      );
     }
     const priced = priceLine({
       quantity: quantityValue,
@@ -345,7 +432,12 @@ function buildLines(env: OrderEnvironment, random: Random, customer: Customer, o
       taxRateBps: env.pricing.taxRateBps(customer, shippingRegion, sku),
       unitCost,
     });
-    lines.push({ sku, priced, quantityMilli: quantityToMilli(quantityValue), priceSource: priceResolution.source });
+    lines.push({
+      sku,
+      priced,
+      quantityMilli: quantityToMilli(quantityValue),
+      priceSource: priceResolution.source,
+    });
   }
   return lines;
 }
@@ -366,11 +458,24 @@ export function decideOrderKind(random: Random, age: number, override?: OrderKin
 export function summarizeOrder(env: OrderEnvironment, skeleton: OrderSkeleton): OrderSummary {
   const random = env.context.random(`order/${skeleton.index}`);
   const customer = env.context.dataset.customers.get(skeleton.customerId) as Customer;
-  const shipping = env.customers.addressesByCustomer.get(customer.id)?.find((address) => address.id === customer.defaultShippingAddressId);
+  const shipping = env.customers.addressesByCustomer
+    .get(customer.id)
+    ?.find((address) => address.id === customer.defaultShippingAddressId);
   const override = env.overrides?.get(skeleton.index);
-  const lines = buildLines(env, random, customer, skeleton.orderDate, shipping?.region ?? 'IL', override);
+  const lines = buildLines(
+    env,
+    random,
+    customer,
+    skeleton.orderDate,
+    shipping?.region ?? 'IL',
+    override,
+  );
   const freight = usd(override?.freightMinor ?? freightFor(random, lines));
-  const totals = documentTotals(lines.map((line) => line.priced), freight, 'USD');
+  const totals = documentTotals(
+    lines.map((line) => line.priced),
+    freight,
+    'USD',
+  );
   return {
     index: skeleton.index,
     customerId: skeleton.customerId,
@@ -392,7 +497,11 @@ function freightFor(random: Random, lines: BuiltLine[]): number {
   return roundHalfUp(dollars) * 100;
 }
 
-function paymentDelayDays(random: Random, customer: Customer, override?: { mean: number; spread: number }): number {
+function paymentDelayDays(
+  random: Random,
+  customer: Customer,
+  override?: { mean: number; spread: number },
+): number {
   if (override) return Math.round(random.normal(override.mean, override.spread));
   switch (customer.health) {
     case 'healthy':
@@ -421,13 +530,15 @@ function paymentMethod(random: Random, customer: Customer): PaymentMethod {
  */
 export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton): OrderGraph {
   const { context } = env;
-  const { dataset, today, now } = context;
+  const { dataset, today } = context;
   const random = context.random(`order/${skeleton.index}`);
   const customer = dataset.customers.get(skeleton.customerId) as Customer;
   const override = env.overrides?.get(skeleton.index);
   const addresses = env.customers.addressesByCustomer.get(customer.id) ?? [];
-  const billing = addresses.find((address) => address.id === customer.billingAddressId) ?? addresses[0];
-  const shipping = addresses.find((address) => address.id === customer.defaultShippingAddressId) ?? billing;
+  const billing =
+    addresses.find((address) => address.id === customer.billingAddressId) ?? addresses[0];
+  const shipping =
+    addresses.find((address) => address.id === customer.defaultShippingAddressId) ?? billing;
   const contacts = env.customers.contactsByCustomer.get(customer.id) ?? [];
   const contact = contacts.find((entry) => entry.isPrimary) ?? contacts[0];
   const age = diffDays(today, skeleton.orderDate);
@@ -438,13 +549,19 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   const index = skeleton.index;
   const id = orderId(index);
   const year = Number(orderDate.slice(0, 4));
-  const orderNumber = override?.orderNumber ?? yearlyNumber(env, 'salesOrder', year, index - (env.firstIndexOfYear.get(year) ?? 0) + 1);
+  const orderNumber =
+    override?.orderNumber ??
+    yearlyNumber(env, 'salesOrder', year, index - (env.firstIndexOfYear.get(year) ?? 0) + 1);
 
   // Lines and freight draw first so `summarizeOrder` and this builder share the same stream.
   const built = buildLines(env, random, customer, orderDate, shippingRegion, override);
   const freight = usd(override?.freightMinor ?? freightFor(random, built));
   const createdAt = instantOn(orderDate, random);
-  const totals = documentTotals(built.map((line) => line.priced), freight, 'USD');
+  const totals = documentTotals(
+    built.map((line) => line.priced),
+    freight,
+    'USD',
+  );
   const maxDiscount = built.reduce((max, line) => Math.max(max, line.priced.discountBps), 0);
 
   const graph: OrderGraph = {
@@ -511,11 +628,20 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     const quoteId = formatId('quote', index + 1);
     const quoteCreatedAt = instantOn(quoteDate, random);
     const quoteYear = Number(quoteDate.slice(0, 4));
-    const quoteApproval = evaluateQuoteApproval({ approvalValueUsdMinor: totals.subtotal.minor + freight.minor, grossMarginBps: totals.grossMarginBps, maxLineDiscountBps: maxDiscount });
+    const quoteApproval = evaluateQuoteApproval({
+      approvalValueUsdMinor: totals.subtotal.minor + freight.minor,
+      grossMarginBps: totals.grossMarginBps,
+      maxLineDiscountBps: maxDiscount,
+    });
     const quote: Quote = {
       id: quoteId,
       organizationId: ORGANIZATION_ID,
-      quoteNumber: yearlyNumber(env, 'quote', quoteYear, index - (env.firstIndexOfYear.get(quoteYear) ?? 0) + 1),
+      quoteNumber: yearlyNumber(
+        env,
+        'quote',
+        quoteYear,
+        index - (env.firstIndexOfYear.get(quoteYear) ?? 0) + 1,
+      ),
       customerId: customer.id,
       contactId: contact?.id ?? '',
       ownerId,
@@ -536,10 +662,19 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       sentAt: addMs(quoteCreatedAt, random.int(1, 6) * 3_600_000),
       acceptedAt: addMs(createdAt, -random.int(1, 48) * 3_600_000),
       convertedOrderId: id,
-      metadata: metadataAt(quoteCreatedAt, ownerId, createdAt, ownerId, quoteApproval.required ? 5 : 4),
-      ...(random.chance(0.5) ? { terms: 'Prices valid 30 days. Freight prepaid and added unless noted.' } : {}),
+      metadata: metadataAt(
+        quoteCreatedAt,
+        ownerId,
+        createdAt,
+        ownerId,
+        quoteApproval.required ? 5 : 4,
+      ),
+      ...(random.chance(0.5)
+        ? { terms: 'Prices valid 30 days. Freight prepaid and added unless noted.' }
+        : {}),
     };
-    if (random.chance(0.5)) quote.viewedAt = addMs(quote.sentAt as string, random.int(1, 72) * 3_600_000);
+    if (random.chance(0.5))
+      quote.viewedAt = addMs(quote.sentAt as string, random.int(1, 72) * 3_600_000);
     graph.quote = quote;
     graph.quoteLines = built.map((line, position) => ({
       id: formatId('quoteLine', index * LINE_BLOCK + position + 1),
@@ -565,7 +700,10 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
 
   // Approval policy
   const approvalValue = totals.subtotal.minor + freight.minor;
-  const creditLimitExceeded = customer.creditLimit.minor > 0 && totals.total.minor > customer.creditLimit.minor * 0.9 && random.chance(0.5);
+  const creditLimitExceeded =
+    customer.creditLimit.minor > 0 &&
+    totals.total.minor > customer.creditLimit.minor * 0.9 &&
+    random.chance(0.5);
   const evaluation = evaluateOrderApproval({
     approvalValueUsdMinor: approvalValue,
     grossMarginBps: totals.grossMarginBps,
@@ -574,7 +712,9 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     customerOnHold: customer.status === 'on_hold' && age <= 60,
   });
   const requiresApproval = evaluation.required;
-  const approvalPending = kind === 'pending_approval' || (requiresApproval && age <= 4 && kind === 'normal' && random.chance(0.6));
+  const approvalPending =
+    kind === 'pending_approval' ||
+    (requiresApproval && age <= 4 && kind === 'normal' && random.chance(0.6));
 
   const riskFlags: OrderRiskFlag[] = [];
   if (creditLimitExceeded) riskFlags.push('credit_limit_exceeded');
@@ -590,7 +730,9 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   let status: SalesOrder['status'];
   let approvalStatus: SalesOrder['approvalStatus'] = requiresApproval ? 'approved' : 'not_required';
   let confirmedAt: string | undefined;
-  const approvalDecidedAt = requiresApproval ? addMs(submittedAt, random.int(2, 36) * 3_600_000) : submittedAt;
+  const approvalDecidedAt = requiresApproval
+    ? addMs(submittedAt, random.int(2, 36) * 3_600_000)
+    : submittedAt;
   const confirmationDate = businessDateOf(approvalDecidedAt);
 
   if (kind === 'draft') {
@@ -611,7 +753,10 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   if (requiresApproval && kind !== 'draft') {
     const requestId = formatId('approvalRequest', index + 1);
     const steps: ApprovalStep[] = evaluation.steps.map((step, position) => {
-      const approverPool = step.requiredRole === 'finance_manager' ? env.financeActors : [env.tenant.personaUserIds.get('sofia-ramirez') as string];
+      const approverPool =
+        step.requiredRole === 'finance_manager'
+          ? env.financeActors
+          : [env.tenant.personaUserIds.get('sofia-ramirez') as string];
       const decided = !approvalPending && !(status === 'cancelled');
       return {
         id: formatId('approvalStep', index * DOC_BLOCK + position + 1),
@@ -619,7 +764,18 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         requiredRole: step.requiredRole,
         assignedUserId: random.pick(approverPool),
         status: decided ? 'approved' : approvalPending && step.sequence > 1 ? 'pending' : 'pending',
-        ...(decided ? { decidedBy: random.pick(approverPool), decidedAt: approvalDecidedAt, comment: random.pick(['Approved — pricing within policy.', 'Approved per strategic account plan.', 'Approved; margin reviewed with sales.', 'OK to proceed.']) } : {}),
+        ...(decided
+          ? {
+              decidedBy: random.pick(approverPool),
+              decidedAt: approvalDecidedAt,
+              comment: random.pick([
+                'Approved — pricing within policy.',
+                'Approved per strategic account plan.',
+                'Approved; margin reviewed with sales.',
+                'OK to proceed.',
+              ]),
+            }
+          : {}),
       };
     });
     graph.approval = {
@@ -635,7 +791,13 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       requestedAt: submittedAt,
       amount: usd(approvalValue),
       steps,
-      metadata: metadataAt(submittedAt, ownerId, approvalPending ? submittedAt : approvalDecidedAt, ownerId, approvalPending ? 1 : 2),
+      metadata: metadataAt(
+        submittedAt,
+        ownerId,
+        approvalPending ? submittedAt : approvalDecidedAt,
+        ownerId,
+        approvalPending ? 1 : 2,
+      ),
       ...(approvalPending ? {} : { decidedAt: approvalDecidedAt }),
     };
   }
@@ -674,12 +836,31 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     ...(sourceQuoteId ? { sourceQuoteId } : {}),
     ...(graph.approval ? { approvalRequestId: graph.approval.id } : {}),
     ...(confirmedAt ? { confirmedAt } : {}),
-    ...(override?.customerPoNumber ? { customerPoNumber: override.customerPoNumber } : random.chance(0.55) ? { customerPoNumber: `${random.pick(['PO', 'PO-', 'P', 'PUR-'])}${random.digits(random.int(5, 7))}` } : {}),
-    ...(override?.requestedDeliveryDate ? { requestedDeliveryDate: override.requestedDeliveryDate } : random.chance(0.45) ? { requestedDeliveryDate: addBusinessDays(orderDate, random.int(3, 15)) } : {}),
-    ...(random.chance(0.12) ? { notes: random.pick(['Customer requests all items ship complete.', 'Call receiving before delivery.', 'Blanket release — see customer PO for schedule.', 'Rush: production line down.', 'Include certs of conformance with shipment.']) } : {}),
+    ...(override?.customerPoNumber
+      ? { customerPoNumber: override.customerPoNumber }
+      : random.chance(0.55)
+        ? {
+            customerPoNumber: `${random.pick(['PO', 'PO-', 'P', 'PUR-'])}${random.digits(random.int(5, 7))}`,
+          }
+        : {}),
+    ...(override?.requestedDeliveryDate
+      ? { requestedDeliveryDate: override.requestedDeliveryDate }
+      : random.chance(0.45)
+        ? { requestedDeliveryDate: addBusinessDays(orderDate, random.int(3, 15)) }
+        : {}),
+    ...(random.chance(0.12)
+      ? {
+          notes: random.pick([
+            'Customer requests all items ship complete.',
+            'Call receiving before delivery.',
+            'Blanket release — see customer PO for schedule.',
+            'Rush: production line down.',
+            'Include certs of conformance with shipment.',
+          ]),
+        }
+      : {}),
   };
   graph.order = order;
-  if (override?.tags) order.riskFlags = order.riskFlags; // tags are not a field on orders; kept for API parity
   void ORDER_TAGS;
 
   if (status === 'draft' || status === 'pending_approval') {
@@ -691,7 +872,13 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   if (status === 'cancelled') {
     const cancelledAt = addMs(submittedAt, random.int(1, 72) * 3_600_000);
     order.cancelledAt = cancelledAt;
-    order.cancellationReason = random.pick(['Customer cancelled — project postponed', 'Duplicate order', 'Pricing dispute', 'Ordered in error', 'Lead time too long']);
+    order.cancellationReason = random.pick([
+      'Customer cancelled — project postponed',
+      'Duplicate order',
+      'Pricing dispute',
+      'Ordered in error',
+      'Lead time too long',
+    ]);
     for (const line of lines) line.cancelledQuantity = line.orderedQuantity;
     order.metadata.version = 3;
     order.metadata.updatedAt = cancelledAt;
@@ -708,9 +895,11 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   // Shortage plan
   const shortages = new Map<number, number>();
   if (override?.backorder) {
-    for (const [lineIndex, qty] of Object.entries(override.backorder)) shortages.set(Number(lineIndex), quantityToMilli(qty) / 1000);
+    for (const [lineIndex, qty] of Object.entries(override.backorder))
+      shortages.set(Number(lineIndex), quantityToMilli(qty) / 1000);
   } else if (override?.shortage) {
-    for (const shortage of override.shortage) shortages.set(shortage.lineIndex, shortage.backordered);
+    for (const shortage of override.shortage)
+      shortages.set(shortage.lineIndex, shortage.backordered);
   } else {
     for (const [position, line] of built.entries()) {
       if (random.chance(0.06)) {
@@ -720,7 +909,9 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       }
     }
   }
-  const shortageResolvesOn = override?.backorder ? addBusinessDays(today, 7) : addBusinessDays(confirmedDate, random.int(4, 18));
+  const shortageResolvesOn = override?.backorder
+    ? addBusinessDays(today, 7)
+    : addBusinessDays(confirmedDate, random.int(4, 18));
   const shortageResolved = compareDates(shortageResolvesOn, today) <= 0;
 
   // Reservations at confirmation.
@@ -768,7 +959,12 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
 
   if (holdOrder) {
     order.status = 'on_hold';
-    order.holdReason = random.pick(['Credit review pending', 'Customer requested hold — site not ready', 'Awaiting updated PO from customer', 'Pricing verification']);
+    order.holdReason = random.pick([
+      'Credit review pending',
+      'Customer requested hold — site not ready',
+      'Awaiting updated PO from customer',
+      'Pricing verification',
+    ]);
     order.allocationStatus = allocationStatusOf(lines);
     order.metadata.version = version + 1;
     order.metadata.updatedAt = addMs(confirmedAt as string, random.int(2, 48) * 3_600_000);
@@ -776,17 +972,29 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   }
 
   // Shipments: first wave ships reserved quantities; backordered remainder ships when resolved.
-  const firstShipDate = nextBusinessDayOnOrAfter(addDays(confirmedDate, random.weighted([
-    { value: 0, weight: 25 },
-    { value: 1, weight: 40 },
-    { value: 2, weight: 20 },
-    { value: 3, weight: 9 },
-    { value: random.int(4, 8), weight: 6 },
-  ])));
-  const waves: { date: string; quantities: Map<string, number>; spec?: OrderWaveSpec | undefined }[] = [];
+  const firstShipDate = nextBusinessDayOnOrAfter(
+    addDays(
+      confirmedDate,
+      random.weighted([
+        { value: 0, weight: 25 },
+        { value: 1, weight: 40 },
+        { value: 2, weight: 20 },
+        { value: 3, weight: 9 },
+        { value: random.int(4, 8), weight: 6 },
+      ]),
+    ),
+  );
+  const waves: {
+    date: string;
+    quantities: Map<string, number>;
+    spec?: OrderWaveSpec | undefined;
+  }[] = [];
   const firstWave = new Map<string, number>();
   for (const line of lines) {
-    const reservedAtConfirm = Math.max(0, quantityToMilli(line.orderedQuantity) - (shortages.get(line.lineNumber - 1) ?? 0) * 1000);
+    const reservedAtConfirm = Math.max(
+      0,
+      quantityToMilli(line.orderedQuantity) - (shortages.get(line.lineNumber - 1) ?? 0) * 1000,
+    );
     if (reservedAtConfirm > 0) firstWave.set(line.id, reservedAtConfirm);
   }
   if (firstWave.size > 0) waves.push({ date: firstShipDate, quantities: firstWave });
@@ -796,7 +1004,10 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       const line = lines[position] as SalesOrderLine;
       secondWave.set(line.id, backordered * 1000);
     }
-    waves.push({ date: nextBusinessDayOnOrAfter(addDays(shortageResolvesOn, random.int(0, 2))), quantities: secondWave });
+    waves.push({
+      date: nextBusinessDayOnOrAfter(addDays(shortageResolvesOn, random.int(0, 2))),
+      quantities: secondWave,
+    });
   }
   if (override?.waves) {
     waves.length = 0;
@@ -810,7 +1021,9 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     }
   }
   // Optional split of the first wave across two shipments for larger orders.
-  const splitCount = override?.waves ? 1 : override?.shipmentCount ?? (lines.length >= 6 && random.chance(0.18) ? 2 : 1);
+  const splitCount = override?.waves
+    ? 1
+    : (override?.shipmentCount ?? (lines.length >= 6 && random.chance(0.18) ? 2 : 1));
   if (splitCount > 1 && waves[0]) {
     const original = waves[0];
     const entries = [...original.quantities.entries()];
@@ -819,7 +1032,13 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     for (let part = 0; part < splitCount; part += 1) {
       const slice = entries.slice(part * partSize, (part + 1) * partSize);
       if (slice.length === 0) continue;
-      parts.push({ date: part === 0 ? original.date : nextBusinessDayOnOrAfter(addDays(original.date, random.int(1, 4))), quantities: new Map(slice) });
+      parts.push({
+        date:
+          part === 0
+            ? original.date
+            : nextBusinessDayOnOrAfter(addDays(original.date, random.int(1, 4))),
+        quantities: new Map(slice),
+      });
     }
     waves.splice(0, 1, ...parts);
   }
@@ -829,7 +1048,12 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     const cancelledAt = addMs(confirmedAt as string, random.int(2, 96) * 3_600_000);
     order.status = 'cancelled';
     order.cancelledAt = cancelledAt;
-    order.cancellationReason = random.pick(['Customer cancelled — project postponed', 'Duplicate order', 'Pricing dispute', 'Ordered in error']);
+    order.cancellationReason = random.pick([
+      'Customer cancelled — project postponed',
+      'Duplicate order',
+      'Pricing dispute',
+      'Ordered in error',
+    ]);
     for (const line of lines) {
       line.cancelledQuantity = line.orderedQuantity;
       line.reservedQuantity = '0';
@@ -841,9 +1065,15 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     return graph;
   }
 
-  const warehouseActors = env.warehouseActors.get(skeleton.warehouseId) ?? [env.tenant.personaUserIds.get('jordan-wells') as string];
+  const warehouseActors = env.warehouseActors.get(skeleton.warehouseId) ?? [
+    env.tenant.personaUserIds.get('jordan-wells') as string,
+  ];
   const carrierSpec = random.pick(CARRIERS);
-  const invoiceableWaves: { shipment: Shipment; shipmentLines: ShipmentLine[]; spec: OrderWaveSpec | undefined }[] = [];
+  const invoiceableWaves: {
+    shipment: Shipment;
+    shipmentLines: ShipmentLine[];
+    spec: OrderWaveSpec | undefined;
+  }[] = [];
   let docCounter = 0;
   const fulfilledMilli = new Map<string, number>();
 
@@ -859,7 +1089,8 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     let deliveredAt: string | undefined;
     const transitDays = random.int(1, 5);
     const createdDate = addDays(shipDate, -random.int(0, 1));
-    const createdAtShipment = compareDates(createdDate, today) <= 0 ? instantOn(createdDate, random, 7, 15) : undefined;
+    const createdAtShipment =
+      compareDates(createdDate, today) <= 0 ? instantOn(createdDate, random, 7, 15) : undefined;
     if (createdAtShipment === undefined) continue; // Not created yet.
     if (daysSinceShip < 0) {
       shipmentStatus = random.pick(['pending', 'pending', 'picking', 'packed']);
@@ -879,10 +1110,15 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       shippedAt = shipDateInstant;
       deliveredAt = instantOn(addDays(shipDate, transitDays), random, 8, 17);
     }
-    const waveStatus = wave.spec?.status ?? (docCounter === 1 ? override?.shipmentStatus : undefined);
+    const waveStatus =
+      wave.spec?.status ?? (docCounter === 1 ? override?.shipmentStatus : undefined);
     if (waveStatus) {
       shipmentStatus = waveStatus;
-      if (shipmentStatus === 'in_transit' || shipmentStatus === 'shipped' || shipmentStatus === 'exception') {
+      if (
+        shipmentStatus === 'in_transit' ||
+        shipmentStatus === 'shipped' ||
+        shipmentStatus === 'exception'
+      ) {
         shippedAt = shipDateInstant;
         deliveredAt = undefined;
       } else if (shipmentStatus === 'delivered') {
@@ -893,12 +1129,17 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         deliveredAt = undefined;
       }
     }
-    const exception = wave.spec?.exception || (override?.exception && docCounter === 1) || (shippedAt && !deliveredAt && random.chance(0.03));
+    const exception =
+      wave.spec?.exception ||
+      (override?.exception && docCounter === 1) ||
+      (shippedAt && !deliveredAt && random.chance(0.03));
     if (exception && shippedAt) shipmentStatus = 'exception';
     const shipment: Shipment = {
       id: shipmentId,
       organizationId: ORGANIZATION_ID,
-      shipmentNumber: wave.spec?.shipmentNumber ?? (override?.shipmentNumber && docCounter === 1 ? override.shipmentNumber : ''),
+      shipmentNumber:
+        wave.spec?.shipmentNumber ??
+        (override?.shipmentNumber && docCounter === 1 ? override.shipmentNumber : ''),
       orderId: id,
       customerId: customer.id,
       warehouseId: skeleton.warehouseId,
@@ -906,8 +1147,16 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       service: random.pick(carrierSpec.services),
       status: shipmentStatus,
       estimatedDeliveryDate: addDays(shipDate, transitDays),
-      metadata: metadataAt(createdAtShipment, actor, deliveredAt ?? shippedAt ?? createdAtShipment, actor, deliveredAt ? 6 : shippedAt ? 5 : shipmentStatus === 'pending' ? 1 : 3),
-      ...(shippedAt ? { shippedAt, trackingNumber: `1Z${random.letters(3)}${random.digits(12)}` } : {}),
+      metadata: metadataAt(
+        createdAtShipment,
+        actor,
+        deliveredAt ?? shippedAt ?? createdAtShipment,
+        actor,
+        deliveredAt ? 6 : shippedAt ? 5 : shipmentStatus === 'pending' ? 1 : 3,
+      ),
+      ...(shippedAt
+        ? { shippedAt, trackingNumber: `1Z${random.letters(3)}${random.digits(12)}` }
+        : {}),
       ...(deliveredAt ? { deliveredAt } : {}),
     };
     if (exception) {
@@ -921,9 +1170,14 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     for (const [orderLineId, milli] of wave.quantities) {
       lineCounter += 1;
       const line = lineById.get(orderLineId) as SalesOrderLine;
-      const reservations = (reservationsByLine.get(orderLineId) ?? []).filter((reservation) => reservation.status === 'active');
+      const reservations = (reservationsByLine.get(orderLineId) ?? []).filter(
+        (reservation) => reservation.status === 'active',
+      );
       const shipmentLine: ShipmentLine = {
-        id: formatId('shipmentLine', index * DOC_BLOCK * LINE_BLOCK + (docCounter - 1) * LINE_BLOCK + lineCounter),
+        id: formatId(
+          'shipmentLine',
+          index * DOC_BLOCK * LINE_BLOCK + (docCounter - 1) * LINE_BLOCK + lineCounter,
+        ),
         organizationId: ORGANIZATION_ID,
         shipmentId,
         orderLineId,
@@ -931,22 +1185,34 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         quantity: milliToQuantity(milli),
         reservationIds: reservations.map((reservation) => reservation.id),
         pickedQuantity: shipmentStatus === 'pending' ? '0' : milliToQuantity(milli),
-        packedQuantity: shipmentStatus === 'pending' || shipmentStatus === 'picking' ? '0' : milliToQuantity(milli),
+        packedQuantity:
+          shipmentStatus === 'pending' || shipmentStatus === 'picking'
+            ? '0'
+            : milliToQuantity(milli),
       };
       shipmentLines.push(shipmentLine);
       if (shippedAt) {
         // Consume reservations and reduce on-hand.
         let remaining = milli;
         for (const reservation of reservations) {
-          const available = quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
+          const available =
+            quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
           const consume = Math.min(available, remaining);
           if (consume <= 0) continue;
-          reservation.consumedQuantity = milliToQuantity(quantityToMilli(reservation.consumedQuantity) + consume);
-          if (quantityToMilli(reservation.consumedQuantity) >= quantityToMilli(reservation.quantity)) reservation.status = 'consumed';
+          reservation.consumedQuantity = milliToQuantity(
+            quantityToMilli(reservation.consumedQuantity) + consume,
+          );
+          if (
+            quantityToMilli(reservation.consumedQuantity) >= quantityToMilli(reservation.quantity)
+          )
+            reservation.status = 'consumed';
           remaining -= consume;
         }
         graph.movements.push({
-          id: formatId('stockMovement', index * DOC_BLOCK * LINE_BLOCK + (docCounter - 1) * LINE_BLOCK + lineCounter),
+          id: formatId(
+            'stockMovement',
+            index * DOC_BLOCK * LINE_BLOCK + (docCounter - 1) * LINE_BLOCK + lineCounter,
+          ),
           organizationId: ORGANIZATION_ID,
           type: 'shipment',
           skuId: line.skuId,
@@ -973,7 +1239,9 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     line.fulfilledQuantity = milliToQuantity(fulfilled);
     let reservedRemaining = 0;
     for (const reservation of reservationsByLine.get(line.id) ?? []) {
-      if (reservation.status === 'active') reservedRemaining += quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
+      if (reservation.status === 'active')
+        reservedRemaining +=
+          quantityToMilli(reservation.quantity) - quantityToMilli(reservation.consumedQuantity);
     }
     line.reservedQuantity = milliToQuantity(reservedRemaining);
   }
@@ -987,10 +1255,21 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     const issuedAt = addMs(wave.shipment.shippedAt as string, random.int(20, 240) * 60_000);
     const invoiceLines: InvoiceLine[] = wave.shipmentLines.map((shipmentLine, position) => {
       const line = lineById.get(shipmentLine.orderLineId) as SalesOrderLine;
-      const priced = priceLine({ quantity: shipmentLine.quantity, listUnitPrice: line.listUnitPrice, discountBps: line.discountBps, taxRateBps: line.taxRateBps, unitCost: line.unitCost });
-      line.invoicedQuantity = milliToQuantity(quantityToMilli(line.invoicedQuantity) + quantityToMilli(shipmentLine.quantity));
+      const priced = priceLine({
+        quantity: shipmentLine.quantity,
+        listUnitPrice: line.listUnitPrice,
+        discountBps: line.discountBps,
+        taxRateBps: line.taxRateBps,
+        unitCost: line.unitCost,
+      });
+      line.invoicedQuantity = milliToQuantity(
+        quantityToMilli(line.invoicedQuantity) + quantityToMilli(shipmentLine.quantity),
+      );
       return {
-        id: formatId('invoiceLine', index * DOC_BLOCK * LINE_BLOCK + (invoiceCounter - 1) * LINE_BLOCK + position + 1),
+        id: formatId(
+          'invoiceLine',
+          index * DOC_BLOCK * LINE_BLOCK + (invoiceCounter - 1) * LINE_BLOCK + position + 1,
+        ),
         organizationId: ORGANIZATION_ID,
         invoiceId,
         lineNumber: position + 1,
@@ -1012,12 +1291,23 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     const subtotal = usd(invoiceLines.reduce((sum, line) => sum + line.netAmount.minor, 0));
     const taxTotal = usd(invoiceLines.reduce((sum, line) => sum + line.taxAmount.minor, 0));
     const total = usd(subtotal.minor + taxTotal.minor + invoiceFreight.minor);
-    const costTotal = usd(invoiceLines.reduce((sum, line) => sum + roundHalfUp(((line.unitCostSnapshot as Money).minor * quantityToMilli(line.quantity)) / 1000), 0));
+    const costTotal = usd(
+      invoiceLines.reduce(
+        (sum, line) =>
+          sum +
+          roundHalfUp(
+            ((line.unitCostSnapshot as Money).minor * quantityToMilli(line.quantity)) / 1000,
+          ),
+        0,
+      ),
+    );
     const dueDate = dueDateFor(issueDate, customer.paymentTermsCode);
     const invoice: Invoice = {
       id: invoiceId,
       organizationId: ORGANIZATION_ID,
-      invoiceNumber: wave.spec?.invoiceNumber ?? (override?.invoiceNumber && invoiceCounter === 1 ? override.invoiceNumber : ''),
+      invoiceNumber:
+        wave.spec?.invoiceNumber ??
+        (override?.invoiceNumber && invoiceCounter === 1 ? override.invoiceNumber : ''),
       customerId: customer.id,
       sourceOrderId: id,
       issueDate,
@@ -1039,7 +1329,13 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       writtenOffAmount: usd(0),
       sentAt: addMs(issuedAt, random.int(5, 120) * 60_000),
       openedAt: issuedAt,
-      metadata: metadataAt(issuedAt, random.pick(env.financeActors), issuedAt, random.pick(env.financeActors), 2),
+      metadata: metadataAt(
+        issuedAt,
+        random.pick(env.financeActors),
+        issuedAt,
+        random.pick(env.financeActors),
+        2,
+      ),
       ...(contact ? { billingContactId: contact.id } : {}),
       ...(order.customerPoNumber ? { customerPoNumber: order.customerPoNumber } : {}),
     };
@@ -1050,16 +1346,24 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     const suppressPayment = wave.spec?.noPayment || (override?.noPayment && invoiceCounter === 1);
     const delay = paymentDelayDays(random, customer, override?.paymentDelayDays);
     let paidDate = addDays(dueDate, delay);
-    if (compareDates(paidDate, addDays(issueDate, 1)) < 0) paidDate = addDays(issueDate, random.int(1, 5));
-    const overdueDays = wave.spec?.invoiceOverdueDays ?? (invoiceCounter === 1 ? override?.invoiceOverdueDays : undefined);
+    if (compareDates(paidDate, addDays(issueDate, 1)) < 0)
+      paidDate = addDays(issueDate, random.int(1, 5));
+    const overdueDays =
+      wave.spec?.invoiceOverdueDays ??
+      (invoiceCounter === 1 ? override?.invoiceOverdueDays : undefined);
     if (overdueDays !== undefined) {
       invoice.dueDate = addDays(today, -overdueDays);
       paidDate = addDays(today, 30);
     }
-    const partial = wave.spec?.partialPayment || (override?.partialPayment && invoiceCounter === 1) || random.chance(0.06);
+    const partial =
+      wave.spec?.partialPayment ||
+      (override?.partialPayment && invoiceCounter === 1) ||
+      random.chance(0.06);
     if (!suppressPayment && compareDates(paidDate, today) <= 0 && weekdayOf(paidDate) !== 0) {
       const paymentDate = nextBusinessDayOnOrAfter(paidDate);
-      const paymentAmount = partial ? roundHalfUp(total.minor * random.float(0.3, 0.7)) : total.minor;
+      const paymentAmount = partial
+        ? roundHalfUp(total.minor * random.float(0.3, 0.7))
+        : total.minor;
       const paymentId = formatId('payment', index * DOC_BLOCK + invoiceCounter);
       const postedAt = instantOn(paymentDate, random, 8, 16);
       const recordedBy = random.pick(env.financeActors);
@@ -1098,12 +1402,23 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     if (override?.invoiceOutstandingMinor !== undefined && invoiceCounter === 1) {
       invoice.outstanding = usd(override.invoiceOutstandingMinor);
       invoice.paidAmount = usd(total.minor - override.invoiceOutstandingMinor);
-      invoice.settlement = override.invoiceOutstandingMinor === 0 ? 'paid' : override.invoiceOutstandingMinor >= total.minor ? 'unpaid' : 'partially_paid';
+      invoice.settlement =
+        override.invoiceOutstandingMinor === 0
+          ? 'paid'
+          : override.invoiceOutstandingMinor >= total.minor
+            ? 'unpaid'
+            : 'partially_paid';
     }
-    if (invoice.outstanding.minor > 0 && compareDates(invoice.dueDate, today) < 0) invoice.collectionState = 'overdue';
+    if (invoice.outstanding.minor > 0 && compareDates(invoice.dueDate, today) < 0)
+      invoice.collectionState = 'overdue';
     if (invoice.lifecycle === 'open' && invoice.outstanding.minor > 0 && random.chance(0.012)) {
       invoice.collectionState = 'disputed';
-      invoice.disputeReason = random.pick(['Customer disputes freight charge', 'Quantity received differs from invoice', 'Pricing does not match quote', 'Duplicate of prior invoice claimed']);
+      invoice.disputeReason = random.pick([
+        'Customer disputes freight charge',
+        'Quantity received differs from invoice',
+        'Pricing does not match quote',
+        'Duplicate of prior invoice claimed',
+      ]);
     }
     version += 1;
   }
@@ -1117,10 +1432,22 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       const requestedAt = instantOn(requestedDate, random);
       const returnId = formatId('return', index + 1);
       const daysSince = diffDays(today, requestedDate);
-      const stages: Return['status'][] = ['requested', 'authorized', 'in_transit', 'received', 'inspected', 'completed'];
-      const stage = Math.min(stages.length - 1, Math.floor(daysSince / 3) + (random.chance(0.3) ? 1 : 0));
+      const stages: Return['status'][] = [
+        'requested',
+        'authorized',
+        'in_transit',
+        'received',
+        'inspected',
+        'completed',
+      ];
+      const stage = Math.min(
+        stages.length - 1,
+        Math.floor(daysSince / 3) + (random.chance(0.3) ? 1 : 0),
+      );
       const returnStatus = random.chance(0.05) ? 'rejected' : (stages[stage] as Return['status']);
-      const returnedLines = graph.shipmentLines.filter((line) => line.shipmentId === source.id).slice(0, random.int(1, 2));
+      const returnedLines = graph.shipmentLines
+        .filter((line) => line.shipmentId === source.id)
+        .slice(0, random.int(1, 2));
       const ret: Return = {
         id: returnId,
         organizationId: ORGANIZATION_ID,
@@ -1132,27 +1459,40 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         receivingWarehouseId: skeleton.warehouseId,
         metadata: metadataAt(requestedAt, ownerId, requestedAt, ownerId, 1),
       };
-      const stampAt = (stageIndex: number): string => instantOn(addDays(requestedDate, stageIndex * 3), random);
+      const stampAt = (stageIndex: number): string =>
+        instantOn(addDays(requestedDate, stageIndex * 3), random);
       if (stage >= 1 && returnStatus !== 'rejected') ret.authorizedAt = stampAt(1);
       if (stage >= 3 && returnStatus !== 'rejected') ret.receivedAt = stampAt(3);
       if (stage >= 4 && returnStatus !== 'rejected') ret.inspectedAt = stampAt(4);
       if (stage >= 5 && returnStatus !== 'rejected') ret.completedAt = stampAt(5);
       ret.metadata.version = 1 + stage;
-      ret.metadata.updatedAt = ret.completedAt ?? ret.inspectedAt ?? ret.receivedAt ?? ret.authorizedAt ?? requestedAt;
+      ret.metadata.updatedAt =
+        ret.completedAt ?? ret.inspectedAt ?? ret.receivedAt ?? ret.authorizedAt ?? requestedAt;
       graph.returns.push(ret);
       let creditMinor = 0;
       let creditTax = 0;
       for (const [position, shipmentLine] of returnedLines.entries()) {
         const line = lineById.get(shipmentLine.orderLineId) as SalesOrderLine;
-        const requestedQty = Math.max(1, Math.floor(quantityToMilli(shipmentLine.quantity) / 1000 * random.float(0.2, 1)));
+        const requestedQty = Math.max(
+          1,
+          Math.floor((quantityToMilli(shipmentLine.quantity) / 1000) * random.float(0.2, 1)),
+        );
         const received = stage >= 3 && returnStatus !== 'rejected' ? requestedQty : 0;
-        const accepted = stage >= 4 && returnStatus !== 'rejected' ? (random.chance(0.85) ? received : Math.max(0, received - 1)) : 0;
-        const disposition: ReturnLine['disposition'] | undefined = stage >= 4 && returnStatus !== 'rejected' ? random.weighted([
-          { value: 'restock', weight: 55 },
-          { value: 'quarantine', weight: 20 },
-          { value: 'scrap', weight: 15 },
-          { value: 'return_to_supplier', weight: 10 },
-        ]) : undefined;
+        const accepted =
+          stage >= 4 && returnStatus !== 'rejected'
+            ? random.chance(0.85)
+              ? received
+              : Math.max(0, received - 1)
+            : 0;
+        const disposition: ReturnLine['disposition'] | undefined =
+          stage >= 4 && returnStatus !== 'rejected'
+            ? random.weighted([
+                { value: 'restock', weight: 55 },
+                { value: 'quarantine', weight: 20 },
+                { value: 'scrap', weight: 15 },
+                { value: 'return_to_supplier', weight: 10 },
+              ])
+            : undefined;
         const unitCredit = line.unitPrice;
         graph.returnLines.push({
           id: formatId('returnLine', index * LINE_BLOCK + position + 1),
@@ -1178,12 +1518,21 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
           ...(disposition ? { disposition } : {}),
         });
         if (accepted > 0) {
-          line.returnedQuantity = milliToQuantity(quantityToMilli(line.returnedQuantity) + accepted * 1000);
+          line.returnedQuantity = milliToQuantity(
+            quantityToMilli(line.returnedQuantity) + accepted * 1000,
+          );
           creditMinor += unitCredit.minor * accepted;
           creditTax += roundHalfUp(unitCredit.minor * accepted * (line.taxRateBps / 10_000));
-          if (disposition === 'restock' || disposition === 'quarantine' || disposition === 'return_to_supplier') {
+          if (
+            disposition === 'restock' ||
+            disposition === 'quarantine' ||
+            disposition === 'return_to_supplier'
+          ) {
             graph.movements.push({
-              id: formatId('stockMovement', index * DOC_BLOCK * LINE_BLOCK + 3 * LINE_BLOCK + position + 1),
+              id: formatId(
+                'stockMovement',
+                index * DOC_BLOCK * LINE_BLOCK + 3 * LINE_BLOCK + position + 1,
+              ),
               organizationId: ORGANIZATION_ID,
               type: 'customer_return',
               skuId: line.skuId,
@@ -1204,7 +1553,10 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         const issuedAt = ret.completedAt as string;
         const invoice = graph.invoices[0];
         const total = usd(creditMinor + creditTax);
-        const applyTo = invoice && invoice.outstanding.minor > 0 ? Math.min(invoice.outstanding.minor, total.minor) : 0;
+        const applyTo =
+          invoice && invoice.outstanding.minor > 0
+            ? Math.min(invoice.outstanding.minor, total.minor)
+            : 0;
         const creditMemo: CreditMemo = {
           id: creditMemoId,
           organizationId: ORGANIZATION_ID,
@@ -1220,7 +1572,13 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
           total,
           appliedAmount: usd(applyTo),
           unappliedAmount: usd(total.minor - applyTo),
-          metadata: metadataAt(issuedAt, random.pick(env.financeActors), issuedAt, random.pick(env.financeActors), 2),
+          metadata: metadataAt(
+            issuedAt,
+            random.pick(env.financeActors),
+            issuedAt,
+            random.pick(env.financeActors),
+            2,
+          ),
           ...(invoice ? { sourceInvoiceId: invoice.id } : {}),
         };
         graph.creditMemos.push(creditMemo);
@@ -1259,19 +1617,39 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   order.invoiceStatus = invoiceStatusOf(lines);
   order.paymentStatus = paymentStatusOf(graph.invoices);
   if (order.fulfillmentStatus === 'partially_fulfilled' || order.allocationStatus !== 'allocated') {
-    if (lines.some((line) => quantityToMilli(line.orderedQuantity) - quantityToMilli(line.cancelledQuantity) - quantityToMilli(line.fulfilledQuantity) - quantityToMilli(line.reservedQuantity) > 0)) {
+    if (
+      lines.some(
+        (line) =>
+          quantityToMilli(line.orderedQuantity) -
+            quantityToMilli(line.cancelledQuantity) -
+            quantityToMilli(line.fulfilledQuantity) -
+            quantityToMilli(line.reservedQuantity) >
+          0,
+      )
+    ) {
       order.riskFlags.push('inventory_shortage');
-      if (order.requestedDeliveryDate && compareDates(order.requestedDeliveryDate, today) < 0) order.riskFlags.push('requested_date_at_risk');
+      if (order.requestedDeliveryDate && compareDates(order.requestedDeliveryDate, today) < 0)
+        order.riskFlags.push('requested_date_at_risk');
     }
   }
-  const allDone = (order.fulfillmentStatus === 'fulfilled' || order.fulfillmentStatus === 'returned' || order.fulfillmentStatus === 'partially_returned') && order.invoiceStatus === 'invoiced' && (order.paymentStatus === 'paid' || order.paymentStatus === 'refunded');
+  const allDone =
+    (order.fulfillmentStatus === 'fulfilled' ||
+      order.fulfillmentStatus === 'returned' ||
+      order.fulfillmentStatus === 'partially_returned') &&
+    order.invoiceStatus === 'invoiced' &&
+    (order.paymentStatus === 'paid' || order.paymentStatus === 'refunded');
   if (allDone) {
     order.status = 'closed';
     order.closedAt = lastUpdatedAt;
   }
   order.metadata.version = version;
   order.metadata.updatedAt = lastUpdatedAt;
-  order.metadata.updatedBy = graph.payments.length > 0 ? (graph.payments[graph.payments.length - 1] as Payment).recordedBy : graph.shipments.length > 0 ? (graph.shipments[graph.shipments.length - 1] as Shipment).metadata.updatedBy : ownerId;
+  order.metadata.updatedBy =
+    graph.payments.length > 0
+      ? (graph.payments[graph.payments.length - 1] as Payment).recordedBy
+      : graph.shipments.length > 0
+        ? (graph.shipments[graph.shipments.length - 1] as Shipment).metadata.updatedBy
+        : ownerId;
   return graph;
 }
 
@@ -1298,4 +1676,13 @@ export function graphRecordCount(graph: OrderGraph): number {
   );
 }
 
-export { instantMs, nextBusinessDayOnOrAfter, instantOn, metadataAt, allocationStatusOf, fulfillmentStatusOf, invoiceStatusOf, paymentStatusOf };
+export {
+  instantMs,
+  nextBusinessDayOnOrAfter,
+  instantOn,
+  metadataAt,
+  allocationStatusOf,
+  fulfillmentStatusOf,
+  invoiceStatusOf,
+  paymentStatusOf,
+};

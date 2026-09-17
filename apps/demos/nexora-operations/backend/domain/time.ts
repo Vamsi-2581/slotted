@@ -72,7 +72,14 @@ export function zoneOffsetMs(instantMs: number, timeZone = ORGANIZATION_TIMEZONE
   if (cached !== undefined) return cached;
   const noon = day * DAY_MS + DAY_MS / 2;
   const parts = zonedParts(noon, timeZone);
-  const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+  const asUtc = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+  );
   const offset = asUtc - Math.floor(noon / 1000) * 1000;
   offsetCache.set(key, offset);
   return offset;
@@ -152,7 +159,11 @@ export function dateFromDayNumber(value: number): string {
   const cached = dateByDayNumber.get(value);
   if (cached !== undefined) return cached;
   const shifted = new Date(value * DAY_MS);
-  const date = formatBusinessDate(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, shifted.getUTCDate());
+  const date = formatBusinessDate(
+    shifted.getUTCFullYear(),
+    shifted.getUTCMonth() + 1,
+    shifted.getUTCDate(),
+  );
   dateByDayNumber.set(value, date);
   dayNumberCache.set(date, value);
   return date;

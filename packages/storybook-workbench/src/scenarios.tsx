@@ -221,7 +221,12 @@ const capabilityApi = {
    * windows now holds a collection and the count is the collection's, so the
    * table demanded a prop no such family can declare.
    */
-  virtualization: ['itemSize', 'overscan'],
+  /**
+   * `itemSize` is a list's word and `rowHeight` a grid's: `data-grid` windows
+   * rows and columns and names the row's height the way AG Grid and MUI X
+   * do, so either answers.
+   */
+  virtualization: [['itemSize', 'rowHeight'], 'overscan'],
   files: ['accept', 'files', 'maxSize', 'multiple'],
   checked: ['checked'],
   /**

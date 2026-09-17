@@ -395,6 +395,19 @@ describe('the virtualization capability', () => {
       ]),
     ).toEqual([]);
   });
+
+  it('takes rowHeight for itemSize, which is what a grid calls the same number', () => {
+    const member = { capabilities: ['virtualization'], defaults: { overscan: 6 } };
+    expect(
+      apiMetadataErrors(member, [
+        { name: 'rowHeight', defaultValue: 'density' },
+        { name: 'overscan', defaultValue: '6' },
+      ]),
+    ).toEqual([]);
+    expect(apiMetadataErrors(member, [{ name: 'overscan', defaultValue: '6' }])).toEqual([
+      'missing API itemSize or rowHeight',
+    ]);
+  });
 });
 
 describe('isolated', () => {

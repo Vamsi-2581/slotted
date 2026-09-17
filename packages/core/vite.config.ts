@@ -20,6 +20,7 @@ export default defineConfig({
         files: resolve(import.meta.dirname, 'src/files/index.ts'),
         filter: resolve(import.meta.dirname, 'src/filter/index.ts'),
         form: resolve(import.meta.dirname, 'src/form/index.ts'),
+        grid: resolve(import.meta.dirname, 'src/grid/index.ts'),
         focus: resolve(import.meta.dirname, 'src/focus/index.ts'),
         highlight: resolve(import.meta.dirname, 'src/highlight/index.ts'),
         identity: resolve(import.meta.dirname, 'src/identity/index.ts'),

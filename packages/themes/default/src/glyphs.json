@@ -52,5 +52,6 @@
   "--slotted-icon-text-wrap": { "icon": "text-wrap" },
   "--slotted-icon-bell": { "icon": "bell" },
   "--slotted-icon-trending-up": { "icon": "trending-up" },
-  "--slotted-icon-image-off": { "icon": "image-off" }
+  "--slotted-icon-image-off": { "icon": "image-off" },
+  "--slotted-icon-funnel": { "icon": "funnel" }
 }

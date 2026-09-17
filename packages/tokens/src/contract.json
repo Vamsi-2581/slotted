@@ -787,6 +787,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-funnel",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-control-font-family",
       "layer": "semantic",
       "axis": "base",

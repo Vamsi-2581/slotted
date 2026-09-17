@@ -144,6 +144,8 @@ export const EXPANDER_COLUMN = '__expander';
 const SELECTION_WIDTH = 48;
 const EXPANDER_WIDTH = 40;
 const DEFAULT_ROW_HEIGHT = 34;
+/** Milliseconds a changed cell stays marked when `highlightChanges` is `true`. */
+const DEFAULT_CHANGED_DURATION = 1200;
 const VIRTUALIZE_ROWS_FROM = 100;
 const VIRTUALIZE_COLUMNS_FROM = 20;
 /** The viewport assumed until the scroller is measured. */
@@ -822,6 +824,7 @@ function contentWidth(cell: HTMLElement): number {
                     [attr.data-invalid]="cell.invalid ? '' : null"
                     [attr.data-loading]="cell.pending ? '' : null"
                     [attr.data-readonly]="cell.readonly ? '' : null"
+                    [attr.data-changed]="cell.changed"
                     [attr.tabindex]="cell.current ? 0 : -1"
                     [attr.title]="cell.invalid ? cell.message : null"
                     [style.--slotted-data-grid-column]="indexOf(column.id)"
@@ -1047,6 +1050,7 @@ function contentWidth(cell: HTMLElement): number {
     '[style.--slotted-data-grid-template]': 'template()',
     '[style.--slotted-data-grid-block-size]': 'blockSize()',
     '[style.--slotted-data-grid-row-block-size]': 'rowBlockSize()',
+    '[style.--slotted-data-grid-changed-duration]': 'changedDuration()',
     '(keydown)': 'onRootKeyDown($event)',
     '(focusout)': 'onRootFocusOut($event)',
   },
@@ -1076,6 +1080,11 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly loading = input(false, { transform: booleanAttribute });
   readonly error = input<string | null | undefined>(undefined);
   readonly disabledKeys = input<readonly string[]>([]);
+  /**
+   * Marks a mounted cell whose value changed between two `rows`, for the
+   * stated milliseconds (`true` is 1200). A row that arrived is not a change.
+   */
+  readonly highlightChanges = input<boolean | number | undefined>(undefined);
 
   /* ── Models ─────────────────────────────────────────────────────────── */
   readonly query = model<GridQuery>(emptyQuery());
@@ -2188,6 +2197,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       inRange: range.inside,
       edges: range.edges,
       readonly: this.anyEditable() && !editable && column.kind !== 'actions',
+      changed: this.changedOf(key, column.id),
     };
   }
   protected cellContext(
@@ -2328,9 +2338,87 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     return cells;
   });
 
+  /* ── Changed cells ──────────────────────────────────────────────────── */
+  private readonly changedFor = computed(() => {
+    const stated = this.highlightChanges();
+    return stated === true ? DEFAULT_CHANGED_DURATION : stated || 0;
+  });
+  protected readonly changedDuration = computed(() => {
+    const ms = this.changedFor();
+    return ms > 0 ? `${ms}ms` : null;
+  });
+  /* One mark per changed cell, with the generation it was marked in: the
+     generation's parity is the attribute's value, so a cell changed twice in
+     a row restarts its paint. The map is read through its version. */
+  private readonly changedCells = new Map<string, { until: number; generation: number }>();
+  private changedGeneration = 0;
+  private readonly changedVersion = signal(0);
+  private changedTimer: ReturnType<typeof setTimeout> | null = null;
+  private previousRows: { rows: readonly Row[]; byKey: Map<string, Row> } | null = null;
+  private changedOf(key: string, column: string): 'a' | 'b' | null {
+    this.changedVersion();
+    const mark = this.changedCells.get(`${key}\u0000${column}`);
+    return mark ? (mark.generation % 2 === 0 ? 'a' : 'b') : null;
+  }
+  private markChanges(rows: readonly Row[]) {
+    const changedFor = untracked(() => this.changedFor());
+    if (changedFor <= 0) {
+      this.previousRows = null;
+      return;
+    }
+    const previous = this.previousRows;
+    const byKey = new Map<string, Row>();
+    for (const row of rows) byKey.set(this.rowKeyOf(row), row);
+    this.previousRows = { rows, byKey };
+    if (!previous || previous.rows === rows) return;
+    const now = Date.now();
+    let marked = false;
+    const columns = untracked(() => this.resolved());
+    for (const { node } of untracked(() => this.mountedEntries())) {
+      if (node.kind !== 'row') continue;
+      const before = previous.byKey.get(node.key);
+      if (before === undefined || before === node.row) continue;
+      for (const column of columns) {
+        if (Object.is(cellValue(column.column, before), cellValue(column.column, node.row as Row)))
+          continue;
+        this.changedCells.set(`${node.key}\u0000${column.id}`, {
+          until: now + changedFor,
+          generation: this.changedGeneration + 1,
+        });
+        marked = true;
+      }
+    }
+    if (!marked) return;
+    this.changedGeneration += 1;
+    this.changedVersion.update((version) => version + 1);
+    if (this.changedTimer === null)
+      this.changedTimer = setTimeout(() => this.sweepChanges(), changedFor);
+  }
+  private sweepChanges() {
+    this.changedTimer = null;
+    const at = Date.now();
+    let next = Number.POSITIVE_INFINITY;
+    for (const [key, mark] of this.changedCells) {
+      if (mark.until <= at) this.changedCells.delete(key);
+      else next = Math.min(next, mark.until);
+    }
+    this.changedVersion.update((version) => version + 1);
+    if (next !== Number.POSITIVE_INFINITY)
+      this.changedTimer = setTimeout(() => this.sweepChanges(), Math.max(16, next - at));
+  }
+
   /* ── Lifecycle ──────────────────────────────────────────────────────── */
   constructor() {
     const destroy = inject(DestroyRef);
+    destroy.onDestroy(() => {
+      if (this.changedTimer !== null) clearTimeout(this.changedTimer);
+    });
+    /* Two consecutive `rows` are compared once the new nodes are known. */
+    effect(() => {
+      const rows = this.rows();
+      this.nodes();
+      untracked(() => this.markChanges(rows));
+    });
 
     /* The scroller: the window, the viewport and the overflow affordance. */
     afterNextRender(

@@ -252,6 +252,7 @@ function BodyCell<Row>({
   const invalid = editing && session.status === 'invalid' && message !== null;
   const pending = editing && session.status === 'pending';
   const part = column.column.rowHeader ? 'row-header' : 'cell';
+  const changed = grid.changedOf(cell);
 
   return (
     <div
@@ -280,6 +281,7 @@ function BodyCell<Row>({
       {...(editing ? { 'data-editing': '' } : {})}
       {...(invalid ? { 'data-invalid': '' } : {})}
       {...(pending ? { 'data-loading': '' } : {})}
+      {...(changed ? { 'data-changed': changed } : {})}
       {...(grid.anyEditable && !editable && column.kind !== 'actions'
         ? { 'data-readonly': '' }
         : {})}

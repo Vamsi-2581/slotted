@@ -109,6 +109,7 @@ const COLUMNS: GridColumn<Shipment>[] = [
       [filterRow]="filterRow()"
       [filterDebounce]="10"
       [rowHeight]="rowHeight()"
+      [highlightChanges]="highlightChanges()"
       [activatable]="activatable()"
       [loading]="loading()"
       [error]="error()"
@@ -142,6 +143,7 @@ class Host {
   readonly columns = COLUMNS;
   readonly rows = signal<readonly Shipment[]>(ROWS);
   readonly rowHeight = signal<number | 'auto' | undefined>(undefined);
+  readonly highlightChanges = signal<boolean | number | undefined>(undefined);
   readonly selectionMode = signal<DataGridSelectionMode>('none');
   readonly filterRow = signal(false);
   readonly activatable = signal(false);
@@ -762,6 +764,37 @@ describe('SlDataGrid, defaults', () => {
       Object.fromEntries(Object.entries(widths).map(([id, width]) => [id, width])),
     );
     delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
+  });
+
+  it('marks a mounted cell whose value changed, for the stated time, and never a row that arrived', async () => {
+    vi.useFakeTimers();
+    try {
+      await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.highlightChanges.set(500);
+      fixture.detectChanges();
+      const [first, second, ...rest] = ROWS;
+      fixture.componentInstance.rows.set([
+        first!,
+        { ...second!, weight: 99 },
+        ...rest,
+        { ...first!, id: 'S9' },
+      ]);
+      fixture.detectChanges();
+      const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+      const cell = (row: string, column: string) =>
+        root.querySelector<HTMLElement>(`[data-row="${row}"] [data-column="${column}"]`)!;
+      expect(cell('S2', 'weight').hasAttribute('data-changed')).toBe(true);
+      expect(cell('S2', 'customer').hasAttribute('data-changed')).toBe(false);
+      expect(cell('S1', 'weight').hasAttribute('data-changed')).toBe(false);
+      expect(cell('S9', 'weight').hasAttribute('data-changed')).toBe(false);
+      expect(root.style.getPropertyValue('--slotted-data-grid-changed-duration')).toBe('500ms');
+      vi.advanceTimersByTime(600);
+      fixture.detectChanges();
+      expect(cell('S2', 'weight').hasAttribute('data-changed')).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('writes a numeric row height to the frame, so the drawn row is the windowed row', async () => {

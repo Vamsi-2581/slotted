@@ -54,3 +54,6 @@ export function insideWidget(event: {
   const widget = target.closest(FOCUSABLE);
   return widget !== null && widget !== cell && cell.contains(widget);
 }
+
+/** Milliseconds a changed cell stays marked when `highlightChanges` is `true`. */
+export const DEFAULT_CHANGED_DURATION = 1200;

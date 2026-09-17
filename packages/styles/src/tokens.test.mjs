@@ -103,6 +103,7 @@ test('names every runtime prefix once, where a family can find the reason', () =
     '--slotted-data-grid-level',
     '--slotted-data-grid-drop-offset',
     '--slotted-data-grid-drop-scroll',
+    '--slotted-data-grid-changed-duration',
     '--slotted-data-grid-window-start',
     '--slotted-data-grid-window-total',
     '--slotted-upload-visible-rows',

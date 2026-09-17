@@ -231,6 +231,11 @@ export interface DataGridProps<Row>
   onLoadMore?: (() => void) | undefined;
   /** Rows a consumer has disabled: not selectable, not editable. */
   disabledKeys?: readonly string[] | undefined;
+  /**
+   * Marks a mounted cell whose value changed between two `rows`, for the
+   * stated milliseconds (`true` is 1200). A row that arrived is not a change.
+   */
+  highlightChanges?: boolean | number | undefined;
 
   /* ── Query ──────────────────────────────────────────────────────────── */
   query?: GridQuery | undefined;

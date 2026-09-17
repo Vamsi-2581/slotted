@@ -1112,6 +1112,63 @@ export const Media: Story = {
   }),
 };
 
+/* A feed that moves twenty shipments every 400 milliseconds: a weight, a
+   status or a cost, on rows anywhere in the ten thousand. The rows array is
+   new each tick and every untouched row keeps its identity. */
+export const Realtime: Story = {
+  parameters: scenario('realtime'),
+  render: () => {
+    const rows = signal(TEN_THOUSAND);
+    const live = signal(true);
+    const ticks = signal(0);
+    let seed = 11;
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const tick = () => {
+      if (!live()) return;
+      rows.update((current) => {
+        const next = current.slice();
+        for (let n = 0; n < 20; n += 1) {
+          const index = Math.floor(random() * (n < 14 ? 24 : next.length));
+          const row = next[index]!;
+          const pick = random();
+          next[index] =
+            pick < 0.4
+              ? {
+                  ...row,
+                  weight: Math.round((row.weight ?? 500) * (0.9 + random() * 0.2) * 10) / 10,
+                }
+              : pick < 0.7
+                ? { ...row, status: STATUSES[Math.floor(random() * STATUSES.length)]! }
+                : { ...row, cost: Math.round(row.cost * (0.95 + random() * 0.1) * 100) / 100 };
+        }
+        return next;
+      });
+      ticks.update((count) => count + 1);
+    };
+    /* The interval runs while the story's grid is on the page; leaving the
+       story detaches the grid, and the next tick stops the clock. */
+    const timer = setInterval(() => {
+      if (!document.querySelector('[data-ui="data-grid"]')) clearInterval(timer);
+      else tick();
+    }, 400);
+    return {
+      props: { ...base(), rows, live, ticks, toggle: () => live.update((on) => !on) },
+      template: screen(grid('[rows]="rows()" highlightChanges selectionMode="multiple"'), {
+        size: 'tall',
+        before: `<div class="slotted-demo-row">
+    ${note('{{ ticks() }} updates, twenty cells each')}
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="toggle()">
+      {{ live() ? 'Pause' : 'Resume' }}
+    </button>
+  </div>`,
+      }),
+    };
+  },
+};
+
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
   render: () => {

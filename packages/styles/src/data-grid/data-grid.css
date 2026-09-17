@@ -122,6 +122,10 @@
       transparent
     );
     --_range: var(--slotted-data-grid-range-surface, var(--slotted-tone-accent-surface, Canvas));
+    --_changed: var(
+      --slotted-data-grid-changed-surface,
+      var(--slotted-tone-accent-subtle-hover, Highlight)
+    );
     --_ring-width: var(--slotted-focus-ring-width, 2px);
     /* A control drawn by the family — the column menu, the filter trigger, the
        expander, the group toggle — is the target minimum where the row has
@@ -1311,6 +1315,54 @@
   [data-ui='data-grid'] [data-part='cell'] > [data-part='editor'] > [data-part='root'] {
     flex: 1 1 auto;
     min-inline-size: 0;
+  }
+
+  /**
+   * A cell whose value just changed between two `rows`: the accent's subtle
+   * ground, fading to nothing over the time the grid was given
+   * (`--slotted-data-grid-changed-duration`, written by the binding from
+   * `highlightChanges`). Two identical animations, one per mark, so a cell
+   * changed again mid-fade restarts from full. The length is the grid's own,
+   * outside the motion scale; under reduced motion the ground stays flat and
+   * leaves when the mark does.
+   */
+  [data-ui='data-grid'] [data-part='cell'][data-changed='a'] {
+    animation: slotted-data-grid-changed-a
+      var(--slotted-data-grid-changed-duration, var(--slotted-duration-long))
+      var(--slotted-easing-standard, ease-out) forwards;
+  }
+
+  [data-ui='data-grid'] [data-part='cell'][data-changed='b'] {
+    animation: slotted-data-grid-changed-b
+      var(--slotted-data-grid-changed-duration, var(--slotted-duration-long))
+      var(--slotted-easing-standard, ease-out) forwards;
+  }
+
+  @keyframes slotted-data-grid-changed-a {
+    from {
+      background-color: var(--_changed);
+    }
+
+    to {
+      background-color: transparent;
+    }
+  }
+
+  @keyframes slotted-data-grid-changed-b {
+    from {
+      background-color: var(--_changed);
+    }
+
+    to {
+      background-color: transparent;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui='data-grid'] [data-part='cell'][data-changed] {
+      animation: none;
+      background-color: var(--_changed);
+    }
   }
 
   /* A cell whose draft failed, or whose value changed under the reader. The

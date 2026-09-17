@@ -679,6 +679,31 @@ describe('DataGrid, the rest', () => {
     delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
   });
 
+  it('marks a mounted cell whose value changed, for the stated time, and never a row that arrived', () => {
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(<Shipments highlightChanges={500} />);
+      const [first, second, ...rest] = ROWS;
+      rerender(
+        <Shipments
+          highlightChanges={500}
+          rows={[first!, { ...second!, weight: 99 }, ...rest, { ...first!, id: 'S9' }]}
+        />,
+      );
+      expect(cell('S2', 'weight')).toHaveAttribute('data-changed');
+      expect(cell('S2', 'customer')).not.toHaveAttribute('data-changed');
+      expect(cell('S1', 'weight')).not.toHaveAttribute('data-changed');
+      expect(cell('S9', 'weight')).not.toHaveAttribute('data-changed');
+      expect(grid().style.getPropertyValue('--slotted-data-grid-changed-duration')).toBe('500ms');
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(cell('S2', 'weight')).not.toHaveAttribute('data-changed');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('draws the loading, empty and error states', () => {
     const { rerender } = render(<Shipments loading rows={[]} />);
     expect(grid().querySelector('[data-part="loader"]')).not.toBeNull();

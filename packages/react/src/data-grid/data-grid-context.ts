@@ -87,6 +87,8 @@ export interface DataGridInternal<Row> {
   readonly selectableCount: number;
   readonly rangeBounds: RangeBounds | null;
   readonly rangeInfo: (cell: GridCell) => { inside: boolean; edges: readonly string[] };
+  /** The mark of a cell whose value just changed — `a` or `b`, alternating so a second change restarts the paint — or `null`. */
+  readonly changedOf: (cell: GridCell) => 'a' | 'b' | null;
   readonly beginRange: (cell: GridCell, extend: boolean, source: unknown) => void;
   readonly extendRange: (cell: GridCell, source: unknown) => void;
   readonly rangeDragging: boolean;

@@ -79,6 +79,7 @@ import {
 import { fill, resolveLabels, useDataGridDefaults } from './data-grid-defaults';
 import { DataGridHead } from './data-grid-header';
 import {
+  DEFAULT_CHANGED_DURATION,
   EXPANDER_COLUMN,
   EXPANDER_WIDTH,
   EDITOR_FIELD,
@@ -182,6 +183,7 @@ export function DataGrid<Row>({
   handle,
   hasMore,
   height,
+  highlightChanges,
   label,
   labelledBy,
   labels,
@@ -1083,6 +1085,77 @@ export function DataGrid<Row>({
       drag.current = null;
     };
   }, []);
+
+  /* ── Changed cells ──────────────────────────────────────────────────── */
+  const changedFor = highlightChanges === true ? DEFAULT_CHANGED_DURATION : highlightChanges || 0;
+  /* One mark per changed cell, with the generation it was marked in: the
+     generation's parity is the attribute's value, so a cell changed twice in
+     a row restarts its paint. Read as a version, so a cell re-renders only
+     when the set moves. */
+  const changedCells = useRef(new Map<string, { until: number; generation: number }>());
+  const changedGeneration = useRef(0);
+  const [changedVersion, setChangedVersion] = useState(0);
+  const changedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousRows = useRef<{ rows: readonly Row[]; byKey: Map<string, Row> } | null>(null);
+  useEffect(() => {
+    if (changedFor <= 0) {
+      previousRows.current = null;
+      return;
+    }
+    const previous = previousRows.current;
+    const byKey = new Map<string, Row>();
+    for (const row of rows) byKey.set(rowKeyOf(row), row);
+    previousRows.current = { rows, byKey };
+    if (!previous || previous.rows === rows) return;
+    const now = Date.now();
+    let marked = false;
+    for (const node of mountedNodes) {
+      if (node.kind !== 'row') continue;
+      const before = previous.byKey.get(node.key);
+      if (before === undefined || before === node.row) continue;
+      for (const column of resolved) {
+        if (Object.is(cellValue(column.column, before), cellValue(column.column, node.row)))
+          continue;
+        changedCells.current.set(`${node.key}\u0000${column.id}`, {
+          until: now + changedFor,
+          generation: changedGeneration.current + 1,
+        });
+        marked = true;
+      }
+    }
+    if (!marked) return;
+    changedGeneration.current += 1;
+    setChangedVersion((version) => version + 1);
+    if (changedTimer.current === null) {
+      const sweep = () => {
+        changedTimer.current = null;
+        const at = Date.now();
+        let next = Number.POSITIVE_INFINITY;
+        for (const [key, mark] of changedCells.current) {
+          if (mark.until <= at) changedCells.current.delete(key);
+          else next = Math.min(next, mark.until);
+        }
+        setChangedVersion((version) => version + 1);
+        if (next !== Number.POSITIVE_INFINITY)
+          changedTimer.current = setTimeout(sweep, Math.max(16, next - at));
+      };
+      changedTimer.current = setTimeout(sweep, changedFor);
+    }
+  }, [rows, rowKeyOf, mountedNodes, resolved, changedFor]);
+  useEffect(
+    () => () => {
+      if (changedTimer.current !== null) clearTimeout(changedTimer.current);
+    },
+    [],
+  );
+  const changedOf = useCallback(
+    (cell: GridCell): 'a' | 'b' | null => {
+      const mark = changedCells.current.get(`${cell.row}\u0000${cell.column}`);
+      return mark ? (mark.generation % 2 === 0 ? 'a' : 'b') : null;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the map is read through its version
+    [changedVersion],
+  );
 
   /* ── Expansion ──────────────────────────────────────────────────────── */
   const expandedSet = useMemo(() => new Set(expanded), [expanded]);
@@ -1996,6 +2069,7 @@ export function DataGrid<Row>({
       selectableCount: selectableKeys.length,
       rangeBounds: bounds,
       rangeInfo,
+      changedOf,
       beginRange,
       extendRange,
       rangeDragging,
@@ -2085,6 +2159,7 @@ export function DataGrid<Row>({
       selectableKeys.length,
       bounds,
       rangeInfo,
+      changedOf,
       beginRange,
       extendRange,
       rangeDragging,
@@ -2146,6 +2221,7 @@ export function DataGrid<Row>({
     ...(typeof resolvedRowHeight === 'number'
       ? { '--slotted-data-grid-row-block-size': `${resolvedRowHeight}px` }
       : {}),
+    ...(changedFor > 0 ? { '--slotted-data-grid-changed-duration': `${changedFor}ms` } : {}),
   } as CSSProperties;
   const bodyStyle = windowsRows
     ? ({

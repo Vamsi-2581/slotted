@@ -811,6 +811,17 @@ class ShipmentsPage {
     }),
   },
   {
+    id: 'realtime',
+    title: 'Realtime',
+    note: 'rows is compared with the rows before it, by key, on the mounted rows only: a cell whose value changed is marked for the time highlightChanges states (true is 1200 ms) and fades on the accent’s subtle ground; under reduced motion the ground stays flat and leaves with the mark. A row that arrived is not a change. Selection, cursor, expansion and scroll survive every tick because the key is the identity.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-realtime',
+      language: 'angular',
+      label: 'A feed',
+      source: `<sl-data-grid rowKey="id" [rows]="feed()" [columns]="columns" highlightChanges />`,
+    }),
+  },
+  {
     id: 'keyboard',
     title: 'Keyboard',
     note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
@@ -1018,6 +1029,13 @@ const api = apiRows([
     'Pixels per row, read once from the first row when unstated; auto measures every row, capped by --slotted-data-grid-row-max-block-size.',
   ],
   ['overscan', 'number', '6', 'sl-data-grid', 'Rows mounted past each edge of the window.'],
+  [
+    'highlightChanges',
+    'boolean | number',
+    'false',
+    'sl-data-grid',
+    'Marks a mounted cell whose value changed between two rows, for the stated milliseconds (true is 1200).',
+  ],
   [
     'loadMoreThreshold',
     'number',

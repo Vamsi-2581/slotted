@@ -1112,6 +1112,70 @@ export const Media: Story = {
   ),
 };
 
+/* ── Realtime ──────────────────────────────────────────────────────────── */
+
+/* A feed that moves twenty shipments every 400 milliseconds: a weight, a
+   status or a cost, on rows anywhere in the ten thousand. The rows array is
+   new each tick and every untouched row keeps its identity. */
+const RealtimeDemo = () => {
+  const [rows, setRows] = useState(TEN_THOUSAND);
+  const [live, setLive] = useState(true);
+  const [ticks, setTicks] = useState(0);
+  useEffect(() => {
+    if (!live) return;
+    let seed = 11;
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const timer = setInterval(() => {
+      setRows((current) => {
+        const next = current.slice();
+        for (let n = 0; n < 20; n += 1) {
+          /* Mostly the first screen, so the change is seen; some anywhere. */
+          const index = Math.floor(random() * (n < 14 ? 24 : next.length));
+          const row = next[index]!;
+          const pick = random();
+          next[index] =
+            pick < 0.4
+              ? {
+                  ...row,
+                  weight: Math.round((row.weight ?? 500) * (0.9 + random() * 0.2) * 10) / 10,
+                }
+              : pick < 0.7
+                ? { ...row, status: STATUSES[Math.floor(random() * STATUSES.length)]! }
+                : { ...row, cost: Math.round(row.cost * (0.95 + random() * 0.1) * 100) / 100 };
+        }
+        return next;
+      });
+      setTicks((count) => count + 1);
+    }, 400);
+    return () => clearInterval(timer);
+  }, [live]);
+  return (
+    <Screen
+      size="tall"
+      before={
+        <div className="slotted-demo-row">
+          <Text size="sm" tone="muted">
+            {ticks} updates, twenty cells each
+          </Text>
+          <Button onClick={() => setLive((on) => !on)} size="sm" tone="secondary" variant="outline">
+            {live ? 'Pause' : 'Resume'}
+          </Button>
+        </div>
+      }
+    >
+      <Shipments highlightChanges rows={rows} selectionMode="multiple" />
+    </Screen>
+  );
+};
+
+export const Realtime: Story = {
+  parameters: scenario('realtime'),
+  render: () => <RealtimeDemo />,
+};
+
 const KeyboardDemo = () => {
   const [cell, setCell] = useState<GridCell | null>({ row: 'SHP-20481', column: 'customer' });
   return (

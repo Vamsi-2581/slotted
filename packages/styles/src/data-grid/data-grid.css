@@ -204,7 +204,13 @@
    * it when a column takes `flex`, and `inline-size: max-content` what lets a
    * wider one scroll.
    */
-  [data-ui='data-grid'] [role='row'] {
+  /* The grid's own rows are the children of its four row groups and no
+     other: a widget inside a cell may hold rows of its own — a multi-select's
+     chips are a `row` of a grid pattern — and a descendant selector laid its
+     chips out on this grid's column template. */
+  [data-ui='data-grid']
+    :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
+    > [role='row'] {
     box-sizing: border-box;
     display: grid;
     /* The template, then a filler track that takes whatever the frame has
@@ -241,7 +247,10 @@
     border-block-end: var(--_rule-width) solid var(--_rule);
   }
 
-  [data-ui='data-grid'] [role='row'] > * {
+  [data-ui='data-grid']
+    :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
+    > [role='row']
+    > * {
     grid-column: var(--slotted-data-grid-column, auto);
   }
 
@@ -339,6 +348,22 @@
   /* A sortable header is a control and takes the hand. */
   [data-ui='data-grid'] [data-part='column-header'][data-sortable] {
     cursor: pointer;
+  }
+
+  /* A header, a filter cell and a summary cell are controls, not prose: a
+     Shift-press that appends a sort key must not also select its name. */
+  [data-ui='data-grid'] [data-part='head'] > [role='row'] > *,
+  [data-ui='data-grid'] [data-part='summary'] > [role='row'] > * {
+    user-select: none;
+  }
+
+  /* While rows are chosen with Shift or cells with a drag, the press is a
+     selection of the grid's own and not of text: the browser's selection is
+     put out of the body for the two modes that press across cells. Ctrl+C
+     copies the range; a grid with no selection keeps its text selectable. */
+  [data-ui='data-grid']:is([data-selection='multiple'], [data-selection='range'])
+    [data-part='body'] {
+    user-select: none;
   }
 
   [data-ui='data-grid'] [data-part='column-header'][data-sortable]:not([data-disabled]):hover {
@@ -647,8 +672,12 @@
   [data-ui='data-grid'] [data-part='filter-row'] > [data-part='filter-cell'] {
     /* The control inside draws no ring of its own: the cell draws the trace
        around the whole of it while anything inside has the focus, so a field
-       in the row and the cell it fills are not two rings. */
+       in the row and the cell it fills are not two rings. The accent edge a
+       select takes while it is open is the same second frame, and is put out
+       for the same reason. */
     --slotted-focus-ring-width: 0px;
+    --slotted-select-open-border-color: transparent;
+    --slotted-multi-select-open-border-color: transparent;
 
     align-items: center;
     background-color: var(--_band-surface);
@@ -673,16 +702,22 @@
     align-items: center;
     display: flex;
     flex: 1 1 auto;
+    /* Inside the cell's trace, not under it: the trace is drawn inward by
+       the ring's width and a control the cell's full height stood over it,
+       and its hover ground covered it. The operand keeps the ring's width
+       back from every edge, at every density. */
+    margin: var(--_ring-width);
     min-inline-size: 0;
     overflow: clip;
     white-space: nowrap;
   }
 
-  /* The plain control inside takes the row's height and a short inset after
-     the operator, the rule every cell holding a plain control applies. */
+  /* The plain control inside takes what the trace leaves of the row's
+     height and a short inset after the operator, the rule every cell
+     holding a plain control applies. */
   [data-ui='data-grid'] [data-part='filter-cell'] [data-part='root'][data-variant='plain'] {
     --slotted-control-padding-inline-sm: var(--slotted-space-3, 0.375rem);
-    --slotted-control-height-sm: calc(var(--_row-block) - var(--_rule-width));
+    --slotted-control-height-sm: calc(var(--_row-block) - var(--_ring-width) * 2);
 
     flex: 1 1 auto;
     min-inline-size: 0;
@@ -958,9 +993,9 @@
     --_track: calc(var(--_row-block) - var(--_rule-width));
   }
 
-  [data-ui='data-grid'] [data-part='head'] [role='row'],
-  [data-ui='data-grid'] [data-part='summary'] [role='row'],
-  [data-ui='data-grid'] [data-part='loader'] [role='row'] {
+  [data-ui='data-grid'] [data-part='head'] > [role='row'],
+  [data-ui='data-grid'] [data-part='summary'] > [role='row'],
+  [data-ui='data-grid'] [data-part='loader'] > [role='row'] {
     grid-auto-rows: minmax(var(--_row-block), auto);
   }
 
@@ -1061,17 +1096,25 @@
     box-shadow: inset 0 0 0 var(--_ring-width) var(--_cursor-rest);
   }
 
-  [data-ui='data-grid'] [role='gridcell']:focus-visible:not([data-editing]),
-  [data-ui='data-grid'] [role='rowheader']:focus-visible:not([data-editing]),
-  [data-ui='data-grid'] [role='columnheader']:focus-visible {
+  /* The grid's own cells, the children of its rows: a chip in a multi-select
+     is a `gridcell` too, of the grid pattern the chips row is, and must keep
+     its own ring rather than take this one. */
+  [data-ui='data-grid'] [role='row'] > [role='gridcell']:focus-visible:not([data-editing]),
+  [data-ui='data-grid'] [role='row'] > [role='rowheader']:focus-visible:not([data-editing]),
+  [data-ui='data-grid'] [role='row'] > [role='columnheader']:focus-visible {
     box-shadow: none;
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--_ring-width) * -1);
   }
 
   /* A widget the cursor landed on draws its own ring; the cell around it
-     draws none, so there are not two. */
-  [data-ui='data-grid'] [role='gridcell'][data-current]:focus-within:not(:focus) {
+     draws none, so there are not two. A cell in edit and a filter cell are
+     the other way round — the control inside is silenced and the cell draws
+     the trace — so they are left out. */
+  [data-ui='data-grid']
+    [role='gridcell'][data-current]:not([data-editing], [data-part='filter-cell']):focus-within:not(
+      :focus
+    ) {
     outline: none;
   }
 
@@ -1102,8 +1145,11 @@
     border-block-start-width: var(--_ring-width);
   }
 
+  /* The bottom edge ends at the cell: run past it, over the row's rule, it
+     read one pixel thicker than the other three. */
   [data-ui='data-grid'] [data-part='cell'][data-range-edge~='bottom']::before {
     border-block-end-width: var(--_ring-width);
+    inset-block-end: 0;
   }
 
   [data-ui='data-grid'] [data-part='cell'][data-range-edge~='start']::before {
@@ -1126,9 +1172,13 @@
     --slotted-control-padding-inline-sm: var(--_pad-inline);
     --slotted-control-padding-inline-md: var(--_pad-inline);
     --slotted-control-padding-inline-lg: var(--_pad-inline);
-    --slotted-control-height-sm: var(--_row-block);
-    --slotted-control-height-md: var(--_row-block);
-    --slotted-control-height-lg: var(--_row-block);
+    /* The control stands inside the cell's trace: the track less the ring
+       on both sides, and the editor keeps the ring's width back from every
+       edge, so nothing the control draws — a hover ground, a stepper — lands
+       on the trace. */
+    --slotted-control-height-sm: calc(var(--_track) - var(--_ring-width) * 2);
+    --slotted-control-height-md: calc(var(--_track) - var(--_ring-width) * 2);
+    --slotted-control-height-lg: calc(var(--_track) - var(--_ring-width) * 2);
     /* The editor is set in the grid's own type: at `sm` a control is a pixel
        smaller than the value it replaces, and the cell in edit read as a
        different row. */
@@ -1138,11 +1188,14 @@
        The token is zeroed for the descendants only; the cell's own trace
        reads `--_ring-width`, resolved on the root. */
     --slotted-focus-ring-width: 0px;
+    --slotted-select-open-border-color: transparent;
+    --slotted-multi-select-open-border-color: transparent;
 
-    /* A cell in edit that is not the cursor — the rest of a row in row mode —
-       shows the field's edge at one pixel; the cursor's own cell shows the
-       trace whole. Four accent frames on one row read as four alarms. */
-    box-shadow: inset 0 0 0 var(--_rule-width) var(--_rule-strong);
+    /* Every cell in edit carries the cursor's resting trace — in row mode
+       the whole row says it is being edited in one voice — and the cursor's
+       own cell carries it whole. A one-pixel field edge on the others read as
+       a different control, and the control's hover ground covered it. */
+    box-shadow: inset 0 0 0 var(--_ring-width) var(--_cursor-rest);
     padding: 0;
   }
 
@@ -1173,6 +1226,8 @@
   [data-ui='data-grid'] [data-part='editor'] {
     display: flex;
     flex: 1 1 auto;
+    /* Inside the cell's trace, at every density. */
+    margin: var(--_ring-width);
     min-inline-size: 0;
   }
 

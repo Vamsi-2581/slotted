@@ -60,6 +60,7 @@ import { SlDateTimeRangePicker } from '@slotted/angular/datetime-range-picker';
 import { SlMenu, SlMenuItem, SlMenuTrigger } from '@slotted/angular/menu';
 import { SlNumberField, SlNumberFieldInput } from '@slotted/angular/number-field';
 import { SlSegment, SlSegmentedControl } from '@slotted/angular/segmented-control';
+import { SlMultiSelect, SlMultiSelectItem } from '@slotted/angular/multi-select';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlTimeField } from '@slotted/angular/time-field';
@@ -118,6 +119,8 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
   imports: [
     SlDatePicker,
     SlDateTimePicker,
+    SlMultiSelect,
+    SlMultiSelectItem,
     SlNumberField,
     SlNumberFieldInput,
     SlSelect,
@@ -196,24 +199,25 @@ function sameFilter(a: FilterDescriptor | null, b: FilterDescriptor | null) {
         </sl-select>
       }
       @case ('set') {
-        <sl-select
+        <sl-multi-select
           size="sm"
-          width="content"
-          multiple
+          overflow="collapse"
           [variant]="variant()"
           [fullWidth]="true"
           [items]="setItems()"
+          [locale]="locale()"
           [placeholder]="labels().filterAny"
           [attr.aria-label]="label()"
           [value]="setValue()"
-          (valueChange)="valueChange.emit(asList($event))"
+          (valueChange)="valueChange.emit([...$event])"
         >
           @for (option of setOptions(); track option.value) {
-            <sl-select-item [value]="option.value"
-              >{{ option.label }}{{ countOf(option.value) }}</sl-select-item
-            >
+            <sl-multi-select-item
+              [value]="option.value"
+              [label]="option.label + countOf(option.value)"
+            />
           }
-        </sl-select>
+        </sl-multi-select>
       }
       @default {
         <div slTextField size="sm" [variant]="variant()">
@@ -685,6 +689,7 @@ export class SlDataGridFilterPanel {
           tabindex="-1"
           [slMenuTriggerFor]="menu"
           [attr.aria-label]="labels().filterOperator + ': ' + operatorName(operator())"
+          [attr.title]="operatorName(operator())"
         >
           {{ symbol() }}
         </button>

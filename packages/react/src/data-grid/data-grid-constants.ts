@@ -10,6 +10,9 @@ export const EXPANDER_WIDTH = 40;
 /** The single widget a cell may hold, which takes the focus in the cell's place. */
 export const SIMPLE_WIDGET =
   'a[href], button, input[type="checkbox"], input[type="radio"], [role="switch"], [role="button"], [role="checkbox"]';
+/** What an editor's focus lands on: its field, before any control beside it. */
+export const EDITOR_FIELD =
+  'input:not([type="checkbox"]):not([type="radio"]):not([disabled]), textarea:not([disabled]), [role="combobox"]:not([disabled]), [role="spinbutton"]:not([disabled]), [role="checkbox"], [role="switch"]';
 export const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 

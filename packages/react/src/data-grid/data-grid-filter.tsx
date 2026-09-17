@@ -36,6 +36,12 @@ import { DateRangePicker } from '../date-range-picker';
 import { DateTimePicker } from '../datetime-picker';
 import { DateTimeRangePicker } from '../datetime-range-picker';
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../menu';
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectControl,
+  MultiSelectItem,
+} from '../multi-select';
 import { NumberField } from '../number-field';
 import { Popover, PopoverAnchor, PopoverContent, PopoverLayer } from '../popover';
 import { Segment, SegmentedControl } from '../segmented-control';
@@ -274,31 +280,34 @@ function Operand<Row>({
         : [];
       const options = [...known, ...extra];
       const chosen = Array.isArray(value) ? (value as readonly string[]) : [];
+      /* The family made for several chosen values, one line high: what does
+         not fit collapses into a counting chip and the whole set stays in the
+         popup. A `select` with `multiple` drew its chips over the trigger. */
       return (
-        <Select
+        <MultiSelect
           fullWidth
-          width="content"
           items={options.map((option) => ({ label: option.label, value: option.value }))}
-          multiple
-          onValueChange={(next) =>
-            onChange(Array.isArray(next) ? next : next === null ? [] : [next])
-          }
+          onValueChange={(next) => onChange([...next])}
+          overflow="collapse"
           size="sm"
           value={chosen}
           variant={variant}
+          {...(locale === undefined ? {} : { locale })}
         >
-          <SelectTrigger aria-label={label} {...(autoFocus ? { autoFocus: true } : {})}>
-            <SelectValue placeholder={labels.filterAny} />
-          </SelectTrigger>
-          <SelectContent>
+          <MultiSelectControl
+            aria-label={label}
+            placeholder={labels.filterAny}
+            {...(autoFocus ? { autoFocus: true } : {})}
+          />
+          <MultiSelectContent aria-label={label}>
             {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <MultiSelectItem key={option.value} textValue={option.label} value={option.value}>
                 {option.label}
                 {counts?.has(option.value) ? ` (${counts.get(option.value)})` : ''}
-              </SelectItem>
+              </MultiSelectItem>
             ))}
-          </SelectContent>
-        </Select>
+          </MultiSelectContent>
+        </MultiSelect>
       );
     }
     default:
@@ -691,6 +700,9 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
                 <button
                   {...props}
                   aria-label={`${labels.filterOperator}: ${labels.filterOperators[operator as FilterOperator] ?? operator}`}
+                  /* The symbol says the operator to a reader who knows the
+                     notation; the title says it in words to one who hovers. */
+                  title={labels.filterOperators[operator as FilterOperator] ?? operator}
                   tabIndex={-1}
                   type="button"
                 >

@@ -80,6 +80,7 @@ import { DataGridHead } from './data-grid-header';
 import {
   EXPANDER_COLUMN,
   EXPANDER_WIDTH,
+  EDITOR_FIELD,
   FOCUSABLE,
   insideWidget,
   SELECTION_COLUMN,
@@ -605,6 +606,19 @@ export function DataGrid<Row>({
     const structural =
       element.matches('[data-part="column-header"], [data-part="filter-cell"]') ||
       element.querySelector('[data-part="group-toggle"]') !== null;
+    /* A cell in edit hands the focus to its editor's field — the input, the
+       select's trigger, the picker's first segment — never to a stepper or a
+       calendar button beside it, and never to the cell: read live, Enter on a
+       numeric cell opened the editor and left the focus on the cell because
+       the field and its two steppers were three widgets, not one. */
+    const editor = element.querySelector<HTMLElement>('[data-part="editor"]');
+    if (editor) {
+      const field =
+        editor.querySelector<HTMLElement>(EDITOR_FIELD) ??
+        editor.querySelector<HTMLElement>(FOCUSABLE);
+      (field ?? element).focus({ preventScroll: false });
+      return true;
+    }
     const widgets = structural ? [] : [...element.querySelectorAll<HTMLElement>(FOCUSABLE)];
     const single = widgets.length === 1 && widgets[0]!.matches(SIMPLE_WIDGET) ? widgets[0]! : null;
     (single ?? element).focus({ preventScroll: false });
@@ -2107,6 +2121,7 @@ export function DataGrid<Row>({
         {...(resolvedSticky ? { 'data-sticky-header': '' } : {})}
         {...(resolvedFilterRow ? { 'data-filter-row': '' } : {})}
         {...(resolvedStickyTo === 'page' ? { 'data-sticky-to': 'page' } : {})}
+        {...(resolvedSelection === 'none' ? {} : { 'data-selection': resolvedSelection })}
       >
         <div data-part="scroll" ref={scroll}>
           <DataGridHead<Row> columnGroups={columnGroups} headerRowCount={headerRowCount} />

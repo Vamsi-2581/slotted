@@ -43,14 +43,20 @@ test('renders every part the contract declares, on the element and with the role
  * are present into the wrong tracks.
  */
 test('lays every row out as a grid over the template the binding writes', () => {
-  const row = rule("[data-ui='data-grid'] [role='row']");
+  /* The grid's own rows only — the children of its row groups. A widget in a
+     cell may hold rows of its own (a multi-select's chips are a `row`), and a
+     descendant selector laid those out on this grid's template. */
+  const groups =
+    ":is([data-part='head'],[data-part='body'],[data-part='summary'],[data-part='loader'])";
+  const row = rule(`[data-ui='data-grid'] ${groups} > [role='row']`);
   assert.match(row, /display:grid;/);
   assert.match(
     row,
     /grid-template-columns:var\(--slotted-data-grid-template,none\) minmax\(0,1fr\);/,
   );
-  const cell = rule("[data-ui='data-grid'] [role='row'] > *");
+  const cell = rule(`[data-ui='data-grid'] ${groups} > [role='row'] > *`);
   assert.match(cell, /grid-column:var\(--slotted-data-grid-column,auto\);/);
+  assert.doesNotMatch(normalized, /\[data-ui='data-grid'\] \[role='row'\]\{/);
 });
 
 /**
@@ -76,7 +82,7 @@ test('draws the cursor inward, at rest as a shadow and under focus as the ring',
   );
   assert.match(rest, /box-shadow:inset 0 0 0 var\(--_ring-width\) var\(--_cursor-rest\);/);
   const focus = rule(
-    "[data-ui='data-grid'] [role='gridcell']:focus-visible:not([data-editing]),[data-ui='data-grid'] [role='rowheader']:focus-visible:not([data-editing]),[data-ui='data-grid'] [role='columnheader']:focus-visible",
+    "[data-ui='data-grid'] [role='row'] > [role='gridcell']:focus-visible:not([data-editing]),[data-ui='data-grid'] [role='row'] > [role='rowheader']:focus-visible:not([data-editing]),[data-ui='data-grid'] [role='row'] > [role='columnheader']:focus-visible",
   );
   assert.match(
     focus,
@@ -129,9 +135,12 @@ test('pins a column with sticky at the offset the binding writes, on the row’s
 });
 
 /**
- * A cell in edit hands its inset and the row's height to the plain control,
- * keeps the grid's type, and silences the control's own ring so the cell's
- * trace is the only one.
+ * A cell in edit hands its inset to the plain control and the control stands
+ * inside the cell's trace — the track less the ring on both sides, the editor
+ * kept the ring's width back from every edge — so nothing the control draws
+ * lands on the trace; it keeps the grid's type and silences the control's own
+ * ring so the cell's trace is the only one. Every cell in edit carries the
+ * resting trace; the cursor's own carries it whole.
  */
 test('hands the editing cell’s inset, height and type to the plain control', () => {
   const editing = rule("[data-ui='data-grid'] [data-part='cell'][data-editing]");
@@ -141,12 +150,25 @@ test('hands the editing cell’s inset, height and type to the plain control', (
       editing,
       new RegExp(`--slotted-control-padding-inline-${step}:var\\(--_pad-inline\\);`),
     );
-    assert.match(editing, new RegExp(`--slotted-control-height-${step}:var\\(--_row-block\\);`));
+    assert.match(
+      editing,
+      new RegExp(
+        `--slotted-control-height-${step}:calc\\(var\\(--_track\\) - var\\(--_ring-width\\) \\* 2\\);`,
+      ),
+    );
   }
   assert.match(editing, /--slotted-control-font-size-sm:var\(--_font-size\);/);
   assert.match(editing, /--slotted-focus-ring-width:0px;/);
+  assert.match(editing, /box-shadow:inset 0 0 0 var\(--_ring-width\) var\(--_cursor-rest\);/);
+  const editor = rule("[data-ui='data-grid'] [data-part='editor']");
+  assert.match(editor, /margin:var\(--_ring-width\);/);
   const invalid = rule("[data-ui='data-grid'] [data-part='cell'][data-editing][data-invalid]");
   assert.match(invalid, /--slotted-focus-ring-color:var\(--slotted-focus-ring-color-invalid\);/);
+  /* The filter row's control stands inside its cell's trace the same way. */
+  const operand = rule(
+    "[data-ui='data-grid'] [data-part='filter-cell'] > [data-part='filter-operand']",
+  );
+  assert.match(operand, /margin:var\(--_ring-width\);/);
 });
 
 /**

@@ -151,6 +151,9 @@ const PROVISIONAL_VIEWPORT = 600;
 const COLUMN_OVERSCAN_PX = 400;
 const SIMPLE_WIDGET =
   'a[href], button, input[type="checkbox"], input[type="radio"], [role="switch"], [role="button"], [role="checkbox"]';
+/** What an editor's focus lands on: its field, before any control beside it. */
+const EDITOR_FIELD =
+  'input:not([type="checkbox"]):not([type="radio"]):not([disabled]), textarea:not([disabled]), [role="combobox"]:not([disabled]), [role="spinbutton"]:not([disabled]), [role="checkbox"], [role="switch"]';
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 
@@ -991,6 +994,7 @@ function isBodyRow(row: string) {
     '[attr.data-striped]': "resolvedStriped() ? '' : null",
     '[attr.data-sticky-header]': "resolvedStickyHeader() ? '' : null",
     '[attr.data-sticky-to]': "resolvedStickyTo() === 'page' ? 'page' : null",
+    '[attr.data-selection]': "resolvedSelectionMode() === 'none' ? null : resolvedSelectionMode()",
     '[attr.data-filter-row]': "resolvedFilterRow() ? '' : null",
     '[attr.data-rows]': "autoRows() ? 'auto' : 'fixed'",
     '[style.--slotted-data-grid-template]': 'template()',
@@ -1551,6 +1555,19 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const structural =
       element.matches('[data-part="column-header"], [data-part="filter-cell"]') ||
       element.querySelector('[data-part="group-toggle"]') !== null;
+    /* A cell in edit hands the focus to its editor's field — the input, the
+       select's trigger, the picker's first segment — never to a stepper or a
+       calendar button beside it, and never to the cell: Enter on a numeric
+       cell opened the editor and left the focus on the cell because the field
+       and its two steppers were three widgets, not one. */
+    const editor = element.querySelector<HTMLElement>('[data-part="editor"]');
+    if (editor) {
+      const field =
+        editor.querySelector<HTMLElement>(EDITOR_FIELD) ??
+        editor.querySelector<HTMLElement>(FOCUSABLE);
+      (field ?? element).focus();
+      return true;
+    }
     const widgets = structural ? [] : [...element.querySelectorAll<HTMLElement>(FOCUSABLE)];
     const single = widgets.length === 1 && widgets[0]!.matches(SIMPLE_WIDGET) ? widgets[0]! : null;
     (single ?? element).focus();

@@ -244,6 +244,10 @@
       "types": "./dist/types/splitter/index.d.ts",
       "import": "./dist/splitter.js"
     },
+    "./split-button": {
+      "types": "./dist/types/split-button/index.d.ts",
+      "import": "./dist/split-button.js"
+    },
     "./sparkline": {
       "types": "./dist/types/sparkline/index.d.ts",
       "import": "./dist/sparkline.js"
@@ -303,6 +307,10 @@
     "./toast": {
       "types": "./dist/types/toast/index.d.ts",
       "import": "./dist/toast.js"
+    },
+    "./toggle": {
+      "types": "./dist/types/toggle/index.d.ts",
+      "import": "./dist/toggle.js"
     },
     "./toolbar": {
       "types": "./dist/types/toolbar/index.d.ts",

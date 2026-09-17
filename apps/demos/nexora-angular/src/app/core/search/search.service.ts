@@ -27,14 +27,15 @@ export class SearchService {
   private sequence = 0;
   readonly recent = signal<SearchHit[]>(this.readRecent());
 
-  async search(q: string): Promise<SearchResponse['groups']> {
+  /** `null` when a newer query superseded this one; the caller keeps what it has. */
+  async search(q: string): Promise<SearchResponse['groups'] | null> {
     const mine = ++this.sequence;
     if (q.trim().length < 2) return [];
     await new Promise((r) => setTimeout(r, DEBOUNCE_MS));
-    if (mine !== this.sequence) return [];
+    if (mine !== this.sequence) return null;
     const api = await this.backend.ready();
     const response = await api.search(q);
-    return mine === this.sequence ? response.groups : [];
+    return mine === this.sequence ? response.groups : null;
   }
 
   routeFor(hit: SearchHit): string {

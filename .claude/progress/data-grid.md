@@ -75,6 +75,14 @@ sessão pode escrever).
     snippets na barra de tabela de `pagination` (page size, status, anterior,
     seguinte; `showRange` desligado).
 
+13. Sessão de refino 2, segunda fatia (commits `99ad443`, `078e3c8`):
+    `autoScroll.axis` no core/drag e eixo `x` na grelha (reorder alcança
+    colunas fora do viewport); `rowHeight` numérico escreve
+    `--slotted-data-grid-row-block-size`; `--slotted-data-grid-head-block-size`
+    separa cabeça/filtro/resumo/rodapé da linha do corpo; cena `media`
+    (contrato, React, Angular) com avatar + miniatura e dez mil linhas de
+    56 px; `--slotted-data-grid-drop-scroll` como propriedade de runtime.
+
 ## Tarefa em curso
 
 Refino contínuo da data-grid em sessão própria. Ferramentas de sessão em
@@ -128,6 +136,14 @@ declara `styleUrls: STYLES` (constante, não literal), que o JIT do Storybook
 não resolve; ficheiro de outra família, por reportar.
 
 ## Aberto (candidatos para a sessão de refino)
+
+- Persistência: um `usePersistedGridState(key)` (React) e equivalente
+  Angular sobre `serializeColumnState`/`toGridParams`, ou manter a decisão
+  de que o storage é da aplicação; decidir com o utilizador.
+- Column/row spanning: reabertura de desenho (conflita com janela de
+  linhas, intervalo e ordenação); não consta de §9.
+- Realtime: medir `applyQuery` a 10 Hz com 10k linhas; "flash" de célula
+  alterada; atualização incremental por linha.
 
 - Medir a grelha fora do Storybook (o addon a11y e a Performance track do
   React em dev dominam o INP medido): uma página de bancada em

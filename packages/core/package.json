@@ -97,6 +97,10 @@
       "types": "./dist/types/measure/index.d.ts",
       "import": "./dist/measure.js"
     },
+    "./outline": {
+      "types": "./dist/types/outline/index.d.ts",
+      "import": "./dist/outline.js"
+    },
     "./overflow": {
       "types": "./dist/types/overflow/index.d.ts",
       "import": "./dist/overflow.js"
@@ -132,6 +136,10 @@
     "./pagination": {
       "types": "./dist/types/pagination/index.d.ts",
       "import": "./dist/pagination.js"
+    },
+    "./scroll-spy": {
+      "types": "./dist/types/scroll-spy/index.d.ts",
+      "import": "./dist/scroll-spy.js"
     },
     "./slider": {
       "types": "./dist/types/slider/index.d.ts",

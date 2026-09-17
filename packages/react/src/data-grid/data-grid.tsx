@@ -99,6 +99,8 @@ import { useModel } from './use-model';
 const DEFAULT_ROW_HEIGHT = 34;
 const VIRTUALIZE_ROWS_FROM = 100;
 const VIRTUALIZE_COLUMNS_FROM = 20;
+/** The viewport assumed until the scroller is measured. */
+const PROVISIONAL_VIEWPORT = 600;
 const COLUMN_OVERSCAN_PX = 400;
 
 function sameQuery(a: GridQuery, b: GridQuery) {
@@ -429,18 +431,20 @@ export function DataGrid<Row>({
     return createRowMetrics(nodes.map((_node, index) => rowSizes.get(index) ?? rowSize));
   }, [autoRows, nodes, rowSizes, rowSize]);
   const rowWindow = useMemo(() => {
-    if (!windowsRows || viewport.height === 0) {
+    if (!windowsRows) {
       return { startIndex: 0, endIndex: nodes.length, startOffset: 0, totalSize: 0 };
     }
-    /* The scroller also holds the sticky head, which stands over the first
-       rows: the offset the body sees is the scroll less the head's height. */
+    /* Before the scroller is measured the window is provisional — a screen's
+       worth of rows — rather than the whole set: a grid of ten thousand rows
+       mounted every one of them once, on its first paint, and windowed only
+       from the second. */
     const win = virtualWindow({
       itemCount: nodes.length,
       itemSize: rowSize,
       metrics,
       overscan: resolvedOverscan,
       scrollOffset: Math.max(0, scrollTop),
-      viewportSize: viewport.height,
+      viewportSize: viewport.height || PROVISIONAL_VIEWPORT,
     });
     return {
       startIndex: win.startIndex,

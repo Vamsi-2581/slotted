@@ -1,0 +1,2852 @@
+import { writeToClipboard } from '@slotted/core/clipboard';
+import { createRowMetrics, nextSelection, virtualWindow } from '@slotted/core/collection';
+import { createDragController, type DragController } from '@slotted/core/drag';
+import { createFilterGroupPredicate, ruleFor, withoutRuleFor } from '@slotted/core/filter';
+import type { FilterDescriptor, FilterKind } from '@slotted/core/filter';
+import {
+  applyQuery,
+  cellText,
+  cellValue,
+  columnRange,
+  columnTemplate,
+  emptyQuery,
+  FILTER_ROW,
+  GROUP_ROW_PREFIX,
+  HEADER_ROW,
+  isGroupCursorRow,
+  moveCursor,
+  normalizeColumnState,
+  rangeBounds,
+  rangeCells,
+  rangeEdges,
+  rangeToText,
+  RESIZE_STEP,
+  resolveColumns,
+  rowRange,
+  sameCell,
+  settleCursor,
+  SUMMARY_ROW,
+  wholeRange,
+  withColumnFilter,
+  withColumnHidden,
+  withColumnMoved,
+  withColumnPinned,
+  withColumnWidth,
+  withoutFilters,
+  withSort,
+  withSortPress,
+  zoneOf,
+  type CursorGrid,
+  type CursorIntent,
+  type GridCell,
+  type GridColumn,
+  type GridColumnGroup,
+  type GridColumnState,
+  type GridNode,
+  type GridQuery,
+  type GridRange,
+  type ResolvedGridColumn,
+  type SortDirection,
+} from '@slotted/core/grid';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
+import { createScrollAffordance } from '@slotted/core/overflow';
+import { createControllable, type ChangeReason, type ChangeRequest } from '@slotted/core/state';
+import { NgTemplateOutlet } from '@angular/common';
+import {
+  afterNextRender,
+  booleanAttribute,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  contentChild,
+  contentChildren,
+  DestroyRef,
+  effect,
+  ElementRef,
+  forwardRef,
+  inject,
+  Injector,
+  input,
+  model,
+  numberAttribute,
+  output,
+  signal,
+  untracked,
+  viewChild,
+  ViewEncapsulation,
+} from '@angular/core';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { ControlValueAccessor } from '@angular/forms';
+
+import { SlButton } from '@slotted/angular/button';
+import { SlCheckbox } from '@slotted/angular/checkbox';
+import { SlMenu, SlMenuItem, SlMenuSeparator, SlMenuTrigger } from '@slotted/angular/menu';
+import {
+  SlPopover,
+  SlPopoverAnchor,
+  SlPopoverContent,
+  SlPopoverLayer,
+} from '@slotted/angular/popover';
+import {
+  SlResultState,
+  SlResultStateActions,
+  SlResultStateContent,
+  SlResultStateDescription,
+  SlResultStateTitle,
+} from '@slotted/angular/result-state';
+import { SlSkeleton } from '@slotted/angular/skeleton';
+import {
+  filterKindOf,
+  SlDataGridEditor,
+  SlDataGridFilterPanel,
+  SlDataGridFilterRowOperand,
+  SlDataGridPart,
+} from './data-grid-controls';
+import {
+  DATA_GRID_LABELS,
+  fillLabel,
+  injectDataGridDefaults,
+  resolveDataGridLabels,
+  SlDataGridIdFactory,
+  type DataGridActivateEvent,
+  type DataGridCellContext,
+  type DataGridColumnStateRequest,
+  type DataGridEditCommit,
+  type DataGridEditMode,
+  type DataGridEditorContext,
+  type DataGridExpandedGroups,
+  type DataGridGroupContext,
+  type DataGridHeaderContext,
+  type DataGridLabels,
+  type DataGridMode,
+  type DataGridQueryRequest,
+  type DataGridReason,
+  type DataGridRowHeight,
+  type DataGridSelection,
+  type DataGridSelectionMode,
+  type DataGridStickyTo,
+  type DataGridVariant,
+  type DataGridVirtualize,
+} from './data-grid-defaults';
+import {
+  SlDataGridCellTemplate,
+  SlDataGridDetailTemplate,
+  SlDataGridEditorTemplate,
+  SlDataGridEmptyTemplate,
+  SlDataGridFilterTemplate,
+  SlDataGridFooter,
+  SlDataGridGroupTemplate,
+  SlDataGridHeaderTemplate,
+} from './data-grid-templates';
+
+export const SELECTION_COLUMN = '__selection';
+export const EXPANDER_COLUMN = '__expander';
+const SELECTION_WIDTH = 48;
+const EXPANDER_WIDTH = 40;
+const DEFAULT_ROW_HEIGHT = 34;
+const VIRTUALIZE_ROWS_FROM = 100;
+const VIRTUALIZE_COLUMNS_FROM = 20;
+/** The viewport assumed until the scroller is measured. */
+const PROVISIONAL_VIEWPORT = 600;
+const COLUMN_OVERSCAN_PX = 400;
+const SIMPLE_WIDGET =
+  'a[href], button, input[type="checkbox"], input[type="radio"], [role="switch"], [role="button"], [role="checkbox"]';
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
+
+interface EditSession {
+  readonly cell: GridCell;
+  readonly columns: readonly string[];
+  readonly drafts: Readonly<Record<string, unknown>>;
+  readonly originals: Readonly<Record<string, unknown>>;
+  readonly status: 'editing' | 'pending' | 'invalid';
+  readonly messages: Readonly<Record<string, string>>;
+}
+
+type GroupNode = Extract<GridNode<unknown>, { kind: 'group' }>;
+type RowNode = Extract<GridNode<unknown>, { kind: 'row' }>;
+
+function sameKeys(a: readonly string[] | 'all', b: readonly string[] | 'all') {
+  if (a === 'all' || b === 'all') return a === b;
+  return a.length === b.length && a.every((key, index) => key === b[index]);
+}
+function sameSelection(a: DataGridSelection, b: DataGridSelection) {
+  if (Array.isArray(a) && Array.isArray(b)) return sameKeys(a, b);
+  return a === b;
+}
+function sameRange(a: GridRange | null, b: GridRange | null) {
+  if (!a || !b) return a === b;
+  return sameCell(a.anchor, b.anchor) && sameCell(a.focus, b.focus);
+}
+function isBodyRow(row: string) {
+  return row !== HEADER_ROW && row !== FILTER_ROW && row !== SUMMARY_ROW && !isGroupCursorRow(row);
+}
+
+/**
+ * A grid of data: the composite widget `table` declined to be. It owns the
+ * rows, applies the query, walks the cells with one cursor, edits in place,
+ * and lets the reader arrange the columns. Its selection is a form value.
+ */
+@Component({
+  selector: 'sl-data-grid',
+  standalone: true,
+  exportAs: 'slDataGrid',
+  imports: [
+    NgTemplateOutlet,
+    SlButton,
+    SlCheckbox,
+    SlDataGridEditor,
+    SlDataGridFilterPanel,
+    SlDataGridFilterRowOperand,
+    SlDataGridPart,
+    SlMenu,
+    SlMenuItem,
+    SlMenuSeparator,
+    SlMenuTrigger,
+    SlPopover,
+    SlPopoverAnchor,
+    SlPopoverContent,
+    SlPopoverLayer,
+    SlResultState,
+    SlResultStateActions,
+    SlResultStateContent,
+    SlResultStateDescription,
+    SlResultStateTitle,
+    SlSkeleton,
+  ],
+  styleUrls: [
+    '../../../styles/src/data-grid/data-grid.css',
+    '../../../styles/src/checkbox/checkbox.css',
+    '../../../styles/src/visually-hidden/visually-hidden.css',
+  ],
+  template: `
+    <div #scroll data-part="scroll">
+      <div data-part="head" role="rowgroup">
+        @if (hasGroups()) {
+          <div data-part="header-row" role="row" aria-rowindex="1">
+            @for (cell of groupCells(); track cell.key) {
+              <div
+                data-part="column-group"
+                role="columnheader"
+                tabindex="-1"
+                [attr.aria-colindex]="cell.first"
+                [attr.aria-colspan]="cell.span"
+                [attr.data-pinned]="cell.pinned"
+                [style.--slotted-data-grid-column]="cell.first + ' / ' + (cell.first + cell.span)"
+                [style.--slotted-data-grid-pin-offset]="cell.pinned ? cell.pinOffset + 'px' : null"
+              >
+                <span>{{ cell.label }}</span>
+              </div>
+            }
+          </div>
+        }
+        <div
+          data-part="header-row"
+          role="row"
+          [attr.data-row]="HEADER"
+          [attr.aria-rowindex]="hasGroups() ? 2 : 1"
+        >
+          @if (hasSelectionColumn()) {
+            <div
+              data-part="selection"
+              role="gridcell"
+              aria-colindex="1"
+              [attr.data-column]="SELECTION"
+              [attr.tabindex]="isCurrent(HEADER, SELECTION) ? 0 : -1"
+              [attr.data-current]="isCurrent(HEADER, SELECTION) ? '' : null"
+              [style.--slotted-data-grid-column]="1"
+              (focus)="onCellFocus({ row: HEADER, column: SELECTION }, $event)"
+              (keydown)="onCellKeyDown($event, { row: HEADER, column: SELECTION })"
+              (pointerdown)="onCellPointerDown($event, { row: HEADER, column: SELECTION })"
+            >
+              @if (resolvedSelectionMode() === 'multiple') {
+                <span
+                  slCheckbox
+                  [checked]="allState() === 'all'"
+                  [indeterminate]="allState() === 'some'"
+                  (checkedChange)="toggleAll($event.source)"
+                >
+                  <span data-ui="visually-hidden" data-part="root">{{ selectAllName() }}</span>
+                </span>
+              }
+            </div>
+          }
+          @if (hasExpanderColumn()) {
+            <div
+              data-part="column-header"
+              role="columnheader"
+              tabindex="-1"
+              [attr.aria-colindex]="expanderIndex()"
+              [attr.data-column]="EXPANDER"
+              [style.--slotted-data-grid-column]="expanderIndex()"
+            >
+              <span></span>
+            </div>
+          }
+          @for (column of mountedColumns(); track column.id) {
+            <ng-container
+              slPopover
+              side="bottom"
+              align="start"
+              size="sm"
+              [open]="filterOpen() === column.id && filterKind(column) !== null"
+              (openChange)="onFilterOpenChange(column.id, $event)"
+            >
+              <div
+                slPopoverAnchor
+                data-part="column-header"
+                role="columnheader"
+                [attr.aria-colindex]="indexOf(column.id)"
+                [attr.aria-sort]="ariaSort(column.id)"
+                [attr.data-column]="column.id"
+                [attr.data-align]="column.align ?? null"
+                [attr.data-numeric]="column.numeric ? '' : null"
+                [attr.data-pinned]="column.pinned"
+                [attr.data-pin-edge]="column.pinEdge ? '' : null"
+                [attr.data-sortable]="column.sortable ? '' : null"
+                [attr.data-sorted]="sortOf(column.id)?.direction ?? null"
+                [attr.data-filtered]="filterOf(column.id) ? '' : null"
+                [attr.data-current]="isCurrent(HEADER, column.id) ? '' : null"
+                [attr.data-dragging]="dragState().dragging === column.id ? '' : null"
+                [attr.data-drop-target]="dragState().target === column.id ? '' : null"
+                [attr.data-resizing]="resizing() === column.id ? '' : null"
+                [attr.tabindex]="isCurrent(HEADER, column.id) ? 0 : -1"
+                [style.--slotted-data-grid-column]="indexOf(column.id)"
+                [style.--slotted-data-grid-pin-offset]="
+                  column.pinned ? column.pinOffset + 'px' : null
+                "
+                (click)="onHeaderClick($event, column)"
+                (focus)="onCellFocus({ row: HEADER, column: column.id }, $event)"
+                (keydown)="onCellKeyDown($event, { row: HEADER, column: column.id })"
+                (pointerdown)="onCellPointerDown($event, { row: HEADER, column: column.id })"
+              >
+                <span>
+                  @if (headerTemplate(column.id); as template) {
+                    <ng-container
+                      [ngTemplateOutlet]="template"
+                      [ngTemplateOutletContext]="headerContext(column)"
+                    />
+                  } @else {
+                    {{ column.column.label }}
+                  }
+                </span>
+                @if (sortOf(column.id); as sort) {
+                  <span
+                    data-part="sort"
+                    aria-hidden="true"
+                    [attr.data-index]="query().sort.length > 1 ? sort.index : null"
+                  ></span>
+                }
+                <span data-part="column-actions">
+                  @if (column.filterable && (filterOf(column.id) || filterOpen() === column.id)) {
+                    <button
+                      data-part="filter"
+                      type="button"
+                      tabindex="-1"
+                      aria-haspopup="dialog"
+                      [attr.aria-expanded]="filterOpen() === column.id"
+                      [attr.aria-label]="t().filter + ' ' + column.column.label"
+                      [attr.data-filtered]="filterOf(column.id) ? '' : null"
+                      [attr.data-open]="filterOpen() === column.id ? '' : null"
+                      (pointerdown)="$event.stopPropagation()"
+                      (click)="$event.stopPropagation(); toggleFilterPanel(column.id)"
+                    ></button>
+                  }
+                  <button
+                    slDataGridPart="column-menu"
+                    type="button"
+                    tabindex="-1"
+                    [slMenuTriggerFor]="columnMenu"
+                    [attr.data-menu-for]="column.id"
+                    [attr.aria-label]="t().columnMenu + ', ' + column.column.label"
+                    (pointerdown)="$event.stopPropagation()"
+                    (click)="$event.stopPropagation()"
+                  ></button>
+                  <sl-menu
+                    #columnMenu
+                    size="sm"
+                    [attr.aria-label]="t().columnMenu + ', ' + column.column.label"
+                  >
+                    @if (column.sortable) {
+                      <button
+                        slMenuItem
+                        [disabled]="isSortedAlone(column.id, 'ascending')"
+                        (select)="setSort(column.id, 'ascending', $event)"
+                      >
+                        {{ t().sortAscendingAction }}
+                      </button>
+                      <button
+                        slMenuItem
+                        [disabled]="isSortedAlone(column.id, 'descending')"
+                        (select)="setSort(column.id, 'descending', $event)"
+                      >
+                        {{ t().sortDescendingAction }}
+                      </button>
+                      <button
+                        slMenuItem
+                        [disabled]="sortOf(column.id) === null"
+                        (select)="setSort(column.id, null, $event)"
+                      >
+                        {{ t().sortClearAction }}
+                      </button>
+                      <hr slMenuSeparator />
+                    }
+                    @if (column.filterable && filterKind(column) !== null) {
+                      <button slMenuItem (select)="filterOpen.set(column.id)">
+                        {{ t().filter }}…
+                      </button>
+                    }
+                    <button
+                      slMenuItem
+                      [disabled]="column.pinned === 'start'"
+                      (select)="pin(column.id, 'start', $event)"
+                    >
+                      {{ t().pinStart }}
+                    </button>
+                    <button
+                      slMenuItem
+                      [disabled]="column.pinned === 'end'"
+                      (select)="pin(column.id, 'end', $event)"
+                    >
+                      {{ t().pinEnd }}
+                    </button>
+                    @if (column.pinned) {
+                      <button slMenuItem (select)="pin(column.id, null, $event)">
+                        {{ t().unpin }}
+                      </button>
+                    }
+                    <hr slMenuSeparator />
+                    @if (column.resizable) {
+                      <button slMenuItem (select)="autofit(column.id, $event)">
+                        {{ t().autofit }}
+                      </button>
+                    }
+                    @if (column.hideable) {
+                      <button slMenuItem (select)="hide(column.id, $event)">{{ t().hide }}</button>
+                    }
+                    <button slMenuItem (select)="manageColumns.emit()">
+                      {{ t().manageColumns }}…
+                    </button>
+                  </sl-menu>
+                </span>
+                @if (column.resizable) {
+                  <div
+                    data-part="resizer"
+                    aria-hidden="true"
+                    [attr.title]="t().resize"
+                    [attr.data-resizing]="resizing() === column.id ? '' : null"
+                    (pointerdown)="beginResize($event, column)"
+                    (pointermove)="moveResize($event, column)"
+                    (pointerup)="endResize($event)"
+                    (pointercancel)="endResize($event)"
+                    (dblclick)="$event.stopPropagation(); autofit(column.id, $event)"
+                  ></div>
+                }
+              </div>
+              <ng-template slPopoverLayer>
+                <div slPopoverContent [attr.aria-label]="t().filter + ' ' + column.column.label">
+                  <sl-data-grid-filter-panel
+                    [column]="$any(column)"
+                    [kind]="filterKind(column)!"
+                    [committed]="filterOf(column.id)"
+                    [labels]="t()"
+                    [locale]="resolvedLocale()"
+                    [counts]="filterKind(column) === 'set' ? countsFor(column.id) : undefined"
+                    [customTemplate]="filterTemplate(column.id)"
+                    (applyRequest)="applyPanel(column.id, $event)"
+                  />
+                </div>
+              </ng-template>
+            </ng-container>
+          }
+        </div>
+        @if (resolvedFilterRow()) {
+          <div
+            data-part="filter-row"
+            role="row"
+            [attr.data-row]="FILTER"
+            [attr.aria-rowindex]="headerRowCount()"
+          >
+            @if (hasSelectionColumn()) {
+              <div
+                data-part="filter-cell"
+                role="gridcell"
+                aria-colindex="1"
+                tabindex="-1"
+                [attr.data-column]="SELECTION"
+                [style.--slotted-data-grid-column]="1"
+              ></div>
+            }
+            @if (hasExpanderColumn()) {
+              <div
+                data-part="filter-cell"
+                role="gridcell"
+                tabindex="-1"
+                [attr.aria-colindex]="expanderIndex()"
+                [attr.data-column]="EXPANDER"
+                [style.--slotted-data-grid-column]="expanderIndex()"
+              ></div>
+            }
+            @for (column of mountedColumns(); track column.id) {
+              <div
+                data-part="filter-cell"
+                role="gridcell"
+                [attr.aria-colindex]="indexOf(column.id)"
+                [attr.data-column]="column.id"
+                [attr.data-pinned]="column.pinned"
+                [attr.data-pin-edge]="column.pinEdge ? '' : null"
+                [attr.data-filtered]="filterOf(column.id) ? '' : null"
+                [attr.data-current]="isCurrent(FILTER, column.id) ? '' : null"
+                [attr.tabindex]="isCurrent(FILTER, column.id) ? 0 : -1"
+                [style.--slotted-data-grid-column]="indexOf(column.id)"
+                [style.--slotted-data-grid-pin-offset]="
+                  column.pinned ? column.pinOffset + 'px' : null
+                "
+                (focus)="onCellFocus({ row: FILTER, column: column.id }, $event)"
+                (keydown)="onCellKeyDown($event, { row: FILTER, column: column.id })"
+                (pointerdown)="onCellPointerDown($event, { row: FILTER, column: column.id })"
+              >
+                @if (column.filterable && filterKind(column); as kind) {
+                  <sl-data-grid-filter-row-operand
+                    [column]="$any(column)"
+                    [kind]="kind"
+                    [committed]="filterOf(column.id)"
+                    [labels]="t()"
+                    [locale]="resolvedLocale()"
+                    [counts]="kind === 'set' ? countsFor(column.id) : undefined"
+                    [debounce]="resolvedDebounce()"
+                    [customTemplate]="filterTemplate(column.id)"
+                    (filterChange)="setFilter(column.id, $event.filter, $event.reason)"
+                  />
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (status() === 'loading') {
+        <div data-part="loader" role="rowgroup" aria-hidden="true">
+          @for (row of skeletonRowsList(); track row) {
+            <div data-part="row" role="row">
+              @for (columnId of columnIds(); track columnId; let index = $index) {
+                <div role="gridcell" [style.--slotted-data-grid-column]="index + 1">
+                  <span slSkeleton [inlineSize]="skeletonWidth(index)"></span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div
+          data-part="body"
+          role="rowgroup"
+          [style.--slotted-data-grid-window-total]="
+            windowsRows() ? rowWindow().totalSize + 'px' : null
+          "
+          [style.--slotted-data-grid-window-start]="
+            windowsRows() ? rowWindow().startOffset + 'px' : null
+          "
+        >
+          @if (status() !== 'rows') {
+            <div data-part="empty" [style.--slotted-data-grid-column]="'1 / -1'">
+              @if (emptyTemplate(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template.template"
+                  [ngTemplateOutletContext]="{ $implicit: status(), status: status() }"
+                />
+              } @else {
+                <section slResultState reach="section" tabindex="-1" [status]="resultStatus()">
+                  <div slResultStateContent>
+                    <div slResultStateTitle>{{ emptyTitle() }}</div>
+                    @if (status() === 'error' && error()) {
+                      <p slResultStateDescription>{{ error() }}</p>
+                    }
+                  </div>
+                  @if (status() === 'no-results') {
+                    <div slResultStateActions>
+                      <button
+                        slButton
+                        type="button"
+                        size="sm"
+                        tone="secondary"
+                        variant="outline"
+                        (click)="clearFilters($event)"
+                      >
+                        {{ t().clearFilters }}
+                      </button>
+                    </div>
+                  } @else if (status() === 'error') {
+                    <div slResultStateActions>
+                      <button
+                        slButton
+                        type="button"
+                        size="sm"
+                        tone="secondary"
+                        variant="outline"
+                        (click)="retry.emit()"
+                      >
+                        {{ t().retry }}
+                      </button>
+                    </div>
+                  }
+                </section>
+              }
+            </div>
+          }
+          @for (entry of mountedEntries(); track entry.node.key) {
+            @if (entry.node.kind === 'group') {
+              <div
+                data-part="group-row"
+                role="row"
+                [attr.data-row]="GROUP_PREFIX + entry.node.key"
+                [attr.aria-rowindex]="entry.rowIndex"
+                [attr.aria-level]="entry.node.level"
+                [attr.aria-expanded]="entry.node.expanded"
+                [attr.data-current]="current()?.row === GROUP_PREFIX + entry.node.key ? '' : null"
+                [style.--slotted-data-grid-level]="entry.node.level"
+              >
+                <div
+                  role="gridcell"
+                  aria-colindex="1"
+                  [attr.aria-colspan]="firstAggregateIndex() - 1"
+                  [attr.data-column]="columnIds()[0]"
+                  [attr.tabindex]="
+                    isCurrent(GROUP_PREFIX + entry.node.key, columnIds()[0]!) ? 0 : -1
+                  "
+                  [attr.data-current]="
+                    isCurrent(GROUP_PREFIX + entry.node.key, columnIds()[0]!) ? '' : null
+                  "
+                  [style.--slotted-data-grid-column]="'1 / ' + firstAggregateIndex()"
+                  (click)="toggleGroup(entry.node.key, $event)"
+                  (focus)="
+                    onCellFocus(
+                      { row: GROUP_PREFIX + entry.node.key, column: columnIds()[0]! },
+                      $event
+                    )
+                  "
+                  (keydown)="
+                    onCellKeyDown($event, {
+                      row: GROUP_PREFIX + entry.node.key,
+                      column: columnIds()[0]!,
+                    })
+                  "
+                  (pointerdown)="
+                    onCellPointerDown($event, {
+                      row: GROUP_PREFIX + entry.node.key,
+                      column: columnIds()[0]!,
+                    })
+                  "
+                >
+                  <button
+                    data-part="group-toggle"
+                    type="button"
+                    tabindex="-1"
+                    [attr.aria-expanded]="entry.node.expanded"
+                    [attr.aria-label]="
+                      (entry.node.expanded ? t().collapseGroup : t().expandGroup) +
+                      ' ' +
+                      entry.node.text
+                    "
+                    (click)="$event.stopPropagation(); toggleGroup(entry.node.key, $event)"
+                  ></button>
+                  @if (groupTemplate(); as template) {
+                    <ng-container
+                      [ngTemplateOutlet]="template.template"
+                      [ngTemplateOutletContext]="groupContext(entry.node)"
+                    />
+                  } @else {
+                    <span>{{ entry.node.text }}</span>
+                    <span data-count="">{{ groupCount(entry.node) }}</span>
+                  }
+                </div>
+                @for (column of aggregated(); track column.id) {
+                  <div
+                    role="gridcell"
+                    [attr.aria-colindex]="indexOf(column.id)"
+                    [attr.data-column]="column.id"
+                    [attr.data-numeric]="column.numeric ? '' : null"
+                    [attr.data-align]="column.align ?? null"
+                    [attr.data-pinned]="column.pinned"
+                    [attr.tabindex]="isCurrent(GROUP_PREFIX + entry.node.key, column.id) ? 0 : -1"
+                    [attr.data-current]="
+                      isCurrent(GROUP_PREFIX + entry.node.key, column.id) ? '' : null
+                    "
+                    [style.--slotted-data-grid-column]="indexOf(column.id)"
+                    [style.--slotted-data-grid-pin-offset]="
+                      column.pinned ? column.pinOffset + 'px' : null
+                    "
+                    (focus)="
+                      onCellFocus({ row: GROUP_PREFIX + entry.node.key, column: column.id }, $event)
+                    "
+                    (keydown)="
+                      onCellKeyDown($event, {
+                        row: GROUP_PREFIX + entry.node.key,
+                        column: column.id,
+                      })
+                    "
+                    (pointerdown)="
+                      onCellPointerDown($event, {
+                        row: GROUP_PREFIX + entry.node.key,
+                        column: column.id,
+                      })
+                    "
+                  >
+                    <span data-aggregate="">{{
+                      aggregateText(column, entry.node.aggregates[column.id])
+                    }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div
+                data-part="row"
+                role="row"
+                [attr.data-row]="entry.node.key"
+                [attr.aria-rowindex]="entry.rowIndex"
+                [attr.aria-selected]="rowSelectable() ? isSelected(entry.node.key) : null"
+                [attr.data-selected]="isSelected(entry.node.key) ? '' : null"
+                [attr.data-current]="current()?.row === entry.node.key ? '' : null"
+                [attr.data-expanded]="isExpanded(entry.node.key) ? '' : null"
+                [attr.data-disabled]="isDisabled(entry.node.key) ? '' : null"
+                [attr.data-editing]="edit()?.cell?.row === entry.node.key ? '' : null"
+                [attr.data-index]="entry.index"
+              >
+                @if (hasSelectionColumn()) {
+                  <div
+                    data-part="selection"
+                    role="gridcell"
+                    aria-colindex="1"
+                    [attr.data-column]="SELECTION"
+                    [attr.tabindex]="isCurrent(entry.node.key, SELECTION) ? 0 : -1"
+                    [attr.data-current]="isCurrent(entry.node.key, SELECTION) ? '' : null"
+                    [style.--slotted-data-grid-column]="1"
+                    (focus)="onCellFocus({ row: entry.node.key, column: SELECTION }, $event)"
+                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: SELECTION })"
+                    (pointerdown)="
+                      onCellPointerDown($event, { row: entry.node.key, column: SELECTION })
+                    "
+                  >
+                    <span
+                      slCheckbox
+                      [checked]="isSelected(entry.node.key)"
+                      [disabled]="isDisabled(entry.node.key) || undefined"
+                      (checkedChange)="
+                        toggleSelected(entry.node.key, {
+                          range: shiftHeld($event.source),
+                          source: $event.source,
+                        })
+                      "
+                    >
+                      <span data-ui="visually-hidden" data-part="root"
+                        >{{ t().selectRow }} {{ entry.node.key }}</span
+                      >
+                    </span>
+                  </div>
+                }
+                @if (hasExpanderColumn()) {
+                  <div
+                    data-part="cell"
+                    data-kind="expander"
+                    role="gridcell"
+                    [attr.aria-colindex]="expanderIndex()"
+                    [attr.data-column]="EXPANDER"
+                    [attr.tabindex]="isCurrent(entry.node.key, EXPANDER) ? 0 : -1"
+                    [attr.data-current]="isCurrent(entry.node.key, EXPANDER) ? '' : null"
+                    [style.--slotted-data-grid-column]="expanderIndex()"
+                    (focus)="onCellFocus({ row: entry.node.key, column: EXPANDER }, $event)"
+                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: EXPANDER })"
+                    (pointerdown)="
+                      onCellPointerDown($event, { row: entry.node.key, column: EXPANDER })
+                    "
+                  >
+                    @if (isExpandable(entry.node.row)) {
+                      <button
+                        data-part="expander"
+                        type="button"
+                        tabindex="-1"
+                        [attr.aria-expanded]="isExpanded(entry.node.key)"
+                        [attr.aria-controls]="
+                          isExpanded(entry.node.key) ? detailId(entry.node.key) : null
+                        "
+                        [attr.aria-label]="isExpanded(entry.node.key) ? t().collapse : t().expand"
+                        (click)="toggleExpanded(entry.node.key, $event)"
+                      ></button>
+                    }
+                  </div>
+                }
+                @for (column of mountedColumns(); track column.id) {
+                  @let cell = cellState(entry.node, column);
+                  <div
+                    [attr.data-part]="column.column.rowHeader ? 'row-header' : 'cell'"
+                    [attr.role]="column.column.rowHeader ? 'rowheader' : 'gridcell'"
+                    [attr.aria-colindex]="indexOf(column.id)"
+                    [attr.aria-readonly]="cell.readonly ? 'true' : null"
+                    [attr.aria-selected]="
+                      resolvedSelectionMode() === 'range' && cell.inRange ? 'true' : null
+                    "
+                    [attr.aria-invalid]="cell.invalid ? 'true' : null"
+                    [attr.data-column]="column.id"
+                    [attr.data-align]="column.align ?? null"
+                    [attr.data-numeric]="column.numeric ? '' : null"
+                    [attr.data-text]="column.text"
+                    [attr.data-pinned]="column.pinned"
+                    [attr.data-pin-edge]="column.pinEdge ? '' : null"
+                    [attr.data-current]="cell.current ? '' : null"
+                    [attr.data-in-range]="cell.inRange ? '' : null"
+                    [attr.data-range-edge]="cell.edges.length > 0 ? cell.edges.join(' ') : null"
+                    [attr.data-editing]="cell.editing ? '' : null"
+                    [attr.data-invalid]="cell.invalid ? '' : null"
+                    [attr.data-loading]="cell.pending ? '' : null"
+                    [attr.data-readonly]="cell.readonly ? '' : null"
+                    [attr.tabindex]="cell.current ? 0 : -1"
+                    [attr.title]="cell.invalid ? cell.message : null"
+                    [style.--slotted-data-grid-column]="indexOf(column.id)"
+                    [style.--slotted-data-grid-pin-offset]="
+                      column.pinned ? column.pinOffset + 'px' : null
+                    "
+                    (click)="onBodyCellClick($event, { row: entry.node.key, column: column.id })"
+                    (dblclick)="
+                      onCellDoubleClick($event, { row: entry.node.key, column: column.id })
+                    "
+                    (focus)="onCellFocus({ row: entry.node.key, column: column.id }, $event)"
+                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: column.id })"
+                    (pointerdown)="
+                      onCellPointerDown($event, { row: entry.node.key, column: column.id })
+                    "
+                    (pointerenter)="
+                      onCellPointerEnter($event, { row: entry.node.key, column: column.id })
+                    "
+                  >
+                    @if (cell.editing) {
+                      <div data-part="editor">
+                        @if (editorTemplate(column.id); as template) {
+                          <ng-container
+                            [ngTemplateOutlet]="template"
+                            [ngTemplateOutletContext]="editorContext(entry.node, column, cell)"
+                          />
+                        } @else {
+                          <sl-data-grid-editor
+                            [column]="$any(column.column)"
+                            [draft]="edit()?.drafts?.[column.id]"
+                            [value]="cell.value"
+                            [invalid]="cell.invalid"
+                            [message]="cell.message"
+                            [labels]="t()"
+                            [locale]="resolvedLocale()"
+                            (draftChange)="setDraft(column.id, $event)"
+                          />
+                        }
+                      </div>
+                    } @else if (cellTemplate(column.id); as template) {
+                      <ng-container
+                        [ngTemplateOutlet]="template"
+                        [ngTemplateOutletContext]="cellContext(entry.node, column, cell)"
+                      />
+                    } @else {
+                      <span [attr.title]="cell.text">{{ cell.text }}</span>
+                    }
+                  </div>
+                }
+              </div>
+              @if (isExpanded(entry.node.key) && detailTemplate(); as template) {
+                <div
+                  data-part="detail"
+                  role="row"
+                  [attr.data-row]="entry.node.key + ':detail'"
+                  [attr.id]="detailId(entry.node.key)"
+                  [attr.aria-rowindex]="entry.rowIndex + 1"
+                >
+                  <div
+                    role="gridcell"
+                    aria-colindex="1"
+                    tabindex="-1"
+                    [attr.aria-colspan]="columnIds().length"
+                    [style.--slotted-data-grid-column]="'1 / -1'"
+                  >
+                    <ng-container
+                      [ngTemplateOutlet]="template.template"
+                      [ngTemplateOutletContext]="{
+                        $implicit: entry.node.row,
+                        row: entry.node.row,
+                        key: entry.node.key,
+                      }"
+                    />
+                  </div>
+                </div>
+              }
+            }
+          }
+        </div>
+      }
+
+      @if (hasSummary() && status() === 'rows') {
+        <div data-part="summary" role="rowgroup">
+          <div role="row" [attr.data-row]="SUMMARY" [attr.aria-rowindex]="summaryRowIndex()">
+            @for (columnId of gutterIds(); track columnId; let index = $index) {
+              <div
+                data-part="summary-cell"
+                role="gridcell"
+                tabindex="-1"
+                [attr.aria-colindex]="index + 1"
+                [attr.data-column]="columnId"
+                [style.--slotted-data-grid-column]="index + 1"
+              ></div>
+            }
+            @for (column of mountedColumns(); track column.id) {
+              <div
+                data-part="summary-cell"
+                role="gridcell"
+                [attr.aria-colindex]="indexOf(column.id)"
+                [attr.data-column]="column.id"
+                [attr.data-numeric]="column.numeric ? '' : null"
+                [attr.data-align]="column.align ?? null"
+                [attr.data-pinned]="column.pinned"
+                [attr.data-pin-edge]="column.pinEdge ? '' : null"
+                [attr.tabindex]="isCurrent(SUMMARY, column.id) ? 0 : -1"
+                [attr.data-current]="isCurrent(SUMMARY, column.id) ? '' : null"
+                [style.--slotted-data-grid-column]="indexOf(column.id)"
+                [style.--slotted-data-grid-pin-offset]="
+                  column.pinned ? column.pinOffset + 'px' : null
+                "
+                (focus)="onCellFocus({ row: SUMMARY, column: column.id }, $event)"
+                (keydown)="onCellKeyDown($event, { row: SUMMARY, column: column.id })"
+                (pointerdown)="onCellPointerDown($event, { row: SUMMARY, column: column.id })"
+              >
+                <span>{{ aggregateText(column, applied().aggregates[column.id]) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @if (dragState().offset !== null) {
+        <div
+          data-part="drop-indicator"
+          aria-hidden="true"
+          [style.--slotted-data-grid-drop-offset]="dragState().offset + 'px'"
+        ></div>
+      }
+    </div>
+    @if (showsFooter()) {
+      <div data-part="footer">
+        @if (rangeText(); as text) {
+          <span data-range="">{{ text }}</span>
+        }
+        <ng-content select="[slDataGridFooter]" />
+        @if (hasMore() && !hasFooterContent()) {
+          <div>
+            <button
+              slButton
+              type="button"
+              size="sm"
+              tone="secondary"
+              variant="outline"
+              [disabled]="loading()"
+              (click)="loadMore.emit()"
+            >
+              {{ t().loadMore }}
+            </button>
+          </div>
+        }
+      </div>
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlDataGrid), multi: true },
+  ],
+  host: {
+    'data-ui': 'data-grid',
+    'data-part': 'root',
+    role: 'grid',
+    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-labelledby]': 'labelledBy() ?? null',
+    '[attr.aria-rowcount]': 'ariaRowCount()',
+    '[attr.aria-colcount]': 'columnIds().length',
+    '[attr.aria-multiselectable]':
+      "resolvedSelectionMode() === 'multiple' || resolvedSelectionMode() === 'range' ? 'true' : null",
+    '[attr.aria-busy]': "loading() && rows().length > 0 ? 'true' : null",
+    '[attr.data-variant]': 'resolvedVariant()',
+    '[attr.data-striped]': "resolvedStriped() ? '' : null",
+    '[attr.data-sticky-header]': "resolvedStickyHeader() ? '' : null",
+    '[attr.data-sticky-to]': "resolvedStickyTo() === 'page' ? 'page' : null",
+    '[attr.data-filter-row]': "resolvedFilterRow() ? '' : null",
+    '[attr.data-rows]': "autoRows() ? 'auto' : 'fixed'",
+    '[style.--slotted-data-grid-template]': 'template()',
+    '[style.--slotted-data-grid-block-size]': 'blockSize()',
+    '(keydown)': 'onRootKeyDown($event)',
+    '(focusout)': 'onRootFocusOut($event)',
+  },
+})
+export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
+  protected readonly HEADER = HEADER_ROW;
+  protected readonly FILTER = FILTER_ROW;
+  protected readonly SUMMARY = SUMMARY_ROW;
+  protected readonly GROUP_PREFIX = GROUP_ROW_PREFIX;
+  protected readonly SELECTION = SELECTION_COLUMN;
+  protected readonly EXPANDER = EXPANDER_COLUMN;
+
+  /* ── Data ───────────────────────────────────────────────────────────── */
+  readonly rows = input.required<readonly Row[]>();
+  readonly rowKey = input.required<keyof Row | ((row: Row) => string)>();
+  readonly columns = input.required<readonly GridColumn<Row>[]>();
+  readonly columnGroups = input<readonly GridColumnGroup[] | undefined>(undefined);
+  readonly mode = input<DataGridMode | undefined>(undefined);
+  readonly totalCount = input<number | undefined, number | string | undefined>(undefined, {
+    transform: (value) => (value === undefined ? undefined : numberAttribute(value)),
+  });
+  readonly hasMore = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
+  });
+  readonly loading = input(false, { transform: booleanAttribute });
+  readonly error = input<string | null | undefined>(undefined);
+  readonly disabledKeys = input<readonly string[]>([]);
+
+  /* ── Models ─────────────────────────────────────────────────────────── */
+  readonly query = model<GridQuery>(emptyQuery());
+  readonly columnState = model<Partial<GridColumnState> | undefined>(undefined);
+  readonly value = model<DataGridSelection>(null);
+  readonly range = model<GridRange | null>(null);
+  readonly current = model<GridCell | null>(null);
+  readonly expanded = model<readonly string[]>([]);
+  readonly expandedGroups = model<DataGridExpandedGroups>('all');
+
+  readonly queryChangeRequest = output<DataGridQueryRequest>();
+  readonly columnStateChangeRequest = output<DataGridColumnStateRequest>();
+  readonly valueChangeRequest = output<ChangeRequest<DataGridSelection>>();
+  readonly rangeChangeRequest = output<ChangeRequest<GridRange | null>>();
+  readonly currentChangeRequest = output<ChangeRequest<GridCell | null>>();
+  readonly expandedChangeRequest = output<ChangeRequest<readonly string[]>>();
+  readonly expandedGroupsChangeRequest = output<ChangeRequest<DataGridExpandedGroups>>();
+
+  readonly editStart = output<GridCell>();
+  readonly editCommit = output<DataGridEditCommit<Row>>();
+  readonly editCancel = output<GridCell>();
+  readonly activate = output<DataGridActivateEvent>();
+  readonly loadMore = output<void>();
+  readonly retry = output<void>();
+  readonly manageColumns = output<void>();
+
+  /* ── Axes ───────────────────────────────────────────────────────────── */
+  readonly variant = input<DataGridVariant | undefined>(undefined);
+  readonly striped = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
+  });
+  readonly stickyHeader = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
+  });
+  readonly stickyTo = input<DataGridStickyTo | undefined>(undefined);
+  readonly selectionMode = input<DataGridSelectionMode | undefined>(undefined);
+  readonly editMode = input<DataGridEditMode | undefined>(undefined);
+  readonly filterRow = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
+  });
+  readonly virtualize = input<DataGridVirtualize | undefined>(undefined);
+  readonly rowHeight = input<DataGridRowHeight | undefined>(undefined);
+  readonly overscan = input<number | undefined>(undefined);
+  readonly filterDebounce = input<number | undefined>(undefined);
+  readonly loadMoreThreshold = input<number | undefined>(undefined);
+  readonly skeletonRows = input<number | undefined>(undefined);
+  readonly activatable = input(false, { transform: booleanAttribute });
+  readonly expandable = input<boolean | ((row: Row) => boolean) | undefined>(undefined);
+  readonly height = input<string | number | undefined>(undefined);
+  readonly label = input<string | undefined>(undefined);
+  readonly labelledBy = input<string | undefined>(undefined);
+  readonly labels = input<Partial<DataGridLabels> | undefined>(undefined);
+  readonly locale = input<string | undefined>(undefined);
+  readonly timeZone = input<string | undefined>(undefined);
+  readonly showRange = input<boolean | undefined>(undefined);
+
+  /* ── Templates ──────────────────────────────────────────────────────── */
+  private readonly cellTemplates = contentChildren(SlDataGridCellTemplate);
+  private readonly editorTemplates = contentChildren(SlDataGridEditorTemplate);
+  private readonly headerTemplates = contentChildren(SlDataGridHeaderTemplate);
+  private readonly filterTemplates = contentChildren(SlDataGridFilterTemplate);
+  protected readonly detailTemplate = contentChild(SlDataGridDetailTemplate);
+  protected readonly groupTemplate = contentChild(SlDataGridGroupTemplate);
+  protected readonly emptyTemplate = contentChild(SlDataGridEmptyTemplate);
+  private readonly footerContent = contentChild(SlDataGridFooter);
+
+  private readonly scrollRef = viewChild<ElementRef<HTMLDivElement>>('scroll');
+  private readonly defaults = injectDataGridDefaults();
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+  readonly id = inject(SlDataGridIdFactory).next();
+
+  /* ── Resolution ─────────────────────────────────────────────────────── */
+  protected readonly resolvedLabels = computed(() =>
+    resolveDataGridLabels(this.defaults.labels, this.labels()),
+  );
+  /** The labels, under the short name the template reads them by. */
+  protected readonly t = this.resolvedLabels;
+  protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
+  protected readonly resolvedStriped = computed(() => this.striped() ?? this.defaults.striped);
+  protected readonly resolvedStickyHeader = computed(
+    () => this.stickyHeader() ?? this.defaults.stickyHeader,
+  );
+  protected readonly resolvedStickyTo = computed(() => this.stickyTo() ?? this.defaults.stickyTo);
+  protected readonly resolvedSelectionMode = computed(
+    () => this.selectionMode() ?? this.defaults.selectionMode,
+  );
+  protected readonly resolvedEditMode = computed(() => this.editMode() ?? this.defaults.editMode);
+  protected readonly resolvedFilterRow = computed(
+    () => this.filterRow() ?? this.defaults.filterRow,
+  );
+  protected readonly resolvedVirtualize = computed(
+    () => this.virtualize() ?? this.defaults.virtualize,
+  );
+  protected readonly resolvedRowHeight = computed(
+    () => this.rowHeight() ?? this.defaults.rowHeight,
+  );
+  protected readonly resolvedOverscan = computed(() => this.overscan() ?? this.defaults.overscan);
+  protected readonly resolvedDebounce = computed(
+    () => this.filterDebounce() ?? this.defaults.filterDebounce,
+  );
+  protected readonly resolvedThreshold = computed(
+    () => this.loadMoreThreshold() ?? this.defaults.loadMoreThreshold,
+  );
+  protected readonly resolvedSkeleton = computed(
+    () => this.skeletonRows() ?? this.defaults.skeletonRows,
+  );
+  protected readonly resolvedLocale = computed(() => this.locale() ?? this.defaults.locale);
+  protected readonly resolvedMode = computed<DataGridMode>(
+    () =>
+      this.mode() ??
+      (this.totalCount() !== undefined || this.hasMore() !== undefined ? 'server' : 'client'),
+  );
+  protected readonly ariaLabel = computed(
+    () => this.label() ?? (this.labelledBy() ? null : this.t().grid),
+  );
+  protected readonly blockSize = computed(() => {
+    const height = this.height();
+    return height === undefined ? null : typeof height === 'number' ? `${height}px` : height;
+  });
+  protected readonly autoRows = computed(() => this.resolvedRowHeight() === 'auto');
+
+  private readonly formatOptions = computed(() => ({
+    locale: this.resolvedLocale(),
+    timeZone: this.timeZone(),
+    booleans: { true: this.t().filterYes, false: this.t().filterNo },
+  }));
+
+  rowKeyOf(row: Row): string {
+    const key = this.rowKey();
+    return typeof key === 'function' ? key(row) : String((row as Record<keyof Row, unknown>)[key]);
+  }
+  textOf(column: GridColumn<Row>, row: Row): string {
+    return cellText(column, row, this.formatOptions());
+  }
+  private readonly disabledSet = computed(() => new Set(this.disabledKeys()));
+  isDisabled(key: string) {
+    return this.disabledSet().has(key);
+  }
+  isEditable(column: GridColumn<Row>, row: Row) {
+    if (this.disabledSet().has(this.rowKeyOf(row))) return false;
+    const editable = column.editable;
+    return typeof editable === 'function' ? editable(row) : editable === true;
+  }
+  private readonly anyEditable = computed(() => this.columns().some((column) => column.editable));
+  isExpandable(row: Row) {
+    if (!this.detailTemplate()) return false;
+    const expandable = this.expandable();
+    if (expandable === undefined) return true;
+    return typeof expandable === 'function' ? expandable(row) : expandable;
+  }
+
+  /* ── Columns ────────────────────────────────────────────────────────── */
+  private readonly effectiveState = computed(() =>
+    normalizeColumnState(this.columnState(), this.columns()),
+  );
+  protected readonly resolved = computed(() =>
+    resolveColumns(this.columns(), this.effectiveState()),
+  );
+  private readonly resolvedById = computed(
+    () => new Map(this.resolved().map((column) => [column.id, column])),
+  );
+  protected readonly hasSelectionColumn = computed(
+    () => this.resolvedSelectionMode() === 'single' || this.resolvedSelectionMode() === 'multiple',
+  );
+  protected readonly hasExpanderColumn = computed(() => this.detailTemplate() !== undefined);
+  protected readonly rowSelectable = this.hasSelectionColumn;
+  private readonly gutters = computed(() => [
+    ...(this.hasSelectionColumn() ? [SELECTION_WIDTH] : []),
+    ...(this.hasExpanderColumn() ? [EXPANDER_WIDTH] : []),
+  ]);
+  protected readonly gutterIds = computed(() => [
+    ...(this.hasSelectionColumn() ? [SELECTION_COLUMN] : []),
+    ...(this.hasExpanderColumn() ? [EXPANDER_COLUMN] : []),
+  ]);
+  protected readonly columnIds = computed(() => [
+    ...this.gutterIds(),
+    ...this.resolved().map((column) => column.id),
+  ]);
+  protected readonly expanderIndex = computed(() => this.columnIds().indexOf(EXPANDER_COLUMN) + 1);
+  protected readonly template = computed(() => columnTemplate(this.resolved(), this.gutters()));
+  protected readonly hasGroups = computed(() => (this.columnGroups()?.length ?? 0) > 0);
+  protected readonly headerRowCount = computed(
+    () => 1 + (this.hasGroups() ? 1 : 0) + (this.resolvedFilterRow() ? 1 : 0),
+  );
+  protected indexOf(columnId: string) {
+    return this.columnIds().indexOf(columnId) + 1;
+  }
+  protected filterKind(column: ResolvedGridColumn<Row>): FilterKind | null {
+    return filterKindOf(column.kind);
+  }
+
+  /* ── The applied query ──────────────────────────────────────────────── */
+  protected readonly applied = computed(() => {
+    const rows = this.rows();
+    const query = this.query();
+    if (this.resolvedMode() === 'server') {
+      const offset = query.page && 'index' in query.page ? query.page.index * query.page.size : 0;
+      const nodes: GridNode<Row>[] = rows.map((row, index) => ({
+        kind: 'row',
+        key: this.rowKeyOf(row),
+        row,
+        index: offset + index,
+        groups: [],
+      }));
+      return {
+        nodes,
+        rows,
+        total: this.totalCount() ?? null,
+        hasMore: this.hasMore() ?? false,
+        aggregates: {} as Record<string, unknown>,
+      };
+    }
+    const applied = applyQuery(rows, this.columns(), query, {
+      rowKey: (row) => this.rowKeyOf(row),
+      expandedGroups: this.expandedGroups(),
+      ...this.formatOptions(),
+    });
+    return { ...applied, total: applied.total as number | null };
+  });
+  protected readonly nodes = computed(() => this.applied().nodes);
+  protected readonly total = computed(() => this.applied().total);
+  protected readonly aggregated = computed(() =>
+    this.resolved().filter((column) => column.column.aggregate !== undefined),
+  );
+  protected readonly hasSummary = computed(
+    () => this.aggregated().length > 0 && this.resolvedMode() === 'client',
+  );
+  protected readonly firstAggregateIndex = computed(() => {
+    const aggregated = this.aggregated();
+    return aggregated.length === 0
+      ? this.columnIds().length + 1
+      : Math.min(...aggregated.map((column) => this.indexOf(column.id)));
+  });
+  protected readonly status = computed<'rows' | 'empty' | 'no-results' | 'error' | 'loading'>(
+    () => {
+      if (this.error()) return 'error';
+      if (this.loading() && this.rows().length === 0) return 'loading';
+      if (this.nodes().length > 0) return 'rows';
+      const query = this.query();
+      return query.filter || query.search.trim() ? 'no-results' : 'empty';
+    },
+  );
+  protected readonly resultStatus = computed<'empty' | 'no-results' | 'error'>(() => {
+    const status = this.status();
+    return status === 'error' || status === 'no-results' ? status : 'empty';
+  });
+  protected readonly emptyTitle = computed(() => {
+    const labels = this.t();
+    const status = this.status();
+    return status === 'error'
+      ? labels.error
+      : status === 'no-results'
+        ? labels.noResults
+        : labels.empty;
+  });
+  protected readonly ariaRowCount = computed(
+    () =>
+      (this.total() === null ? -1 : (this.total() as number)) +
+      this.headerRowCount() +
+      (this.hasSummary() ? 1 : 0),
+  );
+  protected readonly summaryRowIndex = computed(
+    () => this.headerRowCount() + (this.total() ?? this.nodes().length) + 1,
+  );
+  protected readonly skeletonRowsList = computed(() =>
+    Array.from({ length: this.resolvedSkeleton() }, (_unused, index) => index),
+  );
+  protected skeletonWidth(index: number) {
+    return `${[70, 55, 80, 40, 60][index % 5]}%`;
+  }
+
+  /* ── Cursor axis ────────────────────────────────────────────────────── */
+  private readonly cursorRows = computed(() => {
+    const list = [HEADER_ROW];
+    if (this.resolvedFilterRow()) list.push(FILTER_ROW);
+    for (const node of this.nodes())
+      list.push(node.kind === 'group' ? `${GROUP_ROW_PREFIX}${node.key}` : node.key);
+    if (this.hasSummary()) list.push(SUMMARY_ROW);
+    return list;
+  });
+  private readonly bodyStart = computed(() => 1 + (this.resolvedFilterRow() ? 1 : 0));
+  private readonly bodyEnd = computed(() => this.bodyStart() + this.nodes().length);
+
+  /* ── Virtual rows ───────────────────────────────────────────────────── */
+  private readonly scrollTop = signal(0);
+  private readonly scrollLeft = signal(0);
+  private readonly viewport = signal({ width: 0, height: 0 });
+  private readonly measuredRow = signal<number | null>(null);
+  private readonly rowSizes = signal<ReadonlyMap<number, number>>(new Map());
+  private readonly rowSize = computed(() => {
+    const stated = this.resolvedRowHeight();
+    return typeof stated === 'number' ? stated : (this.measuredRow() ?? DEFAULT_ROW_HEIGHT);
+  });
+  protected readonly windowsRows = computed(() => {
+    const mode = this.resolvedVirtualize();
+    return mode === true || (mode === 'auto' && this.nodes().length > VIRTUALIZE_ROWS_FROM);
+  });
+  private readonly metrics = computed(() => {
+    if (!this.autoRows()) return undefined;
+    const sizes = this.rowSizes();
+    const size = this.rowSize();
+    return createRowMetrics(this.nodes().map((_node, index) => sizes.get(index) ?? size));
+  });
+  protected readonly rowWindow = computed(() => {
+    const count = this.nodes().length;
+    if (!this.windowsRows())
+      return { startIndex: 0, endIndex: count, startOffset: 0, totalSize: 0 };
+    /* Before the scroller is measured the window is provisional — a screen's
+       worth of rows — rather than the whole set. */
+    const win = virtualWindow({
+      itemCount: count,
+      itemSize: this.rowSize(),
+      metrics: this.metrics(),
+      overscan: this.resolvedOverscan(),
+      scrollOffset: Math.max(0, this.scrollTop()),
+      viewportSize: this.viewport().height || PROVISIONAL_VIEWPORT,
+    });
+    return {
+      startIndex: win.startIndex,
+      endIndex: win.endIndex,
+      startOffset: win.startOffset,
+      totalSize: win.totalSize,
+    };
+  });
+  private readonly pinnedRows = signal<readonly string[]>([]);
+  protected readonly mountedEntries = computed(() => {
+    const nodes = this.nodes();
+    const window_ = this.rowWindow();
+    const mounted = this.windowsRows() ? nodes.slice(window_.startIndex, window_.endIndex) : nodes;
+    const extra = this.pinnedRows()
+      .map((key) => nodes.find((node) => node.key === key))
+      .filter((node): node is GridNode<Row> => node !== undefined && !mounted.includes(node));
+    const headerRows = this.headerRowCount();
+    const first = this.windowsRows() ? window_.startIndex : 0;
+    return [...mounted, ...extra].map((node, offset) => {
+      const index = first + offset;
+      return { node, index, rowIndex: headerRows + 1 + (node.kind === 'row' ? node.index : index) };
+    });
+  });
+
+  /* ── Virtual columns ────────────────────────────────────────────────── */
+  private readonly middle = computed(() =>
+    this.resolved().filter((column) => column.pinned === null),
+  );
+  private readonly windowsColumns = computed(() => {
+    const mode = this.resolvedVirtualize();
+    return mode === true || (mode === 'auto' && this.middle().length > VIRTUALIZE_COLUMNS_FROM);
+  });
+  protected readonly mountedColumns = computed(() => {
+    const resolved = this.resolved();
+    if (!this.windowsColumns() || this.viewport().width === 0) return resolved;
+    const gutterWidth = this.gutters().reduce((sum, width) => sum + width, 0);
+    const startZone = resolved
+      .filter((column) => column.pinned === 'start')
+      .reduce((sum, column) => sum + column.width, 0);
+    const endZone = resolved
+      .filter((column) => column.pinned === 'end')
+      .reduce((sum, column) => sum + column.width, 0);
+    const from = this.scrollLeft() - COLUMN_OVERSCAN_PX;
+    const to = this.scrollLeft() + this.viewport().width - endZone + COLUMN_OVERSCAN_PX;
+    let offset = gutterWidth + startZone;
+    const kept = new Set<string>();
+    for (const column of this.middle()) {
+      const end = offset + column.width;
+      if (end >= from && offset <= to) kept.add(column.id);
+      offset = end;
+    }
+    const current = this.current();
+    return resolved.filter(
+      (column) => column.pinned !== null || kept.has(column.id) || current?.column === column.id,
+    );
+  });
+
+  /* ── Selection ──────────────────────────────────────────────────────── */
+  private readonly selectableKeys = computed(() => {
+    const source = this.resolvedMode() === 'client' ? this.applied().rows : this.rows();
+    return source.map((row) => this.rowKeyOf(row)).filter((key) => !this.disabledSet().has(key));
+  });
+  private readonly selectedList = computed<readonly string[]>(() => {
+    const value = this.value();
+    return Array.isArray(value)
+      ? value
+      : value === null || value === undefined
+        ? []
+        : [value as string];
+  });
+  private readonly selectedSet = computed(() => new Set(this.selectedList()));
+  private anchor: string | undefined;
+  isSelected(key: string) {
+    return this.selectedSet().has(key);
+  }
+  protected readonly selectedCount = computed(
+    () => this.selectedList().filter((key) => this.selectableKeys().includes(key)).length,
+  );
+  protected readonly allState = computed<'none' | 'some' | 'all'>(() => {
+    const count = this.selectedCount();
+    return count === 0 ? 'none' : count >= this.selectableKeys().length ? 'all' : 'some';
+  });
+  protected readonly selectAllName = computed(() => {
+    const total = this.total();
+    const count = this.selectableKeys().length;
+    const label =
+      total !== null && total > count ? this.t().selectAllPage : this.t().selectAllFiltered;
+    return fillLabel(label, { count });
+  });
+
+  private touched: (() => void) | undefined;
+  private notify: ((value: DataGridSelection) => void) | undefined;
+  private readonly formDisabled = signal(false);
+
+  private requestValue(next: DataGridSelection, reason: DataGridReason, source?: unknown) {
+    const state = createControllable<DataGridSelection>({
+      initial: this.value(),
+      equals: sameSelection,
+      onRequest: (request) => this.valueChangeRequest.emit(request),
+    });
+    if (!state.request(next, reason, source)) return;
+    this.value.set(next);
+    this.notify?.(next);
+    this.touched?.();
+  }
+  private commitSelection(selected: readonly string[], reason: DataGridReason, source?: unknown) {
+    const next = this.resolvedSelectionMode() === 'multiple' ? selected : (selected[0] ?? null);
+    this.requestValue(next, reason, source);
+  }
+  toggleSelected(
+    key: string,
+    options: { range?: boolean; source?: unknown; reason?: DataGridReason },
+  ) {
+    const mode = this.resolvedSelectionMode();
+    if (mode === 'none' || mode === 'range' || this.disabledSet().has(key) || this.formDisabled())
+      return;
+    const outcome = nextSelection({
+      action: options.range ? 'range' : 'toggle',
+      mode,
+      selected: this.selectedList(),
+      keys: this.selectableKeys(),
+      key,
+      anchor: this.anchor,
+      disabled: (candidate) => this.disabledSet().has(candidate),
+    });
+    if (!options.range) this.anchor = key;
+    if (outcome.changed)
+      this.commitSelection(outcome.selected, options.reason ?? 'pointer', options.source);
+  }
+  protected shiftHeld(source: unknown) {
+    return source instanceof MouseEvent && source.shiftKey;
+  }
+  toggleAll(source?: unknown) {
+    if (this.resolvedSelectionMode() !== 'multiple') return;
+    const outcome = nextSelection({
+      action: 'all',
+      mode: 'multiple',
+      selected: this.selectedList(),
+      keys: this.selectableKeys(),
+    });
+    if (outcome.changed) this.commitSelection(outcome.selected, 'select', source);
+  }
+  selectAll() {
+    this.commitSelection(this.selectableKeys(), 'programmatic');
+  }
+  clearSelection() {
+    this.commitSelection([], 'programmatic');
+  }
+
+  /* ── Cursor grid and range ──────────────────────────────────────────── */
+  private readonly cursorGrid = computed<CursorGrid>(() => ({
+    rows: this.cursorRows(),
+    columns: this.columnIds(),
+    pageSize: Math.max(1, Math.floor((this.viewport().height || 400) / this.rowSize()) - 1),
+    bodyStart: this.bodyStart(),
+    bodyEnd: this.bodyEnd(),
+  }));
+  private readonly bounds = computed(() =>
+    this.resolvedSelectionMode() === 'range' ? rangeBounds(this.cursorGrid(), this.range()) : null,
+  );
+  private readonly rangeDragging = signal(false);
+  private rangeAnchor: GridCell | null = null;
+
+  private requestRange(next: GridRange | null, reason: ChangeReason, source?: unknown) {
+    const state = createControllable<GridRange | null>({
+      initial: this.range(),
+      equals: sameRange,
+      onRequest: (request) => this.rangeChangeRequest.emit(request),
+    });
+    if (state.request(next, reason, source)) this.range.set(next);
+  }
+  private beginRange(cell: GridCell, extend: boolean, source: unknown) {
+    if (this.resolvedSelectionMode() !== 'range' || !isBodyRow(cell.row)) return;
+    const from = extend && this.range() ? this.range()!.anchor : cell;
+    this.rangeAnchor = from;
+    this.requestRange({ anchor: from, focus: cell }, 'pointer', source);
+  }
+  private extendRange(cell: GridCell, source: unknown) {
+    if (this.resolvedSelectionMode() !== 'range' || !isBodyRow(cell.row)) return;
+    const from = this.rangeAnchor ?? this.range()?.anchor ?? cell;
+    this.requestRange({ anchor: from, focus: cell }, 'pointer', source);
+  }
+
+  /* ── Cursor ─────────────────────────────────────────────────────────── */
+  private readonly focused = signal(false);
+  private pendingFocus: GridCell | null = null;
+  private lastRowIndex = 0;
+
+  isCurrent(row: string, column: string) {
+    const current = this.current();
+    return current !== null && current.row === row && current.column === column;
+  }
+  private requestCurrent(next: GridCell | null, reason: ChangeReason, source?: unknown) {
+    const state = createControllable<GridCell | null>({
+      initial: this.current(),
+      equals: sameCell,
+      onRequest: (request) => this.currentChangeRequest.emit(request),
+    });
+    if (state.request(next, reason, source)) this.current.set(next);
+  }
+  private focusCellNow(cell: GridCell): boolean {
+    const element = this.host.nativeElement.querySelector<HTMLElement>(
+      `[data-row="${CSS.escape(cell.row)}"] [data-column="${CSS.escape(cell.column)}"]`,
+    );
+    if (!element) return false;
+    const structural =
+      element.matches('[data-part="column-header"], [data-part="filter-cell"]') ||
+      element.querySelector('[data-part="group-toggle"]') !== null;
+    const widgets = structural ? [] : [...element.querySelectorAll<HTMLElement>(FOCUSABLE)];
+    const single = widgets.length === 1 && widgets[0]!.matches(SIMPLE_WIDGET) ? widgets[0]! : null;
+    (single ?? element).focus();
+    return true;
+  }
+  setCurrent(cell: GridCell, reason: DataGridReason, source?: unknown) {
+    if (!sameCell(cell, this.current())) this.requestCurrent(cell, reason, source);
+    this.pendingFocus = cell;
+    const index = this.cursorRows().indexOf(cell.row) - this.bodyStart();
+    const window_ = this.rowWindow();
+    if (
+      this.windowsRows() &&
+      index >= 0 &&
+      (index < window_.startIndex || index >= window_.endIndex)
+    ) {
+      this.pinnedRows.set([cell.row]);
+      const metrics = this.metrics();
+      const offset = metrics ? metrics.offsetOf(index) : index * this.rowSize();
+      this.scrollRef()?.nativeElement.scrollTo({
+        top: offset - this.viewport().height / 2 + this.rowSize(),
+      });
+    }
+    this.flushFocus();
+  }
+  private flushFocus() {
+    afterNextRender(
+      () => {
+        const cell = this.pendingFocus;
+        if (cell && this.focusCellNow(cell)) this.pendingFocus = null;
+      },
+      { injector: this.injector },
+    );
+  }
+  focusCell(cell: GridCell) {
+    this.setCurrent(cell, 'programmatic');
+  }
+
+  /* ── Sorting and filtering ──────────────────────────────────────────── */
+  protected readonly filterOpen = signal<string | null>(null);
+  protected readonly resizing = signal<string | null>(null);
+
+  sortOf(columnId: string) {
+    const index = this.query().sort.findIndex((key) => key.column === columnId);
+    if (index === -1) return null;
+    return { direction: this.query().sort[index]!.direction, index: index + 1 };
+  }
+  protected ariaSort(columnId: string) {
+    const sort = this.sortOf(columnId);
+    return sort && sort.index === 1 ? sort.direction : null;
+  }
+  protected isSortedAlone(columnId: string, direction: SortDirection) {
+    const sort = this.sortOf(columnId);
+    return sort?.direction === direction && sort.index === 1 && this.query().sort.length === 1;
+  }
+  filterOf(columnId: string): FilterDescriptor | null {
+    return ruleFor(this.query().filter, columnId) ?? null;
+  }
+  private requestQuery(next: GridQuery, change: string, reason: ChangeReason, source?: unknown) {
+    const state = createControllable<GridQuery>({
+      initial: this.query(),
+      equals: (a, b) => JSON.stringify(a) === JSON.stringify(b),
+      onRequest: (request) =>
+        this.queryChangeRequest.emit(Object.assign(request, { change }) as DataGridQueryRequest),
+    });
+    if (state.request(next, reason, source)) this.query.set(next);
+  }
+  private labelOf(columnId: string) {
+    return this.resolvedById().get(columnId)?.column.label ?? columnId;
+  }
+  private announceSort(next: GridQuery) {
+    const labels = this.t();
+    if (next.sort.length === 0) {
+      this.announce(labels.sortCleared);
+      return;
+    }
+    const order = next.sort
+      .map((key) =>
+        fillLabel(key.direction === 'ascending' ? labels.sortAscending : labels.sortDescending, {
+          column: this.labelOf(key.column),
+        }),
+      )
+      .join(', ');
+    this.announce(fillLabel(labels.sortedBy, { order }));
+  }
+  pressSort(
+    columnId: string,
+    append: boolean,
+    source?: unknown,
+    reason: DataGridReason = 'pointer',
+  ) {
+    const column = this.resolvedById().get(columnId);
+    if (!column || !column.sortable) return;
+    const move = withSortPress(this.query(), columnId, append);
+    this.requestQuery(move.query, move.change, reason, source);
+    this.announceSort(move.query);
+  }
+  setSort(columnId: string, direction: SortDirection | null, source?: unknown) {
+    const move = withSort(this.query(), columnId, direction);
+    this.requestQuery(move.query, move.change, 'pointer', source);
+    this.announceSort(move.query);
+  }
+  setFilter(
+    columnId: string,
+    filter: FilterDescriptor | null,
+    reason: DataGridReason,
+    source?: unknown,
+  ) {
+    const move = withColumnFilter(this.query(), columnId, filter);
+    this.requestQuery(move.query, move.change, reason, source);
+  }
+  protected applyPanel(
+    columnId: string,
+    event: {
+      filter: FilterDescriptor | null;
+      reason: 'pointer' | 'keyboard' | 'clear';
+      said: string;
+    },
+  ) {
+    this.setFilter(columnId, event.filter, event.reason);
+    this.announce(event.said);
+    this.filterOpen.set(null);
+  }
+  protected onFilterOpenChange(columnId: string, open: boolean) {
+    if (!open && this.filterOpen() === columnId) {
+      this.filterOpen.set(null);
+      this.pendingFocus = { row: HEADER_ROW, column: columnId };
+      this.flushFocus();
+    }
+  }
+  protected toggleFilterPanel(columnId: string) {
+    this.filterOpen.set(this.filterOpen() === columnId ? null : columnId);
+  }
+  protected clearFilters(source?: unknown) {
+    const move = withoutFilters(this.query());
+    this.requestQuery(move.query, move.change, 'clear', source);
+  }
+  private countsCache = new Map<string, ReadonlyMap<string, number>>();
+  countsFor(columnId: string): ReadonlyMap<string, number> {
+    const query = this.query();
+    const rows = this.rows();
+    const key = `${columnId}|${JSON.stringify(query.filter)}|${rows.length}`;
+    const cached = this.countsCache.get(key);
+    if (cached) return cached;
+    const columns = this.columns();
+    const column = columns.find((entry) => entry.id === columnId);
+    const counts = new Map<string, number>();
+    if (column) {
+      const rest = withoutRuleFor(query.filter, columnId);
+      const read = (row: Row, field: string) => {
+        const target = columns.find((entry) => entry.id === field);
+        return target ? cellValue(target, row) : undefined;
+      };
+      const match = createFilterGroupPredicate<Row>(rest.rules.length ? rest : null, read, {
+        locale: this.resolvedLocale(),
+      });
+      for (const row of rows) {
+        if (!match(row)) continue;
+        const raw = cellValue(column, row);
+        for (const entry of Array.isArray(raw) ? raw : [raw]) {
+          if (entry === null || entry === undefined || entry === '') continue;
+          const text = String(entry);
+          counts.set(text, (counts.get(text) ?? 0) + 1);
+        }
+      }
+    }
+    this.countsCache = new Map([[key, counts]]);
+    return counts;
+  }
+
+  /* ── Column moves ───────────────────────────────────────────────────── */
+  private requestState(
+    next: GridColumnState,
+    change: string,
+    reason: DataGridReason,
+    source?: unknown,
+  ) {
+    const state = createControllable<GridColumnState>({
+      initial: this.effectiveState(),
+      equals: (a, b) => JSON.stringify(a) === JSON.stringify(b),
+      onRequest: (request) =>
+        this.columnStateChangeRequest.emit(
+          Object.assign(request, { change }) as DataGridColumnStateRequest,
+        ),
+    });
+    if (state.request(next, reason, source)) this.columnState.set(next);
+  }
+  pin(columnId: string, zone: 'start' | 'end' | null, source?: unknown) {
+    this.requestState(
+      withColumnPinned(this.effectiveState(), columnId, zone),
+      'pinned',
+      'pointer',
+      source,
+    );
+  }
+  hide(columnId: string, source?: unknown) {
+    this.requestState(
+      withColumnHidden(this.effectiveState(), columnId, true),
+      'hidden',
+      'pointer',
+      source,
+    );
+  }
+  resizeTo(columnId: string, width: number, reason: DataGridReason, source?: unknown) {
+    const column = this.columns().find((entry) => entry.id === columnId);
+    if (!column) return;
+    const next = withColumnWidth(this.effectiveState(), column, width);
+    this.requestState(next, 'width', reason, source);
+    if (reason === 'keyboard') {
+      this.announce(
+        fillLabel(this.t().resized, {
+          column: column.label,
+          width: next.widths[columnId] ?? width,
+        }),
+      );
+    }
+  }
+  resizeBy(columnId: string, delta: number, source?: unknown) {
+    const column = this.resolvedById().get(columnId);
+    if (!column || !column.resizable) return;
+    this.resizeTo(columnId, column.width + delta, 'keyboard', source);
+  }
+  autofit(columnId: string, source?: unknown) {
+    const column = this.resolvedById().get(columnId);
+    if (!column) return;
+    let widest = 0;
+    for (const cell of this.host.nativeElement.querySelectorAll<HTMLElement>(
+      `[data-column="${CSS.escape(columnId)}"]`,
+    )) {
+      const inner = cell.firstElementChild as HTMLElement | null;
+      const width = inner ? inner.scrollWidth : cell.scrollWidth;
+      const style = getComputedStyle(cell);
+      const padding = parseFloat(style.paddingInlineStart) + parseFloat(style.paddingInlineEnd);
+      widest = Math.max(
+        widest,
+        width + padding + (cell.getAttribute('role') === 'columnheader' ? 32 : 0),
+      );
+    }
+    if (widest > 0) this.resizeTo(columnId, Math.ceil(widest), 'keyboard', source);
+  }
+  moveColumn(columnId: string, direction: -1 | 1, source?: unknown) {
+    const column = this.resolvedById().get(columnId);
+    if (!column || !column.reorderable) return;
+    const zone = zoneOf(this.resolved(), columnId);
+    const target = zone.indexOf(columnId) + direction;
+    if (target < 0 || target >= zone.length) return;
+    this.requestState(
+      withColumnMoved(this.effectiveState(), columnId, target, zone),
+      'order',
+      'keyboard',
+      source,
+    );
+  }
+
+  private resizeSession: {
+    column: string;
+    startX: number;
+    startWidth: number;
+    rtl: boolean;
+  } | null = null;
+  protected beginResize(event: PointerEvent, column: ResolvedGridColumn<Row>) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.resizeSession = {
+      column: column.id,
+      startX: event.clientX,
+      startWidth: column.width,
+      rtl: getComputedStyle(this.host.nativeElement).direction === 'rtl',
+    };
+    this.resizing.set(column.id);
+  }
+  protected moveResize(event: PointerEvent, column: ResolvedGridColumn<Row>) {
+    const session = this.resizeSession;
+    if (!session || session.column !== column.id) return;
+    const delta = (event.clientX - session.startX) * (session.rtl ? -1 : 1);
+    this.resizeTo(column.id, session.startWidth + delta, 'pointer', event);
+  }
+  protected endResize(event: PointerEvent) {
+    if (!this.resizeSession) return;
+    (event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
+    this.resizeSession = null;
+    this.resizing.set(null);
+  }
+
+  /* ── Reordering by drag ─────────────────────────────────────────────── */
+  protected readonly dragState = signal<{
+    dragging: string | null;
+    target: string | null;
+    offset: number | null;
+  }>({
+    dragging: null,
+    target: null,
+    offset: null,
+  });
+  private drag: DragController | null = null;
+  private readonly draggables = new Map<string, () => void>();
+
+  /* ── Expansion ──────────────────────────────────────────────────────── */
+  private readonly expandedSet = computed(() => new Set(this.expanded()));
+  isExpanded(key: string) {
+    return this.expandedSet().has(key);
+  }
+  toggleExpanded(key: string, source?: unknown, reason: DataGridReason = 'pointer') {
+    const held = this.expanded();
+    const next = this.expandedSet().has(key)
+      ? held.filter((entry) => entry !== key)
+      : [...held, key];
+    const state = createControllable<readonly string[]>({
+      initial: held,
+      equals: sameKeys,
+      onRequest: (request) => this.expandedChangeRequest.emit(request),
+    });
+    if (state.request(next, reason, source)) this.expanded.set(next);
+  }
+  toggleGroup(key: string, source?: unknown, reason: DataGridReason = 'pointer') {
+    const held = this.expandedGroups();
+    const open = held === 'all' || held.includes(key);
+    let next: DataGridExpandedGroups;
+    if (held === 'all') {
+      next = this.nodes()
+        .filter((node) => node.kind === 'group')
+        .map((node) => node.key)
+        .filter((entry) => entry !== key && !entry.startsWith(`${key}/`));
+    } else {
+      next = open ? held.filter((entry) => entry !== key) : [...held, key];
+    }
+    const state = createControllable<DataGridExpandedGroups>({
+      initial: held,
+      equals: sameKeys,
+      onRequest: (request) => this.expandedGroupsChangeRequest.emit(request),
+    });
+    if (state.request(next, reason, source)) this.expandedGroups.set(next);
+  }
+  protected detailId(key: string) {
+    return `${this.id}-detail-${key}`;
+  }
+  protected groupCount(node: GroupNode) {
+    return fillLabel(this.t().groupCount, { count: node.count });
+  }
+  protected groupContext(node: GroupNode): DataGridGroupContext<Row> {
+    const column = this.columns().find((entry) => entry.id === node.column)!;
+    return {
+      $implicit: node as never,
+      node: node as never,
+      column,
+      toggle: () => this.toggleGroup(node.key),
+    };
+  }
+  protected aggregateText(column: ResolvedGridColumn<Row>, value: unknown) {
+    if (value === null || value === undefined) return '';
+    return cellText({ ...column.column, accessor: () => value }, {} as Row, this.formatOptions());
+  }
+
+  /* ── Editing ────────────────────────────────────────────────────────── */
+  readonly edit = signal<EditSession | null>(null);
+  private rowOf(key: string): Row | undefined {
+    const node = this.nodes().find((entry) => entry.kind === 'row' && entry.key === key);
+    return node && node.kind === 'row' ? node.row : undefined;
+  }
+  startEdit(cell: GridCell, seed: string | null = null) {
+    const row = this.rowOf(cell.row);
+    const column = this.columns().find((entry) => entry.id === cell.column);
+    if (!row || !column || !this.isEditable(column, row)) return;
+    const editing =
+      this.resolvedEditMode() === 'row'
+        ? this.columns()
+            .filter((entry) => this.isEditable(entry, row))
+            .map((entry) => entry.id)
+        : [cell.column];
+    const originals: Record<string, unknown> = {};
+    for (const columnId of editing) {
+      const target = this.columns().find((entry) => entry.id === columnId)!;
+      originals[columnId] = cellValue(target, row);
+    }
+    const drafts = { ...originals };
+    if (seed !== null) drafts[cell.column] = column.kind === 'number' ? Number(seed) : seed;
+    this.edit.set({ cell, columns: editing, drafts, originals, status: 'editing', messages: {} });
+    this.editStart.emit(cell);
+    this.pendingFocus = cell;
+    this.flushFocus();
+  }
+  setDraft(columnId: string, draft: unknown) {
+    const session = this.edit();
+    if (session)
+      this.edit.set({
+        ...session,
+        drafts: { ...session.drafts, [columnId]: draft },
+        status: 'editing',
+      });
+  }
+  cancelEdit() {
+    const session = this.edit();
+    if (!session) return;
+    this.edit.set(null);
+    this.editCancel.emit(session.cell);
+    this.pendingFocus = session.cell;
+    this.flushFocus();
+  }
+  private nextEditableCell(cell: GridCell, move: 'down' | 'next' | 'previous'): GridCell | null {
+    if (move === 'down') {
+      const next = moveCursor(this.cursorGrid(), cell, 'down');
+      return sameCell(next, cell) || !isBodyRow(next.row) ? null : next;
+    }
+    const row = this.rowOf(cell.row);
+    if (!row) return null;
+    const editable = this.columnIds().filter((columnId) => {
+      const column = this.columns().find((entry) => entry.id === columnId);
+      return column !== undefined && this.isEditable(column, row);
+    });
+    const index = editable.indexOf(cell.column);
+    const target = editable[index + (move === 'next' ? 1 : -1)];
+    return target ? { row: cell.row, column: target } : null;
+  }
+  commitEdit(
+    reason: 'keyboard' | 'pointer' | 'blur' | 'programmatic',
+    options: { move?: 'down' | 'next' | 'previous' | 'stay' } = {},
+  ) {
+    const session = this.edit();
+    if (!session || session.status === 'pending') return;
+    const row = this.rowOf(session.cell.row);
+    if (!row) {
+      this.edit.set(null);
+      return;
+    }
+    const changes: Record<string, unknown> = {};
+    for (const columnId of session.columns) {
+      if (!Object.is(session.drafts[columnId], session.originals[columnId]))
+        changes[columnId] = session.drafts[columnId];
+    }
+    const after = () => {
+      const move = options.move ?? 'stay';
+      const target = move === 'stay' ? null : this.nextEditableCell(session.cell, move);
+      this.edit.set(null);
+      if (target) {
+        this.setCurrent(target, 'keyboard');
+        if (this.resolvedEditMode() === 'cell' && move !== 'down') this.startEdit(target);
+      } else {
+        this.pendingFocus = session.cell;
+        this.flushFocus();
+      }
+    };
+    if (Object.keys(changes).length === 0) {
+      after();
+      return;
+    }
+    const run = async () => {
+      this.edit.update((state) => (state ? { ...state, status: 'pending' } : state));
+      const messages: Record<string, string> = {};
+      for (const columnId of Object.keys(changes)) {
+        const column = this.columns().find((entry) => entry.id === columnId)!;
+        const parsed = column.parse ? column.parse(changes[columnId], row) : changes[columnId];
+        changes[columnId] = parsed;
+        const message = column.validate ? await column.validate(parsed, row) : null;
+        if (message) messages[columnId] = message;
+      }
+      if (Object.keys(messages).length > 0) {
+        this.edit.update((state) => (state ? { ...state, status: 'invalid', messages } : state));
+        this.pendingFocus = session.cell;
+        this.flushFocus();
+        return;
+      }
+      const primary =
+        session.cell.column in changes ? session.cell.column : Object.keys(changes)[0]!;
+      let waited: Promise<void> | null = null;
+      this.editCommit.emit({
+        key: session.cell.row,
+        column: primary,
+        value: changes[primary],
+        previous: session.originals[primary],
+        row,
+        reason,
+        changes,
+        wait: (promise) => {
+          waited = promise;
+        },
+      });
+      try {
+        if (waited) await waited;
+        after();
+      } catch (failure) {
+        const message =
+          failure instanceof Error && failure.message ? failure.message : this.t().editFailed;
+        this.edit.update((state) =>
+          state ? { ...state, status: 'invalid', messages: { [primary]: message } } : state,
+        );
+        this.pendingFocus = session.cell;
+        this.flushFocus();
+      }
+    };
+    void run();
+  }
+  stopEdit(options?: { commit?: boolean }) {
+    if (options?.commit === false) this.cancelEdit();
+    else this.commitEdit('programmatic');
+  }
+  protected cellState(node: RowNode, column: ResolvedGridColumn<Row>) {
+    const key = node.key;
+    const session = this.edit();
+    const editing =
+      session !== null && session.cell.row === key && session.columns.includes(column.id);
+    const message = editing ? (session.messages[column.id] ?? null) : null;
+    const invalid = editing && session.status === 'invalid' && message !== null;
+    const row = node.row as Row;
+    const range = rangeEdges(this.cursorGrid(), this.bounds(), { row: key, column: column.id });
+    const editable = this.isEditable(column.column, row);
+    return {
+      value: cellValue(column.column, row),
+      text: this.textOf(column.column, row),
+      current: this.isCurrent(key, column.id),
+      selected: this.isSelected(key),
+      editing,
+      invalid,
+      message,
+      pending: editing && session.status === 'pending',
+      inRange: range.inside,
+      edges: range.edges,
+      readonly: this.anyEditable() && !editable && column.kind !== 'actions',
+    };
+  }
+  protected cellContext(
+    node: RowNode,
+    column: ResolvedGridColumn<Row>,
+    cell: ReturnType<SlDataGrid<Row>['cellState']>,
+  ): DataGridCellContext<Row> {
+    return {
+      $implicit: node.row as Row,
+      row: node.row as Row,
+      key: node.key,
+      column: column.column,
+      value: cell.value,
+      text: cell.text,
+      current: cell.current,
+      selected: cell.selected,
+    };
+  }
+  protected editorContext(
+    node: RowNode,
+    column: ResolvedGridColumn<Row>,
+    cell: ReturnType<SlDataGrid<Row>['cellState']>,
+  ): DataGridEditorContext<Row> {
+    return {
+      ...this.cellContext(node, column, cell),
+      draft: this.edit()?.drafts[column.id],
+      setDraft: (draft) => this.setDraft(column.id, draft),
+      commit: () => this.commitEdit('programmatic'),
+      cancel: () => this.cancelEdit(),
+      invalid: cell.invalid,
+      message: cell.message,
+    };
+  }
+  protected headerContext(column: ResolvedGridColumn<Row>): DataGridHeaderContext<Row> {
+    const sort = this.sortOf(column.id);
+    return {
+      $implicit: column.column,
+      column: column.column,
+      resolved: column,
+      sorted: sort?.direction ?? null,
+      sortIndex: sort?.index ?? null,
+      filtered: this.filterOf(column.id) !== null,
+    };
+  }
+  private templateFor<T extends { template: unknown }>(
+    list: readonly T[],
+    read: (entry: T) => string,
+    columnId: string,
+  ) {
+    return (
+      (list.find((entry) => read(entry) === columnId) ?? list.find((entry) => read(entry) === ''))
+        ?.template ?? null
+    );
+  }
+  protected cellTemplate(columnId: string) {
+    return this.templateFor(
+      this.cellTemplates(),
+      (entry) => entry.slDataGridCell(),
+      columnId,
+    ) as never;
+  }
+  protected editorTemplate(columnId: string) {
+    return this.templateFor(
+      this.editorTemplates(),
+      (entry) => entry.slDataGridEditor(),
+      columnId,
+    ) as never;
+  }
+  protected headerTemplate(columnId: string) {
+    return this.templateFor(
+      this.headerTemplates(),
+      (entry) => entry.slDataGridHeader(),
+      columnId,
+    ) as never;
+  }
+  protected filterTemplate(columnId: string) {
+    return this.templateFor(
+      this.filterTemplates(),
+      (entry) => entry.slDataGridFilter(),
+      columnId,
+    ) as never;
+  }
+  protected readonly hasFooterContent = computed(() => this.footerContent() !== undefined);
+  protected readonly showsFooter = computed(
+    () => this.hasFooterContent() || this.rangeText() !== null || this.hasMore() === true,
+  );
+  protected readonly rangeText = computed(() => {
+    const query = this.query();
+    if (this.showRange() === false || !query.page || this.nodes().length === 0) return null;
+    const start = ('index' in query.page ? query.page.index * query.page.size : 0) + 1;
+    const shown =
+      this.resolvedMode() === 'client'
+        ? this.nodes().filter((node) => node.kind === 'row').length
+        : this.rows().length;
+    const last = start + shown - 1;
+    const total = this.total();
+    const labels = this.t();
+    return total === null || total < 0
+      ? fillLabel(labels.rangeUnknown, { start, end: last })
+      : fillLabel(labels.range, {
+          start,
+          end: last,
+          total: total.toLocaleString(this.resolvedLocale()),
+        });
+  });
+
+  /* ── Groups ─────────────────────────────────────────────────────────── */
+  protected readonly groupCells = computed(() => {
+    const groups = this.columnGroups() ?? [];
+    const columns = this.mountedColumns();
+    const offset = this.gutterIds().length;
+    const cells: {
+      key: string;
+      first: number;
+      span: number;
+      label: string;
+      pinned: 'start' | 'end' | null;
+      pinOffset: number;
+    }[] = [];
+    let index = 0;
+    while (index < columns.length) {
+      const column = columns[index]!;
+      const group = groups.find((entry) => entry.columns.includes(column.id));
+      let span = 1;
+      if (group)
+        while (index + span < columns.length && group.columns.includes(columns[index + span]!.id))
+          span += 1;
+      cells.push({
+        key: group ? `${group.id}:${column.id}` : column.id,
+        first: column.index + offset,
+        span,
+        label: group?.label ?? '',
+        pinned: column.pinned,
+        pinOffset: column.pinOffset,
+      });
+      index += span;
+    }
+    return cells;
+  });
+
+  /* ── Lifecycle ──────────────────────────────────────────────────────── */
+  constructor() {
+    const destroy = inject(DestroyRef);
+
+    /* The scroller: the window, the viewport and the overflow affordance. */
+    afterNextRender(
+      () => {
+        const scroller = this.scrollRef()?.nativeElement;
+        if (!scroller) return;
+        let frame = 0;
+        const read = () => {
+          frame = 0;
+          this.scrollTop.set(scroller.scrollTop);
+          this.scrollLeft.set(Math.abs(scroller.scrollLeft));
+        };
+        const onScroll = () => {
+          if (frame === 0) frame = requestAnimationFrame(read);
+        };
+        scroller.addEventListener('scroll', onScroll, { passive: true });
+        const observer =
+          typeof ResizeObserver === 'undefined'
+            ? null
+            : new ResizeObserver(() =>
+                this.viewport.set({ width: scroller.clientWidth, height: scroller.clientHeight }),
+              );
+        observer?.observe(scroller);
+        this.viewport.set({ width: scroller.clientWidth, height: scroller.clientHeight });
+        const affordance = createScrollAffordance(scroller, {
+          orientation: () => 'horizontal',
+          onChange: (state) => {
+            scroller.toggleAttribute('data-overflowing', state.overflowing);
+            scroller.toggleAttribute('data-at-start', state.overflowing && state.atStart);
+            scroller.toggleAttribute('data-at-end', state.overflowing && state.atEnd);
+          },
+        });
+        destroy.onDestroy(() => {
+          scroller.removeEventListener('scroll', onScroll);
+          if (frame) cancelAnimationFrame(frame);
+          observer?.disconnect();
+          affordance.destroy();
+        });
+        this.wireDrag();
+      },
+      { injector: this.injector },
+    );
+
+    /* The row height, read once from the first mounted row; every row when auto. */
+    effect(() => {
+      this.mountedEntries();
+      afterNextRender(
+        () => {
+          const rows = this.host.nativeElement.querySelectorAll<HTMLElement>(
+            '[data-part="body"] > [data-part="row"]',
+          );
+          const first = rows[0];
+          if (!first) return;
+          if (
+            typeof untracked(() => this.resolvedRowHeight()) !== 'number' &&
+            untracked(() => this.measuredRow()) === null
+          ) {
+            const height = first.getBoundingClientRect().height;
+            if (height > 0) this.measuredRow.set(Math.round(height));
+          }
+          if (untracked(() => this.autoRows())) {
+            const sizes = new Map(untracked(() => this.rowSizes()));
+            let changed = false;
+            for (const row of rows) {
+              const index = Number(row.getAttribute('data-index'));
+              const height = row.getBoundingClientRect().height;
+              if (!Number.isNaN(index) && height > 0 && sizes.get(index) !== height) {
+                sizes.set(index, height);
+                changed = true;
+              }
+            }
+            if (changed) this.rowSizes.set(sizes);
+          }
+        },
+        { injector: this.injector },
+      );
+    });
+
+    /* The cursor survives its row leaving: same index, same column. */
+    effect(() => {
+      const current = this.current();
+      const rows = this.cursorRows();
+      const columns = this.columnIds();
+      if (current && rows.includes(current.row)) {
+        this.lastRowIndex = rows.indexOf(current.row);
+        if (columns.includes(current.column)) return;
+      }
+      if (!current) return;
+      const settled = settleCursor(
+        untracked(() => this.cursorGrid()),
+        current,
+        this.lastRowIndex,
+      );
+      untracked(() => {
+        if (settled && !sameCell(settled, current)) {
+          this.requestCurrent(settled, 'programmatic');
+          if (this.focused()) {
+            this.pendingFocus = settled;
+            this.flushFocus();
+          }
+        } else if (!settled && this.focused()) {
+          this.host.nativeElement
+            .querySelector<HTMLElement>('[data-part="empty"] [tabindex]')
+            ?.focus();
+        }
+      });
+    });
+
+    /* A row that changes under an open editor is a conflict, not a refresh. */
+    effect(() => {
+      this.rows();
+      const session = untracked(() => this.edit());
+      if (!session || session.status === 'pending') return;
+      const row = untracked(() => this.rowOf(session.cell.row));
+      if (!row) return;
+      const conflicts: Record<string, string> = {};
+      for (const columnId of session.columns) {
+        const column = this.columns().find((entry) => entry.id === columnId);
+        if (column && !Object.is(cellValue(column, row), session.originals[columnId])) {
+          conflicts[columnId] = this.t().editConflict;
+        }
+      }
+      if (Object.keys(conflicts).length > 0) {
+        untracked(() =>
+          this.edit.set({
+            ...session,
+            status: 'invalid',
+            messages: { ...session.messages, ...conflicts },
+          }),
+        );
+      }
+    });
+
+    /* Load more when the window nears the end. */
+    effect(() => {
+      if (this.hasMore() !== true || this.loading()) return;
+      const remaining = this.nodes().length - this.rowWindow().endIndex;
+      const scroller = this.scrollRef()?.nativeElement;
+      const near = this.windowsRows()
+        ? remaining <= this.resolvedThreshold()
+        : this.scrollTop() + this.viewport().height >=
+          (scroller?.scrollHeight ?? 0) - this.rowSize() * this.resolvedThreshold();
+      if (near && this.viewport().height > 0) untracked(() => this.loadMore.emit());
+    });
+
+    /* The drag session's state, drawn on the headers. */
+    destroy.onDestroy(() => {
+      for (const detach of this.draggables.values()) detach();
+      this.draggables.clear();
+      this.drag?.destroy();
+    });
+
+    /* The headers as draggables, re-attached when the mounted set changes. */
+    effect(() => {
+      this.mountedColumns();
+      afterNextRender(() => this.attachDraggables(), { injector: this.injector });
+    });
+
+    /* A range drag ends on the document. */
+    effect((onCleanup) => {
+      if (!this.rangeDragging()) return;
+      const doc = this.host.nativeElement.ownerDocument;
+      const end = () => this.rangeDragging.set(false);
+      doc.addEventListener('pointerup', end);
+      doc.addEventListener('pointercancel', end);
+      onCleanup(() => {
+        doc.removeEventListener('pointerup', end);
+        doc.removeEventListener('pointercancel', end);
+      });
+    });
+  }
+
+  private wireDrag() {
+    const element = this.host.nativeElement;
+    const controller = createDragController({
+      document: element.ownerDocument,
+      preview: false,
+      autoScroll: false,
+      onDrop: ({ items, target, reason, event }) => {
+        if (target.kind !== 'between') return;
+        const columnId = items[0]!;
+        const zone = zoneOf(this.resolved(), columnId);
+        const from = zone.indexOf(columnId);
+        const to = target.index > from ? target.index - 1 : target.index;
+        this.requestState(
+          withColumnMoved(this.effectiveState(), columnId, to, zone),
+          'order',
+          reason === 'keyboard' ? 'keyboard' : 'pointer',
+          event,
+        );
+      },
+    });
+    const zoneItems = (zone: 'start' | 'middle' | 'end') => () =>
+      this.resolved()
+        .filter((column) => (zone === 'middle' ? column.pinned === null : column.pinned === zone))
+        .map((column) => column.id);
+    const headerOf = (columnId: string) =>
+      element.querySelector(`[data-part="column-header"][data-column="${CSS.escape(columnId)}"]`);
+    for (const zone of ['start', 'middle', 'end'] as const) {
+      controller.registerContainer({
+        key: zone,
+        items: zoneItems(zone),
+        orientation: 'horizontal',
+        element: () => element.querySelector('[data-part="header-row"]:last-of-type'),
+        itemElement: headerOf,
+        label: () => zone,
+        itemLabel: (columnId) => this.labelOf(columnId),
+      });
+    }
+    controller.subscribe((state) => {
+      if (state.status !== 'dragging') {
+        this.dragState.set({ dragging: null, target: null, offset: null });
+        return;
+      }
+      const target = state.target && state.target.kind === 'between' ? state.target : null;
+      let offset: number | null = null;
+      let over: string | null = null;
+      if (target) {
+        const zoneList = zoneItems(target.container as 'start' | 'middle' | 'end')();
+        const scroller = this.scrollRef()?.nativeElement;
+        const first = zoneList[Math.min(target.index, zoneList.length - 1)];
+        const header = first ? headerOf(first) : null;
+        if (header && scroller) {
+          const box = header.getBoundingClientRect();
+          const origin = scroller.getBoundingClientRect();
+          const atEnd = target.index >= zoneList.length;
+          const rtl = getComputedStyle(scroller).direction === 'rtl';
+          const edge = atEnd !== rtl ? box.right : box.left;
+          offset = rtl
+            ? origin.right - edge + scroller.scrollLeft
+            : edge - origin.left + scroller.scrollLeft;
+          over = zoneList[target.index] ?? null;
+        }
+      }
+      this.dragState.set({ dragging: state.items[0] ?? null, target: over, offset });
+    });
+    this.drag = controller;
+    this.attachDraggables();
+  }
+  private attachDraggables() {
+    const controller = this.drag;
+    if (!controller) return;
+    const element = this.host.nativeElement;
+    const seen = new Set<string>();
+    for (const column of this.resolved()) {
+      const node = element.querySelector<HTMLElement>(
+        `[data-part="column-header"][data-column="${CSS.escape(column.id)}"]`,
+      );
+      if (!node || !column.reorderable) continue;
+      seen.add(column.id);
+      const previous = this.draggables.get(column.id);
+      if (previous && (node as HTMLElement & { __slDrag?: string }).__slDrag === column.pinned)
+        continue;
+      previous?.();
+      const detach = controller.attachDraggable(node, {
+        container: column.pinned ?? 'middle',
+        key: column.id,
+        handle: () => node,
+        distance: 6,
+      });
+      (node as HTMLElement & { __slDrag?: string | null }).__slDrag = column.pinned;
+      this.draggables.set(column.id, detach);
+    }
+    for (const [columnId, detach] of this.draggables) {
+      if (!seen.has(columnId)) {
+        detach();
+        this.draggables.delete(columnId);
+      }
+    }
+  }
+
+  /* ── Events ─────────────────────────────────────────────────────────── */
+  announce(message: string) {
+    getLiveAnnouncer(this.host.nativeElement.ownerDocument).announce(message);
+  }
+  private rtl() {
+    return getComputedStyle(this.host.nativeElement).direction === 'rtl';
+  }
+  protected onCellFocus(cell: GridCell, event: FocusEvent) {
+    if (event.target !== event.currentTarget) return;
+    this.focused.set(true);
+    if (!sameCell(cell, this.current())) this.requestCurrent(cell, 'programmatic');
+  }
+  protected onRootFocusOut(event: FocusEvent) {
+    const next = event.relatedTarget as Node | null;
+    if (!next || !this.host.nativeElement.contains(next)) {
+      this.focused.set(false);
+      const session = this.edit();
+      if (session && session.status === 'editing') this.commitEdit('blur', { move: 'stay' });
+    }
+  }
+  protected onRootKeyDown(event: KeyboardEvent) {
+    if (event.defaultPrevented) return;
+    this.drag?.handleKeydown(event);
+  }
+  protected onHeaderClick(event: MouseEvent, column: ResolvedGridColumn<Row>) {
+    const target = event.target as HTMLElement;
+    if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+    if (column.sortable) this.pressSort(column.id, event.shiftKey, event, 'pointer');
+  }
+  protected onBodyCellClick(event: MouseEvent, cell: GridCell) {
+    const target = event.target as HTMLElement;
+    if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+    if (this.resolvedSelectionMode() === 'single' && !this.disabledSet().has(cell.row)) {
+      this.toggleSelected(cell.row, { range: false, source: event });
+    }
+  }
+  protected onCellDoubleClick(event: MouseEvent, cell: GridCell) {
+    const target = event.target as HTMLElement;
+    if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+    const row = this.rowOf(cell.row);
+    const column = this.columns().find((entry) => entry.id === cell.column);
+    if (!row) return;
+    if (column && this.isEditable(column, row) && !this.activatable()) {
+      this.startEdit(cell);
+      return;
+    }
+    if (this.activatable()) this.activate.emit({ key: cell.row, reason: 'pointer', event });
+    else if (column && this.isEditable(column, row)) this.startEdit(cell);
+  }
+  protected onCellPointerDown(event: PointerEvent, cell: GridCell) {
+    if (event.button !== 0) return;
+    const session = this.edit();
+    if (
+      session &&
+      !sameCell(session.cell, cell) &&
+      !(session.cell.row === cell.row && session.columns.includes(cell.column))
+    ) {
+      this.commitEdit('blur', { move: 'stay' });
+    }
+    if (!sameCell(cell, this.current())) this.requestCurrent(cell, 'pointer', event);
+    if (this.resolvedSelectionMode() === 'range' && isBodyRow(cell.row)) {
+      const target = event.target as HTMLElement;
+      if (!target.closest(FOCUSABLE)) {
+        this.beginRange(cell, event.shiftKey, event);
+        this.rangeDragging.set(true);
+      }
+    }
+  }
+  protected onCellPointerEnter(event: PointerEvent, cell: GridCell) {
+    if (this.rangeDragging() && event.buttons === 1) this.extendRange(cell, event);
+  }
+
+  private async copyRange(cell: GridCell) {
+    const bounds = this.bounds();
+    const cells = bounds ? rangeCells(this.cursorGrid(), bounds) : [[cell]];
+    const text = rangeToText(cells, (target) => {
+      const row = this.rowOf(target.row);
+      const column = this.columns().find((entry) => entry.id === target.column);
+      return row && column ? this.textOf(column, row) : '';
+    });
+    const outcome = await writeToClipboard(text, this.host.nativeElement.ownerDocument);
+    if (outcome !== 'refused') {
+      this.announce(
+        fillLabel(this.t().copied, { count: cells.reduce((sum, line) => sum + line.length, 0) }),
+      );
+    }
+  }
+
+  protected onCellKeyDown(event: KeyboardEvent, cell: GridCell) {
+    if (event.defaultPrevented) return;
+    const session = this.edit();
+    const target = event.target as HTMLElement;
+    const cellElement = event.currentTarget as HTMLElement;
+    const insideWidget = target !== cellElement;
+    const key = event.key;
+    const mirror = this.rtl();
+    const ctrl = event.ctrlKey || event.metaKey;
+
+    if (session && sameCell(session.cell, cell)) {
+      if (key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        this.cancelEdit();
+      } else if (key === 'Enter') {
+        event.preventDefault();
+        this.commitEdit('keyboard', { move: this.resolvedEditMode() === 'cell' ? 'down' : 'stay' });
+      } else if (key === 'Tab') {
+        const next = this.nextEditableCell(cell, event.shiftKey ? 'previous' : 'next');
+        if (next) {
+          event.preventDefault();
+          this.commitEdit('keyboard', { move: event.shiftKey ? 'previous' : 'next' });
+        } else this.commitEdit('keyboard', { move: 'stay' });
+      } else if (key === 'F2') {
+        event.preventDefault();
+        this.commitEdit('keyboard', { move: 'stay' });
+      }
+      return;
+    }
+    if (session && session.columns.includes(cell.column) && session.cell.row === cell.row) {
+      if (key === 'Escape') {
+        event.preventDefault();
+        this.cancelEdit();
+      } else if (key === 'Enter') {
+        event.preventDefault();
+        this.commitEdit('keyboard', { move: 'stay' });
+      }
+      return;
+    }
+    if (insideWidget && !target.matches(SIMPLE_WIDGET)) {
+      if (key === 'Escape') {
+        event.preventDefault();
+        cellElement.focus();
+      } else if (key === 'Tab') {
+        const widgets = [...cellElement.querySelectorAll<HTMLElement>(FOCUSABLE)];
+        if (widgets.length > 1) {
+          const index = widgets.indexOf(target);
+          event.preventDefault();
+          widgets[(index + (event.shiftKey ? -1 : 1) + widgets.length) % widgets.length]?.focus();
+        }
+      }
+      return;
+    }
+
+    const header = cell.row === HEADER_ROW;
+    const column = this.resolvedById().get(cell.column);
+    const row = isBodyRow(cell.row) ? this.rowOf(cell.row) : undefined;
+    const grid = this.cursorGrid();
+    const mode = this.resolvedSelectionMode();
+
+    if (header && column) {
+      if (ctrl && event.shiftKey && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+        event.preventDefault();
+        this.resizeBy(
+          cell.column,
+          (key === 'ArrowRight') !== mirror ? RESIZE_STEP : -RESIZE_STEP,
+          event,
+        );
+        return;
+      }
+      if (ctrl && event.shiftKey && key === 'Enter') {
+        event.preventDefault();
+        this.autofit(cell.column, event);
+        return;
+      }
+      if (event.altKey && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+        event.preventDefault();
+        this.moveColumn(cell.column, (key === 'ArrowRight') !== mirror ? 1 : -1, event);
+        this.pendingFocus = cell;
+        this.flushFocus();
+        return;
+      }
+      if (ctrl && key === 'Enter') {
+        event.preventDefault();
+        cellElement.querySelector<HTMLElement>('[data-part="column-menu"]')?.click();
+        return;
+      }
+      if ((key === 'Enter' || key === ' ') && !insideWidget) {
+        event.preventDefault();
+        this.pressSort(cell.column, event.shiftKey, event, 'keyboard');
+        return;
+      }
+    }
+
+    if (
+      isGroupCursorRow(cell.row) &&
+      (key === 'ArrowRight' || key === 'ArrowLeft') &&
+      !event.shiftKey
+    ) {
+      const groupKey = cell.row.slice(GROUP_ROW_PREFIX.length);
+      const held = this.expandedGroups();
+      const open = held === 'all' || held.includes(groupKey);
+      if (((key === 'ArrowRight') !== mirror) !== open) {
+        event.preventDefault();
+        this.toggleGroup(groupKey, event, 'keyboard');
+        return;
+      }
+    }
+    if (
+      row &&
+      cell.column === EXPANDER_COLUMN &&
+      (key === 'ArrowRight' || key === 'ArrowLeft') &&
+      !event.shiftKey &&
+      this.isExpandable(row)
+    ) {
+      const open = this.expandedSet().has(cell.row);
+      if (((key === 'ArrowRight') !== mirror) !== open) {
+        event.preventDefault();
+        this.toggleExpanded(cell.row, event, 'keyboard');
+        return;
+      }
+    }
+
+    if (key === ' ' && event.shiftKey && row) {
+      event.preventDefault();
+      if (mode === 'range') {
+        const line = rowRange(grid, cell.row);
+        if (line) this.requestRange(line, 'keyboard', event);
+      } else this.toggleSelected(cell.row, { range: false, source: event, reason: 'keyboard' });
+      return;
+    }
+    if (key === ' ' && ctrl && mode === 'range' && column) {
+      event.preventDefault();
+      const line = columnRange(grid, cell.column);
+      if (line) this.requestRange(line, 'keyboard', event);
+      return;
+    }
+    if ((key === 'a' || key === 'A') && ctrl && !insideWidget) {
+      if (mode === 'multiple') {
+        event.preventDefault();
+        this.commitSelection(this.selectableKeys(), 'select', event);
+        return;
+      }
+      if (mode === 'range') {
+        event.preventDefault();
+        const all = wholeRange(grid);
+        if (all) this.requestRange(all, 'keyboard', event);
+        return;
+      }
+    }
+    if ((key === 'c' || key === 'C') && ctrl && !insideWidget) {
+      const selection = cellElement.ownerDocument.getSelection();
+      if (selection && selection.toString().length > 0) return;
+      event.preventDefault();
+      void this.copyRange(cell);
+      return;
+    }
+    if (key === 'Escape' && mode === 'range' && this.range()) {
+      event.preventDefault();
+      this.requestRange(null, 'clear', event);
+      return;
+    }
+
+    if (row && column && (key === 'Enter' || key === 'F2')) {
+      const editable = this.isEditable(column.column, row);
+      if (editable && !insideWidget) {
+        event.preventDefault();
+        this.startEdit(cell);
+        return;
+      }
+      const widgets = cellElement.querySelectorAll<HTMLElement>(FOCUSABLE);
+      if (!insideWidget && widgets.length > 0) {
+        event.preventDefault();
+        widgets[0]!.focus();
+        return;
+      }
+      if (key === 'Enter' && this.activatable() && !insideWidget) {
+        event.preventDefault();
+        this.activate.emit({ key: cell.row, reason: 'keyboard', event });
+        return;
+      }
+    }
+    if (
+      row &&
+      column &&
+      !insideWidget &&
+      key.length === 1 &&
+      !ctrl &&
+      !event.altKey &&
+      (column.kind === 'text' || column.kind === 'number') &&
+      this.isEditable(column.column, row)
+    ) {
+      if (column.kind === 'number' && !/[0-9.,-]/.test(key)) return;
+      event.preventDefault();
+      this.startEdit(cell, key);
+      return;
+    }
+
+    const intents: Record<string, CursorIntent> = {
+      ArrowUp: 'up',
+      ArrowDown: 'down',
+      ArrowLeft: mirror ? 'end' : 'start',
+      ArrowRight: mirror ? 'start' : 'end',
+      Home: ctrl ? 'first' : 'rowStart',
+      End: ctrl ? 'last' : 'rowEnd',
+      PageUp: 'pageUp',
+      PageDown: 'pageDown',
+    };
+    const intent = intents[key];
+    if (!intent) return;
+    if (
+      insideWidget &&
+      (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Home' || key === 'End') &&
+      target.matches('input, textarea')
+    ) {
+      return;
+    }
+    event.preventDefault();
+    const next = moveCursor(grid, cell, intent);
+    if (event.shiftKey && key.startsWith('Arrow')) {
+      if (mode === 'range' && isBodyRow(next.row)) {
+        this.requestRange({ anchor: this.range()?.anchor ?? cell, focus: next }, 'keyboard', event);
+      } else if (
+        mode === 'multiple' &&
+        (key === 'ArrowUp' || key === 'ArrowDown') &&
+        isBodyRow(next.row)
+      ) {
+        this.toggleSelected(next.row, { range: true, source: event, reason: 'keyboard' });
+      }
+    }
+    if (!sameCell(next, cell)) this.setCurrent(next, 'keyboard', event);
+  }
+
+  /* ── Imperative surface ─────────────────────────────────────────────── */
+  scrollToRow(key: string, align: 'start' | 'center' | 'end' | 'nearest' = 'nearest') {
+    const index = this.nodes().findIndex((node) => node.key === key);
+    const scroller = this.scrollRef()?.nativeElement;
+    if (index === -1 || !scroller) return;
+    const metrics = this.metrics();
+    const size = this.rowSize();
+    const offset = metrics ? metrics.offsetOf(index) : index * size;
+    const head = scroller.querySelector<HTMLElement>('[data-part="head"]')?.offsetHeight ?? 0;
+    const height = this.viewport().height;
+    let top = offset;
+    if (align === 'center') top = offset - height / 2 + size;
+    else if (align === 'end') top = offset - height + size + head;
+    else if (align === 'nearest') {
+      const visibleTop = scroller.scrollTop;
+      const visibleBottom = visibleTop + height - head;
+      if (offset >= visibleTop && offset + size <= visibleBottom) return;
+      top = offset < visibleTop ? offset : offset - height + size + head;
+    }
+    scroller.scrollTo({ top: Math.max(0, top) });
+    if (this.windowsRows()) this.pinnedRows.set([key]);
+  }
+  scrollToColumn(columnId: string) {
+    const scroller = this.scrollRef()?.nativeElement;
+    const column = this.resolvedById().get(columnId);
+    if (!scroller || !column || column.pinned) return;
+    const gutters = this.gutters().reduce((sum, width) => sum + width, 0);
+    let offset = gutters;
+    for (const entry of this.resolved()) {
+      if (entry.id === columnId) break;
+      if (entry.pinned === null || entry.pinned === 'start') offset += entry.width;
+    }
+    const startZone =
+      this.resolved()
+        .filter((entry) => entry.pinned === 'start')
+        .reduce((sum, entry) => sum + entry.width, 0) + gutters;
+    const endZone = this.resolved()
+      .filter((entry) => entry.pinned === 'end')
+      .reduce((sum, entry) => sum + entry.width, 0);
+    const left = Math.abs(scroller.scrollLeft);
+    const width = this.viewport().width;
+    if (offset < left + startZone) scroller.scrollTo({ left: offset - startZone });
+    else if (offset + column.width > left + width - endZone)
+      scroller.scrollTo({ left: offset + column.width - width + endZone });
+  }
+  scrollToCell(cell: GridCell) {
+    this.scrollToRow(cell.row);
+    this.scrollToColumn(cell.column);
+  }
+  getVisibleRows(): readonly Row[] {
+    return this.resolvedMode() === 'client' ? this.applied().rows : this.rows();
+  }
+
+  /* ── Forms ──────────────────────────────────────────────────────────── */
+  writeValue(value: DataGridSelection | undefined) {
+    this.value.set(value ?? (this.resolvedSelectionMode() === 'multiple' ? [] : null));
+  }
+  registerOnChange(fn: (value: DataGridSelection) => void) {
+    this.notify = fn;
+  }
+  registerOnTouched(fn: () => void) {
+    this.touched = fn;
+  }
+  setDisabledState(isDisabled: boolean) {
+    this.formDisabled.set(isDisabled);
+  }
+}
+
+export { DATA_GRID_LABELS };

@@ -346,7 +346,11 @@ not recoverable from the index, so:
    reformat nothing.
 3. **Keep git narrow.** Stage explicit paths. No `git add -A`, `commit -a`,
    `checkout`, `restore`, `stash` or `clean`. Format with
-   `pnpm exec prettier --write <your paths>`, never `pnpm format`.
+   `pnpm exec prettier --write <your paths>`, never `pnpm format`. Stage and
+   commit in one command: the index is shared, and a commit by the other
+   lane takes whatever you left staged — `detail-panel`'s stylesheet and
+   registry hunks landed inside `table-of-contents`'s commits that way, and a
+   registry entry was committed twice.
 4. **A failure outside your family is not yours.** `pnpm check:full` sees the
    other lane mid-write. Report it at the gate and carry on.
 5. **Ask before restarting a Storybook.** It interrupts the other lane too.

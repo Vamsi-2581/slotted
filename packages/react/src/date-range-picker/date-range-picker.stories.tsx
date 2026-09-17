@@ -369,7 +369,7 @@ export const Narrow: Story = {
     <Grid columns={1}>
       <Scene
         label="In a narrow column"
-        note="Two dates do not fit a frame this narrow, so the check-out drops to a second line and the trigger stays on the first. Open it: the second month wraps under the first, because the surface is capped by the room the positioner measured."
+        note="Two dates do not fit a frame this narrow, so each date clips its own digits at its edge and the trigger stays where it is; step into the check-out and it scrolls into view. Open it: the second month wraps under the first, because the surface is capped by the room the positioner measured."
       >
         <Measure>
           <DateRangePicker count="nights" defaultValue={STAY} locale="pt-BR" />

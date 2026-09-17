@@ -47,7 +47,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'One half of the value, carrying data-half="date" or "time". It exists because the row has to be able to break, and flexbox breaks a line between any two items with no way to forbid one place: the boundary has to be a box rather than a rule. The row wraps between the two and never inside one.',
+      'One half of the value, carrying data-half="date" or "time". It is one box so a date and a clock time each read left to right in every document, and so the row — one line, clipped at the frame — is cut between the halves or inside the time and never inside a segment.',
   },
   {
     part: 'segment',
@@ -299,7 +299,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'narrow',
     title: 'Seven fields in a narrow column',
-    note: 'The row wraps between the halves and never inside one, at every width — no container query, no threshold guessing where the content stops fitting. The comma the locale writes between the halves stays at the end of the first line, which is where a comma in a sentence goes. Nothing is clipped and nothing is removed.',
+    note: 'The row is one line at every width and is clipped at the frame, the way a text input clips a value longer than itself: a control two lines tall broke every row it stood in. Nothing is removed — the value is whole in the field and in what a screen reader hears — and the half the reader steps into is scrolled into view.',
     snippet: defineSnippet({
       id: 'datetime-field-react-narrow',
       label: 'A 200-pixel column',

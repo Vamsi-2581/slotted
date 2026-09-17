@@ -89,19 +89,27 @@ test('takes the order of the halves from one combined formatter', () => {
 });
 
 /**
- * The row wraps between the halves and never inside one, so seven segments
- * hold in a 240-pixel container without anything being clipped or removed.
+ * The row is one line at every width and is clipped at the frame, never
+ * wrapped: a control two lines tall broke every row it stood in. Nothing is
+ * removed, and the half with focus is scrolled into view.
  */
-test('marks the boundary the row may wrap at', () => {
-  assert.equal(contract.dataAttributes['data-half'], 'date or time, and where the row may wrap');
-  assert.match(contract.wrapping.at, /between the two halves/);
-  assert.match(contract.wrapping.never, /inside/);
-  assert.equal(contract.wrapping.removesContent, false);
-  assert.equal(contract.wrapping.part, 'half');
-  assert.ok(member.parts.includes('half'), 'the boundary has to be a box, not a rule');
-  assert.match(contract.wrapping.partWhy, /flexbox/i);
-  assert.match(contract.wrapping.boundaryLiteral, /data-boundary/);
-  assert.match(contract.wrapping.decidedBy, /flex-wrap is on at every width/);
+test('keeps the row on one line and clips it at the frame', () => {
+  assert.equal(
+    contract.dataAttributes['data-half'],
+    'date or time, and where the row is clipped between the two',
+  );
+  assert.match(contract.overflow.at, /one line at every width/);
+  assert.match(contract.overflow.never, /never onto a second line/);
+  assert.equal(contract.overflow.removesContent, false);
+  assert.match(contract.overflow.scrolls, /scrolled into view/);
+  assert.equal(contract.overflow.part, 'half');
+  assert.ok(
+    member.parts.includes('half'),
+    'the halves are boxes: a date and a time each read left to right',
+  );
+  assert.match(contract.overflow.partWhy, /left to right/);
+  assert.match(contract.overflow.boundaryLiteral, /data-boundary/);
+  assert.match(contract.overflow.decidedBy, /flex-wrap is off at every width/);
   assert.equal(
     contract.dataAttributes['data-boundary'],
     'the literal between the two halves, drawn at the end of the date half',

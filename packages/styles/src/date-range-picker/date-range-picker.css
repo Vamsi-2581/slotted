@@ -73,11 +73,14 @@
     box-sizing: border-box;
     color: var(--slotted-date-range-picker-color, var(--slotted-text, CanvasText));
     display: flex;
-    /* Two dates do not fit a frame narrower than about 300 pixels, and a
-       segment cannot shrink below its digits. Rather than push the trigger —
-       the guaranteed way in — out of the frame, the end drops to a second
-       line and takes the two buttons with it. */
-    flex-wrap: wrap;
+    /* One line, whatever the frame's width. Two dates do not fit a frame
+       narrower than about 300 pixels, and the end used to drop to a second
+       line — a control two lines tall broke every row it stood in and read
+       as a different control from the field beside it. The two fields now
+       give way as `date-field` does, each clipping its own digits at its
+       edge, and the buttons at the reading end stay where they are because
+       they stand out of the flow. The field the reader steps into scrolls
+       its own digits into view. */
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
     gap: var(--slotted-space-1, 0.125rem);
@@ -99,9 +102,9 @@
    * keeps their room as padding. Two things follow. The buttons are inset by
    * their own gutter less than the value is, so the glyph ends where the
    * digits begin — the arithmetic `text-field` records. And when the frame is
-   * too narrow for two dates, the end drops to a second line *before* the
-   * trigger does: an in-flow trigger was the first thing to wrap, and left a
-   * line holding nothing but a calendar mark.
+   * too narrow for two dates, the fields give way and the trigger does not:
+   * an in-flow trigger was the first thing to be pushed, and the guaranteed
+   * way in was the first thing lost.
    */
   [data-ui='date-range-picker'] [data-part='control'] {
     --_action-inset: max(

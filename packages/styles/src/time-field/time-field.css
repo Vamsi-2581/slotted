@@ -91,6 +91,10 @@
     display: flex;
     flex: 1 1 auto;
     min-inline-size: 0;
+    /* One line, whatever the frame's width: the row is clipped at the frame's
+       edge, as a text input clips a long value, and a field the reader steps
+       into is scrolled into view. The rule `date-field` records. */
+    overflow: hidden;
     /* Digits that do not shift under one another as a value is typed over, and
        four fields that keep their columns while the reader steps. */
     font-variant-numeric: tabular-nums;
@@ -143,6 +147,10 @@
     color: inherit;
     cursor: text;
     font: inherit;
+    /* A field never shrinks under its digits: a row narrower than its value
+       overflows and is clipped at the frame, the way an input clips text. A
+       flex item shrunk to its minimum drew `mm` as `mr`. */
+    flex: 0 0 auto;
     min-inline-size: var(--slotted-time-field-segment-min-inline-size, calc(var(--_digits) * 1ch));
     padding-inline: var(
       --slotted-time-field-segment-padding-inline,

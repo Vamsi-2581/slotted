@@ -27,7 +27,7 @@
     "why": "Three reasons, and each is a thing a nested date-field and time-field cannot do. **One `role=\"group\"` and one value:** two nested family roots are two groups, two values and two SegmentStates. **One pattern:** the order of the two halves and the literal between them come from one combined Intl.DateTimeFormat, and two independent fields learn neither. **One run of typing:** a digit that fills the last date segment advances into the first time segment.",
     "pattern": "The combined formatter names the order of the halves, the literal between them — `, ` in pt-BR, en-US and de-DE, a bare space in fr-FR, ja-JP and zh-CN, the date form's own full stop in ko-KR — and where the day period lands. A locale that writes the time first is drawn that way without a table of orders being shipped.",
     "typing": "A digit that fills the last date segment advances across the boundary into the first time segment, and ArrowRight walks from the day into the hour. Across two roots both stop at the boundary.",
-    "cost": "The row's markup and its key handling are written a third time, once per binding. What is not written a third time is everything below the markup: the pattern, the digits, the placeholders, the stepping, the wrapping, the held day, the year pivot, the hour cycle, the day-period names and the relative parser are all called from @slotted/core/date."
+    "cost": "The row's markup and its key handling are written a third time, once per binding. What is not written a third time is everything below the markup: the pattern, the digits, the placeholders, the stepping, the held day, the year pivot, the hour cycle, the day-period names and the relative parser are all called from @slotted/core/date."
   },
   "stateSource": "field",
   "mirrorsState": true,
@@ -49,15 +49,16 @@
     "dateHalf": "always whole. A datetime without a day is a date, and date-field is that family.",
     "default": "minute"
   },
-  "wrapping": {
-    "at": "between the two halves, where data-half changes",
-    "never": "inside a half, and never inside a segment",
+  "overflow": {
+    "at": "the frame's edge: the row is one line at every width and is clipped there, the way a text input clips a value longer than itself",
+    "never": "inside a segment — a segment never shrinks under its digits — and never onto a second line",
     "removesContent": false,
+    "scrolls": "the half the reader steps into is scrolled into view: a clipped row is still a scroll container to the focus, so the segment with focus is always the one on screen",
     "part": "half",
-    "partWhy": "Flexbox breaks a line between any two items and offers no way to forbid one place, so the boundary has to be a box rather than a rule. Each half is one flex item holding its own segments and literals, and the row breaks between the two items or not at all.",
-    "boundaryLiteral": "the literal between the halves carries data-boundary and is drawn inside the date half rather than between the two, so a comma left by a wrap sits at the end of its line the way a comma in a sentence does. A boundary the locale writes as whitespace alone is not drawn at all, and the row's own column gap separates the halves instead — which is what fr-FR, ja-JP and zh-CN get, where pt-BR, en-US and de-DE get a comma.",
-    "decidedBy": "the row itself. flex-wrap is on at every width, so no locale, granularity or size can overflow the frame, and no container query has to guess where the content stops fitting.",
-    "why": "Seven segments do not fit a 240-pixel container in every locale. The boundary is the pattern's rather than a count of children, so a locale that writes the time before the date wraps at the same place. Nothing is clipped and nothing is removed, which is the rule calendar already states for a month that stops fitting."
+    "partWhy": "Each half is one flex item holding its own segments and literals, isolated so a date and a clock time read left to right in every document; the row is clipped between the halves or inside the time half, never inside a segment.",
+    "boundaryLiteral": "the literal between the halves carries data-boundary and is drawn inside the date half rather than between the two, so it stays with the date when the time is clipped. A boundary the locale writes as whitespace alone is not drawn at all, and the row's own column gap separates the halves instead — which is what fr-FR, ja-JP and zh-CN get, where pt-BR, en-US and de-DE get a comma.",
+    "decidedBy": "the row itself. overflow is hidden and flex-wrap is off at every width, so no locale, granularity or size can grow the frame to two lines, and no container query has to guess where the content stops fitting.",
+    "why": "Seven segments do not fit a 240-pixel container in every locale. The row used to wrap between the halves; a control two lines tall broke every row it stood in — a filter row, a table cell, a toolbar — and read as a different control from the field beside it. Clipping keeps the frame one line and removes nothing: the value is whole in the field and in aria-valuetext, and the half with focus is on screen."
   },
   "incomplete": {
     "paints": "the frame takes the warning border while the value is incomplete and no segment inside it has focus. It says unfinished rather than wrong, it is quiet while the reader is still typing, and it sits under invalid in the precedence order — a value refused by a bound is wrong whether or not it is whole.",
@@ -291,7 +292,7 @@
   },
   "dataAttributes": {
     "data-field": "which of the seven fields a segment holds",
-    "data-half": "date or time, and where the row may wrap",
+    "data-half": "date or time, and where the row is clipped between the two",
     "data-boundary": "the literal between the two halves, drawn at the end of the date half",
     "data-placeholder": "the segment has no value and is drawing its placeholder",
     "data-incomplete": "date or time — the half that is missing",

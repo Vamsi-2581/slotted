@@ -93,6 +93,15 @@
     display: flex;
     flex: 1 1 auto;
     min-inline-size: 0;
+    /**
+     * One line, whatever the frame's width. The fields keep their digits and
+     * the row is clipped at the frame's edge, the way a text input clips a
+     * value longer than itself; a field the reader steps into is scrolled into
+     * view, because a clipped box is still a scroll container to the focus.
+     * Read on a 130-pixel column: the row ran under the button beside it and
+     * `dd` was drawn over `yyyy`.
+     */
+    overflow: hidden;
     /* Digits that do not shift under one another as a value is typed over, and
        a date whose three fields keep their columns while the reader steps. */
     font-variant-numeric: tabular-nums;
@@ -119,6 +128,10 @@
        and a caret between two digits would offer an edit the family refuses. */
     caret-color: transparent;
     font: inherit;
+    /* A field never shrinks under its digits: a row narrower than its value
+       overflows and is clipped at the frame, the way an input clips text. A
+       flex item shrunk to its minimum drew `mm` as `mr`. */
+    flex: 0 0 auto;
     min-inline-size: var(--slotted-date-field-segment-min-inline-size, calc(var(--_digits) * 1ch));
     padding-inline: var(
       --slotted-date-field-segment-padding-inline,

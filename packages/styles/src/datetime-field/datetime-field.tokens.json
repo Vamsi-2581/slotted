@@ -52,7 +52,6 @@
   "--slotted-datetime-field-radius",
   "--slotted-datetime-field-readonly-background",
   "--slotted-datetime-field-relative-border-color",
-  "--slotted-datetime-field-row-gap",
   "--slotted-datetime-field-segment-focus-background",
   "--slotted-datetime-field-segment-focus-color",
   "--slotted-datetime-field-segment-min-inline-size",

@@ -98,12 +98,15 @@
    * puts the value at the reading edge, so an empty field and a full one start
    * in the same place.
    *
-   * **It wraps, at every width.** Seven fields do not fit a narrow container in
-   * every locale, and a row that could overflow would put a segment under the
-   * border in exactly the configuration a form is most likely to be in. The
-   * break can only land between the two halves, because each half is one flex
-   * item: flexbox breaks a line between two items and offers no way to forbid
-   * one place, so the boundary is a box rather than a rule.
+   * **It is one line, at every width.** Seven fields do not fit a narrow
+   * container in every locale; the row used to wrap between its two halves,
+   * and a control two lines tall broke every row it stood in — a filter row,
+   * a table cell, a toolbar — and read as a different control from the field
+   * beside it. It is now clipped at the frame's edge, the way a text input
+   * clips a value longer than itself, and the half the reader steps into is
+   * scrolled into view, because a clipped box is still a scroll container to
+   * the focus. Each half stays one flex item, so the value never breaks
+   * inside a date or inside a time.
    */
   [data-ui='datetime-field'] [data-part='segments'] {
     align-items: center;
@@ -115,9 +118,8 @@
     cursor: text;
     display: flex;
     flex: 1 1 auto;
-    flex-wrap: wrap;
     min-inline-size: 0;
-    row-gap: var(--slotted-datetime-field-row-gap, var(--slotted-space-1, 0.125rem));
+    overflow: hidden;
   }
 
   /**
@@ -176,6 +178,10 @@
     color: inherit;
     cursor: text;
     font: inherit;
+    /* A field never shrinks under its digits: a row narrower than its value
+       overflows and is clipped at the frame, the way an input clips text. A
+       flex item shrunk to its minimum drew `mm` as `mr`. */
+    flex: 0 0 auto;
     min-inline-size: var(
       --slotted-datetime-field-segment-min-inline-size,
       calc(var(--_digits) * 1ch)

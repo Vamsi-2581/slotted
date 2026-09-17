@@ -381,7 +381,7 @@ export const Narrow: Story = {
       1,
       scene(
         'In a narrow column',
-        'Two dates do not fit a frame this narrow, so the check-out drops to a second line and the trigger stays on the first. Open it: the second month wraps under the first, because the surface is capped by the room the positioner measured.',
+        'Two dates do not fit a frame this narrow, so each date clips its own digits at its edge and the trigger stays where it is; step into the check-out and it scrolls into view. Open it: the second month wraps under the first, because the surface is capped by the room the positioner measured.',
         measure(
           `<div slDateRangePicker count="nights" locale="pt-BR" [defaultValue]="stay"></div>`,
         ),

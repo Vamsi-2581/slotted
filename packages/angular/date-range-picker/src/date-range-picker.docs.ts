@@ -296,7 +296,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'narrow',
     title: 'Narrow',
-    note: 'In a column narrower than two dates the check-out drops to a second line and the trigger stays on the first; the surface is capped by the room there is and the second month wraps under the first. On a coarse pointer below 480 pixels it becomes a sheet.',
+    note: 'In a column narrower than two dates the frame stays one line: each date clips its own digits at its edge and scrolls the field the reader steps into back into view, and the trigger stays where it is. The surface is capped by the room there is and the second month wraps under the first. On a coarse pointer below 480 pixels it becomes a sheet.',
     snippet: defineSnippet({
       id: 'date-range-picker-angular-narrow',
       label: 'In a narrow column',

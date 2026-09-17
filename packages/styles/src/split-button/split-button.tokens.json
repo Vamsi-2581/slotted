@@ -1,0 +1,14 @@
+[
+  "--slotted-border-strong",
+  "--slotted-control-border-width",
+  "--slotted-control-radius",
+  "--slotted-disabled-border",
+  "--slotted-icon-chevron-down",
+  "--slotted-split-button-chevron",
+  "--slotted-split-button-radius",
+  "--slotted-tone-accent-solid-active",
+  "--slotted-tone-danger-solid-active",
+  "--slotted-tone-secondary-solid-active",
+  "--slotted-tone-success-solid-active",
+  "--slotted-tone-warning-solid-active"
+]

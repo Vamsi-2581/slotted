@@ -79,6 +79,7 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `chart`                         | a rampa sequencial e o par divergente que a escala de dados não tem; a textura como segundo canal sob `forced-colors`; tooltip e realce por ponto que `sparkline` recusou                                                                            | `chart` (onda 12)                         | `2026-09-16-stat-card-sparkline-design.md` §1; inventário §2               |
 | `menu`                          | deixar de importar `highlight/highlight.css` (React e Angular): a família importa a sua folha e um `mark` num item vem de `Highlight` / `[slHighlight]`; o arquivo estava em edição por `context-menu hover-card` na mesma rodada                    | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `tree`                          | o `<mark>` sem identificador da busca passa a `Highlight` / `[slHighlight]` dentro do rótulo, e a folha `highlight/highlight.css` deixa de ser importada                                                                                             | —                                         | `2026-09-16-highlight-design.md` §5                                        |
+| `toggle-group`                  | o `item` passa a ser a família `toggle` deferindo ao contexto do grupo (a forma de Base UI); a pintura do item, escrita em `toggle-group.css` e em `toggle.css` sob dois prefixos, sai de uma das duas; o grupo continua o único dono do valor       | —                                         | `2026-09-16-split-button-toggle-design.md` §2                              |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -349,10 +350,42 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   (variante unida) e `menu`. A escolha no menu só atualiza a ação principal sob
   uma opção declarada (`remember`), porque a atualização silenciosa muda o que
   o próximo clique faz.
+
+  Entregue em 2026-09-16, numa sessão com `toggle`. Inventário em
+  `docs/superpowers/specs/2026-09-16-split-button-toggle-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-16-split-button-toggle-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-16-split-button-toggle-self-assessment.md`.
+  A raiz é um `div[role=group]`; as duas metades são elementos de `button`
+  (Button e IconButton como gatilho de `menu`) a carregar as partes `primary` e
+  `menu-trigger` — `button` seleciona-se por `data-ui` apenas e a vaga da parte
+  é da família que compõe. A junção reescreve a de `button-group` para dois
+  filhos; o chevron é `--slotted-icon-chevron-down` e não gira. `loading` na
+  raiz: o primary mostra o indicador de `button`, o gatilho fica
+  `aria-disabled`, focável e pintado no tom. `remember` liga `value`/
+  `defaultValue`/`onValueChange` ao grupo de rádio de `menu` por
+  `SplitButtonChoices` / `slSplitButtonChoices`. O nome do gatilho é
+  obrigatório (tipo em React, verificação de `SlIconButton` em Angular).
+  `@slotted/angular/button` passou a exportar `BUTTON_WAIT`, `resolveInertness`,
+  `resolveLoadingIndicator`, `stateAttribute` e `blockActivation`, para uma
+  família estender um membro sem alcançar a sua fonte; o gatilho Angular
+  hospeda `slMenuTriggerFor` por `hostDirectives`.
+
 - `toggle` — um `button` com `aria-pressed` fora de grupo. O item que
   `toggle-group` já desenha, publicado como família própria para a barra de
   ferramentas e para o controle avulso (`wrap` de `code-block` é um). Não
   substitui `checkbox` em formulário.
+
+  Entregue em 2026-09-16, na sessão de `split-button` (mesmos três documentos).
+  Um modo — Bold, Wrap, Pin — verdadeiro no instante em que é premido, neutro
+  até ligar e de uma cor só quando ligado (o par de acento); `ToggleButton` de
+  `button` continua a ação que persiste e espera. Partes `root`, `icon`,
+  `label`; eixos `size` e `variant` (`outline`, `ghost`); modelo `pressed`
+  idêntico ao de `ToggleButton`; sem `loading`, sem tons, sem `value`, sem
+  `ControlValueAccessor`. Dentro de `toolbar` a barra é dona da parada de
+  tabulação. A pintura é a do item de `toggle-group`, escrita sob prefixo
+  próprio; a reabertura acima faz do item esta família.
+
 - `otp-input` — valor único distribuído em N caixas; comprimento, tipo
   numérico ou alfanumérico, colagem completa, `autocomplete="one-time-code"`,
   máscara opcional. Uma parada de foco lógica: o input real é um só, oculto, e

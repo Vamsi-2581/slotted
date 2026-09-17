@@ -39,6 +39,11 @@
     --slotted-tone-accent-subtle-active: #132724;
   }
 
+  /* Panels that hold a list need room for a row and its actions on one line. */
+  [data-ui='popover'] {
+    --slotted-popover-measure-lg: 28rem;
+  }
+
   html,
   body {
     height: 100%;

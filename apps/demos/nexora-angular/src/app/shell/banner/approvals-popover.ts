@@ -53,6 +53,9 @@ import { ClockService } from '../../core/session/clock.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
+    .panel {
+      inline-size: min(28rem, calc(100vw - 2rem));
+    }
     .empty {
       margin: 0;
       padding: var(--slotted-space-4);
@@ -60,7 +63,7 @@ import { ClockService } from '../../core/session/clock.service';
     }
   `,
   template: `
-    <ng-container slPopover side="bottom" align="end" (openChangeRequest)="opened($event.value)">
+    <ng-container slPopover size="lg" side="bottom" align="end" (openChangeRequest)="opened($event.value)">
       <span slBadgeAnchor>
         <button
           slIconButton
@@ -77,7 +80,7 @@ import { ClockService } from '../../core/session/clock.service';
         }
       </span>
       <ng-template slPopoverLayer>
-        <div slPopoverContent style="--slotted-popover-measure: 26rem">
+        <div slPopoverContent class="panel">
           <div slPopoverHeader><div slPopoverTitle>Approvals</div></div>
           <div slPopoverBody>
             @if (store.items().length === 0) {

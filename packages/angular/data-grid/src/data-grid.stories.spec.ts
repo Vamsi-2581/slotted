@@ -29,8 +29,10 @@ import {
 } from './data-grid-templates';
 import { ANGULAR_DATA_GRID_DOCS } from './data-grid.docs';
 import * as dataGridStories from './data-grid.stories';
+import { SavedViewDemo } from './data-grid.stories';
 
 const STORY_IMPORTS = [
+  SavedViewDemo,
   SlDataGrid,
   SlDataGridCellTemplate,
   SlDataGridDetailTemplate,

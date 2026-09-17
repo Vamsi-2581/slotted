@@ -6,6 +6,12 @@ export {
   useDataGridDefaults,
 } from './data-grid-defaults';
 export { EXPANDER_COLUMN, SELECTION_COLUMN } from './data-grid-constants';
+export { usePersistedGridView } from './use-persisted-grid-view';
+export type {
+  GridViewStorage,
+  PersistedGridView,
+  UsePersistedGridViewOptions,
+} from './use-persisted-grid-view';
 export type {
   DataGridActivateEvent,
   DataGridCellContext,

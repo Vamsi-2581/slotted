@@ -70,6 +70,8 @@ export {
   withSortPress,
 } from './query';
 export type { GridParamOptions, QueryMove } from './query';
+export { emptyGridView, parseGridView, serializeGridView } from './view';
+export type { GridView, GridViewOptions } from './view';
 export { FILTER_ROW, GROUP_ROW_PREFIX, HEADER_ROW, SUMMARY_ROW } from './types';
 export type {
   GridAggregate,

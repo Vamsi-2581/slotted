@@ -12,6 +12,9 @@ import {
   moveCursor,
   normalizeColumnState,
   parseColumnState,
+  parseGridView,
+  emptyGridView,
+  serializeGridView,
   rangeBounds,
   rangeEdges,
   rangeToText,
@@ -211,6 +214,34 @@ describe('columns', () => {
     expect(normalizeColumnState(parseColumnState(text), columns)).toEqual(state);
     expect(serializeColumnState(normalizeColumnState(null, columns), columns)).toBe('');
     expect(parseColumnState('garbage;;w=:x;o=')).toEqual(emptyColumnState());
+  });
+});
+
+describe('view', () => {
+  it('is the query and the column state as one line, and nothing when untouched', () => {
+    const view = {
+      columns: normalizeColumnState({ widths: { weight: 120 }, hidden: ['priority'] }, columns),
+      query: {
+        ...emptyQuery({ index: 2, size: 25 }),
+        sort: [{ column: 'weight', direction: 'descending' as const }],
+      },
+    };
+    const text = serializeGridView(view, columns);
+    expect(text).toBe('sort=weight%3Adesc&page=3&size=25&columns=w%3Dweight%3A120%3Bh%3Dpriority');
+    expect(parseGridView(text, columns)).toEqual(view);
+    expect(serializeGridView(emptyGridView(), columns)).toBe('');
+    expect(parseGridView('%%%garbage')).toEqual(emptyGridView());
+    expect(parseGridView('%%%garbage', columns).columns).toEqual(
+      normalizeColumnState(null, columns),
+    );
+  });
+
+  it('drops a column the model no longer has when it meets the model', () => {
+    const text = 'columns=h%3Dpriority%2Cgone%3Bw%3Dgone%3A50';
+    expect(parseGridView(text).columns.hidden).toEqual(['priority', 'gone']);
+    expect(parseGridView(text, columns).columns).toEqual(
+      normalizeColumnState({ hidden: ['priority'] }, columns),
+    );
   });
 });
 

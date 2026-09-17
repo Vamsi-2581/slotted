@@ -1,4 +1,10 @@
 export { SlDataGrid, SELECTION_COLUMN, EXPANDER_COLUMN } from './data-grid';
+export { persistedGridView } from './persisted-grid-view';
+export type {
+  GridViewStorage,
+  PersistedGridView,
+  PersistedGridViewOptions,
+} from './persisted-grid-view';
 export {
   SlDataGridEditor,
   SlDataGridFilterPanel,

@@ -574,18 +574,19 @@ class ShipmentsPage {
   {
     id: 'column-state',
     title: 'Saving a view',
-    note: 'order, widths, hidden and pinned are one object: serializeColumnState writes it to text, parseColumnState reads it back, and normalizeColumnState drops a column the model no longer has. The same for the query, through toGridParams and fromGridParams.',
+    note: 'A view is the column state and the query as one line of text: serializeGridView writes it, parseGridView reads it back and drops a column the model no longer has. persistedGridView keeps that line under a key in localStorage (or any store with getItem, setItem and removeItem; null keeps it in memory), reads it once, writes it after every change through an effect, and resets to the defaults by removing the entry. Its two signals take the two-way bindings. Selection, cursor and expansion are session state and are not kept.',
     snippet: defineSnippet({
       id: 'data-grid-angular-column-state',
       language: 'ts',
-      label: 'A view is two strings',
-      source: `class ShipmentsPage {
-  readonly state = signal(parseColumnState(localStorage.getItem('view')));
-
-  onColumnState(next: GridColumnState) {
-    this.state.set(next);
-    localStorage.setItem('view', serializeColumnState(next, columns));
-  }
+      label: 'A view, kept',
+      source: `export class ShipmentsPage {
+  readonly columns = columns;
+  readonly view = persistedGridView({
+    key: 'shipments',
+    columns,
+    defaultColumnState: { pinned: { start: ['id'], end: [] } },
+  });
+  // <sl-data-grid [(query)]="view.query" [(columnState)]="view.columnState" … />
 }`,
     }),
   },

@@ -16,7 +16,7 @@ import {
   type GridRange,
 } from '@slotted/core/grid';
 import type { ChangeRequest } from '@slotted/core/state';
-import { signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButton } from '@slotted/angular/button';
@@ -38,6 +38,7 @@ import type { Meta, StoryObj } from '@storybook/angular-vite';
 import { applicationConfig, moduleMetadata } from '@storybook/angular-vite';
 
 import { SlDataGrid } from './data-grid';
+import { persistedGridView } from './persisted-grid-view';
 import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridColumnStateRequest,
@@ -314,9 +315,93 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     virtualization: Virtualization,
   });
 
+/* The view lives in the browser's own storage, under one key, so a reload
+   of this story brings the arrangement back; the field mirrors the entry.
+   `persistedGridView` runs an effect, so it is called where an injection
+   context exists: a component of the story's own. */
+const VIEW_KEY = 'slotted-demo:data-grid-view';
+
+@Component({
+  selector: 'sl-data-grid-saved-view-demo',
+  standalone: true,
+  imports: [SlDataGrid, SlDataGridCellTemplate, SlBadge, SlButton, SlTextField, SlTextFieldInput],
+  /* The story's own frame, written out: a component's template is a literal
+     for the compiler. */
+  template: ` <div class="slotted-demo-stage" data-layout="block">
+    <div class="slotted-demo-row">
+      <div slTextField mono>
+        <input
+          slTextFieldInput
+          aria-label="Saved view"
+          readonly
+          [value]="entry() || '(nothing saved)'"
+        />
+      </div>
+      <button
+        slButton
+        size="sm"
+        tone="secondary"
+        variant="outline"
+        type="button"
+        (click)="view.reset()"
+      >
+        Reset view
+      </button>
+    </div>
+    <div class="slotted-demo-room" data-room="desktop">
+      <div class="slotted-demo-viewport" data-size="tall">
+        <sl-data-grid
+          label="Shipments"
+          rowKey="id"
+          height="100%"
+          variant="framed"
+          [columns]="columns"
+          [rows]="rows"
+          [(query)]="view.query"
+          [(columnState)]="view.columnState"
+        >
+          <ng-template slDataGridCell="status" let-value="value">
+            <span slBadge variant="soft" [tone]="statusTone(value)">{{ value }}</span>
+          </ng-template>
+        </sl-data-grid>
+      </div>
+    </div>
+  </div>`,
+})
+export class SavedViewDemo {
+  readonly columns = columns;
+  readonly statusTone = statusTone;
+  readonly rows = FIFTY.slice(0, 8);
+  readonly entry = signal('');
+  readonly view = persistedGridView({
+    key: VIEW_KEY,
+    columns,
+    storage: {
+      getItem: (key) => localStorage.getItem(key),
+      setItem: (key, value) => {
+        localStorage.setItem(key, value);
+        this.entry.set(value);
+      },
+      removeItem: (key) => {
+        localStorage.removeItem(key);
+        this.entry.set('');
+      },
+    },
+    defaultColumnState: { pinned: { start: ['id'], end: [] }, hidden: ['eta', 'priority'] },
+  });
+  constructor() {
+    try {
+      this.entry.set(localStorage.getItem(VIEW_KEY) ?? '');
+    } catch {
+      /* No store: the field stays empty. */
+    }
+  }
+}
+
 const meta: Meta<DataGridStoryArgs> = {
   title: 'Components/Data grid',
   component: SlDataGrid,
+  excludeStories: ['SavedViewDemo'],
   decorators: [
     moduleMetadata({
       imports: [
@@ -337,6 +422,7 @@ const meta: Meta<DataGridStoryArgs> = {
         SlText,
         SlTextField,
         SlTextFieldInput,
+        SavedViewDemo,
       ],
     }),
   ],
@@ -740,29 +826,10 @@ export const ColumnMenu: Story = {
 
 export const ColumnState: Story = {
   parameters: scenario('column-state'),
-  render: () => {
-    const text = signal('o=id,cost,customer;w=customer:240;h=eta,priority;ps=id;pe=cost');
-    return {
-      props: {
-        ...base(),
-        rows: FIFTY.slice(0, 8),
-        text,
-        state: () => parseColumnState(text()),
-        setText: (request: ChangeRequest<string>) => text.set(request.value),
-        save: (next: Partial<GridColumnState> | undefined) =>
-          text.set(serializeColumnState(next as GridColumnState, columns)),
-      },
-      template: screen(
-        grid('[rows]="rows" [columnState]="state()" (columnStateChange)="save($event)"'),
-        {
-          size: 'tall',
-          before: `<div slTextField mono>
-    <input slTextFieldInput aria-label="Saved view" [value]="text()" (valueChange)="setText($event)" />
-  </div>`,
-        },
-      ),
-    };
-  },
+  render: () => ({
+    props: {},
+    template: '<sl-data-grid-saved-view-demo></sl-data-grid-saved-view-demo>',
+  }),
 };
 
 export const Grouping: Story = {

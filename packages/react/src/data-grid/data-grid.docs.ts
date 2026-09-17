@@ -530,19 +530,17 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'column-state',
     title: 'Saving a view',
-    note: 'order, widths, hidden and pinned are one object: serializeColumnState writes it to text, parseColumnState reads it back, and normalizeColumnState drops a column the model no longer has. The same for the query, through toGridParams and fromGridParams.',
+    note: 'A view is the column state and the query as one line of text: serializeGridView writes it, parseGridView reads it back and drops a column the model no longer has. usePersistedGridView keeps that line under a key in localStorage (or any store with getItem, setItem and removeItem; null keeps it in memory), reads it once on mount, writes it after every change, and resets to the defaults by removing the entry. Spread its result on the grid. Selection, cursor and expansion are session state and are not kept.',
     snippet: defineSnippet({
       id: 'data-grid-react-column-state',
       language: 'tsx',
-      label: 'A view is two strings',
-      source: `const [state, setState] = useState(() => parseColumnState(localStorage.getItem('view')));
-<DataGrid
-  columnState={state}
-  onColumnStateChange={(next) => {
-    setState(next);
-    localStorage.setItem('view', serializeColumnState(next, columns));
-  }}
-/>;`,
+      label: 'A view, kept',
+      source: `const view = usePersistedGridView({
+  key: 'shipments',
+  columns,
+  defaultColumnState: { pinned: { start: ['id'], end: [] } },
+});
+<DataGrid {...view} columns={columns} rows={rows} rowKey="id" />;`,
     }),
   },
   {

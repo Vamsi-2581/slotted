@@ -1,7 +1,6 @@
 import type { FilterGroup } from '@slotted/core/filter';
 import {
   emptyQuery,
-  parseColumnState,
   serializeColumnState,
   withColumnFilter,
   withFilter,
@@ -36,6 +35,7 @@ import { Text } from '../typography';
 import { TextField } from '../text-field';
 import { DataGrid } from './data-grid';
 import { DataGridDefaultsProvider } from './data-grid-defaults';
+import { usePersistedGridView } from './use-persisted-grid-view';
 import { REACT_DATA_GRID_DOCS, REACT_DATA_GRID_TOKENS } from './data-grid.docs';
 import type { DataGridHandle, DataGridProps } from './data-grid.types';
 
@@ -693,21 +693,50 @@ export const ColumnMenu: Story = {
   render: () => <ColumnMenuDemo />,
 };
 
+/* The view lives in the browser's own storage, under one key, so a reload
+   of this story brings the arrangement back; the field mirrors the entry. */
+const VIEW_KEY = 'slotted-demo:data-grid-view';
 const SavedViewDemo = () => {
-  const [text, setText] = useState(
-    'o=id,cost,customer;w=customer:240;h=eta,priority;ps=id;pe=cost',
+  const [entry, setEntry] = useState(() => {
+    try {
+      return localStorage.getItem(VIEW_KEY) ?? '';
+    } catch {
+      return '';
+    }
+  });
+  const storage = useMemo(
+    () => ({
+      getItem: (key: string) => localStorage.getItem(key),
+      setItem: (key: string, value: string) => {
+        localStorage.setItem(key, value);
+        setEntry(value);
+      },
+      removeItem: (key: string) => {
+        localStorage.removeItem(key);
+        setEntry('');
+      },
+    }),
+    [],
   );
-  const state = useMemo(() => parseColumnState(text), [text]);
+  const view = usePersistedGridView({
+    key: VIEW_KEY,
+    columns,
+    storage,
+    defaultColumnState: { pinned: { start: ['id'], end: [] }, hidden: ['eta', 'priority'] },
+  });
   return (
     <Screen
       size="tall"
-      before={<TextField aria-label="Saved view" mono onValueChange={setText} value={text} />}
+      before={
+        <div className="slotted-demo-row">
+          <TextField aria-label="Saved view" mono readOnly value={entry || '(nothing saved)'} />
+          <Button onClick={view.reset} size="sm" tone="secondary" variant="outline">
+            Reset view
+          </Button>
+        </div>
+      }
     >
-      <Shipments
-        columnState={state}
-        onColumnStateChange={(next) => setText(serializeColumnState(next, columns))}
-        rows={FIFTY.slice(0, 8)}
-      />{' '}
+      <Shipments {...view} rows={FIFTY.slice(0, 8)} />
     </Screen>
   );
 };

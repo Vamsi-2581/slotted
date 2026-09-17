@@ -29,7 +29,7 @@ Entra:
 
 Não entra: qualquer módulo de negócio (CRM, Sales, …), o motor de aprovações
 completo (§79), idempotência de mutações (§73.9), IndexedDB com Dexie (adapter
-próprio, ver §5.5), analytics.
+próprio, ver §4.4), analytics.
 
 ## 2. Estrutura
 

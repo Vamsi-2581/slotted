@@ -578,6 +578,27 @@ describe('the pointer', () => {
     expect(drag.state.status).toBe('dragging');
   });
 
+  it('leaves a press the family refuses to whatever the press was for', () => {
+    const { drag, list } = scene();
+    list('todo');
+    const item = document.getElementById('todo-b')!;
+    item.innerHTML = '<span data-label>b</span><span data-part="resizer"></span>';
+    drag.attachDraggable(item, {
+      container: 'todo',
+      key: 'b',
+      canDrag: (event) =>
+        !(event.target instanceof Element && event.target.closest('[data-part="resizer"]')),
+    });
+
+    down(item.querySelector('[data-part="resizer"]')!, 10, 135);
+    moveTo(10, 160);
+    expect(drag.state.status).toBe('idle');
+
+    down(item.querySelector('[data-label]')!, 10, 135);
+    moveTo(10, 160);
+    expect(drag.state.status).toBe('dragging');
+  });
+
   it('lets a family replace the hit test and keep everything else', () => {
     const resolveTarget = vi.fn(() => between('done', 0));
     const { drag, drops, list } = scene({ resolveTarget });

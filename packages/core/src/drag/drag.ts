@@ -546,6 +546,7 @@ export function createDragController(options: DragControllerOptions = {}): DragC
         rects: items.map((item) => toRect(owner.itemElement?.(item))),
         targets: owner.targets ?? ['between'],
         ...(owner.orientation === undefined ? {} : { orientation: owner.orientation }),
+        direction: directionOf(key),
       };
       measured.push(entry);
     }
@@ -776,6 +777,7 @@ export function createDragController(options: DragControllerOptions = {}): DragC
          on the button is the button's. A handle that *is* a control is the
          family's own decision, so only what sits under the handle is skipped. */
       if (handle !== event.target && isInteractive(event.target, handle)) return;
+      if (draggable.canDrag?.(event) === false) return;
 
       const origin = { x: event.clientX, y: event.clientY };
       const delay = delayFor(draggable, event.pointerType);

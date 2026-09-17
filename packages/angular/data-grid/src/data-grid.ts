@@ -968,6 +968,7 @@ function isBodyRow(row: string) {
           data-part="drop-indicator"
           aria-hidden="true"
           [style.--slotted-data-grid-drop-offset]="dragState().offset + 'px'"
+          [style.--slotted-data-grid-drop-scroll]="dragState().scrollTop + 'px'"
         ></div>
       }
     </div>
@@ -1907,10 +1908,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     dragging: string | null;
     target: string | null;
     offset: number | null;
+    /** Where the scroller stood at the last move: the line follows the viewport, not the content. */
+    scrollTop: number;
   }>({
     dragging: null,
     target: null,
     offset: null,
+    scrollTop: 0,
   });
   private drag: DragController | null = null;
   private readonly draggables = new Map<string, () => void>();
@@ -2498,13 +2502,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
            on the header: read live, a reordered column came back sorted. */
         if (wasDragging) this.swallowClick = true;
         wasDragging = false;
-        this.dragState.set({ dragging: null, target: null, offset: null });
+        this.dragState.set({ dragging: null, target: null, offset: null, scrollTop: 0 });
         return;
       }
       wasDragging = true;
       const dragging = state.items[0] ?? null;
       const target = state.target && state.target.kind === 'between' ? state.target : null;
       let offset: number | null = null;
+      let scrollTop = 0;
       let over: string | null = null;
       if (target && dragging) {
         const list = this.resolved();
@@ -2526,13 +2531,17 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
           const origin = scroller.getBoundingClientRect();
           const rtl = getComputedStyle(scroller).direction === 'rtl';
           const edge = atEnd !== rtl ? box.right : box.left;
+          /* Content coordinates: the indicator is positioned in the
+             scroller's box at scroll zero, so the scrolled distance is added
+             back. `scrollLeft` is negative once an rtl scroller has moved. */
           offset = rtl
-            ? origin.right - edge + scroller.scrollLeft
+            ? origin.right - edge - scroller.scrollLeft
             : edge - origin.left + scroller.scrollLeft;
+          scrollTop = scroller.scrollTop;
           over = ids[boundary] ?? null;
         }
       }
-      this.dragState.set({ dragging, target: over, offset });
+      this.dragState.set({ dragging, target: over, offset, scrollTop });
     });
     this.drag = controller;
     this.attachDraggables();
@@ -2557,6 +2566,11 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         container: 'columns',
         key: column.id,
         handle: () => node,
+        /* A press on the resize handle is a resize: the controller's own
+           listener sits on the header and fires before the handle's, so
+           the handle cannot stop it. */
+        canDrag: (event) =>
+          !(event.target instanceof Element && event.target.closest('[data-part="resizer"]')),
         distance: 6,
       });
       this.draggableNodes.set(column.id, node);

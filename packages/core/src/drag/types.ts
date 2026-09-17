@@ -165,6 +165,13 @@ export interface DraggableOptions {
   /** The element a press has to start on. Default: the draggable itself. */
   handle?: () => Element | null;
   disabled?: () => boolean;
+  /**
+   * Whether this press may become a drag, asked after the handle and the
+   * control under it have been checked. A control the selector cannot name —
+   * a column's resize handle, a slider's thumb — is refused here. Default:
+   * every press.
+   */
+  canDrag?: (event: PointerEvent) => boolean;
   /** Pixels of travel before a press is a drag. Default 5. */
   readonly distance?: number;
   /** Milliseconds of holding before a press is a drag, per pointer type. Default touch 250. */

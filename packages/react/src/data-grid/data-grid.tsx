@@ -882,10 +882,13 @@ export function DataGrid<Row>({
     dragging: string | null;
     target: string | null;
     offset: number | null;
+    /** Where the scroller stood at the last move: the line follows the viewport, not the content. */
+    scrollTop: number;
   }>({
     dragging: null,
     target: null,
     offset: null,
+    scrollTop: 0,
   });
   const drag = useRef<DragController | null>(null);
   const latest = useRef({ resolved, effectiveState, requestState, gutters, labelOf });
@@ -908,6 +911,11 @@ export function DataGrid<Row>({
       container: 'columns',
       key: columnId,
       handle: () => node,
+      /* A press on the resize handle is a resize: the controller's own
+         listener sits on the header and fires before the handle's, so
+         the handle cannot stop it. */
+      canDrag: (event) =>
+        !(event.target instanceof Element && event.target.closest('[data-part="resizer"]')),
       distance: 6,
     });
     draggables.current.set(columnId, detach);
@@ -976,13 +984,14 @@ export function DataGrid<Row>({
            on the header: read live, a reordered column came back sorted. */
         if (wasDragging) swallowClick.current = true;
         wasDragging = false;
-        setDragState({ dragging: null, target: null, offset: null });
+        setDragState({ dragging: null, target: null, offset: null, scrollTop: 0 });
         return;
       }
       wasDragging = true;
       const dragging = state.items[0] ?? null;
       const target = state.target && state.target.kind === 'between' ? state.target : null;
       let offset: number | null = null;
+      let scrollTop = 0;
       let over: string | null = null;
       if (target && dragging) {
         const list = latest.current.resolved;
@@ -1004,13 +1013,17 @@ export function DataGrid<Row>({
           const origin = scroller.getBoundingClientRect();
           const rtl = getComputedStyle(scroller).direction === 'rtl';
           const edge = atEnd !== rtl ? box.right : box.left;
+          /* Content coordinates: the indicator is positioned in the
+             scroller's box at scroll zero, so the scrolled distance is added
+             back. `scrollLeft` is negative once an rtl scroller has moved. */
           offset = rtl
-            ? origin.right - edge + scroller.scrollLeft
+            ? origin.right - edge - scroller.scrollLeft
             : edge - origin.left + scroller.scrollLeft;
+          scrollTop = scroller.scrollTop;
           over = ids[boundary] ?? null;
         }
       }
-      setDragState({ dragging, target: over, offset });
+      setDragState({ dragging, target: over, offset, scrollTop });
     });
     drag.current = controller;
     /* The headers' ref callbacks ran in the commit before this effect, when
@@ -2210,7 +2223,10 @@ export function DataGrid<Row>({
               aria-hidden
               data-part="drop-indicator"
               style={
-                { '--slotted-data-grid-drop-offset': `${dragState.offset}px` } as CSSProperties
+                {
+                  '--slotted-data-grid-drop-offset': `${dragState.offset}px`,
+                  '--slotted-data-grid-drop-scroll': `${dragState.scrollTop}px`,
+                } as CSSProperties
               }
             />
           ) : null}

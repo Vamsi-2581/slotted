@@ -63,6 +63,23 @@ not need. That import is gone; the Angular preview never had one. Do not add a
 `dist` stylesheet to a preview: the layer order comes from
 `@slotted/tokens/styles.css`, which is imported first.
 
+## The beta channel
+
+`apps/demos/` holds applications that consume the library as a published
+package: a separate pnpm installation each, no workspace link, every
+`@slotted/*` installed from a tarball in `apps/demos/.registry/`. The
+directory is not committed; it is written by:
+
+- `pnpm pack:beta`: builds every package and packs the ones that declare a
+  published surface (`files` or `publishConfig.directory`) at their current
+  version.
+- `pnpm release:beta`: moves every published package to the next
+  `0.x.y-beta.N`, then does the above.
+
+A demo names the version it consumes in its own `package.json` and moves to a
+newer one deliberately, the way a consumer would. `pnpm test:release` checks
+that the published set and the shared version stay what this section says.
+
 ## Validation Commands
 
 - `pnpm check`: normal fast repository gate.

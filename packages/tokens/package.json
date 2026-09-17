@@ -1,8 +1,14 @@
 {
   "name": "@slotted/tokens",
-  "version": "0.0.0",
+  "version": "0.1.0-beta.0",
   "private": true,
   "type": "module",
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.mjs",
+    "scripts/build-theme-cli.mjs"
+  ],
   "bin": {
     "slotted-build-theme": "./scripts/build-theme-cli.mjs"
   },

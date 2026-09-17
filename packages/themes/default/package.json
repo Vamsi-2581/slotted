@@ -1,8 +1,11 @@
 {
   "name": "@slotted/theme-default",
-  "version": "0.0.0",
+  "version": "0.1.0-beta.0",
   "private": true,
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "exports": {
     "./styles.css": "./dist/styles.css"
   },
@@ -12,7 +15,7 @@
     "typecheck": "node --check test/theme.test.mjs && node --check test/default-theme.test.mjs",
     "verify": "pnpm build && pnpm test && pnpm typecheck"
   },
-  "dependencies": {
+  "devDependencies": {
     "@slotted/tokens": "workspace:*"
   }
 }

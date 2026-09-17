@@ -7,5 +7,6 @@ coverage
 dist
 docs/superpowers
 node_modules
+apps/demos
 pnpm-lock.yaml
 PROJECT-PRD.md

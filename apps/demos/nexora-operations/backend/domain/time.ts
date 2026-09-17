@@ -95,7 +95,8 @@ export function zonedToInstantMs(
 }
 
 export function toIsoInstant(ms: number): string {
-  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  // Second precision: `YYYY-MM-DDTHH:mm:ssZ`.
+  return `${new Date(ms).toISOString().slice(0, 19)}Z`;
 }
 
 export function instantMs(instant: string): number {
@@ -212,6 +213,37 @@ export function businessDateToInstant(
 export const BUSINESS_DAY_START_HOUR = 8;
 export const BUSINESS_DAY_END_HOUR = 18;
 
+interface DayBounds {
+  weekday: number;
+  dayStart: number;
+  dayEnd: number;
+  nextDay: number;
+  nextDayStart: number;
+}
+
+const dayBoundsCache = new Map<number, DayBounds>();
+
+/** Business-hour bounds of the organization-timezone day containing `instantMs`. */
+function dayBoundsAt(instantMs: number): DayBounds {
+  const offset = zoneOffsetMs(instantMs);
+  const localDay = Math.floor((instantMs + offset) / DAY_MS);
+  const cached = dayBoundsCache.get(localDay);
+  if (cached) return cached;
+  const local = new Date(localDay * DAY_MS);
+  const year = local.getUTCFullYear();
+  const month = local.getUTCMonth() + 1;
+  const day = local.getUTCDate();
+  const bounds: DayBounds = {
+    weekday: local.getUTCDay(),
+    dayStart: zonedToInstantMs(year, month, day, BUSINESS_DAY_START_HOUR),
+    dayEnd: zonedToInstantMs(year, month, day, BUSINESS_DAY_END_HOUR),
+    nextDay: zonedToInstantMs(year, month, day + 1, 0),
+    nextDayStart: zonedToInstantMs(year, month, day + 1, BUSINESS_DAY_START_HOUR),
+  };
+  dayBoundsCache.set(localDay, bounds);
+  return bounds;
+}
+
 /**
  * Business minutes between two instants, counting Monday–Friday 08:00–18:00
  * in the organization timezone (section 68.3).
@@ -222,18 +254,15 @@ export function businessMinutesBetween(start: string, end: string): number {
   if (finish <= cursor) return 0;
   let minutes = 0;
   while (cursor < finish) {
-    const parts = zonedParts(cursor);
-    const dayStart = zonedToInstantMs(parts.year, parts.month, parts.day, BUSINESS_DAY_START_HOUR);
-    const dayEnd = zonedToInstantMs(parts.year, parts.month, parts.day, BUSINESS_DAY_END_HOUR);
-    const nextDay = zonedToInstantMs(parts.year, parts.month, parts.day + 1, 0);
-    if (parts.weekday === 0 || parts.weekday === 6 || cursor >= dayEnd) {
-      cursor = nextDay;
+    const bounds = dayBoundsAt(cursor);
+    if (bounds.weekday === 0 || bounds.weekday === 6 || cursor >= bounds.dayEnd) {
+      cursor = bounds.nextDay;
       continue;
     }
-    const from = Math.max(cursor, dayStart);
-    const to = Math.min(finish, dayEnd);
+    const from = Math.max(cursor, bounds.dayStart);
+    const to = Math.min(finish, bounds.dayEnd);
     if (to > from) minutes += (to - from) / MINUTE;
-    cursor = nextDay;
+    cursor = bounds.nextDay;
   }
   return Math.round(minutes);
 }
@@ -243,19 +272,16 @@ export function addBusinessMinutes(start: string, businessMinutes: number): stri
   let cursor = instantMs(start);
   let remaining = businessMinutes;
   for (let guard = 0; guard < 10_000; guard += 1) {
-    const parts = zonedParts(cursor);
-    const dayStart = zonedToInstantMs(parts.year, parts.month, parts.day, BUSINESS_DAY_START_HOUR);
-    const dayEnd = zonedToInstantMs(parts.year, parts.month, parts.day, BUSINESS_DAY_END_HOUR);
-    const nextDayStart = zonedToInstantMs(parts.year, parts.month, parts.day + 1, BUSINESS_DAY_START_HOUR);
-    if (parts.weekday === 0 || parts.weekday === 6 || cursor >= dayEnd) {
-      cursor = nextDayStart;
+    const bounds = dayBoundsAt(cursor);
+    if (bounds.weekday === 0 || bounds.weekday === 6 || cursor >= bounds.dayEnd) {
+      cursor = bounds.nextDayStart;
       continue;
     }
-    if (cursor < dayStart) cursor = dayStart;
-    const availableMinutes = (dayEnd - cursor) / MINUTE;
+    if (cursor < bounds.dayStart) cursor = bounds.dayStart;
+    const availableMinutes = (bounds.dayEnd - cursor) / MINUTE;
     if (remaining <= availableMinutes) return toIsoInstant(cursor + remaining * MINUTE);
     remaining -= availableMinutes;
-    cursor = nextDayStart;
+    cursor = bounds.nextDayStart;
   }
   throw new RangeError('addBusinessMinutes exceeded its iteration guard');
 }

@@ -39,6 +39,7 @@ export function quantityToMilli(value: Quantity | SignedQuantity): number {
 
 /** Renders integer thousandths as a canonical quantity string with the given precision. */
 export function milliToQuantity(milli: number, precision: QuantityPrecision = 3): SignedQuantity {
+  if (milli % 1000 === 0) return String(milli / 1000);
   const negative = milli < 0;
   const absolute = Math.abs(milli);
   const whole = Math.floor(absolute / 1000);

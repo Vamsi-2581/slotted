@@ -53,6 +53,10 @@ export function createOrderEnvironment(context: SeedContext, tenant: TenantSeedR
       if (override.orderNumber) reservedNumbers.add(override.orderNumber);
       if (override.shipmentNumber) reservedNumbers.add(override.shipmentNumber);
       if (override.invoiceNumber) reservedNumbers.add(override.invoiceNumber);
+      for (const wave of override.waves ?? []) {
+        if (wave.shipmentNumber) reservedNumbers.add(wave.shipmentNumber);
+        if (wave.invoiceNumber) reservedNumbers.add(wave.invoiceNumber);
+      }
     }
   }
   return {
@@ -110,9 +114,10 @@ export function numberHistoricalGraph(env: OrderEnvironment, graph: OrderGraph):
   for (const memo of graph.creditMemos) if (!memo.creditMemoNumber) memo.creditMemoNumber = plainNumber(env, 'creditMemo', index + 1);
 }
 
-export function seedSales(context: SeedContext, tenant: TenantSeedResult, catalog: CatalogSeedResult, customers: CustomerSeedResult, overrides?: Map<number, OrderOverride>): SalesSeedResult {
+export function seedSales(context: SeedContext, tenant: TenantSeedResult, catalog: CatalogSeedResult, customers: CustomerSeedResult, curate?: (skeletons: OrderSkeleton[]) => Map<number, OrderOverride>): SalesSeedResult {
   const { dataset, today, operationalStart } = context;
   const skeletons = buildOrderSkeletons(context, tenant, customers);
+  const overrides = curate?.(skeletons);
   const environment = createOrderEnvironment(context, tenant, catalog, customers, skeletons, overrides);
 
   let firstOperationalIndex = skeletons.length;

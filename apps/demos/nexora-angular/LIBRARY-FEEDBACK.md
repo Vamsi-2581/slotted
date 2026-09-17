@@ -5,6 +5,7 @@ One entry per friction met while consuming `@slotted/angular` as a beta. Family,
 | Beta         | Family                                              | Friction                                                                                                              | Cost                                                             |
 | ------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | 0.1.0-beta.0 | app-shell, page-header, page, side-navigation       | four `provide*Defaults` calls to speak English                                                                        | `app.config.ts` grows one provider per family that speaks        |
+| 0.1.0-beta.0 | avatar                                              | an empty `[slAvatarFallback]` element suppresses the initials computed from `name`, silently                                | one blank disc until the marker was removed; `name` alone is the contract |
 | 0.1.0-beta.0 | grid                                                | `columns` and `gap` are numeric unions without a string transform: `columns="3"` is a type error, `[columns]="3"` works | one bracket per attribute; other families accept strings         |
 
 ## Backend

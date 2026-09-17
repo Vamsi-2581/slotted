@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, type OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { SlAvatar, SlAvatarFallback } from '@slotted/angular/avatar';
+import { SlAvatar } from '@slotted/angular/avatar';
 import { SlCard, SlCardBody } from '@slotted/angular/card';
 
 import { DemoStore } from '../../core/demo/demo.store';
@@ -11,7 +11,7 @@ import { BrandMark } from '../../shell/banner/brand-mark';
 /** The demonstration's sign-in: an account chooser over the seeded personas, no password. */
 @Component({
   selector: 'app-sign-in-page',
-  imports: [SlAvatar, SlAvatarFallback, SlCard, SlCardBody, BrandMark],
+  imports: [SlAvatar, SlCard, SlCardBody, BrandMark],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     :host {
@@ -76,9 +76,7 @@ import { BrandMark } from '../../shell/banner/brand-mark';
               [disabled]="!p.active || demo.busy()"
               (click)="signIn(p.key)"
             >
-              <span slAvatar [name]="p.name" size="sm" tone="accent" variant="soft">
-                <span slAvatarFallback></span>
-              </span>
+              <span slAvatar [name]="p.name" size="sm" tone="accent" variant="soft"></span>
               <span>
                 {{ p.name }}
                 <small>{{ p.role }} · {{ p.context }}</small>

@@ -2,15 +2,24 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import {
+  lucideActivity,
   lucideBell,
   lucideBoxes,
+  lucideChartColumn,
   lucideCircleHelp,
+  lucideLandmark,
   lucideLayoutDashboard,
+  lucideLifeBuoy,
   lucideMoon,
+  lucidePackage,
+  lucideScrollText,
   lucideSettings,
+  lucideShoppingCart,
   lucideSun,
   lucideTruck,
   lucideUsers,
+  lucideWarehouse,
+  lucideWorkflow,
 } from '@ng-icons/lucide';
 import { provideAppShellDefaults } from '@slotted/angular/app-shell';
 import { providePageDefaults } from '@slotted/angular/page';
@@ -35,15 +44,24 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     { provide: TitleStrategy, useClass: NexoraTitleStrategy },
     provideIcons({
+      lucideActivity,
       lucideBell,
       lucideBoxes,
+      lucideChartColumn,
       lucideCircleHelp,
+      lucideLandmark,
       lucideLayoutDashboard,
+      lucideLifeBuoy,
       lucideMoon,
+      lucidePackage,
+      lucideScrollText,
       lucideSettings,
+      lucideShoppingCart,
       lucideSun,
       lucideTruck,
       lucideUsers,
+      lucideWarehouse,
+      lucideWorkflow,
     }),
     provideAppShellDefaults({
       messages: {

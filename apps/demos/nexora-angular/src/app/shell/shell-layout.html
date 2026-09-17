@@ -1,0 +1,110 @@
+@switch (session.status()) {
+  @case ('error') {
+    <div class="shell-error" slResultState status="error" reach="page">
+      <div slResultStateContent>
+        <h1 slResultStateTitle>Nexora is unavailable</h1>
+        <p slResultStateDescription>{{ session.error() }}</p>
+      </div>
+      <div slResultStateActions><button slButton (click)="retry()">Retry</button></div>
+    </div>
+  }
+  @default {
+    <div
+      slAppShell
+      primary="banner"
+      canvas="inset"
+      navMode="auto"
+      collapsedTo="rail"
+      scroll="content"
+      [(navOpen)]="navOpen"
+    >
+      <header slAppShellBanner>
+        <app-banner />
+      </header>
+
+      <nav slAppShellNav>
+        <div slAppShellNavHeader>
+          @if (organization(); as org) {
+            <span slAvatar shape="square" size="sm" tone="accent" variant="solid" [name]="org.displayName"></span>
+            <span class="org">
+              <span class="org-name">{{ org.displayName }}</span>
+              <span class="org-role">{{ role() }}</span>
+            </span>
+          } @else {
+            <span slSkeleton shape="square" size="sm"></span>
+          }
+        </div>
+        <div slAppShellNavBody>
+          @if (session.status() === 'ready') {
+            <div
+              slSideNavigation
+              [value]="current()"
+              [expanded]="expanded()"
+              (valueChangeRequest)="navigate($event)"
+              autoExpand
+            >
+              @for (section of sections(); track section.id) {
+                <div slSideNavigationSection>
+                  @if (section.label) {
+                    <div slSideNavigationSectionLabel>{{ section.label }}</div>
+                  }
+                  <ul slSideNavigationList>
+                    @for (m of section.modules; track m.id) {
+                      <li slSideNavigationItem [value]="m.id">
+                        @if (m.destinations.length === 0) {
+                          <a slSideNavigationLink [routerLink]="m.path">
+                            <span slSideNavigationIcon><ng-icon [name]="m.icon" size="16" /></span>
+                            <span slSideNavigationLabel>{{ m.label }}</span>
+                          </a>
+                        } @else {
+                          <button slSideNavigationTrigger>
+                            <span slSideNavigationIcon><ng-icon [name]="m.icon" size="16" /></span>
+                            <span slSideNavigationLabel>{{ m.label }}</span>
+                          </button>
+                          <ul slSideNavigationGroup>
+                            @for (x of m.destinations; track x.id) {
+                              <li slSideNavigationItem [value]="x.id">
+                                <a slSideNavigationLink [routerLink]="x.path">
+                                  <span slSideNavigationLabel>{{ x.label }}</span>
+                                  @if (countFor(x); as count) {
+                                    <span slSideNavigationCount>{{ count }}</span>
+                                  }
+                                </a>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          } @else {
+            <ul slSideNavigationList>
+              @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+                <li slSideNavigationSkeleton></li>
+              }
+            </ul>
+          }
+        </div>
+        <div slAppShellNavFooter>
+          <button slAppShellNavToggle></button>
+          <app-connection-status />
+        </div>
+      </nav>
+
+      <main slAppShellMain>
+        @if (session.status() === 'ready') {
+          <router-outlet />
+        } @else {
+          <div slSkeletonRegion label="Loading page" class="page-skeleton">
+            <span slSkeleton shape="block" size="lg"></span>
+            <p slSkeletonText [lines]="3"></p>
+            <p slSkeletonText [lines]="3"></p>
+          </div>
+        }
+      </main>
+    </div>
+  }
+}

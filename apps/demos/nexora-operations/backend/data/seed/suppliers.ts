@@ -1,5 +1,8 @@
 import {
+  FX_RATES_TO_USD,
   ORGANIZATION_ID,
+  money,
+  type RegionCode,
   addDays,
   businessDateToInstant,
   quantity,
@@ -20,6 +23,14 @@ import {
   SUPPLIER_TAGS,
   US_CITIES,
 } from '../vocabulary';
+import {
+  BR_CITIES,
+  BR_COMPANY_DESCRIPTORS,
+  BR_COMPANY_STEMS,
+  BR_FIRST_NAMES,
+  BR_LAST_NAMES,
+  BR_STREET_NAMES,
+} from '../vocabulary-br';
 
 /** Section 46 — flagship suppliers; their names double as product brands. */
 export const FLAGSHIP_SUPPLIERS: {
@@ -119,6 +130,7 @@ export function seedSuppliers(context: SeedContext): SupplierSeedResult {
     category: string,
     tier: Supplier['relationshipTier'],
     flagship: boolean,
+    regionCode: RegionCode = 'US',
   ): Supplier => {
     const status: Supplier['status'] = flagship
       ? 'active'
@@ -127,16 +139,24 @@ export function seedSuppliers(context: SeedContext): SupplierSeedResult {
           { value: 'on_hold', weight: 5 },
           { value: 'inactive', weight: 7 },
         ]);
-    const currencies = random.chance(0.14)
-      ? (['USD', random.pick(['EUR', 'GBP'])] as Supplier['supportedCurrencies'])
-      : (['USD'] as Supplier['supportedCurrencies']);
-    const contactFirst = random.pick(FIRST_NAMES);
-    const contactLast = random.pick(LAST_NAMES);
-    const domain = `${name.toLowerCase().replace(/[^a-z0-9]+/g, '')}.example`;
+    const brazil = regionCode === 'BR';
+    const currencies = brazil
+      ? (['BRL'] as Supplier['supportedCurrencies'])
+      : random.chance(0.14)
+        ? (['USD', random.pick(['EUR', 'GBP'])] as Supplier['supportedCurrencies'])
+        : (['USD'] as Supplier['supportedCurrencies']);
+    const contactFirst = random.pick(brazil ? BR_FIRST_NAMES : FIRST_NAMES);
+    const contactLast = random.pick(brazil ? BR_LAST_NAMES : LAST_NAMES);
+    const domain = `${name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '')}.${brazil ? 'com.br' : 'example'}`;
     const supplier: Supplier = withId({
       id: context.nextId('supplier'),
       organizationId: ORGANIZATION_ID,
       supplierNumber: context.sequences.nextBusinessNumber('supplier'),
+      regionCode,
       legalName: `${name}${random.chance(0.6) ? ', Inc.' : random.chance(0.5) ? ' LLC' : ' Corp.'}`,
       displayName: name,
       status,
@@ -166,18 +186,22 @@ export function seedSuppliers(context: SeedContext): SupplierSeedResult {
     bucket.push(supplier.id);
     supplierIdsByCategory.set(category, bucket);
 
-    const city = random.pick(US_CITIES);
+    const city = random.pick(brazil ? BR_CITIES : US_CITIES);
     const address: Address = withId({
       id: context.nextId('address'),
       organizationId: ORGANIZATION_ID,
       ownerType: 'supplier',
       ownerId: supplier.id,
       type: 'headquarters',
-      line1: `${random.int(100, 9_900)} ${random.pick(STREET_NAMES)}`,
+      line1: brazil
+        ? `${random.pick(BR_STREET_NAMES)}, ${random.int(100, 9_900)}`
+        : `${random.int(100, 9_900)} ${random.pick(STREET_NAMES)}`,
       city: city.city,
       region: city.region,
-      postalCode: `${city.postalPrefix}${random.digits(2)}`,
-      countryCode: 'US',
+      postalCode: brazil
+        ? `${city.postalPrefix}${random.digits(3)}-${random.digits(3)}`
+        : `${city.postalPrefix}${random.digits(2)}`,
+      countryCode: brazil ? 'BR' : 'US',
       isDefault: true,
       metadata: context.metadata(supplier.metadata.createdAt),
     });
@@ -194,8 +218,12 @@ export function seedSuppliers(context: SeedContext): SupplierSeedResult {
   }
 
   const target = Math.max(scale.suppliers, FLAGSHIP_SUPPLIERS.length);
+  const brazilEnabled = scale.warehouses > 5;
   while (dataset.suppliers.size < target) {
-    const name = `${random.pick(COMPANY_STEMS)} ${random.pick(SUPPLIER_DESCRIPTORS)}`;
+    const brazil = brazilEnabled && random.chance(0.1);
+    const name = brazil
+      ? `${random.pick(BR_COMPANY_STEMS)} ${random.pick(BR_COMPANY_DESCRIPTORS)}`
+      : `${random.pick(COMPANY_STEMS)} ${random.pick(SUPPLIER_DESCRIPTORS)}`;
     if (usedNames.has(name)) continue;
     usedNames.add(name);
     const tier = random.weighted<Supplier['relationshipTier']>([
@@ -203,7 +231,7 @@ export function seedSuppliers(context: SeedContext): SupplierSeedResult {
       { value: 'preferred', weight: 28 },
       { value: 'conditional', weight: 10 },
     ]);
-    createSupplier(name, random.pick(SUPPLIER_CATEGORIES), tier, false);
+    createSupplier(name, random.pick(SUPPLIER_CATEGORIES), tier, false, brazil ? 'BR' : 'US');
   }
 
   // Supplier ↔ SKU mappings. Each SKU gets a preferred supplier aligned with its
@@ -243,11 +271,17 @@ export function seedSuppliers(context: SeedContext): SupplierSeedResult {
         supplierId,
         skuId: sku.id,
         supplierSku: `${random.letters(2)}${random.digits(random.int(5, 7))}`,
-        unitCost: usd(roundHalfUp(sku.standardCost.minor * costRatio)),
+        unitCost:
+          supplier?.regionCode === 'BR'
+            ? money(
+                roundHalfUp((sku.standardCost.minor * costRatio) / Number(FX_RATES_TO_USD.BRL)),
+                'BRL',
+              )
+            : usd(roundHalfUp(sku.standardCost.minor * costRatio)),
         minimumOrderQuantity: quantity(packMultiple * random.pick([1, 1, 2, 4])),
         packMultiple: quantity(packMultiple),
         leadTimeDays: Math.max(1, sku.leadTimeDays + random.int(-3, 10)),
-        currency: 'USD',
+        currency: supplier?.regionCode === 'BR' ? 'BRL' : 'USD',
         status: supplier?.status === 'inactive' ? 'inactive' : 'active',
         isPreferred: first,
       };

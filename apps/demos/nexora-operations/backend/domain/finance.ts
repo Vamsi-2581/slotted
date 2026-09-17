@@ -67,7 +67,8 @@ export interface InvoiceLine {
   unitCostSnapshot?: Money;
 }
 
-export type PaymentMethod = 'ach' | 'wire' | 'credit_card' | 'check' | 'other';
+/** `pix` and `boleto` are the Brazil region's local methods. */
+export type PaymentMethod = 'ach' | 'wire' | 'credit_card' | 'check' | 'pix' | 'boleto' | 'other';
 export type PaymentStatus = 'pending' | 'posted' | 'failed' | 'reversed';
 
 export interface Payment {

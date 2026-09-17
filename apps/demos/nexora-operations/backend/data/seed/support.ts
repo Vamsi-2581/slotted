@@ -18,14 +18,13 @@ import {
   type TicketStatus,
 } from '../../domain';
 import type { Random } from '../random';
+import { RESOLUTION_CODES, TICKET_CATEGORIES, TICKET_SUBJECTS } from '../vocabulary';
 import {
-  RESOLUTION_CODES,
-  TICKET_AGENT_REPLIES,
-  TICKET_CATEGORIES,
-  TICKET_CUSTOMER_OPENERS,
-  TICKET_INTERNAL_NOTES,
-  TICKET_SUBJECTS,
-} from '../vocabulary';
+  AGENT_REPLIES_BY_CATEGORY,
+  INTERNAL_NOTES,
+  TICKET_FOLLOWUPS,
+  TICKET_OPENERS_BY_CATEGORY,
+} from '../corpora';
 import type { SeedContext } from './context';
 import type { CustomerSeedResult } from './customers';
 import { instantOn, metadataAt } from './orders';
@@ -337,7 +336,14 @@ function buildTicket(
     ticketNumber: override?.ticketNumber ?? deps.ticketNumber(index + 1),
     customerId,
     subject,
-    description: override?.description ?? fill(random.pick(TICKET_CUSTOMER_OPENERS), tokens),
+    description:
+      override?.description ??
+      fill(
+        random.pick(
+          TICKET_OPENERS_BY_CATEGORY[category] ?? (TICKET_OPENERS_BY_CATEGORY['other'] as string[]),
+        ),
+        tokens,
+      ),
     channel: random.weighted([
       { value: 'email', weight: 52 },
       { value: 'portal', weight: 24 },
@@ -470,16 +476,31 @@ function buildTicket(
   };
   addMessage('customer', ticket.description, 'public', createdAt);
   if (firstRespondedAt) {
-    addMessage('user', random.pick(TICKET_AGENT_REPLIES), 'public', firstRespondedAt);
+    addMessage(
+      'user',
+      random.pick(
+        AGENT_REPLIES_BY_CATEGORY[category] ?? (AGENT_REPLIES_BY_CATEGORY['other'] as string[]),
+      ),
+      'public',
+      firstRespondedAt,
+    );
     cursor = firstRespondedAt;
   }
   while (messages.length < messageTarget) {
     const next = addMs(cursor, random.int(30, 60 * 30) * 60_000);
     if (instantMs(next) > instantMs(lastAllowed)) break;
     const roll = random.next();
-    if (roll < 0.4) addMessage('customer', random.pick(TICKET_CUSTOMER_OPENERS), 'public', next);
-    else if (roll < 0.8) addMessage('user', random.pick(TICKET_AGENT_REPLIES), 'public', next);
-    else addMessage('user', random.pick(TICKET_INTERNAL_NOTES), 'internal', next);
+    if (roll < 0.4) addMessage('customer', random.pick(TICKET_FOLLOWUPS), 'public', next);
+    else if (roll < 0.8)
+      addMessage(
+        'user',
+        random.pick(
+          AGENT_REPLIES_BY_CATEGORY[category] ?? (AGENT_REPLIES_BY_CATEGORY['other'] as string[]),
+        ),
+        'public',
+        next,
+      );
+    else addMessage('user', random.pick(INTERNAL_NOTES), 'internal', next);
     cursor = next;
   }
   if (resolvedAt)

@@ -430,7 +430,7 @@ function seedNotificationsAndTasks(context: SeedContext, tenant: TenantSeedResul
           userId,
           'warning',
           `Invoice ${invoice.invoiceNumber} is ${diffDays(today, invoice.dueDate)} days overdue`,
-          `${customer?.displayName ?? 'Customer'} owes ${(invoice.outstanding.minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}.`,
+          `${customer?.displayName ?? 'Customer'} owes ${(invoice.outstanding.minor / 100).toLocaleString('en-US', { style: 'currency', currency: invoice.currency })}.`,
           'invoice',
           invoice.id,
           hoursAgo,

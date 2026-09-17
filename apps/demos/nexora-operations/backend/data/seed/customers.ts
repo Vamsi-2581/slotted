@@ -1,11 +1,13 @@
 import {
   ORGANIZATION_ID,
+  money,
+  regionByCode,
+  type RegionCode,
   addDays,
   addMinutes,
   businessDateToInstant,
   quantity,
   roundHalfUp,
-  usd,
   type Address,
   type Contact,
   type ContractPrice,
@@ -27,14 +29,23 @@ import {
   CUSTOMER_TAGS,
   EMPLOYEE_BANDS,
   FIRST_NAMES,
-  HOLD_REASONS,
   INDUSTRIES,
   LAST_NAMES,
-  NOTE_BODIES,
   STREET_NAMES,
   US_CITIES,
   type CityRecord,
 } from '../vocabulary';
+import {
+  BR_CITIES,
+  BR_COMPANY_DESCRIPTORS,
+  BR_COMPANY_PATTERNS,
+  BR_COMPANY_STEMS,
+  BR_COMPANY_SUFFIXES,
+  BR_FIRST_NAMES,
+  BR_LAST_NAMES,
+  BR_STREET_NAMES,
+} from '../vocabulary-br';
+import { CUSTOMER_NOTE_BODIES, HOLD_REASONS_LONG } from '../corpora';
 
 const CENTRAL_STATES = new Set([
   'IL',
@@ -271,14 +282,27 @@ export function seedCustomers(
     bucket.push(user.id);
     salesRepsByTeam.set(team.code, bucket);
   }
-  const teamCodeFor = (region: string, segment: CustomerSegment): string => {
+  const teamCodeFor = (
+    region: string,
+    segment: CustomerSegment,
+    regionCode: RegionCode,
+  ): string => {
+    if (regionCode === 'BR' && tenant.teamIdsByCode.has('SALES-BR')) return 'SALES-BR';
     if (segment === 'strategic' && tenant.teamIdsByCode.has('SALES-SA')) return 'SALES-SA';
     if (CENTRAL_STATES.has(region) && tenant.teamIdsByCode.has('SALES-C')) return 'SALES-C';
     if (EAST_STATES.has(region) && tenant.teamIdsByCode.has('SALES-E')) return 'SALES-E';
     return tenant.teamIdsByCode.has('SALES-W') ? 'SALES-W' : 'SALES-C';
   };
 
-  const priceListFor = (segment: CustomerSegment): string => {
+  const priceListFor = (segment: CustomerSegment, regionCode: RegionCode): string => {
+    if (regionCode === 'BR') {
+      const brName =
+        segment === 'smb' || random.chance(0.6) ? 'Brazil Standard' : 'Brazil Distributor';
+      return (
+        tenant.priceListIdsByName.get(brName) ??
+        (tenant.priceListIdsByName.get('Standard') as string)
+      );
+    }
     const name =
       segment === 'smb'
         ? 'SMB'
@@ -314,7 +338,20 @@ export function seedCustomers(
     count: number,
     options: { noPhone?: boolean } = {},
   ): Contact[] => {
-    const domain = `${customer.displayName.toLowerCase().replace(/[^a-z0-9]+/g, '')}.example`;
+    const brazil = customer.regionCode === 'BR';
+    const domain = `${customer.displayName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '')}.${brazil ? 'com.br' : 'example'}`;
+    const phone = (): string =>
+      brazil
+        ? `+55 (${random.pick(['11', '11', '19', '21', '31', '41', '47', '51'])}) ${random.int(2000, 5999)}-${random.digits(4)}`
+        : `(${random.int(201, 989)}) ${random.int(200, 999)}-${random.digits(4)}`;
+    const mobile = (): string =>
+      brazil
+        ? `+55 (${random.pick(['11', '11', '19', '21', '31', '41', '47', '51'])}) 9${random.digits(4)}-${random.digits(4)}`
+        : phone();
     const contacts: Contact[] = [];
     const roles: [string, string][] = [
       ['Purchasing Manager', 'Procurement'],
@@ -329,8 +366,8 @@ export function seedCustomers(
       ['Owner', 'Executive'],
     ];
     for (let index = 0; index < count; index += 1) {
-      const firstName = random.pick(FIRST_NAMES);
-      const lastName = random.pick(LAST_NAMES);
+      const firstName = random.pick(brazil ? BR_FIRST_NAMES : FIRST_NAMES);
+      const lastName = random.pick(brazil ? BR_LAST_NAMES : LAST_NAMES);
       const [title, department] = index === 0 ? (roles[0] as [string, string]) : random.pick(roles);
       const hasPhone = !options.noPhone && random.chance(0.8);
       const contact: Contact = withId({
@@ -342,16 +379,16 @@ export function seedCustomers(
         displayName: `${firstName} ${lastName}`,
         title,
         department,
-        email: `${firstName}.${lastName}@${domain}`.toLowerCase().replace(/[^a-z0-9.@]/g, ''),
+        email: `${firstName}.${lastName}@${domain}`
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9.@]/g, ''),
         isPrimary: index === 0,
         status: index > 0 && random.chance(0.08) ? 'inactive' : 'active',
         metadata: context.metadata(addDays(customer.metadata.createdAt, random.int(0, 400))),
-        ...(hasPhone
-          ? { phone: `(${random.int(201, 989)}) ${random.int(200, 999)}-${random.digits(4)}` }
-          : {}),
-        ...(hasPhone && random.chance(0.4)
-          ? { mobile: `(${random.int(201, 989)}) ${random.int(200, 999)}-${random.digits(4)}` }
-          : {}),
+        ...(hasPhone ? { phone: phone() } : {}),
+        ...(hasPhone && random.chance(0.4) ? { mobile: mobile() } : {}),
         ...(random.chance(0.6)
           ? { preferredContactMethod: hasPhone && random.chance(0.3) ? 'phone' : 'email' }
           : {}),
@@ -386,11 +423,17 @@ export function seedCustomers(
         ownerType: 'customer',
         ownerId: customer.id,
         type,
-        line1: `${random.int(100, 9_900)} ${random.pick(STREET_NAMES)}`,
+        line1:
+          customer.regionCode === 'BR'
+            ? `${random.pick(BR_STREET_NAMES)}, ${random.int(100, 9_900)}`
+            : `${random.int(100, 9_900)} ${random.pick(STREET_NAMES)}`,
         city: cityRecord.city,
         region: cityRecord.region,
-        postalCode: `${cityRecord.postalPrefix}${random.digits(2)}`,
-        countryCode: 'US',
+        postalCode:
+          customer.regionCode === 'BR'
+            ? `${cityRecord.postalPrefix}${random.digits(3)}-${random.digits(3)}`
+            : `${cityRecord.postalPrefix}${random.digits(2)}`,
+        countryCode: customer.regionCode === 'BR' ? 'BR' : 'US',
         isDefault,
         metadata: context.metadata(customer.metadata.createdAt),
         ...(label ? { label } : {}),
@@ -452,7 +495,7 @@ export function seedCustomers(
         organizationId: ORGANIZATION_ID,
         customerId: customer.id,
         authorId: owner?.id ?? customer.accountOwnerId,
-        body: random.pick(NOTE_BODIES),
+        body: random.pick(CUSTOMER_NOTE_BODIES),
         visibility: random.weighted([
           { value: 'organization', weight: 70 },
           { value: 'team', weight: 22 },
@@ -484,8 +527,11 @@ export function seedCustomers(
     ownerId?: string;
     tags: string[];
     flagship?: boolean;
+    regionCode?: RegionCode;
   }): Customer => {
-    const teamCode = teamCodeFor(spec.city.region, spec.segment);
+    const regionCode = spec.regionCode ?? 'US';
+    const region = regionByCode(regionCode);
+    const teamCode = teamCodeFor(spec.city.region, spec.segment, regionCode);
     const reps = salesRepsByTeam.get(teamCode) ??
       [...salesRepsByTeam.values()][0] ?? [tenant.personaUserIds.get('noah-bennett') as string];
     const ownerId = spec.ownerId ?? random.pick(reps);
@@ -494,18 +540,28 @@ export function seedCustomers(
       id: context.nextId('customer'),
       organizationId: ORGANIZATION_ID,
       accountNumber: spec.accountNumber ?? context.sequences.nextBusinessNumber('customer'),
+      regionCode,
       legalName: spec.legalName,
       displayName: spec.displayName,
       status: spec.status,
       segment: spec.segment,
       industry: spec.industry,
       employeeBand: spec.employeeBand,
-      website: `https://www.${spec.displayName.toLowerCase().replace(/[^a-z0-9]+/g, '')}.example`,
+      website: `https://www.${spec.displayName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '')}.${regionCode === 'BR' ? 'com.br' : 'example'}`,
       accountOwnerId: ownerId,
       salesTeamId: tenant.teamIdsByCode.get(teamCode) as string,
       paymentTermsCode: spec.paymentTerms,
-      creditLimit: usd(spec.creditLimit * 100),
-      priceListId: priceListFor(spec.segment),
+      creditLimit: money(
+        regionCode === 'BR'
+          ? Math.round(spec.creditLimit / Number(region.fxRateToUsd) / 1_000) * 1_000 * 100
+          : spec.creditLimit * 100,
+        region.currency,
+      ),
+      priceListId: priceListFor(spec.segment, regionCode),
       taxProfile: random.chance(0.08)
         ? {
             type: 'exempt',
@@ -516,9 +572,12 @@ export function seedCustomers(
             ]),
           }
         : { type: 'taxable' },
-      preferredCurrency: 'USD',
+      preferredCurrency: region.currency,
       customerSince: spec.customerSince,
-      annualRevenueEstimate: usd(roundHalfUp(spec.creditLimit * random.float(6, 30)) * 100),
+      annualRevenueEstimate: money(
+        roundHalfUp((spec.creditLimit * random.float(6, 30)) / Number(region.fxRateToUsd)) * 100,
+        region.currency,
+      ),
       health: spec.health,
       tags: spec.tags,
       metadata: context.metadata(
@@ -528,7 +587,7 @@ export function seedCustomers(
         ownerId,
       ),
     });
-    if (spec.status === 'on_hold') customer.holdReason = random.pick(HOLD_REASONS);
+    if (spec.status === 'on_hold') customer.holdReason = random.pick(HOLD_REASONS_LONG);
     if (spec.status === 'closed' || spec.status === 'inactive') {
       if (random.chance(0.5))
         customer.metadata.archivedAt = addMinutes(
@@ -566,11 +625,15 @@ export function seedCustomers(
   // Generated customers
   const target = Math.max(scale.customers, FLAGSHIP_CUSTOMERS.length);
   let generatedIndex = 0;
+  const brazilEnabled = scale.warehouses > 5;
   while (dataset.customers.size < target) {
-    const stem = random.pick(COMPANY_STEMS);
-    const descriptor = random.pick(COMPANY_DESCRIPTORS);
-    const suffix = random.weighted(COMPANY_SUFFIXES);
-    const displayName = `${stem} ${descriptor}`;
+    const brazil = brazilEnabled && generatedIndex >= 12 && random.chance(0.2);
+    const stem = random.pick(brazil ? BR_COMPANY_STEMS : COMPANY_STEMS);
+    const descriptor = random.pick(brazil ? BR_COMPANY_DESCRIPTORS : COMPANY_DESCRIPTORS);
+    const suffix = random.weighted(brazil ? BR_COMPANY_SUFFIXES : COMPANY_SUFFIXES);
+    const displayName = brazil
+      ? random.weighted(BR_COMPANY_PATTERNS).replace('{d}', descriptor).replace('{s}', stem)
+      : `${stem} ${descriptor}`;
     if (usedNames.has(displayName)) {
       if (random.chance(0.5)) continue;
     }
@@ -596,11 +659,11 @@ export function seedCustomers(
             { value: 'watch', weight: 22 },
             { value: 'at_risk', weight: 8 },
           ]);
-    const city = random.pick(US_CITIES);
+    const city = random.pick(brazil ? BR_CITIES : US_CITIES);
     const sinceDays = status === 'prospect' ? random.int(5, 120) : random.int(120, 365 * 7);
     const creditLimit = creditLimitFor(random, segment);
     const legalName = suffix
-      ? `${displayName}${suffix === 'Group' ? ' Group' : `, ${suffix}`}`
+      ? `${displayName}${suffix === 'Group' ? ' Group' : brazil ? ` ${suffix}` : `, ${suffix}`}`
       : displayName;
     const customer = createCustomer({
       displayName,
@@ -629,6 +692,7 @@ export function seedCustomers(
         )
       ] as string,
       tags: random.chance(0.45) ? random.sample(CUSTOMER_TAGS, random.int(1, 3)) : [],
+      regionCode: brazil ? 'BR' : 'US',
     });
     const contactCount = Math.max(
       1,
@@ -706,7 +770,11 @@ export function seedCustomers(
     const prices: ContractPrice[] = [];
     for (const skuId of chosen) {
       const standard = catalog.entriesByList
-        .get(tenant.priceListIdsByName.get('Standard') as string)
+        .get(
+          tenant.priceListIdsByName.get(
+            customer.regionCode === 'BR' ? 'Brazil Standard' : 'Standard',
+          ) as string,
+        )
         ?.get(skuId);
       if (!standard) continue;
       const validFrom = addDays(context.today, -random.int(30, 400));
@@ -715,8 +783,11 @@ export function seedCustomers(
         organizationId: ORGANIZATION_ID,
         customerId,
         skuId,
-        currency: 'USD',
-        unitPrice: usd(roundHalfUp(standard.unitPrice.minor * random.float(0.78, 0.92))),
+        currency: customer.preferredCurrency,
+        unitPrice: money(
+          roundHalfUp(standard.unitPrice.minor * random.float(0.78, 0.92)),
+          customer.preferredCurrency,
+        ),
         validFrom,
         validTo: addDays(validFrom, random.pick([365, 365, 540, 730])),
         metadata: context.metadata(businessDateToInstant(validFrom, 10), customer.accountOwnerId),

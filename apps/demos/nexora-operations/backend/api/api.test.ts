@@ -232,6 +232,30 @@ describe('order to cash', () => {
   });
 });
 
+describe('regions and currencies', () => {
+  it('exposes the operating regions and issues Brazilian documents in BRL', async () => {
+    const session = await api.session.get();
+    expect(session.organization.regions.map((region) => region.code)).toEqual(['US', 'BR']);
+    const brazil = await api.customers.list({ filter: { regionCode: 'BR' }, pageSize: 25 });
+    expect(brazil.page.totalItems).toBeGreaterThan(0);
+    const customer = brazil.data[0]!;
+    expect(customer.preferredCurrency).toBe('BRL');
+    expect(customer.creditLimit.currency).toBe('BRL');
+    expect(customer.summary.grossReceivables.currency).toBe('BRL');
+    const orders = await api.orders.list({
+      filter: { customerId: customer.id },
+      pageSize: 25,
+    });
+    for (const order of orders.data) {
+      expect(order.currency).toBe('BRL');
+      expect(order.total.currency).toBe('BRL');
+    }
+    const invoices = await api.finance.invoices.list({ filter: { currency: 'BRL' }, pageSize: 25 });
+    expect(invoices.page.totalItems).toBeGreaterThan(0);
+    expect(invoices.data[0]!.fxRateToUsd).toBe('0.18500000');
+  });
+});
+
 describe('analytics and scenarios', () => {
   it('produces a dashboard, finance overview and search results', async () => {
     const dashboard = await api.analytics.dashboard();

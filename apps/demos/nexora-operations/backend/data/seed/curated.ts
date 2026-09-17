@@ -5,6 +5,8 @@ import {
   compareDates,
   diffDays,
   formatId,
+  FX_RATES_TO_USD,
+  money,
   usd,
   type ContractPrice,
   type Customer,
@@ -75,7 +77,7 @@ export function curateMasterData(
     const entry = catalog.entriesByList.get(listId)?.get(mx240);
     if (!entry) continue;
     const factor =
-      listName === 'Standard'
+      listName === 'Standard' || listName === 'Brazil Standard'
         ? 1
         : listName === 'SMB'
           ? 1.04
@@ -83,8 +85,15 @@ export function curateMasterData(
             ? 0.94
             : listName === 'Strategic Accounts'
               ? 0.89
-              : 0.85;
-    entry.unitPrice = usd(Math.round((MERIDIAN.mx240ListPriceMinor * factor) / 100) * 100);
+              : listName === 'Brazil Distributor'
+                ? 0.88
+                : 0.85;
+    // Brazil lists keep the landed-price rule of the catalog seed (USD list / FX × 1.15).
+    const landed = entry.unitPrice.currency === 'BRL' ? 1.15 / Number(FX_RATES_TO_USD.BRL) : 1;
+    entry.unitPrice = money(
+      Math.round((MERIDIAN.mx240ListPriceMinor * factor * landed) / 100) * 100,
+      entry.unitPrice.currency,
+    );
   }
   void standardListId;
   const existing = [...dataset.contractPrices.values()].find(
@@ -518,6 +527,8 @@ export function tuneMeridianReceivables(
     if (invoice.invoiceNumber === MERIDIAN.invoiceNumber) continue;
     if (diffDays(today, invoice.issueDate) < 3) continue;
     const amount = invoice.outstanding.minor;
+    // Settle only invoices that keep the balance at or above the narrative figure.
+    if (outstanding - amount < MERIDIAN.grossReceivablesTargetMinor) continue;
     const paymentDate = nextBusinessDayOnOrAfter(
       addDays(
         invoice.issueDate,

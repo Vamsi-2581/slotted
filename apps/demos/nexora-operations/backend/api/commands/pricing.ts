@@ -3,7 +3,8 @@ import {
   priceLine,
   quantityFitsPrecision,
   taxRateBpsFor,
-  usd,
+  fromUsd,
+  money,
   type Customer,
   type DocumentTotals,
   type FieldError,
@@ -53,9 +54,12 @@ export function resolveListPrice(
       (!entry.validTo || entry.validTo >= businessDate),
   );
   if (customerEntry) return { unitPrice: customerEntry.unitPrice, source: 'customer_list' };
-  const standardId = [...runtime.store.dataset.priceLists.values()].find(
-    (list) => list.name === 'Standard',
-  )?.id;
+  const lists = [...runtime.store.dataset.priceLists.values()];
+  const standardId =
+    lists.find(
+      (list) =>
+        list.regionCode === customer.regionCode && list.currency === customer.preferredCurrency,
+    )?.id ?? lists.find((list) => list.name === 'Standard')?.id;
   const standard = entries.find(
     (entry) => entry.priceListId === standardId && entry.validFrom <= businessDate,
   );
@@ -127,7 +131,7 @@ export function priceLines(
           code: 'FORBIDDEN',
           message: 'Price override requires orders.override_price',
         });
-      listUnitPrice = usd(input.unitPriceMinor);
+      listUnitPrice = money(input.unitPriceMinor, customer.preferredCurrency);
       source = 'override';
     } else {
       const resolved = resolveListPrice(runtime, customer, sku, businessDate);
@@ -147,8 +151,13 @@ export function priceLines(
       quantity: input.quantity,
       listUnitPrice,
       discountBps,
-      taxRateBps: taxRateBpsFor(shippingRegion, customer.taxProfile, sku.taxClass),
-      unitCost: sku.standardCost,
+      taxRateBps: taxRateBpsFor(
+        shippingRegion,
+        customer.taxProfile,
+        sku.taxClass,
+        customer.regionCode,
+      ),
+      unitCost: fromUsd(sku.standardCost, customer.preferredCurrency),
     });
     if (priced.netAmount.minor < 0)
       errors.push({
@@ -165,7 +174,7 @@ export function priceLines(
       documentTotals(
         lines.map((line) => line.priced),
         freight,
-        'USD',
+        customer.preferredCurrency,
       ),
   };
 }

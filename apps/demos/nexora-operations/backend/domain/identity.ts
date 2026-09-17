@@ -1,4 +1,10 @@
-import type { AddressSnapshot, CurrencyCode, EntityMetadata, PermissionScope } from './common';
+import type {
+  AddressSnapshot,
+  CurrencyCode,
+  EntityMetadata,
+  PermissionScope,
+  Region,
+} from './common';
 
 export interface Organization {
   id: string;
@@ -7,6 +13,7 @@ export interface Organization {
   industry: string;
   primaryCurrency: 'USD';
   supportedCurrencies: CurrencyCode[];
+  regions: Region[];
   timezone: 'America/Chicago';
   fiscalYearStartMonth: 1;
   billingAddress: AddressSnapshot;

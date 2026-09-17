@@ -5,7 +5,9 @@ import {
   type CustomerNote,
   type CustomerSegment,
   type PaymentTermsCode,
-  usd,
+  type RegionCode,
+  money,
+  regionByCode,
 } from '../../domain';
 import type { ApiRuntime, MutationOptions } from '../runtime';
 import {
@@ -26,7 +28,10 @@ export interface CreateCustomerInput {
   legalName?: string;
   segment: CustomerSegment;
   industry: string;
+  /** Defaults to 'US'. Sets `preferredCurrency`, the credit limit currency and the default price list of the region. */
+  regionCode?: RegionCode;
   paymentTermsCode?: PaymentTermsCode;
+  /** Minor units of the region currency. */
   creditLimitMinor?: number;
   priceListId?: string;
   accountOwnerId?: string;
@@ -70,12 +75,23 @@ export type UpdateCustomerInput = Partial<
     | 'billingAddressId'
     | 'defaultShippingAddressId'
   >
-> & { creditLimitMinor?: number; taxExempt?: boolean; status?: 'prospect' | 'active' | 'inactive' };
+> & {
+  creditLimitMinor?: number;
+  taxExempt?: boolean;
+  status?: 'prospect' | 'active' | 'inactive';
+};
 
 export function createCrmCommands(runtime: ApiRuntime) {
-  const standardList = (): string =>
-    [...runtime.store.dataset.priceLists.values()].find((list) => list.name === 'Standard')?.id ??
-    (runtime.store.dataset.priceLists.keys().next().value as string);
+  const standardList = (regionCode: RegionCode): string => {
+    const lists = [...runtime.store.dataset.priceLists.values()];
+    const region = regionByCode(regionCode);
+    return (
+      lists.find((list) => list.regionCode === regionCode && list.currency === region.currency)
+        ?.id ??
+      lists.find((list) => list.name === 'Standard')?.id ??
+      (runtime.store.dataset.priceLists.keys().next().value as string)
+    );
+  };
 
   return {
     create: (input: CreateCustomerInput, options?: MutationOptions): Promise<CustomerListItem> =>
@@ -114,11 +130,14 @@ export function createCrmCommands(runtime: ApiRuntime) {
           )?.teamId ??
           [...dataset.teams.values()].find((team) => team.type === 'sales')?.id ??
           '';
+        const regionCode = input.regionCode ?? 'US';
+        const region = regionByCode(regionCode);
         const id = runtime.store.nextId('customer');
         const customer: Customer = {
           id,
           organizationId: dataset.organization.id,
           accountNumber: runtime.store.nextBusinessNumber('customer'),
+          regionCode,
           legalName: trimmed(input.legalName) ?? input.displayName.trim(),
           displayName: input.displayName.trim(),
           status: 'prospect',
@@ -127,12 +146,12 @@ export function createCrmCommands(runtime: ApiRuntime) {
           accountOwnerId: ownerId,
           salesTeamId: teamId,
           paymentTermsCode: input.paymentTermsCode ?? 'NET_30',
-          creditLimit: usd(input.creditLimitMinor ?? 0),
-          priceListId: input.priceListId ?? standardList(),
+          creditLimit: money(input.creditLimitMinor ?? 0, region.currency),
+          priceListId: input.priceListId ?? standardList(regionCode),
           taxProfile: input.taxExempt
             ? { type: 'exempt', exemptionReason: 'Exemption certificate on file' }
             : { type: 'taxable' },
-          preferredCurrency: 'USD',
+          preferredCurrency: region.currency,
           customerSince: runtime.store.today,
           health: 'healthy',
           tags: input.tags ?? [],
@@ -263,7 +282,7 @@ export function createCrmCommands(runtime: ApiRuntime) {
           input.creditLimitMinor !== undefined &&
           input.creditLimitMinor !== customer.creditLimit.minor
         ) {
-          customer.creditLimit = usd(input.creditLimitMinor);
+          customer.creditLimit = money(input.creditLimitMinor, customer.preferredCurrency);
           changed.push('creditLimit');
         }
         if (input.taxExempt !== undefined) {

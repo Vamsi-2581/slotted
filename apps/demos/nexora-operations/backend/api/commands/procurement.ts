@@ -4,9 +4,15 @@ import {
   evaluatePurchaseOrderApproval,
   milliToQuantity,
   quantityToMilli,
+  FX_RATES_TO_USD,
+  addMoney,
+  fromUsd,
+  money,
   ratioBps,
-  usd,
+  regionByCode,
+  usdMinor,
   type GoodsReceipt,
+  type RegionCode,
   type PaymentTermsCode,
   type PurchaseOrder,
   type PurchaseOrderLine,
@@ -62,6 +68,8 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
         primaryContactName?: string;
         primaryContactEmail?: string;
         tags?: string[];
+        /** Defaults to 'US'. */
+        regionCode?: RegionCode;
       },
       options?: MutationOptions,
     ): Promise<SupplierListItem> =>
@@ -76,13 +84,14 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
           id,
           organizationId: runtime.store.dataset.organization.id,
           supplierNumber: runtime.store.nextBusinessNumber('supplier'),
+          regionCode: input.regionCode ?? 'US',
           legalName: trimmed(input.legalName) ?? input.displayName.trim(),
           displayName: input.displayName.trim(),
           status: 'active',
           relationshipTier: input.relationshipTier ?? 'standard',
           category: input.category.trim(),
           paymentTermsCode: input.paymentTermsCode ?? 'NET_30',
-          supportedCurrencies: ['USD'],
+          supportedCurrencies: [regionByCode(input.regionCode ?? 'US').currency],
           tags: input.tags ?? [],
           metadata: metadata(tx, id),
           ...(trimmed(input.primaryContactName)
@@ -177,7 +186,10 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
       const mapping = runtime.indexes.mappingsBySku
         .get(sku.id)
         .find((candidate) => candidate.supplierId === po.supplierId);
-      const unitCost = input.unitCostMinor ?? mapping?.unitCost.minor ?? sku.standardCost.minor;
+      const unitCost =
+        input.unitCostMinor ??
+        (mapping?.currency === po.currency ? mapping.unitCost.minor : undefined) ??
+        fromUsd(sku.standardCost, po.currency).minor;
       const previous = lastAcceptedCost(po.supplierId, sku.id);
       if (previous)
         maxVarianceBps = Math.max(maxVarianceBps, ratioBps(unitCost - previous, previous));
@@ -195,9 +207,9 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
         receivedAcceptedQuantity: '0',
         receivedDamagedQuantity: '0',
         rejectedQuantity: '0',
-        unitCost: usd(unitCost),
+        unitCost: money(unitCost, po.currency),
         taxRateBps: 0,
-        lineTotal: usd(lineTotal),
+        lineTotal: money(lineTotal, po.currency),
         expectedDate: input.expectedDate ?? po.expectedDate,
       };
       tx.create('purchaseOrderLines', line);
@@ -221,10 +233,10 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
   };
 
   const recalcTotals = (po: PurchaseOrder, subtotalMinor: number, freightMinor: number): void => {
-    po.subtotal = usd(subtotalMinor);
-    po.taxTotal = usd(0);
-    po.freight = usd(freightMinor);
-    po.total = usd(subtotalMinor + freightMinor);
+    po.subtotal = money(subtotalMinor, po.currency);
+    po.taxTotal = money(0, po.currency);
+    po.freight = money(freightMinor, po.currency);
+    po.total = money(subtotalMinor + freightMinor, po.currency);
   };
 
   const poHooks: ApprovalDecisionHooks = {
@@ -268,6 +280,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
         const warehouse = load(runtime, 'warehouses', input.destinationWarehouseId, 'Warehouse');
         if (warehouse.status === 'closed')
           throw domainError('WAREHOUSE_CLOSED', `${warehouse.code} is closed`, 409);
+        const poCurrency = supplier.supportedCurrencies[0] ?? 'USD';
         if (!input.lines || input.lines.length === 0)
           throw domainError('VALIDATION_FAILED', 'A purchase order needs at least one line');
         const id = runtime.store.nextId('purchaseOrder');
@@ -283,12 +296,12 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
           exceptionFlags: [],
           createdBusinessDate: today,
           expectedDate: input.expectedDate ?? addBusinessDays(today, 10),
-          currency: 'USD',
-          fxRateToUsd: '1.00000000',
-          subtotal: usd(0),
-          taxTotal: usd(0),
-          freight: usd(input.freightMinor ?? 0),
-          total: usd(0),
+          currency: poCurrency,
+          fxRateToUsd: FX_RATES_TO_USD[poCurrency],
+          subtotal: money(0, poCurrency),
+          taxTotal: money(0, poCurrency),
+          freight: money(input.freightMinor ?? 0, poCurrency),
+          total: money(0, poCurrency),
           metadata: metadata(tx, id),
           ...(trimmed(input.notes) ? { notes: trimmed(input.notes) as string } : {}),
         };
@@ -302,7 +315,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
           subjectType: 'purchase_order',
           subjectId: id,
           subjectLabel: po.purchaseOrderNumber,
-          summary: `Purchase order ${po.purchaseOrderNumber} drafted for ${supplier.displayName} (${dollars(po.total.minor)})`,
+          summary: `Purchase order ${po.purchaseOrderNumber} drafted for ${supplier.displayName} (${dollars(po.total)})`,
         });
         return getPurchaseOrder(runtime, id);
       }),
@@ -375,7 +388,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
             maxVariance = Math.max(maxVariance, ratioBps(line.unitCost.minor - previous, previous));
         }
         const evaluation = evaluatePurchaseOrderApproval({
-          approvalValueUsdMinor: po.subtotal.minor + po.freight.minor,
+          approvalValueUsdMinor: usdMinor(addMoney(po.subtotal, po.freight), po.fxRateToUsd),
           supplierConditional: supplier.relationshipTier === 'conditional',
           maxCostVarianceBps: maxVariance,
         });
@@ -386,7 +399,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
             targetNumber: po.purchaseOrderNumber,
             evaluation,
             requestedBy: tx.actor.id,
-            amount: usd(po.subtotal.minor + po.freight.minor),
+            amount: addMoney(po.subtotal, po.freight),
           });
           po.status = 'pending_approval';
           po.approvalRequestId = request.id;

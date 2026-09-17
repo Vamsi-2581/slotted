@@ -78,6 +78,7 @@ function placeholderOrganization(now: string) {
     industry: '',
     primaryCurrency: 'USD' as const,
     supportedCurrencies: ['USD' as const],
+    regions: [],
     timezone: 'America/Chicago' as const,
     fiscalYearStartMonth: 1 as const,
     billingAddress: { line1: '', city: '', region: '', postalCode: '', countryCode: 'US' },

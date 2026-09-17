@@ -2,7 +2,54 @@
  * Shared value types from sections 53 and 89.1 of the Nexora domain contract.
  */
 
-export type CurrencyCode = 'USD' | 'EUR' | 'GBP';
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'BRL';
+
+/** Operating regions of the multinational tenant. Formatting is the client's concern; the data carries the facts. */
+export type RegionCode = 'US' | 'BR';
+
+export interface Region {
+  code: RegionCode;
+  name: string;
+  countryCode: 'US' | 'BR';
+  currency: CurrencyCode;
+  locale: 'en-US' | 'pt-BR';
+  timezone: string;
+  /** Snapshot rate used when the region's documents are consolidated into USD (section 53.7). */
+  fxRateToUsd: string;
+}
+
+export const REGIONS: readonly Region[] = [
+  {
+    code: 'US',
+    name: 'United States',
+    countryCode: 'US',
+    currency: 'USD',
+    locale: 'en-US',
+    timezone: 'America/Chicago',
+    fxRateToUsd: '1.00000000',
+  },
+  {
+    code: 'BR',
+    name: 'Brazil',
+    countryCode: 'BR',
+    currency: 'BRL',
+    locale: 'pt-BR',
+    timezone: 'America/Sao_Paulo',
+    fxRateToUsd: '0.18500000',
+  },
+];
+
+export function regionByCode(code: RegionCode): Region {
+  return REGIONS.find((region) => region.code === code) as Region;
+}
+
+/** Seed FX table to USD, 8 fractional digits (section 53.7). */
+export const FX_RATES_TO_USD: Record<CurrencyCode, string> = {
+  USD: '1.00000000',
+  EUR: '1.08000000',
+  GBP: '1.27000000',
+  BRL: '0.18500000',
+};
 
 /** Integer minor units (cents for the three supported currencies). */
 export interface Money {

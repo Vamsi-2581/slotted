@@ -77,6 +77,7 @@ export const invoiceResource: ResourceDefinition<InvoiceListItem> = {
     customerName: ['string', (item) => item.customerName],
     sourceOrderId: ['string', (item) => item.sourceOrderId],
     orderNumber: ['string', (item) => item.orderNumber],
+    currency: ['enum', (item) => item.currency],
     issueDate: ['date', (item) => item.issueDate],
     dueDate: ['date', (item) => item.dueDate],
     lifecycle: ['enum', (item) => item.lifecycle],
@@ -195,6 +196,7 @@ export const paymentResource: ResourceDefinition<PaymentListItem> = {
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
     method: ['enum', (item) => item.method],
+    currency: ['enum', (item) => item.amount.currency],
     status: ['enum', (item) => item.status],
     receivedDate: ['date', (item) => item.receivedDate],
     amount: ['money', (item) => item.amount],
@@ -412,6 +414,7 @@ export function scoreCandidates(
     });
   };
   for (const payment of pools.payments) {
+    if (payment.amount.currency !== transaction.amount.currency) continue;
     if (Math.abs(diffDays(transaction.postedDate, payment.receivedDate)) > 14) continue;
     consider(
       payment.customerId,
@@ -423,6 +426,7 @@ export function scoreCandidates(
     );
   }
   for (const invoice of pools.invoices) {
+    if (invoice.currency !== transaction.amount.currency) continue;
     if (Math.abs(diffDays(transaction.postedDate, invoice.dueDate)) > 60) continue;
     if (
       invoice.outstanding.minor !== transaction.amount.minor &&

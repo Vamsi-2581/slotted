@@ -1,4 +1,5 @@
 import {
+  FX_RATES_TO_USD,
   ORGANIZATION_ID,
   addDays,
   addMs,
@@ -7,8 +8,8 @@ import {
   diffDays,
   formatBusinessNumber,
   formatId,
+  money,
   roundHalfUp,
-  usd,
   type BankTransaction,
   type CreditMemo,
   type Customer,
@@ -39,6 +40,10 @@ function bankDescription(
       return `MERCHANT DEPOSIT BATCH ${random.digits(6)}`;
     case 'check':
       return `LOCKBOX DEPOSIT CHK ${random.digits(5)} ${name}`;
+    case 'pix':
+      return `PIX RECEBIDO ${name} E2E${random.digits(12)}`;
+    case 'boleto':
+      return `LIQ BOLETO ${name} NN ${random.digits(11)}`;
     default:
       return `DEPOSIT ${name}`;
   }
@@ -91,7 +96,7 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     const record = addBank({
       postedDate,
       description: bankDescription(random, customer, payment),
-      amount: usd(payment.amount.minor),
+      amount: payment.amount,
       status: matched ? 'matched' : random.chance(0.75) ? 'suggested' : 'needs_review',
       createdAt: instantOn(postedDate, random, 6, 8),
       ...(random.chance(0.6) && payment.reference ? { reference: payment.reference } : {}),
@@ -115,13 +120,18 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
     const customer = dataset.customers.get(invoice.customerId) as Customer;
     const postedDate = nextBusinessDayOnOrAfter(addDays(today, -random.int(0, 12)));
     const exact = random.chance(0.7);
+    const prefixes =
+      customer.regionCode === 'BR'
+        ? ['PIX RECEBIDO', 'TED RECEBIDA', 'LIQ BOLETO']
+        : ['ACH CREDIT', 'FED WIRE IN', 'LOCKBOX DEPOSIT'];
     addBank({
       postedDate,
-      description: `${random.pick(['ACH CREDIT', 'FED WIRE IN', 'LOCKBOX DEPOSIT'])} ${customer.legalName.toUpperCase().replace(/[.,]/g, '').slice(0, 22)}${random.chance(0.5) ? ` ${invoice.invoiceNumber ?? ''}` : ''}`,
-      amount: usd(
+      description: `${random.pick(prefixes)} ${customer.legalName.toUpperCase().replace(/[.,]/g, '').slice(0, 22)}${random.chance(0.5) ? ` ${invoice.invoiceNumber ?? ''}` : ''}`,
+      amount: money(
         exact
           ? invoice.outstanding.minor
           : roundHalfUp(invoice.outstanding.minor * random.float(0.4, 1.1)),
+        invoice.currency,
       ),
       status: exact ? 'suggested' : 'needs_review',
       createdAt: instantOn(postedDate, random, 6, 8),
@@ -138,7 +148,7 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
         'MERCHANT PROCESSING FEE',
         'ANALYSIS CHARGE',
       ]),
-      amount: usd(-roundHalfUp(random.float(15, 240) * 100)),
+      amount: money(-roundHalfUp(random.float(15, 240) * 100), 'USD'),
       status: 'ignored',
       ignoreReason: 'Bank fee — not a customer receipt',
       createdAt: instantOn(postedDate, random, 6, 8),
@@ -157,8 +167,10 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   );
   for (let index = 0; index < unappliedCount; index += 1) {
     const customer = random.pick(activeCustomers);
+    const currency = customer.preferredCurrency;
     const receivedDate = nextBusinessDayOnOrAfter(addDays(today, -random.int(1, 60)));
-    const amount = roundHalfUp(random.logNormal(2_400, 0.8)) * 100;
+    const amount =
+      roundHalfUp(random.logNormal(2_400, 0.8) / Number(FX_RATES_TO_USD[currency])) * 100;
     const postedAt = instantOn(receivedDate, random, 8, 16);
     paymentCounter += 1;
     const recordedBy = random.pick(financeActors);
@@ -167,14 +179,17 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
       organizationId: ORGANIZATION_ID,
       paymentNumber: formatBusinessNumber('payment', maxPaymentSequence + index + 1),
       customerId: customer.id,
-      amount: usd(amount),
-      fxRateToUsd: '1.00000000',
-      method: random.pick(['ach', 'wire', 'check']),
+      amount: money(amount, currency),
+      fxRateToUsd: FX_RATES_TO_USD[currency],
+      method:
+        customer.regionCode === 'BR'
+          ? random.pick(['pix', 'boleto', 'wire'])
+          : random.pick(['ach', 'wire', 'check']),
       receivedDate,
-      reference: `${random.pick(['ACH', 'WIRE', 'CHK'])}-${random.digits(8)}`,
+      reference: `${customer.regionCode === 'BR' ? random.pick(['PIX', 'BOL', 'TED']) : random.pick(['ACH', 'WIRE', 'CHK'])}-${random.digits(8)}`,
       status: 'posted',
       recordedBy,
-      unappliedAmount: usd(amount),
+      unappliedAmount: money(amount, currency),
       metadata: metadataAt(postedAt, recordedBy, postedAt, recordedBy, 2),
     };
     dataset.payments.set(payment.id, payment);
@@ -197,8 +212,8 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
       nextBusinessDayOnOrAfter(addDays(today, -random.int(1, 30))),
       random,
     );
-    invoice.writtenOffAmount = usd(invoice.outstanding.minor);
-    invoice.outstanding = usd(0);
+    invoice.writtenOffAmount = invoice.outstanding;
+    invoice.outstanding = money(0, invoice.currency);
     invoice.lifecycle = 'written_off';
     invoice.collectionState = 'current';
     invoice.writtenOffAt = writtenOffAt;
@@ -241,13 +256,13 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
       sourceInvoiceId: invoice.id,
       reason: random.pick(['pricing_correction', 'service_recovery', 'manual_adjustment']),
       issueDate,
-      currency: 'USD',
+      currency: invoice.currency,
       lifecycle: applied >= total ? 'fully_applied' : 'open',
-      subtotal: usd(amount),
-      taxTotal: usd(tax),
-      total: usd(total),
-      appliedAmount: usd(applied),
-      unappliedAmount: usd(total - applied),
+      subtotal: money(amount, invoice.currency),
+      taxTotal: money(tax, invoice.currency),
+      total: money(total, invoice.currency),
+      appliedAmount: money(applied, invoice.currency),
+      unappliedAmount: money(total - applied, invoice.currency),
       metadata: metadataAt(issuedAt, actor, issuedAt, actor, 2),
     };
     dataset.creditMemos.set(memo.id, memo);
@@ -261,8 +276,8 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
           : memo.reason === 'service_recovery'
             ? 'Service recovery credit — delayed delivery'
             : 'Manual adjustment',
-      amount: usd(amount),
-      taxAmount: usd(tax),
+      amount: money(amount, invoice.currency),
+      taxAmount: money(tax, invoice.currency),
     });
     if (applied > 0) {
       dataset.creditMemoApplications.set(`cma_${memo.id.slice(4)}`, {
@@ -270,12 +285,12 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
         organizationId: ORGANIZATION_ID,
         creditMemoId: memo.id,
         invoiceId: invoice.id,
-        amount: usd(applied),
+        amount: money(applied, invoice.currency),
         status: 'active',
         createdAt: issuedAt,
       });
-      invoice.paidAmount = usd(invoice.paidAmount.minor + applied);
-      invoice.outstanding = usd(invoice.outstanding.minor - applied);
+      invoice.paidAmount = money(invoice.paidAmount.minor + applied, invoice.currency);
+      invoice.outstanding = money(invoice.outstanding.minor - applied, invoice.currency);
       invoice.settlement = invoice.outstanding.minor === 0 ? 'paid' : 'partially_paid';
       if (invoice.outstanding.minor === 0) invoice.collectionState = 'current';
       if (index === 0 && invoice.settlement === 'paid')
@@ -300,16 +315,19 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
       refundNumber: formatBusinessNumber('refund', 1_400 + index + 1),
       customerId: memo.customerId,
       creditMemoId: memo.id,
-      amount: usd(memo.unappliedAmount.minor),
-      method: random.pick(['ach', 'check', 'wire']),
+      amount: memo.unappliedAmount,
+      method:
+        memo.currency === 'BRL'
+          ? random.pick(['pix', 'wire'])
+          : random.pick(['ach', 'check', 'wire']),
       status: random.chance(0.85) ? 'posted' : 'pending',
       reason: 'Refund of unapplied return credit',
       metadata: metadataAt(postedAt, actor, postedAt, actor, 1),
     };
     if (refund.status === 'posted') {
       refund.postedAt = postedAt;
-      memo.appliedAmount = usd(memo.total.minor);
-      memo.unappliedAmount = usd(0);
+      memo.appliedAmount = memo.total;
+      memo.unappliedAmount = money(0, memo.currency);
       memo.lifecycle = 'fully_applied';
     }
     dataset.refunds.set(refund.id, refund);
@@ -341,8 +359,11 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
   if (partiallyPaid) dataset.fixtures.set('edge.invoice.partially_paid', partiallyPaid.id);
   const largest = [...dataset.invoices.values()].sort((a, b) => b.total.minor - a.total.minor)[0];
   if (largest) dataset.fixtures.set('edge.invoice.large', largest.id);
-  const zeroCustomer = random.pick(activeCustomers);
+  const zeroCustomer = random.pick(
+    activeCustomers.filter((customer) => customer.regionCode === 'US'),
+  );
   const zeroDate = addDays(today, -6);
+  const usd = (minor: number) => money(minor, 'USD');
   const zeroAt = instantOn(zeroDate, random);
   const zeroInvoice: Invoice = {
     id: formatId('invoice', 99_000_001),

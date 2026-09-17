@@ -85,6 +85,14 @@ The same seed (`nexora-v1`) always produces the same dataset, ids and business n
 
 Curated business numbers (`SO-2026-01842`, `INV-2026-02891`, `SHP-009841`, `TCK-10492`) are mandated by §76 and reserved; generated sequences skip them.
 
+## Regions and currencies
+
+The tenant operates two regions (`session.get().organization.regions`): `US` (USD, `en-US`, `America/Chicago`) and `BR` (BRL, `pt-BR`, `America/Sao_Paulo`). Every profile except `new_tenant` seeds the Brazil region: warehouse `SAO-01`, teams `SALES-BR` and `WH-SAO`, price lists `Brazil Standard` and `Brazil Distributor` in BRL, about 20% of generated customers and 10% of suppliers with Brazilian names, addresses (`CEP` postal codes, state codes), `+55` phones, `.com.br` domains, `pix`/`boleto` payments and Brazilian carriers.
+
+Customers, suppliers, warehouses and price lists carry `regionCode`. Commercial documents of a customer are issued in `customer.preferredCurrency`; purchase orders in the supplier's first `supportedCurrencies` entry. Every `Money` value states its currency and every quote, order, invoice, payment and purchase order carries `fxRateToUsd` (§53.7; the seed table is `FX_RATES_TO_USD`). Per-customer projections (`summary`) are in the customer currency; consolidated projections (`finance.overview`, `analytics.dashboard`, supplier `annualSpendUsd`, approval thresholds) convert to USD at the document rate. Lists filter by `regionCode`, `preferredCurrency` (customers) and `currency` (quotes, orders, invoices, payments, purchase orders).
+
+The data layer carries no formatting or translation: authored text stays in English, and rendering amounts, dates and locale-specific labels is the client's concern.
+
 ## Scenarios and clock
 
 `demo.setScenario(id)` applies §77 overlays (`month_end`, `inventory_crisis`, `collections_pressure`, `support_incident`, `heavy_data`, `new_tenant`, `enterprise_scale`, `restricted_user`, `system_degraded`). Structural scenarios reset the seed first (§74.6). `demo.advanceClock(hours)` moves `demoClock` (§25) and re-evaluates overdue invoices, quote expiry and ticket auto-close. `demo.setLatency('normal' | 'degraded' | 'none')` selects the §78 transport profile.

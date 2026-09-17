@@ -1,4 +1,4 @@
-import type { Address, AddressSnapshot, Customer, Money, Sku } from '../../domain';
+import type { Address, AddressSnapshot, Customer, Money, RegionCode, Sku } from '../../domain';
 import { taxRateBpsFor } from '../../domain';
 import type { Dataset } from '../dataset';
 import type { CatalogSeedResult } from './catalog';
@@ -22,7 +22,7 @@ export class PricingResolver {
   constructor(
     private readonly dataset: Dataset,
     private readonly catalog: CatalogSeedResult,
-    private readonly standardListId: string,
+    private readonly standardListIds: Record<RegionCode, string | undefined>,
   ) {
     for (const price of dataset.contractPrices.values()) {
       const key = `${price.customerId}\u0000${price.skuId}`;
@@ -67,13 +67,16 @@ export class PricingResolver {
     if (customerEntry && customerEntry.validFrom <= businessDate) {
       return { listUnitPrice: customerEntry.unitPrice, source: 'customer_list' };
     }
-    const standard = this.catalog.entriesByList.get(this.standardListId)?.get(sku.id);
+    const standardListId = this.standardListIds[customer.regionCode] ?? this.standardListIds.US;
+    const standard = standardListId
+      ? this.catalog.entriesByList.get(standardListId)?.get(sku.id)
+      : undefined;
     if (standard) return { listUnitPrice: standard.unitPrice, source: 'standard' };
     return undefined;
   }
 
   taxRateBps(customer: Customer, shippingRegion: string, sku: Sku): number {
-    return taxRateBpsFor(shippingRegion, customer.taxProfile, sku.taxClass);
+    return taxRateBpsFor(shippingRegion, customer.taxProfile, sku.taxClass, customer.regionCode);
   }
 }
 

@@ -4,8 +4,10 @@ import {
   type ActivityEvent,
   type ApprovalRequest,
   type AuditEvent,
+  type CurrencyCode,
   type ImportJob,
   type Notification,
+  type Region,
   type Role,
   type SavedView,
   type Task,
@@ -32,7 +34,16 @@ export interface SessionInfo {
   permissions: string[];
   warehouseIds: string[] | 'all';
   teams: Pick<Team, 'id' | 'code' | 'name' | 'type'>[];
-  organization: { id: string; displayName: string; legalName: string; timezone: string };
+  organization: {
+    id: string;
+    displayName: string;
+    legalName: string;
+    timezone: string;
+    primaryCurrency: CurrencyCode;
+    supportedCurrencies: CurrencyCode[];
+    /** Operating regions with currency, locale and timezone; formatting is the client's concern. */
+    regions: Region[];
+  };
   demo: {
     seedVersion: string;
     scenarioId: string;
@@ -89,6 +100,9 @@ export function sessionInfo(runtime: ApiRuntime): SessionInfo {
       displayName: store.dataset.organization.displayName,
       legalName: store.dataset.organization.legalName,
       timezone: store.dataset.organization.timezone,
+      primaryCurrency: store.dataset.organization.primaryCurrency,
+      supportedCurrencies: store.dataset.organization.supportedCurrencies,
+      regions: store.dataset.organization.regions,
     },
     demo: {
       seedVersion: store.metadata.seedVersion,

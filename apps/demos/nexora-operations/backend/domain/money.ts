@@ -1,4 +1,4 @@
-import type { CurrencyCode, Money, Quantity } from './common';
+import { FX_RATES_TO_USD, type CurrencyCode, type Money, type Quantity } from './common';
 import { quantityToMilli } from './quantity';
 
 /** Round-half-up to the nearest integer; symmetric for negatives (section 53.7). */
@@ -83,10 +83,21 @@ export function ratioBps(part: number, whole: number): number {
 }
 
 /** FX rates are decimal strings with up to 8 fractional digits (section 53.7). */
-export function toUsd(value: Money, fxRateToUsd: string | undefined): Money {
+export function toUsd(value: Money, fxRateToUsd?: string): Money {
   if (value.currency === 'USD') return value;
-  const rate = Number(fxRateToUsd ?? '1');
+  const rate = Number(fxRateToUsd ?? FX_RATES_TO_USD[value.currency]);
   return { currency: 'USD', minor: roundHalfUp(value.minor * rate) };
+}
+
+/** USD minor units of a document amount; the document rate wins over the seed table. */
+export function usdMinor(value: Money, fxRateToUsd?: string): number {
+  return toUsd(value, fxRateToUsd).minor;
+}
+
+/** Converts a USD amount into `currency` at the seed table rate (section 53.7). */
+export function fromUsd(value: Money, currency: CurrencyCode): Money {
+  if (currency === 'USD' || value.currency === currency) return value;
+  return { currency, minor: roundHalfUp(value.minor / Number(FX_RATES_TO_USD[currency])) };
 }
 
 export function formatMoney(value: Money): string {

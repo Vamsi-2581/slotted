@@ -1,6 +1,7 @@
 import {
   AUTOMATION_ACTOR_ID,
   ORGANIZATION_ID,
+  REGIONS,
   PERSONAS,
   ROLE_DEFINITIONS,
   SYSTEM_ACTOR_ID,
@@ -8,7 +9,9 @@ import {
   addMinutes,
   businessDateToInstant,
   type Category,
+  type CurrencyCode,
   type PermissionScope,
+  type RegionCode,
   type PriceList,
   type Role,
   type RoleAssignment,
@@ -26,6 +29,7 @@ import {
   type LeafCategoryDefinition,
 } from '../catalog-vocabulary';
 import { FIRST_NAMES, LAST_NAMES } from '../vocabulary';
+import { BR_FIRST_NAMES, BR_LAST_NAMES } from '../vocabulary-br';
 import { withId, type SeedContext } from './context';
 
 export const EMAIL_DOMAIN = 'asteronsupply.com';
@@ -37,6 +41,7 @@ interface TeamSpec {
   /** Number of generated members at canonical scale (personas are added on top). */
   size: number;
   warehouseCode?: string;
+  regionCode?: RegionCode;
 }
 
 const TEAM_SPECS: TeamSpec[] = [
@@ -83,6 +88,15 @@ const TEAM_SPECS: TeamSpec[] = [
     warehouseCode: 'NJ-01',
   },
   { code: 'SUPPORT', name: 'Customer Support', type: 'support', size: 14 },
+  { code: 'SALES-BR', name: 'Sales — Brazil', type: 'sales', size: 8, regionCode: 'BR' },
+  {
+    code: 'WH-SAO',
+    name: 'Warehouse — São Paulo',
+    type: 'warehouse',
+    size: 14,
+    warehouseCode: 'SAO-01',
+    regionCode: 'BR',
+  },
   { code: 'SYS', name: 'Business Systems', type: 'administration', size: 4 },
 ];
 
@@ -100,6 +114,8 @@ const PERSONA_TEAM: Record<string, string> = {
 
 interface WarehouseSpec {
   code: string;
+  regionCode: RegionCode;
+  countryCode: 'US' | 'BR';
   name: string;
   city: string;
   region: string;
@@ -112,6 +128,8 @@ interface WarehouseSpec {
 export const WAREHOUSE_SPECS: WarehouseSpec[] = [
   {
     code: 'CHI-01',
+    regionCode: 'US',
+    countryCode: 'US',
     name: 'Chicago Central',
     city: 'Chicago',
     region: 'IL',
@@ -122,6 +140,8 @@ export const WAREHOUSE_SPECS: WarehouseSpec[] = [
   },
   {
     code: 'DAL-01',
+    regionCode: 'US',
+    countryCode: 'US',
     name: 'Dallas Distribution',
     city: 'Dallas',
     region: 'TX',
@@ -132,6 +152,8 @@ export const WAREHOUSE_SPECS: WarehouseSpec[] = [
   },
   {
     code: 'ATL-01',
+    regionCode: 'US',
+    countryCode: 'US',
     name: 'Atlanta Hub',
     city: 'Atlanta',
     region: 'GA',
@@ -142,6 +164,8 @@ export const WAREHOUSE_SPECS: WarehouseSpec[] = [
   },
   {
     code: 'DEN-01',
+    regionCode: 'US',
+    countryCode: 'US',
     name: 'Denver Regional',
     city: 'Denver',
     region: 'CO',
@@ -152,6 +176,8 @@ export const WAREHOUSE_SPECS: WarehouseSpec[] = [
   },
   {
     code: 'NJ-01',
+    regionCode: 'US',
+    countryCode: 'US',
     name: 'New Jersey East',
     city: 'Edison',
     region: 'NJ',
@@ -159,6 +185,18 @@ export const WAREHOUSE_SPECS: WarehouseSpec[] = [
     postalCode: '08837',
     timezone: 'America/New_York',
     capacity: 22_000,
+  },
+  {
+    code: 'SAO-01',
+    regionCode: 'BR',
+    countryCode: 'BR',
+    name: 'São Paulo Distribution',
+    city: 'Guarulhos',
+    region: 'SP',
+    line1: 'Av. Guarulhos, 3100',
+    postalCode: '07030-000',
+    timezone: 'America/Sao_Paulo',
+    capacity: 19_000,
   },
 ];
 
@@ -169,6 +207,9 @@ export const PRICE_LIST_NAMES = [
   'Strategic Accounts',
   'Distributor',
 ];
+
+/** Brazil region lists priced in BRL; the first is the region's standard list. */
+export const BR_PRICE_LIST_NAMES = ['Brazil Standard', 'Brazil Distributor'];
 
 const TITLES_BY_TEAM: Record<TeamType, { lead: string; members: string[] }> = {
   executive: {
@@ -291,7 +332,8 @@ export function seedTenant(context: SeedContext): TenantSeedResult {
     displayName: 'Asteron Industrial Supply',
     industry: 'Industrial Distribution',
     primaryCurrency: 'USD',
-    supportedCurrencies: ['USD', 'EUR', 'GBP'],
+    supportedCurrencies: ['USD', 'EUR', 'GBP', 'BRL'],
+    regions: [...REGIONS],
     timezone: 'America/Chicago',
     fiscalYearStartMonth: 1,
     billingAddress: {
@@ -349,6 +391,7 @@ export function seedTenant(context: SeedContext): TenantSeedResult {
     const warehouse: Warehouse = withId({
       id: context.nextId('warehouse'),
       organizationId: ORGANIZATION_ID,
+      regionCode: spec.regionCode,
       code: spec.code,
       name: spec.name,
       address: {
@@ -357,7 +400,7 @@ export function seedTenant(context: SeedContext): TenantSeedResult {
         city: spec.city,
         region: spec.region,
         postalCode: spec.postalCode,
-        countryCode: 'US',
+        countryCode: spec.countryCode,
       },
       managerId: SYSTEM_ACTOR_ID,
       timezone: spec.timezone,
@@ -508,8 +551,8 @@ export function seedTenant(context: SeedContext): TenantSeedResult {
       const title = isLead ? titles.lead : random.pick(titles.members);
       const status = isLead ? 'active' : (statuses[statusCursor++] as User['status']);
       const user = createUser(
-        random.pick(FIRST_NAMES),
-        random.pick(LAST_NAMES),
+        random.pick(spec.regionCode === 'BR' ? BR_FIRST_NAMES : FIRST_NAMES),
+        random.pick(spec.regionCode === 'BR' ? BR_LAST_NAMES : LAST_NAMES),
         spec.code,
         title,
         isLead ? leadRole(spec.type) : roleForMember(spec.type, title, index),
@@ -523,8 +566,8 @@ export function seedTenant(context: SeedContext): TenantSeedResult {
   for (const spec of teamSpecs) {
     if (teamLeadIds.has(spec.code)) continue;
     const user = createUser(
-      random.pick(FIRST_NAMES),
-      random.pick(LAST_NAMES),
+      random.pick(spec.regionCode === 'BR' ? BR_FIRST_NAMES : FIRST_NAMES),
+      random.pick(spec.regionCode === 'BR' ? BR_LAST_NAMES : LAST_NAMES),
       spec.code,
       TITLES_BY_TEAM[spec.type].lead,
       leadRole(spec.type),
@@ -631,12 +674,19 @@ export function seedTenant(context: SeedContext): TenantSeedResult {
 
   // Price lists
   const priceListIdsByName = new Map<string, string>();
-  for (const name of PRICE_LIST_NAMES) {
+  const listSpecs: [string, RegionCode, CurrencyCode][] = [
+    ...PRICE_LIST_NAMES.map((name): [string, RegionCode, CurrencyCode] => [name, 'US', 'USD']),
+    ...(scale.warehouses > 5
+      ? BR_PRICE_LIST_NAMES.map((name): [string, RegionCode, CurrencyCode] => [name, 'BR', 'BRL'])
+      : []),
+  ];
+  for (const [name, regionCode, currency] of listSpecs) {
     const priceList: PriceList = withId({
       id: context.nextId('priceList'),
       organizationId: ORGANIZATION_ID,
+      regionCode,
       name,
-      currency: 'USD',
+      currency,
       status: 'active',
       metadata: context.metadata(foundedAt),
     });

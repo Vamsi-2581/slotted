@@ -1,10 +1,17 @@
-import type { AddressSnapshot, EntityMetadata, Quantity, SignedQuantity } from './common';
+import type {
+  AddressSnapshot,
+  EntityMetadata,
+  Quantity,
+  RegionCode,
+  SignedQuantity,
+} from './common';
 
 export type WarehouseStatus = 'operational' | 'restricted' | 'closed';
 
 export interface Warehouse {
   id: string;
   organizationId: string;
+  regionCode: RegionCode;
   code: string;
   name: string;
   address: AddressSnapshot;

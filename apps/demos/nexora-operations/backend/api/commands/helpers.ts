@@ -2,6 +2,7 @@ import {
   NexoraApiError,
   notFound,
   validationFailed,
+  type CurrencyCode,
   type EntityMetadata,
   type FieldError,
   type Money,
@@ -145,6 +146,9 @@ export function trimmed(value: string | undefined): string | undefined {
 }
 
 /** Human-readable USD from minor units for messages. */
-export function dollars(minor: number): string {
-  return (minor / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+/** Activity summaries use en-US formatting with the document currency; display formatting is the client's concern. */
+export function dollars(value: Money | number, currency: CurrencyCode = 'USD'): string {
+  const minor = typeof value === 'number' ? value : value.minor;
+  const code = typeof value === 'number' ? currency : value.currency;
+  return (minor / 100).toLocaleString('en-US', { style: 'currency', currency: code });
 }

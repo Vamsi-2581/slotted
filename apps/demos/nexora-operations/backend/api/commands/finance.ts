@@ -5,7 +5,8 @@ import {
   milliToQuantity,
   priceLine,
   quantityToMilli,
-  usd,
+  FX_RATES_TO_USD,
+  money,
   writeOffAuthority,
   type CreditMemo,
   type Invoice,
@@ -39,7 +40,15 @@ import {
 } from './helpers';
 import type { SalesCommands } from './sales';
 
-const PAYMENT_METHODS: PaymentMethod[] = ['ach', 'wire', 'credit_card', 'check', 'other'];
+const PAYMENT_METHODS: PaymentMethod[] = [
+  'ach',
+  'wire',
+  'credit_card',
+  'check',
+  'pix',
+  'boleto',
+  'other',
+];
 
 export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands) {
   const recalc = (tx: Transaction, invoice: Invoice): void => {
@@ -134,6 +143,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
             ),
           0,
         );
+        const cash = (minor: number) => money(minor, order.currency);
         const invoice: Invoice = {
           id,
           organizationId: order.organizationId,
@@ -141,21 +151,21 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           sourceOrderId: order.id,
           issueDate: today,
           dueDate: dueDateFor(today, order.paymentTermsCode),
-          currency: 'USD',
-          fxRateToUsd: '1.00000000',
+          currency: order.currency,
+          fxRateToUsd: order.fxRateToUsd,
           lifecycle: 'draft',
           collectionState: 'current',
           settlement: 'unpaid',
-          paidAmount: usd(0),
-          outstanding: usd(subtotal + tax + freight),
+          paidAmount: cash(0),
+          outstanding: cash(subtotal + tax + freight),
           billingAddress: order.billingAddress,
           paymentTermsCode: order.paymentTermsCode,
-          subtotal: usd(subtotal),
-          taxTotal: usd(tax),
-          freight: usd(freight),
-          total: usd(subtotal + tax + freight),
-          costTotal: usd(cost),
-          writtenOffAmount: usd(0),
+          subtotal: cash(subtotal),
+          taxTotal: cash(tax),
+          freight: cash(freight),
+          total: cash(subtotal + tax + freight),
+          costTotal: cash(cost),
+          writtenOffAmount: cash(0),
           metadata: metadata(tx, id),
           ...(input.billingContactId
             ? { billingContactId: input.billingContactId }
@@ -212,8 +222,11 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           changed.push('dueDate');
         }
         if (input.freightMinor !== undefined) {
-          invoice.freight = usd(input.freightMinor);
-          invoice.total = usd(invoice.subtotal.minor + invoice.taxTotal.minor + input.freightMinor);
+          invoice.freight = money(input.freightMinor, invoice.currency);
+          invoice.total = money(
+            invoice.subtotal.minor + invoice.taxTotal.minor + input.freightMinor,
+            invoice.currency,
+          );
           changed.push('freight');
         }
         recalc(tx, invoice);
@@ -234,7 +247,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         invoice.lifecycle = 'open';
         invoice.invoiceNumber = runtime.store.nextBusinessNumber('invoice');
         invoice.openedAt = tx.occurredAt;
-        invoice.fxRateToUsd = '1.00000000';
+        invoice.fxRateToUsd = FX_RATES_TO_USD[invoice.currency];
         recalc(tx, invoice);
         finalize(tx, 'invoices', invoice, 'invoice.opened', 'invoice', [
           'lifecycle',
@@ -247,7 +260,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           subjectLabel: invoice.invoiceNumber,
           customerId: invoice.customerId,
           orderId: invoice.sourceOrderId,
-          summary: `Invoice ${invoice.invoiceNumber} opened for ${dollars(invoice.total.minor)}`,
+          summary: `Invoice ${invoice.invoiceNumber} opened for ${dollars(invoice.total)}`,
         });
         refreshOrder(tx, invoice.sourceOrderId);
         return getInvoice(runtime, id);
@@ -333,7 +346,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           );
         invoice.lifecycle = 'voided';
         invoice.voidedAt = tx.occurredAt;
-        invoice.outstanding = usd(0);
+        invoice.outstanding = money(0, invoice.currency);
         invoice.collectionState = 'current';
         for (const line of runtime.indexes.invoiceLinesByInvoice.get(id)) {
           const orderLine = line.orderLineId
@@ -417,9 +430,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
               evaluation: {
                 required: true,
                 policyCode: 'invoice_write_off.v1',
-                reasons: [
-                  `write-off of ${dollars(invoice.outstanding.minor)}: ${input.reason.trim()}`,
-                ],
+                reasons: [`write-off of ${dollars(invoice.outstanding)}: ${input.reason.trim()}`],
                 steps: [
                   {
                     sequence: 1,
@@ -435,7 +446,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
             return getInvoice(runtime, id);
           }
         }
-        invoice.writtenOffAmount = usd(invoice.outstanding.minor);
+        invoice.writtenOffAmount = invoice.outstanding;
         invoice.lifecycle = 'written_off';
         invoice.writtenOffAt = tx.occurredAt;
         recalc(tx, invoice);
@@ -456,7 +467,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           subjectLabel: invoice.invoiceNumber ?? id,
           customerId: invoice.customerId,
           orderId: invoice.sourceOrderId,
-          summary: `Invoice ${invoice.invoiceNumber ?? ''} written off (${dollars(invoice.writtenOffAmount.minor)}) — ${input.reason.trim()}`,
+          summary: `Invoice ${invoice.invoiceNumber ?? ''} written off (${dollars(invoice.writtenOffAmount)}) — ${input.reason.trim()}`,
         });
         refreshOrder(tx, invoice.sourceOrderId);
         return getInvoice(runtime, id);
@@ -468,7 +479,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
       const invoice = load(runtime, 'invoices', request.targetId, 'Invoice');
       if (invoice.lifecycle !== 'open' || invoice.outstanding.minor <= 0) return;
       tx.touch('invoices', invoice);
-      invoice.writtenOffAmount = usd(invoice.outstanding.minor);
+      invoice.writtenOffAmount = invoice.outstanding;
       invoice.lifecycle = 'written_off';
       invoice.writtenOffAt = tx.occurredAt;
       runtime.projections.recalculateInvoice(invoice);
@@ -516,7 +527,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
       if (entry.amountMinor > invoice.outstanding.minor)
         throw domainError(
           'ALLOCATION_EXCEEDS_OUTSTANDING',
-          `Allocation exceeds the ${dollars(invoice.outstanding.minor)} outstanding on ${invoice.invoiceNumber ?? invoice.id}`,
+          `Allocation exceeds the ${dollars(invoice.outstanding)} outstanding on ${invoice.invoiceNumber ?? invoice.id}`,
           409,
         );
       if (allocated + entry.amountMinor > payment.amount.minor)
@@ -530,7 +541,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         organizationId: payment.organizationId,
         paymentId: payment.id,
         invoiceId: invoice.id,
-        amount: usd(entry.amountMinor),
+        amount: money(entry.amountMinor, payment.amount.currency),
         status: 'active',
         createdAt: tx.occurredAt,
       };
@@ -545,7 +556,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
       ]);
       refreshOrder(tx, invoice.sourceOrderId);
     }
-    payment.unappliedAmount = usd(payment.amount.minor - allocated);
+    payment.unappliedAmount = money(payment.amount.minor - allocated, payment.amount.currency);
   };
 
   const payments = {
@@ -579,13 +590,13 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           organizationId: customer.organizationId,
           paymentNumber: runtime.store.nextBusinessNumber('payment'),
           customerId: customer.id,
-          amount: usd(input.amountMinor),
-          fxRateToUsd: '1.00000000',
+          amount: money(input.amountMinor, customer.preferredCurrency),
+          fxRateToUsd: FX_RATES_TO_USD[customer.preferredCurrency],
           method: input.method,
           receivedDate: input.receivedDate ?? runtime.store.today,
           status: 'posted',
           recordedBy: tx.actor.id,
-          unappliedAmount: usd(input.amountMinor),
+          unappliedAmount: money(input.amountMinor, customer.preferredCurrency),
           metadata: metadata(tx, id),
           ...(trimmed(input.reference) ? { reference: trimmed(input.reference) as string } : {}),
           ...(input.sourceBankTransactionId
@@ -603,7 +614,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           subjectId: id,
           subjectLabel: payment.paymentNumber,
           customerId: customer.id,
-          summary: `Payment ${payment.paymentNumber} of ${dollars(payment.amount.minor)} recorded for ${customer.displayName}`,
+          summary: `Payment ${payment.paymentNumber} of ${dollars(payment.amount)} recorded for ${customer.displayName}`,
         });
         return getPayment(runtime, id);
       }),
@@ -655,7 +666,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         payment.status = 'reversed';
         payment.reversedAt = tx.occurredAt;
         payment.reversalReason = input.reason.trim();
-        payment.unappliedAmount = usd(0);
+        payment.unappliedAmount = money(0, payment.amount.currency);
         if (payment.sourceBankTransactionId) {
           const transaction = runtime.store.dataset.bankTransactions.get(
             payment.sourceBankTransactionId,
@@ -722,13 +733,13 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           customerId: customer.id,
           reason: input.reason,
           issueDate: runtime.store.today,
-          currency: 'USD',
+          currency: customer.preferredCurrency,
           lifecycle: 'draft',
-          subtotal: usd(input.amountMinor),
-          taxTotal: usd(tax),
-          total: usd(input.amountMinor + tax),
-          appliedAmount: usd(0),
-          unappliedAmount: usd(input.amountMinor + tax),
+          subtotal: money(input.amountMinor, customer.preferredCurrency),
+          taxTotal: money(tax, customer.preferredCurrency),
+          total: money(input.amountMinor + tax, customer.preferredCurrency),
+          appliedAmount: money(0, customer.preferredCurrency),
+          unappliedAmount: money(input.amountMinor + tax, customer.preferredCurrency),
           metadata: metadata(tx, id),
           ...(input.sourceInvoiceId
             ? { sourceInvoiceId: load(runtime, 'invoices', input.sourceInvoiceId, 'Invoice').id }
@@ -740,8 +751,8 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           organizationId: customer.organizationId,
           creditMemoId: id,
           description: input.description.trim(),
-          amount: usd(input.amountMinor),
-          taxAmount: usd(tax),
+          amount: money(input.amountMinor, customer.preferredCurrency),
+          taxAmount: money(tax, customer.preferredCurrency),
         });
         tx.audit('credit_memo.created', 'credit_memo', id, { nextVersion: 1 });
         return getCreditMemo(runtime, id);
@@ -761,7 +772,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           subjectId: id,
           subjectLabel: memo.creditMemoNumber,
           customerId: memo.customerId,
-          summary: `Credit memo ${memo.creditMemoNumber} opened for ${dollars(memo.total.minor)}`,
+          summary: `Credit memo ${memo.creditMemoNumber} opened for ${dollars(memo.total)}`,
         });
         return getCreditMemo(runtime, id);
       }),
@@ -806,12 +817,12 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           organizationId: memo.organizationId,
           creditMemoId: id,
           invoiceId: invoice.id,
-          amount: usd(amount),
+          amount: money(amount, memo.currency),
           status: 'active',
           createdAt: tx.occurredAt,
         });
-        memo.appliedAmount = usd(memo.appliedAmount.minor + amount);
-        memo.unappliedAmount = usd(memo.total.minor - memo.appliedAmount.minor);
+        memo.appliedAmount = money(memo.appliedAmount.minor + amount, memo.currency);
+        memo.unappliedAmount = money(memo.total.minor - memo.appliedAmount.minor, memo.currency);
         if (memo.unappliedAmount.minor === 0) memo.lifecycle = 'fully_applied';
         tx.touch('invoices', invoice);
         recalc(tx, invoice);
@@ -837,7 +848,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         )
           throw transition('Credit memo', memo.lifecycle, 'be voided');
         memo.lifecycle = 'voided';
-        memo.unappliedAmount = usd(0);
+        memo.unappliedAmount = money(0, memo.currency);
         finalize(tx, 'creditMemos', memo, 'credit_memo.voided', 'credit_memo', ['lifecycle']);
         return getCreditMemo(runtime, id);
       }),
@@ -893,7 +904,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         if (input.amountMinor > available)
           throw domainError(
             'CREDIT_EXCEEDED',
-            `Refund exceeds the ${dollars(available)} of available customer credit`,
+            `Refund exceeds the ${dollars(available, customer.preferredCurrency)} of available customer credit`,
             409,
           );
         const id = runtime.store.nextId('refund');
@@ -902,7 +913,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           organizationId: customer.organizationId,
           refundNumber: runtime.store.nextBusinessNumber('refund'),
           customerId: customer.id,
-          amount: usd(input.amountMinor),
+          amount: money(input.amountMinor, customer.preferredCurrency),
           method: input.method,
           status: 'posted',
           reason: input.reason.trim(),
@@ -916,8 +927,8 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         if (memo) {
           const fromMemo = Math.min(remaining, memo.unappliedAmount.minor);
           tx.touch('creditMemos', memo);
-          memo.appliedAmount = usd(memo.appliedAmount.minor + fromMemo);
-          memo.unappliedAmount = usd(memo.total.minor - memo.appliedAmount.minor);
+          memo.appliedAmount = money(memo.appliedAmount.minor + fromMemo, memo.currency);
+          memo.unappliedAmount = money(memo.total.minor - memo.appliedAmount.minor, memo.currency);
           if (memo.unappliedAmount.minor === 0) memo.lifecycle = 'fully_applied';
           finalize(tx, 'creditMemos', memo, 'credit_memo.refunded', 'credit_memo', [
             'appliedAmount',
@@ -927,7 +938,10 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         }
         if (payment && remaining > 0) {
           tx.touch('payments', payment);
-          payment.unappliedAmount = usd(payment.unappliedAmount.minor - remaining);
+          payment.unappliedAmount = money(
+            payment.unappliedAmount.minor - remaining,
+            payment.amount.currency,
+          );
           finalize(tx, 'payments', payment, 'payment.refunded', 'payment', ['unappliedAmount']);
         }
         tx.audit('refund.created', 'refund', id, { nextVersion: 1 });
@@ -937,7 +951,7 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
           subjectId: id,
           subjectLabel: refund.refundNumber,
           customerId: customer.id,
-          summary: `Refund ${refund.refundNumber} of ${dollars(refund.amount.minor)} posted — ${refund.reason}`,
+          summary: `Refund ${refund.refundNumber} of ${dollars(refund.amount)} posted — ${refund.reason}`,
         });
         return refund;
       }),
@@ -972,7 +986,10 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
               'VALIDATION_FAILED',
               `Payment ${payment.paymentNumber} is already matched`,
             );
-          if (payment.amount.minor !== transaction.amount.minor)
+          if (
+            payment.amount.minor !== transaction.amount.minor ||
+            payment.amount.currency !== transaction.amount.currency
+          )
             throw domainError('VALIDATION_FAILED', 'Payment amount differs from the bank amount');
           tx.touch('payments', payment).sourceBankTransactionId = id;
           finalize(tx, 'payments', payment, 'payment.matched', 'payment', [
@@ -996,18 +1013,23 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
             organizationId: customer.organizationId,
             paymentNumber: runtime.store.nextBusinessNumber('payment'),
             customerId: customer.id,
-            amount: usd(transaction.amount.minor),
-            fxRateToUsd: '1.00000000',
-            method: transaction.description.includes('WIRE')
-              ? 'wire'
-              : transaction.description.includes('CHK') ||
-                  transaction.description.includes('LOCKBOX')
-                ? 'check'
-                : 'ach',
+            amount: transaction.amount,
+            fxRateToUsd: FX_RATES_TO_USD[transaction.amount.currency],
+            method: transaction.description.includes('PIX')
+              ? 'pix'
+              : transaction.description.includes('BOLETO')
+                ? 'boleto'
+                : transaction.description.includes('WIRE') ||
+                    transaction.description.includes('TED')
+                  ? 'wire'
+                  : transaction.description.includes('CHK') ||
+                      transaction.description.includes('LOCKBOX')
+                    ? 'check'
+                    : 'ach',
             receivedDate: transaction.postedDate,
             status: 'posted',
             recordedBy: tx.actor.id,
-            unappliedAmount: usd(transaction.amount.minor),
+            unappliedAmount: transaction.amount,
             sourceBankTransactionId: id,
             metadata: metadata(tx, paymentId),
             ...(transaction.reference ? { reference: transaction.reference } : {}),

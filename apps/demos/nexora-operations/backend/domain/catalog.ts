@@ -5,6 +5,7 @@ import type {
   PaymentTermsCode,
   Quantity,
   QuantityPrecision,
+  RegionCode,
   UnitOfMeasure,
 } from './common';
 
@@ -70,6 +71,7 @@ export interface Sku {
 export interface PriceList {
   id: string;
   organizationId: string;
+  regionCode: RegionCode;
   name: string;
   currency: CurrencyCode;
   status: 'active' | 'inactive';
@@ -106,6 +108,7 @@ export interface Supplier {
   id: string;
   organizationId: string;
   supplierNumber: string;
+  regionCode: RegionCode;
   legalName: string;
   displayName: string;
   status: SupplierStatus;

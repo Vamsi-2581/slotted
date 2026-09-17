@@ -13,7 +13,8 @@ import {
   quantity,
   quantityToMilli,
   roundHalfUp,
-  usd,
+  money,
+  FX_RATES_TO_USD,
   type ApprovalRequest,
   type GoodsReceipt,
   type GoodsReceiptLine,
@@ -26,7 +27,7 @@ import {
   type Warehouse,
 } from '../../domain';
 import type { Random } from '../random';
-import { PO_NOTES } from '../vocabulary';
+import { PO_NOTES_LONG } from '../corpora';
 import type { SeedContext } from './context';
 import { instantOn, metadataAt, nextBusinessDayOnOrAfter } from './orders';
 import { dailyVolumeFactor } from './timeline';
@@ -332,6 +333,9 @@ function buildPurchaseOrder(
   );
   const expectedDate =
     override?.expectedDate ?? addBusinessDays(skeleton.createdDate, lead + random.int(0, 5));
+  const currency = chosen[0]?.currency ?? 'USD';
+  const fxRateToUsd = FX_RATES_TO_USD[currency];
+  const cash = (minor: number) => money(minor, currency);
   const lines: PurchaseOrderLine[] = [];
   let subtotalMinor = 0;
   let maxVarianceBps = 0;
@@ -375,15 +379,17 @@ function buildPurchaseOrder(
       receivedAcceptedQuantity: '0',
       receivedDamagedQuantity: '0',
       rejectedQuantity: '0',
-      unitCost: usd(unitCostMinor),
+      unitCost: cash(unitCostMinor),
       taxRateBps: 0,
-      lineTotal: usd(lineTotal),
+      lineTotal: cash(lineTotal),
       expectedDate,
     });
   }
-  const freightMinor = random.chance(0.45) ? 0 : roundHalfUp(random.float(40, 900)) * 100;
+  const freightMinor = random.chance(0.45)
+    ? 0
+    : roundHalfUp(random.float(40, 900) / Number(fxRateToUsd)) * 100;
   const evaluation = evaluatePurchaseOrderApproval({
-    approvalValueUsdMinor: subtotalMinor + freightMinor,
+    approvalValueUsdMinor: roundHalfUp((subtotalMinor + freightMinor) * Number(fxRateToUsd)),
     supplierConditional: supplier.relationshipTier === 'conditional',
     maxCostVarianceBps: maxVarianceBps,
   });
@@ -416,17 +422,17 @@ function buildPurchaseOrder(
     exceptionFlags: [],
     createdBusinessDate: skeleton.createdDate,
     expectedDate,
-    currency: 'USD',
-    fxRateToUsd: '1.00000000',
-    subtotal: usd(subtotalMinor),
-    taxTotal: usd(0),
-    freight: usd(freightMinor),
-    total: usd(subtotalMinor + freightMinor),
+    currency,
+    fxRateToUsd,
+    subtotal: cash(subtotalMinor),
+    taxTotal: cash(0),
+    freight: cash(freightMinor),
+    total: cash(subtotalMinor + freightMinor),
     metadata: metadataAt(createdAt, skeleton.buyerId, createdAt, skeleton.buyerId, 1),
     ...(override?.notes
       ? { notes: override.notes }
       : random.chance(0.25)
-        ? { notes: random.pick(PO_NOTES) }
+        ? { notes: random.pick(PO_NOTES_LONG) }
         : {}),
   };
   dataset.purchaseOrders.set(id, po);
@@ -445,7 +451,7 @@ function buildPurchaseOrder(
       status: pending ? 'pending' : status === 'cancelled' ? 'cancelled' : 'approved',
       requestedBy: skeleton.buyerId,
       requestedAt: submittedAt,
-      amount: usd(subtotalMinor + freightMinor),
+      amount: cash(subtotalMinor + freightMinor),
       steps: evaluation.steps.map((step, position) => {
         const pool =
           step.requiredRole === 'finance_manager' ? deps.financeManagers : deps.procurementManagers;

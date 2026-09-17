@@ -701,6 +701,7 @@ export function createPlatformCommands(runtime: ApiRuntime) {
               id: customerId,
               organizationId: runtime.store.dataset.organization.id,
               accountNumber: runtime.store.nextBusinessNumber('customer'),
+              regionCode: 'US',
               legalName: name,
               displayName: name,
               status: 'prospect',

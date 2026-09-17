@@ -1,8 +1,10 @@
 import {
   notFound,
-  usd,
+  money,
+  roundHalfUp,
   type ApprovalRequest,
   type Contact,
+  type CurrencyCode,
   type Customer,
   type CustomerFinancialSummary,
   type InventoryReservation,
@@ -33,6 +35,7 @@ export interface OrderListItem {
   customerId: string;
   customerName: string;
   customerSegment: Customer['segment'];
+  currency: CurrencyCode;
   ownerId: string;
   ownerName: string;
   salesTeamId: string;
@@ -141,6 +144,7 @@ export class SalesReadModels {
       orderNumber: order.orderNumber,
       customerId: order.customerId,
       ...this.names(order.customerId, order.ownerId),
+      currency: order.currency,
       ownerId: order.ownerId,
       salesTeamId: order.salesTeamId,
       orderDate: order.orderDate,
@@ -192,20 +196,25 @@ export class SalesReadModels {
         ),
         customerId: summary.customerId,
         ...this.names(summary.customerId, ownerId),
+        currency: summary.currency,
         ownerId,
         salesTeamId: customer?.salesTeamId ?? '',
         orderDate: summary.orderDate,
         defaultWarehouseId: skeleton.warehouseId,
         status: derived.status,
         approvalStatus:
-          summary.subtotalMinor + summary.freightMinor >= 5_000_000 ? 'approved' : 'not_required',
+          roundHalfUp(
+            (summary.subtotalMinor + summary.freightMinor) * Number(summary.fxRateToUsd),
+          ) >= 5_000_000
+            ? 'approved'
+            : 'not_required',
         allocationStatus: derived.allocation,
         fulfillmentStatus: derived.fulfillment,
         invoiceStatus: derived.invoice,
         paymentStatus: derived.payment,
         riskFlags: [],
-        subtotal: usd(summary.subtotalMinor),
-        total: usd(summary.totalMinor),
+        subtotal: money(summary.subtotalMinor, summary.currency),
+        total: money(summary.totalMinor, summary.currency),
         grossMarginBps:
           summary.subtotalMinor === 0
             ? 0
@@ -236,6 +245,7 @@ export const orderResource: ResourceDefinition<OrderListItem> = {
     customerId: ['string', (item) => item.customerId],
     customerName: ['string', (item) => item.customerName],
     customerSegment: ['enum', (item) => item.customerSegment],
+    currency: ['enum', (item) => item.currency],
     ownerId: ['string', (item) => item.ownerId],
     ownerName: ['string', (item) => item.ownerName],
     salesTeamId: ['string', (item) => item.salesTeamId],
@@ -415,6 +425,7 @@ export const quoteResource: ResourceDefinition<QuoteListItem> = {
     customerName: ['string', (item) => item.customerName],
     ownerId: ['string', (item) => item.ownerId],
     ownerName: ['string', (item) => item.ownerName],
+    currency: ['enum', (item) => item.currency],
     status: ['enum', (item) => item.status],
     createdBusinessDate: ['date', (item) => item.createdBusinessDate],
     expirationDate: ['date', (item) => item.expirationDate],

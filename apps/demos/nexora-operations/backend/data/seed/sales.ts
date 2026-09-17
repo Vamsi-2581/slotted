@@ -78,11 +78,10 @@ export function createOrderEnvironment(
     tenant,
     catalog,
     customers,
-    pricing: new PricingResolver(
-      dataset,
-      catalog,
-      tenant.priceListIdsByName.get('Standard') as string,
-    ),
+    pricing: new PricingResolver(dataset, catalog, {
+      US: tenant.priceListIdsByName.get('Standard'),
+      BR: tenant.priceListIdsByName.get('Brazil Standard'),
+    }),
     reservedNumbers,
     firstIndexOfYear: firstIndexesByYear(skeletons),
     warehouseActors,

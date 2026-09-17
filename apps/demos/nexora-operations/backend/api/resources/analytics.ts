@@ -4,9 +4,14 @@ import {
   diffDays,
   monthKey,
   quantityToMilli,
+  addMoney,
+  roundHalfUp,
+  subtractMoney,
   usd,
+  usdMinor,
   type Money,
 } from '../../domain';
+import type { OrderSummary } from '../../data/seed/orders';
 import type { ApiRuntime } from '../runtime';
 import { supportMetrics } from './support';
 
@@ -81,23 +86,30 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
     }
     return entry;
   };
+  // Consolidated figures are USD at each document's rate (section 53.7).
+  const summaryUsd = (minor: number, summary: OrderSummary): number =>
+    roundHalfUp(minor * Number(summary.fxRateToUsd));
   for (const summary of store.history.summaries) {
     if (summary.kind === 'cancelled' || summary.kind === 'draft') continue;
     const entry = bucket(monthKey(summary.orderDate));
-    entry.revenue += summary.subtotalMinor + summary.freightMinor;
-    entry.margin += summary.subtotalMinor - summary.costMinor;
-    entry.booked += summary.subtotalMinor + summary.freightMinor;
+    const net = summaryUsd(summary.subtotalMinor + summary.freightMinor, summary);
+    entry.revenue += net;
+    entry.margin += summaryUsd(summary.subtotalMinor - summary.costMinor, summary);
+    entry.booked += net;
     entry.orders += 1;
   }
   for (const invoice of store.dataset.invoices.values()) {
     if (invoice.lifecycle !== 'open' && invoice.lifecycle !== 'written_off') continue;
     const entry = bucket(monthKey(invoice.issueDate));
-    entry.revenue += invoice.subtotal.minor + invoice.freight.minor;
-    entry.margin += invoice.subtotal.minor - invoice.costTotal.minor;
+    entry.revenue += usdMinor(addMoney(invoice.subtotal, invoice.freight), invoice.fxRateToUsd);
+    entry.margin += usdMinor(
+      subtractMoney(invoice.subtotal, invoice.costTotal),
+      invoice.fxRateToUsd,
+    );
   }
   for (const memo of store.dataset.creditMemos.values()) {
     if (memo.lifecycle === 'draft' || memo.lifecycle === 'voided') continue;
-    bucket(monthKey(memo.issueDate)).revenue -= memo.subtotal.minor;
+    bucket(monthKey(memo.issueDate)).revenue -= usdMinor(memo.subtotal);
   }
   const ordersByStatus: Record<string, number> = {};
   let bookedLast30 = 0;
@@ -115,39 +127,35 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
     )
       continue;
     const entry = bucket(monthKey(order.orderDate));
-    entry.booked += order.subtotal.minor + order.freight.minor;
+    const net = usdMinor(addMoney(order.subtotal, order.freight), order.fxRateToUsd);
+    entry.booked += net;
     entry.orders += 1;
     if (compareDates(order.orderDate, from30) >= 0) {
-      bookedLast30 += order.subtotal.minor + order.freight.minor;
+      bookedLast30 += net;
       ordersLast30 += 1;
     } else if (compareDates(order.orderDate, from60) >= 0) {
-      bookedPrev30 += order.subtotal.minor + order.freight.minor;
+      bookedPrev30 += net;
       ordersPrev30 += 1;
     }
     if (compareDates(order.orderDate, from365) >= 0) {
       const customerEntry = revenueByCustomer.get(order.customerId) ?? { revenue: 0, orders: 0 };
-      customerEntry.revenue += order.subtotal.minor + order.freight.minor;
+      customerEntry.revenue += net;
       customerEntry.orders += 1;
       revenueByCustomer.set(order.customerId, customerEntry);
       const segment = store.dataset.customers.get(order.customerId)?.segment ?? 'smb';
-      revenueBySegment.set(
-        segment,
-        (revenueBySegment.get(segment) ?? 0) + order.subtotal.minor + order.freight.minor,
-      );
+      revenueBySegment.set(segment, (revenueBySegment.get(segment) ?? 0) + net);
     }
   }
   for (const summary of store.history.summaries) {
     if (summary.kind === 'cancelled' || summary.kind === 'draft') continue;
     if (compareDates(summary.orderDate, from365) < 0) continue;
+    const net = summaryUsd(summary.subtotalMinor + summary.freightMinor, summary);
     const customerEntry = revenueByCustomer.get(summary.customerId) ?? { revenue: 0, orders: 0 };
-    customerEntry.revenue += summary.subtotalMinor + summary.freightMinor;
+    customerEntry.revenue += net;
     customerEntry.orders += 1;
     revenueByCustomer.set(summary.customerId, customerEntry);
     const segment = store.dataset.customers.get(summary.customerId)?.segment ?? 'smb';
-    revenueBySegment.set(
-      segment,
-      (revenueBySegment.get(segment) ?? 0) + summary.subtotalMinor + summary.freightMinor,
-    );
+    revenueBySegment.set(segment, (revenueBySegment.get(segment) ?? 0) + net);
   }
 
   const monthly: MonthlyPoint[] = [...months.entries()]
@@ -168,10 +176,10 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
   for (const invoice of store.dataset.invoices.values()) {
     if (invoice.lifecycle !== 'open' && invoice.lifecycle !== 'written_off') continue;
     if (compareDates(invoice.issueDate, from30) >= 0) {
-      revenue30 += invoice.subtotal.minor + invoice.freight.minor;
-      margin30 += invoice.subtotal.minor - invoice.costTotal.minor;
+      revenue30 += usdMinor(addMoney(invoice.subtotal, invoice.freight), invoice.fxRateToUsd);
+      margin30 += usdMinor(subtractMoney(invoice.subtotal, invoice.costTotal), invoice.fxRateToUsd);
     } else if (compareDates(invoice.issueDate, from60) >= 0)
-      revenuePrev30 += invoice.subtotal.minor + invoice.freight.minor;
+      revenuePrev30 += usdMinor(addMoney(invoice.subtotal, invoice.freight), invoice.fxRateToUsd);
   }
   const inventoryValue = projections.inventoryValue();
   let shippedCost12 = 0;
@@ -180,12 +188,12 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
       (invoice.lifecycle === 'open' || invoice.lifecycle === 'written_off') &&
       compareDates(invoice.issueDate, from365) >= 0
     )
-      shippedCost12 += invoice.costTotal.minor;
+      shippedCost12 += usdMinor(invoice.costTotal, invoice.fxRateToUsd);
   }
   let historyCost12 = 0;
   for (const summary of store.history.summaries)
     if (summary.kind !== 'cancelled' && compareDates(summary.orderDate, from365) >= 0)
-      historyCost12 += summary.costMinor;
+      historyCost12 += summaryUsd(summary.costMinor, summary);
   const turns =
     inventoryValue.minor === 0
       ? null
@@ -232,7 +240,7 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
       continue;
     const entry = productTotals.get(line.skuId) ?? { units: 0, revenue: 0 };
     entry.units += quantityToMilli(line.orderedQuantity) - quantityToMilli(line.cancelledQuantity);
-    entry.revenue += line.netAmount.minor;
+    entry.revenue += usdMinor(line.netAmount, order.fxRateToUsd);
     productTotals.set(line.skuId, entry);
   }
   const topProducts = [...productTotals.entries()]
@@ -268,7 +276,7 @@ export function executiveDashboard(runtime: ApiRuntime): ExecutiveDashboard {
       quote.status === 'draft'
     ) {
       openQuotes += 1;
-      openQuoteValue += quote.total.minor;
+      openQuoteValue += usdMinor(quote.total, quote.fxRateToUsd);
     }
   }
   let backorderedLines = 0;

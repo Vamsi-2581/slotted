@@ -7,7 +7,10 @@ import {
   evaluateQuoteApproval,
   milliToQuantity,
   quantityToMilli,
-  usd,
+  FX_RATES_TO_USD,
+  addMoney,
+  money,
+  usdMinor,
   type ApprovalRequest,
   type Customer,
   type InventoryReservation,
@@ -274,7 +277,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
     const creditLimitExceeded =
       customer.creditLimit.minor > 0 && exposureAfter > customer.creditLimit.minor;
     const evaluation = evaluateOrderApproval({
-      approvalValueUsdMinor: order.subtotal.minor + order.freight.minor,
+      approvalValueUsdMinor: usdMinor(addMoney(order.subtotal, order.freight), order.fxRateToUsd),
       grossMarginBps: order.grossMarginBps,
       maxLineDiscountBps: maxDiscount(lines),
       creditLimitExceeded,
@@ -304,7 +307,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
       subjectLabel: order.orderNumber,
       customerId: order.customerId,
       orderId: order.id,
-      summary: `Order ${order.orderNumber} confirmed (${dollars(order.total.minor)})${result.shortages.length > 0 ? ` — ${result.shortages.length} line(s) short` : ''}`,
+      summary: `Order ${order.orderNumber} confirmed (${dollars(order.total)})${result.shortages.length > 0 ? ` — ${result.shortages.length} line(s) short` : ''}`,
     });
     if (result.shortages.length > 0)
       tx.notify(
@@ -336,7 +339,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         targetNumber: order.orderNumber,
         evaluation,
         requestedBy: tx.actor.id,
-        amount: usd(order.subtotal.minor + order.freight.minor),
+        amount: addMoney(order.subtotal, order.freight),
       });
       order.status = 'pending_approval';
       order.approvalStatus = 'pending';
@@ -460,7 +463,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         const priced = priceLines(runtime, customer, input.lines, region, today, {
           allowOverride: runtime.can('orders.override_price'),
         });
-        const totals = priced.totals(usd(input.freightMinor ?? 0));
+        const totals = priced.totals(money(input.freightMinor ?? 0, customer.preferredCurrency));
         const id = runtime.store.nextId('quote');
         const quote: Quote = {
           id,
@@ -471,7 +474,8 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           ownerId: actor.id,
           createdBusinessDate: today,
           expirationDate: expiration,
-          currency: 'USD',
+          currency: customer.preferredCurrency,
+          fxRateToUsd: FX_RATES_TO_USD[customer.preferredCurrency],
           priceListId: customer.priceListId,
           status: 'draft',
           subtotal: totals.subtotal,
@@ -495,7 +499,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           subjectId: id,
           subjectLabel: quote.quoteNumber,
           customerId: customer.id,
-          summary: `Quote ${quote.quoteNumber} drafted for ${customer.displayName} (${dollars(quote.total.minor)})`,
+          summary: `Quote ${quote.quoteNumber} drafted for ${customer.displayName} (${dollars(quote.total)})`,
         });
         return getQuote(runtime, id);
       }),
@@ -557,12 +561,18 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
             for (const line of quoteLinesFrom(tx, id, priced.lines)) tx.create('quoteLines', line);
             changed.push('lines');
           }
-          applyTotals(quote, priced.totals(usd(input.freightMinor ?? quote.freight.minor)));
+          applyTotals(
+            quote,
+            priced.totals(money(input.freightMinor ?? quote.freight.minor, quote.currency)),
+          );
           changed.push('totals');
           if (quote.status === 'approved') {
             cancelApproval(tx, quote.approvalRequestId, 'Quote edited after approval');
             const evaluation = evaluateQuoteApproval({
-              approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor,
+              approvalValueUsdMinor: usdMinor(
+                addMoney(quote.subtotal, quote.freight),
+                quote.fxRateToUsd,
+              ),
               grossMarginBps: quote.grossMarginBps,
               maxLineDiscountBps: maxDiscount(priced.lines.map((line) => line.priced)),
             });
@@ -590,7 +600,10 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           throw domainError('QUOTE_EMPTY', 'A quote needs at least one line before submission');
         open(tx, 'quotes', id, 'Quote', options);
         const evaluation = evaluateQuoteApproval({
-          approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor,
+          approvalValueUsdMinor: usdMinor(
+            addMoney(quote.subtotal, quote.freight),
+            quote.fxRateToUsd,
+          ),
           grossMarginBps: quote.grossMarginBps,
           maxLineDiscountBps: maxDiscount(lines),
         });
@@ -601,7 +614,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
             targetNumber: quote.quoteNumber,
             evaluation,
             requestedBy: tx.actor.id,
-            amount: usd(quote.subtotal.minor + quote.freight.minor),
+            amount: addMoney(quote.subtotal, quote.freight),
           });
           quote.status = 'pending_approval';
           quote.approvalRequestId = request.id;
@@ -624,7 +637,10 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           if (lines.length === 0)
             throw domainError('QUOTE_EMPTY', 'A quote needs at least one line before sending');
           const evaluation = evaluateQuoteApproval({
-            approvalValueUsdMinor: quote.subtotal.minor + quote.freight.minor,
+            approvalValueUsdMinor: usdMinor(
+              addMoney(quote.subtotal, quote.freight),
+              quote.fxRateToUsd,
+            ),
             grossMarginBps: quote.grossMarginBps,
             maxLineDiscountBps: maxDiscount(lines),
           });
@@ -762,8 +778,8 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           defaultWarehouseId: warehouseId,
           billingAddress: addresses.billing,
           shippingAddress: addresses.snapshot,
-          currency: 'USD',
-          fxRateToUsd: '1.00000000',
+          currency: customer.preferredCurrency,
+          fxRateToUsd: FX_RATES_TO_USD[customer.preferredCurrency],
           paymentTermsCode: customer.paymentTermsCode,
           status: 'draft',
           approvalStatus: 'not_required',
@@ -887,7 +903,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
         const priced = priceLines(runtime, customer, input.lines, addresses.region, today, {
           allowOverride: runtime.can('orders.override_price'),
         });
-        const totals = priced.totals(usd(input.freightMinor ?? 0));
+        const totals = priced.totals(money(input.freightMinor ?? 0, customer.preferredCurrency));
         const id = runtime.store.nextId('salesOrder');
         const order: SalesOrder = {
           id,
@@ -901,8 +917,8 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           defaultWarehouseId: warehouseId,
           billingAddress: addresses.billing,
           shippingAddress: addresses.snapshot,
-          currency: 'USD',
-          fxRateToUsd: '1.00000000',
+          currency: customer.preferredCurrency,
+          fxRateToUsd: FX_RATES_TO_USD[customer.preferredCurrency],
           paymentTermsCode: customer.paymentTermsCode,
           status: 'draft',
           approvalStatus: 'not_required',
@@ -939,7 +955,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
           subjectLabel: order.orderNumber,
           customerId: customer.id,
           orderId: id,
-          summary: `Order ${order.orderNumber} drafted for ${customer.displayName} (${dollars(order.total.minor)})`,
+          summary: `Order ${order.orderNumber} drafted for ${customer.displayName} (${dollars(order.total)})`,
         });
         return getOrder(runtime, models, id);
       }),
@@ -1016,7 +1032,10 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
             order.orderDate,
           ))
             tx.create('salesOrderLines', line);
-          applyTotals(order, priced.totals(usd(input.freightMinor ?? order.freight.minor)));
+          applyTotals(
+            order,
+            priced.totals(money(input.freightMinor ?? order.freight.minor, order.currency)),
+          );
           priceSensitive = true;
           changed.push('lines');
         } else if (input.lineQuantities || input.freightMinor !== undefined) {
@@ -1040,7 +1059,10 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
             line.taxAmount = next.priced.taxAmount;
             line.totalAmount = next.priced.totalAmount;
           }
-          applyTotals(order, priced.totals(usd(input.freightMinor ?? order.freight.minor)));
+          applyTotals(
+            order,
+            priced.totals(money(input.freightMinor ?? order.freight.minor, order.currency)),
+          );
           priceSensitive = true;
           changed.push(input.lineQuantities ? 'lineQuantities' : 'freight');
         }
@@ -1063,7 +1085,7 @@ export function createSalesCommands(runtime: ApiRuntime, models: SalesReadModels
               targetNumber: order.orderNumber,
               evaluation,
               requestedBy: tx.actor.id,
-              amount: usd(order.subtotal.minor + order.freight.minor),
+              amount: addMoney(order.subtotal, order.freight),
             });
             order.status = 'pending_approval';
             order.approvalStatus = 'pending';

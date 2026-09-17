@@ -2,7 +2,7 @@ import {
   addDays,
   milliToQuantity,
   quantityToMilli,
-  usd,
+  money,
   type CreditMemo,
   type Return,
   type ReturnLine,
@@ -635,6 +635,8 @@ export function createFulfillmentCommands(runtime: ApiRuntime, sales: SalesComma
             .find((candidate) => candidate.lifecycle === 'open' && candidate.outstanding.minor > 0);
           const total = credit + tax;
           const applied = invoice ? Math.min(invoice.outstanding.minor, total) : 0;
+          const currency = load(runtime, 'salesOrders', record.orderId, 'Order').currency;
+          const cash = (minor: number) => money(minor, currency);
           const memo: CreditMemo = {
             id: memoId,
             organizationId: record.organizationId,
@@ -643,13 +645,13 @@ export function createFulfillmentCommands(runtime: ApiRuntime, sales: SalesComma
             sourceReturnId: id,
             reason: 'return',
             issueDate: runtime.store.today,
-            currency: 'USD',
+            currency,
             lifecycle: applied >= total ? 'fully_applied' : 'open',
-            subtotal: usd(credit),
-            taxTotal: usd(tax),
-            total: usd(total),
-            appliedAmount: usd(applied),
-            unappliedAmount: usd(total - applied),
+            subtotal: cash(credit),
+            taxTotal: cash(tax),
+            total: cash(total),
+            appliedAmount: cash(applied),
+            unappliedAmount: cash(total - applied),
             metadata: metadata(tx, memoId),
             ...(invoice ? { sourceInvoiceId: invoice.id } : {}),
           };
@@ -659,8 +661,8 @@ export function createFulfillmentCommands(runtime: ApiRuntime, sales: SalesComma
             organizationId: record.organizationId,
             creditMemoId: memoId,
             description: `Return credit for ${record.returnNumber}`,
-            amount: usd(credit),
-            taxAmount: usd(tax),
+            amount: cash(credit),
+            taxAmount: cash(tax),
           });
           if (invoice && applied > 0) {
             tx.create('creditMemoApplications', {
@@ -668,7 +670,7 @@ export function createFulfillmentCommands(runtime: ApiRuntime, sales: SalesComma
               organizationId: record.organizationId,
               creditMemoId: memoId,
               invoiceId: invoice.id,
-              amount: usd(applied),
+              amount: cash(applied),
               status: 'active',
               createdAt: tx.occurredAt,
             });
@@ -688,7 +690,7 @@ export function createFulfillmentCommands(runtime: ApiRuntime, sales: SalesComma
             subjectLabel: memo.creditMemoNumber,
             customerId: record.customerId,
             orderId: record.orderId,
-            summary: `Credit memo ${memo.creditMemoNumber} issued for ${dollars(total)} (${record.returnNumber})`,
+            summary: `Credit memo ${memo.creditMemoNumber} issued for ${dollars(total, currency)} (${record.returnNumber})`,
           });
         }
         record.status = 'completed';

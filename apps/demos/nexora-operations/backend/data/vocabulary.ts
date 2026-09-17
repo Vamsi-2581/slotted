@@ -863,36 +863,6 @@ export const TICKET_SUBJECTS: Record<string, string[]> = {
   other: ['General inquiry', 'Feedback on recent delivery', 'Request for account review meeting'],
 };
 
-export const TICKET_CUSTOMER_OPENERS = [
-  'Hi, we placed {order} last week and the tracking still shows label created. Can you confirm when this will ship?',
-  'Following up on the issue below — our production line is waiting on this delivery.',
-  'Our receiving team logged a discrepancy against this order. Attached is the packing list with the counts we recorded.',
-  'Could someone from your billing team review this? The amount on the invoice does not match our PO.',
-  'We need an update by end of day. Our plant manager is asking.',
-  'Thanks for the quick turnaround last time. We have a similar situation again.',
-  'Please advise on next steps. Reference is included in the subject line.',
-];
-
-export const TICKET_AGENT_REPLIES = [
-  'Thanks for reaching out. I have pulled up the order and I am checking with the warehouse now. I will follow up within the hour.',
-  'I confirmed with our carrier that the shipment left the facility this morning. Updated tracking should appear by this afternoon.',
-  'I have issued the RMA and emailed a prepaid label. Once the unit is received we will inspect it within two business days.',
-  'Our finance team has corrected the posting. You should see the updated balance on your next statement.',
-  'I escalated this to our warehouse manager so we can prioritize the remaining units.',
-  'Apologies for the delay. I have requested an expedited replacement at no charge.',
-  'Could you send a photo of the damaged packaging? It helps us file the carrier claim.',
-  'The contract price has been applied and a corrected invoice is attached.',
-];
-
-export const TICKET_INTERNAL_NOTES = [
-  'Customer is a key account — keep the AE in the loop.',
-  'Checked ledger: 6 units short at CHI-01, inbound PO due Friday.',
-  'Carrier claim filed, reference in the shipment notes.',
-  'Finance confirmed payment was applied to the wrong invoice; reversal in progress.',
-  'Waiting on supplier confirmation before promising a date.',
-  'Customer called again; tone is escalating. Prioritize.',
-];
-
 export const RESOLUTION_CODES = [
   'resolved_shipped',
   'resolved_credit_issued',
@@ -901,44 +871,6 @@ export const RESOLUTION_CODES = [
   'resolved_no_action',
   'duplicate',
   'cannot_reproduce',
-];
-
-export const NOTE_BODIES = [
-  'Renewal discussion scheduled for next month. Prepare pricing on the top 20 SKUs by volume.',
-  'Plant expansion in Q1 — expect a 15–20% increase in monthly volume.',
-  'Accounts payable contact changed. Update the billing contact before the next invoice run.',
-  'Customer prefers consolidated weekly shipments to reduce receiving load.',
-  'Collections call completed. Customer committed to pay the overdue invoice by the end of the week.',
-  'Site visit notes: two lines running the MX-240 servo; spare inventory is low on their side.',
-  'Requested a quarterly business review. Include OTD metrics and open backorders.',
-  'Escalated shipping delay to warehouse; customer is aware and appreciative of the transparency.',
-  'Credit limit reviewed with Finance; no change until the overdue balance clears.',
-  'Competitor quoted lower on fasteners. Hold price on motion control; consider a bundle.',
-];
-
-export const HOLD_REASONS = [
-  'Credit exposure exceeds approved limit',
-  'Overdue receivables beyond 60 days',
-  'Pending finance review of payment terms',
-  'Disputed invoices outstanding',
-];
-
-export const SHIPMENT_EXCEPTIONS: { code: string; message: string }[] = [
-  { code: 'CARRIER_DELAY', message: 'Carrier reported a weather delay at the regional hub.' },
-  {
-    code: 'ADDRESS_ISSUE',
-    message: 'Delivery attempted; receiving dock closed. Redelivery scheduled.',
-  },
-  { code: 'DAMAGED_IN_TRANSIT', message: 'Pallet damage reported by the carrier; claim opened.' },
-  { code: 'LOST_IN_TRANSIT', message: 'Carrier cannot locate the shipment; trace initiated.' },
-];
-
-export const PO_NOTES = [
-  'Blanket release against annual agreement.',
-  'Expedite — customer backorder pending.',
-  'Confirm pack multiple before shipping.',
-  'Ship complete only.',
-  'Supplier requested revised delivery window.',
 ];
 
 export const WORKFLOW_NAMES = [

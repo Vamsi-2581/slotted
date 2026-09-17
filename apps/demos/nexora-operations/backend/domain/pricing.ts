@@ -1,4 +1,11 @@
-import type { CurrencyCode, Money, PaymentTermsCode, Quantity, TaxProfile } from './common';
+import type {
+  CurrencyCode,
+  Money,
+  PaymentTermsCode,
+  Quantity,
+  RegionCode,
+  TaxProfile,
+} from './common';
 import {
   addMoney,
   applyBps,
@@ -20,13 +27,34 @@ const TAX_RATE_BPS_BY_REGION: Record<string, number> = {
 };
 export const DEFAULT_TAX_RATE_BPS = 500;
 
+/** Simplified Brazil demo rate by state; not a legal tax engine. */
+const BR_TAX_RATE_BPS_BY_STATE: Record<string, number> = {
+  SP: 1_800,
+  RJ: 2_000,
+  MG: 1_800,
+  PR: 1_800,
+  SC: 1_700,
+  RS: 1_700,
+  BA: 1_900,
+  PE: 1_800,
+  CE: 1_800,
+  GO: 1_700,
+  AM: 2_000,
+  ES: 1_700,
+};
+export const BR_DEFAULT_TAX_RATE_BPS = 1_800;
+
 export function taxRateBpsFor(
   region: string,
   taxProfile: TaxProfile,
   taxClass: 'standard' | 'reduced' | 'exempt' = 'standard',
+  regionCode: RegionCode = 'US',
 ): number {
   if (taxProfile.type === 'exempt' || taxClass === 'exempt') return 0;
-  const base = TAX_RATE_BPS_BY_REGION[region] ?? DEFAULT_TAX_RATE_BPS;
+  const base =
+    regionCode === 'BR'
+      ? (BR_TAX_RATE_BPS_BY_STATE[region] ?? BR_DEFAULT_TAX_RATE_BPS)
+      : (TAX_RATE_BPS_BY_REGION[region] ?? DEFAULT_TAX_RATE_BPS);
   return taxClass === 'reduced' ? roundHalfUp(base / 2) : base;
 }
 

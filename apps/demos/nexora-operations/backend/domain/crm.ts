@@ -4,6 +4,7 @@ import type {
   EntityMetadata,
   Money,
   PaymentTermsCode,
+  RegionCode,
   TaxProfile,
 } from './common';
 
@@ -14,6 +15,7 @@ export interface Customer {
   id: string;
   organizationId: string;
   accountNumber: string;
+  regionCode: RegionCode;
   legalName: string;
   displayName: string;
   status: CustomerStatus;

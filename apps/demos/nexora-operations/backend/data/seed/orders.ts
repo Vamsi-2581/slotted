@@ -1,5 +1,9 @@
 import {
+  FX_RATES_TO_USD,
   ORGANIZATION_ID,
+  fromUsd,
+  money,
+  type CurrencyCode,
   addBusinessDays,
   addDays,
   addMs,
@@ -20,7 +24,6 @@ import {
   quantity,
   quantityToMilli,
   roundHalfUp,
-  usd,
   weekdayOf,
   type ApprovalRequest,
   type ApprovalStep,
@@ -62,7 +65,9 @@ import { pickDemandSku } from './catalog';
 import type { CustomerSeedResult } from './customers';
 import type { TenantSeedResult } from './tenant';
 import { PricingResolver, snapshotAddress } from './pricing-resolver';
-import { CARRIERS, ORDER_TAGS, SHIPMENT_EXCEPTIONS } from '../vocabulary';
+import { CARRIERS, ORDER_TAGS } from '../vocabulary';
+import { BR_CARRIERS } from '../vocabulary-br';
+import { CANCELLATION_REASONS, ORDER_NOTES, SHIPMENT_EXCEPTIONS_LONG } from '../corpora';
 
 export type OrderKind = 'normal' | 'draft' | 'cancelled' | 'on_hold' | 'pending_approval';
 
@@ -79,6 +84,8 @@ export interface OrderSummary {
   customerId: string;
   orderDate: string;
   kind: OrderKind;
+  currency: CurrencyCode;
+  fxRateToUsd: string;
   totalMinor: number;
   subtotalMinor: number;
   freightMinor: number;
@@ -350,7 +357,7 @@ function buildLines(
       if (!sku) return [];
       const priced = priceLine({
         quantity: spec.quantity,
-        listUnitPrice: usd(spec.unitPriceMinor),
+        listUnitPrice: money(spec.unitPriceMinor, customer.preferredCurrency),
         discountBps: spec.discountBps ?? 0,
         taxRateBps: spec.taxRateBps ?? env.pricing.taxRateBps(customer, shippingRegion, sku),
         unitCost: sku.standardCost,
@@ -366,9 +373,10 @@ function buildLines(
     });
   }
   const lineCount = lineCountFor(random, override?.lineCount);
+  const fx = Number(FX_RATES_TO_USD[customer.preferredCurrency]);
   const targetTotal =
     override?.targetTotalMinor ??
-    targetOrderTotalMinor(random, customer, override?.targetMedianDollars);
+    roundHalfUp(targetOrderTotalMinor(random, customer, override?.targetMedianDollars) / fx);
   const weights: number[] = [];
   let weightSum = 0;
   for (let index = 0; index < lineCount; index += 1) {
@@ -415,14 +423,15 @@ function buildLines(
             { value: random.pick([200, 300, 500, 750, 1_000]), weight: 26.5 },
             { value: random.pick([1_200, 1_500, 2_000, 2_500, 3_000]), weight: 1.5 },
           ]));
-    let unitCost = sku.standardCost;
+    let unitCost = fromUsd(sku.standardCost, customer.preferredCurrency);
     if (override?.marginTargetBps !== undefined) {
-      unitCost = usd(
+      unitCost = money(
         roundHalfUp(
           priceResolution.listUnitPrice.minor *
             (1 - discountBps / 10_000) *
             (1 - override.marginTargetBps / 10_000),
         ),
+        customer.preferredCurrency,
       );
     }
     const priced = priceLine({
@@ -470,17 +479,20 @@ export function summarizeOrder(env: OrderEnvironment, skeleton: OrderSkeleton): 
     shipping?.region ?? 'IL',
     override,
   );
-  const freight = usd(override?.freightMinor ?? freightFor(random, lines));
+  const currency = customer.preferredCurrency;
+  const freight = money(override?.freightMinor ?? freightFor(random, lines, currency), currency);
   const totals = documentTotals(
     lines.map((line) => line.priced),
     freight,
-    'USD',
+    currency,
   );
   return {
     index: skeleton.index,
     customerId: skeleton.customerId,
     orderDate: skeleton.orderDate,
     kind: skeleton.kind,
+    currency,
+    fxRateToUsd: FX_RATES_TO_USD[currency],
     totalMinor: totals.total.minor,
     subtotalMinor: totals.subtotal.minor,
     freightMinor: freight.minor,
@@ -489,12 +501,12 @@ export function summarizeOrder(env: OrderEnvironment, skeleton: OrderSkeleton): 
   };
 }
 
-function freightFor(random: Random, lines: BuiltLine[]): number {
+function freightFor(random: Random, lines: BuiltLine[], currency: CurrencyCode): number {
   if (random.chance(0.38)) return 0;
   let grams = 0;
   for (const line of lines) grams += (line.sku.weightGrams ?? 500) * (line.quantityMilli / 1000);
   const dollars = 18 + Math.min(1_200, grams / 1_000) * random.float(0.25, 0.6);
-  return roundHalfUp(dollars) * 100;
+  return roundHalfUp(dollars / Number(FX_RATES_TO_USD[currency])) * 100;
 }
 
 function paymentDelayDays(
@@ -514,6 +526,14 @@ function paymentDelayDays(
 }
 
 function paymentMethod(random: Random, customer: Customer): PaymentMethod {
+  if (customer.regionCode === 'BR') {
+    return random.weighted<PaymentMethod>([
+      { value: 'pix', weight: 46 },
+      { value: 'boleto', weight: 38 },
+      { value: 'wire', weight: 12 },
+      { value: 'credit_card', weight: 4 },
+    ]);
+  }
   return random.weighted<PaymentMethod>([
     { value: 'ach', weight: customer.segment === 'smb' ? 42 : 58 },
     { value: 'wire', weight: customer.segment === 'smb' ? 14 : 28 },
@@ -555,12 +575,16 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
 
   // Lines and freight draw first so `summarizeOrder` and this builder share the same stream.
   const built = buildLines(env, random, customer, orderDate, shippingRegion, override);
-  const freight = usd(override?.freightMinor ?? freightFor(random, built));
+  const currency = customer.preferredCurrency;
+  const fxRateToUsd = FX_RATES_TO_USD[currency];
+  const usdEquivalent = (minor: number): number => roundHalfUp(minor * Number(fxRateToUsd));
+  const cash = (minor: number): Money => money(minor, currency);
+  const freight = cash(override?.freightMinor ?? freightFor(random, built, currency));
   const createdAt = instantOn(orderDate, random);
   const totals = documentTotals(
     built.map((line) => line.priced),
     freight,
-    'USD',
+    currency,
   );
   const maxDiscount = built.reduce((max, line) => Math.max(max, line.priced.discountBps), 0);
 
@@ -629,7 +653,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     const quoteCreatedAt = instantOn(quoteDate, random);
     const quoteYear = Number(quoteDate.slice(0, 4));
     const quoteApproval = evaluateQuoteApproval({
-      approvalValueUsdMinor: totals.subtotal.minor + freight.minor,
+      approvalValueUsdMinor: usdEquivalent(totals.subtotal.minor + freight.minor),
       grossMarginBps: totals.grossMarginBps,
       maxLineDiscountBps: maxDiscount,
     });
@@ -647,8 +671,8 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       ownerId,
       createdBusinessDate: quoteDate,
       expirationDate: addDays(quoteDate, 30),
-      currency: 'USD',
-      fxRateToUsd: '1.00000000',
+      currency,
+      fxRateToUsd,
       priceListId: customer.priceListId,
       status: 'converted',
       subtotal: totals.subtotal,
@@ -705,7 +729,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     totals.total.minor > customer.creditLimit.minor * 0.9 &&
     random.chance(0.5);
   const evaluation = evaluateOrderApproval({
-    approvalValueUsdMinor: approvalValue,
+    approvalValueUsdMinor: usdEquivalent(approvalValue),
     grossMarginBps: totals.grossMarginBps,
     maxLineDiscountBps: maxDiscount,
     creditLimitExceeded,
@@ -789,7 +813,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       status: approvalPending ? 'pending' : status === 'cancelled' ? 'cancelled' : 'approved',
       requestedBy: ownerId,
       requestedAt: submittedAt,
-      amount: usd(approvalValue),
+      amount: cash(approvalValue),
       steps,
       metadata: metadataAt(
         submittedAt,
@@ -814,8 +838,8 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     defaultWarehouseId: skeleton.warehouseId,
     billingAddress: snapshotAddress(billing, customer.legalName),
     shippingAddress: snapshotAddress(shipping, customer.displayName),
-    currency: 'USD',
-    fxRateToUsd: '1.00000000',
+    currency,
+    fxRateToUsd,
     paymentTermsCode: customer.paymentTermsCode,
     status,
     approvalStatus,
@@ -850,13 +874,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         : {}),
     ...(random.chance(0.12)
       ? {
-          notes: random.pick([
-            'Customer requests all items ship complete.',
-            'Call receiving before delivery.',
-            'Blanket release — see customer PO for schedule.',
-            'Rush: production line down.',
-            'Include certs of conformance with shipment.',
-          ]),
+          notes: random.pick(ORDER_NOTES),
         }
       : {}),
   };
@@ -872,13 +890,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   if (status === 'cancelled') {
     const cancelledAt = addMs(submittedAt, random.int(1, 72) * 3_600_000);
     order.cancelledAt = cancelledAt;
-    order.cancellationReason = random.pick([
-      'Customer cancelled — project postponed',
-      'Duplicate order',
-      'Pricing dispute',
-      'Ordered in error',
-      'Lead time too long',
-    ]);
+    order.cancellationReason = random.pick(CANCELLATION_REASONS);
     for (const line of lines) line.cancelledQuantity = line.orderedQuantity;
     order.metadata.version = 3;
     order.metadata.updatedAt = cancelledAt;
@@ -1048,12 +1060,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
     const cancelledAt = addMs(confirmedAt as string, random.int(2, 96) * 3_600_000);
     order.status = 'cancelled';
     order.cancelledAt = cancelledAt;
-    order.cancellationReason = random.pick([
-      'Customer cancelled — project postponed',
-      'Duplicate order',
-      'Pricing dispute',
-      'Ordered in error',
-    ]);
+    order.cancellationReason = random.pick(CANCELLATION_REASONS);
     for (const line of lines) {
       line.cancelledQuantity = line.orderedQuantity;
       line.reservedQuantity = '0';
@@ -1068,7 +1075,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
   const warehouseActors = env.warehouseActors.get(skeleton.warehouseId) ?? [
     env.tenant.personaUserIds.get('jordan-wells') as string,
   ];
-  const carrierSpec = random.pick(CARRIERS);
+  const carrierSpec = random.pick(customer.regionCode === 'BR' ? BR_CARRIERS : CARRIERS);
   const invoiceableWaves: {
     shipment: Shipment;
     shipmentLines: ShipmentLine[];
@@ -1160,7 +1167,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       ...(deliveredAt ? { deliveredAt } : {}),
     };
     if (exception) {
-      const detail = random.pick(SHIPMENT_EXCEPTIONS);
+      const detail = random.pick(SHIPMENT_EXCEPTIONS_LONG);
       shipment.exceptionCode = detail.code;
       shipment.exceptionMessage = detail.message;
     }
@@ -1287,11 +1294,11 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         unitCostSnapshot: line.unitCost,
       };
     });
-    const invoiceFreight = waveIndex === 0 ? freight : usd(0);
-    const subtotal = usd(invoiceLines.reduce((sum, line) => sum + line.netAmount.minor, 0));
-    const taxTotal = usd(invoiceLines.reduce((sum, line) => sum + line.taxAmount.minor, 0));
-    const total = usd(subtotal.minor + taxTotal.minor + invoiceFreight.minor);
-    const costTotal = usd(
+    const invoiceFreight = waveIndex === 0 ? freight : cash(0);
+    const subtotal = cash(invoiceLines.reduce((sum, line) => sum + line.netAmount.minor, 0));
+    const taxTotal = cash(invoiceLines.reduce((sum, line) => sum + line.taxAmount.minor, 0));
+    const total = cash(subtotal.minor + taxTotal.minor + invoiceFreight.minor);
+    const costTotal = cash(
       invoiceLines.reduce(
         (sum, line) =>
           sum +
@@ -1312,12 +1319,12 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       sourceOrderId: id,
       issueDate,
       dueDate,
-      currency: 'USD',
-      fxRateToUsd: '1.00000000',
+      currency,
+      fxRateToUsd,
       lifecycle: 'open',
       collectionState: 'current',
       settlement: 'unpaid',
-      paidAmount: usd(0),
+      paidAmount: cash(0),
       outstanding: total,
       billingAddress: order.billingAddress,
       paymentTermsCode: customer.paymentTermsCode,
@@ -1326,7 +1333,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
       freight: invoiceFreight,
       total,
       costTotal,
-      writtenOffAmount: usd(0),
+      writtenOffAmount: cash(0),
       sentAt: addMs(issuedAt, random.int(5, 120) * 60_000),
       openedAt: issuedAt,
       metadata: metadataAt(
@@ -1372,14 +1379,14 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         organizationId: ORGANIZATION_ID,
         paymentNumber: '',
         customerId: customer.id,
-        amount: usd(paymentAmount),
-        fxRateToUsd: '1.00000000',
+        amount: cash(paymentAmount),
+        fxRateToUsd,
         method: paymentMethod(random, customer),
         receivedDate: paymentDate,
         reference: `${random.pick(['ACH', 'WIRE', 'CHK', 'CC'])}-${random.digits(8)}`,
         status: 'posted',
         recordedBy,
-        unappliedAmount: usd(0),
+        unappliedAmount: cash(0),
         metadata: metadataAt(postedAt, recordedBy, postedAt, recordedBy, 2),
       };
       graph.payments.push(payment);
@@ -1388,20 +1395,20 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         organizationId: ORGANIZATION_ID,
         paymentId,
         invoiceId,
-        amount: usd(paymentAmount),
+        amount: cash(paymentAmount),
         status: 'active',
         createdAt: postedAt,
       });
-      invoice.paidAmount = usd(paymentAmount);
-      invoice.outstanding = usd(total.minor - paymentAmount);
+      invoice.paidAmount = cash(paymentAmount);
+      invoice.outstanding = cash(total.minor - paymentAmount);
       invoice.settlement = paymentAmount >= total.minor ? 'paid' : 'partially_paid';
       invoice.metadata.updatedAt = postedAt;
       invoice.metadata.version = 3;
       lastUpdatedAt = postedAt;
     }
     if (override?.invoiceOutstandingMinor !== undefined && invoiceCounter === 1) {
-      invoice.outstanding = usd(override.invoiceOutstandingMinor);
-      invoice.paidAmount = usd(total.minor - override.invoiceOutstandingMinor);
+      invoice.outstanding = cash(override.invoiceOutstandingMinor);
+      invoice.paidAmount = cash(total.minor - override.invoiceOutstandingMinor);
       invoice.settlement =
         override.invoiceOutstandingMinor === 0
           ? 'paid'
@@ -1552,7 +1559,7 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         const creditMemoId = formatId('creditMemo', index + 1);
         const issuedAt = ret.completedAt as string;
         const invoice = graph.invoices[0];
-        const total = usd(creditMinor + creditTax);
+        const total = cash(creditMinor + creditTax);
         const applyTo =
           invoice && invoice.outstanding.minor > 0
             ? Math.min(invoice.outstanding.minor, total.minor)
@@ -1565,13 +1572,13 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
           sourceReturnId: returnId,
           reason: 'return',
           issueDate: businessDateOf(issuedAt),
-          currency: 'USD',
+          currency,
           lifecycle: applyTo >= total.minor ? 'fully_applied' : 'open',
-          subtotal: usd(creditMinor),
-          taxTotal: usd(creditTax),
+          subtotal: cash(creditMinor),
+          taxTotal: cash(creditTax),
           total,
-          appliedAmount: usd(applyTo),
-          unappliedAmount: usd(total.minor - applyTo),
+          appliedAmount: cash(applyTo),
+          unappliedAmount: cash(total.minor - applyTo),
           metadata: metadataAt(
             issuedAt,
             random.pick(env.financeActors),
@@ -1588,8 +1595,8 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
           creditMemoId,
           returnLineId: graph.returnLines[0]?.id ?? '',
           description: `Return credit for ${ret.returnNumber || 'RMA'}`,
-          amount: usd(creditMinor),
-          taxAmount: usd(creditTax),
+          amount: cash(creditMinor),
+          taxAmount: cash(creditTax),
         });
         ret.creditMemoId = creditMemoId;
         if (invoice && applyTo > 0) {
@@ -1598,12 +1605,12 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
             organizationId: ORGANIZATION_ID,
             creditMemoId,
             invoiceId: invoice.id,
-            amount: usd(applyTo),
+            amount: cash(applyTo),
             status: 'active',
             createdAt: issuedAt,
           });
-          invoice.paidAmount = usd(invoice.paidAmount.minor + applyTo);
-          invoice.outstanding = usd(invoice.outstanding.minor - applyTo);
+          invoice.paidAmount = cash(invoice.paidAmount.minor + applyTo);
+          invoice.outstanding = cash(invoice.outstanding.minor - applyTo);
           invoice.settlement = invoice.outstanding.minor === 0 ? 'paid' : 'partially_paid';
           if (invoice.outstanding.minor === 0) invoice.collectionState = 'current';
         }

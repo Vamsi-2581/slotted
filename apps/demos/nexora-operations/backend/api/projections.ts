@@ -10,7 +10,10 @@ import {
   quantityToMilli,
   ratioBps,
   roundHalfUp,
+  addMoney,
+  money,
   usd,
+  usdMinor,
   type Customer,
   type CustomerFinancialSummary,
   type CustomerHealth,
@@ -576,25 +579,27 @@ export class Projections {
     for (const ticket of this.indexes.ticketsByCustomer.get(customerId))
       if (ticket.status !== 'closed' && ticket.status !== 'resolved') openTickets += 1;
     const customer = this.store.dataset.customers.get(customerId);
+    const currency = customer?.preferredCurrency ?? 'USD';
+    const cash = (minor: number): Money => money(minor, currency);
     const creditExposure = gross + openOrderExposure;
     const creditLimit = customer?.creditLimit.minor ?? 0;
     const summary: CustomerFinancialSummary = {
       customerId,
-      grossReceivables: usd(gross),
-      unappliedCredit: usd(unapplied),
-      netReceivables: usd(Math.max(0, gross - unapplied)),
-      openOrderExposure: usd(openOrderExposure),
-      creditExposure: usd(creditExposure),
+      grossReceivables: cash(gross),
+      unappliedCredit: cash(unapplied),
+      netReceivables: cash(Math.max(0, gross - unapplied)),
+      openOrderExposure: cash(openOrderExposure),
+      creditExposure: cash(creditExposure),
       creditUtilizationBps:
         creditLimit === 0
           ? creditExposure > 0
             ? 10_000
             : 0
           : ratioBps(creditExposure, creditLimit),
-      overdueReceivables: usd(overdue),
-      lifetimeRevenue: usd(lifetimeNet),
+      overdueReceivables: cash(overdue),
+      lifetimeRevenue: cash(lifetimeNet),
       ordersLast12Months: orders12,
-      averageOrderValueLast12Months: usd(orders12 === 0 ? 0 : roundHalfUp(value12 / orders12)),
+      averageOrderValueLast12Months: cash(orders12 === 0 ? 0 : roundHalfUp(value12 / orders12)),
       openInvoiceCount: openInvoices,
       overdueInvoiceCount: overdueInvoices,
       openOrderCount: openOrders,
@@ -672,7 +677,8 @@ export class Projections {
       )
         open += 1;
       if (po.status === 'cancelled' || po.status === 'draft') continue;
-      if (compareDates(po.createdBusinessDate, cutoff) >= 0) spend += po.total.minor;
+      if (compareDates(po.createdBusinessDate, cutoff) >= 0)
+        spend += usdMinor(po.total, po.fxRateToUsd);
       for (const line of this.indexes.poLinesByPo.get(po.id)) {
         const ordered = quantityToMilli(line.orderedQuantity);
         const accepted = quantityToMilli(line.receivedAcceptedQuantity);
@@ -742,13 +748,14 @@ export class Projections {
     for (const invoice of dataset.invoices.values()) {
       if (invoice.lifecycle === 'open' || invoice.lifecycle === 'written_off') {
         if (compareDates(invoice.issueDate, cutoff90) >= 0) {
-          revenue90 += invoice.subtotal.minor + invoice.freight.minor;
-          if (compareDates(invoice.issueDate, cutoff30) >= 0)
-            revenue30 += invoice.subtotal.minor + invoice.freight.minor;
+          const net = usdMinor(addMoney(invoice.subtotal, invoice.freight), invoice.fxRateToUsd);
+          revenue90 += net;
+          if (compareDates(invoice.issueDate, cutoff30) >= 0) revenue30 += net;
         }
       }
       if (invoice.lifecycle !== 'open' || invoice.outstanding.minor <= 0) continue;
-      receivables += invoice.outstanding.minor;
+      const outstandingUsd = usdMinor(invoice.outstanding, invoice.fxRateToUsd);
+      receivables += outstandingUsd;
       openCount += 1;
       if (invoice.collectionState === 'disputed') disputedCount += 1;
       const daysPastDue = diffDays(today, invoice.dueDate);
@@ -764,29 +771,31 @@ export class Projections {
                 ? '61-90'
                 : '90+';
       const entry = aging.get(bucket) as { amount: number; count: number };
-      entry.amount += invoice.outstanding.minor;
+      entry.amount += outstandingUsd;
       entry.count += 1;
       if (invoice.collectionState === 'overdue') {
-        overdue += invoice.outstanding.minor;
+        overdue += outstandingUsd;
         overdueCount += 1;
         overdueByCustomer.set(
           invoice.customerId,
-          (overdueByCustomer.get(invoice.customerId) ?? 0) + invoice.outstanding.minor,
+          (overdueByCustomer.get(invoice.customerId) ?? 0) + outstandingUsd,
         );
       }
     }
     for (const memo of dataset.creditMemos.values()) {
       if (memo.lifecycle === 'voided' || memo.lifecycle === 'draft') continue;
       if (compareDates(memo.issueDate, cutoff90) >= 0) {
-        revenue90 -= memo.subtotal.minor;
-        if (compareDates(memo.issueDate, cutoff30) >= 0) revenue30 -= memo.subtotal.minor;
+        const net = usdMinor(memo.subtotal);
+        revenue90 -= net;
+        if (compareDates(memo.issueDate, cutoff30) >= 0) revenue30 -= net;
       }
     }
     let unapplied = 0;
     for (const payment of dataset.payments.values())
-      if (payment.status === 'posted') unapplied += payment.unappliedAmount.minor;
+      if (payment.status === 'posted')
+        unapplied += usdMinor(payment.unappliedAmount, payment.fxRateToUsd);
     for (const memo of dataset.creditMemos.values())
-      if (memo.lifecycle === 'open') unapplied += memo.unappliedAmount.minor;
+      if (memo.lifecycle === 'open') unapplied += usdMinor(memo.unappliedAmount);
     let unmatched = 0;
     for (const transaction of dataset.bankTransactions.values())
       if (

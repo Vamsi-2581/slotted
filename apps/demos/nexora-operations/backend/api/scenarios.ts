@@ -10,6 +10,8 @@ import {
   milliToQuantity,
   parseBusinessDate,
   quantityToMilli,
+  addMoney,
+  money,
   usd,
   SLA_TARGETS,
   type ApprovalRequest,
@@ -202,11 +204,12 @@ function applyMonthEnd(runtime: ApiRuntime): void {
         id: formatId('bankTransaction', 700_000 + counter),
         organizationId: ORGANIZATION_ID,
         postedDate: addDays(today, -random.int(0, 3)),
-        description: `${random.pick(['ACH CREDIT', 'FED WIRE IN', 'LOCKBOX DEPOSIT'])} ${(customer?.legalName ?? '').toUpperCase().replace(/[.,]/g, '').slice(0, 22)}`,
-        amount: usd(
+        description: `${random.pick(invoice.currency === 'BRL' ? ['PIX RECEBIDO', 'TED RECEBIDA', 'LIQ BOLETO'] : ['ACH CREDIT', 'FED WIRE IN', 'LOCKBOX DEPOSIT'])} ${(customer?.legalName ?? '').toUpperCase().replace(/[.,]/g, '').slice(0, 22)}`,
+        amount: money(
           random.chance(0.6)
             ? invoice.outstanding.minor
             : Math.round(invoice.outstanding.minor * random.float(0.5, 1.2)),
+          invoice.currency,
         ),
         status: random.chance(0.6) ? 'suggested' : 'needs_review',
         candidates: [],
@@ -246,7 +249,7 @@ function applyMonthEnd(runtime: ApiRuntime): void {
         status: 'pending',
         requestedBy: order.ownerId,
         requestedAt: store.now,
-        amount: usd(order.subtotal.minor + order.freight.minor),
+        amount: addMoney(order.subtotal, order.freight),
         steps: [
           {
             id: `aps_${order.id.slice(4)}_1`,
@@ -450,8 +453,9 @@ function applyCollectionsPressure(runtime: ApiRuntime): void {
       (customer) => projections.customerSummary(customer.id).creditUtilizationBps >= 9_000,
     ).length;
     for (const entry of exposed.slice(0, Math.max(0, 18 - currentlyAbove))) {
-      entry.customer.creditLimit = usd(
+      entry.customer.creditLimit = money(
         Math.max(100_000, Math.round(entry.summary.creditExposure.minor / 0.95 / 100) * 100),
+        entry.customer.preferredCurrency,
       );
       entry.customer.metadata.updatedAt = store.now;
     }

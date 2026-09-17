@@ -1,5 +1,7 @@
 import {
+  FX_RATES_TO_USD,
   ORGANIZATION_ID,
+  money,
   addDays,
   businessDateToInstant,
   quantity,
@@ -10,6 +12,7 @@ import {
   type Sku,
 } from '../../domain';
 import type { LeafCategoryDefinition, ProductTypeTemplate } from '../catalog-vocabulary';
+import { PRODUCT_CLAIMS_BY_ROOT } from '../corpora';
 import type { Random } from '../random';
 import { withId, type SeedContext } from './context';
 import type { TenantSeedResult } from './tenant';
@@ -127,17 +130,18 @@ function describe(
   brand: string,
   name: string,
   random: Random,
+  rootName: string,
 ): string {
-  const claims = [
-    'Industrial-grade construction rated for continuous duty.',
-    'Backed by a 24-month manufacturer warranty.',
-    'Ships from stock at most Asteron locations.',
-    'Compatible with standard mounting hardware.',
-    'Meets CE and UL requirements where applicable.',
-    'Suited to packaging, material handling and general automation lines.',
-    'RoHS compliant.',
+  const claims =
+    PRODUCT_CLAIMS_BY_ROOT[rootName] ?? PRODUCT_CLAIMS_BY_ROOT['MRO Consumables'] ?? [];
+  const uses = [
+    'OEM and MRO applications',
+    'plant maintenance and machine builders',
+    'production lines and facilities teams',
+    'packaging and material handling lines',
+    'panel builders and integrators',
   ];
-  return `${brand} ${name}. ${template.noun} for OEM and MRO applications. ${random.sample(claims, 2).join(' ')}`;
+  return `${brand} ${name}. ${template.noun} for ${random.pick(uses)}. ${random.sample(claims, 2).join(' ')}`;
 }
 
 export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): CatalogSeedResult {
@@ -190,6 +194,34 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
     dataset.priceListEntries.set(standard.id, standard);
     standardEntryBySku.set(sku.id, standard.id);
     entriesByList.get(standardListId)?.set(sku.id, standard);
+    // Brazil lists in BRL: landed price = USD list / FX × import factor; distributor at −12%.
+    const brStandardId = tenant.priceListIdsByName.get('Brazil Standard');
+    if (brStandardId) {
+      const brl = priceMinor(((listPrice / Number(FX_RATES_TO_USD.BRL)) * 1.15) / 100);
+      const entry: PriceListEntry = {
+        id: context.nextId('priceEntry'),
+        organizationId: ORGANIZATION_ID,
+        priceListId: brStandardId,
+        skuId: sku.id,
+        unitPrice: money(brl, 'BRL'),
+        validFrom,
+      };
+      dataset.priceListEntries.set(entry.id, entry);
+      entriesByList.get(brStandardId)?.set(sku.id, entry);
+      const brDistributorId = tenant.priceListIdsByName.get('Brazil Distributor');
+      if (brDistributorId && (onAllLists || random.chance(0.35))) {
+        const distributor: PriceListEntry = {
+          id: context.nextId('priceEntry'),
+          organizationId: ORGANIZATION_ID,
+          priceListId: brDistributorId,
+          skuId: sku.id,
+          unitPrice: money(priceMinor((brl * 0.88) / 100), 'BRL'),
+          validFrom,
+        };
+        dataset.priceListEntries.set(distributor.id, distributor);
+        entriesByList.get(brDistributorId)?.set(sku.id, distributor);
+      }
+    }
     if (!onAllLists && !random.chance(0.35)) return;
     for (const [name, bps] of listAdjustments) {
       const listId = tenant.priceListIdsByName.get(name);
@@ -233,7 +265,7 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
       id: context.nextId('product'),
       organizationId: ORGANIZATION_ID,
       name: spec.name,
-      description: describe(template, spec.brand, spec.name, random),
+      description: describe(template, spec.brand, spec.name, random, rootNameOf(leafId)),
       categoryId: leafId,
       brand: spec.brand,
       manufacturer: spec.brand,

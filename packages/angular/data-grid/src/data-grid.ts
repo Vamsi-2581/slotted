@@ -154,6 +154,24 @@ const SIMPLE_WIDGET =
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 
+/**
+ * Whether a pointer event landed on a widget inside the cell — a link, a
+ * button, a field — rather than on the cell itself. Asked of the cell and not
+ * of the document: the scroller is focusable while the grid overflows, and
+ * `closest` walked up to it from every value, so a press on a header's name
+ * sorted nothing and only the cell's own padding answered. A press outside
+ * the cell — on the menu it opened — is not its own either.
+ */
+function insideWidget(event: Event) {
+  const cell = event.currentTarget as HTMLElement;
+  const target = event.target as HTMLElement | null;
+  /* An event from a layer the cell owns — React bubbles a portal's events
+     through the tree — is not the cell's own press either. */
+  if (!target || !cell.contains(target)) return true;
+  const widget = target.closest(FOCUSABLE);
+  return widget !== null && widget !== cell && cell.contains(widget);
+}
+
 interface EditSession {
   readonly cell: GridCell;
   readonly columns: readonly string[];
@@ -365,6 +383,7 @@ function isBodyRow(row: string) {
                   <sl-menu
                     #columnMenu
                     size="sm"
+                    [sideOffset]="MENU_OFFSET"
                     [attr.aria-label]="t().columnMenu + ', ' + column.column.label"
                   >
                     @if (column.sortable) {
@@ -439,6 +458,7 @@ function isBodyRow(row: string) {
                     (pointermove)="moveResize($event, column)"
                     (pointerup)="endResize($event)"
                     (pointercancel)="endResize($event)"
+                    (click)="$event.stopPropagation()"
                     (dblclick)="$event.stopPropagation(); autofit(column.id, $event)"
                   ></div>
                 }
@@ -986,6 +1006,8 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly GROUP_PREFIX = GROUP_ROW_PREFIX;
   protected readonly SELECTION = SELECTION_COLUMN;
   protected readonly EXPANDER = EXPANDER_COLUMN;
+  /** The room between the header and the menu it opens: one space step. */
+  protected readonly MENU_OFFSET = 4;
 
   /* ── Data ───────────────────────────────────────────────────────────── */
   readonly rows = input.required<readonly Row[]>();
@@ -1159,7 +1181,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     normalizeColumnState(this.columnState(), this.columns()),
   );
   protected readonly resolved = computed(() =>
-    resolveColumns(this.columns(), this.effectiveState()),
+    resolveColumns(this.columns(), this.effectiveState(), {
+      leading: this.gutters().reduce((sum, width) => sum + width, 0),
+    }),
   );
   private readonly resolvedById = computed(
     () => new Map(this.resolved().map((column) => [column.id, column])),
@@ -2397,11 +2421,17 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         itemLabel: (columnId) => this.labelOf(columnId),
       });
     }
+    let wasDragging = false;
     controller.subscribe((state) => {
       if (state.status !== 'dragging') {
+        /* The click the browser fires after a drop is the drag's, not a press
+           on the header: read live, a reordered column came back sorted. */
+        if (wasDragging) this.swallowClick = true;
+        wasDragging = false;
         this.dragState.set({ dragging: null, target: null, offset: null });
         return;
       }
+      wasDragging = true;
       const target = state.target && state.target.kind === 'between' ? state.target : null;
       let offset: number | null = null;
       let over: string | null = null;
@@ -2483,21 +2513,23 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     if (event.defaultPrevented) return;
     this.drag?.handleKeydown(event);
   }
+  private swallowClick = false;
   protected onHeaderClick(event: MouseEvent, column: ResolvedGridColumn<Row>) {
-    const target = event.target as HTMLElement;
-    if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+    if (this.swallowClick) {
+      this.swallowClick = false;
+      return;
+    }
+    if (insideWidget(event)) return;
     if (column.sortable) this.pressSort(column.id, event.shiftKey, event, 'pointer');
   }
   protected onBodyCellClick(event: MouseEvent, cell: GridCell) {
-    const target = event.target as HTMLElement;
-    if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+    if (insideWidget(event)) return;
     if (this.resolvedSelectionMode() === 'single' && !this.disabledSet().has(cell.row)) {
       this.toggleSelected(cell.row, { range: false, source: event });
     }
   }
   protected onCellDoubleClick(event: MouseEvent, cell: GridCell) {
-    const target = event.target as HTMLElement;
-    if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+    if (insideWidget(event)) return;
     const row = this.rowOf(cell.row);
     const column = this.columns().find((entry) => entry.id === cell.column);
     if (!row) return;
@@ -2510,6 +2542,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   }
   protected onCellPointerDown(event: PointerEvent, cell: GridCell) {
     if (event.button !== 0) return;
+    this.swallowClick = false;
     const session = this.edit();
     if (
       session &&
@@ -2520,8 +2553,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     }
     if (!sameCell(cell, this.current())) this.requestCurrent(cell, 'pointer', event);
     if (this.resolvedSelectionMode() === 'range' && isBodyRow(cell.row)) {
-      const target = event.target as HTMLElement;
-      if (!target.closest(FOCUSABLE)) {
+      if (!insideWidget(event)) {
         this.beginRange(cell, event.shiftKey, event);
         this.rangeDragging.set(true);
       }

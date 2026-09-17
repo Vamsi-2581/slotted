@@ -30,3 +30,24 @@ export function columnAttributes<Row>(column: ResolvedGridColumn<Row>) {
     'data-column': column.id,
   };
 }
+
+/**
+ * Whether a pointer event landed on a widget inside the cell — a link, a
+ * button, a field — rather than on the cell itself. Asked of the cell and not
+ * of the document: the scroller is focusable while the grid overflows, and
+ * `closest` walked up to it from every value, so a press on a header's name
+ * sorted nothing and only the cell's own padding answered. A press outside
+ * the cell — on the menu it opened — is not its own either.
+ */
+export function insideWidget(event: {
+  target: EventTarget | null;
+  currentTarget: EventTarget | null;
+}) {
+  const cell = event.currentTarget as HTMLElement;
+  const target = event.target as HTMLElement | null;
+  /* An event from a layer the cell owns — React bubbles a portal's events
+     through the tree — is not the cell's own press either. */
+  if (!target || !cell.contains(target)) return true;
+  const widget = target.closest(FOCUSABLE);
+  return widget !== null && widget !== cell && cell.contains(widget);
+}

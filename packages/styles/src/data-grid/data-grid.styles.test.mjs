@@ -102,6 +102,30 @@ test('pins a column with sticky at the offset the binding writes, on the row’s
   }
   const corner = rule("[data-ui='data-grid'] [data-part='head'] [data-pinned]");
   assert.match(corner, /z-index:calc\(var\(--slotted-z-index-sticky,100\) \+ 2\);/);
+  /* The zone's edge is the hairline the rows are ruled with; while something
+     slides under it the line casts a short shadow, never a stronger line: a
+     dark rule down the body read as a frame inside the frame. */
+  const edge = rule("[data-ui='data-grid'] [data-pinned][data-pin-edge]::after");
+  assert.match(edge, /background-color:var\(--_rule\);/);
+  assert.match(edge, /inline-size:var\(--_rule-width\);/);
+  const hidden = rule(
+    "[data-ui='data-grid'] [data-part='scroll'][data-overflowing]:not([data-at-start]) [data-pinned='start'][data-pin-edge]::after",
+  );
+  assert.match(
+    hidden,
+    /background-image:linear-gradient\(to right,var\(--_rule\) var\(--_rule-width\),var\(--_edge-shadow\) var\(--_rule-width\),transparent\);/,
+  );
+  assert.doesNotMatch(normalized, /\[data-pin-edge\]::after\{[^}]*--_rule-strong/);
+  /* The cells end where the rule under the row begins: the track is the row
+     less the rule, or a pinned cell painted above its row covered the rule. */
+  const body = rule(
+    "[data-ui='data-grid']:is([data-variant='ruled'],[data-variant='framed']) [data-part='body']",
+  );
+  assert.match(body, /--_track:calc\(var\(--_row-block\) - var\(--_rule-width\)\);/);
+  const fixed = rule(
+    "[data-ui='data-grid'][data-rows='fixed'] [data-part='body'] > [data-part='row']",
+  );
+  assert.match(fixed, /block-size:var\(--_row-block\);grid-auto-rows:var\(--_track\);/);
 });
 
 /**
@@ -150,7 +174,21 @@ test('lays the filter panel out as one line per condition', () => {
   const panel = rule("[data-ui='data-grid'][data-part='filter-panel']");
   assert.match(panel, /grid-template-columns:max-content var\(--_operator-size\) minmax\(0,1fr\);/);
   assert.match(panel, /inline-size:var\(--slotted-data-grid-filter-panel-size,24rem\);/);
-  assert.match(panel, /(^|;)padding:0;/);
+  /* The popover pads its header and its body, not its surface; the panel
+     stands in the surface and takes the `sm` inset itself, and the layer that
+     holds it is given the panel's measure. Read live: at the popover's own
+     sixteen rem the panel stood out of the surface on both sides. */
+  assert.match(
+    panel,
+    /padding:var\(--slotted-popover-padding-block-sm,var\(--slotted-space-4,0\.5rem\)\) var\(--slotted-popover-padding-inline-sm,var\(--slotted-space-5,0\.75rem\)\);/,
+  );
+  const layer = rule(
+    "[data-ui='popover']:has(> [data-part='content'] > [data-ui='data-grid'][data-part='filter-panel'])",
+  );
+  assert.match(
+    layer,
+    /--slotted-popover-measure-sm:calc\(var\(--slotted-data-grid-filter-panel-size,24rem\) \+ 2 \* \(var\(--slotted-popover-gap,0\.5rem\) \+ var\(--slotted-border-width-thin,1px\)\)\);/,
+  );
   assert.match(
     normalized,
     /--_operator-size:var\(--slotted-data-grid-filter-operator-size,7rem\);/,

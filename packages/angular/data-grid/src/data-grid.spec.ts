@@ -328,6 +328,16 @@ describe('SlDataGrid', () => {
     expect(header('weight').hasAttribute('aria-sort')).toBe(false);
   });
 
+  it('sorts on a press on the name while the scroller is a tab stop, and never on the handle', () => {
+    root().querySelector('[data-part="scroll"]')!.setAttribute('tabindex', '0');
+    header('customer').querySelector('span')!.click();
+    fixture.detectChanges();
+    expect(header('customer').getAttribute('aria-sort')).toBe('ascending');
+    header('customer').querySelector<HTMLElement>('[data-part="resizer"]')!.click();
+    fixture.detectChanges();
+    expect(header('customer').getAttribute('aria-sort')).toBe('ascending');
+  });
+
   it('sorts from the keyboard on the header cell', () => {
     host.current.set({ row: 'header', column: 'customer' });
     fixture.detectChanges();

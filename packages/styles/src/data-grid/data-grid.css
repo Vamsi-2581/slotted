@@ -47,6 +47,11 @@
       var(--slotted-border-strong, ButtonBorder)
     );
     --_rule-width: var(--slotted-data-grid-border-width, var(--slotted-border-width-thin, 1px));
+    --_edge-shadow: var(
+      --slotted-data-grid-pin-shadow-color,
+      color-mix(in oklab, var(--slotted-text, CanvasText) 5%, transparent)
+    );
+    --_edge-shadow-size: var(--slotted-data-grid-pin-shadow-size, var(--slotted-space-5, 0.75rem));
     --_indent: var(--slotted-data-grid-indent, var(--slotted-space-6, 1rem));
 
     /* Ink and ground. The row's ground is stated rather than transparent,
@@ -108,6 +113,21 @@
     );
     --_range: var(--slotted-data-grid-range-surface, var(--slotted-tone-accent-surface, Canvas));
     --_ring-width: var(--slotted-focus-ring-width, 2px);
+    /* A control drawn by the family — the column menu, the filter trigger, the
+       expander, the group toggle — is the target minimum where the row has
+       room and the row less the cursor's ring where it has not: at dense the
+       track is 26 pixels and a 24-pixel button stood over the two-pixel ring
+       drawn inward on both sides of it. */
+    --_control: min(
+      var(--slotted-target-min, 24px),
+      calc(var(--_row-block) - var(--_ring-width) * 2)
+    );
+    /* The track a body row lays its cells on: the row's height less the rule
+       under it, so the cells end where the rule begins. Stated as the whole
+       row, the cells overflowed the row's content box by the rule's width and
+       a pinned cell, painted above its row, covered the rule — read on the
+       pinning scene, where the pinned column had no lines between its rows. */
+    --_track: var(--_row-block);
     --_transition: var(--slotted-control-transition-duration, var(--slotted-duration-short))
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
 
@@ -398,7 +418,7 @@
     flex: none;
     gap: var(--slotted-space-1, 0.125rem);
     /* Pulled back onto the line so the target does not grow the header. */
-    margin-block: calc((var(--_line) - var(--slotted-target-min, 24px)) / 2);
+    margin-block: calc((var(--_line) - var(--_control)) / 2);
     /* The slot stands at the trailing edge whatever the column's alignment. */
     margin-inline-start: auto;
   }
@@ -413,14 +433,14 @@
   [data-ui='data-grid'] [data-part='group-toggle'] {
     align-items: center;
     background-color: transparent;
-    block-size: var(--slotted-target-min, 24px);
+    block-size: var(--_control);
     border: 0;
     border-radius: var(--slotted-data-grid-control-radius, var(--slotted-radius-sm, 4px));
     color: var(--_muted);
     cursor: pointer;
     display: inline-flex;
     flex: none;
-    inline-size: var(--slotted-target-min, 24px);
+    inline-size: var(--_control);
     justify-content: center;
     padding: 0;
     transition:
@@ -714,6 +734,19 @@
    * at full width in `md`; this is the form the invocation asked for, and the
    * one `table` and `filter-bar` inherit.
    */
+  /* The popover is `sm` for its type and its measure at that step is
+     sixteen rem: the panel's twenty-four stood out of it on both sides. The
+     layer that holds the panel is given the panel's measure plus the gap the
+     layer keeps around its surface and the surface's own border. */
+  [data-ui='popover']:has(
+    > [data-part='content'] > [data-ui='data-grid'][data-part='filter-panel']
+  ) {
+    --slotted-popover-measure-sm: calc(
+      var(--slotted-data-grid-filter-panel-size, 24rem) + 2 *
+        (var(--slotted-popover-gap, 0.5rem) + var(--slotted-border-width-thin, 1px))
+    );
+  }
+
   [data-ui='data-grid'][data-part='filter-panel'] {
     --_operator-size: var(--slotted-data-grid-filter-operator-size, 7rem);
     --_panel-gap: var(--slotted-space-3, 0.375rem);
@@ -733,9 +766,10 @@
        between past the popover's own edge. */
     inline-size: var(--slotted-data-grid-filter-panel-size, 24rem);
     max-inline-size: 100%;
-    /* The popover pads; at its `sm` step that inset is the one the panel
-       wants, and a second one here doubled it. */
-    padding: 0;
+    /* The popover pads its header and its body, not its surface: the panel
+       stands in the surface directly and takes the `sm` inset itself. */
+    padding: var(--slotted-popover-padding-block-sm, var(--slotted-space-4, 0.5rem))
+      var(--slotted-popover-padding-inline-sm, var(--slotted-space-5, 0.75rem));
   }
 
   [data-ui='data-grid'][data-part='filter-panel'] > [data-part='filter-condition'] {
@@ -850,11 +884,15 @@
    */
   [data-ui='data-grid'][data-rows='fixed'] [data-part='body'] > [data-part='row'] {
     block-size: var(--_row-block);
-    grid-auto-rows: var(--_row-block);
+    grid-auto-rows: var(--_track);
   }
 
   [data-ui='data-grid'][data-rows='auto'] [data-part='body'] > [data-part='row'] {
-    grid-auto-rows: minmax(var(--_row-block), var(--_row-max-block));
+    grid-auto-rows: minmax(var(--_track), var(--_row-max-block));
+  }
+
+  [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed']) [data-part='body'] {
+    --_track: calc(var(--_row-block) - var(--_rule-width));
   }
 
   [data-ui='data-grid'] [data-part='head'] [role='row'],
@@ -1191,13 +1229,15 @@
     background-color: var(--_selected);
   }
 
-  /* The last pinned cell of each zone draws the edge. */
+  /* The last pinned cell of each zone draws the edge: the same hairline as
+     the rules between rows, and no more. */
   [data-ui='data-grid'] [data-pinned][data-pin-edge]::after {
     background-color: var(--_rule);
     content: '';
     inline-size: var(--_rule-width);
     /* Past the row's own rule below, so the edge is one line down the body. */
     inset-block: 0 calc(var(--_rule-width) * -1);
+    pointer-events: none;
     position: absolute;
     z-index: 1;
   }
@@ -1214,16 +1254,68 @@
     inset-inline-start: 0;
   }
 
-  /* The edge darkens while something is hidden under it: the affordance a
-     grid needs where a table did not, because a grid virtualises columns and
-     a column cut mid-word is not always there to be seen. */
+  /* While something is hidden under the zone the hairline casts a short
+     shadow over what slides beneath it — the affordance a grid needs where a
+     table did not, because a grid virtualises columns and a column cut
+     mid-word is not always there to be seen. A shadow and not a stronger
+     line: read on the pinning scene, a dark rule down the body read as a
+     frame inside the frame. */
   [data-ui='data-grid']
     [data-part='scroll'][data-overflowing]:not([data-at-start])
     [data-pinned='start'][data-pin-edge]::after,
   [data-ui='data-grid']
     [data-part='scroll'][data-overflowing]:not([data-at-end])
     [data-pinned='end'][data-pin-edge]::after {
-    background-color: var(--_rule-strong);
+    /* The colour is the gradient's alone: with the hairline's colour still
+       under the widened box, the shadow read as a solid grey band. */
+    background-color: transparent;
+    inline-size: calc(var(--_rule-width) + var(--_edge-shadow-size));
+  }
+
+  [data-ui='data-grid']
+    [data-part='scroll'][data-overflowing]:not([data-at-start])
+    [data-pinned='start'][data-pin-edge]::after {
+    background-image: linear-gradient(
+      to right,
+      var(--_rule) var(--_rule-width),
+      var(--_edge-shadow) var(--_rule-width),
+      transparent
+    );
+    inset-inline-end: calc(var(--_edge-shadow-size) * -1);
+  }
+
+  [data-ui='data-grid']
+    [data-part='scroll'][data-overflowing]:not([data-at-end])
+    [data-pinned='end'][data-pin-edge]::after {
+    background-image: linear-gradient(
+      to left,
+      var(--_rule) var(--_rule-width),
+      var(--_edge-shadow) var(--_rule-width),
+      transparent
+    );
+    inset-inline-start: calc(var(--_edge-shadow-size) * -1);
+  }
+
+  [data-ui='data-grid']:dir(rtl)
+    [data-part='scroll'][data-overflowing]:not([data-at-start])
+    [data-pinned='start'][data-pin-edge]::after {
+    background-image: linear-gradient(
+      to left,
+      var(--_rule) var(--_rule-width),
+      var(--_edge-shadow) var(--_rule-width),
+      transparent
+    );
+  }
+
+  [data-ui='data-grid']:dir(rtl)
+    [data-part='scroll'][data-overflowing]:not([data-at-end])
+    [data-pinned='end'][data-pin-edge]::after {
+    background-image: linear-gradient(
+      to right,
+      var(--_rule) var(--_rule-width),
+      var(--_edge-shadow) var(--_rule-width),
+      transparent
+    );
   }
 
   /**

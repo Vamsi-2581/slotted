@@ -30,6 +30,7 @@ export {
   withColumnWidth,
   zoneOf,
 } from './columns';
+export type { ResolveColumnsOptions } from './columns';
 export {
   cellIndex,
   columnRange,

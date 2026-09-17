@@ -73,9 +73,15 @@ const ENGINE_KINDS = new Set(['text', 'number', 'date', 'time', 'datetime', 'boo
  * middle, the end zone — each with its width, its pin offset and its index.
  * Everything a binding draws a row from.
  */
+export interface ResolveColumnsOptions {
+  /** Pixels already pinned at the start before the first column: the gutters. */
+  readonly leading?: number | undefined;
+}
+
 export function resolveColumns<Row>(
   columns: readonly GridColumn<Row>[],
   state: GridColumnState,
+  options: ResolveColumnsOptions = {},
 ): ResolvedGridColumn<Row>[] {
   const byId = new Map(columns.map((column) => [column.id, column]));
   const hidden = new Set(state.hidden);
@@ -94,7 +100,9 @@ export function resolveColumns<Row>(
     return clampWidth(column, state.widths[id] ?? column.width ?? DEFAULT_COLUMN_WIDTH);
   };
 
-  let startOffset = 0;
+  /* The start zone begins after the gutters the binding pins before it — the
+     chooser and the expander — or the first pinned column stood over them. */
+  let startOffset = options.leading ?? 0;
   const startOffsets = new Map<string, number>();
   for (const id of start) {
     startOffsets.set(id, startOffset);

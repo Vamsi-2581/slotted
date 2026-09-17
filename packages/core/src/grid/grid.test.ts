@@ -141,6 +141,12 @@ describe('columns', () => {
     expect(resolved[5]).toMatchObject({ pinned: 'end', pinOffset: 0, pinEdge: true });
     expect(resolved[3]).toMatchObject({ numeric: true, sortable: true, filterable: true });
     expect(resolved[5]).toMatchObject({ sortable: false, filterable: false, searchable: false });
+    /* The gutters a binding pins before the first column push the start zone
+       along: without them the first pinned column stood over the chooser. */
+    const behindGutters = resolveColumns(columns, state, { leading: 48 });
+    expect(behindGutters[0]!.pinOffset).toBe(48);
+    expect(behindGutters[1]!.pinOffset).toBe(168);
+    expect(behindGutters[5]!.pinOffset).toBe(0);
   });
 
   it('writes one track per visible column, flex as minmax', () => {

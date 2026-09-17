@@ -222,6 +222,17 @@ describe('DataGrid, the query', () => {
     expect(header('weight')).not.toHaveAttribute('aria-sort');
   });
 
+  it('sorts on a press on the name while the scroller is a tab stop, and never on the handle', () => {
+    render(<Shipments />);
+    /* The scroller becomes a tab stop while the grid overflows; a press on
+       the name walked up to it and sorted nothing. */
+    grid().querySelector('[data-part="scroll"]')!.setAttribute('tabindex', '0');
+    fireEvent.click(header('customer').querySelector('span')!);
+    expect(header('customer')).toHaveAttribute('aria-sort', 'ascending');
+    fireEvent.click(header('customer').querySelector('[data-part="resizer"]')!);
+    expect(header('customer')).toHaveAttribute('aria-sort', 'ascending');
+  });
+
   it('sorts from the keyboard on the header cell', () => {
     render(<Shipments defaultCurrent={{ row: 'header', column: 'customer' }} />);
     fireEvent.keyDown(header('customer'), { key: 'Enter' });

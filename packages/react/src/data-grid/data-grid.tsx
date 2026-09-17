@@ -81,6 +81,7 @@ import {
   EXPANDER_COLUMN,
   EXPANDER_WIDTH,
   FOCUSABLE,
+  insideWidget,
   SELECTION_COLUMN,
   SELECTION_WIDTH,
   SIMPLE_WIDGET,
@@ -329,14 +330,6 @@ export function DataGrid<Row>({
   );
 
   /* ── Columns ────────────────────────────────────────────────────────── */
-  const resolved = useMemo(
-    () => resolveColumns(columns, effectiveState),
-    [columns, effectiveState],
-  );
-  const resolvedById = useMemo(
-    () => new Map(resolved.map((column) => [column.id, column])),
-    [resolved],
-  );
   const hasSelectionColumn = resolvedSelection === 'single' || resolvedSelection === 'multiple';
   const hasExpanderColumn = renderDetail !== undefined;
   const gutters = useMemo(() => {
@@ -345,6 +338,15 @@ export function DataGrid<Row>({
     if (hasExpanderColumn) list.push(EXPANDER_WIDTH);
     return list;
   }, [hasSelectionColumn, hasExpanderColumn]);
+  const leading = gutters.reduce((sum, width) => sum + width, 0);
+  const resolved = useMemo(
+    () => resolveColumns(columns, effectiveState, { leading }),
+    [columns, effectiveState, leading],
+  );
+  const resolvedById = useMemo(
+    () => new Map(resolved.map((column) => [column.id, column])),
+    [resolved],
+  );
   const columnIds = useMemo(
     () => [
       ...(hasSelectionColumn ? [SELECTION_COLUMN] : []),
@@ -868,6 +870,7 @@ export function DataGrid<Row>({
   const latest = useRef({ resolved, effectiveState, requestState, gutters, labelOf });
   latest.current = { resolved, effectiveState, requestState, gutters, labelOf };
   const draggables = useRef(new Map<string, () => void>());
+  const swallowClick = useRef(false);
 
   useEffect(() => {
     const element = root.current;
@@ -908,11 +911,17 @@ export function DataGrid<Row>({
         itemLabel: (columnId) => latest.current.labelOf(columnId),
       });
     }
+    let wasDragging = false;
     const unsubscribe = controller.subscribe((state) => {
       if (state.status !== 'dragging') {
+        /* The click the browser fires after a drop is the drag's, not a press
+           on the header: read live, a reordered column came back sorted. */
+        if (wasDragging) swallowClick.current = true;
+        wasDragging = false;
         setDragState({ dragging: null, target: null, offset: null });
         return;
       }
+      wasDragging = true;
       const target = state.target && state.target.kind === 'between' ? state.target : null;
       let offset: number | null = null;
       let over: string | null = null;
@@ -1591,6 +1600,7 @@ export function DataGrid<Row>({
   const onCellPointerDown = useCallback(
     (event: PointerEvent<HTMLElement>, cell: GridCell) => {
       if (event.button !== 0) return;
+      swallowClick.current = false;
       const session = editRef.current;
       if (
         session &&
@@ -1601,8 +1611,7 @@ export function DataGrid<Row>({
       }
       if (!sameCell(cell, current)) requestCurrent(cell, 'pointer', event);
       if (resolvedSelection === 'range' && isBodyRow(cell.row)) {
-        const target = event.target as HTMLElement;
-        if (!target.closest(FOCUSABLE)) {
+        if (!insideWidget(event)) {
           beginRange(cell, event.shiftKey, event);
           setRangeDragging(true);
         }
@@ -1630,8 +1639,11 @@ export function DataGrid<Row>({
 
   const onCellClick = useCallback(
     (event: MouseEvent<HTMLElement>, cell: GridCell) => {
-      const target = event.target as HTMLElement;
-      if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+      if (swallowClick.current) {
+        swallowClick.current = false;
+        return;
+      }
+      if (insideWidget(event)) return;
       if (cell.row === HEADER_ROW && resolvedById.get(cell.column)?.sortable) {
         pressSort(cell.column, event.shiftKey, event, 'pointer');
         return;
@@ -1648,8 +1660,7 @@ export function DataGrid<Row>({
   );
   const onCellDoubleClick = useCallback(
     (event: MouseEvent<HTMLElement>, cell: GridCell) => {
-      const target = event.target as HTMLElement;
-      if (target.closest(FOCUSABLE) && target !== event.currentTarget) return;
+      if (insideWidget(event)) return;
       const row = rowOf(cell.row);
       const column = columns.find((entry) => entry.id === cell.column);
       if (!row) return;

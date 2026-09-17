@@ -24,6 +24,9 @@ interface HeadProps {
   headerRowCount: number;
 }
 
+/** The room between the header and the menu it opens: one space step, so the surface does not sit on the header's rule. */
+const MENU_OFFSET = 4;
+
 export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
   const grid = useDataGridInternal<Row>();
   const gutterCount = grid.columnIds.length - grid.resolved.length;
@@ -294,7 +297,12 @@ function ColumnMenu<Row>({ column, open }: { column: ResolvedGridColumn<Row>; op
   const name = column.column.label;
 
   return (
-    <Menu onOpenChange={(next) => grid.setMenuOpen(next ? column.id : null)} open={open} size="sm">
+    <Menu
+      onOpenChange={(next) => grid.setMenuOpen(next ? column.id : null)}
+      open={open}
+      sideOffset={MENU_OFFSET}
+      size="sm"
+    >
       <MenuTrigger
         render={(props) => (
           <button
@@ -434,6 +442,9 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
     <div
       aria-hidden
       data-part="resizer"
+      /* A press on the handle is a resize, never the header's sort: the
+         click the browser fires after the pointer is released stops here. */
+      onClick={(event) => event.stopPropagation()}
       onDoubleClick={(event) => {
         event.stopPropagation();
         grid.autofit(column.id, event);

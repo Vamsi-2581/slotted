@@ -4,12 +4,36 @@ const QUANTITY_PATTERN = /^-?\d+(\.\d{1,3})?$/;
 
 /** Parses a decimal quantity string into integer thousandths. */
 export function quantityToMilli(value: Quantity | SignedQuantity): number {
-  if (!QUANTITY_PATTERN.test(value)) {
-    throw new RangeError(`Invalid quantity: ${JSON.stringify(value)}`);
+  let index = 0;
+  let negative = false;
+  if (value.charCodeAt(0) === 45) {
+    negative = true;
+    index = 1;
   }
-  const negative = value.startsWith('-');
-  const [whole = '0', fraction = ''] = (negative ? value.slice(1) : value).split('.');
-  const milli = Number(whole) * 1000 + Number(fraction.padEnd(3, '0'));
+  let whole = 0;
+  let digits = 0;
+  for (; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code === 46) break;
+    if (code < 48 || code > 57) throw new RangeError(`Invalid quantity: ${JSON.stringify(value)}`);
+    whole = whole * 10 + (code - 48);
+    digits += 1;
+  }
+  if (digits === 0) throw new RangeError(`Invalid quantity: ${JSON.stringify(value)}`);
+  let milli = whole * 1000;
+  if (index < value.length) {
+    index += 1;
+    let scale = 100;
+    let fractionDigits = 0;
+    for (; index < value.length; index += 1) {
+      const code = value.charCodeAt(index);
+      if (code < 48 || code > 57 || fractionDigits === 3) throw new RangeError(`Invalid quantity: ${JSON.stringify(value)}`);
+      milli += (code - 48) * scale;
+      scale /= 10;
+      fractionDigits += 1;
+    }
+    if (fractionDigits === 0) throw new RangeError(`Invalid quantity: ${JSON.stringify(value)}`);
+  }
   return negative ? -milli : milli;
 }
 

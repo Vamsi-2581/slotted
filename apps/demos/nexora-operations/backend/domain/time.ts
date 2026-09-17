@@ -58,11 +58,24 @@ export function zonedParts(instant: string | number, timeZone = ORGANIZATION_TIM
   };
 }
 
-/** Offset of `timeZone` from UTC in milliseconds at the given instant. */
+const offsetCache = new Map<string, number>();
+
+/**
+ * Offset of `timeZone` from UTC in milliseconds at the given instant. Cached
+ * per UTC day at noon; the one-hour drift around a DST switch hour is
+ * accepted for demo timestamps.
+ */
 export function zoneOffsetMs(instantMs: number, timeZone = ORGANIZATION_TIMEZONE): number {
-  const parts = zonedParts(instantMs, timeZone);
+  const day = Math.floor(instantMs / DAY_MS);
+  const key = `${timeZone}|${day}`;
+  const cached = offsetCache.get(key);
+  if (cached !== undefined) return cached;
+  const noon = day * DAY_MS + DAY_MS / 2;
+  const parts = zonedParts(noon, timeZone);
   const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
-  return asUtc - Math.floor(instantMs / 1000) * 1000;
+  const offset = asUtc - Math.floor(noon / 1000) * 1000;
+  offsetCache.set(key, offset);
+  return offset;
 }
 
 /** Converts wall-clock components in `timeZone` to a UTC instant (ms). */
@@ -103,8 +116,9 @@ export function addMinutes(instant: string, minutes: number): string {
 
 /** Business date (`YYYY-MM-DD`) of an instant in the given timezone. */
 export function businessDateOf(instant: string, timeZone = ORGANIZATION_TIMEZONE): string {
-  const parts = zonedParts(instant, timeZone);
-  return formatBusinessDate(parts.year, parts.month, parts.day);
+  const ms = instantMs(instant);
+  const local = new Date(ms + zoneOffsetMs(ms, timeZone));
+  return formatBusinessDate(local.getUTCFullYear(), local.getUTCMonth() + 1, local.getUTCDate());
 }
 
 export function formatBusinessDate(year: number, month: number, day: number): string {
@@ -112,21 +126,44 @@ export function formatBusinessDate(year: number, month: number, day: number): st
 }
 
 export function parseBusinessDate(date: string): { year: number; month: number; day: number } {
-  const [year, month, day] = date.split('-').map(Number) as [number, number, number];
-  return { year, month, day };
+  return {
+    year: Number(date.slice(0, 4)),
+    month: Number(date.slice(5, 7)),
+    day: Number(date.slice(8, 10)),
+  };
+}
+
+const dayNumberCache = new Map<string, number>();
+const dateByDayNumber = new Map<number, string>();
+
+/** Days since the Unix epoch for a business date (cached; dates repeat heavily). */
+export function dayNumber(date: string): number {
+  const cached = dayNumberCache.get(date);
+  if (cached !== undefined) return cached;
+  const { year, month, day } = parseBusinessDate(date);
+  const value = Math.round(Date.UTC(year, month - 1, day) / DAY_MS);
+  dayNumberCache.set(date, value);
+  dateByDayNumber.set(value, date);
+  return value;
+}
+
+export function dateFromDayNumber(value: number): string {
+  const cached = dateByDayNumber.get(value);
+  if (cached !== undefined) return cached;
+  const shifted = new Date(value * DAY_MS);
+  const date = formatBusinessDate(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, shifted.getUTCDate());
+  dateByDayNumber.set(value, date);
+  dayNumberCache.set(date, value);
+  return date;
 }
 
 /** Calendar-day arithmetic on business dates (no timezone involved). */
 export function addDays(date: string, days: number): string {
-  const { year, month, day } = parseBusinessDate(date);
-  const shifted = new Date(Date.UTC(year, month - 1, day + days));
-  return formatBusinessDate(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, shifted.getUTCDate());
+  return dateFromDayNumber(dayNumber(date) + days);
 }
 
 export function diffDays(later: string, earlier: string): number {
-  const a = parseBusinessDate(later);
-  const b = parseBusinessDate(earlier);
-  return Math.round((Date.UTC(a.year, a.month - 1, a.day) - Date.UTC(b.year, b.month - 1, b.day)) / DAY_MS);
+  return dayNumber(later) - dayNumber(earlier);
 }
 
 export function compareDates(a: string, b: string): number {
@@ -134,8 +171,8 @@ export function compareDates(a: string, b: string): number {
 }
 
 export function weekdayOf(date: string): number {
-  const { year, month, day } = parseBusinessDate(date);
-  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  // 1970-01-01 was a Thursday (4).
+  return (((dayNumber(date) + 4) % 7) + 7) % 7;
 }
 
 export function isBusinessDay(date: string): boolean {

@@ -233,7 +233,7 @@ export function seedCatalog(context: SeedContext, tenant: TenantSeedResult): Cat
       dataset.skus.set(sku.id, sku);
       skuIds.push(sku.id);
       skuCategoryLeaf.set(sku.id, definition.name);
-      demandWeights.push((spec.flagship ? 40 : 1) * template.demand * random.logNormal(1, 1.35) * (skuStatus === 'active' ? 1 : 0.05));
+      demandWeights.push((spec.flagship ? 8 : 1) * template.demand * random.logNormal(1, 1.35) * (skuStatus === 'active' ? 1 : 0.05));
       addPriceEntries(sku, variantPrice, Boolean(spec.flagship));
       if (spec.flagship && index === 0) flagshipSkuIds.set(spec.name, sku.id);
     }

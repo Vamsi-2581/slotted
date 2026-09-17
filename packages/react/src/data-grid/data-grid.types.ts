@@ -302,6 +302,12 @@ export interface DataGridProps<Row>
   footer?: ReactNode | undefined;
   /** Whether the footer states the range. Default: when the query pages. */
   showRange?: boolean | undefined;
+  /**
+   * The frame's height: a length, or a number of pixels. It writes
+   * `--slotted-data-grid-block-size`; without one the grid grows to its rows
+   * and windows nothing.
+   */
+  height?: string | number | undefined;
   /** The accessible name, or the id of the element that names the grid. */
   label?: string | undefined;
   labelledBy?: string | undefined;

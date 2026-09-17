@@ -222,6 +222,16 @@
     grid-column: var(--slotted-data-grid-column, auto);
   }
 
+  /* A row group is as wide as its rows, never narrower: a block box the
+     scroller's width with wider rows inside it is a box its own rows overflow,
+     which the page audit reads as a defect and a reader never sees. Sized to
+     the rows, the only thing that scrolls is the scroller. */
+  [data-ui='data-grid']
+    :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader']) {
+    inline-size: max-content;
+    min-inline-size: 100%;
+  }
+
   /**
    * ── The header ─────────────────────────────────────────────────────────
    *
@@ -543,6 +553,17 @@
        header still takes the press. */
     touch-action: none;
     z-index: 1;
+  }
+
+  /* The last column's handle stays inside the row: half a target hanging
+     past the last cell was twelve pixels of overflow on a row nothing could
+     scroll to. */
+  [data-ui='data-grid']
+    [data-part='header-row']
+    > [data-part='column-header']:last-child
+    > [data-part='resizer'] {
+    inline-size: calc(var(--slotted-target-min, 24px) / 2);
+    inset-inline-end: 0;
   }
 
   [data-ui='data-grid'] [data-part='resizer']::after {
@@ -1120,7 +1141,11 @@
     white-space: nowrap;
   }
 
+  /* A value that is never broken is clipped at its cell rather than drawn over
+     the next one: a grid's columns are its layout, and a value crossing one is
+     a value in the wrong column. */
   [data-ui='data-grid'] [data-text='nowrap'] > span:first-child {
+    overflow: hidden;
     white-space: nowrap;
   }
 

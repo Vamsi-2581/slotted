@@ -151,6 +151,7 @@ export function DataGrid<Row>({
   footer,
   handle,
   hasMore,
+  height,
   label,
   labelledBy,
   labels,
@@ -1995,6 +1996,9 @@ export function DataGrid<Row>({
   const rootStyle = {
     ...style,
     '--slotted-data-grid-template': template,
+    ...(height === undefined
+      ? {}
+      : { '--slotted-data-grid-block-size': typeof height === 'number' ? `${height}px` : height }),
   } as CSSProperties;
   const bodyStyle = windowsRows
     ? ({

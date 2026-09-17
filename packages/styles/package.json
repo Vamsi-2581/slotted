@@ -69,6 +69,8 @@
     "./description-list/tokens.json": "./src/description-list/description-list.tokens.json",
     "./detail-panel/detail-panel.css": "./src/detail-panel/detail-panel.css",
     "./detail-panel/tokens.json": "./src/detail-panel/detail-panel.tokens.json",
+    "./detail-panel/detail-panel.css": "./src/detail-panel/detail-panel.css",
+    "./detail-panel/tokens.json": "./src/detail-panel/detail-panel.tokens.json",
     "./dialog/dialog.css": "./src/dialog/dialog.css",
     "./dialog/tokens.json": "./src/dialog/dialog.tokens.json",
     "./divider/divider.css": "./src/divider/divider.css",

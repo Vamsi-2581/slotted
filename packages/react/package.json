@@ -112,6 +112,10 @@
       "types": "./dist/types/description-list/index.d.ts",
       "import": "./dist/description-list.js"
     },
+    "./detail-panel": {
+      "types": "./dist/types/detail-panel/index.d.ts",
+      "import": "./dist/detail-panel.js"
+    },
     "./dialog": {
       "types": "./dist/types/dialog/index.d.ts",
       "import": "./dist/dialog.js"
@@ -144,13 +148,13 @@
       "types": "./dist/types/grid/index.d.ts",
       "import": "./dist/grid.js"
     },
-    "./highlight": {
-      "types": "./dist/types/highlight/index.d.ts",
-      "import": "./dist/highlight.js"
-    },
     "./hover-card": {
       "types": "./dist/types/hover-card/index.d.ts",
       "import": "./dist/hover-card.js"
+    },
+    "./highlight": {
+      "types": "./dist/types/highlight/index.d.ts",
+      "import": "./dist/highlight.js"
     },
     "./icon": {
       "types": "./dist/types/icon/index.d.ts",
@@ -244,6 +248,10 @@
       "types": "./dist/types/skeleton/index.d.ts",
       "import": "./dist/skeleton.js"
     },
+    "./sparkline": {
+      "types": "./dist/types/sparkline/index.d.ts",
+      "import": "./dist/sparkline.js"
+    },
     "./splitter": {
       "types": "./dist/types/splitter/index.d.ts",
       "import": "./dist/splitter.js"
@@ -252,21 +260,17 @@
       "types": "./dist/types/split-button/index.d.ts",
       "import": "./dist/split-button.js"
     },
-    "./sparkline": {
-      "types": "./dist/types/sparkline/index.d.ts",
-      "import": "./dist/sparkline.js"
-    },
     "./stack": {
       "types": "./dist/types/stack/index.d.ts",
       "import": "./dist/stack.js"
     },
-    "./stepper": {
-      "types": "./dist/types/stepper/index.d.ts",
-      "import": "./dist/stepper.js"
-    },
     "./stat-card": {
       "types": "./dist/types/stat-card/index.d.ts",
       "import": "./dist/stat-card.js"
+    },
+    "./stepper": {
+      "types": "./dist/types/stepper/index.d.ts",
+      "import": "./dist/stepper.js"
     },
     "./switch": {
       "types": "./dist/types/switch/index.d.ts",
@@ -275,6 +279,10 @@
     "./table": {
       "types": "./dist/types/table/index.d.ts",
       "import": "./dist/table.js"
+    },
+    "./table-of-contents": {
+      "types": "./dist/types/table-of-contents/index.d.ts",
+      "import": "./dist/table-of-contents.js"
     },
     "./tabs": {
       "types": "./dist/types/tabs/index.d.ts",
@@ -352,6 +360,10 @@
       "types": "./dist/types/tooltip/index.d.ts",
       "import": "./dist/tooltip.js"
     },
+    "./top-navigation": {
+      "types": "./dist/types/top-navigation/index.d.ts",
+      "import": "./dist/top-navigation.js"
+    },
     "./tree": {
       "types": "./dist/types/tree/index.d.ts",
       "import": "./dist/tree.js"
@@ -359,10 +371,6 @@
     "./upload": {
       "types": "./dist/types/upload/index.d.ts",
       "import": "./dist/upload.js"
-    },
-    "./top-navigation": {
-      "types": "./dist/types/top-navigation/index.d.ts",
-      "import": "./dist/top-navigation.js"
     }
   },
   "scripts": {

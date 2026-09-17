@@ -7,6 +7,6 @@ coverage
 dist
 docs/superpowers
 node_modules
-apps/demos
+apps/demos/nexora-angular
 pnpm-lock.yaml
 PROJECT-PRD.md

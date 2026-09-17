@@ -9,7 +9,7 @@ export default tseslint.config(
       '**/coverage/**',
       '**/dist/**',
       '**/node_modules/**',
-      'apps/demos/**',
+      'apps/demos/nexora-angular/**',
       'pnpm-lock.yaml',
     ],
   },

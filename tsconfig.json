@@ -27,6 +27,6 @@
     "**/.turbo/**",
     "**/coverage/**",
     "**/storybook-static/**",
-    "apps/demos/**"
+    "apps/demos/nexora-angular/**"
   ]
 }

@@ -76,6 +76,12 @@ directory is not committed; it is written by:
 - `pnpm release:beta`: moves every published package to the next
   `0.x.y-beta.N`, then does the above.
 
+- `pnpm demo:refresh`: the loop after one library change — builds
+  `@slotted/angular`, `@slotted/core` and `@slotted/theme-default`, repacks only
+  those three at the current version and reinstalls, so
+  `apps/demos/nexora-angular` sees the change on its next `pnpm start` (a
+  running dev server is restarted).
+
 A demo names the version it consumes in its own `package.json` and moves to a
 newer one deliberately, the way a consumer would. `pnpm test:release` checks
 that the published set and the shared version stay what this section says.

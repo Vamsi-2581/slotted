@@ -18,6 +18,9 @@ import { fileURLToPath } from 'node:url';
  * `--bump` moves every published package to the next `beta` prerelease and
  * stops; the build that follows is what writes the new version into the
  * Angular `dist/package.json`, so bumping and packing are two steps.
+ *
+ * `--only a,b` packs those packages and leaves the other tarballs in place:
+ * the loop a demo runs after one library change, without the whole build.
  */
 export const REGISTRY_DIRECTORY = 'apps/demos/.registry';
 
@@ -48,13 +51,23 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const repositoryRoot = fileURLToPath(new URL('..', import.meta.url));
   const registry = join(repositoryRoot, REGISTRY_DIRECTORY);
   const bump = process.argv.includes('--bump');
+  const onlyIndex = process.argv.indexOf('--only');
+  const only =
+    onlyIndex === -1 ? null : (process.argv[onlyIndex + 1] ?? '').split(',').filter(Boolean);
 
   const packages = readPackageDirectories(join(repositoryRoot, 'packages'))
     .map((directory) => ({
       directory,
       manifest: JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')),
     }))
-    .filter(({ manifest }) => isPublishable(manifest));
+    .filter(({ manifest }) => isPublishable(manifest))
+    .filter(({ manifest }) => only === null || only.includes(manifest.name));
+  if (only !== null && packages.length !== only.length) {
+    const found = packages.map(({ manifest }) => manifest.name);
+    throw new Error(
+      `--only names a package that is not published: ${only.filter((n) => !found.includes(n)).join(', ')}`,
+    );
+  }
 
   if (bump) {
     for (const { directory } of packages) {
@@ -65,10 +78,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(0);
   }
 
-  rmSync(registry, { recursive: true, force: true });
+  if (only === null) rmSync(registry, { recursive: true, force: true });
   mkdirSync(registry, { recursive: true });
 
-  const index = {};
+  const indexPath = join(registry, 'index.json');
+  const index =
+    only === null || !existsSync(indexPath) ? {} : JSON.parse(readFileSync(indexPath, 'utf8'));
   for (const { directory, manifest } of packages) {
     run('pnpm', ['pack', '--pack-destination', registry], directory);
     index[manifest.name] = { version: manifest.version, tarball: tarballName(manifest) };
@@ -77,5 +92,5 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     );
   }
 
-  writeFileSync(join(registry, 'index.json'), `${JSON.stringify(index, null, 2)}\n`);
+  writeFileSync(indexPath, `${JSON.stringify(index, null, 2)}\n`);
 }

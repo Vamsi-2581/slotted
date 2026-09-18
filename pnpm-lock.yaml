@@ -2753,7 +2753,7 @@ packages:
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
 
   '@slotted/angular@file:apps/demos/.registry/slotted-angular-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-AI9dqqcTgJbLajLnyMoTSRmjUNGmKxoMGWh3oJt1Bx6IgQJmrynsNDST68vpej+0MRfUd9Q9TxEJfa+dB1qabQ==, tarball: file:apps/demos/.registry/slotted-angular-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-DyT6XWafRBoiPjid75RzydZL8GJLKCWCbHqVPo69u70ky3nij1O+iJIepOHeZJOQIiGlFcpSVllhdCTn2GBA0g==, tarball: file:apps/demos/.registry/slotted-angular-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
     peerDependencies:
       '@angular/common': '>=22.1.0 <23'
@@ -2762,7 +2762,7 @@ packages:
       '@slotted/core': 0.1.0-beta.0
 
   '@slotted/core@file:apps/demos/.registry/slotted-core-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-syELKwuxxaqqXlBWyLxQHW+cR0MOIfQ+HSztmDVkXlVaRiaSAU+gdHLhFm9aO5HluZpvacdVtPVntsjbCNIuQg==, tarball: file:apps/demos/.registry/slotted-core-0.1.0-beta.0.tgz}
+    resolution: {integrity: sha512-RTGhTVZ1r06B8bc2SYB24TAOcLnfL2GP5K8S7jC3aFCyq6Y36dl/LHhCiTMKEZBcSaWu9pbkP8mRTUCZ2FSTYA==, tarball: file:apps/demos/.registry/slotted-core-0.1.0-beta.0.tgz}
     version: 0.1.0-beta.0
 
   '@slotted/theme-default@file:apps/demos/.registry/slotted-theme-default-0.1.0-beta.0.tgz':

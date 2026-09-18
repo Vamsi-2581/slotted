@@ -48,6 +48,12 @@ The backend is memory only: a reload re-seeds. The client keeps, in `localStorag
 persona and scenario (`nexora:demo`), preferences per user (`nexora:preferences:<userId>`),
 recent search hits and the navigation state. `?scale=light|demo` on the URL picks the seed size.
 
+## Seeing a library change here
+
+At the repository root, `pnpm demo:refresh` builds the three packages this app consumes, repacks
+them at the current beta version and reinstalls; restart `pnpm start` afterwards. `pnpm pack:beta`
+does the same for every package, after a full build.
+
 ## Moving to a newer beta
 
 1. At the repository root: `pnpm release:beta`.

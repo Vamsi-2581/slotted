@@ -615,6 +615,42 @@ de outra da mesma onda.
   marcar tudo, ações e paginação incremental. `badge`, `popover` e página
   completa compartilham o modelo; atualizações ao vivo não roubam foco nem
   reordenam enquanto o leitor lê (a parte `fresh` de `timeline`).
+
+  Entregue em 2026-09-18. Inventário em
+  `docs/superpowers/specs/2026-09-17-notification-center-capability-inventory.md`,
+  decisões em `docs/superpowers/specs/2026-09-17-notification-center-design.md`,
+  autoavaliação em
+  `docs/superpowers/specs/2026-09-17-notification-center-self-assessment.md`.
+  Uma `section` (região nomeada pelo próprio título) com o Feed da APG por
+  dentro; partes `root`, `header`, `title`, `count`, `mark-all`, `actions`,
+  `views`, `fresh`, `feed`, `group`, `group-label`, `item`, `visual`,
+  `content`, `description`, `time`, `controls`, `read-toggle`, `dismiss`,
+  `more`, `empty`, `footer`. Eixos `size` (`sm` | `md`), `level` (2–4),
+  `growing` (`none` | `button` | `scroll`), `arrivals` (`hold` | `show`),
+  `timeFormat`, `controls` (`both` | `read` | `dismiss` | `none`), `tone` por
+  item; estados `read` (novo no vocabulário, 24cfc95) e `loading`; modelo
+  `current` (`view` / `defaultView` / `onViewChange`, vistas embutidas `all` e
+  `unread`). A família não guarda factos: `onReadChange({ keys, read })`,
+  `onRemove`, `onOpen` (cancelável antes da navegação), `onReveal`,
+  `onLoadMore` pedem com razão e a loja responde pelo array; `onUnreadChange`
+  é facto para o sino. Chegadas ficam retidas atrás de `fresh` enquanto o foco
+  está no feed ou o scroller passou do início. Não lida é o lavado na
+  tonalidade e o título semibold — quatro marcas recusadas na porta visual; um
+  item com tonalidade e sem visual recebe o glifo da tonalidade num círculo
+  (triângulos recusados na biblioteca inteira, ver briefing). `sm` declara
+  largura mínima de 22rem para o popover. A faixa é `tabs` só com a lista e o
+  feed como painel único: `Tab` ganhou `controls` nos dois bindings. Sem
+  `badge` (a contagem é chip próprio), sem sino (`top-navigation`), sem
+  abrir/fechar (`popover`), sem seleção em massa (`selection-toolbar`), sem
+  grupos colapsáveis. React: `NotificationCenter` (`items`, `renderItem`,
+  `actions`, `footer`, `empty`, `groupBy`, `ref` com `focus`/`reveal`/
+  `markAllRead`). Angular: `section[slNotificationCenter]`, `[(view)]`,
+  `ng-template[slNotificationItem | slNotificationVisual |
+slNotificationActions]`, `[slNotificationCenterActions | Footer | Empty]`,
+  `provideNotificationCenterDefaults()`. Correção partilhada: o workbench
+  endereçava todo `h2` da página de referência e alcançava o título da
+  família; a regra passou a `.slotted-reference-page__section > h2`.
+
 - `markdown` — renderização com allowlist de elementos e URLs, headings com IDs
   estáveis, links externos, tabelas, código por `code-block`, conteúdo vazio e
   erro. Sanitização obrigatória; plugins opt-in. A tipografia é `prose`. O

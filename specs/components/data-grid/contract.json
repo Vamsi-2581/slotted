@@ -940,6 +940,7 @@
       "content",
       "media",
       "realtime",
+      "export",
       "keyboard",
       "accessibility"
     ]

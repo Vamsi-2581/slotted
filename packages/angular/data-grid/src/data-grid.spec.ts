@@ -766,6 +766,51 @@ describe('SlDataGrid, defaults', () => {
     delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
   });
 
+  it('exports the visible rows and columns as CSV, and the selected rows on request', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.selectionMode.set('multiple');
+    fixture.componentInstance.value.set(['S3', 'S1']);
+    fixture.componentInstance.columnState.set({
+      order: ['customer', 'id'],
+      widths: {},
+      hidden: ['priority', 'shipped'],
+      pinned: { start: [], end: [] },
+    });
+    fixture.componentInstance.query.set({
+      ...emptyQuery(),
+      sort: [{ column: 'weight', direction: 'ascending' }],
+    });
+    fixture.detectChanges();
+    const grid = fixture.componentInstance.grid();
+    /* Sorted by weight ascending, the empty one last; hidden columns out,
+       the reader's order. */
+    expect(grid.toCsv()).toBe(
+      'Customer,Tracking,Carrier,Weight\r\n' +
+        'Bloom,S2,UPS,18.2\r\n' +
+        'Casa Verde,S4,DHL,64.3\r\n' +
+        'Aurora,S1,DHL,142.5\r\n' +
+        'Nordwind,S3,FedEx,\r\n',
+    );
+    /* The selected rows in the grid's order, not the selection's. */
+    expect(grid.toCsv({ rows: 'selected', header: false })).toBe(
+      'Aurora,S1,DHL,142.5\r\nNordwind,S3,FedEx,\r\n',
+    );
+    const clicks: string[] = [];
+    const click = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+      clicks.push(`${this.download}:${this.href}`);
+    };
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: () => 'blob:1' });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: () => undefined });
+    try {
+      grid.exportCsv({ filename: 'shipments.csv' });
+      expect(clicks).toEqual(['shipments.csv:blob:1']);
+    } finally {
+      HTMLAnchorElement.prototype.click = click;
+    }
+  });
+
   it('marks a mounted cell whose value changed, for the stated time, and never a row that arrived', async () => {
     vi.useFakeTimers();
     try {

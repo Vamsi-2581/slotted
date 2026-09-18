@@ -41,6 +41,7 @@ export type {
   DataGridEditCommit,
   DataGridEditMode,
   DataGridEditorContext,
+  DataGridExportOptions,
   DataGridExpandedGroups,
   DataGridFilterOperandContext,
   DataGridGroupContext,

@@ -1,5 +1,6 @@
 import type { FilterDescriptor, FilterJoin, FilterOperator } from '@slotted/core/filter';
 import type {
+  CsvOptions,
   GridCell,
   GridColumn,
   GridColumnGroup,
@@ -191,6 +192,15 @@ export interface DataGridActivateEvent {
 }
 
 /** The imperative surface: what a consumer cannot express declaratively. */
+export interface DataGridExportOptions extends CsvOptions {
+  /** Default `export.csv`. */
+  readonly filename?: string | undefined;
+  /** `visible`: the rows the query left (every page in client mode; the received page in server mode). `selected`: the selected rows, in the grid's order. Default `visible`. */
+  readonly rows?: 'visible' | 'selected' | undefined;
+  /** `visible`: the columns not hidden, in the reader's order. `all`: every column the model declares. Default `visible`. */
+  readonly columns?: 'visible' | 'all' | undefined;
+}
+
 export interface DataGridHandle {
   focusCell(cell: GridCell): void;
   scrollToRow(key: string, align?: 'start' | 'center' | 'end' | 'nearest'): void;
@@ -200,6 +210,10 @@ export interface DataGridHandle {
   stopEdit(options?: { commit?: boolean }): void;
   autofit(column?: string): void;
   getVisibleRows(): readonly unknown[];
+  /** The file's text, by `toCsv`, for the consumer who sends it elsewhere. */
+  toCsv(options?: DataGridExportOptions): string;
+  /** Builds the file and hands it to the browser as a download. */
+  exportCsv(options?: DataGridExportOptions): void;
   selectAll(): void;
   clearSelection(): void;
   readonly element: HTMLDivElement | null;

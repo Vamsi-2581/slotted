@@ -1,5 +1,6 @@
 import type { FilterJoin, FilterOperator } from '@slotted/core/filter';
 import type {
+  CsvOptions,
   GridCell,
   GridColumn,
   GridColumnState,
@@ -23,6 +24,15 @@ export type DataGridRowHeight = number | 'auto';
 export type DataGridReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'programmatic';
 export type DataGridExpandedGroups = readonly string[] | 'all';
 export type DataGridSelection = string | readonly string[] | null;
+
+export interface DataGridExportOptions extends CsvOptions {
+  /** Default `export.csv`. */
+  readonly filename?: string | undefined;
+  /** `visible`: the rows the query left (every page in client mode; the received page in server mode). `selected`: the selected rows, in the grid's order. Default `visible`. */
+  readonly rows?: 'visible' | 'selected' | undefined;
+  /** `visible`: the columns not hidden, in the reader's order. `all`: every column the model declares. Default `visible`. */
+  readonly columns?: 'visible' | 'all' | undefined;
+}
 
 /** The request a query change carries: the value, plus which part of it moved. */
 export interface DataGridQueryRequest extends ChangeRequest<GridQuery> {

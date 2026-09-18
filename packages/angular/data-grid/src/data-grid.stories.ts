@@ -1240,6 +1240,48 @@ export const Realtime: Story = {
   },
 };
 
+export const Export: Story = {
+  parameters: scenario('export'),
+  render: () => {
+    const preview = signal('');
+    return {
+      props: {
+        ...base(),
+        preview,
+        show: (text: string) => preview.set(text.slice(0, 160)),
+        print: () => window.print(),
+        value: ['SHP-20482', 'SHP-20484'],
+        query: { ...emptyQuery(), sort: [{ column: 'weight', direction: 'descending' as const }] },
+      },
+      template: screen(
+        grid(
+          '#grid="slDataGrid" [rows]="rows" [query]="query" [value]="value" selectionMode="multiple"',
+        ),
+        {
+          size: 'tall',
+          before: `<div class="slotted-demo-row">
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="grid.exportCsv({ filename: 'shipments.csv' })">
+      CSV
+    </button>
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="grid.exportCsv({ filename: 'selected.csv', rows: 'selected' })">
+      CSV, selected rows
+    </button>
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="show(grid.toCsv())">
+      Preview
+    </button>
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="print()">
+      Print
+    </button>
+    @if (preview()) {
+      <p slText size="sm" tone="muted"><code>{{ preview() }}…</code></p>
+    }
+  </div>`,
+        },
+      ),
+    };
+  },
+};
+
 export const Keyboard: Story = {
   parameters: scenario('keyboard'),
   render: () => {

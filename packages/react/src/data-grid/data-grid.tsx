@@ -9,6 +9,7 @@ import {
   applyQuery,
   cellText,
   cellValue,
+  toCsv,
   columnRange,
   columnTemplate,
   emptyQuery,
@@ -91,6 +92,7 @@ import {
 } from './data-grid-constants';
 import { defaultCellContent, defaultEditor } from './data-grid-editors';
 import type {
+  DataGridExportOptions,
   DataGridCellContext,
   DataGridEditorContext,
   DataGridExpandedGroups,
@@ -1948,6 +1950,34 @@ export function DataGrid<Row>({
     },
     [resolvedById, gutters, resolved, viewport.width],
   );
+  /* The file's text, shared by the two handle methods. */
+  const buildCsv = useCallback(
+    (options: DataGridExportOptions = {}) => {
+      const { filename: _filename, rows: which, columns: whichColumns, ...csv } = options;
+      const visible = resolvedMode === 'client' ? result.rows : rows;
+      const chosen =
+        which === 'selected' ? visible.filter((row) => selectedSet.has(rowKeyOf(row))) : visible;
+      const model = whichColumns === 'all' ? columns : resolved.map((column) => column.column);
+      return toCsv(chosen, model, {
+        locale: resolvedLocale,
+        timeZone,
+        booleans: formatOptions.booleans,
+        ...csv,
+      });
+    },
+    [
+      resolvedMode,
+      result.rows,
+      rows,
+      selectedSet,
+      rowKeyOf,
+      columns,
+      resolved,
+      resolvedLocale,
+      timeZone,
+      formatOptions.booleans,
+    ],
+  );
   useImperativeHandle(
     handle,
     (): DataGridHandle => ({
@@ -1966,6 +1996,20 @@ export function DataGrid<Row>({
         options?.commit === false ? cancelEdit() : commitEdit('programmatic'),
       autofit: (columnId) => (columnId ? autofit(columnId) : autofitAll()),
       getVisibleRows: () => (resolvedMode === 'client' ? result.rows : rows),
+      toCsv: buildCsv,
+      /* A download by an anchor: the one way a browser saves a file without
+         a permission prompt, and the URL is revoked as soon as the click has
+         taken it. */
+      exportCsv: (options = {}) => {
+        const text = buildCsv(options);
+        const doc = root.current?.ownerDocument ?? document;
+        const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+        const link = doc.createElement('a');
+        link.href = url;
+        link.download = options.filename ?? 'export.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+      },
       selectAll: () => commitSelection(selectableKeys, 'programmatic', undefined),
       clearSelection: () => commitSelection([], 'programmatic', undefined),
       get element() {
@@ -1984,6 +2028,7 @@ export function DataGrid<Row>({
       resolvedMode,
       result.rows,
       rows,
+      buildCsv,
       commitSelection,
       selectableKeys,
     ],

@@ -15,6 +15,7 @@ import {
   parseGridView,
   emptyGridView,
   serializeGridView,
+  toCsv,
   rangeBounds,
   rangeEdges,
   rangeToText,
@@ -214,6 +215,54 @@ describe('columns', () => {
     expect(normalizeColumnState(parseColumnState(text), columns)).toEqual(state);
     expect(serializeColumnState(normalizeColumnState(null, columns), columns)).toBe('');
     expect(parseColumnState('garbage;;w=:x;o=')).toEqual(emptyColumnState());
+  });
+});
+
+describe('toCsv', () => {
+  it('writes RFC 4180: a header, CRLF, and quotes only where a field needs them', () => {
+    const csvColumns: GridColumn<{
+      id: string;
+      name: string;
+      note: string;
+      weight: number | null;
+      sent: boolean;
+    }>[] = [
+      { id: 'id', label: 'Id' },
+      { id: 'name', label: 'Name, full' },
+      { id: 'note', label: 'Note' },
+      {
+        id: 'weight',
+        label: 'Weight',
+        kind: 'number',
+        format: (value) => (value === null ? '' : `${value} kg`),
+      },
+      { id: 'sent', label: 'Sent', kind: 'boolean' },
+    ];
+    const csv = toCsv(
+      [
+        { id: 'a', name: 'Anvil', note: 'He said "go"', weight: 1234.5, sent: true },
+        { id: 'b', name: 'Bolt', note: 'two\nlines', weight: null, sent: false },
+      ],
+      csvColumns,
+    );
+    expect(csv).toBe(
+      'Id,"Name, full",Note,Weight,Sent\r\n' +
+        'a,Anvil,"He said ""go""",1234.5 kg,Yes\r\n' +
+        'b,Bolt,"two\nlines",,No\r\n',
+    );
+  });
+
+  it('takes a delimiter, drops the header and leads with a mark on request', () => {
+    const csv = toCsv(
+      [{ id: 'a', n: 1.5 }],
+      [
+        { id: 'id', label: 'Id' },
+        { id: 'n', label: 'N', kind: 'number' },
+      ],
+      { delimiter: ';', header: false, bom: true, locale: 'de-DE' },
+    );
+    expect(csv).toBe('﻿a;1,5\r\n');
+    expect(toCsv([], [])).toBe('');
   });
 });
 

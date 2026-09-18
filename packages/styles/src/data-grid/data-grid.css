@@ -1954,9 +1954,19 @@
     }
   }
 
+  /**
+   * ── Print ──────────────────────────────────────────────────────────────
+   *
+   * The frame grows to its rows, nothing scrolls, nothing sticks, and what
+   * exists only for the pointer — the column's actions, the resize handle,
+   * the drop guide, the cursor's ring, the row's hover ground — is not on
+   * paper. A grid that windows its rows prints the rows it has mounted; a
+   * consumer who prints ten thousand turns the window off first.
+   */
   @media print {
     [data-ui='data-grid'][data-part='root'] {
       block-size: auto;
+      break-inside: auto;
     }
 
     [data-ui='data-grid'] > [data-part='scroll'] {
@@ -1965,8 +1975,34 @@
 
     [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'],
     [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'],
+    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty'],
     [data-ui='data-grid'] [data-pinned] {
       position: static;
+    }
+
+    [data-ui='data-grid'] [data-pinned] {
+      box-shadow: none;
+    }
+
+    [data-ui='data-grid'] [data-part='column-actions'],
+    [data-ui='data-grid'] [data-part='resizer'],
+    [data-ui='data-grid'] [data-part='drop-indicator'],
+    [data-ui='data-grid'] [data-part='loader'] {
+      display: none;
+    }
+
+    [data-ui='data-grid'] [role='gridcell'][data-current],
+    [data-ui='data-grid'] [role='rowheader'][data-current],
+    [data-ui='data-grid'] [role='columnheader'][data-current] {
+      box-shadow: none;
+    }
+
+    [data-ui='data-grid'] [data-part='body'] > [data-part='row'] {
+      break-inside: avoid;
+    }
+
+    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='body'] > [data-part='row'] {
+      --_hover: transparent;
     }
   }
 }

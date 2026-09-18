@@ -7,6 +7,7 @@ import {
   applyQuery,
   cellText,
   cellValue,
+  toCsv,
   columnRange,
   columnTemplate,
   emptyQuery,
@@ -114,6 +115,7 @@ import {
   type DataGridEditCommit,
   type DataGridEditMode,
   type DataGridEditorContext,
+  type DataGridExportOptions,
   type DataGridExpandedGroups,
   type DataGridGroupContext,
   type DataGridHeaderContext,
@@ -3099,6 +3101,32 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   }
   getVisibleRows(): readonly Row[] {
     return this.resolvedMode() === 'client' ? this.applied().rows : this.rows();
+  }
+  /** The file's text, by `toCsv`, for the consumer who sends it elsewhere. */
+  toCsv(options: DataGridExportOptions = {}): string {
+    const { filename: _filename, rows: which, columns: whichColumns, ...csv } = options;
+    const visible = this.getVisibleRows();
+    const selected = this.selectedSet();
+    const chosen =
+      which === 'selected' ? visible.filter((row) => selected.has(this.rowKeyOf(row))) : visible;
+    const model =
+      whichColumns === 'all' ? this.columns() : this.resolved().map((column) => column.column);
+    return toCsv(chosen, model, { ...this.formatOptions(), ...csv });
+  }
+  /**
+   * Builds the file and hands it to the browser as a download: an anchor is
+   * the one way a browser saves a file without a permission prompt, and the
+   * URL is revoked as soon as the click has taken it.
+   */
+  exportCsv(options: DataGridExportOptions = {}) {
+    const text = this.toCsv(options);
+    const doc = this.host.nativeElement.ownerDocument;
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+    const link = doc.createElement('a');
+    link.href = url;
+    link.download = options.filename ?? 'export.csv';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   /* ── Forms ──────────────────────────────────────────────────────────── */

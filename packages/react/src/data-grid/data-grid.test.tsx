@@ -704,6 +704,83 @@ describe('DataGrid, the rest', () => {
     }
   });
 
+  it('exports the visible rows and columns as CSV, and the selected rows on request', () => {
+    const urls: string[] = [];
+    const created: Blob[] = [];
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: (blob: Blob) => {
+        created.push(blob);
+        return `blob:${created.length}`;
+      },
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: (url: string) => void urls.push(url),
+    });
+    const clicks: string[] = [];
+    const click = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+      clicks.push(`${this.download}:${this.href}`);
+    };
+    try {
+      const texts: string[] = [];
+      function Handled() {
+        const handle = useRef<DataGridHandle | null>(null);
+        return (
+          <>
+            <button
+              onClick={() => {
+                texts.push(handle.current!.toCsv());
+                handle.current?.exportCsv({ filename: 'shipments.csv' });
+              }}
+            >
+              csv
+            </button>
+            <button
+              onClick={() => {
+                texts.push(handle.current!.toCsv({ rows: 'selected', header: false }));
+                handle.current?.exportCsv({ rows: 'selected', header: false });
+              }}
+            >
+              selected
+            </button>
+            <Shipments
+              defaultColumnState={{ hidden: ['priority', 'shipped'], order: ['customer', 'id'] }}
+              defaultQuery={{
+                ...emptyQuery(),
+                sort: [{ column: 'weight', direction: 'ascending' }],
+              }}
+              defaultValue={['S3', 'S1']}
+              handle={handle}
+              selectionMode="multiple"
+            />
+          </>
+        );
+      }
+      render(<Handled />);
+      fireEvent.click(screen.getByText('csv'));
+      expect(clicks).toEqual(['shipments.csv:blob:1']);
+      expect(urls).toEqual(['blob:1']);
+      expect(created[0]!.type).toBe('text/csv;charset=utf-8');
+      /* Sorted by weight ascending, the empty one last; hidden columns out,
+         the reader's order. */
+      expect(texts[0]).toBe(
+        'Customer,Tracking,Carrier,Weight\r\n' +
+          'Bloom,S2,UPS,18.2\r\n' +
+          'Casa Verde,S4,DHL,64.3\r\n' +
+          'Aurora,S1,DHL,142.5\r\n' +
+          'Nordwind,S3,FedEx,\r\n',
+      );
+      fireEvent.click(screen.getByText('selected'));
+      expect(clicks[1]).toBe('export.csv:blob:2');
+      /* The selected rows in the grid's order, not the selection's. */
+      expect(texts[1]).toBe('Aurora,S1,DHL,142.5\r\nNordwind,S3,FedEx,\r\n');
+    } finally {
+      HTMLAnchorElement.prototype.click = click;
+    }
+  });
+
   it('draws the loading, empty and error states', () => {
     const { rerender } = render(<Shipments loading rows={[]} />);
     expect(grid().querySelector('[data-part="loader"]')).not.toBeNull();

@@ -745,6 +745,23 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'export',
+    title: 'Export and print',
+    note: 'handle.exportCsv builds the file by toCsv — RFC 4180, each cell as the grid draws it — from the rows the query left (every page in client mode) and the columns not hidden in the reader’s order, or the selected rows and every column on request, and hands it to the browser as a download; handle.toCsv returns the text for a consumer who sends it elsewhere. In print, the frame grows to its rows, nothing scrolls or sticks, and the pointer’s controls are not on paper; a windowed grid prints the rows it has mounted, so a consumer who prints ten thousand turns the window off first. Excel is the consumer’s: SheetJS reads the same text.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-export',
+      language: 'tsx',
+      label: 'A file, a print',
+      source: `<>
+  <Button onClick={() => grid.current?.exportCsv({ filename: 'shipments.csv' })}>CSV</Button>
+  <Button onClick={() => grid.current?.exportCsv({ rows: 'selected', bom: true })}>
+    Selected, for Excel
+  </Button>
+  <Button onClick={() => window.print()}>Print</Button>
+</>;`,
+    }),
+  },
+  {
     id: 'keyboard',
     title: 'Keyboard',
     note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
@@ -1177,7 +1194,7 @@ const api = apiRows([
     'RefObject<DataGridHandle>',
     '—',
     'DataGrid',
-    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (one column, or every resizable column as one request), getVisibleRows, selectAll, clearSelection, element.',
+    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (one column, or every resizable column as one request), getVisibleRows, toCsv, exportCsv, selectAll, clearSelection, element.',
   ],
   [
     'align',
@@ -1283,7 +1300,7 @@ const composition = apiRows([
     'DataGridHandle',
     '—',
     'DataGrid',
-    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, startEdit, stopEdit, autofit, getVisibleRows, selectAll, clearSelection.',
+    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, startEdit, stopEdit, autofit, getVisibleRows, toCsv, exportCsv, selectAll, clearSelection.',
   ],
   [
     'native props',

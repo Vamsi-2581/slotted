@@ -1205,6 +1205,69 @@ export const Realtime: Story = {
   render: () => <RealtimeDemo />,
 };
 
+/* ── Export ────────────────────────────────────────────────────────────── */
+
+const ExportDemo = () => {
+  const handle = useRef<DataGridHandle | null>(null);
+  const [preview, setPreview] = useState('');
+  return (
+    <Screen
+      size="tall"
+      before={
+        <div className="slotted-demo-row">
+          <Button
+            onClick={() => handle.current?.exportCsv({ filename: 'shipments.csv' })}
+            size="sm"
+            tone="secondary"
+            variant="outline"
+          >
+            CSV
+          </Button>
+          <Button
+            onClick={() =>
+              handle.current?.exportCsv({ filename: 'selected.csv', rows: 'selected' })
+            }
+            size="sm"
+            tone="secondary"
+            variant="outline"
+          >
+            CSV, selected rows
+          </Button>
+          <Button
+            onClick={() => setPreview(handle.current?.toCsv({ bom: false }).slice(0, 160) ?? '')}
+            size="sm"
+            tone="secondary"
+            variant="outline"
+          >
+            Preview
+          </Button>
+          <Button onClick={() => window.print()} size="sm" tone="secondary" variant="outline">
+            Print
+          </Button>
+          {preview ? (
+            <Text size="sm" tone="muted">
+              <code>{preview}…</code>
+            </Text>
+          ) : null}
+        </div>
+      }
+    >
+      <Shipments
+        defaultQuery={{ ...emptyQuery(), sort: [{ column: 'weight', direction: 'descending' }] }}
+        defaultValue={['SHP-20482', 'SHP-20484']}
+        handle={handle}
+        rows={FIFTY}
+        selectionMode="multiple"
+      />
+    </Screen>
+  );
+};
+
+export const Export: Story = {
+  parameters: scenario('export'),
+  render: () => <ExportDemo />,
+};
+
 const KeyboardDemo = () => {
   const [cell, setCell] = useState<GridCell | null>({ row: 'SHP-20481', column: 'customer' });
   return (

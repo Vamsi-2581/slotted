@@ -5,7 +5,7 @@
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "examplePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/",
   "listboxPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/listbox/",
-  "patternStatus": "Three pages answer this family. The combobox pattern owns the control, its role and its properties; the select-only combobox example owns the key table, because a combobox that takes no text is what this family is; the listbox pattern owns the popup, its options, its groups and its selection states. All three were read on 2026-09-04 and transcribed into docs/superpowers/specs/2026-09-04-select-and-combobox-design.md §4.",
+  "patternStatus": "Three pages answer this family. The combobox pattern owns the control, its role and its properties; the select-only combobox example owns the key table, because a combobox that takes no text is what this family is; the listbox pattern owns the popup, its options, its groups and its selection states. All three were read on 2026-09-04 and transcribed into docs/history/designs/2026-09-04-select-and-combobox-design.md §4.",
   "roles": {
     "trigger": "combobox",
     "content": "listbox",
@@ -303,7 +303,7 @@
   "form": {
     "react": "a visually hidden native select carrying name, required, form and one option per value",
     "angular": "ControlValueAccessor and Validator",
-    "reason": "Neither ecosystem has the other's mechanism. The hidden select is what makes a plain form submit, a native reset() restore and a browser's own validation bubble point at the right control; Radix ships the same element for the same reason. Recording the asymmetry is what docs/superpowers/specs/2026-09-04-select-and-combobox-design.md §11 asks instead of levelling both to the smaller shape."
+    "reason": "Neither ecosystem has the other's mechanism. The hidden select is what makes a plain form submit, a native reset() restore and a browser's own validation bubble point at the right control; Radix ships the same element for the same reason. Recording the asymmetry is what docs/history/designs/2026-09-04-select-and-combobox-design.md §11 asks instead of levelling both to the smaller shape."
   },
   "mount": {
     "active": "the layer exists only while it is open",

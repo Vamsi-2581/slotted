@@ -25,7 +25,7 @@ In order:
 1. `docs/build-briefing.md`
 2. `references/quick-law.md` (this file)
 3. Family paragraph in `docs/component-features.md` + sections 2 and 18
-4. `docs/superpowers/specs/*` design doc for that family if it exists
+4. `docs/history/designs/*` design doc for that family if it exists
 
 Then read full-law docs when this brief leaves open questions, with no exception in these cases:
 

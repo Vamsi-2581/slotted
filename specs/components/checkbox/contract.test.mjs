@@ -95,7 +95,7 @@ test('binds no key of its own', () => {
 });
 
 /**
- * The mechanism `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`
+ * The mechanism `docs/history/designs/2026-08-31-field-aware-controls-design.md`
  * states, with the one departure `2026-09-03-choice-controls-design.md` records:
  * this control owns its own label, so a field's `id` would give it a second one.
  */

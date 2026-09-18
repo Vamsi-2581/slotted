@@ -4,7 +4,7 @@
  * A month grid is not a collection: its cells are derived from an arithmetic
  * rather than keyed from a set, it moves by seven and pages by a calendar
  * month, and neither is an index arithmetic. That is why it lives here and not
- * under `collection` — see `docs/superpowers/specs/2026-09-09-date-design.md`.
+ * under `collection` — see `docs/history/designs/2026-09-09-date-design.md`.
  *
  * Nothing here touches the DOM or a framework.
  */

@@ -160,7 +160,7 @@ test('holds the wait as a state, not as another tone', () => {
  * `disabled` is not in `defaults`, and that absence is the decision. A message
  * that defaulted to `false` would quietly override a disabled `field` in wave
  * 3; `undefined` defers, and anything else wins, which is the invariant
- * `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md` states
+ * `docs/history/designs/2026-08-31-field-aware-controls-design.md` states
  * from the other side.
  */
 test('leaves disabled unstated, so the field can answer it', () => {

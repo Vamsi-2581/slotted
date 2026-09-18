@@ -625,7 +625,7 @@
    * What the reader has so far, and how long it is. The two ends are drawn
    * as they stand, the one not yet chosen as its placeholder, and the length
    * answers the question the reader is actually asking while the run is
-   * being drawn — the reason `docs/superpowers/specs/2026-09-09-date-design.md`
+   * being drawn — the reason `docs/history/designs/2026-09-09-date-design.md`
    * §12 records.
    *
    * It renders at the panel's width and contributes nothing to it, by the

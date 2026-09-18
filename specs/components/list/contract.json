@@ -55,7 +55,7 @@
     },
     "virtualization": {
       "deferTo": "the collection engine, wave 6",
-      "reason": "`docs/build-order.md` retires `virtual-list` as a family and makes windowing a capability of the collection engine, whose first consumer is `listbox`."
+      "reason": "`docs/process/build-order.md` retires `virtual-list` as a family and makes windowing a capability of the collection engine, whose first consumer is `listbox`."
     },
     "orientation": {
       "deferTo": "inline",

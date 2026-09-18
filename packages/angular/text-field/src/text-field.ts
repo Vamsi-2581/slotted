@@ -28,7 +28,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
  * render a wrapper from inside a component; an Angular directive cannot create
  * a box around its own host. `slTextFieldInput` injects this class, so a
  * control written without the frame is a compile-time failure rather than a
- * silent one — the property `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`
+ * silent one — the property `docs/history/designs/2026-08-31-field-aware-controls-design.md`
  * asks of every control this library ships.
  */
 @Component({

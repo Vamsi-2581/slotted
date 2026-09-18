@@ -166,7 +166,7 @@ test('stops the keys it acts on rather than only defaulting them', () => {
 
 /**
  * The reviewer's brief for wave 8, recorded in
- * `docs/superpowers/specs/2026-09-09-date-design.md` §12: a time written as a
+ * `docs/history/designs/2026-09-09-date-design.md` §12: a time written as a
  * duration from now, resolved in view before it is accepted.
  */
 test('accepts a time written as a duration and resolves it before committing', () => {

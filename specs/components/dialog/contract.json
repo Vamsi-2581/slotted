@@ -178,7 +178,7 @@
     },
     "edgePlacement": {
       "deferTo": "drawer",
-      "reason": "docs/build-order.md wave 5 item 4. Base UI's own usage guideline says the same: a panel needing gestures or snap points is Drawer, not Dialog"
+      "reason": "docs/process/build-order.md wave 5 item 4. Base UI's own usage guideline says the same: a panel needing gestures or snap points is Drawer, not Dialog"
     },
     "positioner": {
       "reason": "A dialog is anchored to the viewport, not to an element, so there is nothing to position against and no collision to resolve. @slotted/core/positioner is not composed"

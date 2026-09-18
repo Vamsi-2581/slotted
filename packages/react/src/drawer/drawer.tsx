@@ -63,7 +63,7 @@ const NO_SNAP_POINTS: readonly number[] = [];
  * This component renders no DOM. It is the provider, and the trigger has to be
  * a descendant of it while the layer is portalled out — the shape Radix, Base
  * UI and Ark all reach. Angular needs no equivalent, and
- * `docs/superpowers/specs/2026-09-04-drawer-design.md` §11 says why.
+ * `docs/history/designs/2026-09-04-drawer-design.md` §11 says why.
  */
 export function Drawer({
   children,

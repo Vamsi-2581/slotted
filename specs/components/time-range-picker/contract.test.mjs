@@ -28,7 +28,7 @@ test('names the identifier a consumer selects the family by', () => {
 
 /**
  * One time field, the current end's, behind a trigger — nothing of the field
- * is drawn again. The scope line in `docs/build-order.md`, wave 9, said two;
+ * is drawn again. The scope line in `docs/process/build-order.md`, wave 9, said two;
  * one end at a time needs one.
  */
 test("composes one time field, the current end's, instead of drawing it again", () => {

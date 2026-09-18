@@ -4,7 +4,7 @@
   "ui": "multi-select",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "chipsPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
-  "patternStatus": "Two pages answer this family, both read on 2026-09-10 from the rendered pattern pages. The combobox pattern owns the input, its role, aria-expanded, aria-controls, aria-activedescendant, aria-autocomplete and both key tables. The grid pattern's Layout Grids for Grouping Widgets half owns the chip row, and it names this exact control: \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" The itemised comparison of both is in docs/superpowers/specs/2026-09-10-multi-select-design.md §4, and the three departures are in `departures` below.",
+  "patternStatus": "Two pages answer this family, both read on 2026-09-10 from the rendered pattern pages. The combobox pattern owns the input, its role, aria-expanded, aria-controls, aria-activedescendant, aria-autocomplete and both key tables. The grid pattern's Layout Grids for Grouping Widgets half owns the chip row, and it names this exact control: \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" The itemised comparison of both is in docs/history/designs/2026-09-10-multi-select-design.md §4, and the three departures are in `departures` below.",
   "roles": {
     "input": "combobox",
     "control": "grid",
@@ -139,7 +139,7 @@
     "commit": "Enter commits and emits selection with reason submit",
     "revert": "Escape reverts and restores grid navigation",
     "state": "not modelled: it exists between one Enter and the next, the way a caret does",
-    "reason": "docs/superpowers/specs/2026-09-02-tag-family-design.md deferred the editable chip to this family by name — \"an editable chip is a text field wearing a chip, and it needs the field's validity, its commit-and-revert keys and its own state model\". The grid pattern already prescribes the keys: Enter disables grid navigation and places focus in an input field, Escape restores it."
+    "reason": "docs/history/designs/2026-09-02-tag-family-design.md deferred the editable chip to this family by name — \"an editable chip is a text field wearing a chip, and it needs the field's validity, its commit-and-revert keys and its own state model\". The grid pattern already prescribes the keys: Enter disables grid navigation and places focus in an input field, Escape restores it."
   },
   "reorder": {
     "axis": "reorderable",

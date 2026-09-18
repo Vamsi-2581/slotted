@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
  * public identifier a consumer selects the family by, and the state model —
  * controlled, uncontrolled, and the reason a change carries. A family still on
  * schema 4 is listed in `legacy-families.json` and is awaiting the rebuild
- * ordered in `docs/build-order.md`; that list only shrinks.
+ * ordered in `docs/process/build-order.md`; that list only shrinks.
  */
 export const SCHEMA_VERSION = 5;
 export const LEGACY_SCHEMA_VERSION = 4;

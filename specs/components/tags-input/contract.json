@@ -3,7 +3,7 @@
   "family": "tags-input",
   "ui": "tags-input",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
-  "patternStatus": "One page answers this family, read on 2026-09-14 from the rendered pattern page: the Grid pattern's Layout Grids for Grouping Widgets half, which names this exact control — \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" The combobox pattern is not cited: the input is a text box that opens nothing, and writing role=combobox on it would promise a popup that does not exist. The itemised comparison is in docs/superpowers/specs/2026-09-14-tags-input-design.md §4, and the two departures are in `departures` below.",
+  "patternStatus": "One page answers this family, read on 2026-09-14 from the rendered pattern page: the Grid pattern's Layout Grids for Grouping Widgets half, which names this exact control — \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" The combobox pattern is not cited: the input is a text box that opens nothing, and writing role=combobox on it would promise a popup that does not exist. The itemised comparison is in docs/history/designs/2026-09-14-tags-input-design.md §4, and the two departures are in `departures` below.",
   "roles": {
     "input": null,
     "control": "grid",
@@ -118,7 +118,7 @@
     "commit": "the text becomes a value with reason submit",
     "keep": "the text stays in the input",
     "discard": "the text is emptied with reason blur",
-    "reason": "Three answers exist in the field and all three are real: a recipients field commits, a filter operand keeps, a chat tag box discards. Zag's blurBehavior has add and clear and treats unset as keep; multi-select's commitOnBlur holds two of the three. The wider axis is recorded for multi-select in docs/build-order.md."
+    "reason": "Three answers exist in the field and all three are real: a recipients field commits, a filter operand keeps, a chat tag box discards. Zag's blurBehavior has add and clear and treats unset as keep; multi-select's commitOnBlur holds two of the three. The wider axis is recorded for multi-select in docs/process/build-order.md."
   },
   "editing": {
     "axis": "editable",
@@ -126,7 +126,7 @@
     "commit": "Enter commits and emits value with reason submit; the edited text is judged like any other",
     "revert": "Escape reverts and restores grid navigation",
     "state": "not modelled: it exists between one Enter and the next, the way a caret does",
-    "reason": "docs/superpowers/specs/2026-09-02-tag-family-design.md deferred the editable chip to this family by name. The grid pattern prescribes the keys: Enter disables grid navigation and places focus in an input field, Escape restores it. Double click is the pointer reader's Enter."
+    "reason": "docs/history/designs/2026-09-02-tag-family-design.md deferred the editable chip to this family by name. The grid pattern prescribes the keys: Enter disables grid navigation and places focus in an input field, Escape restores it. Double click is the pointer reader's Enter."
   },
   "reorder": {
     "axis": "reorderable",

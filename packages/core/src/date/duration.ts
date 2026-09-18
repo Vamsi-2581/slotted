@@ -5,7 +5,7 @@
  * minutes from now" to the reader's own arithmetic. This is the module behind
  * the entry that does not:  the reader writes `+40m` and sees `15:20` before
  * anything commits. The brief is recorded in
- * `docs/superpowers/specs/2026-09-09-date-design.md` §12.
+ * `docs/history/designs/2026-09-09-date-design.md` §12.
  *
  * The grammar is symbols and unit letters rather than the locale's own words.
  * `+40m` works on every keyboard in every language; `daqui a 40 minutos` would

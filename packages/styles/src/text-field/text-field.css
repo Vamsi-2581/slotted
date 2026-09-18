@@ -261,7 +261,7 @@
   /* ── Monospace ────────────────────────────────────────────────────────
    *
    * A back-office form full of identifiers, hashes and keys, which is the
-   * audience `PROJECT-PRD.md` names first. Primer and Polaris both ship it.
+   * audience `docs/product/prd.md` names first. Primer and Polaris both ship it.
    */
   [data-ui='text-field'][data-part='root'][data-mono] {
     font-family: var(--slotted-font-family-mono, monospace);

@@ -5,8 +5,8 @@ plan is detailed and was written for someone with no context for this codebase.
 Follow it. Report when it is done.
 
 Repository: `/home/dreco/dev/slotted`
-Plan: `docs/superpowers/plans/2026-08-31-token-foundation.md`
-Spec: `docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-design.md`
+Plan: `docs/history/plans/2026-08-31-token-foundation.md`
+Spec: `docs/history/designs/2026-08-31-component-foundation-and-craft-skill-design.md`
 
 ## 1. Orient, once
 
@@ -14,8 +14,8 @@ Spec: `docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-de
 cd /home/dreco/dev/slotted
 git status --short --branch
 git log --oneline -5
-cat docs/superpowers/plans/2026-08-31-token-foundation.md
-cat docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-design.md
+cat docs/history/plans/2026-08-31-token-foundation.md
+cat docs/history/designs/2026-08-31-component-foundation-and-craft-skill-design.md
 ```
 
 Read both documents in full before writing anything. The plan is what you

@@ -741,7 +741,7 @@ function dateTimeOf(text: unknown): PlainDateTime | null {
  * start, and it carries the application's presets. The descriptor is
  * unchanged. A pair whose start is later than its end is the overnight window
  * to the engine and `order` to the picker; the pair reaches the descriptor
- * either way, and the picker's `wrap`, pending in `docs/build-order.md`, is
+ * either way, and the picker's `wrap`, pending in `docs/process/build-order.md`, is
  * what lifts the mark. No `(keydown.enter)` on the range picker: its frame
  * is a button, and `Enter` on it opens the picker.
  */

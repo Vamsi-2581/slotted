@@ -12,7 +12,7 @@
  * The calendar is the proleptic Gregorian one, and only that one. A second
  * calendar system is a second arithmetic rather than an option, which is why
  * `calendar` is an axis on the families with one value today rather than a
- * silence — see `docs/superpowers/specs/2026-09-09-date-design.md`.
+ * silence — see `docs/history/designs/2026-09-09-date-design.md`.
  *
  * Nothing here touches the DOM or a framework.
  */

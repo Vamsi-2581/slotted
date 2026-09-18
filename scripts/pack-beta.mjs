@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
  * `--only a,b` packs those packages and leaves the other tarballs in place:
  * the loop a demo runs after one library change, without the whole build.
  */
-export const REGISTRY_DIRECTORY = 'apps/demos/.registry';
+export const REGISTRY_DIRECTORY = 'demos/.registry';
 
 export function isPublishable(manifest) {
   return Array.isArray(manifest.files) || typeof manifest.publishConfig?.directory === 'string';

@@ -14,8 +14,8 @@ Run these and read the output before touching anything:
 cd /home/dreco/dev/slotted
 git status --short --branch
 git log --oneline -12
-cat docs/superpowers/specs/2026-08-30-component-catalog-design.md
-cat docs/superpowers/specs/2026-08-30-layered-architecture-design.md
+cat docs/history/designs/2026-08-30-component-catalog-design.md
+cat docs/history/designs/2026-08-30-layered-architecture-design.md
 ls specs/components packages
 ```
 
@@ -57,7 +57,7 @@ Apps: `apps/storybook-react`, `apps/storybook-angular`.
 
 ## 2. Start here
 
-Read `docs/BUILD-LOG.md` last section first — "Where the queue stands". It names
+Read `docs/history/build-log.md` last section first — "Where the queue stands". It names
 the next component, what it will demand of you, and the handful of conventions
 that cost the previous session a failed gate before it learned them. Everything
 before that section is one entry per shipped component: the decisions taken, the
@@ -66,7 +66,7 @@ defects found, and the work each one left behind.
 The working tree is clean and `main` is green. Your first batch is
 **Checkbox**, **RadioGroup** and **Slider**, and `Checkbox` goes first:
 
-- Read `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`
+- Read `docs/history/designs/2026-08-31-field-aware-controls-design.md`
   first. It is short, and it settles how a control reads its field, what an
   unset state means, and how Angular crosses an entry point. Do not reopen any
   of it.
@@ -94,7 +94,7 @@ left provisional on purpose.
 These are already enforced by tests. Do not weaken a test to make your code pass — fix the code.
 
 1. **Layer dependency rule.** `scripts/verify-package-layers.mjs` computes a rank per package: the tens digit is the architectural layer, the ones digit orders packages inside it. A package may depend only on a strictly lower rank. `@slotted/react` and `@slotted/angular` must never depend on each other. `@slotted/core` imports nothing from this repository and no framework.
-2. **Contract first.** Every family begins as `specs/components/<family>/contract.json` plus a test calling `assertContractShape` from `specs/contract.schema.mjs`, then family-specific assertions. Extend the shared vocabulary in `contract.schema.mjs` when a genuinely new state or capability appears — and extend `capabilityApi` in `packages/storybook-workbench/src/scenarios.tsx` to match.
+2. **Contract first.** Every family begins as `specs/components/<family>/contract.json` plus a test calling `assertContractShape` from `specs/contract.schema.mjs`, then family-specific assertions. Extend the shared vocabulary in `contract.schema.mjs` when a genuinely new state or capability appears — and extend `capabilityApi` in `tools/storybook-workbench/src/scenarios.tsx` to match.
 3. **One authored stylesheet.** All component CSS lives in `packages/styles/src/<family>/`, written once with class and data-attribute selectors, inside `@layer slotted.components`. Both frameworks consume the same file. Every declaration reads a token. Each family carries a `<family>.tokens.json` verified against its stylesheet by a test.
 4. **Angular uses `ViewEncapsulation.None` everywhere.** Class selectors cannot match a host element under emulated encapsulation. Angular components reference the shared stylesheet by relative path: `styleUrl: '../../../styles/src/<family>/<family>.css'`.
 5. **Boolean state attributes, never a single-valued `data-state`.** Present-or-absent with an empty value: `'' : undefined` in React, `"'' : null"` in Angular. States combine.
@@ -143,7 +143,7 @@ at a time rather than as a batch. Do the same with Listbox, Tree and Calendar.
 
 Repeat until the queue is exhausted. Do not stop between components. Do not summarize and wait.
 
-**5.1 Decide the design.** Do not write a design document for a component that raises no architectural question. Most of T1 raises none. Write a short design doc in `docs/superpowers/specs/YYYY-MM-DD-<name>-design.md` only when the component introduces a new `core` module, a new shared vocabulary entry, a cross-framework mechanism, or a decision a future maintainer would otherwise redo. `Splitter`, `VirtualList` and `FileUpload` each needed one, as did the T3 field-aware control mechanism, and `Checkbox`, `Listbox`, `Calendar`, `Tree` and `Dialog` still will. `Divider` did not.
+**5.1 Decide the design.** Do not write a design document for a component that raises no architectural question. Most of T1 raises none. Write a short design doc in `docs/history/designs/YYYY-MM-DD-<name>-design.md` only when the component introduces a new `core` module, a new shared vocabulary entry, a cross-framework mechanism, or a decision a future maintainer would otherwise redo. `Splitter`, `VirtualList` and `FileUpload` each needed one, as did the T3 field-aware control mechanism, and `Checkbox`, `Listbox`, `Calendar`, `Tree` and `Dialog` still will. `Divider` did not.
 
 **5.2 Write the contract and its test.** Test first: write the assertions, watch them fail on the missing `contract.json`, then write the contract. Commit.
 
@@ -254,13 +254,13 @@ You will find defects — in this library, in earlier decisions, in your own wor
 
 **A test that fails for a reason you do not understand:** stop guessing. Read the actual failure output, form one hypothesis, test that hypothesis specifically. Do not change three things at once.
 
-**Genuinely blocked on one component** — an upstream tool limitation you cannot work around: record the blocker in `docs/BUILD-LOG.md`, skip that component, and take the next eligible one. Never stop the loop. Blocking is rare; make sure you have actually tried before you claim it.
+**Genuinely blocked on one component** — an upstream tool limitation you cannot work around: record the blocker in `docs/history/build-log.md`, skip that component, and take the next eligible one. Never stop the loop. Blocking is rare; make sure you have actually tried before you claim it.
 
 ---
 
 ## 9. Keep a build log
 
-Append to `docs/BUILD-LOG.md` after each component. One entry, terse:
+Append to `docs/history/build-log.md` after each component. One entry, terse:
 
 ```markdown
 ## <Component> — <date>
@@ -286,7 +286,7 @@ You are building a library other people will depend on. Hold this line even at 4
 - **SSR safety.** No unconditional `window` or `document` at module scope, no non-deterministic ids, no effects that cause hydration mismatches.
 - **Every interactive component gets a keyboard model taken from the WAI-ARIA Authoring Practices**, not from memory. Look it up.
 - **Tests assert behaviour, not implementation.** A test that would pass with the component deleted is worse than no test.
-- **Read the project's own documents when a question arises**: `PROJECT-PRD.md` is the authority on principles, non-goals, versioning, and accessibility responsibility. `PRODUCT.md` holds the product constraints. Consult them rather than inventing a policy.
+- **Read the project's own documents when a question arises**: `docs/product/prd.md` is the authority on principles, non-goals, versioning, and accessibility responsibility. `PRODUCT.md` holds the product constraints. Consult them rather than inventing a policy.
 
 ---
 
@@ -296,7 +296,7 @@ There is no end state. Work until the session is interrupted. Leave the reposito
 
 - `main` is green: `pnpm check:full` exits `0`.
 - Nothing is half-finished in the working tree; every completed unit is committed.
-- `docs/BUILD-LOG.md` explains what happened and what comes next.
+- `docs/history/build-log.md` explains what happened and what comes next.
 - The last thing you did was push to `origin/main`.
 
 Begin now with `Checkbox`. Do not reply with a plan before starting — start, and let the commits be the report.

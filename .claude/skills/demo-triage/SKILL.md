@@ -1,20 +1,20 @@
 ---
 name: demo-triage
-description: Use when a problem is reported in a demo application under apps/demos (Nexora or any other consumer app), or when a demo behaves wrongly while building it. Decides whether the fault is in the UI kit packages or in the demo's own code, and fixes it on the right side. Triggers on "na demo", "no nexora", "a demo está", "isso é bug do pacote?", "o componente X não", a screenshot of a demo screen, or a failing demo test.
+description: Use when a problem is reported in a demo application under demos/ (Nexora or any other consumer app), or when a demo behaves wrongly while building it. Decides whether the fault is in the UI kit packages or in the demo's own code, and fixes it on the right side. Triggers on "na demo", "no nexora", "a demo está", "isso é bug do pacote?", "o componente X não", a screenshot of a demo screen, or a failing demo test.
 ---
 
 # Demo triage
 
-The demos under `apps/demos/` consume the library as a real consumer would: `@slotted/*` from
-tarballs in `apps/demos/.registry`, never from source. A problem seen there is either a defect of
+The demos under `demos/` consume the library as a real consumer would: `@slotted/*` from
+tarballs in `demos/.registry`, never from source. A problem seen there is either a defect of
 the UI kit — which real consumers would hit — or a mistake in the demo. The two are fixed in
 different places and never confused: a package defect is never patched around in the demo, and a
 demo mistake never changes the package.
 
 ## 1. Reproduce
 
-- Read `apps/demos/<app>/README.md` for the run commands. The Angular demo: `pnpm start` in
-  `apps/demos/nexora-angular`, `http://localhost:4250`.
+- Read `demos/<app>/README.md` for the run commands. The Angular demo: `pnpm start` in
+  `demos/nexora/angular`, `http://localhost:4250`.
 - Capture what the report describes: `node tools/shoot.mjs <url> <out.png> [light|dark] [width]`
   in the app, or a failing `pnpm test`. A screenshot is evidence; a description is not.
 - Note the beta the demo consumes: the `file:` versions in its `package.json`.
@@ -34,7 +34,7 @@ Answer, in order, and stop at the first that decides:
    `packages/angular/<family>/src/<family>.spec.ts`, or
    `packages/styles/src/<family>/<family>.styles.test.mjs` for a stylesheet rule. The test
    decides, and it stays.
-4. **Backend.** In Nexora, data shapes come from `apps/demos/nexora-operations`. A wrong count,
+4. **Backend.** In Nexora, data shapes come from `demos/nexora/backend`. A wrong count,
    label or missing field is checked against `backend/api/resources/*.ts` before anything in
    the UI is blamed.
 
@@ -53,7 +53,7 @@ with `<markup>`" or "demo — the family expects `<x>` and the app wrote `<y>`".
   shared surface;
 - rebuild the tarballs and reinstall: `pnpm demo:refresh` at the repository root (three
   packages, current version), or `pnpm pack:beta` for all; restart the demo's dev server;
-- in `apps/demos/<app>/LIBRARY-FEEDBACK.md`, the entry gains the commit that fixed it. A fix
+- in `demos/<app>/LIBRARY-FEEDBACK.md`, the entry gains the commit that fixed it. A fix
   that changes public API is a beta bump (`pnpm release:beta`) and the demo moves its
   `file:` versions deliberately.
 
@@ -72,7 +72,7 @@ from; a problem fixed without a row is a problem the next consumer meets again.
 
 ## Frictions already classified
 
-`apps/demos/nexora-angular/LIBRARY-FEEDBACK.md` lists what the Shell met. The rows judged
+`demos/nexora/angular/LIBRARY-FEEDBACK.md` lists what the Shell met. The rows judged
 package-side at triage time, in priority order: `avatar` empty fallback erasing initials;
 `top-navigation` root required as the banner's direct child, `[slTopNavigationCount]` bound to
 `notifications` only, static `aria-label` on its controls; `command-palette` clicking `href`

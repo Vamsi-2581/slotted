@@ -111,7 +111,7 @@ test('implements read-only rather than declaring it unsupported', () => {
 });
 
 /**
- * The mechanism `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`
+ * The mechanism `docs/history/designs/2026-08-31-field-aware-controls-design.md`
  * fixed. `aria-required` never becomes the native `required`, which would
  * engage browser constraint validation and change submit behaviour.
  */

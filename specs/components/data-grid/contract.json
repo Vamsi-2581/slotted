@@ -3,14 +3,14 @@
   "family": "data-grid",
   "ui": "data-grid",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
-  "patternStatus": "Read on 2026-09-16 from the rendered page, section \"Data Grids For Presenting Tabular Information\", \"Keyboard Interaction - Setting Focus and Navigating Inside Cells\" and \"WAI-ARIA Roles, States, and Properties\". The itemised comparison is in docs/superpowers/specs/2026-09-16-data-grid-design.md §2.",
+  "patternStatus": "Read on 2026-09-16 from the rendered page, section \"Data Grids For Presenting Tabular Information\", \"Keyboard Interaction - Setting Focus and Navigating Inside Cells\" and \"WAI-ARIA Roles, States, and Properties\". The itemised comparison is in docs/history/designs/2026-09-16-data-grid-design.md §2.",
   "practice": "https://www.w3.org/WAI/ARIA/apg/practices/grid-and-table-properties/",
   "examples": [
     "https://www.w3.org/WAI/ARIA/apg/patterns/grid/examples/data-grids/",
     "https://www.w3.org/WAI/ARIA/apg/patterns/grid/examples/advanced-data-grid/"
   ],
   "rootRole": "grid",
-  "roleReason": "The pattern's own words: a grid is a composite widget, it always contains multiple focusable elements, only one of them is in the page tab sequence, and the author manages focus inside it. That is the line docs/superpowers/specs/2026-09-09-table-design.md §1 drew: table is the static structure and this family is the composite widget. The roles are written by hand — grid, rowgroup, row, columnheader, rowheader, gridcell — because the DOM is div, and the DOM is div because a row that is display: grid takes a track per column, which is what lets a column be resized live, pinned with sticky and left out of the DOM when it is off screen; table-layout gives none of the three.",
+  "roleReason": "The pattern's own words: a grid is a composite widget, it always contains multiple focusable elements, only one of them is in the page tab sequence, and the author manages focus inside it. That is the line docs/history/designs/2026-09-09-table-design.md §1 drew: table is the static structure and this family is the composite widget. The roles are written by hand — grid, rowgroup, row, columnheader, rowheader, gridcell — because the DOM is div, and the DOM is div because a row that is display: grid takes a track per column, which is what lets a column be resized live, pinned with sticky and left out of the DOM when it is off screen; table-layout gives none of the three.",
   "rootReason": "The root is the frame and the widget, and the scroller is one element in. The frame holds the border, the radius, the clip, the footer bar and every aria-* property the grid role carries; the scroller is the window the virtualiser measures and the box a sticky header and a pinned column resolve against. Unlike table, the family owns its height: a virtualised grid needs a viewport, and a grid without one grows to its content, stays correct and windows nothing.",
   "elements": {
     "root": "div",
@@ -105,7 +105,7 @@
     "kind": "a FilterKind of @slotted/core/filter — text, number, date, time, datetime, boolean, set — or actions or custom. It decides the operators, the comparator, the default alignment, the default editor and whether the column is searchable.",
     "accessor": "accessor(row) gives the domain value; format(value, row) gives the text. Sorting and filtering read the value; the cell draws the text. §2.9: a number, a currency and a date are values, not strings.",
     "mode": "client applies the query to rows with applyQuery; server reports the query and draws the rows it is given, reading totalCount or hasMore. Resolved to client when both are omitted.",
-    "reason": "AG Grid, MUI X, Kendo, DevExtreme and Glide own the rows and apply the query; TanStack, React Aria, Fluent and Carbon leave it to the consumer. docs/build-order.md wave 9 decides it for this family: it applies the descriptor, and table reports."
+    "reason": "AG Grid, MUI X, Kendo, DevExtreme and Glide own the rows and apply the query; TanStack, React Aria, Fluent and Carbon leave it to the consumer. docs/process/build-order.md wave 9 decides it for this family: it applies the descriptor, and table reports."
   },
   "query": {
     "shape": "{ sort: { column, direction }[], filter: FilterGroup | null, search: string, page: { index, size } | { cursor, size } | null, group: string[] }",
@@ -216,7 +216,7 @@
     "engine": "@slotted/core/filter",
     "shape": "a trigger in the column-actions slot and a compact panel it opens; and, with filterRow, a row under the header with one operand per filterable column",
     "form": "One condition is one line: [operator] [operand], controls in size sm, the operator at --slotted-data-grid-filter-operator-size and the operand taking the rest; between puts both operands on the same line with a dash. The join is two words in a segmented-control where the second line's operator would stand, shown once the first condition is active. The footer is Clear in ghost and Apply in solid, both sm, at the trailing edge. No title: the trigger names the column and the panel opens under it.",
-    "formReason": "table's panel stacks the operator, the operand, the join and two md buttons at full width, and the invocation refuses that form in writing. The form decided here is inherited by table and filter-bar in reopenings recorded in docs/build-order.md, so the three places a filter is edited share one geometry.",
+    "formReason": "table's panel stacks the operator, the operand, the join and two md buttons at full width, and the invocation refuses that form in writing. The form decided here is inherited by table and filter-bar in reopenings recorded in docs/process/build-order.md, so the three places a filter is edited share one geometry.",
     "row": "filterRow draws a row under the header inside the head rowgroup: role row, one gridcell per column, the cursor reaches it with the arrows. Each cell holds the kind's operand in variant plain and size sm filling the cell, with the operator as a symbol button at the start of the field that opens a menu naming the operators in full. Text and number apply after filterDebounce and on Enter; the others on change. A set draws select with multiple, whose trigger summarises the chosen values; a boolean a select of any, yes, no.",
     "rowReason": "AG Grid, MUI X, Kendo and DevExtreme ship it, and it is the densest form a wide listing has. table declined it because it cost a row of a static structure; here the row is part of the composite widget and the cursor walks it.",
     "symbols": "⊃ ⊅ = ≠ ^ $ > ≥ < ≤ ↔ ∅ ∄ and the kind's own words for is, is not, before, after, any of, none of. They are typographic characters with meaning rather than icons — the criterion that lets kbd write ⌘ — and the button's accessible name says the operator in full.",

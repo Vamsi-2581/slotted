@@ -4,7 +4,7 @@
  * Written against VirtualList, reviewed against Listbox — the first caller that
  * windows a collection **and** selects inside it at the same time. That pairing
  * is what the original signature could not answer, and
- * `docs/superpowers/specs/2026-09-04-collection-engine-review.md` §2 records the
+ * `docs/history/designs/2026-09-04-collection-engine-review.md` §2 records the
  * four failures it produced. Two of them are answered here:
  *
  * 1. a window computed from the scroll offset alone recycles the option

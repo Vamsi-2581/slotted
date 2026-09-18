@@ -5,8 +5,8 @@ yours; it is explained at the end so you know what you are building towards.
 Report when Task 4 is committed.
 
 Repository: `/home/dreco/dev/slotted`
-Plan: `docs/superpowers/plans/2026-08-31-component-craft-skill.md`
-Spec: `docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-design.md`
+Plan: `docs/history/plans/2026-08-31-component-craft-skill.md`
+Spec: `docs/history/designs/2026-08-31-component-foundation-and-craft-skill-design.md`
 
 ## 1. Orient, once
 
@@ -14,8 +14,8 @@ Spec: `docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-de
 cd /home/dreco/dev/slotted
 git status --short --branch
 git log --oneline -5
-cat docs/superpowers/plans/2026-08-31-component-craft-skill.md
-cat docs/superpowers/specs/2026-08-31-component-foundation-and-craft-skill-design.md
+cat docs/history/plans/2026-08-31-component-craft-skill.md
+cat docs/history/designs/2026-08-31-component-foundation-and-craft-skill-design.md
 cat docs/token-foundation.md
 ```
 

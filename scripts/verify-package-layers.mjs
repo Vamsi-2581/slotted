@@ -72,7 +72,7 @@ function readManifests(roots) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const repositoryRoot = fileURLToPath(new URL('..', import.meta.url));
   const violations = layerViolations(
-    readManifests([join(repositoryRoot, 'packages'), join(repositoryRoot, 'apps')]),
+    readManifests(['packages', 'apps', 'demos', 'tools'].map((root) => join(repositoryRoot, root))),
   );
 
   if (violations.length > 0) {

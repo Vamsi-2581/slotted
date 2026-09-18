@@ -53,7 +53,7 @@
   "palette": {
     "tokens": "--slotted-code-<scope>, twelve, component layer, scheme axis, root, forced colour CanvasText",
     "ground": "--slotted-surface-sunken, the fence's ground prose already draws",
-    "ratio": "4.5:1 in light and dark, 7:1 in high-contrast, measured by packages/themes/default/test/default-theme.test.mjs",
+    "ratio": "4.5:1 in light and dark, 7:1 in high-contrast, measured by packages/theme-default/test/default-theme.test.mjs",
     "reason": "the five tones give five hues and a language has more than five kinds of word; painting a keyword with danger would make one tone mean two things on a page that also has an error — the bar upload's file-kind scale cleared"
   },
   "composes": {

@@ -4,7 +4,7 @@
   "ui": "split-button",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/button/",
   "triggerPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/",
-  "patternStatus": "The APG has no split-button pattern. The primary is the Button pattern's button and the menu trigger is the Menu Button pattern's, each with its own tab stop, which is what Fluent, Atlassian, PrimeNG, Kendo, Ant, MUI and Carbon all do. Both pages were read on 2026-09-16 and the keys are transcribed in docs/superpowers/specs/2026-09-16-split-button-toggle-design.md §4.",
+  "patternStatus": "The APG has no split-button pattern. The primary is the Button pattern's button and the menu trigger is the Menu Button pattern's, each with its own tab stop, which is what Fluent, Atlassian, PrimeNG, Kendo, Ant, MUI and Carbon all do. Both pages were read on 2026-09-16 and the keys are transcribed in docs/history/designs/2026-09-16-split-button-toggle-design.md §4.",
   "roles": {
     "root": "group",
     "primary": "button",
@@ -48,7 +48,7 @@
   "remember": {
     "default": false,
     "effect": "the menu's items are menu's radio items bound to the family's value; the consumer renders the primary's label from it",
-    "reason": "docs/build-order.md: the choice in the menu updates the primary action only under a declared option, because a silent update changes what the next click does. With remember the reader has been told — the item is announced as a checked radio and the primary's label is the one they chose. MUI's example moves the label silently; Kendo leaves it to onItemClick."
+    "reason": "docs/process/build-order.md: the choice in the menu updates the primary action only under a declared option, because a silent update changes what the next click does. With remember the reader has been told — the item is announced as a checked radio and the primary's label is the one they chose. MUI's example moves the label silently; Kendo leaves it to onItemClick."
   },
   "keyboard": [
     {

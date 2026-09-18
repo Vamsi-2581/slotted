@@ -56,7 +56,7 @@ rules to their own layer or leave them unlayered.
 
 ## Addendum, 3 September 2026
 
-`docs/superpowers/specs/2026-09-03-css-theming-design.md` adds two layer
+`docs/history/designs/2026-09-03-css-theming-design.md` adds two layer
 names, `slotted.theme-overrides` and `slotted.preferences`, and does not
 revive `slotted.overrides`.
 

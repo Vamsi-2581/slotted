@@ -5,8 +5,9 @@
 .turbo
 coverage
 dist
-docs/superpowers
+docs/history/designs
+docs/history/plans
 node_modules
-apps/demos/nexora-angular
+demos/nexora/angular
 pnpm-lock.yaml
-PROJECT-PRD.md
+docs/product/prd.md

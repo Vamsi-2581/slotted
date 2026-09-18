@@ -5,14 +5,14 @@ checkpoint desta sessão.
 
 ## Plano
 
-`docs/build-schedule.md`, rodada 18, bloco `highlight`. Skill `/component`,
+`docs/process/build-schedule.md`, rodada 18, bloco `highlight`. Skill `/component`,
 modo `create` (a folha existia; o contrato não). Sem arquivo de plano.
 
 ## Tarefas concluídas
 
 1. Passos 1–5: inventário em
-   `docs/superpowers/specs/2026-09-16-highlight-capability-inventory.md`;
-   desenho em `docs/superpowers/specs/2026-09-16-highlight-design.md`.
+   `docs/history/designs/2026-09-16-highlight-capability-inventory.md`;
+   desenho em `docs/history/designs/2026-09-16-highlight-design.md`.
 2. Passo 6: `specs/components/highlight/{contract.json,contract.test.mjs}`;
    blocos `mark` de `combobox`, `multi-select`, `command-palette` apontam para
    a família; `select.search.highlight` e `combobox.filtering.highlight`
@@ -41,8 +41,8 @@ modo `create` (a folha existia; o contrato não). Sem arquivo de plano.
    `test:package-layers`, `test:docs` limpos nesta família; falhas restantes
    noutras lanes (`context-menu`, `hover-card`, `toggle-group`, `image`,
    `table`, `stat-card`, `aspect-ratio`). Builds de core, react e angular passam.
-8. Passo 13: `docs/superpowers/specs/2026-09-16-highlight-self-assessment.md`;
-   `docs/build-order.md` com "Entregue" e as reaberturas de `menu` e `tree`.
+8. Passo 13: `docs/history/designs/2026-09-16-highlight-self-assessment.md`;
+   `docs/process/build-order.md` com "Entregue" e as reaberturas de `menu` e `tree`.
 
 ## Tarefa em curso
 
@@ -53,8 +53,8 @@ Passo 14 — gate de lançamento. Mensagem entregue; aguardar.
 Branch `review/implementation-pass-1`. Nada desta sessão no índice. Arquivos
 desta sessão:
 
-- `docs/superpowers/specs/2026-09-16-highlight-capability-inventory.md`
-- `docs/superpowers/specs/2026-09-16-highlight-design.md`
+- `docs/history/designs/2026-09-16-highlight-capability-inventory.md`
+- `docs/history/designs/2026-09-16-highlight-design.md`
 - `specs/components/highlight/contract.json`, `contract.test.mjs`
 - `specs/components/{combobox,multi-select,command-palette,select}/contract.json`;
   `specs/components/{combobox,command-palette}/contract.test.mjs`
@@ -66,11 +66,11 @@ desta sessão:
 Fora desta sessão, sujos no working tree: `menu` (React e Angular),
 `popover`, `app-shell`, `avatar`, `date-field`, `time-field`, `datetime-field`,
 `packages/react/{package.json,vite.config.ts,src/index.ts}`,
-`packages/styles/package.json`, `docs/build-order.md`.
+`packages/styles/package.json`, `docs/process/build-order.md`.
 
 ## Próxima ação
 
 Após o gate: passo 15, um commit por passo, caminhos explícitos. Para
-`docs/build-order.md`, `packages/react/package.json`, `packages/react/vite.config.ts`
+`docs/process/build-order.md`, `packages/react/package.json`, `packages/react/vite.config.ts`
 e `packages/react/src/index.ts` (sujos por outra sessão), montar o patch só com
 os hunks desta família e `git apply --cached`.

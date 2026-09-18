@@ -3,7 +3,7 @@
 O que executar, em que ordem, e o que pode rodar ao mesmo tempo. Cada bloco de
 código é uma sessão limpa: cole exatamente o que está nele.
 
-`docs/build-order.md` diz o que cada família entrega.
+`docs/process/build-order.md` diz o que cada família entrega.
 `docs/build-briefing.md` é lido pelo passo 1 da skill e carrega o resto.
 
 ## Como ler
@@ -234,7 +234,7 @@ com fuso — a razão está em "Decisions already taken" no briefing.
 O revisor pediu que esta cadeia seja mais inventiva que o campo pesquisado. A
 abertura que a onda 7 encontrou e não tomou: uma hora escrita como duração a
 partir de agora, resolvida à vista antes de ser aceita. Está em
-docs/superpowers/specs/2026-09-09-date-design.md §12.
+docs/history/designs/2026-09-09-date-design.md §12.
 
 De todas as sessões desta rodada é a que menos toca em arquivo compartilhado:
 @slotted/core/date já é uma entrada, então nem package.json nem vite.config.ts
@@ -397,7 +397,7 @@ beside another session" em docs/build-briefing.md.
 Dois campos e o modo range que calendar já tem, atrás de um gatilho. Não depende
 da cadeia de hora. O revisor pediu que o comprimento do intervalo seja dito
 enquanto ele está sendo desenhado, e não só as duas pontas; a razão está em
-docs/superpowers/specs/2026-09-09-date-design.md §12.
+docs/history/designs/2026-09-09-date-design.md §12.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.
@@ -452,8 +452,8 @@ ele foi construído. Três trabalhos, um por família nova:
 O que está entregue não muda de forma: o descritor, o predicado, o codec e o
 resumo continuam os mesmos, e nenhuma consulta escrita por um consumidor deixa
 de ser lida. Decisões em
-docs/superpowers/specs/2026-09-10-table-filter-design.md, e o âmbito de cada uma
-das três está escrito na família que a fornece, em docs/build-order.md.
+docs/history/designs/2026-09-10-table-filter-design.md, e o âmbito de cada uma
+das três está escrito na família que a fornece, em docs/process/build-order.md.
 
 Outra sessão pode estar trabalhando nesta mesma worktree agora. Siga "Working
 beside another session" em docs/build-briefing.md.

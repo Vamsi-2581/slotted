@@ -2,18 +2,18 @@
 
 ## Plano
 
-`docs/build-order.md`, onda 10, `stat-card sparkline`. Skill `/component`, modo
+`docs/process/build-order.md`, onda 10, `stat-card sparkline`. Skill `/component`, modo
 `create`, uma sessão para as duas famílias. Sem arquivo de plano.
 
 ## Tarefas concluídas
 
 1. Passos 1–5: inventário e desenho em
-   `docs/superpowers/specs/2026-09-16-stat-card-sparkline-{capability-inventory,design}.md`.
+   `docs/history/designs/2026-09-16-stat-card-sparkline-{capability-inventory,design}.md`.
 2. Fundação: `--slotted-data-1…8`, `--slotted-font-size-4xl`,
    `--slotted-line-height-4xl`, `--slotted-icon-trending-up`
-   (`packages/tokens/src/contract.json`, `packages/themes/default/src/{theme,glyphs}.json`,
+   (`packages/tokens/src/contract.json`, `packages/theme-default/src/{theme,glyphs}.json`,
    `docs/token-foundation.md`, `scripts/verify-token-foundation.test.mjs`,
-   `packages/themes/default/test/default-theme.test.mjs`).
+   `packages/theme-default/test/default-theme.test.mjs`).
 3. Passo 6: contratos e testes (19/19).
 4. Motor `packages/core/src/sparkline/` (29/29), registado em core.
 5. Passo 7–8: folhas, harness, testes de estilo (14 + 17); capturas lidas.
@@ -25,15 +25,15 @@
    `packages/styles/package.json`.
 8. Passo 11: docs + stories + stories tests em ambos (React 36 testes com as
    stories; Angular 26). Workbench: `measurement` aceita `value` ou `data`
-   (`packages/storybook-workbench/src/scenarios.{tsx,test.ts}`). React
+   (`tools/storybook-workbench/src/scenarios.{tsx,test.ts}`). React
    Storybook (6006) lido a 1280; `audit.mjs` a 1280 e 620 nas duas páginas:
    0 achados. Angular Storybook (6007) sem resposta.
 9. Passo 12: `pnpm lint/typecheck/test:contracts/test:package-layers/test:docs`
-   passam; `format:check` falha em `docs/nexora-op-demo-domain.md` (outra
+   passam; `format:check` falha em `demos/nexora/domain.md` (outra
    lane); `turbo run verify --affected --continue` em curso (log em
    `scratchpad/verify2.log`).
-10. Passo 13: `docs/superpowers/specs/2026-09-16-stat-card-sparkline-self-assessment.md`.
-11. `docs/build-order.md`: reaberturas `typography` (4xl) e `chart`.
+10. Passo 13: `docs/history/designs/2026-09-16-stat-card-sparkline-self-assessment.md`.
+11. `docs/process/build-order.md`: reaberturas `typography` (4xl) e `chart`.
 
 ## Tarefa em curso
 

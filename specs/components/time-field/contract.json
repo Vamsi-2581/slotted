@@ -3,7 +3,7 @@
   "family": "time-field",
   "ui": "time-field",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/spinbutton/",
-  "patternStatus": "Read on 2026-09-10 and transcribed key by key into docs/superpowers/specs/2026-09-10-time-design.md §5. The example the pattern links is deprecated for its visible increment and decrement buttons; its roles, its wrapping rule and its aria-valuetext guidance are taken whole and the buttons are not drawn.",
+  "patternStatus": "Read on 2026-09-10 and transcribed key by key into docs/history/designs/2026-09-10-time-design.md §5. The example the pattern links is deprecated for its visible increment and decrement buttons; its roles, its wrapping rule and its aria-valuetext guidance are taken whole and the buttons are not drawn.",
   "controlPart": "segments",
   "controlRole": "group",
   "segmentRole": "spinbutton",
@@ -120,7 +120,7 @@
       "the arrow keys on every segment",
       "the now control at the head of time-picker's panel"
     ],
-    "source": "docs/superpowers/specs/2026-09-09-date-design.md §12, recorded from the reviewer at wave 7's visual gate"
+    "source": "docs/history/designs/2026-09-09-date-design.md §12, recorded from the reviewer at wave 7's visual gate"
   },
   "placeholder": {
     "from": "Intl.DisplayNames dateTimeField",

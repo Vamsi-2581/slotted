@@ -4,8 +4,8 @@
   "ui": "app-shell",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
   "control": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/",
-  "design": "docs/superpowers/specs/2026-09-14-app-shell-redesign-design.md",
-  "inventory": "docs/superpowers/specs/2026-09-13-app-shell-capability-inventory.md",
+  "design": "docs/history/designs/2026-09-14-app-shell-redesign-design.md",
+  "inventory": "docs/history/designs/2026-09-13-app-shell-capability-inventory.md",
   "composes": ["presence", "dismissable-layer", "focus", "portal", "measure"],
   "anatomy": {
     "root": "a div, and a grid. It is deliberately not a sectioning element: a main inside an article stops being a landmark, and the root has to be placeable anywhere without changing what the five regions mean. It is the query container the whole family answers",
@@ -302,7 +302,7 @@
     "mirrored": "the artwork is direction-sensitive, so the family turns it whole wherever the region is not at the start of the line: navSide=end, a right-to-left document, or either but not both",
     "aside": "the aside-toggle draws the same pair mirrored: the pane is on the end of the line the navigation is not on, so the artwork the navigation turns for navSide=end is the pane artwork at rest, and it turns back where the pane is at the start"
   },
-  "designHistory": ["docs/superpowers/specs/2026-09-13-app-shell-design.md"],
+  "designHistory": ["docs/history/designs/2026-09-13-app-shell-design.md"],
   "asideMode": {
     "inline": "the pane is a column of the grid beside the content, at or above overlayAt, and a row under the content below it. Closed, it leaves the layout by display: none — a pane has no rail, and a region at nought pixels that still lays its children out puts content outside the box that owns it",
     "overlay": "the pane is out of the grid and over the content as a dismissable layer, from the end of the line the navigation is not on. Composed from the same three modules the navigation layer is",

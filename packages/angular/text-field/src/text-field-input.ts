@@ -121,7 +121,7 @@ export class SlTextFieldInput implements ControlValueAccessor, OnInit, SlTextFie
    * The frame around the control. Injected without `optional`, so an `input`
    * written without it fails at construction rather than silently losing its
    * border, its ring and the place its two buttons stand — the property
-   * `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md` asks of
+   * `docs/history/designs/2026-08-31-field-aware-controls-design.md` asks of
    * every control this library ships. It is public because a template that
    * reaches the input through `exportAs` may want the frame's resolved step.
    */

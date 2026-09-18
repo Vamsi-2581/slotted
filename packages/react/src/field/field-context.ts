@@ -13,7 +13,7 @@ export const FieldContext = createContext<FieldContextValue | undefined>(undefin
  *
  * It is the hook a control reads to take its identifier, its description and
  * its state without being wrapped, which is the mechanism
- * `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md` states: a
+ * `docs/history/designs/2026-08-31-field-aware-controls-design.md` states: a
  * control that wires itself cannot be written wrong.
  */
 export function useField(): FieldContextValue | undefined {

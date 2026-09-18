@@ -2,8 +2,8 @@
  * Where a layer sits on screen, and what the stylesheet is told about it.
  *
  * The engine is `@floating-ui/dom`, adopted by
- * `docs/superpowers/specs/2026-09-03-overlay-infrastructure-design.md` and by
- * `PROJECT-PRD.md` §20.1 before it. Measuring an anchor correctly means
+ * `docs/history/designs/2026-09-03-overlay-infrastructure-design.md` and by
+ * `docs/product/prd.md` §20.1 before it. Measuring an anchor correctly means
  * answering a scaled ancestor, a nested scroll container that clips, an
  * `offsetParent` that is not the containing block, a `fixed` subtree and a
  * document in an iframe, and the library that has answered them for years is a

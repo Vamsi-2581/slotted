@@ -24,8 +24,8 @@
   "compilerOptions": {
     "paths": {
       "@slotted/angular/*": ["../../packages/angular/*/src/public-api.ts"],
-      "@slotted/storybook-workbench": ["../../packages/storybook-workbench/src/index.tsx"],
-      "@slotted/storybook-workbench/*": ["../../packages/storybook-workbench/src/*.ts"]
+      "@slotted/storybook-workbench": ["../../tools/storybook-workbench/src/index.tsx"],
+      "@slotted/storybook-workbench/*": ["../../tools/storybook-workbench/src/*.ts"]
     }
   },
   "exclude": ["dist/**", "node_modules/**", "**/*.spec.ts"]

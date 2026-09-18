@@ -3,7 +3,7 @@
   "family": "toggle",
   "ui": "toggle",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/button/",
-  "patternStatus": "The Button pattern's toggle button: a button with aria-pressed whose label does not change with its state. Read on 2026-09-16; the keys and properties are transcribed in docs/superpowers/specs/2026-09-16-split-button-toggle-design.md §4.",
+  "patternStatus": "The Button pattern's toggle button: a button with aria-pressed whose label does not change with its state. Read on 2026-09-16; the keys and properties are transcribed in docs/history/designs/2026-09-16-split-button-toggle-design.md §4.",
   "roles": {
     "root": "button"
   },
@@ -14,7 +14,7 @@
   },
   "sibling": {
     "family": "toggle-group",
-    "relation": "toggle-group's item is the picture this family paints, held inside the group so the group is the value's only owner. The reopen recorded in docs/build-order.md makes that item this family; until then the two sheets state the same rules under two prefixes and each says so."
+    "relation": "toggle-group's item is the picture this family paints, held inside the group so the group is the value's only owner. The reopen recorded in docs/process/build-order.md makes that item this family; until then the two sheets state the same rules under two prefixes and each says so."
   },
   "wiring": {
     "aria-pressed": "in both states, so the control is announced as a toggle rather than as a button that happens to be pressed",

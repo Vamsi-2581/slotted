@@ -9,7 +9,7 @@
  * split to avoid.
  *
  * The browser already does all of this for a `<dialog>` opened with
- * `showModal()`. `docs/superpowers/specs/2026-09-04-dialog-and-alert-dialog-capability-inventory.md`
+ * `showModal()`. `docs/history/designs/2026-09-04-dialog-and-alert-dialog-capability-inventory.md`
  * records why the library's overlays are not on the top layer, and this file is
  * the price of that decision — paid once, here, rather than by each family.
  *

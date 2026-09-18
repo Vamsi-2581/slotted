@@ -35,7 +35,7 @@ test('answers the combobox pattern with a listbox popup, and hands the layer to 
 });
 
 /**
- * `docs/build-order.md` says what the family is in five words — "dialog com
+ * `docs/process/build-order.md` says what the family is in five words — "dialog com
  * combobox + listbox dentro" — and `docs/build-briefing.md` says overlay
  * behaviour is composed and never rewritten. The family therefore composes the
  * dialog family and says so, rather than reaching for the core modules dialog
@@ -111,7 +111,7 @@ test('gives Escape the clear, the page and the close, in that order', () => {
   assert.match(effect, /inline/);
 });
 
-/** `docs/build-order.md`: the family never executes a disabled item. */
+/** `docs/process/build-order.md`: the family never executes a disabled item. */
 test('never executes a disabled item, and never highlights one', () => {
   assert.match(keyed('Enter').effect, /disabled item is never highlighted and never executed/);
   assert.match(contract.items.disabled, /never executed/);

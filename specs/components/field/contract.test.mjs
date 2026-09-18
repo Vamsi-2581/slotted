@@ -46,7 +46,7 @@ test('renders a div holding a native label and a native control', () => {
 
 /**
  * The description and the error are `inline-message`, which
- * `docs/build-order.md` states as the reason that family was built in wave 2.
+ * `docs/process/build-order.md` states as the reason that family was built in wave 2.
  * The field draws neither a mark nor a severity word of its own; it points at
  * the family that already does, so a field error and a status light about the
  * same thing speak the same word.
@@ -83,7 +83,7 @@ test('speaks through the message family instead of drawing a message', () => {
  * `label[for]` then resolves to the identifier the control will use with no
  * ordering dependency between siblings and nothing to coordinate during
  * hydration, which is the decision
- * `docs/superpowers/specs/2026-08-31-field-primitive-design.md` records.
+ * `docs/history/designs/2026-08-31-field-primitive-design.md` records.
  */
 test('derives every identifier from one base', () => {
   assert.deepEqual(contract.identifiers, ['control', 'label', 'description', 'error']);
@@ -182,7 +182,7 @@ test('steps with the control it wraps', () => {
  * decision. A default of `false` cannot be told from a consumer saying "not
  * disabled", so a field that defaulted to `false` would quietly override a
  * disabled `field-group` — the invariant
- * `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md` states from
+ * `docs/history/designs/2026-08-31-field-aware-controls-design.md` states from
  * the control's side.
  */
 test('leaves every shared state unset, so the group can answer it', () => {
@@ -222,7 +222,7 @@ test('lets the counter go over its limit before the field is in error', () => {
 
 /**
  * The field is told its state; it holds none. The value belongs to the control
- * and the validity to `form` in wave 3, which `docs/build-order.md` names as
+ * and the validity to `form` in wave 3, which `docs/process/build-order.md` names as
  * the owner of submission and validation. The assertion keeps the absence a
  * decision rather than an oversight.
  */

@@ -4,7 +4,7 @@
   "ui": "command-palette",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/",
   "layerPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
-  "patternStatus": "The combobox pattern with a listbox popup answers the search field and the list: DOM focus stays on the input and the list is navigated with aria-activedescendant, which is the pattern's own note. The popup never closes on its own — the list is the surface — so aria-expanded is always true, recorded as a departure in docs/superpowers/specs/2026-09-15-command-palette-design.md §6. The dialog pattern is answered by the dialog family this one composes. Both read on 2026-09-15.",
+  "patternStatus": "The combobox pattern with a listbox popup answers the search field and the list: DOM focus stays on the input and the list is navigated with aria-activedescendant, which is the pattern's own note. The popup never closes on its own — the list is the surface — so aria-expanded is always true, recorded as a departure in docs/history/designs/2026-09-15-command-palette-design.md §6. The dialog pattern is answered by the dialog family this one composes. Both read on 2026-09-15.",
   "roles": {
     "input": "combobox",
     "list": "listbox",
@@ -96,7 +96,7 @@
     "event": "onSelect(item, request) on the root and onSelect on the item; reason pointer or keyboard, the source event, keepOpen() and the pending promise",
     "async": "a handler that returns a promise keeps the palette open, marks the item data-loading and aria-busy, and refuses to execute the same item again until it settles; on fulfilment the palette closes unless keepOpen() was called; on rejection it stays open and the status row announces errorLabel",
     "close": "closeOnSelect closes with reason select after a synchronous handler and after a fulfilled promise",
-    "reason": "docs/build-order.md: 'ações assíncronas' and 'não executa item disabled'."
+    "reason": "docs/process/build-order.md: 'ações assíncronas' and 'não executa item disabled'."
   },
   "hotkey": {
     "default": "mod+k",
@@ -133,7 +133,7 @@
     "count": "countLabel, with {count} replaced, after every change of the result set",
     "loading": "loadingLabel while loading",
     "error": "errorLabel, with {message} replaced, after a rejected handler",
-    "reason": "docs/build-order.md: 'anuncia o número de resultados pelo live-announcer'. The row is visually hidden and never duplicated: the announcer refuses to say the same sentence twice in a row."
+    "reason": "docs/process/build-order.md: 'anuncia o número de resultados pelo live-announcer'. The row is visually hidden and never duplicated: the announcer refuses to say the same sentence twice in a row."
   },
   "wiring": {
     "role": "combobox on the input, listbox on the list, option on each item, group on each group, separator between groups, status on the live region",

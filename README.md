@@ -39,7 +39,7 @@ the override rules.
 - `pnpm check:affected` covers changed task-bearing packages and dependents.
 - `pnpm check:full` covers the complete task graph.
 
-Read the [project PRD](PROJECT-PRD.md) for product context and [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes.
+Read the [project PRD](docs/product/prd.md) for product context and [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes.
 
 ## License
 

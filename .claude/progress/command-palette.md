@@ -5,9 +5,9 @@ Ficheiro próprio porque `current.md` pertence a outra sessão nesta worktree
 
 ## Plano
 
-`docs/build-order.md`, onda 9, item `command-palette`. Skill `/component`, modo
+`docs/process/build-order.md`, onda 9, item `command-palette`. Skill `/component`, modo
 criar. Inventário e desenho em
-`docs/superpowers/specs/2026-09-15-command-palette-{capability-inventory,design}.md`.
+`docs/history/designs/2026-09-15-command-palette-{capability-inventory,design}.md`.
 
 ## Tarefas concluídas
 
@@ -38,20 +38,20 @@ criar. Inventário e desenho em
    contratos ok; falhas fora da família: lint em `toggle-group`, docs-snippets
    em `top-navigation`, styles em `alert`/`breadcrumb`/… (rodada R2 de outra
    sessão).
-7. Passo 13: `docs/superpowers/specs/2026-09-15-command-palette-self-assessment.md`.
+7. Passo 13: `docs/history/designs/2026-09-15-command-palette-self-assessment.md`.
 
 ## Tarefa em curso
 
 Nenhuma. Família entregue: commits `5ffa6dd`, `ef80746`, `fb7c45b`,
 `43ba9ab`, `3e2f931`, `f51759b` (núcleo em `70ec5a7`, `c2a7fee`). Pendentes
 para outra sessão: página Angular por ler (6007 em baixo); reaberturas de
-`dialog` (`ariaLabel`) e `combobox` (`createRanker`) em `docs/build-order.md`.
+`dialog` (`ariaLabel`) e `combobox` (`createRanker`) em `docs/process/build-order.md`.
 
 ## Git
 
 Branch `review/implementation-pass-1`; HEAD `70ec5a7`. Árvore com ficheiros
 não rastreados desta família (specs, styles, docs) e ficheiros de outras
-sessões (`top-navigation`, `time-range-picker`, `apps/demos`, tokens/tema).
+sessões (`top-navigation`, `time-range-picker`, `demos`, tokens/tema).
 
 ## Testes
 
@@ -84,7 +84,7 @@ sessões (`top-navigation`, `time-range-picker`, `apps/demos`, tokens/tema).
 
 ## Próxima ação exata
 
-Após o portão de release: passo 15 — commits por passo, ficheiros explícitos; inserir a linha de `command-palette` em `docs/build-order.md` (entregue na onda 9). Antes disso, se o revisor reiniciar o Storybook: Criar `packages/react/src/command-palette/`
+Após o portão de release: passo 15 — commits por passo, ficheiros explícitos; inserir a linha de `command-palette` em `docs/process/build-order.md` (entregue na onda 9). Antes disso, se o revisor reiniciar o Storybook: Criar `packages/react/src/command-palette/`
 (`command-palette.tsx`, `command-palette.types.ts`, `command-palette-defaults.tsx`,
 `command-palette-items.tsx`, `index.ts`, `command-palette.test.tsx`) compondo
 `../dialog` (`Dialog`, `DialogContent`, `DialogTrigger`) e `../kbd` (`Shortcut`);

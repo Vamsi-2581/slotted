@@ -105,7 +105,7 @@ async function main() {
     module,
     fragment,
     composedCss: composed.join('\n'),
-    themeCss: await read(`packages/themes/${theme}/dist/styles.css`),
+    themeCss: await read(`packages/theme-${theme}/dist/styles.css`),
     bundle: await bundleModule(
       new URL(`packages/core/src/${module}/index.ts`, root),
       new URL('packages/core/', root),

@@ -50,7 +50,7 @@ test('records that no APG pattern exists, and cites what governs instead', () =>
 /**
  * Three parts, and the three that are missing are the three a drawn scrollbar
  * needs. This test is what keeps a later pass from growing them, and with them
- * the decision recorded in `docs/superpowers/specs/2026-09-13-scroll-area-design.md`
+ * the decision recorded in `docs/history/designs/2026-09-13-scroll-area-design.md`
  * section 5: the scrollbar is the platform's.
  */
 test('is the scrollport and its frame, and declares no scrollbar of its own', () => {

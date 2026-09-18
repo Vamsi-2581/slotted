@@ -4,9 +4,9 @@
   "ui": "top-navigation",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation/",
   "landmarkPattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
-  "patternStatus": "Read on 2026-09-15 from the rendered example page, with the Navigation Menubar example beside it. The menubar example's own caution — that menubar demands functionality a site's navigation does not need, and that the disclosure pattern is the one suited to it — is why no menubar role, no roving tabindex and no arrow keys are written here; the scope says the same in its own words: the bar is not a toolbar with one tab stop per region. The keyboard table transcribes the disclosure example's Keyboard Support section without its optional arrow keys; the itemised comparison is in docs/superpowers/specs/2026-09-15-top-navigation-design.md §4.",
-  "design": "docs/superpowers/specs/2026-09-15-top-navigation-design.md",
-  "inventory": "docs/superpowers/specs/2026-09-15-top-navigation-capability-inventory.md",
+  "patternStatus": "Read on 2026-09-15 from the rendered example page, with the Navigation Menubar example beside it. The menubar example's own caution — that menubar demands functionality a site's navigation does not need, and that the disclosure pattern is the one suited to it — is why no menubar role, no roving tabindex and no arrow keys are written here; the scope says the same in its own words: the bar is not a toolbar with one tab stop per region. The keyboard table transcribes the disclosure example's Keyboard Support section without its optional arrow keys; the itemised comparison is in docs/history/designs/2026-09-15-top-navigation-design.md §4.",
+  "design": "docs/history/designs/2026-09-15-top-navigation-design.md",
+  "inventory": "docs/history/designs/2026-09-15-top-navigation-capability-inventory.md",
   "composes": ["presence", "dismissable-layer", "tooltip"],
   "roles": {
     "root": "banner | none",

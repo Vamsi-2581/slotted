@@ -62,7 +62,7 @@ test('shares the pressed model with button’s ToggleButton and says which is wh
  * The picture is `toggle-group`'s item: the same parts, the same two variants,
  * the same three sizes, the same "on" pair. The group keeps its item so the
  * value has one owner; the reopen that makes the item this family is recorded
- * in `docs/build-order.md`.
+ * in `docs/process/build-order.md`.
  */
 test('paints what toggle-group’s item paints', () => {
   assert.equal(contract.sibling.family, 'toggle-group');

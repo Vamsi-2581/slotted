@@ -53,7 +53,7 @@ interface FamilyProps extends DialogProps {
  * trigger renders in place and the layer is portalled out; Radix, Base UI and
  * Ark all reach the same shape. Angular needs no equivalent, because a template
  * reference variable plus `exportAs` links the two without one, and
- * `docs/superpowers/specs/2026-09-04-dialog-and-alert-dialog-design.md` records
+ * `docs/history/designs/2026-09-04-dialog-and-alert-dialog-design.md` records
  * the asymmetry rather than levelling both down to the smaller shape.
  */
 function DialogFamily({
@@ -328,7 +328,7 @@ function DialogFamily({
  * a `select` opened inside one would portal to the body and paint behind the
  * dialog it belongs to. The cost — this family needs JavaScript for containment,
  * inertness and Escape — is written in
- * `docs/superpowers/specs/2026-09-04-dialog-and-alert-dialog-capability-inventory.md`.
+ * `docs/history/designs/2026-09-04-dialog-and-alert-dialog-capability-inventory.md`.
  */
 export function Dialog(props: DialogProps) {
   return <DialogFamily {...props} member="dialog" />;

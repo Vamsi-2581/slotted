@@ -68,7 +68,7 @@ test('lays the picture out at its own size, its parent’s, or its frame’s, an
  * The five values `object-fit` has, and `cover` first because it is what a
  * picture in a frame that is not its own shape needs — Chakra's and Mantine's
  * default. `aspect-ratio` alone says `contain`; the crop is this family's
- * decision, which is the split `docs/build-order.md` wrote.
+ * decision, which is the split `docs/process/build-order.md` wrote.
  */
 test('fits the picture with the platform’s five values, and crops by default', () => {
   assert.deepEqual(contract.axes.fit, ['cover', 'contain', 'fill', 'none', 'scale-down']);

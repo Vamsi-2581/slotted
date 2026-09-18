@@ -138,7 +138,7 @@ export function FieldControl({
  *
  * It renders an `inline-message`, so it arrives with a tone, a mark, a clipped
  * severity word an application translates once, and a `reserve` that holds its
- * line open — none of which the field reimplements. `docs/build-order.md`
+ * line open — none of which the field reimplements. `docs/process/build-order.md`
  * states that as the reason `inline-message` was built in wave 2.
  */
 export function FieldDescription({ children, mark, tone, ...rest }: FieldMessageProps) {

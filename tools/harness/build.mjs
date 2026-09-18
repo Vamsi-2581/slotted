@@ -315,7 +315,7 @@ async function main() {
     fragment,
     familyCss: await read(`packages/styles/src/${family}/${family}.css`),
     composedCss: composed.join('\n'),
-    themeCss: await read(`packages/themes/${theme}/dist/styles.css`),
+    themeCss: await read(`packages/theme-${theme}/dist/styles.css`),
     theme,
   });
 

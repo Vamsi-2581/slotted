@@ -120,7 +120,7 @@
     },
     "syntaxHighlighting": {
       "deferTo": "code-block, wave 8",
-      "reason": "Prose paints the type, the ground and the inset of a pre. Highlighting, a copy control, line numbers and a wrap toggle are a family, and docs/build-order.md already names it."
+      "reason": "Prose paints the type, the ground and the inset of a pre. Highlighting, a copy control, line numbers and a wrap toggle are a family, and docs/process/build-order.md already names it."
     },
     "tableBehaviour": {
       "deferTo": "table, wave 6",

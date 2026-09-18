@@ -64,7 +64,7 @@ const NO_SNAP_POINTS: readonly number[] = [];
  * Either way the host is the portal's *origin*, so the layer keeps the scheme,
  * density, theme and direction of the region it was written in whether or not
  * a trigger exists — React has to use the trigger for that, and
- * `docs/superpowers/specs/2026-09-04-drawer-design.md` §11 records the
+ * `docs/history/designs/2026-09-04-drawer-design.md` §11 records the
  * asymmetry rather than levelling both down.
  */
 @Component({

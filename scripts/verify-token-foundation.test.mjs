@@ -13,14 +13,12 @@ import { centringOffset, inkBox, VIEW_BOX } from './glyph-ink.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const contract = JSON.parse(readFileSync(join(ROOT, 'packages/tokens/src/contract.json'), 'utf8'));
-const theme = JSON.parse(
-  readFileSync(join(ROOT, 'packages/themes/default/src/theme.json'), 'utf8'),
-);
+const theme = JSON.parse(readFileSync(join(ROOT, 'packages/theme-default/src/theme.json'), 'utf8'));
 const glyphs = JSON.parse(
-  readFileSync(join(ROOT, 'packages/themes/default/src/glyphs.json'), 'utf8'),
+  readFileSync(join(ROOT, 'packages/theme-default/src/glyphs.json'), 'utf8'),
 );
 const foundation = readFileSync(join(ROOT, 'docs/token-foundation.md'), 'utf8');
-const buildLog = readFileSync(join(ROOT, 'docs/BUILD-LOG.md'), 'utf8');
+const buildLog = readFileSync(join(ROOT, 'docs/history/build-log.md'), 'utf8');
 
 const SCHEMES = ['light', 'dark', 'high-contrast'];
 const DENSITIES = ['comfortable', 'compact', 'dense'];

@@ -123,7 +123,7 @@
     },
     "overflow": {
       "deferTo": "toolbar",
-      "reason": "A bar with more triggers than room is the overflow question, and docs/build-order.md gives it to toolbar at the end of this wave. A menubar names four to eight commands by convention; one that needs an overflow menu is a toolbar whose actions happen to open menus."
+      "reason": "A bar with more triggers than room is the overflow question, and docs/process/build-order.md gives it to toolbar at the end of this wave. A menubar names four to eight commands by convention; one that needs an overflow menu is a toolbar whose actions happen to open menus."
     },
     "modal": {
       "deferTo": "dialog",

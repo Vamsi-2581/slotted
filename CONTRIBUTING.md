@@ -44,7 +44,7 @@ invisible until they are:
 | Changed                                              | Build                       | Because                                                                         |
 | ---------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------- |
 | `packages/tokens/src/contract.json`                  | `pnpm build:tokens`         | the token stylesheet and the layer order are emitted from the contract          |
-| `packages/themes/default/src/theme.json`             | `pnpm build:tokens`         | the theme stylesheet is emitted from the theme                                  |
+| `packages/theme-default/src/theme.json`              | `pnpm build:tokens`         | the theme stylesheet is emitted from the theme                                  |
 | `packages/core/src/**`                               | none for Storybook or tests | aliased to source by `scripts/source-aliases.mjs`; build only before publishing |
 | `packages/react/src/**`, `packages/angular/*/src/**` | none for Storybook          | `pnpm build` before publishing or before reading `dist`; the servers use source |
 
@@ -65,9 +65,9 @@ not need. That import is gone; the Angular preview never had one. Do not add a
 
 ## The beta channel
 
-`apps/demos/` holds applications that consume the library as a published
+`demos/` holds applications that consume the library as a published
 package: a separate pnpm installation each, no workspace link, every
-`@slotted/*` installed from a tarball in `apps/demos/.registry/`. The
+`@slotted/*` installed from a tarball in `demos/.registry/`. The
 directory is not committed; it is written by:
 
 - `pnpm pack:beta`: builds every package and packs the ones that declare a
@@ -79,7 +79,7 @@ directory is not committed; it is written by:
 - `pnpm demo:refresh`: the loop after one library change — builds
   `@slotted/angular`, `@slotted/core` and `@slotted/theme-default`, repacks only
   those three at the current version and reinstalls, so
-  `apps/demos/nexora-angular` sees the change on its next `pnpm start` (a
+  `demos/nexora/angular` sees the change on its next `pnpm start` (a
   running dev server is restarted).
 
 A demo names the version it consumes in its own `package.json` and moves to a
@@ -97,4 +97,4 @@ Choose the smallest command that covers the changed surface. Pull requests that 
 
 ## Product Direction
 
-Read [`PROJECT-PRD.md`](PROJECT-PRD.md) for product context. Its phases and open questions are not an automatic implementation checklist.
+Read [`docs/product/prd.md`](docs/product/prd.md) for product context. Its phases and open questions are not an automatic implementation checklist.

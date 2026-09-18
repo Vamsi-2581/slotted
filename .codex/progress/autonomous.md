@@ -2,7 +2,7 @@
 
 ## Goal & acceptance criteria
 
-Execute `docs/superpowers/plans/2026-09-15-nexora-materialization-calibration.md` completely in the isolated worktree.
+Execute `docs/history/plans/2026-09-15-nexora-materialization-calibration.md` completely in the isolated worktree.
 
 Done means:
 

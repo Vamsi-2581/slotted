@@ -76,7 +76,7 @@ test('draws itself round for a person and square for everything else', () => {
 /**
  * `auto` is the default because a list of twenty grey circles is a list nobody
  * scans. The palette is the library's five tones rather than a colour list:
- * `PROJECT-PRD.md` 2.4 refuses an arbitrary colour in the contract, and the
+ * `docs/product/prd.md` 2.4 refuses an arbitrary colour in the contract, and the
  * five are the only colours whose text-on-surface ratio the theme already
  * holds.
  */

@@ -2,14 +2,14 @@
 
 ## Plano
 
-`docs/build-schedule.md`, rodada 18, bloco `otp-input`. Skill `/component`,
+`docs/process/build-schedule.md`, rodada 18, bloco `otp-input`. Skill `/component`,
 modo `create`. Sem arquivo de plano.
 
 ## Tarefas concluídas
 
 1. Passos 1–5: inventário em
-   `docs/superpowers/specs/2026-09-16-otp-input-capability-inventory.md`;
-   desenho em `docs/superpowers/specs/2026-09-16-otp-input-design.md`.
+   `docs/history/designs/2026-09-16-otp-input-capability-inventory.md`;
+   desenho em `docs/history/designs/2026-09-16-otp-input-design.md`.
 2. Passo 6: `specs/components/otp-input/{contract.json,contract.test.mjs}` (14/14).
 3. Passos 7–8: `packages/styles/src/otp-input/{otp-input.css,otp-input.tokens.json,
    otp-input.harness.html,otp-input.styles.test.mjs}`; styles + shared tests 196/196.
@@ -28,8 +28,8 @@ modo `create`. Sem arquivo de plano.
    `-webkit-user-drag`, `::selection` fill); piso de largura da caixa
    (`0.6 × altura`); cenas `stack` → `block`; botão em `slotted-demo-row`.
 7. Passo 12: `pnpm check` — só falhas fora da família. `turbo verify` em curso.
-8. Passo 13: `docs/superpowers/specs/2026-09-16-otp-input-self-assessment.md`;
-   `docs/build-order.md` com o parágrafo "Entregue".
+8. Passo 13: `docs/history/designs/2026-09-16-otp-input-self-assessment.md`;
+   `docs/process/build-order.md` com o parágrafo "Entregue".
 
 ## Tarefa em curso
 

@@ -214,7 +214,7 @@ describe('Field', () => {
 
   /**
    * The description and the error are `inline-message` roots, which is what
-   * `docs/build-order.md` states as the reason that family was built in wave
+   * `docs/process/build-order.md` states as the reason that family was built in wave
    * 2: a field error arrives with the clipped severity word an application
    * translates once, and the field draws none of it.
    */

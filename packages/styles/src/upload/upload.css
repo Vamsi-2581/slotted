@@ -14,7 +14,7 @@
    * the label around the trigger rather than around the whole region is what
    * makes the input's accessible name three words instead of every word in the
    * box; the reasoning and its cost are in
-   * `docs/superpowers/specs/2026-09-10-upload-design.md` §2.
+   * `docs/history/designs/2026-09-10-upload-design.md` §2.
    *
    * **The family owns its own container.** Four of its layout decisions answer
    * the width of the box rather than the width of the window — a row folds its
@@ -600,7 +600,7 @@
    *
    * One ratio answers both questions the pair raises, because the mark is the
    * tile's own foreground: the tile against the page, and the mark against the
-   * tile. `packages/themes/default/test/default-theme.test.mjs` measures all
+   * tile. `packages/theme-default/test/default-theme.test.mjs` measures all
    * twenty-seven.
    */
   [data-ui='upload'] [data-part='preview'] {
@@ -686,7 +686,7 @@
    * and its sentence. The tile is about the file. Measured rather than assumed,
    * every kind clears 4.03 : 1 against a failed row's ground in `light`,
    * 6.46 : 1 in `dark` and 8.31 : 1 in `high-contrast`, against a 3 : 1 floor —
-   * held by `packages/themes/default/test/default-theme.test.mjs`.
+   * held by `packages/theme-default/test/default-theme.test.mjs`.
    */
 
   /* ── What the row says ─────────────────────────────────────────────────

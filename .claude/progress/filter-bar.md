@@ -1,7 +1,7 @@
 # Checkpoint — filter-bar code-block
 
 `/component filter-bar code-block`, uma sessão só (rodada 11 de
-`docs/build-schedule.md`). O ficheiro é `filter-bar.md` e não `current.md`
+`docs/process/build-schedule.md`). O ficheiro é `filter-bar.md` e não `current.md`
 porque outra sessão escreve `current.md` nesta mesma worktree.
 
 ## Plano
@@ -18,7 +18,7 @@ para as duas.
    `token-foundation.md`, `state-and-events.md`, `contract.schema.mjs`,
    `2026-09-10-table-filter-design.md`.
 2. Inventários (fontes lidas por URL em 2026-09-14):
-   `docs/superpowers/specs/2026-09-14-filter-bar-capability-inventory.md`,
+   `docs/history/designs/2026-09-14-filter-bar-capability-inventory.md`,
    `2026-09-14-code-block-capability-inventory.md`.
 3. Desenhos com as duas tabelas de integração e a transcrição do teclado:
    `2026-09-14-filter-bar-design.md`, `2026-09-14-code-block-design.md`.
@@ -32,7 +32,7 @@ para as duas.
    `filter`). `tsc` limpo nos ficheiros desta sessão.
 6. **Commit `d300090`** — escala de tokens `--slotted-code-*` (12, camada
    component, eixo scheme, `CanvasText` sob forced-colors) em
-   `packages/tokens/src/contract.json`, `packages/themes/default/src/theme.json`,
+   `packages/tokens/src/contract.json`, `packages/theme-default/src/theme.json`,
    teste em `default-theme.test.mjs`, secção **Code scope** em
    `docs/token-foundation.md`. Tokens e tema reconstruídos.
 7. `packages/styles/src/filter-bar/{filter-bar.css,filter-bar.tokens.json,
@@ -70,7 +70,7 @@ para as duas.
     testes, verdes); cenas `revealed` nos dois harness; foco fotografado em
     `remove` do construtor, chip, `copy` e `reveal`; `reveal` com anel interno
     e cantos do bloco, máscara do colapso a desvanecer só a última linha.
-    Escopo das duas famílias em `docs/build-order.md` (onda 8, append).
+    Escopo das duas famílias em `docs/process/build-order.md` (onda 8, append).
     `node --test specs/*.test.mjs` 45/45.
 
 12. Gate visual aprovado ("siga"). Passo 10: ligações React
@@ -107,7 +107,7 @@ para as duas.
     (outras faixas); `packages/core` 1247/1247; `packages/styles` 1142/1143
     (`page-header`, outra faixa); `packages/react` 2513/2513 + build;
     `packages/angular` `pnpm test` 1898/1898 + build + 9 bundle.
-17. Passo 13: `docs/superpowers/specs/2026-09-14-{filter-bar,code-block}-self-assessment.md`.
+17. Passo 13: `docs/history/designs/2026-09-14-{filter-bar,code-block}-self-assessment.md`.
 
 18. Revisão do utilizador no gate: popover dos pills sem largura (regra da
     raiz a apanhar o editor) e construtor sem tema (portal fora do
@@ -131,12 +131,12 @@ para as duas.
     profundidade; harness `builder` com três níveis.
 21. Fundação (decisão do utilizador): escala `--slotted-control-inner-size-{sm,md,lg}`
     (22/24/28, 18/20/24, 16/18/22) em `packages/tokens/src/contract.json`,
-    `packages/themes/default/src/theme.json`, `docs/token-foundation.md`
+    `packages/theme-default/src/theme.json`, `docs/token-foundation.md`
     (tabela + parágrafo, semantic 103); `text-field` escreve
     `--slotted-control-inner-size` nos adornos, `multi-select` e `tags-input`
     na fila de chips; `kbd` e `tag` lêem-na como altura (linha e inset
     derivados). Medido: kbd 24/20/18 em campos 34/28/26; chip 24/20/18.
-    Decisão no briefing; R2 (clear etc.) pendente em `docs/build-order.md`.
+    Decisão no briefing; R2 (clear etc.) pendente em `docs/process/build-order.md`.
     Testes: styles 1144/1145 (`page-header`, outra faixa), foundation
     143/144 (`control-font-family`, anterior), React kbd/tag/text-field/
     multi-select/tags-input 158/158. Dist de tokens e tema reconstruídos; o

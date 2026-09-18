@@ -15,7 +15,7 @@ Documento de trabalho para um agente executor. Cada item descreve: sintoma obser
 | ------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Contrato      | `specs/components/<componente>/contract.json`                                          | Props, partes, estados. Toda remoção ou adição de prop começa aqui.                          |
 | Estilo        | `packages/styles/src/<componente>/<componente>.css` + `.tokens.json` + `.harness.html` | Fonte única de estilo para React e Angular.                                                  |
-| Tema          | `packages/themes/default/src/theme.json`                                               | Valores por esquema (`light`, `dark`, `high-contrast`), incluindo glifos `--slotted-icon-*`. |
+| Tema          | `packages/theme-default/src/theme.json`                                                | Valores por esquema (`light`, `dark`, `high-contrast`), incluindo glifos `--slotted-icon-*`. |
 | Tokens        | `packages/tokens/src/contract.json`                                                    | Declaração dos tokens.                                                                       |
 | Comportamento | `packages/core/src/<módulo>`                                                           | `positioner`, `presence`, `dismissable-layer`, `portal`, `collection`, `number`, `focus`.    |
 | React         | `packages/react/src/<componente>`                                                      | Componente, stories, testes.                                                                 |
@@ -68,7 +68,7 @@ Critério de aceite: nenhum `data-ui='button'` ou `data-ui='icon-button'` render
 
 Sintoma: em `dark`, botões e outros controles exibem anel de foco branco em vez da cor de destaque.
 
-Fatos verificados: `packages/themes/default/src/theme.json` define `--slotted-focus-ring-color` como `#2563eb` em `light`, `#60a5fa` em `dark` e `#000000` em `high-contrast`. `button.css:343` declara `outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight)`.
+Fatos verificados: `packages/theme-default/src/theme.json` define `--slotted-focus-ring-color` como `#2563eb` em `light`, `#60a5fa` em `dark` e `#000000` em `high-contrast`. `button.css:343` declara `outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight)`.
 
 Causas prováveis a investigar, nesta ordem:
 
@@ -80,7 +80,7 @@ Critério de aceite: em `dark`, `getComputedStyle(el).outlineColor` de um botão
 
 ### R4 — Ícones vêm de um conjunto publicado, não de paths escritos à mão
 
-Fato verificado: `packages/themes/default/src/theme.json` define `--slotted-icon-circle-info`, `--slotted-icon-circle`, `--slotted-icon-circle-check`, `--slotted-icon-triangle-alert`, `--slotted-icon-circle-alert` e outros como `data:image/svg+xml` inline com `stroke-width='1.8'`. Estes glifos são usados por `Alert`, `Toast`, `ResultState`, `Field`, `InlineMessage` via `mask-image`. As dependências `lucide-react@1.24.0` e `@ng-icons/lucide@35.0.1` já existem no repositório.
+Fato verificado: `packages/theme-default/src/theme.json` define `--slotted-icon-circle-info`, `--slotted-icon-circle`, `--slotted-icon-circle-check`, `--slotted-icon-triangle-alert`, `--slotted-icon-circle-alert` e outros como `data:image/svg+xml` inline com `stroke-width='1.8'`. Estes glifos são usados por `Alert`, `Toast`, `ResultState`, `Field`, `InlineMessage` via `mask-image`. As dependências `lucide-react@1.24.0` e `@ng-icons/lucide@35.0.1` já existem no repositório.
 
 Decisão: todo glifo em `theme.json` deve ser gerado a partir do SVG oficial do Lucide correspondente (`info`, `circle`, `circle-check`, `triangle-alert`, `circle-alert`, `x`, `chevron-down`, `check`, `search`, etc.), com `stroke-width` 2 e `viewBox 0 0 24 24`. Um script em `scripts/` deve gerar os data URIs a partir do pacote `lucide` para impedir divergência manual. Ícones usados nas stories devem vir de `lucide-react`/`@ng-icons/lucide`, nunca de SVG inline nas stories.
 
@@ -127,7 +127,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 
 ## Geral
 
-- [x] **G1 — Botões internos de componentes compostos.** Ver R2. Fato verificado (auditoria em `docs/implementation-review-log.md`, nota para G1): nenhuma das 14 famílias importa ou renderiza `Button`/`IconButton` em React ou Angular; o critério de DOM de R2 já era atendido. O item é a regra de estilo das partes internas existentes (`clear`, `reveal`, `dismiss`, `close`, `remove`, `ellipsis`, `scroll`, `overflow`, `increment`/`decrement`): caixa derivada de `--slotted-control-icon-size-<densidade>` mais um passo de ar (`--slotted-space-2`) por lado, nunca de uma altura de controle; sem borda, sombra ou fundo em repouso; `hover` e `active` alteram apenas `background-color`, em um passo; `:focus-visible` com o anel de R3; alvo de 24px pela própria caixa ou por pseudo-elemento transparente. Guarda: `packages/styles/src/inner-control.test.mjs` (16 partes em 14 famílias, mais o piso de glifo de SL3). BC1, T1, TF1, SL3 e CB3 fecham junto.
+- [x] **G1 — Botões internos de componentes compostos.** Ver R2. Fato verificado (auditoria em `docs/process/implementation-review-log.md`, nota para G1): nenhuma das 14 famílias importa ou renderiza `Button`/`IconButton` em React ou Angular; o critério de DOM de R2 já era atendido. O item é a regra de estilo das partes internas existentes (`clear`, `reveal`, `dismiss`, `close`, `remove`, `ellipsis`, `scroll`, `overflow`, `increment`/`decrement`): caixa derivada de `--slotted-control-icon-size-<densidade>` mais um passo de ar (`--slotted-space-2`) por lado, nunca de uma altura de controle; sem borda, sombra ou fundo em repouso; `hover` e `active` alteram apenas `background-color`, em um passo; `:focus-visible` com o anel de R3; alvo de 24px pela própria caixa ou por pseudo-elemento transparente. Guarda: `packages/styles/src/inner-control.test.mjs` (16 partes em 14 famílias, mais o piso de glifo de SL3). BC1, T1, TF1, SL3 e CB3 fecham junto.
 - [x] **G2 — Rails laterais para estado.** Ver R1. Remover todas as ocorrências.
 - [x] **G3 — Anel de foco branco em `dark`.** Ver R3.
 - [x] **G4 — Glifos escritos à mão.** Ver R4.
@@ -187,7 +187,7 @@ Critério de aceite: cada overlay renderiza pelo menos um frame no estado inicia
 ## Breadcrumb
 
 - [x] **BC1 — Controle de expansão (ellipsis) desalinhado.** Causa: uso de `IconButton` (R2). Esperado: parte interna `[data-part='expand']` com a mesma altura de linha dos itens do breadcrumb, glifo `ellipsis` do Lucide em `--slotted-control-icon-size-<densidade>`, sem borda, `hover` com superfície `secondary-subtle-hover` e raio `--slotted-radius-xs`. Alinhamento vertical pela linha de base dos itens, não `align-items: center` sobre um botão mais alto.
-- [x] **BC2 — Glifo `ellipsis` do Lucide no controle de expansão.** BC1 pede o glifo `ellipsis` do Lucide; `theme.json` não tem `--slotted-icon-ellipsis` e o token não pôde ser adicionado na sessão de G1 (theme e tokens reservados a outra sessão). O controle segue desenhando U+2026 como texto no tamanho do trail (decisão registrada em `breadcrumb.css`), o que é o que o alinha à linha de base. Esperado: adicionar `ellipsis` a `packages/themes/default/src/glyphs.json` (R4), trocar o texto pela máscara em `--_icon-size` em `breadcrumb.css` e em `toolbar.css` (`[data-part='overflow']`, mesma decisão), e atualizar `breadcrumb.styles.test.mjs` e `toolbar.styles.test.mjs`. Decidir antes se a regra 3 de `docs/token-foundation.md` (U+2026 não é ícone) é mantida.
+- [x] **BC2 — Glifo `ellipsis` do Lucide no controle de expansão.** BC1 pede o glifo `ellipsis` do Lucide; `theme.json` não tem `--slotted-icon-ellipsis` e o token não pôde ser adicionado na sessão de G1 (theme e tokens reservados a outra sessão). O controle segue desenhando U+2026 como texto no tamanho do trail (decisão registrada em `breadcrumb.css`), o que é o que o alinha à linha de base. Esperado: adicionar `ellipsis` a `packages/theme-default/src/glyphs.json` (R4), trocar o texto pela máscara em `--_icon-size` em `breadcrumb.css` e em `toolbar.css` (`[data-part='overflow']`, mesma decisão), e atualizar `breadcrumb.styles.test.mjs` e `toolbar.styles.test.mjs`. Decidir antes se a regra 3 de `docs/token-foundation.md` (U+2026 não é ícone) é mantida.
 
 ---
 
@@ -253,7 +253,7 @@ Localização: `packages/styles/src/combobox/combobox.css`, `packages/react/src/
 - [x] **CB1 — `#Select:1`.** Mesma causa raiz no positioner.
 - [x] **CB2 — `#Select:2`.**
 - [x] **CB3 — `#Select:3`.**
-- [x] **CB4 — `#Select:4`.** Fechado sem código: o contrato de `combobox` declina `multiple` (`declined.multiple`, defere para `multi-select`), logo não há várias seleções para pré-visualizar nesta família. Registado em `docs/implementation-review-log.md` na entrada de SL4.
+- [x] **CB4 — `#Select:4`.** Fechado sem código: o contrato de `combobox` declina `multiple` (`declined.multiple`, defere para `multi-select`), logo não há várias seleções para pré-visualizar nesta família. Registado em `docs/process/implementation-review-log.md` na entrada de SL4.
 - [x] **CB5 — `#Select:6`.**
 - [x] **CB6 — Destaque do match do filtro.** Localização: `combobox.css:665` (`[data-part='match']`): `font-weight: 600`, `padding-inline: 0.1em`, `border-radius: 2px`, fundo `accent-surface`. O peso e o padding alteram a métrica da palavra e o trecho destacado parece deslocado. Esperado, extraído para um componente compartilhado (`packages/styles/src/highlight/highlight.css`, parte `[data-ui='highlight']` ou `[data-part='match']` global), consumido por `Combobox`, `Select` com filtro, `Listbox` com filtro e `Menu` com busca (R6):
   - `font-weight: inherit`. `padding: 0`. `border-radius: 0`. `letter-spacing: inherit`.
@@ -340,7 +340,7 @@ Localização: `packages/styles/src/drawer/drawer.css`.
 
 ## ListItem
 
-Localização: `packages/styles/src/list-item/list-item.css`, `docs/superpowers/specs/2026-09-04-list-and-list-item-self-assessment.md`.
+Localização: `packages/styles/src/list-item/list-item.css`, `docs/history/designs/2026-09-04-list-and-list-item-self-assessment.md`.
 
 Componente inteiro requer passada de polimento. Ordem de execução: LI1 → LI2 → LI3.
 
@@ -390,7 +390,7 @@ Localização: `packages/styles/src/listbox/listbox.css`.
 
 ## Stepper
 
-Localização: `packages/styles/src/stepper/stepper.css`, `docs/superpowers/specs/2026-09-03-breadcrumb-pagination-stepper-self-assessment.md`.
+Localização: `packages/styles/src/stepper/stepper.css`, `docs/history/designs/2026-09-03-breadcrumb-pagination-stepper-self-assessment.md`.
 
 - [x] **ST1 — Verificação funcional.** Escrever ou completar testes de story cobrindo: navegação por clique em passo concluído, bloqueio de passo futuro quando `linear`, estados `completed`/`current`/`upcoming`/`error`/`disabled`, teclado (`ArrowLeft`/`ArrowRight`/`Home`/`End`), `aria-current="step"` no passo atual. Ambos os frameworks.
 - [x] **ST3 — Itens transbordam o palco a 240px.** Observado por `tools/harness/audit.mjs` durante G4, sem alteração de layout: nas cenas `content` (155px em 120px), `statuses` (191px em 144px), `panels` e `placement` (335px em 240px), `li[data-part='item']` transborda nos três esquemas. Esperado: mesma regra de `#Alert:2` — `min-inline-size: 0` na coluna e quebra do rótulo dentro da largura do palco.
@@ -460,7 +460,7 @@ Todos os itens deste documento estão `[x]`. Nenhum ficou `[!]`.
 
 O que a revisão registrou ao longo das suas sessões e continua aberto — nada disto é um item, e nada disto é resolvível por esta máquina:
 
-- **O Storybook Angular (porta 6007) não respondeu em nenhuma sessão.** Toda a verificação Angular da revisão veio de spec, contrato e `turbo run verify`; nenhuma página Angular foi vista. Registrado em 48 entradas de `docs/implementation-review-log.md`.
+- **O Storybook Angular (porta 6007) não respondeu em nenhuma sessão.** Toda a verificação Angular da revisão veio de spec, contrato e `turbo run verify`; nenhuma página Angular foi vista. Registrado em 48 entradas de `docs/process/implementation-review-log.md`.
 - **O servidor do Storybook React (porta 6006) serve uma transformação em cache de `packages/styles`.** Medido em DL1 e outra vez em DR5: `?direct` devolve o texto em disco e o módulo que a página importa devolve o anterior. Enquanto o servidor não for reiniciado, a página de referência mostra a folha antiga; as imagens novas da revisão foram verificadas no harness, que é construído a partir do ficheiro. Reiniciar é do revisor.
-- **Os dois Storybooks precisam de reinício para ver o que esta revisão acrescentou:** dois glifos novos em `packages/themes/default` (`--slotted-icon-maximize`, `--slotted-icon-minimize`), a parte `[data-part='fullscreen']` de `Dialog` e a folha nova de `Drawer`.
+- **Os dois Storybooks precisam de reinício para ver o que esta revisão acrescentou:** dois glifos novos em `packages/theme-default` (`--slotted-icon-maximize`, `--slotted-icon-minimize`), a parte `[data-part='fullscreen']` de `Dialog` e a folha nova de `Drawer`.
 - **Nada foi verificado com leitor de ecrã, com um ecrã real ou com um dispositivo de toque.** Os nomes acessíveis, a ordem de foco e os alvos de ponteiro estão medidos por teste e por geometria; nenhum deles está ouvido.

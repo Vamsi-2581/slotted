@@ -1,8 +1,7 @@
 packages:
   - apps/*
-  - apps/demos/*
+  - demos/*/*
   - packages/*
-  - packages/themes/*
   - tools/*
 allowBuilds:
   '@parcel/watcher': true

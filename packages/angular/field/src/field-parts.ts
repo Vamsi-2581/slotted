@@ -67,7 +67,7 @@ export class SlFieldLabel {
  *
  * Controls this library ships read the field themselves and need no directive,
  * which is what
- * `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md` decides.
+ * `docs/history/designs/2026-08-31-field-aware-controls-design.md` decides.
  * This exists for the two cases that cannot: a plain native element, and a
  * component written before this library.
  *

@@ -3,7 +3,7 @@
   "family": "tree",
   "ui": "tree",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/treeview/",
-  "patternStatus": "Read on 2026-09-09 from the rendered pattern page and from the File Directory Treeview (computed properties) and Navigation Treeview examples. The optional keys and both multi-select interaction models are transcribed from the page source rather than from its summary, so the recommended model — no modifier held while moving — is the one implemented. The keyboard table, the roles and the properties are below, and the itemised comparison is in docs/superpowers/specs/2026-09-09-tree-design.md §6 and §7.",
+  "patternStatus": "Read on 2026-09-09 from the rendered pattern page and from the File Directory Treeview (computed properties) and Navigation Treeview examples. The optional keys and both multi-select interaction models are transcribed from the page source rather than from its summary, so the recommended model — no modifier held while moving — is the one implemented. The keyboard table, the roles and the properties are below, and the itemised comparison is in docs/history/designs/2026-09-09-tree-design.md §6 and §7.",
   "roles": {
     "root": "presentation",
     "canvas": "tree",

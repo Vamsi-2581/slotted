@@ -1,13 +1,13 @@
 # Nexora Operations — simulated backend plan
 
-Source of truth: `/home/dreco/dev/slotted/docs/nexora-op-demo-domain.md` (Part II normative, sections 52–92).
-Location: `apps/demos/nexora-operations/` (private workspace package `@slotted/demo-nexora-operations`).
+Source of truth: `/home/dreco/dev/slotted/demos/nexora/domain.md` (Part II normative, sections 52–92).
+Location: `demos/nexora/backend/` (private workspace package `@slotted/demo-nexora-backend`).
 Consumer: the future React client under the same directory. The client calls the typed in-process API; no HTTP transport in V1.
 
 Layout:
 
 ```
-apps/demos/nexora-operations/
+demos/nexora/backend/
   backend/domain/   types, ids, business numbers, money, quantity, time, permissions, roles, personas, errors
   backend/data/     PRNG, distributions, vocabularies, seed (tenant, master, transactions, curated, edge cases), scenarios, demo clock
   backend/api/      store, query engine, list/detail/search, commands, projections, latency profile
@@ -27,5 +27,5 @@ Scale: canonical counts from section 75. Operational tier (trailing 120 days + a
 - [x] T7 Store + API: query engine, list/detail/search for every GET endpoint, session/persona, authorization, errors, latency, idempotency, concurrency.
 - [x] T8 Commands: section 79 operation catalog.
 - [x] T9 Scenarios, demo clock advance, reset. IndexedDB persistence deferred: the in-memory seed rebuilds deterministically in ≈3 s (`light`) / ≈11 s (`demo`).
-- [x] T10 README for the client + `pnpm --filter @slotted/demo-nexora-operations test` green.
+- [x] T10 README for the client + `pnpm --filter @slotted/demo-nexora-backend test` green.
 - [x] T11 Remove `tools/nexora-benchmark` and its root scripts (evidence remains in git history).

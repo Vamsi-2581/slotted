@@ -30,7 +30,7 @@ test('cites the pattern it implements rather than claiming to have checked it', 
  * The family is the separator and holds no panels. Three parts, one of them the
  * root: a bar, two hairlines and the grip between them.
  *
- * The decision is recorded in `docs/superpowers/specs/2026-09-11-splitter-design.md`
+ * The decision is recorded in `docs/history/designs/2026-09-11-splitter-design.md`
  * section 1, against seven of seven surveyed implementations. This test is what
  * keeps a later pass from quietly growing a `panel` part and turning the family
  * into the layout engine it declined to be.

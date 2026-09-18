@@ -13,7 +13,7 @@
  * Usage:
  *   node scripts/generate-icon-glyphs.mjs [--theme <package dir>] [--check]
  *
- * `--theme` defaults to `packages/themes/default`. `--check` writes nothing and
+ * `--theme` defaults to `packages/theme-default`. `--check` writes nothing and
  * exits 1 when the theme's glyphs differ from the manifest's.
  */
 import { readFile, writeFile } from 'node:fs/promises';
@@ -28,7 +28,7 @@ export const GLYPH_PREFIX = '--slotted-icon-';
 export const DEFAULT_STROKE_WIDTH = 2;
 
 const ROOT = new URL('..', import.meta.url);
-const DEFAULT_THEME = 'packages/themes/default';
+const DEFAULT_THEME = 'packages/theme-default';
 
 /** `circle-question-mark` → `CircleQuestionMark`, the key the `lucide` map uses. */
 function pascal(name) {

@@ -3,7 +3,7 @@
   "family": "time-picker",
   "ui": "time-picker",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/listbox/",
-  "patternStatus": "Read on 2026-09-10 and transcribed key by key into docs/superpowers/specs/2026-09-10-time-design.md §5. The pattern's rule for where focus lands when a listbox receives it — the selected option, or the first when none is selected — is taken whole; the optional Home, End and type-ahead keys are all bound because the pattern recommends them above seven options and this list holds ninety-six; and the grouped-options rules are taken for the hour headings, which the pattern names as a group inside the listbox carrying an accessible name of its own.",
+  "patternStatus": "Read on 2026-09-10 and transcribed key by key into docs/history/designs/2026-09-10-time-design.md §5. The pattern's rule for where focus lands when a listbox receives it — the selected option, or the first when none is selected — is taken whole; the optional Home, End and type-ahead keys are all bound because the pattern recommends them above seven options and this list holds ninety-six; and the grouped-options rules are taken for the hour headings, which the pattern names as a group inside the listbox carrying an accessible name of its own.",
   "controlPart": "control",
   "rootRole": null,
   "contentRole": "listbox",

@@ -71,7 +71,7 @@
      * with the rows around it. The box's inset comes from the space scale,
      * which does not vary by density — the cost `card` accepted for the same
      * reason, and recorded in
-     * `docs/superpowers/specs/2026-09-02-alert-family-design.md`: at `dense`
+     * `docs/history/designs/2026-09-02-alert-family-design.md`: at `dense`
      * the box keeps its inset while the type inside it shrinks.
      *
      * `--_font-size` is the *title's* size and the root's own, and the
@@ -271,7 +271,7 @@
   /* ── Variant: the three ways one tone is painted ───────────────────────
    *
    * The words take the tone's own `text` role in all three, because that is
-   * the one pair `packages/themes/default/test/contrast.test.mjs` measures
+   * the one pair `packages/theme-default/test/contrast.test.mjs` measures
    * against these grounds: the tone's text on the tone's surface, and the
    * tone's text on each of the three neutral surfaces. Painting a tinted
    * ground with `--slotted-text` would be an unheld ratio, and the theme's own

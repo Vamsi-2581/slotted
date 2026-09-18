@@ -3,9 +3,9 @@
   "family": "side-navigation",
   "ui": "side-navigation",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/examples/disclosure-navigation-hybrid/",
-  "patternStatus": "Read on 2026-09-15 from the rendered example page, with the plain Disclosure Navigation Menu example and the Navigation Treeview example beside it. The treeview example's own caution — that the tree role requires functionality a site's navigation does not need, and that the disclosure pattern is better suited — is why no tree role is written here. The keyboard table transcribes the hybrid example's Keyboard Support section, optional keys included; the itemised comparison is in docs/superpowers/specs/2026-09-15-side-navigation-design.md §4.",
-  "design": "docs/superpowers/specs/2026-09-15-side-navigation-design.md",
-  "inventory": "docs/superpowers/specs/2026-09-15-side-navigation-capability-inventory.md",
+  "patternStatus": "Read on 2026-09-15 from the rendered example page, with the plain Disclosure Navigation Menu example and the Navigation Treeview example beside it. The treeview example's own caution — that the tree role requires functionality a site's navigation does not need, and that the disclosure pattern is better suited — is why no tree role is written here. The keyboard table transcribes the hybrid example's Keyboard Support section, optional keys included; the itemised comparison is in docs/history/designs/2026-09-15-side-navigation-design.md §4.",
+  "design": "docs/history/designs/2026-09-15-side-navigation-design.md",
+  "inventory": "docs/history/designs/2026-09-15-side-navigation-capability-inventory.md",
   "composes": [
     "disclosure",
     "portal",
@@ -230,7 +230,7 @@
     },
     "reorder": {
       "deferTo": "a reopening after drag-and-drop",
-      "reason": "Pinned destinations a reader reorders — Slack's sidebar sections, Linear's favourites — compose @slotted/core/drag over the items, the way listbox, tree and tags-input are promised the same reopening in docs/build-order.md"
+      "reason": "Pinned destinations a reader reorders — Slack's sidebar sections, Linear's favourites — compose @slotted/core/drag over the items, the way listbox, tree and tags-input are promised the same reopening in docs/process/build-order.md"
     },
     "filter": {
       "reason": "Slack and Notion search the column. A text-field above the list and a consumer that renders the items it keeps is the composition; the family draws whatever items it is given and never owns the set"

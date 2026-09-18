@@ -34,7 +34,7 @@ test('names the identifier a consumer selects the family by', () => {
 
 /**
  * Two datetime fields, the range calendar, and a list per end — the scope
- * line in `docs/build-order.md`, wave 9. Nothing of the three is drawn again.
+ * line in `docs/process/build-order.md`, wave 9. Nothing of the three is drawn again.
  */
 test('composes one datetime field and one calendar instead of drawing them again', () => {
   assert.deepEqual(contract.composes, ['datetime-field', 'calendar']);

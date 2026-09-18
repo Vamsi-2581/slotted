@@ -3,8 +3,8 @@
 ## Plano
 
 Skill `/component`, modo `create`. Desenho em
-`docs/superpowers/specs/2026-09-16-data-grid-design.md`; inventário em
-`docs/superpowers/specs/2026-09-16-data-grid-capability-inventory.md`.
+`docs/history/designs/2026-09-16-data-grid-design.md`; inventário em
+`docs/history/designs/2026-09-16-data-grid-capability-inventory.md`.
 Progresso desta família fica neste arquivo (não em `current.md`, que outra
 sessão pode escrever).
 
@@ -49,7 +49,7 @@ sessão pode escrever).
    `tag`/`text-field`/`tabs`, tokens `Geist`, React `calendar`/`table`,
    Angular `table`, bundle `context-menu`). Angular `ng build` prod pass.
 10. Passo 13: autoavaliação
-    (`docs/superpowers/specs/2026-09-16-data-grid-self-assessment.md`),
+    (`docs/history/designs/2026-09-16-data-grid-self-assessment.md`),
     build-order (entregue + três reaberturas), tema `funnel`, snippets
     literais nos docs (commits `0a7ac80`, `954d4af`, `13698c7`).
 
@@ -84,7 +84,7 @@ sessão pode escrever).
     56 px; `--slotted-data-grid-drop-scroll` como propriedade de runtime.
 
 14. Extensões (desenho em
-    `docs/superpowers/specs/2026-09-17-data-grid-extensions-design.md`),
+    `docs/history/designs/2026-09-17-data-grid-extensions-design.md`),
     onda 1, fatia 1 (commits `10deddd`, `458d516`, `a9b6780`): autofit total
     num só pedido e medido por Range; `highlightChanges` com cena `realtime`;
     vista persistida (`core/grid/view.ts`, `usePersistedGridView`,
@@ -140,7 +140,7 @@ com combinador.
 Branch `review/implementation-pass-1`. Commits desta sessão: `84a9984`,
 `d8e995a`, `f9ac5d9`, `e199d0f`, `9a6acf9`, `668a137`, `2d2a472`, `3adb5e1`,
 `709513e`, `8b9524b`. Tema `funnel` commitado em `0a7ac80` (a sessão de `image` já tinha
-commitado `image-off`). Nada da família fica por commitar; `docs/build-order.md`
+commitado `image-off`). Nada da família fica por commitar; `docs/process/build-order.md`
 mantém hunks de outras sessões (`dialog`, `prose`, `page-header`,
 `table-of-contents`, `detail-panel`).
 
@@ -191,7 +191,7 @@ não resolve; ficheiro de outra família, por reportar.
   após o commit); identificar e fundir.
 - Select com `width="content"` e itens curtos (Yes/No) abre a 69 px; decidir
   se a família `select` merece um mínimo de medida para listas.
-- Autoavaliação e `docs/build-order.md` ainda descrevem o estado anterior às
+- Autoavaliação e `docs/process/build-order.md` ainda descrevem o estado anterior às
   rondas de refino (e.g. `set` como `select multiple`); atualizar.
 - A página Angular (6007) continua por ler renderizada.
 
@@ -199,8 +199,8 @@ não resolve; ficheiro de outra família, por reportar.
 
 Ler o Storybook Angular (6007) cena a cena quando o `filter-bar` da outra
 lane compilar; medir `applyQuery` a 10 Hz com 10k linhas na cena
-`realtime`; atualizar `docs/superpowers/specs/2026-09-16-data-grid-self-assessment.md`
-e `docs/build-order.md` com as extensões.
+`realtime`; atualizar `docs/history/designs/2026-09-16-data-grid-self-assessment.md`
+e `docs/process/build-order.md` com as extensões.
 
 
 Peça 4: escrever `packages/core/src/grid/export.ts` com `toCsv(rows, columns,

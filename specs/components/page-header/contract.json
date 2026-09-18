@@ -5,8 +5,8 @@
   "pattern": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
   "togglePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/",
   "pinPattern": "https://www.w3.org/WAI/ARIA/apg/patterns/button/",
-  "design": "docs/superpowers/specs/2026-09-10-page-design.md",
-  "inventory": "docs/superpowers/specs/2026-09-10-page-capability-inventory.md",
+  "design": "docs/history/designs/2026-09-10-page-design.md",
+  "inventory": "docs/history/designs/2026-09-10-page-capability-inventory.md",
   "reference": "SAP Fiori Dynamic Page: sap.f.DynamicPage, sap.f.DynamicPageTitle, sap.f.DynamicPageHeader, read in the OpenUI5 sources",
   "composes": ["container", "breadcrumb", "toolbar", "tabs", "typography"],
   "anatomy": {

@@ -17,7 +17,7 @@ export type DateFieldVariant = 'outline' | 'subtle' | 'plain';
  * One value today, and it is an axis rather than a silence: a second calendar
  * system is a second arithmetic, and declaring the axis now is what keeps its
  * arrival from being a contract break. See
- * `docs/superpowers/specs/2026-09-09-date-capability-inventory.md` §2.
+ * `docs/history/designs/2026-09-09-date-capability-inventory.md` §2.
  */
 export type DateFieldCalendar = 'gregory';
 

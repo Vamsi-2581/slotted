@@ -3,7 +3,7 @@
   "family": "datetime-picker",
   "ui": "datetime-picker",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-datepicker/",
-  "patternStatus": "Read on 2026-09-10, together with the listbox and grid patterns it links, and transcribed into docs/superpowers/specs/2026-09-10-datetime-design.md §3. The example gives its popup role=dialog and its trigger aria-haspopup=dialog, returns focus to the trigger on Escape, and states the Tab rule this family needs twice over: only one element of a calendar grid is in the Tab sequence, so a dialog holding a grid and a listbox is two Tab stops rather than forty-three.",
+  "patternStatus": "Read on 2026-09-10, together with the listbox and grid patterns it links, and transcribed into docs/history/designs/2026-09-10-datetime-design.md §3. The example gives its popup role=dialog and its trigger aria-haspopup=dialog, returns focus to the trigger on Escape, and states the Tab rule this family needs twice over: only one element of a calendar grid is in the Tab sequence, so a dialog holding a grid and a listbox is two Tab stops rather than forty-three.",
   "controlPart": "control",
   "rootRole": null,
   "contentRole": "dialog",

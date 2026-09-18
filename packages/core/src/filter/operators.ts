@@ -8,7 +8,7 @@
  * argument that put `sort` in the shared contract schema.
  *
  * Every operator here is shipped by two or more of the implementations surveyed
- * in `docs/superpowers/specs/2026-09-10-table-filter-capability-inventory.md`.
+ * in `docs/history/designs/2026-09-10-table-filter-capability-inventory.md`.
  * Nothing here touches the DOM or a framework.
  */
 

@@ -2,7 +2,7 @@
 
 ## Scope
 
-`PROJECT-PRD.md` is product context, not an automatic backlog. Implement only the requested task and preserve unrelated user work.
+`docs/product/prd.md` is product context, not an automatic backlog. Implement only the requested task and preserve unrelated user work.
 
 React and Angular must remain idiomatic to their frameworks. Share specifications and contracts when useful; do not force shared implementation without demonstrated need.
 
@@ -34,7 +34,7 @@ Do not use Playwright for exploratory browsing, generic UI inspection, broad scr
 
 ## Demo Feedback Loop
 
-`apps/demos/*` consume the library as published packages (`docs`: `CONTRIBUTING.md` › "The beta channel"). A problem seen in a demo is triaged with the `demo-triage` skill before any change: package defect → fixed in the family with a test, then `pnpm demo:refresh`; demo mistake → fixed in the demo. Both are recorded in `apps/demos/<app>/LIBRARY-FEEDBACK.md`, the ledger the public-API review reads. A package defect is never worked around inside a demo.
+`demos/*` consume the library as published packages (`docs`: `CONTRIBUTING.md` › "The beta channel"). A problem seen in a demo is triaged with the `demo-triage` skill before any change: package defect → fixed in the family with a test, then `pnpm demo:refresh`; demo mistake → fixed in the demo. Both are recorded in `demos/<app>/LIBRARY-FEEDBACK.md`, the ledger the public-API review reads. A package defect is never worked around inside a demo.
 
 ## Restraint
 

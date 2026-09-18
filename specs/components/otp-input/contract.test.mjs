@@ -27,7 +27,7 @@ test('names the identifier a consumer selects the family by', () => {
  * render one input per box and pay for it with N tab stops, no real label and
  * an SMS autofill that only works on a single field; input-otp is the
  * surveyed implementation that made the other choice, and the scope in
- * `docs/build-order.md` made it too.
+ * `docs/process/build-order.md` made it too.
  */
 test('draws one control and paints the boxes over it', () => {
   assert.deepEqual(Object.keys(contract.members), ['otpInput']);
@@ -71,7 +71,7 @@ test('reports completion and rejected input as events, not as state', () => {
 });
 
 /**
- * The mechanism `docs/superpowers/specs/2026-08-31-field-aware-controls-design.md`
+ * The mechanism `docs/history/designs/2026-08-31-field-aware-controls-design.md`
  * fixed. `aria-required` never becomes the native `required`, which would
  * engage browser constraint validation and change submit behaviour.
  */

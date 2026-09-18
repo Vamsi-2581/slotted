@@ -4,7 +4,7 @@ Read before every `/component` invocation. It holds what does not change between
 families. It directs judgement; it does not replace it. Where it decides
 something, it says why, and a better reason beats it.
 
-`docs/build-order.md` says what each family delivers, and which invocations
+`docs/process/build-order.md` says what each family delivers, and which invocations
 reopen a family already delivered. If the invoked family has no scope written
 there yet, derive it from its section in `docs/component-features.md`, write it
 in as part of the work, and carry on. The scopes of the families delivered in
@@ -84,10 +84,10 @@ A defect in shared tooling is fixed as part of the work, in its own commit,
 before the family that found it. Reported and left in place, the next family
 inherits it.
 
-`docs/BUILD-LOG.md` is not a diary, and writing one entry per family is how it
+`docs/history/build-log.md` is not a diary, and writing one entry per family is how it
 grew past four thousand lines. A decision that binds another family belongs in
 _Decisions already taken_ below; a pending item belongs in
-`docs/build-order.md` — in the family's scope when it is not built yet, in
+`docs/process/build-order.md` — in the family's scope when it is not built yet, in
 _Reaberturas prometidas por escrito_ when it is; a convention belongs in the
 comment of the test that enforces it. What is left for the log is a defect with a lesson, or a debt
 nobody else owns — and nothing at all is a valid entry.
@@ -139,7 +139,7 @@ other families stand on. Justify it at the gate before writing it.
   the only runtime dependency of `@slotted/core`, imported by `src/positioner`
   alone and marked external in the build. No type or option name of it appears
   in any public surface, which is what keeps CSS Anchor Positioning available as
-  a replacement. `PROJECT-PRD.md` §48 open question 8 is answered yes for the DOM
+  a replacement. `docs/product/prd.md` §48 open question 8 is answered yes for the DOM
   layer; its React and Angular packages are not adopted.
 - **A family that changes its own tracks with a container query needs two
   elements.** `container-type: inline-size` makes an element a query container
@@ -327,7 +327,7 @@ start` on the grid is the fix, and `collapsible` never met it because its
   pixels at 1280 and 1030 at 1920, and a grid of two columns halves it: every
   scene of `top-navigation` — a bar whose widest step is 1024 — was squeezed
   into a picture the family never paints. `.slotted-demo-room[data-room]` in
-  `packages/storybook-workbench` gives a scene `desktop` (1024), `laptop`
+  `tools/storybook-workbench` gives a scene `desktop` (1024), `laptop`
   (900), `tablet` (640) or `phone` (375) pixels, one room per column, and
   scrolls sideways when the column is narrower than the room. The room's
   child measures the room's width as content box, so a container query inside
@@ -337,7 +337,7 @@ start` on the grid is the fix, and `collapsible` never met it because its
 ## Working beside another session
 
 Another session may be building a different family in this same worktree at the
-same time; `docs/build-schedule.md` says which run together. What breaks here is
+same time; `docs/process/build-schedule.md` says which run together. What breaks here is
 not recoverable from the index, so:
 
 1. **Write only your own family's files**, plus the shared registries below.
@@ -346,7 +346,7 @@ not recoverable from the index, so:
    writing: `packages/react/package.json`, `packages/react/src/index.ts`,
    `packages/react/vite.config.ts`, the path mapping in
    `packages/angular/tsconfig.base.json`, `packages/styles/package.json`,
-   `docs/BUILD-LOG.md` and `docs/build-order.md`. Insert your entry; reorder and
+   `docs/history/build-log.md` and `docs/process/build-order.md`. Insert your entry; reorder and
    reformat nothing.
 3. **Keep git narrow.** Stage explicit paths. No `git add -A`, `commit -a`,
    `checkout`, `restore`, `stash` or `clean`. Format with

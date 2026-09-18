@@ -5,7 +5,7 @@ import { Directive } from '@angular/core';
  *
  * A `TemplateRef` rather than a render function, because that is what Angular
  * has where React has a function — and it is the asymmetry
- * `docs/superpowers/specs/2026-09-04-select-and-combobox-design.md` §11 records
+ * `docs/history/designs/2026-09-04-select-and-combobox-design.md` §11 records
  * rather than levels away. The context carries the values and the labels the
  * family could resolve, so a consumer who already holds the records does not
  * resolve them twice:

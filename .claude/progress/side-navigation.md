@@ -5,13 +5,13 @@ mesma worktree.
 
 ## Plano
 
-`docs/build-schedule.md`, rodada 17, bloco `side-navigation`. Skill
+`docs/process/build-schedule.md`, rodada 17, bloco `side-navigation`. Skill
 `/component`, modo `novo`.
 
 ## Tarefas concluídas
 
-1. Inventário: `docs/superpowers/specs/2026-09-15-side-navigation-capability-inventory.md`.
-2. Desenho: `docs/superpowers/specs/2026-09-15-side-navigation-design.md`.
+1. Inventário: `docs/history/designs/2026-09-15-side-navigation-capability-inventory.md`.
+2. Desenho: `docs/history/designs/2026-09-15-side-navigation-design.md`.
 3. Contrato e teste: `specs/components/side-navigation/` (14 testes passam).
 4. Folha de estilo, tokens, harness e teste de estilo:
    `packages/styles/src/side-navigation/`.
@@ -85,9 +85,9 @@ Após o gate de release: passo 15, commits por passo (ordem em «Commits»).
 1. `packages/core/src/text/*`, `packages/core/package.json`, `packages/core/vite.config.ts` — módulo.
 2. `packages/styles/src/overlay-motion.test.mjs` — registo do flyout.
 3. `packages/react/src/app-shell/app-shell.tsx`, `index.ts` — `useAppShellIfPresent`.
-4. `specs/components/side-navigation/*`, `docs/superpowers/specs/2026-09-15-side-navigation-*.md`, `packages/styles/src/side-navigation/*`, `packages/styles/package.json`, `packages/react/src/side-navigation/*`, `packages/react/src/index.ts`, `packages/react/package.json`, `packages/react/vite.config.ts`, `packages/angular/side-navigation/*` — a família.
+4. `specs/components/side-navigation/*`, `docs/history/designs/2026-09-15-side-navigation-*.md`, `packages/styles/src/side-navigation/*`, `packages/styles/package.json`, `packages/react/src/side-navigation/*`, `packages/react/src/index.ts`, `packages/react/package.json`, `packages/react/vite.config.ts`, `packages/angular/side-navigation/*` — a família.
 5. `packages/react/src/app-shell/app-shell-demo/*`, `packages/angular/app-shell/src/app-shell.stories.ts` — demonstrações.
-6. `docs/build-order.md` (pendente: mover `side-navigation` para entregue), `.claude/progress/side-navigation.md`.
+6. `docs/process/build-order.md` (pendente: mover `side-navigation` para entregue), `.claude/progress/side-navigation.md`.
 
 Antiga «Após o gate: passo 10.» Criar `packages/react/src/side-navigation/` a partir de
 `packages/react/src/collapsible/` (defaults, types, root, parts, index) e

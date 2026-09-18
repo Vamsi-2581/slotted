@@ -71,7 +71,7 @@ Follow these steps in order. Replace `<family>` with the invoked family name. Wh
    Then read:
 
 - the section of `docs/component-features.md` that covers this family, and sections 2 and 18;
-- `references/frameworks.md` and the family-specific design doc in `docs/superpowers/specs/` if it exists.
+- `references/frameworks.md` and the family-specific design doc in `docs/history/designs/` if it exists.
 
 Only when the compact brief and these files leave an unresolved question, read
 `docs/token-foundation.md`, `docs/state-and-events.md`, `references/rubric.md`,
@@ -89,11 +89,11 @@ Do not inspect the family implementation first.
 
    The cost of a break is written, not avoided: record what changed and how a consumer moves, as `docs/component-features.md` section 18 requires of a contract break. That note is the price of the change, and it is cheaper than carrying a shape the family has outgrown.
 
-3. **Survey the field, then inventory the capabilities.** Follow `references/capability.md`. Produce the inventory before any design or code, in four named sections, in this order: **Surveyed**, **Table stakes**, **Differentiators**, **Gaps**. Read `PROJECT-PRD.md` and weigh every item the invocation named inside the same inventory.
+3. **Survey the field, then inventory the capabilities.** Follow `references/capability.md`. Produce the inventory before any design or code, in four named sections, in this order: **Surveyed**, **Table stakes**, **Differentiators**, **Gaps**. Read `docs/product/prd.md` and weigh every item the invocation named inside the same inventory.
 
    The inventory is produced in both modes, from the field rather than from the family. In rebuild mode, produce it before reading the current implementation, then put the two side by side and name the delta: what shipped, what the field ships, and what this family will ship. A capability the family already has is not automatically kept — it is inventoried like every other, and dropped if the field and this library's own context say it was wrong.
 
-   The scope paragraph in `docs/build-order.md` is a floor, not a ceiling. A capability two or more surveyed implementations ship is adopted or adapted; declining one requires naming the family that owns it instead, or the two or three lines of consumer code that compose it. "Not needed yet" is not a reason, and neither is a shared tool that cannot express it.
+   The scope paragraph in `docs/process/build-order.md` is a floor, not a ceiling. A capability two or more surveyed implementations ship is adopted or adapted; declining one requires naming the family that owns it instead, or the two or three lines of consumer code that compose it. "Not needed yet" is not a reason, and neither is a shared tool that cannot express it.
 
    Present the inventory before writing code.
 
@@ -101,7 +101,7 @@ Do not inspect the family implementation first.
 
 5. **Design the family, and both bindings' ergonomics, before either is written.** Answer both integration tables in `references/frameworks.md` in writing — every line gets the place that answers it, or one sentence naming why this family does not need it. A blank line is an unanswered question, not a no.
 
-   When responsibility, anatomy, state ownership, composition, cross-framework behaviour, or a public API break needs a decision, write a design in `docs/superpowers/specs/` and proceed after recording the decision and rationale. A rebuild that changes any of those needs the document as much as a new family does; only a change that alters no decision skips it, and the integration tables are answered either way.
+   When responsibility, anatomy, state ownership, composition, cross-framework behaviour, or a public API break needs a decision, write a design in `docs/history/designs/` and proceed after recording the decision and rationale. A rebuild that changes any of those needs the document as much as a new family does; only a change that alters no decision skips it, and the integration tables are answered either way.
 
    Write the shortest document that records the decision and what it costs. The reader is the family that inherits the decision, not a reviewer being persuaded: a decision that outlives this family is worth a page, and one that does not is worth a paragraph in the contract or the stylesheet beside the rule it explains.
 
@@ -190,7 +190,7 @@ Do not inspect the family implementation first.
 
     It exits non-zero on an element collapsed to a sliver inside a wide stage, or on content overflowing the box that owns it — the two defects a screenshot can show and no offline test can see. `pagination` shipped with its root at zero pixels inside a 676-pixel stage and 171 pixels of spill, on a page that passed every test. A finding is a defect of this step.
 
-    A defect in the workbench is fixed in the workbench, with a test in `packages/storybook-workbench`, before the family's own work continues — as step 6 requires of every shared tool.
+    A defect in the workbench is fixed in the workbench, with a test in `tools/storybook-workbench`, before the family's own work continues — as step 6 requires of every shared tool.
 
 12. **Run the automatic gates.** Format every changed file, then require:
 
@@ -211,4 +211,4 @@ Run only the minimum verification for the current cycle and do not add extra ver
 
 15. **Commit after the release gate.** Make one commit per step of substance, name every staged file explicitly, and include only this family's work. Do not stage a directory.
 
-    `docs/BUILD-LOG.md` is not a diary. A decision that binds another family goes to the briefing's _Decisions already taken_; a pending item goes to `docs/build-order.md` — the family's scope when it is not built yet, _Reaberturas prometidas por escrito_ when it is; a convention goes to the comment of the test that enforces it. Write in the log only what a later family must know and none of those three places can hold — a defect with a lesson, or a debt nobody else owns.
+    `docs/history/build-log.md` is not a diary. A decision that binds another family goes to the briefing's _Decisions already taken_; a pending item goes to `docs/process/build-order.md` — the family's scope when it is not built yet, _Reaberturas prometidas por escrito_ when it is; a convention goes to the comment of the test that enforces it. Write in the log only what a later family must know and none of those three places can hold — a defect with a lesson, or a debt nobody else owns.

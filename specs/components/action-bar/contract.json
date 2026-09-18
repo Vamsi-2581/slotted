@@ -3,8 +3,8 @@
   "family": "action-bar",
   "ui": "action-bar",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/",
-  "inventory": "docs/superpowers/specs/2026-09-13-action-bar-capability-inventory.md",
-  "design": "docs/superpowers/specs/2026-09-13-action-bar-design.md",
+  "inventory": "docs/history/designs/2026-09-13-action-bar-capability-inventory.md",
+  "design": "docs/history/designs/2026-09-13-action-bar-design.md",
   "patternDeparture": {
     "from": "roving focus, and the toolbar role with it",
     "reason": "The controls of an action bar are the page's own form actions. A reader walking a form with Tab expects to reach Cancel and then Save; roving focus would make the whole bar one tab stop and put Save behind an arrow key that announces nothing. Primer, Fluent and the APG's own example bind the arrows because their bars are strips of icon buttons in an editor, where ten controls are exactly what nobody wants to walk through one at a time.",

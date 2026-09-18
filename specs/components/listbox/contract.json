@@ -3,7 +3,7 @@
   "family": "listbox",
   "ui": "listbox",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/listbox/",
-  "patternStatus": "Read on 2026-09-04 from the rendered page and from content/patterns/listbox/listbox-pattern.html in w3c/aria-practices, so the optional and alternative keyboard models are transcribed from the source rather than from the page's summary. The keyboard table, the roles and the properties are below, and the itemised comparison is in docs/superpowers/specs/2026-09-04-listbox-design.md §4.",
+  "patternStatus": "Read on 2026-09-04 from the rendered page and from content/patterns/listbox/listbox-pattern.html in w3c/aria-practices, so the optional and alternative keyboard models are transcribed from the source rather than from the page's summary. The keyboard table, the roles and the properties are below, and the itemised comparison is in docs/history/designs/2026-09-04-listbox-design.md §4.",
   "roles": {
     "root": "listbox",
     "canvas": "presentation",
@@ -71,7 +71,7 @@
     "itemSize": "required whenever virtual is set, rather than optional. A window over rows whose height depends on how their own text wrapped is the measured variant the engine deferred, and accepting it silently would produce a list that drifts further from its canvas with every row.",
     "sections": "With groups the family builds createRowMetrics over the row list, because a group label is not an option's height. Without them it passes itemSize and the engine keeps its two multiplications.",
     "placement": "transform: translateY on a positioned wrapper inside the canvas, so no option carries a layout offset of its own and the option subgrid survives.",
-    "reason": "docs/component-features.md §2.10: virtualisation is an optional capability of a collection and not a parallel component. docs/build-order.md wave 6 retires virtual-list for it, and this family is the engine's first caller that windows and selects at the same time."
+    "reason": "docs/component-features.md §2.10: virtualisation is an optional capability of a collection and not a parallel component. docs/process/build-order.md wave 6 retires virtual-list for it, and this family is the engine's first caller that windows and selects at the same time."
   },
   "incremental": {
     "request": "onLoadMore",

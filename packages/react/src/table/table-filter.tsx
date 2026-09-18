@@ -635,7 +635,7 @@ export function TableTimeFilter(props: TableTimeFilterProps) {
              is unchanged. A pair whose start is later than its end is the
              overnight window to the engine and `order` to the picker; the
              pair reaches the descriptor either way, and the picker's `wrap`,
-             pending in `docs/build-order.md`, is what lifts the mark. No
+             pending in `docs/process/build-order.md`, is what lifts the mark. No
              `applyOnEnter`: the frame is a button, and `Enter` on it opens
              the picker. */
           <TimeRangePicker

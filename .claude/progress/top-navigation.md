@@ -2,16 +2,16 @@
 
 ## Plano
 
-`docs/build-order.md`, onda 9, linha `top-navigation`. Skill `/component`,
+`docs/process/build-order.md`, onda 9, linha `top-navigation`. Skill `/component`,
 modo novo. Sem arquivo de plano.
 
 ## Tarefas concluídas
 
-1. Inventário: `docs/superpowers/specs/2026-09-15-top-navigation-capability-inventory.md`.
-2. Desenho: `docs/superpowers/specs/2026-09-15-top-navigation-design.md`.
+1. Inventário: `docs/history/designs/2026-09-15-top-navigation-capability-inventory.md`.
+2. Desenho: `docs/history/designs/2026-09-15-top-navigation-design.md`.
 3. Contrato e teste: `specs/components/top-navigation/{contract.json,contract.test.mjs}` (16/16).
 4. Glifo `--slotted-icon-bell`: `packages/tokens/src/contract.json`,
-   `packages/themes/default/src/glyphs.json`, `theme.json` (gerado por `pnpm build`),
+   `packages/theme-default/src/glyphs.json`, `theme.json` (gerado por `pnpm build`),
    `docs/token-foundation.md`, `scripts/verify-token-foundation.test.mjs`.
 5. Folha, tokens, harness, teste de estilo em `packages/styles/src/top-navigation/`;
    registo em `packages/styles/package.json`. Testes de estilo partilhados 174/174;
@@ -25,10 +25,10 @@ modo novo. Sem arquivo de plano.
 8. Angular: `packages/angular/top-navigation/` (defaults, root, parts,
    public-api, ng-package, spec 16/16, docs, stories, stories spec 4/4);
    `pnpm typecheck` (ng build) limpo.
-9. `docs/build-order.md` (entrega + reabertura de `app-shell`);
-   autoavaliação em `docs/superpowers/specs/2026-09-15-top-navigation-self-assessment.md`.
+9. `docs/process/build-order.md` (entrega + reabertura de `app-shell`);
+   autoavaliação em `docs/history/designs/2026-09-15-top-navigation-self-assessment.md`.
 10. Correção pós-revisão («tudo espremido»): primitiva `.slotted-demo-room`
-    em `packages/storybook-workbench/src/workbench.css` (+ teste); cenas em
+    em `tools/storybook-workbench/src/workbench.css` (+ teste); cenas em
     salas de largura declarada nos dois bindings; raiz sem `padding`
     (`--_edge`); `context` ao painel em 768; procura com piso 10rem;
     `aria-current='page'` pintado como corrente. Página React lida a 1920,
@@ -47,7 +47,7 @@ escuta) e a resposta do revisor; depois passo 15 (commits).
 ## Git
 
 Branch `review/implementation-pass-1`, HEAD `88b572a`. Nada no índice; nada
-commitado desta família. Outra sessão: `app-shell/*`, `avatar/*`, `apps/demos/`.
+commitado desta família. Outra sessão: `app-shell/*`, `avatar/*`, `demos/`.
 
 ## Ajustes de escopo
 
@@ -67,7 +67,7 @@ commitado desta família. Outra sessão: `app-shell/*`, `avatar/*`, `apps/demos/
 - `[data-ui='app-shell'] [data-part='brand']` é seletor descendente e alcança o
   `brand` desta família dentro do `banner`; contornado com
   `[data-ui='top-navigation'][data-part='root'] > [data-part='brand']`. Linha
-  de reabertura de `app-shell` a escrever em `docs/build-order.md`.
+  de reabertura de `app-shell` a escrever em `docs/process/build-order.md`.
 
 ## Próxima ação
 

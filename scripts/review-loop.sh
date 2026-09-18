@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Runs docs/autonomous-review-prompt.md in fresh Claude Code sessions until
-# docs/implementation-review.md has no `- [ ]` line left. Each session closes up
+# Runs docs/process/review-prompt.md in fresh Claude Code sessions until
+# docs/process/implementation-review.md has no `- [ ]` line left. Each session closes up
 # to REVIEW_ITEMS_PER_SESSION items and starts with an empty context, so state
 # lives only in the review file, the log file and git.
 #
@@ -39,9 +39,9 @@ RETRY_WAIT="${REVIEW_RETRY_WAIT:-900}"
 MAX_WAITS="${REVIEW_MAX_WAITS:-40}"
 STALL_LIMIT="${REVIEW_STALL_LIMIT:-2}"
 ITEM_ATTEMPTS="${REVIEW_ITEM_ATTEMPTS:-2}"
-PROMPT_FILE="docs/autonomous-review-prompt.md"
-REVIEW_FILE="docs/implementation-review.md"
-REVIEW_LOG="docs/implementation-review-log.md"
+PROMPT_FILE="docs/process/review-prompt.md"
+REVIEW_FILE="docs/process/implementation-review.md"
+REVIEW_LOG="docs/process/implementation-review-log.md"
 LOG_DIR="tools/harness/out/review-loop"
 mkdir -p "$LOG_DIR"
 

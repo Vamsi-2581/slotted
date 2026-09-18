@@ -39,7 +39,7 @@ contrato.
   `-inverse`, `--slotted-text-inverse`, `--slotted-border-strong` e
   `--slotted-scrim`.
 - Esquema `high-contrast`, cobrado em 7:1 para texto e 3:1 para borda e anel de
-  foco por `packages/themes/default/test/contrast.test.mjs`.
+  foco por `packages/theme-default/test/contrast.test.mjs`.
 - Densidade `dense`.
 - Bloco `@media (forced-colors: active)` emitido pelo tema, mapeando cada um dos
   64 tokens de esquema para uma cor de sistema. O contrato exige o mapeamento;
@@ -134,7 +134,7 @@ implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
   `role="img"`, ausência decide `aria-hidden`, e não há chave `decorative`.
   Stroke/fill recusado: a família não é dona da geometria. As seis máscaras
   `--slotted-icon-*` permanecem como estão, e a fronteira entre elas e a família
-  está em `docs/superpowers/specs/2026-09-01-icon-family-design.md`.
+  está em `docs/history/designs/2026-09-01-icon-family-design.md`.
 - **`visually-hidden`** — reconstrução. Conteúdo oculto visualmente permanece
   acessível sem alterar layout; a variante revelável no foco continua sendo uma
   regra só, não uma regra mais o seu desfazer.
@@ -168,7 +168,7 @@ implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
   aninhado, dentro de uma região com scroll e num container que não preenche a
   página. Padrões da aplicação em uma decisão só: `ContainerDefaultsProvider`
   no React e `provideContainerDefaults` no Angular. A decisão completa está em
-  `docs/superpowers/specs/2026-09-01-container-family-design.md`.
+  `docs/history/designs/2026-09-01-container-family-design.md`.
 
 - **`card`** — entregue. Um membro e sete partes: `root`, `media`, `header`,
   `actions`, `body`, `footer` e `link`. Superfície vem de
@@ -218,7 +218,7 @@ implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
   e estado `loading` que todos os controles seguem. `button-group` depois dele.
 - `progress-indicator` absorve `spinner`, `progress-bar` e `loading-bar` como
   recipes de uma família só (guia 17), e resolve a duplicação já registrada em
-  `docs/BUILD-LOG.md` entre o anel do Button e `spinner.css`. Remove três
+  `docs/history/build-log.md` entre o anel do Button e `spinner.css`. Remove três
   entradas de `specs/components/`. Os tokens
   `--slotted-button-loading-indicator-*` já saíram do contrato na reconstrução
   de `button`: o anel lê `--slotted-duration-loop-fast`,
@@ -427,8 +427,8 @@ implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
   inteiro. O grupo provê `size`, `shape` e `variant` aos membros pelo mecanismo
   de defaults do próprio `avatar`, e nunca `tone`.
 
-  Quebra de contrato registrada em `docs/BUILD-LOG.md` e no design em
-  `docs/superpowers/specs/2026-09-02-avatar-family-design.md`.
+  Quebra de contrato registrada em `docs/history/build-log.md` e no design em
+  `docs/history/designs/2026-09-02-avatar-family-design.md`.
 
 - **`kbd`** — combinação localizada por plataforma, com nome acessível. Não
   registra atalho nenhum. Lê `--slotted-font-family-mono`.
@@ -458,7 +458,7 @@ implementador: adotar, adaptar ou recusar, com uma frase de razão cada.
 
   O anel do Button ainda desenha a sua própria borda girando: a troca são duas
   declarações e um elemento em três ficheiros, e os três estavam a ser editados
-  por uma sessão concorrente nesta worktree. Registado em `docs/BUILD-LOG.md`.
+  por uma sessão concorrente nesta worktree. Registado em `docs/history/build-log.md`.
   A geometria já corresponde — o traço é um oitavo do diâmetro nos dois.
 
 - **`status-indicator`** — ponto, ícone ou rótulo curto de estado operacional,
@@ -513,7 +513,7 @@ Sequencial. Cada item reusa a decisão de anatomia do anterior.
    antes foi revertido: `card` é um contêiner de conteúdo e não conhece `size`
    vindo do `field`, `invalid`, `readonly` nem `required`. O arranjo continua
    sendo de `grid`. Decisões em
-   `docs/superpowers/specs/2026-09-03-choice-controls-design.md`.
+   `docs/history/designs/2026-09-03-choice-controls-design.md`.
 5. `switch` — refazer.
 6. `number-field` — novo. Valor `number | null` controlado/não controlado com
    razão, `min`, `max`, `step`, `largeStep` (Shift e PageUp/PageDown) e
@@ -528,7 +528,7 @@ Sequencial. Cada item reusa a decisão de anatomia do anterior.
    símbolo de moeda sobrevive a ele. O parser e a aritmética moram em
    `@slotted/core/number`, novo entry point, para que os dois bindings não
    discordem sobre o que `1.234` significa. Decisões em
-   `docs/superpowers/specs/2026-09-03-number-field-design.md`.
+   `docs/history/designs/2026-09-03-number-field-design.md`.
 7. `slider` — novo. Valor único ou intervalo em `number | number[]`
    controlado/não controlado com razão, `onValueCommit` separado da mudança,
    `min`, `max`, `step`, `largeStep` (Shift e PageUp/PageDown),
@@ -542,7 +542,7 @@ Sequencial. Cada item reusa a decisão de anatomia do anterior.
    O teclado inteiro é da família, porque os navegadores discordam sobre PageUp
    num `input[type=range]`. `readonly` é da família também: o elemento não o
    responde. A geometria mora em `@slotted/core/slider`, novo entry point.
-   Decisões em `docs/superpowers/specs/2026-09-03-slider-and-form-design.md`.
+   Decisões em `docs/history/designs/2026-09-03-slider-and-form-design.md`.
 8. `form` — novo. Submissão, validação e integração com Reactive Forms no
    binding Angular. A família guarda só o mapa de erros — `docs/component-features.md`
    § 6 diz que ela coordena "sem possuir o estado de cada framework" — e lê o
@@ -573,7 +573,7 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
    modelo de digitação e a unidade menor, não um segundo formatador. O motor
    mora em `@slotted/core/currency`, novo entry point sobre
    `@slotted/core/number`. Decisões em
-   `docs/superpowers/specs/2026-09-03-currency-field-design.md`.
+   `docs/history/designs/2026-09-03-currency-field-design.md`.
 
 ## Onda 4 — Navegação e disclosure sem overlay
 
@@ -631,7 +631,7 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   nomeia o texto desta família como seu exemplo de status message, e nenhuma das
   sete implementações pesquisadas escreve papel vivo algum. Medida fica com
   `container` e moldura com `card`. Decisões em
-  `docs/superpowers/specs/2026-09-03-result-state-design.md`.
+  `docs/history/designs/2026-09-03-result-state-design.md`.
 - `toolbar` fecha a onda sem o overflow para menu; o overflow depende de `menu`
   e volta como refino na onda 5.
 
@@ -703,8 +703,8 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   segundo `dd`, nomeada pelo próprio termo com `aria-describedby`. Título e ações
   do conjunto ficam com `card`; ajuda em camada, com `popover` da onda 5;
   carregamento, com `skeleton`. Inventário em
-  `docs/superpowers/specs/2026-09-03-description-list-capability-inventory.md`,
-  decisões em `docs/superpowers/specs/2026-09-03-description-list-design.md`.
+  `docs/history/designs/2026-09-03-description-list-capability-inventory.md`,
+  decisões em `docs/history/designs/2026-09-03-description-list-design.md`.
 
 - **`list list-item`** — duas famílias, a relação que `accordion` e
   `collapsible` já têm: nenhuma regra da folha do conjunto alcança
@@ -726,8 +726,8 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   rotativo, virtualização e reordenação por arraste ficam com `listbox`, com o
   motor de coleção e com drag-and-drop, todos da onda 6.
   Inventário em
-  `docs/superpowers/specs/2026-09-03-list-and-list-item-capability-inventory.md`,
-  decisões em `docs/superpowers/specs/2026-09-03-list-and-list-item-design.md`.
+  `docs/history/designs/2026-09-03-list-and-list-item-capability-inventory.md`,
+  decisões em `docs/history/designs/2026-09-03-list-and-list-item-design.md`.
 
 - **`prose`** — entregue em 2026-09-04. A tipografia de uma região que a
   aplicação não escreveu elemento por elemento: a árvore chega de um renderizador
@@ -758,8 +758,8 @@ formatações` (guia §6) continua valendo: o que esta família acrescenta é o
   tabulação num bloco que cabe não faz nada.
   Realce de sintaxe fica com `code-block` (onda 8) e comportamento de tabela com
   `table` (onda 6). Inventário em
-  `docs/superpowers/specs/2026-09-04-prose-capability-inventory.md`, decisões em
-  `docs/superpowers/specs/2026-09-04-prose-design.md`.
+  `docs/history/designs/2026-09-04-prose-capability-inventory.md`, decisões em
+  `docs/history/designs/2026-09-04-prose-design.md`.
 
 ## Onda 5 — Infraestrutura de overlay e overlays
 
@@ -773,8 +773,8 @@ Infraestrutura primeiro, em `packages/core`, com teste próprio e sem UI:
 4. `live-announcer` — prioridade, deduplicação e limpeza.
 
 Os cinco foram entregues em 2026-09-03, na mesma invocação. Inventário em
-`docs/superpowers/specs/2026-09-03-overlay-infrastructure-capability-inventory.md`,
-decisões em `docs/superpowers/specs/2026-09-03-overlay-infrastructure-design.md`.
+`docs/history/designs/2026-09-03-overlay-infrastructure-capability-inventory.md`,
+decisões em `docs/history/designs/2026-09-03-overlay-infrastructure-design.md`.
 Nenhum importa outro: a família compõe.
 
 `focus` já existe e é revisado, não reescrito. A revisão encontrou as duas
@@ -809,9 +809,9 @@ Depois, nesta ordem:
    porque dezesseis folhas de estilo aqui selecionam `[data-part='root']`; e o
    tooltip é uma `dismissable-layer`, então Escape, o press externo e o
    empilhamento vêm todos do mesmo mecanismo. Inventário em
-   `docs/superpowers/specs/2026-09-04-tooltip-and-popover-capability-inventory.md`,
+   `docs/history/designs/2026-09-04-tooltip-and-popover-capability-inventory.md`,
    decisões em
-   `docs/superpowers/specs/2026-09-04-tooltip-and-popover-design.md`.
+   `docs/history/designs/2026-09-04-tooltip-and-popover-design.md`.
 
 2. `popover` — o diálogo **não modal** da APG, entregue com `tooltip` na mesma
    sessão porque os dois são o mesmo posicionamento com políticas de dismissal
@@ -833,7 +833,7 @@ Depois, nesta ordem:
    `createFocusScope` — contenção e restauração ao gatilho — está em
    `packages/core/src/focus`, com teste próprio, como esta linha pedia.
    Inventário, decisões e autoavaliação em
-   `docs/superpowers/specs/2026-09-04-dialog-and-alert-dialog-*.md`.
+   `docs/history/designs/2026-09-04-dialog-and-alert-dialog-*.md`.
 4. `drawer` — entregue em 2026-09-04, como **família própria**, `data-ui="drawer"`,
    e não como membro de `dialog`. O que decide é que um drawer persistente não
    tem papel `dialog` nenhum: um alert dialog _é_ um dialog, então uma regra do
@@ -848,7 +848,7 @@ Depois, nesta ordem:
    `specs/contract.schema.mjs` chegaram aqui, em commit próprio antes da
    família; `splitter`, na onda 8, é o segundo consumidor de ambos e responde ao
    mesmo padrão Window Splitter. Inventário, decisões e autoavaliação em
-   `docs/superpowers/specs/2026-09-04-drawer-*.md`.
+   `docs/history/designs/2026-09-04-drawer-*.md`.
 5. `menu menubar` — entregues em 2026-09-04. Duas famílias, uma máquina: o
    menubar é um contêiner sobre `menu` sem reexportar nada, e um submenu é a
    mesma família aberta a partir de um item. Dois módulos novos em
@@ -856,8 +856,8 @@ Depois, nesta ordem:
    `typeahead`, que a revisão da onda 6 herda em vez de escrever de novo, e
    `pointer-intent`, cujo segundo consumidor é `preview-card` na onda 8.
    Inventário em
-   `docs/superpowers/specs/2026-09-04-menu-and-menubar-capability-inventory.md`,
-   decisões em `docs/superpowers/specs/2026-09-04-menu-and-menubar-design.md`.
+   `docs/history/designs/2026-09-04-menu-and-menubar-capability-inventory.md`,
+   decisões em `docs/history/designs/2026-09-04-menu-and-menubar-design.md`.
 6. `toast` — a região é a raiz, não a mensagem: um `section` com nome, marco de
    navegação e nunca live region. O anúncio sai por
    `packages/core/src/live-announcer`, porque uma live region criada na mesma
@@ -877,9 +877,9 @@ Depois, nesta ordem:
    teclado quando a mensagem que o tinha sai.
    Duas palavras novas no vocabulário partilhado, em commit próprio antes da
    família: a razão `timeout` e a capacidade `queue`. Inventário em
-   `docs/superpowers/specs/2026-09-04-toast-capability-inventory.md`, decisões
-   em `docs/superpowers/specs/2026-09-04-toast-design.md`, avaliação em
-   `docs/superpowers/specs/2026-09-04-toast-self-assessment.md`.
+   `docs/history/designs/2026-09-04-toast-capability-inventory.md`, decisões
+   em `docs/history/designs/2026-09-04-toast-design.md`, avaliação em
+   `docs/history/designs/2026-09-04-toast-self-assessment.md`.
 7. `loading-overlay` — cobre conteúdo que já está na página e não pode ser
    tocado, preservando a geometria da região. Nove partes — `root`,
    `announcement`, `content`, `scrim`, `panel`, `indicator`, `label`,
@@ -899,10 +899,10 @@ Depois, nesta ordem:
    `skeleton`. `cancel` é opcional e, quando existe, `Escape` pede o
    cancelamento; a família emite a requisição e não se esconde sozinha.
    Inventário em
-   `docs/superpowers/specs/2026-09-10-loading-overlay-capability-inventory.md`,
-   decisões em `docs/superpowers/specs/2026-09-10-loading-overlay-design.md`,
+   `docs/history/designs/2026-09-10-loading-overlay-capability-inventory.md`,
+   decisões em `docs/history/designs/2026-09-10-loading-overlay-design.md`,
    avaliação em
-   `docs/superpowers/specs/2026-09-10-loading-overlay-self-assessment.md`.
+   `docs/history/designs/2026-09-10-loading-overlay-self-assessment.md`.
 
 Refino de `toolbar` com overflow — entregue em 2026-09-04. `overflow` ganha o
 valor `menu` ao lado de `wrap` e `scroll`, e a família ganha duas partes:
@@ -914,10 +914,10 @@ sem prop de prioridade. Uma barra sem gatilho, ou só com unidades fixas, rola e
 vez de recortar. `@slotted/core/overflow` ganha `collapseState` e
 `createCollapse`, uma medição para as duas ligações; `createArrowNavigation`
 deixa de recolher item que a plataforma não foca. Inventário em
-`docs/superpowers/specs/2026-09-04-toolbar-overflow-capability-inventory.md`,
-decisões em `docs/superpowers/specs/2026-09-04-toolbar-overflow-design.md`,
+`docs/history/designs/2026-09-04-toolbar-overflow-capability-inventory.md`,
+decisões em `docs/history/designs/2026-09-04-toolbar-overflow-design.md`,
 avaliação em
-`docs/superpowers/specs/2026-09-04-toolbar-overflow-self-assessment.md`.
+`docs/history/designs/2026-09-04-toolbar-overflow-self-assessment.md`.
 
 ## Onda 6 — Coleções
 
@@ -946,10 +946,10 @@ avaliação em
    `columns` é um número declarado e não medido, para que o desenho e o teclado
    não possam discordar; o custo é que o consumidor o redeclara no próprio
    breakpoint. Inventário em
-   `docs/superpowers/specs/2026-09-04-listbox-capability-inventory.md`, decisões
-   em `docs/superpowers/specs/2026-09-04-listbox-design.md`, revisão do motor em
-   `docs/superpowers/specs/2026-09-04-collection-engine-review.md`, avaliação em
-   `docs/superpowers/specs/2026-09-04-listbox-self-assessment.md`.
+   `docs/history/designs/2026-09-04-listbox-capability-inventory.md`, decisões
+   em `docs/history/designs/2026-09-04-listbox-design.md`, revisão do motor em
+   `docs/history/designs/2026-09-04-collection-engine-review.md`, avaliação em
+   `docs/history/designs/2026-09-04-listbox-self-assessment.md`.
 3. `select`
 4. `combobox`
 5. `multi-select`
@@ -974,8 +974,8 @@ avaliação em
    `aria-rowcount` e `aria-rowindex` são escritos exatamente quando o DOM não
    tem o conjunto inteiro, que é o que a prática exige e o que nenhuma das seis
    implementações pesquisadas faz. Inventário em
-   `docs/superpowers/specs/2026-09-09-table-capability-inventory.md`, decisões em
-   `docs/superpowers/specs/2026-09-09-table-design.md`.
+   `docs/history/designs/2026-09-09-table-capability-inventory.md`, decisões em
+   `docs/history/designs/2026-09-09-table-design.md`.
    A filtragem por coluna foi refeita a 10 de setembro como base da biblioteca
    inteira: o vocabulário de operadores, o descritor, o predicado, o codec de
    query string e o resumo legível vivem em `@slotted/core/filter`, e a família
@@ -985,10 +985,10 @@ avaliação em
    quebra de `value` registada em `filter.break` no contrato, e
    `declined.typedFilterRules` retirado: o que fica adiado para `filter-bar` é o
    aninhamento, os presets e a busca global, não o vocabulário. Inventário em
-   `docs/superpowers/specs/2026-09-10-table-filter-capability-inventory.md`,
-   decisões em `docs/superpowers/specs/2026-09-10-table-filter-design.md`,
+   `docs/history/designs/2026-09-10-table-filter-capability-inventory.md`,
+   decisões em `docs/history/designs/2026-09-10-table-filter-design.md`,
    avaliação em
-   `docs/superpowers/specs/2026-09-10-table-filter-self-assessment.md`.
+   `docs/history/designs/2026-09-10-table-filter-self-assessment.md`.
    A 14 de setembro, na rodada 12, o filtro ganhou os três operandos que não
    existiam quando foi construído: as espécies `time` e `datetime` no motor,
    com os operadores de `date` sobre texto ISO cortado num campo — `HH:MM`,
@@ -998,7 +998,7 @@ avaliação em
    `date-range-picker` como operando único do `between` de `date`, com
    `presets`; e `operand="tags"` no filtro de conjunto, com `options`
    opcional. Nada do que estava entregue mudou de forma. Inventário em
-   `docs/superpowers/specs/2026-09-14-table-filter-operands-capability-inventory.md`,
+   `docs/history/designs/2026-09-14-table-filter-operands-capability-inventory.md`,
    decisões em `2026-09-14-table-filter-operands-design.md`, avaliação em
    `2026-09-14-table-filter-operands-self-assessment.md`.
 
@@ -1028,8 +1028,8 @@ Independentes entre si, exceto a cadeia de data.
   camada de `packages/core`, e não redesenha nem o campo nem a grelha.
   Calendário não-gregoriano é a única capacidade adiada, com eixo `calendar` de
   um valor hoje para que a chegada não quebre contrato. Inventário em
-  `docs/superpowers/specs/2026-09-09-date-capability-inventory.md`, decisões em
-  `docs/superpowers/specs/2026-09-09-date-design.md`.
+  `docs/history/designs/2026-09-09-date-capability-inventory.md`, decisões em
+  `docs/history/designs/2026-09-09-date-design.md`.
 - `time-field` → `time-picker` → `datetime-field` → `datetime-picker` — a
   segunda metade da mesma cadeia, e Core pela mesma razão que `date-field` é:
   um formulário que sabe dizer _quando_ precisa da hora, e uma biblioteca que
@@ -1052,7 +1052,7 @@ Independentes entre si, exceto a cadeia de data.
   `PlainTime` é `{ hour, minute, second }`, `PlainDateTime` é um `PlainDate` ao
   lado de um `PlainTime`, e um instante com fuso não é nenhum deles — a razão
   está em _Decisions already taken_ no briefing. Decisões em
-  `docs/superpowers/specs/2026-09-09-date-design.md` §11 e §12.
+  `docs/history/designs/2026-09-09-date-design.md` §11 e §12.
 
   O inventário de `time-field` e `time-picker`, sobre oito implementações,
   acrescentou a este parágrafo o que ele não nomeava e que é entregue na mesma
@@ -1064,8 +1064,8 @@ Independentes entre si, exceto a cadeia de data.
   `unavailableOptions`; `options` para o conjunto de horas que um passo não
   descreve, incluindo os segundos, com `maxOptions` a guardar a lista; e o
   estado vazio para quando nenhuma hora está disponível. Inventário em
-  `docs/superpowers/specs/2026-09-10-time-capability-inventory.md`, decisões em
-  `docs/superpowers/specs/2026-09-10-time-design.md`.
+  `docs/history/designs/2026-09-10-time-capability-inventory.md`, decisões em
+  `docs/history/designs/2026-09-10-time-design.md`.
 
   `--slotted-icon-clock` entra na escala de glifos com a razão em
   `docs/token-foundation.md`, ao lado da que `--slotted-icon-calendar` já
@@ -1078,7 +1078,7 @@ Independentes entre si, exceto a cadeia de data.
   conjunto que um passo não descreve, incluindo segundos. A guarda contra uma
   lista impossível é `maxOptions` (1440, um dia ao passo de um minuto) e não um
   piso no passo. Avaliação nas onze dimensões em
-  `docs/superpowers/specs/2026-09-10-time-self-assessment.md`.
+  `docs/history/designs/2026-09-10-time-self-assessment.md`.
   Quando a cadeia existir, `@slotted/core/filter` ganha as espécies `time` e
   `datetime` e `table` ganha `TableTimeFilter` e `TableDateTimeFilter` — os
   operadores são os de `date` sobre um `PlainTime` e um `PlainDateTime`, e o
@@ -1117,12 +1117,12 @@ Independentes entre si, exceto a cadeia de data.
   gastam. A lista responde ao dia em que o leitor está, e não a um dia já
   comprometido. `datetime-range-picker` fica adiado para a onda 8, ao lado de
   `date-range-picker` e de `time-range-picker`, pela mesma pesagem. Inventário em
-  `docs/superpowers/specs/2026-09-10-datetime-capability-inventory.md`, decisões
-  em `docs/superpowers/specs/2026-09-10-datetime-design.md`.
+  `docs/history/designs/2026-09-10-datetime-capability-inventory.md`, decisões
+  em `docs/history/designs/2026-09-10-datetime-design.md`.
 
 - `upload` — consolida `file-upload`, `dropzone` e `file-input` (guia 17). A
   linha era esta e só esta; o que a família entrega está inventariado em
-  `docs/superpowers/specs/2026-09-10-upload-capability-inventory.md` §6, e o que
+  `docs/history/designs/2026-09-10-upload-capability-inventory.md` §6, e o que
   ela acrescenta ao parágrafo é: **a transferência**, com adaptador, fila,
   concorrência, nova tentativa limitada, cancelamento, pausa onde o adaptador a
   honra, e início automático ou manual; **`@slotted/core/upload`** como entrada
@@ -1190,8 +1190,8 @@ Independentes entre si, exceto a cadeia de data.
   responsiva, sessão, tenant e permissões sem acoplar autenticação ao design
   system; e persistência de sidebar como preferência do produto, com os
   landmarks e a ordem de foco intactos. Inventário em
-  `docs/superpowers/specs/2026-09-13-app-shell-capability-inventory.md`,
-  decisões em `docs/superpowers/specs/2026-09-13-app-shell-design.md` e, na
+  `docs/history/designs/2026-09-13-app-shell-capability-inventory.md`,
+  decisões em `docs/history/designs/2026-09-13-app-shell-design.md` e, na
   segunda passagem, em `2026-09-14-app-shell-redesign-design.md`.
 
   **Construída, em duas passagens.** Cinco landmarks ganhos do elemento e
@@ -1269,7 +1269,7 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   datas é uma composição especializada de um valor que a onda 7 já tem, enquanto
   uma hora é um valor que o Core não sabia dizer. `docs/component-features.md`
   já separava as duas linhas. O que a família entrega está inventariado em
-  `docs/superpowers/specs/2026-09-14-date-range-picker-capability-inventory.md`
+  `docs/history/designs/2026-09-14-date-range-picker-capability-inventory.md`
   e decidido em `2026-09-14-date-range-picker-design.md`; o que acrescenta ao
   parágrafo: **o comprimento dito enquanto a corrida é desenhada** (`length`,
   `aria-live`), a unidade `count: days | nights`, `minLength`/`maxLength`
@@ -1308,7 +1308,7 @@ Somente após o Core inteiro estar aprovado: `splitter`, `side-navigation`,
   valor é** — chaves resolvidas por uma coleção lá, o texto que o leitor
   escreveu aqui. Sem popup, sem positioner e sem coleção; o `list` nativo passa
   para uma `datalist`. O que acrescenta ao parágrafo do guia, inventariado em
-  `docs/superpowers/specs/2026-09-14-tags-input-capability-inventory.md` e
+  `docs/history/designs/2026-09-14-tags-input-capability-inventory.md` e
   decidido em `2026-09-14-tags-input-design.md`: **um valor inválido fica, é
   marcado e descrito** em vez de ser descartado (`invalidValues: keep | refuse`,
   chip em tom `danger` com marca, `setCustomValidity` no input, `invalidValues`
@@ -1340,7 +1340,7 @@ keep | discard`; `lockedValues`; cópia por `Ctrl+C`/`Ctrl+X`, e a lista inteira
   virtualização, ordenação por várias chaves e ativação de linha.
 - **`toggle-group segmented-control`** — uma sessão só, porque a semântica é
   uma decisão e decidi-la duas vezes produz duas respostas. A decisão, escrita
-  em `docs/superpowers/specs/2026-09-10-toggle-segmented-design.md`: o que
+  em `docs/history/designs/2026-09-10-toggle-segmented-design.md`: o que
   separa as duas não é a pintura, é o elemento — e a pintura sai dele.
   `toggle-group` é um conjunto de botões de dois estados sob `role="group"`,
   cada item um `button` com `aria-pressed`: seleção simples ou múltipla,
@@ -1379,7 +1379,7 @@ keep | discard`; `lockedValues`; cópia por `Ctrl+C`/`Ctrl+X`, e a lista inteira
   a linha do tempo de rolagem (`animation-timeline: scroll()`) para o véu
   ficou por construir, com a razão em `2026-09-13-scroll-area-design.md` §5.
   Inventário, decisões e autoavaliação em
-  `docs/superpowers/specs/2026-09-13-scroll-area-*.md`.
+  `docs/history/designs/2026-09-13-scroll-area-*.md`.
 - **`timeline`** — escopo derivado de `docs/component-features.md` §10,
   _Timeline / Activity Feed_: eventos ordenados com timestamp, ator, título,
   descrição, marcador e ações; orientação, agrupamento por período, loading
@@ -1397,7 +1397,7 @@ keep | discard`; `lockedValues`; cópia por `Ctrl+C`/`Ctrl+X`, e a lista inteira
   `@slotted/core/disclosure`; `growing` com `button` e `scroll`. Recusas com
   família nomeada: conteúdo expansível para `collapsible`, filtros para
   `filter-bar`, esqueleto para `skeleton`, virtualização para `growing`.
-  Inventário e desenho em `docs/superpowers/specs/2026-09-14-timeline-*.md`.
+  Inventário e desenho em `docs/history/designs/2026-09-14-timeline-*.md`.
 - **`filter-bar code-block`** — uma sessão só (rodada 11). `filter-bar`
   compõe sobre `@slotted/core/filter` e o motor ganhou `group.ts`: o valor da
   família é uma árvore `FilterGroup = { join, rules: (FilterRule | FilterGroup)[] }`
@@ -1423,7 +1423,7 @@ manual` com rascunho e `data-dirty`; campo `required` com `defaultValue` a
   `maxLines`, cópia de `description-list` sem as linhas removidas. Recusas com
   dono: abas para `tabs`, código em linha para `prose`/`kbd`, moldura de
   terminal e `disabled` recusados com uma implementação cada. Inventários e
-  desenhos em `docs/superpowers/specs/2026-09-14-{filter-bar,code-block}-*.md`.
+  desenhos em `docs/history/designs/2026-09-14-{filter-bar,code-block}-*.md`.
 
   Pendente da fundação, aberto no gate de release desta rodada: os inner
   controls da regra R2 (`clear`, `reveal`, os steppers de `number-field` e

@@ -28,7 +28,7 @@ test('names the identifier a consumer selects the family by', () => {
 
 /**
  * Two fields and the range mode `calendar` already has, behind a trigger — the
- * scope line in `docs/build-order.md`. Nothing of either is drawn again here.
+ * scope line in `docs/process/build-order.md`. Nothing of either is drawn again here.
  */
 test('composes two date fields and one calendar instead of drawing them again', () => {
   assert.deepEqual(contract.composes, ['date-field', 'calendar']);

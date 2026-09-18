@@ -2,7 +2,7 @@
 
 ## Plano
 
-`docs/build-schedule.md`, rodada 18, bloco `context-menu hover-card`. Skill
+`docs/process/build-schedule.md`, rodada 18, bloco `context-menu hover-card`. Skill
 `/component`, modo `create`, uma sessão para as duas famílias. Sem arquivo de
 plano. Outras sessões na mesma worktree (`highlight`, `stat-card sparkline`,
 `table`): só arquivos das duas famílias, do núcleo alterado e os registros
@@ -10,7 +10,7 @@ append-only são escritos.
 
 ## Tarefas concluídas
 
-1. Passos 1–5: inventário, desenho (`docs/superpowers/specs/2026-09-16-context-menu-hover-card-*.md`).
+1. Passos 1–5: inventário, desenho (`docs/history/designs/2026-09-16-context-menu-hover-card-*.md`).
 2. Passo 6: contratos `specs/components/{context-menu,hover-card}/` — 13 + 17.
 3. Passo 7: `packages/styles/src/{context-menu,hover-card}/`; `packages/styles/package.json`.
 4. Passos 8–9: capturas no scratchpad (`shots/`); gate visual aprovado
@@ -25,11 +25,11 @@ append-only são escritos.
    1280 e 620. 6007 em baixo: Angular não lida renderizada.
 8. Passo 12: `test:contracts` 1726/1726, `test:package-layers`, `test:docs`
    25/25, styles 170/170, React vitest (famílias + núcleo) 112/112.
-   `pnpm check` falha em `format:check` só em `docs/nexora-op-demo-domain.md` e
+   `pnpm check` falha em `format:check` só em `demos/nexora/domain.md` e
    `packages/styles/src/stat-card/stat-card.harness.html` (outras sessões).
    `lint`, `typecheck` e `ng build` completos: em curso em segundo plano.
 9. Passo 13: `2026-09-16-context-menu-hover-card-self-assessment.md`;
-   `docs/build-order.md` com "Entregue" e duas reaberturas.
+   `docs/process/build-order.md` com "Entregue" e duas reaberturas.
 
 ## Tarefa em curso
 

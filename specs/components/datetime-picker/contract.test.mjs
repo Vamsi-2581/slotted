@@ -261,7 +261,7 @@ test('refuses selection following focus, for the reason the sibling records', ()
 
 /**
  * Two marks, one per surface, and no third glyph asked of the scale.
- * `docs/build-order.md` states it as scope.
+ * `docs/process/build-order.md` states it as scope.
  */
 /**
  * Two marks, one per half of the value, and each on a control that does

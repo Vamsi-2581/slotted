@@ -19,7 +19,7 @@
        control-sized thing: one theme decision retunes the rows, the buttons and
        the fields together, and `@media (pointer: coarse)` grows all three at
        once without this family writing a rule. `list-item` took the same
-       decision for the same reason, and `PROJECT-PRD.md` §13.1 names
+       decision for the same reason, and `docs/product/prd.md` §13.1 names
        `table.row.height` as a density-derived value — which this is. */
     --_row-min-block: var(
       --slotted-table-row-min-block-size,
@@ -98,7 +98,7 @@
       --slotted-table-row-surface-stripe,
       color-mix(in oklab, var(--slotted-text, CanvasText) 5%, var(--_surface))
     );
-    /* `PROJECT-PRD.md` §8 names `table.row.hover.background` as a decision an
+    /* `docs/product/prd.md` §8 names `table.row.hover.background` as a decision an
        application retunes on its own. It is one token, over the tone step every
        neutral row in the library hovers with. */
     --_hover: var(

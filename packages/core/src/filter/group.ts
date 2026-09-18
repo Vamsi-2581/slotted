@@ -10,7 +10,7 @@
  * Every surveyed bar that holds a map of fields — Polaris, Fiori, PatternFly,
  * EUI, Carbon, MUI — is a group with `join: 'and'` and no nested group, which
  * is why the first level has map-shaped helpers of its own. AG Grid's Advanced
- * Filter and react-querybuilder nest, and `docs/build-order.md` assigns the
+ * Filter and react-querybuilder nest, and `docs/process/build-order.md` assigns the
  * nesting here by name.
  *
  * Every field is JSON, as the descriptor's are, and the rule the descriptor

@@ -28,11 +28,11 @@ executar a seguir; **histórico** registra o que foi feito e não é editado;
 
 ## Histórico
 
-| Arquivo              | Conteúdo                                                                               |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| `BUILD-LOG.md`       | Uma entrada por família ou correção, na ordem em que aterrou, desde 2026-08-31.        |
-| `superpowers/specs/` | Inventário, desenho e autoavaliação por tema. Índice em `superpowers/specs/README.md`. |
-| `superpowers/plans/` | Planos de implementação da fundação (2026-08-27 a 2026-09-03), executados.             |
+| Arquivo            | Conteúdo                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `BUILD-LOG.md`     | Uma entrada por família ou correção, na ordem em que aterrou, desde 2026-08-31.      |
+| `history/designs/` | Inventário, desenho e autoavaliação por tema. Índice em `history/designs/README.md`. |
+| `history/plans/`   | Planos de implementação da fundação (2026-08-27 a 2026-09-03), executados.           |
 
 ## Arquivo
 

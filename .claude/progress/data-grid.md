@@ -124,6 +124,17 @@ Refino contínuo da data-grid em sessão própria. Ferramentas de sessão em
 `sb-profile.mjs` (perfil CPU de uma ação), `sb-trace.mjs` (timeline). O
 diretório é da sessão: copiar para o scratchpad da nova sessão antes de usar.
 
+## Regra desta família (aprendida à custa)
+
+Cada ajuste é verificado ao vivo nas **duas** páginas, 6006 e 6007, antes de
+commitar. A binding Angular aloja partes em elementos host próprios
+(`display: contents`): painel de filtro, operando da linha de filtro,
+controlo do editor e dos operandos. Uma regra CSS com combinador de filho
+(`>`) que atravesse um desses hosts vale só no React;
+`data-grid.styles.test.mjs` recusa-as, e uma parte alojada é alcançada por
+dois seletores (filho, e filho de um elemento sem parte), nunca por `:is()`
+com combinador.
+
 ## Git
 
 Branch `review/implementation-pass-1`. Commits desta sessão: `84a9984`,

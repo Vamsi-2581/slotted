@@ -142,7 +142,17 @@
   min-inline-size: 0;
 }
 
-.slotted-reference-page h1 {
+/**
+ * The page's own two headings — the title in the header and the label of
+ * each section — addressed as the page's children rather than as every `h1`
+ * and `h2` under it. Written as bare elements, the section label reached the
+ * heading a family renders inside a demonstration: the reset returns type
+ * and ink to the family, and `margin`, `align-self` and `letter-spacing` are
+ * not in it, so `notification-center`'s `h2` lost the `margin-inline-end:
+ * auto` that keeps its title at the start of the header and was drawn at
+ * the end of the row.
+ */
+.slotted-reference-page__title-row > h1 {
   font-size: clamp(28px, 3vw, 38px);
   font-weight: 720;
   letter-spacing: -0.035em;
@@ -150,7 +160,7 @@
   margin: 0;
 }
 
-.slotted-reference-page h2 {
+.slotted-reference-page__section > h2 {
   align-self: start;
   font-size: 14px;
   font-weight: 720;

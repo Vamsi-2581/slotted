@@ -133,6 +133,17 @@ test('workbench CSS keeps the reference-sheet layout and accessibility invariant
 });
 
 /**
+ * The page's two headings are the page's children, not every `h1` and `h2`
+ * under it: a family's own heading inside a demonstration keeps the margin
+ * and the alignment it declares.
+ */
+test('workbench CSS addresses the page’s own headings as its children', () => {
+  assert.match(css, /\.slotted-reference-page__title-row > h1\s*\{/);
+  assert.match(css, /\.slotted-reference-page__section > h2\s*\{/);
+  assert.doesNotMatch(css, /\.slotted-reference-page h[1-6]\s*[{,]/);
+});
+
+/**
  * The page's grey ring is for the page's own controls. Unlayered, the rule
  * outranked every family stylesheet, and a focused `Button` in the `dark`
  * scheme measured `#d4d4d8` where the theme says `#60a5fa` (R3). A family's

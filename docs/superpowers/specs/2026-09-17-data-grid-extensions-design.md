@@ -81,16 +81,75 @@ Recusado: Excel (`xlsx`) — um consumidor com SheetJS escreve
 `aoa_to_sheet(toCsv rows)` em duas linhas; a família não carrega a
 dependência.
 
-## Onda 2 (a detalhar antes de escrever)
+## Onda 2
 
-- **Tree data**: linhas com `parentKey` (ou `getTreePath`), `aria-level`,
-  `aria-expanded` na célula de expansão, setas Left/Right nas células da
-  coluna de árvore, filhos carregados sob pedido (`onLoadChildren`),
-  filtro que mantém antepassados. Reutiliza `expanded`/`open`.
-- **Row reordering**: `rowsReorderable`, alça na coluna de seleção ou uma
-  coluna `drag`, `core/drag` com contentor vertical e a mesma guia de
-  destino; `onRowsReorder({ key, to })`. Só sem ordenação e sem agrupamento
-  ativos (MUI X, a mesma regra).
+### 5. Tree data
+
+Linhas hierárquicas, à maneira de MUI X Pro (`treeData`) e AG Grid
+(`getDataPath`), mas por chave de pai, não por caminho: uma linha diz quem é
+o pai e o pai está em `rows`. Um caminho serve para inventar nós que os dados
+não têm; aqui um nó é sempre uma linha, e uma linha cujo pai não está em
+`rows` é raiz.
+
+- **Modelo.** `tree?: { parentKey: (row) => string | null; column?: string;
+  hasChildren?: (row) => boolean }`. `column` é a coluna que leva o recuo e o
+  botão de abrir; por omissão a primeira coluna visível que não é a de seleção.
+  `hasChildren` diz que uma linha tem filhos que ainda não estão em `rows`
+  (carregamento sob pedido).
+- **Estado.** Os ramos abertos são `expanded` — a capacidade `open` que o
+  detalhe já usa. Uma linha com filhos abre os filhos; uma folha com detalhe
+  abre o detalhe; uma linha com as duas coisas não existe (o detalhe é para
+  folhas). `defaultExpanded: []` — fechado, como MUI X.
+- **Motor.** `applyQuery` recebe `tree`. Filtro e pesquisa: uma linha fica se
+  cumpre ou se um descendente cumpre; os antepassados de uma linha que fica
+  ficam também, mesmo sem cumprir. Ordenação: entre irmãos. Página: sobre os
+  nós visíveis depois da expansão, achatados — o que MUI X faz. `group` é
+  ignorado quando `tree` existe (as duas hierarquias não se somam; docs). O
+  nó de linha ganha `level` (1 na raiz), `parent` (chave ou `null`),
+  `childCount` (filhos em `rows`) e `open`.
+- **Papéis.** `role="treegrid"` no root quando `tree` existe; `aria-level`
+  e, numa linha com filhos, `aria-expanded` na linha (APG treegrid).
+- **Teclado.** Com o cursor na coluna da árvore: ArrowRight abre um ramo
+  fechado; ArrowLeft fecha um ramo aberto, e numa folha ou ramo fechado
+  sobe ao pai. Nas outras células as setas movem o cursor como sempre.
+- **Desenho.** A célula da coluna da árvore recua `--_indent × (level − 1)`
+  e leva `[data-part='tree-toggle']` (um `button` com `aria-expanded`, não
+  uma tab stop: o cursor está na célula) antes do valor; uma folha leva o
+  mesmo espaço vazio para o texto alinhar.
+- **Sob pedido.** Abrir uma linha com `hasChildren` e sem filhos em `rows`
+  emite `onLoadChildren({ key, row })` e marca a linha `data-loading`
+  (spinner no toggle) até chegarem filhos ou até fechar.
+- **Seleção.** Selecionar um pai não seleciona os filhos (MUI X). Intervalo
+  e cursor tratam os nós achatados como linhas.
+- **Cena** `tree`: locais → armazéns → zonas, 3 níveis, um ramo por pedido.
+
+Recusado: nós inventados por caminho; agregados por ramo (o resumo é do
+conjunto); mover uma linha para outro pai por arrasto.
+
+### 6. Row reordering
+
+- **Modelo.** `rowsReorderable?: boolean`. A grelha não guarda a ordem: as
+  linhas são os dados do consumidor, e um arrasto emite
+  `onRowsReorder({ key, from, to, reason, event })` com `from`/`to` índices
+  em `rows`; o consumidor move e devolve `rows`. Sem estado próprio, sem
+  segunda fonte de verdade.
+- **Quando.** Só com a query em repouso — sem `sort`, `filter`, `search`,
+  `group`, `page` — e sem `tree`: numa lista ordenada ou filtrada a posição
+  visual não é a posição em `rows`. Fora disso a alça fica `aria-disabled` e
+  o docs diz porquê (a regra de MUI X Pro).
+- **Alça.** Coluna reservada `DRAG_COLUMN` (`data-column="__drag"`, 40 px),
+  a seguir à de seleção, com `[data-part='row-handle']` — um `button` com o
+  nome "Reorder {row}", tab stop só quando é a célula corrente. O ponteiro
+  arrasta a partir da alça (`handle` do `core/drag`); o teclado pega com
+  Space na alça e move com as setas (`handleKeydown` do controlador), como
+  as colunas.
+- **Contentor.** `core/drag` com um contentor `rows`, vertical, sobre o
+  `body`; itens = chaves das linhas montadas; `autoScroll: { axis: 'y' }`.
+  A guia é a mesma `drop-indicator`, com `data-axis="row"`, horizontal na
+  fenda de destino e à largura do viewport.
+- **Anúncio.** As mensagens do controlador com o rótulo da linha (a coluna
+  `rowHeader`, ou a chave).
+- **Cena** `reorder-rows`: oito linhas, a ordem escrita por baixo.
 
 ## Onda 3 (a detalhar antes de escrever)
 

@@ -2,7 +2,7 @@ import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { SlButtonLink, SlIconButton } from '@slotted/angular/button';
+import { SlButtonLink } from '@slotted/angular/button';
 import { SlList } from '@slotted/angular/list';
 import {
   SlListItem,
@@ -21,7 +21,7 @@ import {
   SlPopoverTitle,
   SlPopoverTrigger,
 } from '@slotted/angular/popover';
-import { SlBadge, SlBadgeAnchor } from '@slotted/angular/badge';
+import { SlTopNavigationAction, SlTopNavigationCount } from '@slotted/angular/top-navigation';
 
 import { ApprovalsStore } from '../../core/activity/approvals.store';
 import { ClockService } from '../../core/session/clock.service';
@@ -33,7 +33,6 @@ import { ClockService } from '../../core/session/clock.service';
     RouterLink,
     NgIcon,
     SlButtonLink,
-    SlIconButton,
     SlList,
     SlListItem,
     SlListItemBody,
@@ -48,8 +47,8 @@ import { ClockService } from '../../core/session/clock.service';
     SlPopoverLayer,
     SlPopoverTitle,
     SlPopoverTrigger,
-    SlBadge,
-    SlBadgeAnchor,
+    SlTopNavigationAction,
+    SlTopNavigationCount,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -64,21 +63,12 @@ import { ClockService } from '../../core/session/clock.service';
   `,
   template: `
     <ng-container slPopover size="lg" side="bottom" align="end" (openChangeRequest)="opened($event.value)">
-      <span slBadgeAnchor>
-        <button
-          slIconButton
-          slPopoverTrigger
-          size="md"
-          tone="secondary"
-          variant="ghost"
-          [attr.aria-label]="label()"
-        >
-          <ng-icon name="lucideClipboardCheck" />
-        </button>
+      <button slTopNavigationAction slPopoverTrigger [label]="label()">
+        <ng-icon name="lucideClipboardCheck" />
         @if (store.pending() > 0) {
-          <span slBadge size="sm" tone="accent" variant="solid" [count]="store.pending()"></span>
+          <span slTopNavigationCount>{{ store.pending() }}</span>
         }
-      </span>
+      </button>
       <ng-template slPopoverLayer>
         <div slPopoverContent class="panel">
           <div slPopoverHeader><div slPopoverTitle>Approvals</div></div>

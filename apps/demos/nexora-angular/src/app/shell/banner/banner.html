@@ -26,20 +26,9 @@
     <app-tasks-popover [label]="tasksLabel()" />
     <app-notifications-popover [label]="notificationsLabel()" />
     <app-help-menu />
-    <ng-container slTooltip>
-      <button
-        slIconButton
-        slTooltipTrigger
-        size="md"
-        tone="secondary"
-        variant="ghost"
-        aria-label="Demo controls"
-        (click)="demo().openAt()"
-      >
-        <ng-icon name="lucideFlaskConical" />
-      </button>
-      <ng-template slTooltipLayer><div slTooltipContent>Demo controls</div></ng-template>
-    </ng-container>
+    <button slTopNavigationAction aria-label="Demo controls" (click)="demo().openAt()">
+      <ng-icon name="lucideFlaskConical" />
+    </button>
     <app-user-menu />
   </div>
 </div>

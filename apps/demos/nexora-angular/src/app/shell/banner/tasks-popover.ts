@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { SlIconButton } from '@slotted/angular/button';
 import { SlList } from '@slotted/angular/list';
 import {
   SlListItem,
@@ -18,7 +17,7 @@ import {
   SlPopoverTitle,
   SlPopoverTrigger,
 } from '@slotted/angular/popover';
-import { SlBadge, SlBadgeAnchor } from '@slotted/angular/badge';
+import { SlTopNavigationAction, SlTopNavigationCount } from '@slotted/angular/top-navigation';
 
 import { TasksStore } from '../../core/activity/tasks.store';
 import { ClockService } from '../../core/session/clock.service';
@@ -27,7 +26,6 @@ import { ClockService } from '../../core/session/clock.service';
   selector: 'app-tasks-popover',
   imports: [
     NgIcon,
-    SlIconButton,
     SlList,
     SlListItem,
     SlListItemBody,
@@ -41,8 +39,8 @@ import { ClockService } from '../../core/session/clock.service';
     SlPopoverLayer,
     SlPopoverTitle,
     SlPopoverTrigger,
-    SlBadge,
-    SlBadgeAnchor,
+    SlTopNavigationAction,
+    SlTopNavigationCount,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -57,21 +55,12 @@ import { ClockService } from '../../core/session/clock.service';
   `,
   template: `
     <ng-container slPopover size="lg" side="bottom" align="end" (openChangeRequest)="opened($event.value)">
-      <span slBadgeAnchor>
-        <button
-          slIconButton
-          slPopoverTrigger
-          size="md"
-          tone="secondary"
-          variant="ghost"
-          [attr.aria-label]="label()"
-        >
-          <ng-icon name="lucideListTodo" />
-        </button>
+      <button slTopNavigationAction slPopoverTrigger [label]="label()">
+        <ng-icon name="lucideListTodo" />
         @if (store.open() > 0) {
-          <span slBadge size="sm" tone="accent" variant="solid" [count]="store.open()"></span>
+          <span slTopNavigationCount>{{ store.open() }}</span>
         }
-      </span>
+      </button>
       <ng-template slPopoverLayer>
         <div slPopoverContent class="panel">
           <div slPopoverHeader><div slPopoverTitle>Tasks</div></div>

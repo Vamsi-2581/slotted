@@ -233,7 +233,7 @@ test('outranks the shell selector that reaches its brand', () => {
  * as the controls the family marks, with the consumer's own glyph inside at
  * the control's glyph size, and `count` positioned over its corner.
  */
-test('gives a consumer action the shape and the states of the marked controls', () => {
+test('gives every icon-only control, the consumer action included, the same shape and states', () => {
   const rules = [...stripped.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => ({
     selector: selector.replace(/\s+/g, ' ').trim(),
     body,
@@ -241,25 +241,32 @@ test('gives a consumer action the shape and the states of the marked controls', 
   const shape = rules.find(
     ({ selector, body }) =>
       selector.includes("[data-part='notifications']") &&
-      selector.includes("[data-part='action']") &&
       /min-inline-size: var\(--_control-height\)/.test(body),
   );
-  assert.ok(shape, 'action does not share the square of the marked controls');
+  assert.ok(shape, 'no shared square for the icon-only controls');
   assert.match(shape.body, /position: relative/);
-  for (const state of [
-    ['hover', /background-color: var\(--_hover-background\)/],
-    ['active', /background-color: var\(--_active-background\)/],
-    ['focus-visible', /outline:/],
-    ['disabled', /cursor: not-allowed/],
-  ]) {
-    const [pseudo, expectation] = state;
-    const rule = rules.find(
-      ({ selector, body }) =>
-        selector.includes(`[data-part='action']`) &&
-        selector.includes(pseudo) &&
-        expectation.test(body),
-    );
-    assert.ok(rule, `action has no ${pseudo} treatment`);
+  const parts = [...shape.selector.matchAll(/\[data-part='([a-z-]+)'\]/g)].map(([, part]) => part);
+  assert.ok(parts.includes('action'), 'action does not share the square of the marked controls');
+  /* A part that joins the shape joins every state, or it is a control that looks right at rest only. */
+  for (const part of parts) {
+    for (const state of [
+      ['hover', /background-color: var\(--_hover-background\)/],
+      ['active', /background-color: var\(--_active-background\)/],
+      ['focus-visible', /outline:/],
+      ['disabled', /cursor: not-allowed/],
+    ]) {
+      const [pseudo, expectation] = state;
+      /* The pseudo-class attached to the control: a space before it would make it a descendant. */
+      const attached = new RegExp(`[)\\]](:[a-z-]+(\\([^)]*\\))?)*:${pseudo}`);
+      const rule = rules.find(
+        ({ selector, body }) =>
+          selector.includes(`[data-part='${part}']`) &&
+          attached.test(selector) &&
+          !new RegExp(`\\s:${pseudo}`).test(selector) &&
+          expectation.test(body),
+      );
+      assert.ok(rule, `${part} has no ${pseudo} treatment`);
+    }
   }
   const glyph = rules.find(
     ({ selector, body }) =>
@@ -272,4 +279,32 @@ test('gives a consumer action the shape and the states of the marked controls', 
     stripped,
     /\[data-part='action'\]\s*\{[^}]*--slotted-icon-size: var\(--_icon-size\)/,
   );
+});
+
+/**
+ * The count is type, and it is sized as the type it is: the control scale's
+ * small step, on a disc the height of that type's line, with a space step of
+ * inset on either side of the figures. It used to be a fraction of the bell —
+ * 14 pixels holding 10-pixel semibold figures with two pixels of inset — and
+ * the figures were crushed against the edge and sat high, because a flex
+ * container centres the line box and not the ink. A block container can trim
+ * the line to the cap and the baseline; a flex container cannot.
+ */
+test('sizes the count from the small type step and centres its figures on the ink', () => {
+  const rule = stripped.match(
+    /\[data-ui='top-navigation'\] \[data-part='count'\]\s*\{([^}]*)\}/,
+  )?.[1];
+  assert.ok(rule, 'no count rule');
+  assert.match(rule, /--_count-font: var\(--slotted-control-font-size-sm/);
+  assert.match(rule, /--_count-size: calc\(var\(--_count-font\) \* var\(--slotted-line-height-xs/);
+  assert.match(rule, /font-size: var\(--_count-font\)/);
+  assert.match(rule, /padding-inline: var\(--slotted-space-2/);
+  assert.match(rule, /min-inline-size: var\(--_count-size\)/);
+  assert.match(rule, /align-content: center/);
+  assert.doesNotMatch(rule, /display: inline-flex/);
+  const trimmed = stripped.match(
+    /@supports \(text-box: trim-both cap alphabetic\)\s*\{\s*\[data-ui='top-navigation'\] \[data-part='count'\]\s*\{([^}]*)\}/,
+  )?.[1];
+  assert.ok(trimmed, 'the count is not trimmed to its ink');
+  assert.match(trimmed, /text-box: trim-both cap alphabetic/);
 });

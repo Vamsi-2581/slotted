@@ -632,8 +632,7 @@
       [data-part='search-close'],
       [data-part='notifications'],
       [data-part='account']
-    )
-    :disabled,
+    ):disabled,
   [data-ui='top-navigation'] button:is([data-part='help'], [data-part='action']):disabled {
     color: var(--_disabled-color);
     cursor: not-allowed;
@@ -669,31 +668,52 @@
    * boxes beside it — and a third digit grows away from the bell, over the gap,
    * where the control beside it holds no ink. Tabular figures, so a count that
    * goes from 9 to 10 does not shift the ring.
+   *
+   * The count is type, and it is sized as the type it is, the way `badge`
+   * sizes a count: the control scale's small step — which is the step that
+   * moves with density — on a disc the height of that type's line, with a
+   * space step of inset on either side of the figures. Sized as a fraction of
+   * the bell instead, it was 14 pixels holding 10-pixel semibold figures with
+   * two pixels of inset, and the figures were crushed against the edge.
+   *
+   * A block container rather than a flex one: a flex container centres the
+   * line box, which is not symmetric around the figures inside it, and the
+   * figures sat high. `align-content` centres the one line, and the trim
+   * below makes that line the ink.
    */
   [data-ui='top-navigation'] [data-part='count'] {
-    --_count-size: calc(var(--_icon-size) * 0.875);
+    --_count-font: var(--slotted-control-font-size-sm, 12px);
+    --_count-size: calc(var(--_count-font) * var(--slotted-line-height-xs, 1.4));
     --_count-inset: calc((var(--_control-height) - var(--_icon-size)) / 2);
-    align-items: center;
+    align-content: center;
     background-color: var(--_count-background);
     block-size: var(--_count-size);
     border-radius: var(--slotted-radius-full, 9999px);
     box-shadow: 0 0 0 var(--slotted-border-width-thick, 2px) var(--_surface);
     box-sizing: border-box;
     color: var(--_count-color);
-    display: inline-flex;
-    font-size: max(0.625rem, calc(var(--_count-size) * 0.7));
+    display: block;
+    font-size: var(--_count-font);
     font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-font-weight-semibold, 600);
     inset-block-start: calc(var(--_count-inset) - var(--_count-size) / 2);
     /* Its centre on the bell's top-end corner, so the disc covers a corner of the mark and no more; a pill of three ends inside the account's halo. */
     inset-inline-start: calc(100% - var(--_count-inset) - var(--_count-size) / 2);
-    justify-content: center;
     line-height: 1;
     min-inline-size: var(--_count-size);
-    padding-inline: calc(var(--_count-size) * 0.15);
+    padding-inline: var(--slotted-space-2, 0.25rem);
     pointer-events: none;
     position: absolute;
+    text-align: center;
+    white-space: nowrap;
     z-index: 1;
+  }
+
+  /** What is centred is the ink rather than the font's metrics, as `badge` and `avatar` do it. */
+  @supports (text-box: trim-both cap alphabetic) {
+    [data-ui='top-navigation'] [data-part='count'] {
+      text-box: trim-both cap alphabetic;
+    }
   }
 
   /* ── Search ─────────────────────────────────────────────────────────────── */

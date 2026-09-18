@@ -97,12 +97,15 @@ sessão pode escrever).
     `pagination` (margem do intervalo), histórias Angular (props que
     colidiam com membros da grelha: `status`, `setFilter`).
 
+16. Onda 3 (commits `pinned rows`, `data source`): `pinnedRows` com
+    rowgroups sticky às alturas medidas; `dataSource` com cache por query,
+    abort, erro/retry e `reload()`. Desenho das extensões fechado.
+
 ## Tarefa em curso
 
-Onda 3: row pinning (`pinnedRows: { top, bottom }`, rowgroups sticky fora
-da janela e do resumo, cursor a atravessá-los) e data source
-(`dataSource.getRows(query, signal)` com cache por query, abort, erro/retry,
-`handle.reload()`).
+Nenhuma. As três ondas do desenho de extensões estão entregues. Candidatos
+seguintes: spanning (reabertura de §9), paste (reabertura de §9), list view
+(depende de família de lista), lazy loading por janela na fonte.
 
 Onda 1, peça 4 — exportação: `toCsv` em `core/grid`, `handle.exportCsv`
 (React) e `exportCsv()` (Angular), `@media print` na folha, cena `export`
@@ -182,6 +185,12 @@ não resolve; ficheiro de outra família, por reportar.
 - A página Angular (6007) continua por ler renderizada.
 
 ## Próxima ação
+
+Ler o Storybook Angular (6007) cena a cena quando o `filter-bar` da outra
+lane compilar; medir `applyQuery` a 10 Hz com 10k linhas na cena
+`realtime`; atualizar `docs/superpowers/specs/2026-09-16-data-grid-self-assessment.md`
+e `docs/build-order.md` com as extensões.
+
 
 Peça 4: escrever `packages/core/src/grid/export.ts` com `toCsv(rows, columns,
 options)` (RFC 4180, texto pelo formatador da coluna e do tipo — ver

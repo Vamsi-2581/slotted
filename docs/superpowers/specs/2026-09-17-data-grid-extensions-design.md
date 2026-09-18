@@ -153,10 +153,33 @@ conjunto); mover uma linha para outro pai por arrasto.
   `rowHeader`, ou a chave).
 - **Cena** `reorder-rows`: oito linhas, a ordem escrita por baixo.
 
-## Onda 3 (a detalhar antes de escrever)
+## Onda 3
 
-- **Row pinning**: `pinnedRows: { top: keys[], bottom: keys[] }`, linhas
-  fora da janela e do resumo, sticky nas duas arestas.
-- **Data source**: `dataSource: { getRows(query) => Promise<{ rows, total }> }`
-  com cache por query, janela de carregamento (`lazy`), e `onError`; a
-  grelha guarda a query e pede.
+### 7. Row pinning
+
+- **Modelo.** `pinnedRows?: { top?: string[]; bottom?: string[] }` por chave,
+  na ordem dada. Uma linha presa sai da query — nem ordenada, nem filtrada,
+  nem paginada — e fica sempre em ecrã, sob a cabeça e sobre o resumo.
+- **DOM.** Dois rowgroups `[data-part='pinned-rows'][data-edge='top'|'bottom']`
+  fora do `body` e da janela, sticky às alturas que a binding mede para a
+  cabeça e o resumo (`ResizeObserver` → `--slotted-data-grid-pinned-*-offset`
+  no scroller). A folha trata `pinned-rows` como um grupo do corpo em todas
+  as regras de linha (track, réguas, hover, seleção, cursor).
+- **Linhas.** São linhas do corpo: o cursor atravessa-as (topo → corpo →
+  fundo), selecionam-se, editam-se, exportam-se e contam em
+  `aria-rowcount`/`aria-rowindex`.
+
+### 8. Data source
+
+- **Modelo.** `dataSource: { getRows(query, { signal }) => Promise<{ rows,
+  total?, hasMore? }>; cacheSize? }`. Com fonte a grelha está em modo
+  servidor e `rows`, `totalCount`, `loading`, `error` e `onRetry` são da
+  fonte, não lidos das props (`rows` passa a opcional).
+- **Ciclo.** Um pedido por query, o anterior abortado pelo `AbortSignal`;
+  a resposta guardada pela query serializada (`cacheSize`, 20 por omissão,
+  0 desliga); uma página presente fica, escurecida (`aria-busy`), enquanto a
+  seguinte chega; uma rejeição que não é abort é o estado de erro com a
+  mensagem lançada; "Try again" repete a query; `handle.reload()` /
+  `reload()` despeja a cache.
+- **Recusado.** Carregamento por janela (chunks) e cursor infinito pela
+  fonte: `hasMore` + `onLoadMore` sobre `rows` continuam a ser do consumidor.

@@ -6,6 +6,10 @@
 
 React and Angular must remain idiomatic to their frameworks. Share specifications and contracts when useful; do not force shared implementation without demonstrated need.
 
+## Layout
+
+One top-level directory holds one type of content (`docs/decisions/0002-repository-layout.md`). `docs/README.md` indexes every document by reading class: law at the root, `process/` edited each session, `history/` append-only, `archive/` closed. Session design documents go to `docs/history/designs/`, plans to `docs/history/plans/`, checkpoints to `.claude/progress/`.
+
 ## Working Loop
 
 1. Read only the context required for the task.

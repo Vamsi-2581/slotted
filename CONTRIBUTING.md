@@ -63,6 +63,21 @@ not need. That import is gone; the Angular preview never had one. Do not add a
 `dist` stylesheet to a preview: the layer order comes from
 `@slotted/tokens/styles.css`, which is imported first.
 
+## Repository layout
+
+```
+apps/       storybook-react, storybook-angular
+demos/      nexora/{angular,backend,domain.md}; .registry/ (beta tarballs, ignored)
+packages/   core, react, angular, styles, tokens, theme-default — the published set
+tools/      harness, storybook-workbench — workspace packages, never published
+specs/      one contract.json and its test per family
+scripts/    repository scripts, flat, named by verb
+docs/       the law at the root; decisions/, product/, process/, history/, archive/
+```
+
+`docs/decisions/0002-repository-layout.md` records the rule; `docs/README.md`
+indexes every document.
+
 ## The beta channel
 
 `demos/` holds applications that consume the library as a published

@@ -22,7 +22,7 @@ Read, in this order:
 3. `.claude/skills/component/references/harness.md` — how to build a harness page and capture it (`tools/harness/build.mjs`, `tools/harness/shoot.mjs`, `tools/harness/audit.mjs`).
 4. `docs/process/implementation-review-log.md` — what previous iterations did. Create the file if it does not exist.
 
-Do not read `docs/process/build-order.md`, `docs/component-features.md` or the specs in `docs/superpowers/` unless an item points at them.
+Do not read `docs/process/build-order.md`, `docs/component-features.md` or the designs in `docs/history/designs/` unless an item points at them.
 
 ## 2. Pick work
 

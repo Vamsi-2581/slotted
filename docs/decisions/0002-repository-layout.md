@@ -51,3 +51,13 @@ and tool configuration. Product documents are `docs/product/`.
   `packages/angular` is the only project it declares.
 - A new theme is `packages/theme-<name>` with `@slotted/theme-<name>` as its
   manifest name; the Storybook workbench discovers it by that prefix.
+- `packages/angular/<family>/` stays beside `src/` and `package.json`:
+  ng-packagr names a secondary entry point by its path under the package root,
+  so `packages/angular/button/` is what makes `@slotted/angular/button`
+  importable. Moving the families under `src/` would put `src` in every import.
+- Agent skills have one source, `.claude/skills/<skill>/`. `.codex/skills/`
+  links to it and adds only `agents/openai.yaml`; a skill edited in one place
+  is read the same by both agents.
+- `.claude/progress/` holds a checkpoint only for a family with uncommitted
+  work or an open gate. A delivered family's checkpoint is deleted; its history
+  is the commit log and `docs/history/`.

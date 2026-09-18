@@ -206,8 +206,15 @@ test('lays the filter panel out as one line per condition', () => {
     panel,
     /padding:var\(--slotted-popover-padding-block-sm,var\(--slotted-space-4,0\.5rem\)\) var\(--slotted-popover-padding-inline-sm,var\(--slotted-space-5,0\.75rem\)\);/,
   );
+  /* The panel is found anywhere under the content, not as its child: the
+     Angular binding draws it inside a host element of its own, and a child
+     combinator left that popover at sixteen rem with the panel out of it. */
   const layer = rule(
-    "[data-ui='popover']:has(> [data-part='content'] > [data-ui='data-grid'][data-part='filter-panel'])",
+    "[data-ui='popover']:has(> [data-part='content'] [data-ui='data-grid'][data-part='filter-panel'])",
+  );
+  assert.doesNotMatch(
+    normalized,
+    /\[data-part='content'\] > \[data-ui='data-grid'\]\[data-part='filter-panel'\]/,
   );
   assert.match(
     layer,

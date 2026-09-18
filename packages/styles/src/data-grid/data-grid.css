@@ -995,10 +995,12 @@
   /* The popover is `sm` for its type and its measure at that step is
      sixteen rem: the panel's twenty-four stood out of it on both sides. The
      layer that holds the panel is given the panel's measure plus the gap the
-     layer keeps around its surface and the surface's own border. */
-  [data-ui='popover']:has(
-    > [data-part='content'] > [data-ui='data-grid'][data-part='filter-panel']
-  ) {
+     layer keeps around its surface and the surface's own border. The panel
+     is found anywhere under the content, not as its child: the Angular
+     binding draws it inside a host element of its own (`display: contents`),
+     and a child combinator here left that popover at sixteen rem with the
+     panel standing out of it. */
+  [data-ui='popover']:has(> [data-part='content'] [data-ui='data-grid'][data-part='filter-panel']) {
     --slotted-popover-measure-sm: calc(
       var(--slotted-data-grid-filter-panel-size, 24rem) + 2 *
         (var(--slotted-popover-gap, 0.5rem) + var(--slotted-border-width-thin, 1px))
@@ -1009,13 +1011,13 @@
      date-times: the panel widens for the kinds whose operand is long, so the
      range is read whole rather than clipped. */
   [data-ui='popover']:has(
-    > [data-part='content'] > [data-ui='data-grid'][data-part='filter-panel'][data-kind='date']
+    > [data-part='content'] [data-ui='data-grid'][data-part='filter-panel'][data-kind='date']
   ) {
     --slotted-data-grid-filter-panel-size: var(--slotted-data-grid-filter-panel-size-date, 28rem);
   }
 
   [data-ui='popover']:has(
-    > [data-part='content'] > [data-ui='data-grid'][data-part='filter-panel'][data-kind='datetime']
+    > [data-part='content'] [data-ui='data-grid'][data-part='filter-panel'][data-kind='datetime']
   ) {
     --slotted-data-grid-filter-panel-size: var(
       --slotted-data-grid-filter-panel-size-datetime,

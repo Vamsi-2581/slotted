@@ -201,6 +201,7 @@ export function DataGrid<Row>({
   onEditStart,
   onExpandedChange,
   onExpandedGroupsChange,
+  onLoadChildren,
   onKeyDown,
   onLoadMore,
   onManageColumns,
@@ -232,6 +233,7 @@ export function DataGrid<Row>({
   style,
   timeZone,
   totalCount,
+  tree,
   value: valueProp,
   variant,
   virtualize,
@@ -398,6 +400,10 @@ export function DataGrid<Row>({
         index:
           (query.page && 'index' in query.page ? query.page.index * query.page.size : 0) + index,
         groups: [],
+        level: 1,
+        parent: null,
+        childCount: 0,
+        open: false,
       }));
       return {
         nodes,
@@ -410,6 +416,8 @@ export function DataGrid<Row>({
     const applied = applyQuery(rows, columns, query, {
       rowKey: rowKeyOf,
       expandedGroups,
+      tree,
+      expanded: tree ? expanded : undefined,
       locale: resolvedLocale,
       timeZone,
       booleans: formatOptions.booleans,
@@ -422,6 +430,8 @@ export function DataGrid<Row>({
     query,
     rowKeyOf,
     expandedGroups,
+    tree,
+    expanded,
     resolvedLocale,
     timeZone,
     formatOptions.booleans,
@@ -1171,6 +1181,47 @@ export function DataGrid<Row>({
     },
     [expandedSet, expanded, requestExpanded],
   );
+  /* ── Tree ───────────────────────────────────────────────────────────── */
+  const treeColumn = useMemo(() => {
+    if (!tree) return null;
+    if (tree.column && resolvedById.has(tree.column)) return tree.column;
+    return resolved[0]?.id ?? null;
+  }, [tree, resolvedById, resolved]);
+  const nodeByKey = useMemo(() => {
+    const map = new Map<string, Extract<GridNode<Row>, { kind: 'row' }>>();
+    for (const node of nodes) if (node.kind === 'row') map.set(node.key, node);
+    return map;
+  }, [nodes]);
+  /* A row opened with children still to come: asked for once, marked until
+     a child of hers is in `rows` or she is closed. */
+  const [loadingChildren, setLoadingChildren] = useState<ReadonlySet<string>>(new Set());
+  const isLoadingChildren = useCallback(
+    (key: string) => loadingChildren.has(key),
+    [loadingChildren],
+  );
+  const hasChildren = useCallback((row: Row) => tree?.hasChildren?.(row) === true, [tree]);
+  useEffect(() => {
+    if (loadingChildren.size === 0) return;
+    const next = new Set(loadingChildren);
+    for (const key of loadingChildren) {
+      const node = nodeByKey.get(key);
+      if (!node || !expandedSet.has(key) || node.childCount > 0) next.delete(key);
+    }
+    if (next.size !== loadingChildren.size) setLoadingChildren(next);
+  }, [loadingChildren, nodeByKey, expandedSet]);
+  const toggleBranch = useCallback(
+    (key: string, source?: unknown, reason: DataGridReason = 'pointer') => {
+      const node = nodeByKey.get(key);
+      if (!node) return;
+      const opening = !expandedSet.has(key);
+      toggleExpanded(key, source, reason);
+      if (opening && node.childCount === 0 && tree?.hasChildren?.(node.row) && onLoadChildren) {
+        setLoadingChildren((current) => new Set(current).add(key));
+        onLoadChildren({ key, row: node.row });
+      }
+    },
+    [nodeByKey, expandedSet, toggleExpanded, tree, onLoadChildren],
+  );
   const groupKeys = useMemo(
     () => nodes.filter((node) => node.kind === 'group').map((node) => node.key),
     [nodes],
@@ -1615,6 +1666,31 @@ export function DataGrid<Row>({
           return;
         }
       }
+      /* In the tree column, the horizontal arrows open a closed branch,
+         close an open one, and climb to the parent from a closed row or a
+         leaf; elsewhere in the row they move the cursor as anywhere. */
+      if (
+        row &&
+        treeColumn !== null &&
+        cell.column === treeColumn &&
+        (key === 'ArrowRight' || key === 'ArrowLeft') &&
+        !event.shiftKey
+      ) {
+        const node = nodeByKey.get(cell.row);
+        const branch =
+          node !== undefined && (node.childCount > 0 || tree?.hasChildren?.(row) === true);
+        const opening = (key === 'ArrowRight') !== mirror;
+        if (node && branch && opening !== node.open) {
+          event.preventDefault();
+          toggleBranch(cell.row, event, 'keyboard');
+          return;
+        }
+        if (node && !opening && node.parent !== null) {
+          event.preventDefault();
+          setCurrent({ row: node.parent, column: cell.column }, 'keyboard', event);
+          return;
+        }
+      }
       if (
         row &&
         cell.column === EXPANDER_COLUMN &&
@@ -1762,6 +1838,10 @@ export function DataGrid<Row>({
       isExpandable,
       expandedSet,
       toggleExpanded,
+      treeColumn,
+      nodeByKey,
+      tree,
+      toggleBranch,
       resolvedSelection,
       cursorGrid,
       requestRange,
@@ -2120,6 +2200,10 @@ export function DataGrid<Row>({
       rangeDragging,
       isExpanded,
       toggleExpanded,
+      toggleBranch,
+      treeColumn,
+      hasChildren,
+      isLoadingChildren,
       toggleGroup,
       sortOf,
       pressSort,
@@ -2210,6 +2294,10 @@ export function DataGrid<Row>({
       rangeDragging,
       isExpanded,
       toggleExpanded,
+      toggleBranch,
+      treeColumn,
+      hasChildren,
+      isLoadingChildren,
       toggleGroup,
       sortOf,
       pressSort,
@@ -2354,7 +2442,7 @@ export function DataGrid<Row>({
           drag.current?.handleKeydown(event.nativeEvent);
         }}
         ref={attachRoot}
-        role="grid"
+        role={tree ? 'treegrid' : 'grid'}
         style={rootStyle}
         {...(resolvedStriped ? { 'data-striped': '' } : {})}
         {...(resolvedSticky ? { 'data-sticky-header': '' } : {})}

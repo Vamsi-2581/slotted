@@ -5669,6 +5669,304 @@
   The three things a body can hold instead of rows — nothing at all, nothing
   after the filter, and an error — and the first load's skeleton.
 -->
+<!--
+  Rows as a tree: a country open over its warehouses, one warehouse open
+  over its zones, one waiting for zones to arrive. The tree column steps in
+  by its level and leads with the toggle; a leaf keeps the toggle's room.
+-->
+<section data-scene="tree">
+  <div
+    data-ui="data-grid"
+    data-part="root"
+    role="treegrid"
+    data-variant="framed"
+    data-sticky-header
+    data-rows="fixed"
+    aria-label="Sites"
+    aria-rowcount="7"
+    aria-colcount="3"
+    style="--slotted-data-grid-template: 280px 130px 120px"
+  >
+    <div data-part="scroll">
+      <div data-part="head" role="rowgroup">
+        <div data-part="header-row" role="row" aria-rowindex="1">
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="1"
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Site</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="2"
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Kind</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="3"
+            data-numeric
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Stock</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <div data-part="body" role="rowgroup">
+        <div
+          data-part="row"
+          role="row"
+          aria-rowindex="2"
+          aria-level="1"
+          aria-expanded="true"
+          data-current
+        >
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            data-tree="branch"
+            data-current
+            tabindex="0"
+            style="--slotted-data-grid-level: 1"
+          >
+            <button
+              data-part="tree-toggle"
+              type="button"
+              tabindex="-1"
+              aria-expanded="true"
+              aria-label="Collapse"
+            ></button>
+            <span>Portugal</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Country</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-numeric
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>0</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="3" aria-level="2" aria-expanded="true">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            data-tree="branch"
+            tabindex="-1"
+            style="--slotted-data-grid-level: 2"
+          >
+            <button
+              data-part="tree-toggle"
+              type="button"
+              tabindex="-1"
+              aria-expanded="true"
+              aria-label="Collapse"
+            ></button>
+            <span>Lisboa</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Warehouse</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-numeric
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>0</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="4" aria-level="3">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            data-tree="leaf"
+            tabindex="-1"
+            style="--slotted-data-grid-level: 3"
+          >
+            <span data-part="tree-toggle" data-empty aria-hidden="true"></span>
+            <span>Zona A</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Zone</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-numeric
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>1,240</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="5" aria-level="3">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            data-tree="leaf"
+            tabindex="-1"
+            style="--slotted-data-grid-level: 3"
+          >
+            <span data-part="tree-toggle" data-empty aria-hidden="true"></span>
+            <span>Zona B</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Zone</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-numeric
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>860</span>
+          </div>
+        </div>
+        <div
+          data-part="row"
+          role="row"
+          aria-rowindex="6"
+          aria-level="2"
+          aria-expanded="true"
+          data-loading
+        >
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            data-tree="branch"
+            tabindex="-1"
+            style="--slotted-data-grid-level: 2"
+          >
+            <button
+              data-part="tree-toggle"
+              type="button"
+              tabindex="-1"
+              aria-expanded="true"
+              aria-label="Collapse"
+              data-loading
+            ></button>
+            <span>Porto</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Warehouse</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-numeric
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>0</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="7" aria-level="1" aria-expanded="false">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            data-tree="branch"
+            tabindex="-1"
+            style="--slotted-data-grid-level: 1"
+          >
+            <button
+              data-part="tree-toggle"
+              type="button"
+              tabindex="-1"
+              aria-expanded="false"
+              aria-label="Expand"
+            ></button>
+            <span>España</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Country</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-numeric
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section data-scene="empty-and-loading">
   <div style="display: grid; gap: var(--slotted-space-6)">
     <div

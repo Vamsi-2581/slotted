@@ -96,6 +96,14 @@ export interface DataGridInternal<Row> {
   /* expansion */
   readonly isExpanded: (key: string) => boolean;
   readonly toggleExpanded: (key: string, source?: unknown, reason?: DataGridReason) => void;
+  /** Opens or closes a tree row's children, asking for them when they are not in `rows`. */
+  readonly toggleBranch: (key: string, source?: unknown, reason?: DataGridReason) => void;
+  /** The column that carries the tree's indent and toggle, or `null` without a tree. */
+  readonly treeColumn: string | null;
+  /** Whether a row says it has children that are not in `rows` yet. */
+  readonly hasChildren: (row: Row) => boolean;
+  /** Rows whose children were asked for and have not arrived. */
+  readonly isLoadingChildren: (key: string) => boolean;
   readonly toggleGroup: (key: string, source?: unknown, reason?: DataGridReason) => void;
 
   /* sorting and filtering */

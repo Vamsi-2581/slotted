@@ -1240,6 +1240,107 @@ export const Realtime: Story = {
   },
 };
 
+/* Countries, their warehouses, the zones in each: one warehouse (Porto) has
+   zones that arrive only when it is opened. */
+interface Site {
+  id: string;
+  parent: string | null;
+  name: string;
+  kind: 'country' | 'warehouse' | 'zone';
+  stock: number;
+  updated: string;
+}
+const SITE_COLUMNS: GridColumn<Site>[] = [
+  { id: 'name', label: 'Site', rowHeader: true, width: 280 },
+  {
+    id: 'kind',
+    label: 'Kind',
+    kind: 'set',
+    width: 130,
+    options: [
+      { value: 'country', label: 'Country' },
+      { value: 'warehouse', label: 'Warehouse' },
+      { value: 'zone', label: 'Zone' },
+    ],
+  },
+  { id: 'stock', label: 'Stock', kind: 'number', width: 120, aggregate: 'sum' },
+  { id: 'updated', label: 'Updated', kind: 'date', width: 150 },
+];
+const site = (
+  id: string,
+  parent: string | null,
+  name: string,
+  kind: Site['kind'],
+  stock: number,
+  updated: string,
+): Site => ({ id, parent, name, kind, stock, updated });
+const SITES: Site[] = [
+  site('pt', null, 'Portugal', 'country', 0, '2026-09-12'),
+  site('pt-lis', 'pt', 'Lisboa', 'warehouse', 0, '2026-09-12'),
+  site('pt-lis-a', 'pt-lis', 'Zona A', 'zone', 1240, '2026-09-12'),
+  site('pt-lis-b', 'pt-lis', 'Zona B', 'zone', 860, '2026-09-10'),
+  site('pt-por', 'pt', 'Porto', 'warehouse', 0, '2026-09-11'),
+  site('es', null, 'España', 'country', 0, '2026-09-09'),
+  site('es-mad', 'es', 'Madrid', 'warehouse', 0, '2026-09-09'),
+  site('es-mad-a', 'es-mad', 'Zona A', 'zone', 2210, '2026-09-09'),
+  site('es-bcn', 'es', 'Barcelona', 'warehouse', 0, '2026-09-08'),
+  site('es-bcn-a', 'es-bcn', 'Zona A', 'zone', 430, '2026-09-08'),
+  site('es-bcn-b', 'es-bcn', 'Zona B', 'zone', 970, '2026-09-07'),
+  site('de', null, 'Deutschland', 'country', 0, '2026-09-06'),
+  site('de-ham', 'de', 'Hamburg', 'warehouse', 0, '2026-09-06'),
+  site('de-ham-a', 'de-ham', 'Zone A', 'zone', 1520, '2026-09-06'),
+];
+const PORTO_ZONES: Site[] = [
+  site('pt-por-a', 'pt-por', 'Zona A', 'zone', 610, '2026-09-11'),
+  site('pt-por-b', 'pt-por', 'Zona B', 'zone', 340, '2026-09-11'),
+];
+
+export const Tree: Story = {
+  parameters: scenario('tree'),
+  render: () => {
+    const rows = signal<readonly Site[]>(SITES);
+    const loads = signal(0);
+    return {
+      props: {
+        siteColumns: SITE_COLUMNS,
+        rows,
+        loads,
+        expanded: signal<readonly string[]>(['es']),
+        tree: {
+          parentKey: (row: Site) => row.parent,
+          hasChildren: (row: Site) => row.id === 'pt-por',
+        },
+        fetchZones: () => {
+          loads.update((count) => count + 1);
+          setTimeout(() => rows.update((current) => [...current, ...PORTO_ZONES]), 700);
+        },
+      },
+      template: screen(
+        `
+    <sl-data-grid
+      label="Sites"
+      rowKey="id"
+      height="100%"
+      variant="framed"
+      selectionMode="multiple"
+      [columns]="siteColumns"
+      [rows]="rows()"
+      [tree]="tree"
+      [(expanded)]="expanded"
+      [current]="{ row: 'pt', column: 'name' }"
+      (loadChildren)="fetchZones()"
+    ></sl-data-grid>`,
+        {
+          size: 'tall',
+          before: note(
+            `{{ loads() === 0 ? 'Open Portugal, then Porto: its zones are fetched on demand' : 'Porto’s zones fetched ' + (loads() === 1 ? 'once' : loads() + ' times') }}`,
+          ),
+        },
+      ),
+    };
+  },
+};
+
 export const Export: Story = {
   parameters: scenario('export'),
   render: () => {

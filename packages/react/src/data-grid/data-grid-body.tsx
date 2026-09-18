@@ -90,7 +90,9 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
   const selected = grid.isSelected(key);
   const disabled = grid.isDisabled(key);
   const current = grid.current !== null && grid.current.row === key;
-  const expanded = grid.isExpanded(key);
+  /* In a tree, `expanded` is the branch; the detail is a leaf's alone. */
+  const expanded = grid.isExpanded(key) && (grid.treeColumn === null || node.childCount === 0);
+  const loadingChildren = grid.isLoadingChildren(key);
   const editing = grid.edit !== null && grid.edit.cell.row === key;
   const attach = useCallback(
     (element: HTMLDivElement | null) => {
@@ -112,6 +114,11 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
         data-row={key}
         ref={attach}
         role="row"
+        {...(grid.treeColumn !== null ? { 'aria-level': node.level } : {})}
+        {...(grid.treeColumn !== null && (node.childCount > 0 || node.open || loadingChildren)
+          ? { 'aria-expanded': node.open }
+          : {})}
+        {...(loadingChildren ? { 'data-loading': '' } : {})}
         {...(selected ? { 'data-selected': '' } : {})}
         {...(current ? { 'data-current': '' } : {})}
         {...(expanded ? { 'data-expanded': '' } : {})}
@@ -253,6 +260,10 @@ function BodyCell<Row>({
   const pending = editing && session.status === 'pending';
   const part = column.column.rowHeader ? 'row-header' : 'cell';
   const changed = grid.changedOf(cell);
+  const treeCell = grid.treeColumn === column.id;
+  const branch =
+    treeCell &&
+    (node.childCount > 0 || node.open || grid.isLoadingChildren(key) || grid.hasChildren(node.row));
 
   return (
     <div
@@ -264,7 +275,14 @@ function BodyCell<Row>({
       data-part={part}
       data-text={column.text}
       role={part === 'row-header' ? 'rowheader' : 'gridcell'}
-      style={cellStyle(column, index)}
+      style={
+        treeCell
+          ? ({
+              ...cellStyle(column, index),
+              '--slotted-data-grid-level': String(node.level),
+            } as CSSProperties)
+          : cellStyle(column, index)
+      }
       tabIndex={current ? 0 : -1}
       title={invalid && message ? message : undefined}
       onClick={(event) => grid.onCellClick(event, cell)}
@@ -285,7 +303,27 @@ function BodyCell<Row>({
       {...(grid.anyEditable && !editable && column.kind !== 'actions'
         ? { 'data-readonly': '' }
         : {})}
+      {...(treeCell ? { 'data-tree': branch ? 'branch' : 'leaf' } : {})}
     >
+      {treeCell ? (
+        branch ? (
+          <button
+            aria-expanded={node.open}
+            aria-label={node.open ? grid.labels.collapse : grid.labels.expand}
+            data-part="tree-toggle"
+            onClick={(event) => {
+              event.stopPropagation();
+              grid.toggleBranch(key, event);
+            }}
+            onPointerDown={(event) => event.stopPropagation()}
+            tabIndex={-1}
+            type="button"
+            {...(grid.isLoadingChildren(key) ? { 'data-loading': '' } : {})}
+          />
+        ) : (
+          <span aria-hidden data-part="tree-toggle" data-empty="" />
+        )
+      ) : null}
       {editing ? (
         <div data-part="editor">
           {grid.renderEditorContent({

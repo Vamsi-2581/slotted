@@ -11,6 +11,7 @@ import type {
   GridQueryChange,
   GridRange,
   ResolvedGridColumn,
+  GridTree,
 } from '@slotted/core/grid';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
@@ -296,6 +297,13 @@ export interface DataGridProps<Row>
     | undefined;
   /** Whether a row has a detail to open; the detail itself comes from `renderDetail`. */
   expandable?: boolean | ((row: Row) => boolean) | undefined;
+  /**
+   * Rows as a tree: each row names its parent by key. The open branches are
+   * `expanded`; `query.group` is ignored. The root is a `treegrid`.
+   */
+  tree?: GridTree<Row> | undefined;
+  /** Called when a row `hasChildren` says has children opens and none are in `rows`. */
+  onLoadChildren?: ((event: { key: string; row: Row }) => void) | undefined;
 
   /* ── Editing and activation ─────────────────────────────────────────── */
   onEditStart?: ((cell: GridCell) => void) | undefined;

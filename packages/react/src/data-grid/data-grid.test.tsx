@@ -845,4 +845,123 @@ describe('DataGrid, the rest', () => {
     render(<Shipments current={cellRef} />);
     expect(cell('S1', 'id')).toHaveAttribute('data-current');
   });
+  describe('as a tree', () => {
+    interface Site {
+      id: string;
+      parent: string | null;
+      name: string;
+      stock: number;
+    }
+    const SITE_COLUMNS: GridColumn<Site>[] = [
+      { id: 'name', label: 'Name', rowHeader: true },
+      { id: 'stock', label: 'Stock', kind: 'number' },
+    ];
+    const SITES: Site[] = [
+      { id: 'pt', parent: null, name: 'Portugal', stock: 0 },
+      { id: 'pt-lis', parent: 'pt', name: 'Lisboa', stock: 40 },
+      { id: 'pt-lis-a', parent: 'pt-lis', name: 'Zona A', stock: 25 },
+      { id: 'pt-por', parent: 'pt', name: 'Porto', stock: 30 },
+      { id: 'es', parent: null, name: 'España', stock: 0 },
+    ];
+    function Sites(props: Partial<DataGridProps<Site>>) {
+      return (
+        <DataGrid<Site>
+          columns={SITE_COLUMNS}
+          label="Sites"
+          rowKey="id"
+          rows={SITES}
+          tree={{ parentKey: (row: Site) => row.parent }}
+          {...props}
+        />
+      );
+    }
+    const sites = () => screen.getByRole('treegrid', { name: 'Sites' });
+    const rowKeys = () =>
+      [...sites().querySelectorAll<HTMLElement>('[data-part="body"] > [data-part="row"]')].map(
+        (row) => row.dataset['row'],
+      );
+    const toggle = (key: string) =>
+      sites().querySelector<HTMLElement>(`[data-row="${key}"] [data-part="tree-toggle"]`);
+
+    it('is a treegrid of closed roots, each with its level, and opens a branch from its toggle', () => {
+      render(<Sites />);
+      expect(rowKeys()).toEqual(['pt', 'es']);
+      const pt = sites().querySelector('[data-row="pt"]')!;
+      expect(pt).toHaveAttribute('aria-level', '1');
+      expect(pt).toHaveAttribute('aria-expanded', 'false');
+      expect(sites().querySelector('[data-row="es"]')).not.toHaveAttribute('aria-expanded');
+      /* A leaf keeps the toggle's room, empty, so the names align. */
+      expect(toggle('es')!.tagName).toBe('SPAN');
+      expect(toggle('pt')!.tagName).toBe('BUTTON');
+      fireEvent.click(toggle('pt')!);
+      expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-por', 'es']);
+      expect(pt).toHaveAttribute('aria-expanded', 'true');
+      expect(sites().querySelector('[data-row="pt-lis"]')).toHaveAttribute('aria-level', '2');
+      expect(
+        sites()
+          .querySelector<HTMLElement>('[data-row="pt-lis"] [data-column="name"]')!
+          .style.getPropertyValue('--slotted-data-grid-level'),
+      ).toBe('2');
+    });
+
+    it('opens and closes from the keyboard in the tree column, and climbs to the parent', () => {
+      const onExpandedChange = vi.fn();
+      render(
+        <Sites
+          defaultCurrent={{ row: 'pt', column: 'name' }}
+          defaultExpanded={['pt']}
+          onExpandedChange={onExpandedChange}
+        />,
+      );
+      const cell = (row: string, column: string) =>
+        sites().querySelector<HTMLElement>(`[data-row="${row}"] [data-column="${column}"]`)!;
+      fireEvent.keyDown(cell('pt', 'name'), { key: 'ArrowRight' });
+      /* Open already: the arrow moves the cursor, as anywhere else. */
+      expect(cell('pt', 'stock')).toHaveAttribute('data-current');
+      fireEvent.keyDown(cell('pt', 'stock'), { key: 'ArrowLeft' });
+      fireEvent.keyDown(cell('pt', 'name'), { key: 'ArrowDown' });
+      fireEvent.keyDown(cell('pt-lis', 'name'), { key: 'ArrowRight' });
+      expect(onExpandedChange).toHaveBeenLastCalledWith(
+        ['pt', 'pt-lis'],
+        expect.objectContaining({ reason: 'keyboard' }),
+      );
+      expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-lis-a', 'pt-por', 'es']);
+      fireEvent.keyDown(cell('pt-lis', 'name'), { key: 'ArrowLeft' });
+      expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-por', 'es']);
+      /* Closed now: the next left climbs to the parent. */
+      fireEvent.keyDown(cell('pt-lis', 'name'), { key: 'ArrowLeft' });
+      expect(cell('pt', 'name')).toHaveAttribute('data-current');
+    });
+
+    it('asks for the children of a row that has none yet, and shows the wait until they arrive', () => {
+      const onLoadChildren = vi.fn();
+      const { rerender } = render(
+        <Sites
+          onLoadChildren={onLoadChildren}
+          rows={SITES.filter((row) => row.id !== 'pt-lis-a')}
+          tree={{
+            parentKey: (row: Site) => row.parent,
+            hasChildren: (row: Site) => row.id === 'pt-lis',
+          }}
+        />,
+      );
+      fireEvent.click(toggle('pt')!);
+      expect(toggle('pt-lis')).not.toBeNull();
+      fireEvent.click(toggle('pt-lis')!);
+      expect(onLoadChildren).toHaveBeenCalledWith({ key: 'pt-lis', row: SITES[1] });
+      expect(sites().querySelector('[data-row="pt-lis"]')).toHaveAttribute('data-loading');
+      rerender(
+        <Sites
+          onLoadChildren={onLoadChildren}
+          rows={SITES}
+          tree={{
+            parentKey: (row: Site) => row.parent,
+            hasChildren: (row: Site) => row.id === 'pt-lis',
+          }}
+        />,
+      );
+      expect(sites().querySelector('[data-row="pt-lis"]')).not.toHaveAttribute('data-loading');
+      expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-lis-a', 'pt-por', 'es']);
+    });
+  });
 });

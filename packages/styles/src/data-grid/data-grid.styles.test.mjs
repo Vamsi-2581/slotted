@@ -251,7 +251,7 @@ test('reserves room for the column menu and none for an unsorted mark', () => {
 /** A value keeps its own direction inside a right-to-left grid. */
 test('keeps a cell value’s own writing direction', () => {
   const value = rule(
-    "[data-ui='data-grid'] [data-part='cell'] > span:first-child:not([data-ui]),[data-ui='data-grid'] [data-part='row-header'] > span:first-child:not([data-ui]),[data-ui='data-grid'] [data-part='summary-cell'] > span:first-child:not([data-ui])",
+    "[data-ui='data-grid'] [data-part='cell'] > span:not([data-ui], [data-part]),[data-ui='data-grid'] [data-part='row-header'] > span:not([data-ui], [data-part]),[data-ui='data-grid'] [data-part='summary-cell'] > span:not([data-ui], [data-part])",
   );
   assert.match(value, /unicode-bidi:plaintext;/);
 });

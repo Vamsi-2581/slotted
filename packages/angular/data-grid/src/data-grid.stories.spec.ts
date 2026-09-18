@@ -117,7 +117,10 @@ describe('Data grid stories', () => {
       const fixture = TestBed.createComponent(StoryHost);
       Object.assign(fixture.componentInstance as object, props);
       expect(() => fixture.detectChanges(), name).not.toThrow();
-      expect(fixture.nativeElement.querySelector('[role="grid"]'), name).not.toBeNull();
+      expect(
+        fixture.nativeElement.querySelector('[role="grid"], [role="treegrid"]'),
+        name,
+      ).not.toBeNull();
       fixture.destroy();
     }
   }, 60_000);

@@ -224,6 +224,12 @@ const anatomy: AnatomyRow[] = [
     purpose: 'Opens and closes a group.',
   },
   {
+    part: 'tree-toggle',
+    element: 'button',
+    required: false,
+    purpose: 'Opens and closes a tree row’s children; a leaf keeps its room empty.',
+  },
+  {
     part: 'summary',
     element: 'div[role="rowgroup"]',
     required: false,
@@ -823,6 +829,24 @@ class ShipmentsPage {
     }),
   },
   {
+    id: 'tree',
+    title: 'Tree data',
+    note: 'tree names each row’s parent by key; a row whose parent is not in rows is a root. The root is a treegrid, every row carries aria-level and a branch aria-expanded. The open branches are expanded — the same state the detail uses; a branch opens its children, a leaf its detail. Filter and search keep a row that matches or has a descendant that matches, with its ancestors; sorting is among siblings; the page is a slice of the open rows; query.group is ignored. In the tree column, ArrowRight opens a closed branch, ArrowLeft closes an open one and climbs to the parent from a leaf. A row hasChildren says has children not yet in rows emits loadChildren when opened, and shows the wait until they arrive.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-tree',
+      language: 'angular',
+      label: 'Rows that name their parent',
+      source: `<sl-data-grid
+  rowKey="id"
+  [rows]="sites()"
+  [columns]="columns"
+  [tree]="{ parentKey: parentOf, hasChildren: isWarehouse }"
+  [(expanded)]="open"
+  (loadChildren)="fetchZones($event.key)"
+/>`,
+    }),
+  },
+  {
     id: 'export',
     title: 'Export and print',
     note: 'exportCsv() on the grid (exportAs slDataGrid) builds the file by toCsv — RFC 4180, each cell as the grid draws it — from the rows the query left (every page in client mode) and the columns not hidden in the reader’s order, or the selected rows and every column on request, and hands it to the browser as a download; toCsv() returns the text for a consumer who sends it elsewhere. In print, the frame grows to its rows, nothing scrolls or sticks, and the pointer’s controls are not on paper; a windowed grid prints the rows it has mounted, so a consumer who prints ten thousand turns the window off first. Excel is the consumer’s: SheetJS reads the same text.',
@@ -1046,6 +1070,20 @@ const api = apiRows([
     'Pixels per row, read once from the first row when unstated; auto measures every row, capped by --slotted-data-grid-row-max-block-size.',
   ],
   ['overscan', 'number', '6', 'sl-data-grid', 'Rows mounted past each edge of the window.'],
+  [
+    'tree',
+    '{ parentKey, column?, hasChildren? }',
+    '—',
+    'sl-data-grid',
+    'Rows as a tree, each naming its parent by key; the open branches are expanded and the root is a treegrid.',
+  ],
+  [
+    'loadChildren',
+    '{ key, row }',
+    '—',
+    'sl-data-grid',
+    'Emitted when a branch hasChildren says has children opens and none are in rows.',
+  ],
   [
     'highlightChanges',
     'boolean | number',

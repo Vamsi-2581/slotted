@@ -489,7 +489,8 @@
   [data-ui='data-grid'] [data-part='column-menu'],
   [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],
   [data-ui='data-grid'] [data-part='expander'],
-  [data-ui='data-grid'] [data-part='group-toggle'] {
+  [data-ui='data-grid'] [data-part='group-toggle'],
+  [data-ui='data-grid'] [data-part='tree-toggle'] {
     align-items: center;
     background-color: transparent;
     block-size: var(--_control);
@@ -549,7 +550,8 @@
 
   [data-ui='data-grid'] [data-part='column-menu']::after,
   [data-ui='data-grid'] [data-part='expander']::after,
-  [data-ui='data-grid'] [data-part='group-toggle']::after {
+  [data-ui='data-grid'] [data-part='group-toggle']::after,
+  [data-ui='data-grid'] button[data-part='tree-toggle']::after {
     background-color: currentcolor;
     block-size: var(--_control-icon);
     content: '';
@@ -592,12 +594,14 @@
   /* The expander and the group toggle are `chevron-right`, turned a quarter
      turn when open and mirrored in a right-to-left document. */
   [data-ui='data-grid'] [data-part='expander']::after,
-  [data-ui='data-grid'] [data-part='group-toggle']::after {
+  [data-ui='data-grid'] [data-part='group-toggle']::after,
+  [data-ui='data-grid'] button[data-part='tree-toggle']::after {
     mask-image: var(--slotted-icon-chevron-right);
     transition: rotate var(--_transition);
   }
 
   [data-ui='data-grid'] [data-part='expander'][aria-expanded='true']::after,
+  [data-ui='data-grid'] button[data-part='tree-toggle'][aria-expanded='true']::after,
   [data-ui='data-grid']
     [data-part='group-row'][aria-expanded='true']
     [data-part='group-toggle']::after {
@@ -605,15 +609,56 @@
   }
 
   [data-ui='data-grid']:dir(rtl) [data-part='expander']::after,
-  [data-ui='data-grid']:dir(rtl) [data-part='group-toggle']::after {
+  [data-ui='data-grid']:dir(rtl) [data-part='group-toggle']::after,
+  [data-ui='data-grid']:dir(rtl) button[data-part='tree-toggle']::after {
     rotate: 180deg;
   }
 
   [data-ui='data-grid']:dir(rtl) [data-part='expander'][aria-expanded='true']::after,
+  [data-ui='data-grid']:dir(rtl) button[data-part='tree-toggle'][aria-expanded='true']::after,
   [data-ui='data-grid']:dir(rtl)
     [data-part='group-row'][aria-expanded='true']
     [data-part='group-toggle']::after {
     rotate: 90deg;
+  }
+
+  /**
+   * ── The tree ───────────────────────────────────────────────────────────
+   *
+   * The tree column's cell steps in by its level and leads with the toggle;
+   * a leaf keeps the toggle's room, empty, so the names of one level align.
+   * The toggle is not a tab stop: the cursor stands on the cell, and the
+   * horizontal arrows there open and close. A row waiting for its children
+   * turns the chevron into the loader's ring.
+   */
+  [data-ui='data-grid'] [data-part='cell'][data-tree],
+  [data-ui='data-grid'] [data-part='row-header'][data-tree] {
+    gap: var(--slotted-space-1, 0.125rem);
+    padding-inline-start: calc(
+      var(--_pad-inline) + var(--_indent) * (var(--slotted-data-grid-level, 1) - 1)
+    );
+  }
+
+  [data-ui='data-grid'] [data-part='tree-toggle'][data-empty] {
+    /* The room, and nothing in it. */
+    cursor: default;
+  }
+
+  [data-ui='data-grid'] button[data-part='tree-toggle']:not(:disabled):hover {
+    background-color: var(--_hover);
+    color: var(--_text);
+  }
+
+  [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading]::after {
+    animation: slotted-data-grid-turn var(--slotted-duration-loop) linear infinite;
+    mask-image: var(--slotted-icon-loader-circle);
+    rotate: 0deg;
+  }
+
+  @keyframes slotted-data-grid-turn {
+    to {
+      rotate: 1turn;
+    }
   }
 
   /**
@@ -1089,9 +1134,9 @@
      keeps its own direction: an identifier, an email or a price in a
      right-to-left document is left-to-right text, and read in `dir="rtl"`
      "Bloom & Co." had its full stop moved to the front. */
-  [data-ui='data-grid'] [data-part='cell'] > span:first-child:not([data-ui]),
-  [data-ui='data-grid'] [data-part='row-header'] > span:first-child:not([data-ui]),
-  [data-ui='data-grid'] [data-part='summary-cell'] > span:first-child:not([data-ui]) {
+  [data-ui='data-grid'] [data-part='cell'] > span:not([data-ui], [data-part]),
+  [data-ui='data-grid'] [data-part='row-header'] > span:not([data-ui], [data-part]),
+  [data-ui='data-grid'] [data-part='summary-cell'] > span:not([data-ui], [data-part]) {
     flex: 1 1 auto;
     min-inline-size: 0;
     unicode-bidi: plaintext;
@@ -1100,7 +1145,7 @@
   /* A family drawn in a cell by a renderer — a badge, a tag — keeps its own
      size: read on the status column, a badge filled the cell's whole width
      because it was a span standing where the value stands. */
-  [data-ui='data-grid'] [data-part='cell'] > [data-ui]:first-child {
+  [data-ui='data-grid'] [data-part='cell'] > [data-ui]:not([data-part]) {
     flex: 0 0 auto;
     max-inline-size: 100%;
   }
@@ -1369,6 +1414,10 @@
     [data-ui='data-grid'] [data-part='cell'][data-changed] {
       animation: none;
       background-color: var(--_changed);
+    }
+
+    [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading]::after {
+      animation: none;
     }
   }
 
@@ -1949,6 +1998,7 @@
     [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']::after,
     [data-ui='data-grid'] [data-part='expander']::after,
     [data-ui='data-grid'] [data-part='group-toggle']::after,
+    [data-ui='data-grid'] button[data-part='tree-toggle']::after,
     [data-ui='data-grid'] [data-part='resizer']::after {
       forced-color-adjust: none;
     }

@@ -48,6 +48,7 @@ import {
   type GridRange,
   type ResolvedGridColumn,
   type SortDirection,
+  type GridTree,
 } from '@slotted/core/grid';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createScrollAffordance } from '@slotted/core/overflow';
@@ -734,7 +735,17 @@ function contentWidth(cell: HTMLElement): number {
                 [attr.aria-selected]="rowSelectable() ? isSelected(entry.node.key) : null"
                 [attr.data-selected]="isSelected(entry.node.key) ? '' : null"
                 [attr.data-current]="current()?.row === entry.node.key ? '' : null"
-                [attr.data-expanded]="isExpanded(entry.node.key) ? '' : null"
+                [attr.data-expanded]="detailOpen(entry.node) ? '' : null"
+                [attr.aria-level]="tree() ? entry.node.level : null"
+                [attr.aria-expanded]="
+                  tree() &&
+                  (entry.node.childCount > 0 ||
+                    entry.node.open ||
+                    isLoadingChildren(entry.node.key))
+                    ? entry.node.open
+                    : null
+                "
+                [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
                 [attr.data-disabled]="isDisabled(entry.node.key) ? '' : null"
                 [attr.data-editing]="edit()?.cell?.row === entry.node.key ? '' : null"
                 [attr.data-index]="entry.index"
@@ -845,7 +856,23 @@ function contentWidth(cell: HTMLElement): number {
                     (pointerenter)="
                       onCellPointerEnter($event, { row: entry.node.key, column: column.id })
                     "
+                    [attr.data-tree]="cell.tree"
+                    [style.--slotted-data-grid-level]="cell.tree ? entry.node.level : null"
                   >
+                    @if (cell.tree === 'branch') {
+                      <button
+                        data-part="tree-toggle"
+                        type="button"
+                        tabindex="-1"
+                        [attr.aria-expanded]="entry.node.open"
+                        [attr.aria-label]="entry.node.open ? t().collapse : t().expand"
+                        [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
+                        (click)="$event.stopPropagation(); toggleBranch(entry.node.key, $event)"
+                        (pointerdown)="$event.stopPropagation()"
+                      ></button>
+                    } @else if (cell.tree === 'leaf') {
+                      <span data-part="tree-toggle" data-empty aria-hidden="true"></span>
+                    }
                     @if (cell.editing) {
                       <div data-part="editor">
                         @if (editorTemplate(column.id); as template) {
@@ -877,7 +904,7 @@ function contentWidth(cell: HTMLElement): number {
                   </div>
                 }
               </div>
-              @if (isExpanded(entry.node.key) && detailTemplate(); as template) {
+              @if (detailOpen(entry.node) && detailTemplate(); as template) {
                 <div
                   data-part="detail"
                   role="row"
@@ -1034,7 +1061,7 @@ function contentWidth(cell: HTMLElement): number {
   host: {
     'data-ui': 'data-grid',
     'data-part': 'root',
-    role: 'grid',
+    '[attr.role]': "tree() ? 'treegrid' : 'grid'",
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-labelledby]': 'labelledBy() ?? null',
     '[attr.aria-rowcount]': 'ariaRowCount()',
@@ -1110,6 +1137,8 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly editCancel = output<GridCell>();
   readonly activate = output<DataGridActivateEvent>();
   readonly loadMore = output<void>();
+  /** A branch `hasChildren` says has children opened and none are in `rows`. */
+  readonly loadChildren = output<{ key: string; row: Row }>();
   readonly retry = output<void>();
   readonly manageColumns = output<void>();
 
@@ -1142,6 +1171,11 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
    */
   readonly manageable = input(false, { transform: booleanAttribute });
   readonly expandable = input<boolean | ((row: Row) => boolean) | undefined>(undefined);
+  /**
+   * Rows as a tree: each row names its parent by key. The open branches are
+   * `expanded`; `query.group` is ignored. The root is a `treegrid`.
+   */
+  readonly tree = input<GridTree<Row> | undefined>(undefined);
   readonly height = input<string | number | undefined>(undefined);
   readonly label = input<string | undefined>(undefined);
   readonly labelledBy = input<string | undefined>(undefined);
@@ -1307,6 +1341,10 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         row,
         index: offset + index,
         groups: [],
+        level: 1,
+        parent: null,
+        childCount: 0,
+        open: false,
       }));
       return {
         nodes,
@@ -1319,6 +1357,8 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const applied = applyQuery(rows, this.columns(), query, {
       rowKey: (row) => this.rowKeyOf(row),
       expandedGroups: this.expandedGroups(),
+      tree: this.tree(),
+      expanded: this.tree() ? this.expanded() : undefined,
       ...this.formatOptions(),
     });
     return { ...applied, total: applied.total as number | null };
@@ -1981,6 +2021,48 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
 
   /* ── Expansion ──────────────────────────────────────────────────────── */
   private readonly expandedSet = computed(() => new Set(this.expanded()));
+  /* ── Tree ───────────────────────────────────────────────────────────── */
+  protected readonly treeColumn = computed(() => {
+    const tree = this.tree();
+    if (!tree) return null;
+    if (tree.column && this.resolvedById().has(tree.column)) return tree.column;
+    return this.resolved()[0]?.id ?? null;
+  });
+  private readonly nodeByKey = computed(() => {
+    const map = new Map<string, RowNode>();
+    for (const node of this.nodes()) if (node.kind === 'row') map.set(node.key, node);
+    return map;
+  });
+  /* A row opened with children still to come: asked for once, marked until
+     a child of hers is in `rows` or she is closed. */
+  private readonly loadingChildren = signal<ReadonlySet<string>>(new Set());
+  protected isLoadingChildren(key: string) {
+    return this.loadingChildren().has(key);
+  }
+  /** In a tree, `expanded` is the branch; the detail is a leaf's alone. */
+  protected detailOpen(node: RowNode) {
+    return this.isExpanded(node.key) && (this.tree() === undefined || node.childCount === 0);
+  }
+  protected treeKind(node: RowNode, column: string): 'branch' | 'leaf' | null {
+    if (this.treeColumn() !== column) return null;
+    const branch =
+      node.childCount > 0 ||
+      node.open ||
+      this.isLoadingChildren(node.key) ||
+      this.tree()?.hasChildren?.(node.row as Row) === true;
+    return branch ? 'branch' : 'leaf';
+  }
+  toggleBranch(key: string, source?: unknown, reason: DataGridReason = 'pointer') {
+    const node = this.nodeByKey().get(key);
+    if (!node) return;
+    const opening = !this.expandedSet().has(key);
+    this.toggleExpanded(key, source, reason);
+    if (opening && node.childCount === 0 && this.tree()?.hasChildren?.(node.row as Row)) {
+      this.loadingChildren.update((current) => new Set(current).add(key));
+      this.loadChildren.emit({ key, row: node.row as Row });
+    }
+  }
+
   isExpanded(key: string) {
     return this.expandedSet().has(key);
   }
@@ -2200,6 +2282,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       edges: range.edges,
       readonly: this.anyEditable() && !editable && column.kind !== 'actions',
       changed: this.changedOf(key, column.id),
+      tree: this.treeKind(node, column.id),
     };
   }
   protected cellContext(
@@ -2414,6 +2497,19 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const destroy = inject(DestroyRef);
     destroy.onDestroy(() => {
       if (this.changedTimer !== null) clearTimeout(this.changedTimer);
+    });
+    /* A wait ends when a child arrived, or the row closed. */
+    effect(() => {
+      const waiting = this.loadingChildren();
+      if (waiting.size === 0) return;
+      const byKey = this.nodeByKey();
+      const open = this.expandedSet();
+      const next = new Set(waiting);
+      for (const key of waiting) {
+        const node = byKey.get(key);
+        if (!node || !open.has(key) || node.childCount > 0) next.delete(key);
+      }
+      if (next.size !== waiting.size) this.loadingChildren.set(next);
     });
     /* Two consecutive `rows` are compared once the new nodes are known. */
     effect(() => {
@@ -2922,6 +3018,31 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       if (((key === 'ArrowRight') !== mirror) !== open) {
         event.preventDefault();
         this.toggleGroup(groupKey, event, 'keyboard');
+        return;
+      }
+    }
+    /* In the tree column, the horizontal arrows open a closed branch, close
+       an open one, and climb to the parent from a closed row or a leaf. */
+    const treeColumn = this.treeColumn();
+    if (
+      row &&
+      treeColumn !== null &&
+      cell.column === treeColumn &&
+      (key === 'ArrowRight' || key === 'ArrowLeft') &&
+      !event.shiftKey
+    ) {
+      const node = this.nodeByKey().get(cell.row);
+      const branch =
+        node !== undefined && (node.childCount > 0 || this.tree()?.hasChildren?.(row) === true);
+      const opening = (key === 'ArrowRight') !== mirror;
+      if (node && branch && opening !== node.open) {
+        event.preventDefault();
+        this.toggleBranch(cell.row, event, 'keyboard');
+        return;
+      }
+      if (node && !opening && node.parent !== null) {
+        event.preventDefault();
+        this.setCurrent({ row: node.parent, column: cell.column }, 'keyboard', event);
         return;
       }
     }

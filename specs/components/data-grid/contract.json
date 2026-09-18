@@ -43,6 +43,7 @@
     "detail": "div",
     "group-row": "div",
     "group-toggle": "button",
+    "tree-toggle": "button",
     "summary": "div",
     "summary-cell": "div",
     "empty": "div",
@@ -896,6 +897,7 @@
         "detail",
         "group-row",
         "group-toggle",
+        "tree-toggle",
         "summary",
         "summary-cell",
         "empty",
@@ -941,6 +943,7 @@
       "media",
       "realtime",
       "export",
+      "tree",
       "keyboard",
       "accessibility"
     ]

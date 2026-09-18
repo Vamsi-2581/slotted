@@ -9,6 +9,7 @@ import type {
   GridColumnState,
   GridQuery,
   GridRange,
+  GridTree,
 } from '@slotted/core/grid';
 import { emptyQuery } from '@slotted/core/grid';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -858,5 +859,121 @@ describe('SlDataGrid, defaults', () => {
     const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
     expect(root.getAttribute('data-variant')).toBe('framed');
     expect(root.querySelector('[data-part="empty"]')!.textContent).toContain('Nada');
+  });
+});
+
+describe('SlDataGrid as a tree', () => {
+  interface Site {
+    id: string;
+    parent: string | null;
+    name: string;
+    stock: number;
+  }
+  const SITE_COLUMNS: GridColumn<Site>[] = [
+    { id: 'name', label: 'Name', rowHeader: true },
+    { id: 'stock', label: 'Stock', kind: 'number' },
+  ];
+  const SITES: Site[] = [
+    { id: 'pt', parent: null, name: 'Portugal', stock: 0 },
+    { id: 'pt-lis', parent: 'pt', name: 'Lisboa', stock: 40 },
+    { id: 'pt-lis-a', parent: 'pt-lis', name: 'Zona A', stock: 25 },
+    { id: 'pt-por', parent: 'pt', name: 'Porto', stock: 30 },
+    { id: 'es', parent: null, name: 'España', stock: 0 },
+  ];
+
+  @Component({
+    standalone: true,
+    imports: [SlDataGrid],
+    template: `
+      <sl-data-grid
+        label="Sites"
+        rowKey="id"
+        [rows]="rows()"
+        [columns]="columns"
+        [tree]="tree"
+        [(expanded)]="expanded"
+        [current]="current()"
+        (loadChildren)="loads.push($event.key)"
+      />
+    `,
+  })
+  class TreeHost {
+    readonly grid = viewChild.required(SlDataGrid);
+    readonly columns = SITE_COLUMNS;
+    readonly rows = signal<readonly Site[]>(SITES);
+    readonly expanded = signal<readonly string[]>([]);
+    readonly current = signal<GridCell | null>(null);
+    readonly loads: string[] = [];
+    tree: GridTree<Site> = { parentKey: (row) => row.parent };
+  }
+
+  async function mount() {
+    await TestBed.configureTestingModule({ imports: [TreeHost] }).compileComponents();
+    const fixture = TestBed.createComponent(TreeHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[data-ui="data-grid"]') as HTMLElement;
+    const rowKeys = () =>
+      [...root.querySelectorAll<HTMLElement>('[data-part="body"] > [data-part="row"]')].map(
+        (row) => row.dataset['row'],
+      );
+    const cell = (row: string, column: string) =>
+      root.querySelector<HTMLElement>(`[data-row="${row}"] [data-column="${column}"]`)!;
+    const toggle = (key: string) =>
+      root.querySelector<HTMLElement>(`[data-row="${key}"] [data-part="tree-toggle"]`)!;
+    return { fixture, root, rowKeys, cell, toggle };
+  }
+
+  it('is a treegrid of closed roots, and opens a branch from its toggle', async () => {
+    const { fixture, root, rowKeys, toggle } = await mount();
+    expect(root.getAttribute('role')).toBe('treegrid');
+    expect(rowKeys()).toEqual(['pt', 'es']);
+    expect(root.querySelector('[data-row="pt"]')!.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle('es').tagName).toBe('SPAN');
+    toggle('pt').click();
+    fixture.detectChanges();
+    expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-por', 'es']);
+    expect(root.querySelector('[data-row="pt-lis"]')!.getAttribute('aria-level')).toBe('2');
+  });
+
+  it('opens and closes from the keyboard in the tree column, and climbs to the parent', async () => {
+    const { fixture, cell, rowKeys } = await mount();
+    fixture.componentInstance.expanded.set(['pt']);
+    fixture.componentInstance.current.set({ row: 'pt-lis', column: 'name' });
+    fixture.detectChanges();
+    cell('pt-lis', 'name').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }),
+    );
+    fixture.detectChanges();
+    expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-lis-a', 'pt-por', 'es']);
+    cell('pt-lis', 'name').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }),
+    );
+    fixture.detectChanges();
+    expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-por', 'es']);
+    cell('pt-lis', 'name').dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }),
+    );
+    fixture.detectChanges();
+    expect(cell('pt', 'name').hasAttribute('data-current')).toBe(true);
+  });
+
+  it('asks for the children of a row that has none yet, and shows the wait until they arrive', async () => {
+    const { fixture, root, rowKeys, toggle } = await mount();
+    fixture.componentInstance.tree = {
+      parentKey: (row) => row.parent,
+      hasChildren: (row) => row.id === 'pt-lis',
+    };
+    fixture.componentInstance.rows.set(SITES.filter((row) => row.id !== 'pt-lis-a'));
+    fixture.detectChanges();
+    toggle('pt').click();
+    fixture.detectChanges();
+    toggle('pt-lis').click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loads).toEqual(['pt-lis']);
+    expect(root.querySelector('[data-row="pt-lis"]')!.hasAttribute('data-loading')).toBe(true);
+    fixture.componentInstance.rows.set(SITES);
+    fixture.detectChanges();
+    expect(root.querySelector('[data-row="pt-lis"]')!.hasAttribute('data-loading')).toBe(false);
+    expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-lis-a', 'pt-por', 'es']);
   });
 });

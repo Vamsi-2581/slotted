@@ -1205,6 +1205,178 @@ export const Realtime: Story = {
   render: () => <RealtimeDemo />,
 };
 
+/* ── Tree ──────────────────────────────────────────────────────────────── */
+
+interface Site {
+  id: string;
+  parent: string | null;
+  name: string;
+  kind: 'country' | 'warehouse' | 'zone';
+  stock: number;
+  updated: string;
+}
+
+const SITE_COLUMNS: GridColumn<Site>[] = [
+  { id: 'name', label: 'Site', rowHeader: true, width: 280 },
+  {
+    id: 'kind',
+    label: 'Kind',
+    kind: 'set',
+    width: 130,
+    options: [
+      { value: 'country', label: 'Country' },
+      { value: 'warehouse', label: 'Warehouse' },
+      { value: 'zone', label: 'Zone' },
+    ],
+  },
+  { id: 'stock', label: 'Stock', kind: 'number', width: 120, aggregate: 'sum' },
+  { id: 'updated', label: 'Updated', kind: 'date', width: 150 },
+];
+
+/* Countries, their warehouses, the zones in each: one warehouse (Porto) has
+   zones that arrive only when it is opened. */
+const SITES: Site[] = [
+  { id: 'pt', parent: null, name: 'Portugal', kind: 'country', stock: 0, updated: '2026-09-12' },
+  {
+    id: 'pt-lis',
+    parent: 'pt',
+    name: 'Lisboa',
+    kind: 'warehouse',
+    stock: 0,
+    updated: '2026-09-12',
+  },
+  {
+    id: 'pt-lis-a',
+    parent: 'pt-lis',
+    name: 'Zona A',
+    kind: 'zone',
+    stock: 1240,
+    updated: '2026-09-12',
+  },
+  {
+    id: 'pt-lis-b',
+    parent: 'pt-lis',
+    name: 'Zona B',
+    kind: 'zone',
+    stock: 860,
+    updated: '2026-09-10',
+  },
+  { id: 'pt-por', parent: 'pt', name: 'Porto', kind: 'warehouse', stock: 0, updated: '2026-09-11' },
+  { id: 'es', parent: null, name: 'España', kind: 'country', stock: 0, updated: '2026-09-09' },
+  {
+    id: 'es-mad',
+    parent: 'es',
+    name: 'Madrid',
+    kind: 'warehouse',
+    stock: 0,
+    updated: '2026-09-09',
+  },
+  {
+    id: 'es-mad-a',
+    parent: 'es-mad',
+    name: 'Zona A',
+    kind: 'zone',
+    stock: 2210,
+    updated: '2026-09-09',
+  },
+  {
+    id: 'es-bcn',
+    parent: 'es',
+    name: 'Barcelona',
+    kind: 'warehouse',
+    stock: 0,
+    updated: '2026-09-08',
+  },
+  {
+    id: 'es-bcn-a',
+    parent: 'es-bcn',
+    name: 'Zona A',
+    kind: 'zone',
+    stock: 430,
+    updated: '2026-09-08',
+  },
+  {
+    id: 'es-bcn-b',
+    parent: 'es-bcn',
+    name: 'Zona B',
+    kind: 'zone',
+    stock: 970,
+    updated: '2026-09-07',
+  },
+  { id: 'de', parent: null, name: 'Deutschland', kind: 'country', stock: 0, updated: '2026-09-06' },
+  {
+    id: 'de-ham',
+    parent: 'de',
+    name: 'Hamburg',
+    kind: 'warehouse',
+    stock: 0,
+    updated: '2026-09-06',
+  },
+  {
+    id: 'de-ham-a',
+    parent: 'de-ham',
+    name: 'Zone A',
+    kind: 'zone',
+    stock: 1520,
+    updated: '2026-09-06',
+  },
+];
+const PORTO_ZONES: Site[] = [
+  {
+    id: 'pt-por-a',
+    parent: 'pt-por',
+    name: 'Zona A',
+    kind: 'zone',
+    stock: 610,
+    updated: '2026-09-11',
+  },
+  {
+    id: 'pt-por-b',
+    parent: 'pt-por',
+    name: 'Zona B',
+    kind: 'zone',
+    stock: 340,
+    updated: '2026-09-11',
+  },
+];
+
+const TreeDemo = () => {
+  const [rows, setRows] = useState(SITES);
+  const [loads, setLoads] = useState(0);
+  return (
+    <Screen
+      size="tall"
+      before={
+        <Text size="sm" tone="muted">
+          {loads === 0
+            ? 'Open Portugal, then Porto: its zones are fetched on demand'
+            : `Porto’s zones fetched ${loads === 1 ? 'once' : `${loads} times`}`}
+        </Text>
+      }
+    >
+      <DataGrid<Site>
+        columns={SITE_COLUMNS}
+        defaultCurrent={{ row: 'pt', column: 'name' }}
+        defaultExpanded={['es']}
+        height="100%"
+        label="Sites"
+        onLoadChildren={({ key }) => {
+          setLoads((count) => count + 1);
+          setTimeout(() => setRows((current) => [...current, ...PORTO_ZONES]), 700);
+          void key;
+        }}
+        rowKey="id"
+        rows={rows}
+        selectionMode="multiple"
+        tree={{ parentKey: (row) => row.parent, hasChildren: (row) => row.id === 'pt-por' }}
+        variant="framed"
+      />
+    </Screen>
+  );
+};
+
+export const Tree: Story = { parameters: scenario('tree'), render: () => <TreeDemo /> };
+
 /* ── Export ────────────────────────────────────────────────────────────── */
 
 const ExportDemo = () => {

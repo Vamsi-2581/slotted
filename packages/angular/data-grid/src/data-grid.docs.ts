@@ -693,6 +693,17 @@ class ShipmentsPage {
     }),
   },
   {
+    id: 'data-source',
+    title: 'A data source',
+    note: 'dataSource hands the grid its own fetching: getRows is called with the query on every change and an AbortSignal, the request before it aborted; the answer — rows, total or hasMore — is kept by the query’s text (cacheSize, default 20), so a page the reader comes back to is on screen at once. The grid is in server mode with the loading and the error states of its own: a rejection is the error state with the message thrown, Try again asks the same query, reload() drops the cache. rows, totalCount, loading, error and retry are the source’s and are not read.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-data-source',
+      language: 'angular',
+      label: 'The grid asks',
+      source: `<sl-data-grid rowKey="id" [columns]="columns" [dataSource]="shipments" [(query)]="query" />`,
+    }),
+  },
+  {
     id: 'pagination',
     title: 'Pagination',
     note: 'query.page carries the index and the size; the pagination family projected with slDataGridFooter moves both, in the bar a table carries: a page size, the range and the two triggers, at the inline end. The status states the range, so showRange is off. A change of filter, search or group puts the page back at the start in the same request.',
@@ -944,7 +955,13 @@ class ShipmentsPage {
 ];
 
 const api = apiRows([
-  ['rows', 'readonly Row[]', '—', 'sl-data-grid', 'The records. The family never mutates them.'],
+  [
+    'rows',
+    'readonly Row[]',
+    '—',
+    'sl-data-grid',
+    'The records; the family never mutates them. Left out when a dataSource answers for them.',
+  ],
   [
     'rowKey',
     'keyof Row | (row) => string',
@@ -1128,6 +1145,13 @@ const api = apiRows([
     '—',
     'sl-data-grid',
     'Emitted when a branch hasChildren says has children opens and none are in rows.',
+  ],
+  [
+    'dataSource',
+    '{ getRows(query, { signal }), cacheSize? }',
+    '—',
+    'sl-data-grid',
+    'The grid asks for its own rows per query, aborting the request before, keeping answers by query; server mode with its own loading and error.',
   ],
   [
     'pinnedRows',
@@ -1414,7 +1438,7 @@ const composition = apiRows([
     'template reference',
     '—',
     'sl-data-grid',
-    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit, getVisibleRows, toCsv, exportCsv, selectAll, clearSelection, announce.',
+    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit, getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection, announce.',
   ],
   [
     'ControlValueAccessor',

@@ -7,6 +7,7 @@ import {
   applyQuery,
   cellText,
   cellValue,
+  serializeQuery,
   toCsv,
   columnRange,
   columnTemplate,
@@ -116,6 +117,8 @@ import {
   type DataGridEditCommit,
   type DataGridEditMode,
   type DataGridEditorContext,
+  type DataGridDataSource,
+  type DataGridDataSourceResult,
   type DataGridExportOptions,
   type DataGridPinnedRows,
   type DataGridRowsReorderEvent,
@@ -154,6 +157,9 @@ const DRAG_WIDTH = 40;
 const DEFAULT_ROW_HEIGHT = 34;
 /** Milliseconds a changed cell stays marked when `highlightChanges` is `true`. */
 const DEFAULT_CHANGED_DURATION = 1200;
+/** Answers a data source keeps, by query. */
+const DEFAULT_CACHE_SIZE = 20;
+const EMPTY_ROWS: readonly never[] = [];
 const VIRTUALIZE_ROWS_FROM = 100;
 const VIRTUALIZE_COLUMNS_FROM = 20;
 /** The viewport assumed until the scroller is measured. */
@@ -1030,7 +1036,7 @@ function contentWidth(cell: HTMLElement): number {
                     size="sm"
                     tone="secondary"
                     variant="outline"
-                    (click)="retry.emit()"
+                    (click)="onRetry()"
                   >
                     {{ t().retry }}
                   </button>
@@ -1174,19 +1180,53 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly MENU_OFFSET = 4;
 
   /* ── Data ───────────────────────────────────────────────────────────── */
-  readonly rows = input.required<readonly Row[]>();
+  /** The rows, or nothing when a `dataSource` answers for them. */
+  readonly rowsInput = input<readonly Row[] | undefined>(undefined, { alias: 'rows' });
+  /**
+   * The grid asks for its own rows: `getRows` is called with the query on
+   * every change, the request before it aborted, and the answer is kept by
+   * the query's text. The grid is in `server` mode, with the loading and the
+   * error states of its own; `reload()` drops the cache.
+   */
+  readonly dataSource = input<DataGridDataSource<Row> | undefined>(undefined);
   readonly rowKey = input.required<keyof Row | ((row: Row) => string)>();
   readonly columns = input.required<readonly GridColumn<Row>[]>();
   readonly columnGroups = input<readonly GridColumnGroup[] | undefined>(undefined);
   readonly mode = input<DataGridMode | undefined>(undefined);
-  readonly totalCount = input<number | undefined, number | string | undefined>(undefined, {
+  readonly totalCountInput = input<number | undefined, number | string | undefined>(undefined, {
+    alias: 'totalCount',
     transform: (value) => (value === undefined ? undefined : numberAttribute(value)),
   });
-  readonly hasMore = input<boolean | undefined, boolean | string | undefined>(undefined, {
+  readonly hasMoreInput = input<boolean | undefined, boolean | string | undefined>(undefined, {
+    alias: 'hasMore',
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
-  readonly loading = input(false, { transform: booleanAttribute });
-  readonly error = input<string | null | undefined>(undefined);
+  readonly loadingInput = input(false, { alias: 'loading', transform: booleanAttribute });
+  readonly errorInput = input<string | null | undefined>(undefined, { alias: 'error' });
+  /* With a source the grid asks for its rows itself; what the consumer gave
+     for rows, total, loading and error is what the source answered. */
+  private readonly sourced = signal<{
+    result: DataGridDataSourceResult<Row> | null;
+    loading: boolean;
+    error: string | null;
+  }>({ result: null, loading: false, error: null });
+  protected readonly rows = computed<readonly Row[]>(() =>
+    this.dataSource()
+      ? (this.sourced().result?.rows ?? EMPTY_ROWS)
+      : (this.rowsInput() ?? EMPTY_ROWS),
+  );
+  protected readonly totalCount = computed(() =>
+    this.dataSource() ? this.sourced().result?.total : this.totalCountInput(),
+  );
+  protected readonly hasMore = computed(() =>
+    this.dataSource() ? this.sourced().result?.hasMore : this.hasMoreInput(),
+  );
+  protected readonly loading = computed(() =>
+    this.dataSource() ? this.sourced().loading : this.loadingInput(),
+  );
+  protected readonly error = computed(() =>
+    this.dataSource() ? this.sourced().error : this.errorInput(),
+  );
   readonly disabledKeys = input<readonly string[]>([]);
   /**
    * Marks a mounted cell whose value changed between two `rows`, for the
@@ -1333,7 +1373,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly resolvedMode = computed<DataGridMode>(
     () =>
       this.mode() ??
-      (this.totalCount() !== undefined || this.hasMore() !== undefined ? 'server' : 'client'),
+      (this.dataSource() || this.totalCount() !== undefined || this.hasMore() !== undefined
+        ? 'server'
+        : 'client'),
   );
   protected readonly ariaLabel = computed(
     () => this.label() ?? (this.labelledBy() ? null : this.t().grid),
@@ -2671,6 +2713,15 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const destroy = inject(DestroyRef);
     destroy.onDestroy(() => {
       if (this.changedTimer !== null) clearTimeout(this.changedTimer);
+      this.sourceController?.abort();
+    });
+    /* One request per query, and per retry or reload. */
+    effect(() => {
+      const source = this.dataSource();
+      const query = this.query();
+      this.sourceAttempt();
+      if (!source) return;
+      untracked(() => this.fetchFromSource(source, query));
     });
     /* A wait ends when a child arrived, or the row closed. */
     effect(() => {
@@ -2985,6 +3036,53 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     this.drag = controller;
     this.attachDraggables();
     this.wireRowDrag();
+  }
+
+  /* ── The data source ───────────────────────────────────────────────── */
+  private readonly sourceCache = new Map<string, DataGridDataSourceResult<Row>>();
+  private sourceController: AbortController | null = null;
+  private readonly sourceAttempt = signal(0);
+  /** The same query again, after a failure; with a source, else `retry` is emitted. */
+  protected onRetry() {
+    if (this.dataSource()) this.sourceAttempt.update((count) => count + 1);
+    else this.retry.emit();
+  }
+  /** Drops the data source's cache and asks the query again. */
+  reload() {
+    this.sourceCache.clear();
+    this.sourceAttempt.update((count) => count + 1);
+  }
+  private fetchFromSource(source: DataGridDataSource<Row>, query: GridQuery) {
+    const key = serializeQuery(query);
+    const cached = this.sourceCache.get(key);
+    if (cached) {
+      this.sourced.set({ result: cached, loading: false, error: null });
+      return;
+    }
+    this.sourceController?.abort();
+    const own = new AbortController();
+    this.sourceController = own;
+    this.sourced.update((current) => ({ ...current, loading: true, error: null }));
+    source.getRows(query, { signal: own.signal }).then(
+      (result) => {
+        if (own.signal.aborted) return;
+        const size = source.cacheSize ?? DEFAULT_CACHE_SIZE;
+        if (size > 0) {
+          this.sourceCache.set(key, result);
+          while (this.sourceCache.size > size) {
+            const oldest = this.sourceCache.keys().next().value;
+            if (oldest === undefined) break;
+            this.sourceCache.delete(oldest);
+          }
+        }
+        this.sourced.set({ result, loading: false, error: null });
+      },
+      (reason: unknown) => {
+        if (own.signal.aborted) return;
+        const message = reason instanceof Error ? reason.message : String(reason);
+        this.sourced.update((current) => ({ ...current, loading: false, error: message }));
+      },
+    );
   }
 
   /* ── Reordering rows ────────────────────────────────────────────────── */

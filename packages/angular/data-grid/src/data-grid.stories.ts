@@ -42,6 +42,7 @@ import { persistedGridView } from './persisted-grid-view';
 import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridColumnStateRequest,
+  DataGridDataSource,
   DataGridEditCommit,
   DataGridRowsReorderEvent,
   DataGridSelection,
@@ -960,6 +961,68 @@ export const Server: Story = {
           `[rows]="server.page().rows" selectionMode="multiple" [query]="server.query()" (queryChange)="server.setQuery($event)" [totalCount]="server.page().total" [loading]="server.pending()" [error]="server.failing() ? 'The shipments service timed out' : null" (retry)="server.retry()"`,
         ),
         { before: note('{{ summary() }}') },
+      ),
+    };
+  },
+};
+
+/* The same server as a data source: the grid asks, aborts, keeps and
+   retries by itself; the page the reader comes back to is on screen at once. */
+export const DataSource: Story = {
+  parameters: scenario('data-source'),
+  render: () => {
+    const query = signal<GridQuery>(emptyQuery({ index: 0, size: 25 }));
+    const total = signal<number | undefined>(undefined);
+    const source: DataGridDataSource<Shipment> = {
+      async getRows(asked, { signal }) {
+        await new Promise<void>((resolve, reject) => {
+          const timer = setTimeout(resolve, 400);
+          signal.addEventListener('abort', () => {
+            clearTimeout(timer);
+            reject(new DOMException('aborted', 'AbortError'));
+          });
+        });
+        if (asked.search.trim().toLowerCase() === 'fail')
+          throw new Error('The shipments service timed out');
+        const applied = applyQuery(TEN_THOUSAND, columns, asked, { rowKey: (row) => row.id });
+        total.set(applied.total);
+        return {
+          rows: applied.nodes.flatMap((node) => (node.kind === 'row' ? [node.row] : [])),
+          total: applied.total,
+        };
+      },
+    };
+    return {
+      props: {
+        ...base(),
+        query,
+        total,
+        source,
+        page: () => {
+          const held = query().page;
+          return (held && 'index' in held ? held.index : 0) + 1;
+        },
+        setPage: (request: ChangeRequest<number>) =>
+          query.set(withPageIndex(query(), request.value - 1).query),
+      },
+      template: screen(
+        grid(
+          '#grid="slDataGrid" [dataSource]="source" [(query)]="query" selectionMode="multiple" [showRange]="false"',
+          `
+      <nav slDataGridFooter slPagination [count]="total()" [pageSize]="25" [page]="page()" (pageChange)="setPage($event)">
+        <p slPaginationStatus></p>
+        <button slPaginationPrevious type="button"></button>
+        <button slPaginationNext type="button"></button>
+      </nav>`,
+        ),
+        {
+          before: `<div class="slotted-demo-row">
+    ${note('Sort, filter or page: each query is one request; search “fail” for the error')}
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="grid.reload()">
+      Reload
+    </button>
+  </div>`,
+        },
       ),
     };
   },

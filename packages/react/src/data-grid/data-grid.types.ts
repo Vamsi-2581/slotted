@@ -204,6 +204,23 @@ export interface DataGridExportOptions extends CsvOptions {
   readonly columns?: 'visible' | 'all' | undefined;
 }
 
+export interface DataGridDataSourceResult<Row> {
+  readonly rows: readonly Row[];
+  /** The whole set's size, when known. */
+  readonly total?: number | undefined;
+  /** Whether a page past this one exists, when the total is not known. */
+  readonly hasMore?: boolean | undefined;
+}
+
+export interface DataGridDataSource<Row> {
+  getRows(
+    query: GridQuery,
+    options: { readonly signal: AbortSignal },
+  ): Promise<DataGridDataSourceResult<Row>>;
+  /** Answers kept, by query. Default 20; 0 keeps none. */
+  readonly cacheSize?: number | undefined;
+}
+
 export interface DataGridPinnedRows {
   readonly top?: readonly string[] | undefined;
   readonly bottom?: readonly string[] | undefined;
@@ -232,6 +249,8 @@ export interface DataGridHandle {
   toCsv(options?: DataGridExportOptions): string;
   /** Builds the file and hands it to the browser as a download. */
   exportCsv(options?: DataGridExportOptions): void;
+  /** Drops the data source's cache and asks the query again. */
+  reload(): void;
   selectAll(): void;
   clearSelection(): void;
   readonly element: HTMLDivElement | null;
@@ -245,7 +264,15 @@ export interface DataGridProps<Row>
     >,
     DataGridDefaults {
   /* ── Data ───────────────────────────────────────────────────────────── */
-  rows: readonly Row[];
+  /** The rows, or nothing when a `dataSource` answers for them. */
+  rows?: readonly Row[] | undefined;
+  /**
+   * The grid asks for its own rows: `getRows` is called with the query on
+   * every change, the request before it aborted, and the answer is kept by
+   * the query's text. The grid is in `server` mode, with the loading and the
+   * error states of its own; `handle.reload()` drops the cache.
+   */
+  dataSource?: DataGridDataSource<Row> | undefined;
   /** A field name, or a function of the row. */
   rowKey: keyof Row | ((row: Row) => string);
   columns: readonly GridColumn<Row>[];

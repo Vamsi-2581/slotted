@@ -16,6 +16,8 @@ export type {
   DataGridActivateEvent,
   DataGridCellContext,
   DataGridColumnStateRequest,
+  DataGridDataSource,
+  DataGridDataSourceResult,
   DataGridDefaults,
   DataGridDefaultsProviderProps,
   DataGridEditCommit,

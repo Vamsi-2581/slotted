@@ -84,6 +84,7 @@ import {
   type EditSession,
 } from './data-grid-context';
 import { fill, resolveLabels, useDataGridDefaults } from './data-grid-defaults';
+import { useDataSource } from './use-data-source';
 import { DataGridHead } from './data-grid-header';
 import {
   DEFAULT_CHANGED_DURATION,
@@ -143,6 +144,7 @@ function sameSelection(a: string | readonly string[] | null, b: string | readonl
  * and lets the reader arrange the columns.
  */
 type RowNodeOf<Row> = Extract<GridNode<Row>, { kind: 'row' }>;
+const EMPTY_ROWS: readonly never[] = [];
 
 /** The room a cell's content asks for: the value's laid-out width, the boxes beside it, the gaps, the padding and the border. */
 function contentWidth(cell: HTMLElement): number {
@@ -173,6 +175,7 @@ export function DataGrid<Row>({
   activatable,
   cellRenderers,
   columnGroups,
+  dataSource,
   columnState: columnStateProp,
   columns,
   current: currentProp,
@@ -186,7 +189,7 @@ export function DataGrid<Row>({
   disabledKeys,
   editMode,
   editorRenderers,
-  error,
+  error: givenError,
   expandable,
   expanded: expandedProp,
   expandedGroups: expandedGroupsProp,
@@ -194,14 +197,14 @@ export function DataGrid<Row>({
   filterRow,
   footer,
   handle,
-  hasMore,
+  hasMore: givenHasMore,
   height,
   highlightChanges,
   label,
   labelledBy,
   labels,
   loadMoreThreshold,
-  loading,
+  loading: givenLoading,
   locale,
   mode,
   onActivate,
@@ -219,7 +222,7 @@ export function DataGrid<Row>({
   onManageColumns,
   onQueryChange,
   onRangeChange,
-  onRetry,
+  onRetry: givenOnRetry,
   onValueChange,
   overscan,
   pinnedRows,
@@ -237,7 +240,7 @@ export function DataGrid<Row>({
   rowHeight,
   rowKey,
   rowsReorderable,
-  rows,
+  rows: givenRows,
   selectionMode,
   showRange,
   skeletonRows,
@@ -246,7 +249,7 @@ export function DataGrid<Row>({
   striped,
   style,
   timeZone,
-  totalCount,
+  totalCount: givenTotalCount,
   tree,
   value: valueProp,
   variant,
@@ -282,8 +285,6 @@ export function DataGrid<Row>({
   const resolvedSkeleton = skeletonRows ?? defaults.skeletonRows ?? 8;
   const resolvedLocale = locale ?? defaults.locale;
   const resolvedActivatable = activatable ?? false;
-  const resolvedMode =
-    mode ?? (totalCount !== undefined || hasMore !== undefined ? 'server' : 'client');
 
   const rowKeyOf = useCallback(
     (row: Row) =>
@@ -331,6 +332,19 @@ export function DataGrid<Row>({
     onQueryChange as never,
     sameQuery,
   );
+
+  /* ── The data source ───────────────────────────────────────────────── */
+  /* With a source the grid asks for its rows itself; what the consumer gave
+     for rows, total, loading and error is what the source answered. */
+  const sourced = useDataSource(dataSource, query);
+  const rows = dataSource ? sourced.rows : (givenRows ?? EMPTY_ROWS);
+  const totalCount = dataSource ? sourced.total : givenTotalCount;
+  const hasMore = dataSource ? sourced.hasMore : givenHasMore;
+  const loading = dataSource ? sourced.loading : givenLoading;
+  const error = dataSource ? sourced.error : givenError;
+  const onRetry = dataSource ? sourced.retry : givenOnRetry;
+  const resolvedMode =
+    mode ?? (dataSource || totalCount !== undefined || hasMore !== undefined ? 'server' : 'client');
   const normalizedState = useMemo(
     () => normalizeColumnState(columnStateProp ?? defaultColumnState, columns),
     [columnStateProp, columns],
@@ -2346,6 +2360,7 @@ export function DataGrid<Row>({
       /* A download by an anchor: the one way a browser saves a file without
          a permission prompt, and the URL is revoked as soon as the click has
          taken it. */
+      reload: sourced.reload,
       exportCsv: (options = {}) => {
         const text = buildCsv(options);
         const doc = root.current?.ownerDocument ?? document;
@@ -2375,6 +2390,7 @@ export function DataGrid<Row>({
       result.rows,
       rows,
       buildCsv,
+      sourced.reload,
       commitSelection,
       selectableKeys,
     ],

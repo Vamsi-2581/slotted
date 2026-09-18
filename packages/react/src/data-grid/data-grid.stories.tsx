@@ -37,7 +37,7 @@ import { DataGrid } from './data-grid';
 import { DataGridDefaultsProvider } from './data-grid-defaults';
 import { usePersistedGridView } from './use-persisted-grid-view';
 import { REACT_DATA_GRID_DOCS, REACT_DATA_GRID_TOKENS } from './data-grid.docs';
-import type { DataGridHandle, DataGridProps } from './data-grid.types';
+import type { DataGridDataSource, DataGridHandle, DataGridProps } from './data-grid.types';
 
 /* ── The domain: shipments ─────────────────────────────────────────────── */
 
@@ -885,6 +885,93 @@ const ServerDemo = () => {
 };
 
 export const Server: Story = { parameters: scenario('server'), render: () => <ServerDemo /> };
+
+/* The same server as a data source: the grid asks, aborts, keeps and
+   retries by itself; the page the reader comes back to is on screen at once. */
+const shipmentSource: DataGridDataSource<Shipment> = {
+  async getRows(query, { signal }) {
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(resolve, 400);
+      signal.addEventListener('abort', () => {
+        clearTimeout(timer);
+        reject(new DOMException('aborted', 'AbortError'));
+      });
+    });
+    if (query.search.trim().toLowerCase() === 'fail')
+      throw new Error('The shipments service timed out');
+    const { applyQuery } = await import('@slotted/core/grid');
+    const applied = applyQuery(TEN_THOUSAND, columns, query, { rowKey: (row) => row.id });
+    return {
+      rows: applied.nodes.flatMap((node) => (node.kind === 'row' ? [node.row] : [])),
+      total: applied.total,
+    };
+  },
+};
+
+const DataSourceDemo = () => {
+  const [query, setQuery] = useState<GridQuery>(emptyQuery({ index: 0, size: 25 }));
+  const [total, setTotal] = useState<number | undefined>(undefined);
+  const handle = useRef<DataGridHandle | null>(null);
+  const page = query.page && 'index' in query.page ? query.page : { index: 0, size: 25 };
+  /* The pager needs the count the source answered: the source is the
+     consumer's, so the consumer reads it on the way through. */
+  const source = useMemo<DataGridDataSource<Shipment>>(
+    () => ({
+      getRows: async (asked, options) => {
+        const result = await shipmentSource.getRows(asked, options);
+        setTotal(result.total);
+        return result;
+      },
+    }),
+    [],
+  );
+  return (
+    <Screen
+      before={
+        <div className="slotted-demo-row">
+          <Text size="sm" tone="muted">
+            Sort, filter or page: each query is one request; search “fail” for the error
+          </Text>
+          <Button
+            onClick={() => handle.current?.reload()}
+            size="sm"
+            tone="secondary"
+            variant="outline"
+          >
+            Reload
+          </Button>
+        </div>
+      }
+    >
+      <Shipments
+        dataSource={source}
+        footer={
+          <Pagination
+            count={total}
+            onPageChange={(index) => setQuery(withPageIndex(query, index - 1).query)}
+            page={page.index + 1}
+            pageSize={page.size}
+          >
+            <PaginationStatus />
+            <PaginationPrevious />
+            <PaginationNext />
+          </Pagination>
+        }
+        handle={handle}
+        onQueryChange={setQuery}
+        query={query}
+        rows={undefined}
+        selectionMode="multiple"
+        showRange={false}
+      />
+    </Screen>
+  );
+};
+
+export const DataSource: Story = {
+  parameters: scenario('data-source'),
+  render: () => <DataSourceDemo />,
+};
 
 const PaginationDemo = () => {
   const [query, setQuery] = useState<GridQuery>(emptyQuery({ index: 0, size: 8 }));

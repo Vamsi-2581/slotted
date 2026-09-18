@@ -11,7 +11,7 @@ import type {
   GridRange,
   GridTree,
 } from '@slotted/core/grid';
-import { emptyQuery } from '@slotted/core/grid';
+import { emptyQuery, withPageIndex } from '@slotted/core/grid';
 import type { ChangeRequest } from '@slotted/core/state';
 import contract from '../../../../specs/components/data-grid/contract.json';
 import { SlDataGrid } from './data-grid';
@@ -19,6 +19,7 @@ import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridActivateEvent,
   DataGridColumnStateRequest,
+  DataGridDataSource,
   DataGridEditCommit,
   DataGridPinnedRows,
   DataGridQueryRequest,
@@ -1151,5 +1152,105 @@ describe('SlDataGrid pinned rows', () => {
     expect(cell('S1', 'customer').hasAttribute('data-current')).toBe(true);
     down('S1', 'ArrowUp');
     expect(cell('S4', 'customer').hasAttribute('data-current')).toBe(true);
+  });
+});
+
+describe('SlDataGrid with a data source', () => {
+  type Answer = { rows: Shipment[]; total: number };
+  function source(answer: (query: GridQuery) => Answer | Error) {
+    const calls: { query: GridQuery; signal: AbortSignal }[] = [];
+    return {
+      calls,
+      getRows: (query: GridQuery, options: { signal: AbortSignal }) => {
+        calls.push({ query, signal: options.signal });
+        const result = answer(query);
+        return result instanceof Error ? Promise.reject(result) : Promise.resolve(result);
+      },
+    };
+  }
+
+  @Component({
+    standalone: true,
+    imports: [SlDataGrid],
+    template: `
+      <sl-data-grid
+        label="Shipments"
+        rowKey="id"
+        [columns]="columns"
+        [dataSource]="source"
+        [(query)]="query"
+      />
+    `,
+  })
+  class SourcedHost {
+    readonly grid = viewChild.required(SlDataGrid);
+    readonly columns = COLUMNS;
+    readonly query = signal<GridQuery>(emptyQuery({ index: 0, size: 2 }));
+    source: DataGridDataSource<Shipment> = { getRows: () => Promise.resolve({ rows: [] }) };
+  }
+
+  const settle = async (fixture: { detectChanges(): void }) => {
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+  };
+
+  it('asks for the rows of each query, shows the wait, and keeps the answer by the query', async () => {
+    const shipments = source((query) => ({
+      rows:
+        query.page && 'index' in query.page && query.page.index === 1
+          ? [ROWS[2]!, ROWS[3]!]
+          : [ROWS[0]!, ROWS[1]!],
+      total: 4,
+    }));
+    await TestBed.configureTestingModule({ imports: [SourcedHost] }).compileComponents();
+    const fixture = TestBed.createComponent(SourcedHost);
+    fixture.componentInstance.source = shipments;
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    const bodyKeys = () =>
+      [...root.querySelectorAll<HTMLElement>('[data-part="body"] > [data-part="row"]')].map(
+        (row) => row.dataset['row'],
+      );
+    expect(root.querySelector('[data-part="loader"]')).not.toBeNull();
+    await settle(fixture);
+    expect(bodyKeys()).toEqual(['S1', 'S2']);
+    expect(root.getAttribute('aria-rowcount')).toBe('5');
+    fixture.componentInstance.query.update((query) => withPageIndex(query, 1).query);
+    fixture.detectChanges();
+    /* The page that is there stays, dimmed, while the next one is fetched. */
+    expect(bodyKeys()).toEqual(['S1', 'S2']);
+    expect(root.getAttribute('aria-busy')).toBe('true');
+    await settle(fixture);
+    expect(bodyKeys()).toEqual(['S3', 'S4']);
+    fixture.componentInstance.query.update((query) => withPageIndex(query, 0).query);
+    fixture.detectChanges();
+    await settle(fixture);
+    expect(bodyKeys()).toEqual(['S1', 'S2']);
+    expect(shipments.calls).toHaveLength(2);
+  });
+
+  it('draws the error the source threw, retries from it, and reloads past the cache', async () => {
+    let failing = true;
+    const shipments = source(() =>
+      failing ? new Error('The shipments service timed out') : { rows: [ROWS[0]!], total: 1 },
+    );
+    await TestBed.configureTestingModule({ imports: [SourcedHost] }).compileComponents();
+    const fixture = TestBed.createComponent(SourcedHost);
+    fixture.componentInstance.source = shipments;
+    fixture.detectChanges();
+    await settle(fixture);
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    expect(root.textContent).toContain('The shipments service timed out');
+    failing = false;
+    (root.querySelector('[data-part="empty"] button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await settle(fixture);
+    expect(root.querySelectorAll('[data-part="body"] > [data-part="row"]')).toHaveLength(1);
+    expect(shipments.calls).toHaveLength(2);
+    fixture.componentInstance.grid().reload();
+    fixture.detectChanges();
+    await settle(fixture);
+    expect(shipments.calls).toHaveLength(3);
   });
 });

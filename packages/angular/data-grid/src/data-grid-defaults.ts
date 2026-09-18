@@ -25,6 +25,23 @@ export type DataGridReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'prog
 export type DataGridExpandedGroups = readonly string[] | 'all';
 export type DataGridSelection = string | readonly string[] | null;
 
+export interface DataGridDataSourceResult<Row> {
+  readonly rows: readonly Row[];
+  /** The whole set's size, when known. */
+  readonly total?: number | undefined;
+  /** Whether a page past this one exists, when the total is not known. */
+  readonly hasMore?: boolean | undefined;
+}
+
+export interface DataGridDataSource<Row> {
+  getRows(
+    query: GridQuery,
+    options: { readonly signal: AbortSignal },
+  ): Promise<DataGridDataSourceResult<Row>>;
+  /** Answers kept, by query. Default 20; 0 keeps none. */
+  readonly cacheSize?: number | undefined;
+}
+
 export interface DataGridPinnedRows {
   readonly top?: readonly string[] | undefined;
   readonly bottom?: readonly string[] | undefined;

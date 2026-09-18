@@ -626,6 +626,26 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'data-source',
+    title: 'A data source',
+    note: 'dataSource hands the grid its own fetching: getRows is called with the query on every change and an AbortSignal, the request before it aborted; the answer — rows, total or hasMore — is kept by the query’s text (cacheSize, default 20), so a page the reader comes back to is on screen at once. The grid is in server mode with the loading and the error states of its own: a rejection is the error state with the message thrown, Try again asks the same query, handle.reload() drops the cache. rows, totalCount, loading, error and onRetry are the source’s and are not read.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-data-source',
+      language: 'tsx',
+      label: 'The grid asks',
+      source: `const shipments: DataGridDataSource<Shipment> = {
+  getRows: (query, { signal }) =>
+    fetch(\`/api/shipments?\${toGridParams(query)}\`, { signal }).then((response) => response.json()),
+};
+<DataGrid
+  columns={columns}
+  dataSource={shipments}
+  defaultQuery={emptyQuery({ index: 0, size: 25 })}
+  rowKey="id"
+/>;`,
+    }),
+  },
+  {
     id: 'pagination',
     title: 'Pagination',
     note: 'query.page carries the index and the size; the pagination family in the footer moves both, in the bar a table carries: a page size, the range and the two triggers, at the inline end. The status states the range, so showRange is off. A change of filter, search or group puts the page back at the start in the same request.',
@@ -848,7 +868,13 @@ const scenes: ReferenceSceneMeta[] = [
 ];
 
 const api = apiRows([
-  ['rows', 'readonly Row[]', '—', 'DataGrid', 'The records. The family never mutates them.'],
+  [
+    'rows',
+    'readonly Row[]',
+    '—',
+    'DataGrid',
+    'The records; the family never mutates them. Left out when a dataSource answers for them.',
+  ],
   [
     'rowKey',
     'keyof Row | (row) => string',
@@ -1136,6 +1162,13 @@ const api = apiRows([
     'Called when a branch hasChildren says has children opens and none are in rows.',
   ],
   [
+    'dataSource',
+    '{ getRows(query, { signal }), cacheSize? }',
+    '—',
+    'DataGrid',
+    'The grid asks for its own rows per query, aborting the request before, keeping answers by query; server mode with its own loading and error.',
+  ],
+  [
     'pinnedRows',
     '{ top?: string[], bottom?: string[] }',
     '—',
@@ -1288,7 +1321,7 @@ const api = apiRows([
     'RefObject<DataGridHandle>',
     '—',
     'DataGrid',
-    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (one column, or every resizable column as one request), getVisibleRows, toCsv, exportCsv, selectAll, clearSelection, element.',
+    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (one column, or every resizable column as one request), getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection, element.',
   ],
   [
     'align',
@@ -1394,7 +1427,7 @@ const composition = apiRows([
     'DataGridHandle',
     '—',
     'DataGrid',
-    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, startEdit, stopEdit, autofit, getVisibleRows, toCsv, exportCsv, selectAll, clearSelection.',
+    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, startEdit, stopEdit, autofit, getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection.',
   ],
   [
     'native props',

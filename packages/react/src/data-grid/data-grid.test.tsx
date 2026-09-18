@@ -1,5 +1,5 @@
 import type { GridCell, GridColumn, GridColumnState, GridQuery } from '@slotted/core/grid';
-import { emptyQuery } from '@slotted/core/grid';
+import { emptyQuery, withPageIndex } from '@slotted/core/grid';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -846,6 +846,115 @@ describe('DataGrid, the rest', () => {
     render(<Shipments current={cellRef} />);
     expect(cell('S1', 'id')).toHaveAttribute('data-current');
   });
+  describe('with a data source', () => {
+    type Answer = { rows: Shipment[]; total: number };
+    function source(answer: (query: GridQuery) => Answer | Error, delay = 0) {
+      const calls: { query: GridQuery; signal: AbortSignal }[] = [];
+      const getRows = vi.fn((query: GridQuery, options: { signal: AbortSignal }) => {
+        calls.push({ query, signal: options.signal });
+        return new Promise<Answer>((resolve, reject) => {
+          const result = answer(query);
+          const settle = () => (result instanceof Error ? reject(result) : resolve(result));
+          if (delay === 0) settle();
+          else setTimeout(settle, delay);
+        });
+      });
+      return { getRows, calls };
+    }
+    const bodyKeys = () =>
+      [...grid().querySelectorAll<HTMLElement>('[data-part="body"] > [data-part="row"]')].map(
+        (row) => row.dataset['row'],
+      );
+
+    it('asks for the rows of each query, shows the wait, and keeps the answer by the query', async () => {
+      const shipments = source((query) => ({
+        rows:
+          query.page && 'index' in query.page && query.page.index === 1
+            ? [ROWS[2]!, ROWS[3]!]
+            : [ROWS[0]!, ROWS[1]!],
+        total: 4,
+      }));
+      function Sourced() {
+        const [query, setQuery] = useState<GridQuery>(emptyQuery({ index: 0, size: 2 }));
+        return (
+          <>
+            <button onClick={() => setQuery(withPageIndex(query, 1).query)}>next</button>
+            <button onClick={() => setQuery(withPageIndex(query, 0).query)}>back</button>
+            <Shipments
+              dataSource={shipments}
+              onQueryChange={setQuery}
+              query={query}
+              rows={undefined}
+            />
+          </>
+        );
+      }
+      render(<Sourced />);
+      expect(grid().querySelector('[data-part="loader"]')).not.toBeNull();
+      await waitFor(() => expect(bodyKeys()).toEqual(['S1', 'S2']));
+      /* The total from the source, the header, no summary in server mode. */
+      expect(grid()).toHaveAttribute('aria-rowcount', '5');
+      fireEvent.click(screen.getByText('next'));
+      /* The page that is there stays, dimmed, while the next one is fetched. */
+      expect(bodyKeys()).toEqual(['S1', 'S2']);
+      expect(grid()).toHaveAttribute('aria-busy', 'true');
+      await waitFor(() => expect(bodyKeys()).toEqual(['S3', 'S4']));
+      fireEvent.click(screen.getByText('back'));
+      await waitFor(() => expect(bodyKeys()).toEqual(['S1', 'S2']));
+      /* Two queries, two requests: the page the reader came back to was kept. */
+      expect(shipments.getRows).toHaveBeenCalledTimes(2);
+    });
+
+    it('aborts the request a newer query replaces', async () => {
+      const shipments = source(() => ({ rows: [ROWS[0]!], total: 1 }), 50);
+      function Sourced() {
+        const [query, setQuery] = useState<GridQuery>(emptyQuery());
+        return (
+          <>
+            <button onClick={() => setQuery({ ...query, search: 'a' })}>search</button>
+            <Shipments
+              dataSource={shipments}
+              onQueryChange={setQuery}
+              query={query}
+              rows={undefined}
+            />
+          </>
+        );
+      }
+      render(<Sourced />);
+      fireEvent.click(screen.getByText('search'));
+      expect(shipments.calls[0]!.signal.aborted).toBe(true);
+      expect(shipments.calls[1]!.signal.aborted).toBe(false);
+      await waitFor(() => expect(bodyKeys()).toEqual(['S1']));
+    });
+
+    it('draws the error the source threw, retries from it, and reloads past the cache', async () => {
+      let failing = true;
+      const shipments = source(() =>
+        failing ? new Error('The shipments service timed out') : { rows: [ROWS[0]!], total: 1 },
+      );
+      function Sourced() {
+        const handle = useRef<DataGridHandle | null>(null);
+        return (
+          <>
+            <button onClick={() => handle.current?.reload()}>reload</button>
+            <Shipments dataSource={shipments} handle={handle} rows={undefined} />
+          </>
+        );
+      }
+      render(<Sourced />);
+      await waitFor(() =>
+        expect(screen.getByText('The shipments service timed out')).toBeInTheDocument(),
+      );
+      failing = false;
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+      await waitFor(() => expect(bodyKeys()).toEqual(['S1']));
+      expect(shipments.getRows).toHaveBeenCalledTimes(2);
+      fireEvent.click(screen.getByText('reload'));
+      await waitFor(() => expect(shipments.getRows).toHaveBeenCalledTimes(3));
+    });
+  });
+
   describe('pinned rows', () => {
     const keysIn = (part: string) =>
       [...grid().querySelectorAll<HTMLElement>(`[data-part="${part}"] > [data-part="row"]`)].map(

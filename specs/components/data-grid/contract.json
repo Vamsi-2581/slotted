@@ -953,6 +953,7 @@
       "tree",
       "reorder-rows",
       "pinned-rows",
+      "data-source",
       "keyboard",
       "accessibility"
     ]

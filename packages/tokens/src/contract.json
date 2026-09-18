@@ -794,6 +794,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-grip-vertical",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-control-font-family",
       "layer": "semantic",
       "axis": "base",

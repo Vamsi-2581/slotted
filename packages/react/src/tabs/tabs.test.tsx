@@ -51,6 +51,32 @@ describe('Tabs', () => {
     expect(screen.getByRole('tabpanel')).toHaveAttribute('tabindex', '0');
   });
 
+  /**
+   * A strip over one region the value filters — a feed, a table — has no
+   * panel per tab; every tab names that region, and the family's own id
+   * stays out of the DOM.
+   */
+  it('lets a tab name a region the family does not render', () => {
+    render(
+      <>
+        <Tabs defaultValue="a">
+          <TabList aria-label="Vistas">
+            <Tab controls="feed" value="a">
+              Todas
+            </Tab>
+            <Tab controls="feed" value="b">
+              Não lidas
+            </Tab>
+          </TabList>
+        </Tabs>
+        <div id="feed" role="feed" />
+      </>,
+    );
+
+    expect(tab(0)).toHaveAttribute('aria-controls', 'feed');
+    expect(tab(1)).toHaveAttribute('aria-controls', 'feed');
+  });
+
   it('declares every part the contract names', () => {
     render(
       <Tabs defaultValue="a">

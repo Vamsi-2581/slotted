@@ -185,6 +185,12 @@ export interface TabListProps extends ComponentPropsWithRef<'div'> {
 export interface TabProps extends Omit<ComponentPropsWithRef<'button'>, 'value'> {
   /** The label. Wrapped in the `label` part, which is what clips and mirrors it. */
   children?: ReactNode | undefined;
+  /**
+   * The id of the element this tab controls, when it is not a `TabPanel` of
+   * this family: a strip over one region whose content the value filters —
+   * a feed, a table — names that region here, and `aria-controls` says so.
+   */
+  controls?: string | undefined;
   /** Unstated rather than `false`, so the tab defers to the family. */
   disabled?: boolean | undefined;
   /** Whether this tab carries a control that closes it. */

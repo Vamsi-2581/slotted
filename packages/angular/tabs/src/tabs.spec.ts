@@ -31,6 +31,7 @@ import { SlTab, SlTabActions, SlTabList, SlTabPanel } from './tabs-parts';
           [disabled]="item === disabledValue()"
           [dismissible]="dismissible()"
           [dismissLabel]="'Fechar ' + item"
+          [controls]="controls()"
         >
           {{ item }}
         </div>
@@ -52,6 +53,7 @@ class Host {
   readonly disabled = signal(false);
   readonly disabledValue = signal<string | undefined>(undefined);
   readonly dismissible = signal(false);
+  readonly controls = signal<string | undefined>(undefined);
 
   readonly requests: ChangeRequest<string | undefined>[] = [];
   readonly dismissals: TabsDismissRequest[] = [];
@@ -91,6 +93,15 @@ describe('SlTabs', () => {
     expect(tab(0).getAttribute('aria-controls')).toBe(panel.id);
     expect(panel.getAttribute('aria-labelledby')).toBe(tab(0).id);
     expect(panel.getAttribute('tabindex')).toBe('0');
+  });
+
+  /** A strip over one region the value filters names that region from every tab. */
+  it('lets a tab name a region the family does not render', async () => {
+    fixture.componentInstance.controls.set('feed');
+    await fixture.whenStable();
+
+    expect(tab(0).getAttribute('aria-controls')).toBe('feed');
+    expect(tab(1).getAttribute('aria-controls')).toBe('feed');
   });
 
   it('holds one tab stop, on the selected tab', () => {

@@ -138,6 +138,12 @@ export class SlTab {
   readonly dismissLabel = input<string | undefined>(undefined);
   /** Makes the control an anchor, for a view a router can deep-link to. */
   readonly href = input<string | undefined>(undefined);
+  /**
+   * The id of the element this tab controls, when it is not a panel of this
+   * family: a strip over one region whose content the value filters — a
+   * feed, a table — names that region here, and `aria-controls` says so.
+   */
+  readonly controls = input<string | undefined>(undefined);
 
   /** The family this tab belongs to. Public, because a template may read it. */
   readonly tabs = inject(SlTabs);
@@ -154,7 +160,9 @@ export class SlTab {
   readonly resolvedDisabled = computed(() => this.tabs.disabled() || (this.disabled() ?? false));
 
   protected readonly tabId = computed(() => this.tabs.identify(this.value()).tabId);
-  protected readonly panelId = computed(() => this.tabs.identify(this.value()).panelId);
+  protected readonly panelId = computed(
+    () => this.controls() ?? this.tabs.identify(this.value()).panelId,
+  );
 
   protected onClick(event: MouseEvent) {
     if (event.defaultPrevented || this.resolvedDisabled()) return;

@@ -81,6 +81,7 @@ export function TabList({ children, ref, render, ...nativeProps }: TabListProps)
 export function Tab({
   children,
   className,
+  controls,
   disabled,
   dismissLabel,
   dismissible = false,
@@ -94,7 +95,8 @@ export function Tab({
   ...nativeProps
 }: TabProps) {
   const tabs = useTabs();
-  const { panelId, tabId } = tabs.identify(value);
+  const { panelId: ownPanelId, tabId } = tabs.identify(value);
+  const panelId = controls ?? ownPanelId;
 
   const selected = tabs.value === value;
   /**

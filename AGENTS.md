@@ -32,6 +32,10 @@ Except for `pnpm format`, verification commands must not modify files.
 
 Do not use Playwright for exploratory browsing, generic UI inspection, broad screenshot collection, or open-ended visual review. Browser automation is allowed only for a named deterministic scenario with explicit assertions and clear failure semantics.
 
+## Demo Feedback Loop
+
+`apps/demos/*` consume the library as published packages (`docs`: `CONTRIBUTING.md` › "The beta channel"). A problem seen in a demo is triaged with the `demo-triage` skill before any change: package defect → fixed in the family with a test, then `pnpm demo:refresh`; demo mistake → fixed in the demo. Both are recorded in `apps/demos/<app>/LIBRARY-FEEDBACK.md`, the ledger the public-API review reads. A package defect is never worked around inside a demo.
+
 ## Restraint
 
 Do not add dependencies, abstractions, packages, planning artifacts, reviewers, or subagents by default. Introduce them only when current scope or risk justifies them.

@@ -48,6 +48,12 @@ The backend is memory only: a reload re-seeds. The client keeps, in `localStorag
 persona and scenario (`nexora:demo`), preferences per user (`nexora:preferences:<userId>`),
 recent search hits and the navigation state. `?scale=light|demo` on the URL picks the seed size.
 
+## Reporting a problem seen here
+
+A fault in this app is either the UI kit's or this app's. The `demo-triage` skill
+(`.claude/skills/demo-triage/SKILL.md`) decides which, with evidence, and fixes it on the right
+side; `LIBRARY-FEEDBACK.md` is the ledger of what the library had to answer for.
+
 ## Seeing a library change here
 
 At the repository root, `pnpm demo:refresh` builds the three packages this app consumes, repacks

@@ -49,6 +49,7 @@ export type {
   DataGridHeaderContext,
   DataGridLabels,
   DataGridMode,
+  DataGridPinnedRows,
   DataGridQueryRequest,
   DataGridReason,
   DataGridRowHeight,

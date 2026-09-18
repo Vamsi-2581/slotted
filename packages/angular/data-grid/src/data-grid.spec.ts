@@ -20,6 +20,7 @@ import type {
   DataGridActivateEvent,
   DataGridColumnStateRequest,
   DataGridEditCommit,
+  DataGridPinnedRows,
   DataGridQueryRequest,
   DataGridRowsReorderEvent,
   DataGridSelection,
@@ -112,6 +113,7 @@ const COLUMNS: GridColumn<Shipment>[] = [
       [filterDebounce]="10"
       [rowHeight]="rowHeight()"
       [highlightChanges]="highlightChanges()"
+      [pinnedRows]="pinnedRows()"
       [activatable]="activatable()"
       [loading]="loading()"
       [error]="error()"
@@ -146,6 +148,7 @@ class Host {
   readonly rows = signal<readonly Shipment[]>(ROWS);
   readonly rowHeight = signal<number | 'auto' | undefined>(undefined);
   readonly highlightChanges = signal<boolean | number | undefined>(undefined);
+  readonly pinnedRows = signal<DataGridPinnedRows | undefined>(undefined);
   readonly selectionMode = signal<DataGridSelectionMode>('none');
   readonly filterRow = signal(false);
   readonly activatable = signal(false);
@@ -1098,5 +1101,55 @@ describe('SlDataGrid reordering rows', () => {
     expect(fixture.componentInstance.moves.at(-1)).toEqual(
       expect.objectContaining({ key: 'S1', from: 0, to: 3, reason: 'pointer' }),
     );
+  });
+});
+
+describe('SlDataGrid pinned rows', () => {
+  it('keeps pinned rows out of the query, in their own groups, counted and indexed in order', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.pinnedRows.set({ top: ['S3'], bottom: ['S1'] });
+    fixture.componentInstance.query.set({
+      ...emptyQuery(),
+      sort: [{ column: 'weight', direction: 'descending' }],
+    });
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    const keysIn = (selector: string) =>
+      [...root.querySelectorAll<HTMLElement>(`${selector} > [data-part="row"]`)].map(
+        (row) => row.dataset['row'],
+      );
+    expect(keysIn('[data-part="pinned-rows"][data-edge="top"]')).toEqual(['S3']);
+    expect(keysIn('[data-part="body"]')).toEqual(['S4', 'S2']);
+    expect(keysIn('[data-part="pinned-rows"][data-edge="bottom"]')).toEqual(['S1']);
+    /* Four rows, the header and the summary. */
+    expect(root.getAttribute('aria-rowcount')).toBe('6');
+    expect(root.querySelector('[data-row="S3"]')!.getAttribute('aria-rowindex')).toBe('2');
+    expect(root.querySelector('[data-row="S4"]')!.getAttribute('aria-rowindex')).toBe('3');
+    expect(root.querySelector('[data-row="S1"]')!.getAttribute('aria-rowindex')).toBe('5');
+  });
+
+  it('lets the cursor walk from the top pinned row through the body to the bottom one', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.pinnedRows.set({ top: ['S3'], bottom: ['S1'] });
+    fixture.componentInstance.current.set({ row: 'S3', column: 'customer' });
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    const cell = (row: string, column: string) =>
+      root.querySelector<HTMLElement>(`[data-row="${row}"] [data-column="${column}"]`)!;
+    const down = (row: string, key: string) => {
+      cell(row, 'customer').dispatchEvent(
+        new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+      );
+      fixture.detectChanges();
+    };
+    down('S3', 'ArrowDown');
+    expect(cell('S2', 'customer').hasAttribute('data-current')).toBe(true);
+    down('S2', 'ArrowDown');
+    down('S4', 'ArrowDown');
+    expect(cell('S1', 'customer').hasAttribute('data-current')).toBe(true);
+    down('S1', 'ArrowUp');
+    expect(cell('S4', 'customer').hasAttribute('data-current')).toBe(true);
   });
 });

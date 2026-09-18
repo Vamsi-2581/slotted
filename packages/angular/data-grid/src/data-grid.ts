@@ -117,6 +117,7 @@ import {
   type DataGridEditMode,
   type DataGridEditorContext,
   type DataGridExportOptions,
+  type DataGridPinnedRows,
   type DataGridRowsReorderEvent,
   type DataGridExpandedGroups,
   type DataGridGroupContext,
@@ -625,6 +626,237 @@ function contentWidth(cell: HTMLElement): number {
         }
       </div>
 
+      <!-- One row of the body, drawn here and in the held groups at the edges. -->
+      <ng-template #bodyRow let-entry>
+        <div
+          data-part="row"
+          role="row"
+          [attr.data-row]="entry.node.key"
+          [attr.aria-rowindex]="entry.rowIndex"
+          [attr.aria-selected]="rowSelectable() ? isSelected(entry.node.key) : null"
+          [attr.data-selected]="isSelected(entry.node.key) ? '' : null"
+          [attr.data-current]="current()?.row === entry.node.key ? '' : null"
+          [attr.data-expanded]="detailOpen(entry.node) ? '' : null"
+          [attr.aria-level]="tree() ? entry.node.level : null"
+          [attr.aria-expanded]="
+            tree() &&
+            (entry.node.childCount > 0 || entry.node.open || isLoadingChildren(entry.node.key))
+              ? entry.node.open
+              : null
+          "
+          [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
+          [attr.data-dragging]="rowDragState().dragging === entry.node.key ? '' : null"
+          [attr.data-disabled]="isDisabled(entry.node.key) ? '' : null"
+          [attr.data-editing]="edit()?.cell?.row === entry.node.key ? '' : null"
+          [attr.data-index]="entry.index"
+        >
+          @if (hasSelectionColumn()) {
+            <div
+              data-part="selection"
+              role="gridcell"
+              aria-colindex="1"
+              [attr.data-column]="SELECTION"
+              [attr.tabindex]="isCurrent(entry.node.key, SELECTION) ? 0 : -1"
+              [attr.data-current]="isCurrent(entry.node.key, SELECTION) ? '' : null"
+              [style.--slotted-data-grid-column]="1"
+              (focus)="onCellFocus({ row: entry.node.key, column: SELECTION }, $event)"
+              (keydown)="onCellKeyDown($event, { row: entry.node.key, column: SELECTION })"
+              (pointerdown)="onCellPointerDown($event, { row: entry.node.key, column: SELECTION })"
+            >
+              <span
+                slCheckbox
+                [checked]="isSelected(entry.node.key)"
+                [disabled]="isDisabled(entry.node.key) || undefined"
+                (checkedChange)="
+                  toggleSelected(entry.node.key, {
+                    range: shiftHeld($event.source),
+                    source: $event.source,
+                  })
+                "
+              >
+                <span data-ui="visually-hidden" data-part="root"
+                  >{{ t().selectRow }} {{ entry.node.key }}</span
+                >
+              </span>
+            </div>
+          }
+          @if (hasDragColumn()) {
+            <div
+              data-part="cell"
+              role="gridcell"
+              data-kind="drag"
+              [attr.aria-colindex]="dragIndex()"
+              [attr.data-column]="DRAG"
+              [attr.tabindex]="isCurrent(entry.node.key, DRAG) ? 0 : -1"
+              [attr.data-current]="isCurrent(entry.node.key, DRAG) ? '' : null"
+              [style.--slotted-data-grid-column]="dragIndex()"
+              (focus)="onCellFocus({ row: entry.node.key, column: DRAG }, $event)"
+              (keydown)="onCellKeyDown($event, { row: entry.node.key, column: DRAG })"
+              (pointerdown)="onCellPointerDown($event, { row: entry.node.key, column: DRAG })"
+            >
+              <button
+                data-part="row-handle"
+                type="button"
+                [attr.tabindex]="isCurrent(entry.node.key, DRAG) ? 0 : -1"
+                [attr.aria-disabled]="rowsReorderableNow() ? null : 'true'"
+                [attr.data-disabled]="rowsReorderableNow() ? null : ''"
+                [attr.aria-label]="rowHandleLabel(entry.node.key)"
+              ></button>
+            </div>
+          }
+          @if (hasExpanderColumn()) {
+            <div
+              data-part="cell"
+              data-kind="expander"
+              role="gridcell"
+              [attr.aria-colindex]="expanderIndex()"
+              [attr.data-column]="EXPANDER"
+              [attr.tabindex]="isCurrent(entry.node.key, EXPANDER) ? 0 : -1"
+              [attr.data-current]="isCurrent(entry.node.key, EXPANDER) ? '' : null"
+              [style.--slotted-data-grid-column]="expanderIndex()"
+              (focus)="onCellFocus({ row: entry.node.key, column: EXPANDER }, $event)"
+              (keydown)="onCellKeyDown($event, { row: entry.node.key, column: EXPANDER })"
+              (pointerdown)="onCellPointerDown($event, { row: entry.node.key, column: EXPANDER })"
+            >
+              @if (isExpandable(entry.node.row)) {
+                <button
+                  data-part="expander"
+                  type="button"
+                  tabindex="-1"
+                  [attr.aria-expanded]="isExpanded(entry.node.key)"
+                  [attr.aria-controls]="
+                    isExpanded(entry.node.key) ? detailId(entry.node.key) : null
+                  "
+                  [attr.aria-label]="isExpanded(entry.node.key) ? t().collapse : t().expand"
+                  (click)="toggleExpanded(entry.node.key, $event)"
+                ></button>
+              }
+            </div>
+          }
+          @for (column of mountedColumns(); track column.id) {
+            @let cell = cellState(entry.node, column);
+            <div
+              [attr.data-part]="column.column.rowHeader ? 'row-header' : 'cell'"
+              [attr.role]="column.column.rowHeader ? 'rowheader' : 'gridcell'"
+              [attr.aria-colindex]="indexOf(column.id)"
+              [attr.aria-readonly]="cell.readonly ? 'true' : null"
+              [attr.aria-selected]="
+                resolvedSelectionMode() === 'range' && cell.inRange ? 'true' : null
+              "
+              [attr.aria-invalid]="cell.invalid ? 'true' : null"
+              [attr.data-column]="column.id"
+              [attr.data-align]="column.align ?? null"
+              [attr.data-numeric]="column.numeric ? '' : null"
+              [attr.data-text]="column.text"
+              [attr.data-pinned]="column.pinned"
+              [attr.data-pin-edge]="column.pinEdge ? '' : null"
+              [attr.data-current]="cell.current ? '' : null"
+              [attr.data-in-range]="cell.inRange ? '' : null"
+              [attr.data-range-edge]="cell.edges.length > 0 ? cell.edges.join(' ') : null"
+              [attr.data-editing]="cell.editing ? '' : null"
+              [attr.data-invalid]="cell.invalid ? '' : null"
+              [attr.data-loading]="cell.pending ? '' : null"
+              [attr.data-readonly]="cell.readonly ? '' : null"
+              [attr.data-changed]="cell.changed"
+              [attr.tabindex]="cell.current ? 0 : -1"
+              [attr.title]="cell.invalid ? cell.message : null"
+              [style.--slotted-data-grid-column]="indexOf(column.id)"
+              [style.--slotted-data-grid-pin-offset]="
+                column.pinned ? column.pinOffset + 'px' : null
+              "
+              (click)="onBodyCellClick($event, { row: entry.node.key, column: column.id })"
+              (dblclick)="onCellDoubleClick($event, { row: entry.node.key, column: column.id })"
+              (focus)="onCellFocus({ row: entry.node.key, column: column.id }, $event)"
+              (keydown)="onCellKeyDown($event, { row: entry.node.key, column: column.id })"
+              (pointerdown)="onCellPointerDown($event, { row: entry.node.key, column: column.id })"
+              (pointerenter)="
+                onCellPointerEnter($event, { row: entry.node.key, column: column.id })
+              "
+              [attr.data-tree]="cell.tree"
+              [style.--slotted-data-grid-level]="cell.tree ? entry.node.level : null"
+            >
+              @if (cell.tree === 'branch') {
+                <button
+                  data-part="tree-toggle"
+                  type="button"
+                  tabindex="-1"
+                  [attr.aria-expanded]="entry.node.open"
+                  [attr.aria-label]="entry.node.open ? t().collapse : t().expand"
+                  [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
+                  (click)="$event.stopPropagation(); toggleBranch(entry.node.key, $event)"
+                  (pointerdown)="$event.stopPropagation()"
+                ></button>
+              } @else if (cell.tree === 'leaf') {
+                <span data-part="tree-toggle" data-empty aria-hidden="true"></span>
+              }
+              @if (cell.editing) {
+                <div data-part="editor">
+                  @if (editorTemplate(column.id); as template) {
+                    <ng-container
+                      [ngTemplateOutlet]="template"
+                      [ngTemplateOutletContext]="editorContext(entry.node, column, cell)"
+                    />
+                  } @else {
+                    <sl-data-grid-editor
+                      [column]="$any(column.column)"
+                      [draft]="edit()?.drafts?.[column.id]"
+                      [value]="cell.value"
+                      [invalid]="cell.invalid"
+                      [message]="cell.message"
+                      [labels]="t()"
+                      [locale]="resolvedLocale()"
+                      (draftChange)="setDraft(column.id, $event)"
+                    />
+                  }
+                </div>
+              } @else if (cellTemplate(column.id); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="cellContext(entry.node, column, cell)"
+                />
+              } @else {
+                <span [attr.title]="cell.text">{{ cell.text }}</span>
+              }
+            </div>
+          }
+        </div>
+        @if (detailOpen(entry.node) && detailTemplate(); as template) {
+          <div
+            data-part="detail"
+            role="row"
+            [attr.data-row]="entry.node.key + ':detail'"
+            [attr.id]="detailId(entry.node.key)"
+            [attr.aria-rowindex]="entry.rowIndex + 1"
+          >
+            <div
+              role="gridcell"
+              aria-colindex="1"
+              tabindex="-1"
+              [attr.aria-colspan]="columnIds().length"
+              [style.--slotted-data-grid-column]="'1 / -1'"
+            >
+              <ng-container
+                [ngTemplateOutlet]="template.template"
+                [ngTemplateOutletContext]="{
+                  $implicit: entry.node.row,
+                  row: entry.node.row,
+                  key: entry.node.key,
+                }"
+              />
+            </div>
+          </div>
+        }
+      </ng-template>
+      @if (pinned().top.length > 0) {
+        <div data-part="pinned-rows" data-edge="top" role="rowgroup">
+          @for (entry of pinnedTopEntries(); track entry.node.key) {
+            <ng-container
+              [ngTemplateOutlet]="bodyRow"
+              [ngTemplateOutletContext]="{ $implicit: entry }"
+            />
+          }
+        </div>
+      }
       @if (status() === 'loading') {
         <div data-part="loader" role="rowgroup" aria-hidden="true">
           @for (row of skeletonRowsList(); track row) {
@@ -753,234 +985,10 @@ function contentWidth(cell: HTMLElement): number {
                 }
               </div>
             } @else {
-              <div
-                data-part="row"
-                role="row"
-                [attr.data-row]="entry.node.key"
-                [attr.aria-rowindex]="entry.rowIndex"
-                [attr.aria-selected]="rowSelectable() ? isSelected(entry.node.key) : null"
-                [attr.data-selected]="isSelected(entry.node.key) ? '' : null"
-                [attr.data-current]="current()?.row === entry.node.key ? '' : null"
-                [attr.data-expanded]="detailOpen(entry.node) ? '' : null"
-                [attr.aria-level]="tree() ? entry.node.level : null"
-                [attr.aria-expanded]="
-                  tree() &&
-                  (entry.node.childCount > 0 ||
-                    entry.node.open ||
-                    isLoadingChildren(entry.node.key))
-                    ? entry.node.open
-                    : null
-                "
-                [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
-                [attr.data-dragging]="rowDragState().dragging === entry.node.key ? '' : null"
-                [attr.data-disabled]="isDisabled(entry.node.key) ? '' : null"
-                [attr.data-editing]="edit()?.cell?.row === entry.node.key ? '' : null"
-                [attr.data-index]="entry.index"
-              >
-                @if (hasSelectionColumn()) {
-                  <div
-                    data-part="selection"
-                    role="gridcell"
-                    aria-colindex="1"
-                    [attr.data-column]="SELECTION"
-                    [attr.tabindex]="isCurrent(entry.node.key, SELECTION) ? 0 : -1"
-                    [attr.data-current]="isCurrent(entry.node.key, SELECTION) ? '' : null"
-                    [style.--slotted-data-grid-column]="1"
-                    (focus)="onCellFocus({ row: entry.node.key, column: SELECTION }, $event)"
-                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: SELECTION })"
-                    (pointerdown)="
-                      onCellPointerDown($event, { row: entry.node.key, column: SELECTION })
-                    "
-                  >
-                    <span
-                      slCheckbox
-                      [checked]="isSelected(entry.node.key)"
-                      [disabled]="isDisabled(entry.node.key) || undefined"
-                      (checkedChange)="
-                        toggleSelected(entry.node.key, {
-                          range: shiftHeld($event.source),
-                          source: $event.source,
-                        })
-                      "
-                    >
-                      <span data-ui="visually-hidden" data-part="root"
-                        >{{ t().selectRow }} {{ entry.node.key }}</span
-                      >
-                    </span>
-                  </div>
-                }
-                @if (hasDragColumn()) {
-                  <div
-                    data-part="cell"
-                    role="gridcell"
-                    data-kind="drag"
-                    [attr.aria-colindex]="dragIndex()"
-                    [attr.data-column]="DRAG"
-                    [attr.tabindex]="isCurrent(entry.node.key, DRAG) ? 0 : -1"
-                    [attr.data-current]="isCurrent(entry.node.key, DRAG) ? '' : null"
-                    [style.--slotted-data-grid-column]="dragIndex()"
-                    (focus)="onCellFocus({ row: entry.node.key, column: DRAG }, $event)"
-                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: DRAG })"
-                    (pointerdown)="onCellPointerDown($event, { row: entry.node.key, column: DRAG })"
-                  >
-                    <button
-                      data-part="row-handle"
-                      type="button"
-                      [attr.tabindex]="isCurrent(entry.node.key, DRAG) ? 0 : -1"
-                      [attr.aria-disabled]="rowsReorderableNow() ? null : 'true'"
-                      [attr.data-disabled]="rowsReorderableNow() ? null : ''"
-                      [attr.aria-label]="rowHandleLabel(entry.node.key)"
-                    ></button>
-                  </div>
-                }
-                @if (hasExpanderColumn()) {
-                  <div
-                    data-part="cell"
-                    data-kind="expander"
-                    role="gridcell"
-                    [attr.aria-colindex]="expanderIndex()"
-                    [attr.data-column]="EXPANDER"
-                    [attr.tabindex]="isCurrent(entry.node.key, EXPANDER) ? 0 : -1"
-                    [attr.data-current]="isCurrent(entry.node.key, EXPANDER) ? '' : null"
-                    [style.--slotted-data-grid-column]="expanderIndex()"
-                    (focus)="onCellFocus({ row: entry.node.key, column: EXPANDER }, $event)"
-                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: EXPANDER })"
-                    (pointerdown)="
-                      onCellPointerDown($event, { row: entry.node.key, column: EXPANDER })
-                    "
-                  >
-                    @if (isExpandable(entry.node.row)) {
-                      <button
-                        data-part="expander"
-                        type="button"
-                        tabindex="-1"
-                        [attr.aria-expanded]="isExpanded(entry.node.key)"
-                        [attr.aria-controls]="
-                          isExpanded(entry.node.key) ? detailId(entry.node.key) : null
-                        "
-                        [attr.aria-label]="isExpanded(entry.node.key) ? t().collapse : t().expand"
-                        (click)="toggleExpanded(entry.node.key, $event)"
-                      ></button>
-                    }
-                  </div>
-                }
-                @for (column of mountedColumns(); track column.id) {
-                  @let cell = cellState(entry.node, column);
-                  <div
-                    [attr.data-part]="column.column.rowHeader ? 'row-header' : 'cell'"
-                    [attr.role]="column.column.rowHeader ? 'rowheader' : 'gridcell'"
-                    [attr.aria-colindex]="indexOf(column.id)"
-                    [attr.aria-readonly]="cell.readonly ? 'true' : null"
-                    [attr.aria-selected]="
-                      resolvedSelectionMode() === 'range' && cell.inRange ? 'true' : null
-                    "
-                    [attr.aria-invalid]="cell.invalid ? 'true' : null"
-                    [attr.data-column]="column.id"
-                    [attr.data-align]="column.align ?? null"
-                    [attr.data-numeric]="column.numeric ? '' : null"
-                    [attr.data-text]="column.text"
-                    [attr.data-pinned]="column.pinned"
-                    [attr.data-pin-edge]="column.pinEdge ? '' : null"
-                    [attr.data-current]="cell.current ? '' : null"
-                    [attr.data-in-range]="cell.inRange ? '' : null"
-                    [attr.data-range-edge]="cell.edges.length > 0 ? cell.edges.join(' ') : null"
-                    [attr.data-editing]="cell.editing ? '' : null"
-                    [attr.data-invalid]="cell.invalid ? '' : null"
-                    [attr.data-loading]="cell.pending ? '' : null"
-                    [attr.data-readonly]="cell.readonly ? '' : null"
-                    [attr.data-changed]="cell.changed"
-                    [attr.tabindex]="cell.current ? 0 : -1"
-                    [attr.title]="cell.invalid ? cell.message : null"
-                    [style.--slotted-data-grid-column]="indexOf(column.id)"
-                    [style.--slotted-data-grid-pin-offset]="
-                      column.pinned ? column.pinOffset + 'px' : null
-                    "
-                    (click)="onBodyCellClick($event, { row: entry.node.key, column: column.id })"
-                    (dblclick)="
-                      onCellDoubleClick($event, { row: entry.node.key, column: column.id })
-                    "
-                    (focus)="onCellFocus({ row: entry.node.key, column: column.id }, $event)"
-                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: column.id })"
-                    (pointerdown)="
-                      onCellPointerDown($event, { row: entry.node.key, column: column.id })
-                    "
-                    (pointerenter)="
-                      onCellPointerEnter($event, { row: entry.node.key, column: column.id })
-                    "
-                    [attr.data-tree]="cell.tree"
-                    [style.--slotted-data-grid-level]="cell.tree ? entry.node.level : null"
-                  >
-                    @if (cell.tree === 'branch') {
-                      <button
-                        data-part="tree-toggle"
-                        type="button"
-                        tabindex="-1"
-                        [attr.aria-expanded]="entry.node.open"
-                        [attr.aria-label]="entry.node.open ? t().collapse : t().expand"
-                        [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
-                        (click)="$event.stopPropagation(); toggleBranch(entry.node.key, $event)"
-                        (pointerdown)="$event.stopPropagation()"
-                      ></button>
-                    } @else if (cell.tree === 'leaf') {
-                      <span data-part="tree-toggle" data-empty aria-hidden="true"></span>
-                    }
-                    @if (cell.editing) {
-                      <div data-part="editor">
-                        @if (editorTemplate(column.id); as template) {
-                          <ng-container
-                            [ngTemplateOutlet]="template"
-                            [ngTemplateOutletContext]="editorContext(entry.node, column, cell)"
-                          />
-                        } @else {
-                          <sl-data-grid-editor
-                            [column]="$any(column.column)"
-                            [draft]="edit()?.drafts?.[column.id]"
-                            [value]="cell.value"
-                            [invalid]="cell.invalid"
-                            [message]="cell.message"
-                            [labels]="t()"
-                            [locale]="resolvedLocale()"
-                            (draftChange)="setDraft(column.id, $event)"
-                          />
-                        }
-                      </div>
-                    } @else if (cellTemplate(column.id); as template) {
-                      <ng-container
-                        [ngTemplateOutlet]="template"
-                        [ngTemplateOutletContext]="cellContext(entry.node, column, cell)"
-                      />
-                    } @else {
-                      <span [attr.title]="cell.text">{{ cell.text }}</span>
-                    }
-                  </div>
-                }
-              </div>
-              @if (detailOpen(entry.node) && detailTemplate(); as template) {
-                <div
-                  data-part="detail"
-                  role="row"
-                  [attr.data-row]="entry.node.key + ':detail'"
-                  [attr.id]="detailId(entry.node.key)"
-                  [attr.aria-rowindex]="entry.rowIndex + 1"
-                >
-                  <div
-                    role="gridcell"
-                    aria-colindex="1"
-                    tabindex="-1"
-                    [attr.aria-colspan]="columnIds().length"
-                    [style.--slotted-data-grid-column]="'1 / -1'"
-                  >
-                    <ng-container
-                      [ngTemplateOutlet]="template.template"
-                      [ngTemplateOutletContext]="{
-                        $implicit: entry.node.row,
-                        row: entry.node.row,
-                        key: entry.node.key,
-                      }"
-                    />
-                  </div>
-                </div>
-              }
+              <ng-container
+                [ngTemplateOutlet]="bodyRow"
+                [ngTemplateOutletContext]="{ $implicit: entry }"
+              />
             }
           }
         </div>
@@ -1029,6 +1037,16 @@ function contentWidth(cell: HTMLElement): number {
                 </div>
               }
             </section>
+          }
+        </div>
+      }
+      @if (pinned().bottom.length > 0) {
+        <div data-part="pinned-rows" data-edge="bottom" role="rowgroup">
+          @for (entry of pinnedBottomEntries(); track entry.node.key) {
+            <ng-container
+              [ngTemplateOutlet]="bodyRow"
+              [ngTemplateOutletContext]="{ $implicit: entry }"
+            />
           }
         </div>
       }
@@ -1246,6 +1264,12 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
    * tree; elsewhere the handle is disabled.
    */
   readonly rowsReorderable = input(false, { transform: booleanAttribute });
+  /**
+   * Rows held at the top or the bottom of the body, by key, in the stated
+   * order: out of the query — never sorted, filtered or paged — and always on
+   * screen, under the head and over the summary.
+   */
+  readonly pinnedRows = input<DataGridPinnedRows | undefined>(undefined);
   readonly height = input<string | number | undefined>(undefined);
   readonly label = input<string | undefined>(undefined);
   readonly labelledBy = input<string | undefined>(undefined);
@@ -1404,8 +1428,61 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   }
 
   /* ── The applied query ──────────────────────────────────────────────── */
+  /* Held rows leave the query: what is sorted, filtered and paged is the
+     rest. Each becomes a node of its own, outside the body's count. */
+  protected readonly pinned = computed(() => {
+    const held = this.pinnedRows();
+    const top = held?.top ?? [];
+    const bottom = held?.bottom ?? [];
+    if (top.length === 0 && bottom.length === 0) {
+      return {
+        top: [] as RowNode[],
+        bottom: [] as RowNode[],
+        keys: null as ReadonlySet<string> | null,
+      };
+    }
+    const byKey = new Map<string, Row>();
+    for (const row of this.rows()) byKey.set(this.rowKeyOf(row), row);
+    const nodesOf = (keys: readonly string[]) =>
+      keys.flatMap((key): RowNode[] => {
+        const row = byKey.get(key);
+        return row === undefined
+          ? []
+          : [
+              {
+                kind: 'row',
+                key,
+                row,
+                index: -1,
+                groups: [],
+                level: 1,
+                parent: null,
+                childCount: 0,
+                open: false,
+              },
+            ];
+      });
+    return { top: nodesOf(top), bottom: nodesOf(bottom), keys: new Set([...top, ...bottom]) };
+  });
+  private readonly bodyRows = computed(() => {
+    const keys = this.pinned().keys;
+    return keys ? this.rows().filter((row) => !keys.has(this.rowKeyOf(row))) : this.rows();
+  });
+  protected readonly pinnedTopEntries = computed(() => {
+    const first = this.headerRowCount() + 1;
+    return this.pinned().top.map((node, offset) => ({ node, index: -1, rowIndex: first + offset }));
+  });
+  protected readonly pinnedBottomEntries = computed(() => {
+    const first =
+      this.headerRowCount() + this.pinned().top.length + (this.total() ?? this.nodes().length) + 1;
+    return this.pinned().bottom.map((node, offset) => ({
+      node,
+      index: -1,
+      rowIndex: first + offset,
+    }));
+  });
   protected readonly applied = computed(() => {
-    const rows = this.rows();
+    const rows = this.bodyRows();
     const query = this.query();
     if (this.resolvedMode() === 'server') {
       const offset = query.page && 'index' in query.page ? query.page.index * query.page.size : 0;
@@ -1476,11 +1553,18 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly ariaRowCount = computed(
     () =>
       (this.total() === null ? -1 : (this.total() as number)) +
+      this.pinned().top.length +
+      this.pinned().bottom.length +
       this.headerRowCount() +
       (this.hasSummary() ? 1 : 0),
   );
   protected readonly summaryRowIndex = computed(
-    () => this.headerRowCount() + (this.total() ?? this.nodes().length) + 1,
+    () =>
+      this.headerRowCount() +
+      this.pinned().top.length +
+      (this.total() ?? this.nodes().length) +
+      this.pinned().bottom.length +
+      1,
   );
   /* A first load draws as many skeleton rows as the frame shows, capped at
      the page the query asks for: eight rows in a frame of twenty-five left
@@ -1503,13 +1587,21 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private readonly cursorRows = computed(() => {
     const list = [HEADER_ROW];
     if (this.resolvedFilterRow()) list.push(FILTER_ROW);
+    for (const node of this.pinned().top) list.push(node.key);
     for (const node of this.nodes())
       list.push(node.kind === 'group' ? `${GROUP_ROW_PREFIX}${node.key}` : node.key);
+    for (const node of this.pinned().bottom) list.push(node.key);
     if (this.hasSummary()) list.push(SUMMARY_ROW);
     return list;
   });
   private readonly bodyStart = computed(() => 1 + (this.resolvedFilterRow() ? 1 : 0));
-  private readonly bodyEnd = computed(() => this.bodyStart() + this.nodes().length);
+  private readonly bodyEnd = computed(
+    () =>
+      this.bodyStart() +
+      this.pinned().top.length +
+      this.nodes().length +
+      this.pinned().bottom.length,
+  );
 
   /* ── Virtual rows ───────────────────────────────────────────────────── */
   private readonly scrollTop = signal(0);
@@ -1552,15 +1644,15 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       totalSize: win.totalSize,
     };
   });
-  private readonly pinnedRows = signal<readonly string[]>([]);
+  private readonly heldRows = signal<readonly string[]>([]);
   protected readonly mountedEntries = computed(() => {
     const nodes = this.nodes();
     const window_ = this.rowWindow();
     const mounted = this.windowsRows() ? nodes.slice(window_.startIndex, window_.endIndex) : nodes;
-    const extra = this.pinnedRows()
+    const extra = this.heldRows()
       .map((key) => nodes.find((node) => node.key === key))
       .filter((node): node is GridNode<Row> => node !== undefined && !mounted.includes(node));
-    const headerRows = this.headerRowCount();
+    const headerRows = this.headerRowCount() + this.pinned().top.length;
     const first = this.windowsRows() ? window_.startIndex : 0;
     return [...mounted, ...extra].map((node, offset) => {
       const index = first + offset;
@@ -1603,8 +1695,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
 
   /* ── Selection ──────────────────────────────────────────────────────── */
   private readonly selectableKeys = computed(() => {
-    const source = this.resolvedMode() === 'client' ? this.applied().rows : this.rows();
-    return source.map((row) => this.rowKeyOf(row)).filter((key) => !this.disabledSet().has(key));
+    const source = this.resolvedMode() === 'client' ? this.applied().rows : this.bodyRows();
+    const pinned = this.pinned();
+    return [
+      ...pinned.top.map((node) => node.key),
+      ...source.map((row) => this.rowKeyOf(row)),
+      ...pinned.bottom.map((node) => node.key),
+    ].filter((key) => !this.disabledSet().has(key));
   });
   private readonly selectedList = computed<readonly string[]>(() => {
     const value = this.value();
@@ -1791,7 +1888,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       index >= 0 &&
       (index < window_.startIndex || index >= window_.endIndex)
     ) {
-      this.pinnedRows.set([cell.row]);
+      this.heldRows.set([cell.row]);
       const metrics = this.metrics();
       const offset = metrics ? metrics.offsetOf(index) : index * this.rowSize();
       this.scrollRef()?.nativeElement.scrollTo({
@@ -2104,7 +2201,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   });
   private readonly nodeByKey = computed(() => {
     const map = new Map<string, RowNode>();
+    for (const node of this.pinned().top) map.set(node.key, node);
     for (const node of this.nodes()) if (node.kind === 'row') map.set(node.key, node);
+    for (const node of this.pinned().bottom) map.set(node.key, node);
     return map;
   });
   /* A row opened with children still to come: asked for once, marked until
@@ -2194,8 +2293,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   /* ── Editing ────────────────────────────────────────────────────────── */
   readonly edit = signal<EditSession | null>(null);
   private rowOf(key: string): Row | undefined {
-    const node = this.nodes().find((entry) => entry.kind === 'row' && entry.key === key);
-    return node && node.kind === 'row' ? node.row : undefined;
+    return this.nodeByKey().get(key)?.row as Row | undefined;
   }
   startEdit(cell: GridCell, seed: string | null = null) {
     const row = this.rowOf(cell.row);
@@ -2533,7 +2631,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const now = Date.now();
     let marked = false;
     const columns = untracked(() => this.resolved());
-    for (const { node } of untracked(() => this.mountedEntries())) {
+    const pinned = untracked(() => this.pinned());
+    const mounted = untracked(() => this.mountedEntries()).map((entry) => entry.node);
+    for (const node of [...pinned.top, ...mounted, ...pinned.bottom]) {
       if (node.kind !== 'row') continue;
       const before = previous.byKey.get(node.key);
       if (before === undefined || before === node.row) continue;
@@ -2610,10 +2710,32 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         const observer =
           typeof ResizeObserver === 'undefined'
             ? null
-            : new ResizeObserver(() =>
-                this.viewport.set({ width: scroller.clientWidth, height: scroller.clientHeight }),
-              );
+            : new ResizeObserver(() => {
+                this.viewport.set({ width: scroller.clientWidth, height: scroller.clientHeight });
+                this.measureEdges?.();
+              });
+        /* The head's and the summary's heights, for the rows held under one
+           and over the other: written on the scroller as the offsets the held
+           rows stick at. */
+        const edges = () => {
+          const head = scroller.querySelector<HTMLElement>(':scope > [data-part="head"]');
+          const summary = scroller.querySelector<HTMLElement>(':scope > [data-part="summary"]');
+          scroller.style.setProperty(
+            '--slotted-data-grid-pinned-top-offset',
+            `${head?.offsetHeight ?? 0}px`,
+          );
+          scroller.style.setProperty(
+            '--slotted-data-grid-pinned-bottom-offset',
+            `${summary?.offsetHeight ?? 0}px`,
+          );
+        };
         observer?.observe(scroller);
+        for (const part of scroller.querySelectorAll(
+          ':scope > [data-part="head"], :scope > [data-part="summary"]',
+        ))
+          observer?.observe(part);
+        edges();
+        this.measureEdges = edges;
         this.viewport.set({ width: scroller.clientWidth, height: scroller.clientHeight });
         const affordance = createScrollAffordance(scroller, {
           orientation: () => 'horizontal',
@@ -2888,6 +3010,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     scrollLeft: number;
   }>({ dragging: null, offset: null, scrollLeft: 0 });
   private rowDrag: DragController | null = null;
+  private measureEdges: (() => void) | null = null;
   private readonly rowDraggables = new Map<string, () => void>();
   private readonly rowDraggableNodes = new Map<string, HTMLElement>();
   protected rowHandleLabel(key: string) {
@@ -3440,7 +3563,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       top = offset < visibleTop ? offset : offset - height + size + head;
     }
     scroller.scrollTo({ top: Math.max(0, top) });
-    if (this.windowsRows()) this.pinnedRows.set([key]);
+    if (this.windowsRows()) this.heldRows.set([key]);
   }
   scrollToColumn(columnId: string) {
     const scroller = this.scrollRef()?.nativeElement;

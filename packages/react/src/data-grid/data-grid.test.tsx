@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/data-grid/contract.json';
 import { DataGrid } from './data-grid';
+import { SELECTION_COLUMN } from './data-grid-constants';
 import { DataGridDefaultsProvider } from './data-grid-defaults';
 import type { DataGridHandle, DataGridProps } from './data-grid.types';
 
@@ -845,6 +846,70 @@ describe('DataGrid, the rest', () => {
     render(<Shipments current={cellRef} />);
     expect(cell('S1', 'id')).toHaveAttribute('data-current');
   });
+  describe('pinned rows', () => {
+    const keysIn = (part: string) =>
+      [...grid().querySelectorAll<HTMLElement>(`[data-part="${part}"] > [data-part="row"]`)].map(
+        (row) => row.dataset['row'],
+      );
+
+    it('keeps pinned rows out of the query, in their own groups, counted and indexed in order', () => {
+      render(
+        <Shipments
+          pinnedRows={{ top: ['S3'], bottom: ['S1'] }}
+          query={{ ...emptyQuery(), sort: [{ column: 'weight', direction: 'descending' }] }}
+        />,
+      );
+      expect(keysIn('pinned-rows')).toEqual(['S3', 'S1']);
+      expect(keysIn('body')).toEqual(['S4', 'S2']);
+      expect(
+        grid().querySelector('[data-part="pinned-rows"][data-edge="top"] [data-row="S3"]'),
+      ).not.toBeNull();
+      expect(
+        grid().querySelector('[data-part="pinned-rows"][data-edge="bottom"] [data-row="S1"]'),
+      ).not.toBeNull();
+      /* Four rows, the header and the summary. */
+      expect(grid()).toHaveAttribute('aria-rowcount', '6');
+      expect(grid().querySelector('[data-row="S3"]')).toHaveAttribute('aria-rowindex', '2');
+      expect(grid().querySelector('[data-row="S4"]')).toHaveAttribute('aria-rowindex', '3');
+      expect(grid().querySelector('[data-row="S1"]')).toHaveAttribute('aria-rowindex', '5');
+    });
+
+    it('lets the cursor walk from the top pinned row through the body to the bottom one', () => {
+      render(
+        <Shipments
+          defaultCurrent={{ row: 'S3', column: 'customer' }}
+          pinnedRows={{ top: ['S3'], bottom: ['S1'] }}
+        />,
+      );
+      fireEvent.keyDown(cell('S3', 'customer'), { key: 'ArrowDown' });
+      expect(cell('S2', 'customer')).toHaveAttribute('data-current');
+      fireEvent.keyDown(cell('S2', 'customer'), { key: 'ArrowDown' });
+      fireEvent.keyDown(cell('S4', 'customer'), { key: 'ArrowDown' });
+      expect(cell('S1', 'customer')).toHaveAttribute('data-current');
+      fireEvent.keyDown(cell('S1', 'customer'), { key: 'ArrowUp' });
+      expect(cell('S4', 'customer')).toHaveAttribute('data-current');
+    });
+
+    it('selects a pinned row with the rest', () => {
+      const onValueChange = vi.fn();
+      render(
+        <Shipments
+          onValueChange={onValueChange}
+          pinnedRows={{ top: ['S3'] }}
+          selectionMode="multiple"
+        />,
+      );
+      fireEvent.click(within(cell('S3', SELECTION_COLUMN)).getByRole('checkbox'));
+      expect(onValueChange).toHaveBeenLastCalledWith(['S3'], expect.anything());
+      fireEvent.click(
+        within(
+          grid().querySelector<HTMLElement>('[data-part="head"] [data-part="selection"]')!,
+        ).getByRole('checkbox'),
+      );
+      expect(onValueChange).toHaveBeenLastCalledWith(['S3', 'S1', 'S2', 'S4'], expect.anything());
+    });
+  });
+
   describe('reordering rows', () => {
     const handle = (row: string) =>
       grid().querySelector<HTMLElement>(`[data-row="${row}"] [data-part="row-handle"]`)!;

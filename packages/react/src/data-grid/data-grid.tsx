@@ -71,7 +71,13 @@ import {
   ResultStateDescription,
   ResultStateTitle,
 } from '../result-state';
-import { DataGridBody, DataGridEmpty, DataGridLoader, DataGridSummary } from './data-grid-body';
+import {
+  DataGridBody,
+  DataGridEmpty,
+  DataGridLoader,
+  DataGridPinnedRows,
+  DataGridSummary,
+} from './data-grid-body';
 import {
   DataGridInternalContext,
   type DataGridInternal,
@@ -136,6 +142,8 @@ function sameSelection(a: string | readonly string[] | null, b: string | readonl
  * rows, applies the query, walks the cells with one cursor, edits in place,
  * and lets the reader arrange the columns.
  */
+type RowNodeOf<Row> = Extract<GridNode<Row>, { kind: 'row' }>;
+
 /** The room a cell's content asks for: the value's laid-out width, the boxes beside it, the gaps, the padding and the border. */
 function contentWidth(cell: HTMLElement): number {
   const style = getComputedStyle(cell);
@@ -214,6 +222,7 @@ export function DataGrid<Row>({
   onRetry,
   onValueChange,
   overscan,
+  pinnedRows,
   pageSizes,
   query: queryProp,
   range: rangeProp,
@@ -398,8 +407,50 @@ export function DataGrid<Row>({
   );
   const template = useMemo(() => columnTemplate(resolved, gutters), [resolved, gutters]);
 
+  /* ── Pinned rows ────────────────────────────────────────────────────── */
+  /* Held rows leave the query: what is sorted, filtered and paged is the
+     rest. Each becomes a node of its own, outside the body's count. */
+  const pinned = useMemo(() => {
+    const top = pinnedRows?.top ?? [];
+    const bottom = pinnedRows?.bottom ?? [];
+    if (top.length === 0 && bottom.length === 0) {
+      return {
+        top: [] as RowNodeOf<Row>[],
+        bottom: [] as RowNodeOf<Row>[],
+        keys: null as ReadonlySet<string> | null,
+      };
+    }
+    const byKey = new Map<string, Row>();
+    for (const row of rows) byKey.set(rowKeyOf(row), row);
+    const nodesOf = (keys: readonly string[]) =>
+      keys.flatMap((key): RowNodeOf<Row>[] => {
+        const row = byKey.get(key);
+        return row === undefined
+          ? []
+          : [
+              {
+                kind: 'row',
+                key,
+                row,
+                index: -1,
+                groups: [],
+                level: 1,
+                parent: null,
+                childCount: 0,
+                open: false,
+              },
+            ];
+      });
+    return { top: nodesOf(top), bottom: nodesOf(bottom), keys: new Set([...top, ...bottom]) };
+  }, [pinnedRows, rows, rowKeyOf]);
+  const bodyRows = useMemo(
+    () => (pinned.keys ? rows.filter((row) => !pinned.keys!.has(rowKeyOf(row))) : rows),
+    [rows, pinned.keys, rowKeyOf],
+  );
+
   /* ── The applied query ──────────────────────────────────────────────── */
   const result = useMemo(() => {
+    const rows = bodyRows;
     if (resolvedMode === 'server') {
       const nodes: GridNode<Row>[] = rows.map((row, index) => ({
         kind: 'row',
@@ -433,7 +484,7 @@ export function DataGrid<Row>({
     return { ...applied, total: applied.total };
   }, [
     resolvedMode,
-    rows,
+    bodyRows,
     columns,
     query,
     rowKeyOf,
@@ -457,13 +508,15 @@ export function DataGrid<Row>({
   const cursorRows = useMemo(() => {
     const list = [HEADER_ROW];
     if (resolvedFilterRow) list.push(FILTER_ROW);
+    for (const node of pinned.top) list.push(node.key);
     for (const node of nodes)
       list.push(node.kind === 'group' ? `${GROUP_ROW_PREFIX}${node.key}` : node.key);
+    for (const node of pinned.bottom) list.push(node.key);
     if (hasSummary) list.push(SUMMARY_ROW);
     return list;
-  }, [nodes, resolvedFilterRow, hasSummary]);
+  }, [nodes, pinned, resolvedFilterRow, hasSummary]);
   const bodyStart = 1 + (resolvedFilterRow ? 1 : 0);
-  const bodyEnd = bodyStart + nodes.length;
+  const bodyEnd = bodyStart + pinned.top.length + nodes.length + pinned.bottom.length;
 
   /* ── Virtual rows ───────────────────────────────────────────────────── */
   const [scrollTop, setScrollTop] = useState(0);
@@ -509,7 +562,7 @@ export function DataGrid<Row>({
     [windowsRows, nodes, rowWindow.startIndex, rowWindow.endIndex],
   );
   /** Rows the cursor needs mounted whatever the window says. */
-  const [pinnedRows, setPinnedRows] = useState<readonly string[]>([]);
+  const [heldRows, setHeldRows] = useState<readonly string[]>([]);
 
   /* ── Virtual columns ────────────────────────────────────────────────── */
   const middle = useMemo(() => resolved.filter((column) => column.pinned === null), [resolved]);
@@ -544,9 +597,13 @@ export function DataGrid<Row>({
 
   /* ── Selection ──────────────────────────────────────────────────────── */
   const selectableKeys = useMemo(() => {
-    const source = resolvedMode === 'client' ? result.rows : rows;
-    return source.map(rowKeyOf).filter((key) => !disabledSet.has(key));
-  }, [resolvedMode, result.rows, rows, rowKeyOf, disabledSet]);
+    const source = resolvedMode === 'client' ? result.rows : bodyRows;
+    return [
+      ...pinned.top.map((node) => node.key),
+      ...source.map(rowKeyOf),
+      ...pinned.bottom.map((node) => node.key),
+    ].filter((key) => !disabledSet.has(key));
+  }, [resolvedMode, result.rows, bodyRows, pinned, rowKeyOf, disabledSet]);
   const selectedList = useMemo<readonly string[]>(
     () =>
       Array.isArray(value) ? value : value === null || value === undefined ? [] : [value as string],
@@ -691,7 +748,7 @@ export function DataGrid<Row>({
         index >= 0 &&
         (index < rowWindow.startIndex || index >= rowWindow.endIndex)
       ) {
-        setPinnedRows([cell.row]);
+        setHeldRows([cell.row]);
         const offset = metrics ? metrics.offsetOf(index) : index * rowSize;
         scroll.current?.scrollTo({ top: offset - viewport.height / 2 + rowSize });
       }
@@ -1108,9 +1165,11 @@ export function DataGrid<Row>({
 
   const nodeByKey = useMemo(() => {
     const map = new Map<string, Extract<GridNode<Row>, { kind: 'row' }>>();
+    for (const node of pinned.top) map.set(node.key, node);
     for (const node of nodes) if (node.kind === 'row') map.set(node.key, node);
+    for (const node of pinned.bottom) map.set(node.key, node);
     return map;
-  }, [nodes]);
+  }, [nodes, pinned]);
   /* ── Reordering rows ────────────────────────────────────────────────── */
   /* Rows move only while the query is at rest and there is no tree: sorted,
      filtered, searched or grouped, the position on screen is not the
@@ -1307,7 +1366,7 @@ export function DataGrid<Row>({
     if (!previous || previous.rows === rows) return;
     const now = Date.now();
     let marked = false;
-    for (const node of mountedNodes) {
+    for (const node of [...pinned.top, ...mountedNodes, ...pinned.bottom]) {
       if (node.kind !== 'row') continue;
       const before = previous.byKey.get(node.key);
       if (before === undefined || before === node.row) continue;
@@ -1339,7 +1398,7 @@ export function DataGrid<Row>({
       };
       changedTimer.current = setTimeout(sweep, changedFor);
     }
-  }, [rows, rowKeyOf, mountedNodes, resolved, changedFor]);
+  }, [rows, rowKeyOf, mountedNodes, pinned, resolved, changedFor]);
   useEffect(
     () => () => {
       if (changedTimer.current !== null) clearTimeout(changedTimer.current);
@@ -1427,13 +1486,7 @@ export function DataGrid<Row>({
   const [edit, setEdit] = useState<EditSession | null>(null);
   const editRef = useRef(edit);
   editRef.current = edit;
-  const rowOf = useCallback(
-    (key: string) => {
-      const node = nodes.find((entry) => entry.kind === 'row' && entry.key === key);
-      return node && node.kind === 'row' ? node.row : undefined;
-    },
-    [nodes],
-  );
+  const rowOf = useCallback((key: string) => nodeByKey.get(key)?.row, [nodeByKey]);
 
   const startEdit = useCallback(
     (cell: GridCell, seed: string | null = null) => {
@@ -1620,14 +1673,36 @@ export function DataGrid<Row>({
     /* Guarded like `@slotted/core/overflow` guards it: a test document has
        no observer, and a grid that never learns its viewport windows nothing
        and stays correct. */
+    /* The head's and the summary's heights, for the rows held under one and
+       over the other: written on the scroller as the offsets the held rows
+       stick at. Observed rather than computed — a filter row is a control's
+       height, a group row a line's, and the sum is not the density's. */
+    const edges = () => {
+      const head = scroller.querySelector<HTMLElement>(':scope > [data-part="head"]');
+      const summary = scroller.querySelector<HTMLElement>(':scope > [data-part="summary"]');
+      scroller.style.setProperty(
+        '--slotted-data-grid-pinned-top-offset',
+        `${head?.offsetHeight ?? 0}px`,
+      );
+      scroller.style.setProperty(
+        '--slotted-data-grid-pinned-bottom-offset',
+        `${summary?.offsetHeight ?? 0}px`,
+      );
+    };
     const observer =
       typeof ResizeObserver === 'undefined'
         ? null
         : new ResizeObserver(() => {
             setViewport({ width: scroller.clientWidth, height: scroller.clientHeight });
+            edges();
           });
     observer?.observe(scroller);
+    for (const part of scroller.querySelectorAll(
+      ':scope > [data-part="head"], :scope > [data-part="summary"]',
+    ))
+      observer?.observe(part);
     setViewport({ width: scroller.clientWidth, height: scroller.clientHeight });
+    edges();
     const affordance = createScrollAffordance(scroller, {
       orientation: () => 'horizontal',
       onChange: (state) => {
@@ -2192,7 +2267,7 @@ export function DataGrid<Row>({
         top = offset < visibleTop ? offset : offset - viewport.height + rowSize + head;
       }
       scroller.scrollTo({ top: Math.max(0, top) });
-      if (windowsRows) setPinnedRows([key]);
+      if (windowsRows) setHeldRows([key]);
     },
     [nodes, metrics, rowSize, viewport.height, windowsRows],
   );
@@ -2629,7 +2704,13 @@ export function DataGrid<Row>({
         aria-multiselectable={
           resolvedSelection === 'multiple' || resolvedSelection === 'range' ? true : undefined
         }
-        aria-rowcount={(total === null ? -1 : total) + headerRowCount + (hasSummary ? 1 : 0)}
+        aria-rowcount={
+          (total === null ? -1 : total) +
+          pinned.top.length +
+          pinned.bottom.length +
+          headerRowCount +
+          (hasSummary ? 1 : 0)
+        }
         data-part="root"
         data-rows={autoRows ? 'auto' : 'fixed'}
         data-ui="data-grid"
@@ -2652,26 +2733,46 @@ export function DataGrid<Row>({
       >
         <div data-part="scroll" ref={scroll}>
           <DataGridHead<Row> columnGroups={columnGroups} headerRowCount={headerRowCount} />
+          {pinned.top.length > 0 ? (
+            <DataGridPinnedRows<Row>
+              edge="top"
+              firstRowIndex={headerRowCount + 1}
+              nodes={pinned.top}
+            />
+          ) : null}
           {status === 'loading' ? (
             <DataGridLoader<Row> rows={skeletonCount} />
           ) : (
             <DataGridBody<Row>
               bodyStyle={bodyStyle}
               firstIndex={windowsRows ? rowWindow.startIndex : 0}
-              headerRowCount={headerRowCount}
+              headerRowCount={headerRowCount + pinned.top.length}
               measureRow={autoRows || measuredRow === null ? measureRow : undefined}
               nodes={mountedNodes}
-              pinnedRows={pinnedRows}
+              heldRows={heldRows}
               allNodes={nodes}
             />
           )}
           {emptyContent !== null && status !== 'loading' ? (
             <DataGridEmpty>{emptyContent}</DataGridEmpty>
           ) : null}
+          {pinned.bottom.length > 0 ? (
+            <DataGridPinnedRows<Row>
+              edge="bottom"
+              firstRowIndex={headerRowCount + pinned.top.length + (total ?? nodes.length) + 1}
+              nodes={pinned.bottom}
+            />
+          ) : null}
           {hasSummary && status === 'rows' ? (
             <DataGridSummary<Row>
               aggregates={result.aggregates}
-              rowIndex={headerRowCount + (total ?? nodes.length) + 1}
+              rowIndex={
+                headerRowCount +
+                pinned.top.length +
+                (total ?? nodes.length) +
+                pinned.bottom.length +
+                1
+              }
             />
           ) : null}
           {dragState.offset !== null ? (

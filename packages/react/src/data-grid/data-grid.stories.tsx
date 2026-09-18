@@ -1377,6 +1377,62 @@ const TreeDemo = () => {
 
 export const Tree: Story = { parameters: scenario('tree'), render: () => <TreeDemo /> };
 
+/* ── Pinned rows ───────────────────────────────────────────────────────── */
+
+const PinnedRowsDemo = () => {
+  const [pinnedRows, setPinnedRows] = useState<{ top: string[]; bottom: string[] }>({
+    top: ['SHP-20487'],
+    bottom: ['SHP-20481'],
+  });
+  const [current, setCurrent] = useState<GridCell | null>({ row: 'SHP-20482', column: 'customer' });
+  const pin = (edge: 'top' | 'bottom' | null) => {
+    if (!current || current.row === 'header') return;
+    const key = current.row;
+    setPinnedRows((held) => ({
+      top: [...held.top.filter((entry) => entry !== key), ...(edge === 'top' ? [key] : [])],
+      bottom: [
+        ...held.bottom.filter((entry) => entry !== key),
+        ...(edge === 'bottom' ? [key] : []),
+      ],
+    }));
+  };
+  return (
+    <Screen
+      size="tall"
+      before={
+        <div className="slotted-demo-row">
+          <Text size="sm" tone="muted">
+            {current ? `Cursor on ${current.row}` : 'Held rows sit out of the sort and the pages'}
+          </Text>
+          <Button onClick={() => pin('top')} size="sm" tone="secondary" variant="outline">
+            Pin to top
+          </Button>
+          <Button onClick={() => pin('bottom')} size="sm" tone="secondary" variant="outline">
+            Pin to bottom
+          </Button>
+          <Button onClick={() => pin(null)} size="sm" tone="secondary" variant="outline">
+            Unpin
+          </Button>
+        </div>
+      }
+    >
+      <Shipments
+        current={current}
+        defaultQuery={{ ...emptyQuery(), sort: [{ column: 'weight', direction: 'descending' }] }}
+        onCurrentChange={setCurrent}
+        pinnedRows={pinnedRows}
+        rows={FIFTY}
+        selectionMode="multiple"
+      />
+    </Screen>
+  );
+};
+
+export const PinnedRows: Story = {
+  parameters: scenario('pinned-rows'),
+  render: () => <PinnedRowsDemo />,
+};
+
 /* ── Reordering rows ───────────────────────────────────────────────────── */
 
 const ReorderRowsDemo = () => {

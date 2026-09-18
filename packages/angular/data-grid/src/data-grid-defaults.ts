@@ -25,6 +25,11 @@ export type DataGridReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'prog
 export type DataGridExpandedGroups = readonly string[] | 'all';
 export type DataGridSelection = string | readonly string[] | null;
 
+export interface DataGridPinnedRows {
+  readonly top?: readonly string[] | undefined;
+  readonly bottom?: readonly string[] | undefined;
+}
+
 export interface DataGridRowsReorderEvent {
   readonly key: string;
   /** The row's index in `rows`. */

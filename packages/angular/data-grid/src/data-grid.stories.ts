@@ -1342,6 +1342,55 @@ export const Tree: Story = {
   },
 };
 
+export const PinnedRows: Story = {
+  parameters: scenario('pinned-rows'),
+  render: () => {
+    const pinnedRows = signal<{ top: string[]; bottom: string[] }>({
+      top: ['SHP-20487'],
+      bottom: ['SHP-20481'],
+    });
+    const current = signal<GridCell | null>({ row: 'SHP-20482', column: 'customer' });
+    const pin = (edge: 'top' | 'bottom' | null) => {
+      const cell = current();
+      if (!cell || cell.row === 'header') return;
+      const key = cell.row;
+      pinnedRows.update((held) => ({
+        top: [...held.top.filter((entry) => entry !== key), ...(edge === 'top' ? [key] : [])],
+        bottom: [
+          ...held.bottom.filter((entry) => entry !== key),
+          ...(edge === 'bottom' ? [key] : []),
+        ],
+      }));
+    };
+    return {
+      props: {
+        ...base(),
+        pinnedRows,
+        current,
+        query: signal<GridQuery>({
+          ...emptyQuery(),
+          sort: [{ column: 'weight', direction: 'descending' }],
+        }),
+        pin,
+      },
+      template: screen(
+        grid(
+          '[rows]="rows" [pinnedRows]="pinnedRows()" [(current)]="current" [(query)]="query" selectionMode="multiple"',
+        ),
+        {
+          size: 'tall',
+          before: `<div class="slotted-demo-row">
+    ${note(`{{ current() ? 'Cursor on ' + current()!.row : 'Held rows sit out of the sort and the pages' }}`)}
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="pin('top')">Pin to top</button>
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="pin('bottom')">Pin to bottom</button>
+    <button slButton size="sm" tone="secondary" variant="outline" type="button" (click)="pin(null)">Unpin</button>
+  </div>`,
+        },
+      ),
+    };
+  },
+};
+
 export const ReorderRows: Story = {
   parameters: scenario('reorder-rows'),
   render: () => {

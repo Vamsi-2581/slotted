@@ -4994,6 +4994,248 @@
   </div>
 </section>
 
+<!--
+  Rows held at the edges: one under the head, one over the summary, out of
+  the query; the body scrolls between them.
+-->
+<section data-scene="pinned-rows">
+  <div
+    data-ui="data-grid"
+    data-part="root"
+    role="grid"
+    data-variant="framed"
+    data-sticky-header
+    data-rows="fixed"
+    aria-label="Shipments"
+    aria-rowcount="7"
+    aria-colcount="3"
+    style="--slotted-data-grid-template: 130px 180px 150px; --slotted-data-grid-block-size: 220px"
+  >
+    <div
+      data-part="scroll"
+      style="
+        --slotted-data-grid-pinned-top-offset: 34px;
+        --slotted-data-grid-pinned-bottom-offset: 0px;
+      "
+    >
+      <div data-part="head" role="rowgroup">
+        <div data-part="header-row" role="row" aria-rowindex="1">
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="1"
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="2"
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="3"
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <div data-part="pinned-rows" data-edge="top" role="rowgroup">
+        <div data-part="row" role="row" aria-rowindex="2" data-selected>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20481</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Aurora Textiles</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Kraków, PL</span>
+          </div>
+        </div>
+      </div>
+      <div data-part="body" role="rowgroup">
+        <div data-part="row" role="row" aria-rowindex="3">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20482</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Mól &amp; Fils</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Reykjavík, IS</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="4">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20483</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Nordwind Logistik</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Dublin, IE</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="5">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20484</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Ærøskøbing Bryggeri</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Hamburg, DE</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="6">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20485</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Helios Solar</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Dublin, IE</span>
+          </div>
+        </div>
+      </div>
+      <div data-part="pinned-rows" data-edge="bottom" role="rowgroup">
+        <div data-part="row" role="row" aria-rowindex="7">
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="1"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20490</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Casa Verde</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Lisboa, PT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section data-scene="grouping">
   <div
     data-ui="data-grid"

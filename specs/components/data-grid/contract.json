@@ -34,6 +34,7 @@
     "filter-join": "div",
     "filter-actions": "div",
     "body": "div",
+    "pinned-rows": "div",
     "row": "div",
     "row-header": "div",
     "cell": "div",
@@ -56,6 +57,7 @@
     "root": "grid",
     "head": "rowgroup",
     "body": "rowgroup",
+    "pinned-rows": "rowgroup",
     "summary": "rowgroup",
     "loader": "rowgroup",
     "header-row": "row",
@@ -891,6 +893,7 @@
         "filter-join",
         "filter-actions",
         "body",
+        "pinned-rows",
         "row",
         "row-header",
         "cell",
@@ -949,6 +952,7 @@
       "export",
       "tree",
       "reorder-rows",
+      "pinned-rows",
       "keyboard",
       "accessibility"
     ]

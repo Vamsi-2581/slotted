@@ -27,7 +27,7 @@ interface BodyProps<Row> {
   headerRowCount: number;
   bodyStyle: CSSProperties | undefined;
   measureRow: ((index: number, node: HTMLElement | null) => void) | undefined;
-  pinnedRows: readonly string[];
+  heldRows: readonly string[];
 }
 
 export function DataGridBody<Row>({
@@ -37,12 +37,12 @@ export function DataGridBody<Row>({
   headerRowCount,
   measureRow,
   nodes,
-  pinnedRows,
+  heldRows,
 }: BodyProps<Row>) {
   /* A row the cursor stands on is mounted whatever the window says, at its
      own place: with the window's padding on the body it is drawn in flow
      after the windowed rows, and the cursor finds it by key. */
-  const extra = pinnedRows
+  const extra = heldRows
     .map((key) => allNodes.find((node) => node.key === key))
     .filter((node): node is GridNode<Row> => node !== undefined && !nodes.includes(node));
 
@@ -63,6 +63,35 @@ export function DataGridBody<Row>({
           />
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Rows held at an edge of the body: a rowgroup of their own, sticky under
+ * the head or over the summary, outside the window and the query. Each row
+ * is the body's row, cursor and selection included.
+ */
+export function DataGridPinnedRows<Row>({
+  edge,
+  firstRowIndex,
+  nodes,
+}: {
+  edge: 'top' | 'bottom';
+  firstRowIndex: number;
+  nodes: readonly Extract<GridNode<Row>, { kind: 'row' }>[];
+}) {
+  return (
+    <div data-edge={edge} data-part="pinned-rows" role="rowgroup">
+      {nodes.map((node, offset) => (
+        <BodyRow<Row>
+          index={-1}
+          key={node.key}
+          measure={undefined}
+          node={node}
+          rowIndex={firstRowIndex + offset}
+        />
+      ))}
     </div>
   );
 }

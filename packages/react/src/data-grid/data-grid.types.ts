@@ -204,6 +204,11 @@ export interface DataGridExportOptions extends CsvOptions {
   readonly columns?: 'visible' | 'all' | undefined;
 }
 
+export interface DataGridPinnedRows {
+  readonly top?: readonly string[] | undefined;
+  readonly bottom?: readonly string[] | undefined;
+}
+
 export interface DataGridRowsReorderEvent {
   readonly key: string;
   /** The row's index in `rows`. */
@@ -258,6 +263,12 @@ export interface DataGridProps<Row>
   onLoadMore?: (() => void) | undefined;
   /** Rows a consumer has disabled: not selectable, not editable. */
   disabledKeys?: readonly string[] | undefined;
+  /**
+   * Rows held at the top or the bottom of the body, by key, in the stated
+   * order: out of the query — never sorted, filtered or paged — and always on
+   * screen, under the head and over the summary.
+   */
+  pinnedRows?: DataGridPinnedRows | undefined;
   /**
    * Marks a mounted cell whose value changed between two `rows`, for the
    * stated milliseconds (`true` is 1200). A row that arrived is not a change.

@@ -47,7 +47,7 @@ test('lays every row out as a grid over the template the binding writes', () => 
      cell may hold rows of its own (a multi-select's chips are a `row`), and a
      descendant selector laid those out on this grid's template. */
   const groups =
-    "> [data-part='scroll'] > :is([data-part='head'],[data-part='body'],[data-part='summary'],[data-part='loader'])";
+    "> [data-part='scroll'] > :is([data-part='head'],[data-part='body'],[data-part='pinned-rows'],[data-part='summary'],[data-part='loader'])";
   const row = rule(`[data-ui='data-grid'] ${groups} > [role='row']`);
   assert.match(row, /display:grid;/);
   assert.match(
@@ -127,11 +127,11 @@ test('pins a column with sticky at the offset the binding writes, on the row’s
   /* The cells end where the rule under the row begins: the track is the row
      less the rule, or a pinned cell painted above its row covered the rule. */
   const body = rule(
-    "[data-ui='data-grid']:is([data-variant='ruled'],[data-variant='framed']) > [data-part='scroll'] > [data-part='body']",
+    "[data-ui='data-grid']:is([data-variant='ruled'],[data-variant='framed']) > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows'])",
   );
   assert.match(body, /--_track:calc\(var\(--_row-block\) - var\(--_rule-width\)\);/);
   const fixed = rule(
-    "[data-ui='data-grid'][data-rows='fixed'] > [data-part='scroll'] > [data-part='body'] > [data-part='row']",
+    "[data-ui='data-grid'][data-rows='fixed'] > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row']",
   );
   assert.match(fixed, /block-size:var\(--_row-block\);grid-auto-rows:var\(--_track\);/);
 });

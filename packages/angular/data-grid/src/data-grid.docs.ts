@@ -164,6 +164,12 @@ const anatomy: AnatomyRow[] = [
     purpose: 'The rows; carries the virtual window’s total height and start offset.',
   },
   {
+    part: 'pinned-rows',
+    element: 'div[role="rowgroup"]',
+    required: false,
+    purpose: 'Rows held under the head or over the summary, out of the query.',
+  },
+  {
     part: 'row',
     element: 'div[role="row"]',
     required: true,
@@ -853,6 +859,22 @@ class ShipmentsPage {
     }),
   },
   {
+    id: 'pinned-rows',
+    title: 'Pinned rows',
+    note: 'pinnedRows holds rows at the top or the bottom of the body, by key, in the stated order. A held row leaves the query — never sorted, filtered or paged — and stays on screen, under the head and over the summary, at the heights the grid measures for each. It is a row like any other: the cursor walks through it, it selects, edits and exports with the rest, and it counts in aria-rowcount.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-pinned-rows',
+      language: 'angular',
+      label: 'Held at the edges',
+      source: `<sl-data-grid
+  rowKey="id"
+  [rows]="rows()"
+  [columns]="columns"
+  [pinnedRows]="{ top: ['SHP-20487'], bottom: ['SHP-20481'] }"
+/>`,
+    }),
+  },
+  {
     id: 'reorder-rows',
     title: 'Reordering rows',
     note: 'rowsReorderable draws a grip per row in a reserved column. The pointer drags from the grip and drops in a gap, with the same guide a column shows; Alt with the vertical arrows moves the row from any of its cells, and the move is announced. The grid keeps no order of its own: rowsReorder says where the row goes in rows (from and to, the index it takes once moved) and the consumer moves it. Only while the query is at rest — no sort, filter, search or group — and without a tree, because elsewhere the position on screen is not the position in rows; the grip is disabled otherwise.',
@@ -1106,6 +1128,13 @@ const api = apiRows([
     '—',
     'sl-data-grid',
     'Emitted when a branch hasChildren says has children opens and none are in rows.',
+  ],
+  [
+    'pinnedRows',
+    '{ top?: string[], bottom?: string[] }',
+    '—',
+    'sl-data-grid',
+    'Rows held at the top or the bottom of the body, out of the query and always on screen.',
   ],
   [
     'rowsReorderable',

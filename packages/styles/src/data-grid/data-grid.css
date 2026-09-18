@@ -234,7 +234,13 @@
      chips out on this grid's column template. */
   [data-ui='data-grid']
     > [data-part='scroll']
-    > :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
+    > :is(
+      [data-part='head'],
+      [data-part='body'],
+      [data-part='pinned-rows'],
+      [data-part='summary'],
+      [data-part='loader']
+    )
     > [role='row'] {
     box-sizing: border-box;
     display: grid;
@@ -274,7 +280,13 @@
 
   [data-ui='data-grid']
     > [data-part='scroll']
-    > :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader'])
+    > :is(
+      [data-part='head'],
+      [data-part='body'],
+      [data-part='pinned-rows'],
+      [data-part='summary'],
+      [data-part='loader']
+    )
     > [role='row']
     > * {
     grid-column: var(--slotted-data-grid-column, auto);
@@ -286,7 +298,13 @@
      the rows, the only thing that scrolls is the scroller. */
   [data-ui='data-grid']
     > [data-part='scroll']
-    > :is([data-part='head'], [data-part='body'], [data-part='summary'], [data-part='loader']) {
+    > :is(
+      [data-part='head'],
+      [data-part='body'],
+      [data-part='pinned-rows'],
+      [data-part='summary'],
+      [data-part='loader']
+    ) {
     inline-size: max-content;
     min-inline-size: 100%;
   }
@@ -393,7 +411,7 @@
      put out of the body for the two modes that press across cells. Ctrl+C
      copies the range; a grid with no selection keeps its text selectable. */
   [data-ui='data-grid']:is([data-selection='multiple'], [data-selection='range'])
-    [data-part='body'] {
+    :is([data-part='body'], [data-part='pinned-rows']) {
     user-select: none;
   }
 
@@ -1142,7 +1160,7 @@
    */
   [data-ui='data-grid'][data-rows='fixed']
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row'] {
     block-size: var(--_row-block);
     grid-auto-rows: var(--_track);
@@ -1150,7 +1168,7 @@
 
   [data-ui='data-grid'][data-rows='auto']
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row'] {
     grid-auto-rows: minmax(var(--_track), var(--_row-max-block));
   }
@@ -1159,11 +1177,11 @@
      value centred beside a four-line one floats in the middle of nothing,
      and the eye reads a row from its first line. Fixed rows stay centred. */
   [data-ui='data-grid'][data-rows='auto']
-    [data-part='body']
+    :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row']
     > [role='gridcell'],
   [data-ui='data-grid'][data-rows='auto']
-    [data-part='body']
+    :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row']
     > [role='rowheader'] {
     align-items: start;
@@ -1171,7 +1189,7 @@
 
   [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
     > [data-part='scroll']
-    > [data-part='body'] {
+    > :is([data-part='body'], [data-part='pinned-rows']) {
     --_track: calc(var(--_row-block) - var(--_rule-width));
   }
 
@@ -1186,7 +1204,7 @@
   [data-ui='data-grid'] [data-part='summary-cell'],
   [data-ui='data-grid']
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [role='row']
     > [data-part='selection'] {
     align-items: center;
@@ -1232,13 +1250,13 @@
   /* The rule between two rows, on the row; the last gives its rule up so a
      ruled grid does not end in a line with nothing under it. */
   [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
-    [data-part='body']
+    :is([data-part='body'], [data-part='pinned-rows'])
     > [role='row'] {
     border-block-end: var(--_rule-width) solid var(--_rule);
   }
 
   [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
-    [data-part='body']
+    :is([data-part='body'], [data-part='pinned-rows'])
     > [role='row']:last-child {
     border-block-end-color: transparent;
   }
@@ -1246,7 +1264,7 @@
   /* The stripe, declared before every state. */
   [data-ui='data-grid'][data-striped]
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row']:nth-child(even) {
     background-color: var(--_stripe);
   }
@@ -1258,21 +1276,21 @@
    */
   [data-ui='data-grid']
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row']:not([data-disabled]):hover {
     background-color: var(--_hover);
   }
 
   [data-ui='data-grid']
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row'][data-selected] {
     background-color: var(--_selected);
     color: var(--_selected-text);
   }
 
   [data-ui='data-grid']
-    [data-part='body']
+    :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row'][data-selected]:not([data-disabled]):hover {
     background-color: var(--_selected-hover);
   }
@@ -1604,7 +1622,7 @@
 
   [data-ui='data-grid']
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row'][data-selected]
     > [data-pinned] {
     background-color: var(--_selected);
@@ -1625,7 +1643,7 @@
 
   [data-ui='data-grid']
     > [data-part='scroll']
-    > [data-part='body']
+    > :is([data-part='body'], [data-part='pinned-rows'])
     > [role='row']:last-child
     > [data-pin-edge]::after {
     inset-block-end: 0;
@@ -1746,7 +1764,7 @@
   }
 
   [data-ui='data-grid']
-    [data-part='body']
+    :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row'][data-selected]
     > [data-part='selection'] {
     background-color: var(--_selected);
@@ -1859,6 +1877,46 @@
 
   [data-ui='data-grid']:not([data-sticky-header]) > [data-part='scroll'] > [data-part='summary'] {
     position: static;
+  }
+
+  /**
+   * ── Pinned rows ────────────────────────────────────────────────────────
+   *
+   * Rows held at an edge: a rowgroup stuck under the head or over the
+   * summary, at the height the binding measured for each, on the page's
+   * surface so the body scrolls under it, with a rule on the side it faces
+   * the body. Their rows are the body's rows.
+   */
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'] {
+    background-color: var(--_surface);
+    position: sticky;
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
+  }
+
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'][data-edge='top'] {
+    border-block-end: var(--_rule-width) solid var(--_rule-strong);
+    inset-block-start: calc(
+      var(--slotted-data-grid-sticky-offset, 0px) + var(--slotted-data-grid-pinned-top-offset, 0px)
+    );
+  }
+
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'][data-edge='bottom'] {
+    border-block-start: var(--_rule-width) solid var(--_rule-strong);
+    inset-block-end: calc(
+      var(--slotted-data-grid-sticky-offset-end, 0px) +
+        var(--slotted-data-grid-pinned-bottom-offset, 0px)
+    );
+  }
+
+  [data-ui='data-grid']:not([data-sticky-header])
+    > [data-part='scroll']
+    > [data-part='pinned-rows'] {
+    position: static;
+  }
+
+  /* A pinned cell inside a held row stands over the row's own ground. */
+  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'] [data-pinned] {
+    background-color: var(--_surface);
   }
 
   [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'] {
@@ -2101,6 +2159,7 @@
     [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'],
     [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'],
     [data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty'],
+    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'],
     [data-ui='data-grid'] [data-pinned] {
       position: static;
     }
@@ -2123,11 +2182,14 @@
       box-shadow: none;
     }
 
-    [data-ui='data-grid'] [data-part='body'] > [data-part='row'] {
+    [data-ui='data-grid'] :is([data-part='body'], [data-part='pinned-rows']) > [data-part='row'] {
       break-inside: avoid;
     }
 
-    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='body'] > [data-part='row'] {
+    [data-ui='data-grid']
+      > [data-part='scroll']
+      > :is([data-part='body'], [data-part='pinned-rows'])
+      > [data-part='row'] {
       --_hover: transparent;
     }
   }

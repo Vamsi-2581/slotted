@@ -872,8 +872,15 @@
 
   /* The operand fills what the operator leaves and never past the cell: a
      field wider than its column is clipped at the column's edge, not drawn
-     into the next one. What a picker opens is in a layer, not in the cell. */
-  [data-ui='data-grid'] [data-part='filter-cell'] > [data-part='filter-operand'] {
+     into the next one. What a picker opens is in a layer, not in the cell.
+     The operand is the cell's child, or its grandchild through an element
+     with no part of its own: the Angular binding draws it inside a host
+     element (`display: contents`), and a plain child combinator held only
+     for React — read live, the Angular operand had no clip and no inset.
+     `data-grid.styles.test.mjs` holds the rule for every hosted part. */
+  [data-ui='data-grid']
+    [data-part='filter-cell']
+    > :is([data-part='filter-operand'], :not([data-part]) > [data-part='filter-operand']) {
     align-items: center;
     display: flex;
     flex: 1 1 auto;
@@ -893,7 +900,10 @@
   [data-ui='data-grid']
     [data-part='filter-cell']
     [data-part='filter-operand']
-    > [data-part='root'][data-variant='plain'] {
+    > :is(
+      [data-part='root'][data-variant='plain'],
+      :not([data-part]) > [data-part='root'][data-variant='plain']
+    ) {
     --slotted-control-padding-inline-sm: var(--slotted-space-3, 0.375rem);
     --slotted-control-height-sm: calc(var(--_head-block) - var(--_ring-width) * 2);
 
@@ -907,7 +917,7 @@
   [data-ui='data-grid']
     [data-part='filter-cell']
     [data-part='filter-operand'][data-range]
-    > [data-part='root'] {
+    > :is([data-part='root'], :not([data-part]) > [data-part='root']) {
     flex: 1 1 0;
     inline-size: 0;
   }
@@ -921,7 +931,7 @@
   [data-ui='data-grid']
     [data-part='filter-cell']
     [data-part='filter-operand'][data-range]
-    > [data-part='root']:last-child {
+    > :is([data-part='root']:last-child, :not([data-part]):last-child > [data-part='root']) {
     order: 3;
   }
 
@@ -1113,7 +1123,7 @@
 
   [data-ui='data-grid'][data-part='filter-panel']
     [data-part='filter-operand']
-    > [data-part='root'] {
+    > :is([data-part='root'], :not([data-part]) > [data-part='root']) {
     flex: 1 1 auto;
     min-inline-size: 0;
   }
@@ -1454,7 +1464,10 @@
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='editor'] > [data-part='root'] {
+  [data-ui='data-grid']
+    [data-part='cell']
+    > [data-part='editor']
+    > :is([data-part='root'], :not([data-part]) > [data-part='root']) {
     flex: 1 1 auto;
     min-inline-size: 0;
   }

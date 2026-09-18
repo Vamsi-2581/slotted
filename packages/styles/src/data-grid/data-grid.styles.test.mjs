@@ -168,7 +168,7 @@ test('hands the editing cell’s inset, height and type to the plain control', (
   assert.match(invalid, /--slotted-focus-ring-color:var\(--slotted-focus-ring-color-invalid\);/);
   /* The filter row's control stands inside its cell's trace the same way. */
   const operand = rule(
-    "[data-ui='data-grid'] [data-part='filter-cell'] > [data-part='filter-operand']",
+    "[data-ui='data-grid'] [data-part='filter-cell'] > :is([data-part='filter-operand'],:not([data-part]) > [data-part='filter-operand'])",
   );
   assert.match(operand, /margin:var\(--_ring-width\);/);
 });
@@ -229,6 +229,32 @@ test('lays the filter panel out as one line per condition', () => {
 });
 
 /** The filter row is a row of the grid on the band's lighter step, and its operator is one character. */
+/**
+ * Both bindings share this stylesheet, and the Angular one draws some parts
+ * inside host elements of its own (`display: contents`): the filter panel,
+ * the filter row's operand, the editor's control. A child combinator that
+ * reaches one of those from outside the host holds for React alone. Read
+ * live, the Angular panel stood out of a sixteen-rem popover and the Angular
+ * operand had no clip. A hosted part is reached as a child or through an
+ * element with no part of its own.
+ */
+test('reaches every part a binding may host through its host element', () => {
+  const hosted = ['filter-panel', 'filter-operand'];
+  for (const selector of normalized.match(/[^{}]+(?=\{)/g) ?? []) {
+    for (const part of hosted) {
+      const reached = new RegExp(`>\\[data-part='${part}'\\]`);
+      assert.doesNotMatch(selector, reached, `${selector} reaches ${part} as a child alone`);
+    }
+    /* The control inside the editor and the operand is a family of its own,
+       hosted the same way. */
+    assert.doesNotMatch(
+      selector,
+      /\[data-part='(editor|filter-operand)'\](\[[^\]]*\])*>\[data-part='root'\]/,
+      `${selector} reaches a hosted control as a child alone`,
+    );
+  }
+});
+
 test('draws the filter row on the band and its operator on a square inner target', () => {
   const cell = rule("[data-ui='data-grid'] [data-part='filter-row'] > [data-part='filter-cell']");
   assert.match(cell, /background-color:var\(--_band-surface\);/);

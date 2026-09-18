@@ -168,7 +168,7 @@ test('hands the editing cell’s inset, height and type to the plain control', (
   assert.match(invalid, /--slotted-focus-ring-color:var\(--slotted-focus-ring-color-invalid\);/);
   /* The filter row's control stands inside its cell's trace the same way. */
   const operand = rule(
-    "[data-ui='data-grid'] [data-part='filter-cell'] > :is([data-part='filter-operand'],:not([data-part]) > [data-part='filter-operand'])",
+    "[data-ui='data-grid'] [data-part='filter-cell'] > [data-part='filter-operand'],[data-ui='data-grid'] [data-part='filter-cell'] > :not([data-part]) > [data-part='filter-operand']",
   );
   assert.match(operand, /margin:var\(--_ring-width\);/);
 });
@@ -239,19 +239,29 @@ test('lays the filter panel out as one line per condition', () => {
  * element with no part of its own.
  */
 test('reaches every part a binding may host through its host element', () => {
-  const hosted = ['filter-panel', 'filter-operand'];
+  const through = (part) =>
+    new RegExp(`>:not\\(\\[data-part\\]\\)(:last-child)?>\\[data-part='${part}'\\]`);
   for (const selector of normalized.match(/[^{}]+(?=\{)/g) ?? []) {
-    for (const part of hosted) {
-      const reached = new RegExp(`>\\[data-part='${part}'\\]`);
-      assert.doesNotMatch(selector, reached, `${selector} reaches ${part} as a child alone`);
+    for (const part of ['filter-panel', 'filter-operand']) {
+      const asChild = new RegExp(`(^|[^)])>\\[data-part='${part}'\\]`);
+      if (!asChild.test(selector)) continue;
+      assert.match(
+        selector,
+        through(part),
+        `${selector} reaches ${part} as a child but not through its host`,
+      );
     }
     /* The control inside the editor and the operand is a family of its own,
        hosted the same way. */
-    assert.doesNotMatch(
-      selector,
-      /\[data-part='(editor|filter-operand)'\](\[[^\]]*\])*>\[data-part='root'\]/,
-      `${selector} reaches a hosted control as a child alone`,
-    );
+    if (
+      /\[data-part='(editor|filter-operand)'\](\[[^\]]*\])*>\[data-part='root'\]/.test(selector)
+    ) {
+      assert.match(
+        selector,
+        /\[data-part='(editor|filter-operand)'\](\[[^\]]*\])*>:not\(\[data-part\]\)(:last-child)?>\[data-part='root'\]/,
+        `${selector} reaches a hosted control as a child but not through its host`,
+      );
+    }
   }
 });
 

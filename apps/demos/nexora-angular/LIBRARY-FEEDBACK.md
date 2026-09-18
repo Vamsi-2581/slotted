@@ -21,6 +21,7 @@ One entry per friction met while consuming `@slotted/angular` as a beta. Family,
 | 0.1.0-beta.0 | menu, command-palette                               | the mark column sized its own box but not a bare glyph host inside it, so a size-less `ng-icon` rendered at the item's type size (12–13px) instead of the control's glyph size | package — `38274fd` |
 | 0.1.0-beta.0 | top-navigation                                      | the family's own controls (`help`, `notifications`, `account`) stand at `control-height-md`; the docs do not say which `size` a consumer's own `slIconButton` in `actions` must carry to match | package — `083c794`: `action` is the family's own square, so no size is chosen |
 | 0.1.0-beta.0 | top-navigation | a consumer's `slIconButton` in `actions` paints its glyph in the text ink; the family's own controls rest in the muted ink and darken on hover — two inks in one row of six | package — `083c794`: `action` |
+| 0.1.0-beta.0 | top-navigation | `count` was a fraction of the bell — 14px holding 10px semibold figures with 2px of inset — crushed and sitting high; density moved the disc and not the floor of the type | package — `389d85f`: sized as `badge` sizes a count |
 | 0.1.0-beta.0 | menu                                                | the surface is a three-column grid and has no header part; a free block child (the account's identity) lands in the mark column, widens it and collapses the label column to one letter per line | `grid-column: 1 / -1` on the app's identity block |
 
 ## Backend

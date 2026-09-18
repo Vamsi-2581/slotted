@@ -225,3 +225,51 @@ test('draws every mark from the glyph the contract names', () => {
 test('outranks the shell selector that reaches its brand', () => {
   assert.match(css, /\[data-ui='top-navigation'\]\[data-part='root'\] > \[data-part='brand'\] \{/);
 });
+
+/**
+ * A product has global controls the family did not foresee — approvals, tasks
+ * — and they stand in the same cluster as the bell. `action` is the family's
+ * shape for them: the same square, ink, hover, focus and disabled treatment
+ * as the controls the family marks, with the consumer's own glyph inside at
+ * the control's glyph size, and `count` positioned over its corner.
+ */
+test('gives a consumer action the shape and the states of the marked controls', () => {
+  const rules = [...stripped.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, selector, body]) => ({
+    selector: selector.replace(/\s+/g, ' ').trim(),
+    body,
+  }));
+  const shape = rules.find(
+    ({ selector, body }) =>
+      selector.includes("[data-part='notifications']") &&
+      selector.includes("[data-part='action']") &&
+      /min-inline-size: var\(--_control-height\)/.test(body),
+  );
+  assert.ok(shape, 'action does not share the square of the marked controls');
+  assert.match(shape.body, /position: relative/);
+  for (const state of [
+    ['hover', /background-color: var\(--_hover-background\)/],
+    ['active', /background-color: var\(--_active-background\)/],
+    ['focus-visible', /outline:/],
+    ['disabled', /cursor: not-allowed/],
+  ]) {
+    const [pseudo, expectation] = state;
+    const rule = rules.find(
+      ({ selector, body }) =>
+        selector.includes(`[data-part='action']`) &&
+        selector.includes(pseudo) &&
+        expectation.test(body),
+    );
+    assert.ok(rule, `action has no ${pseudo} treatment`);
+  }
+  const glyph = rules.find(
+    ({ selector, body }) =>
+      /\[data-part='action'\] > :not\(\[data-part='count'\]\)/.test(selector) &&
+      /font-size: var\(--_icon-size\)/.test(body),
+  );
+  assert.ok(glyph, 'the glyph inside action is not sized at the control glyph size');
+  assert.match(glyph.body, /inline-size: var\(--_icon-size\)/);
+  assert.match(
+    stripped,
+    /\[data-part='action'\]\s*\{[^}]*--slotted-icon-size: var\(--_icon-size\)/,
+  );
+});

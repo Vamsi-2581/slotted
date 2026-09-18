@@ -747,6 +747,45 @@ export class SlTopNavigationNotifications extends TopNavigationControl {
   }
 }
 
+/**
+ * A global control of the product's own — approvals, tasks — in the family's
+ * square, with the family's ink, ground and hint. A destination on an `a`, a
+ * trigger on a `button`. The consumer projects its own glyph and names the
+ * control: `label` when the words change with a count, `aria-label` when
+ * they do not. `slTopNavigationCount` inside it stands over its corner the
+ * way it stands over the bell.
+ */
+@Component({
+  selector: 'a[slTopNavigationAction], button[slTopNavigationAction]',
+  standalone: true,
+  exportAs: 'slTopNavigationAction',
+  imports: [SlTooltipLayer, SlTooltipContent],
+  template: HINT_TEMPLATE,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  hostDirectives: [SlTooltip],
+  providers: HINT_PROVIDERS,
+  host: {
+    ...HINT_HOST,
+    'data-part': 'action',
+    '[attr.type]': 'type',
+    '[attr.aria-label]': 'text() || null',
+  },
+})
+export class SlTopNavigationAction extends TopNavigationControl {
+  /** The words the control is named by; over `aria-label`, which is read once. */
+  readonly label = input<string | undefined>(undefined);
+  protected readonly type = this.native.tagName === 'BUTTON' ? 'button' : null;
+  readonly text = computed(() => this.label() ?? this.writtenLabel ?? '');
+  /** No words, no hint: a control with no name has nothing to repeat. */
+  override readonly hint = computed(() => this.text() !== '');
+
+  constructor() {
+    super();
+    afterNextRender(() => this.native.setAttribute('data-part', 'action'));
+  }
+}
+
 /** The number of what is waiting, inside the bell's button and so inside its name. */
 @Directive({
   selector: '[slTopNavigationCount]',

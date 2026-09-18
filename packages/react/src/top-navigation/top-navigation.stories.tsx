@@ -1,7 +1,7 @@
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ChevronsUpDown, Search } from 'lucide-react';
+import { ChevronsUpDown, ClipboardCheck, Search } from 'lucide-react';
 import { Fragment, useState } from 'react';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
@@ -55,6 +55,7 @@ import { TopNavigation } from './top-navigation';
 import { TopNavigationDefaultsProvider } from './top-navigation-defaults';
 import {
   TopNavigationAccount,
+  TopNavigationAction,
   TopNavigationActions,
   TopNavigationBrand,
   TopNavigationContext,
@@ -323,6 +324,34 @@ function Notifications({ count = 3 }: { count?: number | string }) {
             <PopoverDescription>
               Carga 4821 entregue em Braga · Rota Norte com 40 min de atraso · Fatura 2026-0917 por
               aprovar
+            </PopoverDescription>
+          </PopoverBody>
+        </PopoverContent>
+      </PopoverLayer>
+    </Popover>
+  );
+}
+
+/** A control of the product's own beside the bell: approvals, with its own glyph and the same count. */
+function Approvals({ count = 7 }: { count?: number | string }) {
+  return (
+    <Popover align="end" side="bottom">
+      <PopoverTrigger
+        render={(props) => (
+          <TopNavigationAction {...props} aria-label={`Aprovações, ${count} pendentes`}>
+            <ClipboardCheck />
+            <TopNavigationCount>{count}</TopNavigationCount>
+          </TopNavigationAction>
+        )}
+      />
+      <PopoverLayer>
+        <PopoverContent>
+          <PopoverHeader>
+            <PopoverTitle>Aprovações</PopoverTitle>
+          </PopoverHeader>
+          <PopoverBody>
+            <PopoverDescription>
+              Cotação 2026-114 acima do desconto · Nota de crédito 88 por validar
             </PopoverDescription>
           </PopoverBody>
         </PopoverContent>
@@ -799,6 +828,22 @@ export const Actions: Story = {
           <TopNavigation>
             <Brand />
             <GlobalActions help="popover" />
+          </TopNavigation>
+        </Stage>
+      </Scene>
+      <Scene
+        label="A control of the product's own"
+        note="Approvals beside the bell: the same square, ink, hover and focus ring as the controls the family marks, the product's own glyph inside, and the count over its corner. Nothing in the cluster is a different kind of button."
+      >
+        <Stage room="laptop" tall>
+          <TopNavigation>
+            <Brand />
+            <TopNavigationActions>
+              <TopNavigationHelp href="#ajuda" />
+              <Approvals />
+              <Notifications />
+              <Account />
+            </TopNavigationActions>
           </TopNavigation>
         </Stage>
       </Scene>

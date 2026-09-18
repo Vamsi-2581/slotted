@@ -6,6 +6,7 @@ import { Tooltip } from '../tooltip';
 import { TooltipContent, TooltipLayer, TooltipTrigger } from '../tooltip/tooltip-parts';
 import { useTopNavigation } from './top-navigation';
 import type {
+  TopNavigationActionProps,
   TopNavigationControlProps,
   TopNavigationControlRootProps,
   TopNavigationHelpProps,
@@ -696,6 +697,53 @@ export function TopNavigationHelp({
 export function TopNavigationNotifications(props: TopNavigationControlProps) {
   const navigation = useTopNavigation();
   return <Control {...props} message={navigation.messages.notifications} part="notifications" />;
+}
+
+/**
+ * A global control of the product's own — approvals, tasks — in the family's
+ * square, with the family's ink, ground and hint. A destination with an
+ * `href`, a trigger without one. The consumer projects its own glyph and
+ * names the control with `aria-label`; `TopNavigationCount` inside it stands
+ * over its corner the way it stands over the bell.
+ */
+export function TopNavigationAction({
+  'aria-label': ariaLabel,
+  children,
+  href,
+  ref,
+  render,
+  ...nativeProps
+}: TopNavigationActionProps) {
+  const text = ariaLabel ?? '';
+  const rootProps = {
+    ...nativeProps,
+    ...(ariaLabel !== undefined ? { 'aria-label': ariaLabel } : {}),
+    children,
+    'data-part': 'action',
+    ...(href !== undefined ? { href } : {}),
+  };
+  return (
+    <Hint disabled={text === ''} text={text}>
+      <TooltipTrigger
+        {...(rootProps as object)}
+        render={(hint) => {
+          const merged = {
+            ...(hint as HTMLAttributes<HTMLElement> & { 'data-part': string }),
+            ref: (node: HTMLElement | null) => {
+              hint.ref?.(node);
+              attach(node as HTMLAnchorElement | null, ref);
+            },
+          };
+          if (render !== undefined) return render(merged);
+          return href === undefined ? (
+            <button {...(merged as object)} type="button" />
+          ) : (
+            <a {...merged} />
+          );
+        }}
+      />
+    </Hint>
+  );
 }
 
 /** The number of what is waiting, inside the bell's button and so inside its name. */

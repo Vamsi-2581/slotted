@@ -20,6 +20,7 @@
     "help": "link | button",
     "notifications": "button",
     "account": "button",
+    "action": "link | button",
     "reason": "Every role is the element's own. A header in the context of the body is the banner landmark and a nav is the navigation landmark, which the APG's HTML Sectioning Elements table maps with no ARIA written; the destinations are nav > ul > li > (a | button), the disclosure navigation example's own structure, and a screen reader announces a list of N items without the family writing a role"
   },
   "element": {
@@ -47,6 +48,7 @@
     "notifications": "button",
     "count": "span",
     "account": "button",
+    "action": "a | button",
     "reason": "The root is a header where the family stands alone and a div inside app-shell's banner part, which is already the banner landmark; two banners in one document is what the resolution order below prevents. home is an a when it has somewhere to go and a span when the mark is only a mark. help is an a when help is a destination and a button when it opens something"
   },
   "anatomy": {
@@ -73,6 +75,7 @@
     "help": "--slotted-icon-circle-question: a destination (a) or a trigger (button) the consumer wraps in menu or popover. Its children are its label — the family's message when there are none — clipped from the eye in the bar, where the mark stands alone and the tooltip repeats the words, and shown as a row's words in the panel below 480 pixels: one accessible name in both places. It moves to the panel below 480",
     "notifications": "--slotted-icon-bell with count in its corner: a button the consumer wraps in menu or popover. It never folds, because a count the reader cannot see is a count lost",
     "count": "the number of what is waiting, drawn by the family as tabular figures on a --slotted-tone-accent-solid disc that becomes a pill from two digits, over the bell's top-end corner and out of the flow: the control keeps the bell's width, and a third digit grows away from the bell over the gap, where the control beside it holds no ink. It stands inside the button, so it is part of the accessible name without a script",
+    "action": "a global control of the product's own — approvals, tasks — in the same square as the marked controls, with the same ink, ground, focus ring and disabled treatment: an a when it is a destination, a button when it opens something. The consumer projects its own glyph, sized by the control at --slotted-control-icon-size, and names it with aria-label; count stands over its top-end corner the way it does over the bell. It never folds",
     "account": "a pill around the consumer's avatar — one step under the control, xs at md, so the pointer's ground keeps a halo of one space step around it — and, when there is room, the name: a button the consumer wraps in menu. It never folds, because it is the way out"
   },
   "landmarks": {
@@ -320,7 +323,8 @@
         "help",
         "notifications",
         "count",
-        "account"
+        "account",
+        "action"
       ],
       "defaultsReason": "Axis defaults only. The uncontrolled starting values are the state models' own uncontrolled names and exist in React alone: Angular ships one model() for each of moreOpen, searchOpen and value, which is both sides. priority is an item's axis and has no root default"
     }

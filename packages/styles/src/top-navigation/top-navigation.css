@@ -470,7 +470,10 @@
   /**
    * One shape for every control the family draws a mark on: a square the
    * control's height, no frame at rest, the ground under the pointer, the
-   * mark a mask painted in the control's own ink.
+   * mark a mask painted in the control's own ink. `action` is the same shape
+   * for a global control the family did not foresee — approvals, tasks — with
+   * the consumer's own glyph where the mask would be, so the cluster is one
+   * row of equals and not four of the family's beside three of another.
    */
   [data-ui='top-navigation']
     :is(
@@ -479,7 +482,8 @@
       [data-part='search-close'],
       [data-part='help'],
       [data-part='notifications'],
-      [data-part='account']
+      [data-part='account'],
+      [data-part='action']
     ) {
     align-items: center;
     appearance: none;
@@ -546,6 +550,23 @@
     mask-image: var(--slotted-icon-bell);
   }
 
+  /**
+   * The glyph inside an action is the consumer's, and the control sizes it:
+   * an icon box reads `--slotted-icon-size` from the control, a bare glyph
+   * host such as `ng-icon` reads the font-size the child rule gives it. The
+   * count stands out of the flow and is not the glyph.
+   */
+  [data-ui='top-navigation'] [data-part='action'] {
+    --slotted-icon-size: var(--_icon-size);
+  }
+
+  [data-ui='top-navigation'] [data-part='action'] > :not([data-part='count']) {
+    block-size: var(--_icon-size);
+    flex: 0 0 auto;
+    font-size: var(--_icon-size);
+    inline-size: var(--_icon-size);
+  }
+
   [data-ui='top-navigation']
     :is(
       [data-part='more'],
@@ -554,8 +575,9 @@
       [data-part='notifications'],
       [data-part='account']
     ):enabled:hover,
-  [data-ui='top-navigation'] a[data-part='help']:not([data-disabled]):hover,
-  [data-ui='top-navigation'] button[data-part='help']:enabled:hover {
+  [data-ui='top-navigation']
+    a:is([data-part='help'], [data-part='action']):not([data-disabled]):hover,
+  [data-ui='top-navigation'] button:is([data-part='help'], [data-part='action']):enabled:hover {
     background-color: var(--_hover-background);
     color: var(--_color);
   }
@@ -568,8 +590,9 @@
       [data-part='notifications'],
       [data-part='account']
     ):enabled:active,
-  [data-ui='top-navigation'] a[data-part='help']:not([data-disabled]):active,
-  [data-ui='top-navigation'] button[data-part='help']:enabled:active {
+  [data-ui='top-navigation']
+    a:is([data-part='help'], [data-part='action']):not([data-disabled]):active,
+  [data-ui='top-navigation'] button:is([data-part='help'], [data-part='action']):enabled:active {
     background-color: var(--_active-background);
     color: var(--_color);
     transition-duration: var(--slotted-duration-instant);
@@ -581,7 +604,8 @@
       [data-part='more'],
       [data-part='notifications'],
       [data-part='account'],
-      [data-part='help']
+      [data-part='help'],
+      [data-part='action']
     )[data-open] {
     background-color: var(--_hover-background);
     color: var(--_color);
@@ -594,7 +618,8 @@
       [data-part='search-close'],
       [data-part='help'],
       [data-part='notifications'],
-      [data-part='account']
+      [data-part='account'],
+      [data-part='action']
     ):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
@@ -609,7 +634,7 @@
       [data-part='account']
     )
     :disabled,
-  [data-ui='top-navigation'] button[data-part='help']:disabled {
+  [data-ui='top-navigation'] button:is([data-part='help'], [data-part='action']):disabled {
     color: var(--_disabled-color);
     cursor: not-allowed;
   }

@@ -1,5 +1,5 @@
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideChevronsUpDown, lucideSearch } from '@ng-icons/lucide';
+import { lucideChevronsUpDown, lucideClipboardCheck, lucideSearch } from '@ng-icons/lucide';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import {
@@ -57,6 +57,7 @@ import { provideTopNavigationDefaults } from './top-navigation-defaults';
 import type { TopNavigationSize } from './top-navigation-defaults';
 import {
   SlTopNavigationAccount,
+  SlTopNavigationAction,
   SlTopNavigationActions,
   SlTopNavigationBrand,
   SlTopNavigationContext,
@@ -105,7 +106,9 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
 const meta: Meta<TopNavigationStoryArgs> = {
   title: 'Components/TopNavigation',
   decorators: [
-    applicationConfig({ providers: [provideIcons({ lucideChevronsUpDown, lucideSearch })] }),
+    applicationConfig({
+      providers: [provideIcons({ lucideChevronsUpDown, lucideClipboardCheck, lucideSearch })],
+    }),
     moduleMetadata({
       imports: [
         NgIcon,
@@ -126,6 +129,7 @@ const meta: Meta<TopNavigationStoryArgs> = {
         SlTopNavigationNotifications,
         SlTopNavigationCount,
         SlTopNavigationAccount,
+        SlTopNavigationAction,
         SlAppShell,
         SlAppShellBanner,
         SlAppShellMain,
@@ -268,6 +272,22 @@ const notifications = (
     <div slPopoverContent>
       <div slPopoverHeader><div slPopoverTitle>Notificações</div></div>
       <div slPopoverBody><div slPopoverDescription>Carga 4821 entregue em Braga · Rota Norte com 40 min de atraso · Fatura 2026-0917 por aprovar</div></div>
+    </div>
+  </ng-template>
+</ng-container>`;
+
+/** A control of the product's own beside the bell: approvals, with its own glyph and the same count. */
+const approvals = (
+  count: number | string = 7,
+) => `<ng-container slPopover align="end" side="bottom">
+  <button slTopNavigationAction slPopoverTrigger label="Aprovações, ${count} pendentes">
+    <ng-icon name="lucideClipboardCheck" />
+    <span slTopNavigationCount>${count}</span>
+  </button>
+  <ng-template slPopoverLayer>
+    <div slPopoverContent>
+      <div slPopoverHeader><div slPopoverTitle>Aprovações</div></div>
+      <div slPopoverBody><div slPopoverDescription>Cotação 2026-114 acima do desconto · Nota de crédito 88 por validar</div></div>
     </div>
   </ng-template>
 </ng-container>`;
@@ -589,6 +609,15 @@ export const Actions: Story = {
         'Without an href, help is a button the consumer wraps: here a popover with the documentation, the shortcuts and the support channel.',
         stage(
           `<header slTopNavigation>${brand()}${actions({ help: 'popover', ref: 'g2' })}</header>`,
+          'laptop',
+          true,
+        ),
+      ),
+      scene(
+        'A control of the product’s own',
+        'Approvals beside the bell: the same square, ink, hover and focus ring as the controls the family marks, the product’s own glyph inside, and the count over its corner. Nothing in the cluster is a different kind of button.',
+        stage(
+          `<header slTopNavigation>${brand()}<div slTopNavigationActions>${helpLink}${approvals()}${notifications()}${account('accountg4')}</div></header>`,
           'laptop',
           true,
         ),

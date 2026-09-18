@@ -7,6 +7,7 @@ import { TopNavigation } from './top-navigation';
 import { TopNavigationDefaultsProvider } from './top-navigation-defaults';
 import {
   TopNavigationAccount,
+  TopNavigationAction,
   TopNavigationActions,
   TopNavigationBrand,
   TopNavigationContext,
@@ -77,6 +78,10 @@ function Bar(props: Partial<TopNavigationProps>) {
       </TopNavigationSearch>
       <TopNavigationActions>
         <TopNavigationHelp href="#ajuda" />
+        <TopNavigationAction aria-label="Aprovações, 7 pendentes">
+          <svg />
+          <TopNavigationCount>7</TopNavigationCount>
+        </TopNavigationAction>
         <TopNavigationNotifications>
           <TopNavigationCount>3</TopNavigationCount>
         </TopNavigationNotifications>
@@ -139,7 +144,11 @@ describe('TopNavigation', () => {
     expect(part('help')).not.toHaveAttribute('aria-label');
     expect(part('help').tagName).toBe('A');
     expect(part('notifications')).toHaveAttribute('aria-label', 'Notificações');
-    expect(part('notifications')).toContainElement(part('count'));
+    expect(part('notifications').querySelector('[data-part="count"]')).not.toBeNull();
+    expect(part('action').tagName).toBe('BUTTON');
+    expect(part('action')).toHaveAttribute('type', 'button');
+    expect(part('action')).toHaveAttribute('aria-label', 'Aprovações, 7 pendentes');
+    expect(part('action').querySelector('[data-part="count"]')).not.toBeNull();
     expect(part('account')).toHaveAttribute('aria-label', 'Conta');
     expect(part('more')).toHaveAttribute('aria-label', 'Mais');
     expect(part('more')).toHaveAttribute('aria-expanded', 'false');

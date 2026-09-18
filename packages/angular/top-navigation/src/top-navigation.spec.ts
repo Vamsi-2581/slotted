@@ -11,6 +11,7 @@ import { provideTopNavigationDefaults } from './top-navigation-defaults';
 import type { TopNavigationSize } from './top-navigation-defaults';
 import {
   SlTopNavigationAccount,
+  SlTopNavigationAction,
   SlTopNavigationActions,
   SlTopNavigationBrand,
   SlTopNavigationContext,
@@ -46,6 +47,7 @@ const PARTS = [
   SlTopNavigationNotifications,
   SlTopNavigationCount,
   SlTopNavigationAccount,
+  SlTopNavigationAction,
 ];
 
 const BAR = `<div slTopNavigationBrand>
@@ -73,6 +75,7 @@ const BAR = `<div slTopNavigationBrand>
 <div slTopNavigationSearch><input aria-label="Procurar" type="search" /></div>
 <div slTopNavigationActions>
   <a slTopNavigationHelp href="#ajuda"></a>
+  <button slTopNavigationAction [label]="approvalsLabel()"><svg></svg><span slTopNavigationCount>7</span></button>
   <button slTopNavigationNotifications><span slTopNavigationCount>3</span></button>
   <button slTopNavigationAccount><span>AB</span></button>
 </div>`;
@@ -107,6 +110,7 @@ class Host {
   readonly moreRequests: ChangeRequest<boolean>[] = [];
   readonly searchRequests: ChangeRequest<boolean>[] = [];
   readonly collapses: (readonly string[])[] = [];
+  readonly approvalsLabel = signal('Aprovações, 7 pendentes');
 }
 
 @Component({
@@ -116,7 +120,9 @@ class Host {
     <header slAppShellBanner><div slTopNavigation>${BAR}</div></header>
   </div>`,
 })
-class InShell {}
+class InShell {
+  readonly approvalsLabel = signal('Aprovações, 7 pendentes');
+}
 
 @Component({
   standalone: true,
@@ -126,7 +132,9 @@ class InShell {}
   ],
   template: `<header slTopNavigation>${BAR}</header>`,
 })
-class WithDefaults {}
+class WithDefaults {
+  readonly approvalsLabel = signal('Aprovações, 7 pendentes');
+}
 
 /**
  * jsdom lays nothing out, so the bar's width is what this says it is: the
@@ -211,13 +219,25 @@ describe('SlTopNavigation', () => {
     expect(part('help').textContent?.trim()).toBe('Ajuda');
     expect(part('help').hasAttribute('aria-label')).toBe(false);
     expect(part('notifications').getAttribute('aria-label')).toBe('Notificações');
-    expect(part('notifications').contains(part('count'))).toBe(true);
+    expect(part('notifications').querySelector('[data-part="count"]')).not.toBeNull();
     expect(part('account').getAttribute('aria-label')).toBe('Conta');
     expect(part('more').getAttribute('aria-label')).toBe('Mais');
     expect(part('more').getAttribute('aria-expanded')).toBe('false');
     expect(part('more').getAttribute('aria-controls')).toBe(part('panel').id);
     expect(part('search-toggle').getAttribute('aria-label')).toBe('Procurar');
     expect(part('trigger').querySelector('[data-part="indicator"]')).not.toBeNull();
+  });
+
+  it('names a control of the product’s own from label, live, and keeps the count inside it', async () => {
+    await mount(1280);
+    const action = part('action');
+    expect(action.tagName).toBe('BUTTON');
+    expect(action.getAttribute('type')).toBe('button');
+    expect(action.getAttribute('aria-label')).toBe('Aprovações, 7 pendentes');
+    expect(action.contains(action.querySelector('[data-part="count"]'))).toBe(true);
+    host.approvalsLabel.set('Aprovações, 8 pendentes');
+    fixture.detectChanges();
+    expect(action.getAttribute('aria-label')).toBe('Aprovações, 8 pendentes');
   });
 
   it('marks the current destination on the link and asks value to move on a press', async () => {

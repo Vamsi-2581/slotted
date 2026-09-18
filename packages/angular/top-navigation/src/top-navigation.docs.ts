@@ -25,11 +25,11 @@ export const ANGULAR_TOP_NAVIGATION_TOKENS = topNavigationTokens.map((name) => (
 
 const imports: ReferenceImport = {
   source:
-    "import { SlTopNavigation, SlTopNavigationAccount, SlTopNavigationActions, SlTopNavigationBrand, SlTopNavigationContext, SlTopNavigationCount, SlTopNavigationHelp, SlTopNavigationHome, SlTopNavigationItem, SlTopNavigationLink, SlTopNavigationList, SlTopNavigationMark, SlTopNavigationName, SlTopNavigationNav, SlTopNavigationNotifications, SlTopNavigationSearch, SlTopNavigationTrigger, provideTopNavigationDefaults } from '@slotted/angular/top-navigation';",
+    "import { SlTopNavigation, SlTopNavigationAccount, SlTopNavigationAction, SlTopNavigationActions, SlTopNavigationBrand, SlTopNavigationContext, SlTopNavigationCount, SlTopNavigationHelp, SlTopNavigationHome, SlTopNavigationItem, SlTopNavigationLink, SlTopNavigationList, SlTopNavigationMark, SlTopNavigationName, SlTopNavigationNav, SlTopNavigationNotifications, SlTopNavigationSearch, SlTopNavigationTrigger, provideTopNavigationDefaults } from '@slotted/angular/top-navigation';",
   selector:
-    '[slTopNavigation], [slTopNavigationBrand], [slTopNavigationHome], [slTopNavigationMark], [slTopNavigationName], [slTopNavigationContext], nav[slTopNavigationNav], ul[slTopNavigationList], li[slTopNavigationItem], a[slTopNavigationLink], button[slTopNavigationTrigger], [slTopNavigationSearch], [slTopNavigationActions], a[slTopNavigationHelp], button[slTopNavigationHelp], button[slTopNavigationNotifications], [slTopNavigationCount], button[slTopNavigationAccount]',
+    '[slTopNavigation], [slTopNavigationBrand], [slTopNavigationHome], [slTopNavigationMark], [slTopNavigationName], [slTopNavigationContext], nav[slTopNavigationNav], ul[slTopNavigationList], li[slTopNavigationItem], a[slTopNavigationLink], button[slTopNavigationTrigger], [slTopNavigationSearch], [slTopNavigationActions], a[slTopNavigationHelp], button[slTopNavigationHelp], button[slTopNavigationNotifications], [slTopNavigationCount], button[slTopNavigationAccount], a[slTopNavigationAction], button[slTopNavigationAction]',
   exportAs:
-    'slTopNavigation, slTopNavigationNav, slTopNavigationList, slTopNavigationItem, slTopNavigationLink, slTopNavigationTrigger, slTopNavigationSearch, slTopNavigationActions, slTopNavigationHelp, slTopNavigationNotifications, slTopNavigationAccount, slTopNavigationMore',
+    'slTopNavigation, slTopNavigationNav, slTopNavigationList, slTopNavigationItem, slTopNavigationLink, slTopNavigationTrigger, slTopNavigationSearch, slTopNavigationActions, slTopNavigationHelp, slTopNavigationNotifications, slTopNavigationAccount, slTopNavigationAction, slTopNavigationMore',
 };
 
 const anatomy: AnatomyRow[] = [
@@ -196,6 +196,13 @@ const anatomy: AnatomyRow[] = [
     purpose:
       'A pill around the consumer’s avatar — xs at md, one step under the control — and, above 768 pixels, a name beside it. slMenuTriggerFor on the same element. It never folds.',
   },
+  {
+    part: 'action',
+    element: 'a with an href, or a button',
+    required: false,
+    purpose:
+      'A global control of the product’s own — approvals, tasks — in the same square, ink and states as the marked controls. The consumer projects its glyph, sized by the control, and names it: label when the words carry a count, aria-label when they do not. slTopNavigationCount inside it stands over its corner. It never folds.',
+  },
 ];
 
 const scenes: ReferenceSceneMeta[] = [
@@ -352,14 +359,25 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'actions',
-    title: 'The four global controls',
-    note: 'Help as a link to a help centre or as the trigger of a popover; the bell with a count over its corner that grows to a pill away from it; the account as a menu’s trigger. Each carries its name for a reader and repeats it in a tooltip.',
+    title: 'The global controls',
+    note: 'Help as a link to a help centre or as the trigger of a popover; the bell with a count over its corner that grows to a pill away from it; the account as a menu’s trigger; a control of the product’s own — approvals — in the same square, with its own glyph and the same count. Each carries its name for a reader and repeats it in a tooltip.',
     snippet: defineSnippet({
       id: 'top-navigation-angular-actions',
       language: 'angular',
-      label: 'Notifications and the account as triggers',
+      label: 'Notifications, approvals and the account as triggers',
       source: `<div slTopNavigationActions>
   <a slTopNavigationHelp href="/ajuda"></a>
+  <ng-container slPopover>
+    <button
+      slTopNavigationAction
+      slPopoverTrigger
+      [label]="'Aprovações, ' + pending() + ' pendentes'"
+    >
+      <ng-icon name="lucideClipboardCheck" />
+      <span slTopNavigationCount>{{ pending() }}</span>
+    </button>
+    <ng-template slPopoverLayer><div slPopoverContent>…</div></ng-template>
+  </ng-container>
   <ng-container slPopover>
     <button slTopNavigationNotifications slPopoverTrigger>
       <span slTopNavigationCount>12</span>

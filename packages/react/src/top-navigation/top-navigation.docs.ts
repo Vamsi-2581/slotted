@@ -25,7 +25,7 @@ export const REACT_TOP_NAVIGATION_TOKENS = topNavigationTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { TopNavigation, TopNavigationAccount, TopNavigationActions, TopNavigationBrand, TopNavigationContext, TopNavigationCount, TopNavigationDefaultsProvider, TopNavigationHelp, TopNavigationHome, TopNavigationItem, TopNavigationLink, TopNavigationList, TopNavigationMark, TopNavigationName, TopNavigationNav, TopNavigationNotifications, TopNavigationSearch, TopNavigationTrigger } from '@slotted/react';",
+    "import { TopNavigation, TopNavigationAccount, TopNavigationAction, TopNavigationActions, TopNavigationBrand, TopNavigationContext, TopNavigationCount, TopNavigationDefaultsProvider, TopNavigationHelp, TopNavigationHome, TopNavigationItem, TopNavigationLink, TopNavigationList, TopNavigationMark, TopNavigationName, TopNavigationNav, TopNavigationNotifications, TopNavigationSearch, TopNavigationTrigger } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -191,6 +191,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'A pill around the consumer’s Avatar — xs at md, one step under the control — and, above 768 pixels, a name beside it. Wrapped in Menu by the consumer. It never folds.',
+  },
+  {
+    part: 'action',
+    element: 'a with an href, a button without one, or the element render returns',
+    required: false,
+    purpose:
+      'A global control of the product’s own — approvals, tasks — in the same square, ink and states as the marked controls. The consumer projects its glyph, sized by the control, and names it with aria-label. TopNavigationCount inside it stands over its corner. It never folds.',
   },
 ];
 
@@ -369,14 +376,25 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'actions',
-    title: 'The four global controls',
-    note: 'Help as a link to a help centre or as the trigger of a popover; the bell with a count over its corner that grows to a pill away from it; the account as a menu’s trigger. Each carries its name for a reader and repeats it in a tooltip.',
+    title: 'The global controls',
+    note: 'Help as a link to a help centre or as the trigger of a popover; the bell with a count over its corner that grows to a pill away from it; the account as a menu’s trigger; a control of the product’s own — approvals — in the same square, with its own glyph and the same count. Each carries its name for a reader and repeats it in a tooltip.',
     snippet: defineSnippet({
       id: 'top-navigation-react-actions',
       language: 'tsx',
-      label: 'Notifications and the account as triggers',
+      label: 'Notifications, approvals and the account as triggers',
       source: `<TopNavigationActions>
   <TopNavigationHelp href="/ajuda" />
+  <Popover>
+    <PopoverTrigger
+      render={(props) => (
+        <TopNavigationAction {...props} aria-label={\`Aprovações, \${pending} pendentes\`}>
+          <ClipboardCheck />
+          <TopNavigationCount>{pending}</TopNavigationCount>
+        </TopNavigationAction>
+      )}
+    />
+    <PopoverContent>…</PopoverContent>
+  </Popover>
   <Popover>
     <PopoverTrigger
       render={(props) => (
@@ -725,7 +743,7 @@ export const REACT_TOP_NAVIGATION_DOCS = {
         'aria-label',
         'string',
         'the family’s message',
-        'TopNavigationHelp, TopNavigationNotifications, TopNavigationAccount, TopNavigationNav',
+        'TopNavigationHelp, TopNavigationNotifications, TopNavigationAccount, TopNavigationAction, TopNavigationNav',
         'The name the consumer writes, kept over the family’s own',
       ],
     ]),

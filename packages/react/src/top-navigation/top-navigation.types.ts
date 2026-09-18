@@ -302,6 +302,12 @@ export interface TopNavigationControlProps extends ComponentPropsWithRef<'button
   render?: ((props: TopNavigationControlRootProps) => ReactNode) | undefined;
 }
 
+export interface TopNavigationActionProps extends ComponentPropsWithRef<'a'> {
+  /** Renders the control into another element: a router's link, a button another family wraps. */
+  render?:
+    ((props: AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }) => ReactNode) | undefined;
+}
+
 export interface TopNavigationHelpProps extends ComponentPropsWithRef<'a'> {
   /** Renders the control into another element: a `button` that opens a panel, a router's link. */
   render?:

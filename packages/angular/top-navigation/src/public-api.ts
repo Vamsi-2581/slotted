@@ -19,6 +19,7 @@ export {
 } from './top-navigation-defaults';
 export {
   SlTopNavigationAccount,
+  SlTopNavigationAction,
   SlTopNavigationActions,
   SlTopNavigationBrand,
   SlTopNavigationContext,

@@ -12,6 +12,7 @@ export {
 } from './top-navigation-defaults';
 export {
   TopNavigationAccount,
+  TopNavigationAction,
   TopNavigationActions,
   TopNavigationBrand,
   TopNavigationContext,
@@ -30,6 +31,7 @@ export {
   useTopNavigationItem,
 } from './top-navigation-parts';
 export type {
+  TopNavigationActionProps,
   TopNavigationContextValue,
   TopNavigationControlProps,
   TopNavigationControlRootProps,

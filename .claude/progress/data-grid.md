@@ -90,7 +90,19 @@ sessão pode escrever).
     vista persistida (`core/grid/view.ts`, `usePersistedGridView`,
     `persistedGridView`) na cena `column-state`.
 
+15. Onda 1 peça 4 e onda 2 (commits `toCsv/exportCsv`, `tree`, `row
+    reordering`, glyph `grip-vertical`): exportação CSV + `@media print`;
+    tree data (motor + duas bindings + folha + harness); row reordering
+    (segundo controlador de drag, alça, Alt+↑/↓). Correções de caminho:
+    `pagination` (margem do intervalo), histórias Angular (props que
+    colidiam com membros da grelha: `status`, `setFilter`).
+
 ## Tarefa em curso
+
+Onda 3: row pinning (`pinnedRows: { top, bottom }`, rowgroups sticky fora
+da janela e do resumo, cursor a atravessá-los) e data source
+(`dataSource.getRows(query, signal)` com cache por query, abort, erro/retry,
+`handle.reload()`).
 
 Onda 1, peça 4 — exportação: `toCsv` em `core/grid`, `handle.exportCsv`
 (React) e `exportCsv()` (Angular), `@media print` na folha, cena `export`

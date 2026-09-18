@@ -1567,8 +1567,11 @@
   }
 
   /* `truncate` is the default in a grid: a column has a width by definition,
-     and the value stays whole in the DOM and in the cell's title. */
-  [data-ui='data-grid'] [data-text='truncate'] > span:first-child {
+     and the value stays whole in the DOM and in the cell's title. The value
+     is the span with no part of its own — in a tree column the toggle comes
+     first, and a rule on `:first-child` left "Barcelona" drawn over the next
+     column once the column was narrower than the name. */
+  [data-ui='data-grid'] [data-text='truncate'] > span:not([data-ui], [data-part]) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1577,12 +1580,12 @@
   /* A value that is never broken is clipped at its cell rather than drawn over
      the next one: a grid's columns are its layout, and a value crossing one is
      a value in the wrong column. */
-  [data-ui='data-grid'] [data-text='nowrap'] > span:first-child {
+  [data-ui='data-grid'] [data-text='nowrap'] > span:not([data-ui], [data-part]) {
     overflow: hidden;
     white-space: nowrap;
   }
 
-  [data-ui='data-grid'] [data-text='wrap'] > span:first-child {
+  [data-ui='data-grid'] [data-text='wrap'] > span:not([data-ui], [data-part]) {
     overflow-wrap: anywhere;
   }
 

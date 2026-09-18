@@ -207,6 +207,10 @@
       "types": "./dist/types/multi-select/index.d.ts",
       "import": "./dist/multi-select.js"
     },
+    "./notification-center": {
+      "types": "./dist/types/notification-center/index.d.ts",
+      "import": "./dist/notification-center.js"
+    },
     "./otp-input": {
       "types": "./dist/types/otp-input/index.d.ts",
       "import": "./dist/otp-input.js"

@@ -52,6 +52,7 @@ export * from './loading-overlay';
 export * from './menu';
 export * from './menubar';
 export * from './multi-select';
+export * from './notification-center';
 export * from './number-field';
 export * from './otp-input';
 export * from './page';

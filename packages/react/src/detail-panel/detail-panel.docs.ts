@@ -701,7 +701,7 @@ export const REACT_DETAIL_PANEL_DOCS = {
 </article>;`,
       }),
       defineSnippet({
-        id: 'detail-panel-react-theming',
+        id: 'detail-panel-theming',
         language: 'css',
         label: 'Retuning the family for an application',
         source: `[data-ui='detail-panel'] {

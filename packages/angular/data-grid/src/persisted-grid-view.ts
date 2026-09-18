@@ -70,7 +70,7 @@ export function persistedGridView<Row>({
     columns: normalizeColumnState(defaultColumnState ?? null, columns),
     query: defaultQuery ?? emptyGridView(options.defaultPageSize).query,
   };
-  let text: string | null = null;
+  let text: string | null;
   try {
     text = store?.getItem(key) ?? null;
   } catch {

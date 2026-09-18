@@ -23,6 +23,7 @@ import { Avatar } from '../avatar';
 import { Badge } from '../badge';
 import { Button } from '../button';
 import { Image } from '../image';
+import { Inline } from '../inline';
 import { FilterBar } from '../filter-bar';
 import {
   Pagination,
@@ -1188,16 +1189,16 @@ const photoOf = (row: Shipment) => {
    lays a renderer's first element out as the value, and what follows it
    would not share the line. */
 const CustomerCell = ({ row }: { row: Shipment }) => (
-  <span style={{ alignItems: 'center', display: 'flex', gap: 8, minWidth: 0 }}>
+  <Inline align="center" wrap="nowrap">
     <Avatar name={row.customer} size="sm" />
-    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-      {row.customer}
-    </span>
-  </span>
+    <Text truncate>{row.customer}</Text>
+  </Inline>
 );
 
+/* `width` and `height` reserve the 4:3 box the way `ratio` would, at the
+   thumbnail's own size instead of the column's. */
 const PhotoCell = ({ row }: { row: Shipment }) => (
-  <Image alt="" radius="sm" ratio="landscape" src={photoOf(row)} style={{ inlineSize: 48 }} />
+  <Image alt="" height={36} radius="sm" src={photoOf(row)} width={48} />
 );
 
 const mediaColumns: GridColumn<Shipment>[] = [

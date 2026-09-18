@@ -2,7 +2,6 @@ import type { FilterGroup } from '@slotted/core/filter';
 import {
   applyQuery,
   emptyQuery,
-  parseColumnState,
   serializeColumnState,
   withColumnFilter,
   withFilter,
@@ -21,6 +20,7 @@ import { SlAvatar } from '@slotted/angular/avatar';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButton } from '@slotted/angular/button';
 import { SlImage } from '@slotted/angular/image';
+import { SlInline } from '@slotted/angular/inline';
 import { SlFilterBar } from '@slotted/angular/filter-bar';
 import type { FilterBarField } from '@slotted/angular/filter-bar';
 import {
@@ -420,6 +420,7 @@ const meta: Meta<DataGridStoryArgs> = {
         SlButton,
         SlFilterBar,
         SlImage,
+        SlInline,
         SlPagination,
         SlPaginationNext,
         SlPaginationPageSize,
@@ -1233,13 +1234,13 @@ export const Media: Story = {
         '[rows]="rows" [rowHeight]="56" selectionMode="multiple"',
         `
       <ng-template slDataGridCell="customer" let-row="row">
-        <span style="align-items: center; display: flex; gap: 8px; min-width: 0">
+        <span slInline align="center" wrap="nowrap">
           <span slAvatar [name]="row.customer" size="sm"></span>
-          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ row.customer }}</span>
+          <span slText truncate>{{ row.customer }}</span>
         </span>
       </ng-template>
       <ng-template slDataGridCell="photo" let-row="row">
-        <div slImage alt="" radius="sm" ratio="landscape" [src]="photoOf(row)" style="inline-size: 48px"></div>
+        <div slImage alt="" height="36" radius="sm" [src]="photoOf(row)" width="48"></div>
       </ng-template>`,
       ),
       { size: 'tall' },

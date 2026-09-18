@@ -73,11 +73,10 @@ export function usePersistedGridView<Row>({
       columns: normalizeColumnState(defaultColumnState ?? null, columns),
       query: defaultQuery ?? emptyGridView(options.defaultPageSize).query,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once
     [],
   );
   const [view, setView] = useState<GridView>(() => {
-    let text: string | null = null;
+    let text: string | null;
     try {
       text = store?.getItem(key) ?? null;
     } catch {

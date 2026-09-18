@@ -20,5 +20,9 @@ export default tseslint.config(
     languageOptions: {
       globals: globals.node,
     },
+    rules: {
+      // `const { omitted, ...rest } = options` is how a key is kept out of `rest`.
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
+    },
   },
 );

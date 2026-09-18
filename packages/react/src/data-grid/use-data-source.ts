@@ -72,7 +72,6 @@ export function useDataSource<Row>(
       },
     );
     return () => own.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- the query is read through its key
   }, [source, key, attempt]);
 
   const retry = useCallback(() => setAttempt((count) => count + 1), []);

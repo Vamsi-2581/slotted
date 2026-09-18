@@ -1424,7 +1424,6 @@ export function DataGrid<Row>({
       const mark = changedCells.current.get(`${cell.row}\u0000${cell.column}`);
       return mark ? (mark.generation % 2 === 0 ? 'a' : 'b') : null;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- the map is read through its version
     [changedVersion],
   );
 

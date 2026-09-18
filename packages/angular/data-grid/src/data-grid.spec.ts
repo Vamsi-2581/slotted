@@ -741,7 +741,6 @@ describe('SlDataGrid, defaults', () => {
     await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
     const fixture = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
     const widths: Record<string, number> = {
       id: 60,
       customer: 140,

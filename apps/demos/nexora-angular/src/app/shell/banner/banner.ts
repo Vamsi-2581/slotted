@@ -3,6 +3,7 @@ import { NgIcon } from '@ng-icons/core';
 import { SlAppShellNavToggle } from '@slotted/angular/app-shell';
 import { SlIconButton } from '@slotted/angular/button';
 import { SlCommandPaletteTrigger } from '@slotted/angular/command-palette';
+import { SlIcon } from '@slotted/angular/icon';
 import { SlShortcut } from '@slotted/angular/kbd';
 import {
   SlTooltip,
@@ -42,6 +43,7 @@ import { TasksPopover } from './tasks-popover';
     SlAppShellNavToggle,
     SlIconButton,
     SlCommandPaletteTrigger,
+    SlIcon,
     SlShortcut,
     SlTooltip,
     SlTooltipContent,

@@ -94,7 +94,7 @@ const ENTITY_ICON: Record<SearchHit['type'], string> = {
     >
       <ng-template slCommandPaletteItem let-item let-query="query">
         @let row = asRow(item);
-        <span data-part="icon"><ng-icon [name]="row.icon ?? 'lucideCornerDownRight'" size="16" /></span>
+        <span data-part="icon"><ng-icon [name]="row.icon ?? 'lucideCornerDownRight'" /></span>
         <span data-part="label"><span slHighlight [text]="row.label" [query]="query"></span></span>
         @if (row.description) {
           <span data-part="description">{{ row.description }}</span>

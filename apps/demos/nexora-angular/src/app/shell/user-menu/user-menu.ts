@@ -30,8 +30,10 @@ import { ShortcutsService } from '../../core/shortcuts/shortcuts.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
+    /* The menu's surface is a three-column grid; a block of its own spans all three. */
     .identity {
       display: grid;
+      grid-column: 1 / -1;
       grid-template-columns: auto 1fr;
       gap: var(--slotted-space-3);
       padding: var(--slotted-space-3);

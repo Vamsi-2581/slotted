@@ -68,12 +68,12 @@ import { ClockService } from '../../core/session/clock.service';
         <button
           slIconButton
           slPopoverTrigger
-          size="sm"
+          size="md"
           tone="secondary"
           variant="ghost"
           [attr.aria-label]="label()"
         >
-          <ng-icon name="lucideClipboardCheck" size="16" />
+          <ng-icon name="lucideClipboardCheck" />
         </button>
         @if (store.pending() > 0) {
           <span slBadge size="sm" tone="accent" variant="solid" [count]="store.pending()"></span>

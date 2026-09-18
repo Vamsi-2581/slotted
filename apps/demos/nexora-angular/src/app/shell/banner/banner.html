@@ -15,7 +15,7 @@
       [slCommandPaletteTrigger]="palette().palette()"
       aria-label="Search or jump to…"
     >
-      <ng-icon name="lucideSearch" size="16" />
+      <span slIcon size="md"><ng-icon name="lucideSearch" /></span>
       <span class="search-placeholder">Search or jump to…</span>
       <kbd slShortcut keys="mod+k" size="sm" variant="soft"></kbd>
     </button>
@@ -30,13 +30,13 @@
       <button
         slIconButton
         slTooltipTrigger
-        size="sm"
+        size="md"
         tone="secondary"
         variant="ghost"
         aria-label="Demo controls"
         (click)="demo().openAt()"
       >
-        <ng-icon name="lucideFlaskConical" size="16" />
+        <ng-icon name="lucideFlaskConical" />
       </button>
       <ng-template slTooltipLayer><div slTooltipContent>Demo controls</div></ng-template>
     </ng-container>

@@ -53,12 +53,12 @@
                       <li slSideNavigationItem [value]="m.id">
                         @if (m.destinations.length === 0) {
                           <a slSideNavigationLink [routerLink]="m.path">
-                            <span slSideNavigationIcon><ng-icon [name]="m.icon" size="16" /></span>
+                            <span slSideNavigationIcon><ng-icon [name]="m.icon" /></span>
                             <span slSideNavigationLabel>{{ m.label }}</span>
                           </a>
                         } @else {
                           <button slSideNavigationTrigger>
-                            <span slSideNavigationIcon><ng-icon [name]="m.icon" size="16" /></span>
+                            <span slSideNavigationIcon><ng-icon [name]="m.icon" /></span>
                             <span slSideNavigationLabel>{{ m.label }}</span>
                           </button>
                           <ul slSideNavigationGroup>

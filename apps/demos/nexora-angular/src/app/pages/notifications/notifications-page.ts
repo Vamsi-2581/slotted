@@ -113,12 +113,12 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
   <div slListItemActions>
     @if (n.readAt === undefined) {
       <button slIconButton size="sm" tone="secondary" variant="ghost" [attr.aria-label]="'Mark as read: ' + n.title" (click)="store.markRead(n.id)">
-        <ng-icon name="lucideCheck" size="14" />
+        <ng-icon name="lucideCheck" />
       </button>
     }
     @if (!n.archivedAt) {
       <button slIconButton size="sm" tone="secondary" variant="ghost" [attr.aria-label]="'Archive: ' + n.title" (click)="store.archive(n.id)">
-        <ng-icon name="lucideArchive" size="14" />
+        <ng-icon name="lucideArchive" />
       </button>
     }
   </div>

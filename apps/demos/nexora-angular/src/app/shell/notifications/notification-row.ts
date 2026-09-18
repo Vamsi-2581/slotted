@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
+import { SlIcon } from '@slotted/angular/icon';
 import {
   SlListItemActions,
   SlListItemBody,
@@ -28,6 +29,7 @@ const TONE: Record<NotificationType, string> = {
   selector: '[appNotificationRow]',
   imports: [
     NgIcon,
+    SlIcon,
     SlListItemBody,
     SlListItemDescription,
     SlListItemLabel,
@@ -82,7 +84,7 @@ const TONE: Record<NotificationType, string> = {
   `,
   template: `
       <span slListItemStart>
-        <span class="glyph" [attr.data-tone]="tone()"><ng-icon [name]="icon()" size="16" /></span>
+        <span class="glyph" [attr.data-tone]="tone()"><span slIcon size="md"><ng-icon [name]="icon()" /></span></span>
       </span>
       <div slListItemBody>
         <button type="button" class="title" slListItemLabel (click)="open.emit(notification())">

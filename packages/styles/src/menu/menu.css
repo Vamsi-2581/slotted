@@ -523,8 +523,17 @@
    * `--slotted-menu-item-icon`, drawn as a mask at the column's own size, or an
    * element of the consumer's own, centred. An empty box that painted a mask
    * over content would cut that content into the shape of the mark.
+   *
+   * The box sizes what it holds: an icon box reads `--slotted-icon-size` from
+   * its container, and a bare glyph host such as `ng-icon` — which sizes
+   * itself at `1em` — reads the font-size the child rule below gives it.
+   * Nothing placed here is drawn at the item's type size. The font-size is on
+   * the child and not on the box, because the box's `1lh` reads the item's
+   * line box.
    */
   [data-ui='menu'] [data-part='icon'] {
+    --slotted-icon-size: var(--_icon-size);
+
     background-color: currentColor;
     grid-column: 1;
     grid-row: 1;
@@ -543,6 +552,10 @@
     display: flex;
     justify-content: center;
     mask-image: none;
+  }
+
+  [data-ui='menu'] [data-part='icon']:not(:empty) > * {
+    font-size: var(--_icon-size);
   }
 
   /* Column two, and the only column that gives way. */

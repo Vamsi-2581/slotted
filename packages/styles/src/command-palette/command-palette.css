@@ -613,7 +613,17 @@
     mask-size: contain;
   }
 
+  /**
+   * The box sizes what it holds: an icon box reads `--slotted-icon-size` from
+   * its container, and a bare glyph host such as `ng-icon` — which sizes
+   * itself at `1em` — reads the font-size the child rule below gives it.
+   * Nothing placed here is drawn at the row's type size. The font-size is on
+   * the child and not on the box, because the box's `1lh` reads the item's
+   * line box.
+   */
   [data-ui='command-palette'] [data-part='icon']:not(:empty) {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     background-color: transparent;
     display: flex;
@@ -623,6 +633,7 @@
 
   [data-ui='command-palette'] [data-part='icon']:not(:empty) > * {
     block-size: var(--_icon-size);
+    font-size: var(--_icon-size);
     inline-size: var(--_icon-size);
   }
 

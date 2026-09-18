@@ -9,7 +9,7 @@ import {
   createSearchPredicate,
   type FilterMatchOptions,
 } from '../filter';
-import type { GridAggregate, GridColumn, GridNode, GridQuery, SortKey } from './types';
+import type { GridAggregate, GridColumn, GridNode, GridQuery, SortKey, GridTree } from './types';
 import { GROUP_ROW_PREFIX } from './types';
 
 /** The domain value a column reads from a row. */
@@ -251,6 +251,10 @@ export interface ApplyQueryOptions<Row> extends FilterMatchOptions, FormatOption
   rowKey: (row: Row) => string;
   /** The group keys that are open, or `all`. Default `all`. */
   expandedGroups?: readonly string[] | 'all';
+  /** Rows as a tree; `query.group` is ignored when set. */
+  tree?: GridTree<Row> | undefined;
+  /** The tree rows whose children are shown. Default none. */
+  expanded?: readonly string[] | undefined;
 }
 
 export interface ApplyQueryResult<Row> {
@@ -306,8 +310,19 @@ export function applyQuery<Row>(
     .map((column) => column.id);
   const search = createSearchPredicate<Row>(query.search, readText, searchable, options);
 
-  let kept = rows.filter((row) => match(row) && search(row));
   const comparator = createComparator(columns, query.sort, options.locale);
+  if (options.tree)
+    return applyTree(
+      rows,
+      columns,
+      query,
+      options,
+      options.tree,
+      (row) => match(row) && search(row),
+      comparator,
+    );
+
+  let kept = rows.filter((row) => match(row) && search(row));
   if (comparator) kept = [...kept].sort(comparator);
   const total = kept.length;
 
@@ -329,7 +344,14 @@ export function applyQuery<Row>(
   const nodes: GridNode<Row>[] = [];
   if (groupColumns.length === 0) {
     paged.forEach((row, index) => {
-      nodes.push({ kind: 'row', key: options.rowKey(row), row, index: offset + index, groups: [] });
+      nodes.push({
+        kind: 'row',
+        key: options.rowKey(row),
+        row,
+        index: offset + index,
+        groups: [],
+        ...LEAF,
+      });
     });
   } else {
     const walk = (
@@ -379,6 +401,7 @@ export function applyQuery<Row>(
               row: entry.row,
               index: entry.index,
               groups: [...parents, key],
+              ...LEAF,
             });
           }
         }
@@ -393,6 +416,93 @@ export function applyQuery<Row>(
   }
 
   return { nodes, rows: kept, total, hasMore, aggregates: aggregates(columns, kept) };
+}
+
+/** What a row node says when there is no tree. */
+const LEAF = { level: 1, parent: null, childCount: 0, open: false } as const;
+
+/**
+ * The tree: filter and search keep a row that matches or has a descendant
+ * that matches, and every ancestor of a kept row; sorting is among siblings;
+ * the open branches are flattened, roots first, and the page is a slice of
+ * that flat list — the reader pages through what is on screen. A row whose
+ * parent is not in `rows` is a root.
+ */
+function applyTree<Row>(
+  rows: readonly Row[],
+  columns: readonly GridColumn<Row>[],
+  query: GridQuery,
+  options: ApplyQueryOptions<Row>,
+  tree: GridTree<Row>,
+  keep: (row: Row) => boolean,
+  comparator: ((a: Row, b: Row) => number) | null,
+): ApplyQueryResult<Row> {
+  const keyOf = options.rowKey;
+  const present = new Set(rows.map(keyOf));
+  const children = new Map<string | null, Row[]>();
+  for (const row of rows) {
+    const parent = tree.parentKey(row) ?? null;
+    const under = parent !== null && present.has(parent) ? parent : null;
+    let list = children.get(under);
+    if (!list) {
+      list = [];
+      children.set(under, list);
+    }
+    list.push(row);
+  }
+  if (comparator) for (const list of children.values()) list.sort(comparator);
+
+  /* A branch survives when it or anything under it does. */
+  const kept = new Set<string>();
+  const survives = (row: Row): boolean => {
+    const key = keyOf(row);
+    let alive = keep(row);
+    for (const child of children.get(key) ?? []) if (survives(child)) alive = true;
+    if (alive) kept.add(key);
+    return alive;
+  };
+  for (const root of children.get(null) ?? []) survives(root);
+
+  const open = new Set(options.expanded ?? []);
+  const flat: GridNode<Row>[] = [];
+  const keptRows: Row[] = [];
+  /* Every kept row is walked, in tree order, so `rows` holds what the query
+     kept whatever is open; only the rows under open branches become nodes. */
+  const walk = (list: readonly Row[], level: number, parent: string | null, visible: boolean) => {
+    for (const row of list) {
+      const key = keyOf(row);
+      if (!kept.has(key)) continue;
+      keptRows.push(row);
+      const under = (children.get(key) ?? []).filter((child) => kept.has(keyOf(child)));
+      const branch = under.length > 0 || tree.hasChildren?.(row) === true;
+      const shown = branch && open.has(key);
+      if (visible) {
+        flat.push({
+          kind: 'row',
+          key,
+          row,
+          index: flat.length,
+          groups: [],
+          level,
+          parent,
+          childCount: under.length,
+          open: shown,
+        });
+      }
+      walk(under, level + 1, key, visible && shown);
+    }
+  };
+  walk(children.get(null) ?? [], 1, null, true);
+
+  const total = flat.length;
+  let nodes: GridNode<Row>[] = flat;
+  let hasMore = false;
+  if (query.page && 'index' in query.page && query.page.size > 0) {
+    const from = query.page.index * query.page.size;
+    nodes = flat.slice(from, from + query.page.size);
+    hasMore = from + query.page.size < total;
+  }
+  return { nodes, rows: keptRows, total, hasMore, aggregates: aggregates(columns, keptRows) };
 }
 
 /** Every group key a grouped query produces, for a consumer collapsing them all. */

@@ -92,6 +92,7 @@ export type {
   GridQueryChange,
   GridRange,
   GridReason,
+  GridTree,
   ResolvedGridColumn,
   SortDirection,
   SortKey,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyQuery,
+  type GridNode,
   cellText,
   columnRange,
   columnTemplate,
@@ -461,6 +462,115 @@ describe('applyQuery', () => {
       'on 2026-09-12',
     );
     expect(cellText(columns[4]!, rows[0]!, { locale: 'en-US' })).toBe('Sep 12, 2026');
+  });
+});
+
+describe('applyQuery with a tree', () => {
+  interface Site {
+    id: string;
+    parent: string | null;
+    name: string;
+    stock: number;
+  }
+  const siteColumns: GridColumn<Site>[] = [
+    { id: 'name', label: 'Name' },
+    { id: 'stock', label: 'Stock', kind: 'number', aggregate: 'sum' },
+  ];
+  const sites: Site[] = [
+    { id: 'pt', parent: null, name: 'Portugal', stock: 0 },
+    { id: 'pt-lis', parent: 'pt', name: 'Lisboa', stock: 40 },
+    { id: 'pt-lis-a', parent: 'pt-lis', name: 'Zona A', stock: 25 },
+    { id: 'pt-lis-b', parent: 'pt-lis', name: 'Zona B', stock: 15 },
+    { id: 'pt-por', parent: 'pt', name: 'Porto', stock: 30 },
+    { id: 'es', parent: null, name: 'España', stock: 0 },
+    { id: 'es-mad', parent: 'es', name: 'Madrid', stock: 50 },
+    { id: 'orphan', parent: 'gone', name: 'Adrift', stock: 1 },
+  ];
+  const tree = { parentKey: (row: Site) => row.parent };
+  const keys = (result: { nodes: readonly GridNode<Site>[] }) =>
+    result.nodes.map((node) =>
+      node.kind === 'row' ? `${'  '.repeat(node.level - 1)}${node.key}` : `#${node.key}`,
+    );
+
+  it('flattens the open branches in order, roots first, an orphan as a root', () => {
+    const closed = applyQuery(sites, siteColumns, emptyQuery(), { rowKey: (row) => row.id, tree });
+    expect(keys(closed)).toEqual(['pt', 'es', 'orphan']);
+    const node = closed.nodes[0]!;
+    expect(node.kind === 'row' && [node.level, node.parent, node.childCount, node.open]).toEqual([
+      1,
+      null,
+      2,
+      false,
+    ]);
+    expect(closed.total).toBe(3);
+
+    const open = applyQuery(sites, siteColumns, emptyQuery(), {
+      rowKey: (row) => row.id,
+      tree,
+      expanded: ['pt', 'pt-lis'],
+    });
+    expect(keys(open)).toEqual([
+      'pt',
+      '  pt-lis',
+      '    pt-lis-a',
+      '    pt-lis-b',
+      '  pt-por',
+      'es',
+      'orphan',
+    ]);
+    expect(open.total).toBe(7);
+    expect(open.rows.map((row) => row.id)).toEqual(sites.map((row) => row.id));
+    /* The summary is over every row the query kept, not over the open ones. */
+    expect(open.aggregates['stock']).toBe(161);
+  });
+
+  it('sorts among siblings, and keeps an ancestor whose descendant matches the filter', () => {
+    const sorted = applyQuery(
+      sites,
+      siteColumns,
+      { ...emptyQuery(), sort: [{ column: 'stock', direction: 'descending' }] },
+      { rowKey: (row) => row.id, tree, expanded: ['pt', 'pt-lis'] },
+    );
+    expect(keys(sorted)).toEqual([
+      'orphan',
+      'pt',
+      '  pt-lis',
+      '    pt-lis-a',
+      '    pt-lis-b',
+      '  pt-por',
+      'es',
+    ]);
+
+    const searched = applyQuery(
+      sites,
+      siteColumns,
+      { ...emptyQuery(), search: 'zona b' },
+      { rowKey: (row) => row.id, tree, expanded: ['pt', 'pt-lis'] },
+    );
+    expect(keys(searched)).toEqual(['pt', '  pt-lis', '    pt-lis-b']);
+    expect(searched.total).toBe(3);
+    /* Closed, the branch that holds the match is still the one row shown. */
+    const closedSearch = applyQuery(
+      sites,
+      siteColumns,
+      { ...emptyQuery(), search: 'zona b' },
+      { rowKey: (row) => row.id, tree },
+    );
+    expect(keys(closedSearch)).toEqual(['pt']);
+  });
+
+  it('pages over the flattened nodes, and ignores grouping', () => {
+    const page = applyQuery(
+      sites,
+      siteColumns,
+      { ...emptyQuery({ index: 1, size: 3 }), group: ['name'] },
+      { rowKey: (row) => row.id, tree, expanded: ['pt', 'pt-lis'] },
+    );
+    expect(keys(page)).toEqual(['    pt-lis-b', '  pt-por', 'es']);
+    expect(page.total).toBe(7);
+    expect(page.hasMore).toBe(true);
+    const first = page.nodes[0]!;
+    expect(first.kind === 'row' && first.index).toBe(3);
   });
 });
 

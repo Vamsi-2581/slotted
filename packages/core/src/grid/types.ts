@@ -102,6 +102,18 @@ export interface GridColumn<Row = unknown> {
   readonly parse?: (draft: unknown, row: Row) => unknown;
 }
 
+/**
+ * Rows as a tree: each row names its parent by key, and the parent is in
+ * `rows`. A row whose parent is not is a root. `hasChildren` says a row has
+ * children that are not in `rows` yet, for loading on demand.
+ */
+export interface GridTree<Row = unknown> {
+  readonly parentKey: (row: Row) => string | null | undefined;
+  /** The column that carries the indent and the toggle. Default: the first visible column. */
+  readonly column?: string | undefined;
+  readonly hasChildren?: ((row: Row) => boolean) | undefined;
+}
+
 export interface GridColumnGroup {
   readonly id: string;
   readonly label: string;
@@ -191,6 +203,14 @@ export type GridNode<Row = unknown> =
       readonly index: number;
       /** The group keys above this row, outermost first. */
       readonly groups: readonly string[];
+      /** 1 at the root; always 1 without a tree. */
+      readonly level: number;
+      /** The parent row's key in a tree, else `null`. */
+      readonly parent: string | null;
+      /** Children present in `rows`; 0 without a tree. */
+      readonly childCount: number;
+      /** Whether the row's children are shown; `false` for a leaf. */
+      readonly open: boolean;
     }
   | {
       readonly kind: 'group';

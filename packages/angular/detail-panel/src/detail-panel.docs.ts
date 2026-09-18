@@ -657,7 +657,7 @@ export const ANGULAR_DETAIL_PANEL_DOCS = {
 ;`,
       }),
       defineSnippet({
-        id: 'detail-panel-angular-theming',
+        id: 'detail-panel-theming',
         language: 'css',
         label: 'Retuning the family for an application',
         source: `[data-ui='detail-panel'] {

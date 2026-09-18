@@ -140,11 +140,13 @@ conjunto); mover uma linha para outro pai por arrasto.
 - **Alça.** Coluna reservada `DRAG_COLUMN` (`data-column="__drag"`, 40 px),
   a seguir à de seleção, com `[data-part='row-handle']` — um `button` com o
   nome "Reorder {row}", tab stop só quando é a célula corrente. O ponteiro
-  arrasta a partir da alça (`handle` do `core/drag`); o teclado pega com
-  Space na alça e move com as setas (`handleKeydown` do controlador), como
-  as colunas.
-- **Contentor.** `core/drag` com um contentor `rows`, vertical, sobre o
-  `body`; itens = chaves das linhas montadas; `autoScroll: { axis: 'y' }`.
+  arrasta a partir da alça (`handle` do `core/drag`); o teclado move a linha
+  com Alt+ArrowUp/ArrowDown a partir de qualquer célula dela, a mesma
+  departure que Alt+ArrowLeft/Right é para as colunas, com anúncio
+  "{row} moved to position {position}".
+- **Contentor.** Um segundo controlador de `core/drag` (o eixo do autoscroll
+  é do controlador) com um contentor `rows`, vertical, sobre o `body`; itens
+  = chaves das linhas montadas; `autoScroll: { axis: 'y' }`.
   A guia é a mesma `drop-indicator`, com `data-axis="row"`, horizontal na
   fenda de destino e à largura do viewport.
 - **Anúncio.** As mensagens do controlador com o rótulo da linha (a coluna

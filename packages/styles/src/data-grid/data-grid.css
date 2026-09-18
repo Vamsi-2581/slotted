@@ -662,6 +662,69 @@
   }
 
   /**
+   * ── Reordering rows ────────────────────────────────────────────────────
+   *
+   * The handle is the grip glyph in the muted ink, the row's whole gutter
+   * as its target, a grab cursor over it; disabled while the query is not at
+   * rest, it stays where it is at half its ink, so the column keeps its
+   * width and the reader hears why nothing moves. A row on its way is
+   * dimmed, as a column is.
+   */
+  [data-ui='data-grid'] [data-part='cell'][data-kind='drag'] {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  [data-ui='data-grid'] [data-part='row-handle'] {
+    align-items: center;
+    background-color: transparent;
+    block-size: var(--_control);
+    border: 0;
+    border-radius: var(--slotted-data-grid-control-radius, var(--slotted-radius-sm, 4px));
+    color: var(--_muted);
+    cursor: grab;
+    display: inline-flex;
+    flex: none;
+    inline-size: var(--_control);
+    justify-content: center;
+    padding: 0;
+    touch-action: none;
+    transition:
+      background-color var(--_transition),
+      color var(--_transition),
+      opacity var(--_transition);
+  }
+
+  [data-ui='data-grid'] [data-part='row-handle']::after {
+    background-color: currentcolor;
+    block-size: var(--_control-icon);
+    content: '';
+    inline-size: var(--_control-icon);
+    mask-image: var(--slotted-icon-grip-vertical);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: var(--_control-icon) var(--_control-icon);
+  }
+
+  [data-ui='data-grid'] [data-part='row-handle']:not([data-disabled]):hover {
+    background-color: var(--_hover);
+    color: var(--_text);
+  }
+
+  [data-ui='data-grid'] [data-part='row-handle'][data-disabled] {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  [data-ui='data-grid'] [data-part='row'][data-dragging] {
+    opacity: 0.5;
+  }
+
+  [data-ui='data-grid'] [data-part='row'][data-dragging] [data-part='row-handle'] {
+    cursor: grabbing;
+  }
+
+  /**
    * ── The resizer ────────────────────────────────────────────────────────
    *
    * Invisible at rest, a strong line under the pointer, the accent line while
@@ -741,6 +804,17 @@
     pointer-events: none;
     position: absolute;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 3);
+  }
+
+  /* The same line for a row on its way: horizontal, in the gap the drop
+     lands in, as wide as the viewport and moved by the sideways scroll. */
+  [data-ui='data-grid'] [data-part='drop-indicator'][data-axis='row'] {
+    block-size: var(--slotted-border-width-thick, 2px);
+    inline-size: 100cqi;
+    inset-block-start: calc(
+      var(--slotted-data-grid-drop-offset, 0px) - var(--slotted-border-width-thick, 2px) / 2
+    );
+    inset-inline-start: var(--slotted-data-grid-drop-scroll, 0px);
   }
 
   /**
@@ -1999,6 +2073,7 @@
     [data-ui='data-grid'] [data-part='expander']::after,
     [data-ui='data-grid'] [data-part='group-toggle']::after,
     [data-ui='data-grid'] button[data-part='tree-toggle']::after,
+    [data-ui='data-grid'] [data-part='row-handle']::after,
     [data-ui='data-grid'] [data-part='resizer']::after {
       forced-color-adjust: none;
     }
@@ -2035,6 +2110,7 @@
     }
 
     [data-ui='data-grid'] [data-part='column-actions'],
+    [data-ui='data-grid'] [data-part='row-handle'],
     [data-ui='data-grid'] [data-part='resizer'],
     [data-ui='data-grid'] [data-part='drop-indicator'],
     [data-ui='data-grid'] [data-part='loader'] {

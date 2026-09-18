@@ -1,4 +1,4 @@
-export { SlDataGrid, SELECTION_COLUMN, EXPANDER_COLUMN } from './data-grid';
+export { SlDataGrid, SELECTION_COLUMN, EXPANDER_COLUMN, DRAG_COLUMN } from './data-grid';
 export { persistedGridView } from './persisted-grid-view';
 export type {
   GridViewStorage,
@@ -42,6 +42,7 @@ export type {
   DataGridEditMode,
   DataGridEditorContext,
   DataGridExportOptions,
+  DataGridRowsReorderEvent,
   DataGridExpandedGroups,
   DataGridFilterOperandContext,
   DataGridGroupContext,

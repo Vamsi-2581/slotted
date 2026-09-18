@@ -39,6 +39,8 @@ export const DEFAULT_DATA_GRID_LABELS: DataGridResolvedLabels = {
   manageColumns: 'Manage columns',
   resized: '{column}, {width} pixels',
   resize: 'Resize column',
+  reorderRow: 'Reorder {row}',
+  rowMoved: '{row} moved to position {position}',
   filter: 'Filter',
   filterClear: 'Clear',
   filterApply: 'Apply',

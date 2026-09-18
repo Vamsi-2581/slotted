@@ -5,7 +5,7 @@ export {
   resolveLabels as resolveDataGridLabels,
   useDataGridDefaults,
 } from './data-grid-defaults';
-export { EXPANDER_COLUMN, SELECTION_COLUMN } from './data-grid-constants';
+export { DRAG_COLUMN, EXPANDER_COLUMN, SELECTION_COLUMN } from './data-grid-constants';
 export { usePersistedGridView } from './use-persisted-grid-view';
 export type {
   GridViewStorage,
@@ -33,6 +33,7 @@ export type {
   DataGridQueryRequest,
   DataGridReason,
   DataGridResolvedLabels,
+  DataGridRowsReorderEvent,
   DataGridRowHeight,
   DataGridSelectionMode,
   DataGridStickyTo,

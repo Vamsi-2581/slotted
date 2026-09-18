@@ -230,6 +230,12 @@ const anatomy: AnatomyRow[] = [
     purpose: 'Opens and closes a tree row’s children; a leaf keeps its room empty.',
   },
   {
+    part: 'row-handle',
+    element: 'button',
+    required: false,
+    purpose: 'The grip a row is dragged by; disabled while the query is not at rest.',
+  },
+  {
     part: 'summary',
     element: 'div[role="rowgroup"]',
     required: false,
@@ -847,6 +853,23 @@ class ShipmentsPage {
     }),
   },
   {
+    id: 'reorder-rows',
+    title: 'Reordering rows',
+    note: 'rowsReorderable draws a grip per row in a reserved column. The pointer drags from the grip and drops in a gap, with the same guide a column shows; Alt with the vertical arrows moves the row from any of its cells, and the move is announced. The grid keeps no order of its own: rowsReorder says where the row goes in rows (from and to, the index it takes once moved) and the consumer moves it. Only while the query is at rest — no sort, filter, search or group — and without a tree, because elsewhere the position on screen is not the position in rows; the grip is disabled otherwise.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-reorder-rows',
+      language: 'angular',
+      label: 'The consumer moves the row',
+      source: `<sl-data-grid
+  rowKey="id"
+  [rows]="rows()"
+  [columns]="columns"
+  rowsReorderable
+  (rowsReorder)="move($event)"
+/>`,
+    }),
+  },
+  {
     id: 'export',
     title: 'Export and print',
     note: 'exportCsv() on the grid (exportAs slDataGrid) builds the file by toCsv — RFC 4180, each cell as the grid draws it — from the rows the query left (every page in client mode) and the columns not hidden in the reader’s order, or the selected rows and every column on request, and hands it to the browser as a download; toCsv() returns the text for a consumer who sends it elsewhere. In print, the frame grows to its rows, nothing scrolls or sticks, and the pointer’s controls are not on paper; a windowed grid prints the rows it has mounted, so a consumer who prints ten thousand turns the window off first. Excel is the consumer’s: SheetJS reads the same text.',
@@ -1083,6 +1106,20 @@ const api = apiRows([
     '—',
     'sl-data-grid',
     'Emitted when a branch hasChildren says has children opens and none are in rows.',
+  ],
+  [
+    'rowsReorderable',
+    'boolean',
+    'false',
+    'sl-data-grid',
+    'A grip per row; the pointer drags it and Alt with the vertical arrows moves it. Only while the query is at rest and without a tree.',
+  ],
+  [
+    'rowsReorder',
+    '{ key, from, to, reason, event }',
+    '—',
+    'sl-data-grid',
+    'Where a row goes in rows: from, and the index it takes once moved. The consumer moves it.',
   ],
   [
     'highlightChanges',

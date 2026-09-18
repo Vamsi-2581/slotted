@@ -117,6 +117,7 @@ import {
   type DataGridEditMode,
   type DataGridEditorContext,
   type DataGridExportOptions,
+  type DataGridRowsReorderEvent,
   type DataGridExpandedGroups,
   type DataGridGroupContext,
   type DataGridHeaderContext,
@@ -144,8 +145,11 @@ import {
 
 export const SELECTION_COLUMN = '__selection';
 export const EXPANDER_COLUMN = '__expander';
+/** The reserved column that carries a row's drag handle. */
+export const DRAG_COLUMN = '__drag';
 const SELECTION_WIDTH = 48;
 const EXPANDER_WIDTH = 40;
+const DRAG_WIDTH = 40;
 const DEFAULT_ROW_HEIGHT = 34;
 /** Milliseconds a changed cell stays marked when `highlightChanges` is `true`. */
 const DEFAULT_CHANGED_DURATION = 1200;
@@ -339,6 +343,18 @@ function contentWidth(cell: HTMLElement): number {
                   <span data-ui="visually-hidden" data-part="root">{{ selectAllName() }}</span>
                 </span>
               }
+            </div>
+          }
+          @if (hasDragColumn()) {
+            <div
+              data-part="column-header"
+              role="columnheader"
+              tabindex="-1"
+              [attr.aria-colindex]="dragIndex()"
+              [attr.data-column]="DRAG"
+              [style.--slotted-data-grid-column]="dragIndex()"
+            >
+              <span></span>
             </div>
           }
           @if (hasExpanderColumn()) {
@@ -551,6 +567,16 @@ function contentWidth(cell: HTMLElement): number {
                 [style.--slotted-data-grid-column]="1"
               ></div>
             }
+            @if (hasDragColumn()) {
+              <div
+                data-part="filter-cell"
+                role="gridcell"
+                tabindex="-1"
+                [attr.aria-colindex]="dragIndex()"
+                [attr.data-column]="DRAG"
+                [style.--slotted-data-grid-column]="dragIndex()"
+              ></div>
+            }
             @if (hasExpanderColumn()) {
               <div
                 data-part="filter-cell"
@@ -746,6 +772,7 @@ function contentWidth(cell: HTMLElement): number {
                     : null
                 "
                 [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
+                [attr.data-dragging]="rowDragState().dragging === entry.node.key ? '' : null"
                 [attr.data-disabled]="isDisabled(entry.node.key) ? '' : null"
                 [attr.data-editing]="edit()?.cell?.row === entry.node.key ? '' : null"
                 [attr.data-index]="entry.index"
@@ -780,6 +807,30 @@ function contentWidth(cell: HTMLElement): number {
                         >{{ t().selectRow }} {{ entry.node.key }}</span
                       >
                     </span>
+                  </div>
+                }
+                @if (hasDragColumn()) {
+                  <div
+                    data-part="cell"
+                    role="gridcell"
+                    data-kind="drag"
+                    [attr.aria-colindex]="dragIndex()"
+                    [attr.data-column]="DRAG"
+                    [attr.tabindex]="isCurrent(entry.node.key, DRAG) ? 0 : -1"
+                    [attr.data-current]="isCurrent(entry.node.key, DRAG) ? '' : null"
+                    [style.--slotted-data-grid-column]="dragIndex()"
+                    (focus)="onCellFocus({ row: entry.node.key, column: DRAG }, $event)"
+                    (keydown)="onCellKeyDown($event, { row: entry.node.key, column: DRAG })"
+                    (pointerdown)="onCellPointerDown($event, { row: entry.node.key, column: DRAG })"
+                  >
+                    <button
+                      data-part="row-handle"
+                      type="button"
+                      [attr.tabindex]="isCurrent(entry.node.key, DRAG) ? 0 : -1"
+                      [attr.aria-disabled]="rowsReorderableNow() ? null : 'true'"
+                      [attr.data-disabled]="rowsReorderableNow() ? null : ''"
+                      [attr.aria-label]="rowHandleLabel(entry.node.key)"
+                    ></button>
                   </div>
                 }
                 @if (hasExpanderColumn()) {
@@ -1028,6 +1079,15 @@ function contentWidth(cell: HTMLElement): number {
           [style.--slotted-data-grid-drop-scroll]="dragState().scrollTop + 'px'"
         ></div>
       }
+      @if (rowDragState().offset !== null) {
+        <div
+          data-part="drop-indicator"
+          data-axis="row"
+          aria-hidden="true"
+          [style.--slotted-data-grid-drop-offset]="rowDragState().offset + 'px'"
+          [style.--slotted-data-grid-drop-scroll]="rowDragState().scrollLeft + 'px'"
+        ></div>
+      }
     </div>
     @if (showsFooter()) {
       <div data-part="footer">
@@ -1091,6 +1151,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly GROUP_PREFIX = GROUP_ROW_PREFIX;
   protected readonly SELECTION = SELECTION_COLUMN;
   protected readonly EXPANDER = EXPANDER_COLUMN;
+  protected readonly DRAG = DRAG_COLUMN;
   /** The room between the header and the menu it opens: one space step. */
   protected readonly MENU_OFFSET = 4;
 
@@ -1139,6 +1200,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly loadMore = output<void>();
   /** A branch `hasChildren` says has children opened and none are in `rows`. */
   readonly loadChildren = output<{ key: string; row: Row }>();
+  readonly rowsReorder = output<DataGridRowsReorderEvent>();
   readonly retry = output<void>();
   readonly manageColumns = output<void>();
 
@@ -1176,6 +1238,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
    * `expanded`; `query.group` is ignored. The root is a `treegrid`.
    */
   readonly tree = input<GridTree<Row> | undefined>(undefined);
+  /**
+   * A handle per row, dragged with the pointer or moved with Alt and the
+   * vertical arrows. The grid keeps no order of its own: `rowsReorder` says
+   * where the row goes in `rows` and the consumer moves it. Only while the
+   * query is at rest — no sort, filter, search or group — and without a
+   * tree; elsewhere the handle is disabled.
+   */
+  readonly rowsReorderable = input(false, { transform: booleanAttribute });
   readonly height = input<string | number | undefined>(undefined);
   readonly label = input<string | undefined>(undefined);
   readonly labelledBy = input<string | undefined>(undefined);
@@ -1304,12 +1374,15 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   );
   protected readonly hasExpanderColumn = computed(() => this.detailTemplate() !== undefined);
   protected readonly rowSelectable = this.hasSelectionColumn;
+  protected readonly hasDragColumn = computed(() => this.rowsReorderable());
   private readonly gutters = computed(() => [
     ...(this.hasSelectionColumn() ? [SELECTION_WIDTH] : []),
+    ...(this.hasDragColumn() ? [DRAG_WIDTH] : []),
     ...(this.hasExpanderColumn() ? [EXPANDER_WIDTH] : []),
   ]);
   protected readonly gutterIds = computed(() => [
     ...(this.hasSelectionColumn() ? [SELECTION_COLUMN] : []),
+    ...(this.hasDragColumn() ? [DRAG_COLUMN] : []),
     ...(this.hasExpanderColumn() ? [EXPANDER_COLUMN] : []),
   ]);
   protected readonly columnIds = computed(() => [
@@ -1317,6 +1390,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     ...this.resolved().map((column) => column.id),
   ]);
   protected readonly expanderIndex = computed(() => this.columnIds().indexOf(EXPANDER_COLUMN) + 1);
+  protected readonly dragIndex = computed(() => this.columnIds().indexOf(DRAG_COLUMN) + 1);
   protected readonly template = computed(() => columnTemplate(this.resolved(), this.gutters()));
   protected readonly hasGroups = computed(() => (this.columnGroups()?.length ?? 0) > 0);
   protected readonly headerRowCount = computed(
@@ -2674,6 +2748,12 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       this.mountedColumns();
       afterNextRender(() => this.attachDraggables(), { injector: this.injector });
     });
+    /* The mounted rows as draggables, the same way. */
+    effect(() => {
+      this.mountedEntries();
+      this.hasDragColumn();
+      afterNextRender(() => this.attachRowDraggables(), { injector: this.injector });
+    });
 
     /* A range drag ends on the document. */
     effect((onCleanup) => {
@@ -2782,6 +2862,165 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     });
     this.drag = controller;
     this.attachDraggables();
+    this.wireRowDrag();
+  }
+
+  /* ── Reordering rows ────────────────────────────────────────────────── */
+  /* Rows move only while the query is at rest and there is no tree: sorted,
+     filtered, searched or grouped, the position on screen is not the
+     position in `rows`. A page is fine — a node's index is its place in
+     `rows` across pages. */
+  protected readonly rowsReorderableNow = computed(() => {
+    const query = this.query();
+    return (
+      this.hasDragColumn() &&
+      this.tree() === undefined &&
+      this.resolvedMode() === 'client' &&
+      query.sort.length === 0 &&
+      query.filter === null &&
+      query.search.trim() === '' &&
+      query.group.length === 0
+    );
+  });
+  protected readonly rowDragState = signal<{
+    dragging: string | null;
+    offset: number | null;
+    scrollLeft: number;
+  }>({ dragging: null, offset: null, scrollLeft: 0 });
+  private rowDrag: DragController | null = null;
+  private readonly rowDraggables = new Map<string, () => void>();
+  private readonly rowDraggableNodes = new Map<string, HTMLElement>();
+  protected rowHandleLabel(key: string) {
+    return fillLabel(this.t().reorderRow, { row: this.rowLabelOf(key) });
+  }
+  /** What a row is called: its row header's text, else its key. */
+  private rowLabelOf(key: string) {
+    const node = this.nodeByKey().get(key);
+    const header = this.columns().find((column) => column.rowHeader);
+    return node && header ? cellText(header, node.row as Row, this.formatOptions()) : key;
+  }
+  private mountedRowKeys() {
+    return this.mountedEntries().flatMap(({ node }) => (node.kind === 'row' ? [node.key] : []));
+  }
+  /** Where a row lands in `rows` when dropped before the visible item at `index`. */
+  private rowMove(key: string, index: number): DataGridRowsReorderEvent | null {
+    const node = this.nodeByKey().get(key);
+    if (!node) return null;
+    const items = this.mountedEntries().flatMap(({ node: entry }) =>
+      entry.kind === 'row' ? [entry] : [],
+    );
+    const last = items[items.length - 1];
+    const before = items[index];
+    const target = before ? before.index : last ? last.index + 1 : 0;
+    /* Removing the row first shifts everything after it up by one. */
+    const to = node.index < target ? target - 1 : target;
+    if (to === node.index) return null;
+    return { key, from: node.index, to, reason: 'pointer' };
+  }
+  private moveRow(key: string, direction: -1 | 1, source?: unknown) {
+    if (!this.rowsReorderableNow()) return;
+    const keys = this.mountedRowKeys();
+    const at = keys.indexOf(key);
+    if (at < 0) return;
+    const index = direction > 0 ? at + 2 : at - 1;
+    if (index < 0) return;
+    const move = this.rowMove(key, index);
+    if (!move) return;
+    this.rowsReorder.emit({ ...move, reason: 'keyboard', event: source as Event | undefined });
+    this.announce(
+      fillLabel(this.t().rowMoved, { row: this.rowLabelOf(key), position: move.to + 1 }),
+    );
+  }
+  private wireRowDrag() {
+    const element = this.host.nativeElement;
+    const controller = createDragController({
+      document: element.ownerDocument,
+      preview: false,
+      autoScroll: { axis: 'y' },
+      onDrop: ({ items, target, reason, event }) => {
+        if (target.kind !== 'between') return;
+        const move = this.rowMove(items[0]!, target.index);
+        if (move)
+          this.rowsReorder.emit({
+            ...move,
+            reason: reason === 'keyboard' ? 'keyboard' : 'pointer',
+            event,
+          });
+      },
+    });
+    const rowOf = (key: string) =>
+      element.querySelector(
+        `[data-part="body"] > [data-part="row"][data-row="${CSS.escape(key)}"]`,
+      );
+    controller.registerContainer({
+      key: 'rows',
+      items: () => this.mountedRowKeys(),
+      orientation: 'vertical',
+      element: () => element.querySelector('[data-part="body"]'),
+      itemElement: rowOf,
+      label: () => 'rows',
+      itemLabel: (key) => this.rowLabelOf(key),
+    });
+    controller.subscribe((state) => {
+      if (state.status !== 'dragging') {
+        this.rowDragState.set({ dragging: null, offset: null, scrollLeft: 0 });
+        return;
+      }
+      const dragging = state.items[0] ?? null;
+      const target = state.target && state.target.kind === 'between' ? state.target : null;
+      let offset: number | null = null;
+      let scrollLeft = 0;
+      const scroller = this.scrollRef()?.nativeElement;
+      if (target && scroller) {
+        const keys = this.mountedRowKeys();
+        const atEnd = target.index >= keys.length;
+        const anchor = keys[atEnd ? keys.length - 1 : target.index];
+        const row = anchor ? rowOf(anchor) : null;
+        if (row) {
+          const box = row.getBoundingClientRect();
+          const origin = scroller.getBoundingClientRect();
+          offset = (atEnd ? box.bottom : box.top) - origin.top + scroller.scrollTop;
+          scrollLeft = Math.abs(scroller.scrollLeft);
+        }
+      }
+      this.rowDragState.set({ dragging, offset, scrollLeft });
+    });
+    this.rowDrag = controller;
+    this.attachRowDraggables();
+  }
+  private attachRowDraggables() {
+    const controller = this.rowDrag;
+    if (!controller) return;
+    const element = this.host.nativeElement;
+    const seen = new Set<string>();
+    if (this.hasDragColumn()) {
+      for (const key of this.mountedRowKeys()) {
+        const node = element.querySelector<HTMLElement>(
+          `[data-part="body"] > [data-part="row"][data-row="${CSS.escape(key)}"]`,
+        );
+        if (!node) continue;
+        seen.add(key);
+        const previous = this.rowDraggables.get(key);
+        if (previous && this.rowDraggableNodes.get(key) === node) continue;
+        previous?.();
+        const detach = controller.attachDraggable(node, {
+          container: 'rows',
+          key,
+          handle: () => node.querySelector('[data-part="row-handle"]'),
+          disabled: () => !this.rowsReorderableNow(),
+          distance: 6,
+        });
+        this.rowDraggableNodes.set(key, node);
+        this.rowDraggables.set(key, detach);
+      }
+    }
+    for (const [key, detach] of this.rowDraggables) {
+      if (!seen.has(key)) {
+        detach();
+        this.rowDraggables.delete(key);
+        this.rowDraggableNodes.delete(key);
+      }
+    }
   }
   private attachDraggables() {
     const controller = this.drag;
@@ -2844,7 +3083,8 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   }
   protected onRootKeyDown(event: KeyboardEvent) {
     if (event.defaultPrevented) return;
-    this.drag?.handleKeydown(event);
+    if (this.drag?.handleKeydown(event)) return;
+    this.rowDrag?.handleKeydown(event);
   }
   private swallowClick = false;
   protected onHeaderClick(event: MouseEvent, column: ResolvedGridColumn<Row>) {
@@ -3021,6 +3261,15 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         return;
       }
     }
+    /* Alt with the vertical arrows moves the row, as Alt with the
+       horizontal ones moves the column. */
+    if (row && event.altKey && (key === 'ArrowUp' || key === 'ArrowDown')) {
+      event.preventDefault();
+      this.moveRow(cell.row, key === 'ArrowDown' ? 1 : -1, event);
+      this.pendingFocus = cell;
+      return;
+    }
+
     /* In the tree column, the horizontal arrows open a closed branch, close
        an open one, and climb to the parent from a closed row or a leaf. */
     const treeColumn = this.treeColumn();

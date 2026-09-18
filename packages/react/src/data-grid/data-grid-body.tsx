@@ -12,6 +12,7 @@ import { Skeleton } from '../skeleton';
 import {
   cellStyle,
   columnAttributes,
+  DRAG_COLUMN,
   EXPANDER_COLUMN,
   SELECTION_COLUMN,
 } from './data-grid-constants';
@@ -94,11 +95,13 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
   const expanded = grid.isExpanded(key) && (grid.treeColumn === null || node.childCount === 0);
   const loadingChildren = grid.isLoadingChildren(key);
   const editing = grid.edit !== null && grid.edit.cell.row === key;
+  const attachRowDraggable = grid.attachRowDraggable;
   const attach = useCallback(
     (element: HTMLDivElement | null) => {
       measure?.(index, element);
+      attachRowDraggable(element, key);
     },
-    [measure, index],
+    [measure, index, attachRowDraggable, key],
   );
 
   return (
@@ -119,6 +122,7 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
           ? { 'aria-expanded': node.open }
           : {})}
         {...(loadingChildren ? { 'data-loading': '' } : {})}
+        {...(grid.draggingRow === key ? { 'data-dragging': '' } : {})}
         {...(selected ? { 'data-selected': '' } : {})}
         {...(current ? { 'data-current': '' } : {})}
         {...(expanded ? { 'data-expanded': '' } : {})}
@@ -126,6 +130,7 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
         {...(editing ? { 'data-editing': '' } : {})}
       >
         {grid.columnIds.includes(SELECTION_COLUMN) ? <SelectionCell<Row> rowKey={key} /> : null}
+        {grid.columnIds.includes(DRAG_COLUMN) ? <DragHandleCell<Row> node={node} /> : null}
         {grid.columnIds.includes(EXPANDER_COLUMN) ? <ExpanderCell<Row> node={node} /> : null}
         {grid.mountedColumns.map((column) => (
           <BodyCell<Row> column={column} key={column.id} node={node} />
@@ -188,6 +193,46 @@ function SelectionCell<Row>({ rowKey }: { rowKey: string }) {
           grid.toggleSelected(rowKey, { range: source?.shiftKey === true, source: request.source });
         }}
         tabIndex={current ? 0 : -1}
+      />
+    </div>
+  );
+}
+
+/**
+ * The row's drag handle: a button the pointer drags from and the keyboard
+ * moves with Alt and the arrows from any cell of the row. Disabled, not
+ * gone, while the query is not at rest, so the column keeps its width and
+ * the reader hears why nothing moves.
+ */
+function DragHandleCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row' }> }) {
+  const grid = useDataGridInternal<Row>();
+  const cell = { row: node.key, column: DRAG_COLUMN };
+  const index = grid.columnIds.indexOf(DRAG_COLUMN) + 1;
+  const current =
+    grid.current !== null && grid.current.row === node.key && grid.current.column === DRAG_COLUMN;
+  return (
+    <div
+      aria-colindex={index}
+      data-column={DRAG_COLUMN}
+      data-kind="drag"
+      data-part="cell"
+      role="gridcell"
+      style={{ '--slotted-data-grid-column': String(index) } as CSSProperties}
+      tabIndex={current ? 0 : -1}
+      onFocus={(event) => {
+        if (event.target === event.currentTarget) grid.onCellFocus(cell);
+      }}
+      onKeyDown={(event) => grid.onCellKeyDown(event, cell)}
+      onPointerDown={(event) => grid.onCellPointerDown(event, cell)}
+      {...(current ? { 'data-current': '' } : {})}
+    >
+      <button
+        aria-disabled={grid.rowsReorderable ? undefined : true}
+        aria-label={fill(grid.labels.reorderRow, { row: grid.rowLabelOf(node.key) })}
+        data-part="row-handle"
+        {...(grid.rowsReorderable ? {} : { 'data-disabled': '' })}
+        tabIndex={current ? 0 : -1}
+        type="button"
       />
     </div>
   );

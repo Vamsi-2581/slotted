@@ -21,6 +21,7 @@ import type {
   DataGridColumnStateRequest,
   DataGridEditCommit,
   DataGridQueryRequest,
+  DataGridRowsReorderEvent,
   DataGridSelection,
   DataGridSelectionMode,
 } from './data-grid-defaults';
@@ -975,5 +976,127 @@ describe('SlDataGrid as a tree', () => {
     fixture.detectChanges();
     expect(root.querySelector('[data-row="pt-lis"]')!.hasAttribute('data-loading')).toBe(false);
     expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-lis-a', 'pt-por', 'es']);
+  });
+});
+
+describe('SlDataGrid reordering rows', () => {
+  @Component({
+    standalone: true,
+    imports: [SlDataGrid],
+    template: `
+      <sl-data-grid
+        label="Shipments"
+        rowKey="id"
+        [rows]="rows"
+        [columns]="columns"
+        [query]="query()"
+        [current]="current()"
+        rowsReorderable
+        (rowsReorder)="moves.push($event)"
+      />
+    `,
+  })
+  class ReorderHost {
+    readonly rows = ROWS;
+    readonly columns = COLUMNS;
+    readonly query = signal<GridQuery>(emptyQuery());
+    readonly current = signal<GridCell | null>(null);
+    readonly moves: DataGridRowsReorderEvent[] = [];
+  }
+
+  async function mount() {
+    await TestBed.configureTestingModule({ imports: [ReorderHost] }).compileComponents();
+    const fixture = TestBed.createComponent(ReorderHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+    const handle = (row: string) =>
+      root.querySelector<HTMLElement>(`[data-row="${row}"] [data-part="row-handle"]`)!;
+    const cell = (row: string, column: string) =>
+      root.querySelector<HTMLElement>(`[data-row="${row}"] [data-column="${column}"]`)!;
+    return { fixture, root, handle, cell };
+  }
+
+  it('draws a handle per row that only works while the query is at rest', async () => {
+    const { fixture, root, handle } = await mount();
+    expect(root.querySelectorAll('[data-part="row-handle"]')).toHaveLength(4);
+    expect(handle('S1').getAttribute('aria-label')).toBe('Reorder S1');
+    expect(handle('S1').hasAttribute('aria-disabled')).toBe(false);
+    fixture.componentInstance.query.set({
+      ...emptyQuery(),
+      sort: [{ column: 'weight', direction: 'ascending' }],
+    });
+    fixture.detectChanges();
+    expect(handle('S1').getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('moves a row with Alt and the vertical arrows, reporting where it goes in rows', async () => {
+    const { fixture, cell } = await mount();
+    fixture.componentInstance.current.set({ row: 'S2', column: 'customer' });
+    fixture.detectChanges();
+    const press = (key: string) =>
+      cell('S2', 'customer').dispatchEvent(
+        new KeyboardEvent('keydown', { key, altKey: true, bubbles: true, cancelable: true }),
+      );
+    press('ArrowDown');
+    expect(fixture.componentInstance.moves.at(-1)).toEqual(
+      expect.objectContaining({ key: 'S2', from: 1, to: 2, reason: 'keyboard' }),
+    );
+    press('ArrowUp');
+    expect(fixture.componentInstance.moves.at(-1)).toEqual(
+      expect.objectContaining({ key: 'S2', from: 1, to: 0, reason: 'keyboard' }),
+    );
+  });
+
+  it('drags a row by its handle to a gap, and reports the move', async () => {
+    const { fixture, root, handle } = await mount();
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-part="body"] > [data-part="row"]')];
+    rows.forEach((row, index) => {
+      row.getBoundingClientRect = () =>
+        ({
+          top: 100 + index * 30,
+          bottom: 130 + index * 30,
+          left: 0,
+          right: 400,
+          width: 400,
+          height: 30,
+          x: 0,
+          y: 100 + index * 30,
+          toJSON: () => ({}),
+        }) as DOMRect;
+    });
+    const body = root.querySelector<HTMLElement>('[data-part="body"]')!;
+    body.getBoundingClientRect = () =>
+      ({
+        top: 100,
+        bottom: 220,
+        left: 0,
+        right: 400,
+        width: 400,
+        height: 120,
+        x: 0,
+        y: 100,
+        toJSON: () => ({}),
+      }) as DOMRect;
+    const press = (type: string, y: number) =>
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 10,
+        clientY: y,
+        button: 0,
+      });
+    handle('S1').dispatchEvent(press('pointerdown', 115));
+    document.dispatchEvent(press('pointermove', 140));
+    document.dispatchEvent(press('pointermove', 205));
+    fixture.detectChanges();
+    expect(root.querySelector('[data-row="S1"]')!.hasAttribute('data-dragging')).toBe(true);
+    expect(root.querySelector('[data-part="drop-indicator"][data-axis="row"]')).not.toBeNull();
+    document.dispatchEvent(press('pointerup', 205));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.moves.at(-1)).toEqual(
+      expect.objectContaining({ key: 'S1', from: 0, to: 3, reason: 'pointer' }),
+    );
   });
 });

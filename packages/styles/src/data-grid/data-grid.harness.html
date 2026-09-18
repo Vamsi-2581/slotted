@@ -4853,6 +4853,147 @@
   Two levels of grouping — carrier, then status — with counts and aggregates
   on the group rows, a collapsed group, and the summary row pinned to the end.
 -->
+<!--
+  Rows that reorder: a grip per row in a reserved column, one row on its way
+  and the horizontal guide in the gap it lands in.
+-->
+<section data-scene="reorder-rows">
+  <div
+    data-ui="data-grid"
+    data-part="root"
+    role="grid"
+    data-variant="ruled"
+    data-sticky-header
+    data-rows="fixed"
+    aria-label="Shipments"
+    aria-rowcount="4"
+    aria-colcount="3"
+    style="--slotted-data-grid-template: 40px 130px 140px"
+  >
+    <div data-part="scroll">
+      <div data-part="head" role="rowgroup">
+        <div data-part="header-row" role="row" aria-rowindex="1">
+          <div data-part="column-header" role="columnheader" aria-colindex="1" tabindex="-1">
+            <span></span>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="2"
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="3"
+            data-sortable
+            tabindex="-1"
+          >
+            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <div data-part="body" role="rowgroup">
+        <div data-part="row" role="row" aria-rowindex="2">
+          <div data-part="cell" role="gridcell" data-kind="drag" aria-colindex="1" tabindex="-1">
+            <button
+              data-part="row-handle"
+              type="button"
+              tabindex="-1"
+              aria-label="Reorder SHP-20481"
+            ></button>
+          </div>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20481</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Aurora Textiles</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="3" data-dragging>
+          <div data-part="cell" role="gridcell" data-kind="drag" aria-colindex="1" tabindex="-1">
+            <button
+              data-part="row-handle"
+              type="button"
+              tabindex="-1"
+              aria-label="Reorder SHP-20482"
+            ></button>
+          </div>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20482</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Mól &amp; Fils</span>
+          </div>
+        </div>
+        <div data-part="row" role="row" aria-rowindex="4">
+          <div data-part="cell" role="gridcell" data-kind="drag" aria-colindex="1" tabindex="-1">
+            <button
+              data-part="row-handle"
+              type="button"
+              tabindex="-1"
+              aria-label="Reorder SHP-20483"
+            ></button>
+          </div>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="2"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>SHP-20483</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="3"
+            data-text="truncate"
+            tabindex="-1"
+          >
+            <span>Nordwind Logistik</span>
+          </div>
+        </div>
+      </div>
+      <div
+        data-part="drop-indicator"
+        data-axis="row"
+        aria-hidden="true"
+        style="--slotted-data-grid-drop-offset: 136px"
+      ></div>
+    </div>
+  </div>
+</section>
+
 <section data-scene="grouping">
   <div
     data-ui="data-grid"

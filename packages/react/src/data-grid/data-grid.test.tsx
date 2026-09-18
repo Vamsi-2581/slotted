@@ -845,6 +845,107 @@ describe('DataGrid, the rest', () => {
     render(<Shipments current={cellRef} />);
     expect(cell('S1', 'id')).toHaveAttribute('data-current');
   });
+  describe('reordering rows', () => {
+    const handle = (row: string) =>
+      grid().querySelector<HTMLElement>(`[data-row="${row}"] [data-part="row-handle"]`)!;
+
+    it('draws a handle per row that only works while the query is at rest', () => {
+      const { rerender } = render(<Shipments rowsReorderable />);
+      expect(grid().querySelectorAll('[data-part="row-handle"]')).toHaveLength(4);
+      expect(handle('S1')).toHaveAttribute('aria-label', 'Reorder S1');
+      expect(handle('S1')).not.toHaveAttribute('aria-disabled');
+      rerender(
+        <Shipments
+          rowsReorderable
+          query={{ ...emptyQuery(), sort: [{ column: 'weight', direction: 'ascending' }] }}
+        />,
+      );
+      expect(handle('S1')).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('moves a row with Alt and the vertical arrows, reporting where it goes in rows', () => {
+      const onRowsReorder = vi.fn();
+      render(
+        <Shipments
+          defaultCurrent={{ row: 'S2', column: 'customer' }}
+          onRowsReorder={onRowsReorder}
+          rowsReorderable
+        />,
+      );
+      fireEvent.keyDown(cell('S2', 'customer'), { key: 'ArrowDown', altKey: true });
+      expect(onRowsReorder).toHaveBeenLastCalledWith(
+        expect.objectContaining({ key: 'S2', from: 1, to: 2, reason: 'keyboard' }),
+      );
+      fireEvent.keyDown(cell('S2', 'customer'), { key: 'ArrowUp', altKey: true });
+      expect(onRowsReorder).toHaveBeenLastCalledWith(
+        expect.objectContaining({ key: 'S2', from: 1, to: 0, reason: 'keyboard' }),
+      );
+      /* The first row has nowhere up to go. */
+      onRowsReorder.mockClear();
+      fireEvent.keyDown(cell('S2', 'customer'), { key: 'ArrowUp', altKey: true });
+      fireEvent.keyDown(cell('S2', 'customer'), { key: 'ArrowUp', altKey: true });
+      expect(onRowsReorder).toHaveBeenCalledTimes(2);
+    });
+
+    it('drags a row by its handle to a gap, and reports the move', () => {
+      const onRowsReorder = vi.fn();
+      render(<Shipments onRowsReorder={onRowsReorder} rowsReorderable />);
+      const rows = [
+        ...grid().querySelectorAll<HTMLElement>('[data-part="body"] > [data-part="row"]'),
+      ];
+      rows.forEach((row, index) => {
+        row.getBoundingClientRect = () =>
+          ({
+            top: 100 + index * 30,
+            bottom: 130 + index * 30,
+            left: 0,
+            right: 400,
+            width: 400,
+            height: 30,
+            x: 0,
+            y: 100 + index * 30,
+            toJSON: () => ({}),
+          }) as DOMRect;
+      });
+      const body = grid().querySelector<HTMLElement>('[data-part="body"]')!;
+      body.getBoundingClientRect = () =>
+        ({
+          top: 100,
+          bottom: 220,
+          left: 0,
+          right: 400,
+          width: 400,
+          height: 120,
+          x: 0,
+          y: 100,
+          toJSON: () => ({}),
+        }) as DOMRect;
+      const press = (type: string, y: number) =>
+        new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+          pointerType: 'mouse',
+          clientX: 10,
+          clientY: y,
+          button: 0,
+        });
+      act(() => {
+        handle('S1').dispatchEvent(press('pointerdown', 115));
+        document.dispatchEvent(press('pointermove', 140));
+        document.dispatchEvent(press('pointermove', 205));
+      });
+      expect(grid().querySelector('[data-row="S1"]')).toHaveAttribute('data-dragging');
+      expect(grid().querySelector('[data-part="drop-indicator"][data-axis="row"]')).not.toBeNull();
+      act(() => {
+        document.dispatchEvent(press('pointerup', 205));
+      });
+      expect(onRowsReorder).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'S1', from: 0, to: 3, reason: 'pointer' }),
+      );
+    });
+  });
+
   describe('as a tree', () => {
     interface Site {
       id: string;

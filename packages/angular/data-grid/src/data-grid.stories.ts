@@ -43,6 +43,7 @@ import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridColumnStateRequest,
   DataGridEditCommit,
+  DataGridRowsReorderEvent,
   DataGridSelection,
 } from './data-grid-defaults';
 import {
@@ -1334,6 +1335,44 @@ export const Tree: Story = {
           size: 'tall',
           before: note(
             `{{ loads() === 0 ? 'Open Portugal, then Porto: its zones are fetched on demand' : 'Porto’s zones fetched ' + (loads() === 1 ? 'once' : loads() + ' times') }}`,
+          ),
+        },
+      ),
+    };
+  },
+};
+
+export const ReorderRows: Story = {
+  parameters: scenario('reorder-rows'),
+  render: () => {
+    const rows = signal<readonly Shipment[]>(FIFTY.slice(0, 8));
+    const query = signal<GridQuery>(emptyQuery());
+    return {
+      props: {
+        ...base(),
+        rows,
+        query,
+        order: () =>
+          rows()
+            .map((row) => row.id.slice(4))
+            .join(', '),
+        sorted: () => query().sort.length > 0,
+        move: ({ from, to }: DataGridRowsReorderEvent) =>
+          rows.update((current) => {
+            const next = current.slice();
+            const [moved] = next.splice(from, 1);
+            next.splice(to, 0, moved!);
+            return next;
+          }),
+      },
+      template: screen(
+        grid(
+          '[rows]="rows()" [(query)]="query" rowsReorderable selectionMode="multiple" (rowsReorder)="move($event)"',
+        ),
+        {
+          size: 'tall',
+          before: note(
+            `{{ sorted() ? 'Sorted: the handles are disabled until the sort is cleared' : 'Drag a handle, or Alt+↑/↓ on a row — ' + order() }}`,
           ),
         },
       ),

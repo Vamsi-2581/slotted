@@ -98,6 +98,11 @@ export interface DataGridInternal<Row> {
   readonly toggleExpanded: (key: string, source?: unknown, reason?: DataGridReason) => void;
   /** Opens or closes a tree row's children, asking for them when they are not in `rows`. */
   readonly toggleBranch: (key: string, source?: unknown, reason?: DataGridReason) => void;
+  /** Whether rows can be reordered now: the prop, the query at rest, no tree. */
+  readonly rowsReorderable: boolean;
+  readonly attachRowDraggable: (node: HTMLElement | null, key: string) => void;
+  /** What a row is called: its row header's text, else its key. */
+  readonly rowLabelOf: (key: string) => string;
   /** The column that carries the tree's indent and toggle, or `null` without a tree. */
   readonly treeColumn: string | null;
   /** Whether a row says it has children that are not in `rows` yet. */
@@ -141,6 +146,7 @@ export interface DataGridInternal<Row> {
   readonly setResizing: (id: string | null) => void;
   readonly dragging: string | null;
   readonly dropTarget: string | null;
+  readonly draggingRow: string | null;
   readonly dropOffset: number | null;
   readonly attachDraggable: (element: HTMLElement | null, id: string) => void;
   readonly onManageColumns: (() => void) | undefined;

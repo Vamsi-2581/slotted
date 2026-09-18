@@ -81,6 +81,8 @@ import { fill, resolveLabels, useDataGridDefaults } from './data-grid-defaults';
 import { DataGridHead } from './data-grid-header';
 import {
   DEFAULT_CHANGED_DURATION,
+  DRAG_COLUMN,
+  DRAG_WIDTH,
   EXPANDER_COLUMN,
   EXPANDER_WIDTH,
   EDITOR_FIELD,
@@ -93,6 +95,7 @@ import {
 import { defaultCellContent, defaultEditor } from './data-grid-editors';
 import type {
   DataGridExportOptions,
+  DataGridRowsReorderEvent,
   DataGridCellContext,
   DataGridEditorContext,
   DataGridExpandedGroups,
@@ -202,6 +205,7 @@ export function DataGrid<Row>({
   onExpandedChange,
   onExpandedGroupsChange,
   onLoadChildren,
+  onRowsReorder,
   onKeyDown,
   onLoadMore,
   onManageColumns,
@@ -223,6 +227,7 @@ export function DataGrid<Row>({
   renderHeader,
   rowHeight,
   rowKey,
+  rowsReorderable,
   rows,
   selectionMode,
   showRange,
@@ -364,13 +369,15 @@ export function DataGrid<Row>({
 
   /* ── Columns ────────────────────────────────────────────────────────── */
   const hasSelectionColumn = resolvedSelection === 'single' || resolvedSelection === 'multiple';
+  const hasDragColumn = rowsReorderable === true;
   const hasExpanderColumn = renderDetail !== undefined;
   const gutters = useMemo(() => {
     const list: number[] = [];
     if (hasSelectionColumn) list.push(SELECTION_WIDTH);
+    if (hasDragColumn) list.push(DRAG_WIDTH);
     if (hasExpanderColumn) list.push(EXPANDER_WIDTH);
     return list;
-  }, [hasSelectionColumn, hasExpanderColumn]);
+  }, [hasSelectionColumn, hasDragColumn, hasExpanderColumn]);
   const leading = gutters.reduce((sum, width) => sum + width, 0);
   const resolved = useMemo(
     () => resolveColumns(columns, effectiveState, { leading }),
@@ -383,10 +390,11 @@ export function DataGrid<Row>({
   const columnIds = useMemo(
     () => [
       ...(hasSelectionColumn ? [SELECTION_COLUMN] : []),
+      ...(hasDragColumn ? [DRAG_COLUMN] : []),
       ...(hasExpanderColumn ? [EXPANDER_COLUMN] : []),
       ...resolved.map((column) => column.id),
     ],
-    [hasSelectionColumn, hasExpanderColumn, resolved],
+    [hasSelectionColumn, hasDragColumn, hasExpanderColumn, resolved],
   );
   const template = useMemo(() => columnTemplate(resolved, gutters), [resolved, gutters]);
 
@@ -1098,6 +1106,184 @@ export function DataGrid<Row>({
     };
   }, []);
 
+  const nodeByKey = useMemo(() => {
+    const map = new Map<string, Extract<GridNode<Row>, { kind: 'row' }>>();
+    for (const node of nodes) if (node.kind === 'row') map.set(node.key, node);
+    return map;
+  }, [nodes]);
+  /* ── Reordering rows ────────────────────────────────────────────────── */
+  /* Rows move only while the query is at rest and there is no tree: sorted,
+     filtered, searched or grouped, the position on screen is not the
+     position in `rows`. A page is fine — a node's index is its place in
+     `rows` across pages. */
+  const rowsReorderableNow =
+    hasDragColumn &&
+    !tree &&
+    resolvedMode === 'client' &&
+    query.sort.length === 0 &&
+    query.filter === null &&
+    query.search.trim() === '' &&
+    query.group.length === 0;
+  const [rowDragState, setRowDragState] = useState<{
+    dragging: string | null;
+    offset: number | null;
+    scrollLeft: number;
+  }>({ dragging: null, offset: null, scrollLeft: 0 });
+  const rowDrag = useRef<DragController | null>(null);
+  const rowNodes = useRef(new Map<string, HTMLElement>());
+  const rowDraggables = useRef(new Map<string, () => void>());
+  const rowLabelOf = useCallback(
+    (key: string) => {
+      const node = nodeByKey.get(key);
+      const header = columns.find((column) => column.rowHeader);
+      return node && header ? cellText(header, node.row, formatOptions) : key;
+    },
+    [nodeByKey, columns, formatOptions],
+  );
+  const latestRows = useRef({
+    nodeByKey,
+    mountedNodes,
+    rowsReorderableNow,
+    onRowsReorder,
+    labelOf: rowLabelOf,
+  });
+  latestRows.current = {
+    nodeByKey,
+    mountedNodes,
+    rowsReorderableNow,
+    onRowsReorder,
+    labelOf: rowLabelOf,
+  };
+  const attachRowNode = useCallback((node: HTMLElement | null, key: string) => {
+    const controller = rowDrag.current;
+    rowDraggables.current.get(key)?.();
+    rowDraggables.current.delete(key);
+    if (!node || !controller) return;
+    const detach = controller.attachDraggable(node, {
+      container: 'rows',
+      key,
+      handle: () => node.querySelector('[data-part="row-handle"]'),
+      disabled: () => !latestRows.current.rowsReorderableNow,
+      distance: 6,
+    });
+    rowDraggables.current.set(key, detach);
+  }, []);
+  const attachRowDraggable = useCallback(
+    (node: HTMLElement | null, key: string) => {
+      if (node) rowNodes.current.set(key, node);
+      else rowNodes.current.delete(key);
+      attachRowNode(node, key);
+    },
+    [attachRowNode],
+  );
+  /** Where a row lands in `rows` when dropped before the visible item at `index`. */
+  const rowMove = useCallback((key: string, index: number): DataGridRowsReorderEvent | null => {
+    const { nodeByKey: byKey, mountedNodes: mounted } = latestRows.current;
+    const node = byKey.get(key);
+    if (!node) return null;
+    const items = mounted.filter((entry) => entry.kind === 'row');
+    const last = items[items.length - 1];
+    const before = items[index];
+    const target =
+      before && before.kind === 'row'
+        ? before.index
+        : last && last.kind === 'row'
+          ? last.index + 1
+          : 0;
+    /* Removing the row first shifts everything after it up by one. */
+    const to = node.index < target ? target - 1 : target;
+    if (to === node.index) return null;
+    return { key, from: node.index, to, reason: 'pointer' };
+  }, []);
+  useEffect(() => {
+    const element = root.current;
+    if (!element || !hasDragColumn) return;
+    const controller = createDragController({
+      document: element.ownerDocument,
+      preview: false,
+      autoScroll: { axis: 'y' },
+      onDrop: ({ items, target, reason, event }) => {
+        if (target.kind !== 'between') return;
+        const move = rowMove(items[0]!, target.index);
+        if (move)
+          latestRows.current.onRowsReorder?.({
+            ...move,
+            reason: reason === 'keyboard' ? 'keyboard' : 'pointer',
+            event,
+          });
+      },
+    });
+    const mountedKeys = () =>
+      latestRows.current.mountedNodes.flatMap((node) => (node.kind === 'row' ? [node.key] : []));
+    const rowOf = (key: string) =>
+      element.querySelector(
+        `[data-part="body"] > [data-part="row"][data-row="${CSS.escape(key)}"]`,
+      );
+    controller.registerContainer({
+      key: 'rows',
+      items: mountedKeys,
+      orientation: 'vertical',
+      element: () => element.querySelector('[data-part="body"]'),
+      itemElement: rowOf,
+      label: () => 'rows',
+      itemLabel: (key) => latestRows.current.labelOf(key),
+    });
+    const unsubscribe = controller.subscribe((state) => {
+      if (state.status !== 'dragging') {
+        setRowDragState({ dragging: null, offset: null, scrollLeft: 0 });
+        return;
+      }
+      const dragging = state.items[0] ?? null;
+      const target = state.target && state.target.kind === 'between' ? state.target : null;
+      let offset: number | null = null;
+      let scrollLeft = 0;
+      const scroller = scroll.current;
+      if (target && scroller) {
+        const keys = mountedKeys();
+        const atEnd = target.index >= keys.length;
+        const anchor = keys[atEnd ? keys.length - 1 : target.index];
+        const row = anchor ? rowOf(anchor) : null;
+        if (row) {
+          const box = row.getBoundingClientRect();
+          const origin = scroller.getBoundingClientRect();
+          offset = (atEnd ? box.bottom : box.top) - origin.top + scroller.scrollTop;
+          scrollLeft = Math.abs(scroller.scrollLeft);
+        }
+      }
+      setRowDragState({ dragging, offset, scrollLeft });
+    });
+    rowDrag.current = controller;
+    for (const [key, node] of rowNodes.current) attachRowNode(node, key);
+    const attached = rowDraggables.current;
+    return () => {
+      unsubscribe();
+      for (const detach of attached.values()) detach();
+      attached.clear();
+      controller.destroy();
+      rowDrag.current = null;
+    };
+  }, [hasDragColumn, attachRowNode, rowMove]);
+  const moveRow = useCallback(
+    (key: string, direction: -1 | 1, source?: unknown) => {
+      if (!latestRows.current.rowsReorderableNow) return;
+      const items = latestRows.current.mountedNodes.filter((node) => node.kind === 'row');
+      const at = items.findIndex((node) => node.key === key);
+      if (at < 0) return;
+      const index = direction > 0 ? at + 2 : at - 1;
+      if (index < 0) return;
+      const move = rowMove(key, index);
+      if (!move) return;
+      onRowsReorder?.({ ...move, reason: 'keyboard', event: source as Event | undefined });
+      announce(
+        fill(resolvedLabels.rowMoved, {
+          row: latestRows.current.labelOf(key),
+          position: move.to + 1,
+        }),
+      );
+    },
+    [rowMove, onRowsReorder, announce, resolvedLabels.rowMoved],
+  );
+
   /* ── Changed cells ──────────────────────────────────────────────────── */
   const changedFor = highlightChanges === true ? DEFAULT_CHANGED_DURATION : highlightChanges || 0;
   /* One mark per changed cell, with the generation it was marked in: the
@@ -1187,11 +1373,6 @@ export function DataGrid<Row>({
     if (tree.column && resolvedById.has(tree.column)) return tree.column;
     return resolved[0]?.id ?? null;
   }, [tree, resolvedById, resolved]);
-  const nodeByKey = useMemo(() => {
-    const map = new Map<string, Extract<GridNode<Row>, { kind: 'row' }>>();
-    for (const node of nodes) if (node.kind === 'row') map.set(node.key, node);
-    return map;
-  }, [nodes]);
   /* A row opened with children still to come: asked for once, marked until
      a child of hers is in `rows` or she is closed. */
   const [loadingChildren, setLoadingChildren] = useState<ReadonlySet<string>>(new Set());
@@ -1666,6 +1847,15 @@ export function DataGrid<Row>({
           return;
         }
       }
+      /* Alt with the vertical arrows moves the row, as Alt with the
+         horizontal ones moves the column. */
+      if (row && event.altKey && (key === 'ArrowUp' || key === 'ArrowDown')) {
+        event.preventDefault();
+        moveRow(cell.row, key === 'ArrowDown' ? 1 : -1, event);
+        pendingFocus.current = cell;
+        return;
+      }
+
       /* In the tree column, the horizontal arrows open a closed branch,
          close an open one, and climb to the parent from a closed row or a
          leaf; elsewhere in the row they move the cursor as anywhere. */
@@ -1842,6 +2032,7 @@ export function DataGrid<Row>({
       nodeByKey,
       tree,
       toggleBranch,
+      moveRow,
       resolvedSelection,
       cursorGrid,
       requestRange,
@@ -2203,6 +2394,9 @@ export function DataGrid<Row>({
       toggleBranch,
       treeColumn,
       hasChildren,
+      rowsReorderable: rowsReorderableNow,
+      attachRowDraggable,
+      rowLabelOf,
       isLoadingChildren,
       toggleGroup,
       sortOf,
@@ -2226,6 +2420,7 @@ export function DataGrid<Row>({
       setResizing,
       dragging: dragState.dragging,
       dropTarget: dragState.target,
+      draggingRow: rowDragState.dragging,
       dropOffset: dragState.offset,
       attachDraggable,
       onManageColumns,
@@ -2297,6 +2492,9 @@ export function DataGrid<Row>({
       toggleBranch,
       treeColumn,
       hasChildren,
+      rowsReorderableNow,
+      attachRowDraggable,
+      rowLabelOf,
       isLoadingChildren,
       toggleGroup,
       sortOf,
@@ -2316,6 +2514,7 @@ export function DataGrid<Row>({
       moveColumn,
       resizing,
       dragState,
+      rowDragState.dragging,
       attachDraggable,
       onManageColumns,
       edit,
@@ -2439,7 +2638,8 @@ export function DataGrid<Row>({
         onKeyDown={(event) => {
           onKeyDown?.(event);
           if (event.defaultPrevented) return;
-          drag.current?.handleKeydown(event.nativeEvent);
+          if (drag.current?.handleKeydown(event.nativeEvent)) return;
+          rowDrag.current?.handleKeydown(event.nativeEvent);
         }}
         ref={attachRoot}
         role={tree ? 'treegrid' : 'grid'}
@@ -2482,6 +2682,19 @@ export function DataGrid<Row>({
                 {
                   '--slotted-data-grid-drop-offset': `${dragState.offset}px`,
                   '--slotted-data-grid-drop-scroll': `${dragState.scrollTop}px`,
+                } as CSSProperties
+              }
+            />
+          ) : null}
+          {rowDragState.offset !== null ? (
+            <div
+              aria-hidden
+              data-axis="row"
+              data-part="drop-indicator"
+              style={
+                {
+                  '--slotted-data-grid-drop-offset': `${rowDragState.offset}px`,
+                  '--slotted-data-grid-drop-scroll': `${rowDragState.scrollLeft}px`,
                 } as CSSProperties
               }
             />

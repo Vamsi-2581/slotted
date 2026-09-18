@@ -13,6 +13,7 @@ import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '../menu
 import {
   cellStyle,
   columnAttributes,
+  DRAG_COLUMN,
   EXPANDER_COLUMN,
   SELECTION_COLUMN,
 } from './data-grid-constants';
@@ -47,6 +48,22 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
         role="row"
       >
         {grid.columnIds.includes(SELECTION_COLUMN) ? <SelectAllCell /> : null}
+        {grid.columnIds.includes(DRAG_COLUMN) ? (
+          <div
+            aria-colindex={grid.columnIds.indexOf(DRAG_COLUMN) + 1}
+            data-column={DRAG_COLUMN}
+            data-part="column-header"
+            role="columnheader"
+            style={
+              {
+                '--slotted-data-grid-column': String(grid.columnIds.indexOf(DRAG_COLUMN) + 1),
+              } as CSSProperties
+            }
+            tabIndex={-1}
+          >
+            <span />
+          </div>
+        ) : null}
         {grid.columnIds.includes(EXPANDER_COLUMN) ? (
           <div
             aria-colindex={grid.columnIds.indexOf(EXPANDER_COLUMN) + 1}
@@ -73,6 +90,15 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
             <div
               aria-colindex={1}
               data-column={SELECTION_COLUMN}
+              data-part="filter-cell"
+              role="gridcell"
+              tabIndex={-1}
+            />
+          ) : null}
+          {grid.columnIds.includes(DRAG_COLUMN) ? (
+            <div
+              aria-colindex={grid.columnIds.indexOf(DRAG_COLUMN) + 1}
+              data-column={DRAG_COLUMN}
               data-part="filter-cell"
               role="gridcell"
               tabIndex={-1}

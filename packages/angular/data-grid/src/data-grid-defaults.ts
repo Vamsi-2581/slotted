@@ -25,6 +25,16 @@ export type DataGridReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'prog
 export type DataGridExpandedGroups = readonly string[] | 'all';
 export type DataGridSelection = string | readonly string[] | null;
 
+export interface DataGridRowsReorderEvent {
+  readonly key: string;
+  /** The row's index in `rows`. */
+  readonly from: number;
+  /** The index the row takes in `rows` once moved. */
+  readonly to: number;
+  readonly reason: 'pointer' | 'keyboard';
+  readonly event?: Event | undefined;
+}
+
 export interface DataGridExportOptions extends CsvOptions {
   /** Default `export.csv`. */
   readonly filename?: string | undefined;
@@ -136,6 +146,8 @@ export interface DataGridLabels {
   manageColumns: string;
   resized: string;
   resize: string;
+  reorderRow: string;
+  rowMoved: string;
   filter: string;
   filterClear: string;
   filterApply: string;
@@ -220,6 +232,8 @@ export const DATA_GRID_LABELS: DataGridLabels = {
   manageColumns: 'Manage columns',
   resized: '{column}, {width} pixels',
   resize: 'Resize column',
+  reorderRow: 'Reorder {row}',
+  rowMoved: '{row} moved to position {position}',
   filter: 'Filter',
   filterClear: 'Clear',
   filterApply: 'Apply',

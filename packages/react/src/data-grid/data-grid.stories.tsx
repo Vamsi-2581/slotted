@@ -1377,6 +1377,46 @@ const TreeDemo = () => {
 
 export const Tree: Story = { parameters: scenario('tree'), render: () => <TreeDemo /> };
 
+/* ── Reordering rows ───────────────────────────────────────────────────── */
+
+const ReorderRowsDemo = () => {
+  const [rows, setRows] = useState(() => FIFTY.slice(0, 8));
+  const [query, setQuery] = useState<GridQuery>(emptyQuery());
+  return (
+    <Screen
+      size="tall"
+      before={
+        <Text size="sm" tone="muted">
+          {query.sort.length > 0
+            ? 'Sorted: the handles are disabled until the sort is cleared'
+            : `Drag a handle, or Alt+↑/↓ on a row — ${rows.map((row) => row.id.slice(4)).join(', ')}`}
+        </Text>
+      }
+    >
+      <Shipments
+        onQueryChange={setQuery}
+        onRowsReorder={({ from, to }) =>
+          setRows((current) => {
+            const next = current.slice();
+            const [moved] = next.splice(from, 1);
+            next.splice(to, 0, moved!);
+            return next;
+          })
+        }
+        query={query}
+        rows={rows}
+        rowsReorderable
+        selectionMode="multiple"
+      />
+    </Screen>
+  );
+};
+
+export const ReorderRows: Story = {
+  parameters: scenario('reorder-rows'),
+  render: () => <ReorderRowsDemo />,
+};
+
 /* ── Export ────────────────────────────────────────────────────────────── */
 
 const ExportDemo = () => {

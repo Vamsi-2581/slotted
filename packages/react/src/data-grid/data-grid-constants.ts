@@ -4,8 +4,11 @@ import type { CSSProperties } from 'react';
 /** The two gutter columns the family adds before the model's own. */
 export const SELECTION_COLUMN = '__selection';
 export const EXPANDER_COLUMN = '__expander';
+/** The reserved column that carries a row's drag handle. */
+export const DRAG_COLUMN = '__drag';
 export const SELECTION_WIDTH = 48;
 export const EXPANDER_WIDTH = 40;
+export const DRAG_WIDTH = 40;
 
 /** The single widget a cell may hold, which takes the focus in the cell's place. */
 export const SIMPLE_WIDGET =

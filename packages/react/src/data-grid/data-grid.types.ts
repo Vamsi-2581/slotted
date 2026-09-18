@@ -64,6 +64,8 @@ export interface DataGridResolvedLabels {
   manageColumns: string;
   resized: string;
   resize: string;
+  reorderRow: string;
+  rowMoved: string;
   filter: string;
   filterClear: string;
   filterApply: string;
@@ -202,6 +204,16 @@ export interface DataGridExportOptions extends CsvOptions {
   readonly columns?: 'visible' | 'all' | undefined;
 }
 
+export interface DataGridRowsReorderEvent {
+  readonly key: string;
+  /** The row's index in `rows`. */
+  readonly from: number;
+  /** The index the row takes in `rows` once moved. */
+  readonly to: number;
+  readonly reason: 'pointer' | 'keyboard';
+  readonly event?: Event | undefined;
+}
+
 export interface DataGridHandle {
   focusCell(cell: GridCell): void;
   scrollToRow(key: string, align?: 'start' | 'center' | 'end' | 'nearest'): void;
@@ -304,6 +316,15 @@ export interface DataGridProps<Row>
   tree?: GridTree<Row> | undefined;
   /** Called when a row `hasChildren` says has children opens and none are in `rows`. */
   onLoadChildren?: ((event: { key: string; row: Row }) => void) | undefined;
+  /**
+   * A handle per row, dragged with the pointer or moved with Alt and the
+   * vertical arrows. The grid keeps no order of its own: `onRowsReorder`
+   * says where the row goes in `rows` and the consumer moves it. Only while
+   * the query is at rest — no sort, filter, search or group — and without a
+   * tree; elsewhere the handle is disabled.
+   */
+  rowsReorderable?: boolean | undefined;
+  onRowsReorder?: ((event: DataGridRowsReorderEvent) => void) | undefined;
 
   /* ── Editing and activation ─────────────────────────────────────────── */
   onEditStart?: ((cell: GridCell) => void) | undefined;

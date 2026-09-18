@@ -44,6 +44,7 @@
     "group-row": "div",
     "group-toggle": "button",
     "tree-toggle": "button",
+    "row-handle": "button",
     "summary": "div",
     "summary-cell": "div",
     "empty": "div",
@@ -615,6 +616,8 @@
     "manageColumns": "Manage columns",
     "resized": "{column}, {width} pixels",
     "resize": "Resize column",
+    "reorderRow": "Reorder {row}",
+    "rowMoved": "{row} moved to position {position}",
     "filter": "Filter",
     "filterClear": "Clear",
     "filterApply": "Apply",
@@ -898,6 +901,7 @@
         "group-row",
         "group-toggle",
         "tree-toggle",
+        "row-handle",
         "summary",
         "summary-cell",
         "empty",
@@ -944,6 +948,7 @@
       "realtime",
       "export",
       "tree",
+      "reorder-rows",
       "keyboard",
       "accessibility"
     ]

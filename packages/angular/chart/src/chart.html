@@ -1,0 +1,481 @@
+@let messages = resolvedMessages(); @let current = chartModel(); @if (title() !== undefined ||
+description() !== undefined || resolvedToolbar() !== 'none') {
+<figcaption data-part="header">
+  <div>
+    <div>
+      @if (title() !== undefined) {
+      <span data-part="title" [id]="id + '-title'">{{ title() }}</span>
+      } @if (help() !== undefined) {
+      <button
+        #helpControl
+        type="button"
+        data-part="help"
+        [attr.aria-label]="messages.help"
+        [attr.aria-controls]="id + '-help'"
+        [attr.aria-expanded]="layerOpen()['help'] ?? false"
+        [attr.data-open]="layerOpen()['help'] ? '' : null"
+        (click)="toggleLayer('help')"
+      ></button>
+      <div
+        #helpLayer
+        popover="auto"
+        data-part="help-content"
+        role="note"
+        [id]="id + '-help'"
+        (toggle)="onLayerToggle('help', $event, helpControl, 'start', false)"
+      >
+        {{ help() }}
+      </div>
+      }
+    </div>
+    @if (description() !== undefined) {
+    <span data-part="description" [id]="id + '-description'">{{ description() }}</span>
+    }
+  </div>
+  <div data-part="actions"><ng-content select="[slChartActions]" /></div>
+  @if (resolvedToolbar() !== 'none' && usable() && current) {
+  <div data-part="toolbar" role="toolbar" [attr.aria-label]="messages.toolbar">
+    @if (zoomed()) {
+    <button
+      type="button"
+      data-part="zoom-reset"
+      [attr.aria-label]="messages.resetZoom"
+      [attr.title]="messages.resetZoom"
+      (click)="resetZoomFromToolbar($event)"
+    ></button>
+    }
+    <button
+      type="button"
+      data-part="view-toggle"
+      [attr.aria-label]="messages.tableView"
+      [attr.title]="messages.tableView"
+      [attr.aria-pressed]="tableOpen()"
+      [attr.data-pressed]="tableOpen() ? '' : null"
+      (click)="requestTable(!tableOpen(), pressReason(), $event)"
+    ></button>
+    <button
+      type="button"
+      data-part="fullscreen-toggle"
+      [attr.aria-label]="fullscreen() ? messages.exitFullscreen : messages.fullscreen"
+      [attr.title]="fullscreen() ? messages.exitFullscreen : messages.fullscreen"
+      (click)="requestFullscreen(!fullscreen(), pressReason(), $event)"
+    ></button>
+    <button
+      #menuControl
+      type="button"
+      data-part="menu-trigger"
+      aria-haspopup="menu"
+      [attr.aria-label]="messages.more"
+      [attr.title]="messages.more"
+      [attr.aria-expanded]="layerOpen()['menu'] ?? false"
+      [attr.data-open]="layerOpen()['menu'] ? '' : null"
+      (click)="toggleLayer('menu')"
+    ></button>
+    <div
+      #menu
+      popover="auto"
+      data-part="menu"
+      role="menu"
+      [attr.aria-label]="messages.more"
+      (toggle)="onLayerToggle('menu', $event, menuControl, 'end')"
+      (keydown)="onLayerKeyDown($event)"
+    >
+      <button
+        type="button"
+        role="menuitem"
+        data-part="menu-item"
+        data-action="view"
+        (click)="menuAction('view', $event)"
+      >
+        {{ messages.tableView }}
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        data-part="menu-item"
+        data-action="fullscreen"
+        (click)="menuAction('fullscreen', $event)"
+      >
+        {{ fullscreen() ? messages.exitFullscreen : messages.fullscreen }}
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        data-part="menu-item"
+        data-action="csv"
+        (click)="menuAction('csv', $event)"
+      >
+        {{ messages.downloadCsv }}
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        data-part="menu-item"
+        data-action="image"
+        (click)="menuAction('image', $event)"
+      >
+        {{ messages.downloadImage }}
+      </button>
+    </div>
+  </div>
+  }
+</figcaption>
+} @if (legend()) {
+<div
+  #legendRow
+  data-part="legend"
+  [attr.role]="legendWaiting() ? null : legendInteractive() ? 'toolbar' : 'list'"
+  [attr.aria-label]="legendWaiting() ? null : messages.legend"
+  (keydown)="onLegendKeyDown($event)"
+>
+  @if (legendWaiting()) { @for (line of repeat(3); track line) {
+  <span
+    data-ui="skeleton"
+    data-part="root"
+    data-shape="block"
+    data-size="md"
+    data-animation="shimmer"
+    data-loading
+    aria-hidden="true"
+  ></span>
+  } } @else if (current) { @for (entry of current.legend; track entry.key; let index = $index) {
+  <ng-container
+    *ngTemplateOutlet="legendItem; context: { $implicit: entry, rowHidden: collapsed().includes(index), inLayer: false }"
+  />
+  }
+  <button
+    #moreControl
+    type="button"
+    data-part="legend-more"
+    aria-haspopup="true"
+    [hidden]="collapsed().length === 0"
+    [attr.tabindex]="rovingKey() === null ? 0 : -1"
+    [attr.aria-expanded]="layerOpen()['more'] ?? false"
+    [attr.data-open]="layerOpen()['more'] ? '' : null"
+    (click)="toggleLayer('more')"
+  >
+    {{ '+' + collapsed().length }}
+  </button>
+  <div
+    #moreLayer
+    popover="auto"
+    data-part="menu"
+    role="group"
+    [attr.aria-label]="messages.legend"
+    (toggle)="onLayerToggle('more', $event, moreControl, 'start')"
+    (keydown)="onLayerKeyDown($event)"
+  >
+    @for (index of collapsed(); track index) { @if (current.legend[index]; as entry) {
+    <ng-container
+      *ngTemplateOutlet="legendItem; context: { $implicit: entry, rowHidden: false, inLayer: true }"
+    />
+    } }
+  </div>
+  }
+</div>
+}
+<ng-template #legendItem let-entry let-rowHidden="rowHidden" let-inLayer="inLayer">
+  @let color = colorOf(entry.color); @if (legendInteractive()) {
+  <button
+    type="button"
+    data-part="legend-item"
+    [attr.data-key]="entry.key"
+    [attr.data-slot]="color.slot"
+    [attr.data-tone]="color.tone"
+    [attr.data-overflow]="color.overflow"
+    [attr.data-current]="isCurrent(entry) ? '' : null"
+    [attr.aria-pressed]="entry.visible"
+    [attr.data-pressed]="entry.visible ? '' : null"
+    [attr.tabindex]="inLayer || rovingKey() === entry.key ? 0 : -1"
+    [hidden]="rowHidden"
+    (click)="onLegendClick(entry, $event)"
+    (keydown)="onLegendItemKey(entry, $event)"
+    (focus)="legendFocus.set(inLayer ? legendFocus() : entry.key); emphasize(entry.visible ? entry.key : null)"
+    (blur)="emphasize(null)"
+    (pointerenter)="entry.visible && emphasize(entry.key)"
+    (pointerleave)="emphasize(null)"
+  >
+    <ng-container *ngTemplateOutlet="legendContent; context: { $implicit: entry }" />
+  </button>
+  } @else {
+  <span
+    role="listitem"
+    data-part="legend-item"
+    [attr.data-key]="entry.key"
+    [attr.data-slot]="color.slot"
+    [attr.data-tone]="color.tone"
+    [attr.data-overflow]="color.overflow"
+    [attr.data-current]="isCurrent(entry) ? '' : null"
+    [hidden]="rowHidden"
+    (pointerenter)="entry.visible && emphasize(entry.key)"
+    (pointerleave)="emphasize(null)"
+  >
+    <ng-container *ngTemplateOutlet="legendContent; context: { $implicit: entry }" />
+  </span>
+  }
+</ng-template>
+<ng-template #legendContent let-entry>
+  @if (legendItemTemplate(); as custom) {
+  <ng-container
+    *ngTemplateOutlet="custom.template; context: { $implicit: entry, value: legendValue(entry), current: isCurrent(entry) }"
+  />
+  } @else {
+  <span
+    data-part="legend-marker"
+    [attr.data-kind]="entry.kind === 'area' || entry.kind === 'bar' || entry.kind === 'pie' ? 'bar' : entry.kind"
+    [attr.data-stroke]="strokeOf(entry)"
+  ></span>
+  <span data-part="legend-label" [attr.title]="entry.label">{{ entry.label }}</span>
+  @if (legendValues()) {
+  <span data-part="legend-value">{{ legendValue(entry) }}</span>
+  } }
+</ng-template>
+<div
+  #plot
+  data-part="plot"
+  role="group"
+  tabindex="0"
+  [attr.aria-roledescription]="messages.roledescription"
+  [attr.aria-labelledby]="title() !== undefined ? id + '-title' : null"
+  [attr.aria-label]="title() === undefined ? messages.roledescription : null"
+  [attr.aria-describedby]="describedBy()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+  (keydown)="onPlotKeyDown($event)"
+  (focus)="onPlotFocus($event)"
+  (blur)="requestActive(null, 'blur', $event)"
+>
+  @let overlayNow = overlay();
+  <div
+    data-part="crosshair"
+    [hidden]="!overlayNow.crosshair"
+    [attr.data-band]="overlayNow.crosshair?.isBand ? '' : null"
+    [attr.data-orientation]="current?.orientation ?? 'vertical'"
+    [style.--slotted-chart-x]="px(overlayNow.crosshair?.x)"
+    [style.--slotted-chart-y]="px(overlayNow.crosshair?.y)"
+    [style.--slotted-chart-band-start]="px(overlayNow.crosshair?.band?.start)"
+    [style.--slotted-chart-band-size]="px(overlayNow.crosshair?.band?.size)"
+    [style.--slotted-chart-frame-start]="px(overlayNow.crosshair?.frame?.start)"
+    [style.--slotted-chart-frame-size]="px(overlayNow.crosshair?.frame?.size)"
+  ></div>
+  <div #canvas data-part="canvas" aria-hidden="true" [hidden]="!drawable()"></div>
+  @for (marker of overlayNow.markers; track marker.key) { @let markerColor = colorOf(marker.color);
+  <div
+    data-part="marker"
+    aria-hidden="true"
+    [attr.data-slot]="markerColor.slot"
+    [attr.data-tone]="markerColor.tone"
+    [attr.data-overflow]="markerColor.overflow"
+    [attr.data-selected]="marker.selected ? '' : null"
+    [attr.data-current]="marker.current ? '' : null"
+    [style.--slotted-chart-x]="px(marker.at.x)"
+    [style.--slotted-chart-y]="px(marker.at.y)"
+  ></div>
+  }
+  <div
+    #tooltipBox
+    data-part="tooltip"
+    aria-hidden="true"
+    [attr.data-open]="overlayNow.tooltip ? '' : null"
+    [attr.data-docked]="overlayNow.docked ? '' : null"
+  >
+    @if (overlayNow.tooltip && current) { @if (tooltipTemplate(); as custom) {
+    <ng-container
+      *ngTemplateOutlet="custom.template; context: { $implicit: overlayNow.tooltip, model: current }"
+    />
+    } @else {
+    <div data-part="tooltip-title">{{ overlayNow.tooltip.title }}</div>
+    @for (item of overlayNow.tooltip.items; track item.series + item.label) { @let itemColor =
+    colorOf(item.color);
+    <div
+      data-part="tooltip-item"
+      [attr.data-current]="overlayNow.tooltip.items.length > 1 && item.current ? '' : null"
+      [attr.data-slot]="itemColor.slot"
+      [attr.data-tone]="itemColor.tone"
+      [attr.data-overflow]="itemColor.overflow"
+    >
+      @if (resolvedTooltip().indicator !== 'none') {
+      <span
+        data-part="tooltip-marker"
+        [attr.data-kind]="markerKind(item.kind, resolvedTooltip().indicator)"
+        [attr.data-stroke]="strokeOf(item)"
+      ></span>
+      }
+      <span data-part="tooltip-label">{{ item.label }}</span>
+      <span data-part="tooltip-value"
+        >{{ item.share ? item.share + ' · ' + item.formatted : item.formatted }}</span
+      >
+    </div>
+    } @if (overlayNow.tooltip.total; as total) {
+    <div data-part="tooltip-total">
+      <span>{{ messages.total }}</span>
+      <span data-part="tooltip-value">{{ total.formatted }}</span>
+    </div>
+    } } }
+  </div>
+  @if (drawable() && current?.shape === 'pie' && (current?.series[0]?.innerRadius ?? 0) > 0) {
+  <div data-part="center" aria-hidden="true">
+    @if (centerTemplate(); as custom) {
+    <ng-container *ngTemplateOutlet="custom.template; context: { $implicit: current }" />
+    } @else {
+    <span data-part="center-value">{{ current!.series[0]!.format(current!.total) }}</span>
+    <span data-part="center-label">{{ messages.total }}</span>
+    }
+  </div>
+  } @if (table(); as rows) {
+  <div
+    data-part="table-region"
+    role="region"
+    tabindex="0"
+    [attr.aria-labelledby]="title() !== undefined ? id + '-title' : null"
+  >
+    <table data-part="table">
+      <caption>
+        {{ title() }}
+      </caption>
+      <thead>
+        <tr>
+          @for (column of rows.columns; track column.key; let index = $index) {
+          <th scope="col" [attr.data-numeric]="index > 0 ? '' : null">{{ column.label }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows.rows; track row.key) {
+        <tr [attr.data-current]="row.key === activeKey() ? '' : null">
+          @for (cell of row.cells; track $index; let index = $index) { @if (index === 0) {
+          <th scope="row">{{ cell.text }}</th>
+          } @else {
+          <td data-numeric>{{ cell.text }}</td>
+          } }
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (loading()) {
+  <div data-part="skeleton" aria-hidden="true" [attr.data-kind]="skeletonKind()">
+    <div data-ui="skeleton" data-part="region" data-animation="shimmer" data-loading>
+      @if (skeletonKind() === 'pie') {
+      <span
+        data-ui="skeleton"
+        data-part="root"
+        data-shape="circle"
+        data-size="md"
+        data-animation="shimmer"
+        data-loading
+        aria-hidden="true"
+      ></span>
+      } @else {
+      <div data-skeleton="y">
+        @for (line of repeat(5); track line) {
+        <span
+          data-ui="skeleton"
+          data-part="root"
+          data-shape="block"
+          data-size="md"
+          data-animation="shimmer"
+          data-loading
+          aria-hidden="true"
+        ></span>
+        }
+      </div>
+      <div data-skeleton="marks">
+        @for (mark of repeat(skeletonKind() === 'bar' ? 7 : 2); track mark) {
+        <span
+          data-ui="skeleton"
+          data-part="root"
+          data-shape="block"
+          data-size="md"
+          data-animation="shimmer"
+          data-loading
+          aria-hidden="true"
+        ></span>
+        }
+      </div>
+      <div data-skeleton="x">
+        @for (line of repeat(6); track line) {
+        <span
+          data-ui="skeleton"
+          data-part="root"
+          data-shape="block"
+          data-size="md"
+          data-animation="shimmer"
+          data-loading
+          aria-hidden="true"
+        ></span>
+        }
+      </div>
+      }
+    </div>
+  </div>
+  } @else if (failed()) {
+  <div data-part="error">
+    @if (errorTemplate(); as custom) {
+    <ng-container *ngTemplateOutlet="custom.template" />
+    } @else {
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-status="error"
+      data-reach="section"
+      data-align="center"
+      data-live="polite"
+    >
+      <div data-part="media" aria-hidden="true"></div>
+      <div data-part="content" role="status"><div data-part="title">{{ messages.error }}</div></div>
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          (click)="onRetry()"
+        >
+          <span data-part="label">{{ messages.retry }}</span>
+        </button>
+      </div>
+    </section>
+    }
+  </div>
+  } @else if (current?.empty; as reason) {
+  <div data-part="empty">
+    @if (emptyTemplate(); as custom) {
+    <ng-container *ngTemplateOutlet="custom.template; context: { $implicit: reason }" />
+    } @else {
+    <section
+      data-ui="result-state"
+      data-part="root"
+      data-reach="section"
+      data-align="center"
+      data-live="polite"
+      [attr.data-status]="reason === 'all-hidden' ? 'no-results' : 'empty'"
+    >
+      <div data-part="media" aria-hidden="true"></div>
+      <div data-part="content" role="status">
+        <div data-part="title">
+          {{ reason === 'all-hidden' ? messages.allHidden : messages.noData }}
+        </div>
+      </div>
+      @if (reason === 'all-hidden') {
+      <div data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-variant="outline"
+          data-tone="secondary"
+          data-size="sm"
+          type="button"
+          (click)="showAll($event)"
+        >
+          <span data-part="label">{{ messages.showAll }}</span>
+        </button>
+      </div>
+      }
+    </section>
+    }
+  </div>
+  }
+  <p data-part="summary" [id]="id + '-summary'">{{ summary() }}</p>
+</div>

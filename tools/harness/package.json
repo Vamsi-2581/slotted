@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test build.test.mjs audit.test.mjs core.test.mjs",
+    "test": "node --test build.test.mjs audit.test.mjs core.test.mjs script.test.mjs",
     "verify": "pnpm test"
   },
   "devDependencies": {

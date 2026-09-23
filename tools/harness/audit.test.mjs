@@ -210,6 +210,15 @@ test('reports content that ran outside the box that owns it', () => {
   ]);
 });
 
+test('leaves the inside of an SVG drawing to the svg that holds it', () => {
+  const label = slot({ element: 'text', scrollWidth: 60, clientWidth: 0, drawing: true });
+  const svg = slot({ element: 'svg', scrollWidth: 266, clientWidth: 240, drawing: false });
+  assert.deepEqual(
+    overflowingElements([label, svg]).map((finding) => finding.element),
+    ['svg'],
+  );
+});
+
 test('lets a rounding artefact through', () => {
   assert.deepEqual(overflowingElements([slot({ scrollWidth: 241, clientWidth: 240 })]), []);
 });

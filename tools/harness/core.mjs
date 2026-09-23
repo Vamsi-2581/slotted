@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 import { composedFamilies, renderHarness } from './build.mjs';
+import { splitFragment } from './script.mjs';
 
 /**
  * A harness for a module of `packages/core` that has no stylesheet of its own.
@@ -26,16 +27,7 @@ import { composedFamilies, renderHarness } from './build.mjs';
  * page by double-clicking it, so the bundle travels inside the document.
  */
 
-const STYLE = /<style\b[^>]*>([\s\S]*?)<\/style>/i;
-const SCRIPT = /<script\b[^>]*type="module"[^>]*>([\s\S]*?)<\/script>/i;
-
-/** The three parts of a core fragment, each taken out of the scenes' way. */
-export function splitFragment(fragment) {
-  const style = STYLE.exec(fragment);
-  const script = SCRIPT.exec(fragment);
-  const scenes = fragment.replace(STYLE, '').replace(SCRIPT, '');
-  return { scenes, css: style?.[1] ?? '', script: script?.[1] ?? '' };
-}
+export { splitFragment };
 
 /**
  * The bundled module, as a single ES module with no import left in it. A

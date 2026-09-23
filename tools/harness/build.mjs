@@ -1,6 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
+import { attachScript, bundleScript, splitFragment } from './script.mjs';
+
 export const SCHEMES = ['light', 'dark', 'high-contrast'];
 export const WIDTHS = [240, 420, 720];
 export const DENSITIES = ['comfortable', 'compact', 'dense'];
@@ -143,6 +145,7 @@ export function renderHarness({
   fragment,
   familyCss,
   composedCss = '',
+  pageCss = '',
   themeCss,
   theme = 'default',
 }) {
@@ -192,13 +195,14 @@ export function renderHarness({
 <style>${themeCss}</style>
 <style>${composedCss}</style>
 <style>${familyCss}</style>
+<style>${pageCss}</style>
 <style>
   body { margin: 0; font: 12px ui-sans-serif, system-ui, sans-serif; background: #eceef1 }
   .cell { margin: 0; padding: 12px }
   .cell[data-scheme="dark"] { background: #0b0b0d; color: #fafafa }
   .cell[data-scheme="light"] { background: #ffffff; color: #0f172a }
   .cell[data-scheme="high-contrast"] { background: #ffffff; color: #000000 }
-  figcaption { font: 11px ui-monospace, monospace; opacity: 0.55; padding-block-end: 8px }
+  .cell > figcaption { font: 11px ui-monospace, monospace; opacity: 0.55; padding-block-end: 8px }
   .stage {
     border: 1px dashed rgb(128 128 128 / 0.35);
     padding: 12px;
@@ -310,14 +314,20 @@ async function main() {
     ),
   );
 
-  const html = renderHarness({
+  /* A family whose picture needs script carries a page stylesheet and a
+     module script beside its scenes; see `script.mjs`. A fragment with
+     neither renders exactly as before. */
+  const { scenes, css, script } = splitFragment(fragment);
+  let html = renderHarness({
     family,
-    fragment,
+    fragment: scenes,
     familyCss: await read(`packages/styles/src/${family}/${family}.css`),
     composedCss: composed.join('\n'),
+    pageCss: css,
     themeCss: await read(`packages/theme-${theme}/dist/styles.css`),
     theme,
   });
+  if (script.trim()) html = attachScript(html, await bundleScript(script, root));
 
   const out = new URL('tools/harness/out/', root);
   await mkdir(out, { recursive: true });

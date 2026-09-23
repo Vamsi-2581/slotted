@@ -201,6 +201,13 @@ export function explainedExcess({ turning = 0, placed = 0, reach = 0 }) {
  * question of what did not fit. A panel positioned against something *outside*
  * this element is not placement by anything in it, and still reports.
  *
+ * An element inside an SVG drawing is withdrawn before any of that. It has no
+ * CSS box, so its client width is nought and its scroll width is the extent
+ * of its glyphs: every axis label of a chart reported as text overflowing a
+ * box of no pixels, 2090 times across the two chart pages. Whether the drawing
+ * fits is the question asked of the `svg` element, which has a box and is
+ * still measured.
+ *
  * The tolerance applies to the explanation as well as to nought, because
  * `scrollWidth` is an integer over fractional boxes: a read-out hanging 16.68px
  * off a 16px thumb reports 33 against 16, and one pixel of rounding is the
@@ -208,6 +215,7 @@ export function explainedExcess({ turning = 0, placed = 0, reach = 0 }) {
  */
 export function overflowingElements(candidates, tolerance = OVERFLOW_TOLERANCE) {
   return candidates
+    .filter((node) => node.drawing !== true)
     .filter((node) => node.scrollWidth - node.clientWidth > explainedExcess(node) + tolerance)
     .map((node) => ({
       scene: node.scene,
@@ -404,6 +412,7 @@ const MEASURE = `(() => {
     overflow.push({
       scene: label(node),
       element: describe(node),
+      drawing: node instanceof SVGElement && node.ownerSVGElement !== null,
       scrollWidth: node.scrollWidth,
       clientWidth: node.clientWidth,
       turning: turningExcessOf(node),

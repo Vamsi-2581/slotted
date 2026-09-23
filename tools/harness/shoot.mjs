@@ -174,6 +174,27 @@ export function captureUrl({ family, scheme, width, density, dir, scene }) {
 }
 
 /**
+ * The promise a page whose picture needs script names on `window`, settled
+ * once every stage is drawn. The load event fires when the module has run,
+ * not when an engine it started has painted: `chart` draws after its engine's
+ * chunks resolve and after a frame, and a capture taken at load showed empty
+ * plots. A page that names no promise is photographed at load, as before.
+ */
+export const READY_EXPRESSION = 'Promise.resolve(window.slottedHarnessReady).then(() => true)';
+
+async function waitUntilDrawn(devtools) {
+  const { exceptionDetails } = await devtools.send('Runtime.evaluate', {
+    expression: READY_EXPRESSION,
+    awaitPromise: true,
+  });
+  if (exceptionDetails) {
+    throw new Error(
+      `the page never finished drawing: ${exceptionDetails.exception?.description ?? 'failed'}`,
+    );
+  }
+}
+
+/**
  * A selector is not a file name, so it travels as a slug. Two focus targets in
  * one combination therefore land in two files instead of one overwriting the
  * other, which is the failure a reader cannot see in the image.
@@ -346,6 +367,7 @@ export async function shoot(options) {
     const loaded = devtools.once('Page.loadEventFired');
     await devtools.send('Page.navigate', { url: captureUrl(options).href });
     await loaded;
+    await waitUntilDrawn(devtools);
 
     if (options.motion !== undefined) {
       await devtools.send('Emulation.setEmulatedMedia', {

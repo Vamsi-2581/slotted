@@ -379,6 +379,33 @@ export const KNOWN_CAPABILITIES = [
    * and `column-manager` hold or edit the same object later.
    */
   'columns',
+  /**
+   * Which of a chart's series, or a pie's slices, are drawn. It is mutable and
+   * a consumer can own it: a saved dashboard restores the series a reader hid,
+   * and two charts that share the value hide the same series together.
+   *
+   * It is not `selection`, which names data to act on: a chart holds a
+   * selected point and a hidden series at once, and the two mean opposite
+   * things. It is not `filter`, which is a descriptor over the values of
+   * records; hiding a series leaves every record in the data and its table.
+   * `chart` found the gap; MUI X calls it `hiddenItems` and ECharts
+   * `legend.selected`.
+   */
+  'visibility',
+  /**
+   * The window of a data domain in view, as a start and an end the reader
+   * moves by wheel, pinch, drag or key. It is mutable and a consumer can own
+   * it: a query string carries the range back, and a dashboard applies one
+   * range to every chart on it.
+   *
+   * It is not `extent`, which is the share of a layer a panel takes rather
+   * than a range of data, and it is not `filter`: the records outside the
+   * window are still the chart's, still in its table, and a reset brings them
+   * back without asking the consumer for them. `chart` found the gap;
+   * `docs/component-features.md` §13 asks for zoom with a reset and an
+   * announcement.
+   */
+  'zoom',
 ];
 
 /** Capabilities that hold state a consumer can own, and therefore need a model. */
@@ -399,6 +426,8 @@ export const MUTABLE_CAPABILITIES = [
   'queue',
   'extent',
   'columns',
+  'visibility',
+  'zoom',
 ];
 
 export function strongestState(states) {

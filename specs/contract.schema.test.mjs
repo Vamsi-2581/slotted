@@ -279,6 +279,22 @@ test('requires a state model from a family whose measure the reader moves', () =
   assert.doesNotThrow(() => assertContractShape(contract));
 });
 
+/**
+ * A chart holds two values the vocabulary had no word for. Which series are
+ * drawn is not `selection` — a chart holds a selected point and a hidden
+ * series at once, and the two mean opposite things, one naming data to act on
+ * and the other naming data to leave out of the picture. The window of the
+ * domain in view is not `extent`, which is the share of a layer a panel takes,
+ * not a range of data. Both are the reader's to move and a consumer's to own:
+ * a saved dashboard restores the series it hid and the range it zoomed to.
+ */
+test('holds the series a chart draws and the window it shows as state a consumer can own', () => {
+  for (const capability of ['visibility', 'zoom']) {
+    assert.ok(KNOWN_CAPABILITIES.includes(capability), `${capability} is unknown`);
+    assert.ok(MUTABLE_CAPABILITIES.includes(capability), `${capability} is not mutable`);
+  }
+});
+
 test('keeps every mutable capability inside the known vocabulary', () => {
   for (const capability of MUTABLE_CAPABILITIES) {
     assert.ok(KNOWN_CAPABILITIES.includes(capability), `${capability} is mutable and unknown`);

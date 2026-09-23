@@ -141,6 +141,16 @@ other families stand on. Justify it at the gate before writing it.
   in any public surface, which is what keeps CSS Anchor Positioning available as
   a replacement. `docs/product/prd.md` §48 open question 8 is answered yes for the DOM
   layer; its React and Angular packages are not adopted.
+- **`echarts` is the chart engine, an optional peer, and it is invisible.**
+  `@slotted/core/chart-echarts` is the only importer; it loads the engine in
+  eleven chunks by `import()`, so an application without a chart installs and
+  ships nothing, and a page of line charts never downloads the pie. It is
+  external in the build, like `@floating-ui/dom`, and no ECharts type or option
+  name appears in the public surface except `extendOption`, the declared escape
+  hatch. The chart's model, keyboard, legend, tooltip and table are the
+  library's own (`@slotted/core/chart`), so another engine is a new adapter,
+  not a new contract. Decided with `chart` in wave 12
+  (`docs/history/designs/2026-09-23-chart-design.md` §1–§2).
 - **A family that changes its own tracks with a container query needs two
   elements.** `container-type: inline-size` makes an element a query container
   for its descendants and not for itself, so a family whose query changes its

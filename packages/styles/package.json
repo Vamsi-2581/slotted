@@ -38,6 +38,8 @@
     "./calendar/tokens.json": "./src/calendar/calendar.tokens.json",
     "./card/card.css": "./src/card/card.css",
     "./card/tokens.json": "./src/card/card.tokens.json",
+    "./chart/chart.css": "./src/chart/chart.css",
+    "./chart/tokens.json": "./src/chart/chart.tokens.json",
     "./checkbox-group/checkbox-group.css": "./src/checkbox-group/checkbox-group.css",
     "./checkbox-group/tokens.json": "./src/checkbox-group/checkbox-group.tokens.json",
     "./checkbox/checkbox.css": "./src/checkbox/checkbox.css",

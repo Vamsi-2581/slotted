@@ -169,6 +169,19 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-code-block-indent',
   '--slotted-code-block-collapse',
   '--slotted-code-block-max-lines',
+  /**
+   * `chart` — where the point the reader is on sits, in the engine's pixels,
+   * and the band of its category. The crosshair, the marker and the tooltip
+   * are the family's HTML drawn over the engine's drawing, and only the engine
+   * knows where a mark landed. Named one by one because the family owns theme
+   * tokens under `--slotted-chart-`.
+   */
+  '--slotted-chart-x',
+  '--slotted-chart-y',
+  '--slotted-chart-band-start',
+  '--slotted-chart-band-size',
+  '--slotted-chart-frame-start',
+  '--slotted-chart-frame-size',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

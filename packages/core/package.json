@@ -12,6 +12,14 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./chart": {
+      "types": "./dist/types/chart/index.d.ts",
+      "import": "./dist/chart.js"
+    },
+    "./chart-echarts": {
+      "types": "./dist/types/chart-echarts/index.d.ts",
+      "import": "./dist/chart-echarts.js"
+    },
     "./clipboard": {
       "types": "./dist/types/clipboard/index.d.ts",
       "import": "./dist/clipboard.js"
@@ -197,6 +205,7 @@
   },
   "devDependencies": {
     "@types/node": "24.13.3",
+    "echarts": "6.1.0",
     "jsdom": "30.0.1",
     "typescript": "6.0.3",
     "vite": "8.2.2",
@@ -204,5 +213,13 @@
   },
   "dependencies": {
     "@floating-ui/dom": "1.8.0"
+  },
+  "peerDependencies": {
+    "echarts": "^6.1.0"
+  },
+  "peerDependenciesMeta": {
+    "echarts": {
+      "optional": true
+    }
   }
 }

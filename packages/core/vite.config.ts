@@ -6,6 +6,8 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(import.meta.dirname, 'src/index.ts'),
+        chart: resolve(import.meta.dirname, 'src/chart/index.ts'),
+        'chart-echarts': resolve(import.meta.dirname, 'src/chart-echarts/index.ts'),
         clipboard: resolve(import.meta.dirname, 'src/clipboard/index.ts'),
         code: resolve(import.meta.dirname, 'src/code/index.ts'),
         collection: resolve(import.meta.dirname, 'src/collection/index.ts'),
@@ -59,7 +61,10 @@ export default defineConfig({
        * the bundle: an application that already uses it, or a framework package
        * that re-bundles this one, would otherwise ship a second copy.
        */
-      external: [/^@floating-ui\//],
+      /* The chart engine is an optional peer: an application without a chart
+         installs nothing, and one with a chart bundles the single copy its own
+         build resolves, split by the dynamic imports in `src/chart-echarts`. */
+      external: [/^@floating-ui\//, /^echarts(\/|$)/, /^zrender(\/|$)/],
       output: { entryFileNames: '[name].js' },
     },
   },

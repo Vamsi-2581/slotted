@@ -59,6 +59,10 @@
       "types": "./dist/types/card/index.d.ts",
       "import": "./dist/card.js"
     },
+    "./chart": {
+      "types": "./dist/types/chart/index.d.ts",
+      "import": "./dist/chart.js"
+    },
     "./code-block": {
       "types": "./dist/types/code-block/index.d.ts",
       "import": "./dist/code-block.js"

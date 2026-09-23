@@ -18,6 +18,7 @@ export default defineConfig({
         button: resolve(import.meta.dirname, 'src/button/index.ts'),
         calendar: resolve(import.meta.dirname, 'src/calendar/index.ts'),
         card: resolve(import.meta.dirname, 'src/card/index.ts'),
+        chart: resolve(import.meta.dirname, 'src/chart/index.ts'),
         'code-block': resolve(import.meta.dirname, 'src/code-block/index.ts'),
         combobox: resolve(import.meta.dirname, 'src/combobox/index.ts'),
         'command-palette': resolve(import.meta.dirname, 'src/command-palette/index.ts'),

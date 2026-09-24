@@ -36,6 +36,7 @@ export default defineConfig({
         'detail-panel': resolve(import.meta.dirname, 'src/detail-panel/index.ts'),
         dialog: resolve(import.meta.dirname, 'src/dialog/index.ts'),
         drawer: resolve(import.meta.dirname, 'src/drawer/index.ts'),
+        'entity-picker': resolve(import.meta.dirname, 'src/entity-picker/index.ts'),
         splitter: resolve(import.meta.dirname, 'src/splitter/index.ts'),
         divider: resolve(import.meta.dirname, 'src/divider/index.ts'),
         'filter-bar': resolve(import.meta.dirname, 'src/filter-bar/index.ts'),

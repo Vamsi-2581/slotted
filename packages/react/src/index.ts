@@ -34,6 +34,7 @@ export * from './detail-panel';
 export * from './dialog';
 export * from './drawer';
 export * from './divider';
+export * from './entity-picker';
 export * from './field';
 export * from './field-group';
 export * from './filter-bar';

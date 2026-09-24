@@ -139,6 +139,10 @@
       "types": "./dist/types/divider/index.d.ts",
       "import": "./dist/divider.js"
     },
+    "./entity-picker": {
+      "types": "./dist/types/entity-picker/index.d.ts",
+      "import": "./dist/entity-picker.js"
+    },
     "./field": {
       "types": "./dist/types/field/index.d.ts",
       "import": "./dist/field.js"

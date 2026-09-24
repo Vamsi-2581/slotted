@@ -44,6 +44,10 @@
       "types": "./dist/types/currency/index.d.ts",
       "import": "./dist/currency.js"
     },
+    "./data-list": {
+      "types": "./dist/types/data-list/index.d.ts",
+      "import": "./dist/data-list.js"
+    },
     "./date": {
       "types": "./dist/types/date/index.d.ts",
       "import": "./dist/date.js"

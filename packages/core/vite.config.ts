@@ -14,6 +14,7 @@ export default defineConfig({
         commands: resolve(import.meta.dirname, 'src/commands/index.ts'),
         count: resolve(import.meta.dirname, 'src/count/index.ts'),
         currency: resolve(import.meta.dirname, 'src/currency/index.ts'),
+        'data-list': resolve(import.meta.dirname, 'src/data-list/index.ts'),
         date: resolve(import.meta.dirname, 'src/date/index.ts'),
         disclosure: resolve(import.meta.dirname, 'src/disclosure/index.ts'),
         'dismissable-layer': resolve(import.meta.dirname, 'src/dismissable-layer/index.ts'),

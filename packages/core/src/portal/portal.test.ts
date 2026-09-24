@@ -216,4 +216,67 @@ describe('createPortalRoot', () => {
     there.release();
     expect(roots(other)).toHaveLength(0);
   });
+
+  /**
+   * The agent paints the fullscreen element and nothing else, so a layer at
+   * the end of the body — a select opened from a region in full screen — is
+   * a layer nobody can see. The root follows the element in and back out.
+   */
+  describe('full screen', () => {
+    let current: Element | null = null;
+
+    beforeEach(() => {
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        get: () => current,
+      });
+    });
+
+    afterEach(() => {
+      current = null;
+      delete (document as unknown as Record<string, unknown>).fullscreenElement;
+    });
+
+    function goFullscreen(element: Element | null) {
+      current = element;
+      document.dispatchEvent(new Event('fullscreenchange'));
+    }
+
+    it('moves the shared root into the fullscreen element and back', () => {
+      const region = document.createElement('div');
+      document.body.append(region);
+      const layer = createPortalRoot();
+      const container = layer.container;
+
+      goFullscreen(region);
+      expect(roots()[0]?.parentElement).toBe(region);
+      expect(layer.container).toBe(container);
+
+      goFullscreen(null);
+      expect(roots()[0]?.parentElement).toBe(document.body);
+      layer.release();
+    });
+
+    it('opens a new layer inside an element already in full screen', () => {
+      const region = document.createElement('div');
+      document.body.append(region);
+      current = region;
+
+      const layer = createPortalRoot();
+      expect(roots()[0]?.parentElement).toBe(region);
+      layer.release();
+    });
+
+    it('stays in the application container for a whole document or a video', () => {
+      const video = document.createElement('video');
+      document.body.append(video);
+      const layer = createPortalRoot();
+
+      goFullscreen(document.documentElement);
+      expect(roots()[0]?.parentElement).toBe(document.body);
+      goFullscreen(video);
+      expect(roots()[0]?.parentElement).toBe(document.body);
+      layer.release();
+    });
+  });
 });

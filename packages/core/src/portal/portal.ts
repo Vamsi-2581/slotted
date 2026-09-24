@@ -61,6 +61,31 @@ interface DocumentPortals {
   /** Every layer of this document and the node whose theme it inherits. */
   layers: Map<Element, Element | null>;
   observer: MutationObserver | null;
+  /** Moves the shared root in and out of the element the page made full screen. */
+  onFullscreen: (() => void) | null;
+}
+
+const FULLSCREEN_EVENTS = ['fullscreenchange', 'webkitfullscreenchange'] as const;
+
+/** Elements whose children the agent does not paint; a layer inside one is invisible. */
+const REPLACED = new Set(['VIDEO', 'IFRAME', 'CANVAS', 'IMG', 'EMBED', 'OBJECT']);
+
+/**
+ * Where the shared root belongs right now. While an element is full screen the
+ * agent paints that element and nothing else, so a layer at the end of the body
+ * — a select opened from a region in full screen — opens where nobody can see
+ * it. The root moves inside the fullscreen element and comes back when it
+ * leaves; the Angular CDK's `FullscreenOverlayContainer` gives the same answer.
+ * The whole document in full screen already contains the body, and a replaced
+ * element paints no children, so both keep the application container.
+ */
+function rootParent(doc: Document): Element | null {
+  const prefixed = doc as Document & { webkitFullscreenElement?: Element | null };
+  const full = doc.fullscreenElement ?? prefixed.webkitFullscreenElement ?? null;
+  if (full && full !== doc.documentElement && full !== doc.body && !REPLACED.has(full.tagName)) {
+    return full;
+  }
+  return getPortalContainer(doc) ?? doc.body;
 }
 
 /**
@@ -116,7 +141,21 @@ function documentPortals(doc: Document): DocumentPortals {
   const existing = portals.get(doc);
   if (existing) return existing;
 
-  const state: DocumentPortals = { root: null, shared: 0, layers: new Map(), observer: null };
+  const state: DocumentPortals = {
+    root: null,
+    shared: 0,
+    layers: new Map(),
+    observer: null,
+    onFullscreen: null,
+  };
+
+  /* A move, not a re-creation: every open layer keeps its node and its state. */
+  state.onFullscreen = () => {
+    if (!state.root) return;
+    const parent = rootParent(doc);
+    if (parent && state.root.parentElement !== parent) parent.append(state.root);
+  };
+  for (const type of FULLSCREEN_EVENTS) doc.addEventListener(type, state.onFullscreen);
 
   /**
    * Attributes only, which is what a theme switch is. Watching the tree for
@@ -148,7 +187,7 @@ function sharedRoot(doc: Document, state: DocumentPortals): Element {
   if (!state.root) {
     state.root = doc.createElement('div');
     state.root.setAttribute(PORTAL_ROOT_ATTRIBUTE, '');
-    (getPortalContainer(doc) ?? doc.body).append(state.root);
+    rootParent(doc)?.append(state.root);
   }
   state.shared += 1;
   return state.root;
@@ -171,6 +210,9 @@ function release(doc: Document, layer: Element, wasShared: boolean) {
 
   if (state.layers.size > 0) return;
   state.observer?.disconnect();
+  if (state.onFullscreen) {
+    for (const type of FULLSCREEN_EVENTS) doc.removeEventListener(type, state.onFullscreen);
+  }
   portals.delete(doc);
 }
 

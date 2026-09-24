@@ -19,6 +19,7 @@ export default defineConfig({
         disclosure: resolve(import.meta.dirname, 'src/disclosure/index.ts'),
         'dismissable-layer': resolve(import.meta.dirname, 'src/dismissable-layer/index.ts'),
         drag: resolve(import.meta.dirname, 'src/drag/index.ts'),
+        'entity-picker': resolve(import.meta.dirname, 'src/entity-picker/index.ts'),
         extent: resolve(import.meta.dirname, 'src/extent/index.ts'),
         files: resolve(import.meta.dirname, 'src/files/index.ts'),
         filter: resolve(import.meta.dirname, 'src/filter/index.ts'),

@@ -52,6 +52,7 @@ export * from './list';
 export * from './list-item';
 export * from './listbox';
 export * from './loading-overlay';
+export * from './markdown';
 export * from './menu';
 export * from './menubar';
 export * from './multi-select';

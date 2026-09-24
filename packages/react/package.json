@@ -215,6 +215,10 @@
       "types": "./dist/types/loading-overlay/index.d.ts",
       "import": "./dist/loading-overlay.js"
     },
+    "./markdown": {
+      "types": "./dist/types/markdown/index.d.ts",
+      "import": "./dist/markdown.js"
+    },
     "./multi-select": {
       "types": "./dist/types/multi-select/index.d.ts",
       "import": "./dist/multi-select.js"
@@ -420,6 +424,7 @@
     "@vitejs/plugin-react": "6.1.1",
     "jsdom": "30.0.1",
     "lucide-react": "1.24.0",
+    "marked": "18.0.5",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "storybook": "10.5.10",

@@ -86,6 +86,7 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `toggle-group`                  | o `item` passa a ser a família `toggle` deferindo ao contexto do grupo (a forma de Base UI); a pintura do item, escrita em `toggle-group.css` e em `toggle.css` sob dois prefixos, sai de uma das duas; o grupo continua o único dono do valor       | —                                         | `2026-09-16-split-button-toggle-design.md` §2                              |
 | `prose`                         | `scroll-margin-block-start` dos headings soma `--slotted-page-sticky-top` ao ar de `_flow`, como `section` lê a propriedade: um salto nativo (`#id` na URL) aterra sob a chrome de `page`; `table-of-contents` compensa ao rolar por si              | —                                         | `2026-09-16-table-of-contents-design.md` §5                                |
 | `page-header`, `section`        | `deferTo: "anchor-nav"` nos três ponteiros dos contratos passa a `table-of-contents`, o nome com que a família foi entregue                                                                                                                          | —                                         | `2026-09-16-table-of-contents-capability-inventory.md` §5                  |
+| `list-item`                     | hover e press de uma linha cujo alvo é um descendente esticado (`title::after` de `data-list`) sem que outra família escreva `--_fill`: um atributo ou uma parte pública que a linha leia                                                            | —                                         | `2026-09-24-data-list-self-assessment.md` §5                               |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/process/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -536,6 +537,11 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   ordenação, filtros e seleção do modelo de dados; não oferece navegação de
   grelha. Compõe `list-item` e `description-list`; `table` sob `wrap` continua
   a resposta para conjuntos que cabem.
+
+  Entregue em 2026-09-24. Lê `GridColumn` e `GridQuery` de `@slotted/core/grid`
+  e compõe `list` e `list-item`; os pares usam a geometria do pop-in de
+  `data-grid` em vez de `description-list`. Decisões em
+  `docs/history/designs/2026-09-24-data-list-design.md`.
 
 ## Onda 11 — Extended de custo médio
 

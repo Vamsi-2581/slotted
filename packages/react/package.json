@@ -91,6 +91,10 @@
       "types": "./dist/types/data-grid/index.d.ts",
       "import": "./dist/data-grid.js"
     },
+    "./data-list": {
+      "types": "./dist/types/data-list/index.d.ts",
+      "import": "./dist/data-list.js"
+    },
     "./date-field": {
       "types": "./dist/types/date-field/index.d.ts",
       "import": "./dist/date-field.js"

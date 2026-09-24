@@ -58,8 +58,14 @@ test('finds every stylesheet in the package', () => {
  * mirroring it would move an already-correct arrow to the wrong edge in a
  * right-to-left document. Every other physical inset in the repository is still
  * refused, including one in the same stylesheet.
+ *
+ * `tour`'s spotlight is the second input of the same kind: the family reads the
+ * target's rectangle from `getBoundingClientRect()` and writes it as
+ * `--slotted-tour-target-x`, `-y`, `-width` and `-height`, which are viewport
+ * pixels measured from the left and the top. A cutout that mirrored them would
+ * frame the element's reflection in a right-to-left document.
  */
-const PHYSICAL_BY_MEASUREMENT = /\[data-part=['"]arrow['"]\]/;
+const PHYSICAL_BY_MEASUREMENT = /\[data-part=['"](?:arrow|spotlight)['"]\]/;
 
 /**
  * Every declaration in a sheet, with the selectors it is nested inside. The

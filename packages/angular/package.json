@@ -27,6 +27,7 @@
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/styles": "workspace:*",
     "@storybook/angular-vite": "10.5.10",
+    "marked": "18.0.5",
     "storybook": "10.5.10"
   }
 }

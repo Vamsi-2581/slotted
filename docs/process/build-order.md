@@ -682,6 +682,26 @@ slNotificationActions]`, `[slNotificationCenterActions | Footer | Empty]`,
   erro. Sanitização obrigatória; plugins opt-in. A tipografia é `prose`. O
   parser é um adaptador: a família recebe uma árvore e nunca HTML, como
   `code-block` recebe tokens.
+
+  Entregue em 2026-09-24. Inventário e decisões em
+  `docs/history/designs/2026-09-24-markdown-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-24-markdown-self-assessment.md`. A entrada é
+  mdast por forma (a saída do remark passa sem conversão; `fromMarkedTokens`
+  mapeia o lexer do marked) e `prepareMarkdown` em `@slotted/core/markdown`
+  decide tudo o que não é elemento: tipos permitidos (`allow`, sem `html`),
+  política de URL (`transformUrl`; links http, https, mailto, tel e relativos,
+  imagens http, https e relativos), ids pelo github-slugger com `idPrefix`,
+  notas numeradas pela primeira referência, alertas `> [!NOTE]` em `alert`
+  (`live="off"`), metadados da cerca (`title="…"`, `{1,4-6}`,
+  `showLineNumbers`) para `code-block`, tabelas com alinhamento lógico.
+  `completeMarkdown` fecha uma fonte cortada durante o streaming. Sem modelo de
+  estado: tarefas e repetir são pedidos com razão. Partes `root`, `embed`,
+  `alert-body`, `task-list`, `task`, `task-body`, `backref`, `empty`, `error`,
+  em volta da região de `prose`. React `Markdown` (`renderers`, `extensions`,
+  `onTaskChange`, `onRetry`); Angular `[slMarkdown]`
+  (`ng-template[slMarkdownNode]`, `[slMarkdownChildren]`, `[slMarkdownEmpty]`,
+  `editableTasks`, `retryable`).
+
 - `tour` — etapas com âncora, título, conteúdo, placement, progresso,
   próximo/anterior/pular e condição de disponibilidade. Move o foco só quando
   apropriado, tem alternativa sem spotlight e recupera de âncora ausente.

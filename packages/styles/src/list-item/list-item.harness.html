@@ -453,3 +453,43 @@
     </li>
   </ul>
 </section>
+
+<!--
+  The edge of a chosen row in a divided list, closed on all four sides. The
+  rule is drawn by the row below; neither a selected or current row nor the
+  row after it draws one, and a run of selected rows has one line inside it.
+-->
+<section data-scene="selected-edges">
+  <ul data-ui="list" data-part="root" data-variant="ruled" data-size="md" role="list">
+    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
+      <div data-part="content">
+        <span data-part="body"><span data-part="label">Before</span></span>
+      </div>
+    </li>
+    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-selected>
+      <div data-part="content">
+        <span data-part="body"><span data-part="label">Selected, first of a run</span></span>
+      </div>
+    </li>
+    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-selected>
+      <div data-part="content">
+        <span data-part="body"><span data-part="label">Selected, second of a run</span></span>
+      </div>
+    </li>
+    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
+      <div data-part="content">
+        <span data-part="body"><span data-part="label">Between</span></span>
+      </div>
+    </li>
+    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-current>
+      <div data-part="content">
+        <span data-part="body"><span data-part="label">Current</span></span>
+      </div>
+    </li>
+    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
+      <div data-part="content">
+        <span data-part="body"><span data-part="label">After</span></span>
+      </div>
+    </li>
+  </ul>
+</section>

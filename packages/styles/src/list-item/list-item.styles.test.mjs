@@ -141,6 +141,37 @@ test('rules between rows only in the divided variants, one hairline in the subtl
 });
 
 /**
+ * The rule is drawn by the row below, outward, on the last pixel of the row
+ * above — which is the pixel a selected or current row's inset edge ends on.
+ * Painted later, the rule covered it, and every selected row in a ruled list
+ * was a box with no bottom. The row after one of those draws no rule: the
+ * edge above it is the line. A run of selected rows is one box, so the second
+ * of two draws its edge without the top it would double.
+ */
+test('closes the edge of a selected or current row the rule below would cover', () => {
+  assert.match(
+    rule(
+      `${ui}:is([data-selected],[data-current]):not(:first-child),${ui}:is([data-selected],[data-current]) + ${ui}`,
+    ),
+    /--_rule-shadow:0 0 0 0 transparent/,
+  );
+  const joined = rule(`${ui}[data-selected] + ${ui}[data-selected]`);
+  assert.match(
+    joined,
+    /--_edge-shadow:inset 0 calc\(var\(--_rule-width\) \* -1\) 0 0 var\(--_selected-edge\)/,
+  );
+  assert.match(joined, /inset var\(--_rule-width\) 0 0 0 var\(--_selected-edge\)/);
+  assert.match(joined, /inset calc\(var\(--_rule-width\) \* -1\) 0 0 0 var\(--_selected-edge\)/);
+  assert.ok(
+    normalized.indexOf(`${ui}:is([data-selected],[data-current]):not(:first-child),`) >
+      normalized.indexOf(
+        `${ui}:is([data-variant='ruled'],[data-variant='framed']):not(:first-child){`,
+      ),
+    'the reset must follow the rule it undoes',
+  );
+});
+
+/**
  * Five appearances on an interactive row, no two alike: hover and press are
  * the neutral pair's two steps, selected is the accent ground (never hover's),
  * focus is the ring, disabled is the muted ink with the pointer withdrawn.

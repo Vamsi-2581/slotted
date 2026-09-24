@@ -563,6 +563,13 @@ de outra da mesma onda.
   `disabled` e ordem opcional. Contrato: `sourceItems`, `targetKeys`,
   `selectedKeys` por painel e um evento de movimento com direção e razão. Em
   tela estreita vira duas etapas. As ações têm rótulo além da seta.
+
+  Entregue em 2026-09-24. Inventário e decisões em
+  `docs/history/designs/2026-09-24-transfer-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-24-transfer-self-assessment.md`. `items` substitui
+  `sourceItems` (a coleção desenha os dois lados); `selectedKeys` é um conjunto e cada
+  painel lê a sua interseção. Aritmética em `@slotted/core/transfer`.
+
 - `entity-picker` — `combobox` orientado a entidades remotas: busca, resultado
   rico (`avatar`, identificadores suficientes para desambiguar), filtros,
   criação opcional, recentes e favoritos, seleção simples ou múltipla. O valor

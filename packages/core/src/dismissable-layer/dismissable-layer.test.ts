@@ -586,4 +586,57 @@ describe('createScrollLock', () => {
     expect(document.body.style.paddingInlineEnd).toBe('');
     lock.release();
   });
+
+  /**
+   * A tour whose step opens a dialog: the dialog joins the stack over the
+   * tour, makes it inert and takes Escape. `raise()` puts the tour back on
+   * top — above the dialog in the stack and in the document, its own `inert`
+   * over the dialog, and the dialog its parent, so a press in the tour is not
+   * a press outside the dialog.
+   */
+  describe('raise', () => {
+    beforeEach(() => {
+      mount(
+        '<div id="page"></div><div id="root"><div id="tour"></div><div id="dialog"></div></div>',
+      );
+    });
+
+    it('puts a layer back on top of one opened over it', () => {
+      const tourLog = recorder();
+      const dialogLog = recorder();
+      const tour = createDismissableLayer(element('tour'), { ...tourLog, modal: true });
+      const dialog = createDismissableLayer(element('dialog'), { ...dialogLog, modal: true });
+      expect(element('tour').hasAttribute('inert')).toBe(true);
+      expect(tour.topmost).toBe(false);
+
+      tour.raise();
+
+      expect(tour.topmost).toBe(true);
+      expect(element('tour').hasAttribute('inert')).toBe(false);
+      expect(element('dialog').hasAttribute('inert')).toBe(true);
+      expect(element('root').lastElementChild).toBe(element('tour'));
+      expect(element('tour').style.getPropertyValue(LAYER_DEPTH_PROPERTY)).toBe('1');
+
+      escape();
+      expect(tourLog.reasons).toEqual(['escape']);
+      expect(dialogLog.reasons).toEqual([]);
+
+      press(element('tour'));
+      expect(dialogLog.reasons).toEqual([]);
+
+      tour.destroy();
+      expect(element('dialog').hasAttribute('inert')).toBe(false);
+      expect(dialog.topmost).toBe(true);
+      dialog.destroy();
+      expect(element('page').hasAttribute('inert')).toBe(false);
+    });
+
+    it('does nothing for a layer already on top', () => {
+      const tour = createDismissableLayer(element('tour'), { ...recorder(), modal: true });
+      tour.raise();
+      expect(tour.topmost).toBe(true);
+      expect(element('dialog').hasAttribute('inert')).toBe(true);
+      tour.destroy();
+    });
+  });
 });

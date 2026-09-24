@@ -75,6 +75,15 @@ export interface DismissableLayerHandle {
   addBranch: (node: Element) => () => void;
   /** Dismisses from code, through the same request. */
   dismiss: (source?: Event) => void;
+  /**
+   * Puts the layer back on top of layers opened over it — a tour whose step
+   * opened a dialog. It moves to the top of the stack and to the end of its
+   * parent in the document, drops the `inert` a newer layer wrote on it or
+   * its ancestors, writes its own again over them when it is modal, and takes
+   * the layer that was topmost as its parent. The history entries keep their
+   * order: the way back still reaches the newer layer first.
+   */
+  raise: () => void;
   destroy: () => void;
 }
 
@@ -375,12 +384,35 @@ export function createDismissableLayer(
       if (destroyed) return;
       request(layer, 'programmatic', source);
     },
+    raise() {
+      if (destroyed || state.layers.at(-1) === layer) return;
+      const below = state.layers.at(-1) ?? null;
+
+      /* No layer may end up its own ancestor: those that hung from this one hang from its parent. */
+      for (const other of state.layers) {
+        if (other.parent === layer) other.parent = layer.parent;
+      }
+      state.layers.splice(state.layers.indexOf(layer), 1);
+      state.layers.push(layer);
+      layer.parent = below;
+      reindex(state);
+
+      node.parentElement?.append(node);
+      for (let current: Element | null = node; current; current = current.parentElement) {
+        current.removeAttribute('inert');
+      }
+      if (options.modal === true) {
+        layer.releaseInert?.();
+        layer.releaseInert = applyInert(node);
+      }
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
 
       layer.releaseInert?.();
       layer.releaseScroll?.();
+      releaseEntry(doc, state, layer);
       node.style.removeProperty(LAYER_DEPTH_PROPERTY);
       if (node.getAttribute('style') === '') node.removeAttribute('style');
 

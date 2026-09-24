@@ -58,6 +58,18 @@ describe('createPortalRoot', () => {
     expect(document.body.innerHTML).toBe('');
   });
 
+  /** A layer raised over the ones opened after it is drawn over them: it goes last. */
+  it('moves a layer after the ones opened after it', () => {
+    const first = createPortalRoot();
+    const second = createPortalRoot();
+    const root = first.container?.parentElement;
+    expect(root?.lastElementChild).toBe(second.container);
+    first.raise();
+    expect(root?.lastElementChild).toBe(first.container);
+    first.release();
+    second.release();
+  });
+
   it('releases once however many times it is called', () => {
     const portal = createPortalRoot();
     const other = createPortalRoot();

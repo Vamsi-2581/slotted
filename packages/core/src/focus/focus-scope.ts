@@ -159,27 +159,38 @@ export function createFocusScope(
 
   /**
    * Every element beside the layer or beside one of its ancestors, as the
-   * document stood when the scope was made. A focus that lands under one of
-   * them lands on the page, and is pulled back; one that lands under an
-   * element added later, after the layer, lands in a layer opened over this
-   * one — a tour over a dialog, a popover from a control inside it — and is
-   * the reader moving up the stack.
+   * document stood when the scope was made, filed by the side of the layer it
+   * stood on. A focus that lands under one that followed lands on the page,
+   * and is pulled back; one that lands under an element added later, or moved
+   * after the layer since, lands in a layer over this one — a tour over a
+   * dialog, a popover from a control inside it — and is the reader moving up
+   * the stack.
    */
-  const present = new WeakSet<Element>();
+  const before = new WeakSet<Element>();
+  const after = new WeakSet<Element>();
   for (
     let current: Element | null = node;
     current?.parentElement;
     current = current.parentElement
   ) {
-    for (const sibling of current.parentElement.children) present.add(sibling);
+    let passed = false;
+    for (const sibling of current.parentElement.children) {
+      if (sibling === current) passed = true;
+      else (passed ? after : before).add(sibling);
+    }
   }
 
+  /**
+   * Whether the focus landed in a layer over this one: an element that now
+   * follows the layer, and either did not exist when the scope was made or
+   * stood before it then — a layer raised over this one moves after it.
+   */
   function openedAbove(target: Node): boolean {
     if (!(node.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING)) return false;
     for (let current = target instanceof Element ? target : target.parentElement; current;) {
       const parent: Element | null = current.parentElement;
       if (parent === null) return false;
-      if (parent.contains(node)) return !present.has(current);
+      if (parent.contains(node)) return !after.has(current);
       current = parent;
     }
     return false;

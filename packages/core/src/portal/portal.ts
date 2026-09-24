@@ -51,6 +51,8 @@ export interface PortalRootHandle {
   readonly container: Element | null;
   /** Removes the layer element, and the shared root with the last layer. */
   release: () => void;
+  /** Moves the layer after every layer opened since, so it is drawn over them. */
+  raise: () => void;
 }
 
 interface DocumentPortals {
@@ -219,7 +221,7 @@ function release(doc: Document, layer: Element, wasShared: boolean) {
 export function createPortalRoot(options: PortalRootOptions = {}): PortalRootHandle {
   const doc = ownerDocument(options);
   if (options.disabled || !doc) {
-    return { container: null, release: () => {} };
+    return { container: null, release: () => {}, raise: () => {} };
   }
 
   const origin = options.origin ?? null;
@@ -244,6 +246,9 @@ export function createPortalRoot(options: PortalRootOptions = {}): PortalRootHan
     },
     release() {
       release(doc, layer, shared);
+    },
+    raise() {
+      if (layer.parentElement !== null) layer.parentElement.append(layer);
     },
   };
 }

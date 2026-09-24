@@ -205,6 +205,8 @@
     "./toggle/toggle.css": "./src/toggle/toggle.css",
     "./toggle/tokens.json": "./src/toggle/toggle.tokens.json",
     "./toolbar/tokens.json": "./src/toolbar/toolbar.tokens.json",
+    "./transfer/transfer.css": "./src/transfer/transfer.css",
+    "./transfer/tokens.json": "./src/transfer/transfer.tokens.json",
     "./toolbar/toolbar.css": "./src/toolbar/toolbar.css",
     "./tooltip/tokens.json": "./src/tooltip/tooltip.tokens.json",
     "./tooltip/tooltip.css": "./src/tooltip/tooltip.css",

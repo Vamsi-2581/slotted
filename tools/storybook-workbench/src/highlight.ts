@@ -53,6 +53,17 @@ const RULES: Record<SnippetLanguage, readonly Rule[]> = {
     { kind: 'tag', pattern: /^[.#[][\w\-='"\]]+|^:[a-z-]+/ },
     { kind: 'number', pattern: /^-?\d+(?:\.\d+)?[a-z%]*/ },
   ],
+  /**
+   * The source a Markdown family is handed: a fence, a heading's hashes, the
+   * `[!NOTE]` of an alert and the `[ ]` of a task read as syntax, inline code
+   * as a string and a link's destination as its property.
+   */
+  markdown: [
+    { kind: 'tag', pattern: /^(?:`{3,}|~{3,})[^\n]*/ },
+    { kind: 'string', pattern: /^`[^`\n]+`/ },
+    { kind: 'keyword', pattern: /^#{1,6}(?= )|^\[![A-Z]+\]|^\[[ x]\](?= )|^\[\^[^\]]+\]/ },
+    { kind: 'property', pattern: /^\]\([^)\s]*(?:\s+"[^"]*")?\)/ },
+  ],
   ts: [
     { kind: 'comment', pattern: /^\/\/[^\n]*|^\/\*[\s\S]*?\*\// },
     { kind: 'string', pattern: /^"[^"]*"|^'[^']*'|^`[^`]*`/ },

@@ -53,4 +53,25 @@ describe('highlight', () => {
       'comment:{/* Rendered only for a new tab. */}',
     ]);
   });
+
+  it('colours Markdown source by its syntax, and gives the source back whole', () => {
+    const source =
+      '## Passos\n\n> [!NOTE]\n> Use `--wait`.\n\n- [ ] [docs](/cli)\n\n```ts\nlet a;\n```';
+    expect(
+      highlight(source, 'markdown')
+        .map((token) => token.text)
+        .join(''),
+    ).toBe(source);
+    const found = kinds(source, 'markdown');
+    for (const expected of [
+      'keyword:##',
+      'keyword:[!NOTE]',
+      'string:`--wait`',
+      'keyword:[ ]',
+      'property:](/cli)',
+      'tag:```ts',
+    ]) {
+      expect(found).toContain(expected);
+    }
+  });
 });

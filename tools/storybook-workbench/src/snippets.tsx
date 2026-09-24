@@ -11,7 +11,7 @@
  * highlighting on TypeScript, and labelling it `tsx` would name the wrong
  * framework on an Angular page.
  */
-export type SnippetLanguage = 'angular' | 'css' | 'ts' | 'tsx';
+export type SnippetLanguage = 'angular' | 'css' | 'markdown' | 'ts' | 'tsx';
 
 export interface WorkbenchSnippet {
   id: string;

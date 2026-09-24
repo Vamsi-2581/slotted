@@ -7,6 +7,7 @@ import type { SnippetLanguage, WorkbenchSnippet } from './snippets';
 const LANGUAGE_LABELS: Record<SnippetLanguage, string> = {
   angular: 'Angular',
   css: 'CSS',
+  markdown: 'Markdown',
   ts: 'TypeScript',
   tsx: 'React',
 };

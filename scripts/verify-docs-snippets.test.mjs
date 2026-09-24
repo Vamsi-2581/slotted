@@ -18,17 +18,22 @@ const ROOT = new URL('..', import.meta.url).pathname;
  * in, and it is not the other framework's code. The rule still refuses a `tsx`
  * snippet on an Angular page and an `angular` one on a React page, which is the
  * confusion it exists to catch.
+ *
+ * `markdown` is the input of the `markdown` family: the source a reader
+ * writes, which the page shows beside the element it becomes. It is the same
+ * text under either framework.
  */
-const NEUTRAL_LANGUAGES = new Set(['css', 'ts']);
+const NEUTRAL_LANGUAGES = new Set(['css', 'markdown', 'ts']);
 
 /**
  * A snippet that is the *same snippet* on both pages, rather than merely
  * written in a language neither framework owns. Only a stylesheet rule is: the
  * Angular `ts` snippet that provides a family's defaults is Angular's own, and
  * a React page's `ts` snippet of the same idea would be a different one, so
- * both ids have to name their framework or the two would collide.
+ * both ids have to name their framework or the two would collide. Markdown
+ * source is shared in the same sense a stylesheet rule is.
  */
-const SHARED_LANGUAGES = new Set(['css']);
+const SHARED_LANGUAGES = new Set(['css', 'markdown']);
 
 /**
  * Each framework's reference pages are written by copying the other's and

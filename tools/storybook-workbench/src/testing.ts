@@ -12,6 +12,7 @@ import type { SnippetLanguage, WorkbenchSnippet } from './snippets';
 const PARSERS: Record<SnippetLanguage, string> = {
   angular: 'angular',
   css: 'css',
+  markdown: 'markdown',
   ts: 'babel-ts',
   tsx: 'babel-ts',
 };

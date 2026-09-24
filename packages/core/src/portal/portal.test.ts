@@ -234,7 +234,7 @@ describe('createPortalRoot', () => {
 
     afterEach(() => {
       current = null;
-      delete (document as unknown as Record<string, unknown>).fullscreenElement;
+      delete (document as unknown as Record<string, unknown>)['fullscreenElement'];
     });
 
     function goFullscreen(element: Element | null) {

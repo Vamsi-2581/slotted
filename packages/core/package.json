@@ -92,6 +92,10 @@
       "types": "./dist/types/focus/index.d.ts",
       "import": "./dist/focus.js"
     },
+    "./fullscreen": {
+      "types": "./dist/types/fullscreen/index.d.ts",
+      "import": "./dist/fullscreen.js"
+    },
     "./highlight": {
       "types": "./dist/types/highlight/index.d.ts",
       "import": "./dist/highlight.js"

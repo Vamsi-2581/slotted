@@ -26,6 +26,7 @@ export default defineConfig({
         form: resolve(import.meta.dirname, 'src/form/index.ts'),
         grid: resolve(import.meta.dirname, 'src/grid/index.ts'),
         focus: resolve(import.meta.dirname, 'src/focus/index.ts'),
+        fullscreen: resolve(import.meta.dirname, 'src/fullscreen/index.ts'),
         highlight: resolve(import.meta.dirname, 'src/highlight/index.ts'),
         identity: resolve(import.meta.dirname, 'src/identity/index.ts'),
         keys: resolve(import.meta.dirname, 'src/keys/index.ts'),

@@ -54,7 +54,7 @@ const anatomy: AnatomyRow[] = [
     element: 'label',
     required: false,
     purpose:
-      'Names the control through for, and carries the target: the gap between the box and the text is its own padding, and it is never shorter than 24 CSS pixels. Absent when the checkbox has no children, for a box named by aria-label in a table header.',
+      'Names the control through for, and carries the target and the hover wash: a 24-pixel square around the box, and a wash behind the box and the text that stands half the control gap off the box and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the box. Absent when the checkbox has no children, for a box named by aria-label in a table header.',
   },
   {
     part: 'description',
@@ -412,7 +412,7 @@ export const REACT_CHECKBOX_DOCS = {
       'aria-required, never the native required. The native attribute engages browser constraint validation and changes submit behaviour, which the library must not impose as a side effect of describing a field; a consumer who wants it writes required on the box and it survives untouched. disabled is native, because that is what the word means.',
       'Read-only has no platform answer for a checkbox, so it is enforced rather than borrowed: the change is refused on the click a pointer and Space share, aria-readonly announces it, and the box keeps its tab stop, its focus ring and its full contrast — a read-only value is real, and it must not look disabled.',
       'The invalid state is never colour alone. In the high-contrast scheme the theme paints the danger border the same black as every other border, so the box thickens its edge as well, and the sentence that says what is wrong is the field group’s error rather than the box’s colour.',
-      'The target is the whole label row, not the square. At the dense step with size="sm" the box is twelve pixels, under WCAG 2.2 SC 2.5.8’s twenty-four, so the label carries a minimum block size and owns the gap between itself and the box — the correction the theme cannot make on the family’s behalf.',
+      'The target is not the square alone. A 24-pixel square around the box meets WCAG 2.2 SC 2.5.8 at every size and density, where the box is fourteen pixels at size="sm"; the label extends it to the end of the text, and the hover wash lights exactly that area. The row keeps its line height: the target is drawn around the box, not laid out beside it.',
       'The mark survives forced colors. It is a mask over a background colour, and forced colors overrides both, so the family restates the pair in system colours — the one rule it writes that the theme cannot reach.',
     ],
     snippets: [

@@ -57,7 +57,7 @@ const anatomy: AnatomyRow[] = [
     element: 'label, in the component’s template',
     required: false,
     purpose:
-      'Names the control through for, and carries the target: the gap between the box and the text is its own padding, and it is never shorter than 24 CSS pixels. Its content is the default ng-content slot, so anything a consumer projects becomes the accessible name.',
+      'Names the control through for, and carries the target and the hover wash: a 24-pixel square around the box, and a wash behind the box and the text that stands half the control gap off the box and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the box. Its content is the default ng-content slot, so anything a consumer projects becomes the accessible name. Rendered when nothing is projected as well, for a box named by aria-label in a table cell; the wash then closes around the box.',
   },
   {
     part: 'description',
@@ -394,7 +394,7 @@ export const ANGULAR_CHECKBOX_DOCS = {
       'Read-only has no platform answer for a checkbox, so it is enforced rather than borrowed: the activation is refused on the click a pointer and Space share, aria-readonly announces it, and the box keeps its tab stop, its focus ring and its full contrast — a read-only value is real, and it must not look disabled.',
       'Refusing the activation is also what keeps a controlled box honest, and the reason nothing here writes the element: the HTML standard’s canceled activation behaviour for a checkbox is checked = !checked rather than a restore, so a correction made inside the listener would be toggled back out from under it.',
       'The invalid state is never colour alone. In the high-contrast scheme the theme paints the danger border the same black as every other border, so the box thickens its edge as well, and the sentence that says what is wrong is the field group’s error rather than the box’s colour.',
-      'The target is the whole label row, not the square: at the dense step with size="sm" the box is twelve pixels, under WCAG 2.2 SC 2.5.8’s twenty-four, so the label carries a minimum block size and owns the gap between itself and the box.',
+      'The target is not the square alone. A 24-pixel square around the box meets WCAG 2.2 SC 2.5.8 at every size and density, where the box is fourteen pixels at size="sm"; the label extends it to the end of the text, and the hover wash lights exactly that area. The row keeps its line height: the target is drawn around the box, not laid out beside it.',
     ],
     snippets: [
       defineSnippet({

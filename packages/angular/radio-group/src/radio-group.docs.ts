@@ -64,7 +64,7 @@ const anatomy: AnatomyRow[] = [
     element: 'label, in the item’s template',
     required: false,
     purpose:
-      'Names the item’s control through for, and carries the target: the gap between the circle and the text is its own padding, and it is never shorter than 24 CSS pixels. Its content is the item’s default ng-content slot.',
+      'Names the item’s control through for, and carries the target and the hover wash: a 24-pixel square around the circle, and a wash behind the circle and the text that stands half the control gap off the circle and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the circle. Its content is the item’s default ng-content slot.',
   },
   {
     part: 'description',
@@ -438,7 +438,7 @@ export const ANGULAR_RADIO_GROUP_DOCS = {
       'aria-required on the group, never the native required on an item — and "choose one" is a fact about the set, which is why the group and not the item is the Validator. disabled is native, because that is also what makes the browser skip the option with the arrow keys.',
       'Read-only has no platform answer for a radio, so it is enforced: the activation is refused, aria-readonly announces it on the group, and every item keeps its tab stop, its focus ring and its full contrast — the chosen option even keeps its accent, because the value is real.',
       'Refusing the activation is not the whole correction here, and the difference is written down: the HTML standard’s canceled activation behaviour restores the clicked radio and not the neighbour it unchecked, so the group writes every element from the value afterwards. A controlled group that refused a change would otherwise show no choice at all.',
-      'The invalid state is never colour alone. In the high-contrast scheme the theme paints the danger border the same black as every other border, so the circle thickens its edge as well. The target is the whole label row, not the circle: at the dense step with size="sm" the circle is twelve pixels, under WCAG 2.2 SC 2.5.8’s twenty-four.',
+      'The invalid state is never colour alone. In the high-contrast scheme the theme paints the danger border the same black as every other border, so the circle thickens its edge as well. The target is not the circle alone. A 24-pixel square around the circle meets WCAG 2.2 SC 2.5.8 at every size and density, where the circle is fourteen pixels at size="sm"; the label extends it to the end of the text, and the hover wash lights exactly that area. The row keeps its line height: the target is drawn around the circle, not laid out beside it.',
     ],
     snippets: [
       defineSnippet({

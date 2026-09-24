@@ -61,7 +61,7 @@ const anatomy: AnatomyRow[] = [
     element: 'label',
     required: false,
     purpose:
-      'Names the item’s control through for, and carries the target: the gap between the circle and the text is its own padding, and it is never shorter than 24 CSS pixels.',
+      'Names the item’s control through for, and carries the target and the hover wash: a 24-pixel square around the circle, and a wash behind the circle and the text that stands half the control gap off the circle and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the circle.',
   },
   {
     part: 'description',
@@ -434,7 +434,7 @@ export const REACT_RADIO_GROUP_DOCS = {
       'aria-required on the group, never the native required on an item. The native attribute engages browser constraint validation and changes submit behaviour, which the library must not impose as a side effect of describing a field. disabled is native, because that is also what makes the browser skip the option with the arrow keys.',
       'Read-only has no platform answer for a radio, so it is enforced: the change is refused on the click a pointer and Space share, aria-readonly announces it on the group, and every item keeps its tab stop, its focus ring and its full contrast — the chosen option even keeps its accent, because the value is real.',
       'The invalid state is never colour alone. In the high-contrast scheme the theme paints the danger border the same black as every other border, so the circle thickens its edge as well, and the sentence that says what is wrong is the field group’s error.',
-      'The target is the whole label row, not the circle: at the dense step with size="sm" the circle is twelve pixels, under WCAG 2.2 SC 2.5.8’s twenty-four, so the label carries a minimum block size and owns the gap between itself and the control.',
+      'The target is not the circle alone. A 24-pixel square around the circle meets WCAG 2.2 SC 2.5.8 at every size and density, where the circle is fourteen pixels at size="sm"; the label extends it to the end of the text, and the hover wash lights exactly that area. The row keeps its line height: the target is drawn around the circle, not laid out beside it.',
     ],
     snippets: [
       defineSnippet({

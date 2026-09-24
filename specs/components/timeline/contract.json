@@ -211,9 +211,7 @@
   },
   "literals": {
     "--slotted-timeline-reflow-breakpoint": "The inline size below which a horizontal or alternate timeline becomes a single column. A container query cannot read a custom property, which docs/token-foundation.md rule 4 states.",
-    "--slotted-timeline-dot-ratio": "The dot is a circle half the height of the marker box, which is a proportion of a box rather than a step on a scale.",
-    "--slotted-timeline-glyph-ratio": "A glyph or the ring projected into the marker is six tenths of the marker box, so a Lucide drawing that fills its own box to the edge keeps a fifth of the marker of air on each side; a proportion of a box, not a step on a scale.",
-    "--slotted-timeline-marker-ratio": "The marker box is the control icon size grown by half again, so a glyph or an avatar has a ring around it; a proportion of a box, as stepper records for its own marker.",
+    "--slotted-timeline-core-ratio": "The solid centre of a dot is four tenths of the dot, rounded to keep the line's parity, which is a proportion of a box rather than a step on a scale. The dot, the badge and the rail are the glyph and steps of air, rounded the same way, and need no literal.",
     "--slotted-timeline-opposite-size": "Eight rem, the width of a medium date and a short time on one line at the medium type step. The scale has no step for a column of text."
   },
   "axes": {
@@ -234,7 +232,7 @@
     "orientation": ["prop", "defaults", "vertical"],
     "placement": ["prop", "defaults", "end"],
     "order": ["prop", "defaults", "oldest-first"],
-    "variant": ["item", "root", "defaults", "outline"],
+    "variant": ["item", "root", "defaults", "subtle"],
     "tone": ["item", "root", "defaults", "secondary"],
     "size": ["prop", "defaults", "md"],
     "connector": ["item", "autoComplete", "solid"],
@@ -251,7 +249,7 @@
         "orientation": "vertical",
         "placement": "end",
         "order": "oldest-first",
-        "variant": "outline",
+        "variant": "subtle",
         "tone": "secondary",
         "size": "md",
         "growing": "none",

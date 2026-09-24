@@ -4,31 +4,57 @@
    * timestamp and a body — and, in feed mode, the APG Feed pattern drawn the
    * same way.
    *
-   * The whole family is drawn from three measurements and one ratio: the rail
-   * is a column as wide as the marker, the marker is the control glyph grown
-   * by half again, and the connector is a rule one thick border wide. The gap
-   * between the rail and the words is the control gap. Everything else — where
-   * the line starts, how far the content indents, where the opposite column
-   * ends — is derived from those, so a theme that retunes the control scale
-   * moves the whole timeline together.
+   * The whole family is drawn from the control glyph size. An empty marker is
+   * a dot as large as the glyph a badge holds, so a dot, a spinner and the
+   * glyph inside a badge are one size; a marker holding a glyph or an avatar is
+   * a badge one step of air wider than the glyph on each side. The rail is a
+   * column as wide as the widest marker the timeline holds. The connector is a
+   * hairline that runs from the centre of one marker to the centre of the
+   * next. Everything else — how far the words stand off the rail, the rhythm
+   * between events — is the control gap plus a step, so density moves the
+   * whole timeline together.
+   *
+   * Every width a centre depends on — the dot, its core, the badge, the rail —
+   * is the line's own width plus an even number of pixels, rounded up to it.
+   * The line then stands a whole number of pixels inside each of them. An
+   * eight-pixel dot on a one-pixel line put the line three and a half pixels
+   * in, the browser rounded the half to a whole CSS pixel, and the line was
+   * drawn one device pixel off the dot's centre at 100%, 150% and 200%.
    */
   [data-ui='timeline'] {
     --_icon: var(--slotted-control-icon-size-md, 16px);
     --_font-size: var(--slotted-timeline-font-size, var(--slotted-control-font-size-md, 13px));
-    --_gap: var(--slotted-timeline-gap, var(--slotted-control-gap-md, 8px));
-    /**
-     * A ring around a glyph or an avatar rather than a box that touches it:
-     * the marker is the glyph grown by half again, and the ratio is recorded
-     * in the contract as the literal it is.
-     */
-    --_marker: calc(var(--_icon) * var(--slotted-timeline-marker-ratio, 1.5));
-    /* The dot an empty marker draws, half the marker's own box. */
-    --_dot: calc(var(--_marker) * var(--slotted-timeline-dot-ratio, 0.5));
-    --_rule: var(--slotted-timeline-connector-thickness, var(--slotted-border-width-thick, 2px));
-    /* Two control gaps, so the rhythm between events tightens with density. */
-    --_item-gap: var(--slotted-timeline-item-gap, calc(2 * var(--_gap)));
-    /* The air between the line's end and the marker it runs into. */
-    --_line-gap: var(--slotted-timeline-line-gap, var(--slotted-space-2, 0.25rem));
+    /* The control gap and one step more: a mark eight pixels from a word reads as touching it. */
+    --_gap: var(
+      --slotted-timeline-gap,
+      calc(var(--slotted-control-gap-md, 8px) + var(--slotted-space-2, 0.25rem))
+    );
+    /* The glyph a badge holds, and the size of a dot and of a spinner: the glyph less a step of air a side. */
+    --_glyph: calc(var(--_icon) - 2 * var(--slotted-space-1, 0.125rem));
+    --_dot: calc(var(--_rule) + round(up, var(--_glyph) - var(--_rule), 2px));
+    /* The solid centre of a dot, a proportion of it: the literal the contract records. */
+    --_core: calc(
+      var(--_rule) +
+        round(nearest, var(--_dot) * var(--slotted-timeline-core-ratio, 0.4) - var(--_rule), 2px)
+    );
+    /* The badge around a glyph: the glyph and one step of air on each side. */
+    --_badge: calc(
+      var(--_rule) +
+        round(up, var(--_icon) + 2 * var(--slotted-space-1, 0.125rem) - var(--_rule), 2px)
+    );
+    --_rail: var(--_dot);
+    --_rule: var(--slotted-timeline-connector-thickness, var(--slotted-border-width-thin, 1px));
+    /* The ring of a hollow dot, and of the halo around the current one. */
+    --_edge: var(--slotted-border-width-medium, 1.5px);
+    /* How far the current ring stands outside its marker. */
+    --_reach: calc(var(--_edge) + var(--slotted-border-width-thick, 2px));
+    /* The gap and one step more, so the rhythm between events tightens with density. */
+    --_item-gap: var(
+      --slotted-timeline-item-gap,
+      calc(var(--_gap) + var(--slotted-space-2, 0.25rem))
+    );
+    /* The air the line leaves around each marker, drawn as a halo of the ground. */
+    --_line-gap: var(--slotted-timeline-line-gap, var(--slotted-space-1, 0.125rem));
     --_opposite: var(--slotted-timeline-opposite-size, 8rem);
     --_line-height: var(--slotted-timeline-line-height, var(--slotted-line-height-md, 1.5));
     --_muted: var(--slotted-timeline-color-muted, var(--slotted-text-muted, GrayText));
@@ -57,13 +83,29 @@
   [data-ui='timeline'][data-size='sm'] {
     --_icon: var(--slotted-control-icon-size-sm, 14px);
     --_font-size: var(--slotted-timeline-font-size, var(--slotted-control-font-size-sm, 12px));
-    --_gap: var(--slotted-timeline-gap, var(--slotted-control-gap-sm, 6px));
+    --_gap: var(
+      --slotted-timeline-gap,
+      calc(var(--slotted-control-gap-sm, 6px) + var(--slotted-space-2, 0.25rem))
+    );
   }
 
   [data-ui='timeline'][data-size='lg'] {
     --_icon: var(--slotted-control-icon-size-lg, 18px);
     --_font-size: var(--slotted-timeline-font-size, var(--slotted-control-font-size-lg, 14px));
-    --_gap: var(--slotted-timeline-gap, var(--slotted-control-gap-lg, 8px));
+    --_gap: var(
+      --slotted-timeline-gap,
+      calc(var(--slotted-control-gap-lg, 8px) + var(--slotted-space-2, 0.25rem))
+    );
+  }
+
+  /**
+   * One badge anywhere widens the rail everywhere, groups included, so the
+   * dots of the plain events stay on the same centre as the badge and every
+   * title starts at the same indent. A spinner is a dot's size and widens
+   * nothing.
+   */
+  [data-ui='timeline']:has([data-part='marker'] > :not([data-ui='spinner'])) {
+    --_rail: var(--_badge);
   }
 
   /* ── Tone ───────────────────────────────────────────────────────────────
@@ -80,6 +122,12 @@
     --_tone-surface: var(--slotted-tone-secondary-surface, Canvas);
     --_tone-border: var(--slotted-tone-secondary-border, ButtonBorder);
     --_tone-text: var(--slotted-tone-secondary-text, CanvasText);
+    /**
+     * The ink of a dot. A tone's border step, which holds 3:1 on the page;
+     * for `secondary` the theme's strong border, because the secondary fill
+     * is a ground and a grey dot in it vanishes on white.
+     */
+    --_tone-mark: var(--slotted-border-strong, GrayText);
   }
 
   [data-ui='timeline'][data-tone='accent'],
@@ -88,6 +136,7 @@
     --_tone-on-solid: var(--slotted-tone-accent-on-solid, HighlightText);
     --_tone-surface: var(--slotted-tone-accent-surface, Canvas);
     --_tone-border: var(--slotted-tone-accent-border, Highlight);
+    --_tone-mark: var(--slotted-tone-accent-border, Highlight);
     --_tone-text: var(--slotted-tone-accent-text, Highlight);
   }
 
@@ -97,6 +146,7 @@
     --_tone-on-solid: var(--slotted-tone-success-on-solid, ButtonText);
     --_tone-surface: var(--slotted-tone-success-surface, Canvas);
     --_tone-border: var(--slotted-tone-success-border, ButtonBorder);
+    --_tone-mark: var(--slotted-tone-success-border, ButtonBorder);
     --_tone-text: var(--slotted-tone-success-text, CanvasText);
   }
 
@@ -106,6 +156,7 @@
     --_tone-on-solid: var(--slotted-tone-warning-on-solid, ButtonText);
     --_tone-surface: var(--slotted-tone-warning-surface, Canvas);
     --_tone-border: var(--slotted-tone-warning-border, ButtonBorder);
+    --_tone-mark: var(--slotted-tone-warning-border, ButtonBorder);
     --_tone-text: var(--slotted-tone-warning-text, CanvasText);
   }
 
@@ -115,6 +166,7 @@
     --_tone-on-solid: var(--slotted-tone-danger-on-solid, MarkText);
     --_tone-surface: var(--slotted-tone-danger-surface, Canvas);
     --_tone-border: var(--slotted-tone-danger-border, Mark);
+    --_tone-mark: var(--slotted-tone-danger-border, Mark);
     --_tone-text: var(--slotted-tone-danger-text, MarkText);
   }
 
@@ -156,7 +208,7 @@
     display: grid;
     grid-template-columns:
       [opposite] var(--_opposite-column, 0)
-      [rail] var(--_marker)
+      [rail] var(--_rail)
       [content] minmax(0, 1fr);
     position: relative;
   }
@@ -164,7 +216,7 @@
   [data-ui='timeline']
     :where([data-part='list']:not(:has([data-part='opposite'])))
     [data-part='item'] {
-    grid-template-columns: [rail] var(--_marker) [content] minmax(0, 1fr);
+    grid-template-columns: [rail] var(--_rail) [content] minmax(0, 1fr);
   }
 
   /**
@@ -204,21 +256,13 @@
 
   /* ── The rail ───────────────────────────────────────────────────────────
    *
-   * The column the marker and the line share, the full height of the row. The
-   * marker is centred on the title's first line by the rule `toast` and
-   * `alert` draw their marks with: pushed from the top of the row by half
-   * the difference between one line and the mark. `1lh` resolves against this
-   * element, whose font size and leading are the title's, so the centre is
-   * the first line's centre at every density and stays there when the title
-   * wraps. The marker is taller than a line, so the push is negative and the
-   * marker overhangs the row by a few pixels at the top — which is where the
-   * connector from the event above arrives.
+   * The column the marker and the line share, the full height of the row.
+   * Its type is the title's, so `1lh` here is the title's first line, and the
+   * middle of that line is where every marker centres and where every
+   * connector starts and ends — whatever size the marker is.
    */
 
   [data-ui='timeline'] [data-part='rail'] {
-    /* Half the difference between one line and the mark, negative here. */
-    --_lift: calc((1lh - var(--_marker)) / 2);
-
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -228,14 +272,32 @@
     position: relative;
   }
 
+  /**
+   * A dot when the marker is empty or holds a spinner, a badge when it holds
+   * a glyph or an avatar. The marker is pushed from the top of the row by half
+   * the difference between one line and itself, the rule `toast` and `alert`
+   * draw their marks with, so a dot and a badge in the same list centre on the
+   * same line. It stands above the connector and wears a halo of the ground,
+   * which is the air the line leaves around it; a halo rather than a shortened
+   * line, because the line then runs centre to centre and never has to know
+   * how big the next marker is.
+   *
+   * A dot is drawn in three layers of one box: the box's ground, its border,
+   * and a core laid over it at a whole-pixel inset. There is no smaller box
+   * centred by arithmetic, so the core lands where the ring does.
+   */
   [data-ui='timeline'] [data-part='marker'] {
+    --_marker: var(--_dot);
+    --_lift: calc((1lh - var(--_marker)) / 2);
+    /* The tone's ink faded into the ground: the soft disc a dot sits in. */
+    --_tint: color-mix(in srgb, var(--_tone-mark) 16%, var(--_surface));
+
     align-items: center;
-    background-color: var(--_surface);
+    background-color: var(--_tint);
     block-size: var(--_marker);
-    border: var(--_rule) solid var(--_ring);
+    border: 0 solid transparent;
     border-radius: var(--slotted-radius-full, 9999px);
-    /* The ring is inside the box, so every length in this sheet that reads
-       `--_marker` reads the whole circle. */
+    box-shadow: 0 0 0 var(--_line-gap) var(--_surface);
     box-sizing: border-box;
     color: var(--_muted);
     display: inline-flex;
@@ -243,7 +305,7 @@
     inline-size: var(--_marker);
     justify-content: center;
     margin-block-start: var(--_lift);
-    /* Nothing projected inside it may push it wider than its column. */
+    /* The halo and the current ring are outside the box; nothing inside may push it wider. */
     overflow: hidden;
     position: relative;
     transition:
@@ -252,197 +314,200 @@
       border-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
+    z-index: 1;
   }
 
   /**
-   * An empty marker draws a dot. The dot is a radial gradient painted on a
-   * box that fills the whole inside of the ring, not a smaller box centred in
-   * it: a box is snapped to device pixels on each edge on its own, so a
-   * twelve-pixel disc inside a twenty-pixel one lands a pixel off centre at
-   * 110% zoom and at any odd device ratio, while a gradient is rasterised at
-   * the box's geometric centre whatever the ratio. The same box carries the
-   * check of a finished event, for the same reason.
-   *
-   * The paint is `currentcolor`, and `forced-color-adjust: none` keeps it
-   * where the system takes every other background away: the ink is the
-   * host's, already forced to the right value.
+   * The core, and the check of a finished dot, on one box that fills the
+   * marker: inset by a whole number of pixels, since the dot and the core
+   * differ by an even number.
    */
   [data-ui='timeline'] [data-part='marker']:empty::after {
-    --_radius: calc(var(--_dot) / 2);
-
-    background-image: radial-gradient(
-      circle at center,
-      currentColor var(--_radius),
-      transparent calc(var(--_radius) + 0.5px)
-    );
+    background-color: var(--_tone-mark);
+    border-radius: inherit;
     content: '';
-    forced-color-adjust: none;
-    inset: 0;
+    inset: calc((var(--_marker) - var(--_core)) / 2);
     position: absolute;
   }
 
   /**
-   * A marker holding a glyph or an avatar. The glyph is half the marker and
-   * takes the ink the marker is drawn in, so an icon inside a solid marker is
-   * knocked out of the fill the way a status glyph is. Half, and not the
-   * control icon size: a Lucide drawing fills its own box to the edge, and at
-   * the control size it sat two pixels from the ring and read as touching it.
-   * The avatar is the opposite case — it is the marker's face and fills the
-   * ring exactly, which is what GitHub draws.
+   * A badge. The glyph is the badge less one step of air on each side, so a
+   * Lucide drawing that fills its own box to the edge stands two pixels off
+   * the ring. The avatar is the badge's face and fills it without a ring.
    */
-  [data-ui='timeline'] [data-part='marker'] > [data-ui='icon'],
+  [data-ui='timeline'] [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
+    --_marker: var(--_badge);
+
+    background-color: var(--_surface);
+    border-color: var(--_ring);
+    border-width: var(--slotted-border-width-thin, 1px);
+  }
+
+  [data-ui='timeline'] [data-part='marker'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_glyph);
+
+    color: inherit;
+  }
+
+  /* A spinner is a dot: the same box, and the same size as the glyph in a badge. */
   [data-ui='timeline'] [data-part='marker'] > [data-ui='spinner'] {
-    --slotted-icon-size: calc(var(--_marker) * var(--slotted-timeline-glyph-ratio, 0.6));
-    --slotted-spinner-size: calc(var(--_marker) * var(--slotted-timeline-glyph-ratio, 0.6));
+    --slotted-spinner-size: var(--_dot);
 
     color: inherit;
   }
 
   [data-ui='timeline'] [data-part='marker'] > [data-ui='avatar'] {
-    --slotted-avatar-size: calc(var(--_marker) - 2 * var(--_rule));
+    --slotted-avatar-size: var(--_badge);
+  }
+
+  [data-ui='timeline'] [data-part='marker']:has(> [data-ui='avatar']) {
+    background-color: transparent;
+    border-width: 0;
   }
 
   /* ── Variants ───────────────────────────────────────────────────────────
    *
-   * The four appearances of a marker, read on the item. `outline` is the
-   * default: a solid `secondary` dot on a `secondary` line is a grey disc on a
-   * grey line, and in `high-contrast` the two colours are one colour. The
-   * outline separates the mark from the track in every scheme. `plain` is the
-   * dot alone, for a run of small events — a commit list, a log — where a
-   * ring on every line is a ring too many; the box keeps its size so the line
-   * stays on the same centre.
+   * Four emphases, read on the item, each drawn twice: once as a dot, once as
+   * a badge. `subtle` is the default and the quiet one — a solid core in a
+   * soft disc of its own tone, or a badge on the tone's ground with its edge,
+   * the pair rule `docs/token-foundation.md` states under semantic colour.
+   * `outline` is the hollow ring, `solid` fills, and `plain` drops every frame:
+   * the core alone, threaded on the line, or the bare glyph over it.
    */
 
-  [data-ui='timeline'] [data-variant='outline'] [data-part='marker'] {
+  [data-ui='timeline'] [data-variant='outline'] [data-part='marker']:empty {
     background-color: var(--_surface);
-    border-color: var(--_ring);
-    color: var(--_muted);
+    border-color: var(--_tone-mark);
+    border-width: var(--_edge);
+  }
+
+  [data-ui='timeline'] [data-variant='outline'] [data-part='marker']:empty::after,
+  [data-ui='timeline'] [data-variant='solid'] [data-part='marker']:empty::after {
+    content: none;
+  }
+
+  [data-ui='timeline'] [data-variant='solid'] [data-part='marker']:empty {
+    background-color: var(--_tone-mark);
+    /* A border as wide as the radius, so forced colours, which drop the ground, keep the disc. */
+    border-color: var(--_tone-mark);
+    border-width: calc(var(--_marker) / 2);
+  }
+
+  /* The core alone, on the line: the ground and the halo give way so the line runs into it. */
+  [data-ui='timeline'] [data-variant='plain'] [data-part='marker']:empty {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  /* The glyph of a hairline or frameless badge is drawn in the dot's own ink. */
+  [data-ui='timeline'] [data-variant='outline'] [data-part='marker']:not(:empty) {
+    color: var(--_tone-mark);
   }
 
   [data-ui='timeline']
     [data-variant='outline'][data-tone]:not([data-tone='secondary'])
-    [data-part='marker'] {
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
     border-color: var(--_tone-border);
-    color: var(--_tone-text);
   }
 
-  /**
-   * An outline marker with artwork in it is a badge, not a ring with a mark
-   * floating inside: the thick ring competed with the glyph's own strokes and
-   * the two read as one odd drawing. It takes the subtle pair — the tone's
-   * ground with its thin edge — and the glyph is drawn in the tone's ink, which
-   * is what Primer's badge and Mantine's bullet both are. The empty marker
-   * keeps its ring, because a dot has no strokes to compete with.
-   */
-  [data-ui='timeline'] [data-variant='outline'] [data-part='marker']:not(:empty) {
-    background-color: var(--_tone-surface);
-    border-color: var(--_tone-border);
-    border-width: var(--slotted-border-width-thin, 1px);
-    color: var(--_tone-text);
-  }
-
-  [data-ui='timeline'] [data-variant='solid'] [data-part='marker'] {
+  [data-ui='timeline']
+    [data-variant='solid']
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
     background-color: var(--_tone-solid);
     border-color: var(--_tone-solid);
     color: var(--_tone-on-solid);
   }
 
-  /**
-   * A ground and an edge together, at the thin width: the tone's surface is a
-   * ground and not a separator, and in `high-contrast` it is the page's own
-   * white — so the edge is what keeps the marker visible there. The pair rule
-   * `docs/token-foundation.md` states under semantic colour.
-   */
-  [data-ui='timeline'] [data-variant='subtle'] [data-part='marker'] {
+  [data-ui='timeline']
+    [data-variant='subtle']
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
     background-color: var(--_tone-surface);
     border-color: var(--_tone-border);
-    border-width: var(--slotted-border-width-thin, 1px);
     color: var(--_tone-text);
   }
 
-  [data-ui='timeline'] [data-variant='plain'] [data-part='marker'] {
-    background-color: transparent;
+  [data-ui='timeline'] [data-variant='plain'] [data-part='marker']:not(:empty) {
+    background-color: var(--_surface);
     border-color: transparent;
-    color: var(--_ring);
-  }
-
-  [data-ui='timeline']
-    [data-variant='plain'][data-tone]:not([data-tone='secondary'])
-    [data-part='marker'] {
-    color: var(--_tone-solid);
+    color: var(--_tone-mark);
   }
 
   /* ── Statuses ───────────────────────────────────────────────────────────
    *
-   * Each one is a shape as well as a colour. A current event is a target —
-   * the ring with a filled centre; a complete one is a filled disc with a
-   * check; a loading one turns the shared ring. Colour alone would not survive
-   * `high-contrast`, where every tone is one ink.
+   * Each one is a shape as well as a colour, because `high-contrast` paints
+   * every tone in one ink and forced colours paint every ring in one. Pending
+   * is the variant's own mark; complete is a filled disc with the check
+   * knocked out of it; current is a filled disc with a ring around it, a
+   * target; loading is the shared spinner. The ring is a shadow and not an
+   * outline, because an outline in this library is the focus ring and a ring
+   * in the tone's ink around a marker would read as focus; forced colours drop
+   * the shadow, and the block at the end draws it there as an outline in the
+   * system's ink, where no colour can be mistaken.
    */
 
-  [data-ui='timeline'] [data-current] [data-part='marker'] {
-    border-color: var(--_tone-solid);
-    color: var(--_tone-text);
+  /**
+   * A finished dot fills with its ground, not with a border as wide as its
+   * radius: that border would leave the check no box to stand in. Forced
+   * colours keep the ground through the block at the end.
+   */
+  [data-ui='timeline'] [data-complete]:not([data-current]) [data-part='marker']:empty {
+    background-color: var(--_tone-mark);
+    border-width: 0;
+  }
+
+  [data-ui='timeline'] [data-current] [data-part='marker']:empty {
+    background-color: var(--_tone-mark);
+    border-color: var(--_tone-mark);
+    border-width: calc(var(--_marker) / 2);
+  }
+
+  [data-ui='timeline'] [data-current] [data-part='marker']:empty::after {
+    content: none;
   }
 
   /**
-   * The current dot is larger than a pending one, so the two read apart in
-   * `high-contrast`, where the ring and both dots are one ink: a target with a
-   * thin white gap against a ring with a small dot in it.
+   * The check is knocked out of the disc in the ground's own colour, so it
+   * reads in every tone and scheme without a token of its own; it is the
+   * glyph size less a step a side, the same air a badge gives its glyph.
    */
-  [data-ui='timeline'] [data-current] [data-part='marker']:empty::after {
-    --_radius: calc(var(--_dot) * 0.65);
-
-    color: var(--_tone-solid);
+  [data-ui='timeline'] [data-complete]:not([data-current]) [data-part='marker']:empty::after {
+    background-color: var(--_surface);
+    content: '';
+    inset: 0;
+    mask-image: var(--slotted-icon-check);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: calc(var(--_marker) - 2 * var(--slotted-space-1, 0.125rem));
   }
 
-  [data-ui='timeline'] [data-current][data-variant='solid'] [data-part='marker'] {
-    /* A filled marker says *here* with a halo of its own tone. */
+  [data-ui='timeline'] [data-current] [data-part='marker'] {
     box-shadow:
-      0 0 0 var(--_rule) var(--_surface),
-      0 0 0 calc(2 * var(--_rule)) var(--_tone-solid);
+      0 0 0 var(--slotted-border-width-thick, 2px) var(--_surface),
+      0 0 0 var(--_reach) var(--_tone-mark),
+      0 0 0 calc(var(--_reach) + var(--_line-gap)) var(--_surface);
   }
 
-  [data-ui='timeline'] [data-complete]:not([data-current]) [data-part='marker'] {
+  [data-ui='timeline']
+    [data-complete]:not([data-current])
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])),
+  [data-ui='timeline']
+    [data-current]
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
     background-color: var(--_tone-solid);
     border-color: var(--_tone-solid);
     color: var(--_tone-on-solid);
   }
 
-  /* A plain marker has no disc to fill: a finished event is a dot in its tone. */
-  [data-ui='timeline']
-    [data-complete][data-variant='plain']:not([data-current])
-    [data-part='marker'] {
-    background-color: transparent;
-    border-color: transparent;
-    color: var(--_tone-solid);
-  }
-
-  /**
-   * The check replaces the dot, not the consumer's own glyph: an event whose
-   * marker already says what it was keeps saying it, filled.
-   */
-  [data-ui='timeline']
-    [data-complete]:not([data-current], [data-variant='plain'])
-    [data-part='marker']:empty::after {
-    background-color: var(--_tone-on-solid);
-    background-image: none;
-    mask-image: var(--slotted-timeline-complete-icon, var(--slotted-icon-check));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_icon);
-  }
-
   /**
    * An event still arriving. The ring is `spinner`'s — one arc, drawn once,
-   * for every family that waits — and this rule only stands it in the marker
-   * and gives it the glyph's size and the marker's ink.
+   * for every family that waits — standing bare on the ground, the size of a
+   * dot, in the tone's ink.
    */
   [data-ui='timeline'] [data-loading][data-variant] [data-part='marker'] {
     background-color: var(--_surface);
-    border-color: var(--_ring);
-    border-width: var(--_rule);
-    color: var(--_muted);
+    border-color: transparent;
+    box-shadow: 0 0 0 var(--_line-gap) var(--_surface);
+    color: var(--_tone-mark);
   }
 
   [data-ui='timeline'] [data-loading] > [data-part='content'] {
@@ -451,11 +516,12 @@
 
   /* ── The connector ──────────────────────────────────────────────────────
    *
-   * The rule from below the marker to the bottom of the item, which is where
-   * the next marker begins. It is a border rather than a painted background,
-   * so `dashed` is a word rather than a gradient and the line keeps its colour
-   * under forced colours. The last item of a list draws none, because there is
-   * nothing after it.
+   * A hairline from the middle of this row's first line to the middle of the
+   * next row's, which are the two markers' centres; the markers stand above
+   * it and their halo opens the gap. It is a border rather than a painted
+   * background, so `dashed` is a word rather than a gradient and the line
+   * keeps its colour under forced colours. The last item of a list draws
+   * none, because there is nothing after it.
    */
 
   [data-ui='timeline'] [data-part='connector'] {
@@ -464,12 +530,8 @@
     border-inline-start: var(--_rule) solid var(--_line);
     display: block;
     inline-size: 0;
-    /**
-     * From a step under this marker to a step above the next one, which
-     * overhangs the next row by the same lift this one does.
-     */
-    inset-block-end: calc(var(--_line-gap) - var(--_lift) - var(--_item-gap));
-    inset-block-start: calc(var(--_lift) + var(--_marker) + var(--_line-gap));
+    inset-block-end: calc(-0.5lh - var(--_item-gap));
+    inset-block-start: 0.5lh;
     inset-inline-start: calc(50% - var(--_rule) / 2);
     position: absolute;
     transition: border-color var(--slotted-control-transition-duration)
@@ -491,7 +553,7 @@
    * timeline reads as a filled track up to where the reader is.
    */
   [data-ui='timeline'] [data-complete] [data-part='connector'] {
-    border-color: var(--_tone-solid);
+    border-color: var(--_tone-mark);
   }
 
   /* ── The body ───────────────────────────────────────────────────────────
@@ -748,11 +810,11 @@
    */
   [data-ui='timeline'] [data-part='more'] {
     margin-block-start: var(--_item-gap);
-    margin-inline-start: calc(var(--_opposite-column, 0px) + var(--_marker) + var(--_gap));
+    margin-inline-start: calc(var(--_opposite-column, 0px) + var(--_rail) + var(--_gap));
   }
 
   [data-ui='timeline'] [data-part='list']:has([data-part='opposite']) ~ [data-part='more'] {
-    margin-inline-start: calc(var(--_opposite) + var(--_marker) + 2 * var(--_gap));
+    margin-inline-start: calc(var(--_opposite) + var(--_rail) + 2 * var(--_gap));
   }
 
   [data-ui='timeline'] div[data-part='more'] {
@@ -785,14 +847,14 @@
   [data-ui='timeline'][data-placement='start'] [data-part='item'] {
     grid-template-columns:
       [content] minmax(0, 1fr)
-      [rail] var(--_marker)
+      [rail] var(--_rail)
       [opposite] var(--_opposite-column, 0);
   }
 
   [data-ui='timeline'][data-placement='start']
     :where([data-part='list']:not(:has([data-part='opposite'])))
     [data-part='item'] {
-    grid-template-columns: [content] minmax(0, 1fr) [rail] var(--_marker);
+    grid-template-columns: [content] minmax(0, 1fr) [rail] var(--_rail);
   }
 
   [data-ui='timeline'][data-placement='start'] [data-part='content'] {
@@ -827,7 +889,7 @@
   [data-ui='timeline'][data-placement='alternate'] [data-part='item'] {
     grid-template-columns:
       [before] minmax(0, 1fr)
-      [rail] var(--_marker)
+      [rail] var(--_rail)
       [after] minmax(0, 1fr);
   }
 
@@ -909,7 +971,7 @@
   }
 
   [data-ui='timeline'][data-placement='alternate'] [data-part='more'] {
-    margin-inline-start: calc(50% + var(--_marker) / 2 + var(--_gap));
+    margin-inline-start: calc(50% + var(--_rail) / 2 + var(--_gap));
   }
 
   /* ── Horizontal ─────────────────────────────────────────────────────────
@@ -930,7 +992,13 @@
     grid-auto-flow: column;
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    padding-block-end: var(--slotted-space-2, 0.25rem);
+    /**
+     * A scroll container clips what stands outside it, and the ring of the
+     * current marker stands outside the rail by its offset and its width: the
+     * list keeps that much room above and before the first marker.
+     */
+    padding-block: var(--_reach) var(--slotted-space-2, 0.25rem);
+    padding-inline: var(--_reach);
   }
 
   [data-ui='timeline'][data-orientation='horizontal'] [data-part='item'] {
@@ -954,14 +1022,24 @@
     padding-inline-end: 0;
   }
 
+  /**
+   * A square as tall and as wide as the rail at the start of the item, with
+   * the marker centred in it, so every centre sits half a rail in and the
+   * line runs from one to the next along the same row.
+   */
   [data-ui='timeline'][data-orientation='horizontal'] [data-part='rail'] {
-    --_lift: 0px;
-
     align-items: start;
     align-self: start;
-    block-size: var(--_marker);
+    block-size: var(--_rail);
     grid-column: 1;
     grid-row: rail;
+    justify-content: center;
+  }
+
+  [data-ui='timeline'][data-orientation='horizontal'] [data-part='marker'] {
+    --_lift: 0px;
+
+    margin-inline-start: calc((var(--_rail) - var(--_marker)) / 2);
   }
 
   [data-ui='timeline'][data-orientation='horizontal'] [data-part='connector'] {
@@ -972,8 +1050,8 @@
     inline-size: auto;
     inset-block-end: auto;
     inset-block-start: calc(50% - var(--_rule) / 2);
-    inset-inline-end: calc(var(--_line-gap) - var(--_item-gap));
-    inset-inline-start: calc(var(--_marker) + var(--_line-gap));
+    inset-inline-end: calc(-1 * var(--_item-gap) - var(--_rail) / 2);
+    inset-inline-start: calc(var(--_rail) / 2);
   }
 
   [data-ui='timeline'][data-orientation='horizontal'] [data-part='content'] {
@@ -1071,7 +1149,7 @@
     [data-ui='timeline'][data-orientation='vertical']:not([data-reflow='false'])
       [data-part='list']
       [data-part='item']:nth-child(n) {
-      grid-template-columns: [rail] var(--_marker) [content] minmax(0, 1fr);
+      grid-template-columns: [rail] var(--_rail) [content] minmax(0, 1fr);
     }
 
     [data-ui='timeline'][data-orientation='vertical']:not([data-reflow='false'])
@@ -1109,7 +1187,7 @@
 
     [data-ui='timeline'][data-orientation='vertical']:not([data-reflow='false'])
       [data-part='more'] {
-      margin-inline-start: calc(var(--_marker) + var(--_gap));
+      margin-inline-start: calc(var(--_rail) + var(--_gap));
     }
   }
 
@@ -1119,14 +1197,14 @@
       display: flex;
       flex-direction: column;
       overflow-x: visible;
-      padding-block-end: 0;
+      padding: 0;
     }
 
     [data-ui='timeline'][data-orientation='horizontal']:not([data-reflow='false'])
       [data-part='item'] {
       align-items: stretch;
       column-gap: var(--_gap);
-      grid-template-columns: [rail] var(--_marker) [content] minmax(0, 1fr);
+      grid-template-columns: [rail] var(--_rail) [content] minmax(0, 1fr);
       grid-template-rows: none;
       margin-block-end: var(--_item-gap);
       padding-inline-end: 0;
@@ -1140,14 +1218,20 @@
 
     [data-ui='timeline'][data-orientation='horizontal']:not([data-reflow='false'])
       [data-part='rail'] {
-      --_lift: calc((1lh - var(--_marker)) / 2);
-
       align-items: center;
       align-self: stretch;
       block-size: auto;
       grid-column: rail;
       /* Two rows when the opposite side takes the first; one row otherwise. */
       grid-row: 1 / 3;
+      justify-content: flex-start;
+    }
+
+    [data-ui='timeline'][data-orientation='horizontal']:not([data-reflow='false'])
+      [data-part='marker'] {
+      --_lift: calc((1lh - var(--_marker)) / 2);
+
+      margin-inline-start: 0;
     }
 
     [data-ui='timeline'][data-orientation='horizontal']:not([data-reflow='false'])
@@ -1156,8 +1240,8 @@
       border-inline-start-width: var(--_rule);
       block-size: auto;
       inline-size: 0;
-      inset-block-end: calc(var(--_line-gap) - var(--_lift) - var(--_item-gap));
-      inset-block-start: calc(var(--_lift) + var(--_marker) + var(--_line-gap));
+      inset-block-end: calc(-0.5lh - var(--_item-gap));
+      inset-block-start: 0.5lh;
       inset-inline-end: auto;
       inset-inline-start: calc(50% - var(--_rule) / 2);
     }
@@ -1190,7 +1274,7 @@
     [data-ui='timeline'][data-orientation='horizontal']:not([data-reflow='false'])
       [data-part='more'] {
       margin-block-start: var(--_item-gap);
-      margin-inline-start: calc(var(--_marker) + var(--_gap));
+      margin-inline-start: calc(var(--_rail) + var(--_gap));
     }
 
     /**
@@ -1202,7 +1286,7 @@
         [data-reflow='false']
       )
       [data-part='item'] {
-      grid-template-columns: [rail] var(--_marker) [content] minmax(0, 1fr);
+      grid-template-columns: [rail] var(--_rail) [content] minmax(0, 1fr);
     }
 
     [data-ui='timeline'][data-orientation='vertical'][data-placement='alternate']:not(
@@ -1277,20 +1361,28 @@
         [data-reflow='false']
       )
       [data-part='more'] {
-      margin-inline-start: calc(var(--_marker) + var(--_gap));
+      margin-inline-start: calc(var(--_rail) + var(--_gap));
     }
   }
 
   /* ── Forced colours ─────────────────────────────────────────────────────
    *
-   * The system replaces every painted surface with the page's own background,
-   * which would flatten the statuses into one outline. The check inside a
-   * finished marker keeps its paint through `forced-color-adjust` on the mark
-   * alone, as the dot already does above; the line is a border and survives by
-   * itself; the chevron keeps `currentcolor`.
+   * The system replaces every painted surface with the page's own background
+   * and every border with one ink, and drops every shadow. The shapes survive
+   * that — core, hollow, filled, filled and ringed — because the filled disc
+   * is drawn in borders, the core keeps the system's text ink through
+   * `forced-color-adjust`, and the current ring is redrawn here as an outline.
+   * A finished marker keeps its fill, so it reads apart from a pending one in
+   * the system's highlight. The chevron keeps `currentcolor`.
    */
 
   @media (forced-colors: active) {
+    /* The marker's own ink, which the system has already forced: text, or highlight text on a finished disc. */
+    [data-ui='timeline'] [data-part='marker']:empty::after {
+      background-color: currentColor;
+      forced-color-adjust: none;
+    }
+
     [data-ui='timeline'] [data-complete]:not([data-current]) [data-part='marker'] {
       background-color: Highlight;
       border-color: Highlight;
@@ -1298,8 +1390,9 @@
       forced-color-adjust: none;
     }
 
-    [data-ui='timeline'] [data-complete]:not([data-current]) [data-part='marker']:empty::after {
-      forced-color-adjust: none;
+    [data-ui='timeline'] [data-current]:not([data-loading]) [data-part='marker'] {
+      outline: var(--_edge) solid CanvasText;
+      outline-offset: var(--slotted-border-width-thick, 2px);
     }
 
     [data-ui='timeline'] [data-part='group-indicator'] {

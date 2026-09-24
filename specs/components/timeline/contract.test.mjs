@@ -198,16 +198,16 @@ test('names the three placements and the two orientations', () => {
 });
 
 /**
- * `outline` rather than `solid` by default: a solid `secondary` dot on a
- * `secondary` line is a grey disc on a grey line, and in `high-contrast` the
- * two colours are the same colour.
+ * `subtle` by default: a solid core in a soft disc of its own tone. A hollow
+ * ring on every event read as a column of radio buttons, and a solid disc on
+ * every event leaves nothing louder for `complete` and `current` to be.
  */
-test('draws an outlined marker by default, in the five tones of the theme', () => {
+test('draws a subtle marker by default, in the five tones of the theme', () => {
   assert.deepEqual(contract.axes.variant, ['solid', 'outline', 'subtle', 'plain']);
-  assert.equal(timeline.defaults.variant, 'outline');
+  assert.equal(timeline.defaults.variant, 'subtle');
   assert.deepEqual([...contract.axes.tone].sort(), [...TONES].sort());
   assert.equal(timeline.defaults.tone, 'secondary');
-  assert.deepEqual(contract.resolution.variant, ['item', 'root', 'defaults', 'outline']);
+  assert.deepEqual(contract.resolution.variant, ['item', 'root', 'defaults', 'subtle']);
   assert.deepEqual(contract.resolution.tone, ['item', 'root', 'defaults', 'secondary']);
   assert.deepEqual(contract.axes.connector, ['solid', 'dashed', 'none']);
   assert.deepEqual(contract.axes.size, ['sm', 'md', 'lg']);
@@ -241,9 +241,7 @@ test('declines with a named owner or a composition, never with silence', () => {
 test('records every literal the stylesheet states', () => {
   assert.deepEqual(Object.keys(contract.literals), [
     '--slotted-timeline-reflow-breakpoint',
-    '--slotted-timeline-dot-ratio',
-    '--slotted-timeline-glyph-ratio',
-    '--slotted-timeline-marker-ratio',
+    '--slotted-timeline-core-ratio',
     '--slotted-timeline-opposite-size',
   ]);
   for (const reason of Object.values(contract.literals)) {

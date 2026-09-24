@@ -43,54 +43,92 @@ test('answers every value of every painted axis', () => {
 });
 
 /**
- * Each status is a shape as well as a colour: a target for the current event,
- * a filled disc with a check for a finished one, the shared ring for one still
- * arriving. `high-contrast` paints every tone in one ink, and the shape is
- * what is left.
+ * Each status is a shape as well as a colour: pending is the variant's own
+ * mark, complete is a filled disc with the check knocked out of it, current is
+ * a filled disc with a ring around it, loading is the shared spinner at a
+ * dot's size. `high-contrast` paints every tone in one ink and forced colours
+ * paint every ring in one, so the shape is what is left. The ring is a shadow,
+ * because an outline in this library is the focus ring; forced colours drop
+ * the shadow and get the ring back as an outline in their block.
  */
 test('separates the statuses by shape as well as by colour', () => {
   assert.ok(
     normalized.includes(
-      "[data-current][data-part='marker']:empty::after{--_radius:calc(var(--_dot)*0.65);",
+      "[data-current][data-part='marker']{box-shadow:000var(--slotted-border-width-thick,2px)var(--_surface),000var(--_reach)var(--_tone-mark),",
     ),
-    'the current dot is larger than a pending one',
+    'the current marker is ringed',
   );
   assert.ok(
     normalized.includes(
-      'mask-image:var(--slotted-timeline-complete-icon,var(--slotted-icon-check))',
+      "[data-current]:not([data-loading])[data-part='marker']{outline:var(--_edge)solidCanvasText;",
+    ),
+    'forced colours get the ring back',
+  );
+  assert.match(
+    normalized,
+    /\[data-complete\]:not\(\[data-current\]\)\[data-part='marker'\]:empty::after\{[^}]*inset:0;[^}]*mask-image:var\(--slotted-icon-check\);/,
+    'a finished dot knocks the check out of the whole disc',
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='marker']>[data-ui='spinner']{--slotted-spinner-size:var(--_dot);",
     ),
   );
-  assert.ok(normalized.includes("[data-part='marker']>[data-ui='spinner']"));
   assert.ok(normalized.includes("[data-complete][data-part='connector']"));
 });
 
 /**
- * The line is a border, not a painted background: a border keeps its colour
- * under forced colours where a background does not, and `dashed` is then a
- * word rather than a gradient. The dot is the one painted background, and it
- * keeps its ink through `forced-color-adjust`.
+ * An empty marker is a dot as large as the glyph a badge holds, and a spinner
+ * is the same dot; a marker with a glyph or an avatar is a badge one step of
+ * air wider than the glyph on each side. The rail widens to the badge only
+ * when the timeline holds one.
+ *
+ * Every width the line is centred in is the line's own width plus an even
+ * number of pixels, so the line stands a whole number of pixels inside it.
+ * An eight-pixel dot on a one-pixel line put the line three and a half pixels
+ * in, and the browser drew it one device pixel off the dot's centre at 100%,
+ * 150% and 200%. The core is laid over the dot at a whole-pixel inset, never
+ * centred inside it as a smaller box.
  */
-test('draws the dot at the geometric centre and the line as a border', () => {
-  /**
-   * A gradient on a box that fills the ring, never a smaller box centred in
-   * it: a box snaps to device pixels edge by edge and lands off centre at
-   * 110% zoom, a gradient is rasterised at the centre whatever the ratio.
-   */
-  assert.match(
-    declarations,
-    /\[data-part='marker'\]:empty::after \{[^}]*background-image: radial-gradient\([^}]*inset: 0;[^}]*position: absolute;/,
+test('keeps every marker width on the line parity', () => {
+  assert.ok(
+    normalized.includes('--_dot:calc(var(--_rule)+round(up,var(--_glyph)-var(--_rule),2px));'),
+  );
+  assert.ok(normalized.includes('--_core:calc(var(--_rule)+round(nearest,'));
+  assert.ok(normalized.includes('--_badge:calc(var(--_rule)+round(up,'));
+  assert.ok(
+    normalized.includes(
+      "[data-ui='timeline']:has([data-part='marker']>:not([data-ui='spinner'])){--_rail:var(--_badge);}",
+    ),
   );
   assert.ok(
-    normalized.includes("[data-part='marker']:empty::after{--_radius:calc(var(--_dot)/2);"),
+    normalized.includes(
+      "[data-part='marker']:not(:empty,:has(>[data-ui='spinner'])){--_marker:var(--_badge);",
+    ),
   );
   assert.ok(
-    normalized.includes('mask-size:var(--_icon)'),
-    'the check is masked on the same full box',
+    normalized.includes(
+      "[data-part='marker']:empty::after{background-color:var(--_tone-mark);border-radius:inherit;content:'';inset:calc((var(--_marker)-var(--_core))/2);",
+    ),
   );
+  assert.ok(!/radial-gradient/.test(declarations), 'no gradient stands in for the dot');
+});
+
+/**
+ * The line is a hairline border from the middle of this row's first line to
+ * the middle of the next row's — the two markers' centres, whatever their
+ * size — and the markers stand above it with a halo of the ground. A border
+ * keeps its colour under forced colours where a background does not, and
+ * `dashed` is then a word rather than a gradient.
+ */
+test('runs the line from centre to centre as a border', () => {
   assert.match(
     declarations,
     /\[data-part='connector'\] \{[^}]*border-inline-start: var\(--_rule\) solid var\(--_line\)/,
   );
+  assert.ok(normalized.includes('inset-block-start:0.5lh'));
+  assert.ok(normalized.includes('inset-block-end:calc(-0.5lh-var(--_item-gap))'));
+  assert.ok(normalized.includes('box-shadow:000var(--_line-gap)var(--_surface)'));
   assert.ok(
     normalized.includes(
       "[data-connector='dashed'][data-part='connector']{border-block-start-style:dashed;border-inline-start-style:dashed;}",

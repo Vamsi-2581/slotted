@@ -157,6 +157,34 @@ export function createFocusScope(
   /** Recorded now, because a removed element no longer has a parent to walk. */
   const originParent = origin?.parentElement ?? null;
 
+  /**
+   * Every element beside the layer or beside one of its ancestors, as the
+   * document stood when the scope was made. A focus that lands under one of
+   * them lands on the page, and is pulled back; one that lands under an
+   * element added later, after the layer, lands in a layer opened over this
+   * one — a tour over a dialog, a popover from a control inside it — and is
+   * the reader moving up the stack.
+   */
+  const present = new WeakSet<Element>();
+  for (
+    let current: Element | null = node;
+    current?.parentElement;
+    current = current.parentElement
+  ) {
+    for (const sibling of current.parentElement.children) present.add(sibling);
+  }
+
+  function openedAbove(target: Node): boolean {
+    if (!(node.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING)) return false;
+    for (let current = target instanceof Element ? target : target.parentElement; current;) {
+      const parent: Element | null = current.parentElement;
+      if (parent === null) return false;
+      if (parent.contains(node)) return !present.has(current);
+      current = parent;
+    }
+    return false;
+  }
+
   /** Whether the node was given a tabindex here, and therefore owes one back. */
   let borrowedTabindex = false;
   let destroyed = false;
@@ -212,6 +240,7 @@ export function createFocusScope(
     if (!node.isConnected) return;
     const target = event.target;
     if (!(target instanceof Node) || node.contains(target)) return;
+    if (openedAbove(target)) return;
 
     recovering = true;
     const items = tabbables(node);

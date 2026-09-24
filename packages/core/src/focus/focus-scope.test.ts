@@ -224,6 +224,31 @@ describe('createFocusScope', () => {
     scope.destroy();
   });
 
+  /**
+   * A layer opened over this one — a tour over a dialog, a popover from a
+   * control inside it — is portalled after it and did not exist when this
+   * scope was made. Focus going there is the reader moving up the stack, and
+   * pulling it back would make the upper layer unreachable.
+   */
+  it('lets focus go to a layer opened over it, and still pulls it back from the page', () => {
+    const { page, layer } = mount('<button id="outside">page</button>', three);
+    const scope = createFocusScope(layer);
+    scope.enter();
+
+    const above = document.createElement('div');
+    above.innerHTML = '<button id="above">next step</button>';
+    document.body.append(above);
+    const card = above.querySelector('button') as HTMLElement;
+    card.focus();
+    expect(document.activeElement).toBe(card);
+
+    (page.querySelector('button') as HTMLElement).focus();
+    expect(layer.contains(document.activeElement)).toBe(true);
+
+    above.remove();
+    scope.destroy();
+  });
+
   it('lets focus leave when it is not containing', () => {
     const { page, layer } = mount('<button id="outside">page</button>', three);
     const scope = createFocusScope(layer, { contain: false });

@@ -94,6 +94,8 @@
     "./filter-bar/tokens.json": "./src/filter-bar/filter-bar.tokens.json",
     "./form/form.css": "./src/form/form.css",
     "./form/tokens.json": "./src/form/form.tokens.json",
+    "./fullscreen/fullscreen.css": "./src/fullscreen/fullscreen.css",
+    "./fullscreen/tokens.json": "./src/fullscreen/fullscreen.tokens.json",
     "./grid/grid.css": "./src/grid/grid.css",
     "./grid/tokens.json": "./src/grid/grid.tokens.json",
     "./highlight/highlight.css": "./src/highlight/highlight.css",

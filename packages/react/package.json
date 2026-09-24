@@ -339,6 +339,10 @@
       "types": "./dist/types/toolbar/index.d.ts",
       "import": "./dist/toolbar.js"
     },
+    "./transfer": {
+      "types": "./dist/types/transfer/index.d.ts",
+      "import": "./dist/transfer.js"
+    },
     "./typography": {
       "types": "./dist/types/typography/index.d.ts",
       "import": "./dist/typography.js"

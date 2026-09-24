@@ -100,3 +100,4 @@ export * from './upload';
 export * from './visually-hidden';
 export * from './splitter';
 export * from './split-button';
+export * from './transfer';

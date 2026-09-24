@@ -74,6 +74,7 @@ export default defineConfig({
         'tags-input': resolve(import.meta.dirname, 'src/tags-input/index.ts'),
         timeline: resolve(import.meta.dirname, 'src/timeline/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
+        transfer: resolve(import.meta.dirname, 'src/transfer/index.ts'),
         toggle: resolve(import.meta.dirname, 'src/toggle/index.ts'),
         'time-field': resolve(import.meta.dirname, 'src/time-field/index.ts'),
         'time-picker': resolve(import.meta.dirname, 'src/time-picker/index.ts'),

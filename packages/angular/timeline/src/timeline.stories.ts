@@ -442,15 +442,15 @@ export const Appearance: Story = {
   render: () => ({
     template: `
 <div class="slotted-demo-grid" data-columns="2">
-  ${scene('variant="outline"', 'A omissão: o anel separa o marcador da linha em qualquer esquema, e o tom pinta o anel e o ponto.', swatches('outline'))}
-  ${scene('variant="solid"', 'Um disco cheio no tom; um evento atual ganha um halo do seu próprio tom.', swatches('solid'))}
-  ${scene('variant="subtle"', 'A superfície do tom com uma aresta fina, que é o que o mantém visível em alto contraste.', swatches('subtle'))}
-  ${scene('variant="plain"', 'O ponto sem anel, para uma fila de commits ou um log: a caixa mantém o tamanho e a linha fica no centro.', swatches('plain'))}
+  ${scene('variant="outline"', 'O anel oco, na tinta do tom; o fundo da página tapa a linha dentro dele.', swatches('outline'))}
+  ${scene('variant="solid"', 'Um disco cheio na tinta do tom.', swatches('solid'))}
+  ${scene('variant="subtle"', 'A omissão: um núcleo sólido num disco suave do próprio tom.', swatches('subtle'))}
+  ${scene('variant="plain"', 'Só o núcleo, enfiado na linha, para uma fila de commits ou um log.', swatches('plain'))}
 </div>
 <div class="slotted-demo-grid" data-columns="1">
-  ${scene('size="sm"', 'Marcador de 21 px e tipo de 12 px, com o ritmo entre eventos a acompanhar.', twoEvents('size="sm"'))}
-  ${scene('size="md"', 'A omissão: marcador de 24 px sobre o tipo de 13 px do controlo médio.', twoEvents(''))}
-  ${scene('size="lg"', 'Marcador de 27 px e tipo de 14 px; a densidade restata os três.', twoEvents('size="lg"'))}
+  ${scene('size="sm"', 'Ponto de 11 px e tipo de 12 px, com o ritmo entre eventos a acompanhar.', twoEvents('size="sm"'))}
+  ${scene('size="md"', 'A omissão: ponto de 13 px, do tamanho do spinner, sobre o tipo de 13 px do controlo médio.', twoEvents(''))}
+  ${scene('size="lg"', 'Ponto de 15 px e tipo de 14 px; a densidade restata os três.', twoEvents('size="lg"'))}
 </div>`,
   }),
 };

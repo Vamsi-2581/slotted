@@ -390,25 +390,22 @@ export const Appearance: Story = {
       <Grid columns={2}>
         <Scene
           label='variant="outline"'
-          note="A omissão: o anel separa o marcador da linha em qualquer esquema, e o tom pinta o anel e o ponto."
+          note="O anel oco, na tinta do tom; o fundo da página tapa a linha dentro dele."
         >
           <Swatches variant="outline" />
         </Scene>
-        <Scene
-          label='variant="solid"'
-          note="Um disco cheio no tom; um evento atual ganha um halo do seu próprio tom."
-        >
+        <Scene label='variant="solid"' note="Um disco cheio na tinta do tom.">
           <Swatches variant="solid" />
         </Scene>
         <Scene
           label='variant="subtle"'
-          note="A superfície do tom com uma aresta fina, que é o que o mantém visível em alto contraste."
+          note="A omissão: um núcleo sólido num disco suave do próprio tom."
         >
           <Swatches variant="subtle" />
         </Scene>
         <Scene
           label='variant="plain"'
-          note="O ponto sem anel, para uma fila de commits ou um log: a caixa mantém o tamanho e a linha fica no centro."
+          note="Só o núcleo, enfiado na linha, para uma fila de commits ou um log."
         >
           <Swatches variant="plain" />
         </Scene>
@@ -416,19 +413,19 @@ export const Appearance: Story = {
       <Grid columns={1}>
         <Scene
           label='size="sm"'
-          note="Marcador de 21 px e tipo de 12 px, com o ritmo entre eventos a acompanhar."
+          note="Ponto de 11 px e tipo de 12 px, com o ritmo entre eventos a acompanhar."
         >
           <Invoice events={INVOICE.slice(0, 2)} size="sm" />
         </Scene>
         <Scene
           label='size="md"'
-          note="A omissão: marcador de 24 px sobre o tipo de 13 px do controlo médio."
+          note="A omissão: ponto de 13 px, do tamanho do spinner, sobre o tipo de 13 px do controlo médio."
         >
           <Invoice events={INVOICE.slice(0, 2)} />
         </Scene>
         <Scene
           label='size="lg"'
-          note="Marcador de 27 px e tipo de 14 px; a densidade restata os três."
+          note="Ponto de 15 px e tipo de 14 px; a densidade restata os três."
         >
           <Invoice events={INVOICE.slice(0, 2)} size="lg" />
         </Scene>

@@ -110,7 +110,7 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'O círculo sobre a linha, centrado na primeira linha do título. Vazio desenha um ponto; com conteúdo desenha-o dentro do anel; loading desenha o anel do spinner; complete o check.',
+      'O marcador sobre a linha, centrado na primeira linha do título. Vazio desenha um ponto do tamanho do spinner; com glifo ou avatar desenha um emblema; loading desenha o spinner no lugar do ponto; complete vaza um check no disco.',
   },
   {
     part: 'connector',
@@ -237,7 +237,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'statuses',
     title: 'O que um evento pode ser',
-    note: 'Cada estado é uma forma além de uma cor: pendente é um anel com um ponto, atual é um alvo, concluído é um disco cheio com um check, a carregar roda o anel partilhado. autoComplete deriva concluído para o lado passado do atual e traceja o futuro.',
+    note: 'Cada estado é uma forma além de uma cor: pendente é a forma do variant, atual é um disco cheio com um anel, concluído é um disco cheio com um check vazado, a carregar é o spinner do tamanho do ponto. autoComplete deriva concluído para o lado passado do atual e traceja o futuro.',
     snippet: defineSnippet({
       id: 'timeline-react-statuses',
       language: 'tsx',
@@ -411,7 +411,7 @@ export const REACT_TIMELINE_DOCS = {
       [
         'variant',
         "'solid' | 'outline' | 'subtle' | 'plain'",
-        'outline',
+        'subtle',
         'Timeline',
         'A aparência do marcador, herdada pelos eventos',
       ],
@@ -614,7 +614,7 @@ export const REACT_TIMELINE_DOCS = {
         language: 'css',
         label: 'Retunar a família para uma aplicação',
         source:
-          "[data-ui='timeline'] {\n  --slotted-timeline-marker-ratio: 1.25;\n  --slotted-timeline-connector-thickness: 1px;\n  --slotted-timeline-opposite-size: 10rem;\n}",
+          "[data-ui='timeline'] {\n  --slotted-timeline-core-ratio: 0.6;\n  --slotted-timeline-connector-thickness: 2px;\n  --slotted-timeline-opposite-size: 10rem;\n}",
       }),
     ],
   },

@@ -112,7 +112,7 @@ export function Timeline({
     timeFormat: timeFormat ?? defaults.timeFormat ?? 'absolute',
     timeZone: timeZone ?? defaults.timeZone,
     tone: tone ?? defaults.tone ?? 'secondary',
-    variant: variant ?? defaults.variant ?? 'outline',
+    variant: variant ?? defaults.variant ?? 'subtle',
   };
 
   /**

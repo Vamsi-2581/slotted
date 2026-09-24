@@ -87,6 +87,7 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `prose`                         | `scroll-margin-block-start` dos headings soma `--slotted-page-sticky-top` ao ar de `_flow`, como `section` lê a propriedade: um salto nativo (`#id` na URL) aterra sob a chrome de `page`; `table-of-contents` compensa ao rolar por si              | —                                         | `2026-09-16-table-of-contents-design.md` §5                                |
 | `page-header`, `section`        | `deferTo: "anchor-nav"` nos três ponteiros dos contratos passa a `table-of-contents`, o nome com que a família foi entregue                                                                                                                          | —                                         | `2026-09-16-table-of-contents-capability-inventory.md` §5                  |
 | `list-item`                     | hover e press de uma linha cujo alvo é um descendente esticado (`title::after` de `data-list`) sem que outra família escreva `--_fill`: um atributo ou uma parte pública que a linha leia                                                            | —                                         | `2026-09-24-data-list-self-assessment.md` §5                               |
+| `chart`                         | a tela cheia própria (`requestFullscreen` no host, camada fixa) passa a `@slotted/core/fullscreen`: restauro de contexto, `webkit`, portal que segue e erro emitido                                                                                  | —                                         | `2026-09-24-fullscreen-design.md` §7                                       |
 
 As reaberturas sem barreira entram no passe de revisão (`docs/process/implementation-review.md`).
 As que têm barreira entram na onda em que a barreira cai.
@@ -713,6 +714,12 @@ slNotificationActions]`, `[slNotificationCenterActions | Footer | Empty]`,
   o contexto; rótulo e ícone acompanham o estado. Fallback "expandir no layout"
   quando a API não existe. Nunca bloqueia Escape do navegador. Motor:
   `@slotted/core/fullscreen`.
+
+  Entregue em 2026-09-24. Inventário e decisões em
+  `docs/history/designs/2026-09-24-fullscreen-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-24-fullscreen-self-assessment.md`. `mode` é
+  `auto | layout`: a recusa da API entra em `layout` e emite o erro. Correção
+  partilhada: a raiz de `@slotted/core/portal` segue o elemento em tela cheia.
 
 ## Onda 12 — Extended de custo alto
 

@@ -43,6 +43,7 @@ const FAMILIES = [
   { family: 'date-range-picker', frame: " [data-part='control']" },
   { family: 'time-range-picker', frame: " [data-part='control']" },
   { family: 'datetime-range-picker', frame: " [data-part='control']" },
+  { family: 'entity-picker', frame: " > [data-part='control']" },
 ];
 
 const INWARD = 'calc(var(--slotted-focus-ring-offset, 2px) * -1)';

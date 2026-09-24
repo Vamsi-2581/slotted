@@ -21,6 +21,7 @@ const FAMILIES = [
   { family: 'select', part: 'item' },
   { family: 'combobox', part: 'item' },
   { family: 'multi-select', part: 'item' },
+  { family: 'entity-picker', part: 'item' },
 ];
 
 function stylesheet(family) {

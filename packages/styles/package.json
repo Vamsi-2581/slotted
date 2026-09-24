@@ -84,6 +84,8 @@
     "./divider/tokens.json": "./src/divider/divider.tokens.json",
     "./drawer/drawer.css": "./src/drawer/drawer.css",
     "./drawer/tokens.json": "./src/drawer/drawer.tokens.json",
+    "./entity-picker/entity-picker.css": "./src/entity-picker/entity-picker.css",
+    "./entity-picker/tokens.json": "./src/entity-picker/entity-picker.tokens.json",
     "./field-group/field-group.css": "./src/field-group/field-group.css",
     "./field-group/tokens.json": "./src/field-group/field-group.tokens.json",
     "./field/field.css": "./src/field/field.css",

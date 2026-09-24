@@ -33,6 +33,11 @@ const LAYERS = [
     layer: "[data-ui='multi-select'][data-part='positioner']",
     lateral: 'fade',
   },
+  {
+    family: 'entity-picker',
+    layer: "[data-ui='entity-picker'][data-part='positioner']",
+    lateral: 'fade',
+  },
   { family: 'menu', layer: "[data-ui='menu']", lateral: 'slide' },
   { family: 'popover', layer: "[data-ui='popover']", lateral: 'fade' },
   { family: 'tooltip', layer: "[data-ui='tooltip']", lateral: 'fade' },

@@ -159,24 +159,38 @@ test('says chosen with the edge and the dot, and leaves the ground alone', () =>
 });
 
 /**
- * The halo, as `checkbox` draws it: the label's pseudo-element sized to the
- * circle and laid over it, its shadow spread to the halo size, behind the
- * control inside the item's own stacking context, lit by hover alone.
+ * The halo, as `checkbox` draws it: a wash behind the circle and the label
+ * together, standing half the gap off the circle and half as far again past
+ * the text, lit by hover alone. Its corner is
+ * the circle's radius plus that half, so a one-line wash is a pill whose ends
+ * are concentric with the circle.
  */
-test('draws the same halo checkbox does, behind the circle, lit by hover alone', () => {
+test('lights the circle and its label as one wash, lit by hover alone', () => {
+  const label = rule(`${root}:not([data-variant='tile']) [data-part='label']`);
+  assert.match(label, /justify-self:start/);
+  assert.match(label, /position:relative/);
   const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::after`);
-  assert.match(halo, /block-size:var\(--_size\)/);
-  assert.match(halo, /inline-size:var\(--_size\)/);
-  assert.match(halo, /inset-block-start:var\(--_lift\)/);
-  assert.match(halo, /direction:var\(--_direction\)/);
-  assert.match(halo, /border-radius:var\(--slotted-radius-full,9999px\)/);
   assert.match(
     halo,
-    /box-shadow:0 0 0 calc\(\(var\(--_halo-size\) - var\(--_size\)\) \/ 2\) var\(--slotted-radio-group-halo-color,var\(--slotted-tone-accent-text\)\)/,
+    /background-color:var\(--slotted-radio-group-halo-color,var\(--slotted-tone-accent-text\)\)/,
+  );
+  assert.match(halo, /border-radius:calc\(var\(--_size\) \/ 2 \+ var\(--_halo-spread\)\)/);
+  assert.match(halo, /inset-block:calc\(var\(--_lift\) - var\(--_halo-spread\)\)/);
+  assert.match(halo, /inset-inline-end:calc\(-1\.5 \* var\(--_halo-spread\)\)/);
+  assert.match(
+    halo,
+    /inset-inline-start:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\) \+ var\(--_halo-spread\)\)\)/,
+  );
+  assert.match(halo, /direction:var\(--_direction\)/);
+  assert.doesNotMatch(halo, /box-shadow/);
+  assert.match(
+    rule(`${root}:not([data-variant='tile']) [data-part='label']:empty::after`),
+    /inset-inline-end:calc\(var\(--_gap\) - var\(--_halo-spread\)\)/,
   );
   assert.match(halo, /opacity:0/);
   assert.match(halo, /z-index:-1/);
-  assert.match(rule(root), /--_halo-size:var\(--slotted-selection-halo-size,32px\)/);
+  assert.match(rule(root), /--_halo-spread:calc\(var\(--_gap\) \/ 2\)/);
+  assert.doesNotMatch(normalized, /--slotted-selection-halo-size/);
   assert.match(rule(part('item')), /isolation:isolate/);
   assert.match(rule(part('item')), /position:relative/);
   assert.ok(
@@ -192,10 +206,12 @@ test('draws the same halo checkbox does, behind the circle, lit by hover alone',
   );
   assert.doesNotMatch(hover, /background-color/);
   assert.match(
-    rule(
-      `${root}[data-label-placement='start'] [data-part='label']::before,${root}[data-label-placement='start'] [data-part='label']::after`,
-    ),
-    /inset-inline-end:0;inset-inline-start:auto/,
+    rule(`${root}[data-label-placement='start'] [data-part='label']`),
+    /justify-self:stretch/,
+  );
+  assert.match(
+    rule(`${root}[data-label-placement='start'] [data-part='label']::after`),
+    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\) \+ var\(--_halo-spread\)\)\);inset-inline-start:calc\(-1\.5 \* var\(--_halo-spread\)\)/,
   );
 });
 
@@ -210,8 +226,8 @@ test('lifts the circle onto the first line of a label that wraps', () => {
 
 /**
  * The row is its line (CK3), as `checkbox` keeps it: no minimum and no slack
- * on the label, and the WCAG 2.2 target is the halo's own box around the
- * circle.
+ * on the label, and the WCAG 2.2 target is the label's `::before` around
+ * the circle.
  */
 test('keeps the row at its line and hits the target around the circle', () => {
   const label = rule(part('label'));
@@ -226,7 +242,14 @@ test('keeps the row at its line and hits the target around the circle', () => {
     target,
     /inset-block-start:calc\(var\(--_lift\) \+ var\(--_size\) - var\(--_target\)\)/,
   );
-  assert.match(target, /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2\)/);
+  assert.match(
+    target,
+    /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2 - var\(--_size\) - var\(--_gap\)\)/,
+  );
+  assert.match(
+    rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
+    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\)\)\);inset-inline-start:auto/,
+  );
   assert.doesNotMatch(target, /box-shadow|opacity/);
   assert.match(target, /direction:var\(--_direction\)/);
   assert.ok(normalized.includes(`${root}{--_direction:ltr;}`));

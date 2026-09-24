@@ -317,6 +317,29 @@
   </div>
 </section>
 
+<!--
+  A box with no text beside it, in a cell a few pixels taller than the box: the
+  Angular binding renders an empty label, and the hover wash closes around the
+  box instead of reaching for text that is not there.
+-->
+<section data-scene="cell">
+  <div
+    style="
+      align-items: center;
+      block-size: 28px;
+      border: 1px solid var(--slotted-border-subtle);
+      display: inline-flex;
+      padding-inline: 8px;
+    "
+  >
+    <div data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
+      <input data-part="control" type="checkbox" id="cb-cell" aria-label="Selecionar linha" />
+      <span data-part="indicator"></span>
+      <label data-part="label" for="cb-cell"></label>
+    </div>
+  </div>
+</section>
+
 <section data-scene="tile">
   <div data-ui="grid" data-part="root" data-min-item-width="sm" data-gap="4">
     <div

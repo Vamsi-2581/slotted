@@ -156,27 +156,48 @@ test('draws the glyph in a box the square clears by a whole pixel on every side'
 });
 
 /**
- * The halo (CK1): a circle twice the box, behind it, lit under the pointer. It
- * is the label's pseudo-element because the label toggles the control, and it
- * sits at a negative stack level inside the root's own stacking context. It is
- * the box's own circle with its shadow spread to the halo size — ink, so the
- * thirty-two pixels are scrollable overflow nowhere.
+ * The halo (CK1, CK8): a wash behind the box and the label together, lit under
+ * the pointer. It is the label's pseudo-element because the label toggles the
+ * control, and it sits at a negative stack level inside the root's own
+ * stacking context, under the text.
+ *
+ * It lights the target rather than a circle beside it. A 32px circle around a
+ * 16px box reached past the gap to the label in seven of nine size-and-density
+ * pairs, drawing under the label's first letter, and past the edge of a small
+ * table cell. The wash stands half the gap off the box on every side, and
+ * half as far again past the end of the text, with the box's corner radius
+ * plus that half, so its corner is concentric with the box's. The label hugs its text, so the wash ends where
+ * the words end and the empty row beside them stops toggling the box.
  */
-test('draws the halo behind the box as ink on the label, lit by hover alone', () => {
+test('lights the box and its label as one wash, lit by hover alone', () => {
+  const label = rule(`${root}:not([data-variant='tile']) [data-part='label']`);
+  assert.match(label, /justify-self:start/);
+  assert.match(label, /position:relative/);
   const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::after`);
-  assert.match(halo, /block-size:var\(--_size\)/);
-  assert.match(halo, /inline-size:var\(--_size\)/);
-  assert.match(halo, /inset-block-start:var\(--_lift\)/);
-  assert.match(halo, /direction:var\(--_direction\)/);
-  assert.match(halo, /border-radius:var\(--slotted-radius-full,9999px\)/);
   assert.match(
     halo,
-    /box-shadow:0 0 0 calc\(\(var\(--_halo-size\) - var\(--_size\)\) \/ 2\) var\(--slotted-checkbox-halo-color,var\(--slotted-tone-accent-text\)\)/,
+    /background-color:var\(--slotted-checkbox-halo-color,var\(--slotted-tone-accent-text\)\)/,
   );
-  assert.doesNotMatch(halo, /background-color/);
+  assert.match(
+    halo,
+    /border-radius:calc\(var\(--slotted-checkbox-radius,var\(--slotted-radius-xs,2px\)\) \+ var\(--_halo-spread\)\)/,
+  );
+  assert.match(halo, /inset-block:calc\(var\(--_lift\) - var\(--_halo-spread\)\)/);
+  assert.match(halo, /inset-inline-end:calc\(-1\.5 \* var\(--_halo-spread\)\)/);
+  assert.match(
+    halo,
+    /inset-inline-start:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\) \+ var\(--_halo-spread\)\)\)/,
+  );
+  assert.match(halo, /direction:var\(--_direction\)/);
+  assert.doesNotMatch(halo, /box-shadow/);
+  assert.match(
+    rule(`${root}:not([data-variant='tile']) [data-part='label']:empty::after`),
+    /inset-inline-end:calc\(var\(--_gap\) - var\(--_halo-spread\)\)/,
+  );
   assert.match(halo, /opacity:0/);
   assert.match(halo, /z-index:-1/);
-  assert.match(rule(root), /--_halo-size:var\(--slotted-selection-halo-size,32px\)/);
+  assert.match(rule(root), /--_halo-spread:calc\(var\(--_gap\) \/ 2\)/);
+  assert.doesNotMatch(normalized, /--slotted-selection-halo-size/);
   assert.match(rule(root), /isolation:isolate/);
   assert.match(rule(root), /position:relative/);
   assert.ok(
@@ -192,12 +213,15 @@ test('draws the halo behind the box as ink on the label, lit by hover alone', ()
     /border-color:var\(--slotted-checkbox-hover-border-color,var\(--slotted-tone-accent-border\)\)/,
   );
   assert.doesNotMatch(hover, /background-color/);
-  /* The other placement puts the halo on the other side. */
+  /* The other placement stretches the label to the box at the row's end, and
+     the wash runs from the text to past the box. */
   assert.match(
-    rule(
-      `${root}[data-label-placement='start'] [data-part='label']::before,${root}[data-label-placement='start'] [data-part='label']::after`,
-    ),
-    /inset-inline-end:0;inset-inline-start:auto/,
+    rule(`${root}[data-label-placement='start'] [data-part='label']`),
+    /justify-self:stretch/,
+  );
+  assert.match(
+    rule(`${root}[data-label-placement='start'] [data-part='label']::after`),
+    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\) \+ var\(--_halo-spread\)\)\);inset-inline-start:calc\(-1\.5 \* var\(--_halo-spread\)\)/,
   );
 });
 
@@ -219,8 +243,8 @@ test('lifts the box onto the first line of a label that wraps', () => {
 /**
  * The row is its line (CK3). The label carries no minimum and no slack — with
  * `content-box` the two added up to 28.5px at `md` for one line of text — and
- * the WCAG 2.2 target the box is too small to be is the halo's own box, hit
- * around the box rather than laid out beside it.
+ * the WCAG 2.2 target the box is too small to be is the label's `::before`,
+ * hit around the box rather than laid out beside it.
  */
 test('keeps the row at its line and hits the target around the box', () => {
   const label = rule(part('label'));
@@ -236,7 +260,15 @@ test('keeps the row at its line and hits the target around the box', () => {
     target,
     /inset-block-start:calc\(var\(--_lift\) \+ var\(--_size\) - var\(--_target\)\)/,
   );
-  assert.match(target, /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2\)/);
+  /* The label is the containing block, and it starts a gap past the box. */
+  assert.match(
+    target,
+    /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2 - var\(--_size\) - var\(--_gap\)\)/,
+  );
+  assert.match(
+    rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
+    /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\)\)\);inset-inline-start:auto/,
+  );
   assert.doesNotMatch(target, /box-shadow|opacity/);
   /* Placed in the root's direction, not the label's: a label in another
      script inside the row would otherwise send both to the far side. */

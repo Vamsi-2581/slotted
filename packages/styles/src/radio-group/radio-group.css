@@ -26,10 +26,10 @@
     --_gap: var(--slotted-control-gap-md, 8px);
     --_line-height: var(--slotted-radio-group-line-height, var(--slotted-line-height-md, 1.5));
     /**
-     * The halo behind the circle: the ring of ink that answers the pointer,
-     * the same one `checkbox` draws behind its square.
+     * The air the halo keeps around the circle and past the end of the text:
+     * half the gap between them, for the reason `checkbox` records.
      */
-    --_halo-size: var(--slotted-selection-halo-size, 32px);
+    --_halo-spread: calc(var(--_gap) / 2);
     /**
      * The target: the WCAG 2.2 minimum, hit around the circle by the halo's
      * own box rather than laid out beside it, for the reason `checkbox`
@@ -196,16 +196,30 @@
     grid-column: 2;
     grid-row: 1;
     overflow-wrap: anywhere;
-    padding-inline-start: var(--_gap);
+  }
+
+  /**
+   * The gap between the control and its text is the grid's, not the label's
+   * padding: a padding is laid out in the label's own direction, and a label
+   * in Arabic inside a row in Portuguese put it on the far side, against
+   * nothing, with the text against the control.
+   */
+  [data-ui='radio-group'] [data-part='item']:has(> [data-part='label']) {
+    column-gap: var(--_gap);
+  }
+
+  [data-ui='radio-group'][data-part='root']:not([data-variant='tile']) [data-part='label'] {
+    justify-self: start;
+    position: relative;
   }
 
   /**
    * The target and the halo, as `checkbox` draws them and for the reasons it
    * records: the label's `::before` is the WCAG-minimum square, ending where
    * the circle ends so it never hangs past the item's end or bottom; its
-   * `::after` is the circle's own ring of ink, centred, with its shadow spread
-   * to the halo size, in the accent's text tone rather than its surface tone,
-   * which is a ground and disappeared into the page in `dark` and in
+   * `::after` is the wash behind the circle and the label, concentric with
+   * the circle, in the accent's text tone rather than its surface tone, which
+   * is a ground and disappeared into the page in `dark` and in
    * `high-contrast` (CK7). The tile has neither; its surface answers the
    * pointer.
    */
@@ -215,26 +229,32 @@
     direction: var(--_direction);
     inline-size: var(--_target);
     inset-block-start: calc(var(--_lift) + var(--_size) - var(--_target));
-    inset-inline-start: calc((var(--_size) - var(--_target)) / 2);
+    inset-inline-start: calc((var(--_size) - var(--_target)) / 2 - var(--_size) - var(--_gap));
     position: absolute;
     z-index: -1;
   }
 
   [data-ui='radio-group'][data-part='root']:not([data-variant='tile']) [data-part='label']::after {
-    block-size: var(--_size);
-    border-radius: var(--slotted-radius-full, 9999px);
-    box-shadow: 0 0 0 calc((var(--_halo-size) - var(--_size)) / 2)
-      var(--slotted-radio-group-halo-color, var(--slotted-tone-accent-text));
+    background-color: var(--slotted-radio-group-halo-color, var(--slotted-tone-accent-text));
+    border-radius: calc(var(--_size) / 2 + var(--_halo-spread));
     content: '';
     direction: var(--_direction);
-    inline-size: var(--_size);
-    inset-block-start: var(--_lift);
-    inset-inline-start: 0;
+    inset-block: calc(var(--_lift) - var(--_halo-spread));
+    inset-inline-end: calc(-1.5 * var(--_halo-spread));
+    inset-inline-start: calc(-1 * (var(--_size) + var(--_gap) + var(--_halo-spread)));
     opacity: 0;
     position: absolute;
     transition: opacity var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
     z-index: -1;
+  }
+
+  /* A label with nothing in it — the Angular binding renders one whether or
+     not content is projected — has no text to wash, so the wash closes around
+     the circle at the same distance on all four sides. */
+  [data-ui='radio-group'][data-part='root']:not([data-variant='tile'])
+    [data-part='label']:empty::after {
+    inset-inline-end: calc(var(--_gap) - var(--_halo-spread));
   }
 
   [data-ui='radio-group'] [data-part='description'] {
@@ -249,7 +269,6 @@
     margin: 0;
     overflow-wrap: anywhere;
     padding-block-start: var(--_description-gap);
-    padding-inline-start: var(--_gap);
   }
 
   /* ── Placement ────────────────────────────────────────────────────────── */
@@ -276,16 +295,22 @@
   [data-ui='radio-group'][data-part='root'][data-label-placement='start']
     [data-part='description'] {
     grid-column: 1;
-    padding-inline-end: var(--_gap);
-    padding-inline-start: 0;
+  }
+
+  [data-ui='radio-group'][data-part='root'][data-label-placement='start'] [data-part='label'] {
+    justify-self: stretch;
   }
 
   [data-ui='radio-group'][data-part='root'][data-label-placement='start']
-    [data-part='label']::before,
+    [data-part='label']::before {
+    inset-inline-end: calc(-1 * (var(--_size) + var(--_gap)));
+    inset-inline-start: auto;
+  }
+
   [data-ui='radio-group'][data-part='root'][data-label-placement='start']
     [data-part='label']::after {
-    inset-inline-end: 0;
-    inset-inline-start: auto;
+    inset-inline-end: calc(-1 * (var(--_size) + var(--_gap) + var(--_halo-spread)));
+    inset-inline-start: calc(-1.5 * var(--_halo-spread));
   }
 
   /* ── States ───────────────────────────────────────────────────────────── */

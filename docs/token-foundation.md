@@ -21,7 +21,7 @@ convention.
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
 | `primitive` | A value with no meaning attached: a step on a scale.           | 113    |
-| `semantic`  | What a value is for: a surface, a border, a control, a target. | 111    |
+| `semantic`  | What a value is for: a surface, a border, a control, a target. | 110    |
 | `component` | One family adjusting a semantic value for itself.              | 27     |
 
 A token is a **scale root** when it states a value rather than composing one: a
@@ -493,15 +493,19 @@ and the circle `radio-group` draws — and the halo that answers the pointer
 behind it. It varies by the family's `size` step and by nothing else: the
 control glyph scale shrinks with density, and a box that followed it fell to
 twelve pixels at `dense`, below the size a mark can be drawn in. The touch
-target is not the box either; it is the halo, which `--slotted-target-min` is
-inside of.
+target is not the box either; it is a transparent square of
+`--slotted-target-min` around it.
+
+The halo has no size token. It reaches half the gap between the control and
+its label, `--slotted-control-gap-<step>` divided by two, so it follows density
+through the gap and never paints under the label. A stated 32px diameter
+reached past the gap in seven of the nine size-and-density pairs.
 
 | Token                              | Default value |
 | ---------------------------------- | ------------- |
 | `--slotted-selection-size-sm`      | `14px`        |
 | `--slotted-selection-size-md`      | `16px`        |
 | `--slotted-selection-size-lg`      | `18px`        |
-| `--slotted-selection-halo-size`    | `32px`        |
 | `--slotted-selection-halo-opacity` | `0.12`        |
 
 ## Highlight

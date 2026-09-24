@@ -905,13 +905,6 @@
       "root": true
     },
     {
-      "name": "--slotted-selection-halo-size",
-      "layer": "semantic",
-      "axis": "base",
-      "type": "length",
-      "root": true
-    },
-    {
       "name": "--slotted-selection-halo-opacity",
       "layer": "semantic",
       "axis": "base",

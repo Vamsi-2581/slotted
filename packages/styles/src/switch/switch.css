@@ -263,7 +263,33 @@
     /** A label that is one unbroken token — an id, a hash, a URL — breaks. */
     overflow-wrap: anywhere;
     padding-block: var(--_label-slack);
-    padding-inline-start: var(--_gap);
+  }
+
+  /**
+   * The gap between the pill and the text is the grid's, opened only beside a
+   * label, and not the label's padding: a padding is laid out in the label's
+   * own direction, and a label in Arabic inside a row in Portuguese took the
+   * gap on its far side and set its text against the pill.
+   *
+   * The padding was also what made the gap toggle the setting. The control
+   * takes that over: it grows by the gap towards the text and gives the growth
+   * back as a negative margin, as it gives back its block overhang, so the row
+   * is no wider and a press between the pill and the words still lands on it.
+   */
+  [data-ui='switch'][data-part='root']:has(> [data-part='label']) {
+    column-gap: var(--_gap);
+  }
+
+  /* Beside the pill, the label is as wide as its words: stretched across the
+     column, a label in Arabic in a row in Portuguese aligned its text to its
+     own start and set it at the far end of the row, away from the pill. */
+  [data-ui='switch'] > [data-part='label'] {
+    justify-self: start;
+  }
+
+  [data-ui='switch'][data-part='root']:has(> [data-part='label']) > [data-part='control'] {
+    inline-size: calc(var(--_track-inline) + var(--_gap));
+    margin-inline-end: calc(-1 * var(--_gap));
   }
 
   /**
@@ -280,15 +306,14 @@
     margin: 0;
     overflow-wrap: anywhere;
     padding-block-start: var(--_description-gap);
-    padding-inline-start: var(--_gap);
   }
 
   /* ── Placement ────────────────────────────────────────────────────────
    *
    * The pill on the other side of its label, which is the settings row every
    * product writes: the label takes the free width and the control sits at the
-   * end. Two columns swap and the padding that owns the gap swaps with them, so
-   * the distance is the same number in both arrangements and in both writing
+   * end. Two columns swap and the column gap stays between them, so the
+   * distance is the same number in both arrangements and in both writing
    * directions.
    */
 
@@ -309,8 +334,18 @@
   [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='label'],
   [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='description'] {
     grid-column: 1;
-    padding-inline-end: var(--_gap);
-    padding-inline-start: 0;
+  }
+
+  /* Before the pill, the label takes the row, so the row is the settings row. */
+  [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='label'] {
+    justify-self: stretch;
+  }
+
+  /* The control reaches across the gap towards the label, now on its start side. */
+  [data-ui='switch'][data-part='root'][data-label-placement='start']:has(> [data-part='label'])
+    > [data-part='control'] {
+    margin-inline-end: 0;
+    margin-inline-start: calc(-1 * var(--_gap));
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────

@@ -60,18 +60,13 @@ test('every selection control reads the control gap the theme restates per densi
 });
 
 /**
- * Where the gap lives. `checkbox` and `radio-group` put it on the grid, as the
- * column gap of the element that holds a label, because a label's own padding
- * is laid out in the label's direction: a label in Arabic inside a row in
- * Portuguese put the gap on the far side and its text against the control.
- * Their labels hug their text so the hover wash ends where the words do, and
- * the wash covers the gap, so the gap still toggles the control. `switch`
- * keeps the gap as the label's padding: the pill has no wash, and the padding
- * is what makes the gap toggle the setting. It carries the same defect with a
- * label in the other direction, recorded in `docs/process/build-order.md`.
+ * Where the gap lives: on the grid, as the column gap of the element that
+ * holds a label, and never as the label's own padding. A padding is laid out
+ * in the label's direction, so a label in Arabic inside a row in Portuguese
+ * put the gap on the far side and its text against the control. The column
+ * gap opens only beside a label, so a control named by `aria-label` alone is
+ * as wide as itself.
  */
-const GAP_ON = { checkbox: 'grid', 'radio-group': 'grid', switch: 'label' };
-
 test('every selection control puts that gap, and nothing else, between the control and its label', () => {
   for (const family of FAMILIES) {
     const all = rules(normalized(family));
@@ -81,22 +76,13 @@ test('every selection control puts that gap, and nothing else, between the contr
     );
     assert.ok(label, `${family} has no label rule`);
     assert.doesNotMatch(label.body, /margin-inline|column-gap|gap:/, `${family} adds to the gap`);
+    assert.doesNotMatch(label.body, /padding-inline/, `${family} label pads the gap again`);
     const grid = all.filter(({ body }) => /column-gap:var\(--_gap\)/.test(body));
-    if (GAP_ON[family] === 'grid') {
-      assert.doesNotMatch(label.body, /padding-inline/, `${family} label pads the gap again`);
-      assert.equal(grid.length, 1, `${family} states the gap on the grid ${grid.length} times`);
-      assert.match(
-        grid[0].selector,
-        /:has\(>\[data-part='label'\]\)$/,
-        `${family} opens the gap when there is no label beside the control`,
-      );
-    } else {
-      assert.match(
-        label.body,
-        /padding-inline-start:var\(--_gap\)/,
-        `${family} label pads by another number`,
-      );
-      assert.equal(grid.length, 0, `${family} states the gap twice`);
-    }
+    assert.equal(grid.length, 1, `${family} states the gap on the grid ${grid.length} times`);
+    assert.match(
+      grid[0].selector,
+      /:has\(>\[data-part='label'\]\)$/,
+      `${family} opens the gap when there is no label beside the control`,
+    );
   }
 });

@@ -1,6 +1,6 @@
 # Halo de seleção: faixa sobre o alvo
 
-Famílias: `checkbox`, `radio-group`. Pendência registrada: `switch`.
+Famílias: `checkbox`, `radio-group`; `switch` pela mudança do `gap`.
 
 ## Defeito
 
@@ -32,4 +32,4 @@ O hover pinta o alvo inteiro: uma faixa atrás do controle e do rótulo, desenha
 - Mudança de token público: um tema que definia `--slotted-selection-halo-size` deixa de ter efeito. Não há consumidor fora de `demos/*`, e nenhuma demo o define.
 - A área clicável do rótulo passa a ser o texto mais a faixa, e não mais a largura da coluna.
 - `table` e `data-grid` continuam a zerar `--slotted-selection-halo-opacity` nas suas células de seleção.
-- `switch` mantém o `gap` como `padding` do rótulo e o defeito de direção. A pílula não tem faixa, e o `padding` é o que faz o `gap` alternar a configuração. A reabertura está em `docs/process/build-order.md`.
+- `switch` segue a mesma regra de `gap` sem ganhar faixa. O `gap` passa para o `column-gap` da raiz, e o rótulo abraça o texto na disposição `end`. Na disposição `start`, a linha de configurações, o rótulo continua esticado. O `padding` do rótulo era o que fazia o `gap` alternar a configuração. Agora o controle transparente cresce o `gap` em direção ao texto e devolve o crescimento como margem negativa, o mesmo padrão da saliência no eixo de bloco. A linha não fica mais larga.

@@ -186,6 +186,41 @@ test('lays the label beside the pill and the description under the label', () =>
 });
 
 /**
+ * The gap between the pill and the text is the grid's column gap, opened only
+ * when a label stands beside the pill. It was the label's inline-start
+ * padding, and a padding is laid out in the label's own direction: a label in
+ * Arabic inside a row in Portuguese took the gap on its far side and set its
+ * text against the pill. The padding was also what made the gap toggle the
+ * setting, so the control takes that job over: it grows by the gap towards the
+ * text and gives the growth back as a negative margin, the pattern it already
+ * uses for its block overhang, so the row is no wider and the gap still
+ * presses the switch.
+ */
+test('opens the gap on the grid and keeps it pressable in both arrangements', () => {
+  assert.match(rule(`${root}:has(>[data-part='label'])`), /column-gap:var\(--_gap\)/);
+  for (const selector of [
+    `${ui}>[data-part='label']`,
+    `${ui}>[data-part='description']`,
+    `${root}[data-label-placement='start']>[data-part='label'],${root}[data-label-placement='start']>[data-part='description']`,
+  ]) {
+    assert.doesNotMatch(rule(selector), /padding-inline/, `${selector} pads the gap again`);
+  }
+  /* Beside the pill the label hugs its words; before it, it takes the row. */
+  assert.ok(normalized.includes(`${ui}>[data-part='label']{justify-self:start;}`));
+  assert.match(
+    rule(`${root}[data-label-placement='start']>[data-part='label']`),
+    /justify-self:stretch/,
+  );
+  const reach = rule(`${root}:has(>[data-part='label'])>[data-part='control']`);
+  assert.match(reach, /inline-size:calc\(var\(--_track-inline\) \+ var\(--_gap\)\)/);
+  assert.match(reach, /margin-inline-end:calc\(-1 \* var\(--_gap\)\)/);
+  assert.match(
+    rule(`${root}[data-label-placement='start']:has(>[data-part='label'])>[data-part='control']`),
+    /margin-inline-end:0;margin-inline-start:calc\(-1 \* var\(--_gap\)\)/,
+  );
+});
+
+/**
  * The pill at the end of the row, which is the settings row every product
  * writes. `1fr` on the label's column rather than `max-content`, so a list of
  * rows ends with every control at the same distance from the edge.

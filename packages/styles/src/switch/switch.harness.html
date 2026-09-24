@@ -50,6 +50,37 @@
   </div>
 </section>
 
+<!--
+  A label in another script than the row: the gap stays between the pill and
+  the text, on the row's side, and a press inside it toggles the switch.
+-->
+<section data-scene="direction">
+  <div data-ui="stack" data-part="root" data-gap="6">
+    <span
+      data-ui="switch"
+      data-part="root"
+      data-size="md"
+      data-indicator="mark"
+      data-label-placement="end"
+    >
+      <input data-part="control" id="direction-end" type="checkbox" role="switch" />
+      <span data-part="track"><span data-part="thumb"></span></span>
+      <label data-part="label" for="direction-end" lang="ar" dir="rtl">تفعيل الإشعارات</label>
+    </span>
+    <span
+      data-ui="switch"
+      data-part="root"
+      data-size="md"
+      data-indicator="mark"
+      data-label-placement="start"
+    >
+      <input data-part="control" id="direction-start" type="checkbox" role="switch" />
+      <span data-part="track"><span data-part="thumb"></span></span>
+      <label data-part="label" for="direction-start" lang="ar" dir="rtl">تفعيل الإشعارات</label>
+    </span>
+  </div>
+</section>
+
 <section data-scene="sizes">
   <div data-ui="stack" data-part="root" data-gap="6">
     <span

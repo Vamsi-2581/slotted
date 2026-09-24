@@ -72,6 +72,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `timeline` | [2026-09-14](2026-09-14-timeline-capability-inventory.md) | [2026-09-14](2026-09-14-timeline-design.md) | [2026-09-14](2026-09-14-timeline-self-assessment.md) |
 | `data-list` | [2026-09-24](2026-09-24-data-list-capability-inventory.md) | [2026-09-24](2026-09-24-data-list-design.md) | [2026-09-24](2026-09-24-data-list-self-assessment.md) |
 | `transfer` | [2026-09-24 §1](2026-09-24-transfer-design.md) | [2026-09-24](2026-09-24-transfer-design.md) | [2026-09-24](2026-09-24-transfer-self-assessment.md) |
+| `entity-picker` | [2026-09-24 §1](2026-09-24-entity-picker-design.md) | [2026-09-24](2026-09-24-entity-picker-design.md) | [2026-09-24](2026-09-24-entity-picker-self-assessment.md) |
 
 ## Fundação
 

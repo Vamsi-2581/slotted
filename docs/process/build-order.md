@@ -581,6 +581,18 @@ de outra da mesma onda.
   criação opcional, recentes e favoritos, seleção simples ou múltipla. O valor
   público é o ID ou o objeto normalizado; query, paginação e resolução de IDs
   são adaptadores.
+
+  Entregue em 2026-09-24. Inventário e decisões em
+  `docs/history/designs/2026-09-24-entity-picker-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-24-entity-picker-self-assessment.md`. Implementação própria
+  (não compõe `combobox` nem `multi-select`) sobre `@slotted/core/entity-picker`: busca com
+  atraso e cancelamento, cache por id, resolução em lote, secções `chosen`/`favorites`/
+  `recent`/resultados e decisão de tecla. O campo fica numa linha num formulário (gate
+  visual): `overflow` `collapse` (omissão, chip "+N") | `wrap`, âmbito como `select` colado à
+  frente. React `EntityPicker` (`source` ou `items`, `onCreate`, `renderOption`,
+  `renderChip`); Angular `sl-entity-picker` (`[createEntity]`, templates de opção e de chip,
+  `ControlValueAccessor` + `Validator` com `unresolved`).
+
 - `hierarchical-picker` — seleção em árvore ou cascata sem expor `tree` +
   `select`. Nós com `id`, `parent`/`children`, carregamento preguiçoso, seleção
   de folha ou ancestral, caminho visível e busca. TreeSelect e Cascader são dois

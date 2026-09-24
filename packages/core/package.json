@@ -188,6 +188,10 @@
       "types": "./dist/types/toast/index.d.ts",
       "import": "./dist/toast.js"
     },
+    "./transfer": {
+      "types": "./dist/types/transfer/index.d.ts",
+      "import": "./dist/transfer.js"
+    },
     "./typeahead": {
       "types": "./dist/types/typeahead/index.d.ts",
       "import": "./dist/typeahead.js"

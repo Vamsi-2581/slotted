@@ -70,6 +70,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `table-filter-operands` | [2026-09-14](2026-09-14-table-filter-operands-capability-inventory.md) | [2026-09-14](2026-09-14-table-filter-operands-design.md) | [2026-09-14](2026-09-14-table-filter-operands-self-assessment.md) |
 | `tags-input` | [2026-09-14](2026-09-14-tags-input-capability-inventory.md) | [2026-09-14](2026-09-14-tags-input-design.md) | [2026-09-14](2026-09-14-tags-input-self-assessment.md) |
 | `timeline` | [2026-09-14](2026-09-14-timeline-capability-inventory.md) | [2026-09-14](2026-09-14-timeline-design.md) | [2026-09-14](2026-09-14-timeline-self-assessment.md) |
+| `transfer` | [2026-09-24 §1](2026-09-24-transfer-design.md) | [2026-09-24](2026-09-24-transfer-design.md) | [2026-09-24](2026-09-24-transfer-self-assessment.md) |
 
 ## Fundação
 

@@ -631,12 +631,21 @@ describe('createScrollLock', () => {
       expect(element('page').hasAttribute('inert')).toBe(false);
     });
 
-    it('does nothing for a layer already on top', () => {
+    /**
+     * The tour's layer re-created while the dialog stands: it is already on top
+     * of the stack, and still under the `inert` the dialog wrote on it.
+     */
+    it('clears an inert written over a layer already on top of the stack', () => {
+      const dialog = createDismissableLayer(element('dialog'), { ...recorder(), modal: true });
       const tour = createDismissableLayer(element('tour'), { ...recorder(), modal: true });
+      expect(tour.topmost).toBe(true);
+      expect(element('tour').hasAttribute('inert')).toBe(true);
       tour.raise();
       expect(tour.topmost).toBe(true);
+      expect(element('tour').hasAttribute('inert')).toBe(false);
       expect(element('dialog').hasAttribute('inert')).toBe(true);
       tour.destroy();
+      dialog.destroy();
     });
   });
 });

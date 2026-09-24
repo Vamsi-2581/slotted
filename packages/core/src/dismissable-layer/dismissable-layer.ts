@@ -385,17 +385,23 @@ export function createDismissableLayer(
       request(layer, 'programmatic', source);
     },
     raise() {
-      if (destroyed || state.layers.at(-1) === layer) return;
-      const below = state.layers.at(-1) ?? null;
-
-      /* No layer may end up its own ancestor: those that hung from this one hang from its parent. */
-      for (const other of state.layers) {
-        if (other.parent === layer) other.parent = layer.parent;
+      if (destroyed) return;
+      /**
+       * A layer already on top of the stack may still sit under an `inert` a
+       * newer layer wrote before this one was re-created, so the document half
+       * runs either way; only the stack half needs a layer above.
+       */
+      if (state.layers.at(-1) !== layer) {
+        const below = state.layers.at(-1) ?? null;
+        /* No layer may end up its own ancestor: those that hung from this one hang from its parent. */
+        for (const other of state.layers) {
+          if (other.parent === layer) other.parent = layer.parent;
+        }
+        state.layers.splice(state.layers.indexOf(layer), 1);
+        state.layers.push(layer);
+        layer.parent = below;
+        reindex(state);
       }
-      state.layers.splice(state.layers.indexOf(layer), 1);
-      state.layers.push(layer);
-      layer.parent = below;
-      reindex(state);
 
       node.parentElement?.append(node);
       for (let current: Element | null = node; current; current = current.parentElement) {

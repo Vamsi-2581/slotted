@@ -39,6 +39,7 @@ export * from './field';
 export * from './field-group';
 export * from './filter-bar';
 export * from './form';
+export * from './fullscreen';
 export * from './grid';
 export * from './hover-card';
 export * from './highlight';

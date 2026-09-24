@@ -40,6 +40,7 @@ export default defineConfig({
         splitter: resolve(import.meta.dirname, 'src/splitter/index.ts'),
         divider: resolve(import.meta.dirname, 'src/divider/index.ts'),
         'filter-bar': resolve(import.meta.dirname, 'src/filter-bar/index.ts'),
+        fullscreen: resolve(import.meta.dirname, 'src/fullscreen/index.ts'),
         grid: resolve(import.meta.dirname, 'src/grid/index.ts'),
         'hover-card': resolve(import.meta.dirname, 'src/hover-card/index.ts'),
         highlight: resolve(import.meta.dirname, 'src/highlight/index.ts'),

@@ -159,6 +159,10 @@
       "types": "./dist/types/filter-bar/index.d.ts",
       "import": "./dist/filter-bar.js"
     },
+    "./fullscreen": {
+      "types": "./dist/types/fullscreen/index.d.ts",
+      "import": "./dist/fullscreen.js"
+    },
     "./grid": {
       "types": "./dist/types/grid/index.d.ts",
       "import": "./dist/grid.js"

@@ -60,6 +60,8 @@
     "./currency-field/tokens.json": "./src/currency-field/currency-field.tokens.json",
     "./data-grid/data-grid.css": "./src/data-grid/data-grid.css",
     "./data-grid/tokens.json": "./src/data-grid/data-grid.tokens.json",
+    "./data-list/data-list.css": "./src/data-list/data-list.css",
+    "./data-list/tokens.json": "./src/data-list/data-list.tokens.json",
     "./date-field/date-field.css": "./src/date-field/date-field.css",
     "./date-field/tokens.json": "./src/date-field/date-field.tokens.json",
     "./date-picker/date-picker.css": "./src/date-picker/date-picker.css",

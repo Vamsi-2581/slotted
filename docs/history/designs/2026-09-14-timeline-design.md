@@ -184,7 +184,7 @@ de um artigo.
 | `orientation` | `vertical`, `horizontal`                 | `vertical`     | prop, defaults, omissão          |
 | `placement`   | `end`, `start`, `alternate`              | `end`          | prop, defaults, omissão          |
 | `order`       | `oldest-first`, `newest-first`           | `oldest-first` | prop, defaults, omissão          |
-| `variant`     | `solid`, `outline`, `subtle`, `plain`    | `outline`      | item, raiz, defaults, omissão    |
+| `variant`     | `solid`, `outline`, `subtle`, `plain`    | `subtle`       | item, raiz, defaults, omissão    |
 | `tone`        | os cinco tons                            | `secondary`    | item, raiz, defaults, omissão    |
 | `size`        | `sm`, `md`, `lg`                         | `md`           | prop, defaults, omissão          |
 | `connector`   | `solid`, `dashed`, `none`                | `solid`        | item; `dashed` derivado por `autoComplete` para o lado futuro |
@@ -192,9 +192,7 @@ de um artigo.
 | `timeFormat`  | `absolute`, `relative`                   | `absolute`     | `time`, raiz, defaults, omissão  |
 | `level`       | `2`…`6`                                  | `3`            | grupo, raiz, omissão             |
 
-`variant` omite `outline` e não `solid`: um ponto sólido em `secondary` é um
-disco cinzento sobre uma linha cinzenta, e o contorno é o que separa o marcador
-da linha em `high-contrast`, onde as duas cores são a mesma.
+`variant` omite `subtle`: ver «Marcador: ponto e emblema» em §6.
 
 `reflow` é booleano na raiz, omissão `true`, e só tem efeito em `horizontal`.
 
@@ -224,40 +222,83 @@ toca o DOM.
 
 ---
 
-### Centro geométrico
+### Marcador: ponto e emblema
 
-O ponto de um marcador vazio e o check de um evento concluído são pintados
-numa caixa que enche o interior do anel (`inset: 0`), e não numa caixa mais
-pequena centrada nele: uma caixa é ajustada a pixels de dispositivo aresta a
-aresta, e um disco de doze pixels dentro de um de vinte fica um pixel fora do
-centro a 110% de zoom e em qualquer razão de dispositivo ímpar. Um gradiente
-radial e uma máscara com `mask-position: center` são rasterizados no centro
-geométrico da caixa, qualquer que seja a razão. O ponto é um
-`radial-gradient` sobre `currentcolor` com `forced-color-adjust: none`, que é
-o que o mantém quando o sistema retira os fundos. Verificado nas capturas
-`--zoom 110` e `--zoom 125` da cena `statuses`.
+Revisto em 24 de setembro de 2026, em duas rodadas da revisão visual. O
+primeiro desenho tinha um marcador vazio de 24 pixels (anel de 2, ponto de 12)
+a 8 pixels do título: uma coluna de botões de rádio. A segunda rodada mediu a
+linha um pixel de dispositivo fora do centro de um ponto de 8 pixels e pediu o
+ponto do tamanho do spinner.
 
-### O marcador com conteúdo
+| Marcador | Quando                                  | `md`, `comfortable` |
+| -------- | --------------------------------------- | ------------------- |
+| ponto    | `marker` vazio, ou com um spinner       | 13 px, núcleo 5 px  |
+| emblema  | `marker` com glifo ou avatar            | 21 px, glifo 12 px  |
 
-Um marcador `outline` vazio é um anel grosso com um ponto. Com um glyph
-dentro, o anel grosso competia com os traços do próprio glyph e os dois liam-se
-como um desenho só, estranho. Com conteúdo o marcador `outline` toma o par
-subtil — a superfície do tom com a aresta fina — e o glyph é desenhado na tinta
-do tom, a seis décimos da caixa: o distintivo de Primer e o _bullet_ de
-Mantine. `solid` continua a recortar o glyph do disco cheio; `plain` dá o
-glyph nu sobre a linha, para quem não quer círculo nenhum. O avatar enche o
-anel, porque é a face do marcador.
+- **Paridade.** Toda largura em que a linha se centra — ponto, núcleo,
+  emblema, coluna — é a espessura da linha mais um número par de pixels,
+  arredondado para cima com `round()`. A linha fica um número inteiro de
+  pixels dentro de cada uma. Com um ponto de 8 e uma linha de 1, a linha ficava
+  a 3,5 pixels, o navegador arredondava o meio pixel, e a linha era desenhada
+  1 pixel de dispositivo fora do centro a 100%, 150% e 200% (medido no
+  harness). Depois da mudança, o desvio medido em fatores de escala reais de
+  0,67 a 3 é no máximo 0,19 pixel de dispositivo. O zoom CSS do harness
+  (`--zoom`) ainda mostra 1 pixel em alguns fatores fracionários, porque a
+  espessura da borda é arredondada para baixo e a caixa não; o zoom do
+  navegador não passa por esse caminho.
+- **Tamanho.** O ponto é o glifo do emblema arredondado para a paridade da
+  linha: 12 → 13. O spinner de `loading` tem o tamanho do ponto e não alarga
+  a coluna do marcador.
+- **Coluna do marcador.** Tem a largura do ponto; um emblema com glifo ou
+  avatar alarga-a na timeline inteira, por `:has()` na raiz.
+- O texto fica a `control-gap + space-2` da coluna do marcador (12 px); a
+  distância entre eventos é essa mais um passo (16 px).
+- A linha tem `border-width-thin` e corre do meio da primeira linha de um item
+  ao meio da primeira linha do seguinte. O marcador fica acima dela com um
+  halo do fundo (`--slotted-timeline-line-gap`, `space-1`).
+- A tinta do ponto é o degrau `border` do tom; em `secondary`,
+  `--slotted-border-strong`.
+
+| `variant`          | ponto                                     | emblema                                      |
+| ------------------ | ----------------------------------------- | -------------------------------------------- |
+| `subtle` (omissão) | núcleo sólido num disco suave do tom (16%) | fundo do tom com aresta fina, glifo `text`   |
+| `outline`          | anel oco de `border-width-medium`         | fundo da página, aresta fina, glifo na tinta |
+| `solid`            | disco cheio                               | fundo `solid` do tom, glifo `on-solid`       |
+| `plain`            | só o núcleo, sobre a linha                | só o glifo, sobre o fundo                    |
+
+| Estado     | Forma                                                                  |
+| ---------- | ---------------------------------------------------------------------- |
+| pendente   | a do `variant`                                                         |
+| `complete` | disco cheio com o check vazado na cor do fundo; linha seguinte no tom |
+| `current`  | disco cheio com anel (`box-shadow`); `outline` em `forced-colors`      |
+| `loading`  | o spinner, do tamanho do ponto, na tinta do tom                        |
+
+A omissão passa de `outline` a `subtle`: um anel oco em todos os eventos lia-se
+como uma coluna de botões de rádio, e um disco cheio em todos não deixa nada
+mais forte para `complete` e `current`.
+
+O núcleo e o check são um `::after` com `inset` inteiro: não há caixa menor
+centrada por aritmética. O anel de `current` é uma sombra, porque `outline` é o
+anel de foco (`focus-ring.test.mjs`). Na lista horizontal, que rola, a lista
+reserva `--_reach` acima e antes do primeiro marcador para o anel não ser
+cortado. Em `forced-colors` o núcleo usa a tinta do próprio marcador
+(`currentColor`) com `forced-color-adjust: none`.
+
+Custo: saem `--slotted-timeline-marker-ratio`, `--slotted-timeline-glyph-ratio`,
+`--slotted-timeline-complete-icon` e `--slotted-timeline-dot-ratio`; o único
+literal é `--slotted-timeline-core-ratio`. A omissão de `variant` muda em
+React (`timeline.tsx`) e em Angular (`TIMELINE_DEFAULT_VARIANT`); quem quer o
+anel oco declara `variant="outline"`.
 
 ## 7. Stylesheet e tokens
 
 Tokens da família, todos sobre a foundation:
 
-- geometria: `--slotted-timeline-rail-size` (largura da coluna do marcador,
-  por `size` sobre `--slotted-control-icon-size-*`), `--slotted-timeline-dot-size`
-  (proporção do ícone, literal registado), `--slotted-timeline-connector-thickness`
-  (`--slotted-border-width-thick`), `--slotted-timeline-gap`
-  (`--slotted-control-gap-*`), `--slotted-timeline-item-gap`
-  (`--slotted-space-6`), `--slotted-timeline-opposite-size` (`--slotted-space-12` × 2, literal registado),
+- geometria: `--slotted-timeline-core-ratio` (literal registado),
+  `--slotted-timeline-connector-thickness` (`--slotted-border-width-thin`),
+  `--slotted-timeline-line-gap` (`--slotted-space-1`), `--slotted-timeline-gap`
+  (`--slotted-control-gap-*` + `--slotted-space-2`), `--slotted-timeline-item-gap`
+  (o gap + `--slotted-space-2`), `--slotted-timeline-opposite-size` (literal registado),
   `--slotted-timeline-track-min` (horizontal), `--slotted-timeline-reflow-breakpoint`
   (literal, regra 4 da foundation);
 - cor: `--slotted-timeline-connector-color` (`--slotted-border-subtle`),

@@ -82,3 +82,32 @@ Capturas lidas em
   ids de trechos em `segmented-control`, `splitter`, `toggle-group`,
   `action-bar` (outras faixas). `packages/styles`: `app-shell` em
   `masked-glyph`, `page-header` em `tokens` (outras faixas).
+
+---
+
+## Revisão do marcador — 2026-09-24
+
+Desenho em `2026-09-14-timeline-design.md` §6, «Marcador: ponto e emblema».
+Capturas em `/tmp/claude-1000/tl/v2/`, `v3/` e `v3/full/`: light, dark,
+high-contrast a 420, 240 e 720 (horizontal), `dense`, `rtl`. Medição de
+centragem em `/tmp/claude-1000/tl/dpr.mjs` e `dprmeasure.mjs`.
+
+| #   | Dimensão       | Mudança                                                                                                                                                             | Estado |
+| --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1   | Ícones         | O check volta ao ponto concluído, vazado a 9 px num disco de 13 px; o spinner tem o tamanho do ponto.                                                              | passa  |
+| 4   | Refinamento    | Linha a no máximo 0,19 px de dispositivo do centro do ponto, emblema e avatar, com fator de escala real de 0,67 a 3 (antes: 1 px a 1x, 1,5x, 2x e 2,5x).           | passa  |
+| 5   | Tokens         | Um literal (`--slotted-timeline-core-ratio`); saem `marker-ratio`, `glyph-ratio`, `dot-ratio` e `complete-icon`. `timeline.tokens.json` regenerado.               | passa  |
+| 7   | Acessibilidade | Pendente, atual, concluído e a carregar distinguem-se pela forma em `high-contrast`; em `forced-colors` o núcleo usa `currentColor` e o anel volta como `outline`. | passa  |
+| 11  | Documentação   | Legendas de `appearance`, descrição de `marker` e de estados, e trecho de tema atualizados nas duas páginas. Páginas não lidas renderizadas: Storybook desligado.   | passa  |
+
+A melhoria que resta: o chevron do grupo alinha pela margem da lista e não
+pelo centro do marcador. Não feita; custo de uma regra, sem efeito na leitura.
+
+§18, item 12 (estabilidade): a omissão de `variant` passa de `outline` a
+`subtle` em React e Angular; quem quer o anel oco declara `variant="outline"`.
+
+Verificação: `pnpm lint`, `typecheck`, `test:contracts`, `test:package-layers`,
+`test:release` e `test:docs` passam; contrato, folha, estilos partilhados e
+páginas de referência (214), React (41) e Angular (25) passam. `pnpm
+format:check` falha em `page-header.styles.test.mjs`, e `turbo verify
+--affected` falha em `table` e `action-bar`; nenhum dos três é desta família.

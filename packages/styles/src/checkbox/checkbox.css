@@ -175,6 +175,11 @@
     inline-size: var(--_size);
     margin: 0;
     margin-block-start: var(--_lift);
+    /* The same air under the box, so a box with no text beside it is still a
+       line tall with the square in its middle. With the lift above and nothing
+       below it stood 17.75px tall against its floor, and beside a line of text
+       it sat 0.9px low. Beside a label the line is that tall already. */
+    margin-block-end: var(--_lift);
     transition:
       background-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
@@ -373,12 +378,39 @@
     z-index: -1;
   }
 
-  /* A label with nothing in it — the Angular binding renders one whether or
-     not content is projected — has no text to wash, so the wash closes around
-     the box at the same distance on all four sides. */
-  [data-ui='checkbox'][data-part='root']:not([data-variant='tile'])
-    [data-part='label']:empty::after {
-    inset-inline-end: calc(var(--_gap) - var(--_halo-spread));
+  /**
+   * A label that shows nothing: empty — React renders one for a box named by
+   * `aria-label`, Angular whether or not content is projected — or holding
+   * only hidden text, which the bindings mark `data-label-hidden` because a
+   * stylesheet cannot tell a text node from a hidden element. Either is zero
+   * wide, and the column gap beside it pushed whatever followed the box eight
+   * pixels away and drew the wash to the gap and half again past the box: 14px
+   * on the end side against 4px on the start. So the gap goes, the target ends
+   * where the box ends, and the wash stands at the halo spread on all four sides.
+   */
+  [data-ui='checkbox'][data-part='root']:is(
+      [data-label-hidden],
+      :has(> [data-part='label']:empty)
+    ):not([data-label-placement='start']) {
+    column-gap: 0;
+  }
+
+  [data-ui='checkbox'][data-part='root']:is(
+      [data-label-hidden],
+      :has(> [data-part='label']:empty)
+    ):not([data-label-placement='start'], [data-variant='tile'])
+    [data-part='label']::before {
+    /* Ending where the box ends, as everywhere: the root ends there too. */
+    inset-inline-start: calc(-1 * var(--_target));
+  }
+
+  [data-ui='checkbox'][data-part='root']:is(
+      [data-label-hidden],
+      :has(> [data-part='label']:empty)
+    ):not([data-label-placement='start'], [data-variant='tile'])
+    [data-part='label']::after {
+    inset-inline-end: calc(-1 * var(--_halo-spread));
+    inset-inline-start: calc(-1 * (var(--_size) + var(--_halo-spread)));
   }
 
   /**

@@ -1,7 +1,7 @@
 import '@slotted/styles/checkbox/checkbox.css';
 
 import { createControllable } from '@slotted/core/state';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent } from 'react';
 
 import { useCheckboxGroup } from '../checkbox-group';
@@ -40,6 +40,16 @@ function activationReason(event: MouseEvent<HTMLInputElement>): CheckboxCheckedR
  * `invalid` default to `undefined` rather than `false`, which is what makes
  * "not disabled" and "said nothing" different answers.
  */
+/** A label with content, all of it hidden text: nothing a sighted reader sees. */
+function showsNothing(label: HTMLElement | null): boolean {
+  if (label === null || label.childNodes.length === 0) return false;
+  return [...label.childNodes].every((node) =>
+    node.nodeType === Node.TEXT_NODE
+      ? (node.textContent ?? '').trim() === ''
+      : node instanceof Element && node.getAttribute('data-ui') === 'visually-hidden',
+  );
+}
+
 export function Checkbox({
   'aria-describedby': describedBy,
   'aria-invalid': ariaInvalid,
@@ -157,6 +167,19 @@ export function Checkbox({
     return true;
   };
 
+  /**
+   * Whether the label shows nothing: its only content is hidden text, the name
+   * a table row or a data list gives a bare box. Read from the DOM after
+   * render, because the children can be any element that renders the hidden
+   * text, and whitespace between them is not text a reader sees.
+   */
+  const labelRef = useRef<HTMLLabelElement | null>(null);
+  const [labelHidden, setLabelHidden] = useState(false);
+  useLayoutEffect(() => {
+    const next = showsNothing(labelRef.current);
+    if (next !== labelHidden) setLabelHidden(next);
+  });
+
   const rootProps: CheckboxRootProps = {
     children: (
       <>
@@ -222,11 +245,11 @@ export function Checkbox({
           value={value}
         />
         <span data-part="indicator" />
-        {children === undefined ? null : (
-          <label data-part="label" htmlFor={controlId}>
-            {children}
-          </label>
-        )}
+        {/* Rendered without children as well: the target and the wash are the
+            label's pseudo-elements, and a box named by aria-label keeps both. */}
+        <label data-part="label" htmlFor={controlId} ref={labelRef}>
+          {children}
+        </label>
         {description === undefined ? null : (
           <p data-part="description" id={descriptionId}>
             {description}
@@ -240,6 +263,7 @@ export function Checkbox({
     ...(resolvedIndeterminate ? { 'data-indeterminate': '' } : {}),
     ...(resolvedInvalid === true ? { 'data-invalid': '' } : {}),
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
+    ...(labelHidden ? { 'data-label-hidden': '' } : {}),
     'data-label-placement': resolvedLabelPlacement,
     'data-part': 'root',
     'data-size': resolvedSize,

@@ -6,6 +6,7 @@ import contract from '../../../../specs/components/checkbox/contract.json';
 import { CheckboxGroup } from '../checkbox-group';
 import { Field, FieldLabel } from '../field';
 import { FieldGroup, FieldGroupLegend } from '../field-group';
+import { VisuallyHidden } from '../visually-hidden';
 import { Checkbox } from './checkbox';
 import { CheckboxDefaultsProvider } from './checkbox-defaults';
 
@@ -13,6 +14,40 @@ const control = () => screen.getByRole('checkbox');
 const root = () => control().parentElement as HTMLElement;
 
 describe('Checkbox', () => {
+  /**
+   * A box with no words beside it still carries the 24-pixel target and the
+   * wash, which are the label's: the label is rendered empty, and the name
+   * comes from aria-label.
+   */
+  it('keeps the target and the wash on a box named by aria-label', () => {
+    render(<Checkbox aria-label="Select Acme Logistics" />);
+    const label = root().querySelector('[data-part="label"]');
+    expect(label).not.toBeNull();
+    expect(label).toBeEmptyDOMElement();
+    expect(label).toHaveAttribute('for', control().id);
+    expect(control()).toHaveAccessibleName('Select Acme Logistics');
+  });
+
+  /** Hidden words are as wide as none, and the wash closes around the box. */
+  it('marks a label whose only content is hidden text', () => {
+    render(
+      <Checkbox>
+        <VisuallyHidden>Select Acme Logistics</VisuallyHidden>
+      </Checkbox>,
+    );
+    expect(root()).toHaveAttribute('data-label-hidden');
+    expect(control()).toHaveAccessibleName('Select Acme Logistics');
+  });
+
+  it('leaves a label with visible words beside hidden ones unmarked', () => {
+    render(
+      <Checkbox>
+        Delete <VisuallyHidden>invoice 42</VisuallyHidden>
+      </Checkbox>,
+    );
+    expect(root()).not.toHaveAttribute('data-label-hidden');
+  });
+
   it('is selected in public by the family identifier and its parts', () => {
     render(
       <Checkbox className="page-box" description="Um resumo por dia.">

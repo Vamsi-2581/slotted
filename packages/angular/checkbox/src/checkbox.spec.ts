@@ -54,6 +54,31 @@ function click(element: HTMLInputElement, detail = 1) {
 }
 
 describe('SlCheckbox', () => {
+  /**
+   * Hidden words are as wide as none: the root says so, and the wash closes
+   * around the box. Visible words beside hidden ones are a label.
+   */
+  it('marks a label whose only content is hidden text', async () => {
+    const hidden = renderTemplate(
+      `<div slCheckbox><span data-ui="visually-hidden">Select Acme Logistics</span></div>`,
+    );
+    await hidden.whenStable();
+    hidden.detectChanges();
+    expect(root(hidden).hasAttribute('data-label-hidden')).toBe(true);
+
+    const mixed = renderTemplate(
+      `<div slCheckbox>Delete <span data-ui="visually-hidden">invoice 42</span></div>`,
+    );
+    await mixed.whenStable();
+    mixed.detectChanges();
+    expect(root(mixed).hasAttribute('data-label-hidden')).toBe(false);
+
+    const empty = renderTemplate(`<div slCheckbox></div>`);
+    await empty.whenStable();
+    empty.detectChanges();
+    expect(root(empty).hasAttribute('data-label-hidden')).toBe(false);
+  });
+
   it('is selected in public by the family identifier and its parts', () => {
     const fixture = renderTemplate(
       `<div slCheckbox>Aceito<p slCheckboxDescription>Enviaremos o recibo.</p></div>`,

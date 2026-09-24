@@ -114,5 +114,11 @@
       "composition",
       "keyboard"
     ]
+  },
+  "labelHidden": {
+    "attribute": "data-label-hidden",
+    "when": "the label's only content is hidden text: elements with data-ui=\"visually-hidden\" and whitespace",
+    "effect": "the wash closes around the box at the halo spread on all four sides, as it does for an empty label",
+    "reason": "hidden text is as wide as none, so the label is zero wide with the column gap still beside it, and the wash reached the gap and half again past the box: 14px on the end side against 4px on the start. The bindings read the label's DOM, because a stylesheet cannot tell a text node from a hidden element."
   }
 }

@@ -1,12 +1,14 @@
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import {
+  afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
   contentChild,
   effect,
+  DestroyRef,
   ElementRef,
   forwardRef,
   HostAttributeToken,
@@ -69,6 +71,16 @@ function activationReason(event: Event): CheckboxCheckedReason {
  * `invalid` default to `undefined` rather than `false`, which is what makes
  * "not disabled" and "said nothing" different answers.
  */
+/** A label with content, all of it hidden text: nothing a sighted reader sees. */
+function showsNothing(label: HTMLElement): boolean {
+  if (label.childNodes.length === 0) return false;
+  return [...label.childNodes].every((node) =>
+    node.nodeType === Node.TEXT_NODE || node.nodeType === Node.COMMENT_NODE
+      ? node.nodeType === Node.COMMENT_NODE || (node.textContent ?? '').trim() === ''
+      : node instanceof Element && node.getAttribute('data-ui') === 'visually-hidden',
+  );
+}
+
 @Component({
   selector: '[slCheckbox]',
   standalone: true,
@@ -91,7 +103,7 @@ function activationReason(event: Event): CheckboxCheckedReason {
       (blur)="onBlur()"
     />
     <span data-part="indicator"></span>
-    <label data-part="label" [attr.for]="controlId"><ng-content /></label>
+    <label #label data-part="label" [attr.for]="controlId"><ng-content /></label>
     <ng-content select="[slCheckboxDescription]" />`,
   styleUrl: '../../../styles/src/checkbox/checkbox.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -110,6 +122,7 @@ function activationReason(event: Event): CheckboxCheckedReason {
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "resolvedInvalid() === true ? '' : null",
     '[attr.data-readonly]': "resolvedReadOnly() === true ? '' : null",
+    '[attr.data-label-hidden]': "labelHidden() ? '' : null",
   },
 })
 export class SlCheckbox implements ControlValueAccessor, OnInit {
@@ -168,6 +181,13 @@ export class SlCheckbox implements ControlValueAccessor, OnInit {
   });
 
   private readonly element = viewChild.required<ElementRef<HTMLInputElement>>('control');
+  private readonly label = viewChild.required<ElementRef<HTMLLabelElement>>('label');
+  /**
+   * Whether the label shows nothing: its only content is hidden text, the name
+   * a table row or a data list gives a bare box. Read from the projected DOM,
+   * and read again when it changes.
+   */
+  protected readonly labelHidden = signal(false);
   private readonly description = contentChild(SlCheckboxDescription, { descendants: true });
 
   private readonly own = signal(false);
@@ -277,6 +297,17 @@ export class SlCheckbox implements ControlValueAccessor, OnInit {
      */
     effect(() => {
       this.element().nativeElement.indeterminate = this.resolvedIndeterminate();
+    });
+
+    const destroy = inject(DestroyRef);
+    afterNextRender(() => {
+      const label = this.label().nativeElement;
+      const read = () => this.labelHidden.set(showsNothing(label));
+      read();
+      if (typeof MutationObserver === 'undefined') return;
+      const watch = new MutationObserver(read);
+      watch.observe(label, { childList: true, characterData: true, subtree: true });
+      destroy.onDestroy(() => watch.disconnect());
     });
   }
 

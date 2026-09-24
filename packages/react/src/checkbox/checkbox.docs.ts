@@ -54,7 +54,7 @@ const anatomy: AnatomyRow[] = [
     element: 'label',
     required: false,
     purpose:
-      'Names the control through for, and carries the target and the hover wash: a 24-pixel square around the box, and a wash behind the box and the text that stands half the control gap off the box and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the box. Absent when the checkbox has no children, for a box named by aria-label in a table header.',
+      'Names the control through for, and carries the target and the hover wash: a 24-pixel square around the box, and a wash behind the box and the text that stands half the control gap off the box and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the box. Rendered without children as well, for a box named by aria-label: the wash then closes around the box. Content that is only hidden text marks the root data-label-hidden, and the wash closes the same way.',
   },
   {
     part: 'description',

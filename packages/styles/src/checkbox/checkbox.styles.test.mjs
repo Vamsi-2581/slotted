@@ -190,10 +190,6 @@ test('lights the box and its label as one wash, lit by hover alone', () => {
   );
   assert.match(halo, /direction:var\(--_direction\)/);
   assert.doesNotMatch(halo, /box-shadow/);
-  assert.match(
-    rule(`${root}:not([data-variant='tile']) [data-part='label']:empty::after`),
-    /inset-inline-end:calc\(var\(--_gap\) - var\(--_halo-spread\)\)/,
-  );
   assert.match(halo, /opacity:0/);
   assert.match(halo, /z-index:-1/);
   assert.match(rule(root), /--_halo-spread:calc\(var\(--_gap\) \/ 2\)/);
@@ -432,5 +428,42 @@ test('puts a description one step from its label, and one step nearer inside a t
   assert.match(
     rule(`${root}[data-variant='tile']`),
     /--_description-gap:var\(--slotted-checkbox-tile-description-gap,var\(--slotted-space-2,0\.25rem\)\)/,
+  );
+});
+
+/**
+ * A box with no text beside it is still one line tall, with the box in its
+ * middle. The lift put the line's air above the box and nothing restored it
+ * below, so a bare box stood 17.75px tall with the square against its floor:
+ * centred beside a line of text it sat 0.9px low, and the wash closed 4px above
+ * the box and 2.25px under it.
+ */
+test('keeps the air of its line under the box as well as over it', () => {
+  assert.match(rule(part('control')), /margin-block-end:var\(--_lift\)/);
+});
+
+/**
+ * A label that shows nothing — empty, or holding only hidden text, which the
+ * bindings mark `data-label-hidden` — is zero wide. The column gap beside it
+ * pushed whatever followed the box eight pixels away, and the wash reached the
+ * gap and half again past the box: 14px on the end side against 4px on the
+ * start. The gap goes, and the target and the wash are measured from the box.
+ */
+test('closes the wash around a box whose label shows nothing, and gives it no gap', () => {
+  const textless = `${root}:is([data-label-hidden],:has(>[data-part='label']:empty))`;
+  assert.match(rule(`${textless}:not([data-label-placement='start'])`), /column-gap:0/);
+  const halo = rule(
+    `${textless}:not([data-label-placement='start'],[data-variant='tile']) [data-part='label']::after`,
+  );
+  assert.match(halo, /inset-inline-end:calc\(-1 \* var\(--_halo-spread\)\)/);
+  assert.match(
+    halo,
+    /inset-inline-start:calc\(-1 \* \(var\(--_size\) \+ var\(--_halo-spread\)\)\)/,
+  );
+  assert.match(
+    rule(
+      `${textless}:not([data-label-placement='start'],[data-variant='tile']) [data-part='label']::before`,
+    ),
+    /inset-inline-start:calc\(-1 \* var\(--_target\)\)/,
   );
 });

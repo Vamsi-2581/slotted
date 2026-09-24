@@ -57,7 +57,7 @@ const anatomy: AnatomyRow[] = [
     element: 'label, in the component’s template',
     required: false,
     purpose:
-      'Names the control through for, and carries the target and the hover wash: a 24-pixel square around the box, and a wash behind the box and the text that stands half the control gap off the box and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the box. Its content is the default ng-content slot, so anything a consumer projects becomes the accessible name. Rendered when nothing is projected as well, for a box named by aria-label in a table cell; the wash then closes around the box.',
+      'Names the control through for, and carries the target and the hover wash: a 24-pixel square around the box, and a wash behind the box and the text that stands half the control gap off the box and half as far again past the text. It hugs its text, so the empty row beside it does not toggle the box. Its content is the default ng-content slot, so anything a consumer projects becomes the accessible name. Rendered when nothing is projected as well; the wash then closes around the box. Projected content that is only hidden text — a [slVisuallyHidden] naming a bare box in a table row or a data list — marks the root data-label-hidden, and the wash closes the same way.',
   },
   {
     part: 'description',

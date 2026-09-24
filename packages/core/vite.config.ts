@@ -31,6 +31,7 @@ export default defineConfig({
         keys: resolve(import.meta.dirname, 'src/keys/index.ts'),
         'live-announcer': resolve(import.meta.dirname, 'src/live-announcer/index.ts'),
         loading: resolve(import.meta.dirname, 'src/loading/index.ts'),
+        markdown: resolve(import.meta.dirname, 'src/markdown/index.ts'),
         measure: resolve(import.meta.dirname, 'src/measure/index.ts'),
         number: resolve(import.meta.dirname, 'src/number/index.ts'),
         otp: resolve(import.meta.dirname, 'src/otp/index.ts'),

@@ -112,6 +112,10 @@
       "types": "./dist/types/loading/index.d.ts",
       "import": "./dist/loading.js"
     },
+    "./markdown": {
+      "types": "./dist/types/markdown/index.d.ts",
+      "import": "./dist/markdown.js"
+    },
     "./measure": {
       "types": "./dist/types/measure/index.d.ts",
       "import": "./dist/measure.js"

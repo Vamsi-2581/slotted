@@ -81,6 +81,18 @@ test('offers a viewport tall enough for an overlay family to open inside', () =>
  * has to be shorter than what it holds and it has to scroll. Added when `list`
  * needed to show a group heading staying put over its own rows.
  */
+/**
+ * The screen a family fills: the child of a `data-fill` viewport takes its
+ * height. Added when `event-calendar`'s month in a phone room ended half way
+ * down the screen.
+ */
+test('offers a screen a family fills', () => {
+  const rule =
+    /\.slotted-demo-viewport\[data-fill\]\s*>\s*\*\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  assert.match(rule, /block-size:\s*100%/);
+});
+
 test('offers a box a sticky demonstration can be scrolled inside', () => {
   const rule = /\.slotted-demo-scroll\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
 
@@ -90,11 +102,14 @@ test('offers a box a sticky demonstration can be scrolled inside', () => {
 
 /**
  * The primitive a family that answers its own width is demonstrated inside: a
- * room of a stated width, one of four a reader recognises, that scrolls
+ * room of a stated width, one of five a reader recognises, that scrolls
  * sideways where the page is narrower than it. Added when `top-navigation`'s
  * page showed one folded picture eighteen times, because the documentation
  * column is narrower than the bar's widest step and a grid column narrower
- * than its narrowest.
+ * than its narrowest. The wide room came with `dashboard-grid`, whose widest
+ * class starts at 1024 pixels of its own width: a ground and a viewport inset
+ * inside the 1024 room left the grid 936 and drew the tablet picture under the
+ * desktop caption.
  */
 test('offers a room of a stated width for a family that answers its own', () => {
   const room = /\.slotted-demo-room\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
@@ -109,12 +124,12 @@ test('offers a room of a stated width for a family that answers its own', () => 
   const rooms = [...css.matchAll(/\.slotted-demo-room\[data-room='([a-z]+)'\]\s*\{([\s\S]*?)\}/g)];
   assert.deepEqual(
     rooms.map(([, name]) => name),
-    ['desktop', 'laptop', 'tablet', 'phone'],
+    ['wide', 'desktop', 'laptop', 'tablet', 'phone'],
   );
   const widths = rooms.map(([, , body]) =>
     Number(/--slotted-demo-room:\s*(\d+)px/.exec(body)?.[1]),
   );
-  assert.deepEqual(widths, [1024, 900, 640, 375]);
+  assert.deepEqual(widths, [1280, 1024, 900, 640, 375]);
 });
 
 test('workbench CSS keeps the reference-sheet layout and accessibility invariants', () => {
@@ -243,6 +258,20 @@ test('workbench CSS offers a scheme-bearing ground, and a ground that stacks', (
     css,
     /\.slotted-demo-surface\[data-flow='stack'\]\s*\{[\s\S]*?flex-direction:\s*column/,
   );
+});
+
+/**
+ * A wrapping column inside a stage that the grid hands a definite height grows
+ * to break the circularity, the defect the block stage already names. The
+ * stacked ground inherited `flex-wrap: wrap` from the row it is by default, and
+ * `dashboard-grid` measured the cost: a ground of 1737 pixels around 1129 of
+ * content, because the grid inside it is a size container and its height at the
+ * intrinsic width is the one-column height.
+ */
+test('workbench CSS keeps a stacked ground from wrapping', () => {
+  const rule = /\.slotted-demo-surface\[data-flow='stack'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  assert.match(rule, /flex-wrap:\s*nowrap/);
 });
 
 test('dark workbench uses a neutral carbon surface scale', () => {
@@ -527,6 +556,18 @@ test('offers a viewport an anchored layer fills rather than rattles around in', 
   const rule = /\.slotted-demo-viewport\[data-size='layer'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
 
   assert.match(rule, /block-size:/);
+});
+
+/**
+ * A family that owns a screen's width and decides its own height takes a
+ * viewport that follows its content, inset like a page.
+ */
+test('offers a viewport as tall as what it holds, for a screen that decides its height', () => {
+  const rule =
+    /\.slotted-demo-viewport\[data-size='content'\]\s*\{([\s\S]*?)\}/.exec(css)?.[1] ?? '';
+
+  assert.match(rule, /block-size:\s*auto/);
+  assert.match(rule, /padding:\s*var\(--slotted-space-/);
 });
 
 /**

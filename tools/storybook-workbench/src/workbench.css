@@ -542,11 +542,14 @@
  * The painted ground as a column. A surface is a row by default, which is right
  * for the chips and controls it was written for and wrong for a family whose
  * members are blocks: two alerts side by side in a flex row are two alerts at
- * half the width they would ever have in a page.
+ * half the width they would ever have in a page. A column never wraps, for
+ * the reason the block stage gives: a wrapping column with a definite height
+ * grows to resolve the circularity.
  */
 .slotted-demo-surface[data-flow='stack'] {
   align-items: stretch;
   flex-direction: column;
+  flex-wrap: nowrap;
 }
 
 /** A table-shaped context, for a family whose real home is a dense row. */
@@ -692,6 +695,17 @@
 .slotted-demo-viewport[data-size='screen'] {
   block-size: min(80vh, 46rem);
   min-block-size: 32rem;
+}
+
+/**
+ * A screen the family fills, rather than one it stands at the top of. A
+ * calendar on a phone is the whole screen: drawn at its content's height in a
+ * screen-sized box, its month ended half way down and read as a card. The
+ * child takes the box's height, and a family that has a height to give its
+ * body gives it; one that has not keeps its own.
+ */
+.slotted-demo-viewport[data-fill] > * {
+  block-size: 100%;
 }
 
 /**
@@ -891,6 +905,21 @@
 }
 
 /**
+ * A screen as tall as what it holds. A dashboard owns a screen's width and
+ * decides its own height — four figures and a chart are three hundred pixels
+ * at twelve columns and fourteen hundred at one — so every fixed step either
+ * clips it or leaves the empty canvas the page contract refuses. The room
+ * still states the width; this lets the height follow, with the inset a page
+ * gives its content.
+ *
+ * Added when `dashboard-grid` needed its three size classes shown in rooms.
+ */
+.slotted-demo-viewport[data-size='content'] {
+  block-size: auto;
+  padding: var(--slotted-space-6);
+}
+
+/**
  * Puts what the box holds in the middle of it, at any size.
  *
  * An anchored family is demonstrated by opening a layer beside its trigger, so
@@ -1061,6 +1090,12 @@
   box-sizing: content-box;
   flex: none;
   inline-size: var(--slotted-demo-room);
+}
+
+/* A desktop monitor, for a family whose widest step starts at 1024 pixels of
+   its own width and is shown on a ground inset inside the room. */
+.slotted-demo-room[data-room='wide'] {
+  --slotted-demo-room: 1280px;
 }
 
 .slotted-demo-room[data-room='desktop'] {

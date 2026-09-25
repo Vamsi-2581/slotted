@@ -208,17 +208,64 @@ test('draws a focus ring on the control and on the box, and insets only one', ()
 });
 
 /**
- * The box does not own the moment it is inserted, so it animates only its
- * departure. `display` rides along so the box holds its place until the fade is
- * over instead of snapping out from under the content below it.
+ * The box animates its departure always. `display` rides along so the box
+ * holds its place until the fade is over instead of snapping out from under
+ * the content below it. A transition is read from the state being entered, so
+ * the closed box carries the leaving curve and the open box the entering one.
  */
-test('animates the message leaving and never the message arriving', () => {
+test('animates the message leaving on the exit curve and arriving on the enter curve', () => {
   assert.match(rule(root), /transition-behavior:allow-discrete/);
-  assert.ok(rule(root).includes('display var(--slotted-duration-short)'));
-  assert.ok(!/@starting-style/.test(declarations), 'an entry transition fires on first paint');
+  assert.ok(
+    rule(root).includes('display var(--slotted-duration-short) var(--slotted-easing-enter)'),
+  );
   const closed = rule(`${root}[hidden]`);
   assert.match(closed, /display:none/);
   assert.match(closed, /opacity:0/);
+  assert.ok(closed.includes('display var(--slotted-duration-short) var(--slotted-easing-exit)'));
+});
+
+/**
+ * `@starting-style` also applies on first paint, so an unconditional entry
+ * would fade in every alert already on the page. Only a live alert, whose
+ * arrival is the message, has a starting style.
+ */
+test('gives a starting style to a live alert and to no other', () => {
+  const starts = [...normalized.matchAll(/@starting-style\{([^{]+)\{/g)].map(
+    ([, selector]) => selector,
+  );
+  assert.deepEqual(starts, [`${root}:is([data-live='polite'],[data-live='assertive'])`]);
+});
+
+/**
+ * The line box is rounded to an even pixel on the root and on the description,
+ * so a message of one line is a whole number of pixels tall and the controls
+ * centred on it land on whole pixels.
+ */
+test('rounds every line box it sets to an even pixel', () => {
+  const even = /line-height:round\(nearest,calc\(var\(--_line-height\) \* 1em\),2px\)/;
+  assert.match(rule(root), even);
+  assert.match(rule(`${ui} [data-part='description']`), even);
+});
+
+/**
+ * A wide page banner centres the dismiss control beside its action. Centring
+ * aligns the margin box, so both block margins are cleared, or the negative
+ * bottom margin the control keeps on the title's line moves its centre.
+ */
+test('centres the page banner’s dismiss control on its whole box', () => {
+  const wide = normalized.slice(normalized.indexOf('@container slotted-alert (min-width:40rem)'));
+  const dismiss =
+    wide.split(`${ui}[data-reach='page']>[data-part='dismiss']{`)[1]?.split('}')[0] ?? '';
+  assert.match(dismiss, /margin-block:0/);
+});
+
+/**
+ * Eight per cent of white over the `danger` fill moved OKLab lightness by
+ * 0.019, under the 0.02 a surface step has to reach; ten moves it by 0.025.
+ */
+test('washes the dismiss control at a strength every fill can show', () => {
+  assert.match(rule(root), /--slotted-alert-state-layer-hover,10%/);
+  assert.match(rule(root), /--slotted-alert-state-layer-active,16%/);
 });
 
 /**
@@ -250,6 +297,20 @@ test('keeps an edge and a silhouette when the system takes the palette', () => {
   const block = css.slice(css.indexOf('forced-colors: active'));
   assert.match(block, /border-color:\s*CanvasText/);
   assert.doesNotMatch(block, /\[data-part='icon'\]/);
+});
+
+/**
+ * The theme maps the accent fill to `Highlight` and its ink to
+ * `HighlightText`, which the browser keeps; the backplate it draws behind text
+ * is `Canvas`, so a solid alert's words were white on white. Every variant is
+ * repainted, at the specificity that outranks the variant's own rule.
+ */
+test('repaints every variant in the system palette', () => {
+  const block = normalized.slice(normalized.indexOf('forced-colors:active'));
+  const variants = block.split(`${root}[data-variant]{`)[1]?.split('}')[0] ?? '';
+  assert.match(variants, /background-color:Canvas/);
+  assert.match(variants, /border-color:CanvasText/);
+  assert.match(variants, /color:CanvasText/);
 });
 
 /* ── The fragment, which is the third place this DOM is written ─────────── */

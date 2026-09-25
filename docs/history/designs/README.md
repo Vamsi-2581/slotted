@@ -107,3 +107,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 
 - [2026-09-02-error-message-correction.md](2026-09-02-error-message-correction.md)
 - [2026-09-04-collection-engine-review.md](2026-09-04-collection-engine-review.md)
+
+## Dossiês ReUI
+
+- [2026-09-25-alert-reui-dossier.md](2026-09-25-alert-reui-dossier.md)

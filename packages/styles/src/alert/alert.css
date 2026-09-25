@@ -52,15 +52,21 @@
      * so a wash of it is always perceptible and never depends on a pair the
      * theme does not measure. The cost is that a theme retunes it by strength
      * rather than by colour, which is what the two component tokens are for.
+     *
+     * Ten and sixteen per cent, not eight and fourteen: white at eight per cent
+     * over the `danger` fill moved OKLab lightness by 0.019 in the light and
+     * dark schemes, under the 0.02 a surface step has to reach. Ten moves it by
+     * 0.025 there and by at least 0.044 on every soft and outline ground
+     * (`docs/history/designs/2026-09-25-alert-reui-dossier.md` § 4).
      */
     --_state-hover: color-mix(
       in oklab,
-      currentcolor var(--slotted-alert-state-layer-hover, 8%),
+      currentcolor var(--slotted-alert-state-layer-hover, 10%),
       transparent
     );
     --_state-active: color-mix(
       in oklab,
-      currentcolor var(--slotted-alert-state-layer-active, 14%),
+      currentcolor var(--slotted-alert-state-layer-active, 16%),
       transparent
     );
 
@@ -174,25 +180,27 @@
      * none, which is the defect a `grid-template-areas` version of this had.
      */
     grid-template-columns: auto minmax(0, 1fr) auto;
-    line-height: var(--_line-height);
+    /**
+     * The line box is rounded to an even number of pixels. At 13-pixel type
+     * the scale's 1.5 gave 19.5, so a message of one line was 45.5 pixels
+     * tall and every control centred on the line landed on a half pixel. An
+     * even line also centres the 24- and 26-pixel dismiss control and the
+     * 30-pixel actions on whole pixels: 20 at 13, 22 at 14, 18 at 12.
+     */
+    line-height: round(nearest, calc(var(--_line-height) * 1em), 2px);
     padding-block: var(--_inset-block);
     padding-inline: var(--_inset-inline);
     row-gap: var(--_row-gap);
     /**
-     * The exit, and the only transition the box itself carries. Something the
-     * reader was reading is going away, which is a change the eye has to
-     * follow; `display` is carried with it so the box holds its place until
-     * the fade is over rather than snapping out from under the content below.
-     *
-     * There is no entry transition. The family does not own the moment it is
-     * inserted, and `@starting-style` fires on first paint — so every alert
-     * already on a settings page would fade in at once, which is motion
-     * carrying no information. Arrival belongs to `toast`.
+     * The entry, which runs only where an arrival is the message (see the
+     * `@starting-style` rule below). A transition is read from the state being
+     * entered, so the open box carries the entering curve and the closed box
+     * below carries the leaving one.
      */
     transition:
-      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      translate var(--slotted-duration-short) var(--slotted-easing-exit),
-      display var(--slotted-duration-short) var(--slotted-easing-exit);
+      opacity var(--slotted-duration-short) var(--slotted-easing-enter),
+      translate var(--slotted-duration-short) var(--slotted-easing-enter),
+      display var(--slotted-duration-short) var(--slotted-easing-enter);
     transition-behavior: allow-discrete;
   }
 
@@ -202,11 +210,35 @@
    * second time the message arrived. `display: none` is restated because the
    * root's own `display: grid` would otherwise win over the user agent's rule
    * for `[hidden]`.
+   *
+   * The exit. Something the reader was reading is going away, which is a
+   * change the eye has to follow; `display` is carried with it so the box
+   * holds its place until the fade is over rather than snapping out from
+   * under the content below.
    */
   [data-ui='alert'][data-part='root'][hidden] {
     display: none;
     opacity: 0;
+    transition:
+      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
+      translate var(--slotted-duration-short) var(--slotted-easing-exit),
+      display var(--slotted-duration-short) var(--slotted-easing-exit);
     translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
+  }
+
+  /**
+   * The entry belongs to a live alert only. `@starting-style` also applies on
+   * first paint, so an unconditional entry would fade in every alert already
+   * on a settings page at once — motion that carries no information. A
+   * `polite` or `assertive` alert is the one whose arrival is itself the
+   * message: it is closed or empty until something happens, and the motion
+   * marks the moment it does. It travels the path the exit takes, in reverse.
+   */
+  @starting-style {
+    [data-ui='alert'][data-part='root']:is([data-live='polite'], [data-live='assertive']) {
+      opacity: 0;
+      translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
+    }
   }
 
   /* ── Tone: the colour, and the mark that says the same thing ───────────
@@ -472,6 +504,10 @@
 
   [data-ui='alert'] [data-part='description'] {
     font-size: var(--_description-font-size);
+    /* Its own line, rounded against its own size: a page banner's description
+       is set a step below its title, and inheriting the title's 22 pixels
+       would open its lines by two. */
+    line-height: round(nearest, calc(var(--_line-height) * 1em), 2px);
     margin: 0;
     min-inline-size: 0;
     overflow-wrap: anywhere;
@@ -663,11 +699,15 @@
      * line. On its own the control belongs at the message's first line; next to
      * a control that is centred on the whole box, two marks at two heights read
      * as an alignment mistake.
+     *
+     * Both block margins go, not only the top one: centring aligns the margin
+     * box, and the negative bottom margin left behind pulled the control's
+     * centre below the action's by half its overhang.
      */
     [data-ui='alert'][data-reach='page'] > [data-part='dismiss'] {
       align-self: center;
       grid-column: 4;
-      margin-block-start: 0;
+      margin-block: 0;
     }
   }
 
@@ -685,8 +725,19 @@
    * still different from each other when neither of them is coloured.
    */
   @media (forced-colors: active) {
-    [data-ui='alert'][data-part='root'] {
+    /**
+     * Stated per variant, because each variant's own rule outranks a rule on
+     * the root alone. The theme maps the accent fill to `Highlight` and its ink
+     * to `HighlightText`, and a system colour is one the browser keeps: the
+     * solid box stayed `Highlight` while the backplate the browser draws
+     * behind text stayed `Canvas`, and the words were white on white. The
+     * danger fill, not a system colour, was forced to `Canvas` and took its
+     * edge with it.
+     */
+    [data-ui='alert'][data-part='root'][data-variant] {
+      background-color: Canvas;
       border-color: CanvasText;
+      color: CanvasText;
     }
 
     /**

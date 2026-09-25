@@ -29,6 +29,7 @@
   "--slotted-control-transition-easing",
   "--slotted-disabled-foreground",
   "--slotted-duration-short",
+  "--slotted-easing-enter",
   "--slotted-easing-exit",
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",

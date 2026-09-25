@@ -15,11 +15,18 @@ import type { ReactNode } from 'react';
  * The caption of every scene using this says so: in an application the
  * containing block is the viewport, and the drawer covers the page.
  */
-export function Layer({ children }: { children: (container: Element) => ReactNode }) {
+export function Layer({
+  children,
+  size = 'tall',
+}: {
+  children: (container: Element) => ReactNode;
+  /** `screen` for a sheet whose stops are fractions of a phone-tall layer. */
+  size?: 'tall' | 'screen';
+}) {
   const [box, setBox] = useState<HTMLElement | null>(null);
 
   return (
-    <div className="slotted-demo-viewport" data-size="tall" ref={setBox}>
+    <div className="slotted-demo-viewport" data-size={size} ref={setBox}>
       {box === null ? null : children(box)}
     </div>
   );

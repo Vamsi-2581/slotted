@@ -17,6 +17,7 @@ export type {
   DrawerMount,
   DrawerOpenReason,
   DrawerSide,
+  DrawerDrag,
   DrawerSize,
 } from './drawer-defaults';
 export {

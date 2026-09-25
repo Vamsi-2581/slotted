@@ -3,13 +3,15 @@ import { createContext, useContext } from 'react';
 import type { DrawerDefaults, DrawerDefaultsProviderProps } from './drawer.types';
 
 const FALLBACK: DrawerDefaults = {
+  back: 'close',
   escape: 'close',
   modal: true,
   mode: 'overlay',
   mount: 'active',
   outsidePress: 'close',
   side: 'end',
-  size: 'md',
+  size: undefined,
+  drag: 'panel',
 };
 
 const DrawerDefaultsContext = createContext<DrawerDefaults>(FALLBACK);
@@ -34,6 +36,7 @@ export function DrawerDefaultsProvider({ children, ...defaults }: DrawerDefaults
   return (
     <DrawerDefaultsContext.Provider
       value={{
+        back: defaults.back ?? inherited.back,
         escape: defaults.escape ?? inherited.escape,
         modal: defaults.modal ?? inherited.modal,
         mode: defaults.mode ?? inherited.mode,
@@ -41,6 +44,7 @@ export function DrawerDefaultsProvider({ children, ...defaults }: DrawerDefaults
         outsidePress: defaults.outsidePress ?? inherited.outsidePress,
         side: defaults.side ?? inherited.side,
         size: defaults.size ?? inherited.size,
+        drag: defaults.drag ?? inherited.drag,
       }}
     >
       {children}

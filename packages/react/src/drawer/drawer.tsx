@@ -67,9 +67,11 @@ const NO_SNAP_POINTS: readonly number[] = [];
  */
 export function Drawer({
   children,
+  back,
   container,
   defaultExtent,
   defaultOpen,
+  drag,
   escape,
   extent,
   finalFocus,
@@ -85,6 +87,7 @@ export function Drawer({
   open,
   outsidePress,
   ref,
+  scrimFrom,
   side,
   size,
   snapPoints,
@@ -99,6 +102,8 @@ export function Drawer({
   const currentExtent = extent ?? ownExtent;
 
   const [dragging, setDragging] = useState(false);
+  const [live, setLive] = useState<number | null>(null);
+  const [rest, setRest] = useState<number | undefined>(undefined);
 
   const resolvedMode = mode ?? defaults.mode;
   /**
@@ -110,8 +115,17 @@ export function Drawer({
   const resolvedModal = resolvedMode === 'inline' ? false : (modal ?? defaults.modal);
   const resolvedMount = mount ?? defaults.mount;
   const resolvedSide = side ?? defaults.side;
-  const resolvedSize = size ?? defaults.size;
+  /**
+   * A sheet measures what it holds and a side panel takes a named step: every
+   * native sheet sizes to its content, and Ant, Fluent and MUI all give a side
+   * panel a width. The side decides only when nothing else has.
+   */
+  const resolvedSize =
+    size ??
+    defaults.size ??
+    (resolvedSide === 'top' || resolvedSide === 'bottom' ? 'content' : 'md');
   const resolvedEscape = resolvedMode === 'inline' ? 'none' : (escape ?? defaults.escape);
+  const resolvedBack = resolvedMode === 'inline' ? 'none' : (back ?? defaults.back);
   const resolvedOutsidePress =
     resolvedMode === 'inline' ? 'none' : (outsidePress ?? defaults.outsidePress);
   const resolvedSnapPoints = snapPoints ?? NO_SNAP_POINTS;
@@ -120,10 +134,14 @@ export function Drawer({
    * The limits are the first and last stop when there are stops, because a
    * range whose ends no stop can reach has two values nothing produces.
    */
-  const bounds = useMemo(
-    () => extentBounds(resolvedSnapPoints, minExtent ?? 0.2, maxExtent ?? 1),
-    [maxExtent, minExtent, resolvedSnapPoints],
-  );
+  const bounds = useMemo(() => {
+    const stops = extentBounds(resolvedSnapPoints, minExtent ?? 0.2, maxExtent ?? 1);
+    /* Under `content` the height of the content is a stop above the snap
+       points, so the range reaches past the last of them. */
+    return resolvedSize === 'content'
+      ? { ...stops, max: Math.max(stops.max, maxExtent ?? 1) }
+      : stops;
+  }, [maxExtent, minExtent, resolvedSize, resolvedSnapPoints]);
 
   /**
    * The status rather than a boolean. `entering` is one frame long and it is
@@ -138,6 +156,12 @@ export function Drawer({
 
   useEffect(() => {
     presence.current?.sync(currentOpen);
+  }, [currentOpen]);
+
+  /* A sheet closed by a drag keeps the hand's position through its exit, so it
+     slides from there; opening again starts from rest. */
+  useEffect(() => {
+    if (currentOpen) setLive(null);
   }, [currentOpen]);
 
   useEffect(() => {
@@ -247,7 +271,10 @@ export function Drawer({
       let cancelled = false;
       const state = createControllable<number | undefined>({
         controlled: extent,
-        initial: currentExtent ?? bounds.min,
+        /* `undefined` is a value of this state — the panel on its size step —
+           and not a gap to fill: a floor standing in for it made a request for
+           the floor from the content stop look like no change at all. */
+        initial: currentExtent,
         onRequest: (raw) => {
           cancelled = raw.cancelled;
           onExtentChange?.(raw.value, {
@@ -267,7 +294,7 @@ export function Drawer({
       if (cancelled) return;
       if (moved) setOwnExtent(wanted);
     },
-    [bounds.max, bounds.min, currentExtent, extent, onExtentChange],
+    [bounds.max, currentExtent, extent, onExtentChange],
   );
 
   useImperativeHandle<DrawerHandle, DrawerHandle>(
@@ -290,6 +317,13 @@ export function Drawer({
       container,
       descriptionId: descriptionRendered ? `${baseId}description` : '',
       dragging,
+      drag: drag ?? defaults.drag,
+      scrimFrom: scrimFrom ?? 0,
+      live,
+      setLive,
+      rest,
+      setRest,
+      back: resolvedBack,
       escape: resolvedEscape,
       extent: currentExtent,
       finalFocus,
@@ -317,6 +351,8 @@ export function Drawer({
       triggerId: `${baseId}trigger`,
       /** What the stylesheet keys on, which is a frame behind what was asked. */
       visible: resolvedMode === 'inline' ? currentOpen : status === 'open',
+      interactive:
+        resolvedMode === 'inline' ? currentOpen : status === 'entering' || status === 'open',
     }),
     [
       announce,
@@ -328,7 +364,12 @@ export function Drawer({
       defaultExtent,
       currentOpen,
       descriptionRendered,
+      defaults.drag,
+      drag,
       dragging,
+      live,
+      rest,
+      scrimFrom,
       finalFocus,
       initialFocus,
       loading,
@@ -336,6 +377,7 @@ export function Drawer({
       registerLayer,
       requestExtent,
       requestOpen,
+      resolvedBack,
       resolvedEscape,
       resolvedModal,
       resolvedMode,

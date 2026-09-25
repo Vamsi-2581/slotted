@@ -26,7 +26,15 @@ export type DrawerSide = ExtentSide;
  * exact measure sets `--slotted-drawer-extent` on the element, which is the
  * token the steps resolve into.
  */
-export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full' | 'content';
+
+/**
+ * What a hand can move a sheet by. `panel` lets a touch anywhere on an overlay
+ * sheet from the bottom move it and hand itself to the scroll of what it holds,
+ * as every native sheet does; `resizer` leaves the separator the only target.
+ * Only a bottom overlay sheet reads it.
+ */
+export type DrawerDrag = 'panel' | 'resizer';
 
 /**
  * When the panel exists. `active` builds it on opening and drops it once the
@@ -47,7 +55,7 @@ export type DrawerFinalFocus = RefObject<HTMLElement | null> | false;
 /** Why the drawer opened or closed. */
 export type DrawerOpenReason = Extract<
   ChangeRequest<boolean>['reason'],
-  'pointer' | 'keyboard' | 'dismiss' | 'escape' | 'outsidePress' | 'programmatic'
+  'pointer' | 'keyboard' | 'dismiss' | 'escape' | 'outsidePress' | 'back' | 'programmatic'
 >;
 
 /** Why the panel's measure moved. */
@@ -93,13 +101,20 @@ export interface DrawerHandle {
 
 /** What an application sets once for every drawer under it. */
 export interface DrawerDefaults {
+  /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
+  back: DrawerDismissPolicy;
   escape: DrawerDismissPolicy;
   mode: DrawerMode;
   modal: boolean;
   mount: DrawerMount;
   outsidePress: DrawerDismissPolicy;
   side: DrawerSide;
-  size: DrawerSize;
+  /**
+   * Unset, the size the side gives: `content` on `top` and `bottom`, where
+   * every native sheet measures what it holds, and `md` on `start` and `end`.
+   */
+  size: DrawerSize | undefined;
+  drag: DrawerDrag;
 }
 
 export interface DrawerDefaultsProviderProps extends Partial<DrawerDefaults> {
@@ -117,6 +132,23 @@ export interface DrawerContextValue {
   descriptionId: string;
   /** Whether the reader has the separator under the pointer. */
   dragging: boolean;
+  drag: DrawerDrag;
+  /** The fraction below which the scrim is not painted. */
+  scrimFrom: number;
+  /**
+   * Where the hand is holding the panel while the body is dragged, which may be
+   * past the highest stop. `null` outside a gesture: the request is made once,
+   * on release, rather than once per move.
+   */
+  live: number | null;
+  setLive: (live: number | null) => void;
+  /**
+   * What the panel measures at rest — the height of its content under
+   * `size="content"` — as a fraction, measured while `extent` is unset.
+   */
+  rest: number | undefined;
+  setRest: (rest: number | undefined) => void;
+  back: DrawerDismissPolicy;
   escape: DrawerDismissPolicy;
   /** The measure right now, as a fraction of the box the panel is measured in. */
   extent: number | undefined;
@@ -169,6 +201,12 @@ export interface DrawerContextValue {
    * panel that appears already open has no closed style to transition from.
    */
   visible: boolean;
+  /**
+   * Whether the layer takes focus and the pointer. `entering` counts: the
+   * focus scope enters in that frame, and a layer still `inert` then refuses
+   * the initial focus and leaves it on `body`.
+   */
+  interactive: boolean;
 }
 
 export interface DrawerProps {
@@ -209,8 +247,22 @@ export interface DrawerProps {
   modal?: boolean | undefined;
   escape?: DrawerDismissPolicy | undefined;
   outsidePress?: DrawerDismissPolicy | undefined;
+  /**
+   * The platform's way back — a phone's gesture, a browser's button — closes
+   * the layer instead of leaving the page, while the layer is modal.
+   */
+  back?: DrawerDismissPolicy | undefined;
   /** Whether the panel's content is still on its way. */
   loading?: boolean | undefined;
+  /** What a hand moves an overlay sheet from the bottom by. */
+  drag?: DrawerDrag | undefined;
+  /**
+   * Below this fraction the scrim is not painted and a press reaches the page:
+   * the sheet over a map. It pairs with `modal={false}` and
+   * `outsidePress="none"`, because a page left undimmed and inert would promise
+   * something it does not do.
+   */
+  scrimFrom?: number | undefined;
   /** A parent for this layer alone, instead of the shared portal root. */
   container?: Element | null | undefined;
   initialFocus?: DrawerInitialFocus | undefined;

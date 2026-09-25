@@ -1,25 +1,31 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import {
   anchorsAtStart,
+  attachSheetDrag,
+  dampenExtent,
   extentVelocity,
   EXTENT_LARGE_STEP_PX,
   EXTENT_STEP_PX,
   extentAtPoint,
   holdResizeGesture,
   isInlineSide,
-  nearestSnap,
-  projectExtent,
+  measureSheetStops,
+  sameStop,
+  settleExtent,
+  SHEET_FLING_PX_PER_S,
+  stopAsExtent,
   stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
 import type { ExtentSample } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
-import { clamp } from '@slotted/core/measure';
+import { clamp, observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Glyph, Icon } from '../icon';
 import { useDrawer } from './drawer';
 import type {
   DrawerBodyProps,
@@ -165,7 +171,9 @@ function useExtentLength(
   layer: HTMLElement | null,
 ): string | undefined {
   const [length, setLength] = useState<string | undefined>(undefined);
-  const { extent, mode, side } = drawer;
+  const { mode, side } = drawer;
+  /* The hand's position while the body is dragged, and the state otherwise. */
+  const extent = drawer.live ?? drawer.extent;
 
   useIsomorphicLayoutEffect(() => {
     const box = measuringBox(layer, mode);
@@ -188,6 +196,26 @@ function useExtentLength(
   }, [extent, layer, mode, side]);
 
   return length;
+}
+
+/** What the stylesheet leaves above a content sheet, for the press outside. */
+const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
+
+/** The stops a sheet rests on and the rest among them, measured now. */
+function measureStops(drawer: DrawerContextValue, panel: HTMLElement, span: number) {
+  return measureSheetStops({
+    atRest: drawer.extent === undefined && drawer.live === null,
+    content: drawer.size === 'content',
+    panel,
+    reserve: CONTENT_RESERVE,
+    rest: drawer.rest,
+    snapPoints: drawer.snapPoints,
+    span,
+  });
+}
+
+function asRequest(drawer: DrawerContextValue, fraction: number, rest: number | undefined) {
+  return stopAsExtent(fraction, rest, drawer.size === 'content');
 }
 
 /**
@@ -250,6 +278,9 @@ export function DrawerPanel({
            the click rather than the pointerdown so a selection dragged out of
            the panel is not a press on the scrim. */
         createDismissableLayer(layer, {
+          /* A history entry is a modal layer's: a layer the page stays
+             reachable under has no claim on the way back. */
+          back: drawer.modal && drawer.back === 'close',
           branches,
           content: panel,
           escape: drawer.escape === 'close',
@@ -294,6 +325,123 @@ export function DrawerPanel({
     };
   }, [drawer, layer, overlay, panel]);
 
+  /* The latest context, for listeners that live across renders. */
+  const current = useRef(drawer);
+  current.current = drawer;
+
+  /**
+   * What the panel measures at rest, as a fraction, while nothing has moved
+   * it. It is what the separator reports as its value and what `scrimFrom`
+   * compares against, and content that arrives while the sheet is open moves
+   * it, so it is observed rather than read once.
+   */
+  const { setRest, open: isOpen, extent: extentValue, live: liveValue } = drawer;
+  useIsomorphicLayoutEffect(() => {
+    const box = measuringBox(layer, drawer.mode);
+    if (
+      panel === null ||
+      box === null ||
+      !isOpen ||
+      extentValue !== undefined ||
+      liveValue !== null
+    )
+      return;
+    const inline = isInlineSide(drawer.side);
+    const read = () => {
+      const rect = box.getBoundingClientRect();
+      const span = inline ? rect.width : rect.height;
+      if (span <= 0) return;
+      const own = inline ? panel.offsetWidth : panel.offsetHeight;
+      setRest(Math.round((own / span) * 1000) / 1000);
+    };
+    read();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(read);
+    observer.observe(panel);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [layer, drawer.mode, drawer.side, extentValue, isOpen, liveValue, panel, setRest]);
+
+  /**
+   * The virtual keyboard. The layer recedes by what it covers, so the panel
+   * lands above the keys; `@slotted/core/measure` reads it from the visual
+   * viewport.
+   */
+  useEffect(() => {
+    if (!overlay || layer === null || !isOpen) return;
+    const stop = observeKeyboardInset(layer.ownerDocument.defaultView, (pixels) => {
+      if (pixels === 0) layer.style.removeProperty('--slotted-keyboard-inset');
+      else layer.style.setProperty('--slotted-keyboard-inset', `${pixels}px`);
+    });
+    return () => {
+      stop();
+      layer.style.removeProperty('--slotted-keyboard-inset');
+    };
+  }, [isOpen, layer, overlay]);
+
+  /**
+   * The body of a sheet from the bottom moves it under a touch, and hands the
+   * gesture to the scroll of what it holds when that is what it is —
+   * `attachSheetDrag` decides which. The request is made once, on release, and
+   * the hand's position lives in `live` until then.
+   */
+  const sheet = overlay && drawer.side === 'bottom' && drawer.drag === 'panel';
+  useEffect(() => {
+    if (!sheet || panel === null || layer === null || !isOpen) return;
+    let span = 0;
+    let start = 0;
+    let last = 0;
+    let measured: { stops: number[]; rest: number | undefined } = { rest: undefined, stops: [] };
+
+    const now = () => {
+      span = layer.getBoundingClientRect().height;
+      return span > 0 ? panel.offsetHeight / span : 0;
+    };
+
+    return attachSheetDrag(panel, {
+      enabled: () => current.current.open,
+      canGrow: () => {
+        const at = now();
+        const top = measureStops(current.current, panel, span).stops.at(-1);
+        return top !== undefined && at < top && !sameStop(at, top);
+      },
+      onStart: () => {
+        start = now();
+        last = start;
+        measured = measureStops(current.current, panel, span);
+        current.current.setDragging(true);
+        current.current.setLive(start);
+      },
+      onMove: (distance) => {
+        if (span <= 0) return;
+        last = Math.max(0, start + distance / span);
+        const top = measured.stops.at(-1) ?? start;
+        current.current.setLive(dampenExtent(last, top));
+      },
+      onEnd: (velocity) => {
+        const drawerNow = current.current;
+        drawerNow.setDragging(false);
+        const landed = settleExtent({
+          fraction: Math.min(last, measured.stops.at(-1) ?? last),
+          span,
+          stops: measured.stops,
+          velocity: span > 0 ? velocity / span : 0,
+        });
+        if (landed === 'close') {
+          /* The panel stays where the hand left it, so the exit slides from
+             there; a close the consumer refused puts it back. */
+          drawerNow.close('pointer', undefined, null);
+          requestAnimationFrame(() => {
+            if (current.current.open) current.current.setLive(null);
+          });
+          return;
+        }
+        drawerNow.setLive(null);
+        drawerNow.requestExtent(asRequest(drawerNow, landed, measured.rest), 'pointer', null);
+      },
+    });
+  }, [isOpen, layer, panel, sheet]);
+
   if (!drawer.mounted) return null;
   if (overlay && portal === null) return null;
 
@@ -330,9 +478,13 @@ export function DrawerPanel({
       data-size={drawer.size}
       data-ui="drawer"
       {...(drawer.dragging ? { 'data-dragging': '' } : {})}
+      {...(overlay && drawer.side === 'bottom' ? { 'data-drag': drawer.drag } : {})}
+      {...(overlay && (drawer.live ?? drawer.extent ?? drawer.rest ?? 1) < drawer.scrimFrom
+        ? { 'data-undimmed': '' }
+        : {})}
       {...(drawer.loading ? { 'data-loading': '' } : {})}
       {...(drawer.modal ? { 'data-modal': '' } : {})}
-      {...(drawer.visible ? {} : { inert: true })}
+      {...(drawer.interactive ? {} : { inert: true })}
       {...(drawer.visible ? { 'data-open': '' } : {})}
       ref={attachLayer}
       style={
@@ -366,17 +518,8 @@ export function DrawerPanel({
  * one, because there the panel is on the left and the reader is pushing its
  * edge toward the wall.
  */
-/**
- * Fractions of the layer per second, past which a release asks to close
- * whatever distance it covered.
- *
- * Half the panel a second is a deliberate gesture and not a nudge: a hand
- * moving that fast has decided. It is the figure the surveyed sheets converge
- * on, and it is stated here rather than in the stylesheet because it is a
- * decision about intent, not about paint — no theme should be able to retune
- * what counts as meaning to dismiss something.
- */
-const DISMISS_VELOCITY = 0.5;
+/** How far a press on the separator may wander and still be a tap. */
+const TAP_SLOP_PX = 3;
 
 export function DrawerResizer({
   className,
@@ -396,13 +539,19 @@ export function DrawerResizer({
   const dragged = useRef<number | null>(null);
   /** Where the pointer has been, for the velocity the release reads. */
   const samples = useRef<ExtentSample[]>([]);
+  /**
+   * Where the press began and how far the panel's edge was from the pointer
+   * then. The panel follows the pointer from that offset rather than jumping
+   * its edge under it, so a press that does not move is a tap and moves nothing.
+   */
+  const press = useRef<{ x: number; y: number; offset: number; moved: boolean } | null>(null);
   /** What `Enter` restores to once it has collapsed the panel. */
   const restore = useRef<number | null>(null);
   /** What the document looked like before the drag, and how to put it back. */
   const gesture = useRef<(() => void) | null>(null);
 
   const inline = isInlineSide(drawer.side);
-  const current = drawer.extent ?? drawer.minExtent;
+  const current = drawer.live ?? drawer.extent ?? drawer.rest ?? drawer.minExtent;
   const percent = (value: number) => Math.round(clamp(value, 0, 1) * 100);
 
   const layerRect = () => {
@@ -410,10 +559,32 @@ export function DrawerResizer({
     return box === null ? null : box.getBoundingClientRect();
   };
 
+  /**
+   * The stops the keyboard, the release and a tap share. Without snap points
+   * the range is continuous and there are none — the content stop joins only a
+   * list the consumer started, or a separator with no stops would stop moving.
+   */
+  const stopsNow = (): { stops: number[]; rest: number | undefined } => {
+    const panel = drawer.nodes.panel;
+    const rect = layerRect();
+    if (panel === null || rect === null || drawer.snapPoints.length === 0) {
+      return { rest: drawer.rest, stops: [] };
+    }
+    return measureStops(drawer, panel, inline ? rect.width : rect.height);
+  };
+
   const move = (fraction: number, source: unknown) => {
     dragged.current = fraction;
     drawer.requestExtent(fraction, 'pointer', source);
   };
+
+  const pointAt = (event: PointerEvent<HTMLDivElement>, rect: DOMRect) =>
+    extentAtPoint({
+      point: { x: event.clientX, y: event.clientY },
+      rect,
+      rtl: isRtl(node.current),
+      side: drawer.side,
+    });
 
   const pointerDown = (event: PointerEvent<HTMLDivElement>) => {
     onPointerDown?.(event);
@@ -425,36 +596,36 @@ export function DrawerResizer({
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     event.currentTarget.focus();
-    /* The cursor has to survive the pointer leaving the separator, and a drag
-       across the page must not select the text under it. Both are the
-       document's and neither is reachable from the family's own stylesheet. */
-    gesture.current?.();
-    gesture.current = holdResizeGesture(
-      node.current?.ownerDocument,
-      inline ? 'col-resize' : 'row-resize',
-    );
-    drawer.setDragging(true);
-    move(
-      extentAtPoint({
-        point: { x: event.clientX, y: event.clientY },
-        rect,
-        rtl: isRtl(node.current),
-        side: drawer.side,
-      }),
-      event,
-    );
+    press.current = {
+      moved: false,
+      offset: current - pointAt(event, rect),
+      x: event.clientX,
+      y: event.clientY,
+    };
+    samples.current = [];
   };
 
   const pointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (!drawer.dragging) return;
+    const held = press.current;
+    if (held === null) return;
     const rect = layerRect();
     if (rect === null) return;
-    const fraction = extentAtPoint({
-      point: { x: event.clientX, y: event.clientY },
-      rect,
-      rtl: isRtl(node.current),
-      side: drawer.side,
-    });
+
+    if (!held.moved) {
+      if (Math.hypot(event.clientX - held.x, event.clientY - held.y) < TAP_SLOP_PX) return;
+      held.moved = true;
+      /* The cursor has to survive the pointer leaving the separator, and a drag
+         across the page must not select the text under it. Both are the
+         document's and neither is reachable from the family's own stylesheet. */
+      gesture.current?.();
+      gesture.current = holdResizeGesture(
+        node.current?.ownerDocument,
+        inline ? 'col-resize' : 'row-resize',
+      );
+      drawer.setDragging(true);
+    }
+
+    const fraction = clamp(pointAt(event, rect) + held.offset, 0, 1);
     /* Three samples is what `extentVelocity` reads; keeping more would only
        let an older, slower stretch of the same drag dilute the flick. */
     samples.current = [...samples.current, { at: event.timeStamp, fraction }].slice(-3);
@@ -462,50 +633,68 @@ export function DrawerResizer({
   };
 
   /**
-   * Two ways out on release, and the second one is new.
-   *
-   * **By distance**: a measure below the floor asks to close. This is what the
-   * family always had, and on its own it means a reader who flicks a sheet
-   * twenty pixels and lets go gets twenty pixels of movement — a gesture the
-   * component ignored. It was reported as exactly that.
-   *
-   * **By velocity**: a hand still moving toward the closed edge faster than
-   * `DISMISS_VELOCITY` asks to close wherever it is. A flick is short by
-   * definition; distance cannot see it.
-   *
-   * Whichever comes first. A close the consumer cancels leaves the panel at the
-   * floor, as it always did.
-   *
-   * What is not a dismissal settles on the stop nearest the *projected*
-   * position rather than the instantaneous one, so a release that was still
-   * travelling lands where the hand was aiming.
+   * A tap walks the stops upward and wraps from the highest to the lowest,
+   * which is what the grabber of a native sheet does and what Ionic calls
+   * `handleBehavior="cycle"`. A separator with no stops has nowhere to walk.
+   */
+  const cycle = (event: PointerEvent<HTMLDivElement>) => {
+    const { rest: measuredRest, stops } = stopsNow();
+    if (stops.length < 2) return;
+    /* Where the panel is, read with the stops rather than from state a frame old. */
+    const at = drawer.live ?? drawer.extent ?? measuredRest ?? current;
+    const next = stops.find((stop) => stop > at && !sameStop(stop, at)) ?? (stops[0] as number);
+    drawer.requestExtent(asRequest(drawer, next, measuredRest), 'pointer', event);
+  };
+
+  /**
+   * Where the release lands. With stops it is `settleExtent`, the same rule
+   * the sheet's body answers: the closed position is the stop `0`, a fling goes
+   * to the next stop, anything slower to the nearest to where it was heading.
+   * Without stops the range is continuous — resizing is what a separator does
+   * on a desktop screen — and only the floor, or a fling toward the edge, asks
+   * to close. A close the consumer cancels leaves the panel at the floor.
    */
   const endDrag = (event: PointerEvent<HTMLDivElement>) => {
-    if (!drawer.dragging) return;
+    const held = press.current;
+    if (held === null) return;
+    press.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    if (!held.moved) {
+      if (event.type === 'pointerup') cycle(event);
+      return;
+    }
+
     gesture.current?.();
     gesture.current = null;
     drawer.setDragging(false);
 
+    const rect = layerRect();
+    const span = rect === null ? 0 : inline ? rect.width : rect.height;
     const last = dragged.current ?? current;
     const velocity = extentVelocity(samples.current);
     dragged.current = null;
     samples.current = [];
 
-    if (last < drawer.minExtent || velocity < -DISMISS_VELOCITY) {
+    const { rest: measuredRest, stops } = stopsNow();
+    if (stops.length > 0) {
+      const landed = settleExtent({ fraction: last, span, stops, velocity });
+      if (landed === 'close') {
+        drawer.close('pointer', undefined, event);
+        drawer.requestExtent(stops[0], 'pointer', event);
+        return;
+      }
+      drawer.requestExtent(asRequest(drawer, landed, measuredRest), 'pointer', event);
+      return;
+    }
+
+    if (last < drawer.minExtent || velocity * span <= -SHEET_FLING_PX_PER_S) {
       drawer.close('pointer', undefined, event);
       drawer.requestExtent(drawer.minExtent, 'pointer', event);
       return;
     }
-
-    const settled = projectExtent({ fraction: last, velocity });
-    drawer.requestExtent(
-      nearestSnap(clamp(settled, drawer.minExtent, drawer.maxExtent), drawer.snapPoints),
-      'pointer',
-      event,
-    );
+    drawer.requestExtent(clamp(last, drawer.minExtent, drawer.maxExtent), 'pointer', event);
   };
 
   const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -533,18 +722,25 @@ export function DrawerResizer({
               rect,
               side: drawer.side,
             });
-      drawer.requestExtent(
-        stepExtent({
-          amount,
-          direction,
-          fraction: current,
-          max: drawer.maxExtent,
-          min: drawer.minExtent,
-          snapPoints: drawer.snapPoints,
-        }),
-        'keyboard',
-        event,
-      );
+      const { rest: measuredRest, stops } = stopsNow();
+      const next = stepExtent({
+        amount,
+        direction,
+        fraction: current,
+        max: stops.at(-1) ?? drawer.maxExtent,
+        min: stops[0] ?? drawer.minExtent,
+        snapPoints: stops,
+      });
+      drawer.requestExtent(asRequest(drawer, next, measuredRest), 'keyboard', event);
+    };
+
+    /** The two ends of the range: the first and last stop when there are stops. */
+    const to = (end: 'first' | 'last') => {
+      event.preventDefault();
+      const { rest: measuredRest, stops } = stopsNow();
+      const target =
+        end === 'first' ? (stops[0] ?? drawer.minExtent) : (stops.at(-1) ?? drawer.maxExtent);
+      drawer.requestExtent(asRequest(drawer, target, measuredRest), 'keyboard', event);
     };
 
     switch (event.key) {
@@ -553,11 +749,9 @@ export function DrawerResizer({
       case towardLastEdge:
         return by(atStart ? 1 : -1);
       case 'Home':
-        event.preventDefault();
-        return drawer.requestExtent(drawer.minExtent, 'keyboard', event);
+        return to('first');
       case 'End':
-        event.preventDefault();
-        return drawer.requestExtent(drawer.maxExtent, 'keyboard', event);
+        return to('last');
       /**
        * The pattern's own key, and the one departure from it: "collapses the
        * pane" would mean closing the drawer, and Escape already means that. A
@@ -590,13 +784,20 @@ export function DrawerResizer({
     drawer.requestExtent(drawer.defaultExtent, 'pointer', event);
   };
 
+  /* A content sheet may rest below `minExtent`, and its rest is still a value
+     the range holds. */
+  const floor =
+    drawer.size === 'content' && drawer.rest !== undefined
+      ? Math.min(drawer.minExtent, drawer.rest)
+      : drawer.minExtent;
+
   const rootProps = {
     'aria-controls': drawer.panelId,
     ...(drawer.titleId === '' ? {} : { 'aria-labelledby': drawer.titleId }),
     'aria-orientation': (inline ? 'vertical' : 'horizontal') as 'vertical' | 'horizontal',
     'aria-valuemax': percent(drawer.maxExtent),
-    'aria-valuemin': percent(drawer.minExtent),
-    'aria-valuenow': percent(clamp(current, drawer.minExtent, drawer.maxExtent)),
+    'aria-valuemin': percent(floor),
+    'aria-valuenow': percent(clamp(current, floor, drawer.maxExtent)),
     ...rest,
     className,
     'data-part': 'resizer' as const,
@@ -767,7 +968,12 @@ export function DrawerClose({
   const rootProps = {
     'aria-label': 'Close',
     ...rest,
-    children,
+    /* The cross is drawn unless the consumer wrote content of their own. */
+    children: children ?? (
+      <Icon>
+        <Glyph name="x" />
+      </Icon>
+    ),
     className,
     'data-part': 'close' as const,
     onClick: (event: MouseEvent<HTMLButtonElement>) => {

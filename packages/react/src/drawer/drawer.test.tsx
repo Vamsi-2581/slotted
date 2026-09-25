@@ -93,6 +93,28 @@ describe('Drawer', () => {
     expect(layer()?.dataset['ui']).toBe('drawer');
   });
 
+  it('draws the close as the x glyph, and draws nothing over content the consumer wrote', () => {
+    const { unmount } = render(<Basic defaultOpen />);
+    const close = () => document.querySelector('[data-part="close"]') as HTMLElement;
+    const glyph = close().querySelector('[data-ui="icon"] > svg[data-part="glyph"]');
+    expect(glyph).toHaveAttribute('data-glyph', 'x');
+    expect(glyph).toHaveAttribute('aria-hidden', 'true');
+    unmount();
+
+    render(
+      <Drawer defaultOpen>
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Own mark</DrawerTitle>
+            <DrawerClose>Done</DrawerClose>
+          </DrawerHeader>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    expect(close().querySelector('svg')).toBeNull();
+    expect(close()).toHaveTextContent('Done');
+  });
+
   it('writes every axis the stylesheet keys on', () => {
     render(<Basic defaultOpen mount="eager" side="bottom" size="lg" />);
 
@@ -457,6 +479,7 @@ describe('Drawer', () => {
     render(<Basic defaultOpen side="end" />);
 
     fireEvent.pointerDown(separator(), { button: 0, clientX: 600, pointerId: 1 });
+    fireEvent.pointerMove(separator(), { clientX: 580, pointerId: 1 });
     expect(document.body.style.cursor).toBe('col-resize');
     expect(document.documentElement.style.userSelect).toBe('none');
 
@@ -523,13 +546,17 @@ describe('Drawer', () => {
   it('follows the pointer while it is down, and says so in the DOM', () => {
     measureLayerAs(1000, 800);
     const onExtentChange = vi.fn();
-    render(<Basic defaultOpen onExtentChange={onExtentChange} side="end" />);
+    render(<Basic defaultExtent={0.3} defaultOpen onExtentChange={onExtentChange} side="end" />);
 
     const bar = separator();
+    /* The press alone moves nothing: the panel follows the pointer from the
+       offset it was grabbed at, so a press that does not move is a tap. */
     fireEvent.pointerDown(bar, { button: 0, clientX: 700, clientY: 0, pointerId: 1 });
+    expect(onExtentChange).not.toHaveBeenCalled();
+    fireEvent.pointerMove(bar, { clientX: 650, clientY: 0, pointerId: 1 });
     expect(layer()?.hasAttribute('data-dragging')).toBe(true);
     expect(onExtentChange).toHaveBeenLastCalledWith(
-      expect.closeTo(0.3, 5),
+      expect.closeTo(0.35, 5),
       expect.objectContaining({ reason: 'pointer' }),
     );
 
@@ -547,10 +574,11 @@ describe('Drawer', () => {
   it('asks to close when a drag is released below the floor', () => {
     measureLayerAs(1000, 800);
     const onOpenChange = vi.fn();
-    render(<Basic defaultOpen onOpenChange={onOpenChange} side="end" />);
+    render(<Basic defaultExtent={0.3} defaultOpen onOpenChange={onOpenChange} side="end" />);
 
     const bar = separator();
-    fireEvent.pointerDown(bar, { button: 0, clientX: 950, clientY: 0, pointerId: 1 });
+    fireEvent.pointerDown(bar, { button: 0, clientX: 700, clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(bar, { clientX: 950, clientY: 0, pointerId: 1 });
     fireEvent.pointerUp(bar, { pointerId: 1 });
 
     expect(onOpenChange).toHaveBeenCalledWith(
@@ -694,7 +722,7 @@ function stamped(
 describe('a sheet dismissed by velocity', () => {
   function sheet(onOpenChange = vi.fn()) {
     render(
-      <Drawer defaultOpen onOpenChange={onOpenChange} side="bottom">
+      <Drawer defaultExtent={0.5} defaultOpen onOpenChange={onOpenChange} side="bottom">
         <DrawerPanel>
           <DrawerResizer />
           <DrawerHeader>
@@ -772,5 +800,140 @@ describe('a sheet dismissed by velocity', () => {
     ]);
     expect(onOpenChange).toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+});
+
+/**
+ * The reopening of 2026-09-25: a sheet from the bottom measures its content,
+ * moves under a touch on its body, walks its stops on a tap of the grabber and
+ * leaves the page undimmed below `scrimFrom`.
+ */
+describe('a bottom sheet', () => {
+  function touchAt(target: Element, type: string, y: number, at: number) {
+    const event = new Event(type, { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'touches', {
+      value: type === 'touchend' ? [] : [{ clientX: 0, clientY: y, identifier: 1, target }],
+    });
+    Object.defineProperty(event, 'timeStamp', { value: at });
+    act(() => {
+      target.dispatchEvent(event);
+    });
+    return event;
+  }
+
+  function sheet(props: Partial<DrawerProps> = {}) {
+    const onOpenChange = vi.fn();
+    const onExtentChange = vi.fn();
+    render(
+      <Drawer
+        defaultOpen
+        onExtentChange={onExtentChange}
+        onOpenChange={onOpenChange}
+        side="bottom"
+        {...props}
+      >
+        <DrawerPanel>
+          <DrawerResizer />
+          <DrawerHeader>
+            <DrawerTitle>Filtrar faturas</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>Período, status e responsável.</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    const layer = document.querySelector("[data-ui='drawer']") as HTMLElement;
+    const panel = layer.querySelector("[data-part='panel']") as HTMLElement;
+    layer.getBoundingClientRect = () =>
+      ({
+        x: 0,
+        y: 0,
+        width: 400,
+        height: 800,
+        top: 0,
+        left: 0,
+        right: 400,
+        bottom: 800,
+      }) as DOMRect;
+    Object.defineProperty(panel, 'offsetHeight', { configurable: true, value: 400 });
+    return { layer, onExtentChange, onOpenChange, panel };
+  }
+
+  it('measures its content on a block side and takes a step on an inline one', () => {
+    render(<Basic defaultOpen side="bottom" />);
+    expect(layer()?.dataset['size']).toBe('content');
+    expect(layer()?.dataset['drag']).toBe('panel');
+  });
+
+  it('closes on a fast downward drag of its body', () => {
+    const { onOpenChange, panel } = sheet();
+    const body = panel.querySelector("[data-part='body']") as HTMLElement;
+    touchAt(body, 'touchstart', 300, 0);
+    const move = touchAt(body, 'touchmove', 340, 20);
+    expect(move.defaultPrevented).toBe(true);
+    touchAt(body, 'touchmove', 420, 40);
+    touchAt(body, 'touchend', 420, 50);
+    expect(onOpenChange).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('goes back to its rest on a slow short drag, asking for nothing', () => {
+    const { onExtentChange, onOpenChange, panel } = sheet();
+    const body = panel.querySelector("[data-part='body']") as HTMLElement;
+    touchAt(body, 'touchstart', 300, 0);
+    touchAt(body, 'touchmove', 320, 400);
+    touchAt(body, 'touchmove', 340, 800);
+    touchAt(body, 'touchend', 340, 900);
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onExtentChange).not.toHaveBeenCalledWith(expect.any(Number), expect.anything());
+  });
+
+  it('leaves the body alone when it is told to', () => {
+    const { onOpenChange, panel } = sheet({ drag: 'resizer' });
+    const body = panel.querySelector("[data-part='body']") as HTMLElement;
+    touchAt(body, 'touchstart', 300, 0);
+    const move = touchAt(body, 'touchmove', 420, 20);
+    touchAt(body, 'touchend', 420, 30);
+    expect(move.defaultPrevented).toBe(false);
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('walks its stops on a tap of the grabber', () => {
+    const { onExtentChange } = sheet({ defaultExtent: 0.5, size: 'md', snapPoints: [0.5, 0.9] });
+    const bar = screen.getByRole('separator');
+    bar.setPointerCapture = () => {};
+    bar.hasPointerCapture = () => true;
+    bar.releasePointerCapture = () => {};
+    fireEvent.pointerDown(bar, { button: 0, clientY: 400, pointerId: 1 });
+    fireEvent.pointerUp(bar, { clientY: 400, pointerId: 1 });
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      0.9,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  /** From the content stop, `extent` is `undefined`, and the lowest stop is still a move. */
+  it('walks from the content stop back to the lowest snap point', () => {
+    const { onExtentChange, panel } = sheet({ snapPoints: [0.5] });
+    Object.defineProperty(panel.querySelector("[data-part='body']"), 'scrollHeight', {
+      configurable: true,
+      value: 2000,
+    });
+    const bar = screen.getByRole('separator');
+    bar.setPointerCapture = () => {};
+    bar.hasPointerCapture = () => true;
+    bar.releasePointerCapture = () => {};
+    fireEvent.pointerDown(bar, { button: 0, clientY: 100, pointerId: 1 });
+    fireEvent.pointerUp(bar, { clientY: 100, pointerId: 1 });
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      0.5,
+      expect.objectContaining({ previous: undefined, reason: 'pointer' }),
+    );
+  });
+
+  it('leaves the page undimmed below scrimFrom', () => {
+    const { layer } = sheet({ defaultExtent: 0.3, scrimFrom: 0.5, size: 'md' });
+    expect(layer).toHaveAttribute('data-undimmed');
   });
 });

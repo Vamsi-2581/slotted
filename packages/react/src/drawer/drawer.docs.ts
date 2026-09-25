@@ -234,6 +234,68 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'sheet',
+    title: 'A bottom sheet as a phone draws one',
+    note: 'The sheet measures what it holds — the default size on top and bottom — stops at forty rems on a wide layer, and moves under a touch anywhere on its body. A downward drag with the list at its top moves the sheet; an upward one grows it to the next stop — the height of its content among them — before the list scrolls; a fling faster than 500 px/s goes to the next stop or closes. A tap on the grabber walks the stops.',
+    snippet: defineSnippet({
+      id: 'drawer-react-sheet',
+      language: 'tsx',
+      label: 'Half the layer, and the height of the content as the second stop',
+      source: `<Drawer side="bottom" snapPoints={[0.5]} defaultExtent={0.5}>
+  <DrawerTrigger>Filtros</DrawerTrigger>
+  <DrawerPanel>
+    <DrawerResizer />
+    <DrawerHeader>
+      <DrawerTitle>Filtrar faturas</DrawerTitle>
+      <DrawerClose />
+    </DrawerHeader>
+    <DrawerBody>…</DrawerBody>
+  </DrawerPanel>
+</Drawer>;`,
+    }),
+  },
+  {
+    id: 'scrimFrom',
+    title: 'A sheet over a page that stays in use',
+    note: 'Below scrimFrom the scrim is not painted and a press reaches the page — the sheet over a map. It is written beside modal={false} and outsidePress="none", because an undimmed page that stayed inert would promise something it does not do. Drag the sheet past sixty per cent and the scrim fades in.',
+    snippet: defineSnippet({
+      id: 'drawer-react-scrim-from',
+      language: 'tsx',
+      label: 'Undimmed up to the middle stop',
+      source: `<Drawer
+  side="bottom"
+  snapPoints={[0.25, 0.6, 0.95]}
+  defaultExtent={0.25}
+  scrimFrom={0.6}
+  modal={false}
+  outsidePress="none"
+>
+  …
+</Drawer>;`,
+    }),
+  },
+  {
+    id: 'keyboard',
+    title: 'A sheet above the virtual keyboard',
+    note: 'On a phone the keyboard shrinks the visual viewport and leaves fixed layers under the keys. The open layer reads what the keyboard covers and recedes by it, so the sheet — and its footer — land above the keys. The button beside the scene writes the same property the binding writes, 260 pixels, to show it on a screen without one.',
+    snippet: defineSnippet({
+      id: 'drawer-react-keyboard',
+      language: 'tsx',
+      label: 'Nothing to write: the layer does it',
+      source: `<Drawer side="bottom">
+  <DrawerPanel>
+    <DrawerHeader>
+      <DrawerTitle>Enviar lembrete</DrawerTitle>
+    </DrawerHeader>
+    <DrawerBody>
+      <TextField aria-label="Nota para o cliente" />
+    </DrawerBody>
+    <DrawerFooter>…</DrawerFooter>
+  </DrawerPanel>
+</Drawer>;`,
+    }),
+  },
+  {
     id: 'modal',
     title: 'A drawer the page behind can still be used',
     note: 'modal={false} writes no aria-modal, makes nothing inert, locks no scroll and contains no focus. The APG warns that marking a container modal without doing all four is worse for a screen-reader reader than not marking it at all.',
@@ -399,7 +461,7 @@ const events: EventRow[] = [
   {
     name: 'onExtentChange',
     payload: '(extent: number, request: DrawerExtentRequest)',
-    when: 'Before the panel’s measure moves, carrying pointer for a drag, keyboard for an arrow, Home, End or Enter, and programmatic for the consumer’s own call. While a drag is in progress it fires per pointer move, and the value may fall below minExtent — that is what a sheet following the reader’s hand looks like, and the release decides whether it means a smaller panel or a closed one.',
+    when: 'Before the panel’s measure moves, carrying pointer for a drag or a tap on the grabber, keyboard for an arrow, Home, End or Enter, and programmatic for the consumer’s own call. A drag of the separator fires per pointer move, and the value may fall below minExtent; a drag of a sheet’s body fires once, on release, with the stop it settled on. undefined is the panel back on its size step — under size="content", the height of its content.',
   },
   {
     name: 'onClick, onKeyDown, onPointerDown, on every part',
@@ -439,10 +501,10 @@ const composition = apiRows([
   ],
   [
     'DrawerDefaultsProvider',
-    '{ mode, side, size, mount, modal, escape, outsidePress }',
+    '{ mode, side, size, mount, modal, escape, outsidePress, back, drag }',
     '—',
     'a subtree',
-    'The seven decisions an application takes once. A drawer that states any of them itself still wins, because an explicit consumer value always does',
+    'The nine decisions an application takes once. A drawer that states any of them itself still wins, because an explicit consumer value always does',
   ],
 ]);
 
@@ -452,6 +514,7 @@ const accessibility = [
   'aria-modal="true" appears only while the drawer is modal, which is the only state in which the background is genuinely unreachable: dismissable-layer writes inert on every sibling up to the document root. modal is fixed at false under inline, because a panel in the flow that claimed the mark while the page around it stayed reachable is exactly the failure the APG calls severe.',
   'The separator answers the APG’s Window Splitter pattern — w3.org/WAI/ARIA/apg/patterns/windowsplitter/ — key by key: the arrows move it by the screen’s own directions, Home and End reach the limits, and Enter collapses the panel to its floor and restores it. It carries role="separator", tabindex="0", aria-orientation, aria-controls the panel and aria-labelledby the title, and its three values are percentages, which is the range the pattern calls typical. Ant’s resizer and Vaul’s snap dragging are both pointer-only; docs/component-features.md §2.8 makes the alternative a condition of shipping the capability at all.',
   'The one departure from that pattern is Enter. “Collapses the pane” would mean closing the drawer, and Escape already means that; a reader who presses Enter on a separator expects the separator to still be there afterwards. The other is aria-valuetext, which is absent: a reader hears “40” rather than “40 per cent”, because the string would have to be built from a locale this family does not take.',
+  'A bottom sheet moves under a touch on its body as well as on its separator, and the separator stays the keyboard’s: every stop a finger reaches — the content height included — is an arrow press away, and a tap on the grabber walks them as VoiceOver’s activation of a native grabber does. The body gesture never starts on a field, on text being selected, or on an element whose touch-action has already claimed vertical movement.',
   'The closed panel is inert in both modes, so a drawer the eye reads as closed keeps its controls out of the tab sequence and out of the accessibility tree. MUI’s persistent variant leaves them reachable, which is the defect this answers.',
   'Focus moves into an overlay panel on open — the first tabbable element by default, or an element the consumer names — and returns to the element that held it. An inline drawer moves nothing on open and still restores, because the scope moves focus back only when focus is inside it or on the body. A trigger that has since left the document falls back to that row’s nearest connected ancestor rather than dropping focus on the body.',
   'The close button is an inner control rather than a Button (R2): its box is the mark plus a step of air on each side, floored at --slotted-target-min, and the separator is --slotted-target-min thick, so both clear the WCAG 2.2 minimum of 24 by 24 pixels.',
@@ -584,10 +647,10 @@ export const REACT_DRAWER_DOCS = {
     ],
     [
       'size',
-      "'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      "'sm' | 'md' | 'lg' | 'xl' | 'full' | 'content'",
       'md',
       'Drawer, DrawerDefaultsProvider',
-      'The panel’s resting measure. Five named steps rather than a pixel string, because a theme can retune a step; a consumer needing an exact measure sets --slotted-drawer-extent, which is the token the steps resolve into',
+      'The panel’s resting measure. Five named steps rather than a pixel string, because a theme can retune a step, and content, which measures what the panel holds up to four rems short of the layer. Unset, content on top and bottom — every native sheet sizes to its content — and md on start and end',
     ],
     [
       'mount',
@@ -616,6 +679,27 @@ export const REACT_DRAWER_DOCS = {
       'close',
       'Drawer, DrawerDefaultsProvider',
       'Whether a press outside the layer asks to close it. Both this and escape are none under mode="inline", where there is no outside',
+    ],
+    [
+      'back',
+      "'close' | 'none'",
+      'close',
+      'Drawer, DrawerDefaultsProvider',
+      "The platform's way back — a phone's gesture, a browser's button — closes the layer instead of leaving the page, while it is modal: @slotted/core/dismissable-layer holds one history entry per modal layer and answers the popstate that leaves it with the reason back. none under mode=\"inline\", as escape is",
+    ],
+    [
+      'drag',
+      "'panel' | 'resizer'",
+      'panel',
+      'Drawer, DrawerDefaultsProvider',
+      'What a hand moves an overlay sheet from the bottom by. panel: a touch anywhere on it, handed to the scroll of what it holds when that is at its top or the sheet is on its highest stop. resizer: the separator alone, which is what the mouse and the pen always use and what every other side has',
+    ],
+    [
+      'scrimFrom',
+      'number',
+      '0',
+      'Drawer',
+      'Below this fraction the scrim is not painted and a press reaches the page, and the root carries data-undimmed. Write it with modal={false} and outsidePress="none"',
     ],
     [
       'loading',

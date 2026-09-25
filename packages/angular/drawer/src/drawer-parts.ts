@@ -6,8 +6,9 @@ import {
   extentVelocity,
   holdResizeGesture,
   isInlineSide,
-  nearestSnap,
-  projectExtent,
+  sameStop,
+  settleExtent,
+  SHEET_FLING_PX_PER_S,
   stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
@@ -25,6 +26,7 @@ import {
   OnInit,
   ViewEncapsulation,
 } from '@angular/core';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlDrawer } from './drawer';
 import type { DrawerOpenReason } from './drawer-defaults';
@@ -183,10 +185,16 @@ export class SlDrawerFooter {}
  * vocabulary in `docs/state-and-events.md` already has for what a close button
  * means, and its `value` rides out on the request as the result.
  */
-@Directive({
+@Component({
   selector: '[slDrawerClose]',
   standalone: true,
   exportAs: 'slDrawerClose',
+  imports: [SlGlyph, SlIcon],
+  /* The cross is drawn unless the consumer wrote content of their own. */
+  template: `<ng-content
+    ><span slIcon><svg slGlyph name="x"></svg></span
+  ></ng-content>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'close',
     type: 'button',
@@ -224,16 +232,8 @@ export class SlDrawerClose {
  * one, because there the panel is on the left and the reader is pushing its
  * edge toward the wall.
  */
-/**
- * Fractions of the layer per second, past which a release asks to close
- * whatever distance it covered.
- *
- * Half the panel a second is a deliberate gesture and not a nudge: a hand
- * moving that fast has decided. Stated here rather than in the stylesheet
- * because it is a decision about intent and not about paint — no theme should
- * be able to retune what counts as meaning to dismiss something.
- */
-const DISMISS_VELOCITY = 0.5;
+/** How far a press on the separator may wander and still be a tap. */
+const TAP_SLOP_PX = 3;
 
 @Component({
   selector: '[slDrawerResizer]',
@@ -263,7 +263,7 @@ const DISMISS_VELOCITY = 0.5;
     '[attr.aria-controls]': 'drawer.panelId',
     '[attr.aria-labelledby]': 'labelledBy()',
     '[attr.aria-orientation]': 'orientation()',
-    '[attr.aria-valuemin]': 'percent(drawer.bounds().min)',
+    '[attr.aria-valuemin]': 'percent(floor())',
     '[attr.aria-valuemax]': 'percent(drawer.bounds().max)',
     '[attr.aria-valuenow]': 'valueNow()',
     '(pointerdown)': 'pointerDown($event)',
@@ -292,6 +292,12 @@ export class SlDrawerResizer {
   private dragged: number | null = null;
   /** Where the pointer has been, for the velocity the release reads. */
   private samples: ExtentSample[] = [];
+  /**
+   * Where the press began and how far the panel's edge was from the pointer
+   * then. The panel follows the pointer from that offset rather than jumping
+   * its edge under it, so a press that does not move is a tap and moves nothing.
+   */
+  private press: { x: number; y: number; offset: number; moved: boolean } | null = null;
   /** What `Enter` restores to once it has collapsed the panel. */
   private collapsed: number | null = null;
   /** What the document looked like before the drag, and how to put it back. */
@@ -303,21 +309,49 @@ export class SlDrawerResizer {
   protected readonly labelledBy = computed(() =>
     this.drawer.hasTitle() ? this.drawer.titleId : null,
   );
-  protected readonly valueNow = computed(() => {
-    const bounds = this.drawer.bounds();
-    return this.percent(clamp(this.current(), bounds.min, bounds.max));
+  /* A content sheet may rest below `minExtent`, and its rest is still a value
+     the range holds. */
+  protected readonly floor = computed(() => {
+    const min = this.drawer.bounds().min;
+    const rest = this.drawer.rest();
+    return this.drawer.resolvedSize() === 'content' && rest !== undefined
+      ? Math.min(min, rest)
+      : min;
   });
+  protected readonly valueNow = computed(() =>
+    this.percent(clamp(this.current(), this.floor(), this.drawer.bounds().max)),
+  );
 
   protected percent(value: number) {
     return Math.round(clamp(value, 0, 1) * 100);
   }
 
   private current() {
-    return this.drawer.extent() ?? this.drawer.bounds().min;
+    return this.drawer.currentExtent() ?? this.drawer.rest() ?? this.drawer.bounds().min;
   }
 
   private isRtl() {
     return getComputedStyle(this.native).direction === 'rtl';
+  }
+
+  private span() {
+    const box = this.drawer.measuringBox();
+    if (box === null) return 0;
+    const rect = box.getBoundingClientRect();
+    return isInlineSide(this.drawer.resolvedSide()) ? rect.width : rect.height;
+  }
+
+  /**
+   * The stops the keyboard, the release and a tap share. Without snap points
+   * the range is continuous and there are none — the content stop joins only a
+   * list the consumer started, or a separator with no stops would stop moving.
+   */
+  private stopsNow(): { stops: number[]; rest: number | undefined } {
+    const panel = this.native.parentElement;
+    if (panel === null || this.drawer.snapPoints().length === 0) {
+      return { rest: this.drawer.rest(), stops: [] };
+    }
+    return this.drawer.measureStops(panel, this.span());
   }
 
   private fractionAt(event: PointerEvent) {
@@ -339,23 +373,36 @@ export class SlDrawerResizer {
     event.preventDefault();
     this.native.setPointerCapture(event.pointerId);
     this.native.focus();
-    /* The cursor has to survive the pointer leaving the separator, and a drag
-       across the page must not select the text under it. Both are the
-       document's and neither is reachable from the family's own stylesheet. */
-    this.gesture?.();
-    this.gesture = holdResizeGesture(
-      this.native.ownerDocument,
-      isInlineSide(this.drawer.resolvedSide()) ? 'col-resize' : 'row-resize',
-    );
-    this.drawer.dragging.set(true);
-    this.dragged = fraction;
-    this.drawer.requestExtent(fraction, 'pointer', event);
+    this.press = {
+      moved: false,
+      offset: this.current() - fraction,
+      x: event.clientX,
+      y: event.clientY,
+    };
+    this.samples = [];
   }
 
   protected pointerMove(event: PointerEvent) {
-    if (!this.drawer.dragging()) return;
-    const fraction = this.fractionAt(event);
-    if (fraction === null) return;
+    const held = this.press;
+    if (held === null) return;
+    const at = this.fractionAt(event);
+    if (at === null) return;
+
+    if (!held.moved) {
+      if (Math.hypot(event.clientX - held.x, event.clientY - held.y) < TAP_SLOP_PX) return;
+      held.moved = true;
+      /* The cursor has to survive the pointer leaving the separator, and a drag
+         across the page must not select the text under it. Both are the
+         document's and neither is reachable from the family's own stylesheet. */
+      this.gesture?.();
+      this.gesture = holdResizeGesture(
+        this.native.ownerDocument,
+        isInlineSide(this.drawer.resolvedSide()) ? 'col-resize' : 'row-resize',
+      );
+      this.drawer.dragging.set(true);
+    }
+
+    const fraction = clamp(at + held.offset, 0, 1);
     this.dragged = fraction;
     /* Three samples is what `extentVelocity` reads; keeping more would only let
        an older, slower stretch of the same drag dilute the flick. */
@@ -364,49 +411,68 @@ export class SlDrawerResizer {
   }
 
   /**
-   * Two ways out on release, and the second one is new.
-   *
-   * **By distance**: a measure below the floor asks to close. On its own it
-   * means a reader who flicks a sheet twenty pixels and lets go gets twenty
-   * pixels of movement — a gesture the component ignored, and it was reported
-   * as exactly that.
-   *
-   * **By velocity**: a hand still travelling toward the closed edge faster than
-   * `DISMISS_VELOCITY` asks to close wherever it is. A flick is short by
-   * definition, and distance cannot see it.
-   *
-   * Whichever comes first. A close the consumer cancels leaves the panel at the
-   * floor, as it always did. What is not a dismissal settles on the stop
-   * nearest the *projected* position, so a release still travelling lands where
-   * the hand was aiming.
+   * A tap walks the stops upward and wraps from the highest to the lowest,
+   * which is what the grabber of a native sheet does and what Ionic calls
+   * `handleBehavior="cycle"`. A separator with no stops has nowhere to walk.
+   */
+  private cycle(event: PointerEvent) {
+    const { rest, stops } = this.stopsNow();
+    if (stops.length < 2) return;
+    /* Where the panel is, read with the stops rather than from state a frame old. */
+    const at = this.drawer.currentExtent() ?? rest ?? this.current();
+    const next = stops.find((stop) => stop > at && !sameStop(stop, at)) ?? (stops[0] as number);
+    this.drawer.requestExtent(this.drawer.asRequest(next, rest), 'pointer', event);
+  }
+
+  /**
+   * Where the release lands. With stops it is `settleExtent`, the same rule
+   * the sheet's body answers: the closed position is the stop `0`, a fling goes
+   * to the next stop, anything slower to the nearest to where it was heading.
+   * Without stops the range is continuous — resizing is what a separator does
+   * on a desktop screen — and only the floor, or a fling toward the edge, asks
+   * to close. A close the consumer cancels leaves the panel at the floor.
    */
   protected endDrag(event: PointerEvent) {
-    if (!this.drawer.dragging()) return;
+    const held = this.press;
+    if (held === null) return;
+    this.press = null;
     if (this.native.hasPointerCapture(event.pointerId)) {
       this.native.releasePointerCapture(event.pointerId);
     }
+    if (!held.moved) {
+      if (event.type === 'pointerup') this.cycle(event);
+      return;
+    }
+
     this.gesture?.();
     this.gesture = null;
     this.drawer.dragging.set(false);
 
     const bounds = this.drawer.bounds();
+    const span = this.span();
     const last = this.dragged ?? this.current();
     const velocity = extentVelocity(this.samples);
     this.dragged = null;
     this.samples = [];
 
-    if (last < bounds.min || velocity < -DISMISS_VELOCITY) {
+    const { rest, stops } = this.stopsNow();
+    if (stops.length > 0) {
+      const landed = settleExtent({ fraction: last, span, stops, velocity });
+      if (landed === 'close') {
+        this.drawer.request(false, 'pointer', undefined, event);
+        this.drawer.requestExtent(stops[0], 'pointer', event);
+        return;
+      }
+      this.drawer.requestExtent(this.drawer.asRequest(landed, rest), 'pointer', event);
+      return;
+    }
+
+    if (last < bounds.min || velocity * span <= -SHEET_FLING_PX_PER_S) {
       this.drawer.request(false, 'pointer', undefined, event);
       this.drawer.requestExtent(bounds.min, 'pointer', event);
       return;
     }
-
-    const settled = projectExtent({ fraction: last, velocity });
-    this.drawer.requestExtent(
-      nearestSnap(clamp(settled, bounds.min, bounds.max), this.drawer.snapPoints()),
-      'pointer',
-      event,
-    );
+    this.drawer.requestExtent(clamp(last, bounds.min, bounds.max), 'pointer', event);
   }
 
   /**
@@ -447,20 +513,24 @@ export class SlDrawerResizer {
             side,
           });
 
+    const { rest, stops } = this.stopsNow();
     const by = (direction: 1 | -1) => {
       event.preventDefault();
-      this.drawer.requestExtent(
-        stepExtent({
-          amount,
-          direction,
-          fraction: this.current(),
-          max: bounds.max,
-          min: bounds.min,
-          snapPoints: this.drawer.snapPoints(),
-        }),
-        'keyboard',
-        event,
-      );
+      const next = stepExtent({
+        amount,
+        direction,
+        fraction: this.current(),
+        max: stops.at(-1) ?? bounds.max,
+        min: stops[0] ?? bounds.min,
+        snapPoints: stops,
+      });
+      this.drawer.requestExtent(this.drawer.asRequest(next, rest), 'keyboard', event);
+    };
+
+    /** The two ends of the range: the first and last stop when there are stops. */
+    const to = (target: number) => {
+      event.preventDefault();
+      this.drawer.requestExtent(this.drawer.asRequest(target, rest), 'keyboard', event);
     };
 
     switch (event.key) {
@@ -469,11 +539,9 @@ export class SlDrawerResizer {
       case towardLastEdge:
         return by(atStart ? 1 : -1);
       case 'Home':
-        event.preventDefault();
-        return this.drawer.requestExtent(bounds.min, 'keyboard', event);
+        return to(stops[0] ?? bounds.min);
       case 'End':
-        event.preventDefault();
-        return this.drawer.requestExtent(bounds.max, 'keyboard', event);
+        return to(stops.at(-1) ?? bounds.max);
       /**
        * The pattern's own key, and the one departure from it: "collapses the
        * pane" would mean closing the drawer, and Escape already means that. A

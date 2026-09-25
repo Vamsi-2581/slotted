@@ -1,9 +1,18 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
-import { extentBounds, isInlineSide } from '@slotted/core/extent';
+import {
+  attachSheetDrag,
+  dampenExtent,
+  extentBounds,
+  isInlineSide,
+  measureSheetStops,
+  sameStop,
+  settleExtent,
+  stopAsExtent,
+} from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
 import type { FocusScopeHandle } from '@slotted/core/focus';
-import { clamp } from '@slotted/core/measure';
+import { clamp, observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
 import { createPresence } from '@slotted/core/presence';
@@ -24,6 +33,7 @@ import {
   OnInit,
   output,
   signal,
+  untracked,
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
@@ -32,6 +42,7 @@ import { injectDrawerDefaults, SlDrawerIdFactory } from './drawer-defaults';
 import type {
   DrawerChangeRequest,
   DrawerDismissPolicy,
+  DrawerDrag,
   DrawerExtentReason,
   DrawerExtentRequest,
   DrawerFinalFocus,
@@ -44,6 +55,9 @@ import type {
 } from './drawer-defaults';
 
 const NO_SNAP_POINTS: readonly number[] = [];
+
+/** What the stylesheet leaves above a content sheet, for the press outside. */
+const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
 
 /**
  * A panel that comes in from an edge, and either covers the page or stands
@@ -85,7 +99,9 @@ const NO_SNAP_POINTS: readonly number[] = [];
         [attr.data-open]="visible() ? '' : null"
         [attr.data-loading]="loading() ? '' : null"
         [attr.data-dragging]="dragging() ? '' : null"
-        [attr.inert]="visible() ? null : ''"
+        [attr.data-drag]="sheet() ? resolvedDrag() : null"
+        [attr.data-undimmed]="undimmed() ? '' : null"
+        [attr.inert]="interactive() ? null : ''"
         [style.--slotted-drawer-extent]="extentLength()"
       >
         @if (showBackdrop()) {
@@ -131,6 +147,11 @@ export class SlDrawer implements OnInit {
   readonly escape = input<DrawerDismissPolicy | undefined>(undefined);
   readonly outsidePress = input<DrawerDismissPolicy | undefined>(undefined);
   /**
+   * The platform's way back — a phone's gesture, a browser's button — closes
+   * the layer instead of leaving the page, while the layer is modal.
+   */
+  readonly back = input<DrawerDismissPolicy | undefined>(undefined);
+  /**
    * Whether the background is inert, the scroll is locked and focus is
    * contained. Fixed at `false` under `mode="inline"`: a panel in the flow that
    * claimed `aria-modal` while the page around it stayed reachable is the
@@ -139,6 +160,15 @@ export class SlDrawer implements OnInit {
   readonly modal = input(true, { transform: booleanAttribute });
   /** Whether the panel's content is still on its way. */
   readonly loading = input(false, { transform: booleanAttribute });
+  /** What a hand moves an overlay sheet from the bottom by. */
+  readonly drag = input<DrawerDrag | undefined>(undefined);
+  /**
+   * Below this fraction the scrim is not painted and a press reaches the page:
+   * the sheet over a map. It pairs with `[modal]="false"` and
+   * `outsidePress="none"`, because a page left undimmed and inert would promise
+   * something it does not do.
+   */
+  readonly scrimFrom = input(0);
   /** The smallest the reader may make it. A drag released below it asks to close. */
   readonly minExtent = input(0.2);
   readonly maxExtent = input(1);
@@ -185,6 +215,17 @@ export class SlDrawer implements OnInit {
   readonly triggerNode = signal<HTMLElement | null>(null);
   /** Whether the reader has the separator under the pointer. */
   readonly dragging = signal(false);
+  /**
+   * Where the hand is holding the panel while the body is dragged, which may be
+   * past the highest stop. `null` outside a gesture: the request is made once,
+   * on release, rather than once per move.
+   */
+  readonly live = signal<number | null>(null);
+  /**
+   * What the panel measures at rest — the height of its content under
+   * `size="content"` — as a fraction, measured while `extent` is unset.
+   */
+  readonly rest = signal<number | undefined>(undefined);
 
   readonly titleId = `${this.baseId}-title`;
   readonly descriptionId = `${this.baseId}-description`;
@@ -210,13 +251,38 @@ export class SlDrawer implements OnInit {
 
   readonly resolvedMode = computed(() => this.mode() ?? this.defaults.mode);
   readonly resolvedSide = computed(() => this.side() ?? this.defaults.side);
-  readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
+  /**
+   * A sheet measures what it holds and a side panel takes a named step: every
+   * native sheet sizes to its content, and Ant, Fluent and MUI all give a side
+   * panel a width. The side decides only when nothing else has.
+   */
+  readonly resolvedSize = computed<DrawerSize>(() => {
+    const side = this.resolvedSide();
+    return (
+      this.size() ?? this.defaults.size ?? (side === 'top' || side === 'bottom' ? 'content' : 'md')
+    );
+  });
+  readonly resolvedDrag = computed<DrawerDrag>(() => this.drag() ?? this.defaults.drag);
+  /** An overlay sheet from the bottom, which is the only panel a body drag moves. */
+  readonly sheet = computed(
+    () => this.resolvedMode() === 'overlay' && this.resolvedSide() === 'bottom',
+  );
+  /** The measure right now: the hand's while a body drag holds it, the state otherwise. */
+  readonly currentExtent = computed(() => this.live() ?? this.extent());
+  protected readonly undimmed = computed(
+    () =>
+      this.resolvedMode() === 'overlay' &&
+      (this.currentExtent() ?? this.rest() ?? 1) < this.scrimFrom(),
+  );
   readonly resolvedMount = computed(() => this.mount() ?? this.defaults.mount);
   readonly resolvedModal = computed(() =>
     this.resolvedMode() === 'inline' ? false : this.modal(),
   );
   readonly resolvedEscape = computed<DrawerDismissPolicy>(() =>
     this.resolvedMode() === 'inline' ? 'none' : (this.escape() ?? this.defaults.escape),
+  );
+  readonly resolvedBack = computed<DrawerDismissPolicy>(() =>
+    this.resolvedMode() === 'inline' ? 'none' : (this.back() ?? this.defaults.back),
   );
   readonly resolvedOutsidePress = computed<DrawerDismissPolicy>(() =>
     this.resolvedMode() === 'inline' ? 'none' : (this.outsidePress() ?? this.defaults.outsidePress),
@@ -226,9 +292,14 @@ export class SlDrawer implements OnInit {
    * The limits are the first and last stop when there are stops, because a
    * range whose ends no stop can reach has two values nothing produces.
    */
-  readonly bounds = computed(() =>
-    extentBounds(this.snapPoints(), this.minExtent(), this.maxExtent()),
-  );
+  readonly bounds = computed(() => {
+    const stops = extentBounds(this.snapPoints(), this.minExtent(), this.maxExtent());
+    /* Under `content` the height of the content is a stop above the snap
+       points, so the range reaches past the last of them. */
+    return this.resolvedSize() === 'content'
+      ? { ...stops, max: Math.max(stops.max, this.maxExtent()) }
+      : stops;
+  });
 
   /**
    * An inline drawer is always in the document: its own measure is what opens
@@ -247,6 +318,16 @@ export class SlDrawer implements OnInit {
   readonly visible = computed(() =>
     this.resolvedMode() === 'inline' ? this.open() : this.status() === 'open',
   );
+  /**
+   * Whether the layer takes focus and the pointer. `entering` counts: the
+   * focus scope enters in that frame, and a layer still `inert` then refuses
+   * the initial focus and leaves it on `body`.
+   */
+  readonly interactive = computed(() => {
+    if (this.resolvedMode() === 'inline') return this.open();
+    const status = this.status();
+    return status === 'entering' || status === 'open';
+  });
 
   /**
    * The scrim belongs to the layer, not to the dismissal policy: `modal`
@@ -294,6 +375,12 @@ export class SlDrawer implements OnInit {
       this.presence.sync(this.open());
     });
 
+    /* A sheet closed by a drag keeps the hand's position through its exit, so
+       it slides from there; opening again starts from rest. */
+    effect(() => {
+      if (this.open()) untracked(() => this.live.set(null));
+    });
+
     /** Where an overlay layer lives, for as long as it is in the document. */
     effect(() => {
       const node = this.layerRef()?.nativeElement ?? null;
@@ -322,7 +409,7 @@ export class SlDrawer implements OnInit {
      */
     effect((onCleanup) => {
       const box = this.measuringBox();
-      const fraction = this.extent();
+      const fraction = this.currentExtent();
       const inline = isInlineSide(this.resolvedSide());
 
       if (box === null || fraction === undefined) {
@@ -363,6 +450,9 @@ export class SlDrawer implements OnInit {
       const escape = this.resolvedEscape() === 'close';
       const outsidePress = this.resolvedOutsidePress() === 'close';
       const modal = this.resolvedModal();
+      /* A history entry is a modal layer's: a layer the page stays reachable
+         under has no claim on the way back. */
+      const back = modal && this.resolvedBack() === 'close';
       const trigger = this.triggerNode();
 
       if (overlay) {
@@ -370,6 +460,7 @@ export class SlDrawer implements OnInit {
            the click rather than the pointerdown so a selection dragged out of
            the panel is not a press on the scrim. */
         this.layer = createDismissableLayer(node, {
+          back,
           branches: trigger === null ? [] : [trigger],
           content: panel,
           escape,
@@ -404,12 +495,158 @@ export class SlDrawer implements OnInit {
       });
     });
 
+    /**
+     * What the panel measures at rest, as a fraction, while nothing has moved
+     * it. It is what the separator reports and what `scrimFrom` compares
+     * against, and content that arrives while the sheet is open moves it, so it
+     * is observed rather than read once.
+     */
+    effect((onCleanup) => {
+      const box = this.measuringBox();
+      const panel = this.panelRef()?.nativeElement;
+      if (
+        box === null ||
+        panel === undefined ||
+        !this.open() ||
+        this.extent() !== undefined ||
+        this.live() !== null
+      ) {
+        return;
+      }
+      const inline = isInlineSide(this.resolvedSide());
+      const read = () => {
+        const rect = box.getBoundingClientRect();
+        const span = inline ? rect.width : rect.height;
+        if (span <= 0) return;
+        const own = inline ? panel.offsetWidth : panel.offsetHeight;
+        this.rest.set(Math.round((own / span) * 1000) / 1000);
+      };
+      read();
+      if (typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(read);
+      observer.observe(panel);
+      observer.observe(box);
+      onCleanup(() => observer.disconnect());
+    });
+
+    /**
+     * The virtual keyboard. The layer recedes by what it covers, so the panel
+     * lands above the keys; `@slotted/core/measure` reads it from the visual
+     * viewport.
+     */
+    effect((onCleanup) => {
+      const node = this.layerRef()?.nativeElement;
+      if (node === undefined || !this.open() || this.resolvedMode() !== 'overlay') return;
+      const stop = observeKeyboardInset(node.ownerDocument.defaultView, (pixels) => {
+        if (pixels === 0) node.style.removeProperty('--slotted-keyboard-inset');
+        else node.style.setProperty('--slotted-keyboard-inset', `${pixels}px`);
+      });
+      onCleanup(() => {
+        stop();
+        node.style.removeProperty('--slotted-keyboard-inset');
+      });
+    });
+
+    /**
+     * The body of a sheet from the bottom moves it under a touch, and hands the
+     * gesture to the scroll of what it holds when that is what it is —
+     * `attachSheetDrag` decides which. The request is made once, on release,
+     * and the hand's position lives in `live` until then.
+     */
+    effect((onCleanup) => {
+      const node = this.layerRef()?.nativeElement;
+      const panel = this.panelRef()?.nativeElement;
+      if (
+        node === undefined ||
+        panel === undefined ||
+        !this.open() ||
+        !this.sheet() ||
+        this.resolvedDrag() !== 'panel'
+      ) {
+        return;
+      }
+
+      let span = 0;
+      let start = 0;
+      let last = 0;
+      let measured: { stops: number[]; rest: number | undefined } = {
+        rest: undefined,
+        stops: [],
+      };
+      const now = () => {
+        span = node.getBoundingClientRect().height;
+        return span > 0 ? panel.offsetHeight / span : 0;
+      };
+
+      onCleanup(
+        attachSheetDrag(panel, {
+          enabled: () => this.open(),
+          canGrow: () => {
+            const at = now();
+            const top = this.measureStops(panel, span).stops.at(-1);
+            return top !== undefined && at < top && !sameStop(at, top);
+          },
+          onStart: () => {
+            start = now();
+            last = start;
+            measured = this.measureStops(panel, span);
+            this.dragging.set(true);
+            this.live.set(start);
+          },
+          onMove: (distance) => {
+            if (span <= 0) return;
+            last = Math.max(0, start + distance / span);
+            this.live.set(dampenExtent(last, measured.stops.at(-1) ?? start));
+          },
+          onEnd: (velocity) => {
+            this.dragging.set(false);
+            const landed = settleExtent({
+              fraction: Math.min(last, measured.stops.at(-1) ?? last),
+              span,
+              stops: measured.stops,
+              velocity: span > 0 ? velocity / span : 0,
+            });
+            if (landed === 'close') {
+              /* The panel stays where the hand left it, so the exit slides from
+                 there; a close the consumer refused puts it back. */
+              this.request(false, 'pointer', undefined, null);
+              if (this.open()) this.live.set(null);
+              return;
+            }
+            this.live.set(null);
+            this.requestExtent(this.asRequest(landed, measured.rest), 'pointer', null);
+          },
+        }),
+      );
+    });
+
     this.destroyRef.onDestroy(() => {
       this.scope?.destroy();
       this.layer?.destroy();
       this.presence.destroy();
       this.releasePortal();
     });
+  }
+
+  /** The stops a sheet rests on and the rest among them, measured now. */
+  measureStops(panel: HTMLElement, span: number) {
+    return measureSheetStops({
+      atRest: this.extent() === undefined && this.live() === null,
+      content: this.resolvedSize() === 'content',
+      panel,
+      reserve: CONTENT_RESERVE,
+      rest: this.rest(),
+      snapPoints: this.snapPoints(),
+      span,
+    });
+  }
+
+  /**
+   * What a settled fraction is asked as: the content stop is `undefined`, so
+   * the sheet follows its content again when the content grows.
+   */
+  asRequest(fraction: number, rest: number | undefined) {
+    return stopAsExtent(fraction, rest, this.resolvedSize() === 'content');
   }
 
   /**
@@ -477,7 +714,10 @@ export class SlDrawer implements OnInit {
 
     let cancelled = false;
     const state = createControllable<number | undefined>({
-      initial: this.extent() ?? this.bounds().min,
+      /* `undefined` is a value of this state — the panel on its size step —
+         and not a gap to fill: a floor standing in for it made a request for
+         the floor from the content stop look like no change at all. */
+      initial: this.extent(),
       onRequest: (raw) => {
         cancelled = raw.cancelled;
         this.extentChangeRequest.emit({

@@ -44,6 +44,8 @@ import {
       [escape]="escape()"
       [loading]="loading()"
       [snapPoints]="snapPoints()"
+      [drag]="drag()"
+      [scrimFrom]="scrimFrom()"
       (openChangeRequest)="requests.push($event)"
       (extentChangeRequest)="extents.push($event)"
       (closed)="results.push($event)"
@@ -66,7 +68,9 @@ class DrawerHost {
   readonly extent = signal<number | undefined>(undefined);
   readonly mode = signal<'overlay' | 'inline' | undefined>(undefined);
   readonly side = signal<'start' | 'end' | 'top' | 'bottom' | undefined>(undefined);
-  readonly size = signal<'sm' | 'md' | 'lg' | 'xl' | 'full' | undefined>(undefined);
+  readonly size = signal<'sm' | 'md' | 'lg' | 'xl' | 'full' | 'content' | undefined>(undefined);
+  readonly drag = signal<'panel' | 'resizer' | undefined>(undefined);
+  readonly scrimFrom = signal(0);
   readonly mount = signal<'active' | 'lazy' | 'eager' | undefined>(undefined);
   readonly modal = signal(true);
   readonly escape = signal<'close' | 'none' | undefined>(undefined);
@@ -149,6 +153,24 @@ describe('SlDrawer', () => {
       expect(parts, `${part} is declared and never rendered`).toContain(part);
     }
     expect(layer()?.dataset['ui']).toBe('drawer');
+  });
+
+  it('draws the close as the x glyph', () => {
+    host.open.set(true);
+    fixture.detectChanges();
+
+    const close = document.querySelector('[data-part="close"]') as HTMLElement;
+    const glyph = close.querySelector('[data-ui="icon"] > svg[data-part="glyph"]');
+    expect(glyph?.getAttribute('data-glyph')).toBe('x');
+    expect(glyph?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('takes focus in the frame it enters, before the stylesheet reads it as open', () => {
+    host.open.set(true);
+    fixture.detectChanges();
+
+    expect(layer()?.hasAttribute('data-open')).toBe(false);
+    expect(layer()?.hasAttribute('inert')).toBe(false);
   });
 
   it('writes every axis the stylesheet keys on', () => {
@@ -460,6 +482,9 @@ describe('SlDrawer', () => {
     (separator() as HTMLElement).dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: 600, pointerId: 1 }),
     );
+    (separator() as HTMLElement).dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, clientX: 580, pointerId: 1 }),
+    );
     fixture.detectChanges();
     expect(document.body.style.cursor).toBe('col-resize');
     expect(document.documentElement.style.userSelect).toBe('none');
@@ -521,9 +546,12 @@ describe('SlDrawer', () => {
     measureAs(1000, 800);
     host.open.set(true);
     host.side.set('end');
+    host.extent.set(0.3);
     fixture.detectChanges();
 
     const bar = separator() as HTMLElement;
+    /* The press alone moves nothing: the panel follows the pointer from the
+       offset it was grabbed at, so a press that does not move is a tap. */
     bar.dispatchEvent(
       new PointerEvent('pointerdown', {
         bubbles: true,
@@ -535,9 +563,14 @@ describe('SlDrawer', () => {
       }),
     );
     fixture.detectChanges();
+    expect(host.extents).toHaveLength(0);
+    bar.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, clientX: 650, clientY: 0, pointerId: 1 }),
+    );
+    fixture.detectChanges();
 
     expect(layer()?.hasAttribute('data-dragging')).toBe(true);
-    expect(host.extent()).toBeCloseTo(0.3, 5);
+    expect(host.extent()).toBeCloseTo(0.35, 5);
 
     bar.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
     fixture.detectChanges();
@@ -554,6 +587,7 @@ describe('SlDrawer', () => {
     measureAs(1000, 800);
     host.open.set(true);
     host.side.set('end');
+    host.extent.set(0.3);
     fixture.detectChanges();
 
     const bar = separator() as HTMLElement;
@@ -562,10 +596,13 @@ describe('SlDrawer', () => {
         bubbles: true,
         button: 0,
         cancelable: true,
-        clientX: 950,
+        clientX: 700,
         clientY: 0,
         pointerId: 1,
       }),
+    );
+    bar.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, clientX: 950, clientY: 0, pointerId: 1 }),
     );
     fixture.detectChanges();
     bar.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
@@ -614,5 +651,116 @@ describe('SlDrawer', () => {
     scoped.detectChanges();
 
     expect(layer()?.dataset['size']).toBe('sm');
+  });
+
+  /* ---------------------------------------------------------- the sheet - */
+
+  const touchAt = (target: Element, type: string, y: number, at: number) => {
+    const event = new Event(type, { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'touches', {
+      value: type === 'touchend' ? [] : [{ clientX: 0, clientY: y, identifier: 1, target }],
+    });
+    Object.defineProperty(event, 'timeStamp', { value: at });
+    target.dispatchEvent(event);
+    fixture.detectChanges();
+    return event;
+  };
+
+  const openSheet = () => {
+    measureAs(400, 800);
+    host.side.set('bottom');
+    host.open.set(true);
+    fixture.detectChanges();
+    Object.defineProperty(panel() as HTMLElement, 'offsetHeight', {
+      configurable: true,
+      value: 400,
+    });
+    return document.querySelector('[data-part="body"]') as HTMLElement;
+  };
+
+  it('measures its content on a block side and takes a step on an inline one', () => {
+    host.side.set('bottom');
+    host.open.set(true);
+    fixture.detectChanges();
+    expect(layer()?.dataset['size']).toBe('content');
+    expect(layer()?.dataset['drag']).toBe('panel');
+
+    host.side.set('end');
+    fixture.detectChanges();
+    expect(layer()?.dataset['size']).toBe('md');
+  });
+
+  it('closes on a fast downward drag of its body', () => {
+    const body = openSheet();
+    touchAt(body, 'touchstart', 300, 0);
+    const move = touchAt(body, 'touchmove', 340, 20);
+    expect(move.defaultPrevented).toBe(true);
+    touchAt(body, 'touchmove', 420, 40);
+    touchAt(body, 'touchend', 420, 50);
+    expect(host.open()).toBe(false);
+    expect(host.requests.at(-1)?.reason).toBe('pointer');
+  });
+
+  it('goes back to its rest on a slow short drag, asking for nothing', () => {
+    const body = openSheet();
+    touchAt(body, 'touchstart', 300, 0);
+    touchAt(body, 'touchmove', 320, 400);
+    touchAt(body, 'touchmove', 340, 800);
+    touchAt(body, 'touchend', 340, 900);
+    expect(host.open()).toBe(true);
+    expect(host.extent()).toBeUndefined();
+  });
+
+  it('leaves the body alone when it is told to', () => {
+    host.drag.set('resizer');
+    const body = openSheet();
+    touchAt(body, 'touchstart', 300, 0);
+    const move = touchAt(body, 'touchmove', 420, 20);
+    touchAt(body, 'touchend', 420, 30);
+    expect(move.defaultPrevented).toBe(false);
+    expect(host.open()).toBe(true);
+  });
+
+  it('walks its stops on a tap of the grabber', () => {
+    host.size.set('md');
+    host.snapPoints.set([0.5, 0.9]);
+    host.extent.set(0.5);
+    openSheet();
+    const bar = separator() as HTMLElement;
+    bar.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, button: 0, clientY: 400, pointerId: 1 }),
+    );
+    bar.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientY: 400, pointerId: 1 }));
+    fixture.detectChanges();
+    expect(host.extent()).toBe(0.9);
+    expect(host.extents.at(-1)?.reason).toBe('pointer');
+  });
+
+  /** From the content stop, `extent` is `undefined`, and the lowest stop is still a move. */
+  it('walks from the content stop back to the lowest snap point', () => {
+    /* `measureAs` gives every element, the reserve probe included, a width of
+       400, so the content stop here is (800 − 400) / 800. */
+    host.snapPoints.set([0.3]);
+    openSheet();
+    Object.defineProperty(document.querySelector('[data-part="body"]'), 'scrollHeight', {
+      configurable: true,
+      value: 2000,
+    });
+    const bar = separator() as HTMLElement;
+    bar.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, button: 0, clientY: 100, pointerId: 1 }),
+    );
+    bar.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientY: 100, pointerId: 1 }));
+    fixture.detectChanges();
+    expect(host.extent()).toBe(0.3);
+    expect(host.extents.at(-1)?.previous).toBeUndefined();
+  });
+
+  it('leaves the page undimmed below scrimFrom', () => {
+    host.size.set('md');
+    host.extent.set(0.3);
+    host.scrimFrom.set(0.5);
+    openSheet();
+    expect(layer()?.hasAttribute('data-undimmed')).toBe(true);
   });
 });

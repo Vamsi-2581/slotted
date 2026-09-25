@@ -21,9 +21,17 @@ export type DrawerSide = ExtentSide;
  * The panel's resting measure. Five named steps rather than a pixel string: a
  * theme retunes a step and cannot retune `width: 400px`.
  */
-export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type DrawerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full' | 'content';
 
 /** When the panel exists. */
+/**
+ * What a hand moves an overlay sheet from the bottom by. `panel` lets a touch
+ * anywhere on it move it and hand itself to the scroll of what it holds;
+ * `resizer` leaves the separator the only target. Only a bottom overlay sheet
+ * reads it.
+ */
+export type DrawerDrag = 'panel' | 'resizer';
+
 export type DrawerMount = 'active' | 'lazy' | 'eager';
 
 /** Whether a dismissal source closes the drawer. */
@@ -37,7 +45,7 @@ export type DrawerFinalFocus = HTMLElement | false;
 
 /** Why the drawer opened or closed. */
 export type DrawerOpenReason =
-  'pointer' | 'keyboard' | 'dismiss' | 'escape' | 'outsidePress' | 'programmatic';
+  'pointer' | 'keyboard' | 'dismiss' | 'escape' | 'outsidePress' | 'back' | 'programmatic';
 
 /** Why the panel's measure moved. */
 export type DrawerExtentReason = 'pointer' | 'keyboard' | 'programmatic';
@@ -70,23 +78,32 @@ export interface DrawerChangeRequest extends Request<boolean, DrawerOpenReason> 
 export type DrawerExtentRequest = Request<number | undefined, DrawerExtentReason>;
 
 export interface DrawerDefaults {
+  /** The platform's way back — a phone's gesture, a browser's button — closes a modal layer. */
+  back: DrawerDismissPolicy;
   escape: DrawerDismissPolicy;
   mode: DrawerMode;
   modal: boolean;
   mount: DrawerMount;
   outsidePress: DrawerDismissPolicy;
   side: DrawerSide;
-  size: DrawerSize;
+  /**
+   * Unset, the size the side gives: `content` on `top` and `bottom`, where
+   * every native sheet measures what it holds, and `md` on `start` and `end`.
+   */
+  size: DrawerSize | undefined;
+  drag: DrawerDrag;
 }
 
 const FALLBACK: DrawerDefaults = {
+  back: 'close',
   escape: 'close',
   modal: true,
   mode: 'overlay',
   mount: 'active',
   outsidePress: 'close',
   side: 'end',
-  size: 'md',
+  size: undefined,
+  drag: 'panel',
 };
 
 export const DRAWER_DEFAULTS = new InjectionToken<DrawerDefaults>('slotted drawer defaults', {

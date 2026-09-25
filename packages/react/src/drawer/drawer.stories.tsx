@@ -34,6 +34,9 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     size: Size,
     resize: Resize,
     snapPoints: SnapPoints,
+    sheet: Sheet,
+    scrimFrom: ScrimFrom,
+    keyboard: Keyboard,
     modal: Modal,
     policy: Policy,
     focus: Focus,
@@ -139,9 +142,9 @@ function Panel({
  * body ran together as `TodasRecentesArquivadas` on the published page — the
  * Angular page reads correctly because `p slText` is a block there.
  */
-function Line({ children }: { children: ReactNode }) {
+function Line({ children, tone }: { children: ReactNode; tone?: 'muted' }) {
   return (
-    <Text render={(props) => <p {...props} />} size="sm">
+    <Text render={(props) => <p {...props} />} size="sm" {...(tone === undefined ? {} : { tone })}>
       {children}
     </Text>
   );
@@ -177,18 +180,14 @@ function Page({ children }: { children?: ReactNode }) {
 function Navigation() {
   return (
     <>
-      <Text size="sm" weight="semibold">
+      <Text render={(props) => <p {...props} />} size="sm" weight="semibold">
         Contas a receber
       </Text>
-      <Text size="sm">Vencidas · 14</Text>
-      <Text size="sm">A vencer em 7 dias · 32</Text>
-      <Text size="sm">Em conciliação · 3</Text>
-      <Text size="sm" tone="muted">
-        Contestações · nenhuma
-      </Text>
-      <Text size="sm" tone="muted">
-        Baixas automáticas não conciliadas desde 02/09
-      </Text>
+      <Line>Vencidas · 14</Line>
+      <Line>A vencer em 7 dias · 32</Line>
+      <Line>Em conciliação · 3</Line>
+      <Line tone="muted">Contestações · nenhuma</Line>
+      <Line tone="muted">Baixas automáticas não conciliadas desde 02/09</Line>
     </>
   );
 }
@@ -399,6 +398,242 @@ export const SnapPoints: Story = {
             />
           )}
         </Layer>
+      </Scene>
+    </Grid>
+  ),
+};
+
+/** Thirty customers, which is more than a phone shows, so the body scrolls. */
+const CUSTOMERS = [
+  ['Acme Logística', 'R$ 12 480,00'],
+  ['Banco Horizonte', 'R$ 3 920,50'],
+  ['Casa Verde Alimentos', 'R$ 845,00'],
+  ['Distribuidora Norte', 'R$ 27 300,00'],
+  ['Estúdio Lume', 'R$ 1 150,00'],
+  ['Farmácia Popular do Centro', 'R$ 6 712,30'],
+  ['Gráfica Aurora', 'R$ 2 004,90'],
+  ['Hotel Mirante', 'R$ 18 960,00'],
+  ['Instituto Raiz', 'R$ 540,00'],
+  ['Jardins da Serra', 'R$ 9 870,00'],
+  ['Klabin Embalagens', 'R$ 31 225,75'],
+  ['Laboratório Vitta', 'R$ 4 380,00'],
+  ['Lojas Maré Alta', 'R$ 7 410,00'],
+  ['Metalúrgica Boa Vista', 'R$ 18 420,00'],
+  ['Nativa Cosméticos', 'R$ 2 980,40'],
+  ['Oficina do Pão', 'R$ 612,00'],
+  ['Papelaria Central', 'R$ 1 845,90'],
+  ['Química Serrana', 'R$ 22 130,00'],
+  ['Rede Solar Engenharia', 'R$ 48 900,00'],
+  ['Supermercado Bom Preço', 'R$ 11 204,65'],
+  ['Têxtil Vale Verde', 'R$ 5 330,00'],
+  ['Usina Pedra Branca', 'R$ 63 750,00'],
+  ['Viação Litoral', 'R$ 3 118,20'],
+  ['Xavier & Filhos Advogados', 'R$ 9 000,00'],
+  ['Zanella Transportes', 'R$ 14 675,00'],
+  ['Água Clara Saneamento', 'R$ 27 480,00'],
+  ['Brisa Hotelaria', 'R$ 4 190,00'],
+  ['Cooperativa Campo Aberto', 'R$ 16 320,00'],
+  ['Delta Informática', 'R$ 2 240,00'],
+  ['Eco Embalagens', 'R$ 8 905,10'],
+] as const;
+
+function Customers() {
+  return (
+    <>
+      {CUSTOMERS.map(([name, amount]) => (
+        <Line key={name}>
+          {name} · {amount}
+        </Line>
+      ))}
+    </>
+  );
+}
+
+/** A sheet opened from its trigger, with the real policy, to be operated. */
+function SheetDemo({
+  body,
+  label,
+  title,
+  ...props
+}: Partial<DrawerProps> & { body: ReactNode; label: string; title: string }) {
+  return (
+    <Layer size="screen">
+      {(container) => (
+        <Drawer container={container} side="bottom" {...props}>
+          <DrawerTrigger render={(trigger) => <Button {...trigger}>{label}</Button>} />
+          <DrawerPanel>
+            <DrawerResizer />
+            <DrawerHeader>
+              <DrawerTitle>{title}</DrawerTitle>
+              <DrawerClose />
+            </DrawerHeader>
+            <DrawerBody>{body}</DrawerBody>
+            <DrawerFooter>
+              <Button size="sm" tone="secondary" variant="ghost">
+                Limpar
+              </Button>
+              <Button size="sm">Aplicar</Button>
+            </DrawerFooter>
+          </DrawerPanel>
+        </Drawer>
+      )}
+    </Layer>
+  );
+}
+
+export const Sheet: Story = {
+  parameters: scenario('sheet'),
+  render: () => (
+    <Grid columns={2}>
+      <Scene
+        label="Content height — the default on a block side"
+        note="Three filters and a footer, and nothing under them. No size is written: on top and bottom the panel measures what it holds, and on a layer wider than forty rems it stops there and stands centred on the scrim."
+      >
+        <Layer>
+          {(container) => (
+            <Panel
+              body={
+                <>
+                  <Line>Período: últimos 30 dias</Line>
+                  <Line>Status: em aberto, vencidas</Line>
+                  <Line>Responsável: Marina Duarte</Line>
+                </>
+              }
+              container={container}
+              description={null}
+              resizer
+              side="bottom"
+              title="Filtrar faturas"
+            />
+          )}
+        </Layer>
+      </Scene>
+      <Scene
+        label="Operate it — touch, fling, tap the grabber"
+        note="It opens at half the layer; the height of its content is the second stop. Drag the body with a finger, or with touch emulation in the browser's device mode: up grows it to its content before the list scrolls, down with the list at its top moves the sheet, and a fling past 500 px/s goes to the next stop or closes. A mouse drags the grabber, and a click on it walks the two stops."
+      >
+        <SheetDemo
+          body={<Customers />}
+          defaultExtent={0.5}
+          label="Clientes em aberto"
+          snapPoints={[0.5]}
+          title="Clientes com faturas em aberto"
+        />
+      </Scene>
+    </Grid>
+  ),
+};
+
+/** The page a map sheet stands over, with controls that still answer. */
+function Territory({ children }: { children: ReactNode }) {
+  const [selected, setSelected] = useState('Zona Sul');
+  return (
+    <div className="slotted-demo-stack">
+      <Text size="sm" tone="muted">
+        Região selecionada: {selected}
+      </Text>
+      <div className="slotted-demo-row">
+        {['Zona Norte', 'Centro', 'Zona Sul'].map((zone) => (
+          <Button key={zone} onClick={() => setSelected(zone)} size="sm" variant="outline">
+            {zone}
+          </Button>
+        ))}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export const ScrimFrom: Story = {
+  parameters: scenario('scrimFrom'),
+  render: () => (
+    <Grid columns={1}>
+      <Scene
+        label="Undimmed up to the middle stop"
+        note="The sheet rests at a quarter of the layer with the page undimmed: the three zone buttons still answer. Tap the grabber, or press the arrows on it, to climb to sixty and ninety-five per cent — the scrim fades in from the middle stop, and a press on it no longer reaches the page."
+      >
+        <Layer size="screen">
+          {(container) => (
+            <Territory>
+              <Drawer
+                container={container}
+                defaultExtent={0.25}
+                defaultOpen
+                escape="none"
+                initialFocus={false}
+                modal={false}
+                outsidePress="none"
+                scrimFrom={0.6}
+                side="bottom"
+                snapPoints={[0.25, 0.6, 0.95]}
+              >
+                <DrawerPanel>
+                  <DrawerResizer />
+                  <DrawerHeader>
+                    <DrawerTitle>Entregas na região</DrawerTitle>
+                  </DrawerHeader>
+                  <DrawerBody>
+                    <Customers />
+                  </DrawerBody>
+                </DrawerPanel>
+              </Drawer>
+            </Territory>
+          )}
+        </Layer>
+      </Scene>
+    </Grid>
+  ),
+};
+
+/**
+ * The keyboard a desktop screen does not have. The button writes the property
+ * the binding writes from `visualViewport`, on the box the layer is portalled
+ * into; the layer inherits it.
+ */
+function KeyboardDemo() {
+  const [box, setBox] = useState<HTMLElement | null>(null);
+  const [shown, setShown] = useState(false);
+  const toggle = () => {
+    if (box === null) return;
+    if (shown) box.style.removeProperty('--slotted-keyboard-inset');
+    else box.style.setProperty('--slotted-keyboard-inset', '260px');
+    setShown(!shown);
+  };
+
+  return (
+    <div className="slotted-demo-stack">
+      <Button onClick={toggle} size="sm" variant="outline">
+        {shown ? 'Esconder o teclado simulado' : 'Simular um teclado de 260 px'}
+      </Button>
+      <div className="slotted-demo-viewport" data-size="screen" ref={setBox}>
+        {box === null ? null : (
+          <Panel
+            body={
+              <TextField
+                aria-label="Nota para o cliente"
+                defaultValue="Pagamento previsto para sexta"
+              />
+            }
+            container={box}
+            description={null}
+            side="bottom"
+            title="Enviar lembrete"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+export const Keyboard: Story = {
+  parameters: scenario('keyboard'),
+  render: () => (
+    <Grid columns={1}>
+      <Scene
+        label="The sheet recedes by what the keyboard covers"
+        note="On a phone, focus the field: the layer reads the band the keyboard covers from the visual viewport and the sheet lands above the keys, footer included. On this screen the button writes the same 260 pixels the binding would."
+      >
+        <KeyboardDemo />
       </Scene>
     </Grid>
   ),

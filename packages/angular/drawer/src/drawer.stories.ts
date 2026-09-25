@@ -40,6 +40,9 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     size: Size,
     resize: Resize,
     snapPoints: SnapPoints,
+    sheet: Sheet,
+    scrimFrom: ScrimFrom,
+    keyboard: Keyboard,
     modal: Modal,
     policy: Policy,
     focus: Focus,
@@ -95,8 +98,20 @@ type Story = StoryObj<DrawerStoryArgs>;
  * `contain: paint` on the primitive is what makes it the containing block for
  * the fixed layer; in an application that containing block is the viewport.
  */
-const layer = (body: string) =>
-  `<div class="slotted-demo-viewport" data-size="tall" #box>${body}</div>`;
+let layers = 0;
+/**
+ * Each box has its own template reference. Two scenes in one grid are one
+ * template, and a shared `#box` resolved every `[container]="box"` to the
+ * first: the second scene's drawer opened inside the first scene's box.
+ */
+const layer = (body: string, size: 'tall' | 'screen' = 'tall') => {
+  layers += 1;
+  const ref = `box${layers}`;
+  return `<div class="slotted-demo-viewport" data-size="${size}" #${ref}>${body.replaceAll(
+    '[container]="box"',
+    `[container]="${ref}"`,
+  )}</div>`;
+};
 
 /**
  * The shape an inline drawer lives in: the consumer's own two-track grid. It is
@@ -169,6 +184,30 @@ const panel = (
     ${resizer}
   </sl-drawer>`);
 
+/**
+ * The navigation a product would actually have: real labels, real counts and
+ * one awkward row, a queue with nothing in it. The React page has carried it
+ * since its inline scenes were rewritten; this page kept three placeholder
+ * words and no separator until the reviewer compared the two.
+ */
+const NAVIGATION = `<p slText size="sm" weight="semibold">Contas a receber</p>
+  <p slText size="sm">Vencidas · 14</p>
+  <p slText size="sm">A vencer em 7 dias · 32</p>
+  <p slText size="sm">Em conciliação · 3</p>
+  <p slText size="sm" tone="muted">Contestações · nenhuma</p>
+  <p slText size="sm" tone="muted">Baixas automáticas não conciliadas desde 02/09</p>`;
+
+/** The invoice the navigation leads to. */
+const WORKBENCH = `<main>
+  <p slText size="lg" weight="semibold">NF-e 20 483 · Metalúrgica Boa Vista Ltda</p>
+  <p slText size="sm" tone="muted">
+    Emitida em 02/09/2026 · vence em 02/10/2026 · R$ 18 420,00 · vencida há 9 dias
+  </p>
+  <p slText size="sm" tone="muted">
+    Arraste a aresta da barra lateral: a medida que ela publica é a mesma que este layout aplica.
+  </p>
+</main>`;
+
 export const Playground: Story = {
   args: {
     escape: 'close',
@@ -224,16 +263,13 @@ export const Mode: Story = {
       ) +
         scene(
           'inline — a panel beside it',
-          'No portal, no scrim and no z-index. The page beside it reflows because the consumer’s own grid says so, which is what replaces Angular Material’s push and MUI’s persistent.',
+          'Sem portal, sem scrim e sem z-index: é uma barra lateral de verdade, com o separador na aresta e a fatura ao lado. A página reflui porque o grid do consumidor diz isso, que é o que substitui o push do Angular Material e o persistent do MUI.',
           shell(
-            `<sl-drawer mode="inline" side="start" size="sm" [open]="true">
-              <header slDrawerHeader><h2 slDrawerTitle>Coleções</h2></header>
-              <nav slDrawerBody aria-label="Seções">
-                <p slText size="sm">Todas</p>
-                <p slText size="sm">Recentes</p>
-                <p slText size="sm">Arquivadas</p>
-              </nav>
-            </sl-drawer>` + page(),
+            `<sl-drawer mode="inline" side="start" size="sm" [open]="true" [extent]="0.34">
+              <header slDrawerHeader><h2 slDrawerTitle>Recebíveis</h2></header>
+              <nav slDrawerBody aria-label="Contas">${NAVIGATION}</nav>
+              <div slDrawerResizer></div>
+            </sl-drawer>` + WORKBENCH,
           ),
         ),
     ),
@@ -288,12 +324,12 @@ export const Resize: Story = {
     template: grid(
       1,
       scene(
-        'A separator, not an input',
-        'The edge itself is the control: four pixels of nothing until a hand is near it, then a line. Tab to it and press the arrows — sixteen pixels a press, sixty-four with Shift — Home and End reach the limits, Enter collapses it and puts it back, and a double click restores the measure the size step gives it. Ant’s resizer and Vaul’s snap dragging are both pointer-only.',
+        'A separator, not a prop',
+        'A aresta é o controlo, e vê-se sem lhe tocar: duas hairlines com a pega ao meio, que correm a calha inteira sob a mão. Chegue lá com Tab e use as setas — dezasseis pixels por toque, sessenta e quatro com Shift — Home e End vão aos limites, Enter colapsa e repõe, e o duplo clique volta à medida do passo de tamanho. O resizer do Ant e o arrasto do Vaul são só de ponteiro.',
         shell(
           `<sl-drawer mode="inline" side="start" [open]="true" [extent]="0.32" [minExtent]="0.18">
-            <header slDrawerHeader><h2 slDrawerTitle>Coleções</h2></header>
-            <div slDrawerBody><p slText size="sm">Arraste a borda, ou use as setas.</p></div>
+            <header slDrawerHeader><h2 slDrawerTitle>Recebíveis</h2></header>
+            <nav slDrawerBody aria-label="Contas">${NAVIGATION}</nav>
             <div slDrawerResizer></div>
           </sl-drawer>` +
             page(
@@ -320,6 +356,170 @@ export const SnapPoints: Story = {
           resizer: '<div slDrawerResizer></div>',
           title: 'Filtros',
         }),
+      ),
+    ),
+  }),
+};
+
+/** Thirty customers, which is more than a phone shows, so the body scrolls. */
+const CUSTOMERS = [
+  'Acme Logística · R$ 12 480,00',
+  'Banco Horizonte · R$ 3 920,50',
+  'Casa Verde Alimentos · R$ 845,00',
+  'Distribuidora Norte · R$ 27 300,00',
+  'Estúdio Lume · R$ 1 150,00',
+  'Farmácia Popular do Centro · R$ 6 712,30',
+  'Gráfica Aurora · R$ 2 004,90',
+  'Hotel Mirante · R$ 18 960,00',
+  'Instituto Raiz · R$ 540,00',
+  'Jardins da Serra · R$ 9 870,00',
+  'Klabin Embalagens · R$ 31 225,75',
+  'Laboratório Vitta · R$ 4 380,00',
+  'Lojas Maré Alta · R$ 7 410,00',
+  'Metalúrgica Boa Vista · R$ 18 420,00',
+  'Nativa Cosméticos · R$ 2 980,40',
+  'Oficina do Pão · R$ 612,00',
+  'Papelaria Central · R$ 1 845,90',
+  'Química Serrana · R$ 22 130,00',
+  'Rede Solar Engenharia · R$ 48 900,00',
+  'Supermercado Bom Preço · R$ 11 204,65',
+  'Têxtil Vale Verde · R$ 5 330,00',
+  'Usina Pedra Branca · R$ 63 750,00',
+  'Viação Litoral · R$ 3 118,20',
+  'Xavier & Filhos Advogados · R$ 9 000,00',
+  'Zanella Transportes · R$ 14 675,00',
+  'Água Clara Saneamento · R$ 27 480,00',
+  'Brisa Hotelaria · R$ 4 190,00',
+  'Cooperativa Campo Aberto · R$ 16 320,00',
+  'Delta Informática · R$ 2 240,00',
+  'Eco Embalagens · R$ 8 905,10',
+]
+  .map((line) => `<p slText size="sm">${line}</p>`)
+  .join('');
+
+const FILTERS = `<p slText size="sm">Período: últimos 30 dias</p>
+  <p slText size="sm">Status: em aberto, vencidas</p>
+  <p slText size="sm">Responsável: Marina Duarte</p>`;
+
+export const Sheet: Story = {
+  parameters: scenario('sheet'),
+  render: () => ({
+    template: grid(
+      2,
+      scene(
+        'Content height — the default on a block side',
+        'Three filters and a footer, and nothing under them. No size is written: on top and bottom the panel measures what it holds, and on a layer wider than forty rems it stops there and stands centred on the scrim.',
+        panel('side="bottom"', {
+          body: FILTERS,
+          description: '',
+          resizer: '<div slDrawerResizer></div>',
+          title: 'Filtrar faturas',
+        }),
+      ) +
+        scene(
+          'Operate it — touch, fling, tap the grabber',
+          "It opens at half the layer; the height of its content is the second stop. Drag the body with a finger, or with touch emulation in the browser's device mode: up grows it to its content before the list scrolls, down with the list at its top moves the sheet, and a fling past 500 px/s goes to the next stop or closes. A mouse drags the grabber, and a click on it walks the two stops.",
+          layer(
+            `<button slButton [slDrawerTrigger]="sheet">Clientes em aberto</button>
+            <sl-drawer #sheet="slDrawer" [container]="box" side="bottom" [snapPoints]="[0.5]" [extent]="0.5">
+              <div slDrawerResizer></div>
+              <header slDrawerHeader>
+                <h2 slDrawerTitle>Clientes com faturas em aberto</h2>
+                <button slDrawerClose></button>
+              </header>
+              <div slDrawerBody>${CUSTOMERS}</div>
+              <footer slDrawerFooter>
+                <button slButton size="sm" variant="ghost" tone="secondary">Limpar</button>
+                <button slButton size="sm">Aplicar</button>
+              </footer>
+            </sl-drawer>`,
+            'screen',
+          ),
+        ),
+    ),
+  }),
+};
+
+export const ScrimFrom: Story = {
+  parameters: scenario('scrimFrom'),
+  render: () => ({
+    props: { zone: 'Zona Sul' },
+    template: grid(
+      1,
+      scene(
+        'Undimmed up to the middle stop',
+        'The sheet rests at a quarter of the layer with the page undimmed: the three zone buttons still answer. Tap the grabber, or press the arrows on it, to climb to sixty and ninety-five per cent — the scrim fades in from the middle stop, and a press on it no longer reaches the page.',
+        layer(
+          `<div class="slotted-demo-stack">
+            <p slText size="sm" tone="muted">Região selecionada: {{ zone }}</p>
+            <div class="slotted-demo-row">
+              <button slButton size="sm" variant="outline" (click)="zone = 'Zona Norte'">Zona Norte</button>
+              <button slButton size="sm" variant="outline" (click)="zone = 'Centro'">Centro</button>
+              <button slButton size="sm" variant="outline" (click)="zone = 'Zona Sul'">Zona Sul</button>
+            </div>
+          </div>
+          <sl-drawer
+            [container]="box"
+            [open]="true"
+            [modal]="false"
+            escape="none"
+            outsidePress="none"
+            [initialFocus]="false"
+            side="bottom"
+            [extent]="0.25"
+            [snapPoints]="[0.25, 0.6, 0.95]"
+            [scrimFrom]="0.6"
+          >
+            <div slDrawerResizer></div>
+            <header slDrawerHeader><h2 slDrawerTitle>Entregas na região</h2></header>
+            <div slDrawerBody>${CUSTOMERS}</div>
+          </sl-drawer>`,
+          'screen',
+        ),
+      ),
+    ),
+  }),
+};
+
+/**
+ * The keyboard a desktop screen does not have. The button writes the property
+ * the binding writes from `visualViewport`, on the box the layer is portalled
+ * into; the layer inherits it.
+ */
+export const Keyboard: Story = {
+  parameters: scenario('keyboard'),
+  render: () => ({
+    props: { keyboard: false },
+    template: grid(
+      1,
+      scene(
+        'The sheet recedes by what the keyboard covers',
+        'On a phone, focus the field: the layer reads the band the keyboard covers from the visual viewport and the sheet lands above the keys, footer included. On this screen the button writes the same 260 pixels the binding would.',
+        `<div class="slotted-demo-stack">
+          <button
+            slButton
+            size="sm"
+            variant="outline"
+            (click)="keyboard = !keyboard; keyboard ? keyboardBox.style.setProperty('--slotted-keyboard-inset', '260px') : keyboardBox.style.removeProperty('--slotted-keyboard-inset')"
+          >
+            {{ keyboard ? 'Esconder o teclado simulado' : 'Simular um teclado de 260 px' }}
+          </button>
+          <div class="slotted-demo-viewport" data-size="screen" #keyboardBox>
+            <sl-drawer [container]="keyboardBox" [open]="true" ${STILL} side="bottom">
+              <header slDrawerHeader>
+                <h2 slDrawerTitle>Enviar lembrete</h2>
+                <button slDrawerClose></button>
+              </header>
+              <div slDrawerBody>
+                <input slTextField aria-label="Nota para o cliente" value="Pagamento previsto para sexta" />
+              </div>
+              <footer slDrawerFooter>
+                <button slButton size="sm" variant="ghost" tone="secondary">Cancelar</button>
+                <button slButton size="sm">Salvar</button>
+              </footer>
+            </sl-drawer>
+          </div>
+        </div>`,
       ),
     ),
   }),

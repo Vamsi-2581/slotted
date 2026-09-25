@@ -53,6 +53,12 @@
 - `dashboard-grid` (typecheck/Angular), `wizard` (durações literais), `import-export-center` (`:hover` sem guarda; bindings por escrever), `toast` contrato (mapa de tons vs alert), `detail-panel` (botão "Emitir fatura" em coluna de letras), `progress-indicator` (`hidden` não esconde a barra linear).
 - Storybook Angular guardava transformações antigas: `touch` nos ficheiros resolveu.
 
+## Consolidação (2026-09-25)
+
+- A pedido do utilizador ("Commit de tudo"), a árvore inteira foi commitada em commits temáticos, por caminhos explícitos: `fbd11e93` glyph, `769fcc6b` event-calendar, `af938421` grelha, `11af2b73` Nexora, `e5f41a74` núcleo, `981d6133` styles, `819a40bf` react, `165c0cb9` angular, `72c82d76` specs, `314779bd` docs; correções `1e1ed34f` (toast com as marcas do alert), `a0addd1a` (formatação), `fca17508` (table + entity-picker).
+- Fora: `CLAUDE.md` vazio na raiz; alterações do skill `reui` feitas por outra sessão depois do commit de formatação.
+- `pnpm check:full`: 6/7 pacotes verdes; `@slotted/core` falhou só por tempo em `chart-echarts` sob carga e passa isolado (1941/1941).
+
 ## Próxima ação
 
-Gate de release com o utilizador (páginas `http://localhost:6006/iframe.html?viewMode=docs&id=components-eventcalendar--reference` e `:6007`); depois commits por caminhos explícitos, agrupados por lote.
+Nenhuma pendente nesta família.

@@ -708,6 +708,13 @@ slNotificationActions]`, `[slNotificationCenterActions | Footer | Empty]`,
   próximo/anterior/pular e condição de disponibilidade. Move o foco só quando
   apropriado, tem alternativa sem spotlight e recupera de âncora ausente.
   Persistência e versionamento são do produto. Compõe `popover` e `dialog`.
+
+  Entregue em 2026-09-24. Inventário e decisões em
+  `docs/history/designs/2026-09-24-tour-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-24-tour-self-assessment.md`. Compõe os módulos de core de
+  `popover` e `dialog`, não as famílias (`popover` não ancora num alvo externo). Navegação em
+  `@slotted/core/tour`; `dismissable-layer.raise()`, `portal.raise()` e `focus-scope` passam a
+  servir uma camada que volta ao topo sobre um diálogo aberto a meio do tour.
 - `action-sheet` — variante de `menu` para toque: ações curtas, cancelamento
   explícito, safe area, modal opcional. Compõe `drawer` com `side="bottom"`.
   Não duplica `dialog` com formulário.

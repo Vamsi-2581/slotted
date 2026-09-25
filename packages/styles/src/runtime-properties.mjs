@@ -182,6 +182,12 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-chart-band-size',
   '--slotted-chart-frame-start',
   '--slotted-chart-frame-size',
+  /**
+   * `tour` — the rectangle of the current step's target, in viewport pixels,
+   * read from `getBoundingClientRect()` and kept current while the page
+   * scrolls. It is a fact about the page the tour stands over.
+   */
+  '--slotted-tour-target-',
 ];
 
 /** Whether a custom property is written by script rather than by a theme. */

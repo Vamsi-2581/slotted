@@ -38,15 +38,17 @@ const SHADOW_TOKENS = [
 const SHADOW_VALUES = {
   light: {
     '--slotted-shadow-xs': '0 1px 2px rgb(15 23 42 / 0.06)',
-    '--slotted-shadow-sm': '0 1px 3px rgb(15 23 42 / 0.10), 0 1px 2px rgb(15 23 42 / 0.06)',
-    '--slotted-shadow-md': '0 4px 12px rgb(15 23 42 / 0.10)',
-    '--slotted-shadow-lg': '0 12px 32px rgb(15 23 42 / 0.14)',
+    '--slotted-shadow-sm': '0 1px 3px rgb(15 23 42 / 0.08), 0 1px 2px -1px rgb(15 23 42 / 0.08)',
+    '--slotted-shadow-md':
+      '0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.08)',
+    '--slotted-shadow-lg':
+      '0 10px 15px -3px rgb(15 23 42 / 0.10), 0 4px 6px -4px rgb(15 23 42 / 0.08)',
   },
   dark: {
     '--slotted-shadow-xs': '0 1px 2px rgb(0 0 0 / 0.40)',
-    '--slotted-shadow-sm': '0 1px 3px rgb(0 0 0 / 0.50), 0 1px 2px rgb(0 0 0 / 0.40)',
-    '--slotted-shadow-md': '0 4px 12px rgb(0 0 0 / 0.55)',
-    '--slotted-shadow-lg': '0 12px 32px rgb(0 0 0 / 0.65)',
+    '--slotted-shadow-sm': '0 1px 3px rgb(0 0 0 / 0.45), 0 1px 2px -1px rgb(0 0 0 / 0.40)',
+    '--slotted-shadow-md': '0 4px 6px -1px rgb(0 0 0 / 0.50), 0 2px 4px -2px rgb(0 0 0 / 0.45)',
+    '--slotted-shadow-lg': '0 10px 15px -3px rgb(0 0 0 / 0.60), 0 4px 6px -4px rgb(0 0 0 / 0.50)',
   },
 };
 const Z_INDEX_TOKENS = [

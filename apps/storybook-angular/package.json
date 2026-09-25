@@ -11,10 +11,10 @@
     "verify": "pnpm test && pnpm typecheck"
   },
   "dependencies": {
-    "@angular/common": "22.1.4",
-    "@angular/core": "22.1.4",
-    "@angular/platform-browser": "22.1.4",
-    "@angular/router": "22.1.4",
+    "@angular/common": "22.1.7",
+    "@angular/core": "22.1.7",
+    "@angular/platform-browser": "22.1.7",
+    "@angular/router": "22.1.7",
     "@slotted/angular": "workspace:*",
     "@slotted/storybook-workbench": "workspace:*",
     "@slotted/theme-default": "workspace:*",

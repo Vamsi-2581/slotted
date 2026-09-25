@@ -79,7 +79,7 @@ família de que dependem. A coluna "depois de" nomeia a barreira.
 | `chart`                         | a rampa sequencial e o par divergente que a escala de dados não tem; a textura como segundo canal sob `forced-colors`; tooltip e realce por ponto que `sparkline` recusou                                                                            | `chart` (onda 12)                         | `2026-09-16-stat-card-sparkline-design.md` §1; inventário §2               |
 | `chart` (fatia 2)               | heatmap, radar, funil, treemap, gauge, sankey e candlestick, cada um como um chunk do adaptador sob o mesmo contrato de série; seleção de intervalo (brush) como um segundo valor mutável, distinto de `zoom`, com teclado próprio                   | `chart` (onda 12)                         | `2026-09-23-chart-capability-inventory.md` §2, linhas 34 e 35              |
 | `table`, `filter-bar`           | a forma compacta do filtro de `data-grid`: painel de 24 rem, uma condição por linha (operador de 7 rem e operando, em `sm`), o join segmentado na segunda linha, Clear/Apply em `sm`; `set` como `select` `multiple`; o operador em símbolo na linha | —                                         | `2026-09-16-data-grid-design.md` §5                                        |
-| `column-manager`                | edita `columnState` de `data-grid` (`order`, `widths`, `hidden`, `pinned`, um objeto) e responde a `onManageColumns` / `manageColumns`, a saída do menu de coluna que hoje só avisa o consumidor                                                     | `column-manager` (onda 10)                | `2026-09-16-data-grid-design.md` §9                                        |
+| `table`                         | expor `columnState` (`GridColumnState`) para `column-manager` servir às duas famílias; hoje as colunas de `table` são marcação do consumidor e o contrato não declara o modelo                                                                       | —                                         | `2026-09-23-column-management-design.md` §1 (Gaps)                         |
 | `data-grid`                     | vista de impressão: uma folha `@media print` que desliga a janela virtual, a moldura e a altura, e imprime as linhas que a query deixou                                                                                                              | —                                         | `2026-09-16-data-grid-self-assessment.md` §1 (9)                           |
 | `menu`                          | deixar de importar `highlight/highlight.css` (React e Angular): a família importa a sua folha e um `mark` num item vem de `Highlight` / `[slHighlight]`; o arquivo estava em edição por `context-menu hover-card` na mesma rodada                    | —                                         | `2026-09-16-highlight-design.md` §5                                        |
 | `tree`                          | o `<mark>` sem identificador da busca passa a `Highlight` / `[slHighlight]` dentro do rótulo, e a folha `highlight/highlight.css` deixa de ser importada                                                                                             | —                                         | `2026-09-16-highlight-design.md` §5                                        |
@@ -533,11 +533,23 @@ Independentes entre si. `crud-list` depende de `selection-toolbar` e de
   confirmação, política única por instância. Preferências serializáveis e
   versionadas. Edita o modelo de colunas de `data-grid` e de `table`; abre em
   `popover` ou `drawer`. Reordenar por `@slotted/core/drag` e teclado.
+
+  Entregue em 2026-09-23 com `saved-views` (vistas nomeadas sobre `GridView`) e
+  as extensões de `data-grid` (ajuda por coluna, prioridade responsiva,
+  densidade por grelha, ajustar todas, anúncio ao ocultar). Decisões em
+  `docs/history/designs/2026-09-23-column-management-design.md`. Serve só a
+  `data-grid`: a reabertura de `table` está na tabela acima.
+
+  Em 2026-09-23 a prioridade responsiva passou a pop-in: a coluna que não cabe
+  entra na linha como par rótulo/valor em vez de ser descartada. Decisões em
+  `docs/history/designs/2026-09-23-narrow-layout-design.md`.
+
 - `data-list` — o recipe responsivo de um conjunto tabular pequeno quando a
   tabela não cabe: cada item mostra rótulos e valores prioritários. Mantém
   ordenação, filtros e seleção do modelo de dados; não oferece navegação de
   grelha. Compõe `list-item` e `description-list`; `table` sob `wrap` continua
-  a resposta para conjuntos que cabem.
+  a resposta para conjuntos que cabem. Uma coleção tabular em `data-grid` já
+  não precisa dela em telefone: o pop-in do `data-grid` cobre esse caso.
 
   Entregue em 2026-09-24. Lê `GridColumn` e `GridQuery` de `@slotted/core/grid`
   e compõe `list` e `list-item`; os pares usam a geometria do pop-in de
@@ -606,6 +618,16 @@ de outra da mesma onda.
   reordenação e redimensionamento opcionais por `@slotted/core/drag` e teclado,
   persistência e modo de edição explícito. Cada widget é um `card` com heading,
   estados vazio/erro/carregando e ação de detalhe.
+
+  Entregue em 2026-09-24. Inventário e decisões em
+  `docs/history/designs/2026-09-24-dashboard-grid-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-24-dashboard-grid-self-assessment.md`. O layout é uma lista
+  ordenada `{ key, columns, rows, hidden? }` que serve as três classes de tamanho do próprio
+  contentor (600, 1024); sem `x`/`y`. Modelos `layout` e `editing`; capacidades e estado
+  `editing` novos no schema; glifo `--slotted-icon-resize`. Aritmética em
+  `@slotted/core/dashboard-grid`. React `DashboardGrid` + `DashboardWidget`
+  (`usePersistedDashboardLayout`); Angular `[slDashboardGrid]` + `sl-dashboard-widget`
+  (conteúdo em templates, à maneira de `mat-tab`; `persistedDashboardLayout`).
 - `wizard` — etapas com dados acumulados, validação por etapa, voltar/avançar/
   enviar, rascunho, retomada e erro global. O estado vive fora de `stepper`,
   que só o desenha. Navegação direta depende de etapas concluídas; URL, reload
@@ -782,6 +804,17 @@ Cada família traz um subsistema. Uma sessão por família.
   linha, cancelar/repetir e download do resultado. A operação continua fora da
   página; `toast` aponta para o job. Compõe `upload`, `progress-indicator`,
   `table` e `result-state`.
+
+  Entregue em 2026-09-25. Inventário e decisões em
+  `docs/history/designs/2026-09-25-import-export-center-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-25-import-export-center-self-assessment.md`. Cinco estados
+  (`queued`, `running`, `succeeded`, `failed`, `canceled`) e o desfecho `partial` derivado das
+  contagens; controlos por estado, disponibilidade dos arquivos (prazo, permissão), texto do
+  progresso, estimativa de tempo, transições, avisos e destino do foco em
+  `@slotted/core/import-export-center`. Modelos `current` (vista) e `open` (detalhes). A partir de
+  42rem a lista é uma grelha e cada job uma subgrelha. `upload` entra pelo diálogo de importação no
+  slot `actions`, não no cabeçalho. React `ImportExportCenter` e `useJobToasts`; Angular
+  `section[slImportExportCenter]`, `[(view)]`, `[(expanded)]` e `jobToasts`.
 - `search-results` — query, escopo, filtros, ordenação, facets, sugestões,
   resultados com `highlight`, paginação ou carga contínua e estados sem
   resultado e erro. Mantém URL e foco; anuncia a contagem; oferece correção da
@@ -806,14 +839,3 @@ Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.
 Uma reabertura que muda um módulo de `packages/core` commita o módulo e os
 consumidores tocados juntos, para que a árvore nunca tenha duas versões de um
 vocabulário.
-
-  Entregue em 2026-09-25. Inventário e decisões em
-  `docs/history/designs/2026-09-25-import-export-center-design.md`, autoavaliação em
-  `docs/history/designs/2026-09-25-import-export-center-self-assessment.md`. Cinco estados
-  (`queued`, `running`, `succeeded`, `failed`, `canceled`) e o desfecho `partial` derivado das
-  contagens; controlos por estado, disponibilidade dos arquivos (prazo, permissão), texto do
-  progresso, estimativa de tempo, transições, avisos e destino do foco em
-  `@slotted/core/import-export-center`. Modelos `current` (vista) e `open` (detalhes). A partir de
-  42rem a lista é uma grelha e cada job uma subgrelha. `upload` entra pelo diálogo de importação no
-  slot `actions`, não no cabeçalho. React `ImportExportCenter` e `useJobToasts`; Angular
-  `section[slImportExportCenter]`, `[(view)]`, `[(expanded)]` e `jobToasts`.

@@ -6,6 +6,10 @@
 
 React and Angular must remain idiomatic to their frameworks. Share specifications and contracts when useful; do not force shared implementation without demonstrated need.
 
+The packages have zero consumers and are not published. The only consumer is `demos/*`, built inside this repository to exercise the library and surface defects. Nothing outside this repository imports the packages.
+
+Backward compatibility is therefore not a constraint, and must not be treated as one. No deprecation aliases, no compatibility shims, no migration layers, no staged renames, no reasoning about "breaking existing users". When a public API is wrong, change it to the correct shape in one pass and update the demo. Compatibility cost never enters a design decision, and never narrows the design space considered.
+
 ## Layout
 
 One top-level directory holds one type of content (`docs/decisions/0002-repository-layout.md`). `docs/README.md` indexes every document by reading class: law at the root, `process/` edited each session, `history/` append-only, `archive/` closed. Session design documents go to `docs/history/designs/`, plans to `docs/history/plans/`, checkpoints to `.claude/progress/`.
@@ -39,6 +43,10 @@ Do not use Playwright for exploratory browsing, generic UI inspection, broad scr
 ## Demo Feedback Loop
 
 `demos/*` consume the library as published packages (`docs`: `CONTRIBUTING.md` › "The beta channel"). A problem seen in a demo is triaged with the `demo-triage` skill before any change: package defect → fixed in the family with a test, then `pnpm demo:refresh`; demo mistake → fixed in the demo. Both are recorded in `demos/<app>/LIBRARY-FEEDBACK.md`, the ledger the public-API review reads. A package defect is never worked around inside a demo.
+
+## Loading States
+
+Anything a person waits in front of — a skeleton, a spinner, a progress bar, an overlay, a control's own `loading`, and the empty and error states beside them — is built with the `loading-states` skill. It decides which indicator answers which wait, and it holds one rule above the rest: a skeleton is the anatomy of the content it stands in for, and the loaded screen and the loading screen occupy the same boxes.
 
 ## Restraint
 

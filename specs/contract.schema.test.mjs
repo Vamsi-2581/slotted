@@ -295,6 +295,31 @@ test('holds the series a chart draws and the window it shows as state a consumer
   }
 });
 
+/**
+ * A list of named arrangements of a grid, which one is in use and which one a
+ * visit opens on. It is not `columns`, which is one arrangement, and not
+ * `selection` or `current`: the set itself is edited — saved, renamed,
+ * deleted — and a consumer's store owns it.
+ */
+test('holds the saved views of a grid as state a consumer can own', () => {
+  assert.ok(KNOWN_CAPABILITIES.includes('views'), 'views is unknown');
+  assert.ok(MUTABLE_CAPABILITIES.includes('views'), 'views is not mutable');
+});
+
+/**
+ * The reader's own arrangement of a surface of blocks — their order, their
+ * size and which are hidden — and the mode in which the reader makes it. A
+ * dashboard restores the first from a store and enters the second from a
+ * button of the product's own, so a consumer owns both.
+ */
+test('holds a layout and the mode that edits it as state a consumer can own', () => {
+  for (const capability of ['layout', 'editing']) {
+    assert.ok(KNOWN_CAPABILITIES.includes(capability), `${capability} is unknown`);
+    assert.ok(MUTABLE_CAPABILITIES.includes(capability), `${capability} is not mutable`);
+  }
+  assert.equal(STATE_ATTRIBUTES.editing, 'data-editing');
+});
+
 test('keeps every mutable capability inside the known vocabulary', () => {
   for (const capability of MUTABLE_CAPABILITIES) {
     assert.ok(KNOWN_CAPABILITIES.includes(capability), `${capability} is mutable and unknown`);

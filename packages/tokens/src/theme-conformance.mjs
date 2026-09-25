@@ -16,8 +16,6 @@ import { toOklab } from './tone-hover.mjs';
 const VARIANTS = ['accent', 'secondary', 'success', 'warning', 'danger'];
 const SOLID_STATES = ['solid', 'solid-hover', 'solid-active'];
 const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
-/** The OKLab lightness step a neutral highlight keeps from the ground it is drawn on. */
-const HIGHLIGHT_STEP = 0.02;
 
 /**
  * A scheme named for contrast has to earn the name. `high-contrast` is held to
@@ -27,6 +25,14 @@ const HIGHLIGHT_STEP = 0.02;
  */
 export const TEXT_RATIO = { light: 4.5, dark: 4.5, 'high-contrast': 7 };
 const NON_TEXT_RATIO = 3;
+/**
+ * The floor for the edge of a control at rest: a line, and a step above the
+ * rule a divider draws (1.35:1 in the default light scheme), never the 3:1 a
+ * separator or a focus ring holds. See the border test below for the reason.
+ */
+const CONTROL_EDGE_RATIO = 1.5;
+/** The OKLab lightness step a neutral highlight keeps from the ground it is drawn on. */
+const HIGHLIGHT_STEP = 0.02;
 
 /** The collapsed duration is short enough to read as instant, and never zero. */
 const MAX_REDUCED_MOTION_MS = 1;
@@ -286,21 +292,30 @@ function contrastCases(theme) {
     });
 
     /**
-     * A border and a focus ring are non-text elements, and the surface they are
-     * drawn against is not always `--slotted-surface`: an `outline` control
+     * A separator and a focus ring are non-text elements, and the surface they
+     * are drawn against is not always `--slotted-surface`: an `outline` control
      * takes whatever ground it is placed on, so a form inside a raised card and
      * the same form on a sunken page are both cases the ratio has to survive.
-     * Holding only the default surface is what let the control border soften
-     * past the floor on one of the other two without anything saying so.
+     * Holding only the default surface is what let a line soften past the
+     * floor on one of the other two without anything saying so.
+     *
+     * The edge of a control at rest is not held to the ratio. At 3:1 it was the
+     * darkest line on the page in both schemes and read as a high-contrast
+     * theme; a control is identified by its fill, its shadow, its label and its
+     * size, which is the case WCAG 1.4.11 exempts from the boundary ratio, and
+     * the states that carry meaning — focus, invalid, checked — keep it. The
+     * edge still has to be a line: the floor below is the step a divider takes.
      */
     test(`${label} ${scheme} separates surfaces with a visible border`, () => {
       for (const surface of SURFACES) {
-        for (const line of ['--slotted-border-strong', '--slotted-control-border-color']) {
-          assert.ok(
-            contrast(values[surface], values[line]) >= NON_TEXT_RATIO,
-            `${scheme} ${line} on ${surface} is below ${NON_TEXT_RATIO}:1`,
-          );
-        }
+        assert.ok(
+          contrast(values[surface], values['--slotted-border-strong']) >= NON_TEXT_RATIO,
+          `${scheme} --slotted-border-strong on ${surface} is below ${NON_TEXT_RATIO}:1`,
+        );
+        assert.ok(
+          contrast(values[surface], values['--slotted-control-border-color']) >= CONTROL_EDGE_RATIO,
+          `${scheme} --slotted-control-border-color on ${surface} is below ${CONTROL_EDGE_RATIO}:1`,
+        );
         assert.ok(
           contrast(values[surface], values['--slotted-focus-ring-color']) >= NON_TEXT_RATIO,
           `${scheme} focus ring on ${surface} is below ${NON_TEXT_RATIO}:1`,
@@ -320,6 +335,12 @@ function contrastCases(theme) {
           contrast(values['--slotted-surface'], values['--slotted-border-strong']) ||
           scheme === 'high-contrast',
         `${scheme} control border is not lighter than the strong border`,
+      );
+      assert.ok(
+        contrast(values['--slotted-surface'], values['--slotted-disabled-border']) <
+          contrast(values['--slotted-surface'], values['--slotted-control-border-color']) ||
+          scheme === 'high-contrast',
+        `${scheme} disabled border is not lighter than the control border`,
       );
     });
 

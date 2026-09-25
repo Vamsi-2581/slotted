@@ -33,13 +33,17 @@ pela skill `/component`. Cada subdiretório tem uma classe de leitura própria.
 
 ## Operacional
 
-| Ficheiro                               | Conteúdo                                                                                         |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `process/build-order.md`               | Famílias entregues no passe 1, reaberturas prometidas e ondas 9 a 12 com escopo por família.     |
-| `process/build-schedule.md`            | Rodadas do passe 2: o bloco a colar em cada sessão, o que corre em paralelo e o que nunca corre. |
-| `process/implementation-review.md`     | Passe de revisão 2: triagem por família, regras transversais R1–R7 e itens `[ ]` para o loop.    |
-| `process/implementation-review-log.md` | Uma entrada por item fechado no passe 2.                                                         |
-| `process/review-prompt.md`             | Prompt que `scripts/review-loop.sh` entrega a cada sessão do loop de revisão.                    |
+| Ficheiro                                      | Conteúdo                                                                                                       |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `process/build-order.md`                      | Famílias entregues no passe 1, reaberturas prometidas e ondas 9 a 12 com escopo por família.                   |
+| `process/build-schedule.md`                   | Rodadas do passe 2: o bloco a colar em cada sessão, o que corre em paralelo e o que nunca corre.               |
+| `process/implementation-review.md`            | Passe de revisão 2: triagem por família, regras transversais R1–R7 e itens `[ ]` para o loop.                  |
+| `process/implementation-review-log.md`        | Uma entrada por item fechado no passe 2.                                                                       |
+| `process/review-prompt.md`                    | Prompt que `scripts/review-loop.sh` entrega a cada sessão do loop de revisão.                                  |
+| `process/nexora-vertical-slice-prompts.md`    | Preâmbulo e cinco prompts, um por sessão, para a fatia vertical da demo Nexora (`domain.md` §44, Fase 2).      |
+| `process/nexora-inventory-module-prompt.md`   | Prompt do módulo Inventory da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.   |
+| `process/nexora-procurement-module-prompt.md` | Prompt do módulo Procurement da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`. |
+| `process/nexora-finance-module-prompt.md`     | Prompt do módulo Finance da demo Nexora, colado depois do preâmbulo de `nexora-vertical-slice-prompts.md`.     |
 
 ## Histórico
 

@@ -118,6 +118,18 @@ Responsividade muda **composição e prioridade**, não apenas tamanho:
 - overlay escolhe popover no desktop e sheet/action sheet em viewport estreita quando a tarefa exigir;
 - use container queries quando o componente depende do espaço disponível, com fallback documentado.
 
+Classe de tamanho: a faixa de largura do contentor que decide a composição de uma superfície de página.
+
+| Classe    | Largura do contentor |
+| --------- | -------------------- |
+| compacta  | `< 600px`            |
+| média     | `600px` a `1023px`   |
+| expandida | `>= 1024px`          |
+
+- As famílias de superfície de página (`app-shell`, `detail-panel`, `page`, `page-header`) usam nos seus `@container` de largura apenas os limiares `600px` e `1024px`. O script lê os mesmos valores em `COMPACT_BELOW` e `EXPANDED_FROM` de `@slotted/core/measure`.
+- `packages/styles/src/size-classes.test.mjs` rejeita, nessas quatro famílias, outro limiar de largura.
+- O reflow do conteúdo de um componente (`card`, `list-item`, `alert`) mantém limiares literais próprios, porque responde ao conteúdo do componente e não à composição da página. Em `top-navigation`, os passos `low` (1024px) e `high` (480px) respondem aos seus itens; o passo `medium` é o passo de overlay do `app-shell`, 600px.
+
 Nenhum comportamento importante pode depender de hover. O modo responsivo deve poder ser testado deterministicamente.
 
 ### 2.8 Acessibilidade
@@ -204,6 +216,7 @@ Estas capacidades sustentam componentes públicos e devem possuir testes própri
 
 - Centraliza conteúdo com largura máxima, gutters responsivos e variantes de leitura, formulário e tela ampla.
 - Permite largura fluida e nesting; não injeta background, card ou padding vertical de página.
+- Cinco degraus: `measure`, `content`, `wide`, `full` e `bleed`. `full` é o espaço da moldura até ao teto `--slotted-container-full` (120rem); `bleed` é a ausência de máximo. **Quebra de contrato desde 0.1.0-beta.1:** `full` deixou de remover o máximo. Quem contava com isso — grelha de dados, quadro, canvas — passa a escrever `bleed`; quem escreveu `full` sem pensar fica com o degrau limitado, que é o ponto.
 
 ### Divider / Separator `[Core]`
 

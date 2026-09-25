@@ -89,6 +89,16 @@ export const STATE_ATTRIBUTES = {
    * the rules those two answer. What cannot be known is not judged.
    */
   'drop-invalid': 'data-drop-invalid',
+  /**
+   * A surface in the mode where the reader rearranges it: blocks carry a
+   * handle, a resize grip and the columns they snap to.
+   *
+   * It is not `open` and not `expanded`, which are content appearing, and not
+   * `pressed`, which is the state of the control that asks for the mode rather
+   * than of the surface in it. `dashboard-grid` found the gap; Grafana and
+   * gridstack both draw the same surface twice, at rest and in edit.
+   */
+  editing: 'data-editing',
 };
 
 export const ATTRIBUTE_STATES = Object.keys(STATE_ATTRIBUTES);
@@ -180,6 +190,15 @@ export const CHANGE_REASONS = [
    * own outside any shared vocabulary.
    */
   'resize',
+  /**
+   * The platform's own way back — a phone's gesture, a browser's button —
+   * used while a modal layer stood over the page, and answered by the layer
+   * rather than by the history. Neither `escape`, a key a touch screen does
+   * not have, nor `dismiss`, a control of the layer's own. `dismissable-layer`
+   * keeps one history entry per layer that asks for it; `dialog`, `drawer`
+   * and `app-shell` were the first families to ask.
+   */
+  'back',
 ];
 
 export const KNOWN_CAPABILITIES = [
@@ -406,6 +425,37 @@ export const KNOWN_CAPABILITIES = [
    * announcement.
    */
   'zoom',
+  /**
+   * The named arrangements of a grid a reader keeps — each a whole view, its
+   * columns, query and density — with the one in use and the one a visit
+   * opens on. It is mutable and a consumer can own it: a store keeps the list
+   * across visits, and a team shares it.
+   *
+   * It is not `columns`, which is one arrangement, and not `selection` or
+   * `current`: the set itself is edited — saved, renamed, deleted — and which
+   * view is in use is one field of it. `saved-views` found the gap; Airtable,
+   * Notion and Linear each hold the same list.
+   */
+  'views',
+  /**
+   * The reader's own arrangement of a surface of blocks: their order, the
+   * share of the surface each takes, and which are hidden. It is mutable and a
+   * consumer can own it: a store restores it across visits, and a product
+   * ships a default one.
+   *
+   * It is not `columns`, which is one grid's columns of data, and not
+   * `arrangement`, which is the consumer's immutable choice of how children
+   * are laid out. `dashboard-grid` found the gap; react-grid-layout, gridstack
+   * and Kendo each call the same value a layout.
+   */
+  'layout',
+  /**
+   * Whether a surface is in the mode where the reader rearranges it. It is
+   * mutable and a consumer can own it: the button that enters the mode is the
+   * product's, and a product that saves on exit decides when the mode ends.
+   * `dashboard-grid` found the gap.
+   */
+  'editing',
 ];
 
 /** Capabilities that hold state a consumer can own, and therefore need a model. */
@@ -428,6 +478,9 @@ export const MUTABLE_CAPABILITIES = [
   'columns',
   'visibility',
   'zoom',
+  'views',
+  'layout',
+  'editing',
 ];
 
 export function strongestState(states) {

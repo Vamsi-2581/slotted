@@ -42,8 +42,8 @@ event, and it can be cancelled before anything commits.
 
 The reason vocabulary is closed: `pointer`, `keyboard`, `clear`, `remove`,
 `select`, `dismiss`, `escape`, `outsidePress`, `blur`, `submit`,
-`programmatic`, `timeout`, `scroll`, `resize`. A family declares the subset it
-can emit.
+`programmatic`, `timeout`, `scroll`, `resize`, `back`. A family declares the
+subset it can emit.
 
 `timeout` says the time the component was given ran out, and it is neither of
 the two words a family without it would reach for: `dismiss` is the reader
@@ -56,6 +56,14 @@ thing was given changed and it answered; `app-shell` was the first family whose
 state a width moves. Neither is `pointer`, because a wheel, a fling and a window
 corner are gestures and none of them is a press on the control, and neither is
 `programmatic`, because the application asked for nothing.
+
+`back` says the platform's own way back — a phone's gesture, a browser's
+button — was used while a modal layer stood over the page, and the layer
+answered instead of the history. It is neither `escape`, which is a key the
+platform may not have, nor `dismiss`, which is the reader pressing a control
+of the layer's own. `dismissable-layer` holds one history entry per layer
+that asks for it, so the gesture reaches the layer and never the page under
+it; `dialog`, `drawer` and `app-shell` were the first families to ask.
 
 A boolean cannot say whether a menu closed because Escape was pressed or
 because focus left the layer, and a consumer that has to guess writes the wrong

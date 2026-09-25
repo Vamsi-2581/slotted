@@ -70,6 +70,9 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `table-filter-operands` | [2026-09-14](2026-09-14-table-filter-operands-capability-inventory.md) | [2026-09-14](2026-09-14-table-filter-operands-design.md) | [2026-09-14](2026-09-14-table-filter-operands-self-assessment.md) |
 | `tags-input` | [2026-09-14](2026-09-14-tags-input-capability-inventory.md) | [2026-09-14](2026-09-14-tags-input-design.md) | [2026-09-14](2026-09-14-tags-input-self-assessment.md) |
 | `timeline` | [2026-09-14](2026-09-14-timeline-capability-inventory.md) | [2026-09-14](2026-09-14-timeline-design.md) | [2026-09-14](2026-09-14-timeline-self-assessment.md) |
+| `internationalization` | — | [2026-09-22](2026-09-22-internationalization-design.md) | — |
+| `column-management` (`column-manager`, `saved-views`, `data-grid`) | [2026-09-23 §1](2026-09-23-column-management-design.md) | [2026-09-23](2026-09-23-column-management-design.md) | [2026-09-23](2026-09-23-column-management-self-assessment.md) |
+| `narrow-layout` (classes de tamanho, pop-in de `data-grid`, `page`, `page-header`) | [2026-09-23 §2](2026-09-23-narrow-layout-design.md) | [2026-09-23](2026-09-23-narrow-layout-design.md) | — |
 | `data-list` | [2026-09-24](2026-09-24-data-list-capability-inventory.md) | [2026-09-24](2026-09-24-data-list-design.md) | [2026-09-24](2026-09-24-data-list-self-assessment.md) |
 | `transfer` | [2026-09-24 §1](2026-09-24-transfer-design.md) | [2026-09-24](2026-09-24-transfer-design.md) | [2026-09-24](2026-09-24-transfer-self-assessment.md) |
 | `entity-picker` | [2026-09-24 §1](2026-09-24-entity-picker-design.md) | [2026-09-24](2026-09-24-entity-picker-design.md) | [2026-09-24](2026-09-24-entity-picker-self-assessment.md) |

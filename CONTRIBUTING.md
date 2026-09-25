@@ -96,6 +96,8 @@ directory is not committed; it is written by:
   those three at the current version and reinstalls, so
   `demos/nexora/angular` sees the change on its next `pnpm start` (a
   running dev server is restarted).
+- `pnpm demo:nexora`: `demo:refresh` followed by `ng serve` of
+  `demos/nexora/angular`, from the repository root.
 
 A demo names the version it consumes in its own `package.json` and moves to a
 newer one deliberately, the way a consumer would. `pnpm test:release` checks

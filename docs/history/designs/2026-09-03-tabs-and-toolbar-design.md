@@ -210,7 +210,7 @@ answer is the overflow menu that arrives with `menu` in wave 5.
 | State           | `tabs` paints it on                            | Held back for            |
 | --------------- | ----------------------------------------------- | ------------------------ |
 | `default`       | tab, dismiss, scroll                            | —                        |
-| `hover`         | tab (unselected raises its ink, selected keeps it), dismiss, scroll | `disabled` |
+| `hover`         | tab (unselected raises its ink, selected keeps it) and, in `line`, a neutral bar on the item where the mark would go — a fill met the track and read as a button on a line; `contained` keeps the fill; dismiss, scroll | `disabled` |
 | `active`        | tab and dismiss press one step further           | `disabled`               |
 | `focus-visible` | tab, dismiss, panel, and the list when it is the last resort | nothing      |
 | `selected`      | item — the marker, the ink and, in `contained`, the surface | `disabled`   |

@@ -10,7 +10,7 @@
     "./styles.css": "./dist/styles.css"
   },
   "scripts": {
-    "build": "node ../../../scripts/generate-icon-glyphs.mjs --theme . && slotted-build-theme",
+    "build": "node ../../scripts/generate-icon-glyphs.mjs --theme . && slotted-build-theme",
     "test": "node --test test/*.test.mjs",
     "typecheck": "node --check test/theme.test.mjs && node --check test/default-theme.test.mjs",
     "verify": "pnpm build && pnpm test && pnpm typecheck"

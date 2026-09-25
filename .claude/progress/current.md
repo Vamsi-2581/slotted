@@ -1,83 +1,31 @@
-# Checkpoint — rodada 17: `time-range-picker datetime-range-picker`
+# Checkpoint — correções da revisão de telas da Nexora
 
-## Plano
+- Plano: `docs/history/plans/2026-09-24-nexora-screen-review-fixes.md`
+- Ramo `review/implementation-pass-1`. Nada commitado. Outras sessões editam o tree em paralelo (entity-picker, event-calendar, transfer, data-list).
 
-`docs/build-schedule.md`, rodada 17, bloco `time-range-picker
-datetime-range-picker`. Skill `/component`, modo `create`, uma sessão para as
-duas famílias. Sem arquivo de plano.
+## Concluído (itens 1–16)
 
-## Tarefas concluídas
+- Pacote: 1 filter-bar, 2 page-header/toolbar, 5 page/page-header compacto, 10 chart, 11 list-item, 12 scroller principal, 16 alvos de toque dos controlos internos (R2.6), splitter Angular observa o contentor depois do render, exemplos de loading da side-navigation.
+- Demo: 3 `slPage [loading]` em 16 registos e Refresh em 6, 4 `cellAlign="start"`, 7 oito date-pickers, 8 `slSkeletonRegion`, 9 larguras por tipo de página, 13 paginação, 14 splitter, 15 shell sem skeleton, LP-12 (`flex-basis: auto` abaixo de 600 em `styles.css`).
+- Backend: `storedFilter` em `listStockMovements` e `listInventory`; 43/43.
+- Guidelines: LA-05, OV-05, FM-16, AF-07, CP-07, LP-12 (LP-07 retirada); index atualizado.
+- Ledger: 16 linhas novas na tabela principal e 1 em `## Backend`.
+- `demo:refresh` feito às 18:40; dev server :4250 reiniciado.
 
-1. Passos 1–5: inventário em
-   `docs/superpowers/specs/2026-09-15-time-range-capability-inventory.md`;
-   desenho em `docs/superpowers/specs/2026-09-15-time-range-design.md`.
-2. Passo 6: `specs/components/{time-range-picker,datetime-range-picker}/`
-   (24 + 27); `node --test specs/*.test.mjs specs/components/*range-picker/*.test.mjs`
-   96/96.
-3. Motor: `packages/core/src/date/time-range.ts` (+ teste 29/29; `openingIndex`
-   novo), exportado por `packages/core/src/date/index.ts`; `@slotted/core`
-   reconstruído.
-4. Passos 7–9: folhas, tokens, harness, capturas em
-   `/tmp/claude-1000/-home-dreco-dev-slotted/ee1827b8-d2f8-44b5-9e25-e2b5b9195f0e/scratchpad/shots/`;
-   gate visual aprovado com a moldura de uma linha (campos na banda). Depois
-   do gate: linhas das listas centradas (`line-height` = altura), painel
-   **[DT]** com tecto de 38 rem, folha com `max-block-size: 100dvh` e rolagem,
-   atalhos numa linha própria na folha.
-5. Passo 10: React (`packages/react/src/{time-range-picker,datetime-range-picker}/`,
-   67/67 com stories) e Angular (`packages/angular/{time-range-picker,datetime-range-picker}/`,
-   48/48 com stories; `ng build slotted-angular` passa). Fora da família:
-   `label` em `time-field`/`datetime-field` Angular; os três campos Angular
-   não repõem segmentos durante uma sequência de dígitos.
-6. Passo 11: quatro páginas de referência (`*.docs.ts`, `*.stories.*`);
-   as React lidas em 6006 a 1280/720 claro/escuro; `audit.mjs` limpo a 1280 e
-   620. 6007 em baixo: Angular não lida renderizada.
-7. Passo 12: `pnpm typecheck`, `test:contracts`, `test:package-layers`,
-   `test:docs` passam; `pnpm lint` falha só em `toggle-group` (outra sessão);
-   `prettier --check` falha só em `docs/nexora-op-demo-domain.md` (outra
-   sessão); styles: 5 falhas fora da família (`alert`, `breadcrumb`, `tabs`,
-   `tag`, `text-field`).
-8. Passo 13: `docs/superpowers/specs/2026-09-15-time-range-self-assessment.md`.
-   `docs/build-order.md`: parágrafo "Entregue" e reabertura de
-   `date-range-picker`.
+## Verificação
 
-## Tarefa em curso
+- Styles: 1490/1491 (falha `table` plain-variant, causada por entity-picker de outra sessão).
+- `test:contracts` 1920/1920, `test:docs` 25/25, backend 43/43.
+- Specs da demo tocados: shell-layout, contacts, skus, customer-page 22/22. Suite completa da demo não executada.
+- Cenários: splitter PASS; filter-bar 1440/1600; page-header 1400→600→1400 PASS; 375×667 header não sticky e grid com altura das linhas; 1400×900 fill intacto; nenhum controlo mais alto do que largo a 360 px.
 
-Concluída. Gate de lançamento aprovado ("finalize"); commits por passo
-feitos (core, campos Angular, contratos, estilos, React, Angular, docs).
+## Pendências
 
-## Git
-
-Branch `review/implementation-pass-1`. Sete commits desta sessão sobre `c2d5ceb`; nada no índice.
-Arquivos desta sessão (para o passo 15, um commit por passo, caminhos
-explícitos):
-
-- core: `packages/core/src/date/time-range.ts`, `time-range.test.ts`,
-  `packages/core/src/date/index.ts`
-- campos Angular: `packages/angular/{date-field,time-field,datetime-field}/src/*.ts`
-- contratos: `specs/components/{time-range-picker,datetime-range-picker}/`
-- estilos: `packages/styles/src/{time-range-picker,datetime-range-picker}/`,
-  `packages/styles/src/plain-variant.test.mjs`, `packages/styles/package.json`
-- React: `packages/react/src/{time-range-picker,datetime-range-picker}/`,
-  `packages/react/package.json`, `packages/react/src/index.ts`,
-  `packages/react/vite.config.ts`
-- Angular: `packages/angular/{time-range-picker,datetime-range-picker}/`
-- docs: `docs/superpowers/specs/2026-09-15-time-range-*.md`,
-  `docs/build-order.md`, `.claude/progress/current.md`
-
-Os registros partilhados (`packages/react/package.json`, `src/index.ts`,
-`vite.config.ts`, `packages/styles/package.json`, `docs/build-order.md`)
-também têm linhas de outras sessões: ao commitar, `git add -p` só as linhas
-destas famílias.
-
-## Ajustes de escopo
-
-- `lengthLabel(seconds, locale)` / `limitLabel(min, max, locale)`: a omissão
-  escrevia na locale do runtime.
-- Cenas `panel` (**[DT]** e `completeness`) abrem já abertas dentro de
-  `slotted-demo-viewport[data-size="screen"]`.
+- Páginas de referência e contratos ainda não descrevem o halo de toque do item 16.
+- Legenda do chart continua a listar séries em erro.
+- Shimmer do skeleton anima `background-position`; semeadura do backend é uma tarefa de 1,8 s.
+- Regra da `@container page-header (width < 600px)` na própria raiz nunca se aplica (achado do agente do item 5).
 
 ## Próxima ação
 
-Nenhuma nesta família. A reabertura de `date-range-picker` (moldura de uma
-linha) e a de `table` (`between` com os dois pickers) estão em
-`docs/build-order.md`.
+`cd demos/nexora/angular && npx ng test` com a máquina pouco carregada; depois `pnpm check`.

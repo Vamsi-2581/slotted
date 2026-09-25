@@ -985,6 +985,13 @@ scheme left the light grey `#d4d4d8` for `#60a5fa`, the accent border step,
 which makes the ring the same idea in both schemes instead of a neutral in one
 of them.
 
+The dark scheme's `--slotted-tone-secondary-subtle-hover` left `#18181b` for
+`#222225`. It had been calibrated on `--slotted-surface` alone, and on
+`--slotted-surface-raised`, where every menu, popup list and sheet is drawn, it
+stood 0.005 above the ground in OKLab lightness, so a highlighted item read as
+unlit. It now stands at least 0.025 above every surface and 0.021 short of the
+pressed step, and `theme-conformance` holds a 0.02 step on every surface.
+
 Everything else the theme emitted before this foundation resolves to the same
 value, which `packages/tokens/test/resolve.test.mjs` holds. A row leaves that
 table when its token leaves the contract, or when a change like the two above

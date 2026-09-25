@@ -4,6 +4,7 @@ import test from 'node:test';
 
 import { LAYER_ORDER_STATEMENT } from './layer-order.mjs';
 import { renderThemeCss } from './render-theme.mjs';
+import { toOklab } from './tone-hover.mjs';
 
 /**
  * The rules every theme is held to, in one place, so a second theme is a JSON
@@ -15,6 +16,8 @@ import { renderThemeCss } from './render-theme.mjs';
 const VARIANTS = ['accent', 'secondary', 'success', 'warning', 'danger'];
 const SOLID_STATES = ['solid', 'solid-hover', 'solid-active'];
 const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
+/** The OKLab lightness step a neutral highlight keeps from the ground it is drawn on. */
+const HIGHLIGHT_STEP = 0.02;
 
 /**
  * A scheme named for contrast has to earn the name. `high-contrast` is held to
@@ -245,6 +248,33 @@ function contrastCases(theme) {
             `${scheme} ${text} on ${surface} is below ${required}:1`,
           );
         }
+      }
+    });
+
+    /**
+     * The neutral highlight is a ground, not a line, so it is held to a step of
+     * lightness rather than to a ratio: an item under the pointer or the
+     * keyboard has to read as lit on every surface it is drawn on. The dark
+     * scheme's step was calibrated on `--slotted-surface` alone, and on
+     * `--slotted-surface-raised` — where every menu, popup list and sheet
+     * lives — it sat 0.005 above the ground in OKLab lightness: the highlight
+     * of an action sheet's focused item was invisible. 0.02 is the step a
+     * reader tells apart at a glance; the pressed step sits beyond the hover.
+     */
+    test(`${label} ${scheme} lights a neutral highlight on every surface`, () => {
+      const lightness = (name) => toOklab(values[name]).L;
+      for (const surface of ['--slotted-surface', '--slotted-surface-raised']) {
+        const ground = lightness(surface);
+        const hover = lightness('--slotted-tone-secondary-subtle-hover');
+        const active = lightness('--slotted-tone-secondary-subtle-active');
+        assert.ok(
+          Math.abs(hover - ground) >= HIGHLIGHT_STEP,
+          `${scheme} --slotted-tone-secondary-subtle-hover is ${Math.abs(hover - ground).toFixed(3)} from ${surface}, below ${HIGHLIGHT_STEP}`,
+        );
+        assert.ok(
+          Math.abs(active - ground) > Math.abs(hover - ground),
+          `${scheme} the pressed step is not beyond the hover on ${surface}`,
+        );
       }
     });
 

@@ -257,7 +257,7 @@
       "--slotted-tone-secondary-on-solid": "#fafafa",
       "--slotted-tone-secondary-border": "#3f3f46",
       "--slotted-tone-secondary-text": "#fafafa",
-      "--slotted-tone-secondary-subtle-hover": "#18181b",
+      "--slotted-tone-secondary-subtle-hover": "#222225",
       "--slotted-tone-secondary-subtle-active": "#27272a",
       "--slotted-tone-success-solid": "#15803d",
       "--slotted-tone-success-surface": "#162019",

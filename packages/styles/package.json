@@ -233,7 +233,9 @@
     "./upload/tokens.json": "./src/upload/upload.tokens.json",
     "./upload/upload.css": "./src/upload/upload.css",
     "./visually-hidden/tokens.json": "./src/visually-hidden/visually-hidden.tokens.json",
-    "./visually-hidden/visually-hidden.css": "./src/visually-hidden/visually-hidden.css"
+    "./visually-hidden/visually-hidden.css": "./src/visually-hidden/visually-hidden.css",
+    "./wizard/tokens.json": "./src/wizard/wizard.tokens.json",
+    "./wizard/wizard.css": "./src/wizard/wizard.css"
   },
   "scripts": {
     "test": "node --test \"src/**/*.test.mjs\"",

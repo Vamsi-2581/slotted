@@ -23,4 +23,29 @@ describe('NotificationsStore', () => {
     await store.markRead(unread.id);
     expect(store.unread()).toBe(before - 1);
   });
+
+  /**
+   * The control that started a mutation waits on it: the row's id is in
+   * `busy` from the request until the list has been read back, and gone after.
+   */
+  it('marks a row busy while its mutation is in flight', async () => {
+    const store = TestBed.inject(NotificationsStore);
+    await store.loadPage();
+    const unread = store.items().find((n) => n.readAt === undefined)!;
+    const request = store.markRead(unread.id);
+    expect(store.busy().has(unread.id)).toBe(true);
+    await request;
+    expect(store.busy().has(unread.id)).toBe(false);
+    expect(store.busy().size).toBe(0);
+  });
+
+  it('marks the whole list busy while marking all as read', async () => {
+    const store = TestBed.inject(NotificationsStore);
+    await store.loadPage();
+    const request = store.markAllRead();
+    expect(store.busyAll()).toBe(true);
+    await request;
+    expect(store.busyAll()).toBe(false);
+    expect(store.unread()).toBe(0);
+  });
 });

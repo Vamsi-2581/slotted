@@ -4,6 +4,8 @@ export interface NavDestination {
   path: string;
   permissions?: string[];
   count?: 'approvals' | 'support';
+  /** False where the destination has no record of its own to open: no `:id` route is made. */
+  record?: false;
 }
 
 export interface NavModule {
@@ -48,7 +50,12 @@ export const NAV_MODULES: readonly NavModule[] = [
     slice: 'CRM',
     destinations: [
       d('crm', 'customers', 'Customers', '/crm/customers'),
-      d('crm', 'contacts', 'Contacts', '/crm/contacts', { permissions: ['contacts.view'] }),
+      // A contact is read on its account: there is no page of one, and no backend resource for it.
+      d('crm', 'contacts', 'Contacts', '/crm/contacts', {
+        permissions: ['contacts.view'],
+        record: false,
+      }),
+      d('crm', 'imports', 'Imports', '/crm/imports', { permissions: ['imports.run'] }),
     ],
   },
   {
@@ -64,7 +71,8 @@ export const NAV_MODULES: readonly NavModule[] = [
       d('sales', 'quotes', 'Quotes', '/sales/quotes', { permissions: ['quotes.view'] }),
       d('sales', 'orders', 'Orders', '/sales/orders', { permissions: ['orders.view'] }),
       d('sales', 'approvals', 'Approvals', '/sales/approvals', {
-        permissions: ['orders.approve', 'quotes.approve'],
+        // The queue holds purchase orders too (§67): a procurement manager decides theirs here.
+        permissions: ['orders.approve', 'quotes.approve', 'purchase_orders.approve'],
         count: 'approvals',
       }),
     ],
@@ -79,9 +87,14 @@ export const NAV_MODULES: readonly NavModule[] = [
     slice: 'Catalog',
     destinations: [
       d('catalog', 'products', 'Products', '/catalog/products'),
-      d('catalog', 'categories', 'Categories', '/catalog/categories'),
+      // A SKU is the other grain of the same concept, with the stock filters a
+      // product has none of, and the record `/catalog/skus/:id` opens (BR-04).
+      d('catalog', 'skus', 'SKUs', '/catalog/skus'),
+      // The tree leads to a place in the catalogue; it has no record of its own.
+      d('catalog', 'categories', 'Categories', '/catalog/categories', { record: false }),
       d('catalog', 'price-lists', 'Price lists', '/catalog/price-lists', {
         permissions: ['pricing.view'],
+        record: false,
       }),
     ],
   },
@@ -95,10 +108,17 @@ export const NAV_MODULES: readonly NavModule[] = [
     key: 'i',
     slice: 'Inventory',
     destinations: [
-      d('inventory', 'overview', 'Overview', '/inventory/overview'),
+      // The overview summarises and leads; it has no record of its own.
+      d('inventory', 'overview', 'Overview', '/inventory/overview', { record: false }),
+      // The positions are the list an operator lives in, and a list fills its page
+      // (LP-12): it is a destination of its own that every figure of the overview
+      // opens with its filter applied (OV-01). `:id` is one SKU's stock.
+      d('inventory', 'stock', 'Stock', '/inventory/stock'),
       d('inventory', 'warehouses', 'Warehouses', '/inventory/warehouses'),
       d('inventory', 'transfers', 'Transfers', '/inventory/transfers'),
+      // `:id` is one movement, drawn over the ledger it belongs to.
       d('inventory', 'movements', 'Movements', '/inventory/movements'),
+      d('inventory', 'cycle-counts', 'Cycle counts', '/inventory/cycle-counts'),
     ],
   },
   {
@@ -116,6 +136,9 @@ export const NAV_MODULES: readonly NavModule[] = [
       d('procurement', 'purchase-orders', 'Purchase orders', '/procurement/purchase-orders', {
         permissions: ['purchase_orders.view'],
       }),
+      // No endpoint lists goods receipts: the destination is the queue of purchase orders a
+      // receipt is written against (LP-09), and its `:id` is one goods receipt, the one
+      // address a receipt has.
       d('procurement', 'receiving', 'Receiving', '/procurement/receiving', {
         permissions: ['receipts.view'],
       }),
@@ -131,8 +154,10 @@ export const NAV_MODULES: readonly NavModule[] = [
     key: 'f',
     slice: 'Finance',
     destinations: [
+      // The overview summarises and leads; it has no record of its own.
       d('finance', 'overview', 'Overview', '/finance/overview', {
         permissions: ['finance.dashboard'],
+        record: false,
       }),
       d('finance', 'invoices', 'Invoices', '/finance/invoices', { permissions: ['invoices.view'] }),
       d('finance', 'payments', 'Payments', '/finance/payments', { permissions: ['payments.view'] }),

@@ -1,14 +1,13 @@
-<div slTopNavigation>
+<div slTopNavigation (searchOpenChangeRequest)="searchRequested($event)">
   <div slTopNavigationBrand>
     <button slAppShellNavToggle></button>
     <a slTopNavigationHome [href]="preferences.preferences().startRoute">
       <span slTopNavigationMark><app-brand-mark /></span>
       <span slTopNavigationName>Nexora</span>
     </a>
-    <span slTopNavigationContext>{{ context() }}</span>
   </div>
 
-  <div slTopNavigationSearch>
+  <div slTopNavigationSearch class="search">
     <button
       type="button"
       class="search-trigger"
@@ -22,11 +21,11 @@
   </div>
 
   <div slTopNavigationActions>
-    <app-approvals-popover [label]="approvalsLabel()" />
-    <app-tasks-popover [label]="tasksLabel()" />
+    <app-approvals-popover class="product-action" [label]="approvalsLabel()" />
+    <app-tasks-popover class="product-action" [label]="tasksLabel()" />
     <app-notifications-popover [label]="notificationsLabel()" />
     <app-help-menu />
-    <button slTopNavigationAction aria-label="Demo controls" (click)="demo().openAt()">
+    <button slTopNavigationAction class="product-action" aria-label="Demo controls" (click)="demo().openAt()">
       <ng-icon name="lucideFlaskConical" />
     </button>
     <app-user-menu />

@@ -1,4 +1,8 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import {
@@ -8,6 +12,7 @@ import {
   lucideBuilding2,
   lucideChartColumn,
   lucideCheck,
+  lucideCheckCheck,
   lucideCircleAlert,
   lucideCircleCheck,
   lucideCircleHelp,
@@ -22,31 +27,39 @@ import {
   lucideLifeBuoy,
   lucideListTodo,
   lucideMoon,
+  lucideOctagonAlert,
   lucidePackage,
   lucidePlus,
   lucideReceipt,
+  lucideRefreshCw,
+  lucideRows2,
+  lucideRows3,
+  lucideRows4,
   lucideScrollText,
   lucideSearch,
   lucideSettings,
   lucideShoppingCart,
   lucideSun,
-  lucideTriangleAlert,
+  lucideTrash2,
   lucideTruck,
   lucideUser,
   lucideUsers,
   lucideWarehouse,
   lucideWorkflow,
+  lucideX,
 } from '@ng-icons/lucide';
 import { provideAppShellDefaults } from '@slotted/angular/app-shell';
 import { providePageDefaults } from '@slotted/angular/page';
 import { providePageHeaderDefaults } from '@slotted/angular/page-header';
 import { provideSideNavigationDefaults } from '@slotted/angular/side-navigation';
+import { provideSkeletonDefaults } from '@slotted/angular/skeleton';
 import { provideTopNavigationDefaults } from '@slotted/angular/top-navigation';
 
 import { provideNexoraBackend } from './core/backend/nexora-backend.provider';
 import { NexoraTitleStrategy } from './core/nav/title.strategy';
+import { provideNotificationCenterMessages } from './core/activity/notifications.messages';
 
-import { routes } from './app.routes';
+import { preloadLazyPages, routes } from './app.routes';
 
 /**
  * Nexora is an English product. The library's spoken defaults are not, so
@@ -59,6 +72,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideNexoraBackend(),
     provideRouter(routes, withComponentInputBinding()),
+    // After the first paint: the chunks load beside the seed rather than in front of a page.
+    provideAppInitializer(() => void setTimeout(preloadLazyPages, 0)),
     { provide: TitleStrategy, useClass: NexoraTitleStrategy },
     provideIcons({
       lucideActivity,
@@ -67,6 +82,7 @@ export const appConfig: ApplicationConfig = {
       lucideBuilding2,
       lucideChartColumn,
       lucideCheck,
+      lucideCheckCheck,
       lucideCircleAlert,
       lucideCircleCheck,
       lucideCircleHelp,
@@ -81,20 +97,26 @@ export const appConfig: ApplicationConfig = {
       lucideLifeBuoy,
       lucideListTodo,
       lucideMoon,
+      lucideOctagonAlert,
       lucidePackage,
       lucidePlus,
       lucideReceipt,
+      lucideRefreshCw,
+      lucideRows2,
+      lucideRows3,
+      lucideRows4,
       lucideScrollText,
       lucideSearch,
       lucideSettings,
       lucideShoppingCart,
       lucideSun,
-      lucideTriangleAlert,
+      lucideTrash2,
       lucideTruck,
       lucideUser,
       lucideUsers,
       lucideWarehouse,
       lucideWorkflow,
+      lucideX,
     }),
     provideAppShellDefaults({
       messages: {
@@ -122,7 +144,15 @@ export const appConfig: ApplicationConfig = {
         skip: 'Skip to content',
       },
     }),
+    provideNotificationCenterMessages(),
     providePageDefaults({ messages: { footer: 'Page actions' } }),
+    /*
+     * A region's placeholders are never delayed (AF-05): the backend's own
+     * floor is 120 ms and a region with nothing in it reads as a stall from
+     * the first frame. What they are given is a minimum: once drawn, they stay
+     * long enough not to appear and leave inside one frame (AF-06).
+     */
+    provideSkeletonDefaults({ delay: 0, minDuration: 400, label: 'Loading' }),
     providePageHeaderDefaults({
       messages: {
         expand: 'Expand header',

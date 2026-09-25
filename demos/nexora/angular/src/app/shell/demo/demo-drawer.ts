@@ -37,6 +37,7 @@ import {
   SlSectionTitle,
 } from '@slotted/angular/section';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
+import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
 import { SlToastService } from '@slotted/angular/toast';
 import { SlToggle } from '@slotted/angular/toggle';
 import type { ScenarioId } from '@slotted/demo-nexora-backend';
@@ -81,6 +82,8 @@ import { SessionStore } from '../../core/session/session.store';
     SlSectionTitle,
     SlSelect,
     SlSelectItem,
+    SlSkeleton,
+    SlSkeletonRegion,
     SlToggle,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,42 +119,65 @@ import { SessionStore } from '../../core/session/session.store';
         <section slSection id="demo-persona">
           <div slSectionHeader><div slSectionTitle><h3 slSectionHeading>Persona</h3></div></div>
           <div slSectionBody>
-            <ul slList>
-              @for (p of demo.info()?.personas ?? []; track p.key) {
-                <li slListItem size="sm" [selected]="p.active">
-                  <button
-                    type="button"
-                    slListItemContent
-                    [disabled]="demo.busy()"
-                    (click)="setPersona(p.key, p.name)"
-                  >
-                    <span slListItemStart>
-                      <span slAvatar size="sm" tone="accent" variant="soft" [name]="p.name"></span>
-                    </span>
-                    <span slListItemBody>
-                      <span slListItemLabel>{{ p.name }}</span>
-                      <span slListItemDescription>{{ roleLabel(p.role) }} · {{ p.context }}</span>
-                    </span>
-                  </button>
-                </li>
-              }
-            </ul>
+            @if (demo.info() === null) {
+              <!-- The session is on its way: the rows' own boxes, so the wait is visible. -->
+              <div slSkeletonRegion label="Loading demo controls" [loading]="true">
+                <ul slList>
+                  @for (i of placeholders; track i) {
+                    <li slListItem size="sm">
+                      <div slListItemContent>
+                        <span slListItemStart><span slSkeleton shape="circle" size="sm"></span></span>
+                        <span slListItemBody>
+                          <span slListItemLabel><span slSkeleton shape="text" inlineSize="50%"></span></span>
+                          <span slListItemDescription><span slSkeleton shape="text" inlineSize="75%"></span></span>
+                        </span>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              </div>
+            } @else {
+              <ul slList>
+                @for (p of demo.info()?.personas ?? []; track p.key) {
+                  <li slListItem size="sm" [selected]="p.active">
+                    <button
+                      type="button"
+                      slListItemContent
+                      [disabled]="demo.busy()"
+                      (click)="setPersona(p.key, p.name)"
+                    >
+                      <span slListItemStart>
+                        <span slAvatar size="sm" tone="accent" variant="soft" [name]="p.name"></span>
+                      </span>
+                      <span slListItemBody>
+                        <span slListItemLabel>{{ p.name }}</span>
+                        <span slListItemDescription>{{ roleLabel(p.role) }} · {{ p.context }}</span>
+                      </span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
           </div>
         </section>
 
         <section slSection id="demo-scenario">
           <div slSectionHeader><div slSectionTitle><h3 slSectionHeading>Scenario</h3></div></div>
           <div slSectionBody>
-            <sl-select
-              aria-label="Scenario"
-              [value]="demo.info()?.scenarioId ?? 'healthy'"
-              (valueChangeRequest)="askScenario($event.value)"
-            >
-              @for (s of demo.info()?.scenarios ?? []; track s.id) {
-                <sl-select-item [value]="s.id">{{ s.label }}</sl-select-item>
-              }
-            </sl-select>
-            <p class="note">{{ scenarioDescription() }}</p>
+            @if (demo.info() === null) {
+              <span slSkeleton shape="block" blockSize="var(--slotted-control-height-md)" [loading]="true"></span>
+            } @else {
+              <sl-select
+                aria-label="Scenario"
+                [value]="demo.info()?.scenarioId ?? 'healthy'"
+                (valueChangeRequest)="askScenario($event.value)"
+              >
+                @for (s of demo.info()?.scenarios ?? []; track s.id) {
+                  <sl-select-item [value]="s.id">{{ s.label }}</sl-select-item>
+                }
+              </sl-select>
+              <p class="note">{{ scenarioDescription() }}</p>
+            }
           </div>
         </section>
 
@@ -228,6 +254,7 @@ export class DemoDrawer {
   private readonly toasts = inject(SlToastService);
   private readonly router = inject(Router);
 
+  readonly placeholders = [1, 2, 3, 4];
   readonly open = signal(false);
   readonly scenarioOpen = signal(false);
   readonly resetOpen = signal(false);

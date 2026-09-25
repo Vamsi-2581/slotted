@@ -5,11 +5,14 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { provideTestBackend, resetTestBackend } from '../../../test/testing';
 import { routes } from '../../app.routes';
+import { provideNotificationCenterMessages } from '../../core/activity/notifications.messages';
 import { NotificationsStore } from '../../core/activity/notifications.store';
 
 describe('NotificationsPopover', () => {
   beforeEach(async () => {
-    TestBed.configureTestingModule({ providers: [provideTestBackend(), provideRouter(routes)] });
+    TestBed.configureTestingModule({
+      providers: [provideTestBackend(), provideRouter(routes), provideNotificationCenterMessages()],
+    });
     await TestBed.inject(ApplicationInitStatus).donePromise;
     await resetTestBackend();
   });

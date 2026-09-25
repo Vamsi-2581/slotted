@@ -6,6 +6,8 @@ import { SlForm } from '@slotted/angular/form';
 import { SlPage, SlPageBody, SlPageFooter } from '@slotted/angular/page';
 import {
   SlPageHeader,
+  SlPageHeaderArea,
+  SlPageHeaderContent,
   SlPageHeaderDescription,
   SlPageHeaderHeading,
   SlPageHeaderTitle,
@@ -33,6 +35,8 @@ import { SessionStore } from '../../core/session/session.store';
     SlPageBody,
     SlPageFooter,
     SlPageHeader,
+    SlPageHeaderArea,
+    SlPageHeaderContent,
     SlPageHeaderDescription,
     SlPageHeaderHeading,
     SlPageHeaderTitle,
@@ -48,7 +52,6 @@ import { SessionStore } from '../../core/session/session.store';
     form {
       display: grid;
       gap: var(--slotted-space-6);
-      max-inline-size: 40rem;
     }
     .checks {
       display: grid;
@@ -56,14 +59,18 @@ import { SessionStore } from '../../core/session/session.store';
     }
   `,
   template: `
-    <div slPage>
+    <div slPage width="measure">
       <header slPageHeader>
         <div slPageHeaderTitleArea>
           <div slPageHeaderTitleRow>
-            <div slPageHeaderTitle>
-              <h1 slPageHeaderHeading>Preferences</h1>
-              <p slPageHeaderDescription>How Nexora looks and what it tells you. Saved on this device, for your account.</p>
-            </div>
+            <div slPageHeaderTitle><h1 slPageHeaderHeading>Preferences</h1></div>
+          </div>
+        </div>
+        <div slPageHeaderArea>
+          <div slPageHeaderContent>
+            <p slPageHeaderDescription>
+              How Nexora looks and what it tells you. Saved on this device, for your account.
+            </p>
           </div>
         </div>
       </header>
@@ -71,7 +78,11 @@ import { SessionStore } from '../../core/session/session.store';
         <form slForm (submit)="$event.preventDefault(); save()">
           <div slField>
             <label slFieldLabel>Appearance</label>
-            <div slRadioGroup [value]="draft().scheme" (valueChange)="patch({ scheme: $any($event.value) })">
+            <div
+              slRadioGroup
+              [value]="draft().scheme"
+              (valueChange)="patch({ scheme: $any($event.value) })"
+            >
               <div slRadio value="light">Light</div>
               <div slRadio value="dark">Dark</div>
               <div slRadio value="system">System</div>
@@ -79,11 +90,30 @@ import { SessionStore } from '../../core/session/session.store';
           </div>
           <div slField>
             <label slFieldLabel>Density</label>
-            <div slRadioGroup [value]="draft().density" (valueChange)="patch({ density: $any($event.value) })">
+            <div
+              slRadioGroup
+              [value]="draft().density"
+              (valueChange)="patch({ density: $any($event.value) })"
+            >
               <div slRadio value="comfortable">Comfortable</div>
               <div slRadio value="compact">Compact</div>
               <div slRadio value="dense">Dense</div>
             </div>
+          </div>
+          <div slField>
+            <label slFieldLabel>Shell canvas</label>
+            <div
+              slRadioGroup
+              [value]="draft().canvas"
+              (valueChange)="patch({ canvas: $any($event.value) })"
+            >
+              <div slRadio value="inset">Inset</div>
+              <div slRadio value="flush">Flush</div>
+            </div>
+            <span slFieldDescription>
+              Inset sinks the frame and raises the content as a card. Flush runs the content to the
+              edge of the window and separates it with a rule.
+            </span>
           </div>
           <div slField>
             <label slFieldLabel>Start page</label>
@@ -97,9 +127,27 @@ import { SessionStore } from '../../core/session/session.store';
           <div slField>
             <label slFieldLabel>Notifications</label>
             <div class="checks">
-              <div slCheckbox [checked]="draft().notifications.emailApprovals" (checkedChange)="patchNotifications({ emailApprovals: $event.value })">Email me approval requests</div>
-              <div slCheckbox [checked]="draft().notifications.emailMentions" (checkedChange)="patchNotifications({ emailMentions: $event.value })">Email me mentions</div>
-              <div slCheckbox [checked]="draft().notifications.inAppOperationalAlerts" (checkedChange)="patchNotifications({ inAppOperationalAlerts: $event.value })">In-app operational alerts</div>
+              <div
+                slCheckbox
+                [checked]="draft().notifications.emailApprovals"
+                (checkedChange)="patchNotifications({ emailApprovals: $event.value })"
+              >
+                Email me approval requests
+              </div>
+              <div
+                slCheckbox
+                [checked]="draft().notifications.emailMentions"
+                (checkedChange)="patchNotifications({ emailMentions: $event.value })"
+              >
+                Email me mentions
+              </div>
+              <div
+                slCheckbox
+                [checked]="draft().notifications.inAppOperationalAlerts"
+                (checkedChange)="patchNotifications({ inAppOperationalAlerts: $event.value })"
+              >
+                In-app operational alerts
+              </div>
               <div slCheckbox [checked]="true" disabled>In-app approvals (always on)</div>
               <div slCheckbox [checked]="true" disabled>In-app mentions (always on)</div>
             </div>

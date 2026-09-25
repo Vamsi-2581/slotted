@@ -4136,6 +4136,8 @@ The default signed-in persona is:
 Sofia Ramirez — Sales Manager
 ```
 
+A stand-in persona covers a role, or a decision, the table leaves to no one. `procurement-lead` is the Procurement team's own active Procurement Manager, offered so a purchase order that waits on that role (§65.5) can be approved in the demo. `finance-controller` is the Finance team's other active Finance Manager: Priya Shah asks for a write-off above $5,000 (§66.5) and a requester never decides it (§67.4), so the step is assigned to the controller. `staff-accountant` is the Finance team's own active Accountant, whose write-off authority stops at $500 (§66.5). Each is a seeded user rather than a new one, never one of the nine personas; a stand-in creates no user and draws nothing from the seed's random sequence, and a scale whose team holds no such user offers none.
+
 ---
 
 # 56. CRM Domain Contract

@@ -22,6 +22,7 @@ import type { ApiRuntime, MutationOptions, Transaction } from '../runtime';
 import {
   getGoodsReceipt,
   getPurchaseOrder,
+  lastAcceptedUnitCost,
   supplierListItem,
   type PurchaseOrderDetail,
   type SupplierListItem,
@@ -217,20 +218,8 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
     return { subtotal, maxVarianceBps };
   };
 
-  const lastAcceptedCost = (supplierId: string, skuId: string): number | undefined => {
-    let latest: { at: string; cost: number } | undefined;
-    for (const po of runtime.indexes.purchaseOrdersBySupplier.get(supplierId)) {
-      for (const line of runtime.indexes.poLinesByPo.get(po.id)) {
-        if (line.skuId !== skuId || quantityToMilli(line.receivedAcceptedQuantity) <= 0) continue;
-        for (const receiptLine of runtime.indexes.receiptLinesByPoLine.get(line.id)) {
-          const receipt = runtime.store.dataset.goodsReceipts.get(receiptLine.goodsReceiptId);
-          if (receipt && (!latest || receipt.receivedAt > latest.at))
-            latest = { at: receipt.receivedAt, cost: line.unitCost.minor };
-        }
-      }
-    }
-    return latest?.cost;
-  };
+  const lastAcceptedCost = (supplierId: string, skuId: string): number | undefined =>
+    lastAcceptedUnitCost(runtime, supplierId, skuId)?.minor;
 
   const recalcTotals = (po: PurchaseOrder, subtotalMinor: number, freightMinor: number): void => {
     po.subtotal = money(subtotalMinor, po.currency);
@@ -341,12 +330,10 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
           changed.push('notes');
         }
         if (input.destinationWarehouseId) {
-          po.destinationWarehouseId = load(
-            runtime,
-            'warehouses',
-            input.destinationWarehouseId,
-            'Warehouse',
-          ).id;
+          const warehouse = load(runtime, 'warehouses', input.destinationWarehouseId, 'Warehouse');
+          if (warehouse.status === 'closed')
+            throw domainError('WAREHOUSE_CLOSED', `${warehouse.code} is closed`, 409);
+          po.destinationWarehouseId = warehouse.id;
           changed.push('destinationWarehouseId');
         }
         if (input.lines || input.freightMinor !== undefined) {
@@ -376,7 +363,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
         const supplier = load(runtime, 'suppliers', po.supplierId, 'Supplier');
         if (supplier.status !== 'active')
           throw domainError(
-            'SUPPLIER_ON_HOLD',
+            supplier.status === 'on_hold' ? 'SUPPLIER_ON_HOLD' : 'SUPPLIER_INACTIVE',
             `${supplier.displayName} is ${supplier.status}`,
             409,
           );
@@ -571,6 +558,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
           ...(trimmed(input.notes) ? { notes: trimmed(input.notes) as string } : {}),
         };
         tx.create('goodsReceipts', receipt);
+        let overTolerance = false;
         let any = false;
         for (const line of runtime.indexes.poLinesByPo.get(id)) {
           const entry = input.lines[line.id];
@@ -586,6 +574,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
             quantityToMilli(line.receivedDamagedQuantity) +
             quantityToMilli(line.rejectedQuantity);
           if (already + accepted + damaged + rejected > ordered * 1.05) {
+            overTolerance = true;
             if (!runtime.can('purchase_orders.approve') || !trimmed(input.overReceiptReason))
               throw domainError(
                 'OVER_RECEIPT_TOLERANCE',
@@ -648,6 +637,7 @@ export function createProcurementCommands(runtime: ApiRuntime, inventory: Invent
             'RECEIPT_EMPTY',
             'A goods receipt needs at least one received quantity',
           );
+        if (overTolerance) receipt.overReceiptReason = trimmed(input.overReceiptReason) as string;
         const complete = runtime.indexes.poLinesByPo
           .get(id)
           .every(

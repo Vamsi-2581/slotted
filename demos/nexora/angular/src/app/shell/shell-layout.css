@@ -1,28 +1,43 @@
-.org {
+/*
+ * The column's pinned rows stand on the geometry the shell publishes: a row's
+ * inset from the region's edge, and a mark column the width of a control, so
+ * the avatar centres over the icons of the destinations under it.
+ */
+.nav-row {
+  padding-inline: var(--slotted-app-shell-row-inset);
+}
+.nav-mark {
+  display: grid;
+  flex: 0 0 auto;
+  inline-size: var(--slotted-app-shell-row-mark);
+  place-items: center;
+}
+
+/* The workspace row: the tenant's name over what the session is scoped to. */
+.workspace {
   display: grid;
   min-inline-size: 0;
+  line-height: var(--slotted-line-height-sm);
 }
-.org-name {
-  font-weight: 600;
+.workspace-name,
+.workspace-scope {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.org-role {
+.workspace-name {
+  font-weight: var(--slotted-font-weight-semibold);
+}
+.workspace-scope {
   color: var(--slotted-text-muted);
-  font-size: var(--slotted-font-size-sm);
+  font-size: var(--slotted-font-size-xs);
 }
 .shell-error {
   min-height: 100dvh;
 }
-.page-skeleton {
-  display: grid;
-  gap: var(--slotted-space-4);
-  padding: var(--slotted-space-6);
-}
 
 /* The rail: the mark stays, the words go. `data-open` is absent when the column is collapsed. */
-[data-ui='app-shell'][data-nav-mode='inline']:not([data-open]) .org,
+[data-ui='app-shell'][data-nav-mode='inline']:not([data-open]) .workspace,
 [data-ui='app-shell'][data-nav-mode='inline']:not([data-open]) app-connection-status {
   display: none;
 }

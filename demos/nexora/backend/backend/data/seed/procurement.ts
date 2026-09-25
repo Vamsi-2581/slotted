@@ -510,7 +510,8 @@ function buildPurchaseOrder(
     po.metadata.version = 5;
     po.metadata.updatedAt = acknowledgedAt;
   }
-  if (status === 'sent') return;
+  // A sent order the supplier never acknowledged still arrives: it goes through the same receipts,
+  // is late when its date has passed, and counts as inbound until it is received.
 
   // Receipts (section 65.7). On-time probability depends on the supplier tier.
   const onTimeProbability =
@@ -570,14 +571,18 @@ function buildPurchaseOrder(
     for (const [position, line] of lines.entries()) {
       const orderedMilli = quantityToMilli(line.orderedQuantity);
       const alreadyMilli = receivedMilli.get(line.id) ?? 0;
-      const targetMilli = Math.min(orderedMilli, Math.round(orderedMilli * step.fraction));
+      // Section 53.8: every quantity at the SKU's own precision — a share of an each is no quantity.
+      const precision = dataset.skus.get(line.skuId)?.quantityPrecision ?? 0;
+      const unitMilli = 10 ** (3 - precision);
+      const toUnit = (milli: number) => Math.round(milli / unitMilli) * unitMilli;
+      const targetMilli = Math.min(orderedMilli, toUnit(orderedMilli * step.fraction));
       const thisMilli = Math.max(0, targetMilli - alreadyMilli);
       if (thisMilli <= 0) continue;
       const damagedShare =
         step.damagedFraction ?? (random.chance(0.04) ? random.float(0.05, 0.3) : 0);
       const rejectedShare = random.chance(0.015) ? random.float(0.05, 0.2) : 0;
-      const damagedMilli = Math.round(thisMilli * damagedShare);
-      const rejectedMilli = Math.round(thisMilli * rejectedShare);
+      const damagedMilli = toUnit(thisMilli * damagedShare);
+      const rejectedMilli = Math.min(thisMilli - damagedMilli, toUnit(thisMilli * rejectedShare));
       const acceptedMilli = thisMilli - damagedMilli - rejectedMilli;
       const receiptLine: GoodsReceiptLine = {
         id: formatId('goodsReceiptLine', (index * 4 + receiptCounter - 1) * 50 + position + 1),

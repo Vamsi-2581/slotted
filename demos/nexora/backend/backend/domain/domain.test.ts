@@ -9,6 +9,7 @@ import {
   businessDateOf,
   businessDateToInstant,
   businessMinutesBetween,
+  diffDays,
   lastBusinessDayOfMonth,
 } from './time';
 
@@ -87,6 +88,16 @@ describe('pricing', () => {
 });
 
 describe('time', () => {
+  /**
+   * `diffDays` is called with instants as well as dates; the day-number cache
+   * kept the instant as the date of its day, and `addDays` then answered
+   * "2026-08-28T13:00:00Z" — four seeded bank transactions carried it.
+   */
+  it('answers a date, never an instant, after reading an instant of the same day', () => {
+    diffDays('2027-03-10T13:00:00Z', '2027-03-01');
+    expect(addDays('2027-03-09', 1)).toBe('2027-03-10');
+  });
+
   it('derives Chicago business dates and instants', () => {
     expect(businessDateOf('2026-09-04T15:00:00Z')).toBe('2026-09-04');
     expect(businessDateOf('2026-09-05T03:30:00Z')).toBe('2026-09-04');

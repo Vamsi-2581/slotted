@@ -223,6 +223,28 @@ function compareValues(a: unknown, b: unknown, type: FieldType): number {
 }
 
 /** Applies filters, search, sort and pagination to an in-memory collection. */
+/**
+ * The query's filters on the named fields, as a test a stored record can answer before it is
+ * turned into a list item. A resource whose items join other records filters by the fields its
+ * records already carry first, so the join is paid for the matching records only. Filters on
+ * other fields, and malformed filters, are left to `runListQuery`.
+ */
+export function storedFilter<S, T extends S>(
+  definition: ResourceDefinition<T>,
+  query: ListQuery,
+  stored: readonly (keyof S & string)[],
+): (record: S) => boolean {
+  const clauses: [string, FieldDefinition<T>, FilterClause][] = [];
+  for (const [name, value] of Object.entries(query.filter ?? {})) {
+    const field = definition.fields[name];
+    if (!field || field.filterable === false || !(stored as readonly string[]).includes(name))
+      continue;
+    clauses.push([name, field, normalizeClause(value, field.type)]);
+  }
+  return (record) =>
+    clauses.every(([name, field, clause]) => matches(record as T, field, clause, name));
+}
+
 export function runListQuery<T>(
   items: Iterable<T>,
   definition: ResourceDefinition<T>,

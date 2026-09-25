@@ -358,6 +358,8 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
           'returns.inspect',
           'receipts.view',
           'receipts.create',
+          // Section 55.5: a warehouse role reads what arrives at its own warehouses.
+          'purchase_orders.view',
         ],
         'warehouse',
       ),
@@ -365,7 +367,6 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
         'catalog.view',
         'orders.view',
         'customers.view',
-        'purchase_orders.view',
         'suppliers.view',
         'analytics.view',
         ...PERSONAL_PERMISSIONS,
@@ -390,10 +391,12 @@ export const ROLE_DEFINITIONS: readonly RoleDefinition[] = [
           'receipts.create',
           'returns.view',
           'returns.receive',
+          // Section 55.5: a warehouse role reads what arrives at its own warehouses.
+          'purchase_orders.view',
         ],
         'warehouse',
       ),
-      ...grants(['catalog.view', 'orders.view', 'purchase_orders.view', ...PERSONAL_PERMISSIONS]),
+      ...grants(['catalog.view', 'orders.view', ...PERSONAL_PERMISSIONS]),
     ],
   },
   {
@@ -554,6 +557,47 @@ export const PERSONAS: readonly PersonaDefinition[] = [
 ];
 
 export const DEFAULT_PERSONA_KEY = 'sofia-ramirez';
+
+/**
+ * A seeded user offered as a persona where section 55.6 leaves a role, or a
+ * decision, to no persona. None of the nine holds `procurement_manager`, and
+ * every purchase order that needs an approval waits on that role first
+ * (section 65.5). Priya Shah is the one Finance Manager, and she is the one
+ * who asks for a write-off above US$5,000 (section 66.5), which a requester
+ * never decides (section 67.4): the finance controller is the Finance team's
+ * other Finance Manager. No persona is an Accountant, whose write-off
+ * authority stops at US$500: the staff accountant is the team's own. A
+ * stand-in is the team's active holder of the role, never one of the nine,
+ * found after the users are seeded: it creates no user and draws nothing from
+ * the seed's random sequence, so every other record keeps its identity.
+ */
+export interface StandInPersona {
+  key: string;
+  role: RoleKey;
+  teamCode: string;
+  context: string;
+}
+
+export const STAND_IN_PERSONAS: readonly StandInPersona[] = [
+  {
+    key: 'procurement-lead',
+    role: 'procurement_manager',
+    teamCode: 'PROC',
+    context: 'Purchase-order approvals',
+  },
+  {
+    key: 'finance-controller',
+    role: 'finance_manager',
+    teamCode: 'FIN',
+    context: 'Write-off approvals',
+  },
+  {
+    key: 'staff-accountant',
+    role: 'accountant',
+    teamCode: 'FIN',
+    context: 'Receivables and reconciliation',
+  },
+];
 
 /** Approval policy role names referenced by section 58.3, 59.4, 65.5, 66.5 and 62.2. */
 export const APPROVER_ROLES = {

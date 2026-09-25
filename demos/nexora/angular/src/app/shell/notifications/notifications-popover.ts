@@ -1,70 +1,55 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { NgIcon } from '@ng-icons/core';
-import { SlButton, SlButtonLink, SlIconButton } from '@slotted/angular/button';
-import { SlList, SlListSection, SlListSectionLabel, SlListSectionList } from '@slotted/angular/list';
-import { SlListItem, SlListItemActions, SlListItemContent } from '@slotted/angular/list-item';
+import { SlLink } from '@slotted/angular/link';
 import {
-  SlPopover,
-  SlPopoverBody,
-  SlPopoverContent,
-  SlPopoverFooter,
-  SlPopoverHeader,
-  SlPopoverLayer,
-  SlPopoverTitle,
-  SlPopoverTrigger,
-} from '@slotted/angular/popover';
+  SlNotificationCenter,
+  SlNotificationCenterFooter,
+  type NotificationCenterItemRequest,
+  type NotificationCenterReadRequest,
+  type NotificationCenterTone,
+  type NotificationItem,
+} from '@slotted/angular/notification-center';
+import { SlPopover, SlPopoverContent, SlPopoverLayer, SlPopoverTrigger } from '@slotted/angular/popover';
 import { SlTopNavigationCount, SlTopNavigationNotifications } from '@slotted/angular/top-navigation';
-import type { Notification } from '@slotted/demo-nexora-backend';
+import type { Notification, NotificationType } from '@slotted/demo-nexora-backend';
 
 import { NotificationsStore } from '../../core/activity/notifications.store';
 import { ClockService } from '../../core/session/clock.service';
-import { NotificationRow } from './notification-row';
 
+const TONE: Record<NotificationType, NotificationCenterTone> = {
+  info: 'secondary',
+  success: 'success',
+  warning: 'warning',
+  action_required: 'danger',
+};
+
+/** The bell, and the centre under it: the family's feed over the store's rows. */
 @Component({
   selector: 'app-notifications-popover',
   imports: [
     RouterLink,
-    NgIcon,
-    SlButton,
-    SlIconButton,
-    SlButtonLink,
-    SlList,
-    SlListItem,
-    SlListItemActions,
-    SlListItemContent,
-    SlListSection,
-    SlListSectionLabel,
-    SlListSectionList,
+    SlLink,
+    SlNotificationCenter,
+    SlNotificationCenterFooter,
     SlPopover,
-    SlPopoverBody,
     SlPopoverContent,
-    SlPopoverFooter,
-    SlPopoverHeader,
     SlPopoverLayer,
-    SlPopoverTitle,
     SlPopoverTrigger,
     SlTopNavigationCount,
     SlTopNavigationNotifications,
-    NotificationRow,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    .empty {
-      margin: 0;
-      padding: var(--slotted-space-6);
-      text-align: center;
-      color: var(--slotted-text-muted);
-    }
-    .panel {
-      inline-size: min(28rem, calc(100vw - 2rem));
-    }
-    .head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--slotted-space-2);
-      inline-size: 100%;
+    /*
+     * The centre contributes no intrinsic width (it is a query container), so
+     * the popover would settle at the family's 22rem floor; the app states the
+     * measure, which is the layer's cap less its own gap. The height is the
+     * app's too: the feed scrolls inside it instead of running to the bottom
+     * of the viewport.
+     */
+    .centre {
+      inline-size: min(27rem, calc(100vw - var(--slotted-space-8)));
+      max-block-size: 30rem;
     }
   `,
   template: `
@@ -76,75 +61,31 @@ import { NotificationRow } from './notification-row';
       [(open)]="open"
       (openChangeRequest)="$event.value && load()"
     >
-      <button slTopNavigationNotifications slPopoverTrigger aria-label="Notifications">
+      <button slTopNavigationNotifications slPopoverTrigger [attr.aria-label]="label()">
         @if (store.unread() > 0) {
           <span slTopNavigationCount>{{ store.unread() }}</span>
         }
       </button>
       <ng-template slPopoverLayer>
-        <div slPopoverContent class="panel">
-          <div slPopoverHeader>
-            <div class="head">
-              <div slPopoverTitle>
-                Notifications
-                @if (store.unread() > 0) {
-                  <span>({{ store.unread() }})</span>
-                }
-              </div>
-              <button
-                slButton
-                size="sm"
-                variant="ghost"
-                tone="secondary"
-                [disabled]="store.unread() === 0"
-                (click)="store.markAllRead()"
-              >
-                Mark all as read
-              </button>
+        <div slPopoverContent aria-label="Notifications">
+          <section
+            slNotificationCenter
+            class="centre"
+            size="sm"
+            level="3"
+            [items]="items()"
+            [count]="store.unread()"
+            [now]="now()"
+            [groupBy]="groupBy"
+            [loading]="store.loading() && items().length === 0"
+            (readRequest)="read($event)"
+            (removeRequest)="archive($event)"
+            (openRequest)="openItem($event)"
+          >
+            <div slNotificationCenterFooter>
+              <a slLink routerLink="/notifications" (click)="open.set(false)">View all notifications</a>
             </div>
-          </div>
-          <div slPopoverBody>
-            @if (store.items().length === 0) {
-              <p class="empty">You're all caught up.</p>
-            } @else {
-              <ul slList>
-                @for (group of groups(); track group.label) {
-                  <li slListSection>
-                    <span slListSectionLabel>{{ group.label }}</span>
-                    <ul slListSectionList>
-                      @for (n of group.items; track n.id) {
-                        <li slListItem size="sm" [attr.data-unread]="n.readAt === undefined ? '' : null">
-                          <div
-                            slListItemContent
-                            appNotificationRow
-                            [notification]="n"
-                            (open)="openNotification($event)"
-                          ></div>
-  <div slListItemActions>
-    @if (n.readAt === undefined) {
-      <button slIconButton size="sm" tone="secondary" variant="ghost" [attr.aria-label]="'Mark as read: ' + n.title" (click)="store.markRead(n.id)">
-        <ng-icon name="lucideCheck" />
-      </button>
-    }
-    @if (!n.archivedAt) {
-      <button slIconButton size="sm" tone="secondary" variant="ghost" [attr.aria-label]="'Archive: ' + n.title" (click)="store.archive(n.id)">
-        <ng-icon name="lucideArchive" />
-      </button>
-    }
-  </div>
-                        </li>
-                      }
-                    </ul>
-                  </li>
-                }
-              </ul>
-            }
-          </div>
-          <div slPopoverFooter>
-            <a slButtonLink routerLink="/notifications" size="sm" variant="ghost" (click)="open.set(false)">
-              View all
-            </a>
-          </div>
+          </section>
         </div>
       </ng-template>
     </ng-container>
@@ -156,22 +97,53 @@ export class NotificationsPopover {
   readonly clock = inject(ClockService);
   private readonly router = inject(Router);
   readonly open = signal(false);
-  readonly groups = computed(() => {
-    const items = this.store.items().slice(0, 10);
-    const today = items.filter((n) => this.clock.isToday(n.createdAt));
-    const earlier = items.filter((n) => !this.clock.isToday(n.createdAt));
-    return [
-      { label: 'Today', items: today },
-      { label: 'Earlier', items: earlier },
-    ].filter((g) => g.items.length > 0);
-  });
+
+  /** The store's rows as the family's items; the row travels in `data` for the open request. */
+  readonly items = computed<NotificationItem[]>(() =>
+    this.store.items().map((n) => ({
+      key: n.id,
+      title: n.title,
+      description: n.body,
+      time: n.createdAt,
+      read: n.readAt !== undefined,
+      tone: TONE[n.type],
+      data: n,
+    })),
+  );
+
+  /** The demo clock's instant at the last open, so "2 hours ago" is measured from the business date. */
+  readonly now = signal(Date.parse(this.clock.now()));
+
+  readonly groupBy = (item: NotificationItem): string =>
+    this.clock.isToday(item.time as string) ? 'Today' : 'Earlier';
 
   load(): void {
+    this.now.set(Date.parse(this.clock.now()));
     this.store.view.set('all');
     void this.store.loadPage(1, 25);
   }
 
-  async openNotification(n: Notification): Promise<void> {
+  /** The backend marks read only; a request to mark unread is refused. */
+  async read(request: NotificationCenterReadRequest): Promise<void> {
+    if (!request.read) {
+      request.cancel();
+      return;
+    }
+    const unread = this.items().filter((item) => !item.read).length;
+    if (request.keys.length === unread && unread > 1) {
+      await this.store.markAllRead();
+      return;
+    }
+    for (const key of request.keys) await this.store.markRead(key);
+  }
+
+  archive(request: NotificationCenterItemRequest): Promise<void> {
+    return this.store.archive(request.key);
+  }
+
+  async openItem(request: NotificationCenterItemRequest): Promise<void> {
+    const n = this.items().find((item) => item.key === request.key)?.data as Notification | undefined;
+    if (n === undefined) return;
     if (n.readAt === undefined) await this.store.markRead(n.id);
     this.open.set(false);
     const route = this.store.routeFor(n);

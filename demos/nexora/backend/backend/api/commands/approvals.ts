@@ -69,16 +69,23 @@ function defaultApprover(
   roleKey: string,
   excludeUserId: string,
 ): string | undefined {
-  const personaByRole: Record<string, string> = {
-    sales_manager: 'sofia-ramirez',
-    finance_manager: 'priya-shah',
-    procurement_manager: 'marcus-lee',
-    warehouse_manager: 'jordan-wells',
+  // The persona who holds the role first, then its stand-in: Priya Shah's own write-off request
+  // is assigned to the finance controller, who is a seeded user the persona switcher offers.
+  const personasByRole: Record<string, string[]> = {
+    sales_manager: ['sofia-ramirez'],
+    finance_manager: ['priya-shah', 'finance-controller'],
+    procurement_manager: ['procurement-lead'],
+    warehouse_manager: ['jordan-wells'],
   };
-  const personaKey = personaByRole[roleKey];
-  const personaId = personaKey ? runtime.store.seed.personaUserIds.get(personaKey) : undefined;
-  if (personaId && personaId !== excludeUserId && runtime.authorization.hasRole(personaId, roleKey))
-    return personaId;
+  for (const personaKey of personasByRole[roleKey] ?? []) {
+    const personaId = runtime.store.seed.personaUserIds.get(personaKey);
+    if (
+      personaId &&
+      personaId !== excludeUserId &&
+      runtime.authorization.hasRole(personaId, roleKey)
+    )
+      return personaId;
+  }
   for (const assignment of runtime.store.dataset.roleAssignments.values()) {
     const role = runtime.store.dataset.roles.get(assignment.roleId);
     if (!role || role.name.toLowerCase().replace(/ /g, '_') !== roleKey) continue;

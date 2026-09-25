@@ -1,4 +1,5 @@
 import {
+  usdMinor,
   ORGANIZATION_ID,
   addBusinessMinutes,
   addDays,
@@ -136,6 +137,8 @@ export function scenarioScale(scenario: ScenarioId | undefined): ScaleProfile['i
 
 /** Applies a deterministic overlay on top of the canonical seed. */
 export function applyScenario(runtime: ApiRuntime, scenario: ScenarioId): void {
+  /* Taken before the scenario rewrites the dataset, as `Transaction` does. */
+  if (scenario !== 'healthy') void runtime.store.history.summaries;
   switch (scenario) {
     case 'month_end':
       return applyMonthEnd(runtime);
@@ -418,21 +421,24 @@ function applyCollectionsPressure(runtime: ApiRuntime): void {
     const open = [...store.dataset.invoices.values()].filter(
       (invoice) => invoice.lifecycle === 'open' && invoice.outstanding.minor > 0,
     );
-    let overdueMinor = 0;
+    // Measured as the overview measures it (§72.6): in US dollars, whatever each invoice is written in.
+    const worth = (invoice: (typeof open)[number]) =>
+      usdMinor(invoice.outstanding, invoice.fxRateToUsd);
+    let overdueUsd = 0;
     for (const invoice of open)
-      if (invoice.collectionState === 'overdue') overdueMinor += invoice.outstanding.minor;
-    const target = overdueMinor * 2.2;
+      if (invoice.collectionState === 'overdue') overdueUsd += worth(invoice);
+    const target = overdueUsd * 2.2;
     const current = open
       .filter(
         (invoice) =>
           invoice.collectionState === 'current' && compareDates(invoice.dueDate, today) >= 0,
       )
-      .sort((a, b) => b.outstanding.minor - a.outstanding.minor);
+      .sort((a, b) => worth(b) - worth(a));
     let added = 0;
     for (const invoice of current) {
-      if (overdueMinor + added >= target) break;
+      if (overdueUsd + added >= target) break;
       invoice.dueDate = addDays(today, -random.int(3, 45));
-      added += invoice.outstanding.minor;
+      added += worth(invoice);
     }
     store.invalidate('invoices');
   });

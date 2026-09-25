@@ -1,6 +1,9 @@
 import {
   diffDays,
+  money,
   notFound,
+  usdMinor,
+  type ApprovalRequest,
   type BankMatchCandidate,
   type BankTransaction,
   type CreditMemo,
@@ -24,6 +27,14 @@ import type { ApiRuntime } from '../runtime';
 
 // ---------------------------------------------------------------------------
 // Invoices
+
+/**
+ * A money field as the list compares it: in US dollars at the document's own
+ * rate, or the seed table's where the document has none (section 53.7).
+ */
+function inUsd(value: import('../../domain').Money, fxRateToUsd?: string) {
+  return money(usdMinor(value, fxRateToUsd), 'USD');
+}
 
 export interface InvoiceListItem extends Invoice {
   customerName: string;
@@ -84,9 +95,10 @@ export const invoiceResource: ResourceDefinition<InvoiceListItem> = {
     settlement: ['enum', (item) => item.settlement],
     collectionState: ['enum', (item) => item.collectionState],
     displayStatus: ['enum', (item) => item.displayStatus],
-    total: ['money', (item) => item.total],
-    outstanding: ['money', (item) => item.outstanding],
-    paidAmount: ['money', (item) => item.paidAmount],
+    // Compared in US dollars, so an invoice in reais and one in dollars sort by what they are worth.
+    total: ['money', (item) => inUsd(item.total, item.fxRateToUsd)],
+    outstanding: ['money', (item) => inUsd(item.outstanding, item.fxRateToUsd)],
+    paidAmount: ['money', (item) => inUsd(item.paidAmount, item.fxRateToUsd)],
     daysOverdue: ['number', (item) => item.daysOverdue],
     paymentTermsCode: ['enum', (item) => item.paymentTermsCode],
     updatedAt: ['datetime', (item) => item.metadata.updatedAt],
@@ -118,6 +130,11 @@ export interface InvoiceDetail {
   })[];
   creditApplications: (CreditMemoApplication & { creditMemoNumber: string })[];
   customer: { id: string; displayName: string; paymentTermsCode: string; health: string };
+  /**
+   * The latest write-off approval asked for on this invoice (sections 66.5 and 67): the one
+   * still pending, or the last decided, so the record says what its write-off waits on.
+   */
+  approval?: ApprovalRequest;
 }
 
 export function getInvoice(runtime: ApiRuntime, id: string): InvoiceDetail {
@@ -127,7 +144,12 @@ export function getInvoice(runtime: ApiRuntime, id: string): InvoiceDetail {
   if (!invoice) throw notFound('Invoice', id);
   const customer = dataset.customers.get(invoice.customerId);
   if (!customer) throw notFound('Customer', invoice.customerId);
+  const approval = runtime.indexes.approvalsByTarget
+    .get(id)
+    .filter((request) => request.targetType === 'invoice_write_off')
+    .sort((a, b) => b.requestedAt.localeCompare(a.requestedAt))[0];
   return {
+    ...(approval ? { approval } : {}),
     invoice: invoiceListItem(runtime, invoice),
     lines: runtime.indexes.invoiceLinesByInvoice
       .get(id)
@@ -199,8 +221,8 @@ export const paymentResource: ResourceDefinition<PaymentListItem> = {
     currency: ['enum', (item) => item.amount.currency],
     status: ['enum', (item) => item.status],
     receivedDate: ['date', (item) => item.receivedDate],
-    amount: ['money', (item) => item.amount],
-    unappliedAmount: ['money', (item) => item.unappliedAmount],
+    amount: ['money', (item) => inUsd(item.amount, item.fxRateToUsd)],
+    unappliedAmount: ['money', (item) => inUsd(item.unappliedAmount, item.fxRateToUsd)],
     reference: ['string', (item) => item.reference],
     updatedAt: ['datetime', (item) => item.metadata.updatedAt],
   }),
@@ -275,8 +297,8 @@ export const creditMemoResource: ResourceDefinition<CreditMemoListItem> = {
     reason: ['enum', (item) => item.reason],
     lifecycle: ['enum', (item) => item.lifecycle],
     issueDate: ['date', (item) => item.issueDate],
-    total: ['money', (item) => item.total],
-    unappliedAmount: ['money', (item) => item.unappliedAmount],
+    total: ['money', (item) => inUsd(item.total)],
+    unappliedAmount: ['money', (item) => inUsd(item.unappliedAmount)],
   }),
   search: (item) => [
     item.creditMemoNumber,
@@ -482,7 +504,7 @@ export const bankTransactionResource: ResourceDefinition<BankTransactionListItem
     postedDate: ['date', (item) => item.postedDate],
     description: ['string', (item) => item.description],
     reference: ['string', (item) => item.reference],
-    amount: ['money', (item) => item.amount],
+    amount: ['money', (item) => inUsd(item.amount)],
     status: ['enum', (item) => item.status],
     matchedPaymentId: ['string', (item) => item.matchedPaymentId],
     confidence: ['enum', (item) => item.bestCandidate?.confidence],
@@ -497,13 +519,20 @@ export function listBankTransactions(
   query: ListQuery,
 ): ListResponse<BankTransactionListItem> {
   runtime.require('reconciliation.view');
+  const pools = candidatePools(runtime);
+  // The confidence is the best candidate's, which is scored on read (section 66.13) and never
+  // stored: a query that filters or sorts by it scores every transaction still to reconcile
+  // first, and any other query scores the page it returns.
+  const byConfidence =
+    query.filter?.['confidence'] !== undefined || (query.sort ?? '').includes('confidence');
   const items: BankTransactionListItem[] = [];
   for (const transaction of runtime.store.dataset.bankTransactions.values())
-    items.push(bankTransactionListItem(runtime, transaction, false));
+    items.push(bankTransactionListItem(runtime, transaction, byConfidence, pools));
   const response = runListQuery(items, bankTransactionResource, query);
-  // Candidates are scored only for the page that is returned.
-  const pools = candidatePools(runtime);
-  response.data = response.data.map((item) => bankTransactionListItem(runtime, item, true, pools));
+  if (!byConfidence)
+    response.data = response.data.map((item) =>
+      bankTransactionListItem(runtime, item, true, pools),
+    );
   return response;
 }
 

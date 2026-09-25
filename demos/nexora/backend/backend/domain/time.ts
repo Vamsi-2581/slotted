@@ -151,7 +151,9 @@ export function dayNumber(date: string): number {
   const { year, month, day } = parseBusinessDate(date);
   const value = Math.round(Date.UTC(year, month - 1, day) / DAY_MS);
   dayNumberCache.set(date, value);
-  dateByDayNumber.set(value, date);
+  // Only a business date answers for its day number: an instant read here ("…T13:00:00Z") would
+  // otherwise come back from `dateFromDayNumber`, and every date computed after it with it.
+  if (date.length === 10) dateByDayNumber.set(value, date);
   return value;
 }
 

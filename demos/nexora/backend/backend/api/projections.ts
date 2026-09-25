@@ -10,6 +10,7 @@ import {
   quantityToMilli,
   ratioBps,
   roundHalfUp,
+  startOfMonth,
   addMoney,
   money,
   usd,
@@ -730,6 +731,7 @@ export class Projections {
     let overdueCount = 0;
     let disputedCount = 0;
     let dueSoon = 0;
+    let disputed = 0;
     let revenue30 = 0;
     let revenue90 = 0;
     const aging = new Map<
@@ -757,7 +759,10 @@ export class Projections {
       const outstandingUsd = usdMinor(invoice.outstanding, invoice.fxRateToUsd);
       receivables += outstandingUsd;
       openCount += 1;
-      if (invoice.collectionState === 'disputed') disputedCount += 1;
+      if (invoice.collectionState === 'disputed') {
+        disputedCount += 1;
+        disputed += outstandingUsd;
+      }
       const daysPastDue = diffDays(today, invoice.dueDate);
       if (daysPastDue >= -5 && daysPastDue <= 0) dueSoon += 1;
       const bucket =
@@ -796,6 +801,33 @@ export class Projections {
         unapplied += usdMinor(payment.unappliedAmount, payment.fxRateToUsd);
     for (const memo of dataset.creditMemos.values())
       if (memo.lifecycle === 'open') unapplied += usdMinor(memo.unappliedAmount);
+    // Section 13: cash collected this month, and the payment trend as the last eight weeks of it.
+    // Cash is what posted payments brought in on their received date; a reversed payment brought nothing.
+    const monthStart = startOfMonth(today);
+    const weekCount = 8;
+    const firstWeek = addDays(today, -(weekCount * 7 - 1));
+    const weeks = Array.from({ length: weekCount }, (_, index) => ({
+      weekStart: addDays(firstWeek, index * 7),
+      amount: 0,
+      count: 0,
+    }));
+    let cashThisMonth = 0;
+    let cashThisMonthCount = 0;
+    for (const payment of dataset.payments.values()) {
+      if (payment.status !== 'posted' || compareDates(payment.receivedDate, today) > 0) continue;
+      const amount = usdMinor(payment.amount, payment.fxRateToUsd);
+      if (compareDates(payment.receivedDate, monthStart) >= 0) {
+        cashThisMonth += amount;
+        cashThisMonthCount += 1;
+      }
+      const offset = diffDays(payment.receivedDate, firstWeek);
+      if (offset < 0) continue;
+      const week = weeks[Math.floor(offset / 7)];
+      if (week) {
+        week.amount += amount;
+        week.count += 1;
+      }
+    }
     let unmatched = 0;
     for (const transaction of dataset.bankTransactions.values())
       if (
@@ -826,6 +858,14 @@ export class Projections {
       openInvoiceCount: openCount,
       overdueInvoiceCount: overdueCount,
       disputedInvoiceCount: disputedCount,
+      disputedReceivables: usd(disputed),
+      cashCollectedMonthToDate: usd(cashThisMonth),
+      paymentsReceivedMonthToDate: cashThisMonthCount,
+      cashCollectedByWeek: weeks.map((week) => ({
+        weekStart: week.weekStart,
+        amount: usd(week.amount),
+        count: week.count,
+      })),
       invoicesDueWithin5Days: dueSoon,
       unmatchedBankTransactions: unmatched,
       pendingApprovals,

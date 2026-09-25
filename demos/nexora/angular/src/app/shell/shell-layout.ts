@@ -41,15 +41,15 @@ import {
   SlSideNavigationList,
   SlSideNavigationSection,
   SlSideNavigationSectionLabel,
-  SlSideNavigationSkeleton,
   SlSideNavigationTrigger,
 } from '@slotted/angular/side-navigation';
-import { SlSkeleton, SlSkeletonRegion, SlSkeletonText } from '@slotted/angular/skeleton';
+import { SlSkeleton } from '@slotted/angular/skeleton';
 import { filter, map, startWith } from 'rxjs';
 
 import { ApprovalsStore } from '../core/activity/approvals.store';
 import { NotificationsStore } from '../core/activity/notifications.store';
 import { TasksStore } from '../core/activity/tasks.store';
+import { TransportHealth } from '../core/backend/transport-health';
 import {
   destinationFor,
   moduleFor,
@@ -58,6 +58,7 @@ import {
   type NavDestination,
   type NavModule,
 } from '../core/nav/nav.model';
+import { PreferencesStore } from '../core/session/preferences.store';
 import { SessionStore } from '../core/session/session.store';
 import { ShortcutsService } from '../core/shortcuts/shortcuts.service';
 import { Banner } from './banner/banner';
@@ -104,11 +105,8 @@ interface Section {
     SlSideNavigationList,
     SlSideNavigationSection,
     SlSideNavigationSectionLabel,
-    SlSideNavigationSkeleton,
     SlSideNavigationTrigger,
     SlSkeleton,
-    SlSkeletonRegion,
-    SlSkeletonText,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell-layout.html',
@@ -121,9 +119,13 @@ export class ShellLayout implements OnInit {
   readonly notifications = inject(NotificationsStore);
   private readonly router = inject(Router);
   private readonly shortcuts = inject(ShortcutsService);
+  private readonly preferences = inject(PreferencesStore);
   private readonly banner = viewChild(Banner);
+  readonly health = inject(TransportHealth);
 
   readonly navOpen = signal(this.readNavOpen());
+  /** The plane the reader chose in their preferences; `inset` before they choose. */
+  readonly canvas = computed(() => this.preferences.preferences().canvas);
   readonly url = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
@@ -153,8 +155,17 @@ export class ShellLayout implements OnInit {
     const m = moduleFor(this.url());
     return m === undefined ? [] : [m.id];
   });
-  readonly role = computed(() => this.session.session()?.roles[0]?.name ?? '');
   readonly organization = computed(() => this.session.session()?.organization ?? null);
+  /** What the session is scoped to: every warehouse, or the ones the operator can see. */
+  readonly scope = computed(() => {
+    const s = this.session.session();
+    if (s === null) return '';
+    const warehouses = this.session.warehouses();
+    if (s.warehouseIds === 'all' || warehouses.length === 0) return 'All warehouses';
+    const first = warehouses[0]!;
+    const rest = warehouses.length - 1;
+    return `${first.code} ${first.name}${rest > 0 ? ` +${rest}` : ''}`;
+  });
 
   constructor() {
     this.shortcuts.install();

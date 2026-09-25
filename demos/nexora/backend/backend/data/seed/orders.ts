@@ -1466,8 +1466,10 @@ export function buildOrderGraph(env: OrderEnvironment, skeleton: OrderSkeleton):
         receivingWarehouseId: skeleton.warehouseId,
         metadata: metadataAt(requestedAt, ownerId, requestedAt, ownerId, 1),
       };
+      // A stage three days apart, never after today: the random step ahead may reach a stage
+      // whose third day has not come yet, and its stamp then falls on today.
       const stampAt = (stageIndex: number): string =>
-        instantOn(addDays(requestedDate, stageIndex * 3), random);
+        instantOn(addDays(requestedDate, Math.min(stageIndex * 3, daysSince)), random);
       if (stage >= 1 && returnStatus !== 'rejected') ret.authorizedAt = stampAt(1);
       if (stage >= 3 && returnStatus !== 'rejected') ret.receivedAt = stampAt(3);
       if (stage >= 4 && returnStatus !== 'rejected') ret.inspectedAt = stampAt(4);

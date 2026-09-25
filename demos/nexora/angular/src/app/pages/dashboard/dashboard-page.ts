@@ -3,7 +3,7 @@ import { SlGrid } from '@slotted/angular/grid';
 import { SlPage, SlPageBody } from '@slotted/angular/page';
 import {
   SlPageHeader,
-  SlPageHeaderDescription,
+  SlPageHeaderSubheading,
   SlPageHeaderHeading,
   SlPageHeaderTitle,
   SlPageHeaderTitleArea,
@@ -30,7 +30,7 @@ import { SessionStore } from '../../core/session/session.store';
     SlPage,
     SlPageBody,
     SlPageHeader,
-    SlPageHeaderDescription,
+    SlPageHeaderSubheading,
     SlPageHeaderHeading,
     SlPageHeaderTitle,
     SlPageHeaderTitleArea,
@@ -49,9 +49,11 @@ import { SessionStore } from '../../core/session/session.store';
           <div slPageHeaderTitleRow>
             <div slPageHeaderTitle>
               <h1 slPageHeaderHeading>Good {{ dayPart() }}, {{ session.user()?.firstName }}</h1>
-              <p slPageHeaderDescription>
+              <p slPageHeaderSubheading>
                 {{ session.session()?.organization?.displayName }} · business date
-                {{ clock.formatDate(clock.now(), { weekday: 'long', month: 'long', day: 'numeric' }) }}
+                {{
+                  clock.formatDate(clock.now(), { weekday: 'long', month: 'long', day: 'numeric' })
+                }}
               </p>
             </div>
           </div>
@@ -69,7 +71,9 @@ import { SessionStore } from '../../core/session/session.store';
           </div>
           <div slStatCard>
             <div slStatCardHeader><span slStatCardLabel>Unread notifications</span></div>
-            <div slStatCardFigure><span slStatCardValue [value]="notifications.unread()"></span></div>
+            <div slStatCardFigure>
+              <span slStatCardValue [value]="notifications.unread()"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -92,7 +96,9 @@ export class DashboardPage implements OnInit {
   }
 
   dayPart(): string {
-    const hour = Number(this.clock.formatDate(this.clock.now(), { hour: 'numeric', hour12: false }));
+    const hour = Number(
+      this.clock.formatDate(this.clock.now(), { hour: 'numeric', hour12: false }),
+    );
     return hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
   }
 }

@@ -12,11 +12,16 @@ import type { Notification, NotificationType } from '@slotted/demo-nexora-backen
 
 import { ClockService } from '../../core/session/clock.service';
 
+/**
+ * Every glyph a ring with a mark in it — the same set the notification centre
+ * in the bell's panel draws. The triangle is refused: its shape is not
+ * symmetric, and beside a column of rings it reads as the odd one out.
+ */
 const ICON: Record<NotificationType, string> = {
   info: 'lucideInfo',
   success: 'lucideCircleCheck',
-  warning: 'lucideTriangleAlert',
-  action_required: 'lucideCircleAlert',
+  warning: 'lucideCircleAlert',
+  action_required: 'lucideOctagonAlert',
 };
 const TONE: Record<NotificationType, string> = {
   info: 'secondary',
@@ -37,63 +42,83 @@ const TONE: Record<NotificationType, string> = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
+    /*
+     * The tone's glyph, filled: the tone's surface as a disc under the ringed
+     * glyph, at the ring's own radius on the icon grid (ten of twenty-four,
+     * stopped a half unit in so the fill ends under the stroke), so the ring
+     * is the disc's edge and the mark stands inside it — what the notification
+     * centre in the bell's panel draws. The disc and the glyph share one box,
+     * so they are concentric at every zoom and density; the tinted disc with
+     * its own edge and a smaller ringed glyph on top was two circles that
+     * rounded apart.
+     */
     .glyph {
+      --_glyph-size: calc(var(--slotted-avatar-size-sm) * 6 / 7);
+
       display: inline-grid;
       place-items: center;
-      inline-size: 2rem;
-      block-size: 2rem;
-      border-radius: var(--slotted-radius-full);
-      background: var(--slotted-tone-secondary-surface);
+      inline-size: var(--slotted-avatar-size-sm);
+      block-size: var(--slotted-avatar-size-sm);
       color: var(--slotted-tone-secondary-text);
+      background-image: radial-gradient(
+        circle,
+        var(--_surface, var(--slotted-tone-secondary-surface)) calc(var(--_glyph-size) * 9.5 / 24 - 0.5px),
+        transparent calc(var(--_glyph-size) * 9.5 / 24 + 0.5px)
+      );
+    }
+    .glyph > [data-ui='icon'] {
+      --slotted-icon-size: var(--_glyph-size);
     }
     .glyph[data-tone='success'] {
-      background: var(--slotted-tone-success-surface);
+      --_surface: var(--slotted-tone-success-surface);
+
       color: var(--slotted-tone-success-text);
     }
     .glyph[data-tone='warning'] {
-      background: var(--slotted-tone-warning-surface);
+      --_surface: var(--slotted-tone-warning-surface);
+
       color: var(--slotted-tone-warning-text);
     }
     .glyph[data-tone='danger'] {
-      background: var(--slotted-tone-danger-surface);
+      --_surface: var(--slotted-tone-danger-surface);
+
       color: var(--slotted-tone-danger-text);
     }
+    /*
+     * Unread is the weight and the ink: a read row's title steps back to the
+     * muted text, an unread one stands in the text ink, semibold. No dot — a
+     * dot after the title wrapped to a line of its own under a long title and
+     * sat off the title's centre on the short ones.
+     */
     .title {
       font-weight: 500;
       text-align: start;
       background: none;
       border: 0;
       padding: 0;
-      color: inherit;
+      color: var(--slotted-text-muted);
       font: inherit;
       cursor: pointer;
     }
     :host-context([data-unread]) .title {
+      color: var(--slotted-text);
       font-weight: 600;
-    }
-    :host-context([data-unread]) .title::after {
-      content: '';
-      display: inline-block;
-      inline-size: 0.5rem;
-      block-size: 0.5rem;
-      margin-inline-start: var(--slotted-space-2);
-      border-radius: 50%;
-      background: var(--slotted-tone-accent-solid);
-      vertical-align: middle;
     }
   `,
   template: `
-      <span slListItemStart>
-        <span class="glyph" [attr.data-tone]="tone()"><span slIcon size="md"><ng-icon [name]="icon()" /></span></span>
+    <span slListItemStart>
+      <span class="glyph" [attr.data-tone]="tone()"
+        ><span slIcon><ng-icon [name]="icon()" /></span
+      ></span>
+    </span>
+    <div slListItemBody>
+      <button type="button" class="title" slListItemLabel (click)="open.emit(notification())">
+        {{ notification().title }}
+      </button>
+      <span slListItemDescription>
+        {{ notification().body }} · {{ clock.relative(notification().createdAt) }}
       </span>
-      <div slListItemBody>
-        <button type="button" class="title" slListItemLabel (click)="open.emit(notification())">
-          {{ notification().title }}
-        </button>
-        <span slListItemDescription>
-          {{ notification().body }} · {{ clock.relative(notification().createdAt) }}
-        </span>
-      </div>
+    </div>
   `,
 })
 export class NotificationRow {

@@ -154,7 +154,7 @@ export class CommandPalette {
     ]);
     const actions: PaletteItem[] = (
       [
-      { id: 'act:customer', kind: 'action', label: 'Create customer', group: 'commands', icon: 'lucidePlus', route: '/crm/customers?new=1', disabled: !this.session.can('customers.create') },
+      { id: 'act:customer', kind: 'action', label: 'Create customer', group: 'commands', icon: 'lucidePlus', route: '/crm/customers/new', disabled: !this.session.can('customers.create') },
       { id: 'act:order', kind: 'action', label: 'Create sales order', group: 'commands', icon: 'lucidePlus', route: '/sales/orders?new=1', disabled: !this.session.can('orders.create') },
       { id: 'act:approvals', kind: 'action', label: 'Open approval queue', group: 'commands', icon: 'lucideClipboardCheck', route: '/sales/approvals', disabled: !this.session.canAny('orders.approve', 'quotes.approve') },
       { id: 'act:notifications', kind: 'action', label: 'Open notifications', group: 'commands', icon: 'lucideBell', route: '/notifications' },

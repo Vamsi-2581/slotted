@@ -17,6 +17,7 @@ import {
   SlPopoverTitle,
   SlPopoverTrigger,
 } from '@slotted/angular/popover';
+import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
 import { SlTopNavigationAction, SlTopNavigationCount } from '@slotted/angular/top-navigation';
 
 import { TasksStore } from '../../core/activity/tasks.store';
@@ -39,6 +40,8 @@ import { ClockService } from '../../core/session/clock.service';
     SlPopoverLayer,
     SlPopoverTitle,
     SlPopoverTrigger,
+    SlSkeleton,
+    SlSkeletonRegion,
     SlTopNavigationAction,
     SlTopNavigationCount,
   ],
@@ -65,10 +68,26 @@ import { ClockService } from '../../core/session/clock.service';
         <div slPopoverContent class="panel">
           <div slPopoverHeader><div slPopoverTitle>Tasks</div></div>
           <div slPopoverBody>
-            @if (store.items().length === 0) {
+            @if (store.items().length === 0 && store.loading()) {
+              <!-- The first answer is on its way: the rows' own boxes, so the wait reads as a wait and not as nothing. -->
+              <div slSkeletonRegion label="Loading tasks" [loading]="true">
+                <ul slList>
+                  @for (i of placeholders; track i) {
+                    <li slListItem size="sm">
+                      <div slListItemContent>
+                        <div slListItemBody>
+                          <span slListItemLabel><span slSkeleton shape="text" inlineSize="60%"></span></span>
+                          <span slListItemDescription><span slSkeleton shape="text" inlineSize="85%"></span></span>
+                        </div>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              </div>
+            } @else if (store.items().length === 0) {
               <p class="empty">No open tasks.</p>
             } @else {
-              <ul slList>
+              <ul slList [attr.aria-busy]="store.loading() ? 'true' : null">
                 @for (t of store.items().slice(0, 6); track t.id) {
                   <li slListItem size="sm" [tone]="t.overdue ? 'danger' : undefined">
                     <div slListItemContent>
@@ -94,6 +113,7 @@ import { ClockService } from '../../core/session/clock.service';
 })
 export class TasksPopover {
   readonly label = input.required<string>();
+  readonly placeholders = [1, 2, 3];
   readonly store = inject(TasksStore);
   readonly clock = inject(ClockService);
 

@@ -20,8 +20,12 @@ import { buildOrderSkeletons, firstIndexesByYear } from './timeline';
 export interface SalesSeedResult {
   environment: OrderEnvironment;
   skeletons: OrderSkeleton[];
-  /** Summaries for every order in the historical tier (index < firstMaterializedIndex, not materialized). */
-  historySummaries: OrderSummary[];
+  /**
+   * Summaries for every order in the historical tier (index < firstMaterializedIndex, not
+   * materialized). Built on first read: 1.1 s of the `light` seed that the first screen does
+   * not need. `Transaction` and `applyScenario` read it before they mutate the dataset.
+   */
+  readonly historySummaries: OrderSummary[];
   /** Indexes of orders materialized into the dataset. */
   materializedIndexes: Set<number>;
   firstOperationalIndex: number;
@@ -176,7 +180,7 @@ export function seedSales(
   }
 
   const materializedIndexes = new Set<number>();
-  const historySummaries: OrderSummary[] = [];
+  const historical: OrderSkeleton[] = [];
   const openWindowStart = diffDays(today, operationalStart) + 150;
 
   for (const skeleton of skeletons) {
@@ -193,12 +197,23 @@ export function seedSales(
       addGraphToDataset(context, graph);
       materializedIndexes.add(skeleton.index);
     } else {
-      historySummaries.push(summarizeOrder(environment, skeleton));
+      historical.push(skeleton);
     }
   }
 
   assignOperationalNumbers(environment, firstOperationalIndex, materializedIndexes);
-  return { environment, skeletons, historySummaries, materializedIndexes, firstOperationalIndex };
+  let historySummaries: OrderSummary[] | undefined;
+  return {
+    environment,
+    skeletons,
+    get historySummaries() {
+      return (historySummaries ??= historical.map((skeleton) =>
+        summarizeOrder(environment, skeleton),
+      ));
+    },
+    materializedIndexes,
+    firstOperationalIndex,
+  };
 }
 
 /**

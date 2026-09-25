@@ -12,7 +12,7 @@
     <div
       slAppShell
       primary="banner"
-      canvas="inset"
+      [canvas]="canvas()"
       navMode="auto"
       collapsedTo="rail"
       scroll="content"
@@ -23,21 +23,34 @@
       </header>
 
       <nav slAppShellNav>
-        <div slAppShellNavHeader>
+        <div slAppShellNavHeader class="nav-row">
+          <span class="nav-mark">
+            @if (organization(); as org) {
+              <span
+                slAvatar
+                shape="square"
+                size="sm"
+                tone="accent"
+                variant="solid"
+                [name]="org.displayName"
+              ></span>
+            } @else {
+              <span slSkeleton shape="square" size="sm"></span>
+            }
+          </span>
           @if (organization(); as org) {
-            <span slAvatar shape="square" size="sm" tone="accent" variant="solid" [name]="org.displayName"></span>
-            <span class="org">
-              <span class="org-name">{{ org.displayName }}</span>
-              <span class="org-role">{{ role() }}</span>
+            <span class="workspace">
+              <span class="workspace-name">{{ org.displayName }}</span>
+              <span class="workspace-scope">{{ scope() }}</span>
             </span>
-          } @else {
-            <span slSkeleton shape="square" size="sm"></span>
           }
         </div>
         <div slAppShellNavBody>
-          @if (session.status() === 'ready') {
+          <!-- A persona switch reloads the session: the column keeps the destinations it shows and says it is busy. -->
+          @if (session.session()) {
             <div
               slSideNavigation
+              [attr.aria-busy]="session.status() === 'loading' || null"
               [value]="current()"
               [expanded]="expanded()"
               (valueChangeRequest)="navigate($event)"
@@ -80,29 +93,22 @@
                 </div>
               }
             </div>
-          } @else {
-            <ul slSideNavigationList>
-              @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
-                <li slSideNavigationSkeleton></li>
-              }
-            </ul>
           }
         </div>
-        <div slAppShellNavFooter>
-          <button slAppShellNavToggle></button>
-          <app-connection-status />
-        </div>
+        @if (health.degraded()) {
+          <div slAppShellNavFooter class="nav-row">
+            <app-connection-status />
+          </div>
+        }
       </nav>
 
-      <main slAppShellMain>
-        @if (session.status() === 'ready') {
+      <main slAppShellMain [attr.aria-busy]="session.status() === 'loading' || null">
+        <!--
+          The page stays on screen while a persona switch reloads the session, and is built again
+          once the new session has arrived: its data is read under the persona now signed in.
+        -->
+        @for (generation of [session.loadedAt()]; track generation) {
           <router-outlet />
-        } @else {
-          <div slSkeletonRegion label="Loading page" class="page-skeleton">
-            <span slSkeleton shape="block" size="lg"></span>
-            <p slSkeletonText [lines]="3"></p>
-            <p slSkeletonText [lines]="3"></p>
-          </div>
         }
       </main>
     </div>

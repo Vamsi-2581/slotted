@@ -3,6 +3,7 @@ import {
   ORGANIZATION_ID,
   REGIONS,
   PERSONAS,
+  STAND_IN_PERSONAS,
   ROLE_DEFINITIONS,
   SYSTEM_ACTOR_ID,
   addDays,
@@ -729,6 +730,26 @@ export function seedTenant(context: SeedContext): TenantSeedResult {
     for (const child of node.children) walk(child, category.id, node.name);
   };
   for (const root of CATEGORY_TREE) walk(root, undefined, '');
+
+  // The stand-ins: the team's lead where it holds the role and is active, else an active holder
+  // in the team, else any active holder — never one of the nine personas, whose role is already
+  // theirs: a stand-in decides what a persona asked for, and a requester never decides (§67.4).
+  const personaIds = new Set(personaUserIds.values());
+  for (const standIn of STAND_IN_PERSONAS) {
+    const holds = (userId: string | undefined): userId is string =>
+      userId !== undefined &&
+      !personaIds.has(userId) &&
+      userRole.get(userId) === standIn.role &&
+      dataset.users.get(userId)?.status === 'active';
+    const lead = teamLeadIds.get(standIn.teamCode);
+    const members = [...userRole.keys()];
+    const userId = holds(lead)
+      ? lead
+      : (members.find(
+          (candidate) => userTeam.get(candidate) === standIn.teamCode && holds(candidate),
+        ) ?? members.find((candidate) => holds(candidate)));
+    if (userId !== undefined) personaUserIds.set(standIn.key, userId);
+  }
 
   return {
     personaUserIds,

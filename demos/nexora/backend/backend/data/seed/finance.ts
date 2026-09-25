@@ -293,10 +293,19 @@ export function seedFinance(context: SeedContext, tenant: TenantSeedResult): Fin
       invoice.outstanding = money(invoice.outstanding.minor - applied, invoice.currency);
       invoice.settlement = invoice.outstanding.minor === 0 ? 'paid' : 'partially_paid';
       if (invoice.outstanding.minor === 0) invoice.collectionState = 'current';
-      if (index === 0 && invoice.settlement === 'paid')
-        dataset.fixtures.set('edge.invoice.paid_with_credit_memo', invoice.id);
     }
   }
+  // Section 82's paid-with-credit-memo invoice: the first, by id, that a credit application
+  // settles in full. Read after every memo is written, returns' included, and drawing nothing.
+  const creditSettled = [...dataset.creditMemoApplications.values()]
+    .filter((application) => application.status === 'active')
+    .map((application) => dataset.invoices.get(application.invoiceId))
+    .filter(
+      (invoice): invoice is Invoice =>
+        invoice?.lifecycle === 'open' && invoice.settlement === 'paid',
+    )
+    .sort((a, b) => a.id.localeCompare(b.id))[0];
+  if (creditSettled) dataset.fixtures.set('edge.invoice.paid_with_credit_memo', creditSettled.id);
 
   // Refunds for customers holding unapplied credit.
   const refundable = [...dataset.creditMemos.values()].filter(

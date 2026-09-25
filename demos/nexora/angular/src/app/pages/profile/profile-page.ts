@@ -10,7 +10,7 @@ import {
 import { SlPage, SlPageBody } from '@slotted/angular/page';
 import {
   SlPageHeader,
-  SlPageHeaderDescription,
+  SlPageHeaderSubheading,
   SlPageHeaderHeading,
   SlPageHeaderMarks,
   SlPageHeaderTitle,
@@ -42,7 +42,7 @@ import { SessionStore } from '../../core/session/session.store';
     SlPage,
     SlPageBody,
     SlPageHeader,
-    SlPageHeaderDescription,
+    SlPageHeaderSubheading,
     SlPageHeaderHeading,
     SlPageHeaderMarks,
     SlPageHeaderTitle,
@@ -71,16 +71,22 @@ import { SessionStore } from '../../core/session/session.store';
   `,
   template: `
     @if (session.session(); as s) {
-      <div slPage>
+      <div slPage width="content">
         <header slPageHeader>
           <div slPageHeaderTitleArea>
             <div slPageHeaderTitleRow>
               <div slPageHeaderVisual>
-                <span slAvatar size="lg" tone="accent" variant="soft" [name]="s.user.displayName"></span>
+                <span
+                  slAvatar
+                  size="lg"
+                  tone="accent"
+                  variant="soft"
+                  [name]="s.user.displayName"
+                ></span>
               </div>
               <div slPageHeaderTitle>
                 <h1 slPageHeaderHeading>{{ s.user.displayName }}</h1>
-                <p slPageHeaderDescription>{{ s.user.title }} · {{ s.user.department }}</p>
+                <p slPageHeaderSubheading>{{ s.user.title }} · {{ s.user.department }}</p>
                 <div slPageHeaderMarks>
                   @for (r of s.roles; track r.id) {
                     <span slBadge tone="accent" variant="soft" size="sm">{{ r.name }}</span>
@@ -106,7 +112,9 @@ import { SessionStore } from '../../core/session/session.store';
                 </div>
                 <div slDescriptionListItem>
                   <dt slDescriptionListTerm>Manager</dt>
-                  <dd slDescriptionListDescription [empty]="!s.user.managerId">{{ s.user.managerId }}</dd>
+                  <dd slDescriptionListDescription [empty]="!s.user.managerId">
+                    {{ s.user.managerId }}
+                  </dd>
                 </div>
                 <div slDescriptionListItem>
                   <dt slDescriptionListTerm>Timezone</dt>
@@ -134,7 +142,9 @@ import { SessionStore } from '../../core/session/session.store';
                 <p class="area">{{ group.label }}</p>
                 <div class="permissions">
                   @for (p of group.permissions; track p) {
-                    <span slBadge tone="secondary" variant="outline" size="sm"><code>{{ p }}</code></span>
+                    <span slBadge tone="secondary" variant="outline" size="sm"
+                      ><code>{{ p }}</code></span
+                    >
                   }
                 </div>
               }

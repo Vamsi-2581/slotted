@@ -21,6 +21,7 @@ import {
   SlPopoverTitle,
   SlPopoverTrigger,
 } from '@slotted/angular/popover';
+import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
 import { SlTopNavigationAction, SlTopNavigationCount } from '@slotted/angular/top-navigation';
 
 import { ApprovalsStore } from '../../core/activity/approvals.store';
@@ -47,6 +48,8 @@ import { ClockService } from '../../core/session/clock.service';
     SlPopoverLayer,
     SlPopoverTitle,
     SlPopoverTrigger,
+    SlSkeleton,
+    SlSkeletonRegion,
     SlTopNavigationAction,
     SlTopNavigationCount,
   ],
@@ -73,10 +76,26 @@ import { ClockService } from '../../core/session/clock.service';
         <div slPopoverContent class="panel">
           <div slPopoverHeader><div slPopoverTitle>Approvals</div></div>
           <div slPopoverBody>
-            @if (store.items().length === 0) {
+            @if (store.items().length === 0 && store.loading()) {
+              <!-- The first answer is on its way: the rows' own boxes, so the wait reads as a wait and not as nothing. -->
+              <div slSkeletonRegion label="Loading approvals" [loading]="true">
+                <ul slList>
+                  @for (i of placeholders; track i) {
+                    <li slListItem size="sm">
+                      <div slListItemContent>
+                        <div slListItemBody>
+                          <span slListItemLabel><span slSkeleton shape="text" inlineSize="60%"></span></span>
+                          <span slListItemDescription><span slSkeleton shape="text" inlineSize="85%"></span></span>
+                        </div>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              </div>
+            } @else if (store.items().length === 0) {
               <p class="empty">Nothing waiting for you.</p>
             } @else {
-              <ul slList>
+              <ul slList [attr.aria-busy]="store.loading() ? 'true' : null">
                 @for (a of store.items().slice(0, 6); track a.id) {
                   <li slListItem size="sm">
                     <div slListItemContent>
@@ -107,6 +126,7 @@ import { ClockService } from '../../core/session/clock.service';
 })
 export class ApprovalsPopover {
   readonly label = input.required<string>();
+  readonly placeholders = [1, 2, 3];
   readonly store = inject(ApprovalsStore);
   readonly clock = inject(ClockService);
 

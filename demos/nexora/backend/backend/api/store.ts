@@ -96,9 +96,9 @@ export interface DemoDatabaseMetadata {
 
 export interface HistoricalTier {
   skeletons: OrderSkeleton[];
-  summaries: OrderSummary[];
+  readonly summaries: OrderSummary[];
   /** Order index → summary for the historical (non-materialized) tier. */
-  summaryByIndex: Map<number, OrderSummary>;
+  readonly summaryByIndex: Map<number, OrderSummary>;
   materializedIndexes: Set<number>;
   firstOperationalIndex: number;
 }
@@ -124,12 +124,18 @@ export class Store {
   ) {
     this.seed = seed;
     this.dataset = seed.dataset;
-    const summaryByIndex = new Map<number, OrderSummary>();
-    for (const summary of seed.sales.historySummaries) summaryByIndex.set(summary.index, summary);
+    const sales = seed.sales;
+    let summaryByIndex: Map<number, OrderSummary> | undefined;
     this.history = {
-      skeletons: seed.sales.skeletons,
-      summaries: seed.sales.historySummaries,
-      summaryByIndex,
+      skeletons: sales.skeletons,
+      get summaries() {
+        return sales.historySummaries;
+      },
+      get summaryByIndex() {
+        return (summaryByIndex ??= new Map(
+          sales.historySummaries.map((summary) => [summary.index, summary]),
+        ));
+      },
       materializedIndexes: seed.sales.materializedIndexes,
       firstOperationalIndex: seed.sales.firstOperationalIndex,
     };

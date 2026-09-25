@@ -204,6 +204,13 @@ export interface FinanceOverview {
   openInvoiceCount: number;
   overdueInvoiceCount: number;
   disputedInvoiceCount: number;
+  /** Outstanding of the disputed open invoices, in USD (section 13, "disputed balance"). */
+  disputedReceivables: Money;
+  /** Posted payments received from the first of the demo month to today, in USD. */
+  cashCollectedMonthToDate: Money;
+  paymentsReceivedMonthToDate: number;
+  /** The payment trend (section 13): eight seven-day weeks ending today, oldest first, in USD. */
+  cashCollectedByWeek: { weekStart: string; amount: Money; count: number }[];
   invoicesDueWithin5Days: number;
   unmatchedBankTransactions: number;
   pendingApprovals: number;

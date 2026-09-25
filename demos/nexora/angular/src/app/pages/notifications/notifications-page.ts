@@ -3,7 +3,16 @@ import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { SlButton, SlIconButton } from '@slotted/angular/button';
 import { SlList } from '@slotted/angular/list';
-import { SlListItem, SlListItemActions, SlListItemContent } from '@slotted/angular/list-item';
+import {
+  SlListItem,
+  SlListItemActions,
+  SlListItemBody,
+  SlListItemContent,
+  SlListItemDescription,
+  SlListItemLabel,
+  SlListItemStart,
+} from '@slotted/angular/list-item';
+import { SlMenuItem, SlMenuItemIcon } from '@slotted/angular/menu';
 import { SlPage, SlPageBody } from '@slotted/angular/page';
 import {
   SlPageHeader,
@@ -11,6 +20,7 @@ import {
   SlPageHeaderHeading,
   SlPageHeaderTitle,
   SlPageHeaderTitleArea,
+  SlPageHeaderTabs,
   SlPageHeaderTitleRow,
 } from '@slotted/angular/page-header';
 import {
@@ -24,7 +34,15 @@ import {
   SlResultStateContent,
   SlResultStateTitle,
 } from '@slotted/angular/result-state';
+import { SlSkeleton, SlSkeletonRegion } from '@slotted/angular/skeleton';
 import { SlTab, SlTabList, SlTabs } from '@slotted/angular/tabs';
+import { SlToolbar, SlToolbarItem, SlToolbarOverflow } from '@slotted/angular/toolbar';
+import {
+  SlTooltip,
+  SlTooltipContent,
+  SlTooltipLayer,
+  SlTooltipTrigger,
+} from '@slotted/angular/tooltip';
 import type { Notification } from '@slotted/demo-nexora-backend';
 
 import { NotificationsStore, type NotificationsView } from '../../core/activity/notifications.store';
@@ -39,13 +57,20 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
     SlList,
     SlListItem,
     SlListItemActions,
+    SlListItemBody,
     SlListItemContent,
+    SlListItemDescription,
+    SlListItemLabel,
+    SlListItemStart,
+    SlMenuItem,
+    SlMenuItemIcon,
     SlPage,
     SlPageBody,
     SlPageHeader,
     SlPageHeaderActions,
     SlPageHeaderHeading,
     SlPageHeaderTitle,
+    SlPageHeaderTabs,
     SlPageHeaderTitleArea,
     SlPageHeaderTitleRow,
     SlPagination,
@@ -55,17 +80,25 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
     SlResultState,
     SlResultStateContent,
     SlResultStateTitle,
+    SlSkeleton,
+    SlSkeletonRegion,
     SlTab,
     SlTabList,
     SlTabs,
+    SlToolbar,
+    SlToolbarItem,
+    SlToolbarOverflow,
+    SlTooltip,
+    SlTooltipContent,
+    SlTooltipLayer,
+    SlTooltipTrigger,
     NotificationRow,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    .views {
-      margin-block-end: var(--slotted-space-4);
-    }
+    /* The pager stands at the end of the line, under the actions column it belongs with. */
     nav[slPagination] {
+      justify-content: flex-end;
       margin-block-start: var(--slotted-space-4);
     }
   `,
@@ -75,28 +108,61 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
         <div slPageHeaderTitleArea>
           <div slPageHeaderTitleRow>
             <div slPageHeaderTitle><h1 slPageHeaderHeading>Notifications</h1></div>
+            <!-- In the compact class the toolbar keeps the action on the title row, or folds it into its menu. -->
             <div slPageHeaderActions>
-              <button slButton variant="outline" [disabled]="store.unread() === 0" (click)="store.markAllRead()">
-                Mark all as read
-              </button>
+              <div slToolbar aria-label="Notification actions" overflow="menu">
+                <div slToolbarItem [slToolbarItemCounterpart]="markAllItem">
+                  <button
+                    slButton
+                    variant="outline"
+                    [disabled]="store.unread() === 0"
+                    [loading]="store.busyAll()"
+                    loadingLabel="Marking all as read"
+                    (click)="store.markAllRead()"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
+                <sl-toolbar-overflow />
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- The views are the header's tabs: pinned under the title while the list scrolls. -->
+        <div slPageHeaderTabs>
+          <div slTabs [value]="store.view()" (valueChange)="setView($event.value)">
+            <div slTabList aria-label="Views">
+              <div slTab value="all">All</div>
+              <div slTab value="unread">
+                Unread
+                @if (store.unread() > 0) {
+                  ({{ store.unread() }})
+                }
+              </div>
+              <div slTab value="archived">Archived</div>
             </div>
           </div>
         </div>
       </header>
       <div slPageBody>
-        <div class="views" slTabs [value]="store.view()" (valueChange)="setView($event.value)">
-          <div slTabList aria-label="Views">
-            <div slTab value="all">All</div>
-            <div slTab value="unread">
-              Unread
-              @if (store.unread() > 0) {
-                ({{ store.unread() }})
+        @if (store.items().length === 0 && store.loading()) {
+          <!-- A view or a page on its way: the rows' own boxes, empty, so the wait is visible. -->
+          <div slSkeletonRegion label="Loading notifications" [loading]="true">
+            <ul slList>
+              @for (i of placeholders; track i) {
+                <li slListItem>
+                  <div slListItemContent>
+                    <span slListItemStart><span slSkeleton shape="circle" size="sm"></span></span>
+                    <div slListItemBody>
+                      <span slListItemLabel><span slSkeleton shape="text" inlineSize="70%"></span></span>
+                      <span slListItemDescription><span slSkeleton shape="text" inlineSize="90%"></span></span>
+                    </div>
+                  </div>
+                </li>
               }
-            </div>
-            <div slTab value="archived">Archived</div>
+            </ul>
           </div>
-        </div>
-        @if (store.items().length === 0 && !store.loading()) {
+        } @else if (store.items().length === 0) {
           <div slResultState status="empty" reach="section">
             <div slResultStateContent><h2 slResultStateTitle>Nothing here</h2></div>
           </div>
@@ -110,27 +176,61 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
                   [notification]="n"
                   (open)="open($event)"
                 ></div>
+  <!--
+    Two glyphs with no words beside them: each names itself in a tooltip on
+    hover, on keyboard focus and on a held touch, as the notification centre
+    in the bell's panel names its own. The accessible name carries the row's
+    title; the tooltip says only the action.
+  -->
   <div slListItemActions>
     @if (n.readAt === undefined) {
-      <button slIconButton size="sm" tone="secondary" variant="ghost" [attr.aria-label]="'Mark as read: ' + n.title" (click)="store.markRead(n.id)">
-        <ng-icon name="lucideCheck" />
-      </button>
+      <ng-container slTooltip openOn="hover" side="bottom">
+        <button
+          slIconButton
+          slTooltipTrigger
+          size="sm"
+          tone="secondary"
+          variant="ghost"
+          [attr.aria-label]="'Mark as read: ' + n.title"
+          [loading]="store.busy().has(n.id)"
+          loadingLabel="Marking as read"
+          (click)="store.markRead(n.id)"
+        >
+          <ng-icon name="lucideCheck" />
+        </button>
+        <ng-template slTooltipLayer><div slTooltipContent>Mark as read</div></ng-template>
+      </ng-container>
     }
     @if (!n.archivedAt) {
-      <button slIconButton size="sm" tone="secondary" variant="ghost" [attr.aria-label]="'Archive: ' + n.title" (click)="store.archive(n.id)">
-        <ng-icon name="lucideArchive" />
-      </button>
+      <ng-container slTooltip openOn="hover" side="bottom">
+        <button
+          slIconButton
+          slTooltipTrigger
+          size="sm"
+          tone="secondary"
+          variant="ghost"
+          [attr.aria-label]="'Archive: ' + n.title"
+          [loading]="store.busy().has(n.id)"
+          loadingLabel="Archiving"
+          (click)="store.archive(n.id)"
+        >
+          <ng-icon name="lucideArchive" />
+        </button>
+        <ng-template slTooltipLayer><div slTooltipContent>Archive</div></ng-template>
+      </ng-container>
     }
   </div>
               </li>
             }
           </ul>
+        }
+        @if (store.total() > 0) {
           <nav
             slPagination
             [page]="store.page()"
             [count]="store.total()"
             [pageSize]="25"
-            (pageChange)="store.loadPage($event.value)"
+            (pageChange)="goTo($event.value)"
             label="Notifications pages"
           >
             <button slPaginationPrevious type="button"></button>
@@ -139,6 +239,17 @@ import { NotificationRow } from '../../shell/notifications/notification-row';
           </nav>
         }
       </div>
+      <ng-template #markAllItem>
+        <button
+          slMenuItem
+          type="button"
+          [disabled]="store.unread() === 0"
+          (click)="store.markAllRead()"
+        >
+          <ng-icon slMenuItemIcon name="lucideCheckCheck" />
+          Mark all as read
+        </button>
+      </ng-template>
     </div>
   `,
 })
@@ -146,13 +257,22 @@ export class NotificationsPage implements OnInit {
   readonly store = inject(NotificationsStore);
   private readonly router = inject(Router);
 
+  readonly placeholders = [1, 2, 3, 4, 5];
+
   ngOnInit(): void {
     void this.store.loadPage(1, 25);
   }
 
+  /** A change of view or of page empties the list first: the rows on screen are the old answer. */
   setView(view: string | undefined): void {
     this.store.view.set((view ?? 'all') as NotificationsView);
+    this.store.items.set([]);
     void this.store.loadPage(1, 25);
+  }
+
+  goTo(page: number): void {
+    this.store.items.set([]);
+    void this.store.loadPage(page, 25);
   }
 
   async open(n: Notification): Promise<void> {

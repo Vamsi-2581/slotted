@@ -7,6 +7,7 @@ import {
   quantityToMilli,
   FX_RATES_TO_USD,
   money,
+  usdMinor,
   writeOffAuthority,
   type CreditMemo,
   type Invoice,
@@ -386,7 +387,9 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
             'INVOICE_ALREADY_PAID',
             `Invoice ${invoice.invoiceNumber ?? id} has no outstanding balance`,
           );
-        const authority = writeOffAuthority(invoice.outstanding.minor);
+        // Section 66.5 states the thresholds as a USD equivalent: a balance in reais is measured in dollars.
+        const outstandingUsd = usdMinor(invoice.outstanding, invoice.fxRateToUsd);
+        const authority = writeOffAuthority(outstandingUsd);
         const actor = tx.actor;
         const isFinanceManager =
           runtime.authorization.hasRole(actor.id, 'finance_manager') ||
@@ -394,14 +397,14 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
         if (authority === 'finance_manager' && !isFinanceManager)
           throw domainError(
             'WRITE_OFF_LIMIT_EXCEEDED',
-            `Write-offs above $500 require the Finance Manager`,
+            `Write-offs above US$500 require a Finance Manager`,
             403,
           );
         if (authority === 'approval_request') {
           if (!isFinanceManager)
             throw domainError(
               'WRITE_OFF_LIMIT_EXCEEDED',
-              'Write-offs above $5,000 require the Finance Manager',
+              'Write-offs above US$5,000 are requested by a Finance Manager',
               403,
             );
           const existing = runtime.indexes.approvalsByTarget
@@ -430,7 +433,9 @@ export function createFinanceCommands(runtime: ApiRuntime, sales: SalesCommands)
               evaluation: {
                 required: true,
                 policyCode: 'invoice_write_off.v1',
-                reasons: [`write-off of ${dollars(invoice.outstanding)}: ${input.reason.trim()}`],
+                reasons: [
+                  `write-off of ${dollars(invoice.outstanding)}${invoice.currency === 'USD' ? '' : ` (${dollars(outstandingUsd, 'USD')})`}: ${input.reason.trim()}`,
+                ],
                 steps: [
                   {
                     sequence: 1,

@@ -17,6 +17,7 @@ import type { InventoryPosition } from '../projections';
 import {
   fields,
   runListQuery,
+  storedFilter,
   type ListQuery,
   type ListResponse,
   type ResourceDefinition,
@@ -293,9 +294,27 @@ export function listInventory(
 ): ListResponse<InventoryListItem> {
   const user = runtime.require('inventory.view');
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
+  // A figure on the overview is a count over every position: the join waits for the positions it counts.
+  const stored = storedFilter<InventoryPosition, InventoryListItem>(inventoryResource, query, [
+    'skuId',
+    'warehouseId',
+    'onHand',
+    'available',
+    'reserved',
+    'inbound',
+    'damaged',
+    'quarantine',
+    'backordered',
+    'reorderPoint',
+    'safetyStock',
+    'belowReorderPoint',
+    'belowSafetyStock',
+    'reorderSuggested',
+  ]);
   const items: InventoryListItem[] = [];
   for (const position of runtime.projections.inventory().values()) {
     if (warehouses !== 'all' && !warehouses.includes(position.warehouseId)) continue;
+    if (!stored(position)) continue;
     items.push(inventoryListItem(runtime, position));
   }
   return runListQuery(items, inventoryResource, query);
@@ -359,9 +378,22 @@ export function listStockMovements(
   const user = runtime.require('inventory.view');
   const warehouses = runtime.authorization.warehouseIdsFor(user.id);
   const { dataset } = runtime.store;
+  // The ledger is the largest collection in the tenant, and a page asks for a day of it at a time.
+  const stored = storedFilter<StockMovement, MovementListItem>(movementResource, query, [
+    'id',
+    'type',
+    'skuId',
+    'warehouseId',
+    'occurredAt',
+    'sourceEntityType',
+    'sourceEntityId',
+    'actorId',
+    'onHandDelta',
+  ]);
   const items: MovementListItem[] = [];
   for (const movement of dataset.stockMovements.values()) {
     if (warehouses !== 'all' && !warehouses.includes(movement.warehouseId)) continue;
+    if (!stored(movement)) continue;
     const sku = dataset.skus.get(movement.skuId);
     items.push({
       ...movement,

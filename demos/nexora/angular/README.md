@@ -71,4 +71,28 @@ does the same for every package, after a full build.
 ## Screenshots
 
 With `pnpm start` running, `node tools/shoot.mjs <url> <out.png> [dark]` captures a page through
-headless Chrome; `screenshots/` is git-ignored.
+headless Chrome; `screenshots/` is git-ignored. `node tools/phone.mjs <url> <out.png> [width]
+[height] [js]` captures the page as a phone — device scale 3, touch, mobile user agent — which is
+what a narrow window is not: with `pointer: coarse` every control grows to its touch target, and
+that is where the header, the row actions and the placeholders broke first. The optional `js`
+runs before the capture and its value is printed, with a list of any element wider than the
+viewport.
+
+`node tools/jump.mjs <url> '<selector>' [width] [height]` measures one box while the screen is
+loading and again once it has loaded. It answers the checklist item of the `loading-states`
+skill that a picture cannot: a `top` that moves is the page jumping under the reader, and a
+`height` that shrinks is a reservation that was too big. A box that grows downward is allowed —
+a section that exists on some records and not on others is not reserved.
+`PERSONA=<key>`, `SCENARIO=<id>` and `TOUCH=1` sign the demo in as a persona, in a scenario, on
+an emulated phone before the first document: a screen a default persona may not open is measured
+as the persona who can.
+
+`node tools/look.mjs <url> <out.png> [width] [height] [persona] [scenario] [desk|phone]
+[light|dark] [js]` captures a page as one persona in one scenario and prints the elements wider
+than the viewport and, on a phone, every control under 44 pixels.
+
+`node tools/journey-b.mjs` walks Journey B (§20) on an emulated phone in one browser session — a
+purchase order from a position below its reorder point, its approval by the procurement lead,
+the send, a partial receipt with damaged and rejected units, the stock, the ledger and the back
+gesture — switching persona through the demo panel, and prints one PASS or FAIL per step. `W`
+and `H` set the viewport (390×844 by default).

@@ -67,6 +67,8 @@ export interface GoodsReceipt {
   receivedBy: string;
   receivedAt: string;
   notes?: string;
+  /** Section 65.7: why a line went past the 5% tolerance, kept with the receipt that did it. */
+  overReceiptReason?: string;
   metadata: EntityMetadata;
 }
 

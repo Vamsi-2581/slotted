@@ -213,6 +213,9 @@ export class Transaction {
   ) {
     this.correlationId = correlationId;
     this.occurredAt = runtime.store.now;
+    /* The historical summaries read the live customers and catalog: they are
+       taken before the first write, so a mutation never rewrites the past. */
+    void runtime.store.history.summaries;
   }
 
   /** Snapshots an existing entity before mutation and returns it. */

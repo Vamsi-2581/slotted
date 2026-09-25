@@ -1,7 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { MERIDIAN } from '../data/seed/curated';
-import { NexoraApiError } from '../domain';
+import { businessDateOf, NexoraApiError } from '../domain';
 import { createNexoraBackend, type NexoraApi } from './index';
+import type { InventoryListItem, MovementListItem } from './resources/operations';
 
 let api: NexoraApi;
 
@@ -26,7 +27,58 @@ describe('session and personas', () => {
     expect(session.user.displayName).toBe('Sofia Ramirez');
     expect(session.permissions).toContain('orders.approve');
     expect(session.permissions).not.toContain('payments.record');
-    expect(session.personas).toHaveLength(9);
+    // The nine of section 55.6, and the stand-ins a scale seeds a holder for (the light seed has all three).
+    expect(
+      session.personas.filter(
+        (persona) =>
+          !persona.key.includes('-lead') &&
+          !['finance-controller', 'staff-accountant'].includes(persona.key),
+      ),
+    ).toHaveLength(9);
+  });
+
+  /**
+   * Section 55.6 names nine personas and none holds procurement_manager, while
+   * every purchase order that needs an approval waits on that role first: the
+   * procurement lead is offered as a stand-in persona, a seeded user and not a
+   * new one, so a purchase order can be approved in the demo.
+   */
+  it('offers the procurement lead as a stand-in who decides a purchase order’s procurement step', async () => {
+    const session = await api.session.get();
+    const lead = session.personas.find((persona) => persona.key === 'procurement-lead');
+    expect(lead?.role).toBe('procurement_manager');
+    await api.demo.setPersona('marcus-lee');
+    const supplier = (
+      await api.suppliers.list({
+        pageSize: 25,
+        filter: {
+          status: { eq: 'active' },
+          relationshipTier: { eq: 'standard' },
+          skuCount: { gte: 1 },
+        },
+      })
+    ).data.find((row) => row.supportedCurrencies[0] === 'USD')!;
+    const mapping = (await api.suppliers.get(supplier.id)).mappings[0]!;
+    const quantity = String(Math.ceil(3_000_000 / mapping.unitCost.minor));
+    const created = await api.purchaseOrders.create({
+      supplierId: supplier.id,
+      destinationWarehouseId: 'wh_000001',
+      lines: [{ skuId: mapping.skuId, quantity, unitCostMinor: mapping.unitCost.minor }],
+    });
+    const submitted = await api.purchaseOrders.submit(created.purchaseOrder.id, {
+      ifMatch: created.purchaseOrder.metadata.version,
+    });
+    expect(submitted.purchaseOrder.status).toBe('pending_approval');
+    await api.demo.setPersona('procurement-lead');
+    await api.approvals.approve(
+      submitted.approval!.id,
+      {},
+      { ifMatch: submitted.approval!.metadata.version },
+    );
+    expect((await api.purchaseOrders.get(created.purchaseOrder.id)).purchaseOrder.status).toBe(
+      'approved',
+    );
+    await api.demo.setPersona('sofia-ramirez');
   });
 
   it('enforces permissions per persona', async () => {
@@ -295,5 +347,490 @@ describe('analytics and scenarios', () => {
     });
     expect(delayed.page.totalItems).toBeGreaterThanOrEqual(8);
     await api.reset('healthy');
+  });
+});
+
+describe('historical tier', () => {
+  it('summarizes the history as seeded, even when a write comes before the first read', async () => {
+    const reference = createNexoraBackend({ scale: 'smoke', latency: 'none' });
+    const expected = reference.store.history.summaries;
+    const summary = expected.find((entry) => entry.kind !== 'cancelled') as (typeof expected)[0];
+    const customer = reference.store.dataset.customers.get(summary.customerId);
+
+    const mutated = createNexoraBackend({ scale: 'smoke', latency: 'none' });
+    await mutated.customers.update(
+      summary.customerId,
+      { taxExempt: customer?.taxProfile.type !== 'exempt' },
+      { ifMatch: customer?.metadata.version ?? 1 },
+    );
+    expect(mutated.store.history.summaries).toEqual(expected);
+  });
+});
+
+describe('stock movements', () => {
+  /**
+   * The ledger filters by the fields a movement already carries before it joins the SKU, the
+   * warehouse and the actor. The answer is the one the joined list would give.
+   */
+  it('answers a day of the ledger as the whole ledger filtered would', async () => {
+    const backend = createNexoraBackend({ scale: 'smoke', latency: 'none' });
+    await backend.demo.setPersona('maya-chen');
+    const all: MovementListItem[] = [];
+    for (let page = 1; ; page++) {
+      const answer = await backend.inventory.movements({ page, pageSize: 100 });
+      all.push(...answer.data);
+      if (page >= answer.page.totalPages) break;
+    }
+    const day = all[Math.floor(all.length / 2)]!.occurredAt.slice(0, 10);
+    const from = `${day}T00:00:00Z`;
+    const to = `${new Date(Date.parse(from) + 86_400_000).toISOString().slice(0, 10)}T00:00:00Z`;
+    const inside = (item: MovementListItem) =>
+      Date.parse(item.occurredAt) >= Date.parse(from) &&
+      Date.parse(item.occurredAt) < Date.parse(to);
+
+    const received = await backend.inventory.movements({
+      pageSize: 25,
+      filter: { occurredAt: { gte: from, lt: to }, onHandDelta: { gt: 0 } },
+    });
+    expect(received.page.totalItems).toBe(
+      all.filter((item) => inside(item) && Number(item.onHandDelta) > 0).length,
+    );
+
+    // A filter on a joined field still reaches the joined item.
+    const sku = all.find(inside)!;
+    const bySku = await backend.inventory.movements({
+      pageSize: 100,
+      filter: { occurredAt: { gte: from, lt: to }, skuCode: sku.skuCode },
+    });
+    expect(bySku.data.map((item) => item.id).sort()).toEqual(
+      all
+        .filter((item) => inside(item) && item.skuCode === sku.skuCode)
+        .map((item) => item.id)
+        .sort(),
+    );
+  });
+
+  it('counts the positions a warehouse has below reorder point as the whole list filtered would', async () => {
+    const backend = createNexoraBackend({ scale: 'smoke', latency: 'none' });
+    await backend.demo.setPersona('maya-chen');
+    const all: InventoryListItem[] = [];
+    for (let page = 1; ; page++) {
+      const answer = await backend.inventory.list({ page, pageSize: 100 });
+      all.push(...answer.data);
+      if (page >= answer.page.totalPages) break;
+    }
+    const warehouseId = all[0]!.warehouseId;
+    const below = await backend.inventory.list({
+      pageSize: 25,
+      filter: { warehouseId, belowReorderPoint: 'true' },
+    });
+    expect(below.page.totalItems).toBe(
+      all.filter((item) => item.warehouseId === warehouseId && item.belowReorderPoint).length,
+    );
+    const byCode = await backend.inventory.list({
+      pageSize: 100,
+      filter: { warehouseId, skuCode: all[0]!.skuCode },
+    });
+    expect(byCode.data.map((item) => item.skuId)).toEqual([all[0]!.skuId]);
+  });
+});
+
+describe('procurement', () => {
+  const CHI = 'wh_000001';
+
+  /** A draft of one line from an active standard supplier in dollars, worth about the dollars asked for. */
+  async function draft(dollars: number, supplierFilter: Record<string, unknown> = {}) {
+    const supplier = (
+      await api.suppliers.list({
+        pageSize: 100,
+        filter: { relationshipTier: { eq: 'standard' }, skuCount: { gte: 1 }, ...supplierFilter },
+      })
+    ).data.find((row) => row.supportedCurrencies[0] === 'USD')!;
+    const mapping = (await api.suppliers.get(supplier.id)).mappings[0]!;
+    const quantity = String(Math.max(1, Math.ceil((dollars * 100) / mapping.unitCost.minor)));
+    return { supplier, mapping, quantity };
+  }
+
+  it('lists and opens to a warehouse operator the purchase orders bound for their warehouse only', async () => {
+    await api.demo.setPersona('maya-chen');
+    const elsewhere = (
+      await api.purchaseOrders.list({ pageSize: 25, filter: { warehouseId: { neq: CHI } } })
+    ).data[0]!;
+    await api.demo.setPersona('jordan-wells');
+    const rows = (await api.purchaseOrders.list({ pageSize: 100 })).data;
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((row) => row.destinationWarehouseId === CHI)).toBe(true);
+    await expectApiError(api.purchaseOrders.get(elsewhere.id), 'FORBIDDEN');
+    const found = await api.search(elsewhere.purchaseOrderNumber);
+    expect(found.groups.flatMap((group) => group.hits).some((hit) => hit.id === elsewhere.id)).toBe(
+      false,
+    );
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  it('refuses a goods receipt taken outside the reader’s warehouses', async () => {
+    await api.demo.setPersona('maya-chen');
+    const receipts = (
+      await api.purchaseOrders.list({
+        pageSize: 100,
+        filter: { status: { in: ['received', 'partially_received'] } },
+      })
+    ).data;
+    const outside = receipts.find((po) => po.destinationWarehouseId !== CHI)!;
+    const inside = receipts.find((po) => po.destinationWarehouseId === CHI)!;
+    const outsideReceipt = (await api.purchaseOrders.get(outside.id)).receipts[0]!;
+    const insideReceipt = (await api.purchaseOrders.get(inside.id)).receipts[0]!;
+    await api.demo.setPersona('jordan-wells');
+    await expectApiError(api.purchaseOrders.receipt(outsideReceipt.id), 'FORBIDDEN');
+    expect((await api.purchaseOrders.receipt(insideReceipt.id)).receipt.id).toBe(insideReceipt.id);
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  it('writes a purchase order’s money down to nought for a reader without cost.view, as the catalogue does', async () => {
+    await api.demo.setPersona('jordan-wells');
+    const row = (
+      await api.purchaseOrders.list({
+        pageSize: 25,
+        filter: { warehouseId: { eq: CHI }, status: { in: ['received'] } },
+      })
+    ).data[0]!;
+    expect(row.total.minor).toBe(0);
+    const detail = await api.purchaseOrders.get(row.id);
+    expect(detail.purchaseOrder.subtotal.minor).toBe(0);
+    expect(
+      detail.lines.every((line) => line.unitCost.minor === 0 && line.lineTotal.minor === 0),
+    ).toBe(true);
+    const receipt = await api.purchaseOrders.receipt(detail.receipts[0]!.id);
+    expect(receipt.lines.every((line) => line.unitCost.minor === 0)).toBe(true);
+    await api.demo.setPersona('maya-chen');
+    expect((await api.purchaseOrders.get(row.id)).purchaseOrder.total.minor).toBeGreaterThan(0);
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  it('refuses to submit an inactive supplier’s draft with the inactive code', async () => {
+    await api.demo.setPersona('maya-chen');
+    const candidates = (
+      await api.suppliers.list({
+        pageSize: 100,
+        sort: 'openPurchaseOrderCount',
+        filter: { status: { eq: 'active' }, skuCount: { gte: 1 } },
+      })
+    ).data;
+    let tried = false;
+    for (const supplier of candidates) {
+      const mapping = (await api.suppliers.get(supplier.id)).mappings[0]!;
+      const created = await api.purchaseOrders.create({
+        supplierId: supplier.id,
+        destinationWarehouseId: CHI,
+        lines: [{ skuId: mapping.skuId, quantity: '1' }],
+      });
+      const idle = await api.suppliers
+        .update(supplier.id, { status: 'inactive' }, { ifMatch: supplier.metadata.version })
+        .catch(() => null);
+      if (idle === null) continue;
+      await expectApiError(
+        api.purchaseOrders.submit(created.purchaseOrder.id, {
+          ifMatch: created.purchaseOrder.metadata.version,
+        }),
+        'SUPPLIER_INACTIVE',
+      );
+      await api.suppliers.update(
+        supplier.id,
+        { status: 'active' },
+        { ifMatch: idle.metadata.version },
+      );
+      tried = true;
+      break;
+    }
+    expect(tried).toBe(true);
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  it('keeps the reason given for a receipt past the 5% tolerance', async () => {
+    await api.demo.setPersona('maya-chen');
+    const { supplier, mapping, quantity } = await draft(2_000, { status: { eq: 'active' } });
+    const created = await api.purchaseOrders.create({
+      supplierId: supplier.id,
+      destinationWarehouseId: CHI,
+      lines: [{ skuId: mapping.skuId, quantity }],
+    });
+    const submitted = await api.purchaseOrders.submit(created.purchaseOrder.id, { ifMatch: 1 });
+    const sent = await api.purchaseOrders.send(created.purchaseOrder.id, {
+      ifMatch: submitted.purchaseOrder.metadata.version,
+    });
+    const line = sent.lines[0]!;
+    const receipt = await api.purchaseOrders.receive(
+      created.purchaseOrder.id,
+      {
+        lines: { [line.id]: { accepted: String(Number(quantity) * 2) } },
+        overReceiptReason: 'A full pallet arrived; kept for the backorder.',
+      },
+      { ifMatch: sent.purchaseOrder.metadata.version },
+    );
+    expect(receipt.receipt.overReceiptReason).toBe(
+      'A full pallet arrived; kept for the backorder.',
+    );
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  it('sorts purchase orders by total in US dollars, whatever currency each is written in', async () => {
+    await api.demo.setPersona('maya-chen');
+    const rows = (await api.purchaseOrders.list({ pageSize: 100, sort: '-total' })).data;
+    const usd = rows.map((row) => Math.round(row.total.minor * Number(row.fxRateToUsd ?? '1')));
+    for (let index = 1; index < usd.length; index += 1)
+      expect(usd[index]!).toBeLessThanOrEqual(usd[index - 1]! + 1);
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  it('states on each mapping the unit cost last accepted from the supplier for the SKU', async () => {
+    await api.demo.setPersona('maya-chen');
+    const received = (
+      await api.purchaseOrders.list({ pageSize: 25, filter: { status: { eq: 'received' } } })
+    ).data[0]!;
+    const detail = await api.purchaseOrders.get(received.id);
+    const line = detail.lines.find((candidate) => Number(candidate.receivedAcceptedQuantity) > 0)!;
+    const mapping = (await api.suppliers.get(received.supplierId)).mappings.find(
+      (candidate) => candidate.skuId === line.skuId,
+    );
+    if (mapping) expect(mapping.lastAcceptedUnitCost?.minor).toBeGreaterThan(0);
+    await api.demo.setPersona('sofia-ramirez');
+  });
+});
+
+describe('finance', () => {
+  const openInvoices = async (filter: Record<string, unknown> = {}) => {
+    const rows = [];
+    for (let page = 1; page <= 40; page += 1) {
+      const answer = await api.finance.invoices.list({
+        page,
+        pageSize: 100,
+        filter: { lifecycle: 'open', ...filter } as never,
+      });
+      rows.push(...answer.data);
+      if (page >= answer.page.totalPages) break;
+    }
+    return rows.filter((row) => row.outstanding.minor > 0);
+  };
+  const usdOf = (row: { outstanding: { minor: number }; fxRateToUsd?: string }) =>
+    Math.round(row.outstanding.minor * Number(row.fxRateToUsd ?? '1'));
+
+  /**
+   * Section 66.5 states the write-off authority in a USD equivalent. The
+   * command measured a balance in the document's own minor units, so an
+   * accountant was refused R$1,000 (US$185) as if it were US$1,000.
+   */
+  it('measures the write-off authority in US dollars, whatever the invoice is written in', async () => {
+    await api.demo.setPersona('staff-accountant');
+    const session = await api.session.get();
+    expect(session.roles.map((role) => role.name)).toContain('Accountant');
+    const brl = (await openInvoices({ currency: 'BRL' })).find(
+      (row) => row.outstanding.minor > 50_000 && usdOf(row) <= 50_000,
+    )!;
+    expect(brl).toBeDefined();
+    const written = await api.finance.invoices.writeOff(
+      brl.id,
+      { reason: 'Balance below collection cost' },
+      { ifMatch: brl.metadata.version },
+    );
+    expect(written.invoice.lifecycle).toBe('written_off');
+
+    const usd = (await openInvoices({ currency: 'USD' })).find(
+      (row) => row.outstanding.minor > 50_000 && row.outstanding.minor <= 500_000,
+    )!;
+    const refused = await expectApiError(
+      api.finance.invoices.writeOff(
+        usd.id,
+        { reason: 'Too small to chase' },
+        { ifMatch: usd.metadata.version },
+      ),
+      'WRITE_OFF_LIMIT_EXCEEDED',
+    );
+    expect(refused.message).toContain('US$500');
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  /**
+   * Priya Shah is the one Finance Manager persona and the one who asks for a
+   * write-off above US$5,000, which a requester never decides (section 67.4):
+   * the step is assigned to the finance controller, a stand-in who decides it.
+   */
+  it('assigns a write-off above US$5,000 to the finance controller, whose approval writes it off', async () => {
+    // The smoke seed's Finance team holds no second Finance Manager; the light seed, the demo's, does.
+    const smoke = api;
+    api = createNexoraBackend({ scale: 'light', latency: 'none' });
+    await api.demo.setPersona('priya-shah');
+    const large = (await openInvoices()).find((row) => usdOf(row) > 500_000)!;
+    const requested = await api.finance.invoices.writeOff(
+      large.id,
+      { reason: 'Customer insolvent' },
+      { ifMatch: large.metadata.version },
+    );
+    expect(requested.invoice.lifecycle).toBe('open');
+    const approval = requested.approval!;
+    expect(approval.status).toBe('pending');
+    expect(approval.steps.map((step) => step.requiredRole)).toEqual(['finance_manager']);
+    const personas = (await api.session.get()).personas;
+    const controller = personas.find((persona) => persona.key === 'finance-controller')!;
+    expect(controller.role).toBe('finance_manager');
+    expect(approval.steps[0]!.assignedUserId).toBe(controller.userId);
+    await expectApiError(
+      api.approvals.approve(approval.id, {}, { ifMatch: approval.metadata.version }),
+      'FORBIDDEN',
+    );
+    await expectApiError(
+      api.finance.invoices.writeOff(
+        large.id,
+        { reason: 'Again' },
+        { ifMatch: requested.invoice.metadata.version },
+      ),
+      'APPROVAL_REQUIRED',
+    );
+    await api.demo.setPersona('finance-controller');
+    await api.approvals.approve(
+      approval.id,
+      { comment: 'Agreed' },
+      { ifMatch: approval.metadata.version },
+    );
+    const after = await api.finance.invoices.get(large.id);
+    expect(after.invoice.lifecycle).toBe('written_off');
+    expect(after.approval?.status).toBe('approved');
+    api = smoke;
+  }, 60_000);
+
+  it('states the cash collected this month, its eight-week trend and the disputed balance', async () => {
+    await api.demo.setPersona('priya-shah');
+    const before = await api.finance.overview();
+    expect(before.cashCollectedByWeek).toHaveLength(8);
+    const disputed = await openInvoices({ collectionState: 'disputed' });
+    expect(before.disputedReceivables.minor).toBe(
+      disputed.reduce((sum, row) => sum + usdOf(row), 0),
+    );
+    const customer = (
+      await api.customers.list({ filter: { preferredCurrency: 'USD' }, pageSize: 25 })
+    ).data[0]!;
+    await api.finance.payments.record({
+      customerId: customer.id,
+      amountMinor: 123_400,
+      method: 'ach',
+    });
+    const after = await api.finance.overview();
+    expect(after.cashCollectedMonthToDate.minor - before.cashCollectedMonthToDate.minor).toBe(
+      123_400,
+    );
+    expect(after.paymentsReceivedMonthToDate).toBe(before.paymentsReceivedMonthToDate + 1);
+    expect(
+      after.cashCollectedByWeek.at(-1)!.amount.minor -
+        before.cashCollectedByWeek.at(-1)!.amount.minor,
+    ).toBe(123_400);
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  it('sorts invoices and payments by their amount in US dollars, whatever currency each is written in', async () => {
+    await api.demo.setPersona('priya-shah');
+    const invoices = await api.finance.invoices.list({
+      pageSize: 100,
+      sort: '-outstanding',
+      filter: { lifecycle: 'open' },
+    });
+    const values = invoices.data.map(usdOf);
+    expect(new Set(invoices.data.map((row) => row.currency)).size).toBeGreaterThan(1);
+    expect(values).toEqual([...values].sort((a, b) => b - a));
+    const payments = await api.finance.payments.list({ pageSize: 100, sort: '-amount' });
+    const amounts = payments.data.map((row) =>
+      Math.round(row.amount.minor * Number(row.fxRateToUsd ?? '1')),
+    );
+    expect(amounts).toEqual([...amounts].sort((a, b) => b - a));
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  /** The light seed held a credit memo of 7 September and returns of 5 and 6 against a today of 4 September. */
+  it('dates no return and no credit memo after the demo’s today, and seeds an invoice a credit memo paid', async () => {
+    const light = createNexoraBackend({ scale: 'light', latency: 'none' });
+    await light.demo.setPersona('maya-chen');
+    const today = (await light.session.get()).demo.today;
+    const memos = await light.finance.creditMemos.list({ pageSize: 25, sort: '-issueDate' });
+    expect(memos.data[0]!.issueDate <= today, memos.data[0]!.issueDate).toBe(true);
+    for (let page = 1; page <= 20; page += 1) {
+      const returns = await light.returns.list({ page, pageSize: 100 });
+      for (const row of returns.data)
+        for (const stamp of [
+          row.requestedAt,
+          row.authorizedAt,
+          row.receivedAt,
+          row.inspectedAt,
+          row.completedAt,
+        ])
+          if (stamp)
+            expect(businessDateOf(stamp) <= today, `${row.returnNumber} ${stamp}`).toBe(true);
+      if (page >= returns.page.totalPages) break;
+    }
+    // Section 82: the invoice settled by a credit memo is seeded, and a credit application settles it.
+    const settled = light.demo.fixtures()['edge.invoice.paid_with_credit_memo'];
+    expect(settled).toBeDefined();
+    const invoice = await light.finance.invoices.get(settled!);
+    expect(invoice.invoice.settlement).toBe('paid');
+    expect(invoice.creditApplications.some((application) => application.status === 'active')).toBe(
+      true,
+    );
+  }, 60_000);
+
+  /** §77.7: overdue receivables ×2.2, as the overview reads them — in US dollars. It measured minor units across currencies and reached ×1.70. */
+  it('raises the overdue receivables 2.2 times in collections pressure, as the overview measures them', async () => {
+    const light = createNexoraBackend({ scale: 'light', latency: 'none', persona: 'priya-shah' });
+    const healthy = (await light.finance.overview()).overdueReceivables.minor;
+    await light.demo.setScenario('collections_pressure');
+    await light.demo.setPersona('priya-shah');
+    const pressed = (await light.finance.overview()).overdueReceivables.minor;
+    expect(pressed / healthy).toBeGreaterThanOrEqual(2.2);
+    expect(pressed / healthy).toBeLessThan(2.35);
+  }, 60_000);
+
+  /** The confidence is scored on read; the filter read the stored candidates, which are empty. */
+  it('filters bank transactions by the confidence it scores', async () => {
+    await api.demo.setPersona('priya-shah');
+    const all = await api.finance.bankTransactions.list({
+      pageSize: 100,
+      filter: { status: { in: ['unmatched', 'suggested', 'needs_review'] } },
+    });
+    const confidences = new Set(
+      all.data.flatMap((row) => (row.bestCandidate ? [row.bestCandidate.confidence] : [])),
+    );
+    expect(confidences.size).toBeGreaterThan(0);
+    for (const confidence of confidences) {
+      const narrowed = await api.finance.bankTransactions.list({
+        pageSize: 100,
+        filter: { confidence },
+      });
+      expect(narrowed.page.totalItems).toBeGreaterThan(0);
+      expect(narrowed.data.every((row) => row.bestCandidate?.confidence === confidence)).toBe(true);
+    }
+    await api.demo.setPersona('sofia-ramirez');
+  });
+
+  /**
+   * Section 55.5 gives a sales representative and a support agent read scope
+   * over every customer and order, and an order's detail lists its invoices:
+   * `invoices.view` answers every invoice to both, as it answers an order.
+   */
+  it('reads every invoice to a representative and a support agent, as it reads every order', async () => {
+    await api.demo.setPersona('maya-chen');
+    const total = (await api.finance.invoices.list({ pageSize: 25 })).page.totalItems;
+    for (const persona of ['noah-bennett', 'aisha-grant']) {
+      await api.demo.setPersona(persona);
+      const user = (await api.session.get()).user;
+      const answer = await api.finance.invoices.list({ pageSize: 25 });
+      expect(answer.page.totalItems).toBe(total);
+      const foreign = (await openInvoices()).find(
+        (row) => row.customerId && row.customerName && row.sourceOrderId,
+      )!;
+      const customer = await api.customers.get(foreign.customerId);
+      if (customer.customer.accountOwnerId !== user.id) {
+        const invoice = await api.finance.invoices.get(foreign.id);
+        const order = await api.orders.get(foreign.sourceOrderId!);
+        expect(order.invoices.map((row) => row.id)).toContain(invoice.invoice.id);
+      }
+      await expectApiError(api.finance.payments.list(), 'FORBIDDEN');
+    }
+    await api.demo.setPersona('sofia-ramirez');
   });
 });

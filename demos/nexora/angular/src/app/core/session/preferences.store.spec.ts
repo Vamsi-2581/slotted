@@ -24,4 +24,22 @@ describe('PreferencesStore', () => {
     const userId = TestBed.inject(SessionStore).user()!.id;
     expect((JSON.parse(localStorage.getItem(`nexora:preferences:${userId}`) ?? '{}') as { scheme: string }).scheme).toBe('dark');
   });
+
+  /**
+   * The canvas is not written onto `html`: it is an input of one shell, so the
+   * store only has to keep it and give it back.
+   */
+  it('keeps the shell canvas per user, inset until the reader says otherwise', () => {
+    const prefs = TestBed.inject(PreferencesStore);
+    expect(prefs.preferences().canvas).toBe('inset');
+
+    prefs.update({ canvas: 'flush' });
+
+    expect(prefs.preferences().canvas).toBe('flush');
+    const userId = TestBed.inject(SessionStore).user()!.id;
+    const stored = JSON.parse(localStorage.getItem(`nexora:preferences:${userId}`) ?? '{}') as {
+      canvas: string;
+    };
+    expect(stored.canvas).toBe('flush');
+  });
 });

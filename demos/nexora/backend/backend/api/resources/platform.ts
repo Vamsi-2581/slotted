@@ -1,5 +1,6 @@
 import {
   PERSONAS,
+  STAND_IN_PERSONAS,
   notFound,
   type ActivityEvent,
   type ApprovalRequest,
@@ -121,7 +122,24 @@ export function sessionInfo(runtime: ApiRuntime): SessionInfo {
         context: persona.context,
         active: userId === user.id,
       };
-    }),
+    }).concat(
+      STAND_IN_PERSONAS.flatMap((standIn) => {
+        const userId = store.seed.personaUserIds.get(standIn.key);
+        const standInUser = userId ? store.dataset.users.get(userId) : undefined;
+        return standInUser
+          ? [
+              {
+                key: standIn.key,
+                userId: standInUser.id,
+                name: standInUser.displayName,
+                role: standIn.role,
+                context: standIn.context,
+                active: standInUser.id === user.id,
+              },
+            ]
+          : [];
+      }),
+    ),
     unreadNotifications: indexes.notificationsByUser
       .get(user.id)
       .filter((notification) => !notification.readAt && !notification.archivedAt).length,
@@ -902,7 +920,10 @@ export function globalSearch(runtime: ApiRuntime, rawQuery: string): SearchRespo
   });
   collect('purchase_order', 'purchase_orders.view', function* () {
     for (const po of store.dataset.purchaseOrders.values())
-      if (matcher(po.purchaseOrderNumber))
+      if (
+        matcher(po.purchaseOrderNumber) &&
+        runtime.can('purchase_orders.view', { warehouseId: po.destinationWarehouseId })
+      )
         yield {
           type: 'purchase_order',
           id: po.id,

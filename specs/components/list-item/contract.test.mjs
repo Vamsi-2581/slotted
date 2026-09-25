@@ -32,6 +32,7 @@ test('is one row whose regions are parts rather than families', () => {
   assert.equal(contract.members.listItem.nativeElement, 'li');
   assert.deepEqual(contract.members.listItem.parts, [
     'root',
+    'marker',
     'content',
     'start',
     'body',

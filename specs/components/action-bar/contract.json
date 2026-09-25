@@ -28,7 +28,7 @@
     "disabled": "the platform's own `:disabled`, from a `<fieldset disabled>` around the bar. The family writes no `data-disabled` and declares no `disabled` state, because it does not own the capability."
   },
   "anatomy": {
-    "root": "div with role=group. The query container (container-type: inline-size), the element that sticks, and the flex row that wraps. It paints ground and rule only under variant=raised.",
+    "root": "div with role=group. The query container (container-type: inline-size), the element that sticks, and the flex row that wraps. It is as wide as the line it stands on (inline-size: 100%, border-box), because a size container has no intrinsic width and a flex parent — the page footer's actions row — shrank it to nothing. It paints ground and rule only under variant=raised.",
     "status": "the sentence at the start: a dirty-state marker, a timestamp, a selection count and its select-all. A slot the consumer fills with inline-message, status-indicator, badge or plain text — the bar supplies the place and the layout guarantee, not a fourth way of saying a sentence.",
     "actions": "the run that gives way. It carries margin-inline-start: auto, which is what anchors it to the bar's end edge, and it is the element the container query restyles into a column.",
     "action": "one unit: its rank, and what it becomes in the surface. A control placed in the bar unwrapped is a unit too — a pinned one, because it declares no counterpart.",

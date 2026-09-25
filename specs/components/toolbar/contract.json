@@ -170,6 +170,7 @@
     "degradation": "a bar whose pinned units alone exceed it scrolls rather than clipping, which is also what `menu` with no `overflow` part does",
     "focus": "moved to the trigger before the unit holding it is hidden, because a hidden control drops focus on `body`",
     "measurement": "@slotted/core/overflow — `collapseState` for the arithmetic, `createCollapse` for the DOM",
+    "container": "the room is the bar's own width, observed on the bar, so the layout around a bar with overflow=menu gives it a width that does not derive from its own content: a bar sized by its content is the trigger alone once everything has folded, it does not grow when its container does, and what folded never returns. A flex item holding it takes a zero basis and grows; a bar that stands at the end of its row fills the room and aligns its controls to the end",
     "reports": "`data-collapsed` on the root carries the count, and the root emits it once per change"
   }
 }

@@ -135,11 +135,33 @@ test('states every delay it holds, with the number and the reason', () => {
  * nothing and named "button" if the family can only write aria-describedby.
  */
 test('can be the trigger name instead of its description', () => {
-  assert.deepEqual(contract.describes.values, ['description', 'label']);
+  assert.deepEqual(contract.describes.values, ['description', 'label', 'none']);
   assert.equal(contract.describes.default, 'description');
   assert.equal(contract.describes.attribute.description, 'aria-describedby');
   assert.equal(contract.describes.attribute.label, 'aria-labelledby');
   assert.equal(contract.describes.forcesMount, 'eager');
+});
+
+/**
+ * A hint that repeats words the trigger already carries — the full name of a
+ * column whose header is clipped — is read twice under either reference.
+ */
+test('can be shown without being read, for a hint the trigger already names', () => {
+  assert.equal(contract.describes.attribute.none, null);
+  assert.match(contract.wiring['aria-hidden'], /describes is none/);
+});
+
+/**
+ * The hint over a truncated name must not open over a name that fits, and the
+ * answer is only true at the moment it would open.
+ */
+test('opens over a cut name alone, measured when it would open', () => {
+  assert.deepEqual(contract.whenClipped.values ?? contract.axes.whenClipped, [true, false]);
+  assert.equal(contract.whenClipped.default, false);
+  assert.equal(contract.whenClipped.measuredAt, 'the moment the hint would open');
+  assert.deepEqual(contract.resolution.whenClipped, ['prop', 'defaults', false]);
+  assert.ok(contract.provides.tooltipDefaults.includes('whenClipped'));
+  assert.equal(contract.members.tooltip.defaults.whenClipped, false);
 });
 
 test('holds the disabled capability without declaring a state nothing paints', () => {

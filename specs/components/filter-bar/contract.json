@@ -39,7 +39,7 @@
   "surfaces": {
     "pill": "popover editing one first-level rule",
     "chip": "the same popover, opened from the chip",
-    "builder": "drawer editing the whole tree, on every width",
+    "builder": "drawer editing the whole tree, on every width; below 30rem of the builder a rule stacks — the field, then the operator and the operand across the row, the remove control in a track of its own width — so the field keeps its name",
     "summary": "below the narrow breakpoint the pills and the chips fold behind one button, 'Filters (n)', which opens the builder",
     "reason": "a tree with a nested group needs a column; a popover anchored to a pill has neither the height nor the anchor for it"
   },
@@ -56,13 +56,16 @@
   "preset": {
     "shape": "{ key, label, value: FilterGroup }[]",
     "select": "choosing one replaces the value, reason select; the value changing afterwards keeps the preset current and marks the root data-dirty",
+    "clear": "the control is clearable: clearing it requests null with reason clear and leaves the value standing, so leaving a preset is not deleting it",
     "save": "onPresetSave(value) from the builder, and nothing else about saving — the name is typed in a dialog the application owns"
   },
   "responsive": {
     "container": "filter-bar, inline-size, on the root; the grid is on frame, one element in, because a container query cannot restyle the element it measures",
-    "wide": "64rem and up: search, toolbar, the consumer's controls and the count on one line, the chips under it",
+    "wide": "64rem and up: search, toolbar, the consumer's controls and the count on one line, the chips under it; when the toolbar would take two lines on that line the root carries data-bar-wrapped and takes the medium composition instead",
     "medium": "36rem to 64rem: the search shares its line with the consumer's controls and the count; the toolbar takes a line of its own; the chips under both",
-    "narrow": "36rem, literal by rule 4 of the token foundation: the search alone, then summary beside the consumer's controls, then the count; pills and chips hidden"
+    "narrow": "36rem, literal by rule 4 of the token foundation: the search alone, then the summary, then the consumer's controls on a line of their own, then the count; pills and chips hidden",
+    "alignment": "every member of the frame starts at the top of its line and is a control tall — the count centres its line in a control height beside the search, and keeps its type's height on a line of its own when narrow — so a line stays aligned with the first line of pills while they wrap",
+    "fallback": "the binding reads the toolbar in the composition the root's width selects, with data-bar-wrapped removed for the read, so the answer does not depend on the fallback it draws: a control whose top is at or below another control's bottom is on a second line. It reads before paint on mount and on the microtask after the frame's contents change, and a resize on the next frame, because the attribute changes the root's height and a change inside a ResizeObserver callback to a box it observes ends the loop with an error"
   },
   "sticky": {
     "axis": "sticky, off by default",
@@ -127,7 +130,7 @@
     },
     {
       "key": "shortcut",
-      "effect": "when set, focuses the search unless focus is in an editable element; default none",
+      "effect": "when set, focuses the search unless focus is in an editable element; default none. Drawn as a kbd at the end of the search, hidden where the primary input is a touch screen — (hover: none) and (pointer: coarse) — while the key keeps working",
       "focus": "the search",
       "source": "Polaris f; toolbar pattern note 3"
     }
@@ -206,6 +209,7 @@
     "data-dirty": "on the root while the draft, or the value against the current preset, differs",
     "data-apply": "live or manual, on the root",
     "data-sticky": "on the root while sticky",
+    "data-bar-wrapped": "on the root while the toolbar takes more than one line in the composition the root's width selects; the wide composition then draws the medium one",
     "data-kind": "on a rule, the field's kind",
     "data-operands": "on a rule, 0, 1 or 2",
     "data-depth": "on a group, its nesting depth from 0"
@@ -297,7 +301,6 @@
         "root",
         "frame",
         "search",
-        "search-icon",
         "bar",
         "pill",
         "add",

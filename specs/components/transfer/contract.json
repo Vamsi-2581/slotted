@@ -31,7 +31,7 @@
     "search": "a div around the text-field family at the family's size step less one, type=search, named by labels.search; absent when searchable is false",
     "search-icon": "the search glyph the family draws in the text field's start slot",
     "list": "a div around the pane's listbox: plain variant, selectionMode multiple, rows options tall; the box the drop indicator is positioned in",
-    "empty": "the content of the listbox's own empty part: labels.empty, or labels.noResults while a query is typed",
+    "empty": "the content of the listbox's own empty part: the inbox glyph and labels.empty, or the search-x glyph and labels.noResults while a query is typed",
     "drop-indicator": "a line of no height inside the list, at --_drop-offset from its top, while a pointer drag hovers a valid position; aria-hidden",
     "pane-footer": "the consumer's content under the list, per side; absent when the consumer gives none",
     "actions": "the column between the panes: a group of the four move buttons, then reorder; in steps it stands under the current pane and shows only that pane's two moves",

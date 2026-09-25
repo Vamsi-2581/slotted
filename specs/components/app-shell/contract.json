@@ -37,11 +37,11 @@
     "contentinfo": "footer",
     "reason": "Every one of the five is an HTML sectioning element in the context of the body, which the APG's HTML Sectioning Elements table maps to the landmark with no ARIA written. The root being a div is what keeps that true"
   },
-  "overlayAt": 768,
-  "overlayAtReason": "The inline size of the shell, not of the window: container-type inline-size on the root, and the condition is literal because @container (min-width: var(--x)) is invalid — rule 4 of docs/token-foundation.md. The number is declared here because the stylesheet needs it literal and the script needs it to know whether the keyboard and the focus are in overlay mode; app-shell.styles.test.mjs reads the @container condition and compares it to this value, which is what stops the two drifting",
+  "overlayAt": 600,
+  "overlayAtReason": "The inline size of the shell, not of the window: container-type inline-size on the root, and the condition is literal because @container (min-width: var(--x)) is invalid — rule 4 of docs/token-foundation.md. The number is COMPACT_BELOW of @slotted/core/measure, the limit of the compact size class. It is declared here because the stylesheet needs it literal and the script needs it to know whether the keyboard and the focus are in overlay mode; app-shell.styles.test.mjs reads the @container condition and compares it to this value, which is what stops the two drifting",
   "navMode": {
     "inline": "the navigation is a column of the grid. open is the wide column, closed is what collapsedTo names",
-    "overlay": "the navigation is out of the grid and over the content, as a dismissable layer composed from packages/core. open is the panel, closed is nothing",
+    "overlay": "the navigation is out of the grid and over the content, as a dismissable layer composed from packages/core. open is the panel, closed is nothing. The layer is --slotted-app-shell-nav-overlay-size wide, 20rem by default and wider than the column, and stops one row mark and two gutters short of the frame: it covers content the reader cannot reach, so its width costs nothing but the strip that says where to press to leave",
     "auto": "inline at or above overlayAt, overlay below it",
     "default": "auto",
     "firstPaint": "data-nav-mode exists only once the script has decided. Below overlayAt the stylesheet shows the panel under [data-nav-mode=overlay][data-open] alone, so a server render and the frame before hydration draw the narrow shell closed, which is the safe default. Above it the container query alone puts the navigation in its column, waiting for no script"
@@ -66,20 +66,22 @@
     "cost": "under document the banner is not sticky. A sticky banner there would oblige the shell to write --slotted-page-sticky-top, which page-header owns writing, and the two writes would erase each other. A shell that wants a permanent banner uses content, which is the default and what every surveyed implementation does"
   },
   "overlay": {
+    "back": "as dialog: one entry of the session history per modal layer, held by @slotted/core/dismissable-layer, and a popstate that leaves it is the platform's way back, answered by the layer with the reason back — the navigation layer and the pane layer alike, the topmost first. The column and the rail hold none: nothing stands over the page",
     "presence": "@slotted/core/presence holds the panel through its exit",
     "dismiss": "@slotted/core/dismissable-layer, with escape and outsidePress as axes. Escape is registered in the capture phase there, so the family handles the key on no element of its own",
     "focus": "@slotted/core/focus contains focus while modal and returns it to the nav-toggle on close",
     "inert": "every region beside the layer takes inert while it is modal — the banner and its toggle included, exactly as a dialog's trigger is. @slotted/core/dismissable-layer applies it to the layer's siblings, and the toggle is registered as a branch so a press on it is never read as a press outside. The ways out are Escape, the veil, a destination, and whatever control the consumer put inside the panel. No surveyed implementation inerts anything: Vaadin and PatternFly draw the veil and leave what is under it operable",
     "extent": "the panel stops under the banner rather than covering it, and the grid says where that is: an absolutely positioned child placed into rows two to the end takes that area as its containing block, so a banner that wraps moves the panel with it and nobody measures anything. It is a decision about what the reader can see rather than about what they can press — under a modal layer the banner is inert like everything else",
     "stack": "two layers can be open together only with navMode and asideMode both forced to overlay; @slotted/core/dismissable-layer keeps one stack, so Escape and an outside press reach the topmost and the other waits",
-    "aside": "the pane layer slides from the end of the line the navigation is not on, stops under the banner by the same grid placement, and returns focus to the aside-toggle that opened it"
+    "aside": "the pane layer slides from the end of the line the navigation is not on, stops under the banner by the same grid placement, and returns focus to the aside-toggle that opened it",
+    "inset": "on the inset plane the layer is a card — a border, a radius, an elevation — and a card insets its rows by --slotted-app-shell-row-inset on both edges, header, body and footer alike, so no row's ground meets the border and the marks keep one column. On the flush plane the sheet meets the frame's edge as the column does"
   },
   "skip": {
     "targets": ["main", "nav", "aside"],
     "reason": "One anchor per region that exists and is open: a link to a region nobody rendered, or to a pane the reader closed, is a dead destination. The banner gets none: it is before all three in the focus order"
   },
   "closeOnNavigate": {
-    "reason": "A click that lands on an a[href] inside the navigation region, in overlay mode, asks to close with the reason select. Vaadin and PatternFly both do it, and without it a phone costs two taps per destination"
+    "reason": "A click that lands on an a[href] inside the navigation region, in overlay mode, asks to close with the reason select, whether or not a client-side router prevented the native navigation; a link with aria-disabled=\"true\" does not. Vaadin and PatternFly both do it, and without it a phone costs two taps per destination"
   },
   "focusOrder": ["skip", "banner", "nav-toggle", "nav", "main", "aside", "aside-toggle", "footer"],
   "focusOrderReason": "The DOM order, and it does not move with primary: grid-template-areas changes where a region is drawn, never where it is written. The nav-toggle stands before the region it controls, which is what the Disclosure pattern assumes; the aside-toggle stands inside the pane header by default, so a pane the reader has opened puts its own close control first",
@@ -154,6 +156,7 @@
     "modal": [true, false],
     "escape": ["close", "none"],
     "outsidePress": ["close", "none"],
+    "back": ["close", "none"],
     "closeOnNavigate": [true, false]
   },
   "resolution": {
@@ -170,6 +173,7 @@
     "modal": ["prop", "defaults", true],
     "escape": ["prop", "defaults", "close"],
     "outsidePress": ["prop", "defaults", "close"],
+    "back": ["prop", "defaults", "close"],
     "closeOnNavigate": ["prop", "defaults", true]
   },
   "provides": {
@@ -187,6 +191,7 @@
       "modal",
       "escape",
       "outsidePress",
+      "back",
       "closeOnNavigate",
       "messages"
     ]
@@ -202,6 +207,7 @@
           "keyboard",
           "escape",
           "outsidePress",
+          "back",
           "select",
           "resize",
           "programmatic"
@@ -212,7 +218,15 @@
         "controlled": "asideOpen",
         "uncontrolled": "defaultAsideOpen",
         "request": "onAsideOpenChange",
-        "reasons": ["pointer", "keyboard", "escape", "outsidePress", "resize", "programmatic"],
+        "reasons": [
+          "pointer",
+          "keyboard",
+          "escape",
+          "outsidePress",
+          "back",
+          "resize",
+          "programmatic"
+        ],
         "attributeOn": "aside",
         "reason": "No select: a pane has no destinations. The attribute is written on the region and not on the root, because the root data-open was the navigation before the pane had a state and every selector written over it still reads the navigation"
       }
@@ -238,6 +252,7 @@
         "modal": true,
         "escape": "close",
         "outsidePress": "close",
+        "back": "close",
         "closeOnNavigate": true
       },
       "capabilities": ["open", "arrangement", "size", "appearance", "wiring"],
@@ -290,14 +305,14 @@
     ]
   },
   "canvas": {
-    "inset": "the frame — banner, navigation, footer — is painted the sunken ground and carries no surface of its own, and the content is a raised card inset from it with a radius and an edge. The gutter does the separating, so no rule is drawn between two regions",
+    "inset": "the frame — banner, navigation, footer — is painted the sunken ground and carries no surface of its own, and the content is a raised card inset from it with a radius and an edge. The gutter does the separating, so no rule is drawn between two regions. Once the navigation is a layer — navMode overlay, or a shell not yet measured below overlayAt — the card gives up its gutter, its radius and its elevation and meets the frame's edges, keeping one rule under the banner: a column of content on a phone has no room for a frame around it",
     "flush": "the regions carry the surface and the content carries the ground, edge to edge, separated by a rule. It is the arrangement every surveyed implementation ships, and it is what a grid or a table that owns the whole column wants",
     "default": "inset",
     "reason": "The first arrangement this family had was flush, and the reviewer read it as a wireframe: in the light scheme --slotted-surface-sunken is two per cent away from --slotted-surface, so every boundary was carried by a one-pixel rule and nothing on the screen had a plane. An inset card gives the content an elevation the two near-identical surfaces cannot. flush stays an axis because an edge-to-edge table wants no gutter around it"
   },
   "mark": {
-    "open": "--slotted-icon-panel-open",
-    "close": "--slotted-icon-panel-close",
+    "open": "panel-open",
+    "close": "panel-close",
     "reason": "The mark draws the region it toggles — a frame with a bar down one side — and the chevron says which way pressing sends it. Three bars say \"a menu is here\" and say nothing about which menu or where it goes, and the glyph scale does not hold them; a double chevron says \"all the way to the end\", which is what pagination draws it for. Both were on this control before this pair was, and the second was read as the wrong mark. The pair is one artwork with the chevron turned, for the reason eye and eye-off are",
     "mirrored": "the artwork is direction-sensitive, so the family turns it whole wherever the region is not at the start of the line: navSide=end, a right-to-left document, or either but not both",
     "aside": "the aside-toggle draws the same pair mirrored: the pane is on the end of the line the navigation is not on, so the artwork the navigation turns for navSide=end is the pane artwork at rest, and it turns back where the pane is at the start"
@@ -319,6 +334,6 @@
     "--slotted-app-shell-row-height": "the height of a row: the mark box, so a mark is centred in the row it stands in",
     "--slotted-app-shell-row-font-size": "the type size of a row label. A list of destinations is text and not a control, so it composes the type scale and not the control scale",
     "--slotted-app-shell-row-line-height": "the line height of a row label, from the scale: normal varies by font and a two-line row needs the number",
-    "reason": "The rows inside the regions are not this family — side-navigation and top-navigation, wave 8 — and a consumer who brings its own list has nothing to align to unless the shell says what a row is. Six numbers, and every left edge, every row height and every label in the frame is one of them. No surveyed implementation publishes its row geometry"
+    "reason": "The rows inside the regions are not this family — side-navigation and top-navigation, wave 8 — and a consumer who brings its own list has nothing to align to unless the shell says what a row is. Six numbers, and every left edge, every row height and every label in the frame is one of them. No surveyed implementation publishes its row geometry."
   }
 }

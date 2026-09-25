@@ -35,7 +35,7 @@
     "label": "the list's title. When present it names the nav through aria-labelledby; in the collapsed layout it is the trigger's fixed text",
     "trigger": "the collapsed layout's button: aria-expanded, aria-controls naming the panel. Holds label, current and indicator",
     "current": "inside the trigger: the label of the current link, so a reader on a phone knows where they are without opening the list",
-    "indicator": "the trigger's chevron, --slotted-icon-chevron-down, turned half a turn while open",
+    "indicator": "the trigger's chevron, the chevron-down Glyph element in an icon box, turned half a turn while open",
     "panel": "the region holding the list: the scrolling body of the column when sticky, the inline scroller of the bar, the layer under the trigger when collapsed. Carries the id aria-controls names",
     "list": "the first level of entries",
     "item": "one entry: data-depth from 1, data-value, and data-current while its link is current",

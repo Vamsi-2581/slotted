@@ -54,7 +54,7 @@
     "description": "the second line of a row. Hidden in compact mode",
     "end": "the suffix: a badge, a count, a key. Hidden in compact mode, and the mark carries a dot while it is",
     "count": "a quantity beside a destination — unread, pending — drawn by the family as tabular figures on the description's type step in the row's muted ink, taking the current row's ink. A count that carries a tone is a badge composed into end. Hidden in compact mode, and the mark carries a dot while it is",
-    "indicator": "the trigger's chevron, --slotted-icon-chevron-down turned half a turn while expanded. Hidden in compact mode",
+    "indicator": "the trigger's chevron, the chevron-right Glyph element turned a quarter turn while expanded. Hidden in compact mode",
     "actions": "controls beside the row and outside its a or button, because interactive content may not nest in either. Hidden in compact mode",
     "group": "an item's children. Inline it is indented under the parent's label with a guide; in compact mode it is presented inside the flyout",
     "divider": "a rule between items that keeps the list a list: an li with role=separator",
@@ -381,7 +381,7 @@
     ]
   },
   "indicator": {
-    "closed": "--slotted-icon-chevron-right, pointing along the reading direction — the way the children are folded away",
+    "closed": "the chevron-right Glyph element in a directional icon box, pointing along the reading direction — the way the children are folded away",
     "open": "the same mark turned a quarter turn to point down",
     "rtl": "mirrored with scale, applied after the rotation, so the closed mark points the other way and the open mark still points down",
     "reason": "A chevron that points down while closed says a list opens here, which is select's promise; one that points along the line says the children are folded past it, and it is what Ant, Fluent, PatternFly and Carbon draw on a closed branch"

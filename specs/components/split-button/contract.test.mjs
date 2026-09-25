@@ -107,7 +107,7 @@ test('joins its halves the way button-group joins a bar', () => {
 
 test('names the trigger, draws the chevron and holds it still', () => {
   assert.match(contract.naming['menu-trigger'], /required/);
-  assert.equal(contract.chevron.glyph, '--slotted-icon-chevron-down');
+  assert.equal(contract.chevron.glyph, 'chevron-down');
   assert.equal(contract.chevron.turns, false);
 });
 

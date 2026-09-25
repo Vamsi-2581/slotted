@@ -142,7 +142,46 @@ test('keeps its root box and sticks with a negative offset the size of the heade
   assert.match(contract.snapDetection.rootMargin, /moves down by what stands above/);
   /* Too much of the screen to hold: a fact the binding writes and the sheet reads. */
   assert.equal(contract.tall.fact, 'data-tall');
-  assert.match(contract.tall.meaning, /640 pixels/);
+  assert.match(contract.tall.meaning, /600 pixels/);
+  /* A filled page does not scroll: a scroller inside its body snaps the area. */
+  assert.match(contract.snapDetection.contained, /data-fill/);
+  assert.match(contract.snapDetection.contained, /16 pixels/);
+  /* Only the principal scroller: a textarea or a short scroll area beside the list does not. */
+  assert.match(contract.snapDetection.contained, /principal/);
+  assert.match(contract.snapDetection.contained, /textarea/);
+  assert.match(contract.snapDetection.contained, /half/);
+});
+
+/**
+ * Compact, nothing sticks: on a phone a record's header and tabs held 40 per
+ * cent of the screen for the whole scroll with nothing to condense.
+ */
+test('is in the flow below the compact size class', () => {
+  assert.equal(contract.compact.fact, 'data-compact');
+  assert.equal(contract.compact.width, '600px');
+  assert.match(contract.compact.meaning, /not sticky/);
+  assert.match(contract.compact.meaning, /--slotted-page-sticky-top/);
+  assert.match(contract.compact.reason, /container query cannot/);
+  assert.match(contract.runtime['--slotted-page-sticky-top'].value, /0px below the compact/);
+  assert.match(contract.responsive.below, /scrolls away/);
+});
+
+/** Compact: one line of subheading, and a folding toolbar stays on the title row. */
+test('states what the compact size class changes', () => {
+  assert.equal(contract.responsive.container, 'page-header');
+  assert.equal(contract.responsive.narrow, '600px');
+  assert.match(contract.responsive.below, /subheading is one line/);
+  assert.match(contract.responsive.below, /overflow=menu/);
+});
+
+/**
+ * The toolbar observes its own width. A slot sized by its content was the
+ * trigger alone after a fold and never grew back, so the actions stayed
+ * folded after the window widened again.
+ */
+test('gives a folding toolbar the room the title leaves, not its own content', () => {
+  assert.match(contract.anatomy.actions, /never its own content/);
+  assert.match(contract.anatomy.actions, /in both directions/);
 });
 
 test('publishes the fixed geometry as runtime properties', () => {
@@ -177,12 +216,12 @@ test('takes the collapsed area out of the tab sequence only when the control col
   assert.match(contract.inert.reason, /focus/);
 });
 
-test('draws its marks from glyph tokens and mirrors the one that points', () => {
+test('draws its marks as Glyph elements and mirrors the one that points', () => {
   assert.deepEqual(contract.glyphs, {
-    toggle: '--slotted-icon-chevron-down',
-    pin: '--slotted-icon-pin',
-    unpin: '--slotted-icon-pin-off',
-    back: '--slotted-icon-arrow-left',
+    toggle: 'chevron-down',
+    pin: 'pin',
+    unpin: 'pin-off',
+    back: 'arrow-left',
   });
   assert.match(contract.mirrored, /back/);
 });

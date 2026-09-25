@@ -270,8 +270,8 @@
     "reason": "The family is two subtrees: the control where the consumer wrote it, and the popup portalled to the end of the document. A stylesheet cannot reach a subtree that is no longer inside the root, so data-ui is written on both — the decision select recorded and date-picker follows."
   },
   "marks": {
-    "trigger": "--slotted-icon-calendar",
-    "now": "--slotted-icon-clock"
+    "trigger": "calendar",
+    "now": "clock"
   },
   "marksReason": "Two marks, one per half of the value, and no third glyph is asked of the scale. The trigger draws the calendar, which is the mark input[type=datetime-local] draws for the same control. `now` draws the clock, at the control glyph size where it is legible: it is the control that writes the current time, so the mark names what it does. Neither is a label over a surface — a mark small enough to sit in a line of eleven-pixel text is a mark nobody can read, and the surfaces name themselves.",
   "statePrecedence": {

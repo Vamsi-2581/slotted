@@ -201,6 +201,7 @@ test('declares every part the anatomy draws, and no more', () => {
     'page',
     'input',
     'clear',
+    'close',
     'list',
     'group',
     'group-label',

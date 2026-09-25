@@ -89,16 +89,19 @@ test('speaks in the library’s five shared tones and invents no sixth word', ()
  * A glyph per tone, so the five are distinguishable in greyscale, in the
  * `high-contrast` scheme and under forced colours, where every tone ground
  * becomes one system colour and the silhouette is all that is left. WCAG 2.2
- * 1.4.1. The map is the one `status-indicator` declares, so a status light and
- * an alert about the same thing draw the same mark.
+ * 1.4.1. Every mark is circled, so all five share one silhouette and one
+ * centre and the symbol inside tells them apart: a triangle's visual centre
+ * is not its box's centre, and it never sat on the line the way the circles
+ * did. Warning and danger therefore differ by `!` against `×`. This departs
+ * from `status-indicator`, which still draws the triangle for warning.
  */
 test('gives every tone a mark, so colour is never the only signal', () => {
   assert.deepEqual(contract.toneGlyphs, {
-    accent: '--slotted-icon-circle-info',
-    secondary: '--slotted-icon-circle',
-    success: '--slotted-icon-circle-check',
-    warning: '--slotted-icon-triangle-alert',
-    danger: '--slotted-icon-circle-alert',
+    accent: 'circle-info',
+    secondary: 'circle',
+    success: 'circle-check',
+    warning: 'circle-alert',
+    danger: 'circle-x',
   });
   for (const tone of contract.axes.tone) {
     assert.ok(tone in contract.toneGlyphs, `${tone} draws no mark`);

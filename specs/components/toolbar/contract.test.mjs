@@ -163,6 +163,16 @@ test('takes what is left over rather than what is convenient to hide', () => {
   assert.ok(!Object.keys(contract.axes).includes('priority'));
 });
 
+/**
+ * The bar observes its own width, so a bar whose width comes from its content
+ * never sees the room it regained: `page-header` kept its actions folded after
+ * the window widened again.
+ */
+test('asks its container for a width that does not derive from its content', () => {
+  assert.match(contract.collapse.container, /does not derive from its own content/);
+  assert.match(contract.collapse.container, /never returns/);
+});
+
 /** A hidden control cannot hold focus, and the browser's answer is `body`. */
 test('moves focus before it hides the control under it', () => {
   assert.match(contract.collapse.focus, /before/);

@@ -10,19 +10,19 @@
   "reference": "SAP Fiori Dynamic Page: sap.f.DynamicPage, sap.f.DynamicPageTitle, sap.f.DynamicPageHeader, read in the OpenUI5 sources",
   "composes": ["container", "breadcrumb", "toolbar", "tabs", "typography"],
   "anatomy": {
-    "root": "a header element with a box of its own — background, border, shadow, container query and the element a ref returns. Sticky with a negative offset the size of the header area, see sticky below",
+    "root": "a header element with a box of its own — background, border, shadow, container query and the element a ref returns. Sticky with a negative offset the size of the header area, see sticky below; in the flow below 600 pixels, see compact",
     "title-area": "the strip that never leaves: the nav row, the title row and the controls. Sticky at 0 inside the root, above the header area in the stack, opaque",
     "nav": "the row above the title: back, then breadcrumbs. Absent when neither is written",
-    "back": "a link or a button the consumer renders, with the arrow glyph the family draws before it. Below 640 pixels it is what remains of the nav row",
-    "breadcrumbs": "the slot the breadcrumb family sits in. Hidden below 640 pixels, where back says where the reader came from",
+    "back": "a link or a button the consumer renders, with the arrow glyph the family draws before it. Below 600 pixels it is what remains of the nav row. On a coarse pointer it reaches the comfortable target by padding given back as a negative margin, so the row keeps its height",
+    "breadcrumbs": "the slot the breadcrumb family sits in. Hidden below 600 pixels, where back says where the reader came from",
     "title-row": "visual, title, navigation, actions — one row that wraps the last two under the title when the width runs out",
     "visual": "the mark before the heading: an avatar, an icon or an image the consumer supplies. No tone axis, because identity is not status",
-    "title": "the column of heading, marks and subheading",
-    "heading": "the h1, or the element the consumer substitutes through render or the directive. Its level is the level axis. Expanded it wraps to three lines and then clamps with the full text in the title attribute; snapped it is one line with an ellipsis",
-    "marks": "the status beside the heading — a tag, a badge, a status-indicator — aligned to the heading's text rather than to its line box",
+    "title": "the column of heading, marks and subheading; at least a medium control tall and centring its content, so a one-line heading stands on the axis of the control beside it while a wrapped heading grows from the top of the row",
+    "heading": "the h1, or the element the consumer substitutes through render or the directive. Its level is the level axis. Expanded it wraps to two lines and then clamps with the full text in the title attribute; snapped it is one line with an ellipsis",
+    "marks": "the status beside the heading — a tag, a badge, a status-indicator — aligned to the heading's text rather than to its line box. Below 600 pixels the marks take a line of their own under the heading, so the header's height does not depend on what they say",
     "subheading": "one line under the heading, in the muted text, part of what stays visible",
-    "actions": "the slot a toolbar sits in, pushed to the end of the title row. Overflow is the toolbar's",
-    "navigation": "the previous and next record, after the actions at the far end of the title row, which is where sap.f puts navigationActions. Below 640 pixels the row wraps under the title",
+    "actions": "the slot a toolbar sits in, pushed to the end of the title row. Below 600 pixels it grows to take a wrapped row and keeps its content at the end of whichever row it lands on. Holding a toolbar with overflow=menu, it stays on the title row at every width: its width is what the title leaves, never its own content, so it follows the row in both directions; it gives way before the title does, never below its menu's trigger and the toolbar's inset, and the toolbar fills it, stands its controls at the end and folds what does not fit. Overflow is the toolbar's. A toolbar without a frame gives its block inset back to the row, so it stands a control tall, the height the title reserves",
+    "navigation": "the previous and next record, after the actions at the far end of the title row, which is where sap.f puts navigationActions. Below 600 pixels the row wraps under the title",
     "controls": "a zero-height row between the header area and the tabs, on the bottom edge of the chrome, carrying the rule and the pill that straddles it: the toggle, then the pin. Placed after the header area rather than inside the title area so that it sits on the chrome's edge in every state without moving in the DOM — at rest it is under the header area, stuck it is under the title area, because the header area is then under the title. Fiori's idiom, and the reviewer's",
     "toggle": "a button with aria-expanded and aria-controls, drawing the chevron rotated by the state",
     "pin": "a toggle button with aria-pressed, drawing pin or pin-off. It exists when it is rendered; there is no prop to hide it",
@@ -47,12 +47,19 @@
     "rootMargin": "the observer's top edge moves down by what stands above the header area inside the root, plus one pixel",
     "rootMarginReason": "stuck at -H the area's bottom edge lands exactly under the title, inside the scrollport and covered; an observer over the whole scrollport never reported it out, and the header never snapped in a browser while every fake said it did. Rebuilt whenever the title changes height; a rebuilt observer's first report repeats the fact it knew and never asks the area to collapse again",
     "fact": "data-scrolled",
+    "contained": "inside a page with data-fill, the binding passes the page's body as contained to @slotted/core/sticky-header: the body's principal scroller scrolling down past 16 pixels asks expanded to move to false with the reason scroll, and the same scroller back at its top asks it back to true. A collapse by the toggle or the application is not undone. A scroller is principal when it is not a form control — input, select, textarea or contenteditable — and its client block size is at least half the body's (PRINCIPAL_SCROLL_FRACTION, 0.5): the rows of a list that fills the body pass, a textarea and a short scroll area beside the list do not, because what the reader types into or glances at is not the content the header heads. Resolved on every scroll, so a page that turns fill on or off, or a pane a splitter resizes, is followed",
     "reason": "Stuck at -H, the header area is entirely above the scrollport and isIntersecting is false, which the binding writes as data-scrolled on the root — a measured fact like toolbar's data-overflowing, not a state the vocabulary holds. No pixel bias, because the observed element is not the one that animates — Sirius observed the hero it also animated and needed SNAP_BIAS_PX to settle the edge. While revealed the fact is frozen, because a root moved to 0 brings the area back into the scrollport and the observer would otherwise undo the reveal it just caused"
   },
   "tall": {
     "fact": "data-tall",
-    "meaning": "the header is too much of the screen to hold: expanded it would take more than six tenths of the scrollport, or the root is narrower than 640 pixels. The stylesheet hides the pin, and a header held when the fact turns true is let go with the reason programmatic",
+    "meaning": "the header is too much of the screen to hold: expanded it would take more than six tenths of the scrollport, or the root is narrower than 600 pixels. The stylesheet hides the pin, and a header held when the fact turns true is let go with the reason programmatic",
     "reason": "on a phone a pinned header took nearly the whole height and left nothing to read. sap.f does not offer the pin on phones; the fraction covers a short landscape screen and a tall header alike. Measured by the engine from the chrome, the area and the scrollport, and written by the binding as a fact like data-scrolled"
+  },
+  "compact": {
+    "fact": "data-compact",
+    "width": "600px",
+    "meaning": "the root is narrower than COMPACT_BELOW from @slotted/core/measure. The header is not sticky: the root and the title area are position relative at an offset of 0, in the flow, and scroll away with the page. The engine observes no scroll — no collapse, no reveal, no contained snap, no fold compensation — writes --slotted-page-sticky-top as 0px, and asks an area a scroll had shut to open with the reason scroll, because in the flow nothing would scroll it back. An area the toggle or the application shut stays shut. The toggle still opens and folds the area in place",
+    "reason": "on a phone a record's header and tabs held 266 of 667 pixels, 40 per cent of the screen, for the whole scroll with nothing to condense. sap.f drops the snap on phones for the same reason. The binding writes the fact from the root's own width, measured by the engine that already reads it for data-tall, because a container query cannot select the container it measures and the root is the element that sticks"
   },
   "revealed": {
     "state": "revealed",
@@ -73,7 +80,7 @@
     "--slotted-page-sticky-top": {
       "writer": "page-header",
       "target": "the nearest scroll container, or the document element",
-      "value": "the height of the chrome that stays: title area plus tabs, plus the header area while pinned or re-opened in place"
+      "value": "the height of the chrome that stays: title area plus tabs, plus the header area while pinned or re-opened in place; 0px below the compact size class, where nothing stays"
     }
   },
   "measurement": "two ResizeObservers, one on the header area and one on the chrome, coalesced into a single requestAnimationFrame and written only when the value changed. Writing a custom property on the scroll container invalidates its whole subtree, and doing it per frame during the collapse transition is what Sirius measured as a frame-rate drop",
@@ -148,10 +155,10 @@
     "reason": "While loading, the binding renders skeleton's text shape inside each of the three in place of the text, and this family's stylesheet says only how wide each placeholder is, through --slotted-skeleton-inline-size. The placeholder is skeleton's — packages/styles/src/waiting.test.mjs holds that a family that waits paints none of its own — and each line measures 1lh of the text it replaces, which is what keeps the height stable when the title arrives"
   },
   "glyphs": {
-    "toggle": "--slotted-icon-chevron-down",
-    "pin": "--slotted-icon-pin",
-    "unpin": "--slotted-icon-pin-off",
-    "back": "--slotted-icon-arrow-left"
+    "toggle": "chevron-down",
+    "pin": "pin",
+    "unpin": "pin-off",
+    "back": "arrow-left"
   },
   "mirrored": "back is mirrored in a right-to-left document; the chevron rotates by state and needs no mirror",
   "heading": {
@@ -160,8 +167,8 @@
   },
   "responsive": {
     "container": "page-header",
-    "narrow": "640px",
-    "below": "breadcrumbs hide and back remains; navigation leaves the title row and joins the actions row; the actions row wraps under the title; the heading size drops one step"
+    "narrow": "600px",
+    "below": "the header is not sticky and scrolls away with the page, see compact; breadcrumbs hide and back remains; navigation leaves the title row and joins the actions row; the actions row wraps under the title, unless the actions hold a toolbar with overflow=menu, which keeps them on the title row and folds what does not fit; the subheading is one line with an ellipsis; the heading size drops one step"
   },
   "messages": {
     "expand": "Expandir cabeçalho",
@@ -195,7 +202,7 @@
       "reason": "Carbon's show-all-tags modal. marks wraps; a product with dozens of tags composes tag and popover on one line"
     },
     "responsiveHidden": {
-      "reason": "Primer's hidden by viewport. The family reorders by container query below 640 pixels; a part the consumer wants hidden in a range is one container-query rule in their own stylesheet"
+      "reason": "Primer's hidden by viewport. The family reorders by container query below 600 pixels; a part the consumer wants hidden in a range is one container-query rule in their own stylesheet"
     },
     "anchorBar": {
       "deferTo": "anchor-nav",

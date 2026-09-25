@@ -37,6 +37,11 @@
     }
   ],
   "escapeBound": true,
+  "back": {
+    "mechanism": "one entry of the session history per modal layer, held by @slotted/core/dismissable-layer: pushed on the same URL over the state that was there when the layer opens, and taken back when the layer closes by any other path. A popstate that leaves the entry is the platform's way back — a phone's gesture, a browser's button — and it asks the topmost layer holding an entry to close with the reason back; a layer that refuses puts its entry back, so the page under it stays where it was",
+    "modalOnly": "a non-modal layer holds no entry: the page stays reachable under it, and the way back is the page's",
+    "reason": "On a phone the way back is the one gesture every reader knows, and a modal layer that leaves the page open behind it while the history moves under it is the defect the Nexora demo met first with the command palette. Android's own dialogs, Material's bottom sheets and every native sheet answer the gesture; the browser's history is the only way a web page hears it"
+  },
   "focus": {
     "contain": "while modal, from @slotted/core/focus. A non-modal layer contains nothing, because a non-modal dialog is reachable from the page by definition",
     "initial": "the first tabbable element, the content itself, or an element the consumer names",
@@ -50,6 +55,7 @@
     "action": "submit",
     "escape": "escape",
     "outsidePress": "outsidePress",
+    "back": "back",
     "handle": "programmatic"
   },
   "result": {
@@ -104,6 +110,7 @@
         "dismiss",
         "escape",
         "outsidePress",
+        "back",
         "submit",
         "programmatic"
       ],
@@ -126,6 +133,7 @@
     "modal": [true, false],
     "escape": ["close", "none"],
     "outsidePress": ["close", "none"],
+    "back": ["close", "none"],
     "tone": ["accent", "secondary", "success", "warning", "danger"],
     "initialFocus": ["first", "container", "cancel"]
   },
@@ -139,6 +147,7 @@
     "modal": ["prop", "defaults", "member"],
     "escape": ["prop", "defaults", "member"],
     "outsidePress": ["prop", "defaults", "member"],
+    "back": ["prop", "defaults", "member"],
     "tone": ["prop", "member"],
     "initialFocus": ["prop", "member"]
   },
@@ -152,7 +161,8 @@
       "fullScreen",
       "modal",
       "escape",
-      "outsidePress"
+      "outsidePress",
+      "back"
     ]
   },
   "declined": {
@@ -201,6 +211,7 @@
         "modal": true,
         "escape": "close",
         "outsidePress": "close",
+        "back": "close",
         "initialFocus": "first",
         "loading": false,
         "fullscreenToggle": false
@@ -244,6 +255,7 @@
         "modal": true,
         "escape": "close",
         "outsidePress": "none",
+        "back": "close",
         "initialFocus": "cancel",
         "tone": "danger",
         "loading": false

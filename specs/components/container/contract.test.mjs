@@ -46,8 +46,8 @@ test('declares the size capability, and does not claim to arrange', () => {
   );
 });
 
-test('bounds by four steps named for what they bound, not by t-shirt letters', () => {
-  assert.deepEqual(contract.axes.size, ['measure', 'content', 'wide', 'full']);
+test('bounds by five steps named for what they bound, not by t-shirt letters', () => {
+  assert.deepEqual(contract.axes.size, ['measure', 'content', 'wide', 'full', 'bleed']);
   for (const letter of ['sm', 'md', 'lg']) {
     assert.ok(!contract.axes.size.includes(letter), `${letter} hides which choice was made`);
   }
@@ -60,7 +60,15 @@ test('owns comfortable measure, which no other family may offer', () => {
   );
 });
 
+/**
+ * The step that removes the maximum is `bleed`, and `full` is bounded: `full`
+ * is what a person types to mean "use the screen", and an application that
+ * typed it on every route was unreadable on an ultra-wide display. The value
+ * written without thinking is the safe one; the other is asked for by name.
+ */
 test('keeps a step that removes the maximum without removing the container', () => {
+  assert.ok(contract.axes.size.includes('bleed'));
+  assert.equal(contract.axes.size.at(-1), 'bleed');
   assert.ok(contract.axes.size.includes('full'));
 });
 

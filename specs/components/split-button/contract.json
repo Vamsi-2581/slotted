@@ -36,7 +36,7 @@
     "reason": "A split button whose second half is named by nothing announces 'button' beside 'Save'. A default string was declined: 'More options' names the menu for no reader, and Atlassian's 'More save options' needs the action's word."
   },
   "chevron": {
-    "glyph": "--slotted-icon-chevron-down",
+    "glyph": "chevron-down",
     "turns": false,
     "reason": "The mark select draws for 'a list opens here', which is the promise a menu button keeps; not the ellipsis, which says 'more' without saying what opens. It does not turn while open: none of the six surveyed split buttons turns it, and a mark that flips says the surface will close, which is not what the reader is looking at. select turns its own because a select's arrow discloses the value's list; a menu button's chevron is a promise, not a state."
   },

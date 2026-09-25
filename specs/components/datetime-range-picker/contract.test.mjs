@@ -191,7 +191,7 @@ test('wires a preset as a part that writes the value', () => {
 test('carries the dialog role and the calendar trigger of datetime-picker', () => {
   assert.equal(contract.contentRole, 'dialog');
   assert.equal(contract.wiring['aria-haspopup'], 'dialog');
-  assert.equal(contract.triggerIcon, '--slotted-icon-calendar');
+  assert.equal(contract.triggerIcon, 'calendar');
   assert.match(contract.triggerName.chosen, /duration/);
 });
 

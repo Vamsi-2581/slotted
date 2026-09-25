@@ -158,8 +158,8 @@ test('names the owner of every declined capability', () => {
   }
 });
 
-test('names the thirty-two parts a filter bar is made of', () => {
-  assert.equal(filterBar.parts.length, 32);
+test('names the thirty-one parts a filter bar is made of', () => {
+  assert.equal(filterBar.parts.length, 31);
   for (const part of [
     'search',
     'bar',

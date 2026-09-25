@@ -9,11 +9,11 @@
     "live": ["off", "polite", "assertive"]
   },
   "toneGlyphs": {
-    "accent": "--slotted-icon-circle-info",
+    "accent": "circle-info",
     "secondary": null,
-    "success": "--slotted-icon-circle-check",
-    "warning": "--slotted-icon-triangle-alert",
-    "danger": "--slotted-icon-circle-alert"
+    "success": "circle-check",
+    "warning": "triangle-alert",
+    "danger": "circle-alert"
   },
   "tonePrefixes": {
     "accent": null,

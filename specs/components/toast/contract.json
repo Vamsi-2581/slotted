@@ -136,11 +136,11 @@
     "solid": "the tone's fill, with `on-solid` for every word, mark and control in the box."
   },
   "toneGlyphs": {
-    "accent": "--slotted-icon-circle-info",
-    "secondary": "--slotted-icon-circle",
-    "success": "--slotted-icon-circle-check",
-    "warning": "--slotted-icon-triangle-alert",
-    "danger": "--slotted-icon-circle-alert"
+    "accent": "circle-info",
+    "secondary": "circle",
+    "success": "circle-check",
+    "warning": "triangle-alert",
+    "danger": "circle-alert"
   },
   "stacking": {
     "measures": true,

@@ -157,7 +157,17 @@
         "loading",
         "disabled"
       ],
-      "parts": ["root", "content", "start", "body", "label", "description", "end", "actions"]
+      "parts": [
+        "root",
+        "marker",
+        "content",
+        "start",
+        "body",
+        "label",
+        "description",
+        "end",
+        "actions"
+      ]
     }
   },
   "scenarios": {

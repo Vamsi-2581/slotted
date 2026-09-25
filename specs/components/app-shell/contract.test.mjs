@@ -67,7 +67,7 @@ test('keeps one element across the three navigation modes', () => {
  * mode it is in. `app-shell.styles.test.mjs` compares the two.
  */
 test('states the width the modes change at, once', () => {
-  assert.equal(contract.overlayAt, 768);
+  assert.equal(contract.overlayAt, 600);
   assert.match(contract.overlayAtReason, /inline size of the shell/);
   assert.match(contract.overlayAtReason, /@container \(min-width: var\(--x\)\) is invalid/);
 });
@@ -112,8 +112,8 @@ test('says where a banner puts things without owning what they are', () => {
 
 /** A character is never an icon, and neither is the wrong drawing. */
 test('draws the control from the pair that depicts the region it toggles', () => {
-  assert.equal(contract.mark.open, '--slotted-icon-panel-open');
-  assert.equal(contract.mark.close, '--slotted-icon-panel-close');
+  assert.equal(contract.mark.open, 'panel-open');
+  assert.equal(contract.mark.close, 'panel-close');
   assert.match(contract.mark.reason, /one artwork with the chevron turned/);
   assert.match(contract.mark.mirrored, /navSide=end/);
 });

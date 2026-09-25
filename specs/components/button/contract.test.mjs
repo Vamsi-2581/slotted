@@ -251,23 +251,16 @@ test('provides uniquely named scenarios for every page', () => {
  * transparent side, which is where the second family would have copied it
  * from. It is a shared stylesheet and an identifier rather than a family: the
  * element that carries it is this family's `indicator` part, which owns its
- * name, its role and its place, and the arc is a glyph the theme generates
- * from Lucide like every other glyph (R4).
+ * name, its role and its place. The sheet draws the ring itself, in
+ * gradients over the host's ink; it was a Lucide glyph for a while, and a
+ * glyph is one shape turned, which is not what a wait looks like.
  */
-test('names the shared ring its indicator carries, and the glyph that draws it', async () => {
-  const tokenContract = JSON.parse(
-    await readFile(new URL('../../../packages/tokens/src/contract.json', import.meta.url), 'utf8'),
-  );
+test('names the shared ring its indicator carries', () => {
   assert.deepEqual(contract.spinner, {
     ui: 'spinner',
     part: 'indicator',
-    glyph: '--slotted-icon-loader-circle',
     stylesheet: 'spinner/spinner.css',
   });
   assert.ok(contract.members.button.parts.includes(contract.spinner.part));
   assert.ok(contract.members.iconButton.parts.includes(contract.spinner.part));
-  assert.ok(
-    tokenContract.tokens.some(({ name }) => name === contract.spinner.glyph),
-    `the foundation declares no ${contract.spinner.glyph}`,
-  );
 });

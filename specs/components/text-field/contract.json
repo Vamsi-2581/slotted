@@ -55,7 +55,7 @@
     }
   },
   "literals": {
-    "--slotted-text-field-action-size": "The two buttons inside the frame are square and sized from the control's own glyph scale plus its gap, which is arithmetic over tokens rather than a literal; the floor under it is --slotted-target-min, which the theme owns."
+    "--slotted-text-field-action-size": "The two buttons inside the frame are square and sized from the control's own glyph scale plus its gap, which is arithmetic over tokens rather than a literal; the floor under it is --slotted-target-min, which the theme owns. On a coarse pointer each box reaches --slotted-target-comfortable in the block axis by a padding its ground does not paint, given back as a negative margin, and the input spans the frame's border box, so the control is the frame's height."
   },
   "members": {
     "textField": {

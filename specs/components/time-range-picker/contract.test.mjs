@@ -239,7 +239,7 @@ test('carries the dialog role and the trigger wiring of date-range-picker', () =
   assert.equal(contract.wiring['aria-haspopup'], 'dialog');
   assert.match(contract.wiring['aria-label'], /both ends/);
   assert.match(contract.triggerName.chosen, /duration/);
-  assert.equal(contract.triggerIcon, '--slotted-icon-clock');
+  assert.equal(contract.triggerIcon, 'clock');
 });
 
 test('closes when the work is whole, and names the departure from the APG', () => {

@@ -70,10 +70,26 @@ test('names the two page grounds the foundation has', () => {
   assert.equal(member.defaults.ground, 'sunken');
 });
 
-test('fills when asked and says what that costs the header', () => {
+test('fills when asked and says how the header collapses there', () => {
   assert.deepEqual(contract.axes.fill, [false, true]);
   assert.equal(member.defaults.fill, false);
-  assert.match(contract.fill.cost, /does not collapse on scroll/);
+  assert.match(contract.fill.header, /contained/);
+  assert.match(contract.fill.header, /16 pixels/);
+  assert.match(contract.fill.header, /principal/);
+  assert.match(contract.fill.cost, /only a scroller inside the body/);
+  /* A phone's column is too short to share: fill holds from the compact class up. */
+  assert.match(contract.fill.on, /600 pixels and wider/);
+});
+
+/** The page answers its own width with the compact size class. */
+test('names its query container and what changes below the compact class', () => {
+  assert.equal(contract.responsive.container, 'slotted-page');
+  assert.equal(contract.responsive.compact, '600px');
+  assert.match(contract.responsive.below, /inset 5 to 12/);
+  assert.match(contract.responsive.below, /step 4/);
+  assert.doesNotMatch(contract.responsive.below, /fill stays/);
+  assert.match(contract.responsive.below, /fill does not apply/);
+  assert.match(contract.responsive.below, /data-grid/);
 });
 
 /** The footer takes space in the flow, so it never covers the last line. */

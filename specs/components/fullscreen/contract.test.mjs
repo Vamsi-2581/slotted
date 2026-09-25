@@ -70,12 +70,12 @@ test('answers the API absent or refused with the in-layout fallback', () => {
 test('changes label and icon with the state and never writes aria-pressed', () => {
   assert.match(contract.wiring['aria-pressed'], /^never/);
   assert.deepEqual(contract.messages, ['enter', 'exit', 'entered', 'exited']);
-  assert.equal(contract.icon.enter, '--slotted-icon-maximize');
-  assert.equal(contract.icon.exit, '--slotted-icon-minimize');
+  /* Glyph names: the binding draws `<Glyph name>` from the state. */
+  assert.equal(contract.icon.enter, 'maximize');
+  assert.equal(contract.icon.exit, 'minimize');
   assert.ok(member.states.includes('fullscreen'));
 });
 
-test('restores the context it took', () => {
 /**
  * The agent stretches the fullscreen element and none of its children. The
  * region fills the screen, so its content must be given the height too — by
@@ -88,6 +88,7 @@ test('gives the content the height of the screen, not only its width', () => {
   assert.match(contract.fill.media, /object-fit: contain/);
 });
 
+test('restores the context it took', () => {
   assert.deepEqual(contract.restores, ['focus', 'page scroll', 'root scroll']);
 });
 

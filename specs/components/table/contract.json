@@ -442,7 +442,12 @@
     },
     "cardLayout": {
       "deferTo": "data-list",
-      "reason": "§12 names the recipe and forbids the shape PatternFly ships: \"nunca converte células em cards sem labels\". A card built from cells loses the column headers, and data-list is the family that carries a label beside every value."
+      "reason": "§12 names the recipe and forbids the shape PatternFly ships: \"nunca converte células em cards sem labels\". A card built from cells loses the column headers, and data-list is the family that carries a label beside every value. It covers rows of records read; a row of form controls is controlRowLayout."
+    },
+    "controlRowLayout": {
+      "deferTo": "field-group",
+      "reason": "data-list draws a value under a dt, which names no control, and declines editing; a row of fields on a phone is a group of fields about one row, so each row becomes a fieldset named by its legend and every control keeps its own field label, description and error.",
+      "composition": "@for (line of lines; track line.id) { <fieldset slFieldGroup><legend slFieldGroupLegend>{{ line.name }}</legend><div slField><label slFieldLabel>Quantity</label>…</div></fieldset> }; a total below the last row is the form's own text"
     },
     "size": {
       "deferTo": "the density axis",

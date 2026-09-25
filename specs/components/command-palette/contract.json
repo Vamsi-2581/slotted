@@ -278,8 +278,8 @@
     "reason": "Only the layer arrives and leaves. A transition on the highlight lags behind a reader holding ArrowDown."
   },
   "declined": {
-    "close": {
-      "reason": "No close part. The dialog closes on Escape and on the scrim, and a ✕ beside a search field reads as clear. A consumer with outsidePress none draws its own in the footer."
+    "closeAtEveryWidth": {
+      "reason": "The dialog closes on Escape and on the scrim, and a ✕ beside a search field reads as clear, so above the dialog's full-screen step there is no close part. Below it there is no scrim to press and a touch screen has no Escape, which left a palette opened by mistake with nothing to press but a command: close is a word — closeLabel — at the end of the field, drawn by the stylesheet under the dialog's own full-screen query alone, and it asks open to be false with the reason dismiss. A consumer with outsidePress none above the step still draws its own in the footer."
     },
     "itemShortcuts": {
       "reason": "Shortcuts on items are drawn and announced, never bound. kbd says 'não registra atalhos sozinho', and a global registry is a family of its own. The consumer binds one with matchesShortcut in three lines, shown on both reference pages."
@@ -347,6 +347,7 @@
       "countLabel",
       "recentLabel",
       "clearLabel",
+      "closeLabel",
       "backLabel",
       "hintNavigate",
       "hintSelect",
@@ -427,6 +428,7 @@
         "countLabel": "{count} results",
         "recentLabel": "Recent",
         "clearLabel": "Clear",
+        "closeLabel": "Close",
         "backLabel": "Back",
         "hintNavigate": "Navigate",
         "hintSelect": "Select",
@@ -465,6 +467,7 @@
         "page",
         "input",
         "clear",
+        "close",
         "list",
         "group",
         "group-label",

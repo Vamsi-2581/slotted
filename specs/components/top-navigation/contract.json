@@ -58,22 +58,22 @@
     "home": "the product's mark and name, linked to the start of the application; a span when there is nowhere to go",
     "mark": "the box the logo stands in: square, the height of a md control, holding whatever image or svg the consumer gives it",
     "name": "the product's name, one line, cut at --slotted-top-navigation-name-max. Below 480 pixels it leaves the eye and not the DOM, so home keeps its accessible name",
-    "context": "what the application is at this moment — the workspace, the store, the environment — as the consumer's own content: a menu trigger, a select, a badge. It keeps its width in the bar; below 768 pixels it is presented at the top of the panel",
+    "context": "what the application is at this moment — the workspace, the store, the environment — as the consumer's own content: a menu trigger, a select, a badge. It keeps its width in the bar; below 600 pixels it is presented at the top of the panel",
     "nav": "the navigation landmark, named by messages.navigation when the consumer writes no aria-label",
     "list": "the destinations of the bar, in the consumer's order",
     "item": "one destination or one section. It carries data-priority, data-collapsed while the width has folded it into the panel, data-current and data-disabled",
     "link": "the destination: an a with an href, aria-current=page while current, aria-disabled and a refused activation while disabled so the destination stays in the DOM",
     "trigger": "a section that opens: a button the consumer wraps in menu, with the family's chevron at its end. The family writes no menu and wires nothing for it: menu's trigger writes aria-expanded and data-open on the element it is rendered as, and the stylesheet reads data-open on the trigger",
-    "indicator": "the trigger's chevron, --slotted-icon-chevron-down turned half a turn while the item is open",
-    "more": "the disclosure button of the panel, at the end of the list inside its own li: --slotted-icon-ellipsis, aria-expanded, aria-controls, data-overflow holding the count of what is folded, data-current while the current destination is folded. Present in the DOM whenever the list exists, hidden by the stylesheet while nothing is folded, so a server render at a narrow width already shows it",
+    "indicator": "the trigger's chevron, the chevron-down Glyph element turned half a turn while the item is open",
+    "more": "the disclosure button of the panel, at the end of the list inside its own li: the ellipsis Glyph element, aria-expanded, aria-controls, data-overflow holding the count of what is folded, data-current while the current destination is folded. Present in the DOM whenever the list exists, hidden by the stylesheet while nothing is folded, so a server render at a narrow width already shows it",
     "panel": "what did not fit, inside the root and after more in DOM order so Tab enters it: context, then panel-list, then help. Absolutely positioned under the bar, full width below 480 pixels and --slotted-top-navigation-panel-size wide above; presence holds it through its exit and dismissable-layer closes it",
     "panel-list": "the ul that receives the folded items — the same li elements, moved (Angular) or portalled (React), so a trigger keeps its menu and a link keeps its badge",
-    "search": "the search region, holding the consumer's text-field and growing in the middle of the bar to --slotted-top-navigation-search-size, never under --slotted-top-navigation-search-min: the search is the first thing that gives way when the bar is short of room, and the floor is where a field is still a field. Below 768 pixels it exists only while searchOpen, and then takes the whole bar",
-    "search-toggle": "--slotted-icon-search: the button that asks searchOpen to be true. Rendered by the family beside search, shown only below 768 pixels while the search is closed",
-    "search-close": "--slotted-icon-x at the end of search, shown only below 768 pixels while the search is open: the pointer's way back when Escape is not at hand",
+    "search": "the search region, holding the consumer's text-field and standing at the start of the middle of the bar — after the brand, the context and the destinations — and growing to --slotted-top-navigation-search-size, never under --slotted-top-navigation-search-min: the search is the first thing that gives way when the bar is short of room, and the floor is where a field is still a field. Below 600 pixels it exists only while searchOpen, and then takes the whole bar",
+    "search-toggle": "the search Glyph element: the button that asks searchOpen to be true. Rendered by the family beside search, shown only below 600 pixels while the search is closed",
+    "search-close": "the x Glyph element at the end of search, shown only below 600 pixels while the search is open: the pointer's way back when Escape is not at hand",
     "actions": "the end cluster, in the consumer's order. The reference page prescribes Carbon's: search, help, notifications, account",
-    "help": "--slotted-icon-circle-question: a destination (a) or a trigger (button) the consumer wraps in menu or popover. Its children are its label — the family's message when there are none — clipped from the eye in the bar, where the mark stands alone and the tooltip repeats the words, and shown as a row's words in the panel below 480 pixels: one accessible name in both places. It moves to the panel below 480",
-    "notifications": "--slotted-icon-bell with count in its corner: a button the consumer wraps in menu or popover. It never folds, because a count the reader cannot see is a count lost",
+    "help": "the circle-question Glyph element: a destination (a) or a trigger (button) the consumer wraps in menu or popover. Its children are its label — the family's message when there are none — clipped from the eye in the bar, where the mark stands alone and the tooltip repeats the words, and shown as a row's words in the panel below 480 pixels: one accessible name in both places. It moves to the panel below 480",
+    "notifications": "the bell Glyph element with count in its corner: a button the consumer wraps in menu or popover. It never folds, because a count the reader cannot see is a count lost",
     "count": "the number of what is waiting, drawn by the family as tabular figures on a --slotted-tone-accent-solid disc that becomes a pill from two digits, over the bell's top-end corner and out of the flow: the control keeps the bell's width, and a third digit grows away from the bell over the gap, where the control beside it holds no ink. It stands inside the button, so it is part of the accessible name without a script",
     "action": "a global control of the product's own — approvals, tasks — in the same square as the marked controls, with the same ink, ground, focus ring and disabled treatment: an a when it is a destination, a button when it opens something. The consumer projects its own glyph, sized by the control at --slotted-control-icon-size, and names it with aria-label; count stands over its top-end corner the way it does over the bell. It never folds",
     "account": "a pill around the consumer's avatar — one step under the control, xs at md, so the pointer's ground keeps a halo of one space step around it — and, when there is room, the name: a button the consumer wraps in menu. It never folds, because it is the way out"
@@ -87,11 +87,11 @@
   "container": {
     "name": "slotted-top-navigation",
     "type": "inline-size",
-    "reason": "The bar answers its own width rather than the viewport's: under app-shell's primary=nav it is the frame's width less the navigation column's. A literal in every condition because @container (inline-size < var(--x)) is invalid — docs/token-foundation.md rule 4. The name is public: anything the consumer places in context, search or actions may write @container slotted-top-navigation (inline-size < 768px) and answer the bar without measuring it"
+    "reason": "The bar answers its own width rather than the viewport's: under app-shell's primary=nav it is the frame's width less the navigation column's. A literal in every condition because @container (inline-size < var(--x)) is invalid — docs/token-foundation.md rule 4. The name is public: anything the consumer places in context, search or actions may write @container slotted-top-navigation (inline-size < 600px) and answer the bar without measuring it"
   },
   "collapseAt": {
     "high": 480,
-    "medium": 768,
+    "medium": 600,
     "low": 1024
   },
   "collapseAtReason": "Three literal steps, each read by the stylesheet in a container condition and by the ResizeObserver that writes data-collapsed, and compared by top-navigation.styles.test.mjs so the two cannot drift. Below low the low-priority items fold; below medium the medium ones fold, the search becomes its toggle, the context moves to the panel and the account gives up the name beside its avatar; below high the high ones fold, help moves to the panel, the name leaves the eye and the gaps drop to one space step. Measured with the reference bar — a mark and a name, a workspace switcher, five destinations, a field, four controls — the medium step is where a context and a field stop fitting side by side What stays at 240 pixels is the mark, the search toggle, the bell, the account and more — five md controls, 202 pixels at comfortable, which is what 240 holds standing alone. Inside the shell the toggle and the shell's own edge add sixty pixels, and the bar holds from 300, which is under the narrowest phone",
@@ -107,7 +107,7 @@
     "sameDomCost": "in React a folded Item loses its children's local state when it changes place, and the family holds none of it: current and open live on the root. In Angular the moved li is the same instance",
     "reason": "UI5 rebuilds its overflow from text and icon, Primer from ChildProps; both lose anything that is not a label. Bootstrap folds all or nothing. Moving the DOM is the one answer that keeps a section trigger, a badge and a translated label whole",
     "panelOrder": "context, panel-list, help, whatever order they arrived in: the stylesheet orders the three with flex order and draws the rules between them from what the panel holds. In Angular the DOM order is that order; in React each part is rendered into the panel in the order it mounted, which the stylesheet's order corrects",
-    "gives": "what gives way when the bar is short of room, in order: the search, to its floor; then the name, to its ellipsis. The context, the destinations and the actions keep their width — a shrinking cluster wraps a button one letter per line — and the steps are what take their room back"
+    "gives": "what gives way when the bar is short of room, in order: the search, to its floor; then the name, to its ellipsis; never the marks — brand keeps its automatic minimum and home contributes the mark's track alone, the name standing in a minmax(0, 1fr) track that contributes nothing. The context, the destinations and the actions keep their width — a shrinking cluster wraps a button one letter per line — and the steps are what take their room back"
   },
   "more": {
     "opens": "a press on more, or Enter and Space on it — the platform's button",
@@ -118,7 +118,7 @@
     "current": "more carries data-current while the current destination is folded, so the reader sees where they are when the destination itself is out of sight — side-navigation's rule for a closed parent"
   },
   "search": {
-    "wide": "the region is always visible, in the middle of the bar, and searchOpen has no effect: data-search-open is not written",
+    "wide": "the region is always visible, at the start of the middle of the bar — after the brand, the context and the destinations, with the free space between it and the actions — and searchOpen has no effect: data-search-open is not written. It is not centred: the two end clusters are never the same width, and a field centred in the space between them stood off the bar's own centre by half their difference in every capture, aligned with nothing. A bar that wants the field centred on the page gives its two clusters one width",
     "narrow": "below medium the region is hidden and search-toggle stands in actions; searchOpen shows the region over the whole bar with search-close at its end, moves focus to the first input inside it, and hides brand, context, nav and the other actions from the eye while it is open",
     "closes": "Escape inside the region, focus leaving it (blur), search-close, and resize when the width passes medium; focus returns to search-toggle",
     "reason": "UI5 (showSearchField, search-field-toggle) and Carbon both expand the search over the bar at a narrow width: a 120-pixel field is no field. The results are not the family's — combobox or command-palette inside search is the consumer's composition, which is why Polaris' searchResults is declined"
@@ -352,11 +352,11 @@
     ]
   },
   "indicator": {
-    "closed": "--slotted-icon-chevron-down: a section opens below the bar, and a chevron pointing down is the promise select and Carbon's HeaderMenu both make for it",
+    "closed": "chevron-down: a section opens below the bar, and a chevron pointing down is the promise select and Carbon's HeaderMenu both make for it",
     "open": "the same mark turned half a turn",
     "rtl": "not mirrored: down is down in both directions"
   },
   "glyphs": {
-    "--slotted-icon-bell": "added for this family: the mark on notifications. Carbon and UI5 draw a bell there, and nothing in the scale stands in for it — inbox says received, the dot says something without saying what"
+    "bell": "added for this family: the mark on notifications. Carbon and UI5 draw a bell there, and nothing in the scale stands in for it — inbox says received, the dot says something without saying what"
   }
 }

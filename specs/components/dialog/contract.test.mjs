@@ -77,7 +77,16 @@ test('declares a state model for the one value a consumer can own', () => {
     controlled: 'open',
     uncontrolled: 'defaultOpen',
     request: 'onOpenChange',
-    reasons: ['pointer', 'keyboard', 'dismiss', 'escape', 'outsidePress', 'submit', 'programmatic'],
+    reasons: [
+      'pointer',
+      'keyboard',
+      'dismiss',
+      'escape',
+      'outsidePress',
+      'back',
+      'submit',
+      'programmatic',
+    ],
     result: 'the value of the close, cancel or action part that was pressed',
   });
 });
@@ -92,7 +101,7 @@ test('names one reason for every source that can close it', () => {
   const sources = Object.entries(contract.reasons);
   assert.deepEqual(
     sources.map(([source]) => source),
-    ['trigger', 'close', 'cancel', 'action', 'escape', 'outsidePress', 'handle'],
+    ['trigger', 'close', 'cancel', 'action', 'escape', 'outsidePress', 'back', 'handle'],
   );
   for (const [source, reason] of sources) {
     for (const value of [reason].flat()) {

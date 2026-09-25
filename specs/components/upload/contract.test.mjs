@@ -11,6 +11,17 @@ import {
 
 const contract = JSON.parse(await readFile(new URL('./contract.json', import.meta.url), 'utf8'));
 const member = contract.members.upload;
+/** The glyph names the theme generates: a token's name without `--slotted-icon-`. */
+const GLYPH_NAMES = new Set(
+  Object.keys(
+    JSON.parse(
+      await readFile(
+        new URL('../../../packages/theme-default/src/glyphs.json', import.meta.url),
+        'utf8',
+      ),
+    ),
+  ).map((token) => token.replace('--slotted-icon-', '')),
+);
 
 test('satisfies the shared contract schema', () => {
   assertContractShape(contract);
@@ -505,7 +516,8 @@ test('says what kind of file a row holds, by colour and by shape', () => {
   const glyphs = new Set();
   const tiles = new Set();
   for (const [kind, entry] of kinds) {
-    assert.ok(entry.glyph.startsWith('--slotted-icon-'), `${kind} draws no mark`);
+    /* A glyph name: the binding draws `<Glyph name>` on the tile. */
+    assert.ok(GLYPH_NAMES.has(entry.glyph), `${kind} draws no mark`);
     assert.ok(!glyphs.has(entry.glyph), `${entry.glyph} is drawn for two kinds`);
     glyphs.add(entry.glyph);
     assert.ok(Array.isArray(entry.matches), `${kind} matches nothing`);

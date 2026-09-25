@@ -6,6 +6,12 @@ import { assertContractShape, MUTABLE_CAPABILITIES, TONES } from '../../contract
 
 const contract = JSON.parse(await readFile(new URL('./contract.json', import.meta.url), 'utf8'));
 const statusIndicator = contract.members.statusIndicator;
+const glyphs = JSON.parse(
+  await readFile(
+    new URL('../../../packages/theme-default/src/glyphs.json', import.meta.url),
+    'utf8',
+  ),
+);
 
 /**
  * Read rather than recalled, because the claim below about the dot is a claim
@@ -71,16 +77,17 @@ test('maps every status onto a tone the theme already paints', () => {
 });
 
 /**
- * The glyph each status draws when the mark is an icon. Named here so the
- * stylesheet, the two bindings and the theme cannot disagree about which
- * artwork means “failed”.
+ * The glyph each status draws when the mark is an icon. Named here so the two
+ * bindings and the harness cannot disagree about which artwork means “failed”.
+ * A name is the glyph token without `--slotted-icon-`, which is the name the
+ * `Glyph` element takes.
  */
 test('gives every status its own glyph from the foundation scale', () => {
   assert.deepEqual(Object.keys(contract.statusGlyphs), contract.axes.status);
   const drawn = Object.values(contract.statusGlyphs);
   assert.equal(new Set(drawn).size, drawn.length, 'two statuses draw the same glyph');
-  for (const [status, token] of Object.entries(contract.statusGlyphs)) {
-    assert.match(token, /^--slotted-icon-[a-z-]+$/, `${status} names no glyph token`);
+  for (const [status, name] of Object.entries(contract.statusGlyphs)) {
+    assert.ok(`--slotted-icon-${name}` in glyphs, `${status} names no glyph: ${name}`);
   }
 });
 

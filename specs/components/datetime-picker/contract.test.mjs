@@ -271,8 +271,8 @@ test('refuses selection following focus, for the reason the sibling records', ()
 test('draws one mark per half of the value, on a control rather than on a label', () => {
   assert.equal(member.parts.includes('panel-label'), false, 'a surface names itself');
   assert.deepEqual(contract.marks, {
-    trigger: '--slotted-icon-calendar',
-    now: '--slotted-icon-clock',
+    trigger: 'calendar',
+    now: 'clock',
   });
   assert.match(contract.marksReason, /no third/i);
   assert.match(contract.marksReason, /legible|eleven-pixel/);

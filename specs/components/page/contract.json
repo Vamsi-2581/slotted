@@ -10,7 +10,7 @@
     "root": "main, or div under landmark=none. A flex column. Under scroll=ancestor it is at least as tall as the scrollport, so the footer has a bottom to stick to; under scroll=self it is exactly as tall as its parent gives it, and the scroll part is what overflows",
     "scroll": "the box the page-header and the body live in. It is the one element a page-header may be a direct child of: a sticky element never leaves the box that contains it, so a header part exactly the header's height would pin nothing — which is why there is no header part",
     "header": "page-header",
-    "body": "the padded column, holding one container at the page's width and inset. Under fill it is a flex column with min-block-size 0 and the container stretches",
+    "body": "the padded column, holding one container at the page's width and inset. Under fill, 600 pixels and wider, it is a flex column with min-block-size 0 and the container stretches",
     "footer": "the bar for the actions that finish the task. In the flow, never fixed: it takes its own height, so the last line of content scrolls up to it rather than under it",
     "actions": "the row inside the footer's container, aligned to the end, wrapping when the width runs out. It exists because the container places each child on a row of its own, and the footer's controls belong on one"
   },
@@ -29,8 +29,14 @@
     "reason": "sap.f.DynamicPage owns its scroller and Sirius refuses to; PatternFly makes main the scroller. Both are real situations — a document that scrolls, and a column that scrolls inside a shell — so the question is an axis and not a decision this family takes for the consumer. page-header attaches to whichever it finds"
   },
   "fill": {
-    "on": "the body is a flex column with min-block-size 0 and the container inside it stretches to the rest of the height, for a master–detail, a splitter or a canvas that scroll their own panes",
-    "cost": "with scroll=self and fill, the body is exactly the height it has and nothing scrolls outside it, so the page-header does not collapse on scroll — there is no scroll to collapse on. sap.f.fitContent has the same cost and does not record it"
+    "on": "at 600 pixels and wider, the body is a flex column with min-block-size 0 and the container inside it stretches to the rest of the height, for a master–detail, a splitter or a canvas that scroll their own panes. The rules sit inside @container slotted-page (width >= 600px); below it see responsive.below",
+    "header": "the page-header is given the body as contained (@slotted/core/sticky-header): the body's principal scroller scrolling down past 16 pixels snaps the header area shut with the reason scroll, and the same scroller back at its top opens it again. Principal means not a form control and at least half the body's client block size, as page-header's snapDetection.contained defines it, so a textarea or a short scroll area in the body never moves the header. A collapse by the toggle or the application is not undone by that return. Fiori's Dynamic Page snaps on the content's scroll the same way",
+    "cost": "with scroll=self and fill, the body is exactly the height it has and nothing scrolls outside it, so only a scroller inside the body moves the header. sap.f.fitContent drops the snap there and does not record it"
+  },
+  "responsive": {
+    "container": "slotted-page",
+    "compact": "600px",
+    "below": "every container in the page with inset 5 to 12 takes step 4 of the space scale as its inset. fill does not apply: the body grows with its content and the page scrolls as a page without fill does, under either scroll value, and the page-header is in the flow and scrolls away with it (page-header compact). A data-grid in the body without a block-size of its own grows to its rows and windows nothing, the data-grid contract's rootReason; a server-paged grid holds one page of rows. A child that took its height from the stretched container — flex-basis 0 in a column, or block-size 100% — has no definite height to take there and collapses to its minimum block size, 0 pixels for a grid under flex: 1 1 0 and min-block-size 0 in headless Chrome at 375 pixels; flex: 1 1 auto fills the stretched column at 600 pixels and wider and is the content's height below. Measured on a 375 by 667 phone, the chrome above a filled list left its rows 155 pixels, 23 per cent of the screen"
   },
   "ground": {
     "sunken": "--slotted-surface-sunken: the canvas of an application, where cards and tables separate from the page",
@@ -48,7 +54,7 @@
     "--slotted-page-sticky-top": {
       "writer": "page-header",
       "target": "the nearest scroll container, or the document element",
-      "value": "the height of the chrome that stays at the top: the title area and the tabs, plus the header area while it is pinned or re-opened in place"
+      "value": "the height of the chrome that stays at the top: the title area and the tabs, plus the header area while it is pinned or re-opened in place; 0px below the compact size class, where the page-header is in the flow"
     },
     "--slotted-page-sticky-bottom": {
       "writer": "page",
@@ -85,7 +91,7 @@
     }
   },
   "axes": {
-    "width": ["measure", "content", "wide", "full"],
+    "width": ["measure", "content", "wide", "full", "bleed"],
     "inset": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
     "scroll": ["ancestor", "self"],
     "fill": [false, true],

@@ -17,12 +17,12 @@
     "unknown": "secondary"
   },
   "statusGlyphs": {
-    "neutral": "--slotted-icon-circle",
-    "info": "--slotted-icon-circle-info",
-    "success": "--slotted-icon-circle-check",
-    "warning": "--slotted-icon-triangle-alert",
-    "danger": "--slotted-icon-circle-alert",
-    "unknown": "--slotted-icon-circle-question"
+    "neutral": "circle",
+    "info": "circle-info",
+    "success": "circle-check",
+    "warning": "triangle-alert",
+    "danger": "circle-alert",
+    "unknown": "circle-question"
   },
   "defaultLabels": {
     "neutral": "Neutral",

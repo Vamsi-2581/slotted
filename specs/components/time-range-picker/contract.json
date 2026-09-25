@@ -138,7 +138,7 @@
     "aria-controls": "the content, while the popup is showing",
     "aria-label": "the trigger, carrying both ends and the duration"
   },
-  "triggerIcon": "--slotted-icon-clock",
+  "triggerIcon": "clock",
   "triggerName": {
     "empty": "chooseLabel",
     "chosen": "changeLabel, both ends in words, then the duration",

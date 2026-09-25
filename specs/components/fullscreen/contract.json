@@ -65,8 +65,8 @@
     }
   ],
   "icon": {
-    "enter": "--slotted-icon-maximize",
-    "exit": "--slotted-icon-minimize",
+    "enter": "maximize",
+    "exit": "minimize",
     "alignment": "to the label's text, not to the line box"
   },
   "messages": ["enter", "exit", "entered", "exited"],

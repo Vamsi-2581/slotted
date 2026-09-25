@@ -253,6 +253,21 @@ test('records the break in the filter value and the way a consumer moves', () =>
 });
 
 /**
+ * A row that reads records and a row that holds a form's controls leave a
+ * phone's table for different families. data-list draws each value under a
+ * `dt` and declines editing, so a row of fields becomes one fieldset per row,
+ * named by its legend, with every control keeping its own label.
+ */
+test('defers a row of records to data-list and a row of controls to field-group', () => {
+  assert.equal(contract.declined.cardLayout.deferTo, 'data-list');
+  assert.match(contract.declined.cardLayout.reason, /records/);
+  assert.equal(contract.declined.controlRowLayout.deferTo, 'field-group');
+  assert.match(contract.declined.controlRowLayout.reason, /dt/);
+  assert.match(contract.declined.controlRowLayout.composition, /fieldset slFieldGroup/);
+  assert.match(contract.declined.controlRowLayout.composition, /legend slFieldGroupLegend/);
+});
+
+/**
  * The APG is explicit and the sentence is quoted rather than summarised: a
  * table "is not an interactive widget. Thus, its cells are not focusable or
  * selectable". Every element of the structure is the platform's own, so the

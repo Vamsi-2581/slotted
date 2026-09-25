@@ -718,47 +718,47 @@
   },
   "kinds": {
     "pdf": {
-      "glyph": "--slotted-icon-file-text",
+      "glyph": "file-text",
       "tile": "--slotted-upload-kind-pdf",
       "matches": ["application/pdf"]
     },
     "document": {
-      "glyph": "--slotted-icon-file-type",
+      "glyph": "file-type",
       "tile": "--slotted-upload-kind-document",
       "matches": ["text/*", ".doc", ".docx", ".odt", ".rtf", ".pages"]
     },
     "spreadsheet": {
-      "glyph": "--slotted-icon-file-spreadsheet",
+      "glyph": "file-spreadsheet",
       "tile": "--slotted-upload-kind-spreadsheet",
       "matches": [".xls", ".xlsx", ".ods", ".csv", ".tsv", ".numbers"]
     },
     "presentation": {
-      "glyph": "--slotted-icon-presentation",
+      "glyph": "presentation",
       "tile": "--slotted-upload-kind-presentation",
       "matches": [".ppt", ".pptx", ".odp", ".key"]
     },
     "image": {
-      "glyph": "--slotted-icon-file-image",
+      "glyph": "file-image",
       "tile": "--slotted-upload-kind-image",
       "matches": ["image/*"]
     },
     "video": {
-      "glyph": "--slotted-icon-file-video",
+      "glyph": "file-video",
       "tile": "--slotted-upload-kind-video",
       "matches": ["video/*"]
     },
     "audio": {
-      "glyph": "--slotted-icon-file-audio",
+      "glyph": "file-audio",
       "tile": "--slotted-upload-kind-audio",
       "matches": ["audio/*"]
     },
     "archive": {
-      "glyph": "--slotted-icon-file-archive",
+      "glyph": "file-archive",
       "tile": "--slotted-upload-kind-archive",
       "matches": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"]
     },
     "other": {
-      "glyph": "--slotted-icon-file",
+      "glyph": "file",
       "tile": "--slotted-upload-kind-other",
       "matches": []
     }
@@ -781,9 +781,9 @@
       "the region's contents, which are laid out logically throughout"
     ],
     "notMirrored": [
-      "--slotted-icon-upload, an arrow that points up",
-      "--slotted-icon-play on the start control",
-      "--slotted-icon-rotate-ccw on the retry control"
+      "the upload glyph, an arrow that points up",
+      "the play glyph on the start control",
+      "the rotate-ccw glyph on the retry control"
     ],
     "reason": "The play triangle here does not mean *advance a timeline*, which is the reading platforms mirror; it means *send this file*, and mirrored it would point back at the name it belongs to. The counter-clockwise arrow of a retry is a gesture rather than a direction, and the upload arrow points up in every writing direction there is. Nothing else in the family carries a direction, because every measure in it is logical."
   },

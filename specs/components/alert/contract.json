@@ -9,11 +9,11 @@
     "live": ["off", "polite", "assertive"]
   },
   "toneGlyphs": {
-    "accent": "--slotted-icon-circle-info",
-    "secondary": "--slotted-icon-circle",
-    "success": "--slotted-icon-circle-check",
-    "warning": "--slotted-icon-triangle-alert",
-    "danger": "--slotted-icon-circle-alert"
+    "accent": "circle-info",
+    "secondary": "circle",
+    "success": "circle-check",
+    "warning": "circle-alert",
+    "danger": "circle-x"
   },
   "liveRoles": {
     "off": null,

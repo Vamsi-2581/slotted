@@ -189,7 +189,10 @@ test('composes what it does not own', () => {
  * chevron that points down while closed is `select`'s promise, not this one.
  */
 test('folds a closed branch along the reading direction', () => {
-  assert.match(contract.indicator.closed, /^--slotted-icon-chevron-right/);
+  assert.match(
+    contract.indicator.closed,
+    /^the chevron-right Glyph element in a directional icon box/,
+  );
   assert.match(contract.indicator.open, /quarter turn/);
   assert.match(contract.depth.deeper, /indent-step/);
 });

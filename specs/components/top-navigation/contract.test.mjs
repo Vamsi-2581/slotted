@@ -200,13 +200,13 @@ test('says current the way side-navigation says it', () => {
  * and the one glyph the scale did not hold is justified beside its name.
  */
 test('names a glyph for every mark it draws', () => {
-  assert.match(contract.anatomy.more, /--slotted-icon-ellipsis/);
-  assert.match(contract.anatomy['search-toggle'], /--slotted-icon-search/);
-  assert.match(contract.anatomy['search-close'], /--slotted-icon-x/);
-  assert.match(contract.anatomy.help, /--slotted-icon-circle-question/);
-  assert.match(contract.anatomy.notifications, /--slotted-icon-bell/);
-  assert.match(contract.indicator.closed, /--slotted-icon-chevron-down/);
-  assert.ok('--slotted-icon-bell' in contract.glyphs);
+  assert.match(contract.anatomy.more, /the ellipsis Glyph element/);
+  assert.match(contract.anatomy['search-toggle'], /the search Glyph element/);
+  assert.match(contract.anatomy['search-close'], /the x Glyph element/);
+  assert.match(contract.anatomy.help, /the circle-question Glyph element/);
+  assert.match(contract.anatomy.notifications, /the bell Glyph element/);
+  assert.match(contract.indicator.closed, /^chevron-down:/);
+  assert.ok('bell' in contract.glyphs);
 });
 
 test('declares a message for every control that has no visible text', () => {

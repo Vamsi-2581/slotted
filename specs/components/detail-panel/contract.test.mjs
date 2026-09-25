@@ -113,7 +113,7 @@ test('keeps its chrome when the record is missing or failed, and says when it is
 });
 
 /**
- * Two columns above 640 pixels of the root's own width, one below, and the
+ * Two columns above 600 pixels of the root's own width, one below, and the
  * aside never hidden: content a desktop has and a phone does not is content
  * a phone reader cannot reach.
  */
@@ -121,7 +121,7 @@ test('reflows the aside under the body instead of hiding it', () => {
   assert.deepEqual(contract.axes.aside, ['end', 'start', 'none']);
   assert.equal(member.defaults.aside, 'end');
   assert.equal(contract.responsive.container, 'detail-panel');
-  assert.equal(contract.responsive.narrow, '640px');
+  assert.equal(contract.responsive.narrow, '600px');
   assert.equal(contract.responsive.hidden.declined, true);
   assert.equal(contract.sticky.aside.declined, true);
   assert.equal(contract.roles.aside, 'complementary');

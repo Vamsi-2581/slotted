@@ -66,11 +66,11 @@ test('defaults to help, which is the message a form carries most of', () => {
  */
 test('gives every severity a mark, so colour is never the only signal', () => {
   assert.deepEqual(contract.toneGlyphs, {
-    accent: '--slotted-icon-circle-info',
+    accent: 'circle-info',
     secondary: null,
-    success: '--slotted-icon-circle-check',
-    warning: '--slotted-icon-triangle-alert',
-    danger: '--slotted-icon-circle-alert',
+    success: 'circle-check',
+    warning: 'triangle-alert',
+    danger: 'circle-alert',
   });
   for (const tone of contract.axes.tone) {
     assert.ok(tone in contract.toneGlyphs, `${tone} has no entry in the glyph map`);

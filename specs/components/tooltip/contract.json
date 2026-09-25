@@ -40,18 +40,24 @@
     "aria-describedby": "the trigger names the layer while describes is description",
     "aria-labelledby": "the trigger names the layer instead while describes is label",
     "role": "tooltip, on the content part and never on the layer, so the layer is free to carry the animation",
-    "aria-hidden": "the arrow, which is decoration the reader has no use for",
+    "aria-hidden": "the arrow, which is decoration the reader has no use for, and the content while describes is none, so a hint that repeats the trigger's own name is not read twice",
     "data-open": "on the layer and on the trigger, so a consumer can style the trigger while its tooltip is showing"
   },
+  "whenClipped": {
+    "default": false,
+    "measuredAt": "the moment the hint would open",
+    "reason": "A name truncated to \"Op…\" is unreadable and a name that fits needs nothing said about it, so the hint that answers the first must not open over the second. The family measures its own trigger — `scrollWidth` against `clientWidth`, and only where the box hides what does not fit — at the moment it would open, rather than watching every trigger on the page: a column dragged wider stops opening a hint without anything being told, and a grid of thirty columns keeps no observers. It is an axis here rather than a capability of `table` and `data-grid` because both need it, and `side-navigation` already measured the same thing for itself."
+  },
   "describes": {
-    "values": ["description", "label"],
+    "values": ["description", "label", "none"],
     "default": "description",
     "attribute": {
       "description": "aria-describedby",
-      "label": "aria-labelledby"
+      "label": "aria-labelledby",
+      "none": null
     },
     "forcesMount": "eager",
-    "reason": "The most common tooltip in a product sits on an icon-only button whose only words are the tooltip's. Described by it and named by nothing, that button is announced as \"button\". Under label the reference is the accessible name, so the layer has to exist before it is opened, and mount is forced to eager rather than silently producing a control with no name."
+    "reason": "The most common tooltip in a product sits on an icon-only button whose only words are the tooltip's. Described by it and named by nothing, that button is announced as \"button\". Under label the reference is the accessible name, so the layer has to exist before it is opened, and mount is forced to eager rather than silently producing a control with no name. Under none the trigger writes neither reference and the content is hidden from the reader: the hint a truncated name opens repeats an accessible name the trigger already carries, and a reference to it would have the reader hear the same words twice."
   },
   "keyboard": [
     {
@@ -209,7 +215,7 @@
   "axes": {
     "variant": ["inverse", "surface"],
     "size": ["sm", "md"],
-    "describes": ["description", "label"],
+    "describes": ["description", "label", "none"],
     "openOn": ["hover", "focus", "manual"],
     "side": ["top", "bottom", "inline-start", "inline-end", "left", "right"],
     "align": ["start", "center", "end"],
@@ -222,7 +228,8 @@
     "shift": [true, false],
     "hideWhenDetached": [true, false],
     "portal": [true, false],
-    "disabled": [true, false]
+    "disabled": [true, false],
+    "whenClipped": [true, false]
   },
   "resolution": {
     "variant": ["prop", "defaults", "inverse"],
@@ -240,7 +247,8 @@
     "shift": ["prop", "defaults", true],
     "hideWhenDetached": ["prop", "defaults", true],
     "portal": ["prop", "defaults", true],
-    "disabled": ["prop", "defaults", false]
+    "disabled": ["prop", "defaults", false],
+    "whenClipped": ["prop", "defaults", false]
   },
   "provides": {
     "tooltipDefaults": [
@@ -266,7 +274,8 @@
       "sideOffset",
       "alignOffset",
       "collisionPadding",
-      "arrowPadding"
+      "arrowPadding",
+      "whenClipped"
     ]
   },
   "stateAttributes": {
@@ -307,7 +316,8 @@
         "sideOffset": 0,
         "alignOffset": 0,
         "collisionPadding": 8,
-        "arrowPadding": 8
+        "arrowPadding": 8,
+        "whenClipped": false
       },
       "capabilities": ["open", "placement", "size", "appearance", "disabled", "wiring"],
       "states": ["default", "open"],

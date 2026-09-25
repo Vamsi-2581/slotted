@@ -11,7 +11,6 @@
   "spinner": {
     "ui": "spinner",
     "part": "indicator",
-    "glyph": "--slotted-icon-loader-circle",
     "stylesheet": "spinner/spinner.css"
   },
   "stateAttributes": {

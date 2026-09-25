@@ -40,6 +40,124 @@ describe('createDismissableLayer', () => {
     mount('');
   });
 
+  /**
+   * The platform's way back reaches the layer and never the page under it: the
+   * layer holds one history entry while it stands, a `popstate` that leaves
+   * the entry is the gesture, and a layer closed by any other path takes its
+   * entry back. jsdom traverses the history on a task of its own, so each
+   * traversal is awaited through the `popstate` it dispatches.
+   */
+  describe('back', () => {
+    const popped = () =>
+      new Promise<void>((resolve) =>
+        window.addEventListener('popstate', () => resolve(), { once: true }),
+      );
+
+    beforeEach(() => {
+      mount('<div id="layer"></div>');
+      history.replaceState({ navigationId: 7 }, '');
+    });
+
+    it('holds one history entry over the state that was there, and asks with back when it is left', async () => {
+      const log = recorder();
+      const handle = createDismissableLayer(element('layer'), { ...log, back: true });
+      expect(history.state).toMatchObject({ navigationId: 7 });
+      expect(typeof history.state.__slottedLayer).toBe('string');
+
+      const gesture = popped();
+      history.back();
+      await gesture;
+
+      expect(log.reasons).toEqual(['back']);
+      expect(history.state).toEqual({ navigationId: 7 });
+      /* The family closed on the request: the entry is already gone, nothing else moves. */
+      const length = history.length;
+      handle.destroy();
+      expect(history.length).toBe(length);
+    });
+
+    it('puts the entry back when the layer refuses', async () => {
+      let refused = 0;
+      const handle = createDismissableLayer(element('layer'), {
+        back: true,
+        onDismiss: (request) => {
+          refused += 1;
+          request.cancel();
+        },
+      });
+      const token = history.state.__slottedLayer as string;
+
+      const gesture = popped();
+      history.back();
+      await gesture;
+
+      expect(refused).toBe(1);
+      expect(history.state.__slottedLayer).toBe(token);
+      handle.destroy();
+      await popped();
+      expect(history.state).toEqual({ navigationId: 7 });
+    });
+
+    it('takes its entry back when closed by another path, and reads no gesture in that', async () => {
+      const log = recorder();
+      const handle = createDismissableLayer(element('layer'), { ...log, back: true });
+      handle.destroy();
+      await popped();
+      expect(history.state).toEqual({ navigationId: 7 });
+      expect(log.reasons).toEqual([]);
+    });
+
+    it('opens after a closed layer’s traversal lands, and reads no gesture in it', async () => {
+      const first = recorder();
+      const second = recorder();
+      const closing = createDismissableLayer(element('layer'), { ...first, back: true });
+      const closed = history.state.__slottedLayer as string;
+      closing.destroy();
+      const next = createDismissableLayer(element('layer'), { ...second, back: true });
+      /* No entry of its own while the first one's traversal is on its way. */
+      expect(history.state.__slottedLayer).toBe(closed);
+      await popped();
+      await Promise.resolve();
+      expect(history.state.__slottedLayer).toEqual(expect.any(String));
+      expect(history.state.__slottedLayer).not.toBe(closed);
+      expect(second.reasons).toEqual([]);
+      next.destroy();
+      await popped();
+      expect(history.state).toEqual({ navigationId: 7 });
+    });
+
+    it('asks the topmost layer that holds an entry, one gesture at a time', async () => {
+      mount('<div id="outer"></div><div id="inner"></div>');
+      const outer = recorder();
+      const inner = recorder();
+      const first = createDismissableLayer(element('outer'), { ...outer, back: true });
+      const second = createDismissableLayer(element('inner'), { ...inner, back: true });
+
+      let gesture = popped();
+      history.back();
+      await gesture;
+      expect(inner.reasons).toEqual(['back']);
+      expect(outer.reasons).toEqual([]);
+      second.destroy();
+
+      gesture = popped();
+      history.back();
+      await gesture;
+      expect(outer.reasons).toEqual(['back']);
+      first.destroy();
+      expect(history.state).toEqual({ navigationId: 7 });
+    });
+
+    it('holds no entry unless asked', () => {
+      const log = recorder();
+      const length = history.length;
+      const handle = createDismissableLayer(element('layer'), log);
+      expect(history.length).toBe(length);
+      expect(history.state).toEqual({ navigationId: 7 });
+      handle.destroy();
+    });
+  });
+
   describe('escape', () => {
     beforeEach(() => {
       mount('<div id="outer"></div><div id="inner"></div><button id="away">away</button>');

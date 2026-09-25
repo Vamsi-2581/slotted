@@ -113,6 +113,7 @@ export {
   plainDateTime,
   START_OF_DAY,
   toISODateTime,
+  wallClockIn,
 } from './plain-date-time';
 export type { DayWindow, DayWindowOptions, PlainDateTime } from './plain-date-time';
 export {

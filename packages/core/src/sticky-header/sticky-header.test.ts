@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { COMPACT_BELOW } from '../measure';
 import {
   COLLAPSE_PROPERTY,
+  CONTAINED_COLLAPSE_AT,
   createStickyHeader,
   findScrollParent,
+  PRINCIPAL_SCROLL_FRACTION,
   STICKY_TOP_PROPERTY,
 } from './sticky-header';
 import type { StickyHeaderHandle, StickyHeaderState } from './sticky-header';
@@ -58,7 +61,14 @@ function sized(element: HTMLElement, height: number) {
   return element;
 }
 
-function scene({ scrollerHeight = 400 }: { scrollerHeight?: number } = {}) {
+function scene({
+  scrollerHeight = 400,
+  contained,
+}: {
+  scrollerHeight?: number;
+  /** Given the page body, returns what the header is told is contained. */
+  contained?: (body: HTMLElement) => HTMLElement | null;
+} = {}) {
   const scroller = document.createElement('div');
   scroller.style.overflowY = 'auto';
   Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: scrollerHeight });
@@ -67,7 +77,11 @@ function scene({ scrollerHeight = 400 }: { scrollerHeight?: number } = {}) {
   const area = sized(document.createElement('div'), 120);
   const tabs = sized(document.createElement('div'), 40);
   root.append(title, area, tabs);
-  scroller.append(root);
+  /* A filled page: the body under the header holds a list that scrolls on its own. */
+  const body = document.createElement('div');
+  const list = document.createElement('div');
+  body.append(list);
+  scroller.append(root, body);
   document.body.append(scroller);
 
   const state: StickyHeaderState = { expanded: true, pinned: false, collapse: 'scroll' };
@@ -85,12 +99,14 @@ function scene({ scrollerHeight = 400 }: { scrollerHeight?: number } = {}) {
     onScrolled,
     onRevealed,
     onScrollRequest,
+    ...(contained === undefined ? {} : { contained: () => contained(body) }),
   });
   const io = FakeIntersectionObserver.instances.at(-1) as FakeIntersectionObserver;
   return {
     area,
     handle,
     io,
+    list,
     onRevealed,
     onScrollRequest,
     onScrolled,
@@ -540,5 +556,306 @@ describe('createStickyHeader', () => {
     (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
     expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('130px');
     handle.destroy();
+  });
+  it('holds the header from the compact size class up, and lets it go below it', () => {
+    const onTall = vi.fn();
+    const scroller = document.createElement('div');
+    scroller.style.overflowY = 'auto';
+    Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 800 });
+    const root = document.createElement('header');
+    Object.defineProperty(root, 'clientWidth', { configurable: true, value: COMPACT_BELOW });
+    const area = sized(document.createElement('div'), 40);
+    root.append(area);
+    scroller.append(root);
+    document.body.append(scroller);
+    const handle = createStickyHeader({
+      root,
+      area: () => area,
+      chrome: () => [],
+      state: () => ({ expanded: true, pinned: false, collapse: 'scroll' }),
+      onScrolled: vi.fn(),
+      onRevealed: vi.fn(),
+      onScrollRequest: vi.fn(),
+      onTall,
+    });
+    expect(handle.tall()).toBe(false);
+
+    Object.defineProperty(root, 'clientWidth', { configurable: true, value: COMPACT_BELOW - 1 });
+    (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
+    expect(onTall).toHaveBeenLastCalledWith(true);
+    handle.destroy();
+  });
+
+  describe('contained', () => {
+    function scrollTo(element: HTMLElement, top: number) {
+      element.scrollTop = top;
+      element.dispatchEvent(new Event('scroll'));
+    }
+
+    /**
+     * A filled page does not scroll: its list does. The header's own scroller
+     * never moves, so the list moving down past a few pixels is what snaps the
+     * area shut, and the list back at its top is what opens it.
+     */
+    it('collapses when a list inside scrolls down past the threshold, and re-opens at its top', () => {
+      const { handle, list, onScrollRequest, state } = scene({ contained: (body) => body });
+
+      scrollTo(list, CONTAINED_COLLAPSE_AT);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+
+      scrollTo(list, 40);
+      expect(onScrollRequest).toHaveBeenLastCalledWith(false);
+      expect(state.expanded).toBe(false);
+
+      /* Up, but not at the top yet: the area stays shut. */
+      scrollTo(list, 20);
+      expect(onScrollRequest).toHaveBeenCalledTimes(1);
+
+      scrollTo(list, 0);
+      expect(onScrollRequest).toHaveBeenLastCalledWith(true);
+      expect(state.expanded).toBe(true);
+      handle.destroy();
+    });
+
+    it('ignores a scroll outside the contained element, and the header’s own scroller', () => {
+      const outside = document.createElement('div');
+      document.body.append(outside);
+      const { handle, onScrollRequest, scroller } = scene({ contained: () => document.body });
+
+      scrollTo(scroller, 300);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+      handle.destroy();
+
+      const other = scene({ contained: (body) => body });
+      scrollTo(outside, 300);
+      expect(other.onScrollRequest).not.toHaveBeenCalled();
+      other.handle.destroy();
+    });
+
+    /**
+     * A grid scrolled sideways fires `scroll` with its `scrollTop` where it was,
+     * often at 0. Read as a return to the top, that re-opened the area the
+     * reader had just scrolled shut.
+     */
+    it('ignores a scroll that leaves the block position where it was', () => {
+      const { handle, list, onScrollRequest } = scene({ contained: (body) => body });
+      const grid = document.createElement('div');
+      list.after(grid);
+
+      scrollTo(list, 40);
+      expect(onScrollRequest).toHaveBeenCalledTimes(1);
+
+      list.dispatchEvent(new Event('scroll'));
+      grid.scrollLeft = 120;
+      grid.dispatchEvent(new Event('scroll'));
+      expect(onScrollRequest).toHaveBeenCalledTimes(1);
+      handle.destroy();
+    });
+
+    it('never re-opens an area the control collapsed, nor one it re-opened and collapsed again', () => {
+      const { handle, list, onScrollRequest, state } = scene({ contained: (body) => body });
+      state.expanded = false;
+      handle.expandedChanged(false, 'control');
+      scrollTo(list, 40);
+      scrollTo(list, 0);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+
+      state.expanded = true;
+      handle.expandedChanged(true, 'control');
+      scrollTo(list, 40);
+      expect(onScrollRequest).toHaveBeenLastCalledWith(false);
+      state.expanded = true;
+      handle.expandedChanged(true, 'control');
+      state.expanded = false;
+      handle.expandedChanged(false, 'programmatic');
+      onScrollRequest.mockClear();
+      scrollTo(list, 0);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+      handle.destroy();
+    });
+
+    it('leaves a pinned header, and one under manual collapse, alone', () => {
+      const pinned = scene({ contained: (body) => body });
+      pinned.state.pinned = true;
+      scrollTo(pinned.list, 40);
+      expect(pinned.onScrollRequest).not.toHaveBeenCalled();
+      pinned.handle.destroy();
+      document.body.innerHTML = '';
+
+      const manual = scene({ contained: (body) => body });
+      manual.state.collapse = 'manual';
+      scrollTo(manual.list, 40);
+      expect(manual.onScrollRequest).not.toHaveBeenCalled();
+      manual.handle.destroy();
+    });
+
+    it('stops listening once destroyed', () => {
+      const { handle, list, onScrollRequest } = scene({ contained: (body) => body });
+      handle.destroy();
+      scrollTo(list, 40);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+    });
+
+    function clientHeight(element: HTMLElement, value: number) {
+      Object.defineProperty(element, 'clientHeight', { configurable: true, value });
+    }
+
+    /**
+     * Only the body's principal scroller moves the header. A note typed into
+     * a textarea, or a short scroll area beside the list, scrolling down past
+     * sixteen pixels snapped the area shut while the list the reader was
+     * reading had not moved.
+     */
+    it('ignores a form control scrolling, however tall it is', () => {
+      const { handle, list, onScrollRequest } = scene({ contained: (body) => body });
+      const body = list.parentElement as HTMLElement;
+      clientHeight(body, 500);
+      for (const tag of ['textarea', 'input', 'select'] as const) {
+        const control = document.createElement(tag);
+        clientHeight(control, 400);
+        body.append(control);
+        scrollTo(control, 40);
+      }
+      const editable = document.createElement('div');
+      editable.setAttribute('contenteditable', '');
+      clientHeight(editable, 400);
+      body.append(editable);
+      scrollTo(editable, 40);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+      handle.destroy();
+    });
+
+    it('ignores a scroller shorter than half the contained element, and follows one that is not', () => {
+      const { handle, list, onScrollRequest, state } = scene({ contained: (body) => body });
+      const body = list.parentElement as HTMLElement;
+      clientHeight(body, 500);
+      const aside = document.createElement('div');
+      clientHeight(aside, 500 * PRINCIPAL_SCROLL_FRACTION - 1);
+      body.append(aside);
+      scrollTo(aside, 40);
+      expect(onScrollRequest).not.toHaveBeenCalled();
+
+      /* The rows of a grid: half the body or more. */
+      clientHeight(list, 500 * PRINCIPAL_SCROLL_FRACTION);
+      scrollTo(list, 40);
+      expect(onScrollRequest).toHaveBeenLastCalledWith(false);
+      expect(state.expanded).toBe(false);
+
+      /* The short one back at its top does not re-open what the list shut. */
+      scrollTo(aside, 0);
+      expect(onScrollRequest).toHaveBeenCalledTimes(1);
+      scrollTo(list, 0);
+      expect(onScrollRequest).toHaveBeenLastCalledWith(true);
+      handle.destroy();
+    });
+  });
+
+  /**
+   * Below the compact size class nothing sticks: the root is in the flow and
+   * scrolls away with the page, so there is nothing to collapse, reveal or
+   * stop under. On a phone a record's header and tabs took 40 per cent of
+   * the screen for the whole scroll with nothing to condense.
+   */
+  describe('compact', () => {
+    function compactScene(width: number, contained = false) {
+      const built = scene(contained ? { contained: (body) => body } : {});
+      const observersBefore = FakeIntersectionObserver.instances.length;
+      const onCompact = vi.fn();
+      built.handle.destroy();
+      Object.defineProperty(built.root, 'clientWidth', { configurable: true, value: width });
+      const onScrollRequest = vi.fn((expanded: boolean) => {
+        built.state.expanded = expanded;
+        handle.expandedChanged(expanded, 'scroll');
+      });
+      const onRevealed = vi.fn();
+      const handle = createStickyHeader({
+        root: built.root,
+        area: () => built.area,
+        chrome: () => [built.title],
+        state: () => built.state,
+        onScrolled: vi.fn(),
+        onRevealed,
+        onScrollRequest,
+        onCompact,
+        ...(contained ? { contained: () => built.list.parentElement as HTMLElement } : {}),
+      });
+      const resize = () => (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
+      const observers = () => FakeIntersectionObserver.instances.length - observersBefore;
+      return { ...built, handle, observers, onCompact, onRevealed, onScrollRequest, resize };
+    }
+
+    it('says so below the width, observes no scroll and leaves no sticky offset', () => {
+      const { handle, observers, onCompact, scroller } = compactScene(COMPACT_BELOW - 1);
+      expect(handle.compact()).toBe(true);
+      expect(onCompact).toHaveBeenLastCalledWith(true);
+      expect(observers()).toBe(0);
+      expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('0px');
+      handle.destroy();
+    });
+
+    it('is not compact from the width up', () => {
+      const { handle, onCompact, scroller } = compactScene(COMPACT_BELOW);
+      expect(handle.compact()).toBe(false);
+      expect(onCompact).not.toHaveBeenCalled();
+      expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('60px');
+      handle.destroy();
+    });
+
+    it('ignores a contained scroll, and opens in the flow rather than revealing', () => {
+      const { handle, list, onRevealed, onScrollRequest, scroller, state } = compactScene(
+        390,
+        true,
+      );
+      list.scrollTop = 40;
+      list.dispatchEvent(new Event('scroll'));
+      expect(onScrollRequest).not.toHaveBeenCalled();
+
+      scroller.scrollTop = 300;
+      state.expanded = false;
+      handle.expandedChanged(false, 'control');
+      state.expanded = true;
+      handle.expandedChanged(true, 'control');
+      expect(onRevealed).not.toHaveBeenCalled();
+      expect(handle.revealed()).toBe(false);
+      handle.destroy();
+    });
+
+    it('opens an area the scroll shut when the header turns compact, and observes again above it', () => {
+      const width = { value: 1024 };
+      const { handle, onCompact, onScrollRequest, resize, root, scroller, state } =
+        compactScene(1024);
+      Object.defineProperty(root, 'clientWidth', { configurable: true, get: () => width.value });
+
+      scroller.scrollTop = 300;
+      (FakeIntersectionObserver.instances.at(-1) as FakeIntersectionObserver).report(false);
+      expect(state.expanded).toBe(false);
+
+      width.value = 390;
+      resize();
+      expect(onCompact).toHaveBeenLastCalledWith(true);
+      expect(onScrollRequest).toHaveBeenLastCalledWith(true);
+      expect(state.expanded).toBe(true);
+      expect(handle.scrolled()).toBe(false);
+
+      const built = FakeIntersectionObserver.instances.length;
+      width.value = 1024;
+      resize();
+      expect(onCompact).toHaveBeenLastCalledWith(false);
+      expect(FakeIntersectionObserver.instances.length).toBe(built + 1);
+      handle.destroy();
+    });
+
+    it('leaves an area the control shut as it is when the header turns compact', () => {
+      const width = { value: 1024 };
+      const { handle, onScrollRequest, resize, root, state } = compactScene(1024);
+      Object.defineProperty(root, 'clientWidth', { configurable: true, get: () => width.value });
+      state.expanded = false;
+      handle.expandedChanged(false, 'control');
+      width.value = 390;
+      resize();
+      expect(onScrollRequest).not.toHaveBeenCalled();
+      expect(state.expanded).toBe(false);
+      handle.destroy();
+    });
   });
 });

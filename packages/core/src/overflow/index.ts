@@ -1,3 +1,4 @@
+export { CLIP_TOLERANCE, isClipped } from './clip';
 export { collapseState, createCollapse } from './collapse';
 export type {
   CollapseHandle,

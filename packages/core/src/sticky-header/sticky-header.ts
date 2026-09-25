@@ -15,13 +15,23 @@
  * - whether the scroll has passed the area — `scrolled`, a fact — and whether
  *   the area was shown whole in place after it had — `revealed`, a state.
  *
+ * A page that fills its height does not scroll: a list inside it does. Given
+ * `contained`, the principal scroller inside that element scrolling down
+ * snaps the area shut, and the same scroller back at its top opens it again.
+ *
+ * Below the compact size class none of this runs: the root is in the flow and
+ * scrolls away with the page, so there is nothing to collapse, reveal or stop
+ * under.
+ *
  * The two bindings own the `expanded` and `pinned` values, because a request
  * with a reason and a cancel is theirs to route. This module tells them when a
  * scroll asks for a move, and they tell it when a value moved and why.
  *
  * Nothing here is framework-specific: an IntersectionObserver, two
- * ResizeObservers, a scroll listener and a few numbers.
+ * ResizeObservers, two scroll listeners and a few numbers.
  */
+
+import { COMPACT_BELOW } from '../measure';
 
 export type StickyHeaderCollapse = 'scroll' | 'manual';
 
@@ -49,12 +59,25 @@ export interface StickyHeaderOptions {
   /**
    * The header is too much of the screen to hold: expanded, it would take
    * more than `TALL_AREA_FRACTION` of the scrollport, or it is narrower than
-   * `NARROW_WIDTH` — a phone. The binding writes `data-tall`, the stylesheet
+   * `COMPACT_BELOW` — a phone. The binding writes `data-tall`, the stylesheet
    * hides the pin, and a held header is let go through `onPinRequest`.
    */
   onTall?: (tall: boolean) => void;
+  /**
+   * The root is narrower than `COMPACT_BELOW`. The binding writes
+   * `data-compact` and the stylesheet takes the root out of `sticky`; the
+   * engine stops collapsing, revealing and publishing a sticky offset, and
+   * opens an area a scroll had shut.
+   */
+  onCompact?: (compact: boolean) => void;
   /** The engine asks `pinned` to move. The binding requests it with the reason `programmatic`. */
   onPinRequest?: (pinned: boolean) => void;
+  /**
+   * The element whose scrolling descendants drive the collapse, when the
+   * header's own scroller does not move — a page that fills its height.
+   * Read on every scroll, so it may be `null` until the element exists.
+   */
+  contained?: () => HTMLElement | null;
 }
 
 export interface StickyHeaderHandle {
@@ -68,6 +91,8 @@ export interface StickyHeaderHandle {
   stuck: () => boolean;
   /** Whether the header is too much of the screen to hold; see `onTall`. */
   tall: () => boolean;
+  /** Whether the root is narrower than the compact size class; see `onCompact`. */
+  compact: () => boolean;
   /**
    * `expanded` moved. `by` says who moved it: the toggle (`control`), the pin
    * (`pin`), the application (`programmatic`) or this module (`scroll`).
@@ -99,8 +124,23 @@ export const REVEAL_SETTLE_WINDOW = 400;
 export const ANCHOR_CORRECTION = 24;
 /** How long an armed fold waits for the area to shrink before the transition is given back, in milliseconds. */
 export const FOLD_TIMEOUT = 600;
-/** Below this width, in pixels, a header is a phone's and is never held. */
-export const NARROW_WIDTH = 640;
+/**
+ * A contained scroll collapses the area once it is past this many pixels. A
+ * list nudged by a few pixels — a rubber band, a focus scrolled into view — is
+ * not the reader leaving the top.
+ */
+export const CONTAINED_COLLAPSE_AT = 16;
+
+/**
+ * A contained scroller is the principal one — the one whose scroll moves the
+ * header — when it is not a form control and its client block size is at
+ * least this share of the contained element's. The rows of a list that fills
+ * the body pass; a textarea, and a short scroll area beside the list, do not.
+ */
+export const PRINCIPAL_SCROLL_FRACTION = 0.5;
+
+/** What scrolls to show its own text, never the content the header heads. */
+const FORM_CONTROL = 'input, select, textarea, [contenteditable]:not([contenteditable="false"])';
 
 /**
  * The header area does not re-open in place when it is taller than this share
@@ -139,6 +179,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   let scrolled = false;
   let revealed = false;
   let tall = false;
+  let compact = false;
   /**
    * The root is travelling back to its offset after a reveal ended, and the
    * area is still in the scrollport on the way: an "in" report during that
@@ -170,6 +211,15 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   let measuredArea = 0;
   /** Who collapsed the area last, which decides whether a return scroll re-opens it. */
   let collapsedBy: 'control' | 'scroll' | null = null;
+  /**
+   * Where each contained scroller stood at its last event. `scroll` does not
+   * bubble, so the document hears every one in the capture phase, and a
+   * sideways scroll fires it with the block position unchanged: that event
+   * says nothing about the top and is dropped.
+   */
+  const containedTops = new WeakMap<Element, number>();
+  /** The area was shut by a contained scroll, the only collapse a contained return re-opens. */
+  let collapsedByContained = false;
   let lastTop = scrollTop();
   let frame = 0;
   let destroyed = false;
@@ -205,6 +255,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   }
 
   function stuck() {
+    if (compact) return false;
     const rootTop = root.getBoundingClientRect().top;
     /* The sticky edge is the scroller's padding box: a bordered scroller
        holds the root `clientTop` pixels below its border box. */
@@ -293,14 +344,16 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (folding === null) measuredArea = area;
     root.style.setProperty(COLLAPSE_PROPERTY, `${area}px`);
     const chrome = options.chrome().reduce((sum, part) => sum + height(part), 0);
+    const width = root.clientWidth;
+    const narrow = width > 0 && width < COMPACT_BELOW;
+    if (narrow !== compact) setCompact(narrow);
     const held = pinned || revealed || collapse === 'manual';
-    target.style.setProperty(STICKY_TOP_PROPERTY, `${chrome + (held ? area : 0)}px`);
+    /* Compact, nothing of the header stays at the top for anything to stop under. */
+    const stays = compact ? 0 : chrome + (held ? area : 0);
+    target.style.setProperty(STICKY_TOP_PROPERTY, `${stays}px`);
     /* Too much of the screen to hold: on a phone, pinned, the header took
        nearly the whole height and left nothing to read. */
-    const width = root.clientWidth;
-    const next =
-      chrome + area > scrollportHeight() * TALL_AREA_FRACTION ||
-      (width > 0 && width < NARROW_WIDTH);
+    const next = chrome + area > scrollportHeight() * TALL_AREA_FRACTION || narrow;
     if (next !== tall) {
       tall = next;
       options.onTall?.(tall);
@@ -308,6 +361,30 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     if (tall && pinned) options.onPinRequest?.(false);
     /* The title grew or shrank: the observer's margin is stale. */
     if (aboveArea() !== observedAbove) observeArea();
+  }
+
+  /**
+   * Crossing into the compact class ends whatever the scroll was holding: a
+   * reveal, a fold under way, the fact itself. An area a scroll had shut is
+   * opened again, because in the flow nothing would ever scroll it back; one
+   * the control or the application shut stays shut.
+   */
+  function setCompact(next: boolean) {
+    compact = next;
+    options.onCompact?.(next);
+    if (next) {
+      releaseFold();
+      settling = false;
+      setRevealed(false);
+      setScrolled(false);
+      const byScroll = collapsedBy === 'scroll' || collapsedByContained;
+      if (byScroll) collapsedBy = null;
+      collapsedByContained = false;
+      observeArea();
+      if (byScroll && !options.state().expanded) options.onScrollRequest(true);
+      return;
+    }
+    observeArea();
   }
 
   function schedule() {
@@ -351,7 +428,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
    */
   function onIntersection(entries: IntersectionObserverEntry[]) {
     const entry = entries[entries.length - 1];
-    if (entry === undefined || destroyed) return;
+    if (entry === undefined || destroyed || compact) return;
     const { collapse, expanded, pinned } = options.state();
     if (collapse === 'manual') return;
     if (revealed) return;
@@ -394,7 +471,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     observedAbove = -1;
     const area = options.area();
     if (area === null || typeof IntersectionObserver === 'undefined') return;
-    if (options.state().collapse === 'manual') return;
+    if (options.state().collapse === 'manual' || compact) return;
     observedAbove = aboveArea();
     intersections = new IntersectionObserver(onIntersection, {
       root: scroller,
@@ -444,9 +521,60 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
   /* The viewport as scroller has no box to observe; its size arrives as a resize. */
   if (scroller === null) view?.addEventListener('resize', schedule);
 
+  /* ── A scroll inside the contained element ─────────────────────────────── */
+
+  function onContainedScroll(event: Event) {
+    if (destroyed) return;
+    const element = event.target;
+    if (!(element instanceof Element) || element === scroller) return;
+    const contained = options.contained?.();
+    if (!contained?.contains(element)) return;
+    const top = element.scrollTop;
+    const previous = containedTops.get(element) ?? 0;
+    containedTops.set(element, top);
+    if (top === previous || compact) return;
+    const { collapse, expanded, pinned } = options.state();
+    if (collapse !== 'scroll' || pinned) return;
+    if (!principal(element, contained)) return;
+    if (expanded && top > CONTAINED_COLLAPSE_AT && top > previous) {
+      collapsedByContained = true;
+      options.onScrollRequest(false);
+      return;
+    }
+    if (!expanded && collapsedByContained && top <= 0) {
+      collapsedByContained = false;
+      options.onScrollRequest(true);
+    }
+  }
+  /**
+   * The scroller the reader reads the body in, as opposed to one they type
+   * into or glance at. Measured on the event rather than cached, because a
+   * pane resized by a splitter changes the answer without a scroll.
+   */
+  function principal(element: Element, contained: HTMLElement) {
+    if (element.matches(FORM_CONTROL)) return false;
+    return element.clientHeight >= contained.clientHeight * PRINCIPAL_SCROLL_FRACTION;
+  }
+
+  if (options.contained !== undefined) {
+    doc.addEventListener('scroll', onContainedScroll, { capture: true, passive: true });
+  }
+
   /* ── What the binding tells us ─────────────────────────────────────────── */
 
   function expandedChanged(expanded: boolean, by: 'control' | 'pin' | 'programmatic' | 'scroll') {
+    /* Opened by anything, or shut by someone other than a scroll: a contained
+       return no longer has a collapse of its own to undo. */
+    if (expanded || by !== 'scroll') collapsedByContained = false;
+    if (compact) {
+      /* In the flow the area opens and folds where it stands: nothing to
+         reveal, and no scroll to compensate, because the reader is looking
+         at the toggle that moved it. */
+      collapsedBy = expanded ? null : 'control';
+      lastTop = scrollTop();
+      schedule();
+      return;
+    }
     if (expanded) {
       const { pinned } = options.state();
       /* Scrolled past the area, or stuck with the area folded: open in place. */
@@ -498,6 +626,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     intersections?.disconnect();
     scrollSource?.removeEventListener('scroll', onScroll);
     if (scroller === null) view?.removeEventListener('resize', schedule);
+    doc.removeEventListener('scroll', onContainedScroll, { capture: true });
     root.style.removeProperty(COLLAPSE_PROPERTY);
     target.style.removeProperty(STICKY_TOP_PROPERTY);
   }
@@ -508,6 +637,7 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     scroller: () => scroller,
     stuck,
     tall: () => tall,
+    compact: () => compact,
     expandedChanged,
     pinnedChanged,
     refresh,

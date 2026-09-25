@@ -51,7 +51,14 @@ export type ChangeReason =
    * state a width moves, and the reason is what lets a product persist the
    * reader's own choice and ignore the one the layout forced.
    */
-  | 'resize';
+  | 'resize'
+  /**
+   * The platform's own way back — a phone's gesture, a browser's button —
+   * used while a modal layer stood over the page, and answered by the layer
+   * rather than by the history. Not `escape`: a touch screen has no such key.
+   * Not `dismiss`: the reader pressed nothing of the layer's own.
+   */
+  | 'back';
 
 export interface ChangeRequest<T> {
   readonly value: T;

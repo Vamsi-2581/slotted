@@ -26,11 +26,10 @@ import {
   isDateInRange,
   parseISODate,
   plainDate,
-  todayIn,
   toISODate,
 } from './plain-date';
 import type { PlainDate } from './plain-date';
-import { addSeconds, compareTime, nowIn, parseISOTime, plainTime, toISOTime } from './plain-time';
+import { addSeconds, compareTime, parseISOTime, plainTime, toISOTime } from './plain-time';
 import type { PlainTime } from './plain-time';
 
 export interface PlainDateTime {
@@ -109,7 +108,46 @@ export function toISODateTime(value: PlainDateTime): string {
 
 /** Now, as a wall-clock value in the zone the caller names. */
 export function nowDateTimeIn(timeZone?: string | undefined): PlainDateTime {
-  return { date: todayIn(timeZone), time: nowIn(timeZone) };
+  return wallClockIn(Date.now(), timeZone);
+}
+
+/**
+ * What a clock on the wall in `timeZone` read at `instant`.
+ *
+ * This is the one conversion the library performs, and it goes in the direction
+ * that has one answer: every instant has exactly one wall-clock reading in a
+ * zone. The reverse has none in the hour a spring change skips and two in the
+ * hour an autumn change repeats, which is why the reverse stays the
+ * application's. An application holding instants — a server's timestamps —
+ * calls this once per value to hand a family the wall-clock values it draws.
+ *
+ * Date and time are read from one `formatToParts`, so a value taken a
+ * millisecond before midnight cannot come back with tomorrow's date beside
+ * today's time. `hourCycle: 'h23'` and the `% 24` answer the engine that writes
+ * midnight as `24`, as `nowIn` does.
+ */
+export function wallClockIn(instant: Date | number, timeZone?: string | undefined): PlainDateTime {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    era: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(typeof instant === 'number' ? new Date(instant) : instant);
+
+  const read = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value ?? 0);
+
+  const year = read('year');
+  const beforeCommonEra = parts.find((part) => part.type === 'era')?.value === 'BC';
+  return {
+    date: { year: beforeCommonEra ? 1 - year : year, month: read('month'), day: read('day') },
+    time: { hour: read('hour') % 24, minute: read('minute'), second: read('second') },
+  };
 }
 
 /**

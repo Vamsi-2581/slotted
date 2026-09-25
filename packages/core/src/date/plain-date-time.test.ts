@@ -11,6 +11,7 @@ import {
   parseISODateTime,
   plainDateTime,
   toISODateTime,
+  wallClockIn,
 } from './plain-date-time';
 import type { PlainDateTime } from './plain-date-time';
 
@@ -167,5 +168,31 @@ describe('dayWindow', () => {
       earliest: { hour: 0, minute: 0, second: 0 },
       latest: { hour: 23, minute: 59, second: 59 },
     });
+  });
+});
+
+describe('wallClockIn', () => {
+  it('reads an instant as the wall clock of the zone named', () => {
+    const instant = Date.UTC(2026, 8, 24, 15, 30, 5);
+    expect(wallClockIn(instant, 'America/Sao_Paulo')).toEqual(at(2026, 9, 24, 12, 30, 5));
+    expect(wallClockIn(new Date(instant), 'Asia/Tokyo')).toEqual(at(2026, 9, 25, 0, 30, 5));
+  });
+
+  /** The hour that does not exist is never produced; the hour that repeats is produced twice. */
+  it('follows the zone across a daylight-saving change', () => {
+    expect(wallClockIn(Date.UTC(2026, 2, 8, 6, 59), 'America/New_York')).toEqual(
+      at(2026, 3, 8, 1, 59),
+    );
+    expect(wallClockIn(Date.UTC(2026, 2, 8, 7, 0), 'America/New_York')).toEqual(
+      at(2026, 3, 8, 3, 0),
+    );
+    const first = wallClockIn(Date.UTC(2026, 10, 1, 5, 30), 'America/New_York');
+    const second = wallClockIn(Date.UTC(2026, 10, 1, 6, 30), 'America/New_York');
+    expect(first).toEqual(at(2026, 11, 1, 1, 30));
+    expect(second).toEqual(first);
+  });
+
+  it('writes midnight as the start of the day, never as 24', () => {
+    expect(wallClockIn(Date.UTC(2026, 0, 1, 0, 0), 'UTC')).toEqual(at(2026, 1, 1, 0, 0));
   });
 });

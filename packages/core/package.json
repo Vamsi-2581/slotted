@@ -68,6 +68,10 @@
       "types": "./dist/types/entity-picker/index.d.ts",
       "import": "./dist/entity-picker.js"
     },
+    "./event-calendar": {
+      "types": "./dist/types/event-calendar/index.d.ts",
+      "import": "./dist/event-calendar.js"
+    },
     "./extent": {
       "types": "./dist/types/extent/index.d.ts",
       "import": "./dist/extent.js"
@@ -83,6 +87,10 @@
     "./form": {
       "types": "./dist/types/form/index.d.ts",
       "import": "./dist/form.js"
+    },
+    "./glyph": {
+      "types": "./dist/types/glyph/index.d.ts",
+      "import": "./dist/glyph.js"
     },
     "./grid": {
       "types": "./dist/types/grid/index.d.ts",
@@ -164,6 +172,10 @@
       "types": "./dist/types/pagination/index.d.ts",
       "import": "./dist/pagination.js"
     },
+    "./recurrence": {
+      "types": "./dist/types/recurrence/index.d.ts",
+      "import": "./dist/recurrence.js"
+    },
     "./scroll-spy": {
       "types": "./dist/types/scroll-spy/index.d.ts",
       "import": "./dist/scroll-spy.js"
@@ -207,6 +219,10 @@
     "./transfer": {
       "types": "./dist/types/transfer/index.d.ts",
       "import": "./dist/transfer.js"
+    },
+    "./dashboard-grid": {
+      "types": "./dist/types/dashboard-grid/index.d.ts",
+      "import": "./dist/dashboard-grid.js"
     },
     "./import-export-center": {
       "types": "./dist/types/import-export-center/index.d.ts",

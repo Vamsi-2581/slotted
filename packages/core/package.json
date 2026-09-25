@@ -223,6 +223,10 @@
     "./upload": {
       "types": "./dist/types/upload/index.d.ts",
       "import": "./dist/upload.js"
+    },
+    "./wizard": {
+      "types": "./dist/types/wizard/index.d.ts",
+      "import": "./dist/wizard.js"
     }
   },
   "scripts": {

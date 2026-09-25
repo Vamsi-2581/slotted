@@ -59,6 +59,7 @@ export default defineConfig({
         tour: resolve(import.meta.dirname, 'src/tour/index.ts'),
         typeahead: resolve(import.meta.dirname, 'src/typeahead/index.ts'),
         upload: resolve(import.meta.dirname, 'src/upload/index.ts'),
+        wizard: resolve(import.meta.dirname, 'src/wizard/index.ts'),
       },
       formats: ['es'],
     },

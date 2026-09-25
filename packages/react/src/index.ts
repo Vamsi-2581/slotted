@@ -1,5 +1,6 @@
 export * from './accordion';
 export * from './action-bar';
+export * from './action-sheet';
 export * from './alert';
 export * from './app-shell';
 export * from './aspect-ratio';

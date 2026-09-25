@@ -18,6 +18,10 @@
       "types": "./dist/types/action-bar/index.d.ts",
       "import": "./dist/action-bar.js"
     },
+    "./action-sheet": {
+      "types": "./dist/types/action-sheet/index.d.ts",
+      "import": "./dist/action-sheet.js"
+    },
     "./alert": {
       "types": "./dist/types/alert/index.d.ts",
       "import": "./dist/alert.js"

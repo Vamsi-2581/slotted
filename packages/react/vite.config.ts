@@ -10,6 +10,7 @@ export default defineConfig({
       entry: {
         index: resolve(import.meta.dirname, 'src/index.ts'),
         'action-bar': resolve(import.meta.dirname, 'src/action-bar/index.ts'),
+        'action-sheet': resolve(import.meta.dirname, 'src/action-sheet/index.ts'),
         'app-shell': resolve(import.meta.dirname, 'src/app-shell/index.ts'),
         'aspect-ratio': resolve(import.meta.dirname, 'src/aspect-ratio/index.ts'),
         avatar: resolve(import.meta.dirname, 'src/avatar/index.ts'),

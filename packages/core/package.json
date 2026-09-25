@@ -208,6 +208,10 @@
       "types": "./dist/types/transfer/index.d.ts",
       "import": "./dist/transfer.js"
     },
+    "./tour": {
+      "types": "./dist/types/tour/index.d.ts",
+      "import": "./dist/tour.js"
+    },
     "./typeahead": {
       "types": "./dist/types/typeahead/index.d.ts",
       "import": "./dist/typeahead.js"

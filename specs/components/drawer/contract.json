@@ -4,7 +4,7 @@
   "ui": "drawer",
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
   "resizePattern": "https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/",
-  "composes": ["portal", "dismissable-layer", "presence", "focus", "extent"],
+  "composes": ["portal", "dismissable-layer", "presence", "focus", "extent", "measure"],
   "identity": {
     "reason": "A drawer is not a member of dialog, and one fact decides it: a persistent drawer has no dialog role at all. An alert dialog is a dialog — same role family, same keyboard, same modality — so a consumer writing [data-ui='dialog'] means it too. An inline drawer is a region of the page, nothing is inert, nothing is contained, and role=dialog on it would be the claim the APG calls severe",
     "cost": "The header's three columns, the words' overflow handling, the close button's geometry and the forced-colours rule are shapes dialog already holds, and packages/styles/src/identity.test.mjs forbids reaching for them. Around eighty lines are written twice, and the two families can move apart without one breaking the other"
@@ -93,11 +93,16 @@
     "restore": "the element that held focus when the drawer opened, or its nearest connected ancestor when that element has since left the document. It restores in both modes, and only when focus is still inside the panel or on the body, so closing a drawer the reader had already left moves nothing",
     "closedPanel": "inert and content-visibility: hidden, in both modes. A panel the eye reads as closed whose controls are still in the tab sequence is the defect MUI's persistent variant ships"
   },
+  "back": {
+    "mechanism": "as dialog: one entry of the session history per modal overlay layer, held by @slotted/core/dismissable-layer, and a popstate that leaves it is the platform's way back, answered by the layer with the reason back. An inline drawer holds none, as it answers no Escape",
+    "reason": "the sheet from the edge is the layer a phone shows most, and the gesture that leaves it is the same one that leaves a native sheet"
+  },
   "reasons": {
     "trigger": ["pointer", "keyboard"],
     "close": "dismiss",
     "escape": "escape",
     "outsidePress": "outsidePress",
+    "back": "back",
     "handle": "programmatic",
     "resizerDrag": "pointer",
     "resizerKeys": "keyboard"
@@ -143,12 +148,13 @@
     "max": "maxExtent, default 1",
     "step": "16px per arrow press and 64px with Shift, converted against the layer measured at the moment of the press, when there are no snap points. A distance and not a proportion: five per cent of a wide layer is a jump rather than an adjustment, and SAP's Splitter, VS Code's sash and the Window Splitter pattern's own examples all move a fixed distance",
     "snapPoints": "an array of fractions, empty by default. With them an arrow moves to the adjacent stop, Home and End go to the first and last, a drag releases onto the nearest, and minExtent and maxExtent default to the first and the last",
-    "dismissThreshold": "a drag released below minExtent asks to close, carrying pointer; a close the consumer cancels leaves the panel at minExtent. That is what MUI's SwipeableDrawer and Vaul's dismiss gesture both do, expressed as a consequence of the resize rather than as a second mechanism",
+    "dismissThreshold": "a release settles through settleExtent (see sheet.settle), where the closed position is the stop 0: a drag released nearer to it than to any stop, or flung toward it, asks to close carrying pointer, and a close the consumer cancels leaves the panel on the lowest stop. That is what MUI's SwipeableDrawer, Vaul's dismiss gesture and BottomSheetBehavior's hide all do, expressed as a consequence of the resize rather than as a second mechanism",
     "overlapCost": "On side=start the separator sits at the panel's inline-end edge, which is where a left-to-right document also puts the body's scrollbar. The wheel still scrolls and the scrollbar's inner half is still reachable, and every desktop application with a resizable sidebar has the same overlap",
     "capability": "Rendering the resizer part is the capability. There is no resizable prop, so a resizable prop with no resizer part, and a resizer part a prop has switched off, are both states this family cannot be in",
     "reason": "A fraction and not a length: the Window Splitter pattern's three aria values are then the fraction times a hundred, the limits and the snap points are the same kind of number so one clamp covers all three, and a keyboard step is a proportion rather than a pixel literal the family would have to tokenise",
     "restore": "a double click on the separator puts the panel back on the measure it started from, which is `undefined` — the size step decides — when the consumer named none. It is the one gesture that restores rather than moves, and every desktop pane divider answers a double click with it",
-    "gesture": "while the pointer is down the separator holds the pointer capture, the document's cursor becomes col-resize or row-resize and its selection is suspended; the panel carries will-change on the axis it is growing in and no transition on that axis at all. R7 forbids animating a layout property, and this animates none: the width is the value the reader is holding, written once per pointermove"
+    "gesture": "while the pointer is down the separator holds the pointer capture, the document's cursor becomes col-resize or row-resize and its selection is suspended; the panel carries will-change on the axis it is growing in and no transition on that axis at all. R7 forbids animating a layout property, and this animates none: the width is the value the reader is holding, written once per pointermove",
+    "press": "a press on the separator moves nothing: the panel follows the pointer from the offset it was grabbed at, so a press that travels less than three pixels is a tap (see sheet.grabberTap) and a drag never jumps the edge under the hand. The old press put the edge where the pointer landed, which made a tap on a sheet's grabber a resize"
   },
   "stateAttributes": {
     "open": "data-open",
@@ -160,7 +166,15 @@
       "controlled": "open",
       "uncontrolled": "defaultOpen",
       "request": "onOpenChange",
-      "reasons": ["pointer", "keyboard", "dismiss", "escape", "outsidePress", "programmatic"],
+      "reasons": [
+        "pointer",
+        "keyboard",
+        "dismiss",
+        "escape",
+        "outsidePress",
+        "back",
+        "programmatic"
+      ],
       "result": "the value of the close part that was pressed"
     },
     "extent": {
@@ -168,7 +182,7 @@
       "uncontrolled": "defaultExtent",
       "request": "onExtentChange",
       "reasons": ["pointer", "keyboard", "programmatic"],
-      "valueType": "number | undefined, where undefined is the panel on the measure its size step gives it"
+      "valueType": "number | undefined, where undefined is the panel on the measure its size step gives it — under size=content, the height of its content"
     }
   },
   "bodyInset": {
@@ -180,11 +194,13 @@
   "axes": {
     "mode": ["overlay", "inline"],
     "side": ["start", "end", "top", "bottom"],
-    "size": ["sm", "md", "lg", "xl", "full"],
+    "size": ["sm", "md", "lg", "xl", "full", "content"],
     "mount": ["active", "lazy", "eager"],
     "modal": [true, false],
     "escape": ["close", "none"],
-    "outsidePress": ["close", "none"]
+    "outsidePress": ["close", "none"],
+    "back": ["close", "none"],
+    "drag": ["panel", "resizer"]
   },
   "resolution": {
     "mode": ["prop", "defaults", "family"],
@@ -193,10 +209,22 @@
     "mount": ["prop", "defaults", "family"],
     "modal": ["prop", "defaults", "family"],
     "escape": ["prop", "defaults", "family"],
-    "outsidePress": ["prop", "defaults", "family"]
+    "outsidePress": ["prop", "defaults", "family"],
+    "back": ["prop", "defaults", "family"],
+    "drag": ["prop", "defaults", "family"]
   },
   "provides": {
-    "drawerDefaults": ["mode", "side", "size", "mount", "modal", "escape", "outsidePress"]
+    "drawerDefaults": [
+      "mode",
+      "side",
+      "size",
+      "mount",
+      "modal",
+      "escape",
+      "outsidePress",
+      "back",
+      "drag"
+    ]
   },
   "declined": {
     "dialogElement": {
@@ -213,10 +241,6 @@
     },
     "parentPush": {
       "reason": "Ant's push slides a parent drawer aside when a child opens. The depth comes from dismissable-layer's single stack and the layers overlap; animating the parent would mean this family owning the geometry of a layer it no longer controls"
-    },
-    "panelDrag": {
-      "reason": "Vaul supports dragging the panel itself and spends most of its complexity there: telling a drag from a scroll, telling it from a text selection, and repositionInputs for the keyboard that opens under it. The resizer is the drag target, it is twenty-four pixels of real estate, and it is the same control the keyboard uses",
-      "cost": "A reader cannot flick a bottom sheet away from its middle, and the resizer has to be rendered for the gesture to exist at all"
     },
     "drawerService": {
       "reason": "The same decision dialog took. With @if and signals, opening a drawer from code is three lines in the consumer's own template, afterClosed() is the closed output carrying the same result, and the data injection is the component's own inputs, checked by the compiler rather than cast from a token"
@@ -236,6 +260,13 @@
     },
     "ariaValueText": {
       "reason": "A reader hears 40 rather than 40 per cent. The string would have to be built from a locale this family does not take, and a hard-coded per-cent sign is wrong in the locales that place it differently. The Window Splitter pattern's 0 to 100 range is what makes the bare number legible"
+    },
+    "backgroundScale": {
+      "reason": "Vaul's shouldScaleBackground and react-modal-sheet's modalEffectRootId shrink the page behind the sheet. The family never writes on an element it does not own, and the page is the consumer's",
+      "replacedBy": "body:has([data-ui='drawer'][data-side='bottom'][data-open]) #app { scale: 0.96; transition: scale var(--slotted-duration-medium) var(--slotted-easing-enter); }"
+    },
+    "edgeAttached": {
+      "reason": "UIKit's prefersEdgeAttachedInCompactHeight is one implementation; the sheet's maximum inline size already gives a phone held sideways a sheet narrower than the screen"
     }
   },
   "members": {
@@ -250,9 +281,12 @@
         "modal": true,
         "escape": "close",
         "outsidePress": "close",
+        "back": "close",
+        "drag": "panel",
         "minExtent": 0.2,
         "maxExtent": 1,
-        "loading": false
+        "loading": false,
+        "scrimFrom": 0
       },
       "fixed": {
         "modalUnderInline": false
@@ -292,7 +326,31 @@
       "content",
       "composition",
       "defaults",
-      "accessibility"
+      "accessibility",
+      "sheet",
+      "scrimFrom",
+      "keyboard"
     ]
+  },
+  "sheet": {
+    "design": "docs/history/designs/2026-09-25-drawer-bottom-sheet-design.md",
+    "content": "size=content is block-size: auto with max-block-size: calc(100% - var(--slotted-space-12)), sixty-four pixels of scrim left above the sheet for the press outside; on an inline side it is inline-size: max-content under the same cap. It is the default size on top and bottom and never on start and end",
+    "contentStop": "under size=content the height of the content is a stop for the keyboard, the drag and the grabber tap, measured when it is needed as panel.offsetHeight - body.clientHeight + body.scrollHeight. A release that settles on it requests extent undefined rather than the measured fraction, so the sheet follows its content again when the content grows",
+    "restStop": "with no snap points and a named size, the rest of the size step is the only stop the body drag has: the sheet goes back to it or closes. The resizer of a sheet with no snap points stays continuous, because resizing is what it does on a desktop screen",
+    "drag": "drag=panel lets a touch anywhere on the panel of an overlay sheet on side=bottom move it, through attachSheetDrag from @slotted/core/extent with non-passive touch listeners. Touch only: a mouse or a pen drags the resizer, because a text drag with a mouse is indistinguishable from the gesture. drag=resizer leaves the resizer the only target, which is what every other side has",
+    "handoff": "the axis and the owner are decided once the touch has moved eight pixels, Android's touch slop. More horizontal than vertical is never the sheet's. Downward with any scroll container between the target and the panel away from scrollTop 0 scrolls; upward with the sheet on its highest stop scrolls; everything else drags and cancels the touchmove. A scroll that reaches the top in the middle of a gesture does not hand over, because a touchmove stops being cancelable once scrolling has begun; the next gesture drags",
+    "exclusions": "no drag starts on input, textarea, select, [contenteditable], the resizer, anything inside data-drawer-drag=\"none\", an element whose computed touch-action does not admit pan-y — a slider, a canvas, a map already claimed the gesture — or while text is selected",
+    "settle": "settleExtent: the stops in order, with 0 joining them as close. Faster than 500 px/s (BottomSheetBehavior's significant velocity) goes to the first stop beyond the release in the direction of travel; slower goes to the stop nearest projectExtent of the release. It replaces the old 0.5 layers per second, which on a 400-pixel layer was 200 px/s and closed a sheet on a slow drag",
+    "overdrag": "dampenExtent: above the highest stop the sheet follows the hand with logarithmic friction and returns on release, as Compose, Vaul, Ionic and gorhom do",
+    "scrimFrom": {
+      "attribute": "data-undimmed",
+      "meaning": "while the extent is below scrimFrom the root carries data-undimmed: the backdrop takes opacity: 0 and pointer-events: none with the opacity transition it already had, and the root, which is fixed over the viewport, takes pointer-events: none while the panel keeps them, so a press reaches the page",
+      "reason": "UIKit's largestUndimmedDetentIdentifier, Vaul's fadeFromIndex, Ionic's backdropBreakpoint and gorhom's appearsOnIndex. It asks for modal=false and outsidePress=none, because a missing scrim over an inert page promises a page that does not answer"
+    },
+    "width": "on top and bottom the panel is min(100%, var(--slotted-drawer-sheet-inline-size)), centred; the token resolves to --slotted-drawer-extent-xl, 40rem, Material 3's 640 dp",
+    "keyboard": "observeKeyboardInset from @slotted/core/measure reads innerHeight - (visualViewport.height + visualViewport.offsetTop) on the visualViewport's resize and scroll, and the open overlay layer writes it as --slotted-keyboard-inset, read as the root's padding-block-end on every side. The panel settles above the keyboard and its 100% cap shrinks with the cell. navigator.virtualKeyboard.overlaysContent is never set: it is page-wide state and the API is not Baseline",
+    "grabberTap": "a click on the resizer that no drag preceded moves to the next stop up, and from the highest back to the lowest. With no stop beyond the rest it does nothing. Enter keeps the Window Splitter reading",
+    "motion": "interpolate-size: allow-keywords on the panel, so a content height that changes, and a move between the content stop and a fraction, transition; a browser without the property jumps",
+    "bounds": "under size=content the range reaches past the last snap point to maxExtent, because the height of the content is a stop above them; a floor never stands in for an unset extent when a request is compared, or a request for the floor from the content stop reads as no change"
   }
 }

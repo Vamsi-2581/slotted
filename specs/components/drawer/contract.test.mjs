@@ -126,7 +126,7 @@ test('declares a state model for both values a consumer can own', () => {
     controlled: 'open',
     uncontrolled: 'defaultOpen',
     request: 'onOpenChange',
-    reasons: ['pointer', 'keyboard', 'dismiss', 'escape', 'outsidePress', 'programmatic'],
+    reasons: ['pointer', 'keyboard', 'dismiss', 'escape', 'outsidePress', 'back', 'programmatic'],
     result: 'the value of the close part that was pressed',
   });
 
@@ -136,7 +136,7 @@ test('declares a state model for both values a consumer can own', () => {
     request: 'onExtentChange',
     reasons: ['pointer', 'keyboard', 'programmatic'],
     valueType:
-      'number | undefined, where undefined is the panel on the measure its size step gives it',
+      'number | undefined, where undefined is the panel on the measure its size step gives it — under size=content, the height of its content',
   });
 });
 
@@ -210,7 +210,7 @@ test('names one reason for every source that can move it', () => {
   const sources = Object.entries(contract.reasons);
   assert.deepEqual(
     sources.map(([source]) => source),
-    ['trigger', 'close', 'escape', 'outsidePress', 'handle', 'resizerDrag', 'resizerKeys'],
+    ['trigger', 'close', 'escape', 'outsidePress', 'back', 'handle', 'resizerDrag', 'resizerKeys'],
   );
 
   const declared = new Set([
@@ -352,7 +352,8 @@ test('names one property for the extent, and says why no theme is shut out of it
 test('makes a snap point a stop of the separator rather than a second mechanism', () => {
   assert.match(contract.extent.snapPoints, /adjacent stop/);
   assert.match(contract.extent.snapPoints, /Home and End/);
-  assert.match(contract.extent.dismissThreshold, /below minExtent asks to close/);
+  assert.match(contract.extent.dismissThreshold, /settleExtent/);
+  assert.match(contract.extent.dismissThreshold, /the stop 0/);
 });
 
 test('declares the two shapes docs/component-features.md section 8 asks for', () => {
@@ -473,6 +474,7 @@ test('composes the overlay modules and names the ones it does not', () => {
     'presence',
     'focus',
     'extent',
+    'measure',
   ]);
   assert.match(contract.declined.positioner.reason, /anchored to an edge/);
   assert.match(contract.declined.liveAnnouncer.reason, /aria-expanded/);
@@ -485,7 +487,7 @@ test('composes the overlay modules and names the ones it does not', () => {
 test('replaces every declined capability rather than only refusing it', () => {
   assert.match(contract.declined.pushMode.replacedBy, /mode="inline"/);
   assert.equal(contract.declined.emptyState.deferTo, 'result-state');
-  assert.ok(contract.declined.panelDrag.cost.length > 0);
+  assert.match(contract.declined.backgroundScale.replacedBy, /:has\(\[data-ui='drawer'\]/);
   assert.ok(contract.declined.dialogElement.cost.length > 0);
   for (const [name, entry] of Object.entries(contract.declined)) {
     assert.ok(entry.reason.length > 0, `${name} is declined with no reason`);
@@ -526,4 +528,61 @@ test('declares a scenario for every axis and for both new capabilities', () => {
 test('lets the consumer drop the body inset', () => {
   assert.equal(contract.bodyInset.attribute, 'data-inset');
   assert.deepEqual(contract.bodyInset.values, ['none']);
+});
+
+/**
+ * The reopening of 2026-09-25 (`docs/history/designs/2026-09-25-drawer-bottom-sheet-design.md`).
+ * A sheet from a block edge measures its content, as every native sheet does;
+ * a panel from an inline edge keeps the named step Ant, Fluent and MUI use.
+ */
+test('measures a sheet by its content and a side panel by its step', () => {
+  assert.ok(contract.axes.size.includes('content'));
+  assert.equal(drawer.defaults.size, 'md');
+  assert.match(contract.sheet.content, /default size on top and bottom and never on start and end/);
+  assert.match(contract.sheet.contentStop, /offsetHeight/);
+  assert.match(contract.sheet.contentStop, /undefined/);
+});
+
+/**
+ * The declined panel drag of 2026-09-04 is revoked: seven of the eight surveyed
+ * sheets drag by the body and hand the gesture to the scroll of what it holds.
+ * The mouse keeps the resizer, for the reason the decline gave.
+ */
+test('drags a sheet by its body and hands the gesture to the scroll', () => {
+  assert.ok(!('panelDrag' in contract.declined), 'the revoked decline is still written');
+  assert.deepEqual(contract.axes.drag, ['panel', 'resizer']);
+  assert.equal(drawer.defaults.drag, 'panel');
+  assert.match(contract.sheet.drag, /touch/);
+  assert.match(contract.sheet.drag, /side=bottom/);
+  assert.match(contract.sheet.handoff, /scrollTop/);
+  assert.match(contract.sheet.handoff, /highest stop/);
+  assert.match(contract.sheet.exclusions, /touch-action/);
+  assert.match(contract.sheet.exclusions, /data-drawer-drag="none"/);
+});
+
+/** One rule for every release, the resizer's and the body's. */
+test('settles a release by fling first and by projected distance second', () => {
+  assert.match(contract.sheet.settle, /500 px\/s/);
+  assert.match(contract.sheet.settle, /projectExtent/);
+  assert.match(contract.sheet.settle, /close/);
+  assert.match(contract.sheet.overdrag, /dampenExtent/);
+});
+
+test('leaves the page undimmed below a stop the consumer names', () => {
+  assert.equal(drawer.defaults.scrimFrom, 0);
+  assert.equal(contract.sheet.scrimFrom.attribute, 'data-undimmed');
+  assert.match(contract.sheet.scrimFrom.meaning, /pointer-events: none/);
+});
+
+test('caps a sheet on a wide layer and lifts it over the virtual keyboard', () => {
+  assert.match(contract.sheet.width, /--slotted-drawer-sheet-inline-size/);
+  assert.match(contract.sheet.keyboard, /--slotted-keyboard-inset/);
+  assert.match(contract.sheet.keyboard, /visualViewport/);
+  assert.match(contract.sheet.grabberTap, /next stop/);
+});
+
+test('demonstrates the sheet, its undimmed stop and the keyboard', () => {
+  for (const id of ['sheet', 'scrimFrom', 'keyboard']) {
+    assert.ok(contract.scenarios.drawer.includes(id), `no scenario demonstrates ${id}`);
+  }
 });

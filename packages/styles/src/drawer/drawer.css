@@ -285,10 +285,12 @@
    * Mounted and closed. `eager` and `lazy` leave the layer in the document and
    * an inline drawer never leaves it at all, so a panel the eye reads as closed
    * would otherwise keep its controls in the tab sequence — the defect MUI's
-   * `persistent` variant ships. The binding writes `inert` alongside this, so a
-   * browser without `content-visibility` cannot put focus inside one either.
+   * `persistent` variant ships. The rule keys on `inert`, which the binding
+   * writes while the panel is closed or exiting, and not on the absence of
+   * `data-open`: the entering frame has no `data-open` either, and a hidden
+   * panel in that frame refuses the focus scope's initial focus.
    */
-  [data-ui='drawer']:not([data-open]) {
+  [data-ui='drawer'][inert] {
     content-visibility: hidden;
     pointer-events: none;
   }
@@ -538,6 +540,104 @@
 
   [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='footer'] {
     grid-row: 4;
+  }
+
+  /* ── The sheet ────────────────────────────────────────────────────────── */
+
+  /**
+   * A sheet on a wide layer is a card over the page, not a strip across it:
+   * forty rems, Material 3's 640 dp, centred, with the scrim on both sides. The
+   * edge then shows on three sides, so the panel draws it on three; on a phone
+   * the two side edges sit on the screen's own and read as nothing.
+   */
+  [data-ui='drawer'][data-mode='overlay'][data-side='top'] > [data-part='panel'],
+  [data-ui='drawer'][data-mode='overlay'][data-side='bottom'] > [data-part='panel'] {
+    justify-self: center;
+    inline-size: min(
+      100%,
+      var(--slotted-drawer-sheet-inline-size, var(--slotted-drawer-extent-xl, 40rem))
+    );
+    border-inline-width: var(--_rule-size);
+  }
+
+  /**
+   * `size="content"`: the panel measures what it holds, which is what every
+   * native sheet does and no named step can. `auto` on a block side and
+   * `max-content` on an inline one, capped four rems short of the layer so a
+   * strip of scrim is always left for the press outside.
+   *
+   * The cap reads `--slotted-drawer-extent` first. Once the reader has moved the
+   * sheet the binding writes that length, and a sheet dragged to the whole layer
+   * is the whole layer; unset, the cap is the strip.
+   *
+   * `interpolate-size` is what lets a height of `auto` transition — content that
+   * arrives while the sheet is open, and a release back onto the content stop. A
+   * browser without it jumps, and nothing else changes.
+   */
+  [data-ui='drawer'][data-size='content'] {
+    --_step: auto;
+    --_content-cap: min(
+      var(--slotted-drawer-extent, calc(100% - var(--slotted-space-12, 4rem))),
+      100%
+    );
+    interpolate-size: allow-keywords;
+  }
+
+  [data-ui='drawer'][data-size='content'][data-side='start'],
+  [data-ui='drawer'][data-size='content'][data-side='end'] {
+    --_step: max-content;
+  }
+
+  [data-ui='drawer'][data-size='content'][data-side='start'] > [data-part='panel'],
+  [data-ui='drawer'][data-size='content'][data-side='end'] > [data-part='panel'] {
+    inline-size: var(--_extent);
+    max-inline-size: var(--_content-cap);
+  }
+
+  [data-ui='drawer'][data-size='content'][data-side='top'] > [data-part='panel'],
+  [data-ui='drawer'][data-size='content'][data-side='bottom'] > [data-part='panel'] {
+    block-size: var(--_extent);
+    max-block-size: var(--_content-cap);
+  }
+
+  /**
+   * The virtual keyboard. `observeKeyboardInset` in `@slotted/core/measure` measures what the
+   * keyboard covers and the binding writes it here while the layer is open; the
+   * cell the panel sits in shrinks by it, so a sheet lands above the keys and a
+   * side panel's footer does too, and every `100%` cap shrinks with the cell.
+   */
+  [data-ui='drawer'][data-mode='overlay'] {
+    padding-block-end: var(--slotted-keyboard-inset, 0px);
+  }
+
+  /**
+   * The scrim a sheet leaves off below the stop the consumer named
+   * (`scrimFrom`): the map behind a sheet at its lowest stop is the page, and a
+   * press on it reaches it. The opacity keeps the transition the scrim already
+   * has, so crossing the stop fades rather than blinks.
+   */
+  [data-ui='drawer'][data-undimmed] > [data-part='backdrop'] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The layer is fixed over the whole viewport, so the scrim alone letting the
+     press through leaves the root to catch it; the panel takes it back. */
+  [data-ui='drawer'][data-undimmed] {
+    pointer-events: none;
+  }
+
+  [data-ui='drawer'][data-undimmed] > [data-part='panel'] {
+    pointer-events: auto;
+  }
+
+  /**
+   * A sheet with no footer: the body is the last row and the home indicator
+   * sits over its end. The inset is padding inside the scrollport, so the last
+   * line scrolls clear of the indicator rather than stopping under it.
+   */
+  [data-ui='drawer'][data-side='bottom'] > [data-part='panel'] > [data-part='body']:last-child {
+    padding-block-end: calc(var(--_padding-block) + env(safe-area-inset-bottom, 0px));
   }
 
   /** `start` is the left edge in one direction and the right edge in the other. */
@@ -869,6 +969,13 @@
     display: none;
   }
 
+  /**
+   * The dot matrix recolours its ink and nothing else: its dots are
+   * `currentColor` over a transparent box, and a `background-color` here filled
+   * the box — the grip became a solid block under the hand, under hover and
+   * under focus. `splitter`, which draws the same picture, only ever changed
+   * `color`. The pill on a block side is a filled box, so it recolours its fill.
+   */
   [data-ui='drawer']
     > [data-part='panel']
     > [data-part='resizer']:not([data-disabled]):hover
@@ -882,6 +989,32 @@
     > [data-part='resizer']
     > [data-part='grip'] {
     color: var(--_active);
+  }
+
+  [data-ui='drawer'][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover
+    > [data-part='grip'],
+  [data-ui='drawer'][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):hover
+    > [data-part='grip'],
+  [data-ui='drawer'][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):focus-visible
+    > [data-part='grip'],
+  [data-ui='drawer'][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']:not([data-disabled]):focus-visible
+    > [data-part='grip'],
+  [data-ui='drawer'][data-dragging][data-side='top']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='grip'],
+  [data-ui='drawer'][data-dragging][data-side='bottom']
+    > [data-part='panel']
+    > [data-part='resizer']
+    > [data-part='grip'] {
     background-color: var(--_active);
   }
 
@@ -981,9 +1114,13 @@
    * An inner control, not a button (R2): the box is the glyph plus a step of
    * air on each side, floored at the WCAG 2.2 minimum, and the glyph is
    * centred in it. It was the control height before, a thirty-four pixel
-   * square beside a sixteen pixel mark.
+   * square beside a sixteen pixel mark. The glyph is the binding's `Glyph` in
+   * an `icon` box, sized here through the icon token so the box and the
+   * formula above read one length.
    */
   [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close'] {
+    --slotted-icon-size: var(--_icon-size);
+
     grid-column: 2;
     grid-row: 1 / span 2;
     align-self: start;
@@ -1008,15 +1145,19 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close']::after {
-    content: '';
-    background: currentcolor;
-    block-size: var(--_icon-size);
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-icon-x);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: a transparent `::before` centred on the control
+     reaches 44 pixels, and the ground and the ring stay square. */
+  @media (pointer: coarse) {
+    [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close'] {
+      position: relative;
+    }
+
+    [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close']::before {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
   }
 
   [data-ui='drawer']
@@ -1147,17 +1288,6 @@
     [data-ui='drawer'] > [data-part='panel'] {
       border-width: var(--slotted-border-width-thick, 2px);
       border-color: CanvasText;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='close']::after {
-      forced-color-adjust: none;
     }
   }
 }

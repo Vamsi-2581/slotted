@@ -51,7 +51,11 @@
         <p data-part="description" id="d1-description">
           Emitida em 12 de agosto, vence em 11 dias.
         </p>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
       <div data-part="body">
         <p style="margin: 0">
@@ -89,7 +93,11 @@
     <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d2-title">
       <header data-part="header">
         <h2 data-part="title" id="d2-title">Menu</h2>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
       <div data-part="body">
         <p style="margin: 0">Projetos</p>
@@ -117,11 +125,10 @@
 
 <section data-scene="sheet" data-fixed>
   <div style="display: grid; gap: var(--slotted-space-4)">
-    <h2 style="font-size: var(--slotted-font-size-lg); margin: 0">Filtros</h2>
+    <h2 style="font-size: var(--slotted-font-size-lg); margin: 0">Faturas</h2>
     <p style="color: var(--slotted-text-muted); margin: 0">
-      A folha vem de baixo e guarda os dois cantos que o leitor consegue ver. A pega fica acima do
-      cabeçalho e é visível em repouso, que é onde uma mão procura uma folha — e não na aresta, onde
-      ninguém a encontrava.
+      A folha mede o conteúdo: três linhas de filtro e o rodapé, e nada abaixo delas. Num ecrã largo
+      para nos 40 rem e fica centrada sobre o scrim.
     </p>
   </div>
 
@@ -131,7 +138,8 @@
     data-open
     data-mode="overlay"
     data-side="bottom"
-    data-size="sm"
+    data-size="content"
+    data-drag="panel"
     data-mount="active"
   >
     <div data-part="backdrop"></div>
@@ -141,7 +149,7 @@
         role="separator"
         tabindex="0"
         aria-orientation="horizontal"
-        aria-valuenow="45"
+        aria-valuenow="42"
         aria-valuemin="20"
         aria-valuemax="100"
         aria-labelledby="d3-title"
@@ -153,10 +161,232 @@
       </div>
       <header data-part="header">
         <h2 data-part="title" id="d3-title">Filtrar faturas</h2>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
       <div data-part="body">
-        <p style="margin: 0">Período, status e responsável.</p>
+        <div style="display: grid; gap: var(--slotted-space-3)">
+          <p style="margin: 0">Período: últimos 30 dias</p>
+          <p style="margin: 0">Status: em aberto, vencidas</p>
+          <p style="margin: 0">Responsável: Marina Duarte</p>
+        </div>
+      </div>
+      <footer data-part="footer">
+        <button type="button">Limpar</button>
+        <button type="button">Aplicar</button>
+      </footer>
+    </div>
+  </div>
+</section>
+
+<section data-scene="sheet-long" data-fixed>
+  <div style="display: grid; gap: var(--slotted-space-4)">
+    <h2 style="font-size: var(--slotted-font-size-lg); margin: 0">Faturas</h2>
+    <p style="color: var(--slotted-text-muted); margin: 0">
+      Doze clientes não cabem: a folha para quatro rems abaixo do topo, deixa essa faixa de scrim
+      para o toque fora, e só o corpo rola.
+    </p>
+  </div>
+
+  <div
+    data-ui="drawer"
+    data-part="root"
+    data-open
+    data-mode="overlay"
+    data-side="bottom"
+    data-size="content"
+    data-drag="panel"
+    data-mount="active"
+  >
+    <div data-part="backdrop"></div>
+    <div
+      data-part="panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d3l-title"
+      id="d3l-panel"
+    >
+      <div
+        data-part="resizer"
+        role="separator"
+        tabindex="0"
+        aria-orientation="horizontal"
+        aria-valuenow="42"
+        aria-valuemin="20"
+        aria-valuemax="100"
+        aria-labelledby="d3l-title"
+        aria-controls="d3l-panel"
+      >
+        <span data-part="line" aria-hidden="true"></span
+        ><span data-part="grip" aria-hidden="true"></span
+        ><span data-part="line" aria-hidden="true"></span>
+      </div>
+      <header data-part="header">
+        <h2 data-part="title" id="d3l-title">Clientes com faturas em aberto</h2>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
+      </header>
+      <div data-part="body">
+        <div style="display: grid; gap: var(--slotted-space-4)">
+          <p style="margin: 0">Acme Logística — R$ 12.480,00</p>
+          <p style="margin: 0">Banco Horizonte — R$ 3.920,50</p>
+          <p style="margin: 0">Casa Verde Alimentos — R$ 845,00</p>
+          <p style="margin: 0">Distribuidora Norte — R$ 27.300,00</p>
+          <p style="margin: 0">Estúdio Lume — R$ 1.150,00</p>
+          <p style="margin: 0">Farmácia Popular do Centro — R$ 6.712,30</p>
+          <p style="margin: 0">Gráfica Aurora — R$ 2.004,90</p>
+          <p style="margin: 0">Hotel Mirante — R$ 18.960,00</p>
+          <p style="margin: 0">Instituto Raiz — R$ 540,00</p>
+          <p style="margin: 0">Jardins da Serra — R$ 9.870,00</p>
+          <p style="margin: 0">Klabin Embalagens — R$ 31.225,75</p>
+          <p style="margin: 0">Laboratório Vitta — R$ 4.380,00</p>
+        </div>
+      </div>
+      <footer data-part="footer">
+        <button type="button">Limpar</button>
+        <button type="button">Aplicar</button>
+      </footer>
+    </div>
+  </div>
+</section>
+
+<section data-scene="sheet-undimmed" data-fixed>
+  <div style="display: grid; gap: var(--slotted-space-4)">
+    <h2 style="font-size: var(--slotted-font-size-lg); margin: 0">Faturas</h2>
+    <p style="color: var(--slotted-text-muted); margin: 0">
+      Abaixo do detent que o consumidor nomeou em scrimFrom a página não escurece e continua a
+      receber o toque; a folha não é modal.
+    </p>
+  </div>
+
+  <div
+    data-ui="drawer"
+    data-part="root"
+    data-open
+    data-mode="overlay"
+    data-side="bottom"
+    data-size="content"
+    data-drag="panel"
+    data-mount="active"
+    data-undimmed
+  >
+    <div data-part="backdrop"></div>
+    <div data-part="panel" role="dialog" aria-labelledby="d3u-title" id="d3u-panel">
+      <div
+        data-part="resizer"
+        role="separator"
+        tabindex="0"
+        aria-orientation="horizontal"
+        aria-valuenow="42"
+        aria-valuemin="20"
+        aria-valuemax="100"
+        aria-labelledby="d3u-title"
+        aria-controls="d3u-panel"
+      >
+        <span data-part="line" aria-hidden="true"></span
+        ><span data-part="grip" aria-hidden="true"></span
+        ><span data-part="line" aria-hidden="true"></span>
+      </div>
+      <header data-part="header">
+        <h2 data-part="title" id="d3u-title">Filtrar faturas</h2>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
+      </header>
+      <div data-part="body">
+        <div style="display: grid; gap: var(--slotted-space-3)">
+          <p style="margin: 0">Período: últimos 30 dias</p>
+          <p style="margin: 0">Status: em aberto, vencidas</p>
+          <p style="margin: 0">Responsável: Marina Duarte</p>
+        </div>
+      </div>
+      <footer data-part="footer">
+        <button type="button">Limpar</button>
+        <button type="button">Aplicar</button>
+      </footer>
+    </div>
+  </div>
+</section>
+
+<section data-scene="sheet-keyboard" data-fixed>
+  <div style="display: grid; gap: var(--slotted-space-4)">
+    <h2 style="font-size: var(--slotted-font-size-lg); margin: 0">Faturas</h2>
+    <p style="color: var(--slotted-text-muted); margin: 0">
+      Com o teclado virtual aberto a camada recua pelo que ele cobre, e a folha assenta acima das
+      teclas.
+    </p>
+  </div>
+  <div
+    aria-hidden="true"
+    style="
+      position: fixed;
+      inset: auto 0 0;
+      block-size: 180px;
+      display: grid;
+      place-items: center;
+      background: var(--slotted-surface-sunken);
+      color: var(--slotted-text-muted);
+      z-index: 2000;
+    "
+  >
+    teclado virtual, 180 px
+  </div>
+
+  <div
+    data-ui="drawer"
+    data-part="root"
+    data-open
+    data-mode="overlay"
+    data-side="bottom"
+    data-size="content"
+    data-drag="panel"
+    data-mount="active"
+    style="--slotted-keyboard-inset: 180px"
+  >
+    <div data-part="backdrop"></div>
+    <div
+      data-part="panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d3k-title"
+      id="d3k-panel"
+    >
+      <div
+        data-part="resizer"
+        role="separator"
+        tabindex="0"
+        aria-orientation="horizontal"
+        aria-valuenow="42"
+        aria-valuemin="20"
+        aria-valuemax="100"
+        aria-labelledby="d3k-title"
+        aria-controls="d3k-panel"
+      >
+        <span data-part="line" aria-hidden="true"></span
+        ><span data-part="grip" aria-hidden="true"></span
+        ><span data-part="line" aria-hidden="true"></span>
+      </div>
+      <header data-part="header">
+        <h2 data-part="title" id="d3k-title">Enviar lembrete</h2>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
+      </header>
+      <div data-part="body">
+        <label style="display: grid; gap: var(--slotted-space-2)">
+          <span>Nota para o cliente</span>
+          <input type="text" value="Pagamento previsto para sexta" />
+        </label>
       </div>
       <footer data-part="footer">
         <button type="button">Limpar</button>
@@ -180,7 +410,7 @@
     data-open
     data-mode="overlay"
     data-side="top"
-    data-size="sm"
+    data-size="content"
     data-mount="active"
   >
     <div data-part="backdrop"></div>
@@ -188,7 +418,11 @@
       <header data-part="header">
         <h2 data-part="title" id="d4-title">Manutenção programada</h2>
         <p data-part="description">Sábado, das 02h às 04h.</p>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
     </div>
   </div>
@@ -317,7 +551,11 @@
           Uma string sem espaços não pode alargar o painel: a medida mínima é zero e a quebra é
           permitida em qualquer ponto.
         </p>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
       <div data-part="body">
         <p style="margin: 0 0 var(--slotted-space-4)">
@@ -356,7 +594,11 @@
     <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d8-title">
       <header data-part="header">
         <h2 data-part="title" id="d8-title">Fatura 4471</h2>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
       <div data-part="body" aria-busy="true">
         <div
@@ -386,7 +628,11 @@
     <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d9-title">
       <header data-part="header">
         <h2 data-part="title" id="d9-title">Pedido 118</h2>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
       <div data-part="body">
         <p style="margin: 0">Escape alcança apenas a camada mais alta.</p>
@@ -408,7 +654,11 @@
     <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d10-title">
       <header data-part="header">
         <h2 data-part="title" id="d10-title">Item 3</h2>
-        <button data-part="close" type="button" aria-label="Fechar"></button>
+        <button data-part="close" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="x"></svg
+          ></span>
+        </button>
       </header>
       <div data-part="body">
         <p style="margin: 0">A profundidade vem da pilha única, não de um número escrito aqui.</p>

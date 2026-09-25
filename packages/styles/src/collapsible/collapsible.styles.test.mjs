@@ -70,15 +70,23 @@ test('reaches its own parts with a child combinator, never a descendant one', ()
   assert.match(fragment, /data-part="content"[\s\S]*data-ui="collapsible"/);
 });
 
-/** The one axis the family answers with a mask, and it is real geometry. */
-test('draws the indicator from a glyph token rather than a character', () => {
+/**
+ * The mark is the `Glyph` element the binding draws, so the stylesheet paints
+ * none: it sizes the `icon` box through the slot and leaves the drawing alone.
+ */
+test('draws the indicator with the Glyph element rather than a mask or a character', () => {
   const indicator = rule(
     `${ui}>[data-part='header']>[data-part='trigger']>[data-part='indicator']`,
   );
-  assert.match(indicator, /mask-image:var\(--slotted-icon-chevron-down\)/);
+  assert.match(indicator, /--slotted-icon-size:var\(--_icon-size\)/);
   assert.ok(!/content:/.test(indicator), 'the mark is drawn with content rather than geometry');
-  assert.match(normalized, /mask-image:var\(--slotted-icon-plus\)/);
-  assert.match(normalized, /mask-image:var\(--slotted-icon-minus\)/);
+  assert.ok(!/mask/.test(normalized), 'the stylesheet still paints a mark with a mask');
+  assert.match(
+    fragment,
+    /data-part="indicator"[^>]*>\s*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="chevron-down">/,
+  );
+  assert.match(fragment, /data-glyph="plus"/);
+  assert.match(fragment, /data-glyph="minus"/);
 });
 
 /**
@@ -108,7 +116,10 @@ test('sits the mark on the first line of the title, not on the middle of the tri
  * document needs no mirrored artwork at all.
  */
 test('turns the mark instead of mirroring it', () => {
-  assert.match(normalized, /\[data-open\][^{]*\[data-part='indicator'\]\{rotate:180deg;\}/);
+  assert.match(
+    normalized,
+    /\[data-open\][^{]*\[data-part='indicator'\]>\[data-ui='icon'\]\{rotate:180deg;\}/,
+  );
   assert.ok(!/scale\(-1/.test(normalized), 'the mark is mirrored somewhere');
 });
 

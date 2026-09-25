@@ -106,7 +106,6 @@
      */
     --_status-size: var(--_title-font-size);
     --_mark-gap: var(--slotted-space-4, 0.5rem);
-    --_tone-icon: var(--slotted-icon-triangle-alert);
     --_tone-color: var(--slotted-tone-danger-text, CanvasText);
 
     /**
@@ -142,11 +141,13 @@
 
   /**
    * Mounted and closed. `eager` and `lazy` leave the layer in the document, and
-   * a layer left visible would cover the page it is not on. The binding writes
-   * `inert` alongside this, so a browser without `content-visibility` still
-   * cannot put focus inside a closed layer.
+   * a layer left visible would cover the page it is not on. The rule keys on
+   * `inert`, which the binding writes while the layer is closed or exiting,
+   * and not on the absence of `data-open`: the entering frame has no
+   * `data-open` either, and a hidden layer in that frame refuses the focus
+   * scope's initial focus.
    */
-  [data-ui='dialog']:not([data-open]) {
+  [data-ui='dialog'][inert] {
     content-visibility: hidden;
     pointer-events: none;
   }
@@ -417,28 +418,29 @@
   /* ── The mark an alert dialog carries ─────────────────────────────────── */
 
   /**
-   * Real geometry from a glyph token, masked so it takes the tone's own text
-   * colour. WCAG 2.2 SC 1.4.1 asks that colour not be the only carrier, and a
+   * Real geometry: the binding draws the tone's own `Glyph` inside an `icon`
+   * box, and the slot gives it the tone's text colour and the mark's size.
+   * WCAG 2.2 SC 1.4.1 asks that colour not be the only carrier, and a
    * destructive confirmation is the place that matters most: under forced
-   * colours every tone ground becomes one system colour and the silhouette is
-   * all that is left.
+   * colours every tone becomes one system colour and the silhouette is all
+   * that is left.
    */
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
     > [data-part='header']
     > [data-part='icon'] {
+    --slotted-icon-size: var(--_status-size);
+
     grid-column: 1;
     grid-row: 1 / span 2;
     align-self: start;
-    background-color: var(--_tone-color);
+    display: inline-grid;
+    place-items: center;
+    color: var(--_tone-color);
     block-size: var(--_status-size);
     inline-size: var(--_status-size);
     flex: none;
-    mask-image: var(--_tone-icon);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
     /* The mark sits on the title's first line rather than on its box: half
        the difference between the title's line and the mark, in the title's own
        type, because the header's line is not the title's. */
@@ -449,27 +451,22 @@
   }
 
   [data-ui='dialog'][data-tone='accent'] {
-    --_tone-icon: var(--slotted-icon-circle-info);
     --_tone-color: var(--slotted-tone-accent-text, CanvasText);
   }
 
   [data-ui='dialog'][data-tone='secondary'] {
-    --_tone-icon: var(--slotted-icon-circle-info);
     --_tone-color: var(--slotted-tone-secondary-text, CanvasText);
   }
 
   [data-ui='dialog'][data-tone='success'] {
-    --_tone-icon: var(--slotted-icon-circle-check);
     --_tone-color: var(--slotted-tone-success-text, CanvasText);
   }
 
   [data-ui='dialog'][data-tone='warning'] {
-    --_tone-icon: var(--slotted-icon-triangle-alert);
     --_tone-color: var(--slotted-tone-warning-text, CanvasText);
   }
 
   [data-ui='dialog'][data-tone='danger'] {
-    --_tone-icon: var(--slotted-icon-circle-alert);
     --_tone-color: var(--slotted-tone-danger-text, CanvasText);
   }
 
@@ -518,13 +515,17 @@
    * An inner control, not a button (R2): the box is the glyph plus a step of
    * air on each side, floored at the WCAG 2.2 minimum, and the glyph is
    * centred in it. It was the control height before, a thirty-four pixel
-   * square beside an eighteen pixel mark.
+   * square beside an eighteen pixel mark. The glyph is the binding's `Glyph`
+   * in an `icon` box, sized here through the icon token so the box and the
+   * formula above read one length.
    */
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
     > [data-part='header']
     > [data-part='close'] {
+    --slotted-icon-size: var(--_icon-size);
+
     grid-column: 4;
     grid-row: 1 / span 2;
     align-self: start;
@@ -548,21 +549,6 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
       color var(--slotted-control-transition-duration, var(--slotted-duration-short))
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
-  }
-
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close']::after {
-    content: '';
-    background: currentcolor;
-    block-size: var(--_icon-size);
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-icon-x);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
   }
 
   [data-ui='dialog']
@@ -609,13 +595,17 @@
    *
    * It sits in the column before the close, which is where a window's controls
    * put it, and it carries no end overhang: the overhang belongs to whichever
-   * control stands against the panel's inset, and that is the close.
+   * control stands against the panel's inset, and that is the close. Its
+   * glyph is the binding's, chosen from the state: the mark says what the
+   * press does next, so it is the opposite of the state the panel is in.
    */
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
     > [data-part='header']
     > [data-part='fullscreen'] {
+    --slotted-icon-size: var(--_icon-size);
+
     grid-column: 3;
     grid-row: 1 / span 2;
     align-self: start;
@@ -657,31 +647,6 @@
     > [data-part='viewport']
     > [data-part='content']
     > [data-part='header']
-    > [data-part='fullscreen']::after {
-    content: '';
-    background: currentcolor;
-    block-size: var(--_icon-size);
-    inline-size: var(--_icon-size);
-    /* The mark says what the press does next, which is why it is the opposite
-       of the state the panel is in. */
-    mask-image: var(--slotted-icon-maximize);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  [data-ui='dialog'][data-fullscreen]
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='fullscreen']::after {
-    mask-image: var(--slotted-icon-minimize);
-  }
-
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
     > [data-part='fullscreen']:not(:disabled):hover {
     /* The ground moves under the pointer and nothing else does (R2). */
     background-color: var(
@@ -708,6 +673,49 @@
     > [data-part='fullscreen']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
+  }
+
+  /**
+   * On a finger the target is the comfortable size in both axes and the box
+   * is the one a mouse sees: a transparent `::before` centred on each control
+   * reaches 44 pixels, and the ground and the ring stay square. The two
+   * controls touch, so neither reaches across the edge they share.
+   */
+  @media (pointer: coarse) {
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
+      > [data-part='header']
+      > :is([data-part='close'], [data-part='fullscreen']) {
+      position: relative;
+    }
+
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
+      > [data-part='header']
+      > :is([data-part='close'], [data-part='fullscreen'])::before {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
+
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
+      > [data-part='header']
+      > [data-part='fullscreen']:has(+ [data-part='close'])::before {
+      inset-inline-end: 0;
+    }
+
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
+      > [data-part='header']
+      > [data-part='fullscreen']
+      + [data-part='close']::before {
+      inset-inline-start: 0;
+    }
   }
 
   /* ── The row that scrolls ─────────────────────────────────────────────── */
@@ -899,26 +907,6 @@
     [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] {
       border-color: CanvasText;
       border-width: var(--slotted-border-width-thick, 2px);
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
-      > [data-part='header']
-      > [data-part='close']::after,
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
-      > [data-part='header']
-      > [data-part='fullscreen']::after {
-      forced-color-adjust: none;
     }
   }
 }

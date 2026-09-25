@@ -179,10 +179,10 @@
 
   /* ── The external marker ────────────────────────────────────────────────
    *
-   * Geometry from the glyph scale, painted through a mask so it is the colour
-   * of the link at every step of the ramp and in every scheme. A character
-   * would be a font's opinion of an arrow, and would not answer forced
-   * colours at all.
+   * The arrow is the `Glyph` element inside an `icon` box, so it is the colour
+   * of the link at every step of the ramp, in every scheme and under forced
+   * colours, and mirrors in a right-to-left document through the box's own
+   * `directional`. A character would be a font's opinion of an arrow.
    *
    * The binding writes a word joiner before this element — U+2060, the
    * zero-width character whose whole purpose is to forbid a line break without
@@ -190,36 +190,16 @@
    * the word it belongs to. A no-break space would do the same job and carry a
    * full word space with it, and "published schedule ↗" then reads as three
    * words rather than a link and its marker. The distance is a token instead.
+   *
+   * The part stays an inline wrapper around the box: the gap is an inline
+   * margin, and the box inside sets its own size and optical alignment from
+   * `--slotted-icon-size`, which the part states at the size of the text.
    */
 
   [data-ui='link'] [data-part='external-icon'] {
-    --_glyph: var(--slotted-link-external-icon-size, 1em);
+    --slotted-icon-size: var(--slotted-link-external-icon-size, 1em);
 
-    background-color: currentColor;
-    block-size: var(--_glyph);
-    display: inline-block;
-    inline-size: var(--_glyph);
     margin-inline-start: var(--slotted-link-external-icon-gap, 0.15em);
-    mask-image: var(--slotted-icon-external);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-    /**
-     * The same correction the `icon` family derives: an inline box sits on the
-     * baseline, which puts its centre above the optical centre of the text
-     * beside it, and by more the larger the box is relative to that text.
-     */
-    vertical-align: calc(0.5cap - 0.5 * var(--_glyph));
-  }
-
-  /**
-   * An arrow that means "away from here" points the other way in a
-   * right-to-left document. `:dir()` rather than an ancestor `[dir]`, so a
-   * mirrored marker inside a left-to-right island reads the directionality
-   * that actually applies to it.
-   */
-  [data-ui='link'] [data-part='external-icon']:dir(rtl) {
-    scale: -1 1;
   }
 
   /* ── The current link ───────────────────────────────────────────────────
@@ -245,22 +225,13 @@
    *
    * The theme remaps every token it owns, so this block covers only what the
    * family paints itself: an underline the axis may have taken away, where a
-   * flattened palette leaves a link with nothing to be recognized by, and a
-   * mask whose paint the system would otherwise replace with the page's own
-   * background.
+   * flattened palette leaves a link with nothing to be recognized by. The
+   * external marker is stroked with `currentColor` and follows the link.
    */
 
   @media (forced-colors: active) {
     [data-ui='link'] {
       text-decoration-line: underline;
-    }
-
-    [data-ui='link'] [data-part='external-icon'] {
-      background-color: LinkText;
-    }
-
-    [data-ui='link'][data-disabled] [data-part='external-icon'] {
-      background-color: GrayText;
     }
   }
 }

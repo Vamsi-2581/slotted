@@ -69,13 +69,15 @@
      */
     --_travel: var(--slotted-duration-medium);
 
-    background: var(
-      --slotted-segmented-control-background,
-      var(--slotted-surface-sunken, ButtonFace)
-    );
+    /* A control in a row of controls: the fill, edge and lift a field has. */
+    background: var(--slotted-segmented-control-background, var(--slotted-control-surface, Field));
     border: var(--_border-width) solid
-      var(--slotted-segmented-control-border-color, var(--slotted-border-subtle, ButtonBorder));
+      var(
+        --slotted-segmented-control-border-color,
+        var(--slotted-control-border-color, ButtonBorder)
+      );
     border-radius: var(--_radius);
+    box-shadow: var(--slotted-segmented-control-shadow, var(--slotted-control-shadow, none));
     box-sizing: border-box;
     display: inline-grid;
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
@@ -192,8 +194,14 @@
     z-index: 1;
   }
 
-  [data-ui='segmented-control'] [data-part='item']:not(:has([data-part='label'])) {
+  /* An empty label is no label: a binding that always renders the span must
+     not leave a flex gap after the icon of a segment without words. */
+  [data-ui='segmented-control'] [data-part='item']:not(:has([data-part='label']:not(:empty))) {
     padding-inline: 0;
+  }
+
+  [data-ui='segmented-control'] [data-part='label']:empty {
+    display: none;
   }
 
   /**

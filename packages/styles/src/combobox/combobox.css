@@ -72,7 +72,7 @@
     );
 
     align-items: center;
-    background-color: var(--slotted-combobox-background, transparent);
+    background-color: var(--slotted-combobox-background, var(--slotted-control-surface, Field));
     border: var(--slotted-control-border-width, 1px) solid
       var(--slotted-combobox-border-color, var(--slotted-control-border-color, ButtonBorder));
     border-radius: var(--slotted-combobox-radius, var(--slotted-control-radius, 4px));
@@ -115,7 +115,13 @@
    */
   [data-ui='combobox'] > [data-part='input'] {
     background-color: transparent;
-    block-size: 100%;
+    /* The frame's border box, not its content box: on a coarse pointer the frame
+       is the touch target's height and the control it holds is too. Stretched
+       rather than a percentage of the frame, which is indefinite wherever the
+       frame is not stretched itself — a search field in a bar measured 17
+       pixels. The control paints no ground, so the frame's edge still shows. */
+    align-self: stretch;
+    margin-block: calc(var(--slotted-control-border-width, 1px) * -1);
     border: 0;
     color: inherit;
     flex: 1 1 auto;
@@ -199,36 +205,49 @@
     position: absolute;
   }
 
-  [data-ui='combobox'] > [data-part='clear']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-combobox-clear-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. Side by side, neither
+     button reaches across the edge the two share. */
+  @media (pointer: coarse) {
+    [data-ui='combobox'] > :is([data-part='clear'], [data-part='trigger'])::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='combobox'] > [data-part='clear']:has(+ [data-part='trigger']:not([hidden]))::after {
+      inset-inline-end: 0;
+    }
+
+    [data-ui='combobox'] > [data-part='clear']:not([hidden]) + [data-part='trigger']::after {
+      inset-inline-start: 0;
+    }
+  }
+
+  /* The cross and the chevron are `Glyph` elements the binding draws, sized
+     here to the control's icon step. */
+  [data-ui='combobox'] > :is([data-part='clear'], [data-part='trigger']) {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   /**
    * The chevron, drawn by its own part rather than by the button, because the
-   * button is what a reader presses and the arrow is what turns over. A mask
-   * from the glyph scale; a character is never an icon.
+   * button is what a reader presses and the arrow is what turns over. The
+   * library's own `Glyph` in an `icon` box; a character is never an icon.
    */
   [data-ui='combobox'] [data-part='arrow'] {
-    background-color: currentcolor;
+    align-items: center;
     block-size: var(--_icon-size);
+    display: flex;
     inline-size: var(--_icon-size);
-    mask-image: var(--slotted-combobox-arrow-icon, var(--slotted-icon-chevron-down));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    justify-content: center;
+  }
+
+  [data-ui='combobox'] [data-part='arrow'] > [data-ui='icon'] {
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='combobox'][data-open] [data-part='arrow'] {
+  [data-ui='combobox'][data-open] [data-part='arrow'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -770,27 +789,19 @@
     block-size: 1lh;
   }
 
+  /* Column one holds content and paints none: a `Glyph` in an `Icon` box, or
+     artwork of the consumer's own, centred and sized from the column. */
   [data-ui='combobox'] [data-part='icon'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_content-icon-size);
+
+    align-items: center;
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_content-icon-size);
+    justify-content: center;
     justify-self: center;
     margin-inline-end: var(--_column-gap);
-    /* A transparent mask rather than `none`, because `none` means "no mask"
-       and paints the whole box. */
-    mask-image: var(--slotted-combobox-item-icon, linear-gradient(transparent, transparent));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  [data-ui='combobox'] [data-part='icon']:not(:empty) {
-    align-items: center;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    mask-image: none;
   }
 
   [data-ui='combobox'] [data-part='label'] {
@@ -831,17 +842,18 @@
     color: inherit;
   }
 
+  /* The tick is a `Glyph` the binding draws, at the content's icon step. */
   [data-ui='combobox'] [data-part='indicator'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_content-icon-size);
+
+    align-items: center;
+    display: flex;
     grid-column: 3;
     grid-row: 1;
     inline-size: var(--_content-icon-size);
+    justify-content: center;
     justify-self: end;
     margin-inline-start: var(--_column-gap);
-    mask-image: var(--slotted-combobox-selected-icon, var(--slotted-icon-check));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0;
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
@@ -965,24 +977,6 @@
     [data-ui='combobox'] [data-part='item'][data-disabled][data-current] {
       background-color: Highlight;
       color: GrayText;
-    }
-
-    [data-ui='combobox'] [data-part='item'][data-selected] > [data-part='indicator'] {
-      background-color: currentcolor;
-      forced-color-adjust: none;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='combobox'] > [data-part='clear']::before,
-    [data-ui='combobox'] [data-part='arrow'],
-    [data-ui='combobox'] [data-part='icon']:empty {
-      forced-color-adjust: none;
     }
   }
 }

@@ -235,3 +235,20 @@ test('writes every rule in logical properties, and takes no duration at all', ()
   assert.doesNotMatch(declarations, /margin-left|margin-right|padding-left|padding-right/);
   assert.doesNotMatch(declarations, /\d+m?s(?![\w-])/);
 });
+
+/**
+ * The overflow trigger is as tall as the bar's items and as wide as its glyph
+ * and a step of air: on a touch screen, beside items grown to the comfortable
+ * target, it stayed 24 pixels wide — the one control of a page header's
+ * actions a finger could miss.
+ */
+test('makes the overflow trigger a full touch target on a coarse pointer', () => {
+  const coarse = /@media \(pointer:coarse\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  const trigger =
+    coarse.split(`[data-ui='toolbar'] [data-part='overflow']{`)[1]?.split('}')[0] ?? '';
+  /* Both axes in one rule and one value, so the box is square whatever the
+     bar's height is. */
+  const side = 'max(var(--slotted-target-comfortable,44px),var(--_height))';
+  assert.ok(trigger.includes(`min-inline-size:${side}`), trigger);
+  assert.ok(trigger.includes(`min-block-size:${side}`), trigger);
+});

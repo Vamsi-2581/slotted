@@ -307,6 +307,19 @@
   /* ── What stands in for it ────────────────────────────────────────────── */
 
   [data-ui='avatar'] [data-part='fallback'] {
+    /**
+     * The last step of the fallback order, and the only artwork this family
+     * owns. It is reached when there is no picture and no name to take
+     * initials from — an unassigned ticket, an anonymous visitor — and the
+     * binding draws it as the `person` glyph in an `Icon` rather than as a
+     * character, which no font can be relied on to carry.
+     *
+     * The size is set on the slot rather than on the icon, so an icon the
+     * consumer projects without a size of its own is drawn at the same step,
+     * and one that states a size keeps it.
+     */
+    --slotted-icon-size: var(--_glyph-size);
+
     align-items: center;
     block-size: 100%;
     border-radius: inherit;
@@ -333,26 +346,38 @@
   }
 
   /**
-   * The last step of the fallback order, and the only artwork this family owns.
-   * It is reached when there is no picture and no name to take initials from —
-   * an unassigned ticket, an anonymous visitor — and it is drawn as a mask from
-   * a glyph token rather than as a character, which no font can be relied on to
-   * carry.
+   * A flex container centres the line box, and a line box is not symmetric
+   * around the letters inside it: the ascender reaches further above the cap
+   * than the descender reaches below the baseline, and two initials have no
+   * descender. Measured with the Geist face at `compact`, `AL` sat 0.56 pixels
+   * high in the 32-pixel disc and 0.68 high in the 26-pixel one; at
+   * `comfortable`, 1.13 high in the 64-pixel one. `text-box` trims the line to
+   * the cap and the baseline, so what is centred is the ink rather than the
+   * font's metrics — the rule `badge`, `kbd`, `tag` and `button` each carry.
    *
-   * `:empty` is the whole condition. Nothing else is in the slot, because the
-   * avatar's accessible name is on the root as `aria-label` rather than as a
-   * hidden node inside it.
+   * Those four have a label part to carry it. The initials are written straight
+   * into the fallback, and `text-box-trim` needs a block container — a flex
+   * container's text lives in an anonymous item no selector can reach — so the
+   * fallback itself becomes the block and centres its one line with
+   * `align-content`, which block containers have taken since Chrome 123 and
+   * Safari 17.4, both earlier than the trim. The box keeps its full size, so
+   * the disc still clips a long word and no descender is beheaded: the clip is
+   * the whole fallback, not the trimmed line, which is the room `badge` had to
+   * buy with padding.
+   *
+   * Only a fallback holding nothing but text is trimmed. A projected logo or
+   * icon is not a line of type: it sits on the baseline of a line whose trim is
+   * measured from the font, and trimming that line would move the artwork
+   * rather than centre it. `:has(> *)` is the whole test, and it excludes the
+   * family's own glyph as well, which is an icon and needs no line at all.
    */
-  [data-ui='avatar'] [data-part='fallback']:empty::before {
-    background-color: currentColor;
-    block-size: var(--_glyph-size);
-    content: '';
-    display: block;
-    inline-size: var(--_glyph-size);
-    mask-image: var(--slotted-icon-person);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  @supports (text-box: trim-both cap alphabetic) {
+    [data-ui='avatar'] [data-part='fallback']:not(:has(> *)) {
+      align-content: center;
+      display: block;
+      text-align: center;
+      text-box: trim-both cap alphabetic;
+    }
   }
 
   /* ── The picture that arrived, and the one that did not ───────────────── */
@@ -495,17 +520,6 @@
   @media (forced-colors: active) {
     [data-ui='avatar'][data-part='root'] {
       --_edge: currentColor;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='avatar'] [data-part='fallback']:empty::before {
-      forced-color-adjust: none;
     }
   }
 }

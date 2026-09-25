@@ -113,3 +113,61 @@ test('the harness draws the range pickers inside a data-range operand and the pl
 function escape(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+/**
+ * A column aligned to the end keeps its name over its values.
+ *
+ * The header's own rule grouped the column header with the selection cell in
+ * one `:is()`, and `:is()` takes the specificity of its strongest argument —
+ * the two-part selection selector — so the header outranked the alignment rule
+ * that comes after it. Every `th` carried `data-align="end"` and every one of
+ * them computed `text-align: start`: the digits stood at the right edge of
+ * their column and the name that labels them at the left. The two branches are
+ * written apart so the header's is no stronger than the axis it has to lose to.
+ */
+test('leaves a column header weak enough for the alignment axis to reach it', () => {
+  assert.ok(
+    normalized.includes(
+      normalize(
+        "[data-ui='table'] [data-part='column-header'],[data-ui='table'] [data-part='head'] [data-part='selection']{",
+      ),
+    ),
+    'the column header and the selection cell are two selectors, not one :is()',
+  );
+  assert.ok(
+    !normalized.includes(
+      normalize(
+        "[data-ui='table'] :is([data-part='column-header'],[data-part='head'] [data-part='selection'])",
+      ),
+    ),
+    'the :is() that outranked the alignment rule is gone',
+  );
+  /* The axis itself, which the header now loses to on source order. */
+  assert.ok(
+    normalized.includes(normalize("[data-ui='table'] [data-align='end']{text-align:end;}")),
+  );
+});
+
+/**
+ * The direction mark and the disclosure chevron are the `Glyph` element the
+ * binding draws, so the sheet paints neither: it sizes, fades and turns the
+ * `icon` box and leaves the drawing alone.
+ */
+test('draws the sort mark and the chevron with the Glyph element, never a mask', () => {
+  assert.ok(!/mask/.test(normalized), 'the sheet still paints a glyph with a mask');
+  assert.ok(
+    normalized.includes(
+      normalize(
+        "[data-ui='table'] [aria-sort='ascending'] > [data-part='sort'] > [data-ui='icon']{rotate:180deg;}",
+      ),
+    ),
+  );
+  assert.match(
+    fragment,
+    /data-part="sort"[^>]*>[^<]+<span data-ui="icon"[^>]*>\s*<svg data-part="glyph" data-glyph="chevron-down">/,
+  );
+  assert.match(
+    fragment,
+    /data-part="expander"[^>]*>\s*<span data-ui="icon"[^>]*>\s*<svg data-part="glyph" data-glyph="chevron-right">/,
+  );
+});

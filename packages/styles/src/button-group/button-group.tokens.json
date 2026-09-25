@@ -1,5 +1,5 @@
 [
-  "--slotted-border-strong",
+  "--slotted-control-border-color",
   "--slotted-control-border-width",
   "--slotted-control-radius",
   "--slotted-text-muted",

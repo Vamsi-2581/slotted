@@ -41,7 +41,7 @@
     );
 
     align-items: center;
-    background-color: var(--slotted-time-field-background, transparent);
+    background-color: var(--slotted-time-field-background, var(--slotted-control-surface, Field));
     border: var(--slotted-control-border-width, 1px) solid
       var(--slotted-time-field-border-color, var(--slotted-control-border-color, ButtonBorder));
     border-radius: var(--slotted-time-field-radius, var(--slotted-control-radius, 4px));
@@ -288,29 +288,16 @@
    * chose after reading all three at four times the type size: `1cap` alone
    * reads high, because every glyph in the scale overshoots a capital, and
    * `1ex` alone reads low, because the mark then hangs below the descenders.
+   *
+   * The mark is the chevron the binding renders as the preview's first child,
+   * marked `directional`: it points along the reading direction, so the `icon`
+   * family turns it in a right-to-left context.
    */
-  [data-ui='time-field'] [data-part='preview']::before {
-    background-color: currentcolor;
-    block-size: var(--_mark);
-    content: '';
-    display: inline-block;
-    inline-size: var(--_mark);
-    margin-inline-end: var(--slotted-space-1, 0.125rem);
-    mask-image: var(--slotted-time-field-preview-icon, var(--slotted-icon-chevron-right));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-    vertical-align: calc((((1cap + 1ex) / 2) - var(--_mark)) / 2);
-  }
+  [data-ui='time-field'] [data-part='preview'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_mark);
 
-  /**
-   * The chevron points along the reading direction, so it turns with the
-   * document. `:dir()` rather than an ancestor `[dir]`, so an expression inside
-   * a right-to-left island of a left-to-right page still turns — the rule
-   * `link` and `pagination` both record for their own directional marks.
-   */
-  [data-ui='time-field'] [data-part='preview']:dir(rtl)::before {
-    scale: -1 1;
+    margin-inline-end: var(--slotted-space-1, 0.125rem);
+    vertical-align: calc((((1cap + 1ex) / 2) - var(--_mark)) / 2);
   }
 
   /**
@@ -418,7 +405,7 @@
 
   /* ── The clear button ─────────────────────────────────────────────────
    *
-   * A real button, with a mask from the theme's glyph scale rather than a
+   * A real button, with the `Glyph` element the binding renders rather than a
    * character, and held to the target minimum by the family rather than by the
    * page.
    */
@@ -458,16 +445,23 @@
     position: absolute;
   }
 
-  [data-ui='time-field'] > [data-part='clear']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-time-field-clear-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. After an end
+     adornment — a picker's trigger — it does not reach back across it. */
+  @media (pointer: coarse) {
+    [data-ui='time-field'] > [data-part='clear']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='time-field'] > [data-part='end'] + [data-part='clear']::after {
+      inset-inline-start: 0;
+    }
+  }
+
+  /* The cross is drawn at the control's own icon step. */
+  [data-ui='time-field'] > [data-part='clear'] {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   [data-ui='time-field'] > [data-part='clear']:hover:not(:disabled):not([data-disabled]) {
@@ -640,14 +634,6 @@
        `plain` control would lose its only edge where an edge matters most. */
     [data-ui='time-field'][data-part='root'][data-variant='plain'] {
       border-color: ButtonBorder;
-    }
-
-    /* A masked glyph is painted with a background, and forced colours replace
-       a background that is not one of the system's own: the mark would go and
-       the box it sat in would stay. */
-    [data-ui='time-field'] > [data-part='clear']::before,
-    [data-ui='time-field'] [data-part='preview']::before {
-      forced-color-adjust: none;
     }
 
     /* The preview's two tones both map to the same system ink, so the border

@@ -9,10 +9,9 @@
    *
    * The mark is a sibling of the control and not a pseudo-element of it,
    * because Firefox renders neither `::before` nor `::after` on an `input`. It
-   * cannot be the control's own `background-image` either: a glyph token is
-   * authored black so it can be masked, and a baked-in colour answers one
-   * scheme out of three. A mask set on the control itself would clip the
-   * border and the ground away with the mark.
+   * is the `Glyph` element the binding renders inside that sibling, which
+   * inherits its ink rather than baking in a colour that answers one scheme
+   * out of three.
    *
    * Painting reads `:checked` and `:indeterminate` rather than the mirrored
    * attributes, so the picture cannot disagree with the element: an
@@ -81,6 +80,9 @@
      */
     --_description-gap: var(--slotted-space-3, 0.375rem);
 
+    /* The rows are as tall as they read. Stretched, the description drifted
+       away from the label it belongs to; the surplus is the container's. */
+    align-content: start;
     color: var(--slotted-checkbox-color, var(--slotted-text, CanvasText));
     display: grid;
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
@@ -189,21 +191,20 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * One element for two glyphs. The check and the dash are the same mask
-   * property pointed at a different token, so the swap between checked and
-   * mixed is one declaration and the two states cannot drift apart.
+   * One element for two glyphs. The binding draws the check, or the dash while
+   * the control is indeterminate; this sheet only reveals whichever it drew,
+   * on `:checked` or `:indeterminate`.
    *
    * The element is the glyph's own box: the square less its clearance on each
    * side, set in the same grid cell as the box, so the two are concentric by
    * construction and `getBoundingClientRect()` on the mark is the mark. The
-   * mask fills that box, which is what keeps the artwork one distance from the
+   * `icon` box fills it, which is what keeps the artwork one distance from the
    * edge at every step.
    */
 
   [data-ui='checkbox'] [data-part='indicator'] {
-    --_glyph: var(--slotted-checkbox-mark-image, var(--slotted-icon-check));
+    --slotted-icon-size: var(--_mark-size);
 
-    background-color: var(--slotted-checkbox-mark-color, var(--slotted-tone-accent-on-solid));
     block-size: var(--_mark-size);
     /**
      * The mark arrives along its own stroke, not out of its middle (CK6). Both
@@ -223,14 +224,13 @@
      * it.
      */
     clip-path: inset(0% 100% 0% 0%);
+    color: var(--slotted-checkbox-mark-color, var(--slotted-tone-accent-on-solid));
+    /* A flex box, so the icon sits in it as a box and not on a line of text. */
+    display: flex;
     grid-area: 1 / 1;
     inline-size: var(--_mark-size);
     margin-block-start: calc(var(--_lift) + var(--_mark-inset));
     margin-inline-start: var(--_mark-inset);
-    mask-image: var(--_glyph);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0;
     /** Nothing here answers the pointer; the control underneath does. */
     pointer-events: none;
@@ -243,15 +243,6 @@
   [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
     clip-path: inset(0% 0% 0% 0%);
     opacity: 1;
-  }
-
-  /**
-   * Mixed is the dash, and it outranks the check: a control that is both
-   * indeterminate and checked is drawing the state its children are actually
-   * in, which is the one the reader has to see.
-   */
-  [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
-    --_glyph: var(--slotted-checkbox-mixed-image, var(--slotted-icon-minus));
   }
 
   /**
@@ -624,10 +615,7 @@
   }
 
   [data-ui='checkbox'] [data-part='control']:disabled + [data-part='indicator'] {
-    background-color: var(
-      --slotted-checkbox-disabled-mark-color,
-      var(--slotted-disabled-foreground)
-    );
+    color: var(--slotted-checkbox-disabled-mark-color, var(--slotted-disabled-foreground));
   }
 
   /**
@@ -900,9 +888,9 @@
   /* ── Forced colors ────────────────────────────────────────────────────
    *
    * The one place this family paints something the theme cannot reach. Forced
-   * colors overrides `background-color` on both boxes, so the mark and the
-   * ground it stands on would be forced to the same colour and the check would
-   * disappear into the box it is drawn in. The pair is restated here in system
+   * colors overrides the box's `background-color` and the mark's `color`, so
+   * the mark and the ground it stands on would be forced to one colour and the
+   * check would disappear into the box it is drawn in. The pair is restated here in system
    * colours, which is what the briefing allows a family to do exactly when the
    * theme cannot.
    */
@@ -920,7 +908,7 @@
 
     [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
     [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
-      background-color: HighlightText;
+      color: HighlightText;
     }
 
     [data-ui='checkbox'] [data-part='control']:disabled {
@@ -929,7 +917,7 @@
     }
 
     [data-ui='checkbox'] [data-part='control']:disabled + [data-part='indicator'] {
-      background-color: GrayText;
+      color: GrayText;
     }
   }
 }

@@ -155,13 +155,13 @@
   }
 
   /**
-   * Above 640 pixels of the root's own width the aside stands beside the
+   * Above 600 pixels of the root's own width the aside stands beside the
    * body in the column its axis names, separated by a rule at the gap's
    * distance from both. The text-to-rule and the main-to-rule distances are
    * the same number, so the rule reads as the middle of the gap rather than
    * as an edge of the aside.
    */
-  @container detail-panel (min-width: 640px) {
+  @container detail-panel (min-width: 600px) {
     [data-ui='detail-panel'] > [data-part='body'] > [data-ui='container'] > [data-part='columns'] {
       grid-template-columns: minmax(0, 1fr) var(--_aside-size);
     }

@@ -137,8 +137,7 @@
     --_item-surface: var(--slotted-upload-item-background, var(--slotted-surface));
     --_item-border: var(--slotted-upload-item-border-color, var(--slotted-border-subtle));
 
-    /** What a file is drawn as when nothing more specific claims it. */
-    --_kind-glyph: var(--slotted-icon-file);
+    /** What a file's tile is painted when nothing more specific claims it. */
     --_kind-tile: var(--slotted-upload-kind-other);
 
     color: var(--slotted-text);
@@ -230,22 +229,14 @@
   }
 
   /**
-   * The mark. `forced-color-adjust: none` is what keeps a mask painted from
-   * `currentcolor` visible when the system replaces the palette: without it
-   * the painted background goes and the empty box stays, which was measured
-   * across 23 glyphs in 16 families before the guard existed.
+   * The mark: an `Icon` holding the `upload` glyph, which the binding draws in
+   * the `dropzone` shape only. The `field` shape is one control's height and
+   * has no room for a second mark beside the trigger's.
    */
-  [data-ui='upload'] [data-part='dropzone']::before {
-    background-color: currentcolor;
-    block-size: var(--_zone-glyph-size);
+  [data-ui='upload'] [data-part='dropzone'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_zone-glyph-size);
+
     color: var(--slotted-text-muted);
-    content: '';
-    flex: none;
-    inline-size: var(--_zone-glyph-size);
-    mask-image: var(--slotted-upload-zone-icon, var(--slotted-icon-upload));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
   }
 
   /**
@@ -316,20 +307,12 @@
   }
 
   /**
-   * The mark on the trigger is drawn only where the region is not: in the
-   * `dropzone` shape the region already carries it, and two of the same mark
-   * eighty pixels apart is one mark too many.
+   * The binding draws the mark on the trigger only where the region does not:
+   * in the `dropzone` shape the region already carries it, and two of the same
+   * mark eighty pixels apart is one mark too many.
    */
-  [data-ui='upload']:not([data-variant='dropzone']) [data-part='trigger']::before {
-    background-color: currentcolor;
-    block-size: var(--_glyph-size);
-    content: '';
-    flex: none;
-    inline-size: var(--_glyph-size);
-    mask-image: var(--slotted-upload-trigger-icon, var(--slotted-icon-upload));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  [data-ui='upload'] [data-part='trigger'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_glyph-size);
   }
 
   [data-ui='upload']:not([data-disabled]) [data-part='trigger']:hover {
@@ -623,56 +606,41 @@
     object-fit: cover;
   }
 
-  [data-ui='upload'] [data-part='preview']:not(:has(img))::before {
-    background-color: currentcolor;
-    block-size: var(--_glyph-size);
-    content: '';
-    flex: none;
-    inline-size: var(--_glyph-size);
-    mask-image: var(--_kind-glyph);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  /* The kind's glyph, drawn by the binding when there is no picture to show. */
+  [data-ui='upload'] [data-part='preview'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_glyph-size);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='pdf'] {
     --_kind-tile: var(--slotted-upload-kind-pdf);
-    --_kind-glyph: var(--slotted-icon-file-text);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='document'] {
     --_kind-tile: var(--slotted-upload-kind-document);
-    --_kind-glyph: var(--slotted-icon-file-type);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='spreadsheet'] {
     --_kind-tile: var(--slotted-upload-kind-spreadsheet);
-    --_kind-glyph: var(--slotted-icon-file-spreadsheet);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='presentation'] {
     --_kind-tile: var(--slotted-upload-kind-presentation);
-    --_kind-glyph: var(--slotted-icon-presentation);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='image'] {
     --_kind-tile: var(--slotted-upload-kind-image);
-    --_kind-glyph: var(--slotted-icon-file-image);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='video'] {
     --_kind-tile: var(--slotted-upload-kind-video);
-    --_kind-glyph: var(--slotted-icon-file-video);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='audio'] {
     --_kind-tile: var(--slotted-upload-kind-audio);
-    --_kind-glyph: var(--slotted-icon-file-audio);
   }
 
   [data-ui='upload'] [data-part='preview'][data-kind='archive'] {
     --_kind-tile: var(--slotted-upload-kind-archive);
-    --_kind-glyph: var(--slotted-icon-file-archive);
   }
 
   /*
@@ -895,53 +863,94 @@
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='upload'] [data-part='viewerExternal']::before,
-  [data-ui='upload'] [data-part='viewerClose']::before,
-  [data-ui='upload'] [data-part='start']::before,
-  [data-ui='upload'] [data-part='pause']::before,
-  [data-ui='upload'] [data-part='retry']::before,
-  [data-ui='upload'] [data-part='cancel']::before,
-  [data-ui='upload'] [data-part='remove']::before {
-    background-color: currentcolor;
-    block-size: var(--_action-glyph-size);
-    content: '';
-    inline-size: var(--_action-glyph-size);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  /**
+   * Each control holds the `Icon` its binding chose for it: external, x, play,
+   * pause, rotate-ccw, x and trash. A cross means *stop this* and a bin means
+   * *take it away*, because the marks appear together on one row.
+   */
+  [data-ui='upload'] [data-part='viewerExternal'] > [data-ui='icon'],
+  [data-ui='upload'] [data-part='viewerClose'] > [data-ui='icon'],
+  [data-ui='upload'] [data-part='start'] > [data-ui='icon'],
+  [data-ui='upload'] [data-part='pause'] > [data-ui='icon'],
+  [data-ui='upload'] [data-part='retry'] > [data-ui='icon'],
+  [data-ui='upload'] [data-part='cancel'] > [data-ui='icon'],
+  [data-ui='upload'] [data-part='remove'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_action-glyph-size);
   }
 
   /**
-   * Five marks chosen against each other, because they appear together on one
-   * row. A cross means *stop this* and a bin means *take it away*: reusing the
-   * cross for both would make two controls one control drawn twice.
+   * On a finger the target is the comfortable size in both axes and the box
+   * is the one a mouse sees: a transparent `::after` centred on each control
+   * reaches 44 pixels, and the ground and the ring stay square. The controls
+   * of one row stand two pixels apart, so none reaches across the edge it
+   * shares with the one beside it; between two of them each keeps its own
+   * width and is 44 tall.
    */
-  [data-ui='upload'] [data-part='viewerExternal']::before {
-    mask-image: var(--slotted-upload-external-icon, var(--slotted-icon-external));
-  }
+  @media (pointer: coarse) {
+    [data-ui='upload']
+      :is(
+        [data-part='viewerExternal'],
+        [data-part='viewerClose'],
+        [data-part='start'],
+        [data-part='pause'],
+        [data-part='retry'],
+        [data-part='cancel'],
+        [data-part='remove']
+      ) {
+      position: relative;
+    }
 
-  [data-ui='upload'] [data-part='viewerClose']::before {
-    mask-image: var(--slotted-upload-close-icon, var(--slotted-icon-x));
-  }
+    [data-ui='upload']
+      :is(
+        [data-part='viewerExternal'],
+        [data-part='viewerClose'],
+        [data-part='start'],
+        [data-part='pause'],
+        [data-part='retry'],
+        [data-part='cancel'],
+        [data-part='remove']
+      )::after {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
 
-  [data-ui='upload'] [data-part='start']::before {
-    mask-image: var(--slotted-upload-start-icon, var(--slotted-icon-play));
-  }
+    [data-ui='upload']
+      :is(
+        [data-part='viewerExternal'],
+        [data-part='start'],
+        [data-part='pause'],
+        [data-part='retry'],
+        [data-part='cancel']
+      ):has(
+        + :is(
+            [data-part='viewerClose'],
+            [data-part='pause'],
+            [data-part='retry'],
+            [data-part='cancel'],
+            [data-part='remove']
+          ):not([hidden])
+      )::after {
+      inset-inline-end: 0;
+    }
 
-  [data-ui='upload'] [data-part='pause']::before {
-    mask-image: var(--slotted-upload-pause-icon, var(--slotted-icon-pause));
-  }
-
-  [data-ui='upload'] [data-part='retry']::before {
-    mask-image: var(--slotted-upload-retry-icon, var(--slotted-icon-rotate-ccw));
-  }
-
-  [data-ui='upload'] [data-part='cancel']::before {
-    mask-image: var(--slotted-upload-cancel-icon, var(--slotted-icon-x));
-  }
-
-  [data-ui='upload'] [data-part='remove']::before {
-    mask-image: var(--slotted-upload-remove-icon, var(--slotted-icon-trash));
+    [data-ui='upload']
+      :is(
+        [data-part='viewerExternal'],
+        [data-part='start'],
+        [data-part='pause'],
+        [data-part='retry'],
+        [data-part='cancel']
+      ):not([hidden])
+      + :is(
+        [data-part='viewerClose'],
+        [data-part='pause'],
+        [data-part='retry'],
+        [data-part='cancel'],
+        [data-part='remove']
+      )::after {
+      inset-inline-start: 0;
+    }
   }
 
   /**
@@ -1126,9 +1135,8 @@
     inline-size: var(--slotted-upload-viewer-tile-size, 6rem);
   }
 
-  [data-ui='upload'] [data-part='viewerStage'] > [data-part='preview']::before {
-    block-size: calc(3 * var(--_glyph-size));
-    inline-size: calc(3 * var(--_glyph-size));
+  [data-ui='upload'] [data-part='viewerStage'] > [data-part='preview'] > [data-ui='icon'] {
+    --slotted-icon-size: calc(3 * var(--_glyph-size));
   }
 
   /*
@@ -1195,23 +1203,17 @@
   }
 
   /**
-   * One mark for both, mirrored for the one that goes back — which is the rule
+   * One mark for both, turned for the one that goes back — which is the rule
    * every chevron in this library follows, and the reason the scale holds one
-   * chevron rather than a pair.
+   * chevron rather than a pair. The binding marks both icons `directional`, so
+   * they mirror where reading runs right to left.
    */
-  [data-ui='upload'] [data-part='viewerPrevious']::before,
-  [data-ui='upload'] [data-part='viewerNext']::before {
-    background-color: currentcolor;
-    block-size: var(--_glyph-size);
-    content: '';
-    inline-size: var(--_glyph-size);
-    mask-image: var(--slotted-icon-chevron-right);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  [data-ui='upload'] [data-part='viewerPrevious'] > [data-ui='icon'],
+  [data-ui='upload'] [data-part='viewerNext'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_glyph-size);
   }
 
-  [data-ui='upload'] [data-part='viewerPrevious']::before {
+  [data-ui='upload'] [data-part='viewerPrevious'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -1282,16 +1284,12 @@
     border-style: solid;
     border-width: var(--slotted-control-border-width, 1px);
     border-color: var(--slotted-control-border-color);
-    background-color: var(--slotted-surface);
+    background-color: var(--slotted-control-surface, Field);
     flex-direction: row;
     gap: var(--_gap);
     padding-block: var(--slotted-space-2, 0.25rem);
     padding-inline: var(--slotted-space-2, 0.25rem);
     text-align: start;
-  }
-
-  [data-ui='upload'][data-variant='field'] [data-part='dropzone']::before {
-    content: none;
   }
 
   /* ── A wall of pictures ────────────────────────────────────────────────
@@ -1372,9 +1370,8 @@
   }
 
   /* A card's tile carries a mark the size of the card, not the size of a row. */
-  [data-ui='upload'][data-layout='grid'] [data-part='preview']:not(:has(img))::before {
-    block-size: calc(2 * var(--_glyph-size));
-    inline-size: calc(2 * var(--_glyph-size));
+  [data-ui='upload'][data-layout='grid'] [data-part='preview'] > [data-ui='icon'] {
+    --slotted-icon-size: calc(2 * var(--_glyph-size));
   }
 
   /* ── Composition that answers the box, not the window ──────────────────
@@ -1435,29 +1432,6 @@
    * carries it there instead.
    */
   @media (forced-colors: active) {
-    /**
-     * A mask is a painted background, and this mode replaces a painted
-     * background with the system's own — so the mark goes and the box it sat in
-     * stays. `forced-color-adjust: none` keeps the author's `currentcolor`,
-     * which here is the host's own ink and has already been forced to the right
-     * value, so every mark is drawn in the system's palette and still follows
-     * hover, disabled and Highlight without the family naming a colour.
-     */
-    [data-ui='upload'] [data-part='dropzone']::before,
-    [data-ui='upload']:not([data-variant='dropzone']) [data-part='trigger']::before,
-    [data-ui='upload'] [data-part='preview']:not(:has(img))::before,
-    [data-ui='upload'] [data-part='viewerExternal']::before,
-    [data-ui='upload'] [data-part='viewerClose']::before,
-    [data-ui='upload'] [data-part='viewerPrevious']::before,
-    [data-ui='upload'] [data-part='viewerNext']::before,
-    [data-ui='upload'] [data-part='start']::before,
-    [data-ui='upload'] [data-part='pause']::before,
-    [data-ui='upload'] [data-part='retry']::before,
-    [data-ui='upload'] [data-part='cancel']::before,
-    [data-ui='upload'] [data-part='remove']::before {
-      forced-color-adjust: none;
-    }
-
     [data-ui='upload'] [data-part='item'][data-status='rejected'],
     [data-ui='upload'] [data-part='item'][data-status='error'] {
       --_item-border: CanvasText;

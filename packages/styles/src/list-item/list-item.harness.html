@@ -96,6 +96,80 @@
   </ul>
 </section>
 
+<!--
+  Two glyph targets at the end of a row that wraps. Below 22rem a target that
+  carries a word takes a line of its own; a pair of glyphs is narrower than the
+  visual at the start and keeps the line it had.
+-->
+<section data-scene="glyph-actions">
+  <ul data-ui="list" data-part="root" data-variant="plain" data-size="md" role="list">
+    <li
+      data-ui="list-item"
+      data-part="root"
+      data-variant="plain"
+      data-size="md"
+      data-align="center"
+    >
+      <div data-part="content">
+        <span data-part="body">
+          <span data-part="label">Shipment SHP-035726 reported an exception</span>
+          <span data-part="description">Pallet damage reported by the carrier; claim opened.</span>
+        </span>
+      </div>
+      <span data-part="actions">
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="sm"
+          data-shape="square"
+          type="button"
+          aria-label="Mark as read"
+        >
+          <span data-part="icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </span>
+        </button>
+        <button
+          data-ui="button"
+          data-part="root"
+          data-tone="secondary"
+          data-variant="ghost"
+          data-size="sm"
+          data-shape="square"
+          type="button"
+          aria-label="Archive"
+        >
+          <span data-part="icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
+            </svg>
+          </span>
+        </button>
+      </span>
+    </li>
+  </ul>
+</section>
+
 <section data-scene="content-elements">
   <ul data-ui="list" data-part="root" data-variant="ruled" data-size="md" role="list">
     <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
@@ -267,11 +341,19 @@
   <div style="display: grid; gap: var(--slotted-space-6)">
     <ul data-ui="list" data-part="root" data-variant="plain" data-marker="bullet" role="list">
       <li data-ui="list-item" data-part="root" data-marker="bullet">
+        <span data-part="marker" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="dot"></svg></span
+        ></span>
         <div data-part="content">
           <span data-part="body"><span data-part="label">Geometry from the glyph scale</span></span>
         </div>
       </li>
       <li data-ui="list-item" data-part="root" data-marker="bullet">
+        <span data-part="marker" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="dot"></svg></span
+        ></span>
         <div data-part="content">
           <span data-part="body">
             <span data-part="label">

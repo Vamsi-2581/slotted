@@ -312,6 +312,11 @@
       font-size: var(--_value-size-narrow);
       line-height: var(--_value-line-narrow);
     }
+
+    /* The value steps down here, and so does the line its placeholder keeps. */
+    [data-ui='stat-card'][data-loading] [data-part='value'] {
+      min-block-size: calc(var(--_value-size-narrow) * var(--_value-line-narrow));
+    }
   }
 
   /* ── Header: the name, a status beside it, an action at the end ──────── */
@@ -361,6 +366,10 @@
      and a corner is where a control is looked for. */
   [data-ui='stat-card'] [data-part='action'] {
     flex: none;
+    /* The label's line, so a link here is as tall in the fallback face as in
+       the web face and the header does not grow when the font arrives. */
+    font-size: var(--_label-size);
+    line-height: var(--_label-line);
     margin-inline-start: auto;
   }
 
@@ -395,7 +404,16 @@
    * fraction at every size.
    */
   [data-ui='stat-card'] [data-part='value'] {
+    /* The figure and its unit are two flex items on one baseline — the text
+       node is an item of its own — so the gap spaces the unit from the digit
+       on whichever side it stands. A margin on the unit, reset by
+       `:first-child` for a leading unit, hugged a trailing one: after a bare
+       figure the unit is the first element child. */
+    align-items: baseline;
     color: var(--_ink);
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.15em;
     font-size: var(--_value-size);
     font-variant-numeric: proportional-nums;
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -417,15 +435,6 @@
     font-size: var(--_delta-size);
     font-weight: var(--slotted-font-weight-medium, 500);
     letter-spacing: 0;
-    margin-inline: 0.125em;
-  }
-
-  [data-ui='stat-card'] [data-part='value'] > [data-part='unit']:first-child {
-    margin-inline-start: 0;
-  }
-
-  [data-ui='stat-card'] [data-part='value'] > [data-part='unit']:last-child {
-    margin-inline-end: 0;
   }
 
   /**
@@ -477,41 +486,27 @@
   /**
    * The mark: one glyph, `trending-up`, turned over for a fall. Lucide's
    * `trending-down` is the same artwork reflected across the horizontal
-   * axis, so the family holds one token and mirrors it, the way every
+   * axis, so the family draws one glyph and mirrors it, the way every
    * chevron in the scale is mirrored by the family that draws it. A flat
-   * change draws `minus`. Painted from `currentcolor`, and kept under forced
-   * colours by `forced-color-adjust: none` on the painting element, in the
-   * block at the end of the sheet (`masked-glyph.test.mjs`).
+   * change draws `minus`. The binding renders the glyph inside the icon box;
+   * the part hands the box its size, and the box inherits the delta's ink.
    */
   [data-ui='stat-card'] [data-part='indicator'] {
-    background-color: currentcolor;
-    block-size: var(--_indicator-size);
-    display: inline-block;
+    --slotted-icon-size: var(--_indicator-size);
+
+    display: inline-flex;
     flex: none;
-    inline-size: var(--_indicator-size);
-    mask-image: var(--slotted-icon-trending-up);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-    /* A mirror, not motion: nothing travels when a rise becomes a fall. */
-    scale: var(--_flip-x) var(--_flip-y);
-
-    --_flip-x: 1;
-    --_flip-y: 1;
   }
 
-  [data-ui='stat-card'] [data-part='delta'][data-trend='down'] [data-part='indicator'] {
-    --_flip-y: -1;
-  }
-
-  /* Time runs from the right in a right-to-left document, so the rise
-     points the other way, as the sparkline beside it does. */
-  [data-ui='stat-card'] [data-part='indicator']:dir(rtl) {
-    --_flip-x: -1;
-  }
-
-  [data-ui='stat-card'] [data-part='delta'][data-trend='flat'] [data-part='indicator'] {
-    mask-image: var(--slotted-icon-minus);
+  /* A reflection across the horizontal axis, not motion: nothing travels when
+     a rise becomes a fall. Time runs from the right in a right-to-left
+     document, so the rise points the other way there, as the sparkline beside
+     it does — the `directional` icon box the binding draws does that. */
+  [data-ui='stat-card']
+    [data-part='delta'][data-trend='down']
+    [data-part='indicator']
+    > [data-ui='icon'] {
+    rotate: x 180deg;
   }
 
   /* ── Comparison: the prose under the figure ───────────────────────────── */
@@ -599,6 +594,19 @@
    * to keep the trend's box at the sparkline's height so the card does not
    * change size when the line arrives.
    */
+  /**
+   * The value's box is an inline flex line, so its height is its content's.
+   * A text placeholder is one cap tall — that is what makes a bar sit on the
+   * band a capital occupies — and a card whose figure is a bar was one cap
+   * tall where the same card loaded is one line, fourteen pixels shorter at
+   * the small step. Every box under a row of figures moved when the answer
+   * arrived. The floor is one line of the value's own type, so the two states
+   * occupy the same box.
+   */
+  [data-ui='stat-card'][data-loading] [data-part='value'] {
+    min-block-size: calc(var(--_value-size) * var(--_value-line));
+  }
+
   [data-ui='stat-card'][data-loading] [data-part='trend'] {
     --slotted-skeleton-block-size: var(
       --slotted-sparkline-block-size,
@@ -618,18 +626,5 @@
       --slotted-sparkline-block-size-lg,
       var(--slotted-space-11, 3rem)
     );
-  }
-
-  /**
-   * The system replaces every painted background, and the indicator is one:
-   * a mask over `currentcolor`. Turning the adjustment off on that one box
-   * keeps the author's `currentcolor`, which is the host's ink the system has
-   * already forced — so the mark is drawn in the system's palette rather
-   * than lost to it. Nothing else on the card paints a mask.
-   */
-  @media (forced-colors: active) {
-    [data-ui='stat-card'] [data-part='indicator'] {
-      forced-color-adjust: none;
-    }
   }
 }

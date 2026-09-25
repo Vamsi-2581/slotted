@@ -102,13 +102,14 @@
   /* ── Footnotes ────────────────────────────────────────────────────────
    *
    * The back link returns the reader up the page to the reference, so its
-   * glyph is an arrow pointing up: `arrow-left` turned a quarter, which reads
-   * the same in either direction and so is not mirrored.
+   * glyph is an arrow pointing up: the binding's `arrow-left` turned a
+   * quarter, which reads the same in either direction and so is not mirrored.
    */
 
   [data-ui='markdown'] [data-part='backref'] {
     --_glyph: var(--slotted-markdown-backref-size, 0.9em);
     --_box: var(--slotted-target-min, 24px);
+    --slotted-icon-size: var(--_glyph);
 
     block-size: var(--_box);
     display: inline-block;
@@ -121,31 +122,12 @@
     vertical-align: calc(0.5cap - 0.5 * var(--_box));
   }
 
-  [data-ui='markdown'] [data-part='backref']::before {
-    background-color: currentColor;
-    block-size: var(--_glyph);
-    content: '';
-    inline-size: var(--_glyph);
+  /* Out of flow, so the box keeps the baseline of a box with nothing in it. */
+  [data-ui='markdown'] [data-part='backref'] > [data-ui='icon'] {
     inset: 0;
     margin: auto;
-    mask-image: var(--slotted-icon-arrow-left);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
     position: absolute;
     rotate: 90deg;
-  }
-
-  /**
-   * The glyph is ink painted through a mask. Under forced colours the system
-   * replaces the paint with its own and the arrow disappears, so the element
-   * keeps its paint, which is the link's own colour — already a system
-   * colour there.
-   */
-  @media (forced-colors: active) {
-    [data-ui='markdown'] [data-part='backref']::before {
-      forced-color-adjust: none;
-    }
   }
 
   /* ── Empty and error ──────────────────────────────────────────────────

@@ -101,7 +101,7 @@
     );
 
     align-items: center;
-    background-color: var(--slotted-select-background, transparent);
+    background-color: var(--slotted-select-background, var(--slotted-control-surface, Field));
     border: var(--slotted-control-border-width, 1px) solid
       var(--slotted-select-border-color, var(--slotted-control-border-color, ButtonBorder));
     border-radius: var(--slotted-select-radius, var(--slotted-control-radius, 4px));
@@ -199,7 +199,10 @@
     /* The ground: every lane on the one row, so nothing the reader presses
        between the chips and the border falls past the button. */
     grid-area: 1 / 1 / 2 / -1;
-    min-block-size: calc(var(--_height) - var(--slotted-control-border-width, 1px) * 2);
+    /* The frame's border box, not its content box: on a coarse pointer the
+       frame is the touch target's height and the trigger is too. */
+    margin-block: calc(var(--slotted-control-border-width, 1px) * -1);
+    min-block-size: var(--_height);
     /* An `auto` minimum refuses to shrink below the longest label, which is how
        a select in a narrow column pushes its own field off the row. */
     min-inline-size: 0;
@@ -353,30 +356,34 @@
   }
 
   /**
-   * The chevron. A mask from the glyph scale rather than a character, and it
-   * turns over when the popup opens — the one movement in the control, and the
-   * only thing on the closed control that says it opens at all.
+   * The chevron. The library's own `Glyph` — an `<svg>` the binding draws
+   * inside an `icon` box — rather than a character, and the box turns over when
+   * the popup opens: the one movement in the control, and the only thing on the
+   * closed control that says it opens at all.
    */
   [data-ui='select'] > [data-part='arrow'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_icon-size);
+
+    align-items: center;
     block-size: var(--_icon-size);
     color: var(--slotted-select-arrow-color, var(--slotted-text-muted, GrayText));
+    display: flex;
     /* The last lane, whichever of the two arrangements is in force. */
     grid-area: 1 / -2 / 2 / -1;
     inline-size: var(--_icon-size);
+    justify-content: center;
     margin-inline-end: var(--_padding-inline);
-    mask-image: var(--slotted-select-arrow-icon, var(--slotted-icon-chevron-down));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     /* Inert on purpose: the trigger spans this lane underneath it, so a press
        here opens the popup rather than landing on a decorative span. */
     pointer-events: none;
+  }
+
+  [data-ui='select'] > [data-part='arrow'] > [data-ui='icon'] {
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='select'][data-open] [data-part='arrow'] {
+  [data-ui='select'][data-open] > [data-part='arrow'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -450,16 +457,20 @@
     position: absolute;
   }
 
-  [data-ui='select'] > [data-part='clear']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-select-clear-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. It does not reach into
+     the chevron's lane after it, which is the trigger's to answer. */
+  @media (pointer: coarse) {
+    [data-ui='select'] > [data-part='clear']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      inset-inline-end: 0;
+    }
+  }
+
+  /* The cross is a `Glyph` the binding draws, at the chevron's size. */
+  [data-ui='select'] > [data-part='clear'] {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────
@@ -997,15 +1008,15 @@
    * a reader does not type into a title.
    */
   [data-ui='select'] [data-part='search-icon'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_content-icon-size);
+
+    align-items: center;
     block-size: var(--_content-icon-size);
     color: var(--slotted-select-search-icon-color, var(--_muted));
+    display: flex;
     flex: 0 0 auto;
     inline-size: var(--_content-icon-size);
-    mask-image: var(--slotted-select-search-icon, var(--slotted-icon-search));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    justify-content: center;
     pointer-events: none;
   }
 
@@ -1285,36 +1296,24 @@
 
   /**
    * Column one, and the reason an option with artwork and one without line
-   * their labels up: the box exists whether or not anything fills it.
+   * their labels up: the column is as wide as the content icon step whether or
+   * not a given option fills it.
    *
-   * Two ways to fill it, as `alert`'s and `menu`'s icon parts take them: a
-   * glyph token in `--slotted-select-item-icon`, drawn as a mask at the
-   * column's own size, or an element of the consumer's own, centred. An empty
-   * box that painted a mask over content would cut that content into the shape
-   * of the mark.
+   * The box holds content and paints none: a `Glyph` in an `Icon` box, or
+   * artwork of the consumer's own, centred and sized from the column through
+   * `--slotted-icon-size`. No stylesheet fills it.
    */
   [data-ui='select'] [data-part='icon'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_content-icon-size);
+
+    align-items: center;
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_content-icon-size);
+    justify-content: center;
     justify-self: center;
     margin-inline-end: var(--_column-gap);
-    /* A transparent mask rather than `none`, because `none` means "no mask"
-       and paints the whole box: an option with an empty icon cell drew a solid
-       square in the first capture of this family. */
-    mask-image: var(--slotted-select-item-icon, linear-gradient(transparent, transparent));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  [data-ui='select'] [data-part='icon']:not(:empty) {
-    align-items: center;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    mask-image: none;
   }
 
   /* Column two, and the only column that gives way. It is scoped to the option
@@ -1361,16 +1360,16 @@
    * sixteen pixels as the reader moves through it.
    */
   [data-ui='select'] [data-part='indicator'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_content-icon-size);
+
+    align-items: center;
+    display: flex;
     grid-column: 3;
     grid-row: 1;
     inline-size: var(--_content-icon-size);
+    justify-content: center;
     justify-self: end;
     margin-inline-start: var(--_column-gap);
-    mask-image: var(--slotted-select-selected-icon, var(--slotted-icon-check));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0;
     /* The check appears rather than blinking: the one movement inside the
        popup, and it is what confirms the press the reader just made. */
@@ -1510,28 +1509,6 @@
     [data-ui='select'] [data-part='item'][data-disabled][data-current] {
       background-color: Highlight;
       color: GrayText;
-    }
-
-    /* The accent ink is gone under forced colours, so the check is the whole of
-       what says an option was chosen — and it must not take the highlight's
-       ground with it. */
-    [data-ui='select'] [data-part='item'][data-selected] > [data-part='indicator'] {
-      background-color: currentcolor;
-      forced-color-adjust: none;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='select'] > [data-part='arrow'],
-    [data-ui='select'] > [data-part='clear']::before,
-    [data-ui='select'] [data-part='search-icon'],
-    [data-ui='select'] [data-part='icon']:empty {
-      forced-color-adjust: none;
     }
   }
 }

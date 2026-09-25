@@ -469,7 +469,7 @@
    * menu of options does not shift by sixteen pixels as one is checked.
    */
   [data-ui='menu'] :is([data-part='indicator'], [data-part='icon']),
-  [data-ui='menu'] [data-part='item'][aria-haspopup='menu']::after {
+  [data-ui='menu'] [data-part='item'][aria-haspopup='menu'] > [data-ui='icon'] {
     /**
      * One line box tall, so a mark beside a label that wrapped onto three
      * lines sits on the first of them rather than in the middle of the item —
@@ -481,16 +481,22 @@
     block-size: 1lh;
   }
 
+  /**
+   * The mark is the Glyph element the binding renders in the box — `check` for
+   * a checkbox item, `dot` for a radio item — and it is shown while the item
+   * is checked.
+   */
   [data-ui='menu'] [data-part='indicator'] {
-    background-color: currentColor;
+    --slotted-icon-size: var(--_icon-size);
+
+    align-items: center;
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_icon-size);
+    justify-content: center;
     justify-self: center;
     margin-inline-end: var(--_column-gap);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0;
   }
 
@@ -498,13 +504,9 @@
     opacity: 1;
   }
 
-  [data-ui='menu'] [data-part='item'][role='menuitemcheckbox'] > [data-part='indicator'] {
-    mask-image: var(--slotted-menu-checked-icon, var(--slotted-icon-check));
-  }
-
+  /* The dot is drawn smaller than the check, at seven tenths of the column's glyph. */
   [data-ui='menu'] [data-part='item'][role='menuitemradio'] > [data-part='indicator'] {
-    mask-image: var(--slotted-menu-selected-icon, var(--slotted-icon-dot));
-    scale: 0.7;
+    --slotted-icon-size: calc(var(--_icon-size) * 0.7);
   }
 
   /**
@@ -519,10 +521,9 @@
    * apart in the light scheme — so the state the item was in could be read from
    * its label and not from its mark.
    *
-   * Two ways to fill it, as `alert`'s icon part takes them: a glyph token in
-   * `--slotted-menu-item-icon`, drawn as a mask at the column's own size, or an
-   * element of the consumer's own, centred. An empty box that painted a mask
-   * over content would cut that content into the shape of the mark.
+   * What fills it is content: the library's own `Glyph` in an icon box, or an
+   * element of the consumer's own, centred. The stylesheet paints nothing
+   * here.
    *
    * The box sizes what it holds: an icon box reads `--slotted-icon-size` from
    * its container, and a bare glyph host such as `ng-icon` — which sizes
@@ -534,27 +535,17 @@
   [data-ui='menu'] [data-part='icon'] {
     --slotted-icon-size: var(--_icon-size);
 
-    background-color: currentColor;
+    align-items: center;
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_icon-size);
+    justify-content: center;
     justify-self: center;
     margin-inline-end: var(--_column-gap);
-    mask-image: var(--slotted-menu-item-icon, none);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
   }
 
-  [data-ui='menu'] [data-part='icon']:not(:empty) {
-    align-items: center;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    mask-image: none;
-  }
-
-  [data-ui='menu'] [data-part='icon']:not(:empty) > * {
+  [data-ui='menu'] [data-part='icon'] > * {
     font-size: var(--_icon-size);
   }
 
@@ -601,29 +592,24 @@
   }
 
   /**
-   * The mark that says an item opens a submenu, drawn from the glyph scale
-   * rather than from a character, and mirrored in a right-to-left document with
-   * `:dir()` so a menu inside a mirrored region turns without an ancestor
-   * saying so. It takes the shortcut's column, because an item that opens a
-   * submenu runs no command and so carries no binding.
+   * The mark that says an item opens a submenu: the `chevron-right` Glyph
+   * element the binding puts at the end of the item, in a `directional` box so
+   * a menu inside a mirrored region turns without an ancestor saying so. It
+   * takes the shortcut's column, because an item that opens a submenu runs no
+   * command and so carries no binding.
    */
-  [data-ui='menu'] [data-part='item'][aria-haspopup='menu']::after {
-    background-color: currentColor;
-    content: '';
+  [data-ui='menu'] [data-part='item'][aria-haspopup='menu'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_icon-size);
+
     grid-column: 3;
     grid-row: 1;
-    inline-size: var(--_icon-size);
     justify-self: end;
+    /* The box sets its own line-height to 1 for inline alignment, and `1lh`
+       above reads it: the item's line box is taken back, or the chevron is a
+       type size tall and sits above the label it annotates. */
+    line-height: inherit;
     margin-inline-start: var(--_column-gap);
-    mask-image: var(--slotted-menu-submenu-icon, var(--slotted-icon-chevron-right));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0.7;
-  }
-
-  [data-ui='menu'] [data-part='item'][aria-haspopup='menu']:dir(rtl)::after {
-    scale: -1 1;
   }
 
   /* ── Separator, empty, loading ────────────────────────────────────────── */
@@ -732,29 +718,6 @@
     [data-ui='menu'] [data-part='item'][data-disabled]:focus {
       background-color: Highlight;
       color: GrayText;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='menu'] [data-part='icon']:empty,
-    [data-ui='menu'] [data-part='item'][aria-haspopup='menu']::after {
-      forced-color-adjust: none;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='menu'] [data-part='indicator'] {
-      forced-color-adjust: none;
     }
   }
 }

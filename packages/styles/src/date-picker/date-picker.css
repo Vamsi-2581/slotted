@@ -66,6 +66,8 @@
    * cannot be the only way in.
    */
   [data-ui='date-picker'] [data-part='trigger'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -114,19 +116,25 @@
     position: absolute;
   }
 
-  [data-ui='date-picker'] [data-part='trigger']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-date-picker-trigger-icon, var(--slotted-icon-calendar));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. Before the field's
+     clear it does not reach across it. */
+  @media (pointer: coarse) {
+    [data-ui='date-picker'] [data-part='trigger']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='date-picker']
+      [data-part='end']:has(+ [data-part='clear']:not([hidden]))
+      > [data-part='trigger']::after {
+      inset-inline-end: 0;
+    }
   }
 
   /**
-   * The mark does not turn, and does not become a chevron while the surface is
+   * The mark is the calendar `Glyph` the binding draws inside an `icon` box, at
+   * the field's icon step. It does not turn, and does not become a chevron while the surface is
    * open. A chevron says "a list opens here", which is the promise `select`
    * makes and this control does not keep: what opens is a month. The state is
    * carried by `aria-expanded` and by the surface itself, and the trigger goes
@@ -407,15 +415,6 @@
       flex-wrap: wrap;
       padding-block-end: var(--slotted-space-4, 0.5rem);
       padding-inline-end: 0;
-    }
-  }
-
-  @media (forced-colors: active) {
-    /* A masked glyph is painted with a background, and forced colours replace
-       a background that is not one of the system's own: the mark would go and
-       the box it sat in would stay. */
-    [data-ui='date-picker'] [data-part='trigger']::before {
-      forced-color-adjust: none;
     }
   }
 }

@@ -64,3 +64,20 @@ test('is selected by the public identifier rather than by a class', () => {
 test('declares no token, because the technique exposes no themable value', () => {
   assert.deepEqual(tokens, []);
 });
+
+/**
+ * Out of flow and unpinned, the box takes the initial containing block
+ * wherever no ancestor is positioned: it is laid out at a document
+ * coordinate, escapes every scroller's clipping and adds its distance down
+ * the page to the document's scrollable overflow. One hint at the foot of a
+ * record page was 186 pixels of page scroll under a shell that scrolls its
+ * own main. The pin is what makes the primitive safe in any container.
+ */
+test('is pinned to the start of its containing block, never left at its static position', () => {
+  assert.ok(
+    normalized.includes('inset-block-start:0'),
+    'an unpinned box adds its own distance down the page to the document’s scroll',
+  );
+  assert.ok(normalized.includes('inset-inline-start:0'), 'the inline axis is pinned too');
+  assert.ok(normalized.includes('margin:-1px'), 'the pin keeps the margin, not replaces it');
+});

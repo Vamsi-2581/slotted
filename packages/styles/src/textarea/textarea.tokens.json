@@ -15,6 +15,7 @@
   "--slotted-control-radius",
   "--slotted-control-shadow",
   "--slotted-control-shadow-focus-geometry",
+  "--slotted-control-surface",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",
   "--slotted-disabled-background",

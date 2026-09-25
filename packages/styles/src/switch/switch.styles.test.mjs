@@ -155,16 +155,13 @@ test('moves the thumb along the writing direction, through the motion scale', ()
  * colour *and* beyond position. The mark is what supplies it, and it is real
  * geometry from the theme's glyph scale rather than a character.
  */
-test('draws the mark as a mask from the glyph scale', () => {
-  const mark = rule(`${ui}>[data-part='track']>[data-part='thumb']::before`);
-  assert.match(mark, /mask-image:var\(--slotted-switch-mark,var\(--slotted-icon-check\)\)/);
-  assert.doesNotMatch(mark, /content:'[^']+'/, 'a character is never an icon');
-  assert.ok(
-    normalized.includes(
-      `${root}[data-indicator='none']>[data-part='track']>[data-part='thumb']::before{`,
-    ),
-    'indicator="none" withdraws nothing',
-  );
+test('draws the mark as the glyph element, never as a mask or a character', () => {
+  const mark = rule(`${ui}>[data-part='track']>[data-part='thumb']>[data-ui='icon']`);
+  assert.match(mark, /block-size:70%/);
+  assert.match(mark, /inline-size:70%/);
+  assert.match(mark, /color:var\(--slotted-switch-mark-color,var\(--slotted-tone-accent-solid\)\)/);
+  assert.doesNotMatch(declarations, /mask-image/);
+  assert.doesNotMatch(declarations, /content:'[^']+'/, 'a character is never an icon');
 });
 
 /**
@@ -290,7 +287,7 @@ test('holds the mark back for the state that outranks it', () => {
   );
   assert.ok(
     normalized.includes(
-      `${root}:is([data-checked],:has(>[data-part='control']:checked)):not([data-loading])>[data-part='track']>[data-part='thumb']::before{opacity:1;}`,
+      `${root}:is([data-checked],:has(>[data-part='control']:checked)):not([data-loading])>[data-part='track']>[data-part='thumb']>[data-ui='icon']{opacity:1;}`,
     ),
     'a loading switch still shows the mark it is not sure about',
   );
@@ -331,4 +328,12 @@ test('stops the pending arc under reduced motion, and never resizes while it run
 
 test('takes every duration and easing from the motion scale', () => {
   assert.doesNotMatch(declarations, /(?<![\w-])\d+(?:\.\d+)?m?s(?![\w-])/);
+});
+
+/**
+ * Stretched — a dialog body filling a phone's height — the rows shared the
+ * surplus and the description drifted from the label it belongs to.
+ */
+test('never distributes surplus height between its rows', () => {
+  assert.match(declarations, /align-content:\s*start/);
 });

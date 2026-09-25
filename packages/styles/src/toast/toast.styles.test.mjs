@@ -148,36 +148,30 @@ test('places the mark on the title’s first line at the title’s size', () => 
   assert.match(mark, /block-size:var\(--_mark-size\)/);
   assert.match(mark, /inline-size:var\(--_mark-size\)/);
   assert.match(mark, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
-  assert.match(mark, /mask-image:var\(--slotted-toast-icon,var\(--_glyph\)\)/);
+  /* The glyph is the binding's `Glyph`, sized by the slot through the icon
+     token; the sheet paints no mark of its own. */
+  assert.match(mark, /--slotted-icon-size:var\(--_mark-size\)/);
+  assert.doesNotMatch(normalized, /mask-image/);
   assert.ok(!normalized.includes(`[data-part='icon']::before`), 'the mark is a pseudo-element');
 });
 
 /**
- * The slot carries the colour and the mask paints `currentcolor`, so one rule
- * repaints the mark on a solid message and one repaints it under forced
- * colours, where the mask's ground has to be a system colour to survive.
+ * The slot carries the colour and the glyph strokes with `currentcolor`, so
+ * one rule repaints the mark on a solid message and one repaints it under
+ * forced colours.
  */
 test('lets one colour reach the mark, so forced colours can replace it', () => {
   assert.match(rule(`${item}>[data-part='icon']`), /color:var\(--_mark\)/);
-  assert.match(rule(`${item}>[data-part='icon']`), /background-color:currentcolor/);
   assert.match(rule(`${item}[data-variant='solid']`), /--_mark:var\(--_on-solid\)/);
-  assert.match(normalized, /forced-colors[^@]*\[data-part='icon'\]\{background-color:CanvasText/);
+  assert.match(normalized, /forced-colors[^@]*\[data-part='icon'\]\{color:CanvasText/);
 });
 
 /** A mark a page supplies takes the same box: it is an icon on the same line. */
 test('gives a supplied mark the box the family draws its own in', () => {
-  const supplied = rule(`${item}>[data-part='icon']:not(:empty)`);
-  assert.match(supplied, /display:flex/);
-  assert.match(supplied, /align-items:center/);
-  assert.match(supplied, /mask-image:none/);
-});
-
-/** Every tone draws the mark the shared map names, and no other. */
-test('takes its marks from the map alert and status-indicator share', () => {
-  for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
-    const painted = rule(`${item}[data-tone='${tone}']`);
-    assert.match(painted, new RegExp(`--_glyph:var\\(${glyph}\\)`), `${tone} draws another mark`);
-  }
+  const mark = rule(`${item}>[data-part='icon']`);
+  assert.match(mark, /display:flex/);
+  assert.match(mark, /align-items:center/);
+  assert.match(mark, /justify-content:center/);
 });
 
 /**

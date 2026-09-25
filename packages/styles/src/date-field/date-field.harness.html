@@ -8,8 +8,8 @@
 
   The `aria-valuetext` on each segment is what a screen reader says instead of
   the number; the group's own label is the whole date in words. The clear
-  button carries no visible text and its mask comes from the theme's glyph
-  scale, so nothing here draws a character as an icon.
+  button carries no visible text and its mark is the empty `Glyph` element the
+  build draws, so nothing here draws a character as an icon.
 -->
 
 <section data-scene="default">
@@ -458,7 +458,11 @@
           2026
         </div>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar a data"></button>
+      <button data-part="clear" type="button" aria-label="Limpar a data">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
       <input data-part="hidden-input" type="hidden" value="2026-09-09" />
     </div>
 

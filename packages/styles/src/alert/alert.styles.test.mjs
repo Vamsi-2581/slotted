@@ -74,11 +74,13 @@ test('creates the row of actions only when there are actions', () => {
   assert.ok(!/grid-template-areas/.test(normalized), 'a fixed template reserves an empty row');
 });
 
-test('gives every tone the mark the contract maps it to', () => {
-  for (const [tone, glyph] of Object.entries(contract.toneGlyphs)) {
+/* The glyph each tone draws is the binding's, from the contract's map; the
+   sheet gives every tone its own colour and paints no glyph. */
+test('gives every tone its own colour and leaves the glyph to the binding', () => {
+  assert.doesNotMatch(normalized, /mask-image|--_glyph:/);
+  for (const tone of Object.keys(contract.toneGlyphs)) {
     const declarations = rule(`${root}[data-tone='${tone}']`);
     assert.ok(declarations.length > 0, `${tone} has no rule`);
-    assert.ok(declarations.includes(`--_glyph:var(${glyph})`), `${tone} draws the wrong mark`);
     assert.ok(
       declarations.includes(`--_text:var(--slotted-tone-${tone}-text)`),
       `${tone} does not take its own text role`,
@@ -87,25 +89,39 @@ test('gives every tone the mark the contract maps it to', () => {
 });
 
 /**
- * The mark is geometry rather than a character, and it is the title's own size
- * on the title's first line (R5): a square of `1em` — the root's font size is
- * the title's — pushed down by half the difference between one line and the
- * mark, so it lands on the message's first line at every reach and every
- * density and stays there when the title wraps. The escape hatch is the outer
- * half of the `var()`, so an application with its own icon set keeps the tone,
- * the size and the alignment. `packages/styles/src/status-mark.test.mjs` holds
- * the same rule for every family that draws one.
+ * The mark is a filled disc with the tone's symbol cut out of it, on the
+ * title's first line: the binding's `Glyph` in its `solid` form, in a box
+ * 12/11 of the mark so the glyph's filled ring (radius 11 of 24) is the mark's
+ * own size. The size is rounded to an even number of pixels, the
+ * disc is hung from the first line's baseline and lowered by a whole number of
+ * pixels so its centre is the capitals' centre and it is snapped by the same
+ * amount as the glyphs, and its own height is cancelled so the words sit where
+ * they sit with no mark. `packages/styles/src/status-mark.test.mjs` holds the shared part of
+ * the rule for every family that draws a mark.
  */
-test('draws the mark as a mask, the title’s size, on the title’s first line', () => {
-  assert.match(rule(root), /--_mark-size:1em/);
+test('draws the mark as a disc with the symbol cut out, on the title’s first line', () => {
+  assert.match(rule(root), /--_mark-size:round\(nearest,\s*1\.2em,\s*2px\)/);
   const icon = rule(`${ui}>[data-part='icon']`);
-  assert.match(icon, /mask-image:var\(--slotted-alert-icon,var\(--_glyph\)\)/);
-  assert.match(icon, /align-self:start/);
+  assert.match(icon, /align-self:baseline/);
+  assert.match(icon, /position:relative/);
   assert.match(icon, /block-size:var\(--_mark-size\)/);
   assert.match(icon, /inline-size:var\(--_mark-size\)/);
-  assert.match(icon, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
-  assert.match(icon, /background-color:currentcolor/);
+  assert.match(
+    icon,
+    /inset-block-start:round\(nearest,\s*\(var\(--_mark-size\) - 1cap\) \/ 2,\s*1px\)/,
+  );
+  assert.match(icon, /margin-block-start:calc\(-1 \* var\(--_mark-size\)\)/);
+  assert.match(icon, /--slotted-icon-size:calc\(var\(--_mark-size\) \* 12 \/ 11\)/);
   assert.ok(!/content:'[^']/.test(icon), 'the mark is drawn with a character');
+  assert.match(rule(`${ui}>[data-part='content']`), /align-self:baseline/);
+  assert.match(icon, /contain:layout/);
+  for (const glyph of Object.values(contract.toneGlyphs)) {
+    assert.match(
+      fragment,
+      new RegExp(`data-glyph="${glyph}" data-solid`),
+      `no scene draws the ${glyph} mark solid`,
+    );
+  }
 });
 
 test('paints one tone three ways, and gives soft an edge of its own', () => {
@@ -226,14 +242,14 @@ test('answers its own inline size, in a container it owns', () => {
 
 /**
  * The theme remaps every colour a family reads, so a family writes a forced
- * colours rule only for something the theme cannot reach. Here that is two
- * things: a border painted in its own transparent fill, which the system does
- * not remap, and a masked glyph, which has no colour of its own at all.
+ * colours rule only for something the theme cannot reach: here a border
+ * painted in its own transparent fill, which the system does not remap. The
+ * mark's glyph fills with `currentcolor`, which the system has already forced.
  */
 test('keeps an edge and a silhouette when the system takes the palette', () => {
   const block = css.slice(css.indexOf('forced-colors: active'));
   assert.match(block, /border-color:\s*CanvasText/);
-  assert.match(block, /background-color:\s*CanvasText/);
+  assert.doesNotMatch(block, /\[data-part='icon'\]/);
 });
 
 /* ── The fragment, which is the third place this DOM is written ─────────── */

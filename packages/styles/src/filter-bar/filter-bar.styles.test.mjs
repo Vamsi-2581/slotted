@@ -63,7 +63,7 @@ test('composes by container query with the container on the root and the grid on
   );
   assert.ok(
     normalized.includes(
-      "[data-part='frame']{align-items:center;column-gap:var(--_gap);display:grid;",
+      "[data-part='frame']{align-items:start;column-gap:var(--_gap);display:grid;",
     ),
   );
   assert.match(declarations, /@container slotted-filter-bar \(min-width: 64rem\)/);
@@ -115,9 +115,39 @@ test('folds the pills and the chips behind the summary, and out of the roving ri
 });
 
 /**
+ * The shortcut is drawn as a legend at the end of the search; where the
+ * primary input is a touch screen the legend names a key the reader has no
+ * way to press, and the palette's footer is hidden under the same query.
+ */
+test('hides the shortcut legend where the primary input is a touch screen', () => {
+  const touch = declarations.slice(declarations.indexOf('(hover: none) and (pointer: coarse)'));
+  assert.ok(touch.length > 0, 'a touch-screen media query');
+  assert.match(
+    touch,
+    /\[data-ui='filter-bar'\] \[data-part='search'\] \[data-ui='kbd'\]\s*\{\s*display: none;/,
+  );
+});
+
+/**
+ * Below 30rem the rule stacks: the field, then the operator and the operand
+ * across both columns, the remove control in the second. A second track of
+ * `auto` took the spanning operand's whole width — a spanning item hands its
+ * size to the non-flexible track first — and left the field 34 pixels wide,
+ * a chevron with no name. The track is the remove control's own width.
+ */
+test('stacks a builder rule on a fixed remove track so the spanning operand cannot widen it', () => {
+  const narrow = declarations.slice(
+    declarations.indexOf('slotted-filter-bar-builder (max-width: 30rem)'),
+  );
+  const block = narrow.slice(0, narrow.indexOf('}') + 1);
+  assert.match(block, /grid-template-columns: minmax\(0, 1fr\) var\(--slotted-target-min, 24px\);/);
+  assert.doesNotMatch(block, /minmax\(0, 1fr\) auto/);
+});
+
+/**
  * A pill holding a rule is a chosen state, carried as the pair the foundation
  * asks for — the accent border and the accent surface — and its chevron is
- * the same glyph every control that opens a list draws.
+ * the `icon` the binding draws, turned here and painted by no mask.
  */
 test('fills a pill from the accent pair and turns the chevron it borrows', () => {
   assert.ok(
@@ -128,15 +158,14 @@ test('fills a pill from the accent pair and turns the chevron it borrows', () =>
   assert.ok(normalized.includes('--_filtered-edge:var(--slotted-tone-accent-border,Highlight)'));
   assert.ok(normalized.includes('--_filtered-surface:var(--slotted-tone-accent-surface,Canvas)'));
   assert.ok(
-    normalized.includes(
-      'mask-image:var(--slotted-filter-bar-pill-icon,var(--slotted-icon-chevron-down))',
-    ),
+    normalized.includes("[data-part='pill']>[data-ui='icon']{--slotted-icon-size:var(--_icon);"),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='pill'][aria-expanded='true']::after{transform:rotate(180deg);}",
+      "[data-part='pill'][aria-expanded='true']>[data-ui='icon']{transform:rotate(180deg);}",
     ),
   );
+  assert.doesNotMatch(declarations, /mask-image/);
 });
 
 /**
@@ -144,19 +173,21 @@ test('fills a pill from the accent pair and turns the chevron it borrows', () =>
  * remove of its own only on a rule inside the builder. The first capture of
  * the family showed two crosses on every chip, one per sheet.
  */
-test('leaves the chip’s remove control to tag and draws its own only on a rule', () => {
+test('leaves the chip’s remove control to tag and sizes its own only on a rule', () => {
   assert.doesNotMatch(declarations, /\[data-ui='filter-bar'\]\s+\[data-part='remove'\]/);
-  assert.ok(normalized.includes("[data-part='rule']>[data-part='remove']::after{"));
   assert.ok(
-    normalized.includes('mask-image:var(--slotted-filter-bar-remove-icon,var(--slotted-icon-x))'),
+    normalized.includes(
+      "[data-part='rule']>[data-part='remove']>[data-ui='icon']{--slotted-icon-size:var(--_icon);}",
+    ),
   );
+  assert.doesNotMatch(declarations, /\[data-part='remove'\]::after/);
 });
 
 /** A field's name and its sentence are two isolated runs, so a right-to-left name beside an ISO date reorders nothing. */
 test('isolates the field name from its sentence', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='pill']>span{min-inline-size:0;overflow:hidden;text-overflow:ellipsis;unicode-bidi:isolate;}",
+      "[data-part='pill']>span:not([data-ui='icon']){min-inline-size:0;overflow:hidden;text-overflow:ellipsis;unicode-bidi:isolate;}",
     ),
   );
   assert.ok(
@@ -208,4 +239,129 @@ test('renders every part and every state in the harness fragment', () => {
   assert.ok(fragment.includes('role="search"'));
   assert.ok(fragment.includes('role="toolbar"'));
   assert.ok(fragment.includes('role="grid"'));
+});
+
+/**
+ * A binding may render the condition inside one element of its own at
+ * `display: contents`; the element is not a grid item, so the operator and
+ * the operand are the rule's grid items and a child combinator misses both.
+ * Under the stacked composition the miss put the operand in the remove
+ * control's track, 24 pixels wide, and past the drawer's edge.
+ */
+test('reaches the operator and the operand through a display-contents wrapper', () => {
+  for (const part of ['operator', 'operand']) {
+    assert.doesNotMatch(
+      normalized,
+      new RegExp(`\\[data-part='rule'\\][^{,]*>\\[data-part='${part}'\\]`),
+      `rule reaches ${part} as a child`,
+    );
+  }
+  assert.ok(
+    normalized.includes(
+      "[data-part='rule']:is([data-part='operator'],[data-part='operand']){grid-column:1/-1;}",
+    ),
+    'the stacked rule spans both parts across the row',
+  );
+});
+
+/**
+ * Below 36rem the consumer's `end` controls take a line of their own. Sharing
+ * the summary's line, an `auto` track for them took every pixel a toolbar of
+ * three controls asked for and folded the summary to one letter per line
+ * (Nexora, 390 pixels); a shrinking track folded their own buttons instead.
+ * A bar with no `end` keeps the two-column line.
+ */
+test("gives a narrow bar's end controls a line of their own", () => {
+  const narrow = normalized.slice(normalized.indexOf('(max-width:36rem)'));
+  assert.match(narrow, /grid-template-columns:minmax\(0,1fr\)auto;/);
+  assert.match(
+    narrow,
+    /\[data-ui='filter-bar'\]>\[data-part='frame'\]:has\(>\[data-part='end'\]:not\(:empty\)\)\{grid-template-areas:'searchsearch''barbar''endend''countcount';\}/,
+  );
+});
+
+/**
+ * The width alone does not say the toolbar fits beside the search: at 1440
+ * pixels (Nexora, /sales/orders) the consumer's three controls left the
+ * toolbar 364 pixels, its pills wrapped onto a second line, and the search
+ * and the controls stood in the middle of the two. A root the binding marks
+ * `data-bar-wrapped` takes the medium composition inside the wide query, the
+ * toolbar on a line of its own.
+ */
+test('gives a wrapping toolbar a line of its own inside the wide composition', () => {
+  const wide = normalized.slice(
+    normalized.indexOf('@containerslotted-filter-bar(min-width:64rem){'),
+    normalized.indexOf("[data-ui='filter-bar'][data-size='sm']"),
+  );
+  assert.match(
+    wide,
+    /\[data-ui='filter-bar'\]\[data-bar-wrapped\]>\[data-part='frame'\]\{grid-template-areas:'searchendcount''barbarbar''chipschipschips';grid-template-columns:minmax\(0,1fr\)autoauto;\}/,
+  );
+});
+
+/**
+ * Every member of the frame starts at the top of its line and the count is a
+ * control tall with its line in the middle, so the search, the consumer's
+ * controls and the count line up with the first line of pills even while
+ * those wrap. On a phone the count is a line of its own and keeps its type's
+ * height.
+ */
+test('starts every member at the top of its line and centres the count in a control height', () => {
+  const count =
+    normalized
+      .split("[data-ui='filter-bar']>[data-part='frame']>[data-part='count']{")
+      .find((block) => block.startsWith('color:'))
+      ?.split('}')[0] ?? '';
+  assert.match(count, /padding-block:max\(0px,calc\(\(var\(--_height\)-1lh\)\/2\)\);/);
+  /**
+   * The count is reached through the frame it belongs to. A descendant
+   * selector also reached the count another family draws inside a control
+   * placed in this bar — the column manager's trigger chip took this padding
+   * and grew to the button's height.
+   */
+  assert.ok(!/\[data-ui='filter-bar'\]\s+\[data-part='count'\]/.test(declarations));
+  assert.ok(!/\[data-loading\]\s+\[data-part='count'\]/.test(declarations));
+  const narrow = normalized.slice(normalized.indexOf('(max-width:36rem)'));
+  assert.match(
+    narrow,
+    /\[data-ui='filter-bar'\]>\[data-part='frame'\]>\[data-part='count'\]\{justify-self:start;padding-block:0;\}/,
+  );
+});
+
+/**
+ * The count waits in its own place: before the first answer it holds only the
+ * spinner, sixteen pixels tall, and the text that replaces it is a line of the
+ * bar's type — twenty. On a phone the count is a row of its own, so the rows
+ * under the bar moved four pixels when the answer landed. The part keeps one
+ * line of its type whatever it holds.
+ */
+test('keeps a line of its type for the count while the first answer is on its way', () => {
+  const count =
+    normalized
+      .split("[data-ui='filter-bar']>[data-part='frame']>[data-part='count']{")
+      .find((block) => block.startsWith('color:'))
+      ?.split('}')[0] ?? '';
+  assert.match(count, /min-block-size:1lh/);
+});
+
+/**
+ * The rule's remove control and the chips' more stood a target minimum on a
+ * touch screen, 24 pixels in a row of 44-pixel fields. They reach the
+ * comfortable target by a transparent `::before` centred on the box, and the
+ * box keeps its 24 pixels: a block padding with a clipped ground left the
+ * remove's border box, and its focus ring, 24 wide and 44 tall.
+ */
+test('makes the rule’s remove and the chips’ more full touch targets on a coarse pointer', () => {
+  const at = normalized.indexOf('@media(pointer:coarse){');
+  assert.notEqual(at, -1, 'a coarse-pointer block');
+  const coarse = normalized.slice(at);
+  const selector =
+    "[data-ui='filter-bar']:is([data-part='more'],[data-part='rule']>[data-part='remove'])";
+  const halo = coarse.split(`${selector}::before{`)[1]?.split('}')[0] ?? '';
+  assert.match(
+    halo,
+    /inset:min\(0px,calc\(\(100%-var\(--slotted-target-comfortable,44px\)\)\/2\)\);/,
+  );
+  const box = coarse.split(`${selector}{`)[1]?.split('}')[0] ?? '';
+  assert.doesNotMatch(box, /background-clip|padding-block|margin-block/);
 });

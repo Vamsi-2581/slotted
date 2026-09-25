@@ -62,7 +62,10 @@
     );
 
     align-items: center;
-    background-color: var(--slotted-date-range-picker-background, transparent);
+    background-color: var(
+      --slotted-date-range-picker-background,
+      var(--slotted-control-surface, Field)
+    );
     border: var(--_border-width) solid
       var(
         --slotted-date-range-picker-border-color,
@@ -240,6 +243,8 @@
    */
   [data-ui='date-range-picker'] [data-part='clear'],
   [data-ui='date-range-picker'] [data-part='trigger'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -280,27 +285,29 @@
     position: absolute;
   }
 
-  [data-ui='date-range-picker'] [data-part='clear']::before,
-  [data-ui='date-range-picker'] [data-part='trigger']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. Side by side, neither
+     button reaches across the edge the two share. */
+  @media (pointer: coarse) {
+    [data-ui='date-range-picker'] :is([data-part='clear'], [data-part='trigger'])::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='date-range-picker']
+      [data-part='clear']:has(+ [data-part='trigger']:not([hidden]))::after {
+      inset-inline-end: 0;
+    }
+
+    [data-ui='date-range-picker'] [data-part='clear']:not([hidden]) + [data-part='trigger']::after {
+      inset-inline-start: 0;
+    }
   }
 
-  [data-ui='date-range-picker'] [data-part='clear']::before {
-    mask-image: var(--slotted-date-range-picker-clear-icon, var(--slotted-icon-x));
-  }
-
-  /* The mark does not turn and does not become a chevron while the surface is
-     open: what opens is a month, not a list, and the trigger goes on saying
-     what kind of value it holds. */
-  [data-ui='date-range-picker'] [data-part='trigger']::before {
-    mask-image: var(--slotted-date-range-picker-trigger-icon, var(--slotted-icon-calendar));
-  }
+  /* The cross and the calendar are `Glyph` elements the binding draws, at the
+     field's icon step. The calendar does not turn and does not become a
+     chevron while the surface is open: what opens is a month, not a list, and
+     the trigger goes on saying what kind of value it holds. */
 
   [data-ui='date-range-picker'] [data-part='clear']:hover:not(:disabled):not([data-disabled]),
   [data-ui='date-range-picker'] [data-part='trigger']:hover:not(:disabled):not([data-disabled]) {
@@ -879,10 +886,8 @@
       border-color: ButtonBorder;
     }
 
-    /* A masked glyph is painted with a background, and forced colours replace
+    /* The underline is painted with a background, and forced colours replace
        a background that is not one of the system's own. */
-    [data-ui='date-range-picker'] [data-part='clear']::before,
-    [data-ui='date-range-picker'] [data-part='trigger']::before,
     [data-ui='date-range-picker'] [data-part='start']::after,
     [data-ui='date-range-picker'] [data-part='end']::after {
       forced-color-adjust: none;

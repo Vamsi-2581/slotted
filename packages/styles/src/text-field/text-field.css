@@ -53,7 +53,7 @@
     );
 
     align-items: center;
-    background-color: var(--slotted-text-field-background, transparent);
+    background-color: var(--slotted-text-field-background, var(--slotted-control-surface, Field));
     /**
      * The control step of the border scale rather than the strong one. A
      * separator between two surfaces and the edge of a control are the same
@@ -121,7 +121,13 @@
    */
   [data-ui='text-field'] > [data-part='input'] {
     background-color: transparent;
-    block-size: 100%;
+    /* The frame's border box, not its content box: on a coarse pointer the frame
+       is the touch target's height and the control it holds is too. Stretched
+       rather than a percentage of the frame, which is indefinite wherever the
+       frame is not stretched itself — a search field in a bar measured 17
+       pixels. The control paints no ground, so the frame's edge still shows. */
+    align-self: stretch;
+    margin-block: calc(var(--slotted-control-border-width, 1px) * -1);
     border: 0;
     color: inherit;
     flex: 1 1 auto;
@@ -206,8 +212,12 @@
 
   /* ── Variant: how much frame the control shows ────────────────────────
    *
-   * `outline` takes the ground it is placed on, so a form inside a card and
-   * the same form on the page both look right without a second token.
+   * `outline` carries `--slotted-control-surface`: the field is a plane of its
+   * own, a step off the ground in each scheme — white on the application's
+   * canvas in `light`, a step above the surface in `dark`. Transparent was
+   * tried first, on the rule that a form inside a card and the same form on
+   * the page both look right without a second token; what it produced was a
+   * field with no plane at all, found only by its edge.
    * `subtle` sinks into the page. `plain` shows nothing at rest and is what a
    * dense table needs: a cell that is only a control while it is being used,
    * and that keeps exactly the same box so the row does not reflow when the
@@ -243,18 +253,6 @@
   @media (forced-colors: active) {
     [data-ui='text-field'][data-part='root'][data-variant='plain'] {
       border-color: ButtonBorder;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='text-field'] > [data-part='clear']::before,
-    [data-ui='text-field'] > [data-part='reveal']::before {
-      forced-color-adjust: none;
     }
   }
 
@@ -343,7 +341,7 @@
    *
    * Both are real buttons, both keep the caret where it was, and both are held
    * to the target minimum by the family rather than by the page. Their glyphs
-   * are masks from the theme's own scale: a character is never an icon.
+   * are the `Glyph` element the binding renders: a character is never an icon.
    */
   [data-ui='text-field'] > [data-part='clear'],
   [data-ui='text-field'] > [data-part='reveal'] {
@@ -389,38 +387,33 @@
     position: absolute;
   }
 
-  [data-ui='text-field'] > [data-part='clear']::before,
-  [data-ui='text-field'] > [data-part='reveal']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. Side by side, neither
+     button reaches across the edge the two share. */
+  @media (pointer: coarse) {
+    [data-ui='text-field'] > :is([data-part='clear'], [data-part='reveal'])::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
 
-  [data-ui='text-field'] > [data-part='clear']::before {
-    mask-image: var(--slotted-icon-x);
+    [data-ui='text-field'] > [data-part='clear']:has(+ [data-part='reveal']:not([hidden]))::after {
+      inset-inline-end: 0;
+    }
+
+    [data-ui='text-field'] > [data-part='clear']:not([hidden]) + [data-part='reveal']::after {
+      inset-inline-start: 0;
+    }
   }
 
   /**
-   * The eye and the crossed eye are two steps the glyph scale gained for this
-   * family, in lockstep with the contract, the theme and
-   * `docs/token-foundation.md`. They are one pair rather than two marks — the
-   * same artwork with a stroke added — so a password toggle reads as one
-   * control changing rather than as two icons swapping places.
-   *
-   * The pressed state shows the crossed eye, because the button announces what
-   * pressing it will do and a revealed password is one a press will hide.
+   * The `icon` box inside each button is drawn at the control's own icon step,
+   * the one its adornments use, rather than at the icon family's default. The
+   * binding picks the glyph: the cross, and for the reveal button the eye or,
+   * pressed, the crossed eye — the button announces what pressing it will do.
    */
-  [data-ui='text-field'] > [data-part='reveal']::before {
-    mask-image: var(--slotted-text-field-reveal-icon, var(--slotted-icon-eye));
-  }
-
-  [data-ui='text-field'] > [data-part='reveal'][aria-pressed='true']::before {
-    mask-image: var(--slotted-text-field-reveal-off-icon, var(--slotted-icon-eye-off));
+  [data-ui='text-field'] > [data-part='clear'],
+  [data-ui='text-field'] > [data-part='reveal'] {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   [data-ui='text-field'] > [data-part='clear']:hover:not(:disabled):not([data-disabled]),

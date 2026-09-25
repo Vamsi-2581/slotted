@@ -74,9 +74,12 @@
    * calendar: a chevron says "a list of choices opens here", and what opens
    * here is a clock's worth of them. The glyph names the kind of value the
    * control holds, which is the one thing about it that never changes — so it
-   * does not turn while the surface is open either.
+   * does not turn while the surface is open either. It is a `Glyph` the
+   * binding draws inside an `icon` box, at the field's icon step.
    */
   [data-ui='time-picker'] [data-part='trigger'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -125,15 +128,20 @@
     position: absolute;
   }
 
-  [data-ui='time-picker'] [data-part='trigger']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-time-picker-trigger-icon, var(--slotted-icon-clock));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. Before the field's
+     clear it does not reach across it. */
+  @media (pointer: coarse) {
+    [data-ui='time-picker'] [data-part='trigger']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='time-picker']
+      [data-part='end']:has(+ [data-part='clear']:not([hidden]))
+      > [data-part='trigger']::after {
+      inset-inline-end: 0;
+    }
   }
 
   [data-ui='time-picker'] [data-part='trigger']:hover:not(:disabled):not([data-disabled]) {
@@ -640,13 +648,6 @@
   }
 
   @media (forced-colors: active) {
-    /* A masked glyph is painted with a background, and forced colours replace
-       a background that is not one of the system's own: the mark would go and
-       the box it sat in would stay. */
-    [data-ui='time-picker'] [data-part='trigger']::before {
-      forced-color-adjust: none;
-    }
-
     /* The chosen row and the highlighted row both lose their painted grounds,
        so each says what it is with a system pair the operating system
        guarantees legible together. */

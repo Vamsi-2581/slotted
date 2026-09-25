@@ -9,10 +9,8 @@
   The field and the calendar inside keep their own `data-ui`: this family owns
   the frame, the trigger and the layer, and restyles neither of them.
 
-  The trigger's mark is the chevron the glyph scale holds today. Every surveyed
-  implementation draws a calendar there instead, and the scale has no such
-  glyph; adding one changes ground other families stand on, so it is a decision
-  for the gate rather than one taken here.
+  The trigger's mark is the calendar, written as the `Glyph` element the
+  bindings render; the build draws the empty `<svg>`.
 -->
 
 <section data-scene="closed">
@@ -62,7 +60,10 @@
             type="button"
             aria-haspopup="dialog"
             aria-label="Alterar data, 9 de setembro de 2026"
-          ></button
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="calendar"></svg
+            ></span></button
         ></span>
         <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
       </div>
@@ -118,7 +119,10 @@
             aria-haspopup="dialog"
             aria-expanded="true"
             aria-label="Alterar data, 9 de setembro de 2026"
-          ></button
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="calendar"></svg
+            ></span></button
         ></span>
         <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
       </div>
@@ -141,9 +145,21 @@
       <div data-part="content" role="dialog" aria-label="Escolher data">
         <div data-ui="calendar" data-part="root">
           <div data-part="header">
-            <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-            <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-            <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            <button data-part="previous" type="button" aria-label="Mês anterior">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+            <button data-part="heading" type="button" aria-live="polite">
+              setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg
+              ></span>
+            </button>
+            <button data-part="next" type="button" aria-label="Próximo mês">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div data-part="grids">
             <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -276,7 +292,10 @@
             aria-haspopup="dialog"
             aria-expanded="true"
             aria-label="Alterar data, 9 de setembro de 2026"
-          ></button
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="calendar"></svg
+            ></span></button
         ></span>
         <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
       </div>
@@ -341,9 +360,21 @@
         </div>
         <div data-ui="calendar" data-part="root">
           <div data-part="header">
-            <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-            <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-            <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            <button data-part="previous" type="button" aria-label="Mês anterior">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+            <button data-part="heading" type="button" aria-live="polite">
+              setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg
+              ></span>
+            </button>
+            <button data-part="next" type="button" aria-label="Próximo mês">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div data-part="grids">
             <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -498,7 +529,10 @@
             aria-haspopup="dialog"
             aria-expanded="true"
             aria-label="Alterar período, 7 a 11 de setembro de 2026"
-          ></button
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="calendar"></svg
+            ></span></button
         ></span>
         <input data-part="hidden-input" type="hidden" name="data" value="2026-09-07" />
       </div>
@@ -521,9 +555,21 @@
       <div data-part="content" role="dialog" aria-label="Escolher data">
         <div data-ui="calendar" data-part="root">
           <div data-part="header">
-            <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-            <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-            <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            <button data-part="previous" type="button" aria-label="Mês anterior">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+            <button data-part="heading" type="button" aria-live="polite">
+              setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg
+              ></span>
+            </button>
+            <button data-part="next" type="button" aria-label="Próximo mês">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div data-part="grids">
             <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -686,7 +732,10 @@
             aria-haspopup="dialog"
             aria-expanded="true"
             aria-label="Alterar data, 9 de setembro de 2026"
-          ></button
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="calendar"></svg
+            ></span></button
         ></span>
         <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
       </div>
@@ -709,9 +758,21 @@
       <div data-part="content" role="dialog" aria-label="Escolher data">
         <div data-ui="calendar" data-part="root">
           <div data-part="header">
-            <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-            <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-            <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            <button data-part="previous" type="button" aria-label="Mês anterior">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+            <button data-part="heading" type="button" aria-live="polite">
+              setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg
+              ></span>
+            </button>
+            <button data-part="next" type="button" aria-label="Próximo mês">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div data-part="grids">
             <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -860,7 +921,10 @@
             aria-haspopup="dialog"
             aria-expanded="true"
             aria-label="Alterar data, 9 de setembro de 2026"
-          ></button
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="calendar"></svg
+            ></span></button
         ></span>
         <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
       </div>
@@ -883,11 +947,21 @@
       <div data-part="content" role="dialog" aria-label="Escolher data">
         <div data-ui="calendar" data-part="root" data-months="2">
           <div data-part="header">
-            <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-            <button data-part="heading" type="button" aria-live="polite">
-              setembro – outubro de 2026
+            <button data-part="previous" type="button" aria-label="Mês anterior">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
             </button>
-            <button data-part="next" type="button" aria-label="Próximo mês"></button>
+            <button data-part="heading" type="button" aria-live="polite">
+              setembro – outubro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg
+              ></span>
+            </button>
+            <button data-part="next" type="button" aria-label="Próximo mês">
+              <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div data-part="grids">
             <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -1091,7 +1165,10 @@
               type="button"
               aria-haspopup="dialog"
               aria-label="Alterar data, 9 de setembro de 2026"
-            ></button
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="calendar"></svg
+              ></span></button
           ></span>
           <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
         </div>
@@ -1149,7 +1226,10 @@
               type="button"
               aria-haspopup="dialog"
               aria-label="Alterar data, 9 de setembro de 2026"
-            ></button
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="calendar"></svg
+              ></span></button
           ></span>
           <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
         </div>
@@ -1207,7 +1287,10 @@
               type="button"
               aria-haspopup="dialog"
               aria-label="Alterar data, 9 de setembro de 2026"
-            ></button
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="calendar"></svg
+              ></span></button
           ></span>
           <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
         </div>
@@ -1265,7 +1348,10 @@
               type="button"
               aria-haspopup="dialog"
               aria-label="Alterar data, 9 de setembro de 2026"
-            ></button
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="calendar"></svg
+              ></span></button
           ></span>
           <input data-part="hidden-input" type="hidden" name="data" value="2026-09-09" />
         </div>

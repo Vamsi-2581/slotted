@@ -1,7 +1,7 @@
 [
-  "--slotted-border-strong",
   "--slotted-border-subtle",
   "--slotted-border-width-thin",
+  "--slotted-control-border-color",
   "--slotted-control-font-family",
   "--slotted-control-font-size-lg",
   "--slotted-control-font-size-md",
@@ -25,12 +25,12 @@
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",
   "--slotted-focus-ring-width",
-  "--slotted-icon-ellipsis",
   "--slotted-radius-md",
   "--slotted-space-1",
   "--slotted-space-2",
   "--slotted-space-3",
   "--slotted-surface-raised",
+  "--slotted-target-comfortable",
   "--slotted-target-min",
   "--slotted-text",
   "--slotted-text-muted",
@@ -44,7 +44,6 @@
   "--slotted-toolbar-overflow-color",
   "--slotted-toolbar-overflow-hover-background",
   "--slotted-toolbar-overflow-hover-color",
-  "--slotted-toolbar-overflow-icon",
   "--slotted-toolbar-overflow-open-background",
   "--slotted-toolbar-separator-color"
 ]

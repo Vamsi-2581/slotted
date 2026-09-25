@@ -198,16 +198,42 @@ test('crosses the picture over the letters instead of swapping them', () => {
 });
 
 /**
- * The last step of the fallback order, and the only artwork the family owns. A
- * character is never an icon: a glyph token is real geometry, and no font can
- * be relied on to carry a silhouette.
+ * The last step of the fallback order, and the only artwork the family owns.
+ * The binding draws it as the `person` glyph in an `Icon`; the sheet only sizes
+ * the icon from the slot, and paints nothing of its own.
  */
-test('draws the person from a glyph token, and only when there is nothing to write', () => {
-  const glyph = rule(`${ui} [data-part='fallback']:empty::before`);
-  assert.ok(glyph.includes('mask-image:var(--slotted-icon-person)'));
-  assert.ok(glyph.includes('background-color:currentColor'));
-  assert.ok(glyph.includes('block-size:var(--_glyph-size)'));
-  assert.ok(!/content:'[^']/.test(glyph), 'the glyph must not be a character');
+test('sizes the person glyph from the slot, and paints no icon of its own', () => {
+  assert.ok(
+    rule(`${ui} [data-part='fallback']`).includes('--slotted-icon-size:var(--_glyph-size)'),
+  );
+  assert.ok(!normalized.includes('mask-image'), 'the glyph is an element, not a mask');
+});
+
+/**
+ * A flex container centres the line box, and a line box is not symmetric around
+ * the letters inside it. Measured on this family with the Geist face at
+ * `compact`, two initials sat 0.56 pixels high in the 32-pixel disc and 0.68
+ * high in the 26-pixel one; at `comfortable`, 1.13 high in the 64-pixel one.
+ * `text-box` centres the ink instead, and it needs a block container — a flex
+ * container's text lives in an anonymous item no selector can reach. The
+ * fallback has no label part to carry the trim, so the fallback itself becomes
+ * the block, and only when it holds nothing but text: a projected logo is not
+ * a line of type, and trimming the line it sits in would move it.
+ */
+test('centres the ink of the initials rather than their line box, where the engine can', () => {
+  const guarded = normalized.split('@supports (text-box:trim-both cap alphabetic){')[1] ?? '';
+  const trimmed = guarded.split('}')[0];
+  assert.ok(
+    trimmed.startsWith(`${ui} [data-part='fallback']:not(:has(> *)){`),
+    'the trim applies to the fallback, and only to one holding text alone',
+  );
+  assert.ok(trimmed.includes('text-box:trim-both cap alphabetic'), 'the trim is not guarded');
+  assert.ok(trimmed.includes('display:block'), 'the trim needs a block container');
+  assert.ok(
+    trimmed.includes('align-content:center'),
+    'a block centres its line with align-content',
+  );
+  assert.ok(trimmed.includes('text-align:center'));
 });
 
 /**

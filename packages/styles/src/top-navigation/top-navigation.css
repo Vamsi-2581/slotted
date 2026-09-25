@@ -16,7 +16,7 @@
    *
    * Three literal steps, declared in the contract as `collapseAt` and compared
    * by `top-navigation.styles.test.mjs`: below 1024 the low-priority items
-   * leave the list, below 768 the medium ones, the search becomes its toggle
+   * leave the list, below 600 the medium ones, the search becomes its toggle
    * and the context moves to the panel, below 480 the high ones and the help
    * go with them and the name leaves the eye. The stylesheet decides the whole picture from the
    * width; the script that comes later writes `data-collapsed` from the same
@@ -97,12 +97,13 @@
     );
     /**
      * The state is a pair, ground and edge, for the reason `side-navigation`
-     * gives: in `high-contrast` every tone ground is the page's white and the
-     * edge is what is left. Drawn as an inset shadow, so nothing moves.
+     * gives: the foundation's `--slotted-current-edge` is transparent where the
+     * tone ground says the state and black in `high-contrast`, where every tone
+     * ground is the page's white. Drawn as an inset shadow, so nothing moves.
      */
     --_current-edge: var(
       --slotted-top-navigation-current-edge,
-      var(--slotted-border-subtle, ButtonBorder)
+      var(--slotted-current-edge, transparent)
     );
     --_count-background: var(
       --slotted-top-navigation-count-background,
@@ -243,13 +244,18 @@
    * that selector to its banner; until then the two declarations it leaks —
    * the inset, and the overflow on every child — are restated here.
    */
+  /**
+   * No `min-inline-size: 0` here: the cluster's minimum is its automatic one,
+   * the marks it holds, which `home` below contributes without the name. At
+   * nought it shrank under its own marks on a phone whose actions held seven
+   * touch-sized controls, and the marks spilled over the cluster beside it.
+   */
   [data-ui='top-navigation'][data-part='root'] > [data-part='brand'] {
     align-items: center;
     display: flex;
     flex: 0 1 auto;
     font-weight: inherit;
     gap: var(--_gap);
-    min-inline-size: 0;
     padding-inline-start: calc(var(--_edge) + var(--_row-inset));
   }
 
@@ -263,18 +269,25 @@
     align-items: center;
     border-radius: var(--_radius);
     color: var(--_color);
-    display: inline-flex;
+    /*
+     * A grid of two tracks, the mark's and the name's, rather than a flex row.
+     * The name gives way to its ellipsis and, past it, to the mark alone —
+     * the mark never does. As a flex row that order could not be stated: a
+     * flex item's minimum is its content's contribution, which for a nowrap
+     * string is the whole string, so a floor on the name became a floor on
+     * the cluster and the bar overflowed at its end. A `minmax(0, 1fr)` track
+     * contributes nothing to the grid's min-content size, so the link's
+     * minimum is the mark's track and the name still shrinks to its ellipsis
+     * inside its own.
+     */
+    display: inline-grid;
     flex: 0 1 auto;
     gap: var(--_gap);
+    grid-template-columns: auto minmax(0, 1fr);
     min-block-size: var(--_control-height);
     /*
-     * The name gives way to its ellipsis and, past it, to the mark alone —
-     * the mark never does. A floor for the name was tried and cannot be
-     * stated: a flex item's minimum is its content's contribution, which for
-     * a nowrap string is the whole string, so a floor on the name became a
-     * floor on the cluster and the bar overflowed at its end instead. A bar
-     * whose priorities leave it short of room loses the name before it loses
-     * a control, which is the order the name's own step at 480 already sets.
+     * A bar whose priorities leave it short of room loses the name before it
+     * loses a control, which is the order the name's own step at 480 already sets.
      */
     min-inline-size: var(--_control-height);
     text-decoration: none;
@@ -445,23 +458,26 @@
 
   /**
    * The chevron says a section opens below the bar — the promise `select`
-   * makes with the same mark — and turns half a turn while it is open. Down
-   * is down in both directions, so `dir` does not mirror it.
+   * makes with the same mark — and turns half a turn while it is open. It is
+   * the `chevron-down` Glyph element the binding renders in the part. Down is
+   * down in both directions, so its box is not `directional`.
    */
   [data-ui='top-navigation'] [data-part='indicator'] {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
+    --slotted-icon-size: var(--_icon-size);
+
+    display: flex;
     flex: 0 0 auto;
-    inline-size: var(--_icon-size);
     margin-inline-end: calc(-1 * var(--slotted-space-2, 0.25rem));
-    mask-image: var(--slotted-icon-chevron-down);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  }
+
+  [data-ui='top-navigation'] [data-part='indicator'] > [data-ui='icon'] {
     transition: rotate var(--slotted-duration-medium) var(--_easing);
   }
 
-  [data-ui='top-navigation'] [data-part='trigger'][data-open] > [data-part='indicator'] {
+  [data-ui='top-navigation']
+    [data-part='trigger'][data-open]
+    > [data-part='indicator']
+    > [data-ui='icon'] {
     rotate: 0.5turn;
   }
 
@@ -470,10 +486,11 @@
   /**
    * One shape for every control the family draws a mark on: a square the
    * control's height, no frame at rest, the ground under the pointer, the
-   * mark a mask painted in the control's own ink. `action` is the same shape
-   * for a global control the family did not foresee — approvals, tasks — with
-   * the consumer's own glyph where the mask would be, so the cluster is one
-   * row of equals and not four of the family's beside three of another.
+   * mark a Glyph element the binding renders in the control's own ink.
+   * `action` is the same shape for a global control the family did not
+   * foresee — approvals, tasks — with the consumer's own glyph where the
+   * family's would be, so the cluster is one row of equals and not four of
+   * the family's beside three of another.
    */
   [data-ui='top-navigation']
     :is(
@@ -511,6 +528,10 @@
     white-space: nowrap;
   }
 
+  /**
+   * The family's marks — `ellipsis`, `search`, `x`, `circle-question` and
+   * `bell` — are sized by the control they stand in.
+   */
   [data-ui='top-navigation']
     :is(
       [data-part='more'],
@@ -518,36 +539,8 @@
       [data-part='search-close'],
       [data-part='help'],
       [data-part='notifications']
-    )::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    flex: 0 0 auto;
-    inline-size: var(--_icon-size);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  [data-ui='top-navigation'] [data-part='more']::before {
-    mask-image: var(--slotted-icon-ellipsis);
-  }
-
-  [data-ui='top-navigation'] [data-part='search-toggle']::before {
-    mask-image: var(--slotted-icon-search);
-  }
-
-  [data-ui='top-navigation'] [data-part='search-close']::before {
-    mask-image: var(--slotted-icon-x);
-  }
-
-  [data-ui='top-navigation'] [data-part='help']::before {
-    mask-image: var(--slotted-icon-circle-question);
-  }
-
-  [data-ui='top-navigation'] [data-part='notifications']::before {
-    mask-image: var(--slotted-icon-bell);
+    ) {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   /**
@@ -722,6 +715,14 @@
    * The one thing in the bar that grows: it takes the middle, up to the
    * measure a search field is read at, and gives way before anything else
    * does. What stands inside it is the consumer's field.
+   *
+   * It stands at the start of the middle, and the free space is between it
+   * and the actions. It was centred in that space, and the two end clusters
+   * are never the same width, so the field stood off the bar's centre by half
+   * their difference — twenty pixels in the first demo capture, aligned with
+   * nothing. Centring on the bar itself needs the two clusters laid out as
+   * one grid track each, which is not this family's tree; what a field at the
+   * start of the middle aligns with is the brand it follows.
    */
   [data-ui='top-navigation'] [data-part='search'] {
     align-items: center;
@@ -734,7 +735,7 @@
        enough to overflow the name's box and draw an ellipsis over a whole name. */
     flex: 1 10000 var(--_search-size);
     gap: var(--_action-gap);
-    margin-inline: auto;
+    margin-inline: 0 auto;
     max-inline-size: var(--_search-size);
     min-inline-size: var(--_search-min);
   }
@@ -929,7 +930,7 @@
     }
   }
 
-  @container slotted-top-navigation (inline-size < 768px) {
+  @container slotted-top-navigation (inline-size < 600px) {
     [data-ui='top-navigation']
       [data-part='list']
       > [data-part='item']:not([data-priority='low']):not([data-priority='high']):not(
@@ -1026,6 +1027,11 @@
       white-space: nowrap;
     }
 
+    /* Out of flow, the name leaves its track empty; one track, or the gap stays. */
+    [data-ui='top-navigation'] [data-part='home'] {
+      grid-template-columns: auto;
+    }
+
     /* Help moves to the panel; in the bar it leaves, and `more` shows for it. */
     [data-ui='top-navigation'] [data-part='actions'] > [data-part='help'] {
       display: none;
@@ -1055,20 +1061,6 @@
   /* ── Forced colours ─────────────────────────────────────────────────────── */
 
   @media (forced-colors: active) {
-    /* Every mark is a mask painted in its control's own ink; the system already
-       forced that ink, so the mark is drawn in its palette rather than lost. */
-    [data-ui='top-navigation'] [data-part='indicator'],
-    [data-ui='top-navigation']
-      :is(
-        [data-part='more'],
-        [data-part='search-toggle'],
-        [data-part='search-close'],
-        [data-part='help'],
-        [data-part='notifications']
-      )::before {
-      forced-color-adjust: none;
-    }
-
     [data-ui='top-navigation'] [data-part='link']:is([data-current], [aria-current='page']) {
       background-color: Highlight;
       color: HighlightText;

@@ -157,28 +157,55 @@ test('scales the figure by size, reaching the new 4xl step at lg', () => {
 
 /**
  * The delta wears the tone's text role and nothing else: no chip, no fill.
- * The mark is one glyph turned over for a fall and `minus` for no change.
+ * The mark is one glyph turned over for a fall and `minus` for no change; the
+ * binding renders the glyph, and the sheet only sizes and turns its box.
  */
 test('paints the delta in the tone it earned and turns one glyph for the fall', () => {
   for (const tone of contract.axes.tone) {
     assert.ok(rule(`${ui} [data-part='delta'][data-tone='${tone}']`), tone);
   }
   const indicator = body(`${ui} [data-part='indicator']`);
-  assert.ok(indicator.includes('mask-image:var(--slotted-icon-trending-up)'));
-  assert.ok(indicator.includes('background-color:currentcolor'));
+  assert.ok(indicator.includes('--slotted-icon-size:var(--_indicator-size)'));
+  assert.doesNotMatch(indicator, /mask|background/);
+  /* The fall is the rise reflected across the horizontal axis; the mirror in
+     a right-to-left document is the `directional` icon box, not the sheet. */
   assert.equal(
-    body(`${ui} [data-part='delta'][data-trend='down'] [data-part='indicator']`),
-    '--_flip-y:-1;',
+    body(`${ui} [data-part='delta'][data-trend='down'] [data-part='indicator'] > [data-ui='icon']`),
+    'rotate:x 180deg;',
   );
-  assert.equal(
-    body(`${ui} [data-part='delta'][data-trend='flat'] [data-part='indicator']`),
-    'mask-image:var(--slotted-icon-minus);',
-  );
-  assert.equal(body(`${ui} [data-part='indicator']:dir(rtl)`), '--_flip-x:-1;');
+  assert.doesNotMatch(css, /\bscale\s*:/);
   assert.doesNotMatch(body(`${ui} [data-part='delta']`), /background/);
 });
 
+/** The harness draws the glyph each trend's binding renders. */
+test('draws trending-up for a rise or a fall and minus for no change', () => {
+  const deltas = [
+    ...fragment.matchAll(
+      /data-trend="(up|down|flat)"[^>]*>\s*<span data-part="indicator" aria-hidden="true"\s*>\s*<span data-ui="icon" data-part="root" aria-hidden="true"\s*>\s*<svg data-part="glyph" data-glyph="([a-z-]+)"/g,
+    ),
+  ];
+  assert.equal(deltas.length, (fragment.match(/data-part="indicator"/g) ?? []).length);
+  for (const [, trend, glyph] of deltas) {
+    assert.equal(glyph, trend === 'flat' ? 'minus' : 'trending-up', trend);
+  }
+});
+
 /** A signed number in a right-to-left document keeps its sign in front. */
+/**
+ * The unit is spaced from the figure by the value's own gap, whichever side
+ * it stands on. Spaced by a margin reset with `:first-child`, a unit after
+ * the figure — `96.1<unit>%</unit>`, the reference page's own form — was the
+ * value's first element child and lost its margin: the sign hugged the digit.
+ */
+test('spaces the unit from the figure on either side, without a first-child reset', () => {
+  const value = body(`${ui} [data-part='value']`);
+  assert.ok(value.includes('display:inline-flex'));
+  assert.ok(value.includes('align-items:baseline'));
+  assert.match(value, /gap:0\.\d+em/);
+  assert.equal(rule(`${ui} [data-part='value'] > [data-part='unit']:first-child`), undefined);
+  assert.ok(!body(`${ui} [data-part='unit']`).includes('margin-inline'));
+});
+
 test('lays the value and the delta out by their own content', () => {
   assert.ok(body(`${ui} [data-part='value']`).includes('unicode-bidi:plaintext'));
   assert.ok(body(`${ui} [data-part='delta']`).includes('unicode-bidi:plaintext'));
@@ -210,6 +237,36 @@ test('keeps the trend the height of the sparkline while it loads', () => {
   assert.ok(rule(`${ui}[data-loading][data-size='lg'] [data-part='trend']`));
 });
 
+/**
+ * The value is an inline flex line, so its height is its content's: a text
+ * placeholder is one cap tall, and a card loading was fourteen pixels shorter
+ * than the same card loaded — every box under a row of figures moved when the
+ * answer arrived.
+ */
+test('keeps the value the height of one of its own lines while it loads', () => {
+  assert.equal(
+    body(`${ui}[data-loading] [data-part='value']`),
+    'min-block-size:calc(var(--_value-size) * var(--_value-line));',
+  );
+  const scope = '@container stat-card (max-width:219px)';
+  assert.equal(
+    body(`${ui}[data-loading] [data-part='value']`, scope),
+    'min-block-size:calc(var(--_value-size-narrow) * var(--_value-line-narrow));',
+  );
+});
+
+/**
+ * The action inherited the document's line: its link stood 19 pixels tall in
+ * the fallback face and 21 in the web face, so the header grew as the font
+ * arrived and every card under it moved. It takes the label's size and line,
+ * the line of the header it stands in.
+ */
+test('sets the action on the label’s own line, whatever face has arrived', () => {
+  const action = body(`${ui} [data-part='action']`);
+  assert.match(action, /font-size:var\(--_label-size\)/);
+  assert.match(action, /line-height:var\(--_label-line\)/);
+});
+
 test('says a failed value in the danger tone and a missing one in the muted step', () => {
   assert.equal(
     body(`${ui}[data-status='error'] [data-part='message']`),
@@ -219,13 +276,6 @@ test('says a failed value in the danger tone and a missing one in the muted step
     rule(
       `${ui}[data-status='empty'] [data-part='value'],${ui}[data-status='error'] [data-part='value']`,
     ),
-  );
-});
-
-test('keeps the indicator under forced colours', () => {
-  assert.equal(
-    body(`${ui} [data-part='indicator']`, '@media (forced-colors:active)'),
-    'forced-color-adjust:none;',
   );
 });
 

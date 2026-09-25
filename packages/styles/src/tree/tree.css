@@ -365,52 +365,47 @@
   }
 
   /**
-   * The chevron. One glyph turned, rather than two glyphs swapped, so the two
-   * states read as one control moving. A leaf keeps the box and draws nothing,
-   * which is what holds every label in one column whatever its node is.
+   * The chevron: the `Glyph` the binding draws inside this box for a branch.
+   * One glyph turned, rather than two glyphs swapped, so the two states read
+   * as one control moving. A leaf keeps the box and the binding draws nothing
+   * in it, which is what holds every label in one column whatever its node is.
    */
   [data-ui='tree'] [data-part='expander'] {
-    background-color: currentcolor;
+    /**
+     * The glyph is the icon size and never the box: under `expandOn="expander"`
+     * the box grows by padding to the target minimum, and the `icon` box stays
+     * in the content box at the size of the icons beside it.
+     */
+    --slotted-icon-size: var(--_icon-size);
     block-size: var(--_icon-size);
     color: var(--_muted);
+    display: flex;
     flex: none;
     inline-size: var(--_icon-size);
-    mask-image: var(--slotted-tree-expander-icon, var(--slotted-icon-chevron-right));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-    margin-inline-end: var(--_gap);
     /**
      * The hit area the artwork does not have is drawn with padding taken back
      * as a negative margin, rather than with a pseudo-element hanging out of
      * the box: `overflow-clip-margin` does not contain what hangs out, which is
      * the measurement `docs/token-foundation.md` records.
      */
+    margin-inline-end: var(--_gap);
+  }
+
+  [data-ui='tree'] [data-part='expander'] > [data-ui='icon'] {
     transition: rotate var(--slotted-control-transition-duration, var(--slotted-duration-short))
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='tree'] [data-part='expander']:dir(rtl) {
+  [data-ui='tree'] [data-part='expander']:dir(rtl) > [data-ui='icon'] {
     rotate: 180deg;
   }
 
-  [data-ui='tree'] [data-part='node'][data-expanded] > [data-part='row'] [data-part='expander'] {
-    rotate: 90deg;
-  }
-
-  /**
-   * A leaf keeps the box and draws nothing, so every label at one depth starts
-   * in one column whatever its node is. The empty mask is a transparent
-   * gradient rather than `none`: `mask-image: none` masks nothing, so the
-   * element paints its whole box — a grey square where the chevron should not
-   * be. The harness showed it on every leaf in every scene; `listbox` records
-   * the same trap for an option with no icon.
-   */
   [data-ui='tree']
-    [data-part='node']:not([data-branch])
+    [data-part='node'][data-expanded]
     > [data-part='row']
-    [data-part='expander'] {
-    mask-image: linear-gradient(transparent, transparent);
+    [data-part='expander']
+    > [data-ui='icon'] {
+    rotate: 90deg;
   }
 
   /**
@@ -492,6 +487,7 @@
     --_mark-inset: var(--slotted-tree-mark-inset, 2px);
     --_check-border: var(--slotted-border-width-medium, 1.5px);
     --_mark-size: calc(var(--_check-size) - 2 * var(--_mark-inset));
+    --slotted-icon-size: var(--_mark-size);
 
     background-color: var(--_surface);
     block-size: var(--_check-size);
@@ -511,25 +507,20 @@
   }
 
   /**
-   * The mark is a pseudo-element rather than a second part, so a node stays one
-   * box in the DOM. It is placed against the border box and not the content
-   * box: `2px - 1.5px` from the padding edge is two whole pixels from the
-   * outside of the square, which is where `checkbox` puts its own.
+   * The mark is the `Glyph` the binding draws inside the box — the check, or
+   * the dash while the node is indeterminate — rather than a second part, so a
+   * node stays one part in the DOM. Its `icon` box is placed against the
+   * border box and not the content box: `2px - 1.5px` from the padding edge is
+   * two whole pixels from the outside of the square, which is where `checkbox`
+   * puts its own.
    */
-  [data-ui='tree'] [data-part='indicator']::after {
-    background-color: var(--slotted-tone-accent-on-solid);
-    block-size: var(--_mark-size);
+  [data-ui='tree'] [data-part='indicator'] > [data-ui='icon'] {
     /* Physical on purpose: a check is not mirrored in a right-to-left row, so
        neither is the hand that draws it. `checkbox` states the same. */
     clip-path: inset(0% 100% 0% 0%);
-    content: '';
-    inline-size: var(--_mark-size);
+    color: var(--slotted-tone-accent-on-solid);
     inset-block-start: calc(var(--_mark-inset) - var(--_check-border));
     inset-inline-start: calc(var(--_mark-inset) - var(--_check-border));
-    mask-image: var(--slotted-tree-selected-icon, var(--slotted-icon-check));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0;
     pointer-events: none;
     position: absolute;
@@ -551,21 +542,10 @@
   [data-ui='tree']
     [data-part='node']:is([data-selected], [data-indeterminate])
     > [data-part='row']
-    [data-part='indicator']::after {
+    [data-part='indicator']
+    > [data-ui='icon'] {
     clip-path: inset(0% 0% 0% 0%);
     opacity: 1;
-  }
-
-  /**
-   * Mixed is the dash, and it outranks the check: a branch that is both partly
-   * and wholly chosen is drawing the state its children are actually in, which
-   * is the one the reader has to see. `checkbox` settled the order.
-   */
-  [data-ui='tree']
-    [data-part='node'][data-indeterminate]
-    > [data-part='row']
-    [data-part='indicator']::after {
-    mask-image: var(--slotted-tree-mixed-icon, var(--slotted-icon-minus));
   }
 
   [data-ui='tree'] [data-part='node'][data-disabled] > [data-part='row'] [data-part='indicator'] {
@@ -990,23 +970,12 @@
     }
 
     /*
-     * A masked glyph is painted with a background, and forced colours replace a
-     * background that is not one of the system's own: the mark goes and the box
-     * it sat in stays. `forced-color-adjust: none` keeps `currentcolor`, which
-     * is the host's ink, already forced to the right value.
-     * `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='tree'] [data-part='expander'] {
-      forced-color-adjust: none;
-    }
-
-    /*
      * The box and its mark are painted from a tone. The theme maps `accent` to
      * `Highlight` and `on-solid` to `HighlightText`, so the chosen box keeps
-     * both; the mask itself needs the rule the expander needs, or the system
-     * replaces the paint and the tick disappears from a box that stays.
+     * both; the mark opts out as well, or the system forces its ink to the
+     * text colour and the tick loses its contrast with the box it stands on.
      */
-    [data-ui='tree'] [data-part='indicator']::after {
+    [data-ui='tree'] [data-part='indicator'] > [data-ui='icon'] {
       forced-color-adjust: none;
     }
   }

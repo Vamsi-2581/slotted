@@ -136,10 +136,33 @@ test('gives the remove control its target on both axes', () => {
   assert.match(halo, /inset:min\(0px,calc\(\(100% - var\(--slotted-target-min,24px\)\) \/ 2\)\)/);
 });
 
-test('draws the remove glyph and the selection mark from glyph tokens', () => {
-  assert.match(rule(`${ui} [data-part='remove']::before`), /mask-image:var\(--slotted-icon-x\)/);
-  assert.match(rule(`${ui} [data-part='indicator']`), /mask-image:var\(--slotted-icon-check\)/);
+/**
+ * The bindings render both marks as the `Glyph` element; the sheet sizes their
+ * icon boxes and paints neither, and the fragment writes the markup they do.
+ */
+test('draws the remove glyph and the selection mark as Glyph elements', () => {
+  assert.ok(!normalized.includes(`${ui} [data-part='remove']::before`));
+  assert.ok(!/mask/.test(declarations), 'no mask stands in for a glyph');
+  assert.match(rule(`${ui} [data-part='remove']`), /--slotted-icon-size:var\(--_icon-size\)/);
+  assert.match(rule(`${ui} [data-part='indicator']`), /--slotted-icon-size:var\(--_icon-size\)/);
   assert.ok(!/content:'[^']+'/.test(normalized), 'a character is never an icon');
+  const drawn = (part, glyph) =>
+    new RegExp(
+      `data-part="${part}"[^>]*>\\s*<span data-ui="icon" data-part="root" aria-hidden="true"\\s*>\\s*<svg data-part="glyph" data-glyph="${glyph}"`,
+      'g',
+    );
+  for (const [part, glyph] of [
+    ['remove', 'x'],
+    ['indicator', 'check'],
+  ]) {
+    const written = (fragment.match(new RegExp(`data-part="${part}"`, 'g')) ?? []).length;
+    assert.ok(written > 0, `no ${part} in the fragment`);
+    assert.equal(
+      (fragment.match(drawn(part, glyph)) ?? []).length,
+      written,
+      `${part} draws ${glyph}`,
+    );
+  }
 });
 
 /**
@@ -193,4 +216,12 @@ test('exercises every declared state in the harness fragment', () => {
   for (const [state, attribute] of Object.entries(contract.stateAttributes)) {
     assert.ok(fragment.includes(attribute), `the fragment never shows ${state}`);
   }
+});
+
+test('hands its glyph size to an icon placed in a slot', () => {
+  // The icon family reads `--slotted-icon-size` from its container; a bare
+  // glyph host reads the slot's font-size instead. Both are the slot's scale.
+  const rule = normalized.split(`${ui} [data-part='end']{`)[1]?.split('}')[0] ?? '';
+  assert.ok(rule.includes('--slotted-icon-size:var(--_icon-size)'));
+  assert.ok(rule.includes('font-size:var(--_icon-size)'));
 });

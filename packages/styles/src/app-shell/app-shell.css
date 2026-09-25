@@ -112,6 +112,13 @@
     --slotted-app-shell-row-line-height: var(--_row-line-height);
 
     --_nav-size: var(--slotted-app-shell-nav-size-md, 15rem);
+    /**
+     * The layer is wider than the column. A column shares the screen with the
+     * content and earns every pixel; a layer covers content the reader cannot
+     * reach, so its width costs nothing but the strip that says where to press
+     * to leave — one mark and the gutters, kept by the `min()` below.
+     */
+    --_nav-overlay-size: var(--slotted-app-shell-nav-overlay-size, 20rem);
     --_aside-size: var(--slotted-app-shell-aside-size-md, 20rem);
     /**
      * A rail is one mark column with a row's inset on each side, so a closed
@@ -135,6 +142,17 @@
     --_frame: var(--slotted-app-shell-frame, var(--slotted-surface-sunken, Canvas));
     --_canvas: var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas));
     --_ink: var(--slotted-app-shell-color, var(--slotted-text, CanvasText));
+    /**
+     * The bar of a scrolling body: the thumb at the strong border step, which
+     * is the step `scroll-area` gives it and the one the foundation holds to
+     * 3:1 against every surface; the track the column's own ground, because a
+     * groove down the side of a navigation column is a second column.
+     */
+    --_scrollbar-thumb: var(
+      --slotted-app-shell-scrollbar-thumb-color,
+      var(--slotted-border-strong, ButtonBorder)
+    );
+    --_scrollbar-track: var(--slotted-app-shell-scrollbar-track-color, transparent);
 
     /**
      * ── The palette, region by region ──────────────────────────────────────
@@ -193,6 +211,34 @@
     grid-template-rows: auto minmax(0, 1fr) auto auto;
     min-block-size: 100%;
     min-inline-size: 0;
+    /**
+     * ── The frame clips its inline axis ───────────────────────────────────
+     *
+     * A closed layer stands one whole width outside the frame, and a
+     * transformed box still counts towards the scrollable overflow of every
+     * scroll container above it — `visibility: hidden` takes it off the screen
+     * and not out of the geometry. Measured in the `navModes` story: the closed
+     * end-side panel gave the document 192 pixels of horizontal overflow once
+     * the demo frame's clip was lifted, and inside that frame the focus scope's
+     * first `focus()` scrolled the frame 240 pixels to the hidden panel, which
+     * the slide then clamped back frame by frame — the whole page jumped and
+     * returned (`tools/harness` reading, Chrome 150).
+     *
+     * `clip` and not `hidden`: `hidden` is a scroll container, which is the
+     * thing `focus()` would scroll; `clip` is not, and it does not establish a
+     * formatting context either, so nothing about the grid changes. Per axis
+     * rather than once, as `progress-indicator` states it: the block axis stays
+     * open because the frame grows with its content under `scroll='document'`,
+     * and a focus ring on the frame's last row has to be drawn past its edge.
+     * No `overflow-clip-margin`: it applies only when both axes clip, and the
+     * margin it leaves is a strip of the layer still counted — four pixels of
+     * the same jump, measured. The logical pair follows the physical one for
+     * the engines that read it, as `scroll-area` writes the same rule.
+     */
+    overflow-x: clip;
+    overflow-y: visible;
+    overflow-inline: clip;
+    overflow-block: visible;
     position: relative;
   }
 
@@ -411,6 +457,17 @@
     min-inline-size: 0;
     padding-block: var(--_row-inset);
   }
+  /**
+   * The body scrolls the way `scroll-area` scrolls, and for the reasons written
+   * there. `scrollbar-gutter: stable` reserves the bar's column before the
+   * list overflows, so a destination added at the bottom moves no row
+   * sideways. `scrollbar-width: thin` is still the platform's bar — the trough
+   * click and the context menu survive — and it is what makes the bar the
+   * family's to colour: an overlay bar drawn by the platform over the rows sat
+   * on the chevron of every parent, because a row ends one inset from the
+   * column's edge and the platform's bar is wider than that inset. A thin
+   * classic bar stands in the gutter instead, beside the rows.
+   */
   [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-body'] {
     align-items: stretch;
     display: flex;
@@ -421,6 +478,9 @@
     overflow: auto;
     overscroll-behavior: contain;
     padding-block: var(--slotted-space-4, 0.5rem);
+    scrollbar-color: var(--_scrollbar-thumb) var(--_scrollbar-track);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
   }
 
   [data-ui='app-shell'] > [data-part='main'] {
@@ -514,12 +574,16 @@
   [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-footer'] {
     justify-content: flex-end;
   }
+  /* The pane's body scrolls as the column's does, bar and gutter included. */
   [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-body'] {
     flex: 1 1 auto;
     min-block-size: 0;
     min-inline-size: 0;
     overflow: auto;
     overscroll-behavior: contain;
+    scrollbar-color: var(--_scrollbar-thumb) var(--_scrollbar-track);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
   }
 
   /**
@@ -582,6 +646,21 @@
   }
   [data-ui='app-shell'][data-canvas='inset'] > [data-part='footer'] {
     padding-block-start: 0;
+  }
+  /**
+   * The card is a wide screen's arrangement. On a phone, where the navigation
+   * has become a layer, a gutter on every side and rounded corners against the
+   * screen's own frame a column of content that has no room to spare. The
+   * content then meets the frame's edges and keeps one rule, under the banner,
+   * for the seam the gutter used to draw. Keyed on the mode, as every layer
+   * rule is; the width answers only for a shell not yet measured, below.
+   */
+  [data-ui='app-shell'][data-canvas='inset'][data-nav-mode='overlay'] > [data-part='main'] {
+    border-block-end: 0;
+    border-inline: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
   }
 
   /* ── The flush canvas ────────────────────────────────────────────────── */
@@ -672,6 +751,8 @@
    */
   [data-ui='app-shell'] [data-part='nav-toggle'],
   [data-ui='app-shell'] [data-part='aside-toggle'] {
+    --slotted-icon-size: var(--slotted-control-icon-size-md, 16px);
+
     background-color: transparent;
     block-size: var(--_row-mark);
     border: none;
@@ -696,38 +777,33 @@
         var(--slotted-control-transition-easing, cubic-bezier(0.2, 0, 0, 1));
   }
 
-  [data-ui='app-shell'] [data-part='nav-toggle']::before,
-  [data-ui='app-shell'] [data-part='aside-toggle']::before {
-    background-color: currentcolor;
-    block-size: var(--slotted-control-icon-size-md, 16px);
-    content: '';
-    display: block;
-    inline-size: var(--slotted-control-icon-size-md, 16px);
-    mask-image: var(--slotted-icon-panel-open);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-  [data-ui='app-shell'][data-open] [data-part='nav-toggle']::before,
-  [data-ui='app-shell'] [data-part='aside-toggle'][aria-expanded='true']::before {
-    mask-image: var(--slotted-icon-panel-close);
-  }
-
   /**
-   * The artwork is direction-sensitive — the bar is on one side of the frame
-   * and the chevron points along the line — so the family turns it whole
-   * wherever the region is not at the start of the line. The pane is on the
-   * end the navigation is not, so its control is the navigation's turned, and
-   * turns back under the same conditions the navigation's turns.
+   * The artwork is the `panel-open` or `panel-close` Glyph element, chosen by
+   * the binding from the region's state. It is direction-sensitive — the bar
+   * is on one side of the frame and the chevron points along the line — so
+   * the family turns it whole wherever the region is not at the start of the
+   * line. The pane is on the end the navigation is not, so its control is the
+   * navigation's turned, and turns back under the same conditions the
+   * navigation's turns. The box is not `directional`: which side the region
+   * stands on is this family's fact, not the reading direction's alone.
    */
-  [data-ui='app-shell'][data-nav-side='end'] [data-part='nav-toggle']::before,
-  [dir='rtl'] [data-ui='app-shell'] [data-part='nav-toggle']::before,
-  [data-ui='app-shell']:not([data-nav-side='end']) [data-part='aside-toggle']::before,
-  [dir='rtl'] [data-ui='app-shell'][data-nav-side='end'] [data-part='aside-toggle']::before {
+  [data-ui='app-shell'][data-nav-side='end'] [data-part='nav-toggle'] > [data-ui='icon'],
+  [dir='rtl'] [data-ui='app-shell'] [data-part='nav-toggle'] > [data-ui='icon'],
+  [data-ui='app-shell']:not([data-nav-side='end']) [data-part='aside-toggle'] > [data-ui='icon'],
+  [dir='rtl']
+    [data-ui='app-shell'][data-nav-side='end']
+    [data-part='aside-toggle']
+    > [data-ui='icon'] {
     scale: -1 1;
   }
-  [dir='rtl'] [data-ui='app-shell'][data-nav-side='end'] [data-part='nav-toggle']::before,
-  [dir='rtl'] [data-ui='app-shell']:not([data-nav-side='end']) [data-part='aside-toggle']::before {
+  [dir='rtl']
+    [data-ui='app-shell'][data-nav-side='end']
+    [data-part='nav-toggle']
+    > [data-ui='icon'],
+  [dir='rtl']
+    [data-ui='app-shell']:not([data-nav-side='end'])
+    [data-part='aside-toggle']
+    > [data-ui='icon'] {
     scale: 1 1;
   }
 
@@ -866,11 +942,10 @@
     box-shadow: var(--slotted-shadow-lg);
     display: flex;
     grid-area: 2 / 1 / -1 / -1;
-    inline-size: var(--_nav-size);
+    inline-size: min(var(--_nav-overlay-size), calc(100% - var(--_row-mark) - 2 * var(--_gutter)));
     inset-block: 0;
     inset-inline-start: 0;
     margin: 0;
-    max-inline-size: 80%;
     padding-inline: 0;
     position: absolute;
     transition:
@@ -899,6 +974,11 @@
    * a sheet welded to the frame's edge — the one region that ignored the plane
    * it slid onto. The closed position then has to clear the gutter as well, or
    * the panel leaves a strip of itself against the edge.
+   *
+   * A card has an edge the column never had, and rows whose ground meets that
+   * edge read as a panel with no padding. One row inset on the card, for all
+   * three parts: the marks keep one column, and a consumer's header row that
+   * writes the same inset stays over them.
    */
   [data-ui='app-shell'][data-canvas='inset'][data-nav-mode='overlay'] > [data-part='nav'] {
     border: var(--_rule-width) solid var(--_rule);
@@ -906,6 +986,7 @@
     box-shadow: var(--slotted-shadow-lg);
     margin-block: var(--_gutter);
     margin-inline-start: var(--_gutter);
+    padding-inline: var(--_row-inset);
     translate: calc(-100% - var(--_gutter)) 0;
   }
   [data-ui='app-shell'][data-canvas='inset'][data-nav-mode='overlay'][data-nav-side='end']
@@ -985,9 +1066,10 @@
 
   /**
    * The breakpoint is a literal because `@container (inline-size: var(--x))` is
-   * invalid CSS. `specs/components/app-shell/contract.json` states the same
-   * number under `overlayAt`, and `app-shell.styles.test.mjs` compares every
-   * condition here against it.
+   * invalid CSS. It is `COMPACT_BELOW` of `@slotted/core/measure`, the limit
+   * of the compact size class; `specs/components/app-shell/contract.json`
+   * states the same number under `overlayAt`, and `app-shell.styles.test.mjs`
+   * compares every condition here against it.
    *
    * The first two blocks answer one question only: what a shell whose mode has
    * not been decided yet draws. A server render and the frame before hydration
@@ -998,7 +1080,7 @@
    * The pane is the other way round: where it stands is a question of room
    * rather than of mode, so the width answers it and the width alone.
    */
-  @container slotted-app-shell (inline-size >= 768px) {
+  @container slotted-app-shell (inline-size >= 600px) {
     [data-ui='app-shell']:not([data-nav-mode]) > [data-part='nav'] {
       inline-size: var(--_rail-size);
     }
@@ -1038,9 +1120,17 @@
     }
   }
 
-  @container slotted-app-shell (inline-size < 768px) {
+  @container slotted-app-shell (inline-size < 600px) {
     [data-ui='app-shell']:not([data-nav-mode]) > [data-part='nav'] {
       display: none;
+    }
+    /* The content flush to the frame, as it is once the mode says overlay. */
+    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='inset'] > [data-part='main'] {
+      border-block-end: 0;
+      border-inline: 0;
+      border-radius: 0;
+      box-shadow: none;
+      margin: 0;
     }
     [data-ui='app-shell']:not([data-aside-mode='overlay'])[data-canvas='inset']
       > [data-part='aside'] {
@@ -1078,20 +1168,5 @@
   [data-ui='app-shell'] > [data-part='scrim'][data-status='entering'],
   [data-ui='app-shell'] > [data-part='scrim'][data-status='exiting'] {
     opacity: 0;
-  }
-
-  /* ── When the system takes the palette over ──────────────────────────── */
-
-  /**
-   * The mark is the host's own ink read through a mask, and a forced palette
-   * replaces the paint rather than the mask: without this the control is an
-   * empty box in the high-contrast schemes.
-   */
-  @media (forced-colors: active) {
-    [data-ui='app-shell'] [data-part='nav-toggle']::before,
-    [data-ui='app-shell'] [data-part='aside-toggle']::before,
-    [data-ui='app-shell'] [data-part='aside-toggle'][aria-expanded='true']::before {
-      forced-color-adjust: none;
-    }
   }
 }

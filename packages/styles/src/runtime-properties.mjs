@@ -122,7 +122,8 @@ export const RUNTIME_PROPERTY_PREFIXES = [
    * before this one; the level is how deep a group row sits; the drop
    * offset is where the reorder indicator stands; the window start and total
    * are the virtualiser's offset of the first mounted row and the height of
-   * every row. None of the seven is a value a theme can hold.
+   * every row; the leading width is the gutters' sum, where a row's pop-in
+   * starts. None of them is a value a theme can hold.
    *
    * Named one by one rather than by a `--slotted-data-grid-` prefix, because
    * the family owns theme tokens under that prefix — its row height, its
@@ -140,6 +141,9 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-data-grid-pinned-bottom-offset',
   '--slotted-data-grid-window-start',
   '--slotted-data-grid-window-total',
+  /** The measured body row height, which the skeleton rows take while the rows load. */
+  '--slotted-data-grid-loader-row-size',
+  '--slotted-data-grid-leading',
   /**
    * `upload` — how many rows of the file list are shown before the rest is
    * scrolled to. It is `maxRows`, stated per instance, and no theme can hold
@@ -182,6 +186,27 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-chart-band-size',
   '--slotted-chart-frame-start',
   '--slotted-chart-frame-size',
+  /**
+   * `event-calendar` — where an event is drawn, computed by
+   * `@slotted/core/event-calendar` from the consumer's events: its lane in a
+   * row of days and how many days its bar covers; its minute and length in a
+   * column of hours, its column in a cluster of overlapping events and how many
+   * columns the cluster has; and, on the grid, how many days the grid draws and
+   * how many lanes each row reserves. They are facts about this consumer's data
+   * and this instance's `maxEvents`, which no theme can hold.
+   *
+   * Named one by one rather than by a prefix: the family owns theme tokens
+   * under `--slotted-event-calendar-`, and `--slotted-event-` would file them.
+   */
+  '--slotted-event-lane',
+  '--slotted-event-span',
+  '--slotted-event-start',
+  '--slotted-event-length',
+  '--slotted-event-column',
+  '--slotted-event-columns',
+  '--slotted-event-calendar-days',
+  '--slotted-event-calendar-lanes',
+  '--slotted-event-calendar-slot',
   /**
    * `tour` — the rectangle of the current step's target, in viewport pixels,
    * read from `getBoundingClientRect()` and kept current while the page

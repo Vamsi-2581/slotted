@@ -34,14 +34,13 @@
     --_hover: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
     --_active: var(--slotted-tone-secondary-subtle-active, ButtonFace);
     /**
-     * The item's tone: the family's own visual, and the tint an unread item
-     * stands on. Accent unless the item says otherwise.
+     * The item's tone: the colour of the family's own visual, and the tint
+     * an unread item stands on. Accent unless the item says otherwise. The
+     * glyph the visual draws is the binding's, from the contract's `toneGlyph`.
      */
     --_tone-solid: var(--slotted-tone-accent-solid, Highlight);
     --_tone-text: var(--slotted-tone-accent-text, Highlight);
     --_tone-surface: var(--slotted-tone-accent-surface, Canvas);
-    --_tone-border: var(--slotted-tone-accent-border, Highlight);
-    --_tone-glyph: var(--slotted-icon-circle-info);
     /**
      * An unread item stands on a wash mixed from the tone's text at the
      * highlight share, for the reason the highlight band does: a tone's
@@ -85,7 +84,7 @@
      * shouted beside the avatars around it.
      */
     --_visual: var(--slotted-avatar-size-sm, 28px);
-    --_visual-glyph: var(--slotted-control-icon-size-md, 16px);
+    --_visual-glyph: calc(var(--_visual) * 6 / 7);
     /** A count beside words: a chip a step below the meta size, on the sunken surface. */
     --_count-size: var(--slotted-font-size-xs, 0.75rem);
     --_count-box: calc(
@@ -101,6 +100,16 @@
     --_rule-size: var(--slotted-border-width-thin, 1px);
     --_duration: var(--slotted-control-transition-duration);
     --_easing: var(--slotted-control-transition-easing);
+    /**
+     * The feed's bar, where a host bounds the feed: the thumb at the strong
+     * border step, as `scroll-area` and `app-shell` draw it; the track the
+     * centre's own ground, so a groove does not stand beside the rows.
+     */
+    --_scrollbar-thumb: var(
+      --slotted-notification-center-scrollbar-thumb-color,
+      var(--slotted-border-strong, ButtonBorder)
+    );
+    --_scrollbar-track: var(--slotted-notification-center-scrollbar-track-color, transparent);
 
     background-color: var(--_ground);
     color: var(--_text);
@@ -147,7 +156,7 @@
       var(--slotted-control-inner-size-sm, 22px)
     );
     --_visual: var(--slotted-avatar-size-xs, 24px);
-    --_visual-glyph: var(--slotted-control-icon-size-sm, 14px);
+    --_visual-glyph: calc(var(--_visual) * 6 / 7);
   }
 
   /* ── The header ──────────────────────────────────────────────────────── */
@@ -325,10 +334,26 @@
 
   /* ── The feed ────────────────────────────────────────────────────────── */
 
+  /**
+   * The one part that gives way. A host with a height — the popover under the
+   * bell, whose panel is bounded by the room the positioner reports — bounds
+   * the feed alone: the header, the views and the footer keep their rows and
+   * the feed scrolls between them, which is what GitHub's and Linear's inboxes
+   * do. A host with no height, a page, gets the whole feed and no bar. The bar
+   * is `scroll-area`'s: a reserved gutter so the rows do not move when the
+   * feed grows past the panel, the thin platform bar, the family's ink on it.
+   */
   [data-ui='notification-center'] > [data-part='feed'] {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
+    min-block-size: 0;
     min-inline-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-color: var(--_scrollbar-thumb) var(--_scrollbar-track);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
   }
 
   /** The footer draws its own rule above, so the last row gives up the one below it: one seam, not two. */
@@ -391,29 +416,21 @@
     --_tone-solid: var(--slotted-tone-secondary-solid, ButtonText);
     --_tone-text: var(--slotted-tone-secondary-text, ButtonText);
     --_tone-surface: var(--slotted-tone-secondary-surface, Canvas);
-    --_tone-border: var(--slotted-tone-secondary-border, ButtonBorder);
-    --_tone-glyph: var(--slotted-icon-bell);
   }
   [data-ui='notification-center'] > [data-part='feed'] [data-part='item'][data-tone='success'] {
     --_tone-solid: var(--slotted-tone-success-solid, ButtonText);
     --_tone-text: var(--slotted-tone-success-text, ButtonText);
     --_tone-surface: var(--slotted-tone-success-surface, Canvas);
-    --_tone-border: var(--slotted-tone-success-border, ButtonBorder);
-    --_tone-glyph: var(--slotted-icon-circle-check);
   }
   [data-ui='notification-center'] > [data-part='feed'] [data-part='item'][data-tone='warning'] {
     --_tone-solid: var(--slotted-tone-warning-solid, ButtonText);
     --_tone-text: var(--slotted-tone-warning-text, ButtonText);
     --_tone-surface: var(--slotted-tone-warning-surface, Canvas);
-    --_tone-border: var(--slotted-tone-warning-border, ButtonBorder);
-    --_tone-glyph: var(--slotted-icon-circle-alert);
   }
   [data-ui='notification-center'] > [data-part='feed'] [data-part='item'][data-tone='danger'] {
     --_tone-solid: var(--slotted-tone-danger-solid, ButtonText);
     --_tone-text: var(--slotted-tone-danger-text, ButtonText);
     --_tone-surface: var(--slotted-tone-danger-surface, Canvas);
-    --_tone-border: var(--slotted-tone-danger-border, ButtonBorder);
-    --_tone-glyph: var(--slotted-icon-circle-x);
   }
 
   /** Unread stands on the wash; read stands on the surface. The dot says the same thing a second way. */
@@ -459,11 +476,29 @@
   }
 
   /**
-   * The family's visual: the tone's glyph on the tone's surface with the
-   * tone's edge, the size the avatar would be — the same weight as the
-   * avatars beside it, read or not. The wrapper carries the tone only when
-   * the item states one; a wrapper a consumer's template left empty on an
-   * untoned item is withdrawn, so the words keep the column.
+   * The family's visual: the tone's glyph, filled. Every tone glyph but the
+   * bell is a ring with a mark in it, and the ring is what the visual is
+   * bounded by: the tone's surface is painted as a disc under the glyph,
+   * with the radius the ring is drawn at on the icon grid — ten units of
+   * twenty-four — so the ring is the disc's own edge and the mark stands
+   * inside it. The disc and the glyph are two pseudo-elements on one box,
+   * the same size at the same place, so the two are concentric by
+   * construction. What stood here before was a disc with an edge of its own
+   * and a smaller ringed glyph on top — a circle drawn inside a circle —
+   * and at a zoom or a density where the two rounded to different pixels
+   * the inner one sat visibly off centre. A bare glyph, tried in between,
+   * read as a coloured mark left loose in the column.
+   *
+   * The glyph is the size the avatar beside it is, less the step the icon
+   * grid keeps clear, so the filled ring is the avatar's own diameter. The
+   * wrapper carries the tone only when the item states one; a wrapper a
+   * consumer's template left empty on an untoned item is withdrawn, so the
+   * words keep the column.
+   *
+   * The binding renders the tone's glyph in an icon box marked
+   * `data-tone-glyph`, which is what tells the family's visual from an icon
+   * the consumer put there. The disc is the wrapper's own background, centred
+   * on the box the glyph is centred in, so the two stay concentric.
    */
   [data-ui='notification-center']
     > [data-part='feed']
@@ -472,32 +507,29 @@
     display: none;
   }
 
+  /**
+   * The disc: the ring's own radius on the grid, less a half unit so the
+   * fill stops under the stroke rather than beside it, cut in lengths
+   * rather than percentages of the ray (Chrome paints a `calc(100% - …)`
+   * stop as a ramp several pixels wide).
+   */
   [data-ui='notification-center']
     > [data-part='feed']
     [data-part='item']
-    > [data-part='visual'][data-tone]:empty {
-    background-color: var(--_tone-surface);
-    block-size: var(--_visual);
-    border: var(--_rule-size) solid var(--_tone-border);
-    border-radius: var(--slotted-radius-full, 9999px);
-    box-sizing: border-box;
-    color: var(--_tone-text);
-    inline-size: var(--_visual);
-  }
+    > [data-part='visual'][data-tone]:has(> [data-tone-glyph]) {
+    --slotted-icon-size: var(--_visual-glyph);
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='visual'][data-tone]:empty::before {
-    background-color: currentcolor;
-    block-size: var(--_visual-glyph);
-    content: '';
-    display: block;
-    inline-size: var(--_visual-glyph);
-    mask-image: var(--_tone-glyph);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    align-items: center;
+    background-image: radial-gradient(
+      circle,
+      var(--_tone-surface) calc(var(--_visual-glyph) * 9.5 / 24 - 0.5px),
+      transparent calc(var(--_visual-glyph) * 9.5 / 24 + 0.5px)
+    );
+    block-size: var(--_visual);
+    color: var(--_tone-text);
+    display: flex;
+    inline-size: var(--_visual);
+    justify-content: center;
   }
 
   /**
@@ -634,13 +666,17 @@
    * dismiss. Each box is the glyph plus a step of air a side, capped by the
    * inner-control scale, and the hit area is taken to the target minimum by a
    * transparent halo — the same construction the row's copy control in
-   * description-list uses.
+   * description-list uses. The binding renders the glyph: `check` while
+   * unread, `dot` while read (the control offers to mark it unread), and `x`
+   * to dismiss; the control hands its icon box the glyph size.
    */
   [data-ui='notification-center']
     > [data-part='feed']
     [data-part='item']
     > [data-part='controls']
     > button {
+    --slotted-icon-size: var(--_glyph);
+
     align-items: center;
     appearance: none;
     background: none;
@@ -673,46 +709,6 @@
     inset-inline-start: 50%;
     position: absolute;
     translate: -50% -50%;
-  }
-
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
-    > button::after {
-    background-color: currentcolor;
-    block-size: var(--_glyph);
-    content: '';
-    display: block;
-    inline-size: var(--_glyph);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
-    > [data-part='read-toggle']::after {
-    mask-image: var(--slotted-icon-check);
-  }
-
-  /** Read: the control now offers to mark unread, and says so with the dot. */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item'][data-read]
-    > [data-part='controls']
-    > [data-part='read-toggle']::after {
-    mask-image: var(--slotted-icon-dot);
-  }
-
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
-    > [data-part='dismiss']::after {
-    mask-image: var(--slotted-icon-x);
   }
 
   [data-ui='notification-center']
@@ -813,26 +809,39 @@
     }
   }
 
+  /* ── On a finger ─────────────────────────────────────────────────────── */
+
+  /**
+   * The two controls are a glyph with a step of air a side, and the halo
+   * that takes the press is the target minimum. A finger is not a pointer:
+   * the theme raises every control it owns to `--slotted-target-comfortable`
+   * under a coarse pointer, and these are the family's own, so the family
+   * raises them. The box grows rather than the halo, so two controls side by
+   * side keep their distance instead of sharing one press; the glyph stays
+   * its size. A box taller than the visual is centred on the visual's axis,
+   * which puts its top above the row's inset — the box is transparent, and
+   * the halo already reached there.
+   */
+  @media (pointer: coarse) {
+    [data-ui='notification-center']
+      > [data-part='feed']
+      [data-part='item']
+      > [data-part='controls'] {
+      --_control: var(--slotted-target-comfortable, 44px);
+
+      margin-block-start: calc((var(--_visual) - var(--_control)) / 2);
+    }
+  }
+
   /* ── Forced colours ──────────────────────────────────────────────────── */
 
   /**
-   * The glyphs are masks painted in their box's ink, which the system has
-   * already forced. The count takes the highlight pair as top-navigation's
-   * does; the wash under unread is gone, so the weight carries unread.
+   * The glyphs are `Glyph` elements drawn in their box's ink, which the
+   * system has already forced. The count takes the highlight pair as
+   * top-navigation's does; the wash under unread is gone, so the weight
+   * carries unread.
    */
   @media (forced-colors: active) {
-    [data-ui='notification-center']
-      > [data-part='feed']
-      [data-part='item']
-      > [data-part='controls']
-      > button::after,
-    [data-ui='notification-center']
-      > [data-part='feed']
-      [data-part='item']
-      > [data-part='visual'][data-tone]:empty::before {
-      forced-color-adjust: none;
-    }
-
     [data-ui='notification-center'] [data-part='count'] {
       background-color: Highlight;
       border-color: Highlight;

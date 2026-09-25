@@ -76,11 +76,27 @@ test('bridges its fixed geometry to table and states its ground for sections', (
   assert.match(root, /--slotted-page-ground:var\(--_ground\)/);
 });
 
-test('fills when asked', () => {
-  const body = rule(`${ui}[data-fill]>[data-part='scroll']>[data-part='body']`);
+/**
+ * Fill is a layout for the medium class and up. Below 600 pixels the body
+ * grows with its content and the page scrolls: on a phone the chrome above a
+ * filled list left its rows 155 of 667 pixels.
+ */
+test('fills when asked, from the compact size class up only', () => {
+  const query = /@container slotted-page \(width\s*>=\s*600px\)\{(.*?\})\}/.exec(normalized);
+  assert.ok(query, 'fill is not held behind a query on the compact size class');
+  const inside = (selector) => query[1].split(`${selector}{`)[1]?.split('}')[0] ?? '';
+  const body = inside(`${ui}[data-fill]>[data-part='scroll']>[data-part='body']`);
   assert.match(body, /display:flex/);
   assert.match(body, /min-block-size:0/);
-  assert.match(rule(`${ui}[data-fill]>[data-part='scroll']>[data-part='body']>*`), /flex:1 1 auto/);
+  assert.match(
+    inside(`${ui}[data-fill]>[data-part='scroll']>[data-part='body']>*`),
+    /flex:1 1 auto/,
+  );
+  assert.doesNotMatch(
+    normalized.replace(query[0], ''),
+    /\[data-fill\]/,
+    'a fill rule applies below 600 pixels',
+  );
 });
 
 test('paints the two grounds the contract names', () => {
@@ -114,4 +130,33 @@ test('has no header part', () => {
 /** The header's chrome changes height as it snaps; anchoring would turn that into a scroll. */
 test('lets nothing under the scroll part anchor the scroll', () => {
   assert.match(rule(`${ui}>[data-part='scroll']`), /overflow-anchor:none/);
+});
+
+/**
+ * The page answers its own width, as page-header does: a query container on
+ * the inline axis alone, so the block-axis layout — at least the scrollport
+ * tall, exactly the parent under self, stretched under fill — stays the flow's.
+ */
+test('is a query container on the inline axis, named for the family', () => {
+  const root = rule(ui);
+  assert.match(root, new RegExp(`container:${contract.responsive.container} / inline-size`));
+  assert.doesNotMatch(root, /container-type:size/);
+  assert.equal(contract.responsive.compact, '600px');
+});
+
+/** Compact, the gutters of every container in the page stop at step 4 of the space scale. */
+test('caps the inset of its containers at step 4 below 600 pixels', () => {
+  const compact =
+    /@container slotted-page \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  const [selectors, body] = compact.split('{');
+  for (let step = 5; step <= 12; step += 1) {
+    assert.ok(
+      selectors.split(',').includes(`${ui} [data-ui='container'][data-inset='${step}']`),
+      `inset ${step} is not capped`,
+    );
+  }
+  for (let step = 0; step <= 4; step += 1) {
+    assert.ok(!selectors.includes(`[data-inset='${step}']`), `inset ${step} is capped`);
+  }
+  assert.match(body ?? '', /--_inset:var\(--slotted-space-4,0\.5rem\)/);
 });

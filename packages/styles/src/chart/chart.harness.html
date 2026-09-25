@@ -12,10 +12,11 @@
   click, and open the table. A scene that states a point, a selection, a zoom
   or a hidden series starts in that state, which is what the captures show.
 
-  The script writes three other families into a chart, and the builder reads
+  The script writes four other families into a chart, and the builder reads
   which stylesheets to carry from the identifiers written here:
   data-ui="skeleton" for the waiting plot, data-ui="result-state" for the empty
-  and failed plot, data-ui="button" for the actions a consumer composes.
+  and failed plot, data-ui="button" for the actions a consumer composes, and
+  data-ui="icon" for the box each toolbar and help glyph is drawn in.
 -->
 <style>
   .h-note {
@@ -420,6 +421,7 @@
     tooltipContext,
   } from '@slotted/core/chart';
   import { mountChartEngine } from '@slotted/core/chart-echarts';
+  import { GLYPH_VIEW_BOX, GLYPHS } from '@slotted/core/glyph';
   import { getLiveAnnouncer } from '@slotted/core/live-announcer';
   import { collapseState } from '@slotted/core/overflow';
   import { createControllable } from '@slotted/core/state';
@@ -1321,6 +1323,47 @@
     return node;
   }
 
+  /**
+   * The `Glyph` element inside the `icon` box, as both bindings render it: the
+   * toolbar is built here by script, so the drawing is read from the same
+   * `@slotted/core/glyph` the bindings read rather than left for the build.
+   */
+  function glyphIcon(name) {
+    const drawing = GLYPHS[name];
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const paint =
+      drawing.paint === 'fill'
+        ? { fill: 'currentColor' }
+        : {
+            fill: 'none',
+            stroke: 'currentColor',
+            'stroke-width': drawing.strokeWidth,
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+          };
+    for (const [attribute, value] of Object.entries({
+      'data-part': 'glyph',
+      'data-glyph': name,
+      'aria-hidden': 'true',
+      focusable: 'false',
+      viewBox: GLYPH_VIEW_BOX,
+      ...paint,
+    }))
+      svg.setAttribute(attribute, String(value));
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const [dx, dy] = drawing.offset;
+    if (dx !== 0 || dy !== 0) group.setAttribute('transform', `translate(${dx} ${dy})`);
+    for (const d of drawing.paths) {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      group.append(path);
+    }
+    svg.append(group);
+    const box = element('span', { 'data-ui': 'icon', 'data-part': 'root', 'aria-hidden': 'true' });
+    box.append(svg);
+    return box;
+  }
+
   function colorAttributes(node, color) {
     node.removeAttribute('data-slot');
     node.removeAttribute('data-tone');
@@ -1498,6 +1541,7 @@
         'aria-label': messages.help,
         'aria-controls': `${id}-help`,
       });
+      help.append(glyphIcon('circle-info'));
       const helpContent = element(
         'div',
         { 'data-part': 'help-content', id: `${id}-help`, role: 'note' },
@@ -1673,13 +1717,14 @@
 
     /* ── Toolbar ─────────────────────────────────────────────────────── */
 
-    function iconButton(part, label, onPress, pressed) {
+    function iconButton(part, glyph, label, onPress, pressed) {
       const button = element('button', {
         'data-part': part,
         type: 'button',
         'aria-label': label,
         title: label,
       });
+      button.append(glyphIcon(glyph));
       if (pressed !== undefined) {
         button.setAttribute('aria-pressed', String(pressed));
         button.toggleAttribute('data-pressed', pressed);
@@ -1703,7 +1748,7 @@
 
       if (config.zoomable && !isFullZoom(state.zoom.value) && model?.shape === 'cartesian') {
         toolbar.append(
-          iconButton('zoom-reset', messages.resetZoom, (reason, event) => {
+          iconButton('zoom-reset', 'rotate-ccw', messages.resetZoom, (reason, event) => {
             request('zoom', FULL_ZOOM, 'clear', event);
             announcer.announce(describeZoom(model, FULL_ZOOM, messages));
             plot.focus();
@@ -1714,6 +1759,7 @@
         toolbar.append(
           iconButton(
             'view-toggle',
+            'file-spreadsheet',
             messages.tableView,
             (reason, event) => request('table', !state.table.value, reason, event),
             state.table.value,
@@ -1723,6 +1769,7 @@
       toolbar.append(
         iconButton(
           'fullscreen-toggle',
+          state.fullscreen.value ? 'minimize' : 'maximize',
           state.fullscreen.value ? messages.exitFullscreen : messages.fullscreen,
           (reason, event) => request('fullscreen', !state.fullscreen.value, reason, event),
         ),
@@ -1737,6 +1784,7 @@
         title: messages.more,
         'aria-haspopup': 'menu',
       });
+      trigger.append(glyphIcon('ellipsis'));
       const menu = element('div', {
         'data-part': 'menu',
         role: 'menu',

@@ -314,3 +314,11 @@ test('never draws a dot without the words it cannot say', () => {
     assert.match(scene, /data-ui="visually-hidden"/, `the ${name} scene draws a dot and no words`);
   }
 });
+
+test('hands its glyph size to an icon placed in a slot', () => {
+  // The icon family reads `--slotted-icon-size` from its container; a bare
+  // glyph host reads the slot's font-size instead. Both are the slot's scale.
+  const rule = normalized.split(`${ui} [data-part='end']{`)[1]?.split('}')[0] ?? '';
+  assert.ok(rule.includes('--slotted-icon-size:var(--_icon-size)'));
+  assert.ok(rule.includes('font-size:var(--_icon-size)'));
+});

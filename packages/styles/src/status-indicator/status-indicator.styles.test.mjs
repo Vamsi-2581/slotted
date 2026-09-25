@@ -98,12 +98,23 @@ test('paints every status in the tone the contract maps it to', () => {
 
 /**
  * The glyph is the family's non-chromatic alternative, so the artwork each
- * status draws is contract rather than a choice made in the sheet.
+ * status draws is contract rather than a choice made in the sheet. The sheet
+ * paints none of it; every icon mark in the fragment holds the `Glyph` element
+ * the contract names for its status.
  */
 test('draws the glyph the contract names for every status', () => {
-  for (const [status, token] of Object.entries(contract.statusGlyphs)) {
-    assert.ok(
-      rule(`${root}[data-status='${status}']`).includes(`--_glyph:var(${token})`),
+  assert.ok(!/var\(--slotted-icon-(?!size)/.test(declarations), 'the sheet paints a glyph token');
+  const marks = [
+    ...fragment.matchAll(
+      /<[a-z]+\b([^>]*data-mark="icon"[^>]*)>\s*<span data-part="mark" aria-hidden="true"\s*>\s*<span data-ui="icon" data-part="root" aria-hidden="true"\s*>\s*<svg data-part="glyph" data-glyph="([a-z-]+)"/g,
+    ),
+  ];
+  assert.equal(marks.length, (fragment.match(/data-mark="icon"/g) ?? []).length);
+  for (const [, attributes, glyph] of marks) {
+    const status = /data-status="([a-z]+)"/.exec(attributes)[1];
+    assert.equal(
+      glyph,
+      contract.statusGlyphs[status],
       `${status} draws artwork the contract does not name`,
     );
   }
@@ -206,14 +217,14 @@ test('takes the gap back when the label holds nothing a reader can see', () => {
 
 /**
  * The ring hangs off the root rather than off the mark, and the reason is a
- * defect that was photographed: an icon mark carries a `mask-image`, a mask
- * clips the element's pseudo-elements with it, and the ring was cut into the
+ * defect that was photographed: when the icon mark was a `mask-image`, the mask
+ * clipped the element's pseudo-elements with it, and the ring was cut into the
  * shape of the triangle it was supposed to leave.
  */
-test('draws the pulse on the root, because a mask would clip it off the mark', () => {
+test('draws the pulse on the root, whatever draws the mark', () => {
   assert.ok(rule(`${ui}[data-pulse]::after`).includes('animation:slotted-status-indicator-pulse'));
   assert.ok(!normalized.includes(`[data-pulse] [data-part='mark']::after`));
-  assert.ok(rule(`${ui}[data-mark='icon'] [data-part='mark']`).includes('mask-image:var('));
+  assert.ok(!rule(`${ui}[data-mark='icon'] [data-part='mark']`).includes('mask'));
 });
 
 /** The ring is the tone's text role: the one step every status has. */
@@ -242,13 +253,15 @@ test('withdraws the endless ring under reduced motion rather than shortening it'
 
 /**
  * The system replaces every author colour, so the six statuses become one mark
- * and the only question left is whether it is visible. A masked glyph over a
+ * and the only question left is whether it is visible. A dot painted from a
  * forced `Canvas` background is not — the defect `link` found on its own
- * external mark.
+ * external mark. The glyph is `currentColor` and needs no fill behind it.
  */
 test('keeps the mark visible under forced colours and withdraws the ring', () => {
   const query = normalized.slice(normalized.indexOf('@media (forced-colors:active)'));
-  assert.ok(query.includes(`${ui} [data-part='mark']{background-color:CanvasText`));
+  assert.ok(
+    query.includes(`${ui}[data-mark='dot'] [data-part='mark']{background-color:CanvasText`),
+  );
   assert.ok(
     query.includes(
       `${ui}[data-mark='dot'][data-status='unknown'] [data-part='mark']{background-color:Canvas`,

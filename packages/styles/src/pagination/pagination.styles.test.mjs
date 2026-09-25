@@ -108,28 +108,27 @@ test("keeps the air around the two sentences, and resets only the paragraph's bl
   assert.doesNotMatch(reset.slice(0, reset.indexOf('}')), /\n\s*margin: 0;/);
 });
 
-test('draws one chevron for a step and two for an end', () => {
-  assert.ok(
-    normalized.includes(
-      'mask-image:var(--slotted-pagination-step-icon,var(--slotted-icon-chevron-right))',
-    ),
-  );
-  assert.ok(
-    normalized.includes(
-      'mask-image:var(--slotted-pagination-end-icon,var(--slotted-icon-chevrons-right))',
-    ),
-  );
+/**
+ * The chevrons are Glyph elements the bindings render; the sheet sizes the box
+ * they sit in and paints none of them.
+ */
+test('paints no chevron of its own', () => {
+  assert.ok(!declarations.includes('mask'), 'a chevron is an svg, not a mask');
+  assert.ok(!declarations.includes('::before') && !declarations.includes('::after'));
+  assert.ok(normalized.includes("[data-part='last']){--slotted-icon-size:var(--_glyph);}"));
 });
 
 /**
- * Three facts, three rules: a chevron points along the reading direction,
- * `previous` and `first` point against it, and a mirrored document turns both
- * of those around.
+ * Two facts, two answers: a chevron points along the reading direction, which
+ * the icon box's `directional` mirror answers in a right-to-left document, and
+ * `previous` and `first` point against it, which a flip of the box answers.
  */
 test('mirrors each trigger with the direction that applies to it', () => {
-  assert.ok(normalized.includes("[data-part='first'],[data-part='previous'])::before{scale:-11"));
-  assert.ok(normalized.includes("[data-part='last']):dir(rtl)::before{scale:-11"));
-  assert.ok(normalized.includes("[data-part='previous']):dir(rtl)::before{scale:11"));
+  assert.ok(
+    normalized.includes(
+      "[data-part='first'],[data-part='previous'])>[data-ui='icon']{rotate:0.5turn;",
+    ),
+  );
   assert.ok(
     !/\[dir=/.test(declarations),
     'an ancestor attribute is not the element directionality',

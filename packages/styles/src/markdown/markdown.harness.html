@@ -30,7 +30,9 @@
           href="https://example.com/cli"
           rel="noopener noreferrer"
           target="_blank"
-          >CLI reference&#8288;<span aria-hidden="true" data-part="external-icon"></span
+          >CLI reference&#8288;<span aria-hidden="true" data-part="external-icon"
+            ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="external"></svg></span></span
           ><span data-part="external-hint" data-ui="visually-hidden"> (opens in a new tab)</span
           >&#8288;</a
         >
@@ -137,11 +139,18 @@
       <div data-part="embed">
         <div data-ui="code-block" data-part="root" data-language="ts" data-marks>
           <div data-part="header">
-            <span data-part="icon" aria-hidden="true"></span>
+            <span data-part="icon" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="file"></svg></span
+            ></span>
             <span data-part="title">deploy.ts</span>
             <span data-part="language">ts</span>
             <div data-part="actions">
-              <button data-part="copy" type="button" aria-label="Copy code"></button>
+              <button data-part="copy" type="button" aria-label="Copy code">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="copy"></svg
+                ></span>
+              </button>
             </div>
           </div>
           <div
@@ -194,7 +203,10 @@
               aria-readonly="true"
               aria-label="Write the migration"
             />
-            <span data-part="indicator"></span>
+            <span data-part="indicator"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="check"></svg></span
+            ></span>
           </div>
           <div data-part="task-body">Write the migration</div>
         </li>
@@ -212,7 +224,10 @@
               aria-readonly="true"
               aria-label="Review it with the data team, whose sign-off the change needs before Friday"
             />
-            <span data-part="indicator"></span>
+            <span data-part="indicator"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="check"></svg></span
+            ></span>
           </div>
           <div data-part="task-body">
             Review it with <strong>the data team</strong>, whose sign-off the change needs before
@@ -225,7 +240,10 @@
         <li data-part="task">
           <div data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
             <input data-part="control" type="checkbox" aria-label="Ship it" />
-            <span data-part="indicator"></span>
+            <span data-part="indicator"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="check"></svg></span
+            ></span>
           </div>
           <div data-part="task-body">
             Ship it
@@ -239,7 +257,10 @@
                   data-checked
                 >
                   <input data-part="control" type="checkbox" checked aria-label="Tag the release" />
-                  <span data-part="indicator"></span>
+                  <span data-part="indicator"
+                    ><span data-ui="icon" data-part="root" aria-hidden="true"
+                      ><svg data-part="glyph" data-glyph="check"></svg></span
+                  ></span>
                 </div>
                 <div data-part="task-body">Tag the release</div>
               </li>
@@ -267,7 +288,10 @@
           data-open=""
           aria-labelledby="a-note"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-info" data-solid></svg></span
+          ></span>
           <div data-part="content">
             <div data-part="title" id="a-note">Note</div>
             <div data-part="description">
@@ -289,7 +313,10 @@
           data-open=""
           aria-labelledby="a-tip"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-check" data-solid></svg></span
+          ></span>
           <div data-part="content">
             <div data-part="title" id="a-tip">Tip</div>
             <div data-part="description">
@@ -311,7 +338,10 @@
           data-open=""
           aria-labelledby="a-important"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle" data-solid></svg></span
+          ></span>
           <div data-part="content">
             <div data-part="title" id="a-important">Important</div>
             <div data-part="description">
@@ -333,7 +363,10 @@
           data-open=""
           aria-labelledby="a-warning"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-alert" data-solid></svg></span
+          ></span>
           <div data-part="content">
             <div data-part="title" id="a-warning">Warning</div>
             <div data-part="description">
@@ -356,7 +389,10 @@
           data-open=""
           aria-labelledby="a-caution"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-x" data-solid></svg></span
+          ></span>
           <div data-part="content">
             <div data-part="title" id="a-caution">Caution</div>
             <div data-part="description">
@@ -401,6 +437,8 @@
                 data-part="backref"
                 href="#fnref-latency"
                 aria-label="Back to reference 1"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="arrow-left"></svg></span
               ></a>
             </p>
           </li>
@@ -410,6 +448,8 @@
                 data-part="backref"
                 href="#fnref-edge"
                 aria-label="Back to reference 2"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="arrow-left"></svg></span
               ></a>
             </p>
           </li>
@@ -435,7 +475,10 @@
           data-size="sm"
           data-live="off"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-alert"></svg></span
+          ></span>
           <span data-part="text">The document could not be loaded.</span>
         </p>
         <button

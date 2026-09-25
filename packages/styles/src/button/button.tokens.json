@@ -1,7 +1,7 @@
 [
-  "--slotted-border-strong",
   "--slotted-border-subtle",
   "--slotted-border-width-thin",
+  "--slotted-control-border-color",
   "--slotted-control-border-width",
   "--slotted-control-font-family",
   "--slotted-control-font-size-lg",

@@ -31,14 +31,6 @@
      * meet 4.5 : 1 against the sunken surface.
      */
     --_text: var(--slotted-text-muted);
-    /**
-     * No mark for help, because help is not a severity. The four tones that are
-     * one restate this with the glyph `specs/components/inline-message/contract.json`
-     * maps them to — the same map `status-indicator` and `alert` declare, so a
-     * status light and an alert about the same thing draw the same silhouette,
-     * and an error under a field the same as the alert about it (F1).
-     */
-    --_glyph: none;
 
     /**
      * Type comes from the control scales, the only ones the theme restates per
@@ -90,31 +82,33 @@
    * `text` role, which is the pair `packages/theme-default/test/contrast.test.mjs`
    * measures against the three neutral surfaces — this family paints on the
    * page's own surface, so that is the pair that applies.
+   *
+   * The glyph is the binding's, from the map in
+   * `specs/components/inline-message/contract.json` — the same map
+   * `status-indicator` and `alert` declare, so a status light and an alert
+   * about the same thing draw the same silhouette, and an error under a field
+   * the same as the alert about it (F1). Help draws none, because help is not
+   * a severity.
    */
 
   [data-ui='inline-message'][data-part='root'][data-tone='accent'] {
     --_text: var(--slotted-tone-accent-text);
-    --_glyph: var(--slotted-icon-circle-info);
   }
 
   [data-ui='inline-message'][data-part='root'][data-tone='secondary'] {
     --_text: var(--slotted-text-muted);
-    --_glyph: none;
   }
 
   [data-ui='inline-message'][data-part='root'][data-tone='success'] {
     --_text: var(--slotted-tone-success-text);
-    --_glyph: var(--slotted-icon-circle-check);
   }
 
   [data-ui='inline-message'][data-part='root'][data-tone='warning'] {
     --_text: var(--slotted-tone-warning-text);
-    --_glyph: var(--slotted-icon-triangle-alert);
   }
 
   [data-ui='inline-message'][data-part='root'][data-tone='danger'] {
     --_text: var(--slotted-tone-danger-text);
-    --_glyph: var(--slotted-icon-circle-alert);
   }
 
   /* ── Size: the step the control it belongs to is at ────────────────────
@@ -184,24 +178,25 @@
    * at every size, every density and every type step without a number saying
    * how, and it stays there when the sentence wraps to three.
    *
-   * `--slotted-inline-message-icon` is the escape hatch: an application with
-   * its own icon set writes one declaration and keeps the tone, the size, the
-   * alignment and the part name.
+   * The glyph is the binding's `Glyph` in an `icon` box, chosen from the tone
+   * and stroked in `currentcolor`; the slot sizes it through the icon token.
+   * A mark the page supplies instead takes the same box and its place on the
+   * first line, centred in it.
    */
   [data-ui='inline-message'] > [data-part='icon'] {
+    --slotted-icon-size: var(--_mark-size);
+
+    align-items: center;
     align-self: start;
-    background-color: currentcolor;
     block-size: var(--_mark-size);
     box-sizing: border-box;
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_mark-size);
+    justify-content: center;
     margin-block-start: calc((1lh - var(--_mark-size)) / 2);
     margin-inline-end: var(--_column-gap);
-    mask-image: var(--slotted-inline-message-icon, var(--_glyph));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
   }
 
   /**
@@ -216,30 +211,30 @@
    *
    * The disc is a third of the mark — 4 pixels under 12-pixel type — so it
    * steps with the size step and with the density like every other mark. The
-   * box is the disc's own width and the mask is twice that, because
-   * `--slotted-icon-dot` draws a circle half the width of its own viewBox: at
-   * twice the box the disc fills the box exactly, and the bullet sits on the
-   * message's left edge under the label above it rather than inside a column
-   * sized for a circled glyph.
+   * slot is the disc's own width and the glyph's box is twice that, because
+   * the `dot` glyph draws a circle half the width of its own viewBox: at twice
+   * the slot the disc fills the slot exactly, the box overhanging it equally
+   * on both sides, and the bullet sits on the message's left edge under the
+   * label above it rather than inside a column sized for a circled glyph.
    *
-   * `:empty` leaves the page's own artwork alone: a supplied mark keeps the
-   * full box it was measured for.
+   * The rule keys on the `dot` glyph the binding draws, which leaves the
+   * page's own artwork alone: a supplied mark keeps the full box it was
+   * measured for.
    */
   [data-ui='inline-message'][data-part='root'][data-mark='dot'] {
-    --_glyph: var(--slotted-icon-dot);
     --_dot-size: calc(var(--_mark-size) / 3);
   }
 
-  [data-ui='inline-message'][data-mark='dot'] > [data-part='icon']:empty {
+  [data-ui='inline-message'][data-mark='dot']
+    > [data-part='icon']:has(> [data-ui='icon'] > [data-glyph='dot']) {
+    --slotted-icon-size: calc(var(--_dot-size) * 2);
+
     inline-size: var(--_dot-size);
-    mask-size: calc(var(--_dot-size) * 2) calc(var(--_dot-size) * 2);
   }
 
   /**
-   * Help draws no mark, and the box is withdrawn rather than left empty: with
-   * `mask-image: none` the box would paint as a solid rectangle of the text
-   * colour, which is what a missing glyph looks like when the mask is the only
-   * thing shaping it.
+   * Help draws no mark, so the binding draws no glyph, and the empty box is
+   * withdrawn rather than left holding a column open for nothing.
    *
    * `:empty` keeps the page's own artwork, and `:not([data-loading])` keeps the
    * ring below — a help message can be waiting for something like any other.
@@ -270,20 +265,6 @@
    */
   [data-ui='inline-message'][data-mark='none']:not([data-loading]) > [data-part='icon']:empty {
     display: none;
-  }
-
-  /**
-   * A mark the page supplied instead of the tone's own. The box keeps its size
-   * and its place on the first line; the mask goes, because a mask over an
-   * element that now has content of its own would cut that content into the
-   * shape of a circle.
-   */
-  [data-ui='inline-message'] > [data-part='icon']:not(:empty) {
-    align-items: center;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    mask-image: none;
   }
 
   /* ── The sentence ─────────────────────────────────────────────────────
@@ -330,7 +311,6 @@
    */
   [data-ui='inline-message'][data-loading] > [data-part='icon'] {
     animation: slotted-inline-message-spin var(--slotted-duration-loop-fast) linear infinite;
-    background-color: transparent;
     block-size: var(--_mark-size);
     border: max(var(--slotted-border-width-thin, 1px), calc(var(--_mark-size) / 8)) solid
       currentcolor;
@@ -345,7 +325,6 @@
        message's own left edge. */
     inline-size: var(--_mark-size);
     margin-block-start: calc((1lh - var(--_mark-size)) / 2);
-    mask-image: none;
   }
 
   /* The page's own artwork withdraws for the ring rather than sitting inside
@@ -386,9 +365,9 @@
   /* ── Forced colours ───────────────────────────────────────────────────
    *
    * The theme remaps every colour this family reads, so the ink needs no rule
-   * here. The mark does: it is drawn as a background under a mask, and the
-   * operating system replaces every background with `Canvas` — which would
-   * leave the silhouette painted in the page's own ground and invisible.
+   * here. The mark takes a system colour of its own, so the silhouette keeps
+   * the ink that says it is a mark and not a word, and the muted one when the
+   * message is disabled.
    *
    * The ring is the same problem from the other side: its missing quarter is
    * `transparent`, which survives, but its border would otherwise be forced to
@@ -396,15 +375,14 @@
    */
   @media (forced-colors: active) {
     [data-ui='inline-message'] > [data-part='icon'] {
-      background-color: CanvasText;
+      color: CanvasText;
     }
 
     [data-ui='inline-message'][data-part='root'][data-disabled] > [data-part='icon'] {
-      background-color: GrayText;
+      color: GrayText;
     }
 
     [data-ui='inline-message'][data-loading] > [data-part='icon'] {
-      background-color: transparent;
       border-color: CanvasText;
       border-inline-end-color: Canvas;
     }

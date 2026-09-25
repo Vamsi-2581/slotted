@@ -205,7 +205,6 @@
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
     --_gap: var(--slotted-control-gap-md, 8px);
-    --_glyph: var(--slotted-icon-maximize);
 
     align-items: center;
     appearance: none;
@@ -246,10 +245,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='fullscreen'][data-part='trigger'][data-fullscreen] {
-    --_glyph: var(--slotted-icon-minimize);
-  }
-
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
   [data-ui='fullscreen'][data-part='trigger'][data-size='sm'] {
@@ -271,9 +266,10 @@
   /* ── Content ──────────────────────────────────────────────────────────── */
 
   /**
-   * The slot sizes what it holds. Empty, it draws the family's own mark from
-   * `--_glyph`, masked from the icon scale in the host's ink; a consumer's
-   * icon placed in it replaces the mark and is sized the same way.
+   * The slot sizes what it holds: the family's own mark, an `Icon` the binding
+   * draws from the state (four corners opening, four corners closing), or a
+   * consumer's icon placed in its stead, each at the control's icon step and
+   * in the host's ink.
    */
   [data-ui='fullscreen'] [data-part='icon'] {
     --slotted-icon-size: var(--_icon-size);
@@ -289,25 +285,6 @@
     block-size: 100%;
     display: block;
     inline-size: 100%;
-  }
-
-  [data-ui='fullscreen'] [data-part='icon']:empty::before {
-    background-color: currentcolor;
-    block-size: 100%;
-    content: '';
-    display: block;
-    inline-size: 100%;
-    mask-image: var(--_glyph);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  /* The mark is the host's ink in forced colours too (masked-glyph.test.mjs). */
-  @media (forced-colors: active) {
-    [data-ui='fullscreen'] [data-part='icon']:empty::before {
-      forced-color-adjust: none;
-    }
   }
 
   /**

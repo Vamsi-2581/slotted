@@ -36,16 +36,13 @@ test('reacts to every state the contract declares', () => {
  * an icon from a character. A rotated rule is neither: it is geometry, it
  * carries no glyph token, and it stops being drawn the moment a consumer puts
  * their own mark inside the element. The one glyph the trail does own is the
- * ellipsis, which is the mark of a control and not the shape of a rule.
+ * ellipsis, which is the mark of a control and not the shape of a rule, and it
+ * is the Glyph element the binding renders, not a mask.
  */
 test('draws the separator as geometry and yields to the consumer content', () => {
   assert.ok(normalized.includes("[data-part='separator']:empty{"));
   assert.ok(normalized.includes('rotate:var(--slotted-breadcrumb-separator-skew,20deg)'));
-  assert.deepEqual(
-    [...declarations.matchAll(/mask-image:[^;]+/g)].map(([match]) => match),
-    ['mask-image: var(--slotted-breadcrumb-ellipsis-icon, var(--slotted-icon-ellipsis))'],
-    'the trail owns one glyph, and it is the ellipsis',
-  );
+  assert.ok(!declarations.includes('mask'), 'the stylesheet paints no glyph');
 });
 
 test('mirrors the separator with the direction that applies to it', () => {
@@ -68,7 +65,8 @@ test('truncates against the trail rather than against a measure it chose', () =>
 });
 
 /**
- * The mark is the Lucide `ellipsis` drawn as a mask at the control glyph size,
+ * The mark is the `ellipsis` Glyph element in an icon box at the control glyph
+ * size,
  * so nothing about it depends on the metrics of the font the page loaded — the
  * exception to rule 3 of `docs/token-foundation.md` that this control used to
  * take is closed (BC2). The box still keeps the trail's own type, because
@@ -88,11 +86,10 @@ test('sets the ellipsis on the crumbs’ line, with a whole target and a glyph',
   assert.ok(ellipsis.includes('font:inherit;'), 'the box keeps the trail’s own line');
   assert.ok(!ellipsis.includes('translate:'), 'nothing lifts the mark off its own centre');
   assert.ok(
-    normalized.includes(
-      "[data-part='ellipsis']::before{background-color:currentcolor;block-size:var(--_icon-size);content:'';display:block;inline-size:var(--_icon-size);mask-image:var(--slotted-breadcrumb-ellipsis-icon,var(--slotted-icon-ellipsis));mask-position:center;mask-repeat:no-repeat;mask-size:contain",
-    ),
-    'the mark is the glyph, at the glyph scale’s own size',
+    ellipsis.startsWith("[data-part='ellipsis']{--slotted-icon-size:var(--_icon-size);"),
+    'the box inside is sized at the glyph scale’s own size',
   );
+  assert.ok(!normalized.includes("[data-part='ellipsis']::before"), 'no pseudo-element icon');
   assert.ok(
     normalized.includes(
       "[data-part='ellipsis']::after{content:'';inset:min(0px,calc((100%-var(--slotted-target-min,24px))/2));position:absolute",

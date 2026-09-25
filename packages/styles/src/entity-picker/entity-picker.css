@@ -410,12 +410,12 @@
     [data-part='chips']
     > [data-ui][data-unresolved]
     > [data-part='body']
-    > [data-part='start']:empty {
-    background-color: currentcolor;
-    mask-image: var(--slotted-entity-picker-unresolved-icon, var(--slotted-icon-circle-alert));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_icon-size);
+    > [data-part='start']
+    > [data-ui='icon'] {
+    /* The alert mark is a `Glyph` the binding draws in the face's place, at the
+       chip's icon step rather than stretched to the face's box. */
+    block-size: var(--_icon-size);
+    inline-size: var(--_icon-size);
   }
 
   /* ── The two buttons inside the frame ─────────────────────────────────── */
@@ -479,26 +479,27 @@
     }
   }
 
-  [data-ui='entity-picker'] > [data-part='control'] > [data-part='clear']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-entity-picker-clear-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* The cross and the chevron are `Glyph` elements the binding draws, sized
+     here to the control's icon step. */
+  [data-ui='entity-picker']
+    > [data-part='control']
+    > :is([data-part='clear'], [data-part='trigger']) {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   [data-ui='entity-picker'] > [data-part='control'] > [data-part='trigger'] > [data-part='arrow'] {
-    background-color: currentcolor;
+    align-items: center;
     block-size: var(--_icon-size);
+    display: flex;
     inline-size: var(--_icon-size);
-    mask-image: var(--slotted-entity-picker-arrow-icon, var(--slotted-icon-chevron-down));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    justify-content: center;
+  }
+
+  [data-ui='entity-picker']
+    > [data-part='control']
+    > [data-part='trigger']
+    > [data-part='arrow']
+    > [data-ui='icon'] {
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
@@ -506,7 +507,8 @@
   [data-ui='entity-picker'][data-open]
     > [data-part='control']
     > [data-part='trigger']
-    > [data-part='arrow'] {
+    > [data-part='arrow']
+    > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -1080,17 +1082,17 @@
    * two-line record it stood nine pixels above the name (`audit.mjs`).
    */
   [data-ui='entity-picker'][data-part='positioner'] [data-part='indicator'] {
+    --slotted-icon-size: var(--_content-icon-size);
+
+    align-items: center;
     align-self: start;
-    background-color: currentcolor;
     block-size: calc(var(--_content-font-size) * var(--slotted-line-height-md, 1.5));
+    display: flex;
     grid-column: 4;
     grid-row: 1;
     inline-size: var(--_content-icon-size);
+    justify-content: center;
     margin-inline-start: var(--_column-gap);
-    mask-image: var(--slotted-entity-picker-selected-icon, var(--slotted-icon-check));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_content-icon-size);
     opacity: 0;
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
@@ -1123,7 +1125,8 @@
 
   /**
    * An offer is an option (design §1.3), and it wears a glyph in the face's
-   * column so its words start where every name starts.
+   * column so its words start where every name starts: the plus to create,
+   * the turning arrow to search again, each a `Glyph` the binding draws.
    */
   [data-ui='entity-picker'][data-part='positioner']
     [data-part='item']:is([data-create], [data-retry]) {
@@ -1133,21 +1136,15 @@
   [data-ui='entity-picker'][data-part='positioner']
     [data-part='item']:is([data-create], [data-retry])
     > [data-part='media'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_content-icon-size);
+
+    align-items: center;
     /* A glyph beside words, so it stands on their first line (`indicator`). */
     align-self: start;
     block-size: calc(var(--_content-font-size) * var(--slotted-line-height-md, 1.5));
     grid-row: 1;
-    mask-image: var(--slotted-entity-picker-create-icon, var(--slotted-icon-plus));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_content-icon-size);
-  }
-
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item'][data-retry]
-    > [data-part='media'] {
-    mask-image: var(--slotted-entity-picker-retry-icon, var(--slotted-icon-rotate-ccw));
+    /* The face's width, which an empty media box takes by itself. */
+    inline-size: var(--_media-size);
   }
 
   /* ── Error, empty, status ─────────────────────────────────────────────── */
@@ -1169,8 +1166,9 @@
   }
 
   /**
-   * The error names what failed in the text colour, with the alert mark
-   * beside it in the danger tone; the offer to search again follows as an
+   * The error names what failed in the text colour, with the alert mark — a
+   * `Glyph` the binding draws before the words — beside it in the danger
+   * tone, centred in the face's column; the offer to search again follows as an
    * option. It stands on the row's inset like every row, not centred like
    * the empty sentence: it is the first of two rows that belong together.
    */
@@ -1183,16 +1181,11 @@
     text-align: start;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='error']::before {
-    background-color: var(--slotted-entity-picker-error-color, var(--slotted-tone-danger-text));
-    block-size: var(--_content-icon-size);
-    content: '';
-    flex: none;
-    inline-size: var(--_media-size);
-    mask-image: var(--slotted-entity-picker-error-icon, var(--slotted-icon-circle-alert));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_content-icon-size);
+  [data-ui='entity-picker'][data-part='positioner'] [data-part='error'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_content-icon-size);
+
+    color: var(--slotted-entity-picker-error-color, var(--slotted-tone-danger-text));
+    margin-inline: calc((var(--_media-size) - var(--_content-icon-size)) / 2);
   }
 
   /* ── The wait ─────────────────────────────────────────────────────────── */
@@ -1302,24 +1295,6 @@
       [data-part='item'][data-disabled][data-current] {
       background-color: Highlight;
       color: GrayText;
-    }
-
-    [data-ui='entity-picker'][data-part='positioner']
-      [data-part='item'][data-selected]
-      > [data-part='indicator'],
-    [data-ui='entity-picker'] > [data-part='control'] > [data-part='clear']::before,
-    [data-ui='entity-picker'] > [data-part='control'] > [data-part='trigger'] > [data-part='arrow'],
-    [data-ui='entity-picker'][data-part='positioner']
-      [data-part='item']:is([data-create], [data-retry])
-      > [data-part='media'],
-    [data-ui='entity-picker'][data-part='positioner'] [data-part='error']::before,
-    [data-ui='entity-picker']
-      > [data-part='control']
-      [data-part='chips']
-      > [data-ui][data-unresolved]
-      > [data-part='body']
-      > [data-part='start']:empty {
-      forced-color-adjust: none;
     }
   }
 }

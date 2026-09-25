@@ -2,65 +2,152 @@
   /**
    * One ring, drawn once. The indeterminate wait every family shows the same
    * way — a button that is working, a select or combobox whose options are
-   * still on their way — was drawn by the first family to need it, in that
-   * family's own sheet, as a border with one transparent side: a thin square-
-   * ended arc whose stroke was a fraction of its diameter, so it was a hair at
-   * the small step and a slab at the large one. The second family would have
-   * copied it. It is drawn here instead, and a host names it and places it.
+   * still on their way — is drawn here, and a host names it and places it.
    *
-   * The arc is a glyph, like every other glyph in the foundation (R4): the
-   * theme generates it from Lucide's `loader-circle` at a stroke of 3 on the
-   * 24-unit grid, which is 2px across a 16px box and keeps the round caps
-   * Lucide draws. Masking the glyph over `currentColor` is what lets the ring
-   * take whatever ink its host is already writing with — the label's colour
-   * on a filled button, the tone on a bare one, the muted text of a field —
-   * and answer every scheme without a colour of its own.
+   * It was a glyph before this: Lucide's `loader-circle`, a three-quarter arc
+   * with two cut ends, masked over the ink and set turning. It read as what
+   * it was, a static shape being rotated, and at the small step its stroke
+   * was heavier than anything beside it. What is drawn now is the pattern
+   * Material and the platform's own progress ring settle on: an arc that
+   * chases itself around a faint track, growing from its head and closing
+   * from its tail, so the eye reads work rather than a wheel.
+   *
+   * Three layers, one mask. The track is the whole circle in the host's ink
+   * at a fifth of its strength — the same step every family uses for a
+   * band or a rail on its own ground — and it is what stands when motion is
+   * off. The arc is a conic gradient from the tail angle to the head angle,
+   * in full ink. Two dots the width of the stroke sit at the two angles and
+   * give the arc the round caps a conic gradient cannot draw. The annulus is
+   * cut by a radial mask a pixel wide at the edge, so the stroke is drawn
+   * rather than stepped. Everything is measured from the box, so the ring is
+   * the same drawing at every step a host can ask for.
+   *
+   * Three angles move it, and none is a rotation of the box. A turning box
+   * is rasterised once and spun as a bitmap; a gradient repainted by angle is
+   * as sharp on the last frame as on the first. In the first half of a cycle
+   * the head runs ahead on an ease and the tail holds, so the arc opens from
+   * a sliver to most of the circle; in the second half the head holds and
+   * the tail runs the same distance, so the arc closes from behind. Neither
+   * end ever moves backward. A linear turn under both keeps the whole
+   * travelling through the eased ends, and it is a turn and a hundred
+   * degrees per cycle because that is what the two resets add up to: the
+   * last frame of a cycle is the first frame of the next, to the degree.
+   *
+   * `currentColor` is what lets the ring take whatever ink its host is
+   * already writing with — the label's colour on a filled button, the tone
+   * on a bare one, the muted text of a field — and answer every scheme
+   * without a colour of its own.
    *
    * The box is the host's glyph box, read through `--slotted-spinner-size`:
-   * a host that sizes its icons sizes the ring the same way, so the ring that
-   * stands in for a glyph is the size of the glyph it replaces. Left alone it
-   * is the medium control icon.
+   * a host that sizes its icons sizes the ring the same way, so the ring
+   * that stands in for a glyph is the size of the glyph it replaces. Left
+   * alone it is the medium control icon. The icon set keeps two units of
+   * twenty-four clear inside that box, and the ring keeps the same inset, so
+   * the swap is between two shapes of one measure.
    */
   [data-ui='spinner'] {
     --_size: var(--slotted-spinner-size, var(--slotted-control-icon-size-md, 16px));
-
+    --_ring: calc(var(--_size) * 5 / 6);
     /**
-     * One full turn per loop step, linear: a ring that eases would read as
-     * stalling once a turn. The loop token is the theme's, so a theme that
-     * slows every loop slows this one with it.
+     * The stroke of the icon set at this size — two units of twenty-four —
+     * and never thinner than the medium hairline, which is where a 12px
+     * ring would otherwise fall below a pixel.
      */
-    animation: slotted-spinner-turn var(--slotted-duration-loop) linear infinite;
-    background-color: currentColor;
+    --_stroke: max(var(--slotted-border-width-medium, 1.5px), calc(var(--_size) / 12));
+    /** The radius the stroke is centred on: where the caps sit. */
+    --_radius: calc((var(--_ring) - var(--_stroke)) / 2);
+    --_track: color-mix(in oklab, currentColor 20%, transparent);
+    --_start: calc(var(--_turn) + var(--_tail));
+    --_end: calc(var(--_turn) + var(--_head));
+    --_cap: calc(var(--_stroke) / 2);
+
+    animation:
+      slotted-spinner-turn var(--slotted-duration-loop-slow) linear infinite,
+      slotted-spinner-head var(--slotted-duration-loop-slow) linear infinite,
+      slotted-spinner-tail var(--slotted-duration-loop-slow) linear infinite;
+    background-image:
+      radial-gradient(
+        circle at calc(50% + var(--_radius) * sin(var(--_end)))
+          calc(50% - var(--_radius) * cos(var(--_end))),
+        currentColor calc(var(--_cap) - 0.5px),
+        transparent calc(var(--_cap) + 0.5px)
+      ),
+      radial-gradient(
+        circle at calc(50% + var(--_radius) * sin(var(--_start)))
+          calc(50% - var(--_radius) * cos(var(--_start))),
+        currentColor calc(var(--_cap) - 0.5px),
+        transparent calc(var(--_cap) + 0.5px)
+      ),
+      conic-gradient(
+        from var(--_start),
+        currentColor 0deg,
+        currentColor calc(var(--_head) - var(--_tail)),
+        transparent calc(var(--_head) - var(--_tail))
+      ),
+      conic-gradient(var(--_track) 0 100%);
+    background-origin: content-box;
+    background-clip: content-box;
     block-size: var(--_size);
     box-sizing: border-box;
     display: inline-block;
     /* A ring that shrinks is not a ring: it keeps its size in a flex row. */
     flex: none;
     inline-size: var(--_size);
-    mask-image: var(--slotted-icon-loader-circle);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    /*
+     * Cut in lengths rather than in percentages of the ray: Chrome paints
+     * `calc(100% - 2px)` as a stop in a radial gradient as a ramp several
+     * pixels wide, and the ring came out as a soft donut. Two lengths a pixel
+     * apart are a stroke with an anti-aliased edge.
+     */
+    mask-image: radial-gradient(
+      circle,
+      transparent calc(var(--_ring) / 2 - var(--_stroke) - 0.5px),
+      #000 calc(var(--_ring) / 2 - var(--_stroke) + 0.5px),
+      #000 calc(var(--_ring) / 2 - 0.5px),
+      transparent calc(var(--_ring) / 2 + 0.5px)
+    );
+    opacity: 1;
+    /* The inset the icon set keeps, so the ring is drawn where a glyph is. */
+    padding: calc((var(--_size) - var(--_ring)) / 2);
+    scale: 1;
+    /**
+     * A ring arrives rather than appears. A host inserts it on the frame the
+     * wait begins, and the first frame is the start of a fade rather than a
+     * cut, in the control's own transition step.
+     */
+    transition:
+      opacity var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
+      scale var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
     vertical-align: middle;
   }
 
+  @starting-style {
+    [data-ui='spinner'] {
+      opacity: 0;
+      scale: 0.6;
+    }
+  }
+
   /**
-   * A frozen ring still communicates waiting. Stopping it entirely is less
-   * distracting than replacing one continuous motion with a slower one.
+   * A frozen ring still communicates waiting: the track, and an arc of most
+   * of a turn resting on it. Stopping it entirely is less distracting than
+   * replacing one continuous motion with a slower one.
    */
   @media (prefers-reduced-motion: reduce) {
     [data-ui='spinner'] {
+      --_head: 270deg;
+
       animation: none;
     }
   }
 
   @media (forced-colors: active) {
     /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
+     * The ring is painted with a background, and forced colours replace a
+     * background that is not one of the system's own colours: the ring goes
      * and the box it sat in stays. `forced-color-adjust: none` keeps
      * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
+     * value.
      */
     [data-ui='spinner'] {
       forced-color-adjust: none;
@@ -68,8 +155,70 @@
   }
 }
 
+/**
+ * Registered so the three angles interpolate: an unregistered custom property
+ * flips between its keyframes instead of turning. Without the registration
+ * the ring stands as it does under reduced motion rather than as nothing.
+ */
+@property --_turn {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: '<angle>';
+}
+
+@property --_head {
+  inherits: false;
+  initial-value: 20deg;
+  syntax: '<angle>';
+}
+
+@property --_tail {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: '<angle>';
+}
+
+/**
+ * The linear turn under both ends. A full turn and the hundred degrees the
+ * two resets below leave over — the tail ends 260 degrees on from where it
+ * starts, the head likewise — so the angle a cycle ends on is the angle the
+ * next begins on, and the loop has no seam.
+ */
 @keyframes slotted-spinner-turn {
   to {
-    transform: rotate(1turn);
+    --_turn: 460deg;
+  }
+}
+
+/**
+ * The head opens the arc in the first half of the cycle and holds in the
+ * second; the tail holds in the first and closes it in the second. The ease
+ * is written on the keyframe it leaves from, so each half eases on its own
+ * and the hold between them is a hold. An arc of twenty degrees to two
+ * hundred and eighty: never nothing, never a closed circle.
+ */
+@keyframes slotted-spinner-head {
+  0% {
+    --_head: 20deg;
+
+    animation-timing-function: ease-in-out;
+  }
+
+  50%,
+  100% {
+    --_head: 280deg;
+  }
+}
+
+@keyframes slotted-spinner-tail {
+  0%,
+  50% {
+    --_tail: 0deg;
+
+    animation-timing-function: ease-in-out;
+  }
+
+  100% {
+    --_tail: 260deg;
   }
 }

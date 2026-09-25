@@ -3,6 +3,7 @@
   "--slotted-border-width-thin",
   "--slotted-control-gap-md",
   "--slotted-control-gap-sm",
+  "--slotted-control-height-md",
   "--slotted-control-height-sm",
   "--slotted-control-icon-size-md",
   "--slotted-control-icon-size-sm",
@@ -23,10 +24,6 @@
   "--slotted-font-size-xl",
   "--slotted-font-weight-medium",
   "--slotted-font-weight-semibold",
-  "--slotted-icon-arrow-left",
-  "--slotted-icon-chevron-down",
-  "--slotted-icon-pin",
-  "--slotted-icon-pin-off",
   "--slotted-line-height-2xl",
   "--slotted-line-height-3xl",
   "--slotted-line-height-lg",
@@ -54,6 +51,7 @@
   "--slotted-space-5",
   "--slotted-space-6",
   "--slotted-surface",
+  "--slotted-target-comfortable",
   "--slotted-target-min",
   "--slotted-text",
   "--slotted-text-muted",
@@ -62,5 +60,6 @@
   "--slotted-tone-accent-text",
   "--slotted-tone-secondary-subtle-active",
   "--slotted-tone-secondary-subtle-hover",
+  "--slotted-toolbar-inset",
   "--slotted-z-index-sticky"
 ]

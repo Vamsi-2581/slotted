@@ -56,7 +56,10 @@
     );
 
     align-items: center;
-    background-color: var(--slotted-currency-field-background, transparent);
+    background-color: var(
+      --slotted-currency-field-background,
+      var(--slotted-control-surface, Field)
+    );
     /**
      * The control step of the border scale rather than the strong one: a
      * separator between two surfaces and the edge of a control are the same
@@ -99,7 +102,13 @@
    */
   [data-ui='currency-field'] > [data-part='input'] {
     background-color: transparent;
-    block-size: 100%;
+    /* The frame's border box, not its content box: on a coarse pointer the frame
+       is the touch target's height and the control it holds is too. Stretched
+       rather than a percentage of the frame, which is indefinite wherever the
+       frame is not stretched itself — a search field in a bar measured 17
+       pixels. The control paints no ground, so the frame's edge still shows. */
+    align-self: stretch;
+    margin-block: calc(var(--slotted-control-border-width, 1px) * -1);
     border: 0;
     color: inherit;
     flex: 1 1 auto;
@@ -227,18 +236,6 @@
     [data-ui='currency-field'][data-part='root'][data-variant='plain'] {
       border-color: ButtonBorder;
     }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='currency-field'] [data-part='increment']::before,
-    [data-ui='currency-field'] [data-part='decrement']::before {
-      forced-color-adjust: none;
-    }
   }
 
   /* ── Adornments ───────────────────────────────────────────────────────
@@ -289,8 +286,8 @@
    * Withdrawn by default on this family — an invoice total is typed, not
    * nudged — and drawn exactly as the sibling draws them when a product asks
    * for them. Real buttons, out of the tab order, with real names and
-   * `aria-controls`. Their glyphs are masks from the theme's own scale: a
-   * character is never an icon.
+   * `aria-controls`. Their glyphs are the `Glyph` element the binding
+   * renders: a character is never an icon.
    */
   [data-ui='currency-field'] > [data-part='stepper'] > button,
   [data-ui='currency-field'] > [data-part='decrement'],
@@ -316,43 +313,24 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='currency-field'] [data-part='decrement']::before,
-  [data-ui='currency-field'] [data-part='increment']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* The `icon` box inside each button is drawn at the control's own icon
+     step rather than at the icon family's default. */
+  [data-ui='currency-field'] [data-part='decrement'],
+  [data-ui='currency-field'] [data-part='increment'] {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   /**
    * Stacked, the marks are chevrons: two halves of one column, pointing at the
-   * direction the value moves. The up chevron is the scale's own down chevron
-   * turned half a turn, so a theme that replaces one replaces both.
-   */
-  [data-ui='currency-field'][data-stepper='stacked'] [data-part='increment']::before {
-    mask-image: var(--slotted-currency-field-increment-icon, var(--slotted-icon-chevron-down));
-    rotate: 0.5turn;
-  }
-
-  [data-ui='currency-field'][data-stepper='stacked'] [data-part='decrement']::before {
-    mask-image: var(--slotted-currency-field-decrement-icon, var(--slotted-icon-chevron-down));
-  }
-
-  /**
+   * direction the value moves. The binding draws the down chevron in both, and
+   * the up one is that artwork turned half a turn.
+   *
    * Split, they are the minus and the plus — one pair on one grid. Less and
    * more do not change with the reading direction, where a chevron along the
    * inline axis would read as "previous" and "next" and would have to mirror.
    */
-  [data-ui='currency-field'][data-stepper='split'] [data-part='decrement']::before {
-    mask-image: var(--slotted-currency-field-decrement-icon, var(--slotted-icon-minus));
-  }
-
-  [data-ui='currency-field'][data-stepper='split'] [data-part='increment']::before {
-    mask-image: var(--slotted-currency-field-increment-icon, var(--slotted-icon-plus));
+  [data-ui='currency-field'][data-stepper='stacked'] [data-part='increment'] > [data-ui='icon'] {
+    rotate: 0.5turn;
   }
 
   /* ── Stacked: one column at the inline end ────────────────────────────
@@ -396,10 +374,15 @@
    * chevron's artwork occupies about a quarter of its box, so a box shrunk to
    * leave visible air would leave a mark a few pixels tall beside a minus and a
    * plus drawn at full size.
+   *
+   * Size containment keeps the drawing out of the column's intrinsic height.
+   * While the frame measures its content the half has no height yet, so the
+   * percentage falls back to the `<svg>`'s own square, and two of them plus the
+   * divider would stand taller than the value and grow the frame.
    */
-  [data-ui='currency-field'] > [data-part='stepper'] > button::before {
+  [data-ui='currency-field'] > [data-part='stepper'] > button > [data-ui='icon'] {
     block-size: min(var(--_icon-size), 100%);
-    inline-size: var(--_icon-size);
+    contain: size;
   }
 
   /* ── Split: one button at each end ────────────────────────────────────
@@ -467,6 +450,34 @@
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
+  }
+
+  /**
+   * On a finger the target is the comfortable size and nothing drawn stands
+   * taller than it is wide — `number-field`'s rule. Split, each button is as
+   * wide as the frame is tall inside its border. Stacked, each half keeps its
+   * own half of the column in the block axis and reaches 44 in the inline
+   * axis.
+   */
+  @media (pointer: coarse) {
+    [data-ui='currency-field'][data-stepper='split']
+      > :is([data-part='decrement'], [data-part='increment']) {
+      inline-size: calc(var(--_height) - 2 * var(--slotted-control-border-width, 1px));
+    }
+
+    [data-ui='currency-field'][data-stepper='split']
+      > :is([data-part='decrement'], [data-part='increment'])::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='currency-field']
+      > [data-part='stepper']
+      > :is([data-part='increment'], [data-part='decrement'])::after {
+      content: '';
+      inset-block: 0;
+      inset-inline: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
   }
 
   /* ── Stepper states ───────────────────────────────────────────────────

@@ -148,6 +148,13 @@
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--_radius);
     /**
+     * A framed table is a box standing on the page, and it is separated from
+     * the page by the surface step, `--slotted-shadow-xs` — the same geometry
+     * a framed control carries at rest, at the ink the elevation scale gives a
+     * surface. `ruled` and `plain` draw no box and cast nothing.
+     */
+    box-shadow: var(--slotted-table-shadow, var(--slotted-shadow-xs, none));
+    /**
      * `clip` and not `hidden`, and the difference is the whole of `stickyTo`.
      *
      * Both clip what the scroller paints into the corners — a row's ground is
@@ -237,7 +244,13 @@
   /* The chooser's header is a `selection` cell and not a `column-header`, so
      every rule naming only the second stopped at it: the band's own line under
      the head broke exactly over the checkbox. */
-  [data-ui='table'] :is([data-part='column-header'], [data-part='head'] [data-part='selection']) {
+  /* Two selectors rather than one `:is()`: `:is()` takes the specificity of
+     its strongest argument, and the selection's two-part selector lifted the
+     column header above the alignment rule that comes after it — a header
+     carrying data-align="end" computed text-align: start, so a numeric
+     column's digits ended at one edge and their name at the other. */
+  [data-ui='table'] [data-part='column-header'],
+  [data-ui='table'] [data-part='head'] [data-part='selection'] {
     background-color: var(--_head-surface);
     border-block-end: var(--_rule-width) solid var(--_rule-strong);
     color: var(--_text);
@@ -817,24 +830,17 @@
   }
 
   /**
-   * The direction mark. One glyph rather than two: `chevron-down` turned a half
-   * turn is `chevron-up`, and a family that added an arrow pair to the
-   * foundation would be adding it for itself.
+   * The direction mark: the `Glyph` the binding draws after the name. One glyph
+   * rather than two: `chevron-down` turned a half turn is `chevron-up`, and a
+   * family that added an arrow pair to the foundation would be adding it for
+   * itself.
    *
    * An unsorted sortable column draws the mark muted and only under the
    * pointer or under focus, so the column says it can be sorted without twelve
    * marks competing with twelve names. The sorted column keeps its mark drawn.
    */
-  [data-ui='table'] [data-part='sort']::after {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    flex: none;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-icon-chevron-down);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_icon-size) var(--_icon-size);
+  [data-ui='table'] [data-part='sort'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_icon-size);
     opacity: 0;
     transition:
       opacity var(--slotted-control-transition-duration, var(--slotted-duration-short))
@@ -843,19 +849,19 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='table'] [data-part='sort']:not(:disabled):hover::after,
-  [data-ui='table'] [data-part='sort']:focus-visible::after {
+  [data-ui='table'] [data-part='sort']:not(:disabled):hover > [data-ui='icon'],
+  [data-ui='table'] [data-part='sort']:focus-visible > [data-ui='icon'] {
     opacity: 0.55;
   }
 
-  [data-ui='table'] [aria-sort] > [data-part='sort']::after {
+  [data-ui='table'] [aria-sort] > [data-part='sort'] > [data-ui='icon'] {
     opacity: 1;
   }
 
   /* Ascending is the same mark turned over. The rotation is animated because it
      is the one movement in this family a reader has to follow: the column did
      not change, its direction did. */
-  [data-ui='table'] [aria-sort='ascending'] > [data-part='sort']::after {
+  [data-ui='table'] [aria-sort='ascending'] > [data-part='sort'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -927,15 +933,6 @@
   }
 
   /**
-   * ── The expander ───────────────────────────────────────────────────────
-   *
-   * The Disclosure pattern, borrowed whole: a `button` carrying `aria-expanded`
-   * and naming the row it opens. The mark is `chevron-right`, turned a quarter
-   * turn when the detail is open — and mirrored in a right-to-left document,
-   * where a closed disclosure points the other way.
-   */
-  [data-ui='table'] [data-part='expander'],
-  /**
    * The element a binding wraps its trigger in is not a box.
    *
    * React renders the trigger straight into the slot; Angular reaches its
@@ -949,6 +946,15 @@
     display: contents;
   }
 
+  /**
+   * ── The expander ───────────────────────────────────────────────────────
+   *
+   * The Disclosure pattern, borrowed whole: a `button` carrying `aria-expanded`
+   * and naming the row it opens. The mark is `chevron-right`, turned a quarter
+   * turn when the detail is open — and mirrored in a right-to-left document,
+   * where a closed disclosure points the other way.
+   */
+  [data-ui='table'] [data-part='expander'],
   [data-ui='table'] [data-part='column-actions'] > button,
   [data-ui='table'] button[data-part='column-actions'],
   [data-ui='table'] [data-part='filter'] {
@@ -982,6 +988,37 @@
     transition: background-color
       var(--slotted-control-transition-duration, var(--slotted-duration-short))
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
+  }
+
+  /**
+   * On a finger the target is the comfortable size in both axes and the box
+   * is the one a mouse sees: a transparent `::after` centred on the control
+   * reaches 44 pixels, and the ground and the ring stay square. A header's
+   * trigger stands after the sort button and its mark, so it does not reach
+   * back across them.
+   */
+  @media (pointer: coarse) {
+    [data-ui='table'] [data-part='expander'],
+    [data-ui='table'] [data-part='column-actions'] > button,
+    [data-ui='table'] button[data-part='column-actions'],
+    [data-ui='table'] [data-part='filter'] {
+      position: relative;
+    }
+
+    [data-ui='table'] [data-part='expander']::after,
+    [data-ui='table'] [data-part='column-actions'] > button::after,
+    [data-ui='table'] button[data-part='column-actions']::after,
+    [data-ui='table'] [data-part='filter']::after {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
+
+    [data-ui='table'] [data-part='column-actions'] > button::after,
+    [data-ui='table'] button[data-part='column-actions']::after,
+    [data-ui='table'] [data-part='filter']::after {
+      inset-inline-start: 0;
+    }
   }
 
   [data-ui='table'] [data-part='expander']:not(:disabled):hover {
@@ -1280,32 +1317,26 @@
     padding-block-start: var(--_gap);
   }
 
-  [data-ui='table'] [data-part='expander']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-icon-chevron-right);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_icon-size) var(--_icon-size);
+  /* The chevron is the `Glyph` the binding draws inside the button. */
+  [data-ui='table'] [data-part='expander'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_icon-size);
     rotate: 0deg;
     transition: rotate var(--slotted-control-transition-duration, var(--slotted-duration-short))
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='table'] [data-part='expander'][aria-expanded='true']::before {
+  [data-ui='table'] [data-part='expander'][aria-expanded='true'] > [data-ui='icon'] {
     rotate: 90deg;
   }
 
   /* A chevron is direction-sensitive artwork, so it is mirrored rather than
      reused: a closed row in Arabic points to the start of the line, which is
      the right-hand side. */
-  [data-ui='table']:dir(rtl) [data-part='expander']::before {
+  [data-ui='table']:dir(rtl) [data-part='expander'] > [data-ui='icon'] {
     scale: -1 1;
   }
 
-  [data-ui='table']:dir(rtl) [data-part='expander'][aria-expanded='true']::before {
+  [data-ui='table']:dir(rtl) [data-part='expander'][aria-expanded='true'] > [data-ui='icon'] {
     rotate: -90deg;
   }
 
@@ -1443,24 +1474,6 @@
     [data-ui='table'][data-sticky-footer] [data-part='summary'] > [data-part='row'] > *,
     [data-ui='table'] [data-sticky] {
       position: static;
-    }
-  }
-
-  /**
-   * ── Forced colours ─────────────────────────────────────────────────────
-   *
-   * The theme remaps every token this family reads, so the grounds, the rules
-   * and the ring arrive already answered. What the system does not answer is a
-   * mask: a glyph painted from `currentcolor` is a painted background, and the
-   * system replaces every one of those — the mark goes and the box it sat in
-   * stays. `forced-color-adjust: none` keeps the author's `currentcolor`, which
-   * there is the ink the system has already forced, so both marks follow every
-   * state instead of naming a colour per state.
-   */
-  @media (forced-colors: active) {
-    [data-ui='table'] [data-part='sort']::after,
-    [data-ui='table'] [data-part='expander']::before {
-      forced-color-adjust: none;
     }
   }
 }

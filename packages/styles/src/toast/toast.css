@@ -167,7 +167,6 @@
     --_tone-surface: var(--slotted-tone-accent-surface);
     --_tone-border: var(--slotted-tone-accent-border);
     --_tone-text: var(--slotted-tone-accent-text);
-    --_glyph: var(--slotted-icon-circle-info);
 
     /* What the variant resolves the five into: a ground, an edge, the ink the
        words are written in, the quieter ink under them, and the mark. */
@@ -293,7 +292,9 @@
    *
    * The map is `specs/components/toast/contract.json`, and it is the map
    * `alert` and `status-indicator` already share — so a message about a
-   * failure draws the same silhouette as the alert about it. Under forced
+   * failure draws the same silhouette as the alert about it. The binding
+   * draws the mark as a `Glyph` from that map; this sheet gives it only the
+   * tone's colour. Under forced
    * colours every ground becomes one system colour and the shape is all that
    * is left, which is WCAG 2.2 SC 1.4.1 as well as a preference.
    */
@@ -304,7 +305,6 @@
     --_tone-surface: var(--slotted-tone-accent-surface);
     --_tone-border: var(--slotted-tone-accent-border);
     --_tone-text: var(--slotted-tone-accent-text);
-    --_glyph: var(--slotted-icon-circle-info);
   }
 
   [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='secondary'] {
@@ -313,7 +313,6 @@
     --_tone-surface: var(--slotted-tone-secondary-surface);
     --_tone-border: var(--slotted-tone-secondary-border);
     --_tone-text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-circle);
   }
 
   [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='success'] {
@@ -322,7 +321,6 @@
     --_tone-surface: var(--slotted-tone-success-surface);
     --_tone-border: var(--slotted-tone-success-border);
     --_tone-text: var(--slotted-tone-success-text);
-    --_glyph: var(--slotted-icon-circle-check);
   }
 
   [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='warning'] {
@@ -331,7 +329,6 @@
     --_tone-surface: var(--slotted-tone-warning-surface);
     --_tone-border: var(--slotted-tone-warning-border);
     --_tone-text: var(--slotted-tone-warning-text);
-    --_glyph: var(--slotted-icon-triangle-alert);
   }
 
   [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='danger'] {
@@ -340,7 +337,6 @@
     --_tone-surface: var(--slotted-tone-danger-surface);
     --_tone-border: var(--slotted-tone-danger-border);
     --_tone-text: var(--slotted-tone-danger-text);
-    --_glyph: var(--slotted-icon-circle-alert);
   }
 
   /* ── Variant: the three ways one tone is painted ───────────────────────
@@ -388,57 +384,34 @@
    * rule for every status mark in the library is worth more than a quarter of
    * a pixel in one of them.
    *
-   * The slot carries the colour and the mask paints `currentcolor`, so on a
-   * `solid` message the mark takes the on-solid ink with the words, and under
-   * forced colours one declaration repaints it.
+   * The slot carries the colour and the size, and the binding's `Glyph` inside
+   * it strokes with `currentcolor`, so on a `solid` message the mark takes the
+   * on-solid ink with the words, and under forced colours one declaration
+   * repaints it.
+   *
+   * A mark the page supplied instead of the tone's own — a spinner from
+   * `progress-indicator` while a promise is in flight, a product's own
+   * artwork — takes the same place: an icon a consumer wrote is an icon, and
+   * the line it belongs to has not moved. The artwork is centred in the box,
+   * so an icon drawn at `1em` fills it and a larger one overhangs it equally
+   * on both sides of the same axis rather than pushing the words along. A
+   * message waiting on a promise with no mark of its own draws none, and the
+   * box stays, so the layout does not jump when the spinner becomes a tick.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
+    --slotted-icon-size: var(--_mark-size);
+
+    align-items: center;
     align-self: start;
-    background-color: currentcolor;
     block-size: var(--_mark-size);
     color: var(--_mark);
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_mark-size);
+    justify-content: center;
     margin-block-start: calc((1lh - var(--_mark-size)) / 2);
     margin-inline-end: var(--_column-gap);
-    mask-image: var(--slotted-toast-icon, var(--_glyph));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
-
-  /**
-   * A mark the page supplied instead of the tone's own — a spinner from
-   * `progress-indicator` while a promise is in flight, a product's own
-   * artwork. It takes the same place: an icon a consumer wrote is an icon, and
-   * the line it belongs to has not moved. The artwork is centred in the box,
-   * so an icon drawn at `1em` fills it and a larger one overhangs it equally
-   * on both sides of the same axis rather than pushing the words along.
-   *
-   * The mask goes, because a mask over an element that now has content of its
-   * own would cut that content into the shape of a circle.
-   */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon']:not(:empty) {
-    align-items: center;
-    background-color: transparent;
-    display: flex;
-    justify-content: center;
-    mask-image: none;
-  }
-
-  /**
-   * A message waiting on a promise draws no tone mark of its own: the spinner
-   * belongs to `progress-indicator`, and two families drawing one would be two
-   * answers to one question. The box stays, so the layout does not jump when
-   * the spinner becomes a tick.
-   */
-  [data-ui='toast']
-    > [data-part='list']
-    > [data-part='item'][data-loading]
-    > [data-part='icon']:empty {
-    background-color: transparent;
-    mask-image: none;
   }
 
   /* ── The words ────────────────────────────────────────────────────────
@@ -519,6 +492,10 @@
    * inset below.
    */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close'] {
+    /* The cross is the binding's `Glyph` in an `icon` box at the glyph size
+       the formula for this box reads. */
+    --slotted-icon-size: var(--_glyph-size);
+
     align-items: center;
     align-self: start;
     appearance: none;
@@ -548,17 +525,6 @@
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']::before {
-    background-color: currentcolor;
-    block-size: var(--_glyph-size);
-    content: '';
-    inline-size: var(--_glyph-size);
-    mask-image: var(--slotted-toast-close-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
-
   /* `:enabled` is the guard the shared state test requires, and the reason it
      exists: a control the browser has already refused answers no pointer. */
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']:enabled:hover {
@@ -567,6 +533,22 @@
 
   [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']:enabled:active {
     background-color: var(--_state-active);
+  }
+
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: a transparent box centred on the control reaches
+     44 pixels, and the ground and the ring stay square. The message clips its
+     overflow, so the target ends at the message's padding edge. */
+  @media (pointer: coarse) {
+    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close'] {
+      position: relative;
+    }
+
+    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']::after {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
   }
 
   /* ── Focus ────────────────────────────────────────────────────────────
@@ -844,15 +826,12 @@
     }
 
     [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
-      background-color: CanvasText;
+      color: CanvasText;
     }
 
     /**
-     * The control's glyph is painted in `currentcolor`, so giving the control
-     * a system colour repaints it. Writing the colour on the pseudo-element
-     * instead would put a system colour inside a decorative rule, which the
-     * shared fallback test refuses — and rightly: decoration with no theme
-     * behind it should disappear rather than shout.
+     * The control's glyph is stroked in `currentcolor`, so giving the control
+     * a system colour repaints it, and the mark's slot the same.
      */
     [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close'] {
       color: CanvasText;
@@ -874,17 +853,6 @@
     [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='progress'] {
       background-color: CanvasText;
       opacity: 1;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']::before {
-      forced-color-adjust: none;
     }
   }
 

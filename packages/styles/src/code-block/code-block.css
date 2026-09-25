@@ -75,16 +75,15 @@
     padding-inline: var(--_inset-inline) var(--slotted-space-4, 0.5rem);
   }
 
+  /* The file's kind, an `Icon` the binding draws from the name's extension. */
   [data-ui='code-block'] > [data-part='header'] > [data-part='icon'] {
+    --slotted-icon-size: var(--_icon);
+
     block-size: var(--_icon);
     color: var(--_muted);
-    display: block;
+    display: flex;
     flex: none;
     inline-size: var(--_icon);
-    mask-image: var(--slotted-icon-file-text);
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-    background-color: currentcolor;
   }
 
   [data-ui='code-block'] > [data-part='header'] > [data-part='title'] {
@@ -138,7 +137,10 @@
 
   /* ── The two controls, description-list's ────────────────────────────── */
 
+  /* Each holds an `Icon`: text-wrap, and copy that turns to a check once done. */
   [data-ui='code-block'] :is([data-part='copy'], [data-part='wrap']) {
+    --slotted-icon-size: var(--_icon);
+
     align-items: center;
     appearance: none;
     background: none;
@@ -157,22 +159,28 @@
       background-color var(--_duration) var(--_easing);
   }
 
-  [data-ui='code-block'] :is([data-part='copy'], [data-part='wrap'])::after {
-    background-color: currentcolor;
-    block-size: var(--_icon);
-    content: '';
-    display: block;
-    inline-size: var(--_icon);
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: a transparent `::before` centred on each control
+     reaches 44 pixels, and the ground and the ring stay square. The two
+     stand two pixels apart, so neither reaches across the edge they share. */
+  @media (pointer: coarse) {
+    [data-ui='code-block'] :is([data-part='copy'], [data-part='wrap']) {
+      position: relative;
+    }
 
-  [data-ui='code-block'] [data-part='copy']::after {
-    mask-image: var(--slotted-code-block-copy-icon, var(--slotted-icon-copy));
-  }
+    [data-ui='code-block'] :is([data-part='copy'], [data-part='wrap'])::before {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
 
-  [data-ui='code-block'] [data-part='wrap']::after {
-    mask-image: var(--slotted-code-block-wrap-icon, var(--slotted-icon-text-wrap));
+    [data-ui='code-block'] [data-part='wrap']:has(+ [data-part='copy'])::before {
+      inset-inline-end: 0;
+    }
+
+    [data-ui='code-block'] [data-part='wrap'] + [data-part='copy']::before {
+      inset-inline-start: 0;
+    }
   }
 
   [data-ui='code-block']
@@ -194,10 +202,6 @@
   /** A copy that finished: the mark changes as well as the colour, and returns on its own. */
   [data-ui='code-block'] [data-part='copy'][data-complete] {
     color: var(--slotted-tone-success-text, CanvasText);
-  }
-
-  [data-ui='code-block'] [data-part='copy'][data-complete]::after {
-    mask-image: var(--slotted-code-block-copied-icon, var(--slotted-icon-check));
   }
 
   [data-ui='code-block']
@@ -520,18 +524,6 @@
   }
 
   @media (forced-colors: active) {
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='code-block'] :is([data-part='copy'], [data-part='wrap'])::after,
-    [data-ui='code-block'] > [data-part='header'] > [data-part='icon'] {
-      forced-color-adjust: none;
-    }
-
     /* The system owns the palette: a mark keeps its bar and its sign and loses its tint; the dim goes. */
     [data-ui='code-block'] [data-part='line'][data-mark] {
       background-color: transparent;

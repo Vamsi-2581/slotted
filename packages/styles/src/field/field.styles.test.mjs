@@ -238,3 +238,12 @@ test('sets the type of what the field says: xs, and a weight up for an outcome',
   assert.equal(contract.messageMark, 'none', 'the field asks for a mark again (F2)');
   assert.ok(!/data-mark="(?:dot|glyph)"/.test(fragment), 'the fragment still draws a mark');
 });
+
+/**
+ * A field in a stretched track — a dialog body filling a phone's height — had
+ * its rows share the surplus: the label stood a finger's width from the
+ * control it names. A field is as tall as its rows.
+ */
+test('never distributes surplus height between its rows', () => {
+  assert.match(declarations, /\[data-ui='field'\]\[data-part='root'\][^}]*align-content:\s*start/);
+});

@@ -216,34 +216,23 @@ test('shrinks the name and never the extension', () => {
 
 /**
  * The five controls on a row are one rule with five marks, not five controls.
- * `packages/styles/src/inner-control.test.mjs` holds the rest of the R2 rule
- * for each of them by name.
+ * The marks are `Icon` elements the binding chooses; the sheet sizes all five
+ * from one rule and paints none of them. `packages/styles/src/inner-control.test.mjs`
+ * holds the rest of the R2 rule for each of them by name.
  */
-test('gives a row’s five controls one box and five marks', () => {
-  const marks = {
-    start: '--slotted-icon-play',
-    pause: '--slotted-icon-pause',
-    retry: '--slotted-icon-rotate-ccw',
-    cancel: '--slotted-icon-x',
-    remove: '--slotted-icon-trash',
-  };
-  const used = new Set();
-  for (const [part, glyph] of Object.entries(marks)) {
-    /*
-     * The declaration rather than the rule: the five share a box rule and a
-     * `::before` rule whose selector lists all five, so reading "the first rule
-     * whose selector starts with this one" would read the shared box every
-     * time and find no mask at all.
-     */
+test('gives a row’s five controls one box and sizes their five marks', () => {
+  for (const part of ['start', 'pause', 'retry', 'cancel', 'remove']) {
     assert.ok(
-      normalized.includes(
-        `[data-part='${part}']::before{mask-image:var(--slotted-upload-${part}-icon,var(${glyph}));}`,
-      ),
-      `${part} does not draw ${glyph}`,
+      normalized.includes(`${ui} [data-part='${part}'] > [data-ui='icon']`),
+      `${part} does not size its icon`,
     );
-    assert.ok(!used.has(glyph), `${glyph} is drawn on two controls of the same row`);
-    used.add(glyph);
   }
+  assert.ok(
+    rule(`${ui} [data-part='remove'] > [data-ui='icon']`).includes(
+      '--slotted-icon-size:var(--_action-glyph-size)',
+    ),
+  );
+  assert.ok(!normalized.includes('mask-image'), 'a mark is an element, not a mask');
 });
 
 /**

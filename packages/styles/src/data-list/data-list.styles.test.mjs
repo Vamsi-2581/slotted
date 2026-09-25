@@ -152,9 +152,18 @@ test('washes the row from its title and holds back for disabled and loading', ()
   assert.match(rule(`${row}:has(${title}:active)`), /--_fill:var\(--_active/);
 });
 
-test('draws every glyph as a mask from the glyph scale', () => {
-  assert.match(css, /var\(--slotted-icon-chevron-down\)/);
+test('draws every glyph with the Glyph element, never a mask or a character', () => {
+  assert.doesNotMatch(css, /var\(--slotted-icon-(?!size|baseline-shift)/);
+  assert.doesNotMatch(normalized, /mask/);
   assert.doesNotMatch(normalized, /content:'[^']+'/);
+  assert.match(
+    fragment,
+    /data-direction="ascending"[\s\S]*?data-part="end"[^>]*>\s*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="chevron-down">/,
+  );
+  assert.match(
+    fragment,
+    /data-part="more"[^>]*>[^<]*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="chevron-down">/,
+  );
 });
 
 test('draws the focus ring from the foundation on every control the family owns', () => {

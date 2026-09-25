@@ -91,9 +91,9 @@ test('clips the severity word from sight without removing it', () => {
 });
 
 /**
- * Help draws no mark, and an unmasked box paints as a solid rectangle of the
- * text colour — the mask is the only thing shaping it. The rule withdraws the
- * box, and all three guards on it matter: `:empty` keeps the page's own
+ * Help draws no mark, so the binding draws no glyph and the rule withdraws the
+ * empty box rather than hold a column open for nothing. All three guards on it
+ * matter: `:empty` keeps the page's own
  * artwork, `:not([data-loading])` keeps the ring, because a help message can be
  * waiting for something like any other, and `:not([data-mark='dot'])` keeps the
  * bullet, which is a mark the help tone does have.
@@ -104,7 +104,7 @@ test('withdraws the mark for the tone that has none', () => {
     normalized.includes(
       `${ui}[data-tone='secondary']:not([data-loading]):not([data-mark='dot'])>[data-part='icon']:empty{display:none;}`,
     ),
-    'the help tone would paint a solid rectangle where its mark would be',
+    'the help tone would hold an empty column where its mark would be',
   );
 });
 
@@ -114,21 +114,22 @@ test('withdraws the mark for the tone that has none', () => {
  * ink changes; the disc is a third of the glyph scale, so it steps with the
  * size and the density rather than with a number.
  *
- * The box is the disc's own width and the mask twice that, because
- * `--slotted-icon-dot` draws a circle half the width of its viewBox: at twice
- * the box the disc fills the box exactly, and the bullet starts on the
- * message's own left edge instead of inside a column sized for a circled glyph.
- * `:empty` leaves a supplied mark the full box it was measured for.
+ * The slot is the disc's own width and the `dot` glyph's box twice that,
+ * because the glyph draws a circle half the width of its viewBox: at twice the
+ * slot the disc fills the slot exactly, and the bullet starts on the message's
+ * own left edge instead of inside a column sized for a circled glyph. Keying
+ * on the `dot` glyph leaves a supplied mark the full box it was measured for.
  */
 test('draws one neutral bullet for every tone when the mark is a dot', () => {
   assert.deepEqual(contract.axes.mark, ['glyph', 'dot', 'none']);
   const dot = rule(`${root}[data-mark='dot']`);
-  assert.match(dot, /--_glyph:var\(--slotted-icon-dot\)/);
   assert.match(dot, /--_dot-size:calc\(var\(--_mark-size\) \/ 3\)/);
 
-  const bullet = rule(`${ui}[data-mark='dot']>[data-part='icon']:empty`);
+  const bullet = rule(
+    `${ui}[data-mark='dot']>[data-part='icon']:has(>[data-ui='icon']>[data-glyph='dot'])`,
+  );
   assert.match(bullet, /inline-size:var\(--_dot-size\)/);
-  assert.match(bullet, /mask-size:calc\(var\(--_dot-size\) \* 2\) calc\(var\(--_dot-size\) \* 2\)/);
+  assert.match(bullet, /--slotted-icon-size:calc\(var\(--_dot-size\) \* 2\)/);
 });
 
 /**
@@ -168,18 +169,15 @@ test('draws nothing at all when there is nothing to say', () => {
 });
 
 /**
- * Every tone the contract declares paints an ink, and every tone the contract
- * gives a glyph reads that glyph token. The map is the contract's rather than
- * this stylesheet's, so the two cannot drift.
+ * Every tone the contract declares paints an ink. The glyph each tone draws is
+ * the binding's, from the contract's map; the sheet paints none of its own.
  */
-test('reads the tone map the contract declares', () => {
+test('paints an ink for every tone the contract declares, and no glyph', () => {
   for (const tone of contract.axes.tone) {
     const declarations = rule(`${root}[data-tone='${tone}']`);
     assert.match(declarations, /--_text:var\(--slotted-/, `${tone} paints no ink`);
-    const glyph = contract.toneGlyphs[tone];
-    if (glyph === null) assert.match(declarations, /--_glyph:none/, `${tone} should draw no mark`);
-    else assert.ok(declarations.includes(`--_glyph:var(${glyph})`), `${tone} draws the wrong mark`);
   }
+  assert.doesNotMatch(normalized, /mask-image|--_glyph/);
 });
 
 /**
@@ -212,7 +210,6 @@ test('turns a ring for the wait and stops it when asked for stillness', () => {
     /animation:slotted-inline-message-spin var\(--slotted-duration-loop-fast\)/,
   );
   assert.match(loading, /infinite/);
-  assert.match(loading, /mask-image:none/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css.slice(css.indexOf('prefers-reduced-motion')), /animation:\s*none/);
 });
@@ -229,13 +226,12 @@ test('lets the stronger state stop the weaker one’s motion', () => {
 
 /**
  * The theme remaps every colour this family reads, so the ink needs no rule of
- * its own. The mark does: it is a background under a mask, and the operating
- * system replaces every background with `Canvas` — which would paint the
- * silhouette in the page's own ground and lose it.
+ * its own. The mark takes a system colour of its own, which its glyph strokes
+ * with through `currentcolor`.
  */
 test('keeps the mark visible when the system replaces the palette', () => {
   const forced = css.slice(css.indexOf('forced-colors: active'));
-  assert.match(forced, /\[data-part='icon'\]\s*\{\s*background-color: CanvasText/);
+  assert.match(forced, /\[data-part='icon'\]\s*\{\s*color: CanvasText/);
   assert.match(forced, /border-inline-end-color: Canvas;/);
 });
 

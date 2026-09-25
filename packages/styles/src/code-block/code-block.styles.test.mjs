@@ -174,21 +174,18 @@ test('marks a line with a tint of the tone’s text, a bar, or a sign', () => {
   );
 });
 
-/** The two controls are description-list's: the copy glyph, the check when done, the shared ring. */
-test('draws the copy and wrap controls from glyph tokens and borrows the ring', () => {
-  assert.ok(
-    normalized.includes('mask-image:var(--slotted-code-block-copy-icon,var(--slotted-icon-copy))'),
-  );
-  assert.ok(
-    normalized.includes(
-      'mask-image:var(--slotted-code-block-copied-icon,var(--slotted-icon-check))',
-    ),
-  );
+/**
+ * The two controls are description-list's: the copy glyph, the check when
+ * done, the shared ring. The glyphs are `Icon` elements the binding draws; the
+ * sheet sizes them from the control and paints none of its own.
+ */
+test('sizes the glyphs of the copy and wrap controls and borrows the ring', () => {
   assert.ok(
     normalized.includes(
-      'mask-image:var(--slotted-code-block-wrap-icon,var(--slotted-icon-text-wrap))',
+      "[data-ui='code-block']:is([data-part='copy'],[data-part='wrap']){--slotted-icon-size:var(--_icon);",
     ),
   );
+  assert.ok(!/mask-image:var\(--slotted-(icon|code-block)-/.test(normalized), 'no glyph is a mask');
   assert.ok(
     normalized.includes(
       "[data-part='copy'][data-complete]{color:var(--slotted-tone-success-text,CanvasText);}",

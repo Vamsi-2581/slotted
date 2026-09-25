@@ -45,13 +45,12 @@ test('separates the four statuses by shape as well as by colour', () => {
   for (const status of ['data-current', 'data-complete', 'data-invalid', 'data-disabled']) {
     assert.ok(declarations.includes(`[${status}]`), `${status} paints nothing of its own`);
   }
+  assert.ok(!declarations.includes('mask'), 'the check and the cross are Glyph elements');
   assert.ok(
     normalized.includes(
-      'mask-image:var(--slotted-stepper-complete-icon,var(--slotted-icon-check))',
+      "[data-part='marker']>[data-ui='icon']{--slotted-icon-size:var(--_mark-size);color:var(--_mark);",
     ),
-  );
-  assert.ok(
-    normalized.includes('mask-image:var(--slotted-stepper-invalid-icon,var(--slotted-icon-x))'),
+    'the glyph the binding renders is sized and painted by the marker',
   );
   assert.ok(
     normalized.includes('background-color:var(--slotted-stepper-marker-surface-complete'),
@@ -98,14 +97,15 @@ test('hides the number wherever a mark replaces it', () => {
 
 /**
  * Where the reader is outranks what they have finished: a step that is both
- * current and complete keeps its number, and an error outranks both.
+ * current and complete keeps its number, and an error outranks both. The
+ * binding draws no glyph on such a step; the sheet paints its number back.
  */
 test('resolves the statuses in the order the vocabulary declares', () => {
   assert.ok(STATE_PRECEDENCE.indexOf('invalid') < STATE_PRECEDENCE.indexOf('complete'));
   assert.ok(STATE_PRECEDENCE.indexOf('current') < STATE_PRECEDENCE.indexOf('complete'));
   assert.ok(
     normalized.includes(
-      "[data-current]:not([data-invalid])[data-part='marker']::after{content:none",
+      "[data-current]:not([data-invalid])[data-part='marker']{color:var(--slotted-stepper-marker-color-current",
     ),
   );
 });

@@ -55,8 +55,16 @@
             type="button"
             aria-label="Full screen"
             aria-pressed="false"
-          ></button>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="maximize"></svg
+            ></span>
+          </button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body">
           <p style="margin: 0">
@@ -108,7 +116,11 @@
         <header data-part="header">
           <h2 data-part="title" id="d2-title">Terms of service</h2>
           <p data-part="description">Updated 4 September 2026.</p>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body">
           <p style="margin-block: 0 var(--slotted-space-5)">
@@ -176,7 +188,10 @@
         aria-describedby="a1-description"
       >
         <header data-part="header">
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-alert"></svg></span
+          ></span>
           <h2 data-part="title" id="a1-title">Delete this project?</h2>
           <p data-part="description" id="a1-description">
             The project and its 42 documents are removed for everyone. This cannot be undone.
@@ -231,7 +246,10 @@
         aria-describedby="a2-description"
       >
         <header data-part="header">
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="triangle-alert"></svg></span
+          ></span>
           <h2 data-part="title" id="a2-title">Leave without saving?</h2>
           <p data-part="description" id="a2-description">
             Your last three edits are not saved yet.
@@ -286,7 +304,11 @@
         <header data-part="header">
           <h2 data-part="title" id="d3-title">New invoice</h2>
           <p data-part="description">No radius, no margins, no measure.</p>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body">
           <p style="margin: 0">The panel spends the whole layer.</p>
@@ -328,13 +350,16 @@
         <header data-part="header">
           <h2 data-part="title" id="d12-title">Reconciliation</h2>
           <p data-part="description">Pressed, so the panel has the layer.</p>
-          <button
-            data-part="fullscreen"
-            type="button"
-            aria-label="Full screen"
-            aria-pressed="true"
-          ></button>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="fullscreen" type="button" aria-label="Full screen" aria-pressed="true">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="minimize"></svg
+            ></span>
+          </button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body">
           <p style="margin: 0">
@@ -376,7 +401,11 @@
         <header data-part="header">
           <h2 data-part="title" id="d4-title">Invoice 4471</h2>
           <p data-part="description">Fetching the line items.</p>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body" aria-busy="true">
           <p style="display: grid; gap: var(--slotted-space-4); margin: 0">
@@ -443,7 +472,11 @@
             Bestätigungsdialog für unwiderrufliche Aktionen mit einer außergewöhnlich langen
             Beschreibung.
           </p>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <footer data-part="footer">
           <button
@@ -482,7 +515,11 @@
         <header data-part="header">
           <h2 data-part="title" id="d6-title">Billing</h2>
           <p data-part="description">The layer underneath.</p>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body"><p style="margin: 0">Escape reaches the topmost layer only.</p></div>
       </div>
@@ -510,7 +547,10 @@
         aria-describedby="d7-description"
       >
         <header data-part="header">
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="circle-alert"></svg></span
+          ></span>
           <h2 data-part="title" id="d7-title">Cancel the subscription?</h2>
           <p data-part="description" id="d7-description">Billing stops at the end of the period.</p>
         </header>
@@ -565,7 +605,11 @@
         <header data-part="header">
           <h2 data-part="title" id="d8-title">Edit project</h2>
           <p data-part="description">Not on the page.</p>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body"><p style="margin: 0">Not on the page either.</p></div>
       </div>
@@ -592,7 +636,11 @@
             ><span data-part="mark" aria-hidden="true"></span
             ><span data-part="label">Em atraso</span></span
           >
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body">
           <p style="margin: 0">
@@ -656,7 +704,11 @@
           <p data-part="description">
             Nem sm nem md: a medida vem de --slotted-dialog-measure, e ganha do passo pedido.
           </p>
-          <button data-part="close" type="button" aria-label="Close"></button>
+          <button data-part="close" type="button" aria-label="Close">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
         </header>
         <div data-part="body"><p style="margin: 0">O rodapé abaixo é o novo inset.</p></div>
         <footer data-part="footer">

@@ -169,7 +169,7 @@
    */
   [data-ui='otp-input'] [data-part='slot'] {
     align-items: center;
-    background-color: var(--slotted-otp-input-background, transparent);
+    background-color: var(--slotted-otp-input-background, var(--slotted-control-surface, Field));
     block-size: var(--_height);
     border: var(--slotted-control-border-width, 1px) solid
       var(--slotted-otp-input-border-color, var(--slotted-control-border-color, ButtonBorder));

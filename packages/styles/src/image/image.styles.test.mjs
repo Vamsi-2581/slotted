@@ -162,18 +162,18 @@ test('crosses the picture over the placeholder instead of swapping them', () => 
  * The fallback is out of the flow until the picture fails, so content a
  * consumer puts in it is neither focusable nor announced while the picture
  * is fine; it has a minimum of its own because a picture that reserved
- * nothing and failed has no box. The glyph is a mask from the token added
- * for this family, on an empty fallback only.
+ * nothing and failed has no box. The glyph is an `Icon` the binding draws,
+ * sized from the slot; the sheet paints no icon of its own.
  */
-test('paints the fallback only in error, with a box of its own and a masked glyph', () => {
-  assert.ok(rule(`${root} [data-part='fallback']`).includes('display:none'));
+test('paints the fallback only in error, with a box of its own and the glyph sized', () => {
+  const idle = rule(`${root} [data-part='fallback']`);
+  assert.ok(idle.includes('display:none'));
+  assert.ok(idle.includes('--slotted-icon-size:var(--slotted-image-glyph-size'));
   const failed = rule(`${root}[data-status='error'] [data-part='fallback']`);
   assert.ok(failed.includes('display:grid'));
   assert.ok(failed.includes('min-block-size:var(--slotted-image-fallback-min-size'));
   assert.ok(failed.includes('background-color:var(--_ground)'));
-  const glyph = rule(`${root} [data-part='fallback']:empty::before`);
-  assert.ok(glyph.includes('mask-image:var(--slotted-icon-image-off)'));
-  assert.ok(glyph.includes('background-color:currentColor'));
+  assert.ok(!normalized.includes('mask-image'), 'the glyph is an element, not a mask');
   assert.ok(!/content:'[^']+'/.test(normalized), 'no character stands in for the glyph');
 });
 

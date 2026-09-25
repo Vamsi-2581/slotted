@@ -189,24 +189,17 @@ test('points the focus ring at the invalid colour rather than repainting it', ()
 });
 
 /**
- * The glyphs are masks from the theme's own scale. A character is never an
- * icon, and the pair the reveal button uses was added to that scale in
- * lockstep with the contract, the theme and `docs/token-foundation.md`.
+ * The glyphs are the `Glyph` element the binding renders inside each button,
+ * never a mask or a character. The stylesheet only sizes the `icon` box, at
+ * the control's own icon step.
  */
-test('draws both glyphs as masks from the glyph scale', () => {
-  assert.ok(
-    normalized.includes(`${ui}>[data-part='clear']::before{mask-image:var(--slotted-icon-x);}`),
-  );
+test('sizes the glyph element of both buttons and paints none itself', () => {
   assert.ok(
     normalized.includes(
-      `${ui}>[data-part='reveal']::before{mask-image:var(--slotted-text-field-reveal-icon,var(--slotted-icon-eye));}`,
+      `${ui}>[data-part='clear'],${ui}>[data-part='reveal']{--slotted-icon-size:var(--_icon-size);}`,
     ),
   );
-  assert.ok(
-    normalized.includes(
-      `${ui}>[data-part='reveal'][aria-pressed='true']::before{mask-image:var(--slotted-text-field-reveal-off-icon,var(--slotted-icon-eye-off));}`,
-    ),
-  );
+  assert.doesNotMatch(declarations, /mask-image/);
   assert.doesNotMatch(declarations, /content:'[^']+'/, 'a character is drawn as an icon');
 });
 

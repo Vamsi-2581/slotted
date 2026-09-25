@@ -16,7 +16,7 @@
    * The same geometry, the same two variants, the same "on", the same hover,
    * the same press timing, the same disabled-and-on reading and the same
    * icon alignment, under this family's own prefix. The group keeps its item
-   * so the value has one owner; the reopen recorded in `docs/build-order.md`
+   * so the value has one owner; the reopen recorded in `docs/process/build-order.md`
    * makes that item this family and the duplicated rules leave. A rule
    * changed in one sheet is changed in the other until then.
    *
@@ -32,7 +32,10 @@
     --_gap: var(--slotted-control-gap-md, 8px);
     --_radius: var(--slotted-toggle-radius, var(--slotted-control-radius, 4px));
     --_border-width: var(--slotted-control-border-width, 1px);
-    --_border-color: var(--slotted-toggle-border-color, var(--slotted-border-strong, ButtonBorder));
+    --_border-color: var(
+      --slotted-toggle-border-color,
+      var(--slotted-control-border-color, ButtonBorder)
+    );
 
     align-items: center;
     appearance: none;
@@ -124,10 +127,18 @@
     display: none;
   }
 
+  /**
+   * The slot sizes what it holds: an icon box reads `--slotted-icon-size`
+   * from its container, and a bare glyph host such as `ng-icon` reads the
+   * slot's font-size, so both are the glyph scale.
+   */
   [data-ui='toggle'] [data-part='icon'] {
+    --slotted-icon-size: var(--_icon-size);
+
     block-size: var(--_icon-size);
     display: inline-flex;
     flex: none;
+    font-size: var(--_icon-size);
     inline-size: var(--_icon-size);
   }
 
@@ -154,6 +165,8 @@
 
   [data-ui='toggle'][data-part='root'][data-variant='outline'] {
     border-color: var(--_border-color);
+    /* A framed control lifts off its ground at rest, as button's outline does. */
+    box-shadow: var(--slotted-toggle-shadow, var(--slotted-control-shadow, none));
   }
 
   /**
@@ -252,6 +265,8 @@
       --slotted-toggle-disabled-border-color,
       var(--slotted-disabled-border, GrayText)
     );
+    /* Nothing a person cannot reach is lifted off the page. */
+    box-shadow: none;
   }
 
   /**

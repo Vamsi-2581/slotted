@@ -40,6 +40,11 @@
     /** The distance from a side label to the control it names. */
     --_column-gap: var(--slotted-field-column-gap, var(--slotted-space-5, 0.75rem));
 
+    /* The field is as tall as its rows. Stretched — a grid track taller than
+       its content, a dialog body filling a phone's height — the rows would
+       share the surplus and stand the label a finger's width from the control
+       it names. The surplus belongs to whatever stretched the field. */
+    align-content: start;
     container-name: slotted-field;
     container-type: inline-size;
     display: grid;

@@ -80,18 +80,23 @@ test('retunes the indent on the canvas, because the root is not its own descenda
 });
 
 /**
- * `mask-image: none` masks nothing, so the element paints its whole box. A leaf
- * drew a filled square where its chevron should not be, on every row of every
- * scene, and the harness is what showed it.
+ * The chevron and the mark are the `Glyph` element the binding draws, so the
+ * sheet paints neither. A leaf keeps its expander box with nothing drawn in it:
+ * the harness renders a chevron on every branch and on no leaf.
  */
-test('empties a mask with a transparent gradient rather than with none', () => {
-  const leaf = rule(
-    `${ui} [data-part='node']:not([data-branch])>[data-part='row'] [data-part='expander']`,
+test('draws the chevron and the mark with the Glyph element, never a mask', () => {
+  assert.ok(!/mask/.test(normalized), 'the sheet still paints a glyph with a mask');
+  const chevron =
+    /data-part="expander"[^>]*>\s*<span data-ui="icon"[^>]*>\s*<svg data-part="glyph" data-glyph="chevron-right">/;
+  assert.match(fragment, chevron);
+  assert.match(fragment, /data-part="expander"[^>]*>\s*<\/span/, 'no leaf in the harness');
+  assert.match(
+    fragment,
+    /data-part="indicator"[^>]*>\s*<span data-ui="icon"[^>]*>\s*<svg data-part="glyph" data-glyph="check">/,
   );
-  assert.match(leaf, /mask-image:linear-gradient\(transparent,transparent\)/);
-  assert.ok(
-    !/mask-image:\s*none/.test(normalized.replace(/-webkit-mask-image:none/g, '')),
-    'a mask is emptied with none somewhere, which paints the whole box',
+  assert.match(
+    fragment,
+    /data-part="indicator"[^>]*>\s*<span data-ui="icon"[^>]*>\s*<svg data-part="glyph" data-glyph="minus">/,
   );
 });
 
@@ -235,7 +240,7 @@ test('draws the checkbox the checkbox family draws', () => {
     .replace(/\s+/g, ' ')
     .replace(/\s*([{};,:>])\s*/g, '$1');
   const box = rule(part('indicator'));
-  const mark = rule(`${part('indicator')}::after`);
+  const mark = rule(`${part('indicator')}>[data-ui='icon']`);
 
   for (const token of [
     '--slotted-selection-size-md',
@@ -256,7 +261,7 @@ test('draws the checkbox the checkbox family draws', () => {
   assert.ok(other.includes('--_mark-inset:var(--slotted-checkbox-mark-inset,2px)'));
   assert.match(mark, /clip-path:inset\(0% 100% 0% 0%\)/);
   assert.ok(other.includes('clip-path:inset(0% 100% 0% 0%)'));
-  assert.match(mark, /background-color:var\(--slotted-tone-accent-on-solid\)/);
+  assert.match(mark, /(?:^|;)color:var\(--slotted-tone-accent-on-solid\)/);
 
   const chosen = rule(
     `${ui} [data-part='node']:is([data-selected],[data-indeterminate])>[data-part='row'] [data-part='indicator']`,
@@ -366,5 +371,15 @@ test('draws one focus ring, on the row, and none on the node', () => {
 /** Both directions are drawn, because the guide is the one part with a physical gradient. */
 test('mirrors the guide and the chevron for a right-to-left document', () => {
   assert.match(normalized, /\[data-part='guide'\]:dir\(rtl\)\{/);
-  assert.match(normalized, /\[data-part='expander'\]:dir\(rtl\)\{rotate:180deg/);
+  assert.match(normalized, /\[data-part='expander'\]:dir\(rtl\)>\[data-ui='icon'\]\{rotate:180deg/);
+});
+
+/**
+ * Under `expandOn="expander"` the chevron box grows to the target minimum with
+ * padding. A glyph that filled the border box grew with it: 24 pixels of
+ * chevron beside 16-pixel icons. The `icon` box is sized by the icon size, and
+ * the padding stays transparent hit area.
+ */
+test('sizes the chevron glyph by the icon size, whatever the box grows to', () => {
+  assert.match(rule(part('expander')), /--slotted-icon-size:var\(--_icon-size\)/);
 });

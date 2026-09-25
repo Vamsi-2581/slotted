@@ -28,7 +28,7 @@ function rule(selector) {
 }
 
 /** The rules inside the one container query, as one string. */
-const wide = normalized.split('@container detail-panel (min-width:640px){')[1] ?? '';
+const wide = normalized.split('@container detail-panel (min-width:600px){')[1] ?? '';
 
 test('lives in the component layer', () => {
   assert.match(css, /@layer slotted\.components/);

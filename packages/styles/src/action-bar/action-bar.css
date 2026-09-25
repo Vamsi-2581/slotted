@@ -34,6 +34,7 @@
     --_easing: var(--slotted-control-transition-easing);
 
     align-items: center;
+    box-sizing: border-box;
     /**
      * The bar answers its own width rather than the viewport's, and the query
      * that stacks it reaches `actions` — a container is a container for its
@@ -45,6 +46,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--slotted-action-bar-gap, var(--_gap));
+    /* A size container has no intrinsic inline size: as a flex item — the
+       page footer's actions row — the bar shrank to nothing and stacked its
+       letters. A bar is as wide as the line it stands on. */
+    inline-size: 100%;
     min-block-size: calc(var(--_height) + 2 * var(--_inset-block));
     min-inline-size: 0;
     padding-block: var(--slotted-action-bar-inset-block, var(--_inset-block));
@@ -271,8 +276,9 @@
   /**
    * `menu`'s own trigger wearing this family's geometry: the bar's height, the
    * WCAG 2.2 minimum in the other axis, and the muted ink the library gives a
-   * control a family draws itself. The mark is the Lucide `ellipsis` as a mask
-   * from the glyph scale, because a character is never an icon.
+   * control a family draws itself. The mark is the `ellipsis` Glyph element in
+   * an `icon` box sized here to the glyph scale, because a character is never
+   * an icon.
    *
    * Its accessible name carries the count, so what a reader hears is a number
    * rather than three dots.
@@ -282,6 +288,8 @@
     appearance: none;
     background-color: transparent;
     border: 0;
+    --slotted-icon-size: var(--_icon-size);
+
     border-radius: var(--slotted-control-radius, 4px);
     color: var(--slotted-action-bar-overflow-color, var(--slotted-text-muted, GrayText));
     cursor: pointer;
@@ -310,22 +318,6 @@
     transition:
       background-color var(--_duration) var(--_easing),
       color var(--_duration) var(--_easing);
-  }
-
-  /**
-   * The mark. It is painted on the span the trigger renders, which is what
-   * carries `aria-hidden`; the accessible name is on the button and says how
-   * many actions the surface holds.
-   */
-  [data-ui='action-bar'] [data-part='overflow'] > * {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-action-bar-overflow-icon, var(--slotted-icon-ellipsis));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
   }
 
   /* The ground moves under the pointer and nothing else does. */
@@ -436,6 +428,14 @@
     [data-ui='action-bar'] [data-part='status'] {
       flex: 1 1 100%;
     }
+
+    /* What the consumer put in the status, addressed as the part's child and
+       never by a class of its own: while the bar is a column the status fills
+       the row, as an action does two rules above. */
+    [data-ui='action-bar'] [data-part='status'] > * {
+      align-content: space-between;
+      inline-size: 100%;
+    }
   }
 
   /* ── Forced colours ───────────────────────────────────────────────────── */
@@ -449,13 +449,6 @@
   @media (forced-colors: active) {
     [data-ui='action-bar'] [data-part='separator'] {
       background-color: CanvasText;
-      forced-color-adjust: none;
-    }
-
-    /* The mark is painted with a background too. `currentcolor` there is the
-       trigger's own ink, which the system has already forced to its text
-       colour, so keeping the paint keeps the mark in the system's palette. */
-    [data-ui='action-bar'] [data-part='overflow'] > * {
       forced-color-adjust: none;
     }
   }

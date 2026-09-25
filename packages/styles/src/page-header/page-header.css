@@ -152,6 +152,23 @@
     inset-block-start: 0;
   }
 
+  /**
+   * Compact, below 600 pixels: nothing sticks. The root and the title area
+   * are in the flow and scroll away with the page, because on a phone a
+   * record's header and tabs held 40 per cent of the screen for the whole
+   * scroll. `relative` and not `static`, so the root keeps the stacking the
+   * pill straddling its edge relies on, at an offset of nought. The binding
+   * writes the attribute from the root's own width: a container query cannot
+   * select the container it measures.
+   */
+  [data-ui='page-header'][data-compact] {
+    inset-block-start: 0;
+    position: relative;
+  }
+  [data-ui='page-header'][data-compact] > * > [data-part='title-area'] {
+    position: relative;
+  }
+
   /* ── The title area ──────────────────────────────────────────────────── */
 
   /**
@@ -197,7 +214,7 @@
   }
   /**
    * One way back at a time. Beside breadcrumbs the arrow says what their
-   * first crumb already says, so it yields to them; below 640 pixels the
+   * first crumb already says, so it yields to them; below 600 pixels the
    * breadcrumbs go and the arrow is what remains. A consumer writes both
    * once and the width decides.
    */
@@ -211,10 +228,13 @@
 
   /**
    * The way back. A link or a button the consumer renders; the arrow is the
-   * family's, drawn from the glyph scale, and it points along the reading
-   * direction, so a right-to-left document mirrors it.
+   * family's, the `arrow-left` Glyph element the binding puts before the
+   * label, and it points along the reading direction, so its `directional`
+   * box mirrors it in a right-to-left document.
    */
   [data-ui='page-header'] > * > [data-part='title-area'] > [data-part='nav'] > [data-part='back'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     background: none;
     border: 0;
@@ -232,26 +252,23 @@
     text-decoration: none;
     transition: color var(--slotted-duration-short) var(--_easing);
   }
-  [data-ui='page-header']
-    > *
-    > [data-part='title-area']
-    > [data-part='nav']
-    > [data-part='back']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-icon-arrow-left);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-  [data-ui='page-header']
-    > *
-    > [data-part='title-area']
-    > [data-part='nav']
-    > [data-part='back']:dir(rtl)::before {
-    scale: -1 1;
+  /* On a finger the way back is a full target among 44-pixel controls: it
+     reaches the comfortable size by padding and gives it back as a negative
+     margin, so the nav row keeps its height and nothing under it moves. */
+  @media (pointer: coarse) {
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='nav']
+      > [data-part='back'] {
+      --_reach: max(
+        0px,
+        calc((var(--slotted-target-comfortable, 44px) - var(--slotted-target-min, 24px)) / 2)
+      );
+
+      margin-block: calc(var(--_reach) * -1);
+      padding-block: var(--_reach);
+    }
   }
   [data-ui='page-header']
     > *
@@ -324,12 +341,16 @@
      */
     flex: 1 1 20rem;
     flex-wrap: wrap;
+    /* At least a control tall, so a one-line heading stands on the axis of
+       the button beside it — sixteen pixels off it on a touch screen, where
+       the row aligns to the start for the sake of a heading that wraps. */
+    min-block-size: var(--slotted-control-height-md, 34px);
     min-inline-size: 0;
     row-gap: var(--slotted-space-1, 0.125rem);
   }
 
   /**
-   * Expanded, the heading wraps to three lines and then clamps; the binding
+   * Expanded, the heading wraps to two lines and then clamps; the binding
    * repeats the full text in `title`, so nothing leaves the DOM. Snapped it is
    * one line, a step smaller, and the clamp is the ellipsis a bar can afford
    * — drawn as a block with `nowrap`, because a `-webkit-box` reports a
@@ -439,6 +460,113 @@
     flex-wrap: wrap;
     gap: var(--slotted-control-gap-md, 8px);
     min-inline-size: 0;
+  }
+
+  /**
+   * A toolbar pads its controls for the reach of their focus rings, which
+   * made it a control and two insets tall: beside a title that reserves one
+   * control, a record whose actions land with its answer grew its title row,
+   * and everything under it moved. The row gives the inset back, so the bar
+   * stands a control tall and its rings still draw inside its own padding.
+   * The pad is the toolbar's own — its inset, or the ring's reach for a bar
+   * that scrolls — written from the same public tokens; a framed bar keeps
+   * its box.
+   */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='actions']
+    > [data-ui='toolbar']:not([data-variant='outline']) {
+    margin-block: calc(-1 * var(--slotted-toolbar-inset, var(--slotted-space-2, 0.25rem)));
+  }
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='actions']
+    > [data-ui='toolbar']:not([data-variant='outline']):is(
+      [data-overflow='menu'],
+      [data-overflow='scroll']
+    ) {
+    margin-block: calc(
+      -1 *
+        var(
+          --slotted-toolbar-inset,
+          max(
+            var(--slotted-space-2, 0.25rem),
+            calc(var(--slotted-focus-ring-offset, 2px) + var(--slotted-focus-ring-width, 2px))
+          )
+        )
+    );
+  }
+
+  /**
+   * A toolbar that folds into its menu keeps the actions on the title row at
+   * every width: the row stops wrapping, the title keeps its own width, and
+   * the cluster takes everything the title leaves, so the toolbar measures
+   * that room and folds the rest. Fiori's Dynamic Page. Loose actions have no
+   * menu to fold into and wrap.
+   *
+   * The cluster's width is the row's remainder and never its own content. A
+   * cluster sized by its content was the trigger alone once everything had
+   * folded, and it did not grow when the row did: the toolbar kept its width,
+   * its observer never fired, and the actions stayed folded after the window
+   * widened again, while a fresh load at the same width showed them all.
+   */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']:has(
+      > [data-part='actions'] > [data-ui='toolbar'][data-overflow='menu']
+    ) {
+    flex-wrap: nowrap;
+  }
+  /* The title starts from its own width, not from the basis a wrapping row gives it, at every
+     width, and does not grow past it: the room it does not use is the cluster's. It shrinks only
+     once the cluster is down to its menu's trigger, because nothing else in the row can. */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']:has(
+      > [data-part='actions'] > [data-ui='toolbar'][data-overflow='menu']
+    )
+    > [data-part='title'] {
+    flex: 0 1 auto;
+  }
+  /* The cluster starts from nothing and grows into what the title leaves, so its width follows
+     the row's in both directions. It never gives way below its menu's trigger, a medium control,
+     and the toolbar's inset on either side: under it the trigger stood past the screen's edge on
+     a phone. */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='actions']:has(> [data-ui='toolbar'][data-overflow='menu']) {
+    flex: 1 1 0%;
+    min-inline-size: calc(
+      var(--slotted-control-height-md, 34px) + 2 *
+        var(
+          --slotted-toolbar-inset,
+          max(
+            var(--slotted-space-2, 0.25rem),
+            calc(var(--slotted-focus-ring-offset, 2px) + var(--slotted-focus-ring-width, 2px))
+          )
+        )
+    );
+  }
+  /* The toolbar fills the cluster, so the room it measures is the cluster's, and its controls
+     stand at the end of the row as they did when the cluster was their own width. `safe`, because
+     a bar of pinned controls wider than the room scrolls, and overflow at the start of a scroll
+     container cannot be scrolled to. */
+  [data-ui='page-header']
+    > *
+    > [data-part='title-area']
+    > [data-part='title-row']
+    > [data-part='actions']
+    > [data-ui='toolbar'][data-overflow='menu'] {
+    flex: 1 1 0%;
+    justify-content: safe flex-end;
   }
 
   /**
@@ -635,6 +763,12 @@
    */
   [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle'],
   [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin'] {
+    /* One step above the nav row's arrow: a mark on a hairline pill reads
+       thin at the small step, and the reviewer asked for weight. The marks
+       are the Glyph elements the bindings render — `chevron-down` in the
+       toggle, `pin` or `pin-off` in the pin by its state. */
+    --slotted-icon-size: var(--slotted-control-icon-size-md, 16px);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -654,45 +788,28 @@
       background-color var(--slotted-duration-short) var(--_easing),
       color var(--slotted-duration-short) var(--_easing);
   }
-  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']::before,
-  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']::before {
-    background-color: currentcolor;
-    /* One step above the nav row's arrow: a mark on a hairline pill reads
-       thin at the small step, and the reviewer asked for weight. */
-    block-size: var(--slotted-control-icon-size-md, 16px);
-    content: '';
-    inline-size: var(--slotted-control-icon-size-md, 16px);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']::before {
-    mask-image: var(--slotted-icon-chevron-down);
+  [data-ui='page-header']
+    > *
+    > [data-part='controls']
+    > *
+    > [data-part='toggle']
+    > [data-ui='icon'] {
     transition: rotate var(--slotted-duration-short) var(--_easing);
   }
   [data-ui='page-header'][data-expanded]
     > *
     > [data-part='controls']
     > *
-    > [data-part='toggle']::before {
+    > [data-part='toggle']
+    > [data-ui='icon'] {
     rotate: 180deg;
-  }
-  [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']::before {
-    mask-image: var(--slotted-icon-pin);
-  }
-  [data-ui='page-header']
-    > *
-    > [data-part='controls']
-    > *
-    > [data-part='pin'][data-pressed]::before {
-    mask-image: var(--slotted-icon-pin-off);
   }
   /**
    * Too much of the screen to hold: expanded, the header would take more
-   * than six tenths of the scrollport, or it is narrower than 640 pixels. On
+   * than six tenths of the scrollport, or it is narrower than 600 pixels. On
    * a phone a pinned header took nearly the whole height and left nothing to
    * read, so the pin is not offered — the binding writes the fact and lets a
-   * held header go — and below 640 pixels the sheet hides it on its own.
+   * held header go — and below 600 pixels the sheet hides it on its own.
    */
   [data-ui='page-header'][data-tall] > * > [data-part='controls'] > * > [data-part='pin'] {
     display: none;
@@ -831,13 +948,13 @@
   /* ── Narrow ──────────────────────────────────────────────────────────── */
 
   /**
-   * Below 640 pixels: the breadcrumbs go and the way back stays; the title
+   * Below 600 pixels: the breadcrumbs go and the way back stays; the title
    * steps down; the actions and the navigation take the row under the title,
    * navigation first so the pair of arrows keeps to the edge. The rule that
    * moves the navigation into the actions row is sap.f's at 1280, read
    * against the component's own width rather than the viewport.
    */
-  @container page-header (width < 640px) {
+  @container page-header (width < 600px) {
     [data-ui='page-header'] {
       --_heading-size: var(
         --slotted-page-header-heading-size-sm,
@@ -876,12 +993,40 @@
       flex: 1 1 0;
       min-inline-size: 60%;
     }
+    /**
+     * The cluster grows so that, wrapped onto its own row, it takes the row.
+     * Its content stands at the end whichever row it lands on: beside a short
+     * title that leaves it room, the grown box put one button at its own
+     * start, mid-row, off the edge every other width aligns it to.
+     */
     [data-ui='page-header']
       > *
       > [data-part='title-area']
       > [data-part='title-row']
       > [data-part='actions'] {
       flex: 1 1 auto;
+      justify-content: flex-end;
+    }
+    /* The marks take a line of their own under the heading: beside it their break depends on
+       what they say, which the waiting header cannot know, and the header grew when it landed. */
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='title-row']
+      > [data-part='title']
+      > [data-part='marks'] {
+      flex-basis: 100%;
+    }
+    /* One line, as snapped: the phone has no second one to give it. */
+    [data-ui='page-header']
+      > *
+      > [data-part='title-area']
+      > [data-part='title-row']
+      > [data-part='title']
+      > [data-part='subheading'] {
+      display: block;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     [data-ui='page-header']
       > *
@@ -897,24 +1042,6 @@
     [data-ui='page-header'] > * > [data-part='header-area'] > [data-part='figure'] {
       padding-block-end: var(--_gap);
       padding-inline-end: 0;
-    }
-  }
-
-  @media (forced-colors: active) {
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box stays. `forced-color-adjust: none` keeps `currentcolor`,
-     * which is the host's ink, already forced to the right value.
-     */
-    [data-ui='page-header']
-      > *
-      > [data-part='title-area']
-      > [data-part='nav']
-      > [data-part='back']::before,
-    [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='toggle']::before,
-    [data-ui='page-header'] > * > [data-part='controls'] > * > [data-part='pin']::before {
-      forced-color-adjust: none;
     }
   }
 }

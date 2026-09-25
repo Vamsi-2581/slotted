@@ -237,3 +237,44 @@ test('answers every density through the control scale', () => {
   }
   assert.match(dense, /--_inner:calc\(var\(--_height\)/);
 });
+
+/**
+ * A segmented control stands in a row of fields and buttons, and it is a
+ * control like them: the track takes the field's fill, edge and lift. The
+ * sunken surface it had read as a hole in a row of raised controls, beside a
+ * text field painted `--slotted-control-surface` (Nexora's list toolbar).
+ */
+test('paints the track as a control, with the fill, edge and lift of a field', () => {
+  const root = dense.slice(dense.indexOf("[data-ui='segmented-control'][data-part='root']{"));
+  const body = root.slice(0, root.indexOf('}'));
+  assert.match(
+    body,
+    /background:var\(--slotted-segmented-control-background,var\(--slotted-control-surface,Field\)\)/,
+  );
+  assert.match(
+    body,
+    /border:var\(--_border-width\)solidvar\(--slotted-segmented-control-border-color,var\(--slotted-control-border-color,ButtonBorder\)\)/,
+  );
+  assert.match(
+    body,
+    /box-shadow:var\(--slotted-segmented-control-shadow,var\(--slotted-control-shadow,none\)\)/,
+  );
+});
+
+/**
+ * A segment with an icon and no words is square, and the icon sits in its
+ * middle. The Angular binding always renders the label's span, empty when the
+ * segment has no words, so the icon-only rule never matched and the flex gap
+ * after the icon put four pixels more on its end side than on its start
+ * (measured: 8 against 12). An empty label is not a label.
+ */
+test('treats an empty label as no label, so an icon-only segment centres its icon', () => {
+  assert.match(
+    dense,
+    /\[data-ui='segmented-control'\]\[data-part='label'\]:empty\{display:none;\}|\[data-ui='segmented-control'\]\[data-part='label'\]:empty\{[^}]*display:none/,
+  );
+  assert.match(
+    dense,
+    /\[data-ui='segmented-control'\]\[data-part='item'\]:not\(:has\(\[data-part='label'\]:not\(:empty\)\)\)\{padding-inline:0;\}/,
+  );
+});

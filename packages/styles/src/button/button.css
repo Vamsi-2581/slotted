@@ -245,12 +245,14 @@
    * The edge of an outline button is neutral and its label carries the tone.
    * A saturated border on all five tones turned a row of actions into a row
    * of status chips: the eye read five different colours of rectangle before
-   * it read a single word. `--slotted-border-strong` is held to 3:1 against
-   * the surface it separates, so the control is still a control.
+   * it read a single word. The edge is the control step, the one a field
+   * carries at rest: reading `--slotted-border-strong` here made the outline
+   * button the darkest line on the form, and the foundation now keeps that
+   * step for the line between two surfaces.
    */
   [data-ui='button'][data-variant='outline'] {
     background: transparent;
-    border-color: var(--slotted-border-strong, ButtonBorder);
+    border-color: var(--slotted-control-border-color, ButtonBorder);
     box-shadow: var(--slotted-control-shadow, none);
     color: var(--_text, ButtonText);
   }

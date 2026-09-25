@@ -174,13 +174,10 @@
 
   [data-ui='stepper'] [data-part='marker'] {
     /**
-     * The colour of the mark drawn over the number, held on the marker rather
-     * than stated inside the pseudo-element that paints it. A pseudo-element
-     * that names a system colour is refused by
-     * `packages/styles/src/fallbacks.test.mjs`, and it is refused for a good
-     * reason: unthemed decoration should disappear rather than shout. Reading
-     * it through one custom property keeps the family's last resort on the
-     * element, where the theme's own tokens live.
+     * The colour of the glyph drawn over the number, held on the marker rather
+     * than stated on the glyph's box. Reading it through one custom property
+     * keeps the family's system-colour last resort on the element where the
+     * theme's own tokens live, and lets the invalid step restate it once.
      */
     --_mark: var(
       --slotted-stepper-marker-color-complete,
@@ -265,12 +262,19 @@
   }
 
   /**
-   * The glyph a finished or failed step shows in place of its number. It is a
-   * mask from the scale drawn on the marker itself, over the number the
-   * binding leaves in the DOM — the number stays there because a reader
-   * enlarging the page to four hundred per cent still needs to know which step
-   * this is, and because the accessible name is built from the `status` part
-   * rather than from what is painted here.
+   * The glyph a finished or failed step shows in place of its number. It is
+   * the Glyph element the binding renders in the marker, chosen from the
+   * step's state, and laid over the number the binding leaves in the DOM. The
+   * number stays there because a reader enlarging the page to four hundred per
+   * cent still needs to know which step this is, and because the accessible
+   * name is built from the `status` part rather than from what is painted
+   * here.
+   *
+   * A failed step shows a bare cross rather than the scale's circled alert.
+   * The status glyphs carry their own container, and `docs/token-foundation.md`
+   * says why: the bare marks are the ones drawn inside a box some control
+   * already provides. The marker is that box, and a circle inside a disc reads
+   * as a ring inside a ring rather than as a failure.
    */
   /**
    * The number gives way to the mark. Neither the complete rule nor the
@@ -284,11 +288,10 @@
     color: transparent;
   }
 
-  [data-ui='stepper'] :is([data-complete], [data-invalid]) [data-part='marker']::after {
-    background-color: var(--_mark);
-    block-size: var(--_mark-size);
-    content: '';
-    inline-size: var(--_mark-size);
+  [data-ui='stepper'] [data-part='marker'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_mark-size);
+
+    color: var(--_mark);
     /**
      * Centred by its own box rather than by the flex container's alignment.
      * An absolutely positioned child takes a static position the engines do
@@ -299,25 +302,7 @@
      */
     inset: 0;
     margin: auto;
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
     position: absolute;
-  }
-
-  [data-ui='stepper'] [data-complete]:not([data-invalid]) [data-part='marker']::after {
-    mask-image: var(--slotted-stepper-complete-icon, var(--slotted-icon-check));
-  }
-
-  /**
-   * A bare cross rather than the scale's circled alert. The status glyphs
-   * carry their own container, and `docs/token-foundation.md` says why: the
-   * bare marks are the ones drawn inside a box some control already provides.
-   * The marker is that box, and a circle inside a disc reads as a ring inside
-   * a ring rather than as a failure.
-   */
-  [data-ui='stepper'] [data-invalid] [data-part='marker']::after {
-    mask-image: var(--slotted-stepper-invalid-icon, var(--slotted-icon-x));
   }
 
   /**
@@ -327,10 +312,6 @@
    */
   [data-ui='stepper'] [data-current]:not([data-invalid]) [data-part='marker'] {
     color: var(--slotted-stepper-marker-color-current, var(--slotted-tone-accent-text, Highlight));
-  }
-
-  [data-ui='stepper'] [data-current]:not([data-invalid]) [data-part='marker']::after {
-    content: none;
   }
 
   /* ── The label and its second line ──────────────────────────────────────
@@ -623,7 +604,7 @@
    * which would flatten the four statuses into one outline. Three things need
    * restating: the connector, which is a painted rule; the fill that separates
    * a finished step from a pending one; and the glyph inside it, which keeps
-   * its paint through `forced-color-adjust` on the mark alone rather than
+   * its paint through the marker's own `forced-color-adjust` rather than
    * through a system colour this family would have to choose.
    */
 
@@ -642,10 +623,6 @@
       background-color: Highlight;
       border-color: Highlight;
       color: HighlightText;
-      forced-color-adjust: none;
-    }
-
-    [data-ui='stepper'] [data-part='marker']::after {
       forced-color-adjust: none;
     }
   }

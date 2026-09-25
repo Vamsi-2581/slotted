@@ -77,7 +77,10 @@
       calc(var(--_padding-inline) - (var(--_action-size) - var(--_icon-size)) / 2)
     );
 
-    background-color: var(--slotted-datetime-range-picker-background, transparent);
+    background-color: var(
+      --slotted-datetime-range-picker-background,
+      var(--slotted-control-surface, Field)
+    );
     block-size: var(--_height);
     border: var(--_border-width) solid
       var(
@@ -199,22 +202,17 @@
   }
 
   /* The calendar `datetime-picker` puts on its trigger — the mark
-     `input[type=datetime-local]` draws for the same control; it does not turn
-     while the surface is open. */
-  [data-ui='datetime-range-picker'] [data-part='trigger']::after {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    /* No system-colour fallback on a decoration: unthemed, it disappears
-       rather than shouts. */
+     `input[type=datetime-local]` draws for the same control, a `Glyph` the
+     binding draws after the summary; it does not turn while the surface is
+     open. */
+  [data-ui='datetime-range-picker'] [data-part='trigger'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_icon-size);
+
+    /* No system-colour fallback on a decoration: unthemed, it takes the
+       trigger's ink rather than shouts. */
     color: var(--slotted-datetime-range-picker-action-color, var(--slotted-text-muted));
-    content: '';
-    inline-size: var(--_icon-size);
     inset-block-start: 50%;
     inset-inline-end: calc(var(--_action-inset) + (var(--_action-size) - var(--_icon-size)) / 2);
-    mask-image: var(--slotted-datetime-range-picker-trigger-icon, var(--slotted-icon-calendar));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     position: absolute;
     translate: 0 -50%;
   }
@@ -230,6 +228,8 @@
    * something visible, and the frame's ring would sit still.
    */
   [data-ui='datetime-range-picker'] [data-part='clear'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -263,15 +263,15 @@
     position: absolute;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='clear']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-datetime-range-picker-clear-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. It does not reach into
+     the calendar's lane after it, which is the trigger's to answer. */
+  @media (pointer: coarse) {
+    [data-ui='datetime-range-picker'] [data-part='clear']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      inset-inline-end: 0;
+    }
   }
 
   [data-ui='datetime-range-picker'] [data-part='clear']:hover:not(:disabled):not([data-disabled]) {
@@ -394,7 +394,9 @@
     cursor: not-allowed;
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-disabled] [data-part='trigger']::after {
+  [data-ui='datetime-range-picker'][data-part='root'][data-disabled]
+    [data-part='trigger']
+    > [data-ui='icon'] {
     color: var(--slotted-disabled-foreground);
   }
 
@@ -1281,10 +1283,8 @@
       border-color: ButtonBorder;
     }
 
-    /* A masked glyph is painted with a background, and forced colours replace
-       a background that is not one of the system's own. */
-    [data-ui='datetime-range-picker'] [data-part='clear']::before,
-    [data-ui='datetime-range-picker'] [data-part='trigger']::after,
+    /* The tab's underline is painted with a background, and forced colours
+       replace a background that is not one of the system's own. */
     [data-ui='datetime-range-picker'] [data-part='tab']::after {
       forced-color-adjust: none;
     }

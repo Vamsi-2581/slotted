@@ -18,6 +18,15 @@
    * `list-item` and a grid, so a row carrying a trailing control has already
    * lost the native `::marker`; `list` writes `role="list"` for that reason and
    * the mark becomes geometry from the glyph scale.
+   *
+   * **Every part is reached with child combinators**, along the anatomy's own
+   * chain: `root > content > start | body | end`, `body > label | description`,
+   * and `root > actions`. A row holds other families, and they reuse these
+   * names — a `tag` in `end` has a `body` and a `label` of its own. Reached by a
+   * descendant selector, the tag's body became a column with its text on the
+   * top edge and its label took the row's line height and weight. Angular puts
+   * each part on the element the page wrote and React renders it as that
+   * element, so the chain in the selectors is the chain in the document.
    */
   [data-ui='list-item'][data-part='root'] {
     /* Geometry. Every value is the control scale's, because a row is a
@@ -271,17 +280,21 @@
    * ── The marker ─────────────────────────────────────────────────────────
    *
    * A character is never an icon — `docs/token-foundation.md` rule 3 — so the
-   * bullet is the library's own dot geometry masked in the row's ink, not a `•`
-   * in a `content` string that changes shape with the reader's font.
+   * bullet is the library's own dot `Glyph`, an `<svg>` the binding draws in a
+   * `marker` part before the row's content and in the row's ink, not a `•` in a
+   * `content` string that changes shape with the reader's font.
    *
    * The number is a counter and stays text, because it is text: a reader hears
-   * "one" before the row, which is what the native marker said.
+   * "one" before the row, which is what the native marker said. It is the
+   * root's own `::before`, which stands in the same column the bullet's part
+   * does.
    *
    * The column is one line tall rather than the row's own height, so the mark
    * sits on the title's line in a row of three lines instead of floating in the
    * middle of the block.
    */
-  [data-ui='list-item']:is([data-marker='bullet'], [data-marker='number'])::before {
+  [data-ui='list-item'][data-marker='bullet'] > [data-part='marker'],
+  [data-ui='list-item'][data-marker='number']::before {
     /* The mark sits on the title's first line and never in the middle of the
        block, whatever `align` says. `align` is about the leading visual — an
        avatar beside three lines of text belongs with the title or with the
@@ -291,8 +304,8 @@
     align-items: start;
     /* One line tall, stated rather than stretched. The mark's own box holds no
        text, so a row that wraps gave it the height of its padding alone and the
-       masked dot disappeared — the numbered marker survived only because its
-       digits gave it a height of their own. */
+       dot disappeared — the numbered marker survived only because its digits
+       gave it a height of their own. */
     block-size: calc(
       var(--_pad-block) * 2 + var(--_font-size) * var(--slotted-line-height-md, 1.5)
     );
@@ -316,24 +329,19 @@
     padding-block-start: var(--_pad-block);
   }
 
-  [data-ui='list-item'][data-marker='bullet']::before {
-    background-color: currentcolor;
-    content: '';
+  [data-ui='list-item'][data-marker='bullet'] > [data-part='marker'] {
+    --slotted-icon-size: var(--_marker-size);
     justify-content: center;
-    mask-image: var(--slotted-icon-dot);
-    /* The dot is placed on the middle of the first line rather than on the
-       middle of the box, because the box is the row's full height and a mask
-       has no baseline to sit on.
-       Half the dot is subtracted because a length in `mask-position` places the
-       image's leading edge, not its centre: without it the dot sat six pixels
-       low, on the baseline rather than between it and the cap line. */
-    mask-position: center
-      calc(
-        var(--_pad-block) + var(--_font-size) * var(--slotted-line-height-md, 1.5) * 0.5 -
-          var(--_marker-size) * 0.5
-      );
-    mask-repeat: no-repeat;
-    mask-size: var(--_marker-size) var(--_marker-size);
+  }
+
+  /* The dot is placed on the middle of the first line rather than on the
+     middle of the part, because the part is one line and its padding tall and
+     the dot has no baseline to sit on. Half the line less half the dot, so the
+     dot stands between the baseline and the cap line rather than on either. */
+  [data-ui='list-item'][data-marker='bullet'] > [data-part='marker'] > [data-ui='icon'] {
+    margin-block-start: calc(
+      var(--_font-size) * var(--slotted-line-height-md, 1.5) * 0.5 - var(--_marker-size) * 0.5
+    );
   }
 
   [data-ui='list-item'][data-marker='number']::before {
@@ -349,7 +357,8 @@
 
   /* `inset` is the set's answer for a list inside a box that already pads its
      own content. The mark gives up its gutter with everything else. */
-  [data-ui='list-item'][data-inset]:is([data-marker='bullet'], [data-marker='number'])::before {
+  [data-ui='list-item'][data-inset][data-marker='bullet'] > [data-part='marker'],
+  [data-ui='list-item'][data-inset][data-marker='number']::before {
     margin-inline-start: 0;
   }
 
@@ -438,7 +447,7 @@
     align-items: start;
   }
 
-  [data-ui='list-item'] [data-part='start'] {
+  [data-ui='list-item'] > [data-part='content'] > [data-part='start'] {
     align-items: center;
     color: var(--_text);
     display: flex;
@@ -463,7 +472,7 @@
    * chooser is (CK1); the gap beside it is the row's control gap, the same
    * distance the chooser puts between its box and its own label.
    */
-  [data-ui='list-item'] [data-part='start']:has(> [data-ui='checkbox']) {
+  [data-ui='list-item'] > [data-part='content'] > [data-part='start']:has(> [data-ui='checkbox']) {
     align-items: start;
     inline-size: var(--_control-size);
     min-block-size: calc(var(--_font-size) * var(--slotted-line-height-md, 1.5));
@@ -471,7 +480,7 @@
 
   /* A leading visual beside a three-line row sits on the title's line, and the
      line is the box's own, not the block's. */
-  [data-ui='list-item'][data-align='start'] [data-part='start'] {
+  [data-ui='list-item'][data-align='start'] > [data-part='content'] > [data-part='start'] {
     min-block-size: calc(var(--_font-size) * var(--slotted-line-height-md, 1.5));
   }
 
@@ -481,7 +490,7 @@
    * word, so a title that is one unbroken token — a URL, a commit hash — pushes
    * the metadata out of the row instead of breaking inside it.
    */
-  [data-ui='list-item'] [data-part='body'] {
+  [data-ui='list-item'] > [data-part='content'] > [data-part='body'] {
     display: flex;
     flex-direction: column;
     grid-area: body;
@@ -489,7 +498,7 @@
     row-gap: var(--slotted-list-item-body-gap, var(--slotted-space-1, 0.125rem));
   }
 
-  [data-ui='list-item'] [data-part='label'] {
+  [data-ui='list-item'] > [data-part='content'] > [data-part='body'] > [data-part='label'] {
     color: inherit;
     font-size: var(--_font-size);
     font-weight: var(--slotted-list-item-font-weight, var(--slotted-font-weight-regular, 400));
@@ -505,7 +514,7 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='list-item'] [data-part='description'] {
+  [data-ui='list-item'] > [data-part='content'] > [data-part='body'] > [data-part='description'] {
     color: var(--_muted);
     font-size: var(--slotted-list-item-description-font-size, var(--slotted-font-size-xs, 0.75rem));
     line-height: var(--slotted-line-height-sm, 1.45);
@@ -524,7 +533,10 @@
    * truncated string is still readable to assistive technology and still
    * reachable in full when the row is opened.
    */
-  [data-ui='list-item'][data-truncate] :is([data-part='label'], [data-part='description']) {
+  [data-ui='list-item'][data-truncate]
+    > [data-part='content']
+    > [data-part='body']
+    > :is([data-part='label'], [data-part='description']) {
     overflow: hidden;
     overflow-wrap: normal;
     text-overflow: ellipsis;
@@ -537,7 +549,7 @@
    * reader and part of its target for a pointer. Anything that acts is
    * `actions` instead.
    */
-  [data-ui='list-item'] [data-part='end'] {
+  [data-ui='list-item'] > [data-part='content'] > [data-part='end'] {
     align-items: center;
     color: var(--_muted);
     display: flex;
@@ -837,7 +849,7 @@
       grid-template-columns: auto minmax(0, 1fr);
     }
 
-    [data-ui='list-item'] [data-part='end'] {
+    [data-ui='list-item'] > [data-part='content'] > [data-part='end'] {
       justify-content: start;
       margin-block-start: var(--slotted-list-item-body-gap, var(--slotted-space-1, 0.125rem));
       margin-inline-start: 0;
@@ -845,7 +857,7 @@
 
     /* The leading visual now spans two rows, so it stops being centred on the
        block and returns to the title's line. */
-    [data-ui='list-item'] [data-part='start'] {
+    [data-ui='list-item'] > [data-part='content'] > [data-part='start'] {
       align-self: start;
       min-block-size: calc(var(--_font-size) * var(--slotted-line-height-md, 1.5));
     }
@@ -868,6 +880,25 @@
 
     [data-ui='list-item'][data-inset] > [data-part='actions'] {
       padding-inline: 0;
+    }
+
+    /**
+     * Unless every target is a glyph. Two icon-only controls are a column
+     * narrower than the visual at the start of the row, and a line of their
+     * own under the words put a row's two smallest things at the end of a
+     * line that belonged to nothing — a notification list on a phone read as
+     * a list of rows with a stray pair of marks under each. A glyph pair
+     * keeps the line it had; a target that carries a word still takes its
+     * own, because a word is what does not fit.
+     */
+    [data-ui='list-item'] > [data-part='actions']:not(:has(> :not([data-shape]))) {
+      flex-basis: auto;
+      padding-block-end: 0;
+      padding-inline: 0 var(--_pad-inline);
+    }
+
+    [data-ui='list-item'][data-inset] > [data-part='actions']:not(:has(> :not([data-shape]))) {
+      padding-inline-end: 0;
     }
   }
 
@@ -901,17 +932,6 @@
     [data-ui='list-item'][data-current]:not([data-selected]) {
       outline: var(--slotted-border-width-thin, 1px) solid Highlight;
       outline-offset: calc(-1 * var(--slotted-border-width-thin, 1px));
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='list-item'][data-marker='bullet']::before {
-      forced-color-adjust: none;
     }
   }
 }

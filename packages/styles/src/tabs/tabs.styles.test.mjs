@@ -18,8 +18,19 @@ const ui = `[data-ui='${contract.ui}']`;
 const member = contract.members.tabs;
 const part = (name) => `${ui} [data-part='${name}']`;
 
+/**
+ * Every declaration the selector receives, across every rule whose selector
+ * list names it: the marker and the hover bar share one geometry block and
+ * each has a block of its own, and a reader that stopped at the first `{`
+ * would see one of the two.
+ */
 function rule(selector) {
-  return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
+  return normalized
+    .split('}')
+    .map((block) => block.split('{').slice(-2))
+    .filter(([selectors]) => selectors?.split(',').includes(selector))
+    .map(([, body]) => body ?? '')
+    .join('');
 }
 
 test('lives in the component layer', () => {
@@ -79,12 +90,17 @@ test('places every part in a grid cell rather than over one', () => {
   assert.match(rule(`${part('scroll')}[data-direction='end']`), /grid-column:3/);
   assert.match(rule(part('actions')), /grid-column:4/);
   assert.match(rule(part('panel')), /grid-column:1 \/ -1/);
-  /* The one thing positioned over a cell is the marker, which is a
-     pseudo-element on the item rather than a part of its own. */
-  const positioned = [...normalized.matchAll(/([^{}]+)\{[^{}]*position:absolute/g)].map(
-    ([, selector]) => selector.trim(),
+  /* The things positioned over a cell are the marker and the hover bar under
+     it, both pseudo-elements on the item rather than parts of their own, and
+     the dismiss's invisible touch target on a coarse pointer (R2.6). */
+  const positioned = [...normalized.matchAll(/([^{}]+)\{[^{}]*position:absolute/g)].flatMap(
+    ([, selector]) => selector.split(','),
   );
-  assert.deepEqual(positioned, [`${part('item')}::after`]);
+  assert.deepEqual(positioned, [
+    `${part('item')}::before`,
+    `${part('item')}::after`,
+    `${part('dismiss')}::after`,
+  ]);
 });
 
 /**
@@ -278,23 +294,28 @@ test('can stand on a line the page already drew', () => {
   assert.match(fragment, /data-track="none"/);
 });
 
-test('draws both glyphs as masks from the scale, never as characters', () => {
-  assert.match(rule(`${part('dismiss')}::before`), /mask-image:var\(--slotted-icon-x\)/);
-  assert.match(rule(`${part('scroll')}::before`), /mask-image:var\(--slotted-icon-chevron-right\)/);
+test('paints no glyph of its own, and never draws one as a character', () => {
+  /* The cross and the chevron are Glyph elements the bindings render; the
+     sheet only sizes the box they sit in. */
+  assert.doesNotMatch(declarations, /--slotted-icon-(x|chevron-right)\b/);
+  assert.doesNotMatch(declarations, /\[data-part='(dismiss|scroll)'\]::before/);
+  assert.match(rule(part('dismiss')), /--slotted-icon-size:var\(--_icon-size\)/);
+  assert.match(rule(part('scroll')), /--slotted-icon-size:var\(--_icon-size\)/);
   /* An empty `content` materialises a box; what is refused is a character
      standing in for artwork, so the pattern is a string with something in it. */
   assert.doesNotMatch(declarations, /content:\s*['"][^'"]/);
 });
 
-/** One glyph, turned. A chevron is symmetrical about the axis it is flipped on. */
+/**
+ * One glyph, turned. A chevron is symmetrical about the axis it is flipped on,
+ * and the box's own `directional` mirror handles a right-to-left document.
+ */
 test('points each paging control along the reading direction', () => {
-  assert.match(rule(`${part('scroll')}[data-direction='start']::before`), /transform:scaleX\(-1\)/);
-  assert.ok(
-    normalized.includes(`${ui}:dir(rtl) [data-part='scroll'][data-direction='start']::before{`),
+  assert.match(
+    rule(`${part('scroll')}[data-direction='start']>[data-ui='icon']`),
+    /rotate:0\.5turn/,
   );
-  assert.ok(
-    normalized.includes(`${ui}:dir(rtl) [data-part='scroll'][data-direction='end']::before{`),
-  );
+  assert.ok(!normalized.includes(`${ui}:dir(rtl) [data-part='scroll']`));
 });
 
 /**

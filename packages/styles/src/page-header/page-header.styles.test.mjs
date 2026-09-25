@@ -137,18 +137,19 @@ test('shows a child of the title area in one state only through data-when', () =
   );
 });
 
-/** The marks are drawn from the glyph scale, and the one that points is mirrored. */
-test('draws its marks from glyph tokens rather than characters, and mirrors the arrow', () => {
-  for (const glyph of Object.values(contract.glyphs)) {
-    assert.match(normalized, new RegExp(`mask-image:var\\(${glyph}\\)`), `${glyph} is not drawn`);
-  }
+/**
+ * The marks are the Glyph elements the bindings render — the arrow in a
+ * `directional` box, so the binding mirrors it — and the sheet only sizes and
+ * turns the box.
+ */
+test('paints no mark of its own, and turns the chevron by state', () => {
+  assert.doesNotMatch(normalized, /mask-image/, 'a mark is an svg, not a mask');
+  assert.doesNotMatch(normalized, /--slotted-icon-(chevron-down|pin|pin-off|arrow-left)\b/);
   assert.doesNotMatch(normalized, /content:'[^']+'/, 'a mark is drawn with a character');
-  const back = rule(
-    `${ui}>*>[data-part='title-area']>[data-part='nav']>[data-part='back']:dir(rtl)::before`,
-  );
-  assert.match(back, /scale:-1 1/);
+  const back = rule(`${ui}>*>[data-part='title-area']>[data-part='nav']>[data-part='back']`);
+  assert.match(back, /--slotted-icon-size:var\(--_icon-size\)/);
   const toggle = rule(
-    `${ui}[data-expanded]>*>[data-part='controls']>*>[data-part='toggle']::before`,
+    `${ui}[data-expanded]>*>[data-part='controls']>*>[data-part='toggle']>[data-ui='icon']`,
   );
   assert.match(toggle, /rotate:180deg/);
 });
@@ -192,8 +193,8 @@ test('places the controls on a zero-height row that carries the rule', () => {
   );
 });
 
-/** The snapped heading is one line, a step smaller; expanded it clamps at three. */
-test('clamps the heading at three lines expanded and one line snapped', () => {
+/** The snapped heading is one line, a step smaller; expanded it clamps at two. */
+test('clamps the heading at two lines expanded and one line snapped', () => {
   const heading = rule(
     `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='title']>[data-part='heading']`,
   );
@@ -222,14 +223,17 @@ test('paints no placeholder of its own while loading', () => {
 });
 
 /** The family answers its own width, not the viewport's. */
-test('reorders below 640 pixels by container query', () => {
-  assert.match(normalized, /@container page-header \(width < 640px\)/);
+test('reorders below 600 pixels by container query', () => {
+  assert.match(normalized, /@container page-header \(width < 600px\)/);
   assert.doesNotMatch(normalized, /@media \(max-width/);
 });
 
-/** Masked glyphs survive forced colours. */
-test('keeps its masked glyphs under forced colours', () => {
-  assert.match(normalized, /@media \(forced-colors:active\)\{[^}]*forced-color-adjust:none/);
+/**
+ * The marks are stroked with `currentColor`, the host's ink, which forced
+ * colours already remap: nothing is restated for them.
+ */
+test('restates nothing for its marks under forced colours', () => {
+  assert.doesNotMatch(normalized, /::before\{[^}]*forced-color-adjust/);
 });
 
 /**
@@ -270,14 +274,14 @@ test('leaves no band under the title when the control collapses the area', () =>
   assert.ok(columns.some((segment) => /padding-block:0/.test(segment)));
 });
 
-/** One way back at a time: beside breadcrumbs the arrow yields; below 640 pixels it returns. */
+/** One way back at a time: beside breadcrumbs the arrow yields; below 600 pixels it returns. */
 test('shows the way back only where the breadcrumbs are not', () => {
   const beside = rule(
     `${ui}>*>[data-part='title-area']>[data-part='nav']>[data-part='back']:has(~[data-part='breadcrumbs']:not(:empty))`,
   );
   assert.match(beside, /display:none/);
   const narrow =
-    /@container page-header \(width < 640px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
   assert.match(
     narrow,
     /\[data-part='back'\]:has\(~\[data-part='breadcrumbs'\]:not\(:empty\)\)\{display:inline-flex/,
@@ -287,9 +291,9 @@ test('shows the way back only where the breadcrumbs are not', () => {
 /** The reviewer's fourth round: weight on the marks, a ground under the pressed pin, arrows on the actions' line and mirrored in RTL. */
 test('draws the controls with weight, the pressed pin on a ground, and the arrows aligned and mirrored', () => {
   const marks = rule(
-    `${ui}>*>[data-part='controls']>*>[data-part='toggle']::before,${ui}>*>[data-part='controls']>*>[data-part='pin']::before`,
+    `${ui}>*>[data-part='controls']>*>[data-part='toggle'],${ui}>*>[data-part='controls']>*>[data-part='pin']`,
   );
-  assert.match(marks, /block-size:var\(--slotted-control-icon-size-md,16px\)/);
+  assert.match(marks, /--slotted-icon-size:var\(--slotted-control-icon-size-md,16px\)/);
   const pressed = rule(`${ui}>*>[data-part='controls']>*>[data-part='pin'][data-pressed]`);
   assert.match(pressed, /background-color:var\(--slotted-tone-accent-surface/);
   const navigation = rule(
@@ -302,13 +306,183 @@ test('draws the controls with weight, the pressed pin on a ground, and the arrow
   );
 });
 
-/** Too much of the screen to hold: the pin is not offered on a tall header, nor below 640 pixels. */
+/** Too much of the screen to hold: the pin is not offered on a tall header, nor below 600 pixels. */
 test('hides the pin on a tall header and on a phone', () => {
   assert.match(
     rule(`${ui}[data-tall]>*>[data-part='controls']>*>[data-part='pin']`),
     /display:none/,
   );
   const narrow =
-    /@container page-header \(width < 640px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
   assert.match(narrow, /\[data-part='controls'\]>\*>\[data-part='pin'\]\{display:none/);
+});
+
+/**
+ * Compact, nothing sticks: the root and the title area are in the flow and
+ * scroll away with the page. On a phone a record's header and tabs held 40
+ * per cent of the screen for the whole scroll. `relative` keeps the stacking
+ * the pill relies on, at an offset of nought.
+ */
+test('takes the root and the title area out of sticky below the compact size class', () => {
+  const root = rule(`${ui}[data-compact]`);
+  assert.match(root, /position:relative/);
+  assert.match(root, /inset-block-start:0/);
+  assert.match(rule(`${ui}[data-compact]>*>[data-part='title-area']`), /position:relative/);
+});
+
+/**
+ * Below 600 pixels the actions cluster grows, so that alone on a wrapped row
+ * it takes the row. Beside a title that leaves it room — one short button
+ * after a short heading at 570 pixels — the grown box put the button at its
+ * own start, mid-row, off the edge every other width aligns it to. The
+ * cluster's content stands at its end whichever row it lands on.
+ */
+test('keeps the actions at the end of their row on a phone', () => {
+  const narrow =
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  assert.match(
+    narrow,
+    /\[data-part='title-row'\]>\[data-part='actions'\]\{[^}]*justify-content:flex-end/,
+  );
+});
+
+/**
+ * The title row aligns its clusters to the start, so a heading that wraps to
+ * two lines keeps the actions on its first. A heading of one line is shorter
+ * than a control — by three pixels with a pointer, by sixteen on a touch
+ * screen, where every control is a 44-pixel target — and stood at the top of
+ * the row with the button hanging under it. The title's box is at least a
+ * control tall and centres its heading, so one line stands on the control's
+ * axis and two lines still grow from the top.
+ */
+test('stands a one-line heading on the axis of the control beside it', () => {
+  const title = rule(
+    `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='title']`,
+  );
+  assert.match(title, /min-block-size:var\(--slotted-control-height-md/);
+  assert.match(title, /align-items:center/);
+});
+
+/**
+ * A toolbar pads its controls for the reach of their focus rings, so in the
+ * actions it stood a control and two insets tall — 52 pixels beside a title
+ * of 51 on a touch screen, and a record whose actions land with its answer
+ * moved its body by the difference. The row gives the inset back.
+ */
+test('gives a toolbar in the actions a control’s height in the title row', () => {
+  const actions = `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='actions']`;
+  const folding = rule(
+    `${actions}>[data-ui='toolbar']:not([data-variant='outline']):is([data-overflow='menu'],[data-overflow='scroll'])`,
+  );
+  assert.match(
+    folding,
+    /margin-block:calc\(-1 \* var\(--slotted-toolbar-inset,max\(var\(--slotted-space-2/,
+  );
+  assert.match(folding, /--slotted-focus-ring-offset/);
+  const wrapping = rule(`${actions}>[data-ui='toolbar']:not([data-variant='outline'])`);
+  assert.match(
+    wrapping,
+    /margin-block:calc\(-1 \* var\(--slotted-toolbar-inset,var\(--slotted-space-2/,
+  );
+});
+
+/**
+ * The way back stood a target-min tall on a coarse pointer, 24 pixels among
+ * 44-pixel controls. The link reaches the comfortable target by padding and
+ * gives it back as a negative margin, so the nav row keeps its height.
+ */
+test('makes the way back a full touch target on a coarse pointer, and moves nothing', () => {
+  const coarse = /@media \(pointer:coarse\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  const back =
+    coarse
+      .split(`${ui}>*>[data-part='title-area']>[data-part='nav']>[data-part='back']{`)[1]
+      ?.split('}')[0] ?? '';
+  assert.match(
+    back,
+    /--_reach:max\(0px,calc\(\(var\(--slotted-target-comfortable,44px\) - var\(--slotted-target-min,24px\)\) \/ 2\)\);/,
+  );
+  assert.match(back, /padding-block:var\(--_reach\);/);
+  assert.match(back, /margin-block:calc\(var\(--_reach\) \* -1\);/);
+});
+
+/**
+ * The contract promises that a toolbar in the actions folds what does not fit
+ * into its menu before the row wraps. Above 600 pixels the row still wrapped:
+ * at 1024 a record's toolbar of six commands took a row of its own under the
+ * title, 42 pixels more header, instead of folding two of them.
+ */
+test('folds a menu toolbar before the title row wraps, at every width', () => {
+  const folding = ":has(>[data-part='actions']>[data-ui='toolbar'][data-overflow='menu'])";
+  const row = rule(`${ui}>*>[data-part='title-area']>[data-part='title-row']${folding}`);
+  assert.match(row, /flex-wrap:nowrap/);
+  const actions = rule(
+    `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='actions']:has(>[data-ui='toolbar'][data-overflow='menu'])`,
+  );
+  // The cluster's width is the row's remainder, never its own content: sized by its content it
+  // was the trigger alone once everything had folded, did not grow when the row did, and the
+  // actions stayed folded after a window went from 600 pixels back to 1400.
+  assert.match(actions, /flex:1 1 0%/);
+  assert.doesNotMatch(actions, /flex:0 /);
+  // It never gives way below its menu's trigger and inset: at 390 pixels with touch a cluster at
+  // no minimum put the trigger past the screen's edge.
+  const floor =
+    /min-inline-size:calc\(var\(--slotted-control-height-md,34px\)\+2 \* var\(--slotted-toolbar-inset,max\(var\(--slotted-space-2/;
+  assert.match(actions, floor);
+  // The toolbar fills the cluster, so the room it measures follows the row, and its controls
+  // stand at the end without losing the start of a bar that scrolls.
+  const bar = rule(
+    `${ui}>*>[data-part='title-area']>[data-part='title-row']>[data-part='actions']>[data-ui='toolbar'][data-overflow='menu']`,
+  );
+  assert.match(bar, /flex:1 1 0%/);
+  assert.match(bar, /justify-content:safe flex-end/);
+  // The title starts from its own width at every width and does not grow past it: the phone's
+  // 60% held a SKU's code and its two marks to two lines beside a toolbar that could still have
+  // folded, and a title that grew took the room the cluster measures.
+  const title = rule(
+    `${ui}>*>[data-part='title-area']>[data-part='title-row']${folding}>[data-part='title']`,
+  );
+  assert.match(title, /flex:0 1 auto/);
+  const narrow =
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  assert.ok(
+    !narrow.includes(`[data-part='actions']:has(>[data-ui='toolbar'][data-overflow='menu']){`),
+    'no phone rule gives the folding cluster another flex',
+  );
+});
+
+/** Compact, the subheading gives the title column one line, as it does snapped. */
+test('holds the subheading to one line on a phone', () => {
+  const narrow =
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  const subheading =
+    narrow.split(`[data-part='title']>[data-part='subheading']{`)[1]?.split('}')[0] ?? '';
+  assert.match(subheading, /white-space:nowrap/);
+  assert.match(subheading, /text-overflow:ellipsis/);
+});
+
+/**
+ * A toolbar that folds into its menu measures the width it is given, so on a
+ * phone the actions stay on the title row and shrink; loose actions keep
+ * taking a wrapped row of their own.
+ */
+test('keeps a folding toolbar on the title row on a phone', () => {
+  const narrow =
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  // Loose actions take a wrapped row of their own; a folding toolbar keeps the title row by the
+  // rules that hold at every width (the test above).
+  assert.match(narrow, /\[data-part='title-row'\]>\[data-part='actions'\]\{flex:1 1 auto/);
+});
+
+/**
+ * Beside the heading the marks share a wrapping line whose break depends on
+ * the record: a code and "Below reorder point" did not fit at 390 pixels where
+ * the placeholders had, and every box under the header moved 25 pixels when the
+ * answer landed. Compact, the marks take a line of their own under the heading,
+ * waiting and loaded alike.
+ */
+test('gives the marks a line of their own on a phone, whatever they say', () => {
+  const narrow =
+    /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
+  const marks = narrow.split(`[data-part='title']>[data-part='marks']{`)[1]?.split('}')[0] ?? '';
+  assert.match(marks, /flex-basis:100%/);
 });

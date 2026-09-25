@@ -69,13 +69,16 @@
    * draws for the same control and the one `date-picker` already uses. The
    * panel holds two surfaces and each names itself inside; the trigger names
    * the kind of value the control holds, which is the one thing about it that
-   * never changes — so it does not turn while the panel is open either.
+   * never changes — so it does not turn while the panel is open either. It is
+   * a `Glyph` the binding draws inside an `icon` box, at the field's icon step.
    *
    * It is always drawn. Angular Material records why: ChromeOS turns
    * `Alt`+`ArrowDown` into `PageDown` before the browser sees it, so the chord
    * cannot be the only way in.
    */
   [data-ui='datetime-picker'] [data-part='trigger'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -124,15 +127,20 @@
     position: absolute;
   }
 
-  [data-ui='datetime-picker'] [data-part='trigger']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-datetime-picker-trigger-icon, var(--slotted-icon-calendar));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. Before the field's
+     clear it does not reach across it. */
+  @media (pointer: coarse) {
+    [data-ui='datetime-picker'] [data-part='trigger']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='datetime-picker']
+      [data-part='end']:has(+ [data-part='clear']:not([hidden]))
+      > [data-part='trigger']::after {
+      inset-inline-end: 0;
+    }
   }
 
   [data-ui='datetime-picker'] [data-part='trigger']:hover:not(:disabled):not([data-disabled]) {
@@ -479,22 +487,15 @@
   }
 
   /**
-   * The mark takes the muted ink the label does not, so the pair reads as one
-   * control with a glyph rather than as two things of equal weight.
+   * The mark — the clock `Glyph` the binding draws before the label, at the
+   * `sm` icon step — takes the muted ink the label does not, so the pair reads
+   * as one control with a glyph rather than as two things of equal weight.
    */
-  [data-ui='datetime-picker'] [data-part='now']::before {
-    /* No system colour behind the mask: a theme that never loaded should let
-       decoration disappear rather than paint it in the operating system's own
-       grey, which is the rule `fallbacks.test.mjs` holds. */
-    background-color: var(--slotted-datetime-picker-now-icon-color, var(--slotted-text-muted));
-    block-size: var(--slotted-control-icon-size-sm, 14px);
-    content: '';
-    flex: 0 0 auto;
-    inline-size: var(--slotted-control-icon-size-sm, 14px);
-    mask-image: var(--slotted-datetime-picker-now-icon, var(--slotted-icon-clock));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  [data-ui='datetime-picker'] [data-part='now'] > [data-ui='icon'] {
+    /* No system colour: a theme that never loaded should let the mark take the
+       label's ink rather than the operating system's own grey, which is the
+       rule `fallbacks.test.mjs` holds. */
+    color: var(--slotted-datetime-picker-now-icon-color, var(--slotted-text-muted));
   }
 
   [data-ui='datetime-picker'] [data-part='now']:hover:not(:disabled):not([data-disabled]) {
@@ -819,14 +820,6 @@
   }
 
   @media (forced-colors: active) {
-    /* A masked glyph is painted with a background, and forced colours replace a
-       background that is not one of the system's own: the mark would go and the
-       box it sat in would stay. */
-    [data-ui='datetime-picker'] [data-part='trigger']::before,
-    [data-ui='datetime-picker'] [data-part='now']::before {
-      forced-color-adjust: none;
-    }
-
     /* The chosen row and the highlighted row both lose their painted grounds,
        so each says what it is with a system pair the operating system
        guarantees legible together. */

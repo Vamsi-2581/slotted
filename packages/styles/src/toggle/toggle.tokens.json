@@ -1,5 +1,5 @@
 [
-  "--slotted-border-strong",
+  "--slotted-control-border-color",
   "--slotted-control-border-width",
   "--slotted-control-font-family",
   "--slotted-control-font-size-lg",
@@ -21,6 +21,7 @@
   "--slotted-control-padding-inline-md",
   "--slotted-control-padding-inline-sm",
   "--slotted-control-radius",
+  "--slotted-control-shadow",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",
   "--slotted-disabled-background",
@@ -43,6 +44,7 @@
   "--slotted-toggle-pressed-color",
   "--slotted-toggle-pressed-hover-background",
   "--slotted-toggle-radius",
+  "--slotted-toggle-shadow",
   "--slotted-tone-accent-border",
   "--slotted-tone-accent-subtle-active",
   "--slotted-tone-accent-subtle-hover",

@@ -263,7 +263,7 @@
   [data-ui='button-group'][data-part='root']
     > [data-ui='button'][data-variant='outline'][data-disabled],
   [data-ui='button-group'][data-part='root'] > [data-ui='button'][data-variant='outline']:disabled {
-    border-color: var(--slotted-border-strong, ButtonBorder);
+    border-color: var(--slotted-control-border-color, ButtonBorder);
   }
 
   [data-ui='button-group'][data-part='root']

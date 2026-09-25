@@ -82,12 +82,103 @@ test('never rewrites the root template from the root own query', () => {
  * area was the body row alone, `max-inline-size: 80%` resolved against a column
  * with nothing in it and clamped a 240-pixel panel to zero.
  */
+/**
+ * A column shares the screen with the content and earns every pixel; a layer
+ * covers content the reader cannot reach, so its width costs nothing but the
+ * strip that says where to press to leave. The layer takes its own measure —
+ * wider than the column — and stops one mark and two gutters short of the
+ * frame, which on a phone is what the eighty per cent it replaced left as a
+ * sliver of unreachable content beside a narrow panel.
+ */
+test('draws the layer wider than the column and leaves a strip to press', () => {
+  const layer = rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body;
+  assert.match(
+    layer.replace(/\s+/g, ''),
+    /inline-size:min\(var\(--_nav-overlay-size\),calc\(100%-var\(--_row-mark\)-2\*var\(--_gutter\)\)\)/,
+  );
+  assert.doesNotMatch(layer, /max-inline-size:\s*80%/);
+  assert.match(css, /--_nav-overlay-size: var\(--slotted-app-shell-nav-overlay-size, 20rem\)/);
+});
+
 test('gives the layer the rows it should cover, and the veil the same ones', () => {
   assert.match(
     rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body,
     /grid-area:\s*2 \/ 1 \/ -1 \/ -1/,
   );
   assert.match(rule("> [data-part='scrim'] {").body, /grid-area:\s*2 \/ 1 \/ -1 \/ -1/);
+});
+
+/**
+ * A closed layer stands one whole width outside the frame, and a transformed
+ * box still counts towards the scrollable overflow of every scroll container
+ * above it. Measured in the `navModes` story: the closed end-side panel gave
+ * the document 192 pixels of horizontal overflow once the demo frame's clip
+ * was lifted, and inside that frame the focus scope's first `focus()` scrolled
+ * the frame 240 pixels to the hidden panel, which the slide then clamped back
+ * frame by frame — the whole page jumped and returned. The frame clips its own
+ * inline axis, so a layer outside it is outside of nothing that can scroll;
+ * the block axis stays open, because the frame grows with its content under
+ * `scroll='document'` and nothing leaves it that way.
+ */
+test('clips its own inline axis, so a closed layer moves no scroll', () => {
+  const root = rule("[data-ui='app-shell'] {").body.replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(root, /overflow-x:\s*clip/);
+  assert.match(root, /overflow-y:\s*visible/);
+  assert.match(root, /overflow-inline:\s*clip/);
+  assert.match(root, /overflow-block:\s*visible/);
+  assert.doesNotMatch(
+    root,
+    /overflow-clip-margin/,
+    'a margin is a strip of the layer left in the frame',
+  );
+});
+
+/**
+ * On the inset plane the layer is a card: a border, a radius, a shadow. The
+ * column it replaces has no edge of its own, so its rows may run to the
+ * region's limit; a card whose row grounds meet its border reads as a panel
+ * with no padding — the Nexora overlay, and the `navModes` story at 420
+ * pixels. The card insets every row by the row inset, header, body and footer
+ * alike, so the marks stay in one column and the consumer's header row, which
+ * writes the same inset, keeps standing over them.
+ */
+test('insets the rows of the overlay card on the inset plane', () => {
+  const card = rule("[data-canvas='inset'][data-nav-mode='overlay'] > [data-part='nav'] {");
+  assert.match(card.body, /padding-inline:\s*var\(--_row-inset\)/);
+  /* The sheet on the flush plane meets the frame's edge as the column does. */
+  const sheet = rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body;
+  assert.match(sheet, /padding-inline:\s*0/);
+});
+
+/**
+ * The card is a wide screen's arrangement: a gutter, a radius and an edge on
+ * all four sides read as one raised sheet among regions. On a phone, where
+ * the navigation has become a layer, the same card is a frame around a
+ * column of content that has no room to spare — a gutter on every side and
+ * rounded corners against the screen's own. The content then meets the
+ * frame's edges and keeps one rule, under the banner, for the seam the
+ * gutter used to draw. Keyed on the mode, as every other layer rule is, with
+ * the width answering only for a shell whose mode is not yet decided.
+ */
+test('flushes the content on the inset plane once the navigation is a layer', () => {
+  const flush = rule(
+    "[data-canvas='inset'][data-nav-mode='overlay'] > [data-part='main'] {",
+  ).body.replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(flush, /border-block-end:\s*0/);
+  assert.match(flush, /border-inline:\s*0/);
+  assert.match(flush, /border-radius:\s*0/);
+  assert.match(flush, /box-shadow:\s*none/);
+  assert.match(flush, /margin:\s*0/);
+  assert.doesNotMatch(flush, /border-block-start:\s*0/, 'the seam under the banner stays');
+
+  const narrow =
+    /@container slotted-app-shell \(inline-size < 600px\) \{([\s\S]*?)\n {2}\}\n/.exec(css)?.[1] ??
+    '';
+  assert.match(
+    narrow,
+    /:not\(\[data-nav-mode\]\)\[data-canvas='inset'\]\s*>\s*\[data-part='main'\]/,
+    'a shell not yet measured draws the narrow picture from the width',
+  );
 });
 
 /**
@@ -255,14 +346,14 @@ test('paints every part the contract declares and no other', () => {
 });
 
 /**
- * The mark on the disclosure control is geometry from the glyph scale, and it
- * is the pair the contract names: one artwork with the chevron turned, drawing
- * the region the control toggles.
+ * The mark on the disclosure control is the pair the contract names, drawn as
+ * the Glyph element the binding renders: the stylesheet paints no glyph and
+ * only turns the box.
  */
-test('draws the disclosure mark from the pair the contract names', () => {
-  assert.match(css, new RegExp(`mask-image:\\s*var\\(${contract.mark.open}\\)`));
-  assert.match(css, new RegExp(`mask-image:\\s*var\\(${contract.mark.close}\\)`));
-  assert.equal(/--slotted-icon-chevrons-right/.test(css), false);
+test('paints no disclosure mark of its own', () => {
+  assert.equal(/mask-image/.test(css), false);
+  assert.equal(/--slotted-icon-(panel|chevrons)/.test(css), false);
+  assert.equal(/toggle'\]::before/.test(css), false);
 });
 
 /**
@@ -310,6 +401,35 @@ test('gives the pane a pinned head, a scrolling body and a pinned foot', () => {
 });
 
 /**
+ * The two scrolling bodies draw the bar `scroll-area` draws: a reserved
+ * gutter, so a column that grows past its height moves no row sideways; the
+ * thin platform bar, so an overlay bar has a gutter to sit in rather than the
+ * row's own chevron; and the family's ink on it. Three declarations, the same
+ * three, on both bodies.
+ */
+test('gives both scrolling bodies a gutter and the thin themed bar', () => {
+  for (const selector of [
+    "> [data-part='nav'] > [data-part='nav-body'] {",
+    "> [data-part='aside'] > [data-part='aside-body'] {",
+  ]) {
+    const { body } = rule(selector);
+    assert.match(body, /scrollbar-gutter:\s*stable/, `${selector} reserves no gutter`);
+    assert.match(body, /scrollbar-width:\s*thin/, `${selector} draws the wide bar`);
+    assert.match(
+      body,
+      /scrollbar-color:\s*var\(--_scrollbar-thumb\)\s+var\(--_scrollbar-track\)/,
+      `${selector} leaves the bar unthemed`,
+    );
+  }
+  const root = rule("[data-ui='app-shell'] {").body;
+  assert.match(root, /--_scrollbar-thumb:\s*var\(\s*--slotted-app-shell-scrollbar-thumb-color/);
+  assert.match(
+    root,
+    /--_scrollbar-track:\s*var\(--slotted-app-shell-scrollbar-track-color,\s*transparent\)/,
+  );
+});
+
+/**
  * One control, two regions. The pane's control is the navigation's turned,
  * and both read their state — the root's attribute for the navigation, the
  * control's own `aria-expanded` for the pane, because the pane's attribute is
@@ -320,6 +440,8 @@ test('draws the pane control as the navigation control turned', () => {
     css,
     /\[data-part='nav-toggle'\],\s*\[data-ui='app-shell'\] \[data-part='aside-toggle'\] \{/,
   );
-  assert.match(css, /\[data-part='aside-toggle'\]\[aria-expanded='true'\]::before/);
-  assert.match(css, /:not\(\[data-nav-side='end'\]\) \[data-part='aside-toggle'\]::before/);
+  assert.match(
+    css,
+    /:not\(\[data-nav-side='end'\]\)\s+\[data-part='aside-toggle'\]\s*>\s*\[data-ui='icon'\]/,
+  );
 });

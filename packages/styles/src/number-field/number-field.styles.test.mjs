@@ -173,30 +173,20 @@ test('centres the value between two split steppers', () => {
 });
 
 /**
- * A character is never an icon. The up chevron is the scale's own down chevron
- * turned half a turn, so a theme that replaces one replaces both.
+ * A character is never an icon, and neither is a mask: the marks are the
+ * `Glyph` element the binding renders. The stylesheet sizes the box and turns
+ * the stacked increment's down chevron half a turn into the up one.
  */
-test('draws every stepper mark as a mask from the glyph scale', () => {
+test('sizes the stepper glyph element and paints none itself', () => {
   assert.doesNotMatch(declarations, /content:\s*'[^']+'/, 'a rule draws a character as an icon');
-
-  const stackedUp = rule(`${ui}[data-stepper='stacked'] [data-part='increment']::before`);
+  assert.doesNotMatch(declarations, /mask-image/);
   assert.match(
-    stackedUp,
-    /mask-image:var\(--slotted-number-field-increment-icon,var\(--slotted-icon-chevron-down\)\)/,
-  );
-  assert.match(stackedUp, /rotate:0\.5turn/);
-
-  assert.match(
-    rule(`${ui}[data-stepper='stacked'] [data-part='decrement']::before`),
-    /mask-image:var\(--slotted-number-field-decrement-icon,var\(--slotted-icon-chevron-down\)\)/,
+    rule(`${ui} [data-part='decrement'],${ui} [data-part='increment']`),
+    /--slotted-icon-size:var\(--_icon-size\)/,
   );
   assert.match(
-    rule(`${ui}[data-stepper='split'] [data-part='decrement']::before`),
-    /mask-image:var\(--slotted-number-field-decrement-icon,var\(--slotted-icon-minus\)\)/,
-  );
-  assert.match(
-    rule(`${ui}[data-stepper='split'] [data-part='increment']::before`),
-    /mask-image:var\(--slotted-number-field-increment-icon,var\(--slotted-icon-plus\)\)/,
+    rule(`${ui}[data-stepper='stacked'] [data-part='increment']>[data-ui='icon']`),
+    /rotate:0\.5turn/,
   );
 });
 
@@ -309,9 +299,5 @@ test('renders every attribute state the contract declares', () => {
     assert.ok(fragment.includes(attribute), `no scene renders ${attribute}`);
   }
   assert.match(fragment, /<fieldset disabled/, 'no scene shows a control disabled by an ancestor');
-  assert.match(
-    fragment,
-    /disabled><\/button>|disabled\s*><\/button>/,
-    'no scene shows a stepper at its bound',
-  );
+  assert.match(fragment, /<button\b[^>]*\bdisabled\s*>/, 'no scene shows a stepper at its bound');
 });

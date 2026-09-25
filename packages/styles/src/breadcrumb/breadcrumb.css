@@ -215,9 +215,9 @@
    * and the rest of that minimum in the block axis is a transparent halo
    * around the paint, so the target is whole without the box being tall.
    *
-   * The mark inside it is the Lucide `ellipsis`, drawn as a mask from the
-   * glyph scale at the control glyph size — the same way every other inner
-   * control in the library draws its mark, and what BC1 asks for. It was the
+   * The mark inside it is the `ellipsis` Glyph element in an `icon` box, at
+   * the control glyph size — the same way every other inner control in the
+   * library draws its mark, and what BC1 asks for. It was the
    * character U+2026 set in the trail's own type, which was the one exception
    * the library took to rule 3 of `docs/token-foundation.md`, on the grounds
    * that U+2026 stands in for omitted content rather than for a concept. The
@@ -237,6 +237,8 @@
    */
 
   [data-ui='breadcrumb'] [data-part='ellipsis'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -257,24 +259,19 @@
     transition: background-color var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  /* The mark itself: the glyph scale's own size, painted in the trail's ink. */
-  [data-ui='breadcrumb'] [data-part='ellipsis']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-breadcrumb-ellipsis-icon, var(--slotted-icon-ellipsis));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
   /* The halo that completes the target where the line is shorter than it. */
   [data-ui='breadcrumb'] [data-part='ellipsis']::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
+  }
+
+  /* On a finger the halo reaches the comfortable size in both axes; the box
+     keeps the line's height, so the trail does not grow. */
+  @media (pointer: coarse) {
+    [data-ui='breadcrumb'] [data-part='ellipsis']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
   }
 
   /* The ground moves under the pointer and nothing else does (R2). */
@@ -294,12 +291,8 @@
    * system takes the palette over. It is restated against a system colour so
    * the trail keeps its marks.
    *
-   * The ellipsis mark is a second: a mask is painted with a background, and a
-   * background is what the system replaces, so the three dots would go with
-   * the hover fill. `forced-color-adjust: none` on the mark alone keeps the
-   * author's `currentcolor`, and `currentcolor` there is the button's own ink,
-   * which the system has already forced to its text colour — so the mark is
-   * drawn in the system's palette rather than against it.
+   * The ellipsis mark is an `svg` stroked in `currentColor`, which is the
+   * button's own ink, and the system forces that ink to its text colour.
    */
 
   @media (forced-colors: active) {
@@ -309,10 +302,6 @@
 
     [data-ui='breadcrumb'] [data-part='ellipsis'] {
       border: var(--slotted-border-width-thin, 1px) solid ButtonBorder;
-    }
-
-    [data-ui='breadcrumb'] [data-part='ellipsis']::before {
-      forced-color-adjust: none;
     }
   }
 }

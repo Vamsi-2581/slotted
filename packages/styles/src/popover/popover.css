@@ -241,6 +241,15 @@
     background: var(--_surface);
     color: var(--_text);
     box-shadow: var(--_shadow);
+    /**
+     * The radius clips what the rows paint. The body's scroll shadow is two
+     * opaque covers in the panel's own ground, and a child's background runs
+     * square through a parent's rounded corner unless the parent clips: a
+     * panel with no footer stood rounded at the top and square at the bottom.
+     * `clip` and not `hidden`, so the panel is no scroll container of its own
+     * and a focus moving inside the body cannot scroll the panel off its frame.
+     */
+    overflow: clip;
 
     font-family: var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif);
     font-size: var(--_font-size);
@@ -250,6 +259,23 @@
     pointer-events: auto;
     /* The panel takes focus on open and is not a tab stop of its own. */
     outline: none;
+  }
+
+  /**
+   * The three rows are the header's, the body's and the footer's, and the
+   * body's alone is bounded. A consumer's own composition — the notification
+   * centre under a bell, an inline command palette — stands as the panel's
+   * one child, and as an auto row it grew past the room the positioner
+   * reported: clipped at the panel's edge, its own footer out of sight. The
+   * one child takes the body's row instead, and the family inside it scrolls
+   * what it owns. Two children or more are the consumer's own layout and keep
+   * their auto rows.
+   */
+  [data-ui='popover']
+    > [data-part='content']
+    > :only-child:not([data-part='header'], [data-part='body'], [data-part='footer']) {
+    grid-row: 2;
+    min-block-size: 0;
   }
 
   [data-ui='popover'] > [data-part='content']:focus-visible {
@@ -296,8 +322,9 @@
 
   /**
    * A square on control geometry, so it holds the WCAG minimum target at every
-   * density, and the mark is a mask from the foundation's glyph set rather than
-   * a character. It is pulled level with the title's cap height by the negative
+   * density, and the mark is the library's own `Glyph` — an `<svg>` the binding
+   * draws inside an `icon` box at `sm` — rather than a character or a mask. It
+   * is pulled level with the title's cap height by the negative
    * block margin rather than by stretching the row.
    */
   [data-ui='popover'] > [data-part='content'] > [data-part='header'] > [data-part='close'] {
@@ -324,17 +351,6 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard)),
       color var(--slotted-control-transition-duration, var(--slotted-duration-short))
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
-  }
-
-  [data-ui='popover'] > [data-part='content'] > [data-part='header'] > [data-part='close']::before {
-    content: '';
-    inline-size: var(--slotted-control-icon-size-sm, 14px);
-    block-size: var(--slotted-control-icon-size-sm, 14px);
-    background: currentColor;
-    mask-image: var(--slotted-icon-x);
-    mask-size: contain;
-    mask-repeat: no-repeat;
-    mask-position: center;
   }
 
   [data-ui='popover']
@@ -499,21 +515,5 @@
     border-bottom-width: var(--_border-width);
     border-left-width: var(--_border-width);
     border-bottom-left-radius: var(--_arrow-tip-radius);
-  }
-
-  @media (forced-colors: active) {
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='popover']
-      > [data-part='content']
-      > [data-part='header']
-      > [data-part='close']::before {
-      forced-color-adjust: none;
-    }
   }
 }

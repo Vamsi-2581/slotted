@@ -11,8 +11,8 @@
   load; its scene restates those two declarations inline, and the rest of the
   picture is this family's.
 
-  The control's mark is the family's own mask from the glyph tokens. The last
-  scene passes a consumer's icon node in the icon part instead.
+  The control's mark is an icon drawing the family's glyph for the state. The
+  last scene passes a consumer's icon node in the icon part instead.
 -->
 
 <section data-scene="region">
@@ -119,17 +119,6 @@
       font-size: 11px;
       margin: 0;
     }
-
-    [data-demo-glyph] {
-      background-color: currentColor;
-      block-size: 100%;
-      display: block;
-      inline-size: 100%;
-      mask-image: var(--slotted-icon-presentation, var(--slotted-icon-maximize));
-      mask-position: center;
-      mask-repeat: no-repeat;
-      mask-size: contain;
-    }
   </style>
 
   <div data-ui="fullscreen" data-part="root" data-demo-panel id="r1">
@@ -144,7 +133,10 @@
           data-icon-only
           type="button"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="maximize"></svg></span
+          ></span>
           <span data-part="label">Tela cheia</span>
         </button>
       </div>
@@ -184,7 +176,10 @@
           data-fullscreen
           type="button"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="minimize"></svg></span
+          ></span>
           <span data-part="label">Sair da tela cheia</span>
         </button>
       </div>
@@ -224,7 +219,10 @@
           data-fullscreen
           type="button"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="minimize"></svg></span
+          ></span>
           <span data-part="label">Sair da tela cheia</span>
         </button>
       </div>
@@ -254,7 +252,10 @@
         data-variant="ghost"
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -264,7 +265,10 @@
         data-variant="ghost"
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -274,7 +278,10 @@
         data-variant="ghost"
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
     </div>
@@ -287,7 +294,10 @@
         data-variant="outline"
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -297,7 +307,10 @@
         data-variant="outline"
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -307,7 +320,10 @@
         data-variant="outline"
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
     </div>
@@ -320,7 +336,10 @@
         data-fullscreen
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="minimize"></svg></span
+        ></span>
         <span data-part="label">Sair da tela cheia</span>
       </button>
       <button
@@ -330,7 +349,10 @@
         data-fullscreen
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="minimize"></svg></span
+        ></span>
         <span data-part="label">Sair da tela cheia</span>
       </button>
     </div>
@@ -344,7 +366,10 @@
         disabled
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -355,7 +380,10 @@
         disabled
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
     </div>
@@ -374,7 +402,10 @@
         data-icon-only
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -385,7 +416,10 @@
         data-icon-only
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -396,7 +430,10 @@
         data-icon-only
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -407,7 +444,10 @@
         data-fullscreen
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="minimize"></svg></span
+        ></span>
         <span data-part="label">Sair da tela cheia</span>
       </button>
       <button
@@ -417,7 +457,10 @@
         data-icon-only
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
       <button
@@ -429,7 +472,10 @@
         disabled
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="maximize"></svg></span
+        ></span>
         <span data-part="label">Tela cheia</span>
       </button>
     </div>
@@ -447,14 +493,20 @@
         data-fullscreen
         type="button"
       >
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="minimize"></svg></span
+        ></span>
         <span data-part="label">Vollbildmodus beenden und zurückkehren</span>
       </button>
     </div>
     <p data-demo-label>o ícone do consumidor na parte icon</p>
     <div data-demo-row>
       <button data-ui="fullscreen" data-part="trigger" data-variant="outline" type="button">
-        <span data-part="icon" aria-hidden="true"><span data-demo-glyph></span></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="presentation"></svg></span
+        ></span>
         <span data-part="label">Apresentar</span>
       </button>
     </div>
@@ -475,7 +527,10 @@
           data-fullscreen
           type="button"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="minimize"></svg></span
+          ></span>
           <span data-part="label">Sair da tela cheia</span>
         </button>
       </div>
@@ -512,7 +567,10 @@
           data-fullscreen
           type="button"
         >
-          <span data-part="icon" aria-hidden="true"></span>
+          <span data-part="icon" aria-hidden="true"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="minimize"></svg></span
+          ></span>
           <span data-part="label">Sair da tela cheia</span>
         </button>
       </div>

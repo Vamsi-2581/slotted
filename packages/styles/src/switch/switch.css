@@ -73,6 +73,9 @@
     /** The distance from the label's text to the description under it. */
     --_description-gap: max(0px, var(--slotted-space-3, 0.375rem) - var(--_label-slack));
 
+    /* The rows are as tall as they read. Stretched, the description drifted
+       away from the label it belongs to; the surplus is the container's. */
+    align-content: start;
     color: var(--slotted-switch-color, var(--slotted-text, CanvasText));
     display: grid;
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
@@ -167,6 +170,9 @@
    * rule at all — the axis is the writing direction's, not the screen's.
    */
   [data-ui='switch'] > [data-part='track'] > [data-part='thumb'] {
+    /* A flex box, so the mark's icon is centred in the knob as a box and not
+       set on a line of text. */
+    align-items: center;
     /**
      * One knob, in both states and all three schemes. `on-solid` is the ink the
      * theme guarantees against a solid tone, and both tracks are solid tones —
@@ -195,10 +201,11 @@
      */
     box-shadow: var(--slotted-switch-thumb-shadow, var(--slotted-control-shadow, none));
     box-sizing: border-box;
-    display: block;
+    display: flex;
     inline-size: var(--_thumb-size);
     inset-block-start: var(--_gutter);
     inset-inline-start: var(--_gutter);
+    justify-content: center;
     position: absolute;
     transition:
       inset-inline-start var(--slotted-control-transition-duration)
@@ -212,37 +219,25 @@
   /**
    * The mark. `docs/component-features.md` asks for the state to be
    * perceptible beyond colour *and* beyond position, and this is what supplies
-   * it: real geometry from the theme's glyph scale, masked rather than drawn as
-   * a character.
+   * it: the check the binding renders in the knob as the `Glyph` element,
+   * never a character. `indicator="none"` is the binding rendering none.
    *
    * It is always in the DOM and fades in, so the eye follows one control
    * changing rather than two marks swapping places. Off is the absence of the
    * mark, which is the same statement a checkbox makes.
    */
-  [data-ui='switch'] > [data-part='track'] > [data-part='thumb']::before {
-    background-color: var(--slotted-switch-mark-color, var(--slotted-tone-accent-solid));
-    block-size: 100%;
-    content: '';
-    display: block;
-    inline-size: 100%;
-    mask-image: var(--slotted-switch-mark, var(--slotted-icon-check));
-    mask-position: center;
-    mask-repeat: no-repeat;
+  [data-ui='switch'] > [data-part='track'] > [data-part='thumb'] > [data-ui='icon'] {
     /**
-     * Seventy per cent rather than `contain`. The glyph is drawn on a 24-unit
-     * grid with a 3-unit stroke, so at `contain` the check filled the knob and
-     * the switch read as a checkbox on a pill.
+     * Seventy per cent of the knob rather than all of it. The glyph is drawn
+     * on a 24-unit grid with a 3-unit stroke, so filling the knob the check
+     * read as a checkbox on a pill.
      */
-    mask-size: 70%;
+    block-size: 70%;
+    color: var(--slotted-switch-mark-color, var(--slotted-tone-accent-solid));
+    inline-size: 70%;
     opacity: 0;
     transition: opacity var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
-  }
-
-  [data-ui='switch'][data-part='root'][data-indicator='none']
-    > [data-part='track']
-    > [data-part='thumb']::before {
-    content: none;
   }
 
   /* ── The label ────────────────────────────────────────────────────────
@@ -411,7 +406,8 @@
       :has(> [data-part='control']:checked)
     ):not([data-loading])
     > [data-part='track']
-    > [data-part='thumb']::before {
+    > [data-part='thumb']
+    > [data-ui='icon'] {
     opacity: 1;
   }
 
@@ -568,7 +564,8 @@
 
   [data-ui='switch'][data-part='root'][data-loading]
     > [data-part='track']
-    > [data-part='thumb']::before {
+    > [data-part='thumb']
+    > [data-ui='icon'] {
     opacity: 0;
   }
 
@@ -664,8 +661,9 @@
 
   [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
     > [data-part='track']
-    > [data-part='thumb']::before {
-    background-color: var(--slotted-switch-disabled-mark-color, var(--slotted-disabled-background));
+    > [data-part='thumb']
+    > [data-ui='icon'] {
+    color: var(--slotted-switch-disabled-mark-color, var(--slotted-disabled-background));
   }
 
   [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))

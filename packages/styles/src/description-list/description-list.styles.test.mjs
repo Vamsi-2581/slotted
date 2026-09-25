@@ -115,10 +115,9 @@ test('collapses a span with the count that produced it', () => {
  */
 test('paints a finished copy by its mark and not only by its colour', () => {
   assert.ok(normalized.includes("[data-part='copy'][data-complete]{color:"));
-  assert.ok(
-    normalized.includes(
-      "[data-part='copy'][data-complete]::after{mask-image:var(--slotted-description-list-copied-icon,var(--slotted-icon-check))",
-    ),
+  assert.match(
+    fragment,
+    /data-complete\s+data-part="copy"[^>]*>\s*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="check">/,
   );
   assert.ok(normalized.includes(':enabled:not([data-complete]):hover'));
 });
@@ -136,8 +135,8 @@ test('clamps a long value without taking any of it out of the DOM', () => {
 });
 
 /**
- * A component-owned mark is geometry from a glyph token; a character is never
- * an icon.
+ * A component-owned mark is the `Glyph` element the binding draws; a character
+ * is never an icon, and neither is a mask the stylesheet paints.
  *
  * The placeholder is the exception that proves which of the two it is. It was
  * drawn as a rule of two pixels, which made the absence of a value an icon this
@@ -147,8 +146,15 @@ test('clamps a long value without taking any of it out of the DOM', () => {
  * it that way.
  */
 test('draws every mark it owns as geometry, and the missing value is not one', () => {
-  assert.ok(normalized.includes('mask-image:var(--slotted-description-list-copy-icon'));
-  assert.ok(normalized.includes('mask-image:var(--slotted-description-list-toggle-icon'));
+  assert.ok(!/mask/.test(normalized), 'the sheet paints a mark with a mask');
+  assert.match(
+    fragment,
+    /data-part="copy"(?![^>]*data-complete)[^>]*>\s*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="copy">/,
+  );
+  assert.match(
+    fragment,
+    /data-part="toggle"[^>]*>[^<]*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="chevron-down">/,
+  );
   assert.ok(
     !normalized.includes("[data-part='placeholder']:empty"),
     'the sheet draws a mark the bindings write',

@@ -24,8 +24,23 @@ const ui = `[data-ui='${contract.ui}']`;
 const member = contract.members.notificationCenter;
 const item = `${ui}>[data-part='feed'] [data-part='item']`;
 
+/**
+ * Every declaration the selector receives, across every rule whose selector
+ * list names it: the visual's disc and glyph share one geometry block and
+ * each has a block of its own, and a reader that stopped at the first `{`
+ * would see one of the two. A selector list is read as the list it is.
+ */
 function rule(selector) {
-  return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
+  const wanted = selector.split(',');
+  return normalized
+    .split('}')
+    .map((block) => block.split('{').slice(-2))
+    .filter(([selectors]) => {
+      const list = selectors?.split(',') ?? [];
+      return wanted.every((one) => list.includes(one));
+    })
+    .map(([, body]) => body ?? '')
+    .join('');
 }
 
 test('lives in the component layer', () => {
@@ -107,31 +122,47 @@ test('paints unread with a wash and weight, and read with neither', () => {
 
 /**
  * A toned row without a consumer visual gets the family's: the tone's glyph
- * on the tone's surface, the size the avatar would be, the same read or not.
+ * filled — the tone's surface as a disc under the ringed glyph, at the ring's
+ * own radius on the icon grid, the two on one box so they are concentric by
+ * construction. A disc with its own edge under a smaller ringed glyph was a
+ * circle inside a circle that rounded apart; a bare glyph read as loose.
  * Every glyph is a circle; a triangle is refused in this library.
  */
 test('draws the tone glyph as the visual when the consumer gives none', () => {
-  const own = rule(`${item}>[data-part='visual'][data-tone]:empty`);
+  const own = rule(`${item}>[data-part='visual'][data-tone]:has(>[data-tone-glyph])`);
   assert.match(rule(`${item}>[data-part='visual']:empty:not([data-tone])`), /display:none/);
-  assert.match(own, /background-color:var\(--_tone-surface\)/);
-  assert.match(own, /border:var\(--_rule-size\) solid var\(--_tone-border\)/);
+  assert.doesNotMatch(own, /border|background-color/, 'the box draws a disc with an edge again');
   assert.match(own, /color:var\(--_tone-text\)/);
   assert.match(own, /block-size:var\(--_visual\)/);
+  assert.match(own, /--slotted-icon-size:var\(--_visual-glyph\)/);
+  assert.match(own, /justify-content:center/);
+  assert.doesNotMatch(normalized, /mask|--_tone-glyph|\[data-part='visual'\][^{]*::(before|after)/);
+  const disc = own.replace(/\s+/g, '');
+  assert.match(
+    disc,
+    /background-image:radial-gradient\(circle,var\(--_tone-surface\)calc\(var\(--_visual-glyph\)\*9\.5\/24-0\.5px\),transparentcalc\(var\(--_visual-glyph\)\*9\.5\/24\+0\.5px\)\)/,
+    'the disc is not the ring radius on the grid',
+  );
+  assert.match(rule(ui), /--_visual-glyph:calc\(var\(--_visual\) \* 6 \/ 7\)/);
   assert.doesNotMatch(normalized, /--_tone-on-solid/);
   assert.doesNotMatch(normalized, /icon-triangle/);
   assert.match(
     rule(`${item}:not(:has(>[data-part='visual']))>[data-part='content']`),
     /grid-column:1 \/ 3/,
   );
-  assert.match(
-    rule(`${item}>[data-part='visual'][data-tone]:empty::before`),
-    /mask-image:var\(--_tone-glyph\)/,
-  );
-  assert.match(rule(ui), /--_tone-glyph:var\(--slotted-icon-circle-info\)/);
   assert.match(rule(ui), /--_visual:var\(--slotted-avatar-size-sm,28px\)/);
-  for (const [tone, glyph] of Object.entries(contract.toneGlyph)) {
-    if (tone === 'reason' || tone === 'accent') continue;
-    assert.match(rule(`${item}[data-tone='${tone}']`), new RegExp(`--slotted-icon-${glyph}`));
+  const visuals = [
+    ...fragment.matchAll(
+      /<span data-part="visual" data-tone="([a-z]+)"\s*>\s*<span data-ui="icon" data-part="root" data-tone-glyph="" aria-hidden="true"\s*>\s*<svg data-part="glyph" data-glyph="([a-z-]+)"/g,
+    ),
+  ];
+  assert.ok(visuals.length > 0, 'the fragment draws no family visual');
+  for (const [, tone, glyph] of visuals) {
+    assert.equal(
+      glyph,
+      contract.toneGlyph[tone],
+      `${tone} draws a glyph the contract does not name`,
+    );
   }
   assert.match(
     rule(`${item}>[data-part='content']`),
@@ -139,21 +170,29 @@ test('draws the tone glyph as the visual when the consumer gives none', () => {
   );
 });
 
-/** The two controls the family draws: glyphs from the scale, a box on the inner-control scale, a halo to the target minimum. */
-test('draws its two controls from glyph tokens on the inner-control scale', () => {
+/** The two controls the family draws: Glyph elements, a box on the inner-control scale, a halo to the target minimum. */
+test('draws its two controls as Glyph elements on the inner-control scale', () => {
   const controls = `${item}>[data-part='controls']`;
-  assert.match(
-    rule(`${controls}>[data-part='read-toggle']::after`),
-    /mask-image:var\(--slotted-icon-check\)/,
-  );
-  assert.match(
-    rule(`${item}[data-read]>[data-part='controls']>[data-part='read-toggle']::after`),
-    /mask-image:var\(--slotted-icon-dot\)/,
-  );
-  assert.match(
-    rule(`${controls}>[data-part='dismiss']::after`),
-    /mask-image:var\(--slotted-icon-x\)/,
-  );
+  assert.match(rule(`${controls}>button`), /--slotted-icon-size:var\(--_glyph\)/);
+  assert.doesNotMatch(normalized, /button::after/);
+  for (const [part, glyphs] of [
+    ['read-toggle', /^(check|dot)$/],
+    ['dismiss', /^x$/],
+  ]) {
+    const drawn = [
+      ...fragment.matchAll(
+        new RegExp(
+          `data-part="${part}"[^>]*>\\s*<span data-ui="icon" data-part="root" aria-hidden="true"\\s*>\\s*<svg data-part="glyph" data-glyph="([a-z-]+)"`,
+          'g',
+        ),
+      ),
+    ];
+    assert.equal(
+      drawn.length,
+      (fragment.match(new RegExp(`data-part="${part}"`, 'g')) ?? []).length,
+    );
+    for (const [, glyph] of drawn) assert.match(glyph, glyphs, part);
+  }
   assert.match(
     rule(ui),
     /--_control:min\(calc\(var\(--_glyph\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--slotted-control-inner-size-md,24px\)\)/,
@@ -227,7 +266,42 @@ test('offers two sizes on the control and type scales', () => {
   assert.match(rule(`${ui}[data-size='sm']`), /--slotted-control-inner-size-sm/);
 });
 
-/** Below 320 pixels the controls drop under the content rather than squeezing it; the one media query is forced colours. */
+/**
+ * A host that bounds the centre — a popover under the bell — bounds the feed
+ * alone: the header, the views and the footer stay where they are and the
+ * feed scrolls between them, with the bar `scroll-area` draws. A host that
+ * gives no height, a page, gets the whole feed and no bar.
+ */
+test('scrolls the feed alone when the host bounds it', () => {
+  const feed = rule(`${ui}>[data-part='feed']`);
+  assert.match(feed, /flex:1 1 auto/);
+  assert.match(feed, /min-block-size:0/);
+  assert.match(feed, /overflow-y:auto/);
+  assert.match(feed, /overscroll-behavior:contain/);
+  assert.match(feed, /scrollbar-gutter:stable/);
+  assert.match(feed, /scrollbar-width:thin/);
+  assert.match(feed, /scrollbar-color:var\(--_scrollbar-thumb\) var\(--_scrollbar-track\)/);
+});
+
+/**
+ * A finger is not a pointer: the family's own controls grow to the
+ * comfortable target under a coarse pointer, as the theme does for the
+ * controls it owns, and the taller box is centred on the visual's axis.
+ */
+test('raises its own controls to the comfortable target on a finger', () => {
+  const coarse = normalized.slice(normalized.indexOf('@media (pointer:coarse)'));
+  const controls = coarse
+    .split(`${ui}>[data-part='feed'] [data-part='item']>[data-part='controls']{`)[1]
+    ?.split('}')[0];
+  assert.ok(controls, 'the controls keep the pointer size on a finger');
+  assert.match(controls, /--_control:var\(--slotted-target-comfortable,44px\)/);
+  assert.match(
+    controls,
+    /margin-block-start:calc\(\(var\(--_visual\) - var\(--_control\)\) \/ 2\)/,
+  );
+});
+
+/** Below 320 pixels the controls drop under the content rather than squeezing it; the media queries are forced colours and the coarse pointer. */
 test('answers its own width and never the viewport', () => {
   assert.match(rule(ui), /container-name:notification-center/);
   assert.match(rule(ui), /container-type:inline-size/);

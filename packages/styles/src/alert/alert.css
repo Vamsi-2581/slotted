@@ -33,7 +33,6 @@
     --_surface: var(--slotted-tone-accent-surface);
     --_border: var(--slotted-tone-accent-border);
     --_text: var(--slotted-tone-accent-text);
-    --_glyph: var(--slotted-icon-circle-info);
 
     /**
      * How the dismiss control answers a pointer, and it is one mechanism for
@@ -79,17 +78,17 @@
      * `em` and land on the message's first line at every reach without a
      * number saying how.
      *
-     * The status mark is the title's own size (R5): a glyph from the control
-     * scale beside a title from the control type scale was three pixels taller
-     * than the capitals it stood next to at every reach, and read as a sticker
-     * on the surface rather than as part of the sentence. `1em` here resolves
-     * against the root, whose font size is the title's.
+     * The status mark is a filled disc a step above the title's `1em`, rounded
+     * to an even number of pixels so its centre falls on a whole pixel: 16 at
+     * 13-pixel type, 14 at 12, 16 at 14. A filled mark carries more weight per
+     * pixel than an outline, so it stays within a few pixels of the capitals
+     * and still reads as the loudest thing on the line.
      */
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_description-font-size: var(--slotted-control-font-size-md, 13px);
     --_glyph-size: var(--slotted-control-icon-size-md, 16px);
     --_inner-size: var(--slotted-control-inner-size-md, 24px);
-    --_mark-size: 1em;
+    --_mark-size: round(nearest, 1.2em, 2px);
     --_line-height: var(--slotted-line-height-md, 1.5);
 
     /**
@@ -214,7 +213,8 @@
    *
    * Five tones and five marks, and the map is
    * `specs/components/alert/contract.json` rather than a decision taken here:
-   * the stylesheet, both bindings and the contract test read one table. It is
+   * both bindings draw the glyph from it and the contract test reads it, and
+   * this sheet paints only the colour. It is
    * the map `status-indicator` declares, so a status light and an alert about
    * the same thing draw the same silhouette.
    *
@@ -229,7 +229,6 @@
     --_surface: var(--slotted-tone-accent-surface);
     --_border: var(--slotted-tone-accent-border);
     --_text: var(--slotted-tone-accent-text);
-    --_glyph: var(--slotted-icon-circle-info);
   }
 
   [data-ui='alert'][data-part='root'][data-tone='secondary'] {
@@ -238,7 +237,6 @@
     --_surface: var(--slotted-tone-secondary-surface);
     --_border: var(--slotted-tone-secondary-border);
     --_text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-circle);
   }
 
   [data-ui='alert'][data-part='root'][data-tone='success'] {
@@ -247,7 +245,6 @@
     --_surface: var(--slotted-tone-success-surface);
     --_border: var(--slotted-tone-success-border);
     --_text: var(--slotted-tone-success-text);
-    --_glyph: var(--slotted-icon-circle-check);
   }
 
   [data-ui='alert'][data-part='root'][data-tone='warning'] {
@@ -256,7 +253,6 @@
     --_surface: var(--slotted-tone-warning-surface);
     --_border: var(--slotted-tone-warning-border);
     --_text: var(--slotted-tone-warning-text);
-    --_glyph: var(--slotted-icon-triangle-alert);
   }
 
   [data-ui='alert'][data-part='root'][data-tone='danger'] {
@@ -265,7 +261,6 @@
     --_surface: var(--slotted-tone-danger-surface);
     --_border: var(--slotted-tone-danger-border);
     --_text: var(--slotted-tone-danger-text);
-    --_glyph: var(--slotted-icon-circle-alert);
   }
 
   /* ── Variant: the three ways one tone is painted ───────────────────────
@@ -376,51 +371,56 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * A square the title's own size, on the title's first line (R5). The box is
-   * exactly the glyph — no line box around it, no ground behind it — and it is
-   * pushed down from the start of the row by half the difference between one
-   * line and the mark. `1lh` and `1em` both resolve against the root, whose
-   * font size and leading are the title's, so the mark's centre is the first
-   * line's centre at every reach, every density and every type size without a
-   * number saying how — and it stays there when the title wraps, which a mark
-   * centred on the whole block would not.
+   * A filled disc on the title's first line, with the tone's symbol cut out
+   * of it: the binding's `Glyph` in its `solid` form, which fills the glyph's
+   * ring and cuts the symbol out of the fill with an SVG mask, so the ground
+   * shows through the symbol on every variant. Every tone's glyph is a
+   * circle, so every mark is the same round silhouette on the same centre;
+   * the symbol inside is what tells the five apart when colour is gone. A
+   * triangle was the one mark whose visual centre is not its box's centre,
+   * and it did not sit on the line the way the four circles did.
    *
-   * The mark is painted in `currentcolor`, so on a `solid` alert it takes the
-   * same ink as the words with no rule of its own.
+   * The glyph's filled ring reaches radius 11 of its 24-unit box, so the box
+   * is 12/11 of the mark and the disc is the mark's own size; the box
+   * overhangs the slot by half a unit on each side, centred.
    *
-   * `--slotted-alert-icon` is the escape hatch: an application with its own
-   * icon set writes one declaration and keeps the tone, the size, the
-   * alignment and the part name.
+   * The disc is painted in `currentcolor`: the tone's text role on `soft` and
+   * `outline`, which the theme measures against those grounds, and `on-solid`
+   * on `solid`, where the cut-out shows the fill beneath.
+   *
+   * The mark hangs from the first line's baseline, not from the top of the
+   * row. Grid baseline alignment puts the mark's bottom edge on the words'
+   * baseline, and a relative offset lowers it by half of what the mark exceeds
+   * the capitals by, so its centre is the centre of the capitals in whatever
+   * face the title is set in. A margin cannot do this: a box with no baseline
+   * of its own is aligned by its border edge, so a margin moves nothing. The
+   * offset is rounded to a whole pixel, and the mark is a whole number of
+   * pixels, so the distance from the baseline to the mark's edge is an
+   * integer: the browser snaps the glyphs and the drawing by the same amount
+   * and they cannot land a pixel apart. The negative block-start margin takes
+   * the mark's own height out of the baseline group, so the words sit where
+   * they sit with no mark at all. Layout containment keeps the glyph's own
+   * baseline out of the box's, so the box is aligned by its border edge.
+   *
+   * A mark the page supplies instead of the tone's takes the same box and its
+   * place on the first line, centred in it.
    */
   [data-ui='alert'] > [data-part='icon'] {
-    align-self: start;
-    background-color: currentcolor;
+    --slotted-icon-size: calc(var(--_mark-size) * 12 / 11);
+
+    align-items: center;
+    align-self: baseline;
     block-size: var(--_mark-size);
+    contain: layout;
+    display: flex;
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_mark-size);
-    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
-    margin-inline-end: var(--_column-gap);
-    mask-image: var(--slotted-alert-icon, var(--_glyph));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
-
-  /**
-   * A mark the page supplied instead of the tone's own. The box keeps its size
-   * and its place on the first line, and the artwork is centred in it, so an
-   * icon drawn at `1em` fills it and a larger one overhangs it equally on both
-   * sides of the same axis; the mask goes, because a mask over an element that
-   * now has content of its own would cut that content into the shape of a
-   * circle.
-   */
-  [data-ui='alert'] > [data-part='icon']:not(:empty) {
-    align-items: center;
-    background-color: transparent;
-    display: flex;
+    inset-block-start: round(nearest, (var(--_mark-size) - 1cap) / 2, 1px);
     justify-content: center;
-    mask-image: none;
+    margin-block-start: calc(-1 * var(--_mark-size));
+    margin-inline-end: var(--_column-gap);
+    position: relative;
   }
 
   /* ── The words, which are the live region ─────────────────────────────
@@ -433,6 +433,8 @@
    * itself and the words run past the box that holds them.
    */
   [data-ui='alert'] > [data-part='content'] {
+    /* The other half of the mark's baseline group: see the mark above. */
+    align-self: baseline;
     display: grid;
     grid-column: 2;
     grid-row: 1;
@@ -457,7 +459,12 @@
    * too narrow for the message anyway.
    */
   [data-ui='alert'] [data-part='title'] {
+    /* A title rendered as a heading keeps the root's type rather than the
+       user agent's `1.17em`: the mark is `1em` of the root, and a 15-pixel
+       title beside a 13-pixel mark put the mark a pixel above its capitals. */
+    font-size: inherit;
     font-weight: var(--slotted-alert-title-font-weight, var(--slotted-font-weight-semibold, 600));
+    line-height: inherit;
     margin: 0;
     min-inline-size: 0;
     overflow-wrap: anywhere;
@@ -508,6 +515,10 @@
    * exactly one line, and the inset above the message equals the inset below.
    */
   [data-ui='alert'] > [data-part='dismiss'] {
+    /* The cross is the binding's `Glyph` in an `icon` box at the glyph size
+       the formula for this box reads. */
+    --slotted-icon-size: var(--_glyph-size);
+
     align-items: center;
     align-self: start;
     appearance: none;
@@ -538,17 +549,6 @@
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='alert'] > [data-part='dismiss']::before {
-    background-color: currentcolor;
-    block-size: var(--_glyph-size);
-    content: '';
-    inline-size: var(--_glyph-size);
-    mask-image: var(--slotted-alert-dismiss-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
-
   /**
    * `:enabled` is the guard `packages/styles/src/states.test.mjs` requires, and
    * the reason it exists: a control the browser has already refused must not
@@ -565,6 +565,21 @@
   [data-ui='alert'] > [data-part='dismiss']:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: default;
+  }
+
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: a transparent box centred on the control reaches
+     44 pixels, and the ground and the ring stay square. */
+  @media (pointer: coarse) {
+    [data-ui='alert'] > [data-part='dismiss'] {
+      position: relative;
+    }
+
+    [data-ui='alert'] > [data-part='dismiss']::after {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
   }
 
   /* ── Focus ────────────────────────────────────────────────────────────
@@ -660,29 +675,23 @@
    *
    * The operating system replaces every author colour, so all five tones
    * become one box and all three variants become one painting. What is left to
-   * decide is whether the box still has an edge and whether the mark is still
-   * there, and the theme cannot answer either: `solid` draws its border in its
-   * own fill, and a transparent border is not a colour the system remaps.
+   * decide is whether the box still has an edge, and the theme cannot answer
+   * it: `solid` draws its border in its own fill, and a transparent border is
+   * not a colour the system remaps.
    *
-   * The mark keeps its silhouette, which is the whole reason a glyph is drawn
-   * per tone — a triangle and a crossed circle are still different from each
-   * other when neither of them is coloured.
+   * The mark needs no rule: its glyph fills with `currentcolor`, which the
+   * system has already forced, and it keeps its silhouette, which is the whole
+   * reason a glyph is drawn per tone — a triangle and a crossed circle are
+   * still different from each other when neither of them is coloured.
    */
   @media (forced-colors: active) {
     [data-ui='alert'][data-part='root'] {
       border-color: CanvasText;
     }
 
-    [data-ui='alert'] > [data-part='icon'] {
-      background-color: CanvasText;
-    }
-
     /**
-     * The control's glyph is painted in `currentcolor`, so giving the control a
-     * system colour repaints the mark with it. Writing the colour on the
-     * pseudo-element instead would put a system colour inside a decorative rule,
-     * which `packages/styles/src/fallbacks.test.mjs` refuses — and rightly:
-     * decoration with no theme behind it should disappear rather than shout.
+     * The control's glyph is stroked in `currentcolor`, so giving the control a
+     * system colour repaints the mark with it.
      */
     [data-ui='alert'] > [data-part='dismiss'] {
       color: CanvasText;
@@ -692,17 +701,6 @@
     [data-ui='alert'] > [data-part='dismiss']:enabled:active {
       background-color: Highlight;
       color: HighlightText;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='alert'] > [data-part='dismiss']::before {
-      forced-color-adjust: none;
     }
   }
 }

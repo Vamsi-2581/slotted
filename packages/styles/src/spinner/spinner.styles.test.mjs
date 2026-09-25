@@ -33,17 +33,88 @@ test('is selected by the identifier the contract declares', () => {
 });
 
 /**
- * The arc is a glyph the theme generates from Lucide (R4), masked over
- * `currentColor`, so the ring takes the ink its host is writing with and no
- * sheet draws a circle by hand. The border-with-one-transparent-side ring it
- * replaces had square ends and a stroke that was a fraction of its diameter.
+ * The ring is drawn here, in gradients over `currentColor`, so it takes the
+ * ink its host is writing with and no host draws a circle of its own. Three
+ * layers under one mask: a track at a fifth of the ink, an arc from the tail
+ * angle to the head angle, and a dot at each end for the round caps a conic
+ * gradient cannot draw. The glyph it replaced was one shape turned.
  */
-test('draws the arc from the theme glyph over the ink around it', () => {
-  const base = rule(ui);
-  assert.ok(base.includes(`mask-image:var(${contract.glyph})`), 'the arc is not the glyph');
-  assert.ok(base.includes('mask-size:contain'));
-  assert.ok(base.includes('background-color:currentColor'));
-  assert.doesNotMatch(declarations, /border-radius|border-inline-end-color/);
+test('draws the ring from gradients over the ink around it', () => {
+  const base = rule(ui).replace(/\s+/g, '');
+  assert.doesNotMatch(css, /--slotted-icon-|mask-size|border-radius/, 'the ring is still a glyph');
+  assert.match(base, /--_track:color-mix\(inoklab,currentColor20%,transparent\)/);
+  assert.match(base, /conic-gradient\(var\(--_track\)0100%\)/, 'no track');
+  assert.match(
+    base,
+    /conic-gradient\(fromvar\(--_start\),currentColor0deg,currentColorcalc\(var\(--_head\)-var\(--_tail\)\),transparentcalc\(var\(--_head\)-var\(--_tail\)\)\)/,
+    'the arc is not the distance from tail to head',
+  );
+  assert.equal(
+    (
+      base.match(
+        /radial-gradient\(circleatcalc\(50%\+var\(--_radius\)\*sin\(var\(--_(?:end|start)\)\)\)/g,
+      ) ?? []
+    ).length,
+    2,
+    'an end has no cap',
+  );
+  assert.match(
+    base,
+    /mask-image:radial-gradient\(circle,transparentcalc\(var\(--_ring\)\/2-var\(--_stroke\)-0\.5px\)/,
+  );
+  assert.doesNotMatch(declarations, /calc\(100%\s*-/, 'a mask stop is a percentage of the ray');
+});
+
+/**
+ * The stroke is the icon set's own at this size, two units of twenty-four,
+ * and never under the medium hairline; the ring keeps the set's inset inside
+ * its box, so the swap with a glyph is between two shapes of one measure.
+ */
+test('is drawn to the measure of the glyph it stands in for', () => {
+  const base = rule(ui).replace(/\s+/g, '');
+  assert.match(base, /--_ring:calc\(var\(--_size\)\*5\/6\)/);
+  assert.match(
+    base,
+    /--_stroke:max\(var\(--slotted-border-width-medium,1\.5px\),calc\(var\(--_size\)\/12\)\)/,
+  );
+  assert.match(base, /padding:calc\(\(var\(--_size\)-var\(--_ring\)\)\/2\)/);
+  assert.match(base, /background-origin:content-box/);
+});
+
+/**
+ * Three angles, none a rotation of the box: a turned box is a bitmap spun,
+ * a gradient by angle is repainted. Head and tail each run one turn in
+ * halves so the arc opens from the front and closes from behind, and the
+ * linear turn under them is a turn and the hundred degrees the two resets
+ * leave, so a cycle ends on the angle the next begins on.
+ */
+test('chases its own tail rather than turning a shape', () => {
+  const base = rule(ui).replace(/\s+/g, '');
+  assert.doesNotMatch(declarations, /rotate|transform/, 'the box is turned');
+  for (const angle of ['turn', 'head', 'tail']) {
+    assert.match(
+      css,
+      new RegExp(`@property --_${angle}\\s*\\{[^}]*syntax: '<angle>'`),
+      `${angle} flips`,
+    );
+    assert.match(
+      base,
+      new RegExp(`slotted-spinner-${angle}var\\(--slotted-duration-loop-slow\\)linearinfinite`),
+    );
+  }
+  assert.match(css, /@keyframes slotted-spinner-turn\s*\{\s*to\s*\{\s*--_turn: 460deg/);
+  assert.match(css, /--_head: 20deg;\s*animation-timing-function: ease-in-out/);
+  assert.match(css, /--_tail: 0deg;\s*animation-timing-function: ease-in-out/);
+  assert.match(css, /--_head: 280deg/);
+  assert.match(css, /--_tail: 260deg/);
+});
+
+test('arrives on a fade rather than a cut', () => {
+  assert.match(
+    css,
+    /@starting-style\s*\{\s*\[data-ui='spinner'\]\s*\{\s*opacity: 0;\s*scale: 0\.6/,
+  );
+  assert.match(rule(ui), /transition:opacity var\(--slotted-control-transition-duration\)/);
 });
 
 /**
@@ -61,15 +132,11 @@ test('is the size its host says, and the medium glyph box otherwise', () => {
   assert.ok(base.includes('flex:none'));
 });
 
-test('turns once per loop step, linear, and stops under reduced motion', () => {
+test('stands still under reduced motion, as a track with an arc resting on it', () => {
   assert.ok(
-    rule(ui).includes(
-      'animation:slotted-spinner-turn var(--slotted-duration-loop) linear infinite',
+    normalized.includes(
+      `@media (prefers-reduced-motion:reduce){${ui}{--_head:270deg;animation:none;}}`,
     ),
-  );
-  assert.match(css, /@keyframes slotted-spinner-turn/);
-  assert.ok(
-    normalized.includes(`@media (prefers-reduced-motion:reduce){${ui}{animation:none;}}`),
     'the ring keeps turning under reduced motion',
   );
 });

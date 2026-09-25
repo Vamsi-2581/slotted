@@ -75,11 +75,9 @@ test('paints the dot from the control it stands on, through the sibling combinat
   assert.ok(normalized.includes(`${part('control')}:checked + [data-part='indicator']`));
 });
 
-test('draws the dot as a mask from the glyph scale, never as a character', () => {
-  assert.match(
-    rule(part('indicator')),
-    /mask-image:var\(--slotted-radio-group-mark-image,var\(--slotted-icon-dot\)\)/,
-  );
+test('draws the dot as the glyph element, never as a mask or a character', () => {
+  assert.match(rule(part('indicator')), /--slotted-icon-size:var\(--_size\)/);
+  assert.doesNotMatch(declarations, /mask-image/);
   /* An empty `content` materialises a box — the tile's edge, the stretched
      target — and is not a mark. What is refused is a character standing in for
      artwork, so the pattern is a string with something in it. */
@@ -145,16 +143,15 @@ test('says chosen with the edge and the dot, and leaves the ground alone', () =>
   const indicator = rule(part('indicator'));
   assert.match(
     indicator,
-    /background-color:var\(--slotted-radio-group-mark-color,var\(--slotted-tone-accent-solid\)\)/,
+    /color:var\(--slotted-radio-group-mark-color,var\(--slotted-tone-accent-solid\)\)/,
   );
   assert.match(indicator, /block-size:var\(--_size\)/);
   assert.match(indicator, /inline-size:var\(--_size\)/);
-  assert.match(indicator, /mask-size:contain/);
   assert.match(indicator, /scale:0\.6/);
   /* Invalid moves the dot with the edge. */
   assert.match(
     rule(`${root}[data-invalid] [data-part='control']:checked + [data-part='indicator']`),
-    /background-color:var\(--slotted-radio-group-invalid-mark-color,var\(--slotted-tone-danger-solid\)\)/,
+    /color:var\(--slotted-radio-group-invalid-mark-color,var\(--slotted-tone-danger-solid\)\)/,
   );
 });
 
@@ -324,9 +321,7 @@ test('restates the pair forced colors would collapse', () => {
   /* The dot is the accent on the field, so under forced colours it is
      Highlight on Field rather than HighlightText on Highlight. */
   assert.ok(
-    normalized.includes(
-      `${part('control')}:checked + [data-part='indicator']{background-color:Highlight;}`,
-    ),
+    normalized.includes(`${part('control')}:checked + [data-part='indicator']{color:Highlight;}`),
   );
 });
 
@@ -378,4 +373,12 @@ test('puts a description one step from its label, and one step nearer inside a t
     rule(`${root}[data-variant='tile'] [data-part='item']`),
     /--_description-gap:var\(--slotted-radio-group-tile-description-gap,var\(--slotted-space-2,0\.25rem\)\)/,
   );
+});
+
+/**
+ * Stretched — a dialog body filling a phone's height — the rows shared the
+ * surplus and the description drifted from the label it belongs to.
+ */
+test('never distributes surplus height between its rows', () => {
+  assert.match(declarations, /align-content:\s*start/);
 });

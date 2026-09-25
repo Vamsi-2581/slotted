@@ -32,6 +32,62 @@ test('is selected by the identifier the contract declares', () => {
 });
 
 /**
+ * A row composes other families, and they reuse this family's part names: a
+ * `tag` in `end` has a `body` and a `label` of its own. A descendant selector
+ * reached them, turned the tag's body into a column with its text on the top
+ * edge and reset its label's line height and weight. Every rule reaches its
+ * parts through the anatomy's own chain instead — `root > content > body >
+ * label` — so the selectors stop where the row's parts stop.
+ */
+test('reaches its parts through the anatomy’s chain, never into a nested family', () => {
+  /* `normalized` drops the space before a colon, and that space is the
+     combinator in `[data-ui='list-item'] :is(…)`. This pass keeps it. */
+  const spaced = declarations
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([{};,>+~])\s*/g, '$1')
+    .replace(/\(\s+/g, '(')
+    .replace(/\s+\)/g, ')');
+  const selectors = [...spaced.matchAll(/(?:^|[{};])([^{};@]+)\{/g)].flatMap(([, list]) => {
+    const split = [];
+    let depth = 0;
+    let start = 0;
+    for (let index = 0; index < list.length; index += 1) {
+      if (list[index] === '(') depth += 1;
+      if (list[index] === ')') depth -= 1;
+      if (list[index] === ',' && depth === 0) {
+        split.push(list.slice(start, index));
+        start = index + 1;
+      }
+    }
+    return [...split, list.slice(start)];
+  });
+  const descendant = selectors.filter((selector) => {
+    if (!selector.startsWith(ui)) return false;
+    let depth = 0;
+    for (const character of selector) {
+      if (character === '(') depth += 1;
+      if (character === ')') depth -= 1;
+      if (character === ' ' && depth === 0) return true;
+    }
+    return false;
+  });
+  assert.deepEqual(descendant, [], 'a descendant combinator reaches past the row’s own parts');
+  const content = `${ui}>[data-part='content']`;
+  for (const part of ['start', 'body', 'end']) {
+    assert.ok(
+      normalized.includes(`${content}>[data-part='${part}']{`),
+      `${part} is not content’s child`,
+    );
+  }
+  for (const part of ['label', 'description']) {
+    assert.ok(
+      normalized.includes(`${content}>[data-part='body']>[data-part='${part}']{`),
+      `${part} is not body’s child`,
+    );
+  }
+});
+
+/**
  * A chooser in the leading column sits on the title's first line (LI2). The
  * column stands at the top of that line and is as tall as it, so `checkbox`'s
  * own lift lands the box on the line's centre; centred on the block it stood a
@@ -39,7 +95,9 @@ test('is selected by the identifier the contract declares', () => {
  * chooser's own square, fixed across densities as the chooser is (CK1).
  */
 test('stands a chooser in the leading column on the title’s first line', () => {
-  const chooser = rule(`${ui} [data-part='start']:has(>[data-ui='checkbox'])`);
+  const chooser = rule(
+    `${ui}>[data-part='content']>[data-part='start']:has(>[data-ui='checkbox'])`,
+  );
   assert.match(chooser, /align-items:start/);
   assert.match(chooser, /inline-size:var\(--_control-size\)/);
   assert.match(
@@ -63,7 +121,7 @@ test('stands a chooser in the leading column on the title’s first line', () =>
     );
   }
   /* The gap beside the chooser is the row's own control gap, nothing added. */
-  const start = rule(`${ui} [data-part='start']`);
+  const start = rule(`${ui}>[data-part='content']>[data-part='start']`);
   assert.match(start, /margin-inline-end:var\(--_gap\)/);
   assert.doesNotMatch(chooser, /margin-inline|padding-inline/);
 });
@@ -108,17 +166,20 @@ test('draws the leading visual at the control glyph size in the row’s own ink,
     rule(root),
     /--_icon-size:var\(--slotted-list-item-icon-size,var\(--slotted-control-icon-size-md,16px\)\)/,
   );
-  const start = rule(`${ui} [data-part='start']`);
+  const start = rule(`${ui}>[data-part='content']>[data-part='start']`);
   assert.match(start, /color:var\(--_text\)/);
   assert.match(start, /min-inline-size:var\(--_icon-size\)/);
   assert.doesNotMatch(start, /background|border-radius/);
-  assert.match(rule(`${ui} [data-part='description']`), /color:var\(--_muted\)/);
+  assert.match(
+    rule(`${ui}>[data-part='content']>[data-part='body']>[data-part='description']`),
+    /color:var\(--_muted\)/,
+  );
   assert.match(
     rule(root),
     /--_muted:var\(--slotted-list-item-color-muted,var\(--slotted-text-muted,GrayText\)\)/,
   );
   assert.match(
-    rule(`${ui} [data-part='body']`),
+    rule(`${ui}>[data-part='content']>[data-part='body']`),
     /row-gap:var\(--slotted-list-item-body-gap,var\(--slotted-space-1,0\.125rem\)\)/,
   );
 });
@@ -215,7 +276,7 @@ test('paints hover, active, selected, focus-visible and disabled as five differe
  */
 test('yields at 240px: the content shrinks and the actions take a line that fits', () => {
   assert.match(rule(`${ui}>[data-part='content']`), /min-inline-size:0/);
-  assert.match(rule(`${ui} [data-part='body']`), /min-inline-size:0/);
+  assert.match(rule(`${ui}>[data-part='content']>[data-part='body']`), /min-inline-size:0/);
   const actions = rule(`${ui}>[data-part='actions']`);
   assert.match(actions, /box-sizing:border-box/);
   const narrow = normalized.split('@container slotted-list-item (max-inline-size:22rem){')[1] ?? '';
@@ -224,4 +285,10 @@ test('yields at 240px: the content shrinks and the actions take a line that fits
     /flex-basis:100%/,
     'the actions do not take their own line below the breakpoint',
   );
+  /* A pair of glyph targets is narrower than the visual: it keeps its line. */
+  const glyphs =
+    narrow.split(`${ui}>[data-part='actions']:not(:has(>:not([data-shape]))){`)[1]?.split('}')[0] ??
+    '';
+  assert.match(glyphs, /flex-basis:auto/, 'icon-only targets take a line of their own');
+  assert.match(glyphs, /padding-block-end:0/);
 });

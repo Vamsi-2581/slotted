@@ -91,10 +91,11 @@ test('keeps the measure under the eighty characters WCAG SC 1.4.8 allows', () =>
   assert.ok(Number(characters) <= 80, `${characters}ch exceeds the SC 1.4.8 ceiling`);
 });
 
-test('bounds the two page steps by a family token with a rem fallback', () => {
+test('bounds every bounded step by a family token with a rem fallback', () => {
   for (const [size, token] of [
     ['content', '--slotted-container-content'],
     ['wide', '--slotted-container-wide'],
+    ['full', '--slotted-container-full'],
   ]) {
     assert.match(
       ruleFor(`${ui}[data-size='${size}']`),
@@ -104,18 +105,25 @@ test('bounds the two page steps by a family token with a rem fallback', () => {
   }
 });
 
-test('keeps the two page steps in the order their names put them', () => {
+test('keeps the bounded steps in the order their names put them', () => {
   const remOf = (size) =>
     Number.parseFloat(/, ([\d.]+)rem\)/.exec(ruleFor(`${ui}[data-size='${size}']`))?.[1] ?? '0');
   assert.ok(remOf('wide') > remOf('content'), 'wide is not wider than content');
+  assert.ok(remOf('full') > remOf('wide'), 'full is not wider than wide');
 });
 
-test('removes the maximum without removing the container', () => {
+/**
+ * The value written without thinking is the bounded one. `full` on every route
+ * of an application was what an ultra-wide display made unreadable, so the
+ * ceiling is what `full` means and the absence of one is asked for by name.
+ */
+test('removes the maximum under bleed, and nowhere else', () => {
   assert.equal(
-    ruleFor(`${ui}[data-size='full']`),
+    ruleFor(`${ui}[data-size='bleed']`),
     '--_max: 100%;',
-    'full is the absence of a maximum, and the gutters stay',
+    'bleed is the absence of a maximum, and the gutters stay',
   );
+  assert.doesNotMatch(ruleFor(`${ui}[data-size='full']`), /100%/);
 });
 
 test('maps every inset step to the space token of the same name', () => {

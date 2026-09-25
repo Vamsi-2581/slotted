@@ -43,7 +43,7 @@
     --_rows: var(--slotted-textarea-rows, 3);
     --_max-rows: var(--slotted-textarea-max-rows, 12);
 
-    background-color: var(--slotted-textarea-background, transparent);
+    background-color: var(--slotted-textarea-background, var(--slotted-control-surface, Field));
     /**
      * The control step of the border scale, not the strong one: a separator
      * between two surfaces and the edge of a control hold the same 3:1 ratio

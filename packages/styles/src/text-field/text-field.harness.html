@@ -3,8 +3,9 @@
   assets: the reference pages use Lucide, and a framework-free page cannot
   import it. Two shapes on the same 24-unit grid are enough to judge the box.
 
-  The clear and reveal buttons carry no visible text, and their masks come from
-  the theme's own glyph scale, so nothing here draws a character as an icon.
+  The clear and reveal buttons carry no visible text; their glyphs are the
+  empty `Glyph` element the build draws, so nothing here draws a character as
+  an icon.
 -->
 
 <section data-scene="default">
@@ -216,30 +217,36 @@
   <div data-ui="stack" data-part="root" data-gap="6">
     <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
       <input data-part="input" type="search" value="nota fiscal 2026" />
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
     <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
       <input data-part="input" type="password" value="senha-secreta" />
-      <button
-        data-part="reveal"
-        type="button"
-        aria-pressed="false"
-        aria-label="Mostrar senha"
-      ></button>
+      <button data-part="reveal" type="button" aria-pressed="false" aria-label="Mostrar senha">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="eye"></svg
+        ></span>
+      </button>
     </div>
     <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
       <input data-part="input" type="text" value="senha-secreta" />
-      <button
-        data-part="reveal"
-        type="button"
-        aria-pressed="true"
-        aria-label="Mostrar senha"
-      ></button>
+      <button data-part="reveal" type="button" aria-pressed="true" aria-label="Mostrar senha">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="eye-off"></svg
+        ></span>
+      </button>
     </div>
     <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
       <span data-part="start" aria-hidden="true">@</span>
       <input data-part="input" value="ada.lovelace" />
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
   </div>
 </section>
@@ -335,11 +342,19 @@
     <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
       <span data-part="start" aria-hidden="true">R$</span>
       <input data-part="input" value="1.480.320.559,00" />
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
     <div data-ui="text-field" data-part="root" data-size="sm" data-variant="subtle">
       <input data-part="input" value="مرحبا بالعالم" />
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
   </div>
 </section>

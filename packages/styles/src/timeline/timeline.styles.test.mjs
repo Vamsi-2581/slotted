@@ -44,7 +44,7 @@ test('answers every value of every painted axis', () => {
 
 /**
  * Each status is a shape as well as a colour: pending is the variant's own
- * mark, complete is a filled disc with the check knocked out of it, current is
+ * mark, complete is a filled disc with the check glyph knocked out of it, current is
  * a filled disc with a ring around it, loading is the shared spinner at a
  * dot's size. `high-contrast` paints every tone in one ink and forced colours
  * paint every ring in one, so the shape is what is left. The ring is a shadow,
@@ -64,10 +64,17 @@ test('separates the statuses by shape as well as by colour', () => {
     ),
     'forced colours get the ring back',
   );
-  assert.match(
-    normalized,
-    /\[data-complete\]:not\(\[data-current\]\)\[data-part='marker'\]:empty::after\{[^}]*inset:0;[^}]*mask-image:var\(--slotted-icon-check\);/,
-    'a finished dot knocks the check out of the whole disc',
+  assert.ok(
+    normalized.includes(
+      "[data-complete]:not([data-current])[data-part='marker']:has(>[data-check]){background-color:var(--_tone-mark);border-width:0;",
+    ),
+    'a finished dot fills the whole disc',
+  );
+  assert.ok(
+    normalized.includes(
+      "[data-part='marker']>[data-ui='icon'][data-check]{--slotted-icon-size:calc(var(--_marker)-2*var(--slotted-space-1,0.125rem));color:var(--_surface);",
+    ),
+    'and knocks the check out of it in the ground',
   );
   assert.ok(
     normalized.includes(
@@ -98,12 +105,12 @@ test('keeps every marker width on the line parity', () => {
   assert.ok(normalized.includes('--_badge:calc(var(--_rule)+round(up,'));
   assert.ok(
     normalized.includes(
-      "[data-ui='timeline']:has([data-part='marker']>:not([data-ui='spinner'])){--_rail:var(--_badge);}",
+      "[data-ui='timeline']:has([data-part='marker']>:not([data-ui='spinner'],[data-check])){--_rail:var(--_badge);}",
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='marker']:not(:empty,:has(>[data-ui='spinner'])){--_marker:var(--_badge);",
+      "[data-part='marker']:not(:empty,:has(>[data-ui='spinner'],>[data-check])){--_marker:var(--_badge);",
     ),
   );
   assert.ok(
@@ -184,15 +191,24 @@ test('draws focus on the article and guards the controls', () => {
 });
 
 /**
- * The ring is `spinner`'s and the chevron is a mask from the glyph scale: the
- * family draws no arc and no character of its own.
+ * The ring is `spinner`'s and the chevron and the check are `Glyph` elements
+ * the bindings render: the family draws no arc, no mask and no character of
+ * its own, and turns the chevron's icon box rather than swapping the glyph.
  */
-test('borrows the ring and masks the chevron', () => {
+test('borrows the ring and turns the chevron glyph', () => {
   assert.ok(!/animation:/.test(declarations), 'the family animates nothing itself');
+  assert.ok(!/mask/.test(declarations), 'no mask stands in for a glyph');
+  assert.ok(normalized.includes("[data-part='group-indicator']>[data-ui='icon']{rotate:-90deg;"));
   assert.ok(
-    normalized.includes("[data-part='group-indicator']{") &&
-      normalized.includes('mask-image:var(--slotted-icon-chevron-down)'),
+    normalized.includes(
+      "[data-open]>[data-part='group-label'][data-part='group-indicator']>[data-ui='icon']{rotate:0deg;",
+    ),
   );
+  for (const indicator of fragment.matchAll(
+    /<span aria-hidden="true" data-part="group-indicator"\s*>([\s\S]*?)<\/span\s*>\s*<\/span/g,
+  )) {
+    assert.match(indicator[1], /data-ui="icon"[\s\S]*data-glyph="chevron-down"/);
+  }
   assert.ok(!/content:\s*['"][^'"]+['"]/.test(declarations), 'no character stands in for a glyph');
 });
 

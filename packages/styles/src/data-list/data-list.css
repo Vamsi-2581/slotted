@@ -108,20 +108,18 @@
 
   /**
    * The direction, drawn after the label: `table`'s own indicator, the
-   * chevron turned a half turn for ascending. Without a key there is nothing
-   * to point at and the mark is absent.
+   * chevron `Glyph` the binding draws in the button's `end` slot, turned a
+   * half turn for ascending. Without a key there is nothing to point at and
+   * the binding draws no mark.
    */
-  [data-ui='data-list'] [data-part='sort'][data-direction] [data-part='end']::before {
-    background-color: currentColor;
-    block-size: var(--slotted-control-icon-size-sm, 14px);
-    content: '';
-    display: inline-block;
-    inline-size: var(--slotted-control-icon-size-sm, 14px);
-    mask: var(--slotted-icon-chevron-down) center / contain no-repeat;
+  [data-ui='data-list'] [data-part='sort'] [data-part='end'] > [data-ui='icon'] {
     transition: transform var(--_transition);
   }
 
-  [data-ui='data-list'] [data-part='sort'][data-direction='ascending'] [data-part='end']::before {
+  [data-ui='data-list']
+    [data-part='sort'][data-direction='ascending']
+    [data-part='end']
+    > [data-ui='icon'] {
     transform: rotate(180deg);
   }
 
@@ -385,17 +383,13 @@
     padding: 0;
   }
 
-  [data-ui='data-list'] [data-part='more']::after {
-    background-color: currentColor;
-    block-size: var(--slotted-control-icon-size-sm, 14px);
-    content: '';
-    flex: none;
-    inline-size: var(--slotted-control-icon-size-sm, 14px);
-    mask: var(--slotted-icon-chevron-down) center / contain no-repeat;
+  /* The chevron is the `Glyph` the binding draws after the words; it turns a
+     half turn once the fields are shown. */
+  [data-ui='data-list'] [data-part='more'] > [data-ui='icon'] {
     transition: transform var(--_transition);
   }
 
-  [data-ui='data-list'] [data-part='more'][aria-expanded='true']::after {
+  [data-ui='data-list'] [data-part='more'][aria-expanded='true'] > [data-ui='icon'] {
     transform: rotate(180deg);
   }
 

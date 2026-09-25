@@ -394,6 +394,7 @@
    * line, so the row keeps its rhythm and the target keeps its size.
    */
   [data-ui='description-list'] [data-part='copy'] {
+    --slotted-icon-size: var(--_glyph);
     align-items: center;
     block-size: var(--slotted-target-min, 24px);
     color: var(--_control-ink);
@@ -409,17 +410,6 @@
      */
     margin-block: calc(var(--_hit) * -1);
     padding: var(--_hit);
-  }
-
-  [data-ui='description-list'] [data-part='copy']::after {
-    background-color: currentcolor;
-    block-size: var(--_glyph);
-    content: '';
-    display: block;
-    inline-size: var(--_glyph);
-    mask-image: var(--slotted-description-list-copy-icon, var(--slotted-icon-copy));
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
   }
 
   [data-ui='description-list'] [data-part='copy']:enabled:not([data-complete]):hover {
@@ -438,8 +428,9 @@
   }
 
   /**
-   * A copy that finished. The mark changes as well as the colour, because a
-   * green clipboard says nothing to a reader who cannot see the green — and the
+   * A copy that finished. The mark changes as well as the colour — the binding
+   * draws the check `Glyph` in place of the copy one — because a green
+   * clipboard says nothing to a reader who cannot see the green, and the
    * control returns to rest on its own, so nothing is left claiming a state
    * that has passed.
    */
@@ -447,18 +438,31 @@
     color: var(--_control-ink-done);
   }
 
-  [data-ui='description-list'] [data-part='copy'][data-complete]::after {
-    mask-image: var(--slotted-description-list-copied-icon, var(--slotted-icon-check));
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: a transparent `::before` centred on the control
+     reaches 44 pixels, and the ground and the ring stay square. The row keeps
+     its rhythm, because the halo takes no room. */
+  @media (pointer: coarse) {
+    [data-ui='description-list'] [data-part='copy'] {
+      position: relative;
+    }
+
+    [data-ui='description-list'] [data-part='copy']::before {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
   }
 
   /**
    * The control that reveals the rest of a clamped value. It reads as a link
    * rather than as a button because what it does is take the reader further
    * into the text, and it carries the chevron every disclosure in this library
-   * carries — turned, not swapped, so the eye follows one mark rather than
-   * catching two.
+   * carries — the `Glyph` the binding draws after the words, turned, not
+   * swapped, so the eye follows one mark rather than catching two.
    */
   [data-ui='description-list'] [data-part='toggle'] {
+    --slotted-icon-size: var(--_glyph);
     align-items: center;
     color: var(--_link-ink);
     column-gap: var(--slotted-space-2, 0.25rem);
@@ -469,21 +473,13 @@
     padding-inline: 0;
   }
 
-  [data-ui='description-list'] [data-part='toggle']::after {
-    background-color: currentcolor;
-    block-size: var(--_glyph);
-    content: '';
-    display: block;
-    mask-image: var(--slotted-description-list-toggle-icon, var(--slotted-icon-chevron-down));
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-    inline-size: var(--_glyph);
+  [data-ui='description-list'] [data-part='toggle'] > [data-ui='icon'] {
     rotate: 0deg;
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='description-list'] [data-revealed] [data-part='toggle']::after {
+  [data-ui='description-list'] [data-revealed] [data-part='toggle'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -674,20 +670,6 @@
 
     [data-ui='description-list'][data-variant='framed'][data-layout='row'] [data-part='term'] {
       border-inline-end: 0;
-    }
-  }
-
-  @media (forced-colors: active) {
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='description-list'] [data-part='copy']::after,
-    [data-ui='description-list'] [data-part='toggle']::after {
-      forced-color-adjust: none;
     }
   }
 }

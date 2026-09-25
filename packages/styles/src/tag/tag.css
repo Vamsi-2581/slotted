@@ -370,8 +370,15 @@
     }
   }
 
+  /**
+   * The slot sizes what it holds: an icon box reads `--slotted-icon-size`
+   * from its container, and a bare glyph host such as `ng-icon` reads the
+   * slot's font-size, so both are the glyph scale.
+   */
   [data-ui='tag'] [data-part='start'],
   [data-ui='tag'] [data-part='end'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     block-size: var(--_icon-size);
     box-sizing: border-box;
@@ -394,8 +401,8 @@
    * ── The selection mark ─────────────────────────────────────────────────
    *
    * A selected chip changes its ground, and a ground is a colour. WCAG 2.2
-   * 1.4.1 asks for a second signal, so the check is drawn as well — real
-   * geometry from a glyph token, never a character.
+   * 1.4.1 asks for a second signal, so the check is drawn as well — the
+   * `check` glyph the binding renders in an icon box, never a character.
    *
    * It arrives by growing from nothing rather than appearing, because the
    * words beside it move to make room and an eye that cannot follow that reads
@@ -404,19 +411,22 @@
    * answer, and the theme collapses its duration under reduced motion.
    */
   [data-ui='tag'] [data-part='indicator'] {
-    background-color: currentColor;
+    --slotted-icon-size: var(--_icon-size);
+
+    align-items: center;
     block-size: var(--_icon-size);
+    display: inline-flex;
     flex: none;
     inline-size: 0;
+    /* The icon keeps its size while the box grows round it, centred and
+       clipped, so the check is uncovered from its middle outwards. */
+    justify-content: center;
     /* A flex gap is drawn beside a zero-width item as readily as beside a wide
        one, so the mark that is not there would still cost the chip a gap of
        leading space. The negative margin is that gap, given back. */
     margin-inline-end: calc(-1 * var(--_gap));
-    mask-image: var(--slotted-icon-check);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_icon-size) var(--_icon-size);
     opacity: 0;
+    overflow: hidden;
     transition:
       inline-size var(--slotted-duration-short) var(--slotted-easing-standard),
       margin-inline-end var(--slotted-duration-short) var(--slotted-easing-standard),
@@ -443,8 +453,13 @@
    *
    * The cost, on a pill: a hovered remove is a rounded-ended segment rather
    * than a disc. That is the shape of the target, which is the truth.
+   *
+   * The mark is the `x` glyph the binding renders; the control hands its icon
+   * box the chip's glyph size.
    */
   [data-ui='tag'] [data-part='remove'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -482,22 +497,31 @@
     position: absolute;
   }
 
+  /**
+   * On a finger the target is the comfortable size in both axes, and the
+   * control's ground is never taller than it is wide: the box is at least as
+   * wide as the chip is tall inside its edges, where a large chip drew a
+   * segment 24 wide and 32 tall. The halo above grows to 44 pixels around it.
+   */
+  @media (pointer: coarse) {
+    [data-ui='tag'] [data-part='remove'] {
+      inline-size: max(
+        var(--slotted-target-min, 24px),
+        min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size)),
+        calc(var(--_block-size) - 2 * var(--_edge-width))
+      );
+    }
+
+    [data-ui='tag'] [data-part='remove']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+  }
+
   /* A tag that is only a remove control is not a tag, but the rounding is one
      rule either way rather than a case the sheet has to know about. */
   [data-ui='tag'] [data-part='remove']:first-child {
     border-end-start-radius: var(--_inner-radius);
     border-start-start-radius: var(--_inner-radius);
-  }
-
-  [data-ui='tag'] [data-part='remove']::before {
-    background-color: currentColor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-icon-x);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
   }
 
   /* ── Selected, held back for the one state stronger than it ───────────── */
@@ -739,28 +763,6 @@
     [data-ui='tag'][data-part='root'][data-disabled] {
       border-color: GrayText;
       color: GrayText;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='tag'] [data-part='remove']::before {
-      forced-color-adjust: none;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='tag'] [data-part='indicator'] {
-      forced-color-adjust: none;
     }
   }
 }

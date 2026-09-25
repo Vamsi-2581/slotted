@@ -369,6 +369,17 @@
    * that reserved nothing and then failed has no box, and a glyph needs one.
    */
   [data-ui='image'][data-part='root'] [data-part='fallback'] {
+    /**
+     * The mark a picture leaves behind: the binding draws `image-off` in an
+     * `Icon` unless the consumer projected content of their own, which
+     * replaces it rather than sitting beside it. The size is set on the slot,
+     * so an icon the consumer projects without a size is drawn at the same
+     * step. It is a token with a length behind it rather than a step of the
+     * control icon scale, whose largest step is eighteen pixels and reads as a
+     * speck in a box of any size a picture takes.
+     */
+    --slotted-icon-size: var(--slotted-image-glyph-size, var(--slotted-space-9, 2rem));
+
     display: none;
   }
 
@@ -383,25 +394,6 @@
     min-block-size: var(--slotted-image-fallback-min-size, var(--slotted-space-12, 4rem));
     min-inline-size: var(--slotted-image-fallback-min-size, var(--slotted-space-12, 4rem));
     place-items: center;
-  }
-
-  /**
-   * The mark a picture leaves behind: `image-off`, drawn as a mask from a
-   * glyph token rather than as a character. `:empty` is the whole condition,
-   * so content the consumer projects replaces it rather than sitting beside
-   * it. The size is a token with a length behind it rather than a step of the
-   * control icon scale, whose largest step is eighteen pixels and reads as a
-   * speck in a box of any size a picture takes.
-   */
-  [data-ui='image'][data-part='root'] [data-part='fallback']:empty::before {
-    background-color: currentColor;
-    block-size: var(--slotted-image-glyph-size, var(--slotted-space-9, 2rem));
-    content: '';
-    inline-size: var(--slotted-image-glyph-size, var(--slotted-space-9, 2rem));
-    mask-image: var(--slotted-icon-image-off);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
   }
 
   /* ── Interaction ──────────────────────────────────────────────────────── */
@@ -453,15 +445,5 @@
    * nothing here needs restating for them. The picture is exempt by the user
    * agent's own rule: `forced-color-adjust` does not apply to images, and a
    * photograph reduced to two system colours is not a photograph.
-   *
-   * A masked glyph is painted with a background, and forced colours replace
-   * a background that is not one of the system's own: the mark would go and
-   * the box would stay. `packages/styles/src/masked-glyph.test.mjs` holds
-   * the rule.
    */
-  @media (forced-colors: active) {
-    [data-ui='image'][data-part='root'] [data-part='fallback']:empty::before {
-      forced-color-adjust: none;
-    }
-  }
 }

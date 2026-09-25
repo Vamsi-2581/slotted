@@ -118,7 +118,7 @@
   [data-ui='split-button'][data-part='root']
     > [data-ui='button'][data-variant='outline'][data-disabled],
   [data-ui='split-button'][data-part='root'] > [data-ui='button'][data-variant='outline']:disabled {
-    border-color: var(--slotted-border-strong, ButtonBorder);
+    border-color: var(--slotted-control-border-color, ButtonBorder);
   }
 
   [data-ui='split-button'][data-part='root']
@@ -206,32 +206,17 @@
    *
    * The mark `select` draws for "a list opens here", which is the promise a
    * menu button keeps; not the ellipsis, which says "more" without saying
-   * what opens. It is a mask from the glyph token painted in the control's
-   * own ink, so it follows the label into hover, press, disabled and every
-   * tone's `on-solid`; `forced-color-adjust: none` keeps that ink under
-   * forced colours, where a painted background is otherwise thrown away
-   * (`masked-glyph.test.mjs`).
+   * what opens. It is the `chevron-down` Glyph element the binding renders in
+   * the icon part, stroked in the control's own ink, so it follows the label
+   * into hover, press, disabled, every tone's `on-solid` and forced colours.
+   * `button` sizes it through the icon part; this stylesheet paints nothing.
    *
    * It does not turn while the menu is open. None of the six surveyed split
    * buttons turns it; a mark that flips says the surface will close, while
    * the surface below is what the reader is looking at. `select` turns its
    * own because a select's arrow discloses the value's list; a menu button's
    * chevron is a promise, not a state.
-   *
-   * The span is the IconButton's own child, which `button` already sizes to
-   * the glyph box; it is selected as the icon part's child rather than by a
-   * part name of its own because it is artwork, not anatomy.
    */
-  [data-ui='split-button'][data-part='root']
-    > [data-part='menu-trigger']
-    > [data-part='icon']
-    > :not([data-part='indicator']) {
-    background-color: currentColor;
-    mask-image: var(--slotted-split-button-chevron, var(--slotted-icon-chevron-down));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
 
   /**
    * ── Loading ───────────────────────────────────────────────────────────
@@ -263,16 +248,6 @@
   @media (forced-colors: active) {
     [data-ui='split-button'][data-part='root'] > [data-ui='button'][data-pressed] {
       border-color: Highlight;
-    }
-
-    /* The chevron keeps the control's own ink, which the system has already
-       forced to the right value; without this the painted mask is thrown
-       away and the box stays empty. */
-    [data-ui='split-button'][data-part='root']
-      > [data-part='menu-trigger']
-      > [data-part='icon']
-      > :not([data-part='indicator']) {
-      forced-color-adjust: none;
     }
   }
 }

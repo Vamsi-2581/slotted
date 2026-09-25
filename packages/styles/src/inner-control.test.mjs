@@ -29,7 +29,25 @@ const source = new URL('.', import.meta.url).pathname;
  * 4. `:focus-visible` draws the theme's ring (R3);
  * 5. the pointer target reaches `--slotted-target-min` — either the box does,
  *    or a transparent pseudo-element around it does — rather than the glyph
- *    growing to fill it.
+ *    growing to fill it;
+ * 6. under `@media (pointer: coarse)` the target reaches
+ *    `--slotted-target-comfortable` in both axes, and nothing the reader sees
+ *    grows taller than it is wide. Either the box grows in both axes at once,
+ *    or a transparent pseudo-element centred on the box reaches the
+ *    comfortable size and the box keeps the size it has on a fine pointer. No
+ *    coarse-pointer rule grows the block axis alone or clips the ground to a
+ *    content box. The rule it replaces padded the box in the block axis and
+ *    clipped the ground: the ground stayed 24 pixels square, and the border
+ *    box, where the focus ring is drawn, stood 24 wide and 44 tall — measured
+ *    on the Nexora demo at 390 pixels with touch emulation.
+ *
+ *    Two halves stacked in one column (a number field's steppers) cannot each
+ *    be 44 tall inside a 44-pixel frame. Each is 44 wide and keeps its own half
+ *    of the frame in the block axis (`inset-block: 0`), which is what the
+ *    column physically holds. Two controls side by side in one frame (a clear
+ *    and a trigger) are 44 tall, and neither target crosses the edge the two
+ *    boxes share: a later halo drawn over an earlier box would take that
+ *    box's presses.
  *
  * The field families additionally floor their glyph at the size SL3 fixed:
  * `--slotted-control-icon-size-*` falls to 12px and 13px at the dense step,
@@ -88,6 +106,46 @@ const FLOORED = [
   'currency-field',
 ];
 
+/**
+ * Rule 6 holds for every part above and for the inner controls the rest of
+ * the audit does not read: the triggers beside a clear, the clear of a date
+ * or time field, a picker's trigger, a filter rule's remove, a tab's dismiss,
+ * a copy control, a table header's filter, and a chart's legend entries — a
+ * text-bearing entry is wider than tall already, and its target is still the
+ * comfortable one.
+ */
+const COARSE = [
+  ...PARTS,
+  { family: 'combobox', part: 'trigger' },
+  { family: 'multi-select', part: 'trigger' },
+  { family: 'entity-picker', part: 'trigger' },
+  { family: 'date-field', part: 'clear' },
+  { family: 'time-field', part: 'clear' },
+  { family: 'datetime-field', part: 'clear' },
+  { family: 'date-picker', part: 'trigger' },
+  { family: 'time-picker', part: 'trigger' },
+  { family: 'datetime-picker', part: 'trigger' },
+  { family: 'date-range-picker', part: 'clear' },
+  { family: 'date-range-picker', part: 'trigger' },
+  { family: 'time-range-picker', part: 'clear' },
+  { family: 'datetime-range-picker', part: 'clear' },
+  { family: 'command-palette', part: 'clear' },
+  { family: 'filter-bar', part: 'remove' },
+  { family: 'filter-bar', part: 'more' },
+  { family: 'tabs', part: 'dismiss' },
+  { family: 'code-block', part: 'copy' },
+  { family: 'code-block', part: 'wrap' },
+  { family: 'description-list', part: 'copy' },
+  { family: 'table', part: 'filter' },
+  { family: 'chart', part: 'legend-item' },
+  { family: 'chart', part: 'legend-more' },
+];
+
+/** Parts stacked in one column, whose block axis is their share of the frame. */
+const STACKED = new Set(['number-field', 'currency-field']);
+
+const COARSE_QUERY = '@media (pointer: coarse)';
+
 const STATE = /:(?:hover|active|focus|disabled)\b|::/;
 const PSEUDO = /::(?:before|after)\b/;
 
@@ -137,6 +195,10 @@ function rules(css) {
         found.push({
           selector: open.selector.replace(/\s+/g, ' '),
           declarations: parse(declarations),
+          /* The at-rules the rule is nested in, outermost first. */
+          media: stack
+            .map(({ selector }) => selector.replace(/\s+/g, ' '))
+            .filter((selector) => selector.startsWith('@')),
         });
       }
       start = index + 1;
@@ -202,7 +264,9 @@ function audit(family, part) {
    * tab list or an overflow control in a toolbar is as tall as the row it
    * sits in, and that height may read the control scale; its width may not.
    */
-  const rest = own.filter(({ selector }) => atRest(selector));
+  const rest = own.filter(
+    ({ selector, media }) => atRest(selector) && !media.includes(COARSE_QUERY),
+  );
   const widths = rest.flatMap(({ declarations }) =>
     ['inline-size', 'min-inline-size']
       .filter((property) => property in declarations)
@@ -302,6 +366,81 @@ for (const family of FLOORED) {
         `${family}: --_icon-size "${value}" is not floored`,
       );
     }
+  });
+}
+
+const COMFORTABLE = /--slotted-target-comfortable/;
+
+function coarseAudit(family, part) {
+  const all = rules(withoutForcedColors(stylesheet(family))).filter(({ selector }) =>
+    selectorSays(selector, part),
+  );
+  const coarse = all.filter(({ media }) => media.includes(COARSE_QUERY));
+  const boxes = coarse.filter(({ selector }) => !PSEUDO.test(selector));
+  const findings = [];
+
+  const reads = (declarations, ...properties) =>
+    properties.some((property) => COMFORTABLE.test(declarations[property] ?? ''));
+
+  const boxReaches =
+    boxes.some(({ declarations }) => reads(declarations, 'inline-size', 'min-inline-size')) &&
+    boxes.some(({ declarations }) => reads(declarations, 'block-size', 'min-block-size'));
+
+  /* The pseudo-element that reaches the size, and the rule that draws it. */
+  const halos = coarse.filter(
+    ({ selector, declarations }) =>
+      PSEUDO.test(selector) && reads(declarations, 'inset', 'inset-inline'),
+  );
+  const drawn = halos.some(({ selector }) => {
+    const kind = PSEUDO.exec(selector)[0];
+    return all.some(
+      ({ selector: other, declarations }) =>
+        other.includes(kind) &&
+        declarations.position === 'absolute' &&
+        declarations.content !== undefined,
+    );
+  });
+  const contained = all.some(
+    ({ selector, declarations }) =>
+      !PSEUDO.test(selector) && /^(?:relative|absolute)$/.test(declarations.position ?? ''),
+  );
+  const both = halos.some(({ declarations }) => reads(declarations, 'inset'));
+  const stacked =
+    STACKED.has(family) &&
+    halos.some(
+      ({ selector, declarations }) =>
+        selector.includes("[data-part='stepper']") &&
+        declarations['inset-block'] === '0' &&
+        reads(declarations, 'inset-inline'),
+    );
+  const haloReaches = drawn && contained && both && (!STACKED.has(family) || stacked);
+
+  if (!boxReaches && !haloReaches) {
+    findings.push('reaches no --slotted-target-comfortable target on a coarse pointer');
+  }
+
+  for (const { selector, declarations } of boxes) {
+    if (declarations['background-clip'] === 'content-box') {
+      findings.push(`clips its ground to the content box on a coarse pointer (${selector})`);
+    }
+    for (const [block, inline] of [
+      ['block-size', 'inline-size'],
+      ['min-block-size', 'min-inline-size'],
+      ['padding-block', 'padding-inline'],
+    ]) {
+      if (block in declarations && declarations[inline] !== declarations[block]) {
+        findings.push(`grows ${block} alone on a coarse pointer (${selector})`);
+      }
+    }
+  }
+
+  return findings;
+}
+
+for (const { family, part } of COARSE) {
+  test(`${family}: [data-part='${part}'] is a comfortable target on a coarse pointer, drawn no taller than wide (R2.6)`, () => {
+    const findings = coarseAudit(family, part);
+    assert.deepEqual(findings, [], `${family} [data-part='${part}']:\n  ${findings.join('\n  ')}`);
   });
 }
 

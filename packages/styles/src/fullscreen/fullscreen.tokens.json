@@ -40,8 +40,6 @@
   "--slotted-fullscreen-trigger-color",
   "--slotted-fullscreen-trigger-hover-background",
   "--slotted-fullscreen-trigger-radius",
-  "--slotted-icon-maximize",
-  "--slotted-icon-minimize",
   "--slotted-space-5",
   "--slotted-space-8",
   "--slotted-surface",

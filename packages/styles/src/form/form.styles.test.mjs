@@ -60,7 +60,7 @@ test('arranges nothing but its own two parts', () => {
  * the same black.
  */
 test('draws the summary as a toned panel with a heavier reading edge', () => {
-  const summary = rule(`${ui} [data-part='summary']`);
+  const summary = rule(`${ui}[data-part='summary']`);
   assert.match(summary, /background-color:var\(--slotted-form-summary-background/);
   assert.match(summary, /border-inline-start-width:var\(--slotted-border-width-thick,2px\)/);
   assert.match(summary, /color:var\(--slotted-form-summary-color/);
@@ -72,7 +72,7 @@ test('draws the summary as a toned panel with a heavier reading edge', () => {
  * reader somewhere they cannot see.
  */
 test('shows the summary when focus is moved to it', () => {
-  const focused = rule(`${ui} [data-part='summary']:focus-visible`);
+  const focused = rule(`${ui}[data-part='summary']:focus-visible`);
   assert.match(focused, /outline:var\(--slotted-focus-ring-width,2px\)solid/);
 });
 
@@ -83,7 +83,7 @@ test('shows the summary when focus is moved to it', () => {
  * fraction of the viewport.
  */
 test('scrolls a long list instead of cutting it out of the DOM', () => {
-  const list = rule(`${ui} [data-part='summary-list']`);
+  const list = rule(`${ui}[data-part='summary']>[data-part='summary-list']`);
   assert.match(list, /overflow-y:auto/);
   assert.match(list, /max-block-size:calc\(12em\*var\(--slotted-line-height-sm/);
   assert.ok(!/vh/.test(list), 'a summary that grew with the screen would push the actions off it');
@@ -99,7 +99,7 @@ test('makes the form the container the action row is measured against', () => {
   assert.match(form, /container-type:inline-size/);
   assert.match(form, new RegExp(`container-name:${contract.containerName}`));
 
-  const actions = rule(`${ui} [data-part='actions']`);
+  const actions = rule(`${ui}[data-part='actions']`);
   assert.ok(!/container-type/.test(actions), 'a container cannot answer its own query');
 });
 
@@ -126,7 +126,7 @@ test('offers every alignment the contract declares', () => {
       `no rule answers data-align="${align}"`,
     );
   }
-  assert.match(rule(`${ui} [data-part='actions']`), /justify-content:flex-end/);
+  assert.match(rule(`${ui}[data-part='actions']`), /justify-content:flex-end/);
 });
 
 /**
@@ -151,6 +151,39 @@ test('takes no duration of its own', () => {
 test('keeps the summary’s reading edge under forced colours', () => {
   const forced = normalized.split('@media (forced-colors:active){')[1] ?? '';
   assert.match(forced, /border-inline-start-color:Highlight/);
+});
+
+/**
+ * The summary and the action row stand anywhere inside the form — a consumer
+ * places `summary="none"`'s summary where they choose — and so do other
+ * families' parts of the same names: a `table`'s summary row, a `section`'s
+ * actions. A rule that reached `[data-part='summary']` as any descendant of the
+ * form painted a table's totals as an error panel. The two parts carry the
+ * family's identifier, as `skeleton`'s region and `tag`'s group do, and every
+ * rule names them by it; the summary's own parts are reached from it with a
+ * child combinator.
+ */
+test('reaches its own parts only, never a nested family’s part of the same name', () => {
+  for (const part of ['summary', 'summary-title', 'summary-list', 'summary-item', 'actions']) {
+    const descendant = new RegExp(`\\[data-ui='form'\\][^{>,]*? \\[data-part='${part}'\\]`);
+    assert.ok(
+      !descendant.test(normalized),
+      `a descendant rule reaches ${part} in any family under the form`,
+    );
+  }
+  assert.ok(
+    normalized.includes(`${ui}[data-part='summary']{`),
+    'the summary is not named by its family',
+  );
+  assert.ok(
+    normalized.includes(`${ui}[data-part='actions']{`),
+    'the action row is not named by its family',
+  );
+  assert.match(
+    fragment,
+    /data-ui="form"[^>]*data-part="summary"|data-part="summary"[^>]*data-ui="form"/,
+  );
+  assert.match(fragment, /data-ui="form" data-part="actions"/);
 });
 
 test('renders every declared part in the harness fragment', () => {

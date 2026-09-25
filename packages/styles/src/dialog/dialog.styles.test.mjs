@@ -75,3 +75,14 @@ test('opens the scrim and the panel over one duration and one curve (DG4)', () =
     );
   }
 });
+
+/**
+ * The entering frame has no `data-open`, and the focus scope enters in it. A
+ * layer hidden by `content-visibility` in that frame refuses the initial focus,
+ * so the closed rule keys on `inert`, which the binding leaves off while the
+ * layer enters.
+ */
+test('hides the layer only while it is inert, never in the entering frame', () => {
+  assert.match(rule(`${ui}[inert]`), /content-visibility:hidden/);
+  assert.equal(rule(`${ui}:not([data-open])`).includes('content-visibility'), false);
+});

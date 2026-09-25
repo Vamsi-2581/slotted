@@ -33,10 +33,10 @@
    * ── What this sheet decides on its own ───────────────────────────────
    *
    * **An invalid value is a chip with a mark.** The tone is `tag`'s `danger`,
-   * written in the DOM; the alert glyph in the chip's `start` slot is drawn
-   * here, as a mask from the glyph scale, because `tag` has no opinion about
-   * what a slot holds. Colour, mark and — in the tree — a description, which
-   * is what §2.5 asks of an invalid state.
+   * written in the DOM; the alert glyph in the chip's `start` slot is the
+   * `Glyph` element the binding renders there, because `tag` has no opinion
+   * about what a slot holds. Colour, mark and — in the tree — a description,
+   * which is what §2.5 asks of an invalid state.
    *
    * **A collapsed row opens where the reader is.** Under `overflow='collapse'`
    * the row is one line and a `+N` at rest, and every chip while the control
@@ -91,7 +91,7 @@
     --_row-gap: var(--slotted-space-2, 0.25rem);
 
     align-items: center;
-    background-color: var(--slotted-tags-input-background, transparent);
+    background-color: var(--slotted-tags-input-background, var(--slotted-control-surface, Field));
     border: var(--slotted-control-border-width, 1px) solid
       var(--slotted-tags-input-border-color, var(--slotted-control-border-color, ButtonBorder));
     border-radius: var(--slotted-tags-input-radius, var(--slotted-control-radius, 4px));
@@ -357,27 +357,6 @@
   }
 
   /**
-   * ── The invalid chip ─────────────────────────────────────────────────
-   *
-   * The tone is written in the DOM — `tag`'s `danger` — and this is the mark:
-   * the alert glyph, drawn as a mask in the slot `tag` reserves for a leading
-   * icon. Real geometry from a glyph token, painted in the chip's own ink so it
-   * follows the tone into `disabled` and forced colours. The slot is sized by
-   * `tag.css`; the mark fills it.
-   */
-  [data-ui='tags-input'] [data-part='chips'] > [data-invalid] [data-part='start']::before {
-    background-color: currentcolor;
-    block-size: 100%;
-    content: '';
-    display: block;
-    inline-size: 100%;
-    mask-image: var(--slotted-tags-input-invalid-icon, var(--slotted-icon-circle-alert));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  /**
    * The chip that counts what did not fit, under `overflow='collapse'`. It is a
    * chip and not a number beside them, so the row reads as one run of chips
    * whose last one happens to be a count, and `createCollapse` measures it the
@@ -485,16 +464,21 @@
     position: absolute;
   }
 
-  [data-ui='tags-input'] > [data-part='clear']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-tags-input-clear-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. It does not reach back
+     over the chips, where the last chip's remove stands a few pixels away. */
+  @media (pointer: coarse) {
+    [data-ui='tags-input'] > [data-part='clear']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      inset-inline-start: 0;
+    }
+  }
+
+  /* The cross is the `Glyph` element the binding renders inside the button,
+     drawn at the control's own icon step. */
+  [data-ui='tags-input'] > [data-part='clear'] {
+    --slotted-icon-size: var(--_icon-size);
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
@@ -685,20 +669,5 @@
   [data-ui='tags-input'] > [data-part='clear']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
-  }
-
-  /* ── Forced colours ───────────────────────────────────────────────────── */
-
-  @media (forced-colors: active) {
-    /*
-     * A masked glyph is painted with a background, and forced colours replace a
-     * background that is not one of the system's own colours: the mark goes and
-     * the box it sat in stays. `forced-color-adjust: none` keeps `currentcolor`,
-     * which is the host's ink, already forced to the right value.
-     */
-    [data-ui='tags-input'] > [data-part='clear']::before,
-    [data-ui='tags-input'] [data-part='chips'] > [data-invalid] [data-part='start']::before {
-      forced-color-adjust: none;
-    }
   }
 }

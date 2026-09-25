@@ -204,7 +204,7 @@
    * this family's geometry: the bar's height, the minimum target in the other
    * axis, and the muted ink `tabs` gives the one control it draws itself.
    *
-   * The mark is the Lucide `ellipsis`, drawn as a mask from the glyph scale at
+   * The mark is the `ellipsis` Glyph element in an `icon` box, sized here to
    * the control glyph size, the same as `breadcrumb` draws it (BC2). It was
    * U+2026 as text, on the exception `breadcrumb` took to rule 3 of
    * `docs/token-foundation.md` — and the two quantities that exception needed
@@ -217,6 +217,8 @@
    * rather than three dots.
    */
   [data-ui='toolbar'] [data-part='overflow'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -244,23 +246,6 @@
       background-color var(--slotted-control-transition-duration)
         var(--slotted-control-transition-easing),
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
-  }
-
-  /**
-   * The mark: the glyph scale's own size, painted in the control's ink and
-   * centred in its box. The element it is painted on is the span the trigger
-   * renders, which is what carries `aria-hidden` — the accessible name is on
-   * the button and says how many controls the menu holds.
-   */
-  [data-ui='toolbar'] [data-part='overflow'] > * {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-toolbar-overflow-icon, var(--slotted-icon-ellipsis));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
   }
 
   /* The ground moves under the pointer and nothing else does (R2). */
@@ -297,6 +282,16 @@
    * operable, and it answers neither hover nor press, which is the precedence
    * `docs/state-and-events.md` fixes.
    */
+  /* On a finger the trigger is a target in both directions, as the items beside
+     it are, and square: one value for both axes, so a bar taller than the
+     comfortable target does not stand it on end. */
+  @media (pointer: coarse) {
+    [data-ui='toolbar'] [data-part='overflow'] {
+      min-block-size: max(var(--slotted-target-comfortable, 44px), var(--_height));
+      min-inline-size: max(var(--slotted-target-comfortable, 44px), var(--_height));
+    }
+  }
+
   [data-ui='toolbar'] [data-part='overflow']:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: default;
@@ -373,13 +368,13 @@
   [data-ui='toolbar'] [data-part='separator'] {
     align-self: stretch;
     /**
-     * The strong border rather than the subtle one `divider` reaches for: this
-     * rule divides controls, and a control's own edge is already the strong
-     * step.
+     * The control edge rather than the subtle rule `divider` reaches for: this
+     * rule divides controls, and it stands at the weight of the edges beside
+     * it — a darker line between two outline buttons read as a third control.
      */
     background-color: var(
       --slotted-toolbar-separator-color,
-      var(--slotted-border-strong, ButtonBorder)
+      var(--slotted-control-border-color, ButtonBorder)
     );
     border: 0;
     flex: none;
@@ -412,13 +407,6 @@
   @media (forced-colors: active) {
     [data-ui='toolbar'] [data-part='separator'] {
       background-color: CanvasText;
-      forced-color-adjust: none;
-    }
-
-    /* The mark is painted with a background too. `currentcolor` there is the
-       trigger's own ink, which the system has already forced to its text
-       colour, so keeping the paint keeps the mark in the system's palette. */
-    [data-ui='toolbar'] [data-part='overflow'] > * {
       forced-color-adjust: none;
     }
   }

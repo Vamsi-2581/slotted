@@ -10,7 +10,7 @@
   the number, and it is what carries the day period: `aria-valuenow` there is 0
   or 1, which is not a name. The group's own label is the whole time in words.
   Nothing here draws a character as an icon: the clear button's mark and the
-  preview's chevron are both masks from the theme's glyph scale.
+  preview's chevron are both the empty `Glyph` element the build draws.
 -->
 
 <section data-scene="default">
@@ -448,7 +448,11 @@
         value="+40m"
         placeholder="+40m"
       />
-      <span data-part="preview" role="status" aria-live="polite" data-resolved>15:20</span>
+      <span data-part="preview" role="status" aria-live="polite" data-resolved
+        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+        >15:20</span
+      >
     </div>
 
     <div
@@ -468,6 +472,8 @@
         placeholder="+40m"
       />
       <span data-part="preview" role="status" aria-live="polite" data-resolved data-crosses-midnight
+        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
         >00:30 no dia seguinte</span
       >
     </div>
@@ -488,7 +494,10 @@
         value="1h30x"
         placeholder="+40m"
       />
-      <span data-part="preview" role="status" aria-live="polite"></span>
+      <span data-part="preview" role="status" aria-live="polite"
+        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+      ></span>
     </div>
   </div>
 </section>
@@ -533,7 +542,11 @@
         </div>
       </div>
       <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora"></button>
+      <button data-part="clear" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
 
     <div
@@ -574,7 +587,11 @@
         </div>
       </div>
       <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora"></button>
+      <button data-part="clear" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
 
     <div
@@ -615,7 +632,11 @@
         </div>
       </div>
       <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora"></button>
+      <button data-part="clear" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
   </div>
 </section>
@@ -963,7 +984,11 @@
         </div>
       </div>
       <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora"></button>
+      <button data-part="clear" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
 
     <div
@@ -1068,7 +1093,11 @@
         </div>
       </div>
       <span data-part="value-text" hidden>2:30 da tarde</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora"></button>
+      <button data-part="clear" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
 
     <div
@@ -1123,7 +1152,11 @@
         </div>
       </div>
       <span data-part="value-text" hidden>14:30:15</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora"></button>
+      <button data-part="clear" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
   </div>
 </section>

@@ -6,11 +6,12 @@
   the family draws itself — the chevron, the ellipsis, the magnifier, the
   question, the bell — is a mask from the glyph scale.
 
-  The default scene declares two widths above the ones the page ships, because
-  the first step folds at 1024 and the three defaults all sit under it.
+  The default scene declares 560, the one width in the medium step, and two
+  widths above the ones the page ships, because the first step folds at 1024
+  and the three defaults all sit under it.
 -->
 
-<section data-scene="default" data-widths="240 420 720 1024 1280">
+<section data-scene="default" data-widths="240 420 560 720 1024 1280">
   <header data-ui="top-navigation" data-part="root" data-size="md" data-frame>
     <a data-part="skip" href="#conteudo">Saltar para o conteúdo</a>
     <div data-part="brand">
@@ -55,7 +56,10 @@
         </li>
         <li data-part="item" data-priority="medium">
           <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
-            Frota<span data-part="indicator" aria-hidden="true"></span>
+            Frota<span data-part="indicator" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
           </button>
         </li>
         <li data-part="item" data-priority="low">
@@ -71,7 +75,11 @@
             aria-label="Mais"
             aria-expanded="false"
             aria-controls="tn-panel"
-          ></button>
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="ellipsis"></svg
+            ></span>
+          </button>
         </li>
       </ul>
     </nav>
@@ -96,12 +104,27 @@
           </kbd>
         </span>
       </div>
-      <button data-part="search-close" type="button" aria-label="Fechar procura"></button>
+      <button data-part="search-close" type="button" aria-label="Fechar procura">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="actions">
-      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
-      <a data-part="help" href="#ajuda">Ajuda</a>
+      <button data-part="search-toggle" type="button" aria-label="Procurar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg
+        ></span>
+      </button>
+      <a data-part="help" href="#ajuda"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="circle-question"></svg></span
+        >Ajuda</a
+      >
       <button data-part="notifications" type="button" aria-haspopup="dialog">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="bell"></svg
+        ></span>
         <span data-part="count">3</span>
       </button>
       <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
@@ -164,7 +187,11 @@
               data-overflow="6"
               data-current=""
               data-open=""
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="ellipsis"></svg
+              ></span>
+            </button>
           </li>
         </ul>
       </nav>
@@ -191,7 +218,10 @@
           </li>
           <li data-part="item" data-priority="medium" data-collapsed="">
             <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
-              Frota<span data-part="indicator" aria-hidden="true"></span>
+              Frota<span data-part="indicator" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
             </button>
           </li>
           <li data-part="item" data-priority="low" data-collapsed="">
@@ -201,11 +231,22 @@
             <a data-part="link" href="#faturacao" aria-disabled="true">Faturação</a>
           </li>
         </ul>
-        <a data-part="help" href="#ajuda">Ajuda</a>
+        <a data-part="help" href="#ajuda"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="circle-question"></svg></span
+          >Ajuda</a
+        >
       </div>
       <div data-part="actions">
-        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+        <button data-part="search-toggle" type="button" aria-label="Procurar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="search"></svg
+          ></span>
+        </button>
         <button data-part="notifications" type="button" aria-haspopup="dialog">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="bell"></svg
+          ></span>
           <span data-part="count">12</span>
         </button>
         <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
@@ -225,7 +266,7 @@
   </div>
 </section>
 
-<!-- The search open below 768 pixels: the field takes the bar and the close stands at its end. -->
+<!-- The search open below 600 pixels: the field takes the bar and the close stands at its end. -->
 <section data-scene="search">
   <header data-ui="top-navigation" data-part="root" data-size="md" data-frame data-search-open="">
     <div data-part="brand">
@@ -251,7 +292,11 @@
           <a data-part="link" href="#painel">Painel</a>
         </li>
         <li data-part="item">
-          <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+          <button data-part="more" type="button" aria-label="Mais" aria-expanded="false">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="ellipsis"></svg
+            ></span>
+          </button>
         </li>
       </ul>
     </nav>
@@ -265,10 +310,18 @@
         </span>
         <input data-part="input" type="search" value="Lisboa → Porto" />
       </div>
-      <button data-part="search-close" type="button" aria-label="Fechar procura"></button>
+      <button data-part="search-close" type="button" aria-label="Fechar procura">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="actions">
-      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
+      <button data-part="search-toggle" type="button" aria-label="Procurar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg
+        ></span>
+      </button>
       <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
         <span
           data-ui="avatar"
@@ -322,7 +375,10 @@
             aria-expanded="true"
             data-open=""
           >
-            Aberta<span data-part="indicator" aria-hidden="true"></span>
+            Aberta<span data-part="indicator" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
           </button>
         </li>
         <li data-part="item" data-priority="high" data-disabled="">
@@ -336,7 +392,10 @@
             aria-expanded="false"
             disabled
           >
-            Secção desativada<span data-part="indicator" aria-hidden="true"></span>
+            Secção desativada<span data-part="indicator" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
           </button>
         </li>
         <li data-part="item" data-priority="low">
@@ -350,14 +409,29 @@
             aria-expanded="false"
             data-overflow="1"
             data-current=""
-          ></button>
+          >
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="ellipsis"></svg
+            ></span>
+          </button>
         </li>
       </ul>
     </nav>
     <div data-part="actions">
-      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
-      <button data-part="help" type="button" aria-haspopup="dialog" data-open="">Ajuda</button>
+      <button data-part="search-toggle" type="button" aria-label="Procurar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg
+        ></span>
+      </button>
+      <button data-part="help" type="button" aria-haspopup="dialog" data-open="">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="circle-question"></svg></span
+        >Ajuda
+      </button>
       <button data-part="notifications" type="button" aria-haspopup="dialog">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="bell"></svg
+        ></span>
         <span data-part="count">128</span>
       </button>
       <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta" disabled>
@@ -402,7 +476,11 @@
               aria-expanded="true"
               aria-controls="tn-shell-nav"
               aria-label="Fechar navegação"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="panel-close"></svg
+              ></span>
+            </button>
             <a data-part="home" href="#inicio">
               <span data-part="mark" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -438,12 +516,11 @@
                 <a data-part="link" href="#relatorios">Relatórios</a>
               </li>
               <li data-part="item">
-                <button
-                  data-part="more"
-                  type="button"
-                  aria-label="Mais"
-                  aria-expanded="false"
-                ></button>
+                <button data-part="more" type="button" aria-label="Mais" aria-expanded="false">
+                  <span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                  ></span>
+                </button>
               </li>
             </ul>
           </nav>
@@ -457,12 +534,27 @@
               </span>
               <input data-part="input" type="search" placeholder="Procurar…" />
             </div>
-            <button data-part="search-close" type="button" aria-label="Fechar procura"></button>
+            <button data-part="search-close" type="button" aria-label="Fechar procura">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="x"></svg
+              ></span>
+            </button>
           </div>
           <div data-part="actions">
-            <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
-            <a data-part="help" href="#ajuda">Ajuda</a>
+            <button data-part="search-toggle" type="button" aria-label="Procurar">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="search"></svg
+              ></span>
+            </button>
+            <a data-part="help" href="#ajuda"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="circle-question"></svg></span
+              >Ajuda</a
+            >
             <button data-part="notifications" type="button" aria-haspopup="dialog">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="bell"></svg
+              ></span>
               <span data-part="count">3</span>
             </button>
             <button data-part="account" type="button" aria-haspopup="menu" aria-label="Conta">
@@ -516,13 +608,25 @@
           </li>
           <li data-part="item" data-priority="high"><a data-part="link" href="#b">Cargas</a></li>
           <li data-part="item">
-            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="ellipsis"></svg
+              ></span>
+            </button>
           </li>
         </ul>
       </nav>
       <div data-part="actions">
-        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
-        <button data-part="notifications" type="button"><span data-part="count">3</span></button>
+        <button data-part="search-toggle" type="button" aria-label="Procurar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="search"></svg
+          ></span>
+        </button>
+        <button data-part="notifications" type="button">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="bell"></svg></span
+          ><span data-part="count">3</span>
+        </button>
         <button data-part="account" type="button" aria-label="Conta">
           <span
             data-ui="avatar"
@@ -562,13 +666,25 @@
           </li>
           <li data-part="item" data-priority="high"><a data-part="link" href="#b">Cargas</a></li>
           <li data-part="item">
-            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="ellipsis"></svg
+              ></span>
+            </button>
           </li>
         </ul>
       </nav>
       <div data-part="actions">
-        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
-        <button data-part="notifications" type="button"><span data-part="count">3</span></button>
+        <button data-part="search-toggle" type="button" aria-label="Procurar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="search"></svg
+          ></span>
+        </button>
+        <button data-part="notifications" type="button">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="bell"></svg></span
+          ><span data-part="count">3</span>
+        </button>
         <button data-part="account" type="button" aria-label="Conta">
           <span
             data-ui="avatar"
@@ -608,13 +724,25 @@
           </li>
           <li data-part="item" data-priority="high"><a data-part="link" href="#b">Cargas</a></li>
           <li data-part="item">
-            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+            <button data-part="more" type="button" aria-label="Mais" aria-expanded="false">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="ellipsis"></svg
+              ></span>
+            </button>
           </li>
         </ul>
       </nav>
       <div data-part="actions">
-        <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
-        <button data-part="notifications" type="button"><span data-part="count">3</span></button>
+        <button data-part="search-toggle" type="button" aria-label="Procurar">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="search"></svg
+          ></span>
+        </button>
+        <button data-part="notifications" type="button">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="bell"></svg></span
+          ><span data-part="count">3</span>
+        </button>
         <button data-part="account" type="button" aria-label="Conta">
           <span
             data-ui="avatar"
@@ -666,17 +794,32 @@
         </li>
         <li data-part="item" data-priority="low">
           <button data-part="trigger" type="button" aria-haspopup="menu" aria-expanded="false">
-            Relatórios e indicadores<span data-part="indicator" aria-hidden="true"></span>
+            Relatórios e indicadores<span data-part="indicator" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
           </button>
         </li>
         <li data-part="item">
-          <button data-part="more" type="button" aria-label="Mais" aria-expanded="false"></button>
+          <button data-part="more" type="button" aria-label="Mais" aria-expanded="false">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="ellipsis"></svg
+            ></span>
+          </button>
         </li>
       </ul>
     </nav>
     <div data-part="actions">
-      <button data-part="search-toggle" type="button" aria-label="Procurar"></button>
-      <button data-part="notifications" type="button"><span data-part="count">99+</span></button>
+      <button data-part="search-toggle" type="button" aria-label="Procurar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="search"></svg
+        ></span>
+      </button>
+      <button data-part="notifications" type="button">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="bell"></svg></span
+        ><span data-part="count">99+</span>
+      </button>
       <button data-part="account" type="button" aria-haspopup="menu">
         <span
           data-ui="avatar"

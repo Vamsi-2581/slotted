@@ -12,6 +12,7 @@
 <section data-scene="summary">
   <form data-ui="form" data-part="root" data-invalid novalidate>
     <div
+      data-ui="form"
       data-part="summary"
       role="alert"
       tabindex="-1"
@@ -34,7 +35,7 @@
 <section data-scene="actions">
   <div data-ui="stack" data-part="root" data-gap="9">
     <form data-ui="form" data-part="root" novalidate>
-      <div data-part="actions" data-align="end">
+      <div data-ui="form" data-part="actions" data-align="end">
         <button
           data-ui="button"
           data-part="root"
@@ -59,7 +60,7 @@
     </form>
 
     <form data-ui="form" data-part="root" novalidate>
-      <div data-part="actions" data-align="between">
+      <div data-ui="form" data-part="actions" data-align="between">
         <button
           data-ui="button"
           data-part="root"
@@ -84,7 +85,7 @@
     </form>
 
     <form data-ui="form" data-part="root" novalidate>
-      <div data-part="actions" data-align="stretch">
+      <div data-ui="form" data-part="actions" data-align="stretch">
         <button
           data-ui="button"
           data-part="root"
@@ -113,7 +114,7 @@
 <section data-scene="states">
   <div data-ui="stack" data-part="root" data-gap="9">
     <form data-ui="form" data-part="root" data-loading aria-busy="true" novalidate>
-      <div data-part="actions" data-align="end">
+      <div data-ui="form" data-part="actions" data-align="end">
         <button
           data-ui="button"
           data-part="root"
@@ -141,7 +142,7 @@
 
     <form data-ui="form" data-part="root" data-disabled novalidate>
       <fieldset disabled style="border: 0; margin: 0; padding: 0">
-        <div data-part="actions" data-align="end">
+        <div data-ui="form" data-part="actions" data-align="end">
           <button
             data-ui="button"
             data-part="root"
@@ -161,6 +162,7 @@
 <section data-scene="composition">
   <form data-ui="form" data-part="root" data-invalid novalidate>
     <div
+      data-ui="form"
       data-part="summary"
       role="alert"
       tabindex="-1"
@@ -222,7 +224,7 @@
       </div>
     </div>
 
-    <div data-part="actions" data-align="end">
+    <div data-ui="form" data-part="actions" data-align="end">
       <button
         data-ui="button"
         data-part="root"
@@ -249,7 +251,13 @@
 
 <section data-scene="content">
   <form data-ui="form" data-part="root" data-invalid novalidate>
-    <div data-part="summary" role="alert" tabindex="-1" aria-labelledby="form-harness-many-title">
+    <div
+      data-ui="form"
+      data-part="summary"
+      role="alert"
+      tabindex="-1"
+      aria-labelledby="form-harness-many-title"
+    >
       <h2 data-part="summary-title" id="form-harness-many-title">Há um problema</h2>
       <ul data-part="summary-list">
         <li>
@@ -271,7 +279,7 @@
       </ul>
     </div>
 
-    <div data-part="actions" data-align="end">
+    <div data-ui="form" data-part="actions" data-align="end">
       <button
         data-ui="button"
         data-part="root"

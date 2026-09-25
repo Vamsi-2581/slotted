@@ -1,5 +1,6 @@
 [
   "--slotted-container-content",
+  "--slotted-container-full",
   "--slotted-container-measure",
   "--slotted-container-wide",
   "--slotted-space-1",

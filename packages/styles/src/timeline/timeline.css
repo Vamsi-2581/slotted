@@ -101,10 +101,10 @@
   /**
    * One badge anywhere widens the rail everywhere, groups included, so the
    * dots of the plain events stay on the same centre as the badge and every
-   * title starts at the same indent. A spinner is a dot's size and widens
-   * nothing.
+   * title starts at the same indent. A spinner and the check of a finished
+   * dot are a dot's size and widen nothing.
    */
-  [data-ui='timeline']:has([data-part='marker'] > :not([data-ui='spinner'])) {
+  [data-ui='timeline']:has([data-part='marker'] > :not([data-ui='spinner'], [data-check])) {
     --_rail: var(--_badge);
   }
 
@@ -318,9 +318,9 @@
   }
 
   /**
-   * The core, and the check of a finished dot, on one box that fills the
-   * marker: inset by a whole number of pixels, since the dot and the core
-   * differ by an even number.
+   * The core, on one box that fills the marker: inset by a whole number of
+   * pixels, since the dot and the core differ by an even number. A finished
+   * dot holds its check instead, so it is not empty and draws no core.
    */
   [data-ui='timeline'] [data-part='marker']:empty::after {
     background-color: var(--_tone-mark);
@@ -334,8 +334,14 @@
    * A badge. The glyph is the badge less one step of air on each side, so a
    * Lucide drawing that fills its own box to the edge stands two pixels off
    * the ring. The avatar is the badge's face and fills it without a ring.
+   *
+   * The check of a finished dot is the one icon the family puts in a marker
+   * itself, marked `data-check` by the binding so it is never read as a badge:
+   * the marker stays a dot, and every rule a dot takes names it beside
+   * `:empty`.
    */
-  [data-ui='timeline'] [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
+  [data-ui='timeline']
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'], > [data-check])) {
     --_marker: var(--_badge);
 
     background-color: var(--_surface);
@@ -375,7 +381,9 @@
    * the core alone, threaded on the line, or the bare glyph over it.
    */
 
-  [data-ui='timeline'] [data-variant='outline'] [data-part='marker']:empty {
+  [data-ui='timeline']
+    [data-variant='outline']
+    [data-part='marker']:is(:empty, :has(> [data-check])) {
     background-color: var(--_surface);
     border-color: var(--_tone-mark);
     border-width: var(--_edge);
@@ -386,7 +394,9 @@
     content: none;
   }
 
-  [data-ui='timeline'] [data-variant='solid'] [data-part='marker']:empty {
+  [data-ui='timeline']
+    [data-variant='solid']
+    [data-part='marker']:is(:empty, :has(> [data-check])) {
     background-color: var(--_tone-mark);
     /* A border as wide as the radius, so forced colours, which drop the ground, keep the disc. */
     border-color: var(--_tone-mark);
@@ -394,25 +404,29 @@
   }
 
   /* The core alone, on the line: the ground and the halo give way so the line runs into it. */
-  [data-ui='timeline'] [data-variant='plain'] [data-part='marker']:empty {
+  [data-ui='timeline']
+    [data-variant='plain']
+    [data-part='marker']:is(:empty, :has(> [data-check])) {
     background-color: transparent;
     box-shadow: none;
   }
 
   /* The glyph of a hairline or frameless badge is drawn in the dot's own ink. */
-  [data-ui='timeline'] [data-variant='outline'] [data-part='marker']:not(:empty) {
+  [data-ui='timeline']
+    [data-variant='outline']
+    [data-part='marker']:not(:empty, :has(> [data-check])) {
     color: var(--_tone-mark);
   }
 
   [data-ui='timeline']
     [data-variant='outline'][data-tone]:not([data-tone='secondary'])
-    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'], > [data-check])) {
     border-color: var(--_tone-border);
   }
 
   [data-ui='timeline']
     [data-variant='solid']
-    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'], > [data-check])) {
     background-color: var(--_tone-solid);
     border-color: var(--_tone-solid);
     color: var(--_tone-on-solid);
@@ -420,13 +434,15 @@
 
   [data-ui='timeline']
     [data-variant='subtle']
-    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'], > [data-check])) {
     background-color: var(--_tone-surface);
     border-color: var(--_tone-border);
     color: var(--_tone-text);
   }
 
-  [data-ui='timeline'] [data-variant='plain'] [data-part='marker']:not(:empty) {
+  [data-ui='timeline']
+    [data-variant='plain']
+    [data-part='marker']:not(:empty, :has(> [data-check])) {
     background-color: var(--_surface);
     border-color: transparent;
     color: var(--_tone-mark);
@@ -450,7 +466,9 @@
    * radius: that border would leave the check no box to stand in. Forced
    * colours keep the ground through the block at the end.
    */
-  [data-ui='timeline'] [data-complete]:not([data-current]) [data-part='marker']:empty {
+  [data-ui='timeline']
+    [data-complete]:not([data-current])
+    [data-part='marker']:has(> [data-check]) {
     background-color: var(--_tone-mark);
     border-width: 0;
   }
@@ -468,16 +486,12 @@
   /**
    * The check is knocked out of the disc in the ground's own colour, so it
    * reads in every tone and scheme without a token of its own; it is the
-   * glyph size less a step a side, the same air a badge gives its glyph.
+   * dot less a step a side, the same air a badge gives its glyph.
    */
-  [data-ui='timeline'] [data-complete]:not([data-current]) [data-part='marker']:empty::after {
-    background-color: var(--_surface);
-    content: '';
-    inset: 0;
-    mask-image: var(--slotted-icon-check);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: calc(var(--_marker) - 2 * var(--slotted-space-1, 0.125rem));
+  [data-ui='timeline'] [data-part='marker'] > [data-ui='icon'][data-check] {
+    --slotted-icon-size: calc(var(--_marker) - 2 * var(--slotted-space-1, 0.125rem));
+
+    color: var(--_surface);
   }
 
   [data-ui='timeline'] [data-current] [data-part='marker'] {
@@ -489,10 +503,10 @@
 
   [data-ui='timeline']
     [data-complete]:not([data-current])
-    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])),
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'], > [data-check])),
   [data-ui='timeline']
     [data-current]
-    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'])) {
+    [data-part='marker']:not(:empty, :has(> [data-ui='spinner'], > [data-check])) {
     background-color: var(--_tone-solid);
     border-color: var(--_tone-solid);
     color: var(--_tone-on-solid);
@@ -705,24 +719,27 @@
   }
 
   /**
-   * Real geometry from a glyph token, turned rather than swapped: a chevron
-   * that rotates between down and up is the same mark in every direction.
+   * The binding's `chevron-down` glyph, turned rather than swapped: a chevron
+   * that rotates between down and up is the same mark in every direction. The
+   * part sizes the icon box and the box turns.
    */
   [data-ui='timeline'] [data-part='group-indicator'] {
-    background-color: currentColor;
-    block-size: var(--_icon);
-    display: inline-block;
+    --slotted-icon-size: var(--_icon);
+
+    display: inline-flex;
     flex: none;
-    inline-size: var(--_icon);
-    mask-image: var(--slotted-icon-chevron-down);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  }
+
+  [data-ui='timeline'] [data-part='group-indicator'] > [data-ui='icon'] {
     rotate: -90deg;
     transition: rotate var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
-  [data-ui='timeline'] [data-open] > [data-part='group-label'] [data-part='group-indicator'] {
+  [data-ui='timeline']
+    [data-open]
+    > [data-part='group-label']
+    [data-part='group-indicator']
+    > [data-ui='icon'] {
     rotate: 0deg;
   }
 
@@ -1373,11 +1390,12 @@
    * is drawn in borders, the core keeps the system's text ink through
    * `forced-color-adjust`, and the current ring is redrawn here as an outline.
    * A finished marker keeps its fill, so it reads apart from a pending one in
-   * the system's highlight. The chevron keeps `currentcolor`.
+   * the system's highlight. The chevron and the check are `Glyph` elements
+   * drawn in `currentColor`, which the system has already forced.
    */
 
   @media (forced-colors: active) {
-    /* The marker's own ink, which the system has already forced: text, or highlight text on a finished disc. */
+    /* The core in the marker's own ink, which the system has already forced. */
     [data-ui='timeline'] [data-part='marker']:empty::after {
       background-color: currentColor;
       forced-color-adjust: none;
@@ -1390,13 +1408,14 @@
       forced-color-adjust: none;
     }
 
+    /* The check in the finished disc's forced ink, not the author's ground. */
+    [data-ui='timeline'] [data-part='marker'] > [data-ui='icon'][data-check] {
+      color: inherit;
+    }
+
     [data-ui='timeline'] [data-current]:not([data-loading]) [data-part='marker'] {
       outline: var(--_edge) solid CanvasText;
       outline-offset: var(--slotted-border-width-thick, 2px);
-    }
-
-    [data-ui='timeline'] [data-part='group-indicator'] {
-      forced-color-adjust: none;
     }
   }
 }

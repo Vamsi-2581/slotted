@@ -493,12 +493,17 @@
     margin-inline-end: var(--_column-gap);
   }
 
+  /**
+   * The tick is the library's own `Glyph`, an `<svg>` the binding draws inside
+   * an `icon` box, sized here to the column so the mark and a consumer's icon
+   * in the same column are one size.
+   */
   [data-ui='listbox'] [data-part='indicator'] {
-    background-color: currentColor;
-    mask-image: var(--slotted-listbox-selected-icon, var(--slotted-icon-check));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    --slotted-icon-size: var(--_icon-size);
+
+    align-items: center;
+    display: flex;
+    justify-content: center;
     opacity: 0;
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
@@ -508,28 +513,16 @@
   }
 
   /**
-   * Two ways to fill the mark column, as `alert`'s and `menu`'s icon parts take
-   * them: a glyph token, drawn as a mask at the column's own size, or an
-   * element of the consumer's own, centred. An empty box that painted a mask
-   * over content would cut that content into the shape of the mark.
+   * The option's own artwork, in the mark column. The box holds content and
+   * paints none: a `Glyph` in an `Icon` box, or an element of the consumer's
+   * own, centred and sized from the column, as the tick is.
    */
   [data-ui='listbox'] [data-part='icon'] {
-    background-color: currentColor;
-    /* A transparent mask rather than `none`: `mask-image: none` masks nothing,
-       so an icon box with no artwork in it would paint a solid square of the
-       option's own colour beside every label. */
-    mask-image: var(--slotted-listbox-option-icon, linear-gradient(transparent, transparent));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
+    --slotted-icon-size: var(--_icon-size);
 
-  [data-ui='listbox'] [data-part='icon']:not(:empty) {
     align-items: center;
-    background-color: transparent;
     display: flex;
     justify-content: center;
-    mask-image: none;
   }
 
   /* Column two, and the only column that gives way. */
@@ -647,28 +640,6 @@
 
     [data-ui='listbox'] [data-part='option'][data-disabled] {
       color: GrayText;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='listbox'] [data-part='icon']:empty {
-      forced-color-adjust: none;
-    }
-
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='listbox'] [data-part='indicator'] {
-      forced-color-adjust: none;
     }
   }
 }

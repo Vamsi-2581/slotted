@@ -67,19 +67,18 @@ test('paints the mark from the control it stands on, through the sibling combina
 });
 
 /**
- * Two glyphs, one property. The check and the dash are the same mask pointed at
- * a different token, so the two states cannot drift apart into two mechanisms.
+ * Two glyphs, one element. The check and the dash are the `Glyph` element the
+ * binding renders in the indicator; the sheet sizes and inks its box and
+ * paints no mark of its own.
  */
-test('draws both marks as a mask from the glyph scale, never as a character', () => {
+test('draws both marks as the glyph element, never as a mask or a character', () => {
   const indicator = rule(part('indicator'));
-  assert.match(indicator, /mask-image:var\(--_glyph\)/);
+  assert.match(indicator, /--slotted-icon-size:var\(--_mark-size\)/);
   assert.match(
     indicator,
-    /--_glyph:var\(--slotted-checkbox-mark-image,var\(--slotted-icon-check\)\)/,
+    /color:var\(--slotted-checkbox-mark-color,var\(--slotted-tone-accent-on-solid\)\)/,
   );
-  assert.ok(
-    normalized.includes('--_glyph:var(--slotted-checkbox-mixed-image,var(--slotted-icon-minus))'),
-  );
+  assert.doesNotMatch(declarations, /mask-image/);
   /* An empty `content` materialises a box — the tile's edge, the stretched
      target — and is not a mark. What is refused is a character standing in for
      artwork, so the pattern is a string with something in it. */
@@ -150,7 +149,6 @@ test('draws the glyph in a box the square clears by a whole pixel on every side'
   assert.match(indicator, /inline-size:var\(--_mark-size\)/);
   assert.match(indicator, /margin-block-start:calc\(var\(--_lift\) \+ var\(--_mark-inset\)\)/);
   assert.match(indicator, /margin-inline-start:var\(--_mark-inset\)/);
-  assert.match(indicator, /mask-size:contain/);
   /** A ratio of the box is what CK6 took out; it must not come back. */
   assert.doesNotMatch(declarations, /--_mark-size:\s*calc\(var\(--_size\)\s*\*/);
 });
@@ -331,9 +329,9 @@ test('answers the disabled element as well as the mirrored attribute', () => {
 });
 
 /**
- * The mark and the ground it stands on are both `background-color`, which
- * forced colors overrides, so the check would disappear into the box. This is
- * the one thing the theme cannot reach, and the one rule the family writes.
+ * Forced colors overrides the ground's `background-color` and the mark's ink
+ * alike, so the check would disappear into the box. This is the one thing the
+ * theme cannot reach, and the one rule the family writes.
  */
 test('restates the pair forced colors would collapse', () => {
   assert.match(declarations, /@media \(forced-colors: active\)/);
@@ -342,7 +340,11 @@ test('restates the pair forced colors would collapse', () => {
       `@media (forced-colors:active){${part('control')}{background-color:Field;border-color:FieldText;}`,
     ),
   );
-  assert.ok(normalized.includes('background-color:HighlightText'));
+  assert.ok(
+    normalized.includes(
+      `${part('control')}:checked + [data-part='indicator'],${part('control')}:indeterminate + [data-part='indicator']{color:HighlightText;}`,
+    ),
+  );
 });
 
 /**
@@ -429,6 +431,14 @@ test('puts a description one step from its label, and one step nearer inside a t
     rule(`${root}[data-variant='tile']`),
     /--_description-gap:var\(--slotted-checkbox-tile-description-gap,var\(--slotted-space-2,0\.25rem\)\)/,
   );
+});
+
+/**
+ * Stretched — a dialog body filling a phone's height — the rows shared the
+ * surplus and the description drifted from the label it belongs to.
+ */
+test('never distributes surplus height between its rows', () => {
+  assert.match(declarations, /align-content:\s*start/);
 });
 
 /**

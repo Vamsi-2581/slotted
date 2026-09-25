@@ -427,20 +427,24 @@
     display: none;
   }
 
+  /**
+   * The chevron is the `chevron-down` Glyph element in an `icon` box, which the
+   * part sizes to the glyph scale and pushes to the end of the trigger. The box
+   * turns half a turn while the panel is open.
+   */
   [data-ui='table-of-contents'] [data-part='indicator'] {
-    background-color: currentColor;
-    block-size: var(--_icon-size);
+    --slotted-icon-size: var(--_icon-size);
+
+    display: flex;
     flex: none;
-    inline-size: var(--_icon-size);
     margin-inline-start: auto;
-    mask-image: var(--slotted-icon-chevron-down);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  }
+
+  [data-ui='table-of-contents'] [data-part='indicator'] > [data-ui='icon'] {
     transition: rotate var(--_duration) var(--_easing);
   }
 
-  [data-ui='table-of-contents'][data-open] [data-part='indicator'] {
+  [data-ui='table-of-contents'][data-open] [data-part='indicator'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -514,11 +518,6 @@
   /* ── Forced colours ───────────────────────────────────────────────────── */
 
   @media (forced-colors: active) {
-    /* The chevron is a mask painted in the trigger's ink; the mark keeps that ink (G15). */
-    [data-ui='table-of-contents'] [data-part='indicator'] {
-      forced-color-adjust: none;
-    }
-
     /* A painted background is the one thing the mode throws away: the marker is redrawn in the system's highlight. */
     [data-ui='table-of-contents'] [data-part='marker'] {
       background-color: Highlight;

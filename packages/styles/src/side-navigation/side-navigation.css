@@ -34,6 +34,20 @@
     /** The mark's box is the row's height: a square the mark is centred in. */
     --_mark: var(--slotted-app-shell-row-mark, var(--_row-height));
     --_inset: var(--slotted-app-shell-row-inset, var(--slotted-space-4, 0.5rem));
+    /**
+     * How far a row's own box stands off the column's inline edges. A row is a
+     * chip with a radius, and a radius drawn against the edge of the region it
+     * sits in reads as a corner cut away: under the shell's flush plane the
+     * region meets the window, and the chip met it too — measured at zero
+     * pixels from the frame, against twelve on the inset plane, where the
+     * region's own margin had been hiding the same fact.
+     *
+     * It is taken out of the row's inset rather than added to it, so the mark
+     * stays on the left edge the shell's own controls stand on. `min` is for a
+     * product that sets the inset to nothing: the standoff never exceeds what
+     * there is to give.
+     */
+    --_standoff: min(var(--slotted-space-2, 0.25rem), var(--_inset));
     --_gap: var(--slotted-app-shell-row-gap, var(--slotted-control-gap-md, 8px));
     --_font-size: var(--slotted-app-shell-row-font-size, var(--slotted-font-size-sm, 0.8125rem));
     --_line-height: var(--slotted-app-shell-row-line-height, var(--slotted-line-height-sm, 1.45));
@@ -76,17 +90,16 @@
     /**
      * The state is a pair, ground and edge: in `high-contrast` every tone
      * ground is the page's own white and the edge is what is left to say where
-     * the reader is. The edge is the subtle border rather than the tone's
-     * border, because the tone's border at one pixel around a row read as a
-     * chosen option, and a destination is where the reader is, not what they
-     * picked — `list-item` drew the same distinction. The subtle border is
-     * near the fill's own edge in `light` and `dark`, and black in
-     * `high-contrast`, where it carries the state alone. Drawn as an inset
-     * shadow, so it changes no measurement and moves no text.
+     * the reader is. The edge is the foundation's `--slotted-current-edge`:
+     * transparent in `light` and `dark`, where the accent ground and the
+     * accent ink say the state and a grey line around a tinted row read as a
+     * chosen option rather than a place; black in `high-contrast`, where it
+     * carries the state alone. Drawn as an inset shadow, so it changes no
+     * measurement and moves no text.
      */
     --_current-edge: var(
       --slotted-side-navigation-current-edge,
-      var(--slotted-border-subtle, ButtonBorder)
+      var(--slotted-current-edge, transparent)
     );
     --_dot-color: var(--slotted-side-navigation-dot-color, var(--slotted-tone-accent-solid));
     --_section-color: var(
@@ -340,11 +353,12 @@
     grid-row: 1;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     grid-template-rows: auto auto;
-    margin: 0;
+    margin-block: 0;
+    margin-inline: var(--_standoff);
     min-block-size: var(--_row-height);
     min-inline-size: 0;
     padding-block: 0;
-    padding-inline: var(--_inset);
+    padding-inline: calc(var(--_inset) - var(--_standoff));
     position: relative;
     text-align: start;
     text-decoration: none;
@@ -395,10 +409,19 @@
 
   /* ── The parts of a row ───────────────────────────────────────────────── */
 
+  /**
+   * The mark's box sizes what it holds: a bare svg by the child rule below,
+   * an icon box through `--slotted-icon-size`, and a glyph host such as
+   * `ng-icon` — which sizes itself at `1em` — through the font-size. Nothing
+   * placed here is drawn at the row's type size.
+   */
   [data-ui='side-navigation'] [data-part='icon'] {
+    --slotted-icon-size: var(--_icon-size);
+
     block-size: var(--_mark);
     color: inherit;
     display: grid;
+    font-size: var(--_icon-size);
     grid-column: 1;
     grid-row: 1;
     inline-size: var(--_mark);
@@ -556,29 +579,25 @@
   }
 
   [data-ui='side-navigation'] [data-part='indicator'] {
-    background-color: currentColor;
-    block-size: var(--_icon-size);
+    --slotted-icon-size: var(--_icon-size);
+
+    display: flex;
     grid-column: 4;
     grid-row: 1;
-    inline-size: var(--_icon-size);
     margin-inline-start: var(--_gap);
-    /**
-     * Closed, the chevron points along the reading direction — the way the
-     * children are folded away — and turns a quarter turn to point down when
-     * they are shown. It is mirrored in a right-to-left document, where the
-     * reading direction is the other way; the open mark points down in both,
-     * turning the other way where it is mirrored.
-     */
-    mask-image: var(--slotted-icon-chevron-right);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-    /* The same duration as the track it announces, so the turn and the opening end together. */
-    transition: rotate var(--slotted-duration-medium) var(--_easing);
   }
 
-  [data-ui='side-navigation'] [data-part='indicator']:dir(rtl) {
-    scale: -1 1;
+  /**
+   * The mark is the `chevron-right` Glyph element in a `directional` icon box.
+   * Closed, it points along the reading direction — the way the children are
+   * folded away — and turns a quarter turn to point down when they are shown.
+   * The box mirrors itself in a right-to-left document, where the reading
+   * direction is the other way; the open mark points down in both, turning the
+   * other way where it is mirrored.
+   */
+  [data-ui='side-navigation'] [data-part='indicator'] > [data-ui='icon'] {
+    /* The same duration as the track it announces, so the turn and the opening end together. */
+    transition: rotate var(--slotted-duration-medium) var(--_easing);
   }
 
   [data-ui='side-navigation']
@@ -592,7 +611,8 @@
   [data-ui='side-navigation']
     [data-part='item'][data-expanded]
     > [data-part='trigger']
-    > [data-part='indicator'] {
+    > [data-part='indicator']
+    > [data-ui='icon'] {
     rotate: 90deg;
   }
 
@@ -600,7 +620,8 @@
   [data-ui='side-navigation']
     [data-part='item'][data-expanded]
     > [data-part='trigger']
-    > [data-part='indicator']:dir(rtl) {
+    > [data-part='indicator']
+    > [data-ui='icon']:dir(rtl) {
     rotate: -90deg;
   }
 
@@ -1054,12 +1075,6 @@
   /* ── Forced colours ───────────────────────────────────────────────────── */
 
   @media (forced-colors: active) {
-    /* The chevron is a mask painted in the row's own ink; the system already
-       forced that ink, so the mark is drawn in its palette rather than lost. */
-    [data-ui='side-navigation'] [data-part='indicator'] {
-      forced-color-adjust: none;
-    }
-
     [data-ui='side-navigation'] [data-part='link'][data-current],
     [data-ui='side-navigation'] [data-part='item'][data-current] > [data-part='trigger'] {
       background-color: Highlight;

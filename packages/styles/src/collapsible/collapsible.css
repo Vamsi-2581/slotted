@@ -235,10 +235,15 @@
   /* ── The indicator ────────────────────────────────────────────────────── */
 
   /**
-   * Real geometry from a glyph token, never a character. It turns rather than
-   * pointing along the inline axis: a chevron that pointed at the start edge
-   * would need mirrored artwork for a right-to-left document, and a mark that
-   * rotates between down and up is the same mark in every direction.
+   * The mark is the library's own `Glyph` — an `<svg>` the binding draws inside
+   * an `icon` box, chevron or plus and minus as the indicator and state say —
+   * never a character or a mask. This part is the slot it stands in: the box
+   * takes the part's size through `--slotted-icon-size`, and the part is a flex
+   * container so the box's own baseline shift does not move it off the slot.
+   * The chevron turns rather than pointing along the inline axis: a chevron
+   * that pointed at the start edge would need mirrored artwork for a
+   * right-to-left document, and a mark that rotates between down and up is the
+   * same mark in every direction.
    */
   [data-ui='collapsible'] > [data-part='header'] > [data-part='trigger'] > [data-part='indicator'] {
     /**
@@ -253,18 +258,23 @@
      * the line the title sets. The mark keeps its own row: spanning both put it
      * in a box the description made taller, which is what centred it there.
      */
+    --slotted-icon-size: var(--_icon-size);
     align-self: start;
-    background-color: var(--slotted-collapsible-indicator-color, currentColor);
     block-size: var(--_icon-size);
+    color: var(--slotted-collapsible-indicator-color, currentColor);
+    display: flex;
     flex: none;
     grid-column: 2;
     grid-row: 1;
     inline-size: var(--_icon-size);
     margin-block-start: calc((1lh - var(--_icon-size)) / 2);
-    mask-image: var(--slotted-icon-chevron-down);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  }
+
+  [data-ui='collapsible']
+    > [data-part='header']
+    > [data-part='trigger']
+    > [data-part='indicator']
+    > [data-ui='icon'] {
     transition: rotate var(--slotted-duration-medium)
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
@@ -272,28 +282,23 @@
   [data-ui='collapsible'][data-open]
     > [data-part='header']
     > [data-part='trigger']
-    > [data-part='indicator'] {
+    > [data-part='indicator']
+    > [data-ui='icon'] {
     rotate: 180deg;
   }
 
   /**
    * The other pair the scale holds, drawn on one grid: the same bar, with a
-   * second crossing it. Nothing rotates, because a plus turning into a minus
-   * by rotation is a plus with a stroke that vanished.
+   * second crossing it. The binding swaps the glyph with the state, and nothing
+   * rotates, because a plus turning into a minus by rotation is a plus with a
+   * stroke that vanished.
    */
   [data-ui='collapsible'][data-indicator='plus-minus']
     > [data-part='header']
     > [data-part='trigger']
-    > [data-part='indicator'] {
-    mask-image: var(--slotted-icon-plus);
+    > [data-part='indicator']
+    > [data-ui='icon'] {
     rotate: none;
-  }
-
-  [data-ui='collapsible'][data-indicator='plus-minus'][data-open]
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='indicator'] {
-    mask-image: var(--slotted-icon-minus);
   }
 
   /**
@@ -536,22 +541,6 @@
 
     [data-ui='collapsible'] > [data-part='panel'] {
       grid-row: 3;
-    }
-  }
-
-  @media (forced-colors: active) {
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='collapsible']
-      > [data-part='header']
-      > [data-part='trigger']
-      > [data-part='indicator'] {
-      forced-color-adjust: none;
     }
   }
 }

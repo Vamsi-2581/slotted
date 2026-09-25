@@ -291,7 +291,6 @@
       [data-part='menu-trigger'],
       [data-part='help']
     ) {
-    --_glyph: var(--slotted-icon-ellipsis);
     --_box: var(--slotted-control-height-sm, 1.75rem);
 
     align-items: center;
@@ -311,25 +310,8 @@
       color var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='chart'] [data-part='zoom-reset'] {
-    --_glyph: var(--slotted-icon-rotate-ccw);
-  }
-
-  [data-ui='chart'] [data-part='view-toggle'] {
-    --_glyph: var(--slotted-icon-file-spreadsheet);
-  }
-
-  [data-ui='chart'] [data-part='fullscreen-toggle'] {
-    --_glyph: var(--slotted-icon-maximize);
-  }
-
-  [data-ui='chart'][data-fullscreen] [data-part='fullscreen-toggle'] {
-    --_glyph: var(--slotted-icon-minimize);
-  }
-
   /* Help sits beside the words it explains, a step smaller than the toolbar. */
   [data-ui='chart'] [data-part='help'] {
-    --_glyph: var(--slotted-icon-circle-info);
     --_box: var(--slotted-control-inner-size-sm, 1.25rem);
 
     /* It hangs past the title's line by the difference rather than growing
@@ -337,25 +319,6 @@
     margin-block: calc(
       (var(--slotted-font-size-md, 0.875rem) * var(--slotted-line-height-md, 1.5) - var(--_box)) / 2
     );
-  }
-
-  [data-ui='chart']
-    :is(
-      [data-part='zoom-reset'],
-      [data-part='view-toggle'],
-      [data-part='fullscreen-toggle'],
-      [data-part='menu-trigger'],
-      [data-part='help']
-    )::before {
-    background-color: currentColor;
-    block-size: var(--slotted-icon-size, 1rem);
-    content: '';
-    flex: none;
-    inline-size: var(--slotted-icon-size, 1rem);
-    mask-image: var(--_glyph);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
   }
 
   [data-ui='chart']
@@ -1237,16 +1200,14 @@
     z-index: 3;
   }
 
-  /* An empty or failed plot keeps the grid it would have drawn, faintly, so
-     the box reads as the chart's and not as a hole in the page. */
+  /* An empty or failed plot keeps the baseline it would have drawn, so the box
+     reads as the chart's and not as a hole in the page. The baseline alone:
+     the message stands on no surface of its own, and the bands the grid drew
+     every quarter of the height crossed the empty title and ran between the
+     failed title and its retry. */
   [data-ui='chart'] [data-part='plot']:has(> :is([data-part='empty'], [data-part='error'])) {
-    --_faint: color-mix(in oklab, var(--_chart-grid) 60%, transparent);
-
-    background:
-      linear-gradient(var(--_chart-grid), var(--_chart-grid)) 0 100% / 100% 1px no-repeat
-        content-box,
-      repeating-linear-gradient(to bottom, var(--_faint) 0 1px, transparent 1px 100%) 0 0 / 100% 25%
-        content-box;
+    background: linear-gradient(var(--_chart-grid), var(--_chart-grid)) 0 100% / 100% 1px no-repeat
+      content-box;
     box-sizing: border-box;
     padding: var(--_chart-inset) var(--_chart-inset) calc(var(--_chart-inset) * 3);
   }
@@ -1397,11 +1358,48 @@
     }
   }
 
-  /* A finger needs the comfortable target, not the minimum one. */
+  /**
+   * A finger needs the comfortable target, not the minimum one.
+   *
+   * A row in the layer is as wide as the layer, so it grows. An entry in the
+   * legend's own line keeps the ground a mouse sees — a `+1` grown to the
+   * comfortable height stood 26 wide and 44 tall — and a transparent
+   * `::after` centred on it reaches 44 pixels in both axes. The line is that
+   * tall, so its clip does not cut the target, and wrapped lines stand that
+   * far apart, so one line's targets do not reach into the next. `+N` follows
+   * the last entry two pixels away and does not reach back across it.
+   */
   @media (pointer: coarse) {
-    [data-ui='chart']
-      :is([data-part='legend-item'], [data-part='legend-more'], [data-part='menu-item']) {
+    [data-ui='chart'] [data-part='menu-item'] {
       min-block-size: var(--slotted-target-comfortable, 2.75rem);
+    }
+
+    [data-ui='chart'] [data-part='menu'] [data-part='legend-item'] {
+      min-block-size: var(--slotted-target-comfortable, 2.75rem);
+      min-inline-size: var(--slotted-target-comfortable, 2.75rem);
+    }
+
+    [data-ui='chart'] [data-part='legend'] {
+      min-block-size: var(--slotted-target-comfortable, 2.75rem);
+      row-gap: calc(var(--slotted-target-comfortable, 2.75rem) - var(--slotted-target-min, 1.5rem));
+    }
+
+    [data-ui='chart']
+      [data-part='legend']
+      > :is([data-part='legend-item'], [data-part='legend-more']) {
+      position: relative;
+    }
+
+    [data-ui='chart']
+      [data-part='legend']
+      > :is([data-part='legend-item'], [data-part='legend-more'])::after {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 2.75rem)) / 2));
+      position: absolute;
+    }
+
+    [data-ui='chart'] [data-part='legend'] > [data-part='legend-more']::after {
+      inset-inline-start: 0;
     }
 
     [data-ui='chart']
@@ -1458,17 +1456,6 @@
 
     [data-ui='chart'] [data-part='crosshair'] {
       background-color: GrayText;
-      forced-color-adjust: none;
-    }
-
-    [data-ui='chart']
-      :is(
-        [data-part='zoom-reset'],
-        [data-part='view-toggle'],
-        [data-part='fullscreen-toggle'],
-        [data-part='menu-trigger'],
-        [data-part='help']
-      )::before {
       forced-color-adjust: none;
     }
   }

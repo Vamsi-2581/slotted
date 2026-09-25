@@ -78,7 +78,10 @@
           <span data-part="shortcut">F2</span>
         </button>
         <button data-part="item" role="menuitem" type="button">
-          <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-copy)"></span>
+          <span data-part="icon"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="copy"></svg></span
+          ></span>
           <span data-part="label">Duplicate</span>
           <span data-part="shortcut">⌘D</span>
         </button>
@@ -90,13 +93,19 @@
           aria-expanded="false"
         >
           <span data-part="label">Move to</span>
+          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+          ></span>
         </button>
         <button data-part="item" role="menuitem" type="button">
           <span data-part="label">Download</span>
         </button>
         <hr data-part="separator" role="separator" aria-orientation="horizontal" />
         <button data-part="item" role="menuitem" type="button" data-tone="danger">
-          <span data-part="icon" style="--slotted-menu-item-icon: var(--slotted-icon-x)"></span>
+          <span data-part="icon"
+            ><span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg></span
+          ></span>
           <span data-part="label">Move to trash</span>
           <span data-part="shortcut">⌫</span>
         </button>

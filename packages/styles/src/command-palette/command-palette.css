@@ -211,18 +211,14 @@
   }
 
   /**
-   * The mark that says what the field is. A mask from the glyph scale, drawn
-   * one line box tall so it sits on the field's line; a character is never an
-   * icon.
+   * The mark that says what the field is: the binding's `search` glyph, its
+   * icon box at the header's icon size so it sits on the field's line; a
+   * character is never an icon.
    */
   [data-ui='command-palette'] [data-part='search'] {
-    background-color: currentcolor;
-    block-size: var(--_header-icon-size);
-    inline-size: var(--_header-icon-size);
-    mask-image: var(--slotted-command-palette-search-icon, var(--slotted-icon-search));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+    --slotted-icon-size: var(--_header-icon-size);
+
+    display: flex;
   }
 
   /**
@@ -320,26 +316,16 @@
   }
 
   /**
-   * The chevron between two pages, from the glyph scale, mirrored in a
-   * right-to-left document by `:dir()` so the trail reads in the direction
-   * the reader reads.
+   * The chevron between two pages: the binding's `chevron-right` glyph before
+   * every page but the first, in a `directional` icon box that mirrors in a
+   * right-to-left document so the trail reads in the direction the reader
+   * reads.
    */
-  [data-ui='command-palette'] [data-part='pages'] > li + li::before {
-    background-color: var(--_muted);
-    block-size: var(--_icon-size);
-    content: '';
-    display: inline-block;
-    flex: none;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-command-palette-trail-icon, var(--slotted-icon-chevron-right));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-    opacity: 0.7;
-  }
+  [data-ui='command-palette'] [data-part='pages'] > li > [data-ui='icon'] {
+    --slotted-icon-size: var(--_icon-size);
 
-  [data-ui='command-palette'] [data-part='pages'] > li + li:dir(rtl)::before {
-    scale: -1 1;
+    color: var(--_muted);
+    opacity: 0.7;
   }
 
   /* ── The field ────────────────────────────────────────────────────────── */
@@ -366,6 +352,22 @@
   [data-ui='command-palette'] [data-part='input']::placeholder {
     color: var(--_muted);
     opacity: 1;
+  }
+
+  /**
+   * A hint longer than the field fades out at the field's end rather than
+   * ending mid-glyph: a phone's field holds a third of the words. A fade and
+   * not `text-overflow: ellipsis`, which Chromium does not draw on a
+   * placeholder whose input the user agent clips (`overflow: clip`), focused
+   * or not — measured on the Nexora palette at 390 pixels. Only while the
+   * placeholder shows: what the reader types is never faded under the caret.
+   */
+  [data-ui='command-palette'] [data-part='input']:placeholder-shown {
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - var(--slotted-command-palette-placeholder-fade, 2em)),
+      transparent
+    );
   }
 
   /* The browser's own clear and its search decoration, which the family
@@ -416,16 +418,20 @@
     position: absolute;
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    display: block;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-command-palette-clear-icon, var(--slotted-icon-x));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
+  /* On a finger the target is the comfortable size in both axes and the box
+     is the one a mouse sees: the ground and the focus ring stay square, and
+     the hit area above grows to 44 pixels around them. It does not reach
+     across the close control after it. */
+  @media (pointer: coarse) {
+    [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']::after {
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+    }
+
+    [data-ui='command-palette']
+      > [data-part='header']
+      > [data-part='clear']:has(+ [data-part='close'])::after {
+      inset-inline-end: 0;
+    }
   }
 
   [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']:not(:disabled):hover {
@@ -447,6 +453,48 @@
      query: a clear beside an empty field is a control with nothing to do. */
   [data-ui='command-palette']:not([data-query]) > [data-part='header'] > [data-part='clear'] {
     display: none;
+  }
+
+  /**
+   * The way out where the scrim is not. The dialog closes on Escape and on
+   * the scrim; a palette that has taken the whole screen has no scrim to
+   * press, and a touch screen has no Escape, so a reader who opened it by
+   * mistake had nothing to press but a command. A word, not a cross: a ✕
+   * beside a search field reads as clear, which is what `clear` already is.
+   * Drawn only under the dialog's own full-screen query, below.
+   */
+  [data-ui='command-palette'] > [data-part='header'] > [data-part='close'] {
+    align-items: center;
+    appearance: none;
+    background-color: transparent;
+    block-size: var(--slotted-control-height-sm, 30px);
+    border: 0;
+    border-radius: var(--slotted-control-radius, 4px);
+    color: var(--slotted-tone-accent-text, LinkText);
+    cursor: pointer;
+    display: none;
+    flex: none;
+    font: inherit;
+    font-size: var(--_font-size);
+    font-weight: var(--slotted-font-weight-medium, 500);
+    padding-block: 0;
+    padding-inline: var(--slotted-space-3, 0.375rem);
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+
+  [data-ui='command-palette'] > [data-part='header'] > [data-part='close']:not(:disabled):hover {
+    background-color: var(--_hover);
+  }
+
+  [data-ui='command-palette'] > [data-part='header'] > [data-part='close']:not(:disabled):active {
+    background-color: var(--_active);
+  }
+
+  [data-ui='command-palette'] > [data-part='header'] > [data-part='close']:focus-visible {
+    outline: var(--slotted-focus-ring-width, 2px) solid
+      var(--slotted-focus-ring-color, currentColor);
+    outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
   /* ── The list ─────────────────────────────────────────────────────────── */
@@ -590,30 +638,9 @@
   /**
    * Column one. The mark's box exists whether or not a mark is drawn, so a
    * list where the third item has an icon and the fourth does not still lines
-   * its labels up. Two ways to fill it, as `menu` takes them: a glyph token in
-   * `--slotted-command-palette-item-icon`, drawn as a mask at the column's own
-   * size, or an element of the consumer's own, centred.
-   */
-  [data-ui='command-palette'] [data-part='icon'] {
-    background-color: currentcolor;
-    block-size: 1lh;
-    grid-column: 1;
-    grid-row: 1;
-    inline-size: var(--_icon-size);
-    justify-self: center;
-    /* One step more than the control gap. A consumer's icon fills its box to
-       the edge — a Lucide glyph drawn at sixteen pixels has ink at fifteen —
-       and at the control gap the mark touched the first letter of the label. */
-    margin-inline-end: calc(var(--_column-gap) + var(--slotted-space-2, 0.25rem));
-    /* A transparent mask rather than `none`, because `none` means "no mask"
-       and paints the whole box. */
-    mask-image: var(--slotted-command-palette-item-icon, linear-gradient(transparent, transparent));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  /**
+   * its labels up. It holds an element of the consumer's own, centred; the
+   * stylesheet paints no mark into it.
+   *
    * The box sizes what it holds: an icon box reads `--slotted-icon-size` from
    * its container, and a bare glyph host such as `ng-icon` — which sizes
    * itself at `1em` — reads the font-size the child rule below gives it.
@@ -621,14 +648,21 @@
    * the child and not on the box, because the box's `1lh` reads the item's
    * line box.
    */
-  [data-ui='command-palette'] [data-part='icon']:not(:empty) {
+  [data-ui='command-palette'] [data-part='icon'] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
-    background-color: transparent;
+    block-size: 1lh;
     display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    inline-size: var(--_icon-size);
     justify-content: center;
-    mask-image: none;
+    justify-self: center;
+    /* One step more than the control gap. A consumer's icon fills its box to
+       the edge — a Lucide glyph drawn at sixteen pixels has ink at fifteen —
+       and at the control gap the mark touched the first letter of the label. */
+    margin-inline-end: calc(var(--_column-gap) + var(--slotted-space-2, 0.25rem));
   }
 
   [data-ui='command-palette'] [data-part='icon']:not(:empty) > * {
@@ -730,26 +764,22 @@
   }
 
   /**
-   * Column five: the mark that says an item opens a page, from the glyph scale
-   * and mirrored in a right-to-left document, as `menu` draws the mark that
-   * says an item opens a submenu.
+   * Column five: the mark that says an item opens a page, as `menu` draws the
+   * mark that says an item opens a submenu. The binding's `chevron-right`
+   * glyph in a `directional` icon box, which mirrors in a right-to-left
+   * document; the column is one line box tall and centres it.
    */
   [data-ui='command-palette'] [data-part='arrow'] {
-    background-color: currentcolor;
+    --slotted-icon-size: var(--_icon-size);
+
+    align-items: center;
     block-size: 1lh;
+    display: flex;
     grid-column: 5;
     inline-size: var(--_icon-size);
     justify-self: end;
     margin-inline-start: var(--_column-gap);
-    mask-image: var(--slotted-command-palette-page-icon, var(--slotted-icon-chevron-right));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0.7;
-  }
-
-  [data-ui='command-palette'] [data-part='arrow']:dir(rtl) {
-    scale: -1 1;
   }
 
   /* ── Separator, empty, status, placeholder ────────────────────────────── */
@@ -916,6 +946,24 @@
       inset: 0;
       position: absolute;
     }
+
+    /* No scrim to press: the word that closes stands at the end of the field. */
+    [data-ui='command-palette'][data-presentation='dialog']
+      > [data-part='header']
+      > [data-part='close'] {
+      display: inline-flex;
+    }
+  }
+
+  /**
+   * A legend for keys the reader has none of. Where the primary input is a
+   * touch screen the footer's hints — arrows, Enter, Escape — name nothing
+   * the reader can press; the list is scrolled and the rows are tapped.
+   */
+  @media (hover: none) and (pointer: coarse) {
+    [data-ui='command-palette'] > [data-part='footer'] {
+      display: none;
+    }
   }
 
   /* ── Forced colours ───────────────────────────────────────────────────── */
@@ -938,17 +986,12 @@
     }
 
     /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
+     * The focus bar under the field is painted with a background, and forced
+     * colours replace a background that is not one of the system's own
+     * colours. `forced-color-adjust: none` keeps its `currentColor` fallback,
+     * the host's ink the system has already forced. The glyphs are `Glyph`
+     * elements drawn in `currentColor` and need nothing here.
      */
-    [data-ui='command-palette'] [data-part='search'],
-    [data-ui='command-palette'] [data-part='arrow'],
-    [data-ui='command-palette'] [data-part='icon']:empty,
-    [data-ui='command-palette'] [data-part='pages'] > li + li::before,
-    [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']::before,
     [data-ui='command-palette']
       > [data-part='header']:has(> [data-part='input']:focus-visible)::after {
       forced-color-adjust: none;

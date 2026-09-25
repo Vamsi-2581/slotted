@@ -105,6 +105,20 @@ test('says current with the ground and paints no bar', () => {
 });
 
 /**
+ * The edge round the current row is the foundation's, not a border step of the
+ * family's own: `--slotted-current-edge` is transparent where the tone ground
+ * says the state and black in `high-contrast`, where the ground is white. A
+ * grey line round a tinted row is what the first demo capture showed.
+ */
+test('draws the current edge from the foundation token, and no border step', () => {
+  assert.match(
+    css,
+    /--_current-edge:\s*var\(\s*--slotted-side-navigation-current-edge,\s*var\(--slotted-current-edge,\s*transparent\)\s*\)/,
+  );
+  assert.doesNotMatch(css, /--_current-edge:[^;]*--slotted-border-subtle/);
+});
+
+/**
  * The flyout stands outside the root, in the portal container, and the row
  * geometry has to reach it: it is stated on `[data-ui]` and not on the root
  * part, so a group moved into the layer keeps the row it had in the column.
@@ -124,4 +138,33 @@ test('reads every row property app-shell publishes', () => {
   for (const property of contract.reads) {
     assert.match(css, new RegExp(`var\\(${property},`), `${property} is not read`);
   }
+});
+
+test('hands its glyph size to whatever the icon slot holds', () => {
+  // A bare svg is held to the icon size by the child rule. A glyph host such
+  // as `ng-icon` sizes itself at `1em`, and an icon box reads
+  // `--slotted-icon-size`: the slot declares both, so nothing placed in it is
+  // drawn at the row's font-size.
+  const rule =
+    css.match(/\[data-ui='side-navigation'\] \[data-part='icon'\] \{([^}]*)\}/)?.[1] ?? '';
+  assert.match(rule, /--slotted-icon-size: var\(--_icon-size\)/);
+  assert.match(rule, /font-size: var\(--_icon-size\)/);
+});
+
+/**
+ * A chip with a radius drawn against the edge of its region loses a corner to
+ * it. The shell's flush plane puts the region on the window's edge, so the row
+ * stood on it too — zero pixels, measured, against twelve on the inset plane.
+ * The standoff is taken out of the row's inset and never added to it: the mark
+ * has to stay on the left edge the shell's own controls stand on.
+ */
+test('stands a row off the column edge without moving its mark', () => {
+  const row = css
+    .slice(
+      css.indexOf("[data-ui='side-navigation'] :is([data-part='link'], [data-part='trigger']) {"),
+    )
+    .slice(0, 900);
+  assert.match(row, /margin-inline:\s*var\(--_standoff\)/);
+  assert.match(row, /padding-inline:\s*calc\(var\(--_inset\) - var\(--_standoff\)\)/);
+  assert.match(css, /--_standoff:\s*min\(var\(--slotted-space-2[^)]*\)[^;]*var\(--_inset\)\)/);
 });

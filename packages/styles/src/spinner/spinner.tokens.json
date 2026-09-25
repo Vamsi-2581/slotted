@@ -1,6 +1,8 @@
 [
+  "--slotted-border-width-medium",
   "--slotted-control-icon-size-md",
-  "--slotted-duration-loop",
-  "--slotted-icon-loader-circle",
+  "--slotted-control-transition-duration",
+  "--slotted-control-transition-easing",
+  "--slotted-duration-loop-slow",
   "--slotted-spinner-size"
 ]

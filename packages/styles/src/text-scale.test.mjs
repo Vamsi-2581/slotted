@@ -32,6 +32,10 @@ const DECORATIVE = new Map([
     'the dot: a masked circle, no text, grown in from 0.6 — the movement CK6 kept',
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
+  [
+    'spinner/(root)',
+    'the ring: an empty box painted with a mask, named by aria-label and never holding text, grown in from 0.6 on the frame the wait begins',
+  ],
   ['status-indicator/(root)::after', 'the pulse ring: an empty pseudo-element leaving the mark'],
   ['tabs/item::after', 'the indicator bar: an empty pseudo-element travelling between tabs'],
 ]);

@@ -16,17 +16,23 @@
     style="--slotted-code-block-digits: 2"
   >
     <div data-part="header">
-      <span data-part="icon" aria-hidden="true"></span>
+      <span data-part="icon" aria-hidden="true"
+        ><span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="file"></svg></span
+      ></span>
       <span data-part="title">packages/core/src/filter/group.ts</span>
       <span data-part="language">ts</span>
       <div data-part="actions">
-        <button
-          data-part="wrap"
-          type="button"
-          aria-pressed="false"
-          aria-label="Wrap lines"
-        ></button>
-        <button data-part="copy" type="button" aria-label="Copy code"></button>
+        <button data-part="wrap" type="button" aria-pressed="false" aria-label="Wrap lines">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="text-wrap"></svg
+          ></span>
+        </button>
+        <button data-part="copy" type="button" aria-label="Copy code">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="copy"></svg
+          ></span>
+        </button>
       </div>
     </div>
     <div
@@ -58,7 +64,11 @@
 <section data-scene="diff">
   <div data-ui="code-block" data-part="root" data-language="css" data-marks>
     <div data-part="actions">
-      <button data-part="copy" type="button" aria-label="Copy code" data-complete></button>
+      <button data-part="copy" type="button" aria-label="Copy code" data-complete>
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="check"></svg
+        ></span>
+      </button>
     </div>
     <div
       data-ui="scroll-area"
@@ -99,8 +109,16 @@
           aria-pressed="true"
           data-pressed
           aria-label="Wrap lines"
-        ></button>
-        <button data-part="copy" type="button" aria-label="Copy code"></button>
+        >
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="text-wrap"></svg
+          ></span>
+        </button>
+        <button data-part="copy" type="button" aria-label="Copy code">
+          <span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="copy"></svg
+          ></span>
+        </button>
       </div>
     </div>
     <div
@@ -140,11 +158,18 @@
       style="--slotted-code-block-collapse: 6"
     >
       <div data-part="header">
-        <span data-part="icon" aria-hidden="true"></span>
+        <span data-part="icon" aria-hidden="true"
+          ><span data-ui="icon" data-part="root" aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="file"></svg></span
+        ></span>
         <span data-part="title">contract.json</span>
         <span data-part="language">json</span>
         <div data-part="actions">
-          <button data-part="copy" type="button" aria-label="Copy code"></button>
+          <button data-part="copy" type="button" aria-label="Copy code">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="copy"></svg
+            ></span>
+          </button>
         </div>
       </div>
       <div

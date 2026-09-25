@@ -119,6 +119,20 @@ test('gives the search its toggle below the medium step, and the bar while open'
 });
 
 /**
+ * The field stands at the start of the middle: the free space is after it,
+ * never shared round it, because the end clusters are never the same width
+ * and a field centred between them is centred on nothing.
+ */
+test('stands the search at the start of the middle and grows it to its measure', () => {
+  const at = css.indexOf("[data-ui='top-navigation'] [data-part='search'] {");
+  assert.notEqual(at, -1);
+  const body = css.slice(css.indexOf('{', at), css.indexOf('\n  }', at));
+  assert.match(body, /margin-inline:\s*0 auto/);
+  assert.match(body, /flex:\s*1 10000 var\(--_search-size\)/);
+  assert.match(body, /max-inline-size:\s*var\(--_search-size\)/);
+});
+
+/**
  * The name leaves the eye and not the DOM: a `home` whose name were
  * `display: none` would have no accessible name but the mark's. Help leaves
  * the bar for the panel at the same step; the context left at the medium one,
@@ -186,6 +200,12 @@ test('says current with the ground and paints no bar', () => {
     /\[data-part='link'\]:is\(\[data-current\], \[aria-current='page'\]\) \{[^}]*--_current-background/,
   );
   assert.doesNotMatch(css, /data-marker/);
+  /* The edge is the foundation's `--slotted-current-edge`, as side-navigation reads it. */
+  assert.match(
+    css,
+    /--_current-edge:\s*var\(\s*--slotted-top-navigation-current-edge,\s*var\(--slotted-current-edge,\s*transparent\)\s*\)/,
+  );
+  assert.doesNotMatch(css, /--_current-edge:[^;]*--slotted-border-subtle/);
 });
 
 /**
@@ -199,21 +219,16 @@ test('reads every row property the contract names', () => {
 });
 
 /**
- * Every mark the family draws is a mask from a glyph token, and every one of
- * them is named in the contract beside the part that draws it.
+ * Every mark the family draws is the Glyph element the contract names beside
+ * the part that draws it, rendered by the binding; the sheet paints none.
  */
-test('draws every mark from the glyph the contract names', () => {
-  const masks = [...css.matchAll(/mask-image: var\((--slotted-icon-[a-z-]+)\)/g)].map(
-    ([, token]) => token,
+test('paints no mark of its own', () => {
+  assert.doesNotMatch(css, /mask-image/);
+  assert.doesNotMatch(
+    css,
+    /--slotted-icon-(bell|chevron-down|circle-question|ellipsis|search|x)\b/,
   );
-  assert.deepEqual(masks.sort(), [
-    '--slotted-icon-bell',
-    '--slotted-icon-chevron-down',
-    '--slotted-icon-circle-question',
-    '--slotted-icon-ellipsis',
-    '--slotted-icon-search',
-    '--slotted-icon-x',
-  ]);
+  assert.doesNotMatch(css, /::before\s*\{[^}]*content: ''/);
 });
 
 /**
@@ -307,4 +322,31 @@ test('sizes the count from the small type step and centres its figures on the in
   )?.[1];
   assert.ok(trimmed, 'the count is not trimmed to its ink');
   assert.match(trimmed, /text-box: trim-both cap alphabetic/);
+});
+
+/**
+ * The brand gives way to the name's ellipsis and no further: the marks never
+ * fold. As a flex item with `min-inline-size: 0`, the cluster shrank under its
+ * own marks on a phone with seven touch-sized controls in the actions, and the
+ * marks it could not hold spilled over the cluster beside it. The minimum is
+ * the marks, which is what `home` contributes when the name stands in a
+ * `minmax(0, 1fr)` track: a grid track that contributes nothing to the
+ * container's min-content size, so the brand's automatic minimum is the marks
+ * alone and the name still shrinks to its ellipsis.
+ */
+test('never shrinks the brand under its marks', () => {
+  const brand = stripped.match(
+    /\[data-ui='top-navigation'\]\[data-part='root'\] > \[data-part='brand'\] \{([^}]*)\}/,
+  )?.[1];
+  assert.ok(brand);
+  assert.doesNotMatch(brand, /min-inline-size:\s*0/);
+  const home = stripped.match(/\[data-ui='top-navigation'\] \[data-part='home'\] \{([^}]*)\}/)?.[1];
+  assert.ok(home);
+  assert.match(home, /display:\s*inline-grid/);
+  assert.match(home, /grid-template-columns:\s*auto minmax\(0, 1fr\)/);
+  /* Below the high step the name is out of flow; the empty track would keep its gap. */
+  const high = rulesUnder(`inline-size < ${contract.collapseAt.high}px`);
+  const narrowHome = high.find(({ selector }) => selector.endsWith("[data-part='home']"));
+  assert.ok(narrowHome, 'no rule for home at the high step');
+  assert.match(narrowHome.body, /grid-template-columns:\s*auto/);
 });

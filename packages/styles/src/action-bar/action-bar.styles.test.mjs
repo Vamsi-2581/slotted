@@ -59,6 +59,16 @@ test('renders every part the contract declares, in at least one scene', () => {
  * the root would place it *relative to its neighbours*, so a message appearing
  * beside it would push it. The property is logical, so the anchor mirrors.
  */
+/**
+ * The root is a size container, and a size container has no intrinsic
+ * inline size: as a flex item — the page footer's actions row — it shrank to
+ * nothing and stacked its letters. A bar is as wide as the line it stands on.
+ */
+test('is as wide as the line it stands on, so a flex parent cannot shrink it', () => {
+  assert.match(rule(ui), /inline-size:100%/);
+  assert.match(rule(ui), /box-sizing:border-box/);
+});
+
 test('anchors the run to the bar own end edge, in a logical property', () => {
   const actions = rule(part('actions'));
   assert.match(actions, /margin-inline-start:auto/);
@@ -129,12 +139,12 @@ test('puts a rule between two runs at more than the distance between two control
 
 /**
  * A rule painted with a background disappears when the system flattens every
- * background, and so does a mark painted through a mask.
+ * background. The mark is an `svg` stroked in `currentColor` and needs nothing.
  */
-test('keeps its rule and its mark when the system takes the palette over', () => {
+test('keeps its rule when the system takes the palette over, and paints no mark', () => {
   const forced = css.slice(css.indexOf('@media (forced-colors: active)'));
   assert.match(forced, /\[data-part='separator'\][\s\S]{0,200}forced-color-adjust: none/);
-  assert.match(forced, /\[data-part='overflow'\] > \*[\s\S]{0,200}forced-color-adjust: none/);
+  assert.ok(!declarations.includes('mask'), 'the mark is the Glyph element, not a mask');
 });
 
 /**

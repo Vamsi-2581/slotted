@@ -70,26 +70,24 @@ test('never paints text with a fill role', () => {
   assert.match(declarations, /--_hover:[\s\S]*?color-mix\(in oklab, var\(--_rest\) 65%/);
 });
 
-test('draws the external marker as a mask from the glyph scale', () => {
-  assert.ok(normalized.includes('mask-image:var(--slotted-icon-external)'));
-  assert.ok(normalized.includes('background-color:currentColor'));
+test('paints no marker of its own: the arrow is the Glyph element in an icon box', () => {
+  assert.ok(!normalized.includes('mask'), 'The marker is an svg, not a mask');
+  assert.ok(!normalized.includes('--slotted-icon-external'));
+  assert.ok(
+    normalized.includes(
+      "[data-part='external-icon']{--slotted-icon-size:var(--slotted-link-external-icon-size,1em);",
+    ),
+    'The part sizes the box inside it at the size of the text',
+  );
 });
 
-test('mirrors the marker in a right-to-left document', () => {
-  assert.ok(normalized.includes("[data-part='external-icon']:dir(rtl){scale:-11;}"));
-});
-
-test('restores the underline under forced colours, and repaints the mask', () => {
+test('restores the underline under forced colours', () => {
   assert.ok(normalized.includes('@media(forced-colors:active)'), 'Missing the query');
   assert.ok(
     /@media\(forced-colors:active\)\{\[data-ui='link'\]\{text-decoration-line:underline/.test(
       normalized,
     ),
     'A link with no underline is unrecognizable once the palette flattens colour',
-  );
-  assert.ok(
-    normalized.includes("[data-part='external-icon']{background-color:LinkText"),
-    'A mask painted with currentColor disappears when the system replaces the palette',
   );
 });
 

@@ -110,6 +110,9 @@
   /* ── One item ─────────────────────────────────────────────────────────── */
 
   [data-ui='radio-group'] [data-part='item'] {
+    /* The rows are as tall as they read. Stretched, the description drifted
+       away from the label it belongs to; the surplus is the container's. */
+    align-content: start;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     /* The halo sits at a negative stack level, and this is the stacking
@@ -155,9 +158,9 @@
 
   /**
    * The dot: the accent's solid step on the surface, inside a circle whose
-   * edge has turned the same colour. The glyph scale's circle is authored at
-   * half its grid, so a mask that fills the box draws a dot of eight pixels in
-   * a circle of sixteen — the proportion every surveyed implementation lands
+   * edge has turned the same colour. The glyph scale's dot is authored at half
+   * its grid, so the `Glyph` element the binding renders, filling the box,
+   * draws a dot of eight pixels in a circle of sixteen — the proportion every surveyed implementation lands
    * on — and the box the dot is centred in is the control's own, of whole
    * pixels, so the two are concentric at every step.
    *
@@ -167,15 +170,15 @@
    * same growth `checkbox`'s does.
    */
   [data-ui='radio-group'] [data-part='indicator'] {
-    background-color: var(--slotted-radio-group-mark-color, var(--slotted-tone-accent-solid));
+    --slotted-icon-size: var(--_size);
+
     block-size: var(--_size);
+    color: var(--slotted-radio-group-mark-color, var(--slotted-tone-accent-solid));
+    /* A flex box, so the icon sits in it as a box and not on a line of text. */
+    display: flex;
     grid-area: 1 / 1;
     inline-size: var(--_size);
     margin-block-start: var(--_lift);
-    mask-image: var(--slotted-radio-group-mark-image, var(--slotted-icon-dot));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
     opacity: 0;
     pointer-events: none;
     /* The mark grows in at the medium step, one above the edge — the same
@@ -406,10 +409,7 @@
   [data-ui='radio-group'][data-part='root'][data-invalid]
     [data-part='control']:checked
     + [data-part='indicator'] {
-    background-color: var(
-      --slotted-radio-group-invalid-mark-color,
-      var(--slotted-tone-danger-solid)
-    );
+    color: var(--slotted-radio-group-invalid-mark-color, var(--slotted-tone-danger-solid));
   }
 
   /**
@@ -446,10 +446,7 @@
   }
 
   [data-ui='radio-group'] [data-part='control']:disabled + [data-part='indicator'] {
-    background-color: var(
-      --slotted-radio-group-disabled-mark-color,
-      var(--slotted-disabled-foreground)
-    );
+    color: var(--slotted-radio-group-disabled-mark-color, var(--slotted-disabled-foreground));
   }
 
   [data-ui='radio-group'][data-part='root'][data-disabled] [data-part='label'],
@@ -705,9 +702,8 @@
 
   /* ── Forced colors ────────────────────────────────────────────────────
    *
-   * The mark and the ground it stands on are both `background-color`, which
-   * forced colors overrides, so the dot would vanish into the circle it is
-   * drawn in. Restated in system colours, as `checkbox` restates the same pair.
+   * Forced colors overrides the circle's `background-color` and the dot's
+   * `color`, so the dot would vanish into the circle it is drawn in. Restated in system colours, as `checkbox` restates the same pair.
    */
   @media (forced-colors: active) {
     [data-ui='radio-group'] [data-part='control'] {
@@ -721,7 +717,7 @@
     }
 
     [data-ui='radio-group'] [data-part='control']:checked + [data-part='indicator'] {
-      background-color: Highlight;
+      color: Highlight;
     }
 
     [data-ui='radio-group'] [data-part='control']:disabled {
@@ -730,7 +726,7 @@
     }
 
     [data-ui='radio-group'] [data-part='control']:disabled + [data-part='indicator'] {
-      background-color: GrayText;
+      color: GrayText;
     }
   }
 }

@@ -93,13 +93,19 @@
     max-inline-size: 100%;
   }
 
-  [data-ui='filter-bar'][data-part='rule'] > [data-part='operand'] {
+  /*
+   * The operator and the operand are reached as descendants and not as
+   * children: a binding may render the condition inside one element of its
+   * own at `display: contents`, which leaves the two parts as grid items of
+   * the rule and out of reach of a child combinator.
+   */
+  [data-ui='filter-bar'][data-part='rule'] [data-part='operand'] {
     display: grid;
     gap: var(--_gap-sm);
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'][data-part='rule'][data-kind='boolean'] > [data-part='operand']:empty {
+  [data-ui='filter-bar'][data-part='rule'][data-kind='boolean'] [data-part='operand']:empty {
     display: none;
   }
 
@@ -110,7 +116,7 @@
     justify-content: flex-end;
   }
 
-  [data-ui='filter-bar'][data-part='rule'][data-invalid] > [data-part='operator'] {
+  [data-ui='filter-bar'][data-part='rule'][data-invalid] [data-part='operator'] {
     --slotted-select-border-color: var(--_invalid);
   }
 
@@ -119,7 +125,13 @@
    * Three compositions, chosen by the bar's own width and not the viewport's.
    *
    * Wide, from 64rem: one line — the search, the toolbar, the consumer's
-   * controls, the count — and the chips under it.
+   * controls, the count — and the chips under it. The width alone does not
+   * say the toolbar fits: the consumer's controls take what they need, and
+   * pills wrapped in the track left over drew a line of pills under a search
+   * that stood alone. The binding measures the toolbar in this composition
+   * and marks the root `data-bar-wrapped` when it takes two lines, and the
+   * bar falls back to the medium composition, where the toolbar has a line
+   * of its own.
    *
    * Medium, 36 to 64rem: the search shares its line with the consumer's
    * controls and the count; the toolbar takes a line of its own, so the pills
@@ -132,9 +144,14 @@
    * pills, the add control and the clear control on their own line at that
    * width, and because a reference page's stage is 39rem wide: at 40rem every
    * demonstration on the page showed the fold and none showed a pill.
+   *
+   * Every member starts at the top of its line and is a control tall, so a
+   * line stays one line even while the toolbar beside the search wraps: the
+   * search and the consumer's controls line up with the first line of pills,
+   * not with the middle of two.
    */
   [data-ui='filter-bar'] > [data-part='frame'] {
-    align-items: center;
+    align-items: start;
     column-gap: var(--_gap);
     display: grid;
     grid-template-areas:
@@ -181,6 +198,14 @@
         'chips chips chips chips';
       grid-template-columns: minmax(12rem, 22rem) minmax(0, 1fr) auto auto;
     }
+
+    [data-ui='filter-bar'][data-bar-wrapped] > [data-part='frame'] {
+      grid-template-areas:
+        'search end count'
+        'bar bar bar'
+        'chips chips chips';
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
   }
 
   [data-ui='filter-bar'][data-size='sm'] {
@@ -203,19 +228,10 @@
   /**
    * The search, the preset, a rule's field and operator are other families'
    * roots — `text-field` and `select` select their own root part — so each
-   * one sits inside a part of this family's and fills it.
+   * one sits inside a part of this family's and fills it. The magnifier before
+   * the query is an `icon` in the field's start adornment, which the field
+   * sizes as it sizes every adornment.
    */
-  /** The glyph before the query, drawn at the size the field gives its adornments. */
-  [data-ui='filter-bar'] [data-part='search-icon'] {
-    background-color: currentcolor;
-    block-size: var(--slotted-icon-size, var(--_icon));
-    display: inline-block;
-    inline-size: var(--slotted-icon-size, var(--_icon));
-    mask-image: var(--slotted-filter-bar-search-icon, var(--slotted-icon-search));
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
-
   [data-ui='filter-bar'] [data-part='search'] > [data-ui='text-field'],
   [data-ui='filter-bar'] [data-part='preset'] > [data-ui='select'],
   [data-ui='filter-bar'] :is([data-part='field'], [data-part='operator']) > [data-ui='select'] {
@@ -237,10 +253,16 @@
   }
 
   /** The count is the answer to the filters, and it takes the far end of its line — PatternFly's rule for an item count. */
-  [data-ui='filter-bar'] [data-part='count'] {
+  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='count'] {
     color: var(--_muted);
     font-variant-numeric: tabular-nums;
     margin: 0;
+    /* A line of its own type whatever it holds: before the first answer it holds only the
+       spinner, shorter than the text that replaces it, and the rows under the bar moved. */
+    min-block-size: 1lh;
+    /* The line in the middle of a control's height, which is the line it shares with the
+       search: the frame starts every member at the top of its line. */
+    padding-block: max(0px, calc((var(--_height) - 1lh) / 2));
     white-space: nowrap;
   }
 
@@ -278,7 +300,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='filter-bar'] [data-part='pill'] > span {
+  [data-ui='filter-bar'] [data-part='pill'] > span:not([data-ui='icon']) {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -290,20 +312,13 @@
     font-weight: var(--slotted-font-weight-regular, 400);
   }
 
-  [data-ui='filter-bar'] [data-part='pill']::after {
-    background-color: currentcolor;
-    block-size: var(--_icon);
-    content: '';
-    display: block;
-    flex: none;
-    inline-size: var(--_icon);
-    mask-image: var(--slotted-filter-bar-pill-icon, var(--slotted-icon-chevron-down));
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  /** The chevron is an `icon` after the label, at the size the bar gives its glyphs. */
+  [data-ui='filter-bar'] [data-part='pill'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_icon);
     transition: transform var(--_duration) var(--_easing);
   }
 
-  [data-ui='filter-bar'] [data-part='pill'][aria-expanded='true']::after {
+  [data-ui='filter-bar'] [data-part='pill'][aria-expanded='true'] > [data-ui='icon'] {
     transform: rotate(180deg);
   }
 
@@ -426,15 +441,25 @@
     inline-size: var(--slotted-target-min, 24px);
   }
 
-  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove']::after {
-    background-color: currentcolor;
-    block-size: var(--_icon);
-    content: '';
-    display: block;
-    inline-size: var(--_icon);
-    mask-image: var(--slotted-filter-bar-remove-icon, var(--slotted-icon-x));
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+  /* On a finger both are full targets beside 44-pixel fields, and the box is
+     the one a mouse sees: a transparent `::before` centred on it reaches the
+     comfortable size in both axes, so no row grows, the builder's remove
+     track keeps its width, and the ground and the ring stay 24 pixels tall. */
+  @media (pointer: coarse) {
+    [data-ui='filter-bar'] :is([data-part='more'], [data-part='rule'] > [data-part='remove']) {
+      position: relative;
+    }
+
+    [data-ui='filter-bar']
+      :is([data-part='more'], [data-part='rule'] > [data-part='remove'])::before {
+      content: '';
+      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+      position: absolute;
+    }
+  }
+
+  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove'] > [data-ui='icon'] {
+    --slotted-icon-size: var(--_icon);
   }
 
   [data-ui='filter-bar']
@@ -504,7 +529,7 @@
   }
 
   /** A loading bar keeps its width and its controls, and says so in the count's place. */
-  [data-ui='filter-bar'][data-loading] [data-part='count'] {
+  [data-ui='filter-bar'][data-loading] > [data-part='frame'] > [data-part='count'] {
     align-items: center;
     display: inline-flex;
     gap: var(--_gap-sm);
@@ -639,13 +664,16 @@
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > * {
+  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > *,
+  [data-ui='filter-bar'][data-part='builder']
+    [data-part='rule']
+    :is([data-part='operator'], [data-part='operand']) {
     min-inline-size: 0;
   }
 
   [data-ui='filter-bar'][data-part='builder']
     [data-part='rule'][data-operands='0']
-    > [data-part='operand'] {
+    [data-part='operand'] {
     display: none;
   }
 
@@ -661,7 +689,7 @@
 
   [data-ui='filter-bar'][data-part='builder']
     [data-part='rule'][data-operands='2']
-    > [data-part='operand'] {
+    [data-part='operand'] {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
@@ -680,24 +708,14 @@
     padding-inline-start: calc(var(--_join-col) + var(--_gap-sm));
   }
 
-  /* Add rule and Add group say so with the plus the bar's own add control carries. */
-  [data-ui='filter-bar'][data-part='builder']
-    :is([data-part='add-rule'], [data-part='add-group'])::before {
-    background-color: currentcolor;
-    block-size: var(--_icon);
-    content: '';
-    display: inline-block;
-    flex: 0 0 auto;
-    inline-size: var(--_icon);
-    mask-image: var(--slotted-filter-bar-add-icon, var(--slotted-icon-plus));
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
-  }
-
   @container slotted-filter-bar-builder (max-width: 30rem) {
+    /* The second track is the remove control's own width, not `auto`: the
+       operator and the operand span both tracks, and a spanning item hands
+       its size to the non-flexible track first — `auto` took the operand's
+       whole width and left the field 34 pixels wide, a chevron with no name. */
     [data-ui='filter-bar'][data-part='builder'] [data-part='rule'],
     [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-operands='0'] {
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) var(--slotted-target-min, 24px);
     }
 
     [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > [data-part='field'] {
@@ -711,7 +729,7 @@
 
     [data-ui='filter-bar'][data-part='builder']
       [data-part='rule']
-      > :is([data-part='operator'], [data-part='operand']) {
+      :is([data-part='operator'], [data-part='operand']) {
       grid-column: 1 / -1;
     }
   }
@@ -732,6 +750,17 @@
       grid-template-columns: minmax(0, 1fr) auto;
     }
 
+    /* The consumer's end controls take a line of their own under the summary:
+       sharing its line, a toolbar of three controls took every pixel and
+       folded the summary, or its own buttons, to one letter a line. */
+    [data-ui='filter-bar'] > [data-part='frame']:has(> [data-part='end']:not(:empty)) {
+      grid-template-areas:
+        'search search'
+        'bar bar'
+        'end end'
+        'count count';
+    }
+
     [data-ui='filter-bar'] > [data-part='frame'] > [data-part='search'] {
       max-inline-size: none;
     }
@@ -749,27 +778,26 @@
       visibility: visible;
     }
 
+    /* A line of its own here, with nothing to line up with. */
     [data-ui='filter-bar'] > [data-part='frame'] > [data-part='count'] {
       justify-self: start;
+      padding-block: 0;
+    }
+  }
+
+  /**
+   * A legend for a key the reader has none of. Where the primary input is a
+   * touch screen the shortcut at the end of the search names nothing the
+   * reader can press; the field is tapped. The key still works when a
+   * keyboard is attached.
+   */
+  @media (hover: none) and (pointer: coarse) {
+    [data-ui='filter-bar'] [data-part='search'] [data-ui='kbd'] {
+      display: none;
     }
   }
 
   @media (forced-colors: active) {
-    /*
-     * A masked glyph is painted with a background, and forced colours replace
-     * a background that is not one of the system's own colours: the mark goes
-     * and the box it sat in stays. `forced-color-adjust: none` keeps
-     * `currentcolor`, which is the host's ink, already forced to the right
-     * value. `packages/styles/src/masked-glyph.test.mjs` holds the rule.
-     */
-    [data-ui='filter-bar'] [data-part='pill']::after,
-    [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove']::after,
-    [data-ui='filter-bar'] [data-part='search-icon'],
-    [data-ui='filter-bar'][data-part='builder'] [data-part='add-rule']::before,
-    [data-ui='filter-bar'][data-part='builder'] [data-part='add-group']::before {
-      forced-color-adjust: none;
-    }
-
     /* A filled pill loses its tint there and keeps its edge, which is the state's other half. */
     [data-ui='filter-bar'] [data-part='pill'][data-filtered] {
       border-width: var(--slotted-border-width-thick, 2px);

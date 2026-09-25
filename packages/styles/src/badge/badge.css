@@ -318,8 +318,15 @@
     }
   }
 
+  /**
+   * The slot sizes what it holds: an icon box reads `--slotted-icon-size`
+   * from its container, and a bare glyph host such as `ng-icon` reads the
+   * slot's font-size, so both are the glyph scale.
+   */
   [data-ui='badge'] [data-part='start'],
   [data-ui='badge'] [data-part='end'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     block-size: var(--_icon-size);
     box-sizing: border-box;

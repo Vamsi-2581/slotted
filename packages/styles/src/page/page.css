@@ -41,6 +41,12 @@
 
     background-color: var(--_ground);
     color: var(--slotted-text, CanvasText);
+    /**
+     * The page answers its own width, not the viewport's. The inline axis
+     * alone: the block axis is what `min-block-size`, `self` and `fill`
+     * decide, and containing it would size the page by nothing.
+     */
+    container: slotted-page / inline-size;
     display: flex;
     flex-direction: column;
     font-family: var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif);
@@ -90,16 +96,22 @@
    * stretches to what is left, for a master–detail, a splitter or a canvas
    * that scroll their own panes. No scroll outside it, so no collapse on
    * scroll — the contract records the cost.
+   *
+   * From the compact size class up only. Below 600 pixels the page scrolls
+   * as any page does and the body grows with its content: on a phone the
+   * chrome above a filled list left its rows 155 of 667 pixels.
    */
-  [data-ui='page'][data-fill] > [data-part='scroll'] > [data-part='body'] {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-block-size: 0;
-  }
-  [data-ui='page'][data-fill] > [data-part='scroll'] > [data-part='body'] > * {
-    flex: 1 1 auto;
-    min-block-size: 0;
+  @container slotted-page (width >= 600px) {
+    [data-ui='page'][data-fill] > [data-part='scroll'] > [data-part='body'] {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-block-size: 0;
+    }
+    [data-ui='page'][data-fill] > [data-part='scroll'] > [data-part='body'] > * {
+      flex: 1 1 auto;
+      min-block-size: 0;
+    }
   }
 
   [data-ui='page'][data-loading] > [data-part='scroll'] > [data-part='body'] {
@@ -142,5 +154,26 @@
     gap: var(--slotted-control-gap-md, 8px);
     justify-content: flex-end;
     min-inline-size: 0;
+  }
+
+  /* ── Compact ─────────────────────────────────────────────────────────── */
+
+  /**
+   * Below 600 pixels, the compact size class: the gutters of every container
+   * in the page stop at step 4 of the space scale. At the default inset,
+   * step 6, the two gutters took 32 of a 390-pixel phone's pixels; at step 4
+   * they take 16. The steps under 4 keep their own value.
+   */
+  @container slotted-page (width < 600px) {
+    [data-ui='page'] [data-ui='container'][data-inset='5'],
+    [data-ui='page'] [data-ui='container'][data-inset='6'],
+    [data-ui='page'] [data-ui='container'][data-inset='7'],
+    [data-ui='page'] [data-ui='container'][data-inset='8'],
+    [data-ui='page'] [data-ui='container'][data-inset='9'],
+    [data-ui='page'] [data-ui='container'][data-inset='10'],
+    [data-ui='page'] [data-ui='container'][data-inset='11'],
+    [data-ui='page'] [data-ui='container'][data-inset='12'] {
+      --_inset: var(--slotted-space-4, 0.5rem);
+    }
   }
 }

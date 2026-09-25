@@ -3,16 +3,29 @@
   against the same grid in every scheme, density and direction. Today is the
   ninth, and it is marked apart from the selection wherever both are true.
 
-  The chevrons on the two page triggers and the one on the heading are masks
-  from the theme's own glyph scale: nothing here draws a character as an icon.
+  The chevrons on the two page triggers and the one on the heading are `Glyph`
+  elements the build draws into the empty `<svg>`: nothing here draws a
+  character as an icon. The year view has no way up, so its heading has none.
 -->
 
 <section data-scene="default">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -97,9 +110,21 @@
 <section data-scene="selected">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -186,9 +211,21 @@
 <section data-scene="today-selected">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -273,9 +310,21 @@
 <section data-scene="range">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -364,9 +413,21 @@
 <section data-scene="multiple">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -457,9 +518,21 @@
 <section data-scene="range-wrapping">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -548,9 +621,21 @@
 <section data-scene="unavailable">
   <div data-ui="calendar" data-part="root">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -651,9 +736,21 @@
 <section data-scene="week-numbers">
   <div data-ui="calendar" data-part="root" data-week-numbers>
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -768,11 +865,21 @@
 <section data-scene="two-months">
   <div data-ui="calendar" data-part="root" data-months="2">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">
-        setembro – outubro de 2026
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
       </button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro – outubro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">
@@ -910,9 +1017,21 @@
 <section data-scene="month-view">
   <div data-ui="calendar" data-part="root" data-view="month">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="months">
       <button data-part="period" type="button">jan.</button>
@@ -934,9 +1053,17 @@
 <section data-scene="year-view">
   <div data-ui="calendar" data-part="root" data-view="year">
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
       <button data-part="heading" type="button" aria-live="polite">2016 – 2027</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="years">
       <button data-part="period" type="button">2016</button>
@@ -958,9 +1085,21 @@
 <section data-scene="disabled">
   <div data-ui="calendar" data-part="root" data-disabled>
     <div data-part="header">
-      <button data-part="previous" type="button" aria-label="Mês anterior"></button>
-      <button data-part="heading" type="button" aria-live="polite">setembro de 2026</button>
-      <button data-part="next" type="button" aria-label="Próximo mês"></button>
+      <button data-part="previous" type="button" aria-label="Mês anterior">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
+      <button data-part="heading" type="button" aria-live="polite">
+        setembro de 2026<span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        ></span>
+      </button>
+      <button data-part="next" type="button" aria-label="Próximo mês">
+        <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        ></span>
+      </button>
     </div>
     <div data-part="grids">
       <table data-part="grid" role="grid" aria-label="setembro de 2026">

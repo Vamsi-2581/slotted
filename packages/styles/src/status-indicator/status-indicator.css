@@ -67,11 +67,12 @@
     --_rim: var(--slotted-status-indicator-mark-border-color, var(--_text));
 
     /**
-     * What the ring is drawn against. The pulse cannot hang off the mark
-     * itself: an icon mark carries a `mask-image`, a mask clips the element's
-     * pseudo-elements with it, and a ring behind a triangle was cut into the
-     * shape of that triangle and then disappeared. Photographed at 300% before
-     * it was moved here.
+     * What the ring is drawn against. The pulse hangs off the root rather
+     * than off the mark: when the icon mark was a `mask-image`, the mask
+     * clipped the element's pseudo-elements with it, and a ring behind a
+     * triangle was cut into the shape of that triangle and then disappeared.
+     * Photographed at 300% before it was moved here, and kept here so the
+     * ring never depends on how a mark is drawn.
      */
     --_pulse-inset: calc((1lh - var(--_mark-size)) / 2);
 
@@ -104,11 +105,12 @@
     vertical-align: middle;
   }
 
-  /* ── Status: the tone each state speaks in, and the glyph it draws ─────
+  /* ── Status: the tone each state speaks in ────────────────────────────
    *
    * Six values, and the map is `specs/components/status-indicator/contract.json`
    * rather than a decision taken here: the stylesheet, both bindings and the
-   * contract test all read the same table.
+   * contract test all read the same table. The glyph each status draws is in
+   * the same contract, and the bindings render it; the sheet only colours it.
    *
    * `neutral` and `unknown` share `secondary` on purpose, so the difference
    * between “nothing is happening” and “nobody knows” is never carried by
@@ -132,37 +134,31 @@
      */
     --_solid: var(--slotted-border-strong);
     --_text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-circle);
   }
 
   [data-ui='status-indicator'][data-part='root'][data-status='info'] {
     --_solid: var(--slotted-tone-accent-solid);
     --_text: var(--slotted-tone-accent-text);
-    --_glyph: var(--slotted-icon-circle-info);
   }
 
   [data-ui='status-indicator'][data-part='root'][data-status='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_text: var(--slotted-tone-success-text);
-    --_glyph: var(--slotted-icon-circle-check);
   }
 
   [data-ui='status-indicator'][data-part='root'][data-status='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_text: var(--slotted-tone-warning-text);
-    --_glyph: var(--slotted-icon-triangle-alert);
   }
 
   [data-ui='status-indicator'][data-part='root'][data-status='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_text: var(--slotted-tone-danger-text);
-    --_glyph: var(--slotted-icon-circle-alert);
   }
 
   [data-ui='status-indicator'][data-part='root'][data-status='unknown'] {
     --_solid: transparent;
     --_text: var(--slotted-tone-secondary-text);
-    --_glyph: var(--slotted-icon-circle-question);
   }
 
   /**
@@ -232,16 +228,16 @@
    * 3:1 a meaningful graphic needs — so the glyph is drawn in one of those and
    * the disc is left to the mark that is a disc.
    *
-   * `--slotted-status-indicator-mark-image` is the escape hatch: an
-   * application with a status of its own writes one declaration and keeps the
-   * tone, the size, the alignment and the name.
+   * The mark is the icon box's container: it hands the box its own size
+   * through `--slotted-icon-size` and its colour through `color`, and the
+   * binding puts the status's glyph inside. `flex` rather than a line box, so
+   * no strut of the root's line-height pushes the glyph off the box.
    */
   [data-ui='status-indicator'][data-mark='icon'] [data-part='mark'] {
-    background-color: var(--_text, CanvasText);
-    mask-image: var(--slotted-status-indicator-mark-image, var(--_glyph));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+    --slotted-icon-size: var(--_mark-size);
+
+    color: var(--_text, CanvasText);
+    display: flex;
   }
 
   /* ── The words ────────────────────────────────────────────────────────
@@ -358,18 +354,20 @@
    *
    * The operating system replaces every author colour here, so the tone is
    * gone whatever the family writes: the six statuses become one mark. What is
-   * left to decide is whether that mark is visible, and a masked glyph over a
+   * left to decide is whether that mark is visible, and a dot painted from a
    * forced `Canvas` background is not — the defect `link` found on its own
    * external mark and answered the same way.
    *
-   * The glyph keeps its silhouette, which is the whole reason the icon mark
-   * exists: a triangle and a circled cross are still different from each other
-   * when neither of them is red. The pulse is withdrawn, because its ring is
-   * painted from a tone the system replaces with a face colour, and a ring in
-   * `ButtonFace` on `Canvas` is an animation of nothing.
+   * Only the dot is filled here. The glyph is drawn in `currentColor`, which
+   * the system already resolves to `CanvasText`, and a filled box behind it
+   * would bury it. It keeps its silhouette, which is the whole reason the icon
+   * mark exists: a triangle and a circled cross are still different from each
+   * other when neither of them is red. The pulse is withdrawn, because its ring
+   * is painted from a tone the system replaces with a face colour, and a ring
+   * in `ButtonFace` on `Canvas` is an animation of nothing.
    */
   @media (forced-colors: active) {
-    [data-ui='status-indicator'] [data-part='mark'] {
+    [data-ui='status-indicator'][data-mark='dot'] [data-part='mark'] {
       background-color: CanvasText;
       border-color: CanvasText;
     }

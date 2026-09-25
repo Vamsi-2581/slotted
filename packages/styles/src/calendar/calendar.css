@@ -158,6 +158,8 @@
    * nothing that focus lands on, so without this nothing announces the month.
    */
   [data-ui='calendar'] [data-part='heading'] {
+    --slotted-icon-size: var(--_icon-size);
+
     appearance: none;
     background-color: transparent;
     border: 0;
@@ -214,32 +216,20 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='calendar'] [data-part='heading']::after {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    flex: 0 0 auto;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-calendar-heading-icon, var(--slotted-icon-chevron-down));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
-  /* The way up is closed at the top: a year view has nowhere further to go,
-     so the mark that offered it goes rather than being shown disabled. */
-
-  [data-ui='calendar'][data-part='root'][data-view='year'] [data-part='heading']::after {
-    display: none;
-  }
+  /* The chevron after the name is a `Glyph` the binding draws. The way up is
+     closed at the top: a year view has nowhere further to go, so the binding
+     leaves the mark that offered it out rather than showing it disabled. */
 
   /* ── The two page triggers ────────────────────────────────────────────
    *
-   * The chevrons are mirrored by the family that draws them, which is how one
-   * pair of glyph tokens serves both document directions.
+   * The chevrons are `Glyph` elements in `directional` icon boxes, mirrored
+   * under `dir="rtl"` by the icon's own rule, which is how one glyph serves
+   * both document directions.
    */
   [data-ui='calendar'] [data-part='previous'],
   [data-ui='calendar'] [data-part='next'] {
+    --slotted-icon-size: var(--_icon-size);
+
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -261,32 +251,13 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='calendar'] [data-part='previous']::before,
-  [data-ui='calendar'] [data-part='next']::before {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-calendar-page-icon, var(--slotted-icon-chevron-right));
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: contain;
-  }
-
   /**
    * One glyph, turned. The chevron points along the writing direction, so the
-   * "previous" trigger is the "next" artwork rotated a half turn and both
-   * follow `dir` without a second token — the rule `pagination` set.
+   * "previous" trigger is the "next" artwork rotated a half turn; the icon's
+   * RTL mirror composes with the turn, so both follow `dir` without a second
+   * glyph — the rule `pagination` set.
    */
-  [data-ui='calendar'] [data-part='previous']::before {
-    rotate: 180deg;
-  }
-
-  [data-ui='calendar']:dir(rtl) [data-part='previous']::before {
-    rotate: 0deg;
-  }
-
-  [data-ui='calendar']:dir(rtl) [data-part='next']::before {
+  [data-ui='calendar'] [data-part='previous'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -833,15 +804,6 @@
   }
 
   @media (forced-colors: active) {
-    /* A masked glyph is painted with a background, and forced colours replace
-       a background that is not one of the system's own: the mark would go and
-       the box it sat in would stay. */
-    [data-ui='calendar'] [data-part='previous']::before,
-    [data-ui='calendar'] [data-part='next']::before,
-    [data-ui='calendar'] [data-part='heading']::after {
-      forced-color-adjust: none;
-    }
-
     /**
      * A mixed tint has nothing to mix in a palette the system replaced, so the
      * run takes an edge here and only here — two rules the operating system

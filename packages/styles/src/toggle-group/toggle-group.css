@@ -52,7 +52,7 @@
     /** The edge of the bar, stated by the items that make it. */
     --_border-color: var(
       --slotted-toggle-group-border-color,
-      var(--slotted-border-strong, ButtonBorder)
+      var(--slotted-control-border-color, ButtonBorder)
     );
 
     align-items: stretch;
@@ -203,8 +203,9 @@
 
   [data-ui='toggle-group'][data-part='root'][data-variant='outline'] [data-part='item'] {
     border-color: var(--_border-color);
+    /* A framed item lifts off its ground at rest, as button's outline does. */
+    box-shadow: var(--slotted-toggle-group-shadow, var(--slotted-control-shadow, none));
   }
-
   [data-ui='toggle-group'][data-part='root']:not([data-attached]) {
     gap: var(--_separation);
   }
@@ -441,6 +442,8 @@
       --slotted-toggle-group-disabled-border-color,
       var(--slotted-disabled-border, GrayText)
     );
+    /* Nothing a person cannot reach is lifted off the page. */
+    box-shadow: none;
   }
 
   /**

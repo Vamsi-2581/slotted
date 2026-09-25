@@ -19,7 +19,7 @@
   the number, and it is what carries the day period: `aria-valuenow` there is 0
   or 1, which is not a name. The group's own label is the whole value in words.
   Nothing here draws a character as an icon: the clear button's mark and the
-  preview's chevron are both masks from the theme's glyph scale.
+  preview's chevron are both the empty `Glyph` element the build draws.
 
   The two day-period glyphs in the `ja-JP` row render as boxes on a capture
   host with no CJK font installed. It is the host's coverage and not the
@@ -803,7 +803,11 @@
         aria-label="Duração a partir de agora"
         placeholder="+40m, 1h30, +2d"
       />
-      <span data-part="preview" data-resolved aria-live="polite">15:20</span>
+      <span data-part="preview" data-resolved aria-live="polite"
+        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+        >15:20</span
+      >
     </div>
 
     <!-- `+2d` moves the day, which is what it is for. The date is written into
@@ -827,6 +831,8 @@
         placeholder="+40m, 1h30, +2d"
       />
       <span data-part="preview" data-resolved data-rolls-day aria-live="polite"
+        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
         ><span data-part="preview-date">12 set</span>, 14:40</span
       >
     </div>
@@ -942,7 +948,11 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
 
     <div
@@ -1031,7 +1041,11 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
 
     <div
@@ -1120,7 +1134,11 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
   </div>
 </section>
@@ -1768,7 +1786,11 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar" disabled></button>
+      <button data-part="clear" type="button" aria-label="Limpar" disabled>
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
   </div>
 </section>
@@ -1876,7 +1898,11 @@
         </span>
       </div>
       <span data-part="end">UTC−3</span>
-      <button data-part="clear" type="button" aria-label="Limpar"></button>
+      <button data-part="clear" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-part="root" aria-hidden="true"
+          ><svg data-part="glyph" data-glyph="x"></svg
+        ></span>
+      </button>
     </div>
   </div>
 </section>

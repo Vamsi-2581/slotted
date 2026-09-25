@@ -131,11 +131,6 @@ test('keeps an edge on every variant that is not bare', () => {
 });
 
 /**
- * A saturated border on all five tones turned a row of actions into a row of
- * status chips. The edge of an outline button is neutral and its label carries
- * the tone; `--slotted-border-strong` is held to 3:1 against the surface.
- */
-/**
  * A fill is its own edge. Anything else — the tone's `border` role, a neutral
  * from the foundation — reads as a line laid over the control rather than as
  * the edge of it. The one exception is the neutral tone, whose fill is 1.23:1
@@ -176,9 +171,17 @@ test('lifts only the variants that draw a frame', () => {
   assert.ok(rule(`${ui}:disabled,${ui}[data-disabled]`).includes('box-shadow:none'));
 });
 
+/**
+ * A saturated border on all five tones turned a row of actions into a row of
+ * status chips. The edge of an outline button is neutral and its label carries
+ * the tone. The neutral is the control step, the edge a field carries at rest:
+ * `--slotted-border-strong` made the outline button the darkest line on the
+ * form, and the foundation keeps that step for the line between two surfaces.
+ */
 test('draws an outline button with a neutral edge and a tone label', () => {
   const outline = rule(`${ui}[data-variant='outline']`);
-  assert.ok(outline.includes('border-color:var(--slotted-border-strong'));
+  assert.ok(outline.includes('border-color:var(--slotted-control-border-color'));
+  assert.ok(!outline.includes('border-color:var(--slotted-border-strong'));
   assert.ok(outline.includes('color:var(--_text'));
   assert.ok(!outline.includes('border-color:var(--_border'));
 });

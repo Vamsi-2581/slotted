@@ -24,8 +24,8 @@ const TONE_GLYPH: Record<ToastTone, GlyphName> = {
   accent: 'circle-info',
   secondary: 'circle',
   success: 'circle-check',
-  warning: 'triangle-alert',
-  danger: 'circle-alert',
+  warning: 'circle-alert',
+  danger: 'circle-x',
 };
 
 /**

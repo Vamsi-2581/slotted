@@ -42,8 +42,8 @@ const TONE_GLYPH: Record<ToastTone, GlyphName> = {
   accent: 'circle-info',
   secondary: 'circle',
   success: 'circle-check',
-  warning: 'triangle-alert',
-  danger: 'circle-alert',
+  warning: 'circle-alert',
+  danger: 'circle-x',
 };
 
 /** Which way a message is dragged away, given the edge its region sits at. */

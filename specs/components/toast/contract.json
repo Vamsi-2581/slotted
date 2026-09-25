@@ -139,8 +139,8 @@
     "accent": "circle-info",
     "secondary": "circle",
     "success": "circle-check",
-    "warning": "triangle-alert",
-    "danger": "circle-alert"
+    "warning": "circle-alert",
+    "danger": "circle-x"
   },
   "stacking": {
     "measures": true,

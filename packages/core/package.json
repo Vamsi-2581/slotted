@@ -208,6 +208,10 @@
       "types": "./dist/types/transfer/index.d.ts",
       "import": "./dist/transfer.js"
     },
+    "./import-export-center": {
+      "types": "./dist/types/import-export-center/index.d.ts",
+      "import": "./dist/import-export-center.js"
+    },
     "./tour": {
       "types": "./dist/types/tour/index.d.ts",
       "import": "./dist/tour.js"

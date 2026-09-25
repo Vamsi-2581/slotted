@@ -55,6 +55,7 @@ export default defineConfig({
         timeline: resolve(import.meta.dirname, 'src/timeline/index.ts'),
         toast: resolve(import.meta.dirname, 'src/toast/index.ts'),
         transfer: resolve(import.meta.dirname, 'src/transfer/index.ts'),
+        'import-export-center': resolve(import.meta.dirname, 'src/import-export-center/index.ts'),
         tour: resolve(import.meta.dirname, 'src/tour/index.ts'),
         typeahead: resolve(import.meta.dirname, 'src/typeahead/index.ts'),
         upload: resolve(import.meta.dirname, 'src/upload/index.ts'),

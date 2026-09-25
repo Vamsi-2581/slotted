@@ -791,3 +791,14 @@ Uma família por commit, `pnpm check` por família e `pnpm check:full` por onda.
 Uma reabertura que muda um módulo de `packages/core` commita o módulo e os
 consumidores tocados juntos, para que a árvore nunca tenha duas versões de um
 vocabulário.
+
+  Entregue em 2026-09-25. Inventário e decisões em
+  `docs/history/designs/2026-09-25-import-export-center-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-25-import-export-center-self-assessment.md`. Cinco estados
+  (`queued`, `running`, `succeeded`, `failed`, `canceled`) e o desfecho `partial` derivado das
+  contagens; controlos por estado, disponibilidade dos arquivos (prazo, permissão), texto do
+  progresso, estimativa de tempo, transições, avisos e destino do foco em
+  `@slotted/core/import-export-center`. Modelos `current` (vista) e `open` (detalhes). A partir de
+  42rem a lista é uma grelha e cada job uma subgrelha. `upload` entra pelo diálogo de importação no
+  slot `actions`, não no cabeçalho. React `ImportExportCenter` e `useJobToasts`; Angular
+  `section[slImportExportCenter]`, `[(view)]`, `[(expanded)]` e `jobToasts`.

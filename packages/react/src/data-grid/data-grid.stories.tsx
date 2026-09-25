@@ -6,10 +6,13 @@ import {
   withFilter,
   withPageIndex,
   withPageSize,
+  withColumnHidden,
   withSearch,
   type GridCell,
   type GridColumn,
   type GridColumnState,
+  type GridDensity,
+  type GridOutOfSpace,
   type GridQuery,
   type GridRange,
 } from '@slotted/core/grid';
@@ -34,11 +37,17 @@ import {
 } from '../pagination';
 import { Text } from '../typography';
 import { TextField } from '../text-field';
+import { createToaster, ToasterProvider, ToastRegion } from '../toast';
 import { DataGrid } from './data-grid';
 import { DataGridDefaultsProvider } from './data-grid-defaults';
 import { usePersistedGridView } from './use-persisted-grid-view';
 import { REACT_DATA_GRID_DOCS, REACT_DATA_GRID_TOKENS } from './data-grid.docs';
-import type { DataGridDataSource, DataGridHandle, DataGridProps } from './data-grid.types';
+import type {
+  DataGridColumn,
+  DataGridDataSource,
+  DataGridHandle,
+  DataGridProps,
+} from './data-grid.types';
 
 /* ── The domain: shipments ─────────────────────────────────────────────── */
 
@@ -205,15 +214,17 @@ const Scene = ({ children, label, note }: { children: ReactNode; label: string; 
 const Screen = ({
   before,
   children,
+  room = 'desktop',
   size = 'screen',
 }: {
   before?: ReactNode;
   children: ReactNode;
+  room?: 'desktop' | 'phone';
   size?: 'screen' | 'tall';
 }) => (
   <div className="slotted-demo-stage" data-layout="block">
     {before}
-    <div className="slotted-demo-room" data-room="desktop">
+    <div className="slotted-demo-room" data-room={room}>
       <div className="slotted-demo-viewport" data-size={size}>
         {children}
       </div>
@@ -241,6 +252,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     accessibility: Accessibility,
     activation: Activation,
     'column-groups': ColumnGroups,
+    'column-help': ColumnHelp,
     'column-menu': ColumnMenu,
     'column-state': ColumnState,
     columns: Columns,
@@ -262,12 +274,14 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     range: Range,
     reorder: Reorder,
     resize: Resize,
+    'responsive-priority': ResponsivePriority,
     search: Search,
     selection: Selection,
     server: Server,
     sorting: Sorting,
     summary: Summary,
     text: TextTreatment,
+    'undo-hide': UndoHide,
     validation: Validation,
     variant: Variant,
     virtualization: Virtualization,
@@ -719,7 +733,12 @@ const SavedViewDemo = () => {
     }),
     [],
   );
-  const view = usePersistedGridView({
+  const {
+    reset,
+    onDensityChange: _density,
+    setView: _setView,
+    ...view
+  } = usePersistedGridView({
     key: VIEW_KEY,
     columns,
     storage,
@@ -731,7 +750,7 @@ const SavedViewDemo = () => {
       before={
         <div className="slotted-demo-row">
           <TextField aria-label="Saved view" mono readOnly value={entry || '(nothing saved)'} />
-          <Button onClick={view.reset} size="sm" tone="secondary" variant="outline">
+          <Button onClick={reset} size="sm" tone="secondary" variant="outline">
             Reset view
           </Button>
         </div>
@@ -740,6 +759,142 @@ const SavedViewDemo = () => {
       <Shipments {...view} rows={FIFTY.slice(0, 8)} />
     </Screen>
   );
+};
+
+/* ── Explaining, undoing, yielding ───────────────────────────────────── */
+
+const helpColumns: DataGridColumn<Shipment>[] = columns.map((column) =>
+  column.id === 'weight'
+    ? { ...column, description: 'Gross weight at pickup, in kilograms, packaging included' }
+    : column.id === 'cost'
+      ? { ...column, description: 'Freight cost billed by the carrier, before VAT' }
+      : column.id === 'status'
+        ? {
+            ...column,
+            help: (
+              <Text size="sm">
+                Customs means the shipment is held at a border for inspection; Returned means the
+                consignee refused it. Delayed is set by the carrier, not by us.
+              </Text>
+            ),
+          }
+        : column,
+);
+
+export const ColumnHelp: Story = {
+  parameters: scenario('column-help'),
+  render: () => (
+    <Screen size="tall">
+      <Shipments
+        columns={helpColumns}
+        defaultCurrent={{ row: 'header', column: 'weight' }}
+        rows={FIFTY.slice(0, 8)}
+      />
+    </Screen>
+  ),
+};
+
+const UndoHideDemo = () => {
+  const [toaster] = useState(() => createToaster());
+  const [state, setState] = useState<Partial<GridColumnState>>({
+    order: [],
+    widths: {},
+    hidden: ['eta', 'priority'],
+    pinned: { start: ['id'], end: [] },
+  });
+  return (
+    <ToasterProvider value={toaster}>
+      <Screen
+        size="tall"
+        before={
+          <Text size="sm" tone="muted">
+            Hide a column from its menu; the toast’s Undo puts it back where it stood
+          </Text>
+        }
+      >
+        <Shipments
+          columnState={state as GridColumnState}
+          onColumnStateChange={(next, request) => {
+            setState(next);
+            if (request.change !== 'hidden') return;
+            const shown = next.hidden.filter((column) => !request.previous.hidden.includes(column));
+            const id = toaster.show({
+              title: 'Column hidden',
+              description: 'The column comes back to its place and its width.',
+              tone: 'secondary',
+              actions: (
+                <Button
+                  onClick={() => {
+                    setState((current) =>
+                      shown.reduce(
+                        (state, column) =>
+                          withColumnHidden(state as GridColumnState, column, false),
+                        current as GridColumnState,
+                      ),
+                    );
+                    toaster.dismiss(id, 'pointer');
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
+                  Undo
+                </Button>
+              ),
+            });
+          }}
+          rows={FIFTY.slice(0, 8)}
+        />
+      </Screen>
+      <ToastRegion attach="inline" />
+    </ToasterProvider>
+  );
+};
+
+export const UndoHide: Story = {
+  parameters: scenario('undo-hide'),
+  render: () => <UndoHideDemo />,
+};
+
+const PRIORITIES: Readonly<Record<string, number>> = {
+  status: 1,
+  eta: 2,
+  weight: 3,
+  carrier: 4,
+  destination: 5,
+  cost: 6,
+};
+/* Cost declines the pop-in: without room it is hidden, not moved into the row. */
+const priorityColumns: GridColumn<Shipment>[] = columns.map((column) => {
+  const priority = PRIORITIES[column.id];
+  if (priority === undefined) return column;
+  return column.id === 'cost' ? { ...column, priority, popin: false } : { ...column, priority };
+});
+const labelOf = (id: string) => columns.find((column) => column.id === id)?.label ?? id;
+
+const ResponsivePriorityDemo = () => {
+  const [out, setOut] = useState<GridOutOfSpace>({ popin: [], hidden: [] });
+  return (
+    <Screen
+      room="phone"
+      size="tall"
+      before={
+        <Text size="sm" tone="muted">
+          {out.popin.length + out.hidden.length === 0
+            ? 'Every column fits'
+            : `In each row: ${out.popin.map(labelOf).join(', ')}${
+                out.hidden.length > 0 ? `. Hidden: ${out.hidden.map(labelOf).join(', ')}` : ''
+              }`}
+        </Text>
+      }
+    >
+      <Shipments columns={priorityColumns} onOutOfSpaceChange={setOut} rows={FIFTY.slice(0, 8)} />
+    </Screen>
+  );
+};
+
+export const ResponsivePriority: Story = {
+  parameters: scenario('responsive-priority'),
+  render: () => <ResponsivePriorityDemo />,
 };
 
 export const ColumnState: Story = {
@@ -1156,13 +1311,38 @@ export const TextTreatment: Story = {
   ),
 };
 
+const DENSITIES: readonly (GridDensity | null)[] = [null, 'comfortable', 'compact', 'dense'];
+
+const DensityDemo = () => {
+  const [density, setDensity] = useState<GridDensity | null>(null);
+  return (
+    <Screen
+      size="tall"
+      before={
+        <div className="slotted-demo-row">
+          {DENSITIES.map((value) => (
+            <Button
+              aria-pressed={density === value}
+              key={value ?? 'page'}
+              onClick={() => setDensity(value)}
+              size="sm"
+              tone="secondary"
+              variant={density === value ? 'solid' : 'outline'}
+            >
+              {value ?? 'The page’s'}
+            </Button>
+          ))}
+        </div>
+      }
+    >
+      <Shipments density={density} rows={FIFTY.slice(0, 10)} selectionMode="multiple" />
+    </Screen>
+  );
+};
+
 export const Density: Story = {
   parameters: scenario('density'),
-  render: () => (
-    <Screen size="tall">
-      <Shipments rows={FIFTY.slice(0, 10)} selectionMode="multiple" />
-    </Screen>
-  ),
+  render: () => <DensityDemo />,
 };
 
 export const Content: Story = {

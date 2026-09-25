@@ -15,6 +15,8 @@ export {
 export type { ApplyQueryOptions, ApplyQueryResult, FormatOptions } from './apply';
 export {
   clampWidth,
+  columnStateChanges,
+  columnsOutOfSpace,
   columnTemplate,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_WIDTH,
@@ -22,6 +24,7 @@ export {
   normalizeColumnState,
   parseColumnState,
   RESIZE_STEP,
+  resolveColumnOverflow,
   resolveColumns,
   serializeColumnState,
   withColumnHidden,
@@ -30,7 +33,7 @@ export {
   withColumnWidth,
   zoneOf,
 } from './columns';
-export type { ResolveColumnsOptions } from './columns';
+export type { OutOfSpaceOptions, ResolveColumnsOptions } from './columns';
 export {
   cellIndex,
   columnRange,
@@ -72,20 +75,46 @@ export {
 export type { GridParamOptions, QueryMove } from './query';
 export { csvField, toCsv } from './export';
 export type { CsvOptions } from './export';
-export { emptyGridView, parseGridView, serializeGridView } from './view';
-export type { GridView, GridViewOptions } from './view';
-export { FILTER_ROW, GROUP_ROW_PREFIX, HEADER_ROW, SUMMARY_ROW } from './types';
+export {
+  emptyGridView,
+  GRID_VIEW_VERSION,
+  parseGridView,
+  sameGridView,
+  serializeGridView,
+} from './view';
+export {
+  BUILT_IN_VIEW_ID,
+  emptySavedViews,
+  isViewNameTaken,
+  parseSavedViews,
+  SAVED_VIEWS_VERSION,
+  sameSavedView,
+  savedViewText,
+  serializeSavedViews,
+  withActiveView,
+  withDefaultView,
+  withViewCreated,
+  withViewDeleted,
+  withViewRenamed,
+  withViewSaved,
+} from './saved-views';
+export type { SavedView, SavedViewsState } from './saved-views';
+export type { GridView, GridViewOptions, GridViewStorage } from './view';
+export { FILTER_ROW, GROUP_ROW_PREFIX, HEADER_ROW, POPIN_COLUMN_ID, SUMMARY_ROW } from './types';
 export type {
   GridAggregate,
   GridCell,
   GridColumn,
   GridColumnGroup,
   GridColumnKind,
+  GridColumnOverflow,
   GridColumnOption,
   GridColumnState,
   GridColumnStateChange,
   GridCursorRow,
+  GridDensity,
   GridNode,
+  GridOutOfSpace,
   GridPage,
   GridPinZone,
   GridQuery,

@@ -15,6 +15,7 @@ export type {
 export type {
   DataGridActivateEvent,
   DataGridCellContext,
+  DataGridColumnOverflow,
   DataGridColumnStateRequest,
   DataGridDataSource,
   DataGridDataSourceResult,

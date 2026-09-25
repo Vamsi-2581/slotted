@@ -5,7 +5,16 @@
  * have columns the view never saw.
  */
 
-import type { GridColumn, GridColumnState, GridPinZone, ResolvedGridColumn } from './types';
+import { COMPACT_BELOW, EXPANDED_FROM } from '../measure';
+import type {
+  GridColumn,
+  GridColumnOverflow,
+  GridColumnState,
+  GridColumnStateChange,
+  GridOutOfSpace,
+  GridPinZone,
+  ResolvedGridColumn,
+} from './types';
 
 export const DEFAULT_COLUMN_WIDTH = 150;
 export const DEFAULT_COLUMN_MIN_WIDTH = 48;
@@ -126,7 +135,10 @@ export function resolveColumns<Row>(
       width: widthOf(id),
       minWidth: column.minWidth ?? DEFAULT_COLUMN_MIN_WIDTH,
       maxWidth: column.maxWidth,
-      flex: column.flex,
+      /* A width the reader set replaces the fraction: a flex track is sized by
+         the room left over, so a resize that only wrote `widths` moved
+         nothing. Resizing a flex column fixes it, as it does in AG Grid. */
+      flex: id in state.widths ? undefined : column.flex,
       pinned,
       pinOffset:
         pinned === 'start' ? startOffsets.get(id)! : pinned === 'end' ? endOffsets.get(id)! : 0,
@@ -290,4 +302,85 @@ export function parseColumnState(text: string | null | undefined): GridColumnSta
     }
   }
   return { order, widths, hidden, pinned: { start, end } };
+}
+
+export interface OutOfSpaceOptions {
+  /** Pixels the gutters take before the first column. */
+  readonly leading?: number | undefined;
+}
+
+/**
+ * The columns that do not fit the frame. A flexible column asks for its floor,
+ * a fixed one for its width, and the gutters for `leading`. Columns leave one
+ * by one until the rest fit: first those without a `priority`, the last in the
+ * row first; then the numbered ones, the highest first, and of two equal ones
+ * the later. The identity column — the first with `rowHeader`, or else the
+ * first that is not `actions` — never leaves, and neither does an `actions`
+ * column; when only those remain the grid scrolls sideways. A frame not
+ * measured yet (`available <= 0`) takes nothing out.
+ */
+export function columnsOutOfSpace<Row>(
+  resolved: readonly ResolvedGridColumn<Row>[],
+  available: number,
+  options: OutOfSpaceOptions = {},
+): GridOutOfSpace {
+  if (!(available > 0)) return { popin: [], hidden: [] };
+  const need = (column: ResolvedGridColumn<Row>) =>
+    column.flex !== undefined ? column.minWidth : column.width;
+  let total = (options.leading ?? 0) + resolved.reduce((sum, column) => sum + need(column), 0);
+  const identity =
+    resolved.find((column) => column.column.rowHeader === true) ??
+    resolved.find((column) => column.kind !== 'actions');
+  const rank = (column: ResolvedGridColumn<Row>) => column.column.priority ?? Infinity;
+  const candidates = resolved
+    .map((column, index) => ({ column, index }))
+    .filter(({ column }) => column !== identity && column.kind !== 'actions')
+    .sort((a, b) => rank(b.column) - rank(a.column) || b.index - a.index);
+  const out = new Set<string>();
+  for (const { column } of candidates) {
+    if (total <= available) break;
+    out.add(column.id);
+    total -= need(column);
+  }
+  const leaving = resolved.filter((column) => out.has(column.id));
+  return {
+    popin: leaving.filter((column) => column.column.popin !== false).map((column) => column.id),
+    hidden: leaving.filter((column) => column.column.popin === false).map((column) => column.id),
+  };
+}
+
+/**
+ * The policy `auto` settles to for a frame `width` pixels wide: the pop-in
+ * under `COMPACT_BELOW`, where a phone has no room to scroll through; under
+ * `EXPANDED_FROM` as well when the main pointer is `coarse`, a tablet's finger;
+ * a sideways scroll everywhere else, where a mouse or a trackpad scrolls and
+ * the columns keep their layout. A frame not measured yet (`width <= 0`)
+ * scrolls. An explicit `popin` or `scroll` is returned as it is.
+ */
+export function resolveColumnOverflow(
+  policy: GridColumnOverflow,
+  width: number,
+  coarse: boolean,
+): 'popin' | 'scroll' {
+  if (policy !== 'auto') return policy;
+  if (!(width > 0)) return 'scroll';
+  return width < COMPACT_BELOW || (coarse && width < EXPANDED_FROM) ? 'popin' : 'scroll';
+}
+
+/** The keys of the state that differ between two states, in a fixed order. */
+export function columnStateChanges(
+  previous: GridColumnState,
+  next: GridColumnState,
+): GridColumnStateChange[] {
+  const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+  /* Widths are a record: the same widths set in another order are the same. */
+  const sameWidths = (a: Readonly<Record<string, number>>, b: Readonly<Record<string, number>>) =>
+    Object.keys(a).length === Object.keys(b).length &&
+    Object.keys(a).every((key) => a[key] === b[key]);
+  const changes: GridColumnStateChange[] = [];
+  if (!same(previous.order, next.order)) changes.push('order');
+  if (!sameWidths(previous.widths, next.widths)) changes.push('width');
+  if (!same(previous.hidden, next.hidden)) changes.push('hidden');
+  if (!same(previous.pinned, next.pinned)) changes.push('pinned');
+  return changes;
 }

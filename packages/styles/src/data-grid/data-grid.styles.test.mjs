@@ -50,13 +50,34 @@ test('lays every row out as a grid over the template the binding writes', () => 
     "> [data-part='scroll'] > :is([data-part='head'],[data-part='body'],[data-part='pinned-rows'],[data-part='summary'],[data-part='loader'])";
   const row = rule(`[data-ui='data-grid'] ${groups} > [role='row']`);
   assert.match(row, /display:grid;/);
-  assert.match(
-    row,
-    /grid-template-columns:var\(--slotted-data-grid-template,none\) minmax\(0,1fr\);/,
-  );
+  /* The filler after the template is `auto`, not `1fr`: an `fr` filler shared
+     the free space with a flexible column, which then stopped at half the
+     frame; `auto` stretches only where no flexible track exists. */
+  assert.match(row, /grid-template-columns:var\(--slotted-data-grid-template,none\) auto;/);
   const cell = rule(`[data-ui='data-grid'] ${groups} > [role='row'] > *`);
   assert.match(cell, /grid-column:var\(--slotted-data-grid-column,auto\);/);
   assert.doesNotMatch(normalized, /\[data-ui='data-grid'\] \[role='row'\]\{/);
+});
+
+/**
+ * A row is as wide as the frame, or as the template's minimum when that is
+ * wider — never as wide as its longest value. Sized to `max-content`, a
+ * flexible column grew with a long name past the frame on a phone, and the
+ * name never truncated; `fit-content` stops at the frame and lets the cell's
+ * own overflow rule work, while a template of fixed widths still scrolls.
+ */
+test('sizes rows and row groups to fit the frame, not to their longest value', () => {
+  const groups =
+    "> [data-part='scroll'] > :is([data-part='head'],[data-part='body'],[data-part='pinned-rows'],[data-part='summary'],[data-part='loader'])";
+  for (const selector of [
+    `[data-ui='data-grid'] ${groups} > [role='row']`,
+    `[data-ui='data-grid'] ${groups}`,
+  ]) {
+    const block = rule(selector);
+    assert.match(block, /inline-size:fit-content;/);
+    assert.match(block, /min-inline-size:100%;/);
+    assert.doesNotMatch(block, /inline-size:max-content;/);
+  }
 });
 
 /**
@@ -297,4 +318,305 @@ test('keeps a cell value’s own writing direction', () => {
     "[data-ui='data-grid'] [data-part='cell'] > span:not([data-ui], [data-part]),[data-ui='data-grid'] [data-part='row-header'] > span:not([data-ui], [data-part]),[data-ui='data-grid'] [data-part='summary-cell'] > span:not([data-ui], [data-part])",
   );
   assert.match(value, /unicode-bidi:plaintext;/);
+});
+
+/**
+ * On a touch screen the row grows to the comfortable target through the
+ * control scale, and the family's own controls — the column menu, the
+ * filter trigger, the expander — grow with it: a 24-pixel button in a
+ * 44-pixel row is a target a thumb misses.
+ */
+test('grows its own controls to the row on a coarse pointer', () => {
+  const coarse = declarations.slice(declarations.indexOf('@media (pointer: coarse)'));
+  const root = coarse.slice(coarse.indexOf("[data-ui='data-grid'][data-part='root']"));
+  const block = root.slice(root.indexOf('{') + 1, root.indexOf('}'));
+  assert.match(
+    normalize(block),
+    /--_control:min\(var\(--slotted-target-comfortable,44px\),calc\(min\(var\(--_row-block\),var\(--_head-block\)\) - var\(--_ring-width\) \* 2\)\);/,
+  );
+});
+
+/**
+ * The controls stood the row less the cursor's ring on a coarse pointer, 40
+ * pixels in a 44-pixel header: under the touch target the brief sets. The
+ * ground keeps that size, so the cursor's ring still shows round it, and the
+ * box grows to the target by a padding its ground does not paint; the margins
+ * give the growth back, so the header and the column's name keep their room.
+ */
+test('makes its own controls a full touch target on a coarse pointer, with the ground they had', () => {
+  const coarse = declarations.slice(declarations.indexOf('@media (pointer: coarse)'));
+  const block = (selector) => {
+    const at = coarse.indexOf(selector);
+    const rest = coarse.slice(at);
+    return normalize(rest.slice(rest.indexOf('{') + 1, rest.indexOf('}')));
+  };
+  const root = block("[data-ui='data-grid'][data-part='root']");
+  assert.match(root, /--_target:var\(--slotted-target-comfortable,44px\);/);
+  assert.match(root, /--_reach:max\(0px,calc\(\(var\(--_target\) - var\(--_control\)\) \/ 2\)\);/);
+  const controls = block("[data-ui='data-grid'] [data-part='column-help'],");
+  assert.match(controls, /background-clip:content-box;/);
+  assert.match(controls, /box-sizing:content-box;/);
+  assert.match(controls, /padding:var\(--_reach\);/);
+  assert.match(controls, /margin:calc\(var\(--_reach\) \* -1\);/);
+});
+
+/**
+ * The empty scene is as wide as the frame's viewport and carries its own
+ * padding. Measured from the content edge, the box was its padding wider than
+ * the frame, and a grid whose columns all fit gained a sideways scroll the
+ * moment a filter emptied it.
+ */
+test('keeps the empty scene’s padding inside the frame’s viewport', () => {
+  const body = rule("[data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty']");
+  assert.match(body, /inline-size:100cqi/);
+  assert.match(body, /padding:/);
+  assert.match(body, /box-sizing:border-box/);
+});
+
+/**
+ * The loader stands in for body rows. Measured against the header's ruler, a
+ * consumer who set a row height of its own had every box move when the rows
+ * arrived — the failure a skeleton exists to prevent.
+ */
+test('reserves the body row’s height in the loader, not the header’s', () => {
+  const cell = rule(
+    "[data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [data-part='row'] > *",
+  );
+  assert.match(cell, /min-block-size:max\(var\(--_row-block\),/);
+});
+
+/**
+ * The column help is one of the family's own header controls — the same
+ * square, ground and ring — drawn with the circled question mark `Glyph`, and never
+ * hidden: a mark a hover reveals is a mark a coarse pointer never sees.
+ */
+test('draws the column help as a header control that is always shown', () => {
+  const shared = rule(
+    "[data-ui='data-grid'] [data-part='column-help'],[data-ui='data-grid'] [data-part='column-menu'],[data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],[data-ui='data-grid'] [data-part='expander'],[data-ui='data-grid'] [data-part='group-toggle'],[data-ui='data-grid'] [data-part='tree-toggle']",
+  );
+  assert.match(shared, /inline-size:var\(--_control\);/);
+  assert.match(shared, /block-size:var\(--_control\);/);
+  assert.match(
+    fragment,
+    /data-part="column-help"[^>]*>\s*<span data-ui="icon"[^>]*>\s*<svg data-part="glyph" data-glyph="circle-question">/,
+  );
+  assert.doesNotMatch(
+    normalized,
+    /\[data-part='column-help'\]\{[^}]*opacity:0/,
+    'the help is never hidden at rest',
+  );
+  assert.match(normalized, /\[data-ui='data-grid'\] \[data-part='column-help'\]:focus-visible,/);
+});
+
+/** The description is read through `aria-describedby` and takes no room in the header. */
+test('keeps the column description for the reader only', () => {
+  const hidden = rule("[data-ui='data-grid'] [data-part='column-description']");
+  assert.match(hidden, /position:absolute;/);
+  assert.match(hidden, /clip-path:inset\(50%\);/);
+  assert.match(hidden, /inline-size:1px;/);
+});
+
+/** The menu's layer is a portal: the description atop it is scoped to the menu, muted and inset like its items. */
+test('sets the column menu description as a muted caption over the items', () => {
+  const caption = rule("[data-ui='menu'] [data-part='column-menu-description']");
+  assert.match(caption, /color:var\(--slotted-text-muted,GrayText\);/);
+  assert.match(caption, /padding-inline:var\(--slotted-control-padding-inline-sm,0\.625rem\);/);
+  assert.match(caption, /font-size:var\(--slotted-font-size-xs,0\.75rem\);/);
+  /* The menu's content is a grid of tracks: the caption crosses them all. */
+  assert.match(caption, /grid-column:1 \/ -1;/);
+});
+
+/**
+ * The columns a narrow frame took out are drawn at the foot of their row: one
+ * cell across every track on the row's second line, as wide as the frame and
+ * still while the row scrolls, its fields starting where the first data
+ * column's text does and filling as many columns as the frame has room for.
+ */
+test('draws the pop-in on the row’s second line, across the frame, after the gutters', () => {
+  const popin = rule("[data-ui='data-grid'] [data-part='popin']");
+  assert.match(popin, /grid-column:1 \/ -1;/);
+  assert.match(popin, /grid-row:2;/);
+  assert.match(popin, /display:grid;/);
+  assert.match(popin, /grid-template-columns:repeat\(auto-fill,minmax\(min\(9rem,100%\),1fr\)\);/);
+  assert.match(popin, /column-gap:var\(--slotted-space-4,0\.5rem\);/);
+  assert.match(popin, /row-gap:var\(--slotted-space-2,0\.25rem\);/);
+  assert.match(popin, /position:sticky;/);
+  assert.match(popin, /inset-inline-start:0;/);
+  assert.match(popin, /max-inline-size:100cqi;/);
+  assert.match(
+    popin,
+    /padding-inline:calc\(var\(--slotted-data-grid-leading,0px\) \+ var\(--_pad-inline\)\) var\(--_pad-inline\);/,
+  );
+  assert.match(popin, /padding-block:0 var\(--_pad-block\);/);
+  /* The values' line is the density's row, grown to its content and no
+     further than the cap; the pop-in's line has no cap. A fixed length as a
+     track's maximum is where an auto-height grid grows every track to. */
+  const row = rule(
+    "[data-ui='data-grid'][data-popin] > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row']",
+  );
+  assert.match(row, /grid-template-rows:minmax\(var\(--_track\),auto\) auto;/);
+  const summary = rule(
+    "[data-ui='data-grid'][data-popin] > [data-part='scroll'] > [data-part='summary'] > [role='row']",
+  );
+  assert.match(summary, /grid-template-rows:minmax\(var\(--_head-block\),auto\) auto;/);
+  /* The chooser, the expander, the values and the actions are centred on the
+     values' line, as in a fixed row. */
+  const first = rule(
+    "[data-ui='data-grid'][data-popin] :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row'] > :is([role='gridcell'],[role='rowheader']):not([data-part='popin'])",
+  );
+  assert.match(first, /align-items:center;/);
+});
+
+/**
+ * An auto row grows to its content and stops at the cap. The cap is the
+ * cell's, not the track's: `minmax(track, cap)` in a grid whose height is its
+ * content is a track grown to the cap, and every auto row was four rows tall.
+ */
+test('grows an auto row to its content, capped by its cells and not its track', () => {
+  const row = rule(
+    "[data-ui='data-grid'][data-rows='auto'] > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row']",
+  );
+  assert.match(row, /grid-auto-rows:minmax\(var\(--_track\),auto\);/);
+  assert.doesNotMatch(normalized, /minmax\(var\(--_track\),var\(--_row-max-block\)\)/);
+  const cell = rule(
+    "[data-ui='data-grid'][data-rows='auto'] :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row'] > :is([role='gridcell'],[role='rowheader']):not([data-part='popin'])",
+  );
+  assert.match(cell, /max-block-size:var\(--_row-max-block\);/);
+  assert.match(cell, /overflow-y:clip;/);
+});
+
+test('grounds a plain header’s pinned cells on the surface, not on a band the row lacks', () => {
+  const pinned = rule(
+    "[data-ui='data-grid'][data-variant='plain'] > [data-part='scroll'] > [data-part='head'] [data-pinned],[data-ui='data-grid'][data-variant='plain'] > [data-part='scroll'] > [data-part='head'] > [role='row'] > [data-part='selection']",
+  );
+  assert.match(pinned, /background-color:var\(--_surface\);/);
+});
+
+test('draws no resting pin edge beside a pop-in, which the edge could not run past', () => {
+  const edge = rule("[data-ui='data-grid'][data-popin] [data-pinned][data-pin-edge]::after");
+  assert.match(edge, /background-color:transparent;/);
+});
+
+/**
+ * A phone's width spent on the gutters' indent left one column of fields
+ * where the row's whole width holds two; with room for one column only, a
+ * label above its value doubles every field's height.
+ */
+test('starts a compact frame’s pop-in at the row’s padding and sets one column of fields inline', () => {
+  const at = (condition) =>
+    normalized.match(
+      new RegExp(`@container ${escape(normalize(condition))}\\{([\\s\\S]*?\\})\\}`),
+    )?.[1] ?? '';
+  assert.match(
+    normalize(rule("[data-ui='data-grid'] [data-part='popin']")),
+    /container:slotted-data-grid-popin \/ inline-size;/,
+  );
+  const compact = at('slotted-data-grid (width < 600px)');
+  assert.match(
+    compact,
+    /\[data-ui='data-grid'\] \[data-part='popin'\]\{padding-inline-start:var\(--_pad-inline\);\}/,
+  );
+  const single = at('slotted-data-grid-popin (width < 19rem)');
+  assert.match(single, /\[data-part='popin-field'\]\{[^}]*display:grid;/);
+  assert.match(single, /grid-template-columns:minmax\(0,7\.5rem\) minmax\(0,1fr\);/);
+});
+
+test('sets a pop-in field as its label above its value, whole and at the start', () => {
+  const field = rule("[data-ui='data-grid'] [data-part='popin-field']");
+  assert.match(field, /flex-direction:column;/);
+  assert.match(field, /min-inline-size:0;/);
+  const label = rule("[data-ui='data-grid'] [data-part='popin-label']");
+  assert.match(label, /color:var\(--_muted\);/);
+  assert.match(label, /font-size:var\(--slotted-font-size-xs,0\.75rem\);/);
+  assert.match(label, /overflow-wrap:anywhere;/);
+  const value = rule("[data-ui='data-grid'] [data-part='popin-value']");
+  assert.match(value, /min-inline-size:0;/);
+  /* An empty value keeps its line, so the fields beside it stay aligned. */
+  assert.match(value, /min-block-size:var\(--_line\);/);
+  assert.match(value, /justify-content:start;/);
+  assert.match(value, /text-align:start;/);
+  /* Whole, whatever the column's own text treatment: the field has the room. */
+  const text = rule(
+    "[data-ui='data-grid'] [data-part='popin-value'][data-text] > span:not([data-ui],[data-part]),[data-ui='data-grid'] [data-part='popin-value'] > span:not([data-ui],[data-part])",
+  );
+  assert.match(text, /overflow:visible;/);
+  assert.match(text, /overflow-wrap:anywhere;/);
+  assert.match(text, /white-space:normal;/);
+  assert.match(text, /text-align:left;/);
+  assert.match(
+    rule(
+      "[data-ui='data-grid']:dir(rtl) [data-part='popin-value'] > span:not([data-ui],[data-part])",
+    ),
+    /text-align:right;/,
+  );
+});
+
+/** The pop-in's column header is a name for a reader and takes no track of the template. */
+test('keeps the pop-in’s column header for the reader only', () => {
+  const hidden = rule("[data-ui='data-grid'] [data-part='popin-header']");
+  assert.match(hidden, /position:absolute;/);
+  assert.match(hidden, /clip-path:inset\(50%\);/);
+  assert.match(hidden, /inline-size:1px;/);
+});
+
+/**
+ * A skeleton row stands in for a body row and takes its box. The binding
+ * counts the skeleton rows by the measured height of the rows it has drawn,
+ * `--slotted-data-grid-loader-row-size`; a skeleton row drawn at the density's
+ * base height beside that count left the frame's lower half empty whenever the
+ * real rows were taller — Nexora's orders reload drew three rows of 34 pixels
+ * in a frame of 466. The row is at least the measured height, so the count and
+ * the drawing agree and nothing moves when the rows arrive.
+ */
+test('draws a skeleton row as tall as the rows it stands in for', () => {
+  const cells = rule(
+    "[data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [data-part='row'] > *",
+  );
+  assert.match(
+    cells,
+    /min-block-size:max\(var\(--_row-block\),var\(--slotted-data-grid-loader-row-size,0px\)\)/,
+  );
+});
+
+/**
+ * A drag down the page that starts over the grid belongs to the page. The
+ * scroller is a scroll container on both axes whatever it overflows on, and
+ * a contained block axis swallowed the gesture where the grid is as tall as
+ * its rows — every phone screen. Across, the containment stays: a sideways
+ * drag over the columns is not the browser's back gesture.
+ */
+test('chains a vertical drag to the page and contains a horizontal one', () => {
+  const scroll = rule("[data-ui='data-grid'] > [data-part='scroll']");
+  assert.match(scroll, /overscroll-behavior-block:auto;/);
+  assert.match(scroll, /overscroll-behavior-inline:contain;/);
+  assert.ok(!/overscroll-behavior:contain/.test(normalized));
+});
+
+/**
+ * Every mark the family owns — the sort chevron, the column's help, menu and
+ * filter, the expander, the group and tree toggles, the loader's ring and the
+ * row's grip — is the `Glyph` element the binding draws. The sheet sizes,
+ * turns and spins the `icon` box and paints no glyph of its own.
+ */
+test('draws every mark it owns with the Glyph element, never a mask', () => {
+  assert.doesNotMatch(normalized, /mask/, 'the sheet still paints a glyph with a mask');
+  for (const [part, glyph] of [
+    ['sort', 'chevron-down'],
+    ['column-help', 'circle-question'],
+    ['column-menu', 'ellipsis'],
+    ['filter', 'funnel'],
+    ['expander', 'chevron-right'],
+    ['group-toggle', 'chevron-right'],
+    ['tree-toggle', 'chevron-right'],
+    ['tree-toggle', 'loader-circle'],
+    ['row-handle', 'grip-vertical'],
+  ]) {
+    assert.match(
+      fragment,
+      new RegExp(
+        `data-part="${part}"[^>]*>\\s*<span data-ui="icon"[^>]*>\\s*<svg data-part="glyph" data-glyph="${glyph}">`,
+      ),
+      `${part} draws no ${glyph} in the harness`,
+    );
+  }
 });

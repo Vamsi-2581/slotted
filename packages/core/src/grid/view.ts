@@ -12,16 +12,38 @@ import {
   serializeColumnState,
 } from './columns';
 import { fromGridParams, toGridParams, type GridParamOptions } from './query';
-import type { GridColumn, GridColumnState, GridQuery } from './types';
+import type { GridColumn, GridColumnState, GridDensity, GridQuery } from './types';
+
+/**
+ * The version `serializeGridView` writes under `v`. Text without it is
+ * version 1; a later version is read for the keys this one knows.
+ */
+export const GRID_VIEW_VERSION = 1;
+
+const DENSITIES: readonly GridDensity[] = ['comfortable', 'compact', 'dense'];
 
 export interface GridView {
   readonly columns: GridColumnState;
   readonly query: GridQuery;
+  /** `null` inherits the page's density. */
+  readonly density: GridDensity | null;
+}
+
+/**
+ * What `localStorage` and `sessionStorage` are, and what a consumer's own
+ * store answers: where a persisted view and a list of saved views are kept.
+ */
+export interface GridViewStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
 }
 
 export interface GridViewOptions extends GridParamOptions {
   /** The parameter the column state is written under. Default `columns`. */
   columnsParam?: string;
+  /** The parameter the density is written under. Default `density`. */
+  densityParam?: string;
   /** The page size a query with a page but no size takes. */
   defaultPageSize?: number | undefined;
 }
@@ -39,6 +61,8 @@ export function serializeGridView(
   const params = toGridParams(view.query, options);
   const state = serializeColumnState(view.columns, columns);
   if (state !== '') params.set(options.columnsParam ?? 'columns', state);
+  if (view.density) params.set(options.densityParam ?? 'density', view.density);
+  if ([...params.keys()].length > 0) params.set('v', String(GRID_VIEW_VERSION));
   return params.toString();
 }
 
@@ -55,9 +79,11 @@ export function parseGridView(
   const params = new URLSearchParams(text ?? '');
   const query = fromGridParams(params, options);
   const state = parseColumnState(params.get(options.columnsParam ?? 'columns'));
+  const density = params.get(options.densityParam ?? 'density');
   return {
     columns: columns ? normalizeColumnState(state, columns) : state,
     query,
+    density: DENSITIES.includes(density as GridDensity) ? (density as GridDensity) : null,
   };
 }
 
@@ -65,5 +91,16 @@ export function emptyGridView(defaultPageSize?: number): GridView {
   return {
     columns: emptyColumnState(),
     query: fromGridParams('', { defaultPageSize }),
+    density: null,
   };
+}
+
+/** Whether two views are the same view: the same line of text. */
+export function sameGridView(
+  a: GridView,
+  b: GridView,
+  columns?: readonly GridColumn<never>[],
+  options: GridViewOptions = {},
+): boolean {
+  return serializeGridView(a, columns, options) === serializeGridView(b, columns, options);
 }

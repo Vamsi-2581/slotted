@@ -1,7 +1,7 @@
 import '@angular/compiler';
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import type { GridColumn } from '@slotted/core/grid';
+import type { GridColumn, GridDensity } from '@slotted/core/grid';
 import { describe, expect, it } from 'vitest';
 
 import { SlDataGrid } from './data-grid';
@@ -37,6 +37,7 @@ function memoryStorage(initial: Record<string, string> = {}): GridViewStorage & 
 }
 
 const STORAGE = signal<GridViewStorage | null>(null);
+const DEFAULT_DENSITY = signal<GridDensity | null>(null);
 
 @Component({
   standalone: true,
@@ -50,6 +51,7 @@ const STORAGE = signal<GridViewStorage | null>(null);
       [columns]="columns"
       [(query)]="view.query"
       [(columnState)]="view.columnState"
+      [density]="view.density()"
     />
   `,
 })
@@ -61,11 +63,13 @@ class Host {
     columns: COLUMNS,
     storage: STORAGE(),
     defaultQuery: { sort: [], filter: null, search: '', page: { index: 0, size: 2 }, group: [] },
+    defaultDensity: DEFAULT_DENSITY(),
   });
 }
 
-async function mount(storage: GridViewStorage | null) {
+async function mount(storage: GridViewStorage | null, defaultDensity: GridDensity | null = null) {
   STORAGE.set(storage);
+  DEFAULT_DENSITY.set(defaultDensity);
   await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
   const fixture = TestBed.createComponent(Host);
   fixture.detectChanges();
@@ -82,13 +86,13 @@ describe('persistedGridView', () => {
     expect(storage.entries.size).toBe(0);
     first.header('size').click();
     first.fixture.detectChanges();
-    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2');
+    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2&v=1');
     first.fixture.componentInstance.view.columnState.update((state) => ({
       ...state,
       hidden: ['size'],
     }));
     first.fixture.detectChanges();
-    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2&columns=h%3Dsize');
+    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2&columns=h%3Dsize&v=1');
     first.fixture.destroy();
     TestBed.resetTestingModule();
 
@@ -130,5 +134,21 @@ describe('persistedGridView', () => {
     header('size').click();
     fixture.detectChanges();
     expect(header('size').getAttribute('aria-sort')).toBe('ascending');
+  });
+
+  it('keeps the density with the view, and reset restores the default density', async () => {
+    const storage = memoryStorage({ items: 'density=dense&v=1' });
+    const { fixture, root } = await mount(storage, 'compact');
+    const view = fixture.componentInstance.view;
+    expect(view.density()).toBe('dense');
+    expect(root.getAttribute('data-slotted-density')).toBe('dense');
+    view.density.set('comfortable');
+    fixture.detectChanges();
+    expect(storage.entries.get('items')).toBe('size=2&density=comfortable&v=1');
+    (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(view.density()).toBe('compact');
+    expect(root.getAttribute('data-slotted-density')).toBe('compact');
+    expect(storage.entries.has('items')).toBe(false);
   });
 });

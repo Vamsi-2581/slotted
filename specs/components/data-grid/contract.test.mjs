@@ -61,7 +61,7 @@ test('is the composite widget table declined to be', () => {
   assert.match(contract.roleReason, /2026-09-09-table-design\.md/);
 });
 
-test('names the thirty-nine parts a grid is made of, and the element and role of each', () => {
+test('names the forty-seven parts a grid is made of, and the element and role of each', () => {
   assert.deepEqual(grid.parts, [
     'root',
     'scroll',
@@ -70,8 +70,11 @@ test('names the thirty-nine parts a grid is made of, and the element and role of
     'column-group',
     'column-header',
     'sort',
+    'column-description',
     'column-actions',
+    'column-help',
     'column-menu',
+    'column-menu-description',
     'resizer',
     'drop-indicator',
     'filter-row',
@@ -92,6 +95,11 @@ test('names the thirty-nine parts a grid is made of, and the element and role of
     'selection',
     'expander',
     'detail',
+    'popin-header',
+    'popin',
+    'popin-field',
+    'popin-label',
+    'popin-value',
     'group-row',
     'group-toggle',
     'tree-toggle',
@@ -121,8 +129,9 @@ test('names the thirty-nine parts a grid is made of, and the element and role of
   }
   assert.equal(contract.roles['column-header'], 'columnheader');
   assert.equal(contract.roles['column-group'], 'columnheader');
+  assert.equal(contract.roles['popin-header'], 'columnheader');
   assert.equal(contract.roles['row-header'], 'rowheader');
-  for (const cell of ['cell', 'filter-cell', 'selection', 'summary-cell']) {
+  for (const cell of ['cell', 'filter-cell', 'selection', 'summary-cell', 'popin']) {
     assert.equal(contract.roles[cell], 'gridcell', cell);
   }
   for (const part of Object.keys(contract.roles)) {
@@ -341,7 +350,50 @@ test('declines with a family, a composition or a reason, never in silence', () =
   }
   assert.equal(contract.declined.paste.deferTo, 'spreadsheet');
   assert.equal(contract.declined.filterChips.deferTo, 'filter-bar');
-  assert.equal(contract.declined.columnManagerPanel.deferTo, 'column-manager');
+  assert.ok(!('columnManagerPanel' in contract.declined), 'the manager is composed, not declined');
+});
+
+/**
+ * The grid does not draw the column manager: the application opens it from
+ * the menu's manageColumns and wires it to columnState. Composition names the
+ * wiring so a reader of the grid's contract finds the family that edits it.
+ */
+test('composes the column manager through the application, and says how', () => {
+  assert.match(contract.composition.columnManager, /manageColumns/);
+  assert.match(contract.composition.columnManager, /column-manager/);
+  assert.match(contract.columnState.manager, /manageColumns.*column-manager/);
+  assert.match(contract.columnState.manager, /does not compose/);
+});
+
+test('explains a column in its header, in its menu and to a reader', () => {
+  assert.equal(contract.elements['column-help'], 'button');
+  assert.equal(contract.elements['column-description'], 'span');
+  assert.equal(contract.elements['column-menu-description'], 'div');
+  assert.match(contract.data.columns, /description/);
+  assert.match(contract.data.columns, /priority/);
+  assert.match(contract.wiring['aria-describedby'], /column-description/);
+  assert.equal(contract.labels.columnHelp, 'About {column}');
+  const f2 = contract.keyboard.find(
+    (entry) => entry.key === 'F2' && entry.where === 'on a column header',
+  );
+  assert.ok(f2, 'F2 on a column header is answered');
+  assert.match(f2.effect, /column-actions/);
+  assert.match(contract.controls.size, /column help/);
+});
+
+test('announces a hidden column, fits every column, and yields columns to a narrow frame', () => {
+  assert.equal(contract.labels.columnHidden, '{column} hidden');
+  assert.equal(contract.labels.autofitAll, 'Fit all columns');
+  assert.match(contract.columnState.resize, /Shift/);
+  assert.match(contract.columnState.priority, /outOfSpace/);
+  assert.match(contract.columnState.priority, /columnsOutOfSpace/);
+  assert.match(contract.columnState.priority, /never.*columnState/);
+  assert.doesNotMatch(JSON.stringify(contract), /hiddenBySpace|data-space-hidden/);
+  assert.deepEqual(contract.axes.density, ['comfortable', 'compact', 'dense']);
+  assert.deepEqual(contract.resolution.density, ['prop', 'page', null]);
+  for (const id of ['column-help', 'responsive-priority', 'undo-hide', 'density']) {
+    assert.ok(contract.scenarios['data-grid'].includes(id), `${id} is demonstrated`);
+  }
 });
 
 test('declares one demonstration per capability the inventory adopted', () => {
@@ -376,4 +428,33 @@ test('declares one demonstration per capability the inventory adopted', () => {
   ]) {
     assert.ok(scenarios.includes(id), `${id} is demonstrated`);
   }
+});
+
+test('moves the columns a narrow frame took out into a pop-in in each row', () => {
+  assert.equal(contract.elements.popin, 'div');
+  assert.equal(contract.elements['popin-header'], 'div');
+  assert.equal(contract.elements['popin-label'], 'span');
+  assert.equal(contract.labels.popinHeader, 'Details');
+  assert.equal(contract.members['data-grid'].defaults.columnOverflow, 'auto');
+  assert.deepEqual(contract.axes.columnOverflow, ['auto', 'popin', 'scroll']);
+  assert.deepEqual(contract.resolution.columnOverflow, ['prop', 'defaults', 'auto']);
+  /* auto pops in on a phone, or on a touch frame narrower than a desktop, and scrolls elsewhere. */
+  assert.match(contract.columnState.priority, /resolveColumnOverflow/);
+  assert.match(contract.columnState.priority, /COMPACT_BELOW/);
+  assert.match(contract.columnState.priority, /pointer: coarse/);
+  assert.match(contract.columnState.priority, /EXPANDED_FROM/);
+  assert.match(contract.columnState.popin, /aria-colindex/);
+  assert.match(contract.columnState.popin, /same (cell )?template/);
+  assert.match(contract.columnState.popin, /read-only|read only/);
+  assert.match(contract.columnState.popin, /data-popin/);
+  assert.match(contract.wiring['aria-colcount'], /pop-in/);
+  assert.match(contract.cursor.popin, /POPIN_COLUMN_ID/);
+  assert.match(contract.activation.when, /touch/);
+  assert.match(contract.activation.when, /500/);
+  const menu = contract.keyboard.find(
+    (entry) => entry.key === 'Shift+F10' && entry.where === 'on a column header',
+  );
+  assert.ok(menu, 'Shift+F10 on a column header is answered');
+  assert.match(contract.controls.contextMenu, /Shift/);
+  assert.match(contract.controls.contextMenu, /anchor/);
 });

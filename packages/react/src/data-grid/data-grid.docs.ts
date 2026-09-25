@@ -25,7 +25,7 @@ export const REACT_DATA_GRID_TOKENS = dataGridTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { DataGrid, DataGridDefaultsProvider } from '@slotted/react';\nimport type { GridColumn, GridQuery, GridColumnState } from '@slotted/core/grid';\nimport { applyQuery, emptyQuery, toGridParams, fromGridParams } from '@slotted/core/grid';",
+    "import { DataGrid, DataGridDefaultsProvider, type DataGridColumn } from '@slotted/react';\nimport type { GridColumn, GridQuery, GridColumnState } from '@slotted/core/grid';\nimport { applyQuery, emptyQuery, toGridParams, fromGridParams } from '@slotted/core/grid';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -66,7 +66,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div[role="columnheader"]',
     required: true,
     purpose:
-      'A column’s name and its controls. Carries aria-sort on the first sort key, data-sorted, data-filtered, data-pinned, data-dragging, data-drop-target and data-resizing.',
+      'A column’s name and its controls. Carries aria-sort on the first sort key, data-sorted, data-filtered, data-pinned, data-dragging, data-drop-target and data-resizing. The name truncates, and a name its box cuts opens a hint with the whole of it — shown rather than read, because the header already states the words.',
   },
   {
     part: 'sort',
@@ -76,16 +76,38 @@ const anatomy: AnatomyRow[] = [
       'The direction mark on a sorted column, with data-index when the order holds more than one key.',
   },
   {
+    part: 'column-description',
+    element: 'span',
+    required: false,
+    purpose:
+      'The column’s description, visually hidden, referenced by the header’s aria-describedby and by the column menu’s; present whenever the column has a description.',
+  },
+  {
     part: 'column-actions',
     element: 'span',
     required: false,
-    purpose: 'The slot at the trailing edge holding the filter trigger and the column menu.',
+    purpose:
+      'The slot at the trailing edge holding the column help, the filter trigger and the column menu. F2 on the header enters it, Tab cycles it, Escape leaves it.',
+  },
+  {
+    part: 'column-help',
+    element: 'button',
+    required: false,
+    purpose:
+      'The circled question mark on a column with a description or a help node, always shown. Opens a popover by click, Enter or Space — never by hover — holding both.',
   },
   {
     part: 'column-menu',
     element: 'button',
     required: false,
-    purpose: 'Opens the column’s menu: sort, filter, pin, hide, fit, manage.',
+    purpose: 'Opens the column’s menu: sort, filter, pin, fit, fit all, hide, manage.',
+  },
+  {
+    part: 'column-menu-description',
+    element: 'div[aria-hidden]',
+    required: false,
+    purpose:
+      'The description again, as a muted caption atop the column menu; hidden from the reader, who hears it once through the menu’s aria-describedby.',
   },
   {
     part: 'resizer',
@@ -206,6 +228,39 @@ const anatomy: AnatomyRow[] = [
     element: 'div[role="row"]',
     required: false,
     purpose: 'The open detail: one cell spanning every column, held to the frame’s width.',
+  },
+  {
+    part: 'popin-header',
+    element: 'div[role="columnheader"]',
+    required: false,
+    purpose:
+      'The pop-in’s column, last in the header row while columns are out of space: labels.popinHeader, visually hidden, with no track.',
+  },
+  {
+    part: 'popin',
+    element: 'div[role="gridcell"]',
+    required: false,
+    purpose:
+      'The last cell of a record’s row and of the summary while columns are out of space: the row’s second line, every track, held to the frame’s width; aria-colindex is the last.',
+  },
+  {
+    part: 'popin-field',
+    element: 'div',
+    required: false,
+    purpose: 'One column in the pop-in, in the order of the columns: its label over its value.',
+  },
+  {
+    part: 'popin-label',
+    element: 'span',
+    required: false,
+    purpose: 'The column’s label, in the small muted type; left out for a column with none.',
+  },
+  {
+    part: 'popin-value',
+    element: 'div',
+    required: false,
+    purpose:
+      'The value, drawn by the column’s cell renderer with the cell’s own context; an editable column is read only here.',
   },
   {
     part: 'group-row',
@@ -490,7 +545,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'activation',
     title: 'Row activation',
-    note: 'activatable turns a double press or Enter on a text cell into onActivate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor.',
+    note: 'activatable turns a double press or Enter on a text cell into onActivate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor. On a touch screen or with a pen one press activates, except on a widget in the cell or a cell in edit, and the double press that follows within 500ms is ignored.',
     snippet: defineSnippet({
       id: 'data-grid-react-activation',
       language: 'tsx',
@@ -537,7 +592,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'column-menu',
     title: 'The column menu',
-    note: 'Revealed by the pointer and by the cursor, opened with Ctrl+Enter: sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content; hide; and manage columns, which hands over to the application’s column-manager.',
+    note: 'Revealed by the pointer and by the cursor, opened with Ctrl+Enter, a secondary press on the header (at the press; Shift keeps the browser’s menu) or Shift+F10 and the Menu key (on the header cell): sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content, and fit all columns in one request; hide; and manage columns, which hands over to the application’s column-manager. A fit chosen by pointer carries reason pointer, by keyboard reason keyboard; Shift with a double press on the resizer fits every column.',
     snippet: defineSnippet({
       id: 'data-grid-react-column-menu',
       language: 'tsx',
@@ -546,14 +601,68 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'column-help',
+    title: 'A column that explains itself',
+    note: 'ARR and Margin carry a description; Status carries a help node with a link. The circled question mark stays shown, because a coarse pointer has no hover; it opens a popover on a press, Enter or Space, and never sorts. The description is also the header’s accessible description and the caption atop its menu. F2 on a header reaches the button without a pointer.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-column-help',
+      language: 'tsx',
+      label: 'A description, or a node of your own',
+      source: `const columns: DataGridColumn<Account>[] = [
+  {
+    id: 'arr',
+    label: 'ARR',
+    kind: 'number',
+    description: 'Annual recurring revenue, in US dollars',
+  },
+  { id: 'status', label: 'Status', help: <StatusGlossary /> },
+];`,
+    }),
+  },
+  {
+    id: 'undo-hide',
+    title: 'Undoing a hidden column',
+    note: 'Hide column announces “Carrier hidden” and asks with change: hidden. The application answers with a toast whose Undo shows that column again through withColumnHidden: a hide moves no order, width or pin, so the column returns to its place and its width, and whatever the reader changed after the hide stays. Writing back request.previous would undo those changes too.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-undo-hide',
+      language: 'tsx',
+      label: 'The undo shows the column again',
+      source: `<DataGrid
+  columnState={state}
+  onColumnStateChange={(next, request) => {
+    setState(next);
+    if (request.change !== 'hidden') return;
+    const shown = next.hidden.filter((column) => !request.previous.hidden.includes(column));
+    const id = toaster.show({
+      title: 'Column hidden',
+      actions: (
+        <Button
+          onClick={() => {
+            setState((current) =>
+              shown.reduce((state, column) => withColumnHidden(state, column, false), current),
+            );
+            toaster.dismiss(id, 'pointer');
+          }}
+          size="sm"
+          variant="outline"
+        >
+          Undo
+        </Button>
+      ),
+    });
+  }}
+/>;`,
+    }),
+  },
+  {
     id: 'column-state',
     title: 'Saving a view',
-    note: 'A view is the column state and the query as one line of text: serializeGridView writes it, parseGridView reads it back and drops a column the model no longer has. usePersistedGridView keeps that line under a key in localStorage (or any store with getItem, setItem and removeItem; null keeps it in memory), reads it once on mount, writes it after every change, and resets to the defaults by removing the entry. Spread its result on the grid. Selection, cursor and expansion are session state and are not kept.',
+    note: 'A view is the column state, the query and the density as one line of text: serializeGridView writes it, parseGridView reads it back and drops a column the model no longer has. usePersistedGridView keeps that line under a key in localStorage (or any store with getItem, setItem and removeItem; null keeps it in memory), reads it once on mount, writes it after every change, and resets to the defaults by removing the entry. Hand reset, onDensityChange and setView — which replaces the whole view in one write, as applying a saved view does — to the controls that call them, and spread the rest on the grid. Selection, cursor and expansion are session state and are not kept.',
     snippet: defineSnippet({
       id: 'data-grid-react-column-state',
       language: 'tsx',
       label: 'A view, kept',
-      source: `const view = usePersistedGridView({
+      source: `const { reset, onDensityChange, setView, ...view } = usePersistedGridView({
   key: 'shipments',
   columns,
   defaultColumnState: { pinned: { start: ['id'], end: [] } },
@@ -729,12 +838,30 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'density',
     title: 'Density',
-    note: 'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Switch density in the toolbar and read the same grid at each.',
+    note: 'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Without density the grid takes the page’s, which the toolbar switches; with density it writes data-slotted-density on its own root and holds that one whatever the page says. The menu and the popovers it opens are portals and stay at the page’s density.',
     snippet: defineSnippet({
       id: 'data-grid-react-density',
       language: 'tsx',
-      label: 'No axis of its own',
-      source: `<DataGrid columns={columns} rowKey="id" rows={shipments} />;`,
+      label: 'The page’s density, or its own',
+      source: `<DataGrid columns={columns} density="dense" rowKey="id" rows={shipments} />;`,
+    }),
+  },
+  {
+    id: 'responsive-priority',
+    title: 'Columns that yield to a phone',
+    note: 'The same grid in a phone-wide room. When the frame is too narrow for the template, columns leave the row: first those without a priority, the last first, then the highest priority; the identity column — the first rowHeader — and an actions column never leave. A column that leaves moves into the row’s pop-in, its label over its value drawn by the same cell renderer; one with popin: false is hidden instead. The root states the pop-in’s count as data-popin, rows grow to their fields, and onOutOfSpaceChange reports both sets — but the column state is untouched, so nothing is persisted and a wider frame brings them back. That is columnOverflow="auto", the default, under 600px, or under 1024px with a coarse pointer; wider, with a mouse, it scrolls. columnOverflow="popin" pops in at every width, and "scroll" keeps every column and scrolls.',
+    snippet: defineSnippet({
+      id: 'data-grid-react-responsive-priority',
+      language: 'tsx',
+      label: 'A lower priority stays longer',
+      source: `const columns: GridColumn<Shipment>[] = [
+  { id: 'id', label: 'Tracking', rowHeader: true },
+  { id: 'status', label: 'Status', priority: 1 },
+  { id: 'eta', label: 'ETA', kind: 'datetime', priority: 2 },
+  { id: 'carrier', label: 'Carrier', priority: 3 },
+  { id: 'cost', label: 'Cost', kind: 'number', popin: false },
+];
+<DataGrid columns={columns} onOutOfSpaceChange={setOut} rowKey="id" rows={rows} />;`,
     }),
   },
   {
@@ -843,7 +970,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'keyboard',
     title: 'Keyboard',
-    note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
+    note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter, Shift+F10 and the Menu key open the menu, Ctrl+Shift+arrows resize, Alt+arrows move. The pop-in is the last cell of a row.',
     snippet: defineSnippet({
       id: 'data-grid-react-keyboard',
       language: 'tsx',
@@ -887,7 +1014,35 @@ const api = apiRows([
     'GridColumn<Row>[]',
     '—',
     'DataGrid',
-    'The column model: id, label, kind, accessor, format, compare, width, minWidth, maxWidth, flex, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse.',
+    'The column model: id, label, description, kind, accessor, format, compare, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse — and help, a node for the column’s help popover.',
+  ],
+  [
+    'description',
+    'string',
+    '—',
+    'DataGridColumn',
+    'What the column is: the header’s accessible description, the caption atop its menu and the first line of its help popover.',
+  ],
+  [
+    'help',
+    'ReactNode',
+    '—',
+    'DataGridColumn',
+    'The column’s own help, under the description in the popover the column-help button opens. Its presence alone draws the button.',
+  ],
+  [
+    'priority',
+    'number',
+    '—',
+    'DataGridColumn',
+    'The lower, the longer the column stays when the frame is too narrow. A column without one leaves before every numbered one; the identity column and an actions column never leave.',
+  ],
+  [
+    'popin',
+    'boolean',
+    'true',
+    'DataGridColumn',
+    'Whether a column with no room moves into the row’s pop-in; false hides it instead.',
   ],
   [
     'columnGroups',
@@ -986,6 +1141,20 @@ const api = apiRows([
     '—',
     'DataGrid',
     'Called by the column menu’s Manage columns; the application opens its column-manager.',
+  ],
+  [
+    'onOutOfSpaceChange',
+    '(outOfSpace: GridOutOfSpace) => void',
+    '—',
+    'DataGrid',
+    'Called when the columns a narrow frame took out by priority change — those in the pop-in and those hidden. Never part of columnState.',
+  ],
+  [
+    'density',
+    "'comfortable' | 'compact' | 'dense' | null",
+    'the page’s',
+    'DataGrid',
+    'This grid’s own density, written as data-slotted-density on the root; absent or null, the page’s.',
   ],
   [
     'selectionMode',
@@ -1144,7 +1313,14 @@ const api = apiRows([
     "number | 'auto'",
     'density',
     'DataGrid',
-    'Pixels per row, read once from the first row when unstated; auto measures every row, capped by --slotted-data-grid-row-max-block-size.',
+    'Pixels per row, read once from the first row when unstated; auto measures every row, capped by --slotted-data-grid-row-max-block-size. While a pop-in is drawn every row is measured, as under auto.',
+  ],
+  [
+    'columnOverflow',
+    "'auto' | 'popin' | 'scroll'",
+    'auto',
+    'DataGrid',
+    'What a frame too narrow for the template does: popin moves columns into each row’s pop-in by priority; scroll keeps them and scrolls sideways; auto pops in on a frame under 600px, or under 1024px when the main pointer is coarse — a phone, a small tablet — and scrolls elsewhere, where a mouse or a trackpad scrolls and the columns keep their layout.',
   ],
   ['overscan', 'number', '6', 'DataGrid', 'Rows mounted past each edge of the window.'],
   [
@@ -1321,7 +1497,7 @@ const api = apiRows([
     'RefObject<DataGridHandle>',
     '—',
     'DataGrid',
-    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (one column, or every resizable column as one request), getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection, element.',
+    'focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (one column, or every resizable column as one request, reason programmatic), getOutOfSpace, getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection, element.',
   ],
   [
     'align',
@@ -1349,7 +1525,12 @@ const events: EventRow[] = [
   {
     name: 'onColumnStateChange',
     payload: '(state: GridColumnState, request: DataGridColumnStateRequest)',
-    when: 'Before a column is resized, moved, hidden or pinned. request.change says which; the reason is pointer, keyboard or programmatic.',
+    when: 'Before a column is resized, moved, hidden or pinned. request.change says which; the reason is pointer, keyboard or programmatic. A hide is announced; the columns in value.hidden and not in previous.hidden are what an undo shows again.',
+  },
+  {
+    name: 'onOutOfSpaceChange',
+    payload: '(outOfSpace: GridOutOfSpace)',
+    when: 'After the frame is measured, whenever the columns in the pop-in or the columns hidden for room change.',
   },
   {
     name: 'onValueChange',
@@ -1384,7 +1565,7 @@ const events: EventRow[] = [
   {
     name: 'onActivate',
     payload: '(event: DataGridActivateEvent)',
-    when: 'A double press or Enter on a text cell while activatable is true.',
+    when: 'A double press or Enter on a text cell, or one touch or pen press, while activatable is true.',
   },
   {
     name: 'onLoadMore / onRetry / onManageColumns',
@@ -1399,7 +1580,7 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, overscan, pageSizes, filterDebounce, loadMoreThreshold, skeletonRows, locale and labels once for a subtree. A grid that states one itself still wins.',
+    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, skeletonRows, locale and labels once for a subtree. A grid that states one itself still wins.',
   ],
   [
     '@slotted/core/grid',
@@ -1427,7 +1608,7 @@ const composition = apiRows([
     'DataGridHandle',
     '—',
     'DataGrid',
-    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, startEdit, stopEdit, autofit, getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection.',
+    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, startEdit, stopEdit, autofit, getOutOfSpace, getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection.',
   ],
   [
     'native props',
@@ -1450,6 +1631,7 @@ const accessibility = [
   'Every row carries aria-rowindex against aria-rowcount on the root, and every cell aria-colindex against aria-colcount, always: the grid windows its rows and columns, so the DOM is never the whole set, and the counts are what let a screen reader say “row 4,812 of 9,000”.',
   'aria-sort is written on the first sort key’s header only — the practice says more than one is ambiguous — and the whole order is announced through the live announcer: “Sorted by Carrier ascending, Weight descending”. A resize announces the column and its width; a filter announces its sentence through describeFilter; a copy announces the count.',
   'A cell that does not edit while others do carries aria-readonly="true"; a draft that fails carries aria-invalid and its message in the title. A selected row carries aria-selected; a cell in a range carries it too, and the root aria-multiselectable in multiple and range.',
+  'A column with a description is described by it: the header carries aria-describedby to a visually hidden span, and the column menu points at the same span while showing the text aria-hidden, so the words are heard once. The column help is a button with a name — “About ARR” — reached by F2 on the header; Tab cycles the header’s widgets and Escape returns to the cell. Hiding a column is announced as “Carrier hidden”.',
   'The header checkbox names what it covers — “Select all 3,412 rows”, or the page in server mode — because a selection over a whole result set is a decision only the query can make. Every control the family draws has a name: the column menu, the filter trigger, the expander, the group toggle, the operator symbol.',
 ];
 

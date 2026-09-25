@@ -24,17 +24,20 @@ import contract from '../../../../specs/components/data-grid/contract.json';
 import { SlDataGrid } from './data-grid';
 import {
   SlDataGridCellTemplate,
+  SlDataGridColumnHelp,
   SlDataGridDetailTemplate,
   SlDataGridFooter,
 } from './data-grid-templates';
 import { ANGULAR_DATA_GRID_DOCS } from './data-grid.docs';
 import * as dataGridStories from './data-grid.stories';
-import { SavedViewDemo } from './data-grid.stories';
+import { SavedViewDemo, UndoHideDemo } from './data-grid.stories';
 
 const STORY_IMPORTS = [
   SavedViewDemo,
+  UndoHideDemo,
   SlDataGrid,
   SlDataGridCellTemplate,
+  SlDataGridColumnHelp,
   SlDataGridDetailTemplate,
   SlDataGridFooter,
   SlAvatar,

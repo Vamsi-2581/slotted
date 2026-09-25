@@ -56,6 +56,23 @@ export interface GridColumnOption {
 export interface GridColumn<Row = unknown> {
   readonly id: string;
   readonly label: string;
+  /**
+   * A short sentence about the column: what the value means, how it is
+   * computed. Read by the header's `aria-describedby`, the column menu and the
+   * column manager.
+   */
+  readonly description?: string;
+  /**
+   * Responsive priority: the lower, the longer the column stays in the row
+   * when the frame is too narrow. A column without one leaves before every
+   * numbered one. The identity column and an `actions` column never leave.
+   */
+  readonly priority?: number;
+  /**
+   * Default `true`: a column that does not fit moves into the row's pop-in as
+   * a label and a value. `false` hides it instead.
+   */
+  readonly popin?: boolean;
   /** Default `text`. */
   readonly kind?: GridColumnKind;
   /** The domain value. Default: `row[id]`. */
@@ -137,6 +154,9 @@ export interface GridColumnState {
 
 export type GridColumnStateChange = 'order' | 'width' | 'hidden' | 'pinned';
 
+/** The density a grid is drawn at: the theme's axis, scoped to one grid. */
+export type GridDensity = 'comfortable' | 'compact' | 'dense';
+
 export type GridPinZone = 'start' | 'end' | null;
 
 /** A column resolved against its state: what the bindings lay out. */
@@ -173,6 +193,24 @@ export const HEADER_ROW = 'header';
 export const FILTER_ROW = 'filter';
 export const SUMMARY_ROW = 'summary';
 export const GROUP_ROW_PREFIX = 'group:';
+
+/** The virtual column the cursor stands on for a row's pop-in, after the last visible one. */
+export const POPIN_COLUMN_ID = '$popin';
+
+/**
+ * What a grid does with the columns its frame cannot hold: `popin` moves them
+ * into the row, `scroll` keeps them and scrolls, `auto` pops in on a phone-wide
+ * frame or a touch frame narrower than a desktop, and scrolls elsewhere.
+ */
+export type GridColumnOverflow = 'auto' | 'popin' | 'scroll';
+
+/** The columns that do not fit the frame, each in the order of the resolved columns. */
+export interface GridOutOfSpace {
+  /** Drawn in the row's pop-in. */
+  readonly popin: readonly string[];
+  /** Declined the pop-in with `popin: false`, and left the row. */
+  readonly hidden: readonly string[];
+}
 
 export interface GridCell {
   readonly row: GridCursorRow;

@@ -25,7 +25,7 @@ export const ANGULAR_DATA_GRID_TOKENS = dataGridTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  SlDataGrid,\n  SlDataGridCellTemplate,\n  SlDataGridDetailTemplate,\n  SlDataGridEditorTemplate,\n  SlDataGridFooter,\n  provideDataGridDefaults,\n} from '@slotted/angular/data-grid';\nimport type { GridColumn, GridQuery, GridColumnState } from '@slotted/core/grid';\nimport { applyQuery, emptyQuery, toGridParams, fromGridParams } from '@slotted/core/grid';",
+    "import {\n  SlDataGrid,\n  SlDataGridCellTemplate,\n  SlDataGridColumnHelp,\n  SlDataGridDetailTemplate,\n  SlDataGridEditorTemplate,\n  SlDataGridFooter,\n  provideDataGridDefaults,\n} from '@slotted/angular/data-grid';\nimport type { GridColumn, GridQuery, GridColumnState } from '@slotted/core/grid';\nimport { applyQuery, emptyQuery, toGridParams, fromGridParams } from '@slotted/core/grid';",
   selector: 'sl-data-grid',
   exportAs: 'slDataGrid',
 };
@@ -68,7 +68,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div[role="columnheader"]',
     required: true,
     purpose:
-      'A column’s name and its controls. Carries aria-sort on the first sort key, data-sorted, data-filtered, data-pinned, data-dragging, data-drop-target and data-resizing. An ng-template[slDataGridHeader] replaces the name.',
+      'A column’s name and its controls. Carries aria-sort on the first sort key, data-sorted, data-filtered, data-pinned, data-dragging, data-drop-target and data-resizing. An ng-template[slDataGridHeader] replaces the name. The name truncates, and a name its box cuts opens a hint with the whole of it — shown rather than read, because the header already states the words.',
   },
   {
     part: 'sort',
@@ -78,16 +78,38 @@ const anatomy: AnatomyRow[] = [
       'The direction mark on a sorted column, with data-index when the order holds more than one key.',
   },
   {
+    part: 'column-description',
+    element: 'span',
+    required: false,
+    purpose:
+      'The column’s description, visually hidden, referenced by the header’s aria-describedby and by the column menu’s; present whenever the column has a description.',
+  },
+  {
     part: 'column-actions',
     element: 'span',
     required: true,
-    purpose: 'The slot at the trailing edge holding the filter trigger and the column menu.',
+    purpose:
+      'The slot at the trailing edge holding the column help, the filter trigger and the column menu. F2 on the header enters it, Tab cycles it, Escape leaves it.',
+  },
+  {
+    part: 'column-help',
+    element: 'button[slPopoverTrigger]',
+    required: false,
+    purpose:
+      'The circled question mark on a column with a description or an slDataGridColumnHelp template, always shown. Opens a popover by click, Enter or Space — never by hover — holding both.',
   },
   {
     part: 'column-menu',
     element: 'button[slMenuTriggerFor]',
     required: true,
-    purpose: 'Opens the column’s sl-menu: sort, filter, pin, hide, fit, manage.',
+    purpose: 'Opens the column’s sl-menu: sort, filter, pin, fit, fit all, hide, manage.',
+  },
+  {
+    part: 'column-menu-description',
+    element: 'div[aria-hidden]',
+    required: false,
+    purpose:
+      'The description again, as a muted caption atop the column menu; hidden from the reader, who hears it once through the menu’s aria-describedby.',
   },
   {
     part: 'resizer',
@@ -216,6 +238,39 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The open detail from ng-template[slDataGridDetail]: one cell spanning every column, held to the frame’s width.',
+  },
+  {
+    part: 'popin-header',
+    element: 'div[role="columnheader"]',
+    required: false,
+    purpose:
+      'The pop-in’s column, last in the header row while columns are out of space: labels.popinHeader, visually hidden, with no track.',
+  },
+  {
+    part: 'popin',
+    element: 'div[role="gridcell"]',
+    required: false,
+    purpose:
+      'The last cell of a record’s row and of the summary while columns are out of space: the row’s second line, every track, held to the frame’s width; aria-colindex is the last.',
+  },
+  {
+    part: 'popin-field',
+    element: 'div',
+    required: false,
+    purpose: 'One column in the pop-in, in the order of the columns: its label over its value.',
+  },
+  {
+    part: 'popin-label',
+    element: 'span',
+    required: false,
+    purpose: 'The column’s label, in the small muted type; left out for a column with none.',
+  },
+  {
+    part: 'popin-value',
+    element: 'div',
+    required: false,
+    purpose:
+      'The value, drawn by the column’s slDataGridCell template with the cell’s own context; an editable column is read only here.',
   },
   {
     part: 'group-row',
@@ -509,7 +564,7 @@ class ShipmentsPage {
   {
     id: 'activation',
     title: 'Row activation',
-    note: 'activatable turns a double press or Enter on a text cell into activate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor.',
+    note: 'activatable turns a double press or Enter on a text cell into activate with the row’s key — opening the record is a different act from choosing it, and the two never share a key. An editable cell keeps Enter for its editor. On a touch screen or with a pen one press activates, except on a widget in the cell or a cell in edit, and the double press that follows within 500ms is ignored.',
     snippet: defineSnippet({
       id: 'data-grid-angular-activation',
       language: 'angular',
@@ -575,7 +630,7 @@ class ShipmentsPage {
   {
     id: 'column-menu',
     title: 'The column menu',
-    note: 'Revealed by the pointer and by the cursor, opened with Ctrl+Enter: sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content; hide; and manage columns, which hands over to the application’s column-manager.',
+    note: 'Revealed by the pointer and by the cursor, opened with Ctrl+Enter, a secondary press on the header (at the press; Shift keeps the browser’s menu) or Shift+F10 and the Menu key (on the header cell): sort ascending, descending or remove; filter; pin to either edge or unpin; fit to content, and fit all columns in one request; hide; and manage columns, which hands over to the application’s column-manager. A fit chosen by pointer carries reason pointer, by keyboard reason keyboard; Shift with a double press on the resizer fits every column.',
     snippet: defineSnippet({
       id: 'data-grid-angular-column-menu',
       language: 'angular',
@@ -590,9 +645,58 @@ class ShipmentsPage {
     }),
   },
   {
+    id: 'column-help',
+    title: 'A column that explains itself',
+    note: 'Weight and Cost carry a description; Status carries an slDataGridColumnHelp template. The circled question mark stays shown, because a coarse pointer has no hover; it opens a popover on a press, Enter or Space, and never sorts. The description is also the header’s accessible description and the caption atop its menu. F2 on a header reaches the button without a pointer.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-column-help',
+      language: 'angular',
+      label: 'A description, or a template of your own',
+      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns">
+  <ng-template slDataGridColumnHelp="status">
+    <p>Customs means the shipment is held at a border for inspection.</p>
+  </ng-template>
+</sl-data-grid>`,
+    }),
+  },
+  {
+    id: 'undo-hide',
+    title: 'Undoing a hidden column',
+    note: 'Hide column announces “Carrier hidden” and asks with change: hidden. The application answers with a toast whose Undo shows that column again through withColumnHidden: a hide moves no order, width or pin, so the column returns to its place and its width, and whatever the reader changed after the hide stays. Writing back request.previous would undo those changes too.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-undo-hide',
+      language: 'ts',
+      label: 'The undo shows the column again',
+      source: `export class ShipmentsPage {
+  // <ng-template #undo let-message>
+  //   <button slButton size="sm" (click)="restore(message.id)">Undo</button>
+  // </ng-template>
+  private readonly undo = viewChild.required<TemplateRef<unknown>>('undo');
+  /** The columns each toast's Undo shows again, by the toast. */
+  private readonly hidden = new Map<string, readonly string[]>();
+
+  onRequest(request: DataGridColumnStateRequest) {
+    if (request.change !== 'hidden') return;
+    const shown = request.value.hidden.filter((id) => !request.previous.hidden.includes(id));
+    const toast = this.toasts.show({ title: 'Column hidden', actions: this.undo() });
+    this.hidden.set(toast, shown);
+  }
+
+  restore(id: string) {
+    const shown = this.hidden.get(id) ?? [];
+    this.hidden.delete(id);
+    this.columnState.update((state) =>
+      shown.reduce((next, column) => withColumnHidden(next, column, false), state),
+    );
+    this.toasts.dismiss(id, 'pointer');
+  }
+}`,
+    }),
+  },
+  {
     id: 'column-state',
     title: 'Saving a view',
-    note: 'A view is the column state and the query as one line of text: serializeGridView writes it, parseGridView reads it back and drops a column the model no longer has. persistedGridView keeps that line under a key in localStorage (or any store with getItem, setItem and removeItem; null keeps it in memory), reads it once, writes it after every change through an effect, and resets to the defaults by removing the entry. Its two signals take the two-way bindings. Selection, cursor and expansion are session state and are not kept.',
+    note: 'A view is the column state, the query and the density as one line of text: serializeGridView writes it, parseGridView reads it back and drops a column the model no longer has. persistedGridView keeps that line under a key in localStorage (or any store with getItem, setItem and removeItem; null keeps it in memory), reads it once, writes it after every change through an effect, and resets to the defaults by removing the entry. query and columnState take the two-way bindings and density the density input. Selection, cursor and expansion are session state and are not kept.',
     snippet: defineSnippet({
       id: 'data-grid-angular-column-state',
       language: 'ts',
@@ -604,7 +708,7 @@ class ShipmentsPage {
     columns,
     defaultColumnState: { pinned: { start: ['id'], end: [] } },
   });
-  // <sl-data-grid [(query)]="view.query" [(columnState)]="view.columnState" … />
+  // <sl-data-grid [(query)]="view.query" [(columnState)]="view.columnState" [density]="view.density()" … />
 }`,
     }),
   },
@@ -800,12 +904,29 @@ class ShipmentsPage {
   {
     id: 'density',
     title: 'Density',
-    note: 'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Switch density in the toolbar and read the same grid at each.',
+    note: 'The row reads the theme’s control scale: 34 pixels at comfortable, 28 at compact, 26 at dense, with the type and the inset stepping with it. Without density the grid takes the page’s, which the toolbar switches; with density it writes data-slotted-density on its own root and holds that one whatever the page says. The menu and the popovers it opens are portals and stay at the page’s density.',
     snippet: defineSnippet({
       id: 'data-grid-angular-density',
       language: 'angular',
-      label: 'No axis of its own',
-      source: `<sl-data-grid rowKey="id" [rows]="shipments()" [columns]="columns" />`,
+      label: 'The page’s density, or its own',
+      source: `<sl-data-grid density="dense" rowKey="id" [rows]="shipments()" [columns]="columns" />`,
+    }),
+  },
+  {
+    id: 'responsive-priority',
+    title: 'Columns that yield to a phone',
+    note: 'The same grid in a phone-wide room. When the frame is too narrow for the template, columns leave the row: first those without a priority, the last first, then the highest priority; the identity column — the first rowHeader — and an actions column never leave. A column that leaves moves into the row’s pop-in, its label over its value drawn by the same cell template; one with popin: false is hidden instead. The root states the pop-in’s count as data-popin, rows grow to their fields, and outOfSpaceChange reports both sets — but the column state is untouched, so nothing is persisted and a wider frame brings them back. That is columnOverflow="auto", the default, under 600px, or under 1024px with a coarse pointer; wider, with a mouse, it scrolls. columnOverflow="popin" pops in at every width, and "scroll" keeps every column and scrolls.',
+    snippet: defineSnippet({
+      id: 'data-grid-angular-responsive-priority',
+      language: 'angular',
+      label: 'A lower priority stays longer',
+      source: `<!-- columns: tracking rowHeader; status priority 1, eta 2, carrier 3; cost popin: false -->
+<sl-data-grid
+  rowKey="id"
+  [rows]="shipments()"
+  [columns]="columns"
+  (outOfSpaceChange)="out.set($event)"
+/>`,
     }),
   },
   {
@@ -921,7 +1042,7 @@ class ShipmentsPage {
   {
     id: 'keyboard',
     title: 'Keyboard',
-    note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter opens the menu, Ctrl+Shift+arrows resize, Alt+arrows move.',
+    note: 'Tab enters on the current cell and leaves the grid. The arrows move one cell, Home and End along the row, Ctrl+Home and Ctrl+End to the corners, PageUp and PageDown a view. Enter and F2 enter a cell, Escape leaves it. On a header: Enter sorts, Shift+Enter appends, Ctrl+Enter, Shift+F10 and the Menu key open the menu, Ctrl+Shift+arrows resize, Alt+arrows move. The pop-in is the last cell of a row.',
     snippet: defineSnippet({
       id: 'data-grid-angular-keyboard',
       language: 'angular',
@@ -974,7 +1095,42 @@ const api = apiRows([
     'GridColumn<Row>[]',
     '—',
     'sl-data-grid',
-    'The column model: id, label, kind, accessor, format, compare, width, minWidth, maxWidth, flex, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse.',
+    'The column model: id, label, description, kind, accessor, format, compare, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse.',
+  ],
+  [
+    'description',
+    'string',
+    '—',
+    'GridColumn',
+    'What the column is: the header’s accessible description, the caption atop its menu and the first line of its help popover.',
+  ],
+  [
+    'priority',
+    'number',
+    '—',
+    'GridColumn',
+    'The lower, the longer the column stays when the frame is too narrow. A column without one leaves before every numbered one; the identity column and an actions column never leave.',
+  ],
+  [
+    'popin',
+    'boolean',
+    'true',
+    'GridColumn',
+    'Whether a column with no room moves into the row’s pop-in; false hides it instead.',
+  ],
+  [
+    'density',
+    "'comfortable' | 'compact' | 'dense' | null",
+    'the page’s',
+    'sl-data-grid',
+    'This grid’s own density, written as data-slotted-density on the root; absent or null, the page’s.',
+  ],
+  [
+    'outOfSpace',
+    'Signal<GridOutOfSpace>',
+    '{ popin: [], hidden: [] }',
+    'sl-data-grid',
+    'The columns a narrow frame took out by priority — those in the pop-in and those hidden — read through exportAs. Never part of columnState.',
   ],
   [
     'columnGroups',
@@ -1129,7 +1285,14 @@ const api = apiRows([
     "number | 'auto'",
     'density',
     'sl-data-grid',
-    'Pixels per row, read once from the first row when unstated; auto measures every row, capped by --slotted-data-grid-row-max-block-size.',
+    'Pixels per row, read once from the first row when unstated; auto measures every row, capped by --slotted-data-grid-row-max-block-size. While a pop-in is drawn every row is measured, as under auto.',
+  ],
+  [
+    'columnOverflow',
+    "'auto' | 'popin' | 'scroll'",
+    'auto',
+    'sl-data-grid',
+    'What a frame too narrow for the template does: popin moves columns into each row’s pop-in by priority; scroll keeps them and scrolls sideways; auto pops in on a frame under 600px, or under 1024px when the main pointer is coarse — a phone, a small tablet — and scrolls elsewhere, where a mouse or a trackpad scrolls and the columns keep their layout.',
   ],
   ['overscan', 'number', '6', 'sl-data-grid', 'Rows mounted past each edge of the window.'],
   [
@@ -1335,7 +1498,12 @@ const events: EventRow[] = [
   {
     name: 'columnStateChangeRequest',
     payload: 'DataGridColumnStateRequest',
-    when: 'Before the arrangement moves. change says which: order | width | hidden | pinned; the reason is pointer, keyboard or programmatic.',
+    when: 'Before the arrangement moves. change says which: order | width | hidden | pinned; the reason is pointer, keyboard or programmatic. A hide is announced; the columns in value.hidden and not in previous.hidden are what an undo shows again.',
+  },
+  {
+    name: 'outOfSpaceChange',
+    payload: 'GridOutOfSpace',
+    when: 'After the frame is measured, whenever the columns in the pop-in or the columns hidden for room change.',
   },
   {
     name: 'valueChange',
@@ -1395,7 +1563,7 @@ const events: EventRow[] = [
   {
     name: 'activate',
     payload: 'DataGridActivateEvent',
-    when: 'A double press or Enter on a text cell while activatable is true.',
+    when: 'A double press or Enter on a text cell, or one touch or pen press, while activatable is true.',
   },
   {
     name: 'loadMore / retry / manageColumns',
@@ -1410,7 +1578,7 @@ const composition = apiRows([
     'provider',
     '—',
     'Application',
-    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, overscan, pageSizes, filterDebounce, loadMoreThreshold, skeletonRows, locale and labels once for an injector. A grid that states one itself still wins.',
+    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, skeletonRows, locale and labels once for an injector. A grid that states one itself still wins.',
   ],
   [
     '@slotted/core/grid',
@@ -1420,11 +1588,11 @@ const composition = apiRows([
     'applyQuery, emptyQuery, withSortPress, withColumnFilter, withSearch, withPageIndex, withGroup, toGridParams, fromGridParams, normalizeColumnState, serializeColumnState, parseColumnState: the engine the grid runs on, for a server mock, a URL and a saved view.',
   ],
   [
-    'slDataGridCell, slDataGridEditor, slDataGridHeader, slDataGridFilter, slDataGridDetail, slDataGridGroup, slDataGridEmpty',
+    'slDataGridCell, slDataGridEditor, slDataGridHeader, slDataGridFilter, slDataGridColumnHelp, slDataGridDetail, slDataGridGroup, slDataGridEmpty',
     'ng-template directives',
     '—',
     'sl-data-grid',
-    'Every surface a consumer replaces, projected as content; the four column-scoped ones name a column or serve every column. row, cell, head and body are fixed: the layout and the roles are theirs.',
+    'Every surface a consumer replaces, projected as content; the four column-scoped ones name a column or serve every column, and slDataGridColumnHelp names one column and draws its help button. row, cell, head and body are fixed: the layout and the roles are theirs.',
   ],
   [
     'slDataGridFooter',
@@ -1438,7 +1606,7 @@ const composition = apiRows([
     'template reference',
     '—',
     'sl-data-grid',
-    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit, getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection, announce.',
+    'The imperative surface for what cannot be said declaratively: focusCell, scrollToRow, scrollToColumn, scrollToCell, startEdit, stopEdit, autofit (reason programmatic), hide, outOfSpace, getVisibleRows, toCsv, exportCsv, reload, selectAll, clearSelection, announce.',
   ],
   [
     'ControlValueAccessor',
@@ -1468,6 +1636,7 @@ const accessibility = [
   'Every row carries aria-rowindex against aria-rowcount on the root, and every cell aria-colindex against aria-colcount, always: the grid windows its rows and columns, so the DOM is never the whole set, and the counts are what let a screen reader say “row 4,812 of 9,000”.',
   'aria-sort is written on the first sort key’s header only — the practice says more than one is ambiguous — and the whole order is announced through the live announcer: “Sorted by Carrier ascending, Weight descending”. A resize announces the column and its width; a filter announces its sentence through describeFilter; a copy announces the count.',
   'A cell that does not edit while others do carries aria-readonly="true"; a draft that fails carries aria-invalid and its message in the title. A selected row carries aria-selected; a cell in a range carries it too, and the root aria-multiselectable in multiple and range.',
+  'A column with a description is described by it: the header carries aria-describedby to a visually hidden span, and the column menu points at the same span while showing the text aria-hidden, so the words are heard once. The column help is a button with a name — “About Weight” — reached by F2 on the header; Tab cycles the header’s widgets and Escape returns to the cell. Hiding a column is announced as “Carrier hidden”.',
   'The header checkbox names what it covers — “Select all 3,412 rows”, or the page in server mode — because a selection over a whole result set is a decision only the query can make. Every control the family draws has a name: the column menu, the filter trigger, the expander, the group toggle, the operator symbol.',
 ];
 

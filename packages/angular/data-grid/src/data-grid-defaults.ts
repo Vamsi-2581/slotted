@@ -3,6 +3,7 @@ import type {
   CsvOptions,
   GridCell,
   GridColumn,
+  GridColumnOverflow,
   GridColumnState,
   GridColumnStateChange,
   GridNode,
@@ -21,6 +22,12 @@ export type DataGridEditMode = 'cell' | 'row';
 export type DataGridMode = 'client' | 'server';
 export type DataGridVirtualize = 'auto' | boolean;
 export type DataGridRowHeight = number | 'auto';
+/**
+ * What a frame too narrow for the template does: moves columns into the row's
+ * pop-in, scrolls, or — `auto` — pops in on a phone-wide or a touch frame
+ * narrower than a desktop and scrolls elsewhere.
+ */
+export type DataGridColumnOverflow = GridColumnOverflow;
 export type DataGridReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'programmatic';
 export type DataGridExpandedGroups = readonly string[] | 'all';
 export type DataGridSelection = string | readonly string[] | null;
@@ -160,12 +167,16 @@ export interface DataGridLabels {
   sortDescendingAction: string;
   sortClearAction: string;
   columnMenu: string;
+  columnHelp: string;
   pinStart: string;
   pinEnd: string;
   unpin: string;
   hide: string;
+  columnHidden: string;
   autofit: string;
+  autofitAll: string;
   manageColumns: string;
+  popinHeader: string;
   resized: string;
   resize: string;
   reorderRow: string;
@@ -214,6 +225,7 @@ export interface DataGridDefaults {
   filterRow: boolean;
   virtualize: DataGridVirtualize;
   rowHeight: DataGridRowHeight | undefined;
+  columnOverflow: DataGridColumnOverflow;
   overscan: number;
   pageSizes: readonly number[];
   filterDebounce: number;
@@ -246,12 +258,16 @@ export const DATA_GRID_LABELS: DataGridLabels = {
   sortDescendingAction: 'Sort descending',
   sortClearAction: 'Remove sort',
   columnMenu: 'Column menu',
+  columnHelp: 'About {column}',
   pinStart: 'Pin to start',
   pinEnd: 'Pin to end',
   unpin: 'Unpin',
   hide: 'Hide column',
+  columnHidden: '{column} hidden',
   autofit: 'Fit to content',
+  autofitAll: 'Fit all columns',
   manageColumns: 'Manage columns',
+  popinHeader: 'Details',
   resized: '{column}, {width} pixels',
   resize: 'Resize column',
   reorderRow: 'Reorder {row}',
@@ -374,6 +390,7 @@ const FALLBACK: DataGridDefaults = {
   filterRow: false,
   virtualize: 'auto',
   rowHeight: undefined,
+  columnOverflow: 'auto',
   overscan: 6,
   pageSizes: [25, 50, 100],
   filterDebounce: 300,

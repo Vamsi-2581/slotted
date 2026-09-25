@@ -1,4 +1,4 @@
-import type { GridColumn } from '@slotted/core/grid';
+import type { GridColumn, GridDensity } from '@slotted/core/grid';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -34,16 +34,35 @@ function memoryStorage(initial: Record<string, string> = {}): GridViewStorage & 
   };
 }
 
-function Items({ storage }: { storage: GridViewStorage | null }) {
-  const view = usePersistedGridView({
+function Items({
+  storage,
+  defaultDensity = null,
+}: {
+  storage: GridViewStorage | null;
+  defaultDensity?: GridDensity | null;
+}) {
+  const { reset, onDensityChange, setView, ...view } = usePersistedGridView({
     key: 'items',
     columns: COLUMNS,
     storage,
     defaultQuery: { sort: [], filter: null, search: '', page: { index: 0, size: 2 }, group: [] },
+    defaultDensity,
   });
   return (
     <>
-      <button onClick={view.reset}>reset</button>
+      <button onClick={reset}>reset</button>
+      <button onClick={() => onDensityChange('comfortable')}>comfortable</button>
+      <button
+        onClick={() =>
+          setView({
+            columns: { order: [], widths: {}, hidden: ['size'], pinned: { start: [], end: [] } },
+            query: { sort: [], filter: null, search: '', page: { index: 0, size: 2 }, group: [] },
+            density: 'dense',
+          })
+        }
+      >
+        apply view
+      </button>
       <DataGrid<Item> {...view} columns={COLUMNS} label="Items" rowKey="id" rows={ROWS} />
     </>
   );
@@ -60,10 +79,10 @@ describe('usePersistedGridView', () => {
     const { unmount } = render(<Items storage={storage} />);
     expect(storage.entries.size).toBe(0);
     fireEvent.click(header('size'));
-    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2');
+    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2&v=1');
     fireEvent.keyDown(header('size'), { key: 'Enter', ctrlKey: true });
     fireEvent.click(screen.getByRole('menuitem', { name: 'Hide column' }));
-    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2&columns=h%3Dsize');
+    expect(storage.entries.get('items')).toBe('sort=size%3Aasc&size=2&columns=h%3Dsize&v=1');
     unmount();
 
     render(<Items storage={storage} />);
@@ -112,5 +131,25 @@ describe('usePersistedGridView', () => {
     )!;
     fireEvent.click(second);
     expect(second).toHaveAttribute('aria-sort', 'ascending');
+  });
+
+  it('keeps the density with the view, and reset restores the default density', () => {
+    const storage = memoryStorage({ items: 'density=dense&v=1' });
+    render(<Items defaultDensity="compact" storage={storage} />);
+    expect(screen.getByRole('grid')).toHaveAttribute('data-slotted-density', 'dense');
+    fireEvent.click(screen.getByText('comfortable'));
+    expect(storage.entries.get('items')).toBe('size=2&density=comfortable&v=1');
+    fireEvent.click(screen.getByText('reset'));
+    expect(screen.getByRole('grid')).toHaveAttribute('data-slotted-density', 'compact');
+    expect(storage.entries.has('items')).toBe(false);
+  });
+
+  it('applies a whole view in one write, as a saved view does', () => {
+    const storage = memoryStorage();
+    render(<Items storage={storage} />);
+    fireEvent.click(screen.getByText('apply view'));
+    expect(screen.getByRole('grid')).toHaveAttribute('data-slotted-density', 'dense');
+    expect(header('size')).toBeNull();
+    expect(storage.entries.get('items')).toBe('size=2&columns=h%3Dsize&density=dense&v=1');
   });
 });

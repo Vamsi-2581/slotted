@@ -12,7 +12,9 @@ const en = {
       between: 'between',
       empty: 'is empty',
       is: 'is',
+      isNot: 'is not',
       anyOf: 'is any of',
+      noneOf: 'is none of',
     })[operator] ?? operator,
   join: (join: 'and' | 'or') => (join === 'and' ? 'and' : 'or'),
 };
@@ -60,6 +62,17 @@ describe('describeFilter', () => {
 
   it('lists a chosen set', () => {
     expect(describeFilter(setFilter(['paid', 'refunded']), en)).toBe('is any of paid, refunded');
+  });
+
+  it('reads a set of one as the equality it is', () => {
+    expect(describeFilter(setFilter(['paid']), en)).toBe('is paid');
+    expect(describeFilter(setFilter(['paid'], 'noneOf'), en)).toBe('is not paid');
+  });
+
+  it('returns to the list form as soon as a second value is chosen', () => {
+    expect(describeFilter(setFilter(['paid', 'refunded'], 'noneOf'), en)).toBe(
+      'is none of paid, refunded',
+    );
   });
 
   it('says nothing for a filter that holds nothing', () => {

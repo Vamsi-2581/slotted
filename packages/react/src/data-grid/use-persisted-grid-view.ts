@@ -5,20 +5,17 @@ import {
   serializeGridView,
   type GridColumn,
   type GridColumnState,
+  type GridDensity,
   type GridQuery,
   type GridView,
   type GridViewOptions,
+  type GridViewStorage,
 } from '@slotted/core/grid';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { DataGridColumnStateRequest, DataGridQueryRequest } from './data-grid.types';
 
-/** What `localStorage` and `sessionStorage` are, and what a consumer's own store answers. */
-export interface GridViewStorage {
-  getItem(key: string): string | null;
-  setItem(key: string, value: string): void;
-  removeItem(key: string): void;
-}
+export type { GridViewStorage } from '@slotted/core/grid';
 
 export interface UsePersistedGridViewOptions<Row> extends GridViewOptions {
   /** The entry the view is kept under. */
@@ -30,6 +27,8 @@ export interface UsePersistedGridViewOptions<Row> extends GridViewOptions {
   /** What the view is before anything was saved, and after `reset`. */
   readonly defaultQuery?: GridQuery | undefined;
   readonly defaultColumnState?: Partial<GridColumnState> | undefined;
+  /** The density before anything was saved, and after `reset`. Default `null`: the page's. */
+  readonly defaultDensity?: GridDensity | null | undefined;
 }
 
 export interface PersistedGridView {
@@ -40,6 +39,12 @@ export interface PersistedGridView {
     state: GridColumnState,
     request: DataGridColumnStateRequest,
   ) => void;
+  /** Pass to the grid's `density`; `null` inherits the page's density. */
+  readonly density: GridDensity | null;
+  /** Wire to the control that picks the density. */
+  readonly onDensityChange: (density: GridDensity | null) => void;
+  /** Replaces the whole view in one write: what applying a saved view does. */
+  readonly setView: (view: GridView) => void;
   /** Back to the defaults, and the entry removed. */
   readonly reset: () => void;
 }
@@ -53,9 +58,10 @@ function defaultStorage(): GridViewStorage | null {
 }
 
 /**
- * The reader's view of a grid, kept across visits: the column state and the
- * query, read once from the store and written after every change. Spread the
- * result on the grid. The store is reached inside `try` both ways — a private
+ * The reader's view of a grid, kept across visits: the column state, the
+ * query and the density, read once from the store and written after every
+ * change. Pass `reset` and `onDensityChange` to the controls that call them and
+ * spread the rest on the grid. The store is reached inside `try` both ways — a private
  * window that refuses, a quota that is full and a server that has no window
  * all leave the view in memory.
  */
@@ -65,6 +71,7 @@ export function usePersistedGridView<Row>({
   storage,
   defaultQuery,
   defaultColumnState,
+  defaultDensity,
   ...options
 }: UsePersistedGridViewOptions<Row>): PersistedGridView {
   const store = useMemo(() => (storage === undefined ? defaultStorage() : storage), [storage]);
@@ -72,6 +79,7 @@ export function usePersistedGridView<Row>({
     () => ({
       columns: normalizeColumnState(defaultColumnState ?? null, columns),
       query: defaultQuery ?? emptyGridView(options.defaultPageSize).query,
+      density: defaultDensity ?? null,
     }),
     [],
   );
@@ -90,6 +98,7 @@ export function usePersistedGridView<Row>({
          the application's, and an older entry may predate paging. */
       query:
         saved.query.page === null ? { ...saved.query, page: defaults.query.page } : saved.query,
+      density: saved.density ?? defaults.density,
     };
   });
   const latest = useRef({ key, columns, options, store, defaults });
@@ -119,6 +128,14 @@ export function usePersistedGridView<Row>({
     dirty.current = true;
     setView((current) => ({ ...current, columns: state }));
   }, []);
+  const onDensityChange = useCallback((density: GridDensity | null) => {
+    dirty.current = true;
+    setView((current) => ({ ...current, density }));
+  }, []);
+  const replaceView = useCallback((next: GridView) => {
+    dirty.current = true;
+    setView(next);
+  }, []);
   /* The defaults are what an empty store means, so the entry goes rather
      than being rewritten as the defaults. */
   const reset = useCallback(() => {
@@ -136,6 +153,9 @@ export function usePersistedGridView<Row>({
     onQueryChange,
     columnState: view.columns,
     onColumnStateChange,
+    density: view.density,
+    onDensityChange,
+    setView: replaceView,
     reset,
   };
 }

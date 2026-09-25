@@ -6,6 +6,7 @@ import type { FilterDescriptor, FilterKind } from '@slotted/core/filter';
 import {
   applyQuery,
   cellText,
+  columnsOutOfSpace,
   cellValue,
   serializeQuery,
   toCsv,
@@ -18,11 +19,13 @@ import {
   isGroupCursorRow,
   moveCursor,
   normalizeColumnState,
+  POPIN_COLUMN_ID,
   rangeBounds,
   rangeCells,
   rangeEdges,
   rangeToText,
   RESIZE_STEP,
+  resolveColumnOverflow,
   resolveColumns,
   rowRange,
   sameCell,
@@ -44,7 +47,9 @@ import {
   type GridColumn,
   type GridColumnGroup,
   type GridColumnState,
+  type GridDensity,
   type GridNode,
+  type GridOutOfSpace,
   type GridQuery,
   type GridRange,
   type ResolvedGridColumn,
@@ -53,6 +58,7 @@ import {
 } from '@slotted/core/grid';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createScrollAffordance } from '@slotted/core/overflow';
+import type { PositionerAnchor } from '@slotted/core/positioner';
 import { createControllable, type ChangeReason, type ChangeRequest } from '@slotted/core/state';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -74,12 +80,15 @@ import {
   numberAttribute,
   output,
   signal,
+  type Signal,
   untracked,
   viewChild,
+  viewChildren,
   ViewEncapsulation,
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
 import { SlButton } from '@slotted/angular/button';
 import { SlCheckbox } from '@slotted/angular/checkbox';
@@ -87,8 +96,10 @@ import { SlMenu, SlMenuItem, SlMenuSeparator, SlMenuTrigger } from '@slotted/ang
 import {
   SlPopover,
   SlPopoverAnchor,
+  SlPopoverBody,
   SlPopoverContent,
   SlPopoverLayer,
+  SlPopoverTrigger,
 } from '@slotted/angular/popover';
 import {
   SlResultState,
@@ -98,6 +109,12 @@ import {
   SlResultStateTitle,
 } from '@slotted/angular/result-state';
 import { SlSkeleton } from '@slotted/angular/skeleton';
+import {
+  SlTooltip,
+  SlTooltipContent,
+  SlTooltipLayer,
+  SlTooltipTrigger,
+} from '@slotted/angular/tooltip';
 import {
   filterKindOf,
   SlDataGridEditor,
@@ -113,6 +130,7 @@ import {
   SlDataGridIdFactory,
   type DataGridActivateEvent,
   type DataGridCellContext,
+  type DataGridColumnOverflow,
   type DataGridColumnStateRequest,
   type DataGridEditCommit,
   type DataGridEditMode,
@@ -138,6 +156,7 @@ import {
 } from './data-grid-defaults';
 import {
   SlDataGridCellTemplate,
+  SlDataGridColumnHelp,
   SlDataGridDetailTemplate,
   SlDataGridEditorTemplate,
   SlDataGridEmptyTemplate,
@@ -160,6 +179,8 @@ const DEFAULT_CHANGED_DURATION = 1200;
 /** Answers a data source keeps, by query. */
 const DEFAULT_CACHE_SIZE = 20;
 const EMPTY_ROWS: readonly never[] = [];
+/** The out-of-space set of a frame not measured yet, or of a grid that scrolls instead. */
+const NONE_OUT: GridOutOfSpace = { popin: [], hidden: [] };
 const VIRTUALIZE_ROWS_FROM = 100;
 const VIRTUALIZE_COLUMNS_FROM = 20;
 /** The viewport assumed until the scroller is measured. */
@@ -172,6 +193,22 @@ const EDITOR_FIELD =
   'input:not([type="checkbox"]):not([type="radio"]):not([disabled]), textarea:not([disabled]), [role="combobox"]:not([disabled]), [role="spinbutton"]:not([disabled]), [role="checkbox"], [role="switch"]';
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
+/** Where a secondary press is the field's own: the browser's menu cuts, copies and pastes. */
+const EDITABLE = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+/**
+ * The window after a keyboard opening of a column menu in which a
+ * `contextmenu` is the one Windows fires for the key, not a second press:
+ * `context-menu-trigger.ts`'s technique.
+ */
+const KEYBOARD_ECHO = 300;
+/** Milliseconds after a touch activation in which the `dblclick` the browser adds is ignored. */
+const TOUCH_ECHO = 500;
+
+/** A rectangle with no size at the point the reader pressed. */
+function pointAnchor(x: number, y: number): PositionerAnchor {
+  const rect = new DOMRect(x, y, 0, 0);
+  return { getBoundingClientRect: () => rect };
+}
 
 /**
  * Whether a pointer event landed on a widget inside the cell — a link, a
@@ -256,6 +293,8 @@ function contentWidth(cell: HTMLElement): number {
   let count = 0;
   for (const child of cell.children) {
     if (!(child instanceof HTMLElement) || getComputedStyle(child).display === 'none') continue;
+    /* The description is read, not drawn: it asks for no room. */
+    if (child.dataset['part'] === 'column-description') continue;
     count += 1;
     if (count === 1 && child.dataset['ui'] === undefined) {
       const range = cell.ownerDocument.createRange();
@@ -280,20 +319,28 @@ function contentWidth(cell: HTMLElement): number {
     SlDataGridFilterPanel,
     SlDataGridFilterRowOperand,
     SlDataGridPart,
+    SlGlyph,
+    SlIcon,
     SlMenu,
     SlMenuItem,
     SlMenuSeparator,
     SlMenuTrigger,
     SlPopover,
     SlPopoverAnchor,
+    SlPopoverBody,
     SlPopoverContent,
     SlPopoverLayer,
+    SlPopoverTrigger,
     SlResultState,
     SlResultStateActions,
     SlResultStateContent,
     SlResultStateDescription,
     SlResultStateTitle,
     SlSkeleton,
+    SlTooltip,
+    SlTooltipContent,
+    SlTooltipLayer,
+    SlTooltipTrigger,
   ],
   styleUrls: [
     '../../../styles/src/data-grid/data-grid.css',
@@ -391,6 +438,9 @@ function contentWidth(cell: HTMLElement): number {
                 role="columnheader"
                 [attr.aria-colindex]="indexOf(column.id)"
                 [attr.aria-sort]="ariaSort(column.id)"
+                [attr.aria-describedby]="
+                  column.column.description ? descriptionId(column.id) : null
+                "
                 [attr.data-column]="column.id"
                 [attr.data-align]="column.align ?? null"
                 [attr.data-numeric]="column.numeric ? '' : null"
@@ -409,28 +459,76 @@ function contentWidth(cell: HTMLElement): number {
                   column.pinned ? column.pinOffset + 'px' : null
                 "
                 (click)="onHeaderClick($event, column)"
+                (contextmenu)="onHeaderContextMenu($event, column.id)"
                 (focus)="onCellFocus({ row: HEADER, column: column.id }, $event)"
                 (keydown)="onCellKeyDown($event, { row: HEADER, column: column.id })"
                 (pointerdown)="onCellPointerDown($event, { row: HEADER, column: column.id })"
               >
-                <span>
-                  @if (headerTemplate(column.id); as template) {
-                    <ng-container
-                      [ngTemplateOutlet]="template"
-                      [ngTemplateOutletContext]="headerContext(column)"
-                    />
-                  } @else {
-                    {{ column.column.label }}
-                  }
-                </span>
+                <ng-container slTooltip whenClipped describes="none" openOn="hover" side="bottom">
+                  <span slTooltipTrigger>
+                    @if (headerTemplate(column.id); as template) {
+                      <ng-container
+                        [ngTemplateOutlet]="template"
+                        [ngTemplateOutletContext]="headerContext(column)"
+                      />
+                    } @else {
+                      {{ column.column.label }}
+                    }
+                  </span>
+                  <ng-template slTooltipLayer>
+                    <div slTooltipContent>{{ column.column.label }}</div>
+                  </ng-template>
+                </ng-container>
                 @if (sortOf(column.id); as sort) {
                   <span
                     data-part="sort"
                     aria-hidden="true"
                     [attr.data-index]="query().sort.length > 1 ? sort.index : null"
-                  ></span>
+                  >
+                    <!-- The stylesheet turns the chevron over for ascending; the
+                         index of a key past the first is its own text before it. -->
+                    <span slIcon><svg slGlyph name="chevron-down"></svg></span>
+                  </span>
+                }
+                @if (column.column.description; as description) {
+                  <span
+                    data-part="column-description"
+                    aria-hidden="true"
+                    [id]="descriptionId(column.id)"
+                    >{{ description }}</span
+                  >
                 }
                 <span data-part="column-actions">
+                  @if (hasHelp(column)) {
+                    <ng-container slPopover side="bottom" align="start" size="sm">
+                      <button
+                        slPopoverTrigger
+                        data-part="column-help"
+                        type="button"
+                        tabindex="-1"
+                        [attr.aria-label]="helpLabel(column)"
+                        (pointerdown)="$event.stopPropagation()"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <span slIcon><svg slGlyph name="circle-question"></svg></span>
+                      </button>
+                      <ng-template slPopoverLayer>
+                        <div slPopoverContent [attr.aria-label]="helpLabel(column)">
+                          <div slPopoverBody>
+                            @if (column.column.description; as description) {
+                              <div>{{ description }}</div>
+                            }
+                            @if (helpTemplate(column.id); as template) {
+                              <ng-container
+                                [ngTemplateOutlet]="template"
+                                [ngTemplateOutletContext]="headerContext(column)"
+                              />
+                            }
+                          </div>
+                        </div>
+                      </ng-template>
+                    </ng-container>
+                  }
                   @if (column.filterable && (filterOf(column.id) || filterOpen() === column.id)) {
                     <button
                       data-part="filter"
@@ -443,7 +541,9 @@ function contentWidth(cell: HTMLElement): number {
                       [attr.data-open]="filterOpen() === column.id ? '' : null"
                       (pointerdown)="$event.stopPropagation()"
                       (click)="$event.stopPropagation(); toggleFilterPanel(column.id)"
-                    ></button>
+                    >
+                      <span slIcon><svg slGlyph name="funnel"></svg></span>
+                    </button>
                   }
                   <button
                     slDataGridPart="column-menu"
@@ -453,14 +553,24 @@ function contentWidth(cell: HTMLElement): number {
                     [attr.data-menu-for]="column.id"
                     [attr.aria-label]="t().columnMenu + ', ' + column.column.label"
                     (pointerdown)="$event.stopPropagation()"
-                    (click)="$event.stopPropagation()"
-                  ></button>
+                    (click)="$event.stopPropagation(); anchorToButton(columnMenu)"
+                  >
+                    <span slIcon><svg slGlyph name="ellipsis"></svg></span>
+                  </button>
                   <sl-menu
                     #columnMenu
                     size="sm"
                     [sideOffset]="MENU_OFFSET"
                     [attr.aria-label]="t().columnMenu + ', ' + column.column.label"
+                    [aria-describedby]="
+                      column.column.description ? descriptionId(column.id) : undefined
+                    "
                   >
+                    @if (column.column.description; as description) {
+                      <div data-part="column-menu-description" aria-hidden="true">
+                        {{ description }}
+                      </div>
+                    }
                     @if (column.sortable) {
                       <button
                         slMenuItem
@@ -511,12 +621,17 @@ function contentWidth(cell: HTMLElement): number {
                     }
                     <hr slMenuSeparator />
                     @if (column.resizable) {
-                      <button slMenuItem (select)="autofit(column.id, $event)">
+                      <button slMenuItem (select)="fit(column.id, $event.reason, $event)">
                         {{ t().autofit }}
+                      </button>
+                      <button slMenuItem (select)="fit(null, $event.reason, $event)">
+                        {{ t().autofitAll }}
                       </button>
                     }
                     @if (column.hideable) {
-                      <button slMenuItem (select)="hide(column.id, $event)">{{ t().hide }}</button>
+                      <button slMenuItem (select)="hide(column.id, $event, $event.reason)">
+                        {{ t().hide }}
+                      </button>
                     }
                     @if (manageable()) {
                       <button slMenuItem (select)="manageColumns.emit()">
@@ -536,7 +651,10 @@ function contentWidth(cell: HTMLElement): number {
                     (pointerup)="endResize($event)"
                     (pointercancel)="endResize($event)"
                     (click)="$event.stopPropagation()"
-                    (dblclick)="$event.stopPropagation(); autofit(column.id, $event)"
+                    (dblclick)="
+                      $event.stopPropagation();
+                      fit($event.shiftKey ? null : column.id, 'pointer', $event)
+                    "
                   ></div>
                 }
               </div>
@@ -555,6 +673,17 @@ function contentWidth(cell: HTMLElement): number {
                 </div>
               </ng-template>
             </ng-container>
+          }
+          @if (hasPopin()) {
+            <!-- The pop-in's column, named for a reader and given no track. -->
+            <div
+              data-part="popin-header"
+              role="columnheader"
+              [attr.aria-colindex]="popinIndex()"
+              [attr.data-column]="POPIN"
+            >
+              {{ t().popinHeader }}
+            </div>
           }
         </div>
         @if (resolvedFilterRow()) {
@@ -707,7 +836,9 @@ function contentWidth(cell: HTMLElement): number {
                 [attr.aria-disabled]="rowsReorderableNow() ? null : 'true'"
                 [attr.data-disabled]="rowsReorderableNow() ? null : ''"
                 [attr.aria-label]="rowHandleLabel(entry.node.key)"
-              ></button>
+              >
+                <span slIcon><svg slGlyph name="grip-vertical"></svg></span>
+              </button>
             </div>
           }
           @if (hasExpanderColumn()) {
@@ -735,7 +866,9 @@ function contentWidth(cell: HTMLElement): number {
                   "
                   [attr.aria-label]="isExpanded(entry.node.key) ? t().collapse : t().expand"
                   (click)="toggleExpanded(entry.node.key, $event)"
-                ></button>
+                >
+                  <span slIcon><svg slGlyph name="chevron-right"></svg></span>
+                </button>
               }
             </div>
           }
@@ -791,7 +924,16 @@ function contentWidth(cell: HTMLElement): number {
                   [attr.data-loading]="isLoadingChildren(entry.node.key) ? '' : null"
                   (click)="$event.stopPropagation(); toggleBranch(entry.node.key, $event)"
                   (pointerdown)="$event.stopPropagation()"
-                ></button>
+                >
+                  <!-- A row waiting for its children turns the chevron into the
+                       loader's ring, which the stylesheet spins. -->
+                  <span slIcon
+                    ><svg
+                      slGlyph
+                      [name]="isLoadingChildren(entry.node.key) ? 'loader-circle' : 'chevron-right'"
+                    ></svg
+                  ></span>
+                </button>
               } @else if (cell.tree === 'leaf') {
                 <span data-part="tree-toggle" data-empty aria-hidden="true"></span>
               }
@@ -825,6 +967,42 @@ function contentWidth(cell: HTMLElement): number {
               }
             </div>
           }
+          @if (hasPopin()) {
+            <div
+              data-part="popin"
+              role="gridcell"
+              [attr.aria-colindex]="popinIndex()"
+              [attr.data-column]="POPIN"
+              [attr.data-current]="isCurrent(entry.node.key, POPIN) ? '' : null"
+              [attr.tabindex]="isCurrent(entry.node.key, POPIN) ? 0 : -1"
+              [style.--slotted-data-grid-column]="'1 / -1'"
+              (click)="onBodyCellClick($event, { row: entry.node.key, column: POPIN })"
+              (dblclick)="onCellDoubleClick($event, { row: entry.node.key, column: POPIN })"
+              (focus)="onCellFocus({ row: entry.node.key, column: POPIN }, $event)"
+              (keydown)="onCellKeyDown($event, { row: entry.node.key, column: POPIN })"
+              (pointerdown)="onCellPointerDown($event, { row: entry.node.key, column: POPIN })"
+            >
+              @for (column of popinColumns(); track column.id) {
+                @let cell = cellState(entry.node, column);
+                <div data-part="popin-field" [attr.data-field]="column.id">
+                  @if (column.column.label) {
+                    <span data-part="popin-label">{{ column.column.label }}</span>
+                  }
+                  <!-- Read only: an edit happens in a visible cell, the detail or the record. -->
+                  <div data-part="popin-value" [attr.data-text]="column.text">
+                    @if (cellTemplate(column.id); as template) {
+                      <ng-container
+                        [ngTemplateOutlet]="template"
+                        [ngTemplateOutletContext]="cellContext(entry.node, column, cell)"
+                      />
+                    } @else {
+                      <span [attr.title]="cell.text">{{ cell.text }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
         @if (detailOpen(entry.node) && detailTemplate(); as template) {
           <div
@@ -838,7 +1016,7 @@ function contentWidth(cell: HTMLElement): number {
               role="gridcell"
               aria-colindex="1"
               tabindex="-1"
-              [attr.aria-colspan]="columnIds().length"
+              [attr.aria-colspan]="ariaColCount()"
               [style.--slotted-data-grid-column]="'1 / -1'"
             >
               <ng-container
@@ -864,12 +1042,24 @@ function contentWidth(cell: HTMLElement): number {
         </div>
       }
       @if (status() === 'loading') {
-        <div data-part="loader" role="rowgroup" aria-hidden="true">
+        <div
+          data-part="loader"
+          role="rowgroup"
+          aria-hidden="true"
+          [style.--slotted-data-grid-loader-row-size]="rowSize() + 'px'"
+        >
           @for (row of skeletonRowsList(); track row) {
             <div data-part="row" role="row">
               @for (columnId of columnIds(); track columnId; let index = $index) {
                 <div role="gridcell" [style.--slotted-data-grid-column]="index + 1">
-                  <span slSkeleton [inlineSize]="skeletonWidth(index)"></span>
+                  <!-- The gutters reserve their width and draw nothing: what
+                       stands in them is a chooser, a handle and a toggle, and
+                       an outline of a control nobody can press yet is a
+                       control that lies. The lengths follow the value
+                       columns, so a gutter does not shift the sequence. -->
+                  @if (index >= gutterCount()) {
+                    <span slSkeleton [inlineSize]="skeletonWidth(index - gutterCount())"></span>
+                  }
                 </div>
               }
             </div>
@@ -941,7 +1131,9 @@ function contentWidth(cell: HTMLElement): number {
                       entry.node.text
                     "
                     (click)="$event.stopPropagation(); toggleGroup(entry.node.key, $event)"
-                  ></button>
+                  >
+                    <span slIcon><svg slGlyph name="chevron-right"></svg></span>
+                  </button>
                   @if (groupTemplate(); as template) {
                     <ng-container
                       [ngTemplateOutlet]="template.template"
@@ -1092,6 +1284,31 @@ function contentWidth(cell: HTMLElement): number {
                 <span>{{ aggregateText(column, applied().aggregates[column.id]) }}</span>
               </div>
             }
+            @if (hasPopinCell(SUMMARY)) {
+              <div
+                data-part="popin"
+                role="gridcell"
+                [attr.aria-colindex]="popinIndex()"
+                [attr.data-column]="POPIN"
+                [attr.data-current]="isCurrent(SUMMARY, POPIN) ? '' : null"
+                [attr.tabindex]="isCurrent(SUMMARY, POPIN) ? 0 : -1"
+                [style.--slotted-data-grid-column]="'1 / -1'"
+                (focus)="onCellFocus({ row: SUMMARY, column: POPIN }, $event)"
+                (keydown)="onCellKeyDown($event, { row: SUMMARY, column: POPIN })"
+                (pointerdown)="onCellPointerDown($event, { row: SUMMARY, column: POPIN })"
+              >
+                @for (column of popinAggregated(); track column.id) {
+                  <div data-part="popin-field" [attr.data-field]="column.id">
+                    @if (column.column.label) {
+                      <span data-part="popin-label">{{ column.column.label }}</span>
+                    }
+                    <div data-part="popin-value">
+                      <span>{{ aggregateText(column, applied().aggregates[column.id]) }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
           </div>
         </div>
       }
@@ -1149,7 +1366,7 @@ function contentWidth(cell: HTMLElement): number {
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-labelledby]': 'labelledBy() ?? null',
     '[attr.aria-rowcount]': 'ariaRowCount()',
-    '[attr.aria-colcount]': 'columnIds().length',
+    '[attr.aria-colcount]': 'ariaColCount()',
     '[attr.aria-multiselectable]':
       "resolvedSelectionMode() === 'multiple' || resolvedSelectionMode() === 'range' ? 'true' : null",
     '[attr.aria-busy]': "loading() && rows().length > 0 ? 'true' : null",
@@ -1160,9 +1377,12 @@ function contentWidth(cell: HTMLElement): number {
     '[attr.data-selection]': "resolvedSelectionMode() === 'none' ? null : resolvedSelectionMode()",
     '[attr.data-filter-row]': "resolvedFilterRow() ? '' : null",
     '[attr.data-rows]': "autoRows() ? 'auto' : 'fixed'",
+    '[attr.data-slotted-density]': 'density() ?? null',
+    '[attr.data-popin]': 'hasPopin() ? outOfSpace().popin.length : null',
     '[style.--slotted-data-grid-template]': 'template()',
     '[style.--slotted-data-grid-block-size]': 'blockSize()',
     '[style.--slotted-data-grid-row-block-size]': 'rowBlockSize()',
+    '[style.--slotted-data-grid-leading]': "hasPopin() ? leading() + 'px' : null",
     '[style.--slotted-data-grid-changed-duration]': 'changedDuration()',
     '(keydown)': 'onRootKeyDown($event)',
     '(focusout)': 'onRootFocusOut($event)',
@@ -1176,6 +1396,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly SELECTION = SELECTION_COLUMN;
   protected readonly EXPANDER = EXPANDER_COLUMN;
   protected readonly DRAG = DRAG_COLUMN;
+  protected readonly POPIN = POPIN_COLUMN_ID;
   /** The room between the header and the menu it opens: one space step. */
   protected readonly MENU_OFFSET = 4;
 
@@ -1261,9 +1482,17 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly rowsReorder = output<DataGridRowsReorderEvent>();
   readonly retry = output<void>();
   readonly manageColumns = output<void>();
+  /** The columns a narrow frame has taken out by their `priority`, each time either set changes. */
+  readonly outOfSpaceChange = output<GridOutOfSpace>();
 
   /* ── Axes ───────────────────────────────────────────────────────────── */
   readonly variant = input<DataGridVariant | undefined>(undefined);
+  /**
+   * The density of this grid alone, written as `data-slotted-density` on the
+   * root; absent or `null`, the grid takes the page's. The layers it opens
+   * are portals and stay at the page's density.
+   */
+  readonly density = input<GridDensity | null | undefined>(undefined);
   readonly striped = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
@@ -1278,6 +1507,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   });
   readonly virtualize = input<DataGridVirtualize | undefined>(undefined);
   readonly rowHeight = input<DataGridRowHeight | undefined>(undefined);
+  /**
+   * What a frame too narrow for the template does. `popin` moves the columns
+   * of least `priority` into a pop-in at the foot of each row, as labelled
+   * values; `scroll` keeps every column and scrolls sideways; `auto`, the
+   * default, pops in on a frame under 600px, or under 1024px when the main
+   * pointer is coarse, and scrolls elsewhere.
+   */
+  readonly columnOverflow = input<DataGridColumnOverflow | undefined>(undefined);
   readonly overscan = input<number | undefined>(undefined);
   readonly filterDebounce = input<number | undefined>(undefined);
   readonly loadMoreThreshold = input<number | undefined>(undefined);
@@ -1323,12 +1560,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private readonly editorTemplates = contentChildren(SlDataGridEditorTemplate);
   private readonly headerTemplates = contentChildren(SlDataGridHeaderTemplate);
   private readonly filterTemplates = contentChildren(SlDataGridFilterTemplate);
+  private readonly helpTemplates = contentChildren(SlDataGridColumnHelp);
   protected readonly detailTemplate = contentChild(SlDataGridDetailTemplate);
   protected readonly groupTemplate = contentChild(SlDataGridGroupTemplate);
   protected readonly emptyTemplate = contentChild(SlDataGridEmptyTemplate);
   private readonly footerContent = contentChild(SlDataGridFooter);
 
   private readonly scrollRef = viewChild<ElementRef<HTMLDivElement>>('scroll');
+  private readonly columnMenus = viewChildren(SlMenu);
   private readonly defaults = injectDataGridDefaults();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
@@ -1358,6 +1597,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   );
   protected readonly resolvedRowHeight = computed(
     () => this.rowHeight() ?? this.defaults.rowHeight,
+  );
+  protected readonly resolvedColumnOverflow = computed(
+    () => this.columnOverflow() ?? this.defaults.columnOverflow,
   );
   protected readonly resolvedOverscan = computed(() => this.overscan() ?? this.defaults.overscan);
   protected readonly resolvedDebounce = computed(
@@ -1391,7 +1633,11 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const height = this.resolvedRowHeight();
     return typeof height === 'number' ? `${height}px` : null;
   });
-  protected readonly autoRows = computed(() => this.resolvedRowHeight() === 'auto');
+  /* A row with a pop-in is as tall as its fields, whatever the stated
+     height: it is measured one by one, as an `auto` row is. */
+  protected readonly autoRows = computed(
+    () => this.resolvedRowHeight() === 'auto' || this.hasPopin(),
+  );
 
   private readonly formatOptions = computed(() => ({
     locale: this.resolvedLocale(),
@@ -1427,11 +1673,57 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private readonly effectiveState = computed(() =>
     normalizeColumnState(this.columnState(), this.columns()),
   );
-  protected readonly resolved = computed(() =>
-    resolveColumns(this.columns(), this.effectiveState(), {
-      leading: this.gutters().reduce((sum, width) => sum + width, 0),
-    }),
+  /** The gutters' width, before the first data column; where a pop-in's fields start. */
+  protected readonly leading = computed(() =>
+    this.gutters().reduce((sum, width) => sum + width, 0),
   );
+  /** Every column the reader has not hidden, before the frame's width is asked. */
+  private readonly layout = computed(() =>
+    resolveColumns(this.columns(), this.effectiveState(), { leading: this.leading() }),
+  );
+  /** The scroller's inner width; 0 until it is measured, and nothing is taken out before. */
+  private readonly frameWidth = signal(0);
+  /** Whether the main pointer is coarse — a finger. A render without `matchMedia` reads a fine one. */
+  private readonly coarsePointer = signal(false);
+  /** The policy the frame's width and the pointer settle `auto` to. */
+  private readonly effectiveColumnOverflow = computed(() =>
+    resolveColumnOverflow(this.resolvedColumnOverflow(), this.frameWidth(), this.coarsePointer()),
+  );
+  /**
+   * The columns a frame too narrow for the template has taken out, by their
+   * `priority`: those drawn in each row's pop-in, and those that declined it
+   * with `popin: false`. Read from the frame's width, which neither set
+   * changes, so the measure never loops. Never in `columnState`. Empty while
+   * `columnOverflow` settles to `scroll`.
+   *
+   * The width is read first: an unmeasured frame takes nothing out and reads
+   * no input, so a template that reads the set before the grid's inputs are
+   * bound — a column manager written before the grid — gets an empty set.
+   */
+  readonly outOfSpace: Signal<GridOutOfSpace> = computed(
+    () => {
+      const available = this.frameWidth();
+      if (available <= 0 || this.effectiveColumnOverflow() === 'scroll') return NONE_OUT;
+      return columnsOutOfSpace(this.layout(), available, { leading: this.leading() });
+    },
+    { equal: (a, b) => sameKeys(a.popin, b.popin) && sameKeys(a.hidden, b.hidden) },
+  );
+  protected readonly resolved = computed(() => {
+    const out = this.outOfSpace();
+    if (out.popin.length === 0 && out.hidden.length === 0) return this.layout();
+    const state = this.effectiveState();
+    return resolveColumns(
+      this.columns(),
+      { ...state, hidden: [...state.hidden, ...out.popin, ...out.hidden] },
+      { leading: this.leading() },
+    );
+  });
+  /** The columns drawn in each row's pop-in, in the order of the resolved columns. */
+  protected readonly popinColumns = computed(() => {
+    const popin = this.outOfSpace().popin;
+    return popin.length === 0 ? [] : this.layout().filter((column) => popin.includes(column.id));
+  });
+  protected readonly hasPopin = computed(() => this.outOfSpace().popin.length > 0);
   private readonly resolvedById = computed(
     () => new Map(this.resolved().map((column) => [column.id, column])),
   );
@@ -1455,6 +1747,16 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     ...this.gutterIds(),
     ...this.resolved().map((column) => column.id),
   ]);
+  protected readonly gutterCount = computed(() => this.gutterIds().length);
+  /** The pop-in is one more column for a reader, after every visible one, with no track. */
+  protected readonly ariaColCount = computed(
+    () => this.columnIds().length + (this.hasPopin() ? 1 : 0),
+  );
+  protected readonly popinIndex = computed(() => this.columnIds().length + 1);
+  /** The columns the cursor walks: the visible ones, then the pop-in's. */
+  private readonly cursorColumns = computed(() =>
+    this.hasPopin() ? [...this.columnIds(), POPIN_COLUMN_ID] : this.columnIds(),
+  );
   protected readonly expanderIndex = computed(() => this.columnIds().indexOf(EXPANDER_COLUMN) + 1);
   protected readonly dragIndex = computed(() => this.columnIds().indexOf(DRAG_COLUMN) + 1);
   protected readonly template = computed(() => columnTemplate(this.resolved(), this.gutters()));
@@ -1561,8 +1863,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly aggregated = computed(() =>
     this.resolved().filter((column) => column.column.aggregate !== undefined),
   );
+  /** The aggregating columns in the pop-in: the summary row draws their totals in its own. */
+  protected readonly popinAggregated = computed(() =>
+    this.popinColumns().filter((column) => column.column.aggregate !== undefined),
+  );
   protected readonly hasSummary = computed(
-    () => this.aggregated().length > 0 && this.resolvedMode() === 'client',
+    () =>
+      this.aggregated().length + this.popinAggregated().length > 0 &&
+      this.resolvedMode() === 'client',
   );
   protected readonly firstAggregateIndex = computed(() => {
     const aggregated = this.aggregated();
@@ -1651,7 +1959,8 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private readonly viewport = signal({ width: 0, height: 0 });
   private readonly measuredRow = signal<number | null>(null);
   private readonly rowSizes = signal<ReadonlyMap<number, number>>(new Map());
-  private readonly rowSize = computed(() => {
+  /** The body row's height: stated, or measured from the rows drawn, or the default. */
+  protected readonly rowSize = computed(() => {
     const stated = this.resolvedRowHeight();
     return typeof stated === 'number' ? stated : (this.measuredRow() ?? DEFAULT_ROW_HEIGHT);
   });
@@ -1838,7 +2147,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   /* ── Cursor grid and range ──────────────────────────────────────────── */
   private readonly cursorGrid = computed<CursorGrid>(() => ({
     rows: this.cursorRows(),
-    columns: this.columnIds(),
+    columns: this.cursorColumns(),
     pageSize: Math.max(1, Math.floor((this.viewport().height || 400) / this.rowSize()) - 1),
     bodyStart: this.bodyStart(),
     bodyEnd: this.bodyEnd(),
@@ -1885,6 +2194,21 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected isTabStop(row: string, column: string) {
     if (this.current() !== null) return this.isCurrent(row, column);
     return row === HEADER_ROW && column === this.columnIds()[0];
+  }
+  /**
+   * Whether a row draws a pop-in: a record's row, held or not, and the
+   * summary while a column in the pop-in has a total to show there.
+   */
+  protected hasPopinCell(row: string) {
+    if (!this.hasPopin()) return false;
+    if (row === SUMMARY_ROW) return this.popinAggregated().length > 0;
+    return isBodyRow(row);
+  }
+  /** The pop-in's column on a row that draws none is that row's last visible column. */
+  private landOn(cell: GridCell): GridCell {
+    if (cell.column !== POPIN_COLUMN_ID || this.hasPopinCell(cell.row)) return cell;
+    const columns = this.columnIds();
+    return { row: cell.row, column: columns[columns.length - 1]! };
   }
   private requestCurrent(next: GridCell | null, reason: ChangeReason, source?: unknown) {
     const state = createControllable<GridCell | null>({
@@ -2109,13 +2433,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       source,
     );
   }
-  hide(columnId: string, source?: unknown) {
-    this.requestState(
-      withColumnHidden(this.effectiveState(), columnId, true),
-      'hidden',
-      'pointer',
-      source,
-    );
+  /** Hides a column and announces it; the undo is the application's, from the request's `previous`. */
+  hide(columnId: string, source?: unknown, reason: DataGridReason = 'programmatic') {
+    const state = this.effectiveState();
+    const column = this.columns().find((entry) => entry.id === columnId);
+    if (!column || state.hidden.includes(columnId)) return;
+    this.requestState(withColumnHidden(state, columnId, true), 'hidden', reason, source);
+    this.announce(fillLabel(this.t().columnHidden, { column: column.label }));
   }
   resizeTo(columnId: string, width: number, reason: DataGridReason, source?: unknown) {
     const column = this.columns().find((entry) => entry.id === columnId);
@@ -2154,10 +2478,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   }
   /** One column to its content; without an id, every resizable column at once, as one request. */
   autofit(columnId?: string, source?: unknown) {
-    if (columnId !== undefined) {
+    this.fit(columnId ?? null, 'programmatic', source);
+  }
+  /** The fit behind the resizer, the menu, the keyboard and `autofit()`, each with its own reason. */
+  protected fit(columnId: string | null, reason: DataGridReason, source?: unknown) {
+    if (columnId !== null) {
       if (!this.resolvedById().has(columnId)) return;
       const width = this.measureFit(columnId);
-      if (width !== null) this.resizeTo(columnId, width, 'keyboard', source);
+      if (width !== null) this.resizeTo(columnId, width, reason, source);
       return;
     }
     const state = this.effectiveState();
@@ -2167,7 +2495,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       const width = this.measureFit(column.id);
       if (width !== null) next = withColumnWidth(next, column.column, width);
     }
-    if (next !== state) this.requestState(next, 'width', 'programmatic', source);
+    if (next !== state) this.requestState(next, 'width', reason, source);
   }
   moveColumn(columnId: string, direction: -1 | 1, source?: unknown) {
     const column = this.resolvedById().get(columnId);
@@ -2193,11 +2521,16 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     if (event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    const handle = event.currentTarget as HTMLElement;
+    handle.setPointerCapture(event.pointerId);
+    /* The header's own box and not the column's stated width: a flex column
+       is as wide as the room left over, and a drag that started from the
+       stated width jumped to it on the first move. */
+    const header = handle.closest('[data-part="column-header"]');
     this.resizeSession = {
       column: column.id,
       startX: event.clientX,
-      startWidth: column.width,
+      startWidth: header ? Math.round(header.getBoundingClientRect().width) : column.width,
       rtl: getComputedStyle(this.host.nativeElement).direction === 'rtl',
     };
     this.resizing.set(column.id);
@@ -2572,6 +2905,22 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       columnId,
     ) as never;
   }
+  protected helpTemplate(columnId: string) {
+    return (this.helpTemplates().find((entry) => entry.slDataGridColumnHelp() === columnId)
+      ?.template ?? null) as never;
+  }
+  protected hasHelp(column: ResolvedGridColumn<Row>) {
+    return (
+      Boolean(column.column.description) ||
+      this.helpTemplates().some((entry) => entry.slDataGridColumnHelp() === column.id)
+    );
+  }
+  protected helpLabel(column: ResolvedGridColumn<Row>) {
+    return fillLabel(this.t().columnHelp, { column: column.column.label });
+  }
+  protected descriptionId(columnId: string) {
+    return `${this.id}-description-${columnId}`;
+  }
   protected filterTemplate(columnId: string) {
     return this.templateFor(
       this.filterTemplates(),
@@ -2736,6 +3085,23 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       }
       if (next.size !== waiting.size) this.loadingChildren.set(next);
     });
+    /* The main pointer, read again when it changes: a tablet docked to a
+       mouse leaves the pop-in for the sideways scroll. */
+    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+      const query = window.matchMedia('(pointer: coarse)');
+      const read = () => this.coarsePointer.set(query.matches);
+      read();
+      query.addEventListener('change', read);
+      destroy.onDestroy(() => query.removeEventListener('change', read));
+    }
+    /* The sets a narrow frame took out, reported when either changes. */
+    let spaced: GridOutOfSpace = NONE_OUT;
+    effect(() => {
+      const next = this.outOfSpace();
+      if (sameKeys(next.popin, spaced.popin) && sameKeys(next.hidden, spaced.hidden)) return;
+      spaced = next;
+      untracked(() => this.outOfSpaceChange.emit(next));
+    });
     /* Two consecutive `rows` are compared once the new nodes are known. */
     effect(() => {
       const rows = this.rows();
@@ -2763,6 +3129,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
             ? null
             : new ResizeObserver(() => {
                 this.viewport.set({ width: scroller.clientWidth, height: scroller.clientHeight });
+                this.frameWidth.set(scroller.clientWidth);
                 this.measureEdges?.();
               });
         /* The head's and the summary's heights, for the rows held under one
@@ -2788,6 +3155,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
         edges();
         this.measureEdges = edges;
         this.viewport.set({ width: scroller.clientWidth, height: scroller.clientHeight });
+        if (observer) this.frameWidth.set(scroller.clientWidth);
         const affordance = createScrollAffordance(scroller, {
           orientation: () => 'horizontal',
           onChange: (state) => {
@@ -2807,9 +3175,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       { injector: this.injector },
     );
 
-    /* The row height, read once from the first mounted row; every row when auto. */
+    /* The row height, read once from the first mounted row; every row when
+       auto. A row with a pop-in changes height with the columns in it and
+       with the frame's width, which reflows its fields, so both are read. */
     effect(() => {
       this.mountedEntries();
+      this.outOfSpace();
+      if (this.hasPopin()) this.frameWidth();
       afterNextRender(
         () => {
           const rows = this.host.nativeElement.querySelectorAll<HTMLElement>(
@@ -2842,21 +3214,28 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       );
     });
 
-    /* The cursor survives its row leaving: same index, same column. */
+    /* The cursor survives its row leaving: same index, same column. A column
+       that moved into the pop-in takes the cursor with it. */
     effect(() => {
       const current = this.current();
       const rows = this.cursorRows();
-      const columns = this.columnIds();
+      const columns = this.cursorColumns();
       if (current && rows.includes(current.row)) {
         this.lastRowIndex = rows.indexOf(current.row);
         if (columns.includes(current.column)) return;
       }
       if (!current) return;
-      const settled = settleCursor(
-        untracked(() => this.cursorGrid()),
-        current,
-        this.lastRowIndex,
-      );
+      const popped =
+        rows.includes(current.row) &&
+        this.outOfSpace().popin.includes(current.column) &&
+        this.hasPopinCell(current.row);
+      const settled = popped
+        ? { row: current.row, column: POPIN_COLUMN_ID }
+        : settleCursor(
+            untracked(() => this.cursorGrid()),
+            current,
+            this.lastRowIndex,
+          );
       untracked(() => {
         if (settled && !sameCell(settled, current)) {
           this.requestCurrent(settled, 'programmatic');
@@ -3308,6 +3687,57 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     this.rowDrag?.handleKeydown(event);
   }
   private swallowClick = false;
+  /** The pointer of the last press on a cell: `touch` and `pen` activate on one press. */
+  private pressedWith = '';
+  private touchActivatedAt = Number.NEGATIVE_INFINITY;
+  private keyboardMenuAt = Number.NEGATIVE_INFINITY;
+  private columnMenuFor(columnId: string) {
+    return this.columnMenus().find(
+      (menu) => menu.trigger()?.getAttribute('data-menu-for') === columnId,
+    );
+  }
+  /**
+   * Opens a column's menu against an anchor other than its button: the point
+   * a context menu was opened at, or the header cell. Focus returns to the
+   * header cell, which is where the reader was.
+   */
+  private openColumnMenu(
+    columnId: string,
+    anchor: PositionerAnchor,
+    reason: 'pointer' | 'keyboard',
+    event: Event,
+    header: HTMLElement,
+  ): boolean {
+    const menu = this.columnMenuFor(columnId);
+    if (!menu || menu.resolvedDisabled()) return false;
+    menu.finalFocus.set(header);
+    menu.anchor.set(anchor);
+    menu.entry.current = 'first';
+    menu.toggle(true, reason, event);
+    return true;
+  }
+  /** The button opens the menu where it always did: under itself, focus returning to it. */
+  protected anchorToButton(menu: SlMenu) {
+    menu.anchor.set(null);
+    menu.finalFocus.set(null);
+  }
+  /**
+   * A secondary press on a data column's header opens its menu at the press.
+   * The browser keeps its own menu under Shift, and over a field, where cut,
+   * copy and paste are the reader's; a `contextmenu` just after Shift+F10 or
+   * the Menu key opened the menu from the keyboard is that key's echo.
+   */
+  protected onHeaderContextMenu(event: MouseEvent, columnId: string) {
+    if (event.shiftKey) return;
+    if (event.target instanceof Element && event.target.closest(EDITABLE)) return;
+    if (Date.now() - this.keyboardMenuAt < KEYBOARD_ECHO) {
+      event.preventDefault();
+      return;
+    }
+    const header = event.currentTarget as HTMLElement;
+    const anchor = pointAnchor(event.clientX, event.clientY);
+    if (this.openColumnMenu(columnId, anchor, 'pointer', event, header)) event.preventDefault();
+  }
   protected onHeaderClick(event: MouseEvent, column: ResolvedGridColumn<Row>) {
     if (this.swallowClick) {
       this.swallowClick = false;
@@ -3317,13 +3747,27 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     if (column.sortable) this.pressSort(column.id, event.shiftKey, event, 'pointer');
   }
   protected onBodyCellClick(event: MouseEvent, cell: GridCell) {
+    const pointer = this.pressedWith;
+    this.pressedWith = '';
     if (insideWidget(event)) return;
     if (this.resolvedSelectionMode() === 'single' && !this.disabledSet().has(cell.row)) {
       this.toggleSelected(cell.row, { range: false, source: event });
     }
+    /* On a touch screen one press opens the record: a double tap is a zoom,
+       not the gesture of opening. A cell in edit keeps the press for its
+       editor. */
+    const session = this.edit();
+    const editing =
+      session !== null && session.cell.row === cell.row && session.columns.includes(cell.column);
+    if (this.activatable() && (pointer === 'touch' || pointer === 'pen') && !editing) {
+      this.touchActivatedAt = Date.now();
+      this.activate.emit({ key: cell.row, reason: 'pointer', event });
+    }
   }
   protected onCellDoubleClick(event: MouseEvent, cell: GridCell) {
     if (insideWidget(event)) return;
+    /* The second tap of a touch that already activated the row. */
+    if (Date.now() - this.touchActivatedAt < TOUCH_ECHO) return;
     const row = this.rowOf(cell.row);
     const column = this.columns().find((entry) => entry.id === cell.column);
     if (!row) return;
@@ -3335,6 +3779,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     else if (column && this.isEditable(column, row)) this.startEdit(cell);
   }
   protected onCellPointerDown(event: PointerEvent, cell: GridCell) {
+    this.pressedWith = event.pointerType ?? '';
     if (event.button !== 0) return;
     this.swallowClick = false;
     const session = this.edit();
@@ -3413,6 +3858,30 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       }
       return;
     }
+    /* A widget of a header cell: Escape and F2 return to the cell, Tab cycles
+       the cell's widgets without leaving it. */
+    if (
+      insideWidget &&
+      cell.row === HEADER_ROW &&
+      target.closest('[data-part="column-actions"]') !== null
+    ) {
+      if (key === 'Escape' || key === 'F2') {
+        event.preventDefault();
+        cellElement.focus();
+        return;
+      }
+      if (key === 'Tab') {
+        const widgets = [
+          ...cellElement.querySelectorAll<HTMLElement>(
+            '[data-part="column-actions"] button:not([disabled])',
+          ),
+        ];
+        const index = widgets.indexOf(target);
+        event.preventDefault();
+        widgets[(index + (event.shiftKey ? -1 : 1) + widgets.length) % widgets.length]?.focus();
+        return;
+      }
+    }
     if (insideWidget && !target.matches(SIMPLE_WIDGET)) {
       if (key === 'Escape') {
         event.preventDefault();
@@ -3435,6 +3904,17 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const mode = this.resolvedSelectionMode();
 
     if (header && column) {
+      /* Shift+F10 and the Menu key open the column menu on the header cell. */
+      if (
+        (key === 'ContextMenu' || (key === 'F10' && event.shiftKey)) &&
+        !target.closest(EDITABLE)
+      ) {
+        if (this.openColumnMenu(cell.column, cellElement, 'keyboard', event, cellElement)) {
+          event.preventDefault();
+          this.keyboardMenuAt = Date.now();
+        }
+        return;
+      }
       if (ctrl && event.shiftKey && (key === 'ArrowLeft' || key === 'ArrowRight')) {
         event.preventDefault();
         this.resizeBy(
@@ -3446,7 +3926,19 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       }
       if (ctrl && event.shiftKey && key === 'Enter') {
         event.preventDefault();
-        this.autofit(cell.column, event);
+        this.fit(cell.column, 'keyboard', event);
+        return;
+      }
+      /* F2 enters the header cell: its widgets are the column's help, its
+         filter and its menu, and a reader reaches them without a pointer. */
+      if (key === 'F2' && !insideWidget) {
+        const first = cellElement.querySelector<HTMLElement>(
+          '[data-part="column-actions"] button:not([disabled])',
+        );
+        if (first) {
+          event.preventDefault();
+          first.focus();
+        }
         return;
       }
       if (event.altKey && (key === 'ArrowLeft' || key === 'ArrowRight')) {
@@ -3571,8 +4063,10 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       return;
     }
 
-    if (row && column && (key === 'Enter' || key === 'F2')) {
-      const editable = this.isEditable(column.column, row);
+    /* The pop-in is a cell of the row: it edits nothing, and Enter enters its
+       widgets or activates the row as any other cell does. */
+    if (row && (column || cell.column === POPIN_COLUMN_ID) && (key === 'Enter' || key === 'F2')) {
+      const editable = column !== undefined && this.isEditable(column.column, row);
       if (editable && !insideWidget) {
         event.preventDefault();
         this.startEdit(cell);
@@ -3626,7 +4120,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       return;
     }
     event.preventDefault();
-    const next = moveCursor(grid, cell, intent);
+    const next = this.landOn(moveCursor(grid, cell, intent));
     if (event.shiftKey && key.startsWith('Arrow')) {
       if (mode === 'range' && isBodyRow(next.row)) {
         this.requestRange({ anchor: this.range()?.anchor ?? cell, focus: next }, 'keyboard', event);

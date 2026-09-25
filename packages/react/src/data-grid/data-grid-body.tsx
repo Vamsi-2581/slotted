@@ -1,5 +1,6 @@
 import {
   GROUP_ROW_PREFIX,
+  POPIN_COLUMN_ID,
   SUMMARY_ROW,
   type GridNode,
   type ResolvedGridColumn,
@@ -8,6 +9,7 @@ import { memo, useCallback } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 
 import { Checkbox } from '../checkbox';
+import { Glyph, Icon } from '../icon';
 import { Skeleton } from '../skeleton';
 import {
   cellStyle,
@@ -164,6 +166,7 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
         {grid.mountedColumns.map((column) => (
           <BodyCell<Row> column={column} key={column.id} node={node} />
         ))}
+        {grid.popinColumns.length > 0 ? <PopinCell<Row> node={node} /> : null}
       </div>
       {expanded && grid.renderDetail ? (
         <div
@@ -175,7 +178,7 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
         >
           <div
             aria-colindex={1}
-            aria-colspan={grid.columnIds.length}
+            aria-colspan={grid.popinColumns.length > 0 ? grid.popinIndex : grid.columnIds.length}
             role="gridcell"
             style={{ '--slotted-data-grid-column': '1 / -1' } as CSSProperties}
             tabIndex={-1}
@@ -262,7 +265,11 @@ function DragHandleCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'r
         {...(grid.rowsReorderable ? {} : { 'data-disabled': '' })}
         tabIndex={current ? 0 : -1}
         type="button"
-      />
+      >
+        <Icon>
+          <Glyph name="grip-vertical" />
+        </Icon>
+      </button>
     </div>
   );
 }
@@ -302,7 +309,11 @@ function ExpanderCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row
           onClick={(event) => grid.toggleExpanded(node.key, event)}
           tabIndex={current ? 0 : -1}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="chevron-right" />
+          </Icon>
+        </button>
       ) : null}
     </div>
   );
@@ -393,7 +404,13 @@ function BodyCell<Row>({
             tabIndex={-1}
             type="button"
             {...(grid.isLoadingChildren(key) ? { 'data-loading': '' } : {})}
-          />
+          >
+            {/* A row waiting for its children turns the chevron into the
+                loader's ring, which the stylesheet spins. */}
+            <Icon>
+              <Glyph name={grid.isLoadingChildren(key) ? 'loader-circle' : 'chevron-right'} />
+            </Icon>
+          </button>
         ) : (
           <span aria-hidden data-part="tree-toggle" data-empty="" />
         )
@@ -427,6 +444,55 @@ function BodyCell<Row>({
           selected,
         })
       )}
+    </div>
+  );
+}
+
+/**
+ * The columns a narrow frame moved out of the row, drawn under it as labelled
+ * values: one cell spanning the row's second line, the last the cursor walks.
+ */
+function PopinCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row' }> }) {
+  const grid = useDataGridInternal<Row>();
+  const key = node.key;
+  const cell = { row: key, column: POPIN_COLUMN_ID };
+  const current =
+    grid.current !== null && grid.current.row === key && grid.current.column === POPIN_COLUMN_ID;
+  const selected = grid.isSelected(key);
+  return (
+    <div
+      aria-colindex={grid.popinIndex}
+      data-column={POPIN_COLUMN_ID}
+      data-part="popin"
+      role="gridcell"
+      style={{ '--slotted-data-grid-column': '1 / -1' } as CSSProperties}
+      tabIndex={current ? 0 : -1}
+      onClick={(event) => grid.onCellClick(event, cell)}
+      onDoubleClick={(event) => grid.onCellDoubleClick(event, cell)}
+      onFocus={(event) => {
+        if (event.target === event.currentTarget) grid.onCellFocus(cell);
+      }}
+      onKeyDown={(event) => grid.onCellKeyDown(event, cell)}
+      onPointerDown={(event) => grid.onCellPointerDown(event, cell)}
+      {...(current ? { 'data-current': '' } : {})}
+    >
+      {grid.popinColumns.map((column) => (
+        <div data-field={column.id} data-part="popin-field" key={column.id}>
+          {column.column.label ? <span data-part="popin-label">{column.column.label}</span> : null}
+          {/* Read only: an edit happens in a visible cell, the detail or the record. */}
+          <div data-part="popin-value" data-text={column.text}>
+            {grid.renderCellContent({
+              row: node.row,
+              rowKey: key,
+              column: column.column,
+              value: grid.valueOf(column.column, node.row),
+              text: grid.textOf(column.column, node.row),
+              current: false,
+              selected,
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -487,7 +553,11 @@ function GroupRow<Row>({
           }}
           tabIndex={-1}
           type="button"
-        />
+        >
+          <Icon>
+            <Glyph name="chevron-right" />
+          </Icon>
+        </button>
         {grid.renderGroup && column ? (
           grid.renderGroup({ node, column, toggle: () => grid.toggleGroup(node.key) })
         ) : (
@@ -531,11 +601,20 @@ function GroupRow<Row>({
   );
 }
 
-/** The skeleton rows of a first load: the grid's shape before its content. */
-export function DataGridLoader<Row>({ rows }: { rows: number }) {
+/**
+ * The skeleton rows of a first load: the grid's shape before its content, each
+ * row as tall as the body rows it stands in for.
+ */
+export function DataGridLoader<Row>({ rows, rowSize }: { rows: number; rowSize: number }) {
   const grid = useDataGridInternal<Row>();
+  const gutterCount = grid.columnIds.length - grid.resolved.length;
   return (
-    <div aria-hidden data-part="loader" role="rowgroup">
+    <div
+      aria-hidden
+      data-part="loader"
+      role="rowgroup"
+      style={{ '--slotted-data-grid-loader-row-size': `${rowSize}px` } as CSSProperties}
+    >
       {Array.from({ length: rows }, (_unused, row) => (
         <div data-part="row" key={row} role="row">
           {grid.columnIds.map((columnId, index) => (
@@ -544,7 +623,17 @@ export function DataGridLoader<Row>({ rows }: { rows: number }) {
               role="gridcell"
               style={{ '--slotted-data-grid-column': String(index + 1) } as CSSProperties}
             >
-              <Skeleton inlineSize={`${[70, 55, 80, 40, 60][index % 5]}%`} loading />
+              {/* The gutters reserve their width and draw nothing: what stands
+                  in them is a chooser, a handle and a toggle, and an outline of
+                  a control nobody can press yet is a control that lies. The
+                  lengths follow the value columns, so a gutter does not shift
+                  the sequence. */}
+              {index >= gutterCount ? (
+                <Skeleton
+                  inlineSize={`${[70, 55, 80, 40, 60][(index - gutterCount) % 5]}%`}
+                  loading
+                />
+              ) : null}
             </div>
           ))}
         </div>
@@ -564,6 +653,16 @@ export function DataGridSummary<Row>({
   const grid = useDataGridInternal<Row>();
   const current = grid.current !== null && grid.current.row === SUMMARY_ROW;
   const gutterCount = grid.columnIds.length - grid.resolved.length;
+  const textOf = (column: ResolvedGridColumn<Row>) => {
+    const value = aggregates[column.id];
+    return value === null || value === undefined
+      ? ''
+      : cellText({ ...column.column, accessor: () => value }, {} as Row, {
+          locale: grid.locale,
+        });
+  };
+  const popinCell = { row: SUMMARY_ROW, column: POPIN_COLUMN_ID };
+  const popinHere = current && grid.current?.column === POPIN_COLUMN_ID;
   return (
     <div data-part="summary" role="rowgroup">
       <div aria-rowindex={rowIndex} data-row={SUMMARY_ROW} role="row">
@@ -582,13 +681,7 @@ export function DataGridSummary<Row>({
           const index = grid.columnIds.indexOf(column.id) + 1;
           const cell = { row: SUMMARY_ROW, column: column.id };
           const here = current && grid.current?.column === column.id;
-          const value = aggregates[column.id];
-          const text =
-            value === null || value === undefined
-              ? ''
-              : cellText({ ...column.column, accessor: () => value }, {} as Row, {
-                  locale: grid.locale,
-                });
+          const text = textOf(column);
           return (
             <div
               {...columnAttributes(column)}
@@ -609,6 +702,33 @@ export function DataGridSummary<Row>({
             </div>
           );
         })}
+        {grid.hasPopinCell(SUMMARY_ROW) ? (
+          <div
+            aria-colindex={grid.popinIndex}
+            data-column={POPIN_COLUMN_ID}
+            data-part="popin"
+            role="gridcell"
+            style={{ '--slotted-data-grid-column': '1 / -1' } as CSSProperties}
+            tabIndex={popinHere ? 0 : -1}
+            onFocus={(event) => {
+              if (event.target === event.currentTarget) grid.onCellFocus(popinCell);
+            }}
+            onKeyDown={(event) => grid.onCellKeyDown(event, popinCell)}
+            onPointerDown={(event) => grid.onCellPointerDown(event, popinCell)}
+            {...(popinHere ? { 'data-current': '' } : {})}
+          >
+            {grid.popinAggregated.map((column) => (
+              <div data-field={column.id} data-part="popin-field" key={column.id}>
+                {column.column.label ? (
+                  <span data-part="popin-label">{column.column.label}</span>
+                ) : null}
+                <div data-part="popin-value">
+                  <span>{textOf(column)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );

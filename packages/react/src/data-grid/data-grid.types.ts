@@ -4,9 +4,12 @@ import type {
   GridCell,
   GridColumn,
   GridColumnGroup,
+  GridColumnOverflow,
   GridColumnState,
   GridColumnStateChange,
+  GridDensity,
   GridNode,
+  GridOutOfSpace,
   GridQuery,
   GridQueryChange,
   GridRange,
@@ -23,8 +26,23 @@ export type DataGridEditMode = 'cell' | 'row';
 export type DataGridMode = 'client' | 'server';
 export type DataGridVirtualize = 'auto' | boolean;
 export type DataGridRowHeight = number | 'auto';
+/**
+ * What a frame too narrow for the template does: moves columns into the row's
+ * pop-in, scrolls, or — `auto` — pops in on a phone-wide or a touch frame
+ * narrower than a desktop and scrolls elsewhere.
+ */
+export type DataGridColumnOverflow = GridColumnOverflow;
 
 export type DataGridReason = 'pointer' | 'keyboard' | 'clear' | 'select' | 'programmatic';
+
+/** A column of the grid: the model's column, plus what only React can carry. */
+export interface DataGridColumn<Row> extends GridColumn<Row> {
+  /**
+   * The column's help, rendered under its `description` in the popover its
+   * column-help button opens. Its presence alone draws the button.
+   */
+  readonly help?: ReactNode;
+}
 
 /** The request a query change carries: the value, plus which part of it moved. */
 export interface DataGridQueryRequest extends ChangeRequest<GridQuery> {
@@ -56,12 +74,16 @@ export interface DataGridResolvedLabels {
   sortDescendingAction: string;
   sortClearAction: string;
   columnMenu: string;
+  columnHelp: string;
   pinStart: string;
   pinEnd: string;
   unpin: string;
   hide: string;
+  columnHidden: string;
   autofit: string;
+  autofitAll: string;
   manageColumns: string;
+  popinHeader: string;
   resized: string;
   resize: string;
   reorderRow: string;
@@ -119,6 +141,14 @@ export interface DataGridDefaults {
   filterRow?: boolean | undefined;
   virtualize?: DataGridVirtualize | undefined;
   rowHeight?: DataGridRowHeight | undefined;
+  /**
+   * What a frame too narrow for the template does. `popin` moves the columns
+   * of least `priority` into a pop-in at the foot of each row, as labelled
+   * values; `scroll` keeps every column and scrolls sideways; `auto` pops in
+   * on a frame under 600px, or under 1024px when the main pointer is coarse,
+   * and scrolls elsewhere. Default `auto`.
+   */
+  columnOverflow?: DataGridColumnOverflow | undefined;
   overscan?: number | undefined;
   pageSizes?: readonly number[] | undefined;
   filterDebounce?: number | undefined;
@@ -244,6 +274,11 @@ export interface DataGridHandle {
   startEdit(cell: GridCell): void;
   stopEdit(options?: { commit?: boolean }): void;
   autofit(column?: string): void;
+  /**
+   * The columns a narrow frame has taken out by their `priority`: those in
+   * the pop-in and those hidden. Never part of `columnState`.
+   */
+  getOutOfSpace(): GridOutOfSpace;
   getVisibleRows(): readonly unknown[];
   /** The file's text, by `toCsv`, for the consumer who sends it elsewhere. */
   toCsv(options?: DataGridExportOptions): string;
@@ -275,7 +310,7 @@ export interface DataGridProps<Row>
   dataSource?: DataGridDataSource<Row> | undefined;
   /** A field name, or a function of the row. */
   rowKey: keyof Row | ((row: Row) => string);
-  columns: readonly GridColumn<Row>[];
+  columns: readonly DataGridColumn<Row>[];
   columnGroups?: readonly GridColumnGroup[] | undefined;
   /** `client` applies the query to `rows`; `server` draws `rows` as given. Inferred from `totalCount` and `hasMore`. */
   mode?: DataGridMode | undefined;
@@ -314,6 +349,18 @@ export interface DataGridProps<Row>
     ((state: GridColumnState, request: DataGridColumnStateRequest) => void) | undefined;
   /** Called when the column menu asks for the manager; the consumer opens `column-manager`. */
   onManageColumns?: (() => void) | undefined;
+  /**
+   * Called when either set of columns a narrow frame has taken out by their
+   * `priority` changes — those in the pop-in and those hidden. Neither set is
+   * ever part of `columnState`.
+   */
+  onOutOfSpaceChange?: ((outOfSpace: GridOutOfSpace) => void) | undefined;
+  /**
+   * The density of this grid alone, written as `data-slotted-density` on the
+   * root; absent or `null`, the grid takes the page's. The layers it opens
+   * are portals and stay at the page's density.
+   */
+  density?: GridDensity | null | undefined;
 
   /* ── Selection ──────────────────────────────────────────────────────── */
   value?: string | readonly string[] | null | undefined;

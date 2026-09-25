@@ -1,23 +1,30 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type {
   GridCell,
   GridColumn,
   GridColumnState,
+  GridDensity,
+  GridOutOfSpace,
   GridQuery,
   GridRange,
   GridTree,
 } from '@slotted/core/grid';
-import { emptyQuery, withPageIndex } from '@slotted/core/grid';
+import { emptyQuery, POPIN_COLUMN_ID, withPageIndex } from '@slotted/core/grid';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import type { ChangeRequest } from '@slotted/core/state';
+import { By } from '@angular/platform-browser';
+import { SlMenu } from '@slotted/angular/menu';
+import { provideTooltipDefaults } from '@slotted/angular/tooltip';
 import contract from '../../../../specs/components/data-grid/contract.json';
 import { SlDataGrid } from './data-grid';
 import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridActivateEvent,
+  DataGridColumnOverflow,
   DataGridColumnStateRequest,
   DataGridDataSource,
   DataGridEditCommit,
@@ -27,7 +34,11 @@ import type {
   DataGridSelection,
   DataGridSelectionMode,
 } from './data-grid-defaults';
-import { SlDataGridDetailTemplate } from './data-grid-templates';
+import {
+  SlDataGridCellTemplate,
+  SlDataGridColumnHelp,
+  SlDataGridDetailTemplate,
+} from './data-grid-templates';
 
 interface Shipment {
   id: string;
@@ -180,6 +191,10 @@ class Host {
   }
 }
 
+/** The glyph a family control draws inside itself, as the Glyph element. */
+const glyphOf = (scope: Element | null | undefined) =>
+  scope?.querySelector(':scope > [data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+
 describe('SlDataGrid', () => {
   let fixture: ComponentFixture<Host>;
   let host: Host;
@@ -318,6 +333,8 @@ describe('SlDataGrid', () => {
     header('weight').click();
     fixture.detectChanges();
     expect(header('weight').getAttribute('aria-sort')).toBe('ascending');
+    expect(glyphOf(header('weight').querySelector('[data-part="sort"]'))).toBe('chevron-down');
+    expect(glyphOf(header('weight').querySelector('[data-part="column-menu"]'))).toBe('ellipsis');
     expect(host.queryRequests.at(-1)).toMatchObject({
       value: { sort: [{ column: 'weight', direction: 'ascending' }] },
       reason: 'pointer',
@@ -388,6 +405,7 @@ describe('SlDataGrid', () => {
     });
     expect(root().querySelectorAll('[data-part="row"]')).toHaveLength(1);
     expect(header('customer').hasAttribute('data-filtered')).toBe(true);
+    expect(glyphOf(header('customer').querySelector('[data-part="filter"]'))).toBe('funnel');
   });
 
   it('edits the panel as a draft and reports on Apply', async () => {
@@ -444,6 +462,7 @@ describe('SlDataGrid', () => {
     fixture.detectChanges();
     const groups = root().querySelectorAll('[data-part="group-row"]');
     expect(groups).toHaveLength(3);
+    expect(glyphOf(groups[0]!.querySelector('[data-part="group-toggle"]'))).toBe('chevron-right');
     expect(groups[0]!.getAttribute('aria-level')).toBe('1');
     expect(groups[0]!.getAttribute('aria-expanded')).toBe('true');
     expect(groups[0]!.textContent).toContain('2 rows');
@@ -598,6 +617,64 @@ describe('SlDataGrid', () => {
     expect(host.activations).toHaveLength(1);
   });
 
+  it('activates a row on one touch, and ignores the double press that follows it', () => {
+    host.activatable.set(true);
+    fixture.detectChanges();
+    const tap = (target: HTMLElement, pointerType: string) => {
+      target.dispatchEvent(
+        new PointerEvent('pointerdown', { button: 0, bubbles: true, pointerType }),
+      );
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+      fixture.detectChanges();
+    };
+    const doublePress = (target: HTMLElement) => {
+      target.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, detail: 2 }));
+      fixture.detectChanges();
+    };
+    tap(cell('S1', 'carrier'), 'touch');
+    expect(host.activations).toHaveLength(1);
+    expect(host.activations[0]).toMatchObject({ key: 'S1', reason: 'pointer' });
+    doublePress(cell('S1', 'carrier'));
+    expect(host.activations).toHaveLength(1);
+
+    tap(cell('S2', 'carrier'), 'pen');
+    expect(host.activations.at(-1)).toMatchObject({ key: 'S2', reason: 'pointer' });
+
+    /* The mouse keeps the double press. */
+    tap(cell('S3', 'carrier'), 'mouse');
+    expect(host.activations).toHaveLength(2);
+    vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 1000);
+    doublePress(cell('S3', 'carrier'));
+    expect(host.activations.at(-1)).toMatchObject({ key: 'S3', reason: 'pointer' });
+    vi.restoreAllMocks();
+  });
+
+  it('never activates on one touch of a widget in the cell, nor of a cell in edit', async () => {
+    host.activatable.set(true);
+    fixture.detectChanges();
+    const widget = document.createElement('button');
+    widget.type = 'button';
+    cell('S1', 'carrier').append(widget);
+    widget.dispatchEvent(
+      new PointerEvent('pointerdown', { button: 0, bubbles: true, pointerType: 'touch' }),
+    );
+    widget.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    widget.remove();
+    expect(host.activations).toHaveLength(0);
+
+    host.current.set({ row: 'S1', column: 'customer' });
+    fixture.detectChanges();
+    press(cell('S1', 'customer'), 'Enter');
+    await settle();
+    expect(cell('S1', 'customer').hasAttribute('data-editing')).toBe(true);
+    const editing = cell('S1', 'customer');
+    editing.dispatchEvent(
+      new PointerEvent('pointerdown', { button: 0, bubbles: true, pointerType: 'touch' }),
+    );
+    editing.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    expect(host.activations).toHaveLength(0);
+  });
+
   it('writes aria-readonly on a cell that does not edit while others do', () => {
     expect(cell('S1', 'id').getAttribute('aria-readonly')).toBe('true');
     expect(cell('S1', 'customer').hasAttribute('aria-readonly')).toBe(false);
@@ -678,6 +755,7 @@ describe('SlDataGrid', () => {
     expect(cell('S1', '__expander').querySelector('button')!.getAttribute('aria-expanded')).toBe(
       'true',
     );
+    expect(glyphOf(cell('S1', '__expander').querySelector('button'))).toBe('chevron-right');
     press(cell('S1', '__expander'), 'ArrowLeft');
     expect(root().querySelector('[data-part="detail"]')).toBeNull();
   });
@@ -690,6 +768,36 @@ describe('SlDataGrid', () => {
     await settle();
     expect(cell('S3', 'customer').hasAttribute('data-editing')).toBe(true);
     expect(host.grid().getVisibleRows()).toHaveLength(4);
+  });
+
+  /**
+   * The gutters hold a chooser, a handle and an expander. An outline of a
+   * control nobody can press yet is a control that lies, so the loader
+   * reserves their width and draws nothing in them.
+   */
+  it('leaves the loader’s gutters empty and skeletons only the value columns', () => {
+    host.selectionMode.set('multiple');
+    host.loading.set(true);
+    host.rows.set([]);
+    fixture.detectChanges();
+    const row = root().querySelector('[data-part="loader"] [data-part="row"]')!;
+    const cells = [...row.children];
+    expect(cells[0]!.querySelector('[data-ui="skeleton"]')).toBeNull();
+    expect(cells.slice(1).every((cell) => cell.querySelector('[data-ui="skeleton"]'))).toBe(true);
+    /* The lengths follow the value columns: the first one takes the first width. */
+    const first = cells[1]!.querySelector('[data-ui="skeleton"]') as HTMLElement;
+    expect(first.style.getPropertyValue('--slotted-skeleton-inline-size')).toBe('70%');
+  });
+
+  /* The skeleton rows take the height of the rows they stand in for, so the
+     count that fills the frame and the rows drawn in it agree. */
+  it('gives the skeleton rows the height of the body rows', () => {
+    host.rowHeight.set(56);
+    host.loading.set(true);
+    host.rows.set([]);
+    fixture.detectChanges();
+    const loader = root().querySelector<HTMLElement>('[data-part="loader"]')!;
+    expect(loader.style.getPropertyValue('--slotted-data-grid-loader-row-size')).toBe('56px');
   });
 
   it('draws the loading, empty and error states', () => {
@@ -866,6 +974,46 @@ describe('SlDataGrid, defaults', () => {
   });
 });
 
+describe('SlDataGrid, a column name its own box cuts', () => {
+  /**
+   * Every column name truncates, and a name cut to `Cus…` is unreadable until
+   * something says the words. The hint says them, and only while the box is
+   * measured as cutting them.
+   */
+  it('opens a hint over it, and none over a name that fits', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideTooltipDefaults({ openDelay: 0 })],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+
+    const measure = (element: Element, sizes: { client: number; scroll: number }) => {
+      Object.defineProperty(element, 'clientWidth', { configurable: true, value: sizes.client });
+      Object.defineProperty(element, 'scrollWidth', { configurable: true, value: sizes.scroll });
+    };
+    const hint = () => document.querySelector('[role="tooltip"]');
+    const name = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+      '[data-part="column-header"][data-column="customer"] span',
+    )!;
+    /* jsdom does not expand the `overflow` shorthand, so the axis is written. */
+    name.style.overflowX = 'hidden';
+
+    measure(name, { client: 160, scroll: 160 });
+    name.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(hint()).toBeNull();
+
+    measure(name, { client: 48, scroll: 160 });
+    name.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    fixture.detectChanges();
+    expect(hint()?.textContent).toBe('Customer');
+    /* The header already states the words: naming them twice is reading them twice. */
+    expect(hint()?.getAttribute('aria-hidden')).toBe('true');
+    expect(name.getAttribute('aria-describedby')).toBeNull();
+  });
+});
+
 describe('SlDataGrid as a tree', () => {
   interface Site {
     id: string;
@@ -933,6 +1081,8 @@ describe('SlDataGrid as a tree', () => {
     expect(rowKeys()).toEqual(['pt', 'es']);
     expect(root.querySelector('[data-row="pt"]')!.getAttribute('aria-expanded')).toBe('false');
     expect(toggle('es').tagName).toBe('SPAN');
+    expect(glyphOf(toggle('pt'))).toBe('chevron-right');
+    expect(glyphOf(toggle('es'))).toBeUndefined();
     toggle('pt').click();
     fixture.detectChanges();
     expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-por', 'es']);
@@ -975,6 +1125,8 @@ describe('SlDataGrid as a tree', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.loads).toEqual(['pt-lis']);
     expect(root.querySelector('[data-row="pt-lis"]')!.hasAttribute('data-loading')).toBe(true);
+    /* The wait turns the chevron into the loader's ring. */
+    expect(glyphOf(toggle('pt-lis'))).toBe('loader-circle');
     fixture.componentInstance.rows.set(SITES);
     fixture.detectChanges();
     expect(root.querySelector('[data-row="pt-lis"]')!.hasAttribute('data-loading')).toBe(false);
@@ -1023,6 +1175,7 @@ describe('SlDataGrid reordering rows', () => {
     const { fixture, root, handle } = await mount();
     expect(root.querySelectorAll('[data-part="row-handle"]')).toHaveLength(4);
     expect(handle('S1').getAttribute('aria-label')).toBe('Reorder S1');
+    expect(glyphOf(handle('S1'))).toBe('grip-vertical');
     expect(handle('S1').hasAttribute('aria-disabled')).toBe(false);
     fixture.componentInstance.query.set({
       ...emptyQuery(),
@@ -1251,5 +1404,563 @@ describe('SlDataGrid with a data source', () => {
     fixture.detectChanges();
     await settle(fixture);
     expect(shipments.calls).toHaveLength(3);
+  });
+});
+
+/* ── Column help, hiding, fitting, responsive priority and density ────── */
+
+interface Account {
+  id: string;
+  name: string;
+  owner: string;
+  region: string;
+  arr: number;
+}
+
+const ACCOUNTS: Account[] = [
+  { id: 'A1', name: 'Aurora Labs', owner: 'Maya Chen', region: 'EMEA', arr: 120000 },
+  { id: 'A2', name: 'Bloom Retail', owner: 'Omar Haddad', region: 'NA', arr: 48000 },
+];
+
+const ACCOUNT_COLUMNS: GridColumn<Account>[] = [
+  { id: 'name', label: 'Account', width: 200 },
+  {
+    id: 'arr',
+    label: 'ARR',
+    kind: 'number',
+    width: 120,
+    description: 'Annual recurring revenue, in US dollars',
+    priority: 1,
+  },
+  { id: 'owner', label: 'Owner', width: 160, priority: 3 },
+  { id: 'region', label: 'Region', width: 120, priority: 2 },
+];
+
+@Component({
+  standalone: true,
+  imports: [SlDataGrid, SlDataGridColumnHelp, SlDataGridCellTemplate],
+  template: `
+    <sl-data-grid
+      label="Accounts"
+      rowKey="id"
+      [rows]="rows"
+      [columns]="columns()"
+      [density]="density()"
+      [columnOverflow]="columnOverflow()"
+      [pinnedRows]="pinnedRows()"
+      [activatable]="activatable()"
+      (columnStateChangeRequest)="stateRequests.push($event)"
+      (queryChangeRequest)="queryRequests.push($event)"
+      (outOfSpaceChange)="spaced.push($event)"
+      (activate)="activations.push($event)"
+    >
+      <ng-template slDataGridColumnHelp="owner">
+        <p>The account executive who <a href="#owners">owns the renewal</a>.</p>
+      </ng-template>
+      <ng-template slDataGridCell="owner" let-text="text" let-key="key">
+        <strong data-owner>{{ text }} ({{ key }})</strong>
+      </ng-template>
+    </sl-data-grid>
+  `,
+})
+class Accounts {
+  readonly grid = viewChild.required(SlDataGrid);
+  readonly rows = ACCOUNTS;
+  readonly columns = signal<readonly GridColumn<Account>[]>(ACCOUNT_COLUMNS);
+  readonly density = signal<GridDensity | null | undefined>(undefined);
+  readonly columnOverflow = signal<DataGridColumnOverflow | undefined>('popin');
+  readonly pinnedRows = signal<DataGridPinnedRows | undefined>(undefined);
+  readonly activatable = signal(false);
+  readonly stateRequests: DataGridColumnStateRequest[] = [];
+  readonly queryRequests: DataGridQueryRequest[] = [];
+  readonly spaced: GridOutOfSpace[] = [];
+  readonly activations: DataGridActivateEvent[] = [];
+}
+
+/**
+ * The composition the column-manager reference writes: the manager, and the
+ * count it reads from the grid, stand before the grid in the template, so the
+ * set is read before the grid's own inputs are bound.
+ */
+@Component({
+  standalone: true,
+  imports: [SlDataGrid],
+  template: `
+    <output>{{ grid.outOfSpace().popin.length }}</output>
+    <sl-data-grid
+      #grid="slDataGrid"
+      label="Accounts"
+      rowKey="id"
+      [rows]="rows"
+      [columns]="columns"
+    />
+  `,
+})
+class ReadBeforeTheGrid {
+  readonly rows = ACCOUNTS;
+  readonly columns = ACCOUNT_COLUMNS;
+}
+
+describe('SlDataGrid, the out-of-space set read before the grid', () => {
+  it('is empty, and throws no required-input error, before the grid is bound', () => {
+    const fixture = TestBed.createComponent(ReadBeforeTheGrid);
+    expect(() => fixture.detectChanges()).not.toThrow();
+    expect((fixture.nativeElement as HTMLElement).querySelector('output')?.textContent).toBe('0');
+  });
+});
+
+describe('SlDataGrid, explaining and arranging columns', () => {
+  let fixture: ComponentFixture<Accounts>;
+  let observed: (() => void)[] = [];
+  /* The main pointer `(pointer: coarse)` answers, and who listens to it. */
+  let coarse = false;
+  let pointerListeners: (() => void)[] = [];
+
+  const root = () => fixture.nativeElement.querySelector('[role="grid"]') as HTMLElement;
+  const header = (column: string) =>
+    root().querySelector<HTMLElement>(`[data-part="column-header"][data-column="${column}"]`)!;
+  const press = (target: HTMLElement, key: string, init: KeyboardEventInit = {}) => {
+    target.dispatchEvent(
+      new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }),
+    );
+    fixture.detectChanges();
+  };
+  const settle = async () => {
+    await fixture.whenStable();
+    fixture.detectChanges();
+  };
+  const menuItem = (name: string) =>
+    [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+      (item) => item.textContent?.trim() === name,
+    )!;
+
+  beforeEach(async () => {
+    observed = [];
+    coarse = false;
+    pointerListeners = [];
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      get matches() {
+        return query === '(pointer: coarse)' && coarse;
+      },
+      addEventListener: (_type: string, listener: () => void) => pointerListeners.push(listener),
+      removeEventListener: (_type: string, listener: () => void) => {
+        pointerListeners = pointerListeners.filter((each) => each !== listener);
+      },
+    }));
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(private readonly callback: (entries: unknown[], observer: unknown) => void) {}
+        observe() {
+          observed.push(() => this.callback([], this));
+        }
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    await TestBed.configureTestingModule({ imports: [Accounts] }).compileComponents();
+    fixture = TestBed.createComponent(Accounts);
+    fixture.detectChanges();
+    await settle();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('marks a column with something to say, and describes its header by the text', () => {
+    const arr = header('arr');
+    const description = arr.querySelector<HTMLElement>('[data-part="column-description"]')!;
+    expect(description.textContent?.trim()).toBe('Annual recurring revenue, in US dollars');
+    expect(arr.getAttribute('aria-describedby')).toBe(description.id);
+    /* Described, not named: the header's name stays the column's label. */
+    expect(description.getAttribute('aria-hidden')).toBe('true');
+    expect(
+      arr.querySelector('[data-part="column-actions"] > [data-part="column-help"]'),
+    ).not.toBeNull();
+    expect(arr.querySelector('[data-part="column-help"]')!.getAttribute('aria-label')).toBe(
+      'About ARR',
+    );
+    /* A template alone is help too; a column with neither has no button. */
+    expect(header('owner').querySelector('[data-part="column-help"]')).not.toBeNull();
+    expect(header('owner').hasAttribute('aria-describedby')).toBe(false);
+    expect(header('name').querySelector('[data-part="column-help"]')).toBeNull();
+    /* The help comes before the filter and the menu. */
+    const actions = [...arr.querySelectorAll<HTMLElement>('[data-part="column-actions"] > *')];
+    expect(actions[0]!.dataset['part']).toBe('column-help');
+  });
+
+  it('opens the help on a press, never sorting, with the description and the template', async () => {
+    const help = header('owner').querySelector<HTMLElement>('[data-part="column-help"]')!;
+    expect(help.getAttribute('aria-expanded')).toBe('false');
+    expect(glyphOf(help)).toBe('circle-question');
+    help.click();
+    await settle();
+    expect(help.getAttribute('aria-expanded')).toBe('true');
+    const content = document.getElementById(help.getAttribute('aria-controls')!)!;
+    expect(content.textContent).toContain('owns the renewal');
+    expect(fixture.componentInstance.queryRequests).toHaveLength(0);
+
+    const arrHelp = header('arr').querySelector<HTMLElement>('[data-part="column-help"]')!;
+    arrHelp.click();
+    await settle();
+    const arrContent = document.getElementById(arrHelp.getAttribute('aria-controls')!)!;
+    expect(arrContent.textContent).toContain('Annual recurring revenue');
+    expect(arrContent.getAttribute('aria-label')).toBe('About ARR');
+  });
+
+  it('shows the description atop the column menu, and describes the menu by it', async () => {
+    header('arr').focus();
+    fixture.detectChanges();
+    press(header('arr'), 'Enter', { ctrlKey: true });
+    await settle();
+    const menu = document.querySelector<HTMLElement>('[role="menu"]')!;
+    const shown = menu.querySelector<HTMLElement>('[data-part="column-menu-description"]')!;
+    expect(shown.textContent?.trim()).toBe('Annual recurring revenue, in US dollars');
+    expect(shown.getAttribute('aria-hidden')).toBe('true');
+    expect(menu.getAttribute('aria-describedby')).toBe(
+      header('arr').querySelector('[data-part="column-description"]')!.id,
+    );
+  });
+
+  it('enters the header cell with F2, cycles its widgets with Tab, and leaves with Escape', async () => {
+    const arr = header('arr');
+    arr.focus();
+    fixture.detectChanges();
+    press(arr, 'F2');
+    const help = arr.querySelector<HTMLElement>('[data-part="column-help"]')!;
+    const menu = arr.querySelector<HTMLElement>('[data-part="column-menu"]')!;
+    expect(document.activeElement).toBe(help);
+    press(help, 'Tab');
+    expect(document.activeElement).toBe(menu);
+    press(menu, 'Tab');
+    expect(document.activeElement).toBe(help);
+    press(help, 'Tab', { shiftKey: true });
+    expect(document.activeElement).toBe(menu);
+    press(menu, 'Escape');
+    expect(document.activeElement).toBe(arr);
+    /* Enter on the header still sorts. */
+    press(arr, 'Enter');
+    expect(fixture.componentInstance.queryRequests.at(-1)).toMatchObject({ change: 'sort' });
+  });
+
+  it('announces a hidden column, and the request carries what an undo restores', async () => {
+    const announce = vi.spyOn(getLiveAnnouncer(document), 'announce');
+    header('owner').focus();
+    fixture.detectChanges();
+    press(header('owner'), 'Enter', { ctrlKey: true });
+    await settle();
+    menuItem('Hide column').click();
+    await settle();
+    const request = fixture.componentInstance.stateRequests.at(-1)!;
+    expect(request).toMatchObject({ change: 'hidden', value: { hidden: ['owner'] } });
+    expect(request.previous.hidden).toEqual([]);
+    expect(announce).toHaveBeenCalledWith('Owner hidden');
+    announce.mockRestore();
+  });
+
+  it('fits one column or every column, with the reason of the gesture', async () => {
+    let measured = 90;
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        width: measured,
+        height: 0,
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        right: measured,
+        bottom: 0,
+      }),
+    });
+    const requests = fixture.componentInstance.stateRequests;
+    const resizer = header('owner').querySelector<HTMLElement>('[data-part="resizer"]')!;
+    resizer.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    expect(requests.at(-1)).toMatchObject({ change: 'width', reason: 'pointer' });
+    expect(Object.keys(requests.at(-1)!.value.widths)).toEqual(['owner']);
+    measured = 80;
+    resizer.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, shiftKey: true }));
+    expect(requests.at(-1)).toMatchObject({ change: 'width', reason: 'pointer' });
+    expect(requests.at(-1)!.value.widths).toEqual({ name: 80, arr: 80, owner: 80, region: 80 });
+    measured = 70;
+    header('owner').focus();
+    fixture.detectChanges();
+    press(header('owner'), 'Enter', { ctrlKey: true, shiftKey: true });
+    expect(requests.at(-1)).toMatchObject({ change: 'width', reason: 'keyboard' });
+
+    measured = 60;
+    press(header('owner'), 'Enter', { ctrlKey: true });
+    await settle();
+    menuItem('Fit all columns').dispatchEvent(
+      new MouseEvent('click', { bubbles: true, detail: 1 }),
+    );
+    await settle();
+    expect(requests.at(-1)).toMatchObject({ change: 'width', reason: 'pointer' });
+    expect(requests.at(-1)!.value.widths).toEqual({ name: 60, arr: 60, owner: 60, region: 60 });
+    measured = 50;
+    press(header('owner'), 'Enter', { ctrlKey: true });
+    await settle();
+    menuItem('Fit to content').click();
+    await settle();
+    expect(requests.at(-1)).toMatchObject({ change: 'width', reason: 'keyboard' });
+    measured = 40;
+    fixture.componentInstance.grid().autofit('owner');
+    expect(requests.at(-1)).toMatchObject({ change: 'width', reason: 'programmatic' });
+    delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
+  });
+
+  const resize = (width: number) => {
+    const scroller = root().querySelector<HTMLElement>('[data-part="scroll"]')!;
+    Object.defineProperty(scroller, 'clientWidth', { configurable: true, value: width });
+    for (const run of observed) run();
+    fixture.detectChanges();
+  };
+  const row = (key: string) =>
+    root().querySelector<HTMLElement>(`[role="row"][data-row="${key}"]`)!;
+  const popin = (key: string) => row(key).querySelector<HTMLElement>('[data-part="popin"]');
+  const fields = (key: string) =>
+    [...popin(key)!.querySelectorAll<HTMLElement>('[data-part="popin-field"]')].map((field) => [
+      field.querySelector('[data-part="popin-label"]')?.textContent?.trim() ?? null,
+      field.querySelector('[data-part="popin-value"]')!.textContent?.trim(),
+    ]);
+  const rightClick = (target: HTMLElement, init: MouseEventInit = {}) => {
+    const event = new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      button: 2,
+      clientX: 40,
+      clientY: 60,
+      ...init,
+    });
+    target.dispatchEvent(event);
+    fixture.detectChanges();
+    return event;
+  };
+  const columnMenu = (column: string) =>
+    fixture.debugElement
+      .queryAll(By.directive(SlMenu))
+      .map((node) => node.componentInstance as SlMenu)
+      .find((menu) => menu.trigger()?.getAttribute('data-menu-for') === column)!;
+
+  it('moves the columns of least priority into the row’s pop-in, outside the state', async () => {
+    const instance = fixture.componentInstance;
+    expect(instance.grid().outOfSpace()).toEqual({ popin: [], hidden: [] });
+    expect(root().hasAttribute('data-popin')).toBe(false);
+    expect(popin('A1')).toBeNull();
+    expect(root().querySelector('[data-part="popin-header"]')).toBeNull();
+
+    resize(400);
+    /* 600 asked for: Owner (3) goes first, then Region (2); ARR (1) stays. */
+    expect(instance.grid().outOfSpace()).toEqual({ popin: ['owner', 'region'], hidden: [] });
+    expect(root().getAttribute('data-popin')).toBe('2');
+    expect(root().hasAttribute('data-space-hidden')).toBe(false);
+    /* Account, ARR and the pop-in's own column. */
+    expect(root().getAttribute('aria-colcount')).toBe('3');
+    expect(header('owner')).toBeNull();
+    expect(root().style.getPropertyValue('--slotted-data-grid-template')).not.toContain('160px');
+
+    const heading = root().querySelector<HTMLElement>('[data-part="popin-header"]')!;
+    expect(heading.getAttribute('role')).toBe('columnheader');
+    expect(heading.getAttribute('aria-colindex')).toBe('3');
+    expect(heading.textContent?.trim()).toBe('Details');
+    expect(heading.parentElement!.lastElementChild).toBe(heading);
+
+    const cell = popin('A1')!;
+    expect(cell.getAttribute('role')).toBe('gridcell');
+    expect(cell.getAttribute('aria-colindex')).toBe('3');
+    expect(row('A1').lastElementChild).toBe(cell);
+    /* The label is the header's, the value the cell's own template with its context. */
+    expect(fields('A1')).toEqual([
+      ['Owner', 'Maya Chen (A1)'],
+      ['Region', 'EMEA'],
+    ]);
+    expect(cell.querySelector('[data-owner]')).not.toBeNull();
+    /* A row with a pop-in is measured as it grows. */
+    expect(root().getAttribute('data-rows')).toBe('auto');
+    /* The pop-in starts where the first data column does: no gutter here. */
+    expect(root().style.getPropertyValue('--slotted-data-grid-leading')).toBe('0px');
+    expect(instance.spaced).toEqual([{ popin: ['owner', 'region'], hidden: [] }]);
+    expect(instance.stateRequests).toHaveLength(0);
+
+    resize(1000);
+    expect(instance.grid().outOfSpace()).toEqual({ popin: [], hidden: [] });
+    expect(root().getAttribute('aria-colcount')).toBe('4');
+    expect(popin('A1')).toBeNull();
+    expect(root().getAttribute('data-rows')).toBe('fixed');
+    expect(root().style.getPropertyValue('--slotted-data-grid-leading')).toBe('');
+    expect(instance.spaced).toEqual([
+      { popin: ['owner', 'region'], hidden: [] },
+      { popin: [], hidden: [] },
+    ]);
+  });
+
+  it('hides a column that declines the pop-in, and takes nothing out under scroll', async () => {
+    const instance = fixture.componentInstance;
+    instance.columns.set(
+      ACCOUNT_COLUMNS.map((column) =>
+        column.id === 'region' ? { ...column, popin: false } : column,
+      ),
+    );
+    fixture.detectChanges();
+    resize(400);
+    expect(instance.grid().outOfSpace()).toEqual({ popin: ['owner'], hidden: ['region'] });
+    expect(root().getAttribute('data-popin')).toBe('1');
+    expect(header('region')).toBeNull();
+    expect(fields('A1')).toEqual([['Owner', 'Maya Chen (A1)']]);
+
+    instance.columnOverflow.set('scroll');
+    fixture.detectChanges();
+    expect(instance.grid().outOfSpace()).toEqual({ popin: [], hidden: [] });
+    expect(root().hasAttribute('data-popin')).toBe(false);
+    expect(header('region')).not.toBeNull();
+    expect(root().getAttribute('aria-colcount')).toBe('4');
+  });
+
+  it('pops in under auto only on a phone-wide frame or a touch frame narrower than a desktop', () => {
+    const instance = fixture.componentInstance;
+    /* 1800 asked for: too many columns for every frame below. */
+    instance.columns.set(
+      ACCOUNT_COLUMNS.map((column) => ({ ...column, width: (column.width ?? 0) * 3 })),
+    );
+    instance.columnOverflow.set(undefined);
+    fixture.detectChanges();
+
+    /* A mouse on a wide frame scrolls: the columns keep their layout. */
+    resize(1280);
+    expect(instance.grid().outOfSpace()).toEqual({ popin: [], hidden: [] });
+    resize(800);
+    expect(instance.grid().outOfSpace()).toEqual({ popin: [], hidden: [] });
+    expect(root().hasAttribute('data-popin')).toBe(false);
+    /* A phone-wide frame pops in, whatever the pointer. */
+    resize(560);
+    expect(instance.grid().outOfSpace().popin.length).toBeGreaterThan(0);
+    expect(root().hasAttribute('data-popin')).toBe(true);
+
+    /* A finger pops in under a desktop's width, and the grid hears the pointer change. */
+    resize(800);
+    expect(instance.grid().outOfSpace().popin).toEqual([]);
+    coarse = true;
+    for (const listener of pointerListeners) listener();
+    fixture.detectChanges();
+    expect(instance.grid().outOfSpace().popin.length).toBeGreaterThan(0);
+    resize(1100);
+    expect(instance.grid().outOfSpace()).toEqual({ popin: [], hidden: [] });
+
+    /* An explicit pop-in holds at any width. */
+    coarse = false;
+    for (const listener of pointerListeners) listener();
+    instance.columnOverflow.set('popin');
+    fixture.detectChanges();
+    expect(instance.grid().outOfSpace().popin.length).toBeGreaterThan(0);
+  });
+
+  it('draws the pop-in in pinned rows, and the popped aggregates in the summary', async () => {
+    const instance = fixture.componentInstance;
+    instance.pinnedRows.set({ top: ['A2'] });
+    instance.columns.set(
+      ACCOUNT_COLUMNS.map((column) =>
+        column.id === 'region' ? { ...column, aggregate: 'count' as const } : column,
+      ),
+    );
+    fixture.detectChanges();
+    resize(400);
+    expect(row('A2').closest('[data-part="pinned-rows"]')).not.toBeNull();
+    expect(fields('A2')).toEqual([
+      ['Owner', 'Omar Haddad (A2)'],
+      ['Region', 'NA'],
+    ]);
+    const summary = root().querySelector<HTMLElement>('[data-part="summary"] [role="row"]')!;
+    const total = popin('summary')!;
+    expect(total.getAttribute('aria-colindex')).toBe('3');
+    expect(fields('summary')).toEqual([['Region', '1']]);
+    expect(total.parentElement).toBe(summary);
+  });
+
+  it('walks the cursor onto the pop-in as the last column, and activates the row from it', async () => {
+    const instance = fixture.componentInstance;
+    instance.activatable.set(true);
+    fixture.detectChanges();
+    resize(400);
+    instance.grid().focusCell({ row: 'A1', column: 'arr' });
+    await settle();
+    const arr = root().querySelector<HTMLElement>('[data-row="A1"] [data-column="arr"]')!;
+    press(arr, 'ArrowRight');
+    await settle();
+    expect(instance.grid().current()).toEqual({ row: 'A1', column: POPIN_COLUMN_ID });
+    expect(popin('A1')!.hasAttribute('data-current')).toBe(true);
+    expect(document.activeElement).toBe(popin('A1'));
+    press(popin('A1')!, 'Enter');
+    expect(instance.activations.at(-1)).toMatchObject({ key: 'A1', reason: 'keyboard' });
+    /* The header row has no cell to stand on there: the cursor stops at ARR. */
+    press(popin('A1')!, 'ArrowUp');
+    await settle();
+    expect(instance.grid().current()).toEqual({ row: 'header', column: 'arr' });
+    press(header('arr'), 'ArrowRight');
+    expect(instance.grid().current()).toEqual({ row: 'header', column: 'arr' });
+  });
+
+  it('opens the column menu at the pointer on a header’s context menu', async () => {
+    const menu = columnMenu('owner');
+    const reasons: string[] = [];
+    menu.openChangeRequest.subscribe((request) => reasons.push(request.reason));
+    const event = rightClick(header('owner'), { clientX: 40, clientY: 60 });
+    await settle();
+    expect(event.defaultPrevented).toBe(true);
+    expect(menu.isOpen()).toBe(true);
+    expect(reasons).toEqual(['pointer']);
+    const point = menu.anchor()!.getBoundingClientRect();
+    expect([point.x, point.y, point.width, point.height]).toEqual([40, 60, 0, 0]);
+
+    /* The button opens it where it always did. */
+    menu.toggle(false, 'programmatic');
+    await settle();
+    header('owner').querySelector<HTMLElement>('[data-part="column-menu"]')!.click();
+    await settle();
+    expect(menu.isOpen()).toBe(true);
+    expect(menu.anchor()).toBeNull();
+  });
+
+  it('opens the column menu on the header from the keyboard, and ignores the echo', async () => {
+    const menu = columnMenu('owner');
+    const reasons: string[] = [];
+    menu.openChangeRequest.subscribe((request) => reasons.push(request.reason));
+    header('owner').focus();
+    press(header('owner'), 'F10', { shiftKey: true });
+    await settle();
+    expect(menu.isOpen()).toBe(true);
+    expect(menu.anchor()).toBe(header('owner'));
+    expect(reasons).toEqual(['keyboard']);
+    /* Windows fires contextmenu for the key the grid already answered. */
+    const echo = rightClick(header('owner'));
+    await settle();
+    expect(echo.defaultPrevented).toBe(true);
+    expect(reasons).toEqual(['keyboard']);
+    expect(menu.anchor()).toBe(header('owner'));
+  });
+
+  it('leaves the browser’s menu with Shift, on a field, and off a data column', async () => {
+    const menu = columnMenu('owner');
+    expect(rightClick(header('owner'), { shiftKey: true }).defaultPrevented).toBe(false);
+    const field = document.createElement('input');
+    header('owner').append(field);
+    expect(rightClick(field).defaultPrevented).toBe(false);
+    field.remove();
+    await settle();
+    expect(menu.isOpen()).toBe(false);
+
+    resize(400);
+    const heading = root().querySelector<HTMLElement>('[data-part="popin-header"]')!;
+    expect(rightClick(heading).defaultPrevented).toBe(false);
+    expect(rightClick(popin('A1')!).defaultPrevented).toBe(false);
+  });
+
+  it('writes its own density on the root, and inherits the page’s without one', () => {
+    expect(root().hasAttribute('data-slotted-density')).toBe(false);
+    fixture.componentInstance.density.set('dense');
+    fixture.detectChanges();
+    expect(root().getAttribute('data-slotted-density')).toBe('dense');
+    fixture.componentInstance.density.set(null);
+    fixture.detectChanges();
+    expect(root().hasAttribute('data-slotted-density')).toBe(false);
   });
 });

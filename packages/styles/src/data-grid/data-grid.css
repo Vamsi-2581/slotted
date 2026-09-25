@@ -181,6 +181,8 @@
   [data-ui='data-grid'][data-variant='framed'] {
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--_radius);
+    /* A box standing on the page takes the surface step, as table's frame does. */
+    box-shadow: var(--slotted-data-grid-shadow, var(--slotted-shadow-xs, none));
     /* `clip` and not `hidden`: `hidden` makes the box a scroll container, and
        under `stickyTo="page"` the header would stick to the frame instead. */
     overflow: clip;
@@ -201,7 +203,15 @@
     flex: 1 1 auto;
     min-block-size: 0;
     overflow: auto;
-    overscroll-behavior: contain;
+    /* Contained across, chained down. The scroller is a scroll container on
+       both axes whether or not it overflows on both, and a block axis held
+       back swallowed every vertical drag started over the grid: on a phone,
+       where the grid is as tall as its rows and the page is what scrolls,
+       a finger on the grid moved nothing. The inline axis stays contained,
+       so a sideways drag over the columns never reaches the browser's
+       back gesture. */
+    overscroll-behavior-block: auto;
+    overscroll-behavior-inline: contain;
     /* The rows are as wide as the template and the template may be wider than
        the frame; the scroller is what gives the header, the body and the
        summary one width to share. */
@@ -225,8 +235,12 @@
    * cells that are not.
    *
    * `min-inline-size: 100%` is what lets a grid narrower than its frame fill
-   * it when a column takes `flex`, and `inline-size: max-content` what lets a
-   * wider one scroll.
+   * it when a column takes `flex`, and `inline-size: fit-content` what lets a
+   * wider one scroll: a row stops at the frame unless the template's own
+   * minimum — the fixed widths and the flexible columns' floors — is wider.
+   * Sized to `max-content`, a flexible column grew with its longest value
+   * past the frame on a phone and the value never truncated; the cell's
+   * overflow rule only works on a track that has stopped growing.
    */
   /* The grid's own rows are the children of its four row groups and no
      other: a widget inside a cell may hold rows of its own — a multi-select's
@@ -249,9 +263,12 @@
        wider, and with no filler a template narrower than the frame left a
        white strip beside the header band — read on the grouping scene. The
        filler holds no cell; the row's own ground and rule cover it, which is
-       why both are painted on the row and not on its cells. */
-    grid-template-columns: var(--slotted-data-grid-template, none) minmax(0, 1fr);
-    inline-size: max-content;
+       why both are painted on the row and not on its cells. It is `auto`, not
+       `1fr`: a flexible track takes the free space before an auto track is
+       stretched, so a column with `flex` fills the frame and the filler is
+       nought; as `1fr` the filler took half the frame beside it. */
+    grid-template-columns: var(--slotted-data-grid-template, none) auto;
+    inline-size: fit-content;
     min-inline-size: 100%;
   }
 
@@ -305,7 +322,7 @@
       [data-part='summary'],
       [data-part='loader']
     ) {
-    inline-size: max-content;
+    inline-size: fit-content;
     min-inline-size: 100%;
   }
 
@@ -420,8 +437,9 @@
   }
 
   /**
-   * The sort mark: `chevron-down`, turned a half turn for ascending, and the
-   * index beside it when the order holds more than one key. It is drawn only
+   * The sort mark: the `chevron-down` `Glyph` the binding draws, turned a half
+   * turn for ascending, and the index beside it when the order holds more than
+   * one key. It is drawn only
    * on a sorted column and takes no room otherwise: a mark reserved on every
    * sortable header cost a 132-pixel column half its name, and a mark that
    * appears under the pointer moves the name it stands beside. What says a
@@ -429,6 +447,7 @@
    * reveals — the answer AG Grid gives.
    */
   [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort'] {
+    --slotted-icon-size: var(--_icon-size);
     align-items: center;
     color: var(--_text);
     display: none;
@@ -439,16 +458,7 @@
     line-height: 1;
   }
 
-  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']::after {
-    background-color: currentcolor;
-    block-size: var(--_icon-size);
-    content: '';
-    flex: none;
-    inline-size: var(--_icon-size);
-    mask-image: var(--slotted-icon-chevron-down);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_icon-size) var(--_icon-size);
+  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort'] > [data-ui='icon'] {
     transition: rotate var(--_transition);
   }
 
@@ -458,7 +468,8 @@
 
   [data-ui='data-grid']
     [data-part='column-header'][data-sorted='ascending']
-    > [data-part='sort']::after {
+    > [data-part='sort']
+    > [data-ui='icon'] {
     rotate: 180deg;
   }
 
@@ -504,11 +515,15 @@
     display: contents;
   }
 
+  [data-ui='data-grid'] [data-part='column-help'],
   [data-ui='data-grid'] [data-part='column-menu'],
   [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],
   [data-ui='data-grid'] [data-part='expander'],
   [data-ui='data-grid'] [data-part='group-toggle'],
   [data-ui='data-grid'] [data-part='tree-toggle'] {
+    /* The mark inside is the `Glyph` the binding draws, at the controls' own
+       icon step rather than the box's. */
+    --slotted-icon-size: var(--_control-icon);
     align-items: center;
     background-color: transparent;
     block-size: var(--_control);
@@ -546,6 +561,8 @@
     opacity: 1;
   }
 
+  [data-ui='data-grid'] [data-part='column-help']:not(:disabled):hover,
+  [data-ui='data-grid'] [data-part='column-help'][data-open],
   [data-ui='data-grid'] [data-part='column-menu']:not(:disabled):hover,
   [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']:not(:disabled):hover,
   [data-ui='data-grid'] [data-part='group-toggle']:not(:disabled):hover {
@@ -558,6 +575,7 @@
     color: var(--_text);
   }
 
+  [data-ui='data-grid'] [data-part='column-help']:focus-visible,
   [data-ui='data-grid'] [data-part='column-menu']:focus-visible,
   [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']:focus-visible,
   [data-ui='data-grid'] [data-part='expander']:focus-visible,
@@ -566,37 +584,61 @@
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='data-grid'] [data-part='column-menu']::after,
-  [data-ui='data-grid'] [data-part='expander']::after,
-  [data-ui='data-grid'] [data-part='group-toggle']::after,
-  [data-ui='data-grid'] button[data-part='tree-toggle']::after {
-    background-color: currentcolor;
-    block-size: var(--_control-icon);
-    content: '';
-    inline-size: var(--_control-icon);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_control-icon) var(--_control-icon);
+  /* The column menu is the ellipsis. The column help is the circled question
+     mark, and it is never hidden: it says the column has something to
+     explain, and a mark revealed by hover is one a coarse pointer never sees.
+     Both are the `Glyph` the binding draws. */
+
+  /* The description is the header's `aria-describedby`: read, never drawn,
+     and out of the header's flow so it asks for no room beside the name. */
+  [data-ui='data-grid'] [data-part='column-description'] {
+    block-size: 1px;
+    border: 0;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
   }
 
-  [data-ui='data-grid'] [data-part='column-menu']::after {
-    mask-image: var(--slotted-icon-ellipsis);
+  /* The pop-in's column header names the pop-in for a reader: read, never
+     drawn, and out of the row's flow so it takes no track of the template. */
+  [data-ui='data-grid'] [data-part='popin-header'] {
+    block-size: 1px;
+    border: 0;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
   }
 
-  /* The filter trigger is the funnel, drawn only while the column is
-     filtered, in the accent ink. `--slotted-icon-funnel` joined the glyph
-     scale for this family: `table` takes the artwork from the consumer, and a
-     control this family draws itself owes its glyph to a token. */
-  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']::after {
-    background-color: currentcolor;
-    block-size: var(--_control-icon);
-    content: '';
-    inline-size: var(--_control-icon);
-    mask-image: var(--slotted-icon-funnel);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_control-icon) var(--_control-icon);
+  /* The description again at the top of the column menu, for the eye: the
+     menu's layer is a portal, so the rule is scoped to the menu, and the text
+     is set as a caption over the items, in the muted ink, on the items' inset.
+     The screen reader hears it once, through the menu's `aria-describedby`.
+     The menu lays its items on a grid of tracks; the caption spans them all. */
+  [data-ui='menu'] [data-part='column-menu-description'] {
+    grid-column: 1 / -1;
+    border-block-end: var(--slotted-border-width-thin, 1px) solid
+      var(--slotted-border-subtle, GrayText);
+    color: var(--slotted-text-muted, GrayText);
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    line-height: var(--slotted-line-height-md, 1.5);
+    margin-block-end: var(--slotted-space-2, 0.25rem);
+    max-inline-size: 18rem;
+    padding-block: var(--slotted-space-2, 0.25rem) var(--slotted-space-3, 0.375rem);
+    padding-inline: var(--slotted-control-padding-inline-sm, 0.625rem);
   }
+
+  /* The filter trigger is the funnel `Glyph` the binding draws, drawn only
+     while the column is filtered, in the accent ink. `funnel` joined the
+     glyph scale for this family: `table` takes the artwork from the consumer,
+     and a control this family draws itself owes its glyph to the scale. */
 
   [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'][data-filtered],
   [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'][data-open] {
@@ -609,34 +651,38 @@
     background-color: var(--slotted-tone-accent-surface, Canvas);
   }
 
-  /* The expander and the group toggle are `chevron-right`, turned a quarter
-     turn when open and mirrored in a right-to-left document. */
-  [data-ui='data-grid'] [data-part='expander']::after,
-  [data-ui='data-grid'] [data-part='group-toggle']::after,
-  [data-ui='data-grid'] button[data-part='tree-toggle']::after {
-    mask-image: var(--slotted-icon-chevron-right);
+  /* The expander and the group toggle are the `chevron-right` `Glyph` the
+     binding draws, turned a quarter turn when open and mirrored in a
+     right-to-left document. */
+  [data-ui='data-grid'] [data-part='expander'] > [data-ui='icon'],
+  [data-ui='data-grid'] [data-part='group-toggle'] > [data-ui='icon'],
+  [data-ui='data-grid'] button[data-part='tree-toggle'] > [data-ui='icon'] {
     transition: rotate var(--_transition);
   }
 
-  [data-ui='data-grid'] [data-part='expander'][aria-expanded='true']::after,
-  [data-ui='data-grid'] button[data-part='tree-toggle'][aria-expanded='true']::after,
+  [data-ui='data-grid'] [data-part='expander'][aria-expanded='true'] > [data-ui='icon'],
+  [data-ui='data-grid'] button[data-part='tree-toggle'][aria-expanded='true'] > [data-ui='icon'],
   [data-ui='data-grid']
     [data-part='group-row'][aria-expanded='true']
-    [data-part='group-toggle']::after {
+    [data-part='group-toggle']
+    > [data-ui='icon'] {
     rotate: 90deg;
   }
 
-  [data-ui='data-grid']:dir(rtl) [data-part='expander']::after,
-  [data-ui='data-grid']:dir(rtl) [data-part='group-toggle']::after,
-  [data-ui='data-grid']:dir(rtl) button[data-part='tree-toggle']::after {
+  [data-ui='data-grid']:dir(rtl) [data-part='expander'] > [data-ui='icon'],
+  [data-ui='data-grid']:dir(rtl) [data-part='group-toggle'] > [data-ui='icon'],
+  [data-ui='data-grid']:dir(rtl) button[data-part='tree-toggle'] > [data-ui='icon'] {
     rotate: 180deg;
   }
 
-  [data-ui='data-grid']:dir(rtl) [data-part='expander'][aria-expanded='true']::after,
-  [data-ui='data-grid']:dir(rtl) button[data-part='tree-toggle'][aria-expanded='true']::after,
+  [data-ui='data-grid']:dir(rtl) [data-part='expander'][aria-expanded='true'] > [data-ui='icon'],
+  [data-ui='data-grid']:dir(rtl)
+    button[data-part='tree-toggle'][aria-expanded='true']
+    > [data-ui='icon'],
   [data-ui='data-grid']:dir(rtl)
     [data-part='group-row'][aria-expanded='true']
-    [data-part='group-toggle']::after {
+    [data-part='group-toggle']
+    > [data-ui='icon'] {
     rotate: 90deg;
   }
 
@@ -667,9 +713,9 @@
     color: var(--_text);
   }
 
-  [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading]::after {
+  /* The binding draws the loader's ring in place of the chevron. */
+  [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading] > [data-ui='icon'] {
     animation: slotted-data-grid-turn var(--slotted-duration-loop) linear infinite;
-    mask-image: var(--slotted-icon-loader-circle);
     rotate: 0deg;
   }
 
@@ -694,6 +740,8 @@
   }
 
   [data-ui='data-grid'] [data-part='row-handle'] {
+    /* The grip is the `Glyph` the binding draws, at the controls' icon step. */
+    --slotted-icon-size: var(--_control-icon);
     align-items: center;
     background-color: transparent;
     block-size: var(--_control);
@@ -711,17 +759,6 @@
       background-color var(--_transition),
       color var(--_transition),
       opacity var(--_transition);
-  }
-
-  [data-ui='data-grid'] [data-part='row-handle']::after {
-    background-color: currentcolor;
-    block-size: var(--_control-icon);
-    content: '';
-    inline-size: var(--_control-icon);
-    mask-image: var(--slotted-icon-grip-vertical);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: var(--_control-icon) var(--_control-icon);
   }
 
   [data-ui='data-grid'] [data-part='row-handle']:not([data-disabled]):hover {
@@ -1187,7 +1224,10 @@
    *
    * `grid-auto-rows` fixes the track, and a cell taller than it overflows its
    * own box evenly without moving anything. An auto row is at least the row
-   * height and at most the cap.
+   * height and grows to its tallest cell. The cap is the cell's and not the
+   * track's: a row's height is its content, and a grid whose height is its
+   * content grows a `minmax(row, cap)` track to the cap — read on the content
+   * scene, every auto row was four rows tall, one line of text in each.
    */
   [data-ui='data-grid'][data-rows='fixed']
     > [data-part='scroll']
@@ -1201,7 +1241,18 @@
     > [data-part='scroll']
     > :is([data-part='body'], [data-part='pinned-rows'])
     > [data-part='row'] {
-    grid-auto-rows: minmax(var(--_track), var(--_row-max-block));
+    grid-auto-rows: minmax(var(--_track), auto);
+  }
+
+  /* A value taller than the cap is clipped at it, on the block axis only: a
+     pinned cell's edge shadow is drawn past its inline end. The pop-in is not
+     a value of the row and has no cap. */
+  [data-ui='data-grid'][data-rows='auto']
+    :is([data-part='body'], [data-part='pinned-rows'])
+    > [data-part='row']
+    > :is([role='gridcell'], [role='rowheader']):not([data-part='popin']) {
+    max-block-size: var(--_row-max-block);
+    overflow-y: clip;
   }
 
   /* A row that grows to its text aligns its cells to the top: a one-line
@@ -1544,7 +1595,7 @@
       background-color: var(--_changed);
     }
 
-    [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading]::after {
+    [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading] > [data-ui='icon'] {
       animation: none;
     }
   }
@@ -1655,6 +1706,21 @@
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
 
+  /* A plain header has no band: a pinned header cell takes the page's ground,
+     opaque over the names sliding under it, and not the band it would be the
+     only piece of — read on the pop-in scene, a grey block behind one name. */
+  [data-ui='data-grid'][data-variant='plain']
+    > [data-part='scroll']
+    > [data-part='head']
+    [data-pinned],
+  [data-ui='data-grid'][data-variant='plain']
+    > [data-part='scroll']
+    > [data-part='head']
+    > [role='row']
+    > [data-part='selection'] {
+    background-color: var(--_surface);
+  }
+
   [data-ui='data-grid'] [data-part='filter-row'] > [data-pinned] {
     background-color: var(--_band-surface);
   }
@@ -1694,6 +1760,14 @@
 
   [data-ui='data-grid'] [data-pinned='end'][data-pin-edge]::after {
     inset-inline-start: 0;
+  }
+
+  /* A pop-in spans the row under the pinned cells, so the edge could never
+     run down the body: it stood as a stub beside each values' line. At rest
+     a grid with a pop-in draws no edge; the shadow below still marks what
+     slides under a zone. */
+  [data-ui='data-grid'][data-popin] [data-pinned][data-pin-edge]::after {
+    background-color: transparent;
   }
 
   /* While something is hidden under the zone the hairline casts a short
@@ -1843,6 +1917,141 @@
     position: sticky;
     inset-inline-start: 0;
     max-inline-size: 100cqi;
+  }
+
+  /**
+   * ── The pop-in ─────────────────────────────────────────────────────────
+   *
+   * The columns a frame too narrow for the template took out, drawn at the
+   * foot of their row as labelled values: one cell on the row's second line,
+   * across every track, and a field per column in as many columns of at
+   * least 9rem as the frame has room for — two on a phone without gutters.
+   * It is as wide as the frame and stays put while the row scrolls sideways,
+   * as the detail does. Outside a compact frame its fields start where the
+   * first data column's text does — after the gutters, whose width the
+   * binding writes as `--slotted-data-grid-leading`, and the cell's inline
+   * padding — and end at
+   * the cell's inline padding. The row paints the ground and the rule, so
+   * hover, selection and the rule between rows cover both lines.
+   */
+  /* The values' line is the density's row, grown to its content; the
+     pop-in's line is as tall as its fields. */
+  [data-ui='data-grid'][data-popin]
+    > [data-part='scroll']
+    > :is([data-part='body'], [data-part='pinned-rows'])
+    > [data-part='row'] {
+    grid-template-rows: minmax(var(--_track), auto) auto;
+  }
+
+  [data-ui='data-grid'][data-popin] > [data-part='scroll'] > [data-part='summary'] > [role='row'] {
+    grid-template-rows: minmax(var(--_head-block), auto) auto;
+  }
+
+  /* The chooser, the expander, the values and the actions stand on the
+     values' line centred, as in a fixed row: the line is the row's own
+     height, and a wrapped value is the only thing that grows it. */
+  [data-ui='data-grid'][data-popin]
+    :is([data-part='body'], [data-part='pinned-rows'])
+    > [data-part='row']
+    > :is([role='gridcell'], [role='rowheader']):not([data-part='popin']) {
+    align-items: center;
+  }
+
+  [data-ui='data-grid'] [data-part='popin'] {
+    align-content: start;
+    box-sizing: border-box;
+    column-gap: var(--slotted-space-4, 0.5rem);
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
+    inset-inline-start: 0;
+    max-inline-size: 100cqi;
+    min-inline-size: 0;
+    padding-block: 0 var(--_pad-block);
+    padding-inline: calc(var(--slotted-data-grid-leading, 0px) + var(--_pad-inline))
+      var(--_pad-inline);
+    position: sticky;
+    row-gap: var(--slotted-space-2, 0.25rem);
+    container: slotted-data-grid-popin / inline-size;
+  }
+
+  /* A compact frame (`COMPACT_BELOW`) cannot spend the gutters' width on an
+     indent: with the chooser and the expander, 88 of 360 pixels left one
+     column of fields where the row's whole width holds two. The fields start
+     at the row's own padding, under the chooser. */
+  @container slotted-data-grid (width < 600px) {
+    [data-ui='data-grid'] [data-part='popin'] {
+      padding-inline-start: var(--_pad-inline);
+    }
+  }
+
+  /* The label above the value, as a form reads, so a narrow field keeps the
+     value's whole width. */
+  [data-ui='data-grid'] [data-part='popin-field'] {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+  }
+
+  /* Room for one column of fields only (two need 2 × 9rem and the gap): the
+     label goes beside its value, so each field takes one line instead of two. */
+  @container slotted-data-grid-popin (width < 19rem) {
+    [data-ui='data-grid'] [data-part='popin-field'] {
+      align-items: baseline;
+      column-gap: var(--slotted-space-3, 0.375rem);
+      display: grid;
+      grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
+    }
+  }
+
+  [data-ui='data-grid'] [data-part='popin-label'] {
+    color: var(--_muted);
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+    font-weight: var(--slotted-font-weight-regular, 400);
+    overflow-wrap: anywhere;
+  }
+
+  /* At the start whatever the column's alignment: a number at the end of a
+     field under a label at its start reads as the next field's. One line tall
+     when empty, so an empty value keeps its place under its label, as the
+     empty cell keeps its row. */
+  [data-ui='data-grid'] [data-part='popin-value'] {
+    align-items: center;
+    display: flex;
+    gap: var(--_gap);
+    justify-content: start;
+    min-block-size: var(--_line);
+    min-inline-size: 0;
+    text-align: start;
+  }
+
+  /* Whole, whatever the column's text treatment: a truncated value in a cell
+     keeps its title and its column; in a field it would be lost, and the
+     field has the room to wrap. A wrapped value keeps its own direction and
+     aligns its lines to the grid's start, under its label: read in `rtl`, a
+     company name set by its own direction ran from the far edge of the field,
+     and `match-parent` did not move it. */
+  [data-ui='data-grid'] [data-part='popin-value'][data-text] > span:not([data-ui], [data-part]),
+  [data-ui='data-grid'] [data-part='popin-value'] > span:not([data-ui], [data-part]) {
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-align: left;
+    text-overflow: clip;
+    unicode-bidi: plaintext;
+    white-space: normal;
+  }
+
+  /* Physical, because `start` under `plaintext` is the value's own start. */
+  [data-ui='data-grid']:dir(rtl) [data-part='popin-value'] > span:not([data-ui], [data-part]) {
+    text-align: right;
+  }
+
+  [data-ui='data-grid'] [data-part='popin-value'] > [data-ui]:not([data-part]) {
+    flex: 0 0 auto;
+    max-inline-size: 100%;
   }
 
   /**
@@ -2061,6 +2270,35 @@
     [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'] {
       opacity: 1;
     }
+
+    /* The row grew to the comfortable target through the control scale; the
+       family's own controls grow with it, to the row less the cursor's ring.
+       A 24-pixel button in a 44-pixel row is a target a thumb misses. */
+    [data-ui='data-grid'][data-part='root'] {
+      --_control: min(
+        var(--slotted-target-comfortable, 44px),
+        calc(min(var(--_row-block), var(--_head-block)) - var(--_ring-width) * 2)
+      );
+      --_target: var(--slotted-target-comfortable, 44px);
+      --_reach: max(0px, calc((var(--_target) - var(--_control)) / 2));
+    }
+
+    /* The ground stays the row less the cursor's ring, so the ring still
+       shows round it; the box reaches the full target by a padding the ground
+       does not paint, and gives it back as a negative margin, so no row, no
+       header and no column name moves. Neighbours overlap by the gap. */
+    [data-ui='data-grid'] [data-part='column-help'],
+    [data-ui='data-grid'] [data-part='column-menu'],
+    [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],
+    [data-ui='data-grid'] [data-part='expander'],
+    [data-ui='data-grid'] [data-part='group-toggle'],
+    [data-ui='data-grid'] [data-part='tree-toggle'],
+    [data-ui='data-grid'] [data-part='row-handle'] {
+      background-clip: content-box;
+      box-sizing: content-box;
+      margin: calc(var(--_reach) * -1);
+      padding: var(--_reach);
+    }
   }
 
   /**
@@ -2068,6 +2306,10 @@
    */
   [data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty'] {
     align-items: center;
+    /* The padding stands inside the viewport's width. Without it the box was
+       its own padding wider than the frame, and a grid whose columns all fit
+       gained a sideways scroll the moment the filter emptied it. */
+    box-sizing: border-box;
     display: flex;
     /* Wide as the frame's viewport and pinned to its start, so the message
        stands in the middle of what the reader sees whatever the columns'
@@ -2079,14 +2321,18 @@
     min-block-size: calc(var(--_row-block) * 6);
     padding: var(--slotted-space-8, 1.5rem);
     position: sticky;
-    position: sticky;
   }
 
   [data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [data-part='row'] > * {
     align-items: center;
     box-sizing: border-box;
     display: flex;
-    min-block-size: var(--_head-block);
+    /* The row the loader stands in for is a body row, not the header: a
+       consumer who set a row height of its own had every box move when the
+       rows arrived. It is as tall as the rows the grid has measured, because
+       the binding counts skeleton rows by that height: drawn at the base
+       height, a count made for taller rows left the frame half empty. */
+    min-block-size: max(var(--_row-block), var(--slotted-data-grid-loader-row-size, 0px));
     min-inline-size: 0;
     padding-block: var(--_pad-block);
     padding-inline: var(--_pad-inline);
@@ -2162,15 +2408,8 @@
       color: HighlightText;
     }
 
-    /* A mask painted `currentcolor` keeps the ink the system forced; the
-       adjustment would otherwise remove the mark and leave its box. */
-    [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']::after,
-    [data-ui='data-grid'] [data-part='column-menu']::after,
-    [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']::after,
-    [data-ui='data-grid'] [data-part='expander']::after,
-    [data-ui='data-grid'] [data-part='group-toggle']::after,
-    [data-ui='data-grid'] button[data-part='tree-toggle']::after,
-    [data-ui='data-grid'] [data-part='row-handle']::after,
+    /* The resizer's line is a painted background, which the adjustment
+       would otherwise replace, leaving the target with no line to show. */
     [data-ui='data-grid'] [data-part='resizer']::after {
       forced-color-adjust: none;
     }

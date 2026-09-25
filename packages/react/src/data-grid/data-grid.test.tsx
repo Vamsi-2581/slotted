@@ -1,14 +1,28 @@
-import type { GridCell, GridColumn, GridColumnState, GridQuery } from '@slotted/core/grid';
-import { emptyQuery, withPageIndex } from '@slotted/core/grid';
+import type {
+  GridCell,
+  GridColumn,
+  GridColumnState,
+  GridDensity,
+  GridQuery,
+} from '@slotted/core/grid';
+import { emptyQuery, POPIN_COLUMN_ID, withPageIndex } from '@slotted/core/grid';
+import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useRef, useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/data-grid/contract.json';
 import { DataGrid } from './data-grid';
 import { SELECTION_COLUMN } from './data-grid-constants';
+import { TooltipDefaultsProvider } from '../tooltip/tooltip-defaults';
 import { DataGridDefaultsProvider } from './data-grid-defaults';
-import type { DataGridHandle, DataGridProps } from './data-grid.types';
+import type {
+  DataGridCellContext,
+  DataGridColumn,
+  DataGridColumnStateRequest,
+  DataGridHandle,
+  DataGridProps,
+} from './data-grid.types';
 
 interface Shipment {
   id: string;
@@ -91,6 +105,10 @@ const cell = (row: string, column: string) =>
   grid().querySelector<HTMLElement>(`[data-row="${row}"] [data-column="${column}"]`)!;
 const header = (column: string) =>
   grid().querySelector<HTMLElement>(`[data-part="column-header"][data-column="${column}"]`)!;
+
+/** The glyph a family control draws inside itself, as the Glyph element. */
+const glyphOf = (scope: Element | null | undefined) =>
+  scope?.querySelector(':scope > [data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
 
 describe('DataGrid, the pattern', () => {
   it('is a grid of rows and cells, with every count written', () => {
@@ -206,6 +224,8 @@ describe('DataGrid, the query', () => {
     render(<Shipments onQueryChange={onQueryChange} />);
     fireEvent.click(header('weight'));
     expect(header('weight')).toHaveAttribute('aria-sort', 'ascending');
+    expect(glyphOf(header('weight').querySelector('[data-part="sort"]'))).toBe('chevron-down');
+    expect(glyphOf(header('weight').querySelector('[data-part="column-menu"]'))).toBe('ellipsis');
     expect(onQueryChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ sort: [{ column: 'weight', direction: 'ascending' }] }),
       expect.objectContaining({ reason: 'pointer', change: 'sort' }),
@@ -271,6 +291,7 @@ describe('DataGrid, the query', () => {
     );
     expect(grid().querySelectorAll('[data-part="row"]')).toHaveLength(1);
     expect(header('customer')).toHaveAttribute('data-filtered');
+    expect(glyphOf(header('customer').querySelector('[data-part="filter"]'))).toBe('funnel');
   });
 
   it('edits the panel as a draft and reports on Apply', () => {
@@ -323,6 +344,7 @@ describe('DataGrid, the query', () => {
     );
     const groups = grid().querySelectorAll('[data-part="group-row"]');
     expect(groups).toHaveLength(3);
+    expect(glyphOf(groups[0]!.querySelector('[data-part="group-toggle"]'))).toBe('chevron-right');
     expect(groups[0]).toHaveAttribute('aria-level', '1');
     expect(groups[0]).toHaveAttribute('aria-expanded', 'true');
     expect(groups[0]).toHaveTextContent('2 rows');
@@ -512,6 +534,70 @@ describe('DataGrid, editing', () => {
     expect(onActivate).toHaveBeenCalledTimes(1);
   });
 
+  it('activates a row on one touch, and ignores the double press that follows it', () => {
+    const onActivate = vi.fn();
+    const onValueChange = vi.fn();
+    render(
+      <Shipments
+        activatable
+        onActivate={onActivate}
+        onValueChange={onValueChange}
+        selectionMode="single"
+      />,
+    );
+    const tap = (target: HTMLElement, pointerType: string) => {
+      fireEvent.pointerDown(target, { button: 0, pointerType });
+      fireEvent.click(target, { detail: 1 });
+    };
+    tap(cell('S1', 'carrier'), 'touch');
+    expect(onActivate).toHaveBeenCalledTimes(1);
+    expect(onActivate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ key: 'S1', reason: 'pointer' }),
+    );
+    /* The press that opens the record chose it too, as a click does. */
+    expect(onValueChange).toHaveBeenLastCalledWith('S1', expect.anything());
+    fireEvent.doubleClick(cell('S1', 'carrier'), { detail: 2 });
+    expect(onActivate).toHaveBeenCalledTimes(1);
+
+    tap(cell('S2', 'carrier'), 'pen');
+    expect(onActivate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ key: 'S2', reason: 'pointer' }),
+    );
+
+    /* The mouse keeps the double press. */
+    tap(cell('S3', 'carrier'), 'mouse');
+    expect(onActivate).toHaveBeenCalledTimes(2);
+    const now = Date.now();
+    vi.spyOn(Date, 'now').mockReturnValue(now + 1000);
+    fireEvent.doubleClick(cell('S3', 'carrier'), { detail: 2 });
+    expect(onActivate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ key: 'S3', reason: 'pointer' }),
+    );
+    vi.restoreAllMocks();
+  });
+
+  it('never activates on one touch of a widget in the cell, nor of a cell in edit', () => {
+    const onActivate = vi.fn();
+    render(
+      <Shipments
+        activatable
+        cellRenderers={{ carrier: ({ text }) => <button type="button">{text}</button> }}
+        defaultCurrent={{ row: 'S1', column: 'customer' }}
+        onActivate={onActivate}
+      />,
+    );
+    const widget = cell('S1', 'carrier').querySelector('button')!;
+    fireEvent.pointerDown(widget, { button: 0, pointerType: 'touch' });
+    fireEvent.click(widget, { detail: 1 });
+    expect(onActivate).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(cell('S1', 'customer'), { key: 'Enter' });
+    expect(cell('S1', 'customer')).toHaveAttribute('data-editing');
+    fireEvent.pointerDown(cell('S1', 'customer'), { button: 0, pointerType: 'touch' });
+    fireEvent.click(cell('S1', 'customer'), { detail: 1 });
+    expect(onActivate).not.toHaveBeenCalled();
+  });
+
   it('writes aria-readonly on a cell that does not edit while others do', () => {
     render(<Shipments />);
     expect(cell('S1', 'id')).toHaveAttribute('aria-readonly', 'true');
@@ -534,6 +620,43 @@ describe('DataGrid, columns', () => {
       expect.objectContaining({ reason: 'keyboard', change: 'width' }),
     );
     expect(grid().style.getPropertyValue('--slotted-data-grid-template')).toContain('168px');
+  });
+
+  /**
+   * Every column name truncates, and a name cut to `Cus…` is unreadable until
+   * something says the words. The hint says them, and only while the box is
+   * measured as cutting them.
+   */
+  it('opens a hint over a column name its box cuts, and none over one that fits', async () => {
+    function measure(element: Element, { client, scroll }: { client: number; scroll: number }) {
+      Object.defineProperty(element, 'clientWidth', { configurable: true, value: client });
+      Object.defineProperty(element, 'scrollWidth', { configurable: true, value: scroll });
+    }
+
+    render(
+      <TooltipDefaultsProvider openDelay={0}>
+        <Shipments />
+      </TooltipDefaultsProvider>,
+    );
+    const name = header('customer').querySelector('span')!;
+    /* jsdom does not expand the `overflow` shorthand, so the axis is written. */
+    name.style.overflowX = 'hidden';
+
+    measure(name, { client: 160, scroll: 160 });
+    fireEvent.pointerEnter(name, { pointerType: 'mouse' });
+    expect(document.querySelector('[role="tooltip"]')).toBeNull();
+
+    measure(name, { client: 48, scroll: 160 });
+    fireEvent.pointerEnter(name, { pointerType: 'mouse' });
+    const hint = await waitFor(() => {
+      const found = document.querySelector('[role="tooltip"]');
+      expect(found).not.toBeNull();
+      return found as HTMLElement;
+    });
+    expect(hint.textContent).toBe('Customer');
+    /* The header already states the words: naming them twice is reading them twice. */
+    expect(hint).toHaveAttribute('aria-hidden', 'true');
+    expect(name).not.toHaveAttribute('aria-describedby');
   });
 
   it('moves a column with Alt and the arrows, inside its zone', () => {
@@ -614,6 +737,7 @@ describe('DataGrid, the rest', () => {
       'aria-expanded',
       'true',
     );
+    expect(glyphOf(within(cell('S1', '__expander')).getByRole('button'))).toBe('chevron-right');
     fireEvent.keyDown(cell('S1', '__expander'), { key: 'ArrowLeft' });
     expect(screen.queryByText('Detail of S1')).toBeNull();
   });
@@ -780,6 +904,26 @@ describe('DataGrid, the rest', () => {
     } finally {
       HTMLAnchorElement.prototype.click = click;
     }
+  });
+
+  /**
+   * The gutters hold a chooser, a handle and an expander. An outline of a
+   * control nobody can press yet is a control that lies, so the loader
+   * reserves their width and draws nothing in them.
+   */
+  it('leaves the loader’s gutters empty and skeletons only the value columns', () => {
+    render(<Shipments loading rows={[]} selectionMode="multiple" />);
+    const cells = [...grid().querySelector('[data-part="loader"] [data-part="row"]')!.children];
+    expect(cells[0]!.querySelector('[data-ui="skeleton"]')).toBeNull();
+    expect(cells.slice(1).every((cell) => cell.querySelector('[data-ui="skeleton"]'))).toBe(true);
+  });
+
+  /* The skeleton rows take the height of the rows they stand in for, so the
+     count that fills the frame and the rows drawn in it agree. */
+  it('gives the skeleton rows the height of the body rows', () => {
+    render(<Shipments loading rowHeight={56} rows={[]} />);
+    const loader = grid().querySelector<HTMLElement>('[data-part="loader"]')!;
+    expect(loader.style.getPropertyValue('--slotted-data-grid-loader-row-size')).toBe('56px');
   });
 
   it('draws the loading, empty and error states', () => {
@@ -1027,6 +1171,7 @@ describe('DataGrid, the rest', () => {
       const { rerender } = render(<Shipments rowsReorderable />);
       expect(grid().querySelectorAll('[data-part="row-handle"]')).toHaveLength(4);
       expect(handle('S1')).toHaveAttribute('aria-label', 'Reorder S1');
+      expect(glyphOf(handle('S1'))).toBe('grip-vertical');
       expect(handle('S1')).not.toHaveAttribute('aria-disabled');
       rerender(
         <Shipments
@@ -1168,6 +1313,8 @@ describe('DataGrid, the rest', () => {
       /* A leaf keeps the toggle's room, empty, so the names align. */
       expect(toggle('es')!.tagName).toBe('SPAN');
       expect(toggle('pt')!.tagName).toBe('BUTTON');
+      expect(glyphOf(toggle('pt'))).toBe('chevron-right');
+      expect(glyphOf(toggle('es'))).toBeUndefined();
       fireEvent.click(toggle('pt')!);
       expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-por', 'es']);
       expect(pt).toHaveAttribute('aria-expanded', 'true');
@@ -1225,6 +1372,8 @@ describe('DataGrid, the rest', () => {
       fireEvent.click(toggle('pt-lis')!);
       expect(onLoadChildren).toHaveBeenCalledWith({ key: 'pt-lis', row: SITES[1] });
       expect(sites().querySelector('[data-row="pt-lis"]')).toHaveAttribute('data-loading');
+      /* The wait turns the chevron into the loader's ring. */
+      expect(glyphOf(toggle('pt-lis'))).toBe('loader-circle');
       rerender(
         <Sites
           onLoadChildren={onLoadChildren}
@@ -1238,5 +1387,590 @@ describe('DataGrid, the rest', () => {
       expect(sites().querySelector('[data-row="pt-lis"]')).not.toHaveAttribute('data-loading');
       expect(rowKeys()).toEqual(['pt', 'pt-lis', 'pt-lis-a', 'pt-por', 'es']);
     });
+  });
+});
+
+/* ── Column help, hiding, fitting, responsive priority and density ────── */
+
+interface Account {
+  id: string;
+  name: string;
+  owner: string;
+  region: string;
+  arr: number;
+}
+
+const ACCOUNTS: Account[] = [
+  { id: 'A1', name: 'Aurora Labs', owner: 'Maya Chen', region: 'EMEA', arr: 120000 },
+  { id: 'A2', name: 'Bloom Retail', owner: 'Omar Haddad', region: 'NA', arr: 48000 },
+];
+
+const ACCOUNT_COLUMNS: DataGridColumn<Account>[] = [
+  { id: 'name', label: 'Account', width: 200 },
+  {
+    id: 'arr',
+    label: 'ARR',
+    kind: 'number',
+    width: 120,
+    description: 'Annual recurring revenue, in US dollars',
+    priority: 1,
+  },
+  {
+    id: 'owner',
+    label: 'Owner',
+    width: 160,
+    priority: 3,
+    help: (
+      <p>
+        The account executive who <a href="#owners">owns the renewal</a>.
+      </p>
+    ),
+  },
+  { id: 'region', label: 'Region', width: 120, priority: 2 },
+];
+
+describe('DataGrid, explaining and arranging columns', () => {
+  let observed: (() => void)[] = [];
+  /* The main pointer `(pointer: coarse)` answers, and who listens to it. */
+  let coarse = false;
+  let pointerListeners: (() => void)[] = [];
+  beforeEach(() => {
+    observed = [];
+    coarse = false;
+    pointerListeners = [];
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      get matches() {
+        return query === '(pointer: coarse)' && coarse;
+      },
+      addEventListener: (_type: string, listener: () => void) => pointerListeners.push(listener),
+      removeEventListener: (_type: string, listener: () => void) => {
+        pointerListeners = pointerListeners.filter((each) => each !== listener);
+      },
+    }));
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(private readonly callback: (entries: unknown[], observer: unknown) => void) {}
+        observe() {
+          observed.push(() => this.callback([], this));
+        }
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function Accounts(props: Partial<DataGridProps<Account>>) {
+    return (
+      <DataGrid<Account>
+        columns={ACCOUNT_COLUMNS}
+        label="Accounts"
+        rowKey="id"
+        rows={ACCOUNTS}
+        {...props}
+      />
+    );
+  }
+  const grid = () => screen.getByRole('grid');
+  const header = (column: string) =>
+    grid().querySelector<HTMLElement>(`[data-part="column-header"][data-column="${column}"]`)!;
+
+  it('marks a column with something to say, and describes its header by the text', () => {
+    render(<Accounts />);
+    const arr = header('arr');
+    const description = arr.querySelector<HTMLElement>('[data-part="column-description"]')!;
+    expect(description.textContent).toBe('Annual recurring revenue, in US dollars');
+    expect(arr).toHaveAttribute('aria-describedby', description.id);
+    /* Described, not named: the header's name stays the column's label. */
+    expect(description).toHaveAttribute('aria-hidden', 'true');
+    const help = arr.querySelector('[data-part="column-actions"] > [data-part="column-help"]');
+    expect(help).toHaveAttribute('aria-label', 'About ARR');
+    /* A help node alone is help too; a column with neither has no button. */
+    expect(header('owner').querySelector('[data-part="column-help"]')).not.toBeNull();
+    expect(header('owner')).not.toHaveAttribute('aria-describedby');
+    expect(header('name').querySelector('[data-part="column-help"]')).toBeNull();
+    const actions = [...arr.querySelectorAll<HTMLElement>('[data-part="column-actions"] > *')];
+    expect(actions[0]!.dataset['part']).toBe('column-help');
+  });
+
+  it('opens the help on a press, never sorting, with the description and the node', async () => {
+    const onQueryChange = vi.fn();
+    render(<Accounts onQueryChange={onQueryChange} />);
+    const help = header('owner').querySelector<HTMLElement>('[data-part="column-help"]')!;
+    expect(help).toHaveAttribute('aria-expanded', 'false');
+    expect(glyphOf(help)).toBe('circle-question');
+    fireEvent.click(help, { detail: 1 });
+    expect(help).toHaveAttribute('aria-expanded', 'true');
+    const content = await waitFor(() => {
+      const found = document.getElementById(help.getAttribute('aria-controls')!);
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    expect(content.textContent).toContain('owns the renewal');
+    expect(onQueryChange).not.toHaveBeenCalled();
+
+    const arrHelp = header('arr').querySelector<HTMLElement>('[data-part="column-help"]')!;
+    fireEvent.click(arrHelp, { detail: 1 });
+    const arrContent = await waitFor(() => {
+      const found = document.getElementById(arrHelp.getAttribute('aria-controls')!);
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    expect(arrContent.textContent).toContain('Annual recurring revenue');
+    expect(arrContent).toHaveAttribute('aria-label', 'About ARR');
+  });
+
+  it('shows the description atop the column menu, and describes the menu by it', () => {
+    render(<Accounts />);
+    fireEvent.keyDown(header('arr'), { key: 'Enter', ctrlKey: true });
+    const menu = screen.getByRole('menu');
+    const shown = menu.querySelector<HTMLElement>('[data-part="column-menu-description"]')!;
+    expect(shown.textContent).toBe('Annual recurring revenue, in US dollars');
+    expect(shown).toHaveAttribute('aria-hidden', 'true');
+    expect(menu).toHaveAttribute(
+      'aria-describedby',
+      header('arr').querySelector('[data-part="column-description"]')!.id,
+    );
+  });
+
+  it('enters the header cell with F2, cycles its widgets with Tab, and leaves with Escape', () => {
+    const onQueryChange = vi.fn();
+    render(<Accounts onQueryChange={onQueryChange} />);
+    const arr = header('arr');
+    act(() => arr.focus());
+    fireEvent.keyDown(arr, { key: 'F2' });
+    const help = arr.querySelector<HTMLElement>('[data-part="column-help"]')!;
+    const menu = arr.querySelector<HTMLElement>('[data-part="column-menu"]')!;
+    expect(document.activeElement).toBe(help);
+    fireEvent.keyDown(help, { key: 'Tab' });
+    expect(document.activeElement).toBe(menu);
+    fireEvent.keyDown(menu, { key: 'Tab' });
+    expect(document.activeElement).toBe(help);
+    fireEvent.keyDown(help, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(menu);
+    fireEvent.keyDown(menu, { key: 'Escape' });
+    expect(document.activeElement).toBe(arr);
+    /* Enter on the header still sorts. */
+    fireEvent.keyDown(arr, { key: 'Enter' });
+    expect(onQueryChange).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ change: 'sort' }),
+    );
+  });
+
+  it('announces a hidden column, and the request carries what an undo restores', () => {
+    const announce = vi.spyOn(getLiveAnnouncer(document), 'announce');
+    const onColumnStateChange = vi.fn();
+    render(<Accounts onColumnStateChange={onColumnStateChange} />);
+    fireEvent.keyDown(header('owner'), { key: 'Enter', ctrlKey: true });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hide column' }), { detail: 1 });
+    const request = onColumnStateChange.mock.calls.at(-1)![1] as DataGridColumnStateRequest;
+    expect(request).toMatchObject({ change: 'hidden', reason: 'pointer' });
+    expect(request.value.hidden).toEqual(['owner']);
+    expect(request.previous.hidden).toEqual([]);
+    expect(announce).toHaveBeenCalledWith('Owner hidden');
+    announce.mockRestore();
+  });
+
+  it('fits one column or every column, with the reason of the gesture', () => {
+    let measured = 90;
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        width: measured,
+        height: 0,
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        right: measured,
+        bottom: 0,
+      }),
+    });
+    const onColumnStateChange = vi.fn();
+    const handle = { current: null as DataGridHandle | null };
+    render(<Accounts handle={handle} onColumnStateChange={onColumnStateChange} />);
+    const last = () => onColumnStateChange.mock.calls.at(-1)![1] as DataGridColumnStateRequest;
+    const resizer = header('owner').querySelector<HTMLElement>('[data-part="resizer"]')!;
+    fireEvent.doubleClick(resizer);
+    expect(last()).toMatchObject({ change: 'width', reason: 'pointer' });
+    expect(Object.keys(last().value.widths)).toEqual(['owner']);
+    measured = 80;
+    fireEvent.doubleClick(resizer, { shiftKey: true });
+    expect(last()).toMatchObject({ change: 'width', reason: 'pointer' });
+    expect(last().value.widths).toEqual({ name: 80, arr: 80, owner: 80, region: 80 });
+    measured = 70;
+    fireEvent.keyDown(header('owner'), { key: 'Enter', ctrlKey: true, shiftKey: true });
+    expect(last()).toMatchObject({ change: 'width', reason: 'keyboard' });
+    measured = 60;
+    fireEvent.keyDown(header('owner'), { key: 'Enter', ctrlKey: true });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Fit all columns' }), { detail: 1 });
+    expect(last()).toMatchObject({ change: 'width', reason: 'pointer' });
+    expect(last().value.widths).toEqual({ name: 60, arr: 60, owner: 60, region: 60 });
+    measured = 50;
+    fireEvent.keyDown(header('owner'), { key: 'Enter', ctrlKey: true });
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Fit to content' }), { detail: 0 });
+    expect(last()).toMatchObject({ change: 'width', reason: 'keyboard' });
+    measured = 40;
+    act(() => handle.current!.autofit('owner'));
+    expect(last()).toMatchObject({ change: 'width', reason: 'programmatic' });
+    delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
+  });
+
+  const resize = (width: number) => {
+    const scroller = grid().querySelector<HTMLElement>('[data-part="scroll"]')!;
+    Object.defineProperty(scroller, 'clientWidth', { configurable: true, value: width });
+    act(() => {
+      for (const run of observed) run();
+    });
+  };
+  const row = (key: string) =>
+    grid().querySelector<HTMLElement>(`[role="row"][data-row="${key}"]`)!;
+  const popin = (key: string) => row(key).querySelector<HTMLElement>('[data-part="popin"]');
+  const fields = (key: string) =>
+    [...popin(key)!.querySelectorAll<HTMLElement>('[data-part="popin-field"]')].map((field) => [
+      field.querySelector('[data-part="popin-label"]')?.textContent?.trim() ?? null,
+      field.querySelector('[data-part="popin-value"]')!.textContent?.trim(),
+    ]);
+  const owners = {
+    owner: ({ rowKey, text }: DataGridCellContext<Account>) => (
+      <strong data-owner="">
+        {text} ({rowKey})
+      </strong>
+    ),
+  };
+  const rightClick = (target: HTMLElement, init: MouseEventInit = {}) => {
+    const event = new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      button: 2,
+      clientX: 40,
+      clientY: 60,
+      ...init,
+    });
+    act(() => void target.dispatchEvent(event));
+    return event;
+  };
+
+  it('moves the columns of least priority into the row’s pop-in, outside the state', () => {
+    const onOutOfSpaceChange = vi.fn();
+    const onColumnStateChange = vi.fn();
+    const handle = { current: null as DataGridHandle | null };
+    render(
+      <Accounts
+        cellRenderers={owners}
+        handle={handle}
+        onColumnStateChange={onColumnStateChange}
+        onOutOfSpaceChange={onOutOfSpaceChange}
+      />,
+    );
+    expect(handle.current!.getOutOfSpace()).toEqual({ popin: [], hidden: [] });
+    expect(grid()).not.toHaveAttribute('data-popin');
+    expect(popin('A1')).toBeNull();
+    expect(grid().querySelector('[data-part="popin-header"]')).toBeNull();
+
+    resize(400);
+    /* 600 asked for: Owner (3) goes first, then Region (2); ARR (1) stays. */
+    expect(handle.current!.getOutOfSpace()).toEqual({ popin: ['owner', 'region'], hidden: [] });
+    expect(grid()).toHaveAttribute('data-popin', '2');
+    expect(grid()).not.toHaveAttribute('data-space-hidden');
+    /* Account, ARR and the pop-in's own column. */
+    expect(grid()).toHaveAttribute('aria-colcount', '3');
+    expect(header('owner')).toBeNull();
+    expect(grid().style.getPropertyValue('--slotted-data-grid-template')).not.toContain('160px');
+
+    const heading = grid().querySelector<HTMLElement>('[data-part="popin-header"]')!;
+    expect(heading).toHaveAttribute('role', 'columnheader');
+    expect(heading).toHaveAttribute('aria-colindex', '3');
+    expect(heading.textContent?.trim()).toBe('Details');
+    expect(heading.parentElement!.lastElementChild).toBe(heading);
+
+    const cell = popin('A1')!;
+    expect(cell).toHaveAttribute('role', 'gridcell');
+    expect(cell).toHaveAttribute('aria-colindex', '3');
+    expect(row('A1').lastElementChild).toBe(cell);
+    /* The label is the header's, the value the cell's own renderer with its context. */
+    expect(fields('A1')).toEqual([
+      ['Owner', 'Maya Chen (A1)'],
+      ['Region', 'EMEA'],
+    ]);
+    expect(cell.querySelector('[data-owner]')).not.toBeNull();
+    const field = cell.querySelector<HTMLElement>('[data-part="popin-field"]')!;
+    expect(field).toHaveAttribute('data-field', 'owner');
+    expect(field).not.toHaveAttribute('data-column');
+    /* A row with a pop-in is measured as it grows. */
+    expect(grid()).toHaveAttribute('data-rows', 'auto');
+    /* The pop-in starts where the first data column does: no gutter here. */
+    expect(grid().style.getPropertyValue('--slotted-data-grid-leading')).toBe('0px');
+    expect(onOutOfSpaceChange.mock.calls).toEqual([[{ popin: ['owner', 'region'], hidden: [] }]]);
+    expect(onColumnStateChange).not.toHaveBeenCalled();
+
+    resize(1000);
+    expect(handle.current!.getOutOfSpace()).toEqual({ popin: [], hidden: [] });
+    expect(grid()).toHaveAttribute('aria-colcount', '4');
+    expect(popin('A1')).toBeNull();
+    expect(grid()).toHaveAttribute('data-rows', 'fixed');
+    expect(grid().style.getPropertyValue('--slotted-data-grid-leading')).toBe('');
+    expect(onOutOfSpaceChange.mock.calls).toEqual([
+      [{ popin: ['owner', 'region'], hidden: [] }],
+      [{ popin: [], hidden: [] }],
+    ]);
+  });
+
+  it('hides a column that declines the pop-in, and takes nothing out under scroll', () => {
+    const handle = { current: null as DataGridHandle | null };
+    const declining = ACCOUNT_COLUMNS.map((column) =>
+      column.id === 'region' ? { ...column, popin: false } : column,
+    );
+    const { rerender } = render(
+      <Accounts cellRenderers={owners} columns={declining} handle={handle} />,
+    );
+    resize(400);
+    expect(handle.current!.getOutOfSpace()).toEqual({ popin: ['owner'], hidden: ['region'] });
+    expect(grid()).toHaveAttribute('data-popin', '1');
+    expect(header('region')).toBeNull();
+    expect(fields('A1')).toEqual([['Owner', 'Maya Chen (A1)']]);
+
+    rerender(
+      <Accounts
+        cellRenderers={owners}
+        columnOverflow="scroll"
+        columns={declining}
+        handle={handle}
+      />,
+    );
+    expect(handle.current!.getOutOfSpace()).toEqual({ popin: [], hidden: [] });
+    expect(grid()).not.toHaveAttribute('data-popin');
+    expect(header('region')).not.toBeNull();
+    expect(grid()).toHaveAttribute('aria-colcount', '4');
+  });
+
+  it('pops in under auto only on a phone-wide frame or a touch frame narrower than a desktop', () => {
+    const handle = { current: null as DataGridHandle | null };
+    /* 1800 asked for: too many columns for every frame below. */
+    const wide = ACCOUNT_COLUMNS.map((column) => ({ ...column, width: (column.width ?? 0) * 3 }));
+    const { rerender } = render(<Accounts columns={wide} handle={handle} />);
+    const out = () => handle.current!.getOutOfSpace();
+
+    /* A mouse on a wide frame scrolls: the columns keep their layout. */
+    resize(1280);
+    expect(out()).toEqual({ popin: [], hidden: [] });
+    resize(800);
+    expect(out()).toEqual({ popin: [], hidden: [] });
+    expect(grid()).not.toHaveAttribute('data-popin');
+    /* A phone-wide frame pops in, whatever the pointer. */
+    resize(560);
+    expect(out().popin.length).toBeGreaterThan(0);
+    expect(grid()).toHaveAttribute('data-popin');
+
+    /* A finger pops in under a desktop's width, and the grid hears the pointer change. */
+    resize(800);
+    expect(out().popin).toEqual([]);
+    coarse = true;
+    act(() => {
+      for (const listener of pointerListeners) listener();
+    });
+    expect(out().popin.length).toBeGreaterThan(0);
+    resize(1100);
+    expect(out()).toEqual({ popin: [], hidden: [] });
+
+    /* An explicit pop-in holds at any width. */
+    coarse = false;
+    act(() => {
+      for (const listener of pointerListeners) listener();
+    });
+    rerender(<Accounts columnOverflow="popin" columns={wide} handle={handle} />);
+    expect(out().popin.length).toBeGreaterThan(0);
+  });
+
+  it('takes the overflow policy an application sets once', () => {
+    render(
+      <DataGridDefaultsProvider columnOverflow="scroll">
+        <Accounts />
+      </DataGridDefaultsProvider>,
+    );
+    resize(400);
+    expect(grid()).not.toHaveAttribute('data-popin');
+    expect(header('owner')).not.toBeNull();
+  });
+
+  it('draws the pop-in in pinned rows, and the popped aggregates in the summary', () => {
+    render(
+      <Accounts
+        cellRenderers={owners}
+        columns={ACCOUNT_COLUMNS.map((column) =>
+          column.id === 'region' ? { ...column, aggregate: 'count' as const } : column,
+        )}
+        pinnedRows={{ top: ['A2'] }}
+      />,
+    );
+    /* Before the frame is measured the total sits in its own visible cell. */
+    expect(grid().querySelector('[data-part="summary"] [data-part="popin"]')).toBeNull();
+    resize(400);
+    expect(row('A2').closest('[data-part="pinned-rows"]')).not.toBeNull();
+    expect(fields('A2')).toEqual([
+      ['Owner', 'Omar Haddad (A2)'],
+      ['Region', 'NA'],
+    ]);
+    const summary = grid().querySelector<HTMLElement>('[data-part="summary"] [role="row"]')!;
+    const total = popin('summary')!;
+    expect(total).toHaveAttribute('aria-colindex', '3');
+    expect(fields('summary')).toEqual([['Region', '1']]);
+    expect(total.parentElement).toBe(summary);
+    expect(total.querySelector('[data-part="popin-value"]')).not.toHaveAttribute('data-numeric');
+  });
+
+  it('keeps no summary pop-in while no column in it aggregates', () => {
+    render(
+      <Accounts
+        columns={ACCOUNT_COLUMNS.map((column) =>
+          column.id === 'arr' ? { ...column, aggregate: 'sum' as const } : column,
+        )}
+      />,
+    );
+    resize(400);
+    expect(grid().querySelector('[data-part="summary"]')).not.toBeNull();
+    expect(popin('summary')).toBeNull();
+    expect(popin('A1')).not.toBeNull();
+  });
+
+  it('walks the cursor onto the pop-in as the last column, and activates the row from it', () => {
+    const onActivate = vi.fn();
+    const onCurrentChange = vi.fn();
+    const handle = { current: null as DataGridHandle | null };
+    render(
+      <Accounts
+        activatable
+        handle={handle}
+        onActivate={onActivate}
+        onCurrentChange={onCurrentChange}
+      />,
+    );
+    resize(400);
+    act(() => handle.current!.focusCell({ row: 'A1', column: 'arr' }));
+    const arr = grid().querySelector<HTMLElement>('[data-row="A1"] [data-column="arr"]')!;
+    fireEvent.keyDown(arr, { key: 'ArrowRight' });
+    const last = () => onCurrentChange.mock.calls.at(-1)![0] as GridCell;
+    expect(last()).toEqual({ row: 'A1', column: POPIN_COLUMN_ID });
+    expect(popin('A1')).toHaveAttribute('data-current');
+    expect(popin('A1')).toHaveAttribute('tabindex', '0');
+    expect(popin('A1')).toHaveAttribute('data-column', POPIN_COLUMN_ID);
+    expect(document.activeElement).toBe(popin('A1'));
+    fireEvent.keyDown(popin('A1')!, { key: 'Enter' });
+    expect(onActivate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ key: 'A1', reason: 'keyboard' }),
+    );
+    /* The header row has no cell to stand on there: the cursor stops at ARR. */
+    fireEvent.keyDown(popin('A1')!, { key: 'ArrowUp' });
+    expect(last()).toEqual({ row: 'header', column: 'arr' });
+    const calls = onCurrentChange.mock.calls.length;
+    fireEvent.keyDown(header('arr'), { key: 'ArrowRight' });
+    expect(onCurrentChange).toHaveBeenCalledTimes(calls);
+    /* The pop-in's heading is never a stop. */
+    expect(grid().querySelector('[data-part="popin-header"]')).not.toHaveAttribute('tabindex');
+  });
+
+  it('follows a column that moves into the pop-in with the cursor', () => {
+    const onCurrentChange = vi.fn();
+    render(
+      <Accounts
+        defaultCurrent={{ row: 'A1', column: 'owner' }}
+        onCurrentChange={onCurrentChange}
+      />,
+    );
+    resize(400);
+    expect(onCurrentChange.mock.calls.at(-1)![0]).toEqual({ row: 'A1', column: POPIN_COLUMN_ID });
+    expect(popin('A1')).toHaveAttribute('data-current');
+  });
+
+  it('measures the rows again when the pop-in or the frame changes', () => {
+    render(<Accounts rowHeight={40} />);
+    const measure = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect');
+    const rowsMeasured = () =>
+      measure.mock.contexts.filter(
+        (element) => element instanceof HTMLElement && element.dataset['row'] === 'A1',
+      ).length;
+    resize(400);
+    expect(rowsMeasured()).toBeGreaterThan(0);
+    measure.mockClear();
+    resize(380);
+    expect(rowsMeasured()).toBeGreaterThan(0);
+    measure.mockRestore();
+  });
+
+  it('opens the column menu at the pointer on a header’s context menu', async () => {
+    render(<Accounts />);
+    const event = rightClick(header('owner'));
+    expect(event.defaultPrevented).toBe(true);
+    const menu = await screen.findByRole('menu');
+    expect(menu).toHaveAccessibleName('Column menu, Owner');
+    /* Hung from the point pressed, 60 down, the menu's offset of 4 away from
+       it on whichever side has room; the header's own box is at 0. */
+    const placedTop = () => {
+      let node: HTMLElement | null = menu;
+      while (node && node.style.top === '') node = node.parentElement;
+      return node ? parseFloat(node.style.top) : null;
+    };
+    await waitFor(() => expect([56, 64]).toContain(placedTop()));
+    await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('menuitem'));
+    /* Focus returns to the header the reader pressed. */
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    expect(document.activeElement).toBe(header('owner'));
+
+    /* The button opens it where it always did, and focus returns to it. */
+    const button = header('owner').querySelector<HTMLElement>('[data-part="column-menu"]')!;
+    fireEvent.click(button, { detail: 1 });
+    await screen.findByRole('menu');
+    await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('menuitem'));
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('opens the column menu on the header from the keyboard, and ignores the echo', async () => {
+    render(<Accounts />);
+    act(() => header('owner').focus());
+    fireEvent.keyDown(header('owner'), { key: 'F10', shiftKey: true });
+    await screen.findByRole('menu', { name: 'Column menu, Owner' });
+    /* Windows fires contextmenu for the key the grid already answered. */
+    const echo = rightClick(header('owner'));
+    expect(echo.defaultPrevented).toBe(true);
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+    await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('menuitem'));
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    expect(document.activeElement).toBe(header('owner'));
+
+    fireEvent.keyDown(header('owner'), { key: 'ContextMenu' });
+    await screen.findByRole('menu', { name: 'Column menu, Owner' });
+  });
+
+  it('leaves the browser’s menu with Shift, on a field, and off a data column', () => {
+    render(<Accounts />);
+    expect(rightClick(header('owner'), { shiftKey: true }).defaultPrevented).toBe(false);
+    const field = document.createElement('input');
+    header('owner').append(field);
+    expect(rightClick(field).defaultPrevented).toBe(false);
+    field.remove();
+    expect(screen.queryByRole('menu')).toBeNull();
+
+    resize(400);
+    const heading = grid().querySelector<HTMLElement>('[data-part="popin-header"]')!;
+    expect(rightClick(heading).defaultPrevented).toBe(false);
+    expect(rightClick(popin('A1')!).defaultPrevented).toBe(false);
+    expect(screen.queryByRole('menu')).toBeNull();
+  });
+
+  it('writes its own density on the root, and inherits the page’s without one', () => {
+    const { rerender } = render(<Accounts />);
+    expect(grid()).not.toHaveAttribute('data-slotted-density');
+    rerender(<Accounts density={'dense' satisfies GridDensity} />);
+    expect(grid()).toHaveAttribute('data-slotted-density', 'dense');
+    rerender(<Accounts density={null} />);
+    expect(grid()).not.toHaveAttribute('data-slotted-density');
   });
 });

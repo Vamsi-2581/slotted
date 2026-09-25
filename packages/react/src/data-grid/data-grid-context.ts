@@ -1,4 +1,5 @@
 import type { FilterDescriptor } from '@slotted/core/filter';
+import type { PositionerAnchor } from '@slotted/core/positioner';
 import type {
   GridCell,
   GridColumn,
@@ -36,6 +37,13 @@ export interface EditSession {
   readonly seed: string | null;
 }
 
+/** What a column menu opened by a context menu hangs from, and where focus returns. */
+export interface ColumnMenuAnchor {
+  readonly column: string;
+  readonly anchor: PositionerAnchor;
+  readonly returnTo: HTMLElement;
+}
+
 /**
  * Everything a part needs from the root. One object, one context: the parts
  * are private to the family and re-render with the grid.
@@ -53,6 +61,14 @@ export interface DataGridInternal<Row> {
   /** The ids mounted in the DOM: the pinned ones and the window over the middle. */
   readonly mountedColumns: readonly ResolvedGridColumn<Row>[];
   readonly columnsWindowed: boolean;
+  /** The columns a narrow frame moved into each row's pop-in, in the resolved order; empty without one. */
+  readonly popinColumns: readonly ResolvedGridColumn<Row>[];
+  /** The pop-in's columns that aggregate: the summary row's pop-in draws their totals. */
+  readonly popinAggregated: readonly ResolvedGridColumn<Row>[];
+  /** The pop-in's `aria-colindex`: after every visible column. */
+  readonly popinIndex: number;
+  /** Whether a cursor row draws a pop-in. */
+  readonly hasPopinCell: (row: string) => boolean;
   readonly query: GridQuery;
   readonly nodes: readonly GridNode<Row>[];
   readonly total: number | null;
@@ -131,16 +147,21 @@ export interface DataGridInternal<Row> {
   readonly setFilterOpen: (id: string | null) => void;
   readonly menuOpen: string | null;
   readonly setMenuOpen: (id: string | null) => void;
+  /** The anchor of a column menu a context menu opened; `null` under its button. */
+  readonly menuAnchor: ColumnMenuAnchor | null;
+  readonly anchorToButton: () => void;
+  readonly onHeaderContextMenu: (event: MouseEvent<HTMLElement>, columnId: string) => void;
   readonly filterDebounce: number;
   /** Counts of a set column's values over the rows every other rule kept. */
   readonly countsFor: (id: string) => ReadonlyMap<string, number>;
 
   /* columns */
   readonly pin: (id: string, zone: 'start' | 'end' | null, source?: unknown) => void;
-  readonly hide: (id: string, source?: unknown) => void;
+  readonly hide: (id: string, source?: unknown, reason?: DataGridReason) => void;
   readonly resizeBy: (id: string, delta: number, source?: unknown) => void;
   readonly resizeTo: (id: string, width: number, reason: DataGridReason, source?: unknown) => void;
-  readonly autofit: (id: string, source?: unknown) => void;
+  /** One column, or every resizable column with `null`, with the gesture's reason. */
+  readonly autofit: (id: string | null, reason: DataGridReason, source?: unknown) => void;
   readonly moveColumn: (id: string, direction: -1 | 1, source?: unknown) => void;
   readonly resizing: string | null;
   readonly setResizing: (id: string | null) => void;

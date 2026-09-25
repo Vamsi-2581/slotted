@@ -12,10 +12,13 @@
             div[data-part='column-header'][role='columnheader']
               span                                           the name
               span[data-part='sort']                         the mark and the index
+              span[data-part='column-description']           visually hidden, the header's aria-describedby
               span[data-part='column-actions']
+                button[data-part='column-help']              always shown when the column explains itself
                 button[data-part='filter']
                 button[data-part='column-menu']
               div[data-part='resizer']
+            div[data-part='popin-header'][role='columnheader']  visually hidden, no track
           div[data-part='filter-row'][role='row']
             div[data-part='filter-cell'][role='gridcell']
               div[data-part='filter-operand'] › div[data-part='filter-operator'] › button, a plain field
@@ -26,12 +29,15 @@
             div[data-part='cell'][role='gridcell'] › span | div[data-part='editor'] | div[data-part='actions']
           div[data-part='group-row'][role='row'] › gridcell › button[data-part='group-toggle']
           div[data-part='detail'][role='row'] › gridcell
+            div[data-part='popin'][role='gridcell']         last in a row, when columns did not fit
+              div[data-part='popin-field'] › span[data-part='popin-label'], div[data-part='popin-value']
         div[data-part='summary'][role='rowgroup'] › row › div[data-part='summary-cell']
         div[data-part='loader'][role='rowgroup']
         div[data-part='empty']
         div[data-part='drop-indicator']
       div[data-part='footer']
     div[data-ui='data-grid'][data-part='filter-panel']    in a popover, outside the root
+    div[data-part='column-menu-description']              atop the column menu, outside the root
 
   Every row is a CSS grid over `--slotted-data-grid-template`, written on the
   root. The cells here are in column order and complete, so auto-placement
@@ -88,7 +94,10 @@
                 id="anatomy-all"
                 aria-label="Select all 6 rows, 2 selected"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="minus"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -101,21 +110,27 @@
             tabindex="-1"
             style="--slotted-data-grid-pin-offset: 3rem"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Tracking"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Tracking">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Tracking"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -128,21 +143,27 @@
             aria-sort="ascending"
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Customer"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Customer">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Customer"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -153,21 +174,32 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
               <button
                 data-part="filter"
                 type="button"
                 tabindex="-1"
                 aria-label="Filter Destination"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Destination"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -178,21 +210,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Carrier</span><span data-part="sort" aria-hidden="true"></span
+            <span>Carrier</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Carrier"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Carrier">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Carrier"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -204,21 +242,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Weight"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Weight">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Weight"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -230,7 +274,10 @@
             tabindex="-1"
             data-filtered
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
               <button
                 data-part="filter"
@@ -238,14 +285,22 @@
                 tabindex="-1"
                 aria-label="Filter Status: is any of In transit, Delayed"
                 data-filtered
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Status"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -256,21 +311,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Shipped</span><span data-part="sort" aria-hidden="true"></span
+            <span>Shipped</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Shipped"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Shipped">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Shipped"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -281,21 +342,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>ETA</span><span data-part="sort" aria-hidden="true"></span
+            <span>ETA</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter ETA"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter ETA">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, ETA"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -308,21 +375,27 @@
             data-sorted="descending"
             tabindex="-1"
           >
-            <span>Cost</span><span data-part="sort" aria-hidden="true" data-index="2"></span
+            <span>Cost</span
+            ><span data-part="sort" aria-hidden="true" data-index="2"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Cost"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Cost">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Cost"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -357,7 +430,10 @@
                 id="anatomy-SHP-20481-select"
                 aria-label="Select SHP-20481"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -514,7 +590,10 @@
                 aria-label="Select SHP-20482"
                 checked
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -678,7 +757,10 @@
                 aria-label="Select SHP-20483"
                 checked
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -829,7 +911,10 @@
                 id="anatomy-SHP-20484-select"
                 aria-label="Select SHP-20484"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -979,7 +1064,10 @@
                 id="anatomy-SHP-20485-select"
                 aria-label="Select SHP-20485"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -1117,7 +1205,11 @@
     <div data-part="footer">
       <span data-range>1–6 of 3,412</span>
       <nav aria-label="Pagination" data-part="root" data-ui="pagination">
-        <button aria-label="Previous page" data-part="previous" type="button"></button>
+        <button aria-label="Previous page" data-part="previous" type="button">
+          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+          ></span>
+        </button>
         <ul data-part="list">
           <li data-part="item">
             <button aria-current="page" aria-label="Page 1" data-part="page" type="button">
@@ -1132,8 +1224,245 @@
           </li>
         </ul>
         <span data-part="summary">Page 1 of 569</span>
-        <button aria-label="Next page" data-part="next" type="button"></button>
+        <button aria-label="Next page" data-part="next" type="button">
+          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
+            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+          ></span>
+        </button>
       </nav>
+    </div>
+  </div>
+</section>
+
+<!--
+  A column that explains itself. ARR and Owner carry the circled question
+  mark, shown at rest because a coarse pointer has no hover to reveal it; ARR
+  is the current header, so its menu is revealed beside it. The help opened
+  from ARR holds the description and the application's own help, and the
+  column menu opened from ARR sets the description over its items, with Fit
+  all columns after Fit to content.
+-->
+<section data-scene="column-help">
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+    <div
+      data-ui="data-grid"
+      data-part="root"
+      role="grid"
+      data-variant="framed"
+      data-rows="fixed"
+      aria-label="Accounts"
+      aria-rowcount="4"
+      aria-colcount="3"
+      style="--slotted-data-grid-template: 132px 116px 144px; inline-size: 394px"
+    >
+      <div data-part="scroll">
+        <div data-part="head" role="rowgroup">
+          <div data-part="header-row" role="row" aria-rowindex="1">
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="1"
+              data-sortable
+              tabindex="-1"
+            >
+              <span>Account</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ><span data-part="column-actions">
+                <button
+                  data-part="column-menu"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="Column menu, Account"
+                  aria-haspopup="menu"
+                >
+                  <span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                  ></span>
+                </button>
+              </span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="2"
+              aria-describedby="help-arr-description"
+              data-numeric
+              data-sortable
+              data-current
+              tabindex="0"
+            >
+              <span>ARR</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ><span data-part="column-description" id="help-arr-description"
+                >Annual recurring revenue, in US dollars</span
+              ><span data-part="column-actions">
+                <button
+                  data-part="column-help"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="About ARR"
+                  aria-haspopup="dialog"
+                  aria-expanded="true"
+                  data-open
+                >
+                  <span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="circle-question"></svg
+                  ></span>
+                </button>
+                <button
+                  data-part="column-menu"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="Column menu, ARR"
+                  aria-haspopup="menu"
+                >
+                  <span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                  ></span>
+                </button>
+              </span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="3"
+              data-sortable
+              tabindex="-1"
+            >
+              <span>Owner</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
+              ><span data-part="column-actions">
+                <button
+                  data-part="column-help"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="About Owner"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                >
+                  <span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="circle-question"></svg
+                  ></span>
+                </button>
+                <button
+                  data-part="column-menu"
+                  type="button"
+                  tabindex="-1"
+                  aria-label="Column menu, Owner"
+                  aria-haspopup="menu"
+                >
+                  <span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                  ></span>
+                </button>
+              </span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+        <div data-part="body" role="rowgroup">
+          <div data-part="row" role="row" aria-rowindex="2">
+            <div data-part="row-header" role="rowheader" aria-colindex="1" tabindex="-1">
+              <span>Aurora Labs</span>
+            </div>
+            <div data-part="cell" role="gridcell" aria-colindex="2" data-numeric tabindex="-1">
+              <span>$120,000</span>
+            </div>
+            <div data-part="cell" role="gridcell" aria-colindex="3" tabindex="-1">
+              <span>Maya Chen</span>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="3">
+            <div data-part="row-header" role="rowheader" aria-colindex="1" tabindex="-1">
+              <span>Bloom Retail</span>
+            </div>
+            <div data-part="cell" role="gridcell" aria-colindex="2" data-numeric tabindex="-1">
+              <span>$48,000</span>
+            </div>
+            <div data-part="cell" role="gridcell" aria-colindex="3" tabindex="-1">
+              <span>Omar Haddad</span>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="4">
+            <div data-part="row-header" role="rowheader" aria-colindex="1" tabindex="-1">
+              <span>Casa Verde</span>
+            </div>
+            <div data-part="cell" role="gridcell" aria-colindex="2" data-numeric tabindex="-1">
+              <span>$212,400</span>
+            </div>
+            <div data-part="cell" role="gridcell" aria-colindex="3" tabindex="-1">
+              <span>Lena Fischer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      data-ui="popover"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="sm"
+      data-width="auto"
+      data-open
+      style="position: relative; --slotted-positioner-available-width: 100%"
+    >
+      <div data-part="content" role="dialog" tabindex="-1" aria-label="About ARR">
+        <div data-part="body">
+          <p>Annual recurring revenue, in US dollars</p>
+          <p>
+            Contracted subscription value for the next twelve months. Usage fees are not included.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      data-ui="menu"
+      data-part="root"
+      data-side="bottom"
+      data-align="start"
+      data-size="sm"
+      data-open
+      style="position: relative; --slotted-positioner-available-width: 100%"
+    >
+      <div
+        data-part="content"
+        role="menu"
+        aria-label="Column menu, ARR"
+        aria-describedby="help-arr-description"
+      >
+        <div data-part="column-menu-description" aria-hidden="true">
+          Annual recurring revenue, in US dollars
+        </div>
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Sort ascending</span>
+        </button>
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Sort descending</span>
+        </button>
+        <hr data-part="separator" role="separator" aria-orientation="horizontal" />
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Pin to start</span>
+        </button>
+        <hr data-part="separator" role="separator" aria-orientation="horizontal" />
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Fit to content</span>
+        </button>
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Fit all columns</span>
+        </button>
+        <button data-part="item" role="menuitem" type="button">
+          <span data-part="label">Hide column</span>
+        </button>
+      </div>
     </div>
   </div>
 </section>
@@ -1166,7 +1495,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1176,7 +1509,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1186,7 +1523,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1197,7 +1538,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1207,7 +1552,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -1440,7 +1789,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1450,7 +1803,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1460,7 +1817,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1471,7 +1832,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1481,7 +1846,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -1761,7 +2130,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1771,7 +2144,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1781,7 +2158,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1791,7 +2172,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Shipped</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Shipped</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1801,7 +2186,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>ETA</span><span data-part="sort" aria-hidden="true"></span>
+            <span>ETA</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -1981,7 +2370,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -1992,7 +2385,11 @@
             data-sorted="ascending"
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true" data-index="2"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true" data-index="2"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -2002,7 +2399,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -2014,7 +2415,11 @@
             data-sorted="descending"
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true" data-index="3"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true" data-index="3"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -2026,7 +2431,11 @@
             aria-sort="ascending"
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -2259,21 +2668,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Tracking"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Tracking">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Tracking"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -2285,7 +2700,10 @@
             tabindex="-1"
             data-filtered
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
               <button
                 data-part="filter"
@@ -2293,14 +2711,22 @@
                 tabindex="-1"
                 aria-label="Filter Customer: contains nord"
                 data-filtered
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Customer"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -2311,21 +2737,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Carrier</span><span data-part="sort" aria-hidden="true"></span
+            <span>Carrier</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Carrier"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Carrier">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Carrier"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -2337,21 +2769,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Weight"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Weight">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Weight"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -2363,7 +2801,10 @@
             tabindex="-1"
             data-filtered
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
               <button
                 data-part="filter"
@@ -2371,14 +2812,22 @@
                 tabindex="-1"
                 aria-label="Filter Status: is any of Delayed, Customs"
                 data-filtered
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Status"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -2389,21 +2838,27 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Shipped</span><span data-part="sort" aria-hidden="true"></span
+            <span>Shipped</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span></span
             ><span data-part="column-actions">
-              <button
-                data-part="filter"
-                type="button"
-                tabindex="-1"
-                aria-label="Filter Shipped"
-              ></button>
+              <button data-part="filter" type="button" tabindex="-1" aria-label="Filter Shipped">
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="funnel"></svg
+                ></span>
+              </button>
               <button
                 data-part="column-menu"
                 type="button"
                 tabindex="-1"
                 aria-label="Column menu, Shipped"
                 aria-haspopup="menu"
-              ></button>
+              >
+                <span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="ellipsis"></svg
+                ></span>
+              </button>
             </span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
@@ -2495,7 +2950,10 @@
                 >
                   <span data-part="value" data-placeholder>Any</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
           </div>
@@ -2570,7 +3028,10 @@
                 >
                   <span data-part="value">Delayed, Customs</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
           </div>
@@ -3036,7 +3497,10 @@
                 >
                   <span data-part="value">Contains</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
             <div data-part="filter-operand" data-kind="text">
@@ -3101,7 +3565,10 @@
                 >
                   <span data-part="value">Begins with</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
             <div data-part="filter-operand" data-kind="text">
@@ -3177,7 +3644,10 @@
                 >
                   <span data-part="value">Between</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
             <div data-part="filter-operand" data-kind="number" data-range>
@@ -3265,7 +3735,10 @@
                 >
                   <span data-part="value">Is empty</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
             <div data-part="filter-operand" data-kind="number"></div>
@@ -3331,7 +3804,10 @@
                 >
                   <span data-part="value">Is any of</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
             <div data-part="filter-operand" data-kind="set">
@@ -3352,7 +3828,10 @@
                 >
                   <span data-part="value">Delayed, Customs</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
           </div>
@@ -3413,7 +3892,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3423,7 +3906,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3433,7 +3920,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3444,7 +3935,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3454,7 +3949,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div data-part="column-header" role="columnheader" aria-colindex="6" tabindex="-1">
@@ -3847,7 +4346,10 @@
                 >
                   <span data-part="value">In transit</span>
                 </button>
-                <span data-part="arrow"></span>
+                <span data-part="arrow"
+                  ><span data-ui="icon" data-part="root" aria-hidden="true"
+                    ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+                ></span>
               </div>
             </div>
           </div>
@@ -3930,7 +4432,10 @@
                 id="pinning-all"
                 aria-label="Select all 6 rows"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -3943,7 +4448,11 @@
             tabindex="-1"
             style="--slotted-data-grid-pin-offset: 3rem"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3953,7 +4462,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3963,7 +4476,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3973,7 +4490,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Carrier</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Carrier</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3984,7 +4505,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -3994,7 +4519,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -4004,7 +4533,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Shipped</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Shipped</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -4014,7 +4547,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>ETA</span><span data-part="sort" aria-hidden="true"></span>
+            <span>ETA</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -4025,7 +4562,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Cost</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Cost</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -4059,7 +4600,10 @@
                 id="pinning-SHP-20481-select"
                 aria-label="Select SHP-20481"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -4209,7 +4753,10 @@
                 id="pinning-SHP-20482-select"
                 aria-label="Select SHP-20482"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -4366,7 +4913,10 @@
                 aria-label="Select SHP-20483"
                 checked
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -4516,7 +5066,10 @@
                 id="pinning-SHP-20484-select"
                 aria-label="Select SHP-20484"
               />
-              <span data-part="indicator"></span>
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span
+              ></span>
             </span>
           </div>
           <div
@@ -4683,7 +5236,11 @@
             tabindex="-1"
             data-resizing
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true" data-resizing></div>
           </div>
           <div
@@ -4694,7 +5251,11 @@
             tabindex="-1"
             data-dragging
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -4705,7 +5266,11 @@
             tabindex="-1"
             data-drop-target
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -4716,7 +5281,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -4883,7 +5452,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -4893,7 +5466,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -4906,7 +5483,11 @@
               type="button"
               tabindex="-1"
               aria-label="Reorder SHP-20481"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="grip-vertical"></svg
+              ></span>
+            </button>
           </div>
           <div
             data-part="row-header"
@@ -4934,7 +5515,11 @@
               type="button"
               tabindex="-1"
               aria-label="Reorder SHP-20482"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="grip-vertical"></svg
+              ></span>
+            </button>
           </div>
           <div
             data-part="row-header"
@@ -4962,7 +5547,11 @@
               type="button"
               tabindex="-1"
               aria-label="Reorder SHP-20483"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="grip-vertical"></svg
+              ></span>
+            </button>
           </div>
           <div
             data-part="row-header"
@@ -5027,7 +5616,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5037,7 +5630,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5047,7 +5644,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -5262,7 +5863,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5272,7 +5877,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5282,7 +5891,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5293,7 +5906,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5304,7 +5921,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Cost</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Cost</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -5324,12 +5945,10 @@
             tabindex="-1"
             style="--slotted-data-grid-column: 1 / 4"
           >
-            <button
-              data-part="group-toggle"
-              type="button"
-              tabindex="-1"
-              aria-label="Collapse DHL"
-            ></button
+            <button data-part="group-toggle" type="button" tabindex="-1" aria-label="Collapse DHL">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span></button
             ><span>DHL</span><span data-count>2 shipments</span>
           </div>
           <div
@@ -5370,7 +5989,10 @@
               type="button"
               tabindex="-1"
               aria-label="Collapse In transit"
-            ></button
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span></button
             ><span>In transit</span><span data-count>2 shipments</span>
           </div>
           <div
@@ -5504,12 +6126,10 @@
             tabindex="-1"
             style="--slotted-data-grid-column: 1 / 4"
           >
-            <button
-              data-part="group-toggle"
-              type="button"
-              tabindex="-1"
-              aria-label="Expand FedEx"
-            ></button
+            <button data-part="group-toggle" type="button" tabindex="-1" aria-label="Expand FedEx">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span></button
             ><span>FedEx</span><span data-count>1 shipment</span>
           </div>
           <div
@@ -5545,12 +6165,10 @@
             tabindex="-1"
             style="--slotted-data-grid-column: 1 / 4"
           >
-            <button
-              data-part="group-toggle"
-              type="button"
-              tabindex="-1"
-              aria-label="Collapse UPS"
-            ></button
+            <button data-part="group-toggle" type="button" tabindex="-1" aria-label="Collapse UPS">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span></button
             ><span>UPS</span><span data-count>2 shipments</span>
           </div>
           <div
@@ -5591,7 +6209,10 @@
               type="button"
               tabindex="-1"
               aria-label="Collapse Delivered"
-            ></button
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span></button
             ><span>Delivered</span><span data-count>2 shipments</span>
           </div>
           <div
@@ -5779,7 +6400,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5789,7 +6414,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5799,7 +6428,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5810,7 +6443,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -5820,7 +6457,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -5841,7 +6482,11 @@
               aria-expanded="true"
               aria-controls="detail-SHP-20481"
               aria-label="Hide details for SHP-20481"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div
             data-part="row-header"
@@ -5930,7 +6575,11 @@
               aria-expanded="false"
               aria-controls="detail-SHP-20482"
               aria-label="Show details for SHP-20482"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div
             data-part="row-header"
@@ -5994,7 +6643,11 @@
               aria-expanded="false"
               aria-controls="detail-SHP-20483"
               aria-label="Show details for SHP-20483"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
           </div>
           <div
             data-part="row-header"
@@ -6049,6 +6702,1739 @@
 </section>
 
 <!--
+  The pop-in: the columns a narrow frame took out, drawn under the values of
+  their row as labelled fields. The chooser, the expander and the actions stay
+  on the row's first line, centred in it; the fields start where the tracking
+  number starts, wrap rather than truncate, and keep an empty value's line.
+  A group row above, the current row, a selected row and an expanded row with
+  its detail below.
+-->
+<section data-scene="popin" data-widths="300 360 420 720 1280">
+  <div
+    data-ui="data-grid"
+    data-part="root"
+    role="grid"
+    data-variant="ruled"
+    data-selection="multiple"
+    data-sticky-header
+    data-rows="auto"
+    data-popin="7"
+    aria-label="Shipments"
+    aria-multiselectable="true"
+    aria-rowcount="7"
+    aria-colcount="5"
+    style="
+      --slotted-data-grid-template: 48px 40px minmax(112px, 1fr) 80px;
+      --slotted-data-grid-leading: 88px;
+    "
+  >
+    <div data-part="scroll">
+      <div data-part="head" role="rowgroup">
+        <div data-part="header-row" role="row" aria-rowindex="1">
+          <div
+            data-part="selection"
+            role="gridcell"
+            aria-colindex="1"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1"
+          >
+            <span
+              data-ui="checkbox"
+              data-part="root"
+              data-size="md"
+              data-label-placement="end"
+              data-indeterminate
+            >
+              <input
+                data-part="control"
+                type="checkbox"
+                id="popin-all"
+                aria-label="Select all 4 rows, 1 selected"
+              />
+              <span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="minus"></svg></span
+              ></span>
+            </span>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="2"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 2"
+          >
+            <span></span>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="3"
+            data-sortable
+            tabindex="-1"
+            style="--slotted-data-grid-column: 3"
+          >
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
+            <div data-part="resizer" aria-hidden="true"></div>
+          </div>
+          <div
+            data-part="column-header"
+            role="columnheader"
+            aria-colindex="4"
+            tabindex="-1"
+            data-pinned="end"
+            data-pin-edge
+            style="--slotted-data-grid-column: 4; --slotted-data-grid-pin-offset: 0px"
+          >
+            <span></span>
+          </div>
+          <div data-part="popin-header" role="columnheader" aria-colindex="5">Details</div>
+        </div>
+      </div>
+      <div data-part="body" role="rowgroup">
+        <div
+          data-part="group-row"
+          role="row"
+          aria-rowindex="2"
+          aria-level="1"
+          aria-expanded="true"
+          style="--slotted-data-grid-level: 1"
+        >
+          <div
+            role="gridcell"
+            aria-colindex="1"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1 / -1"
+          >
+            <button data-part="group-toggle" type="button" tabindex="-1" aria-label="Collapse DHL">
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span></button
+            ><span>DHL</span><span data-count>4 shipments</span>
+          </div>
+        </div>
+        <div
+          data-part="row"
+          role="row"
+          aria-rowindex="3"
+          data-row="SHP-20481"
+          data-current
+          aria-selected="false"
+        >
+          <div
+            data-part="selection"
+            role="gridcell"
+            aria-colindex="1"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1"
+          >
+            <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end"
+              ><input
+                data-part="control"
+                type="checkbox"
+                id="popin-SHP-20481-select"
+                aria-label="Select SHP-20481" /><span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span></span
+            ></span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            data-kind="expander"
+            aria-colindex="2"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 2"
+          >
+            <button
+              data-part="expander"
+              type="button"
+              tabindex="-1"
+              aria-expanded="false"
+              aria-label="Show details"
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+          </div>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="3"
+            tabindex="-1"
+            data-text="truncate"
+            style="--slotted-data-grid-column: 3"
+          >
+            <span title="SHP-20481">SHP-20481</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="4"
+            tabindex="-1"
+            data-pinned="end"
+            data-pin-edge
+            data-align="end"
+            style="--slotted-data-grid-column: 4; --slotted-data-grid-pin-offset: 0px"
+          >
+            <span></span>
+            <div data-part="actions">
+              <button type="button" aria-label="Edit SHP-20481" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg></button
+              ><button type="button" aria-label="More actions for SHP-20481" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div
+            data-part="popin"
+            role="gridcell"
+            aria-colindex="5"
+            data-column="$popin"
+            data-current
+            tabindex="0"
+            style="--slotted-data-grid-column: 1 / -1"
+          >
+            <div data-part="popin-field" data-field="status">
+              <span data-part="popin-label">Status</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span
+                  data-ui="badge"
+                  data-part="root"
+                  data-tone="accent"
+                  data-variant="soft"
+                  data-size="sm"
+                  ><span data-part="label">In transit</span></span
+                >
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="customer">
+              <span data-part="popin-label">Customer</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Aurora Textiles">Aurora Textiles</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="dest">
+              <span data-part="popin-label">Destination</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Porto, PT">Porto, PT</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="weight">
+              <span data-part="popin-label">Weight</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="142.5 kg">142.5 kg</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="shipped">
+              <span data-part="popin-label">Shipped</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="12/09/2026">12/09/2026</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="cost">
+              <span data-part="popin-label">Cost</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="€ 1,240.00">€ 1,240.00</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="notes">
+              <span data-part="popin-label">Notes</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Fragile, keep upright">Fragile, keep upright</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          data-part="row"
+          role="row"
+          aria-rowindex="4"
+          data-row="SHP-20482"
+          aria-selected="true"
+          data-selected
+        >
+          <div
+            data-part="selection"
+            role="gridcell"
+            aria-colindex="1"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1"
+          >
+            <span
+              data-ui="checkbox"
+              data-part="root"
+              data-size="md"
+              data-label-placement="end"
+              data-checked
+              ><input
+                data-part="control"
+                type="checkbox"
+                id="popin-SHP-20482-select"
+                aria-label="Select SHP-20482"
+                checked /><span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span></span
+            ></span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            data-kind="expander"
+            aria-colindex="2"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 2"
+          >
+            <button
+              data-part="expander"
+              type="button"
+              tabindex="-1"
+              aria-expanded="false"
+              aria-label="Show details"
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+          </div>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="3"
+            tabindex="-1"
+            data-text="truncate"
+            style="--slotted-data-grid-column: 3"
+          >
+            <span title="SHP-20482">SHP-20482</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="4"
+            tabindex="-1"
+            data-pinned="end"
+            data-pin-edge
+            data-align="end"
+            style="--slotted-data-grid-column: 4; --slotted-data-grid-pin-offset: 0px"
+          >
+            <span></span>
+            <div data-part="actions">
+              <button type="button" aria-label="Edit SHP-20482" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg></button
+              ><button type="button" aria-label="More actions for SHP-20482" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div
+            data-part="popin"
+            role="gridcell"
+            aria-colindex="5"
+            data-column="$popin"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1 / -1"
+          >
+            <div data-part="popin-field" data-field="status">
+              <span data-part="popin-label">Status</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span
+                  data-ui="badge"
+                  data-part="root"
+                  data-tone="warning"
+                  data-variant="soft"
+                  data-size="sm"
+                  ><span data-part="label">Delayed</span></span
+                >
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="customer">
+              <span data-part="popin-label">Customer</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Hoffmann &amp; Söhne Industriebedarf GmbH"
+                  >Hoffmann &amp; Söhne Industriebedarf GmbH</span
+                >
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="dest">
+              <span data-part="popin-label">Destination</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Mönchengladbach, DE">Mönchengladbach, DE</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="weight">
+              <span data-part="popin-label">Weight</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="1,142.5 kg">1,142.5 kg</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="shipped">
+              <span data-part="popin-label">Shipped</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="13/09/2026">13/09/2026</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="cost">
+              <span data-part="popin-label">Cost</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="€ 12,480.00">€ 12,480.00</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="notes">
+              <span data-part="popin-label">Notes</span>
+              <div data-part="popin-value" data-text="truncate"><span title=""></span></div>
+            </div>
+          </div>
+        </div>
+        <div
+          data-part="row"
+          role="row"
+          aria-rowindex="5"
+          data-row="SHP-20483"
+          aria-selected="false"
+          data-expanded
+        >
+          <div
+            data-part="selection"
+            role="gridcell"
+            aria-colindex="1"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1"
+          >
+            <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end"
+              ><input
+                data-part="control"
+                type="checkbox"
+                id="popin-SHP-20483-select"
+                aria-label="Select SHP-20483" /><span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span></span
+            ></span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            data-kind="expander"
+            aria-colindex="2"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 2"
+          >
+            <button
+              data-part="expander"
+              type="button"
+              tabindex="-1"
+              aria-expanded="true"
+              aria-controls="popin-detail-SHP-20483"
+              aria-label="Hide details"
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+          </div>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="3"
+            tabindex="-1"
+            data-text="truncate"
+            style="--slotted-data-grid-column: 3"
+          >
+            <span title="SHP-20483">SHP-20483</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="4"
+            tabindex="-1"
+            data-pinned="end"
+            data-pin-edge
+            data-align="end"
+            style="--slotted-data-grid-column: 4; --slotted-data-grid-pin-offset: 0px"
+          >
+            <span></span>
+            <div data-part="actions">
+              <button type="button" aria-label="Edit SHP-20483" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg></button
+              ><button type="button" aria-label="More actions for SHP-20483" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div
+            data-part="popin"
+            role="gridcell"
+            aria-colindex="5"
+            data-column="$popin"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1 / -1"
+          >
+            <div data-part="popin-field" data-field="status">
+              <span data-part="popin-label">Status</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span
+                  data-ui="badge"
+                  data-part="root"
+                  data-tone="danger"
+                  data-variant="soft"
+                  data-size="sm"
+                  ><span data-part="label">Held</span></span
+                >
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="customer">
+              <span data-part="popin-label">Customer</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Bloom &amp; Co.">Bloom &amp; Co.</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="dest">
+              <span data-part="popin-label">Destination</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Lyon, FR">Lyon, FR</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="weight">
+              <span data-part="popin-label">Weight</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="18.2 kg">18.2 kg</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="shipped">
+              <span data-part="popin-label">Shipped</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="14/09/2026">14/09/2026</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="cost">
+              <span data-part="popin-label">Cost</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="€ 96.40">€ 96.40</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="notes">
+              <span data-part="popin-label">Notes</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Awaiting the commercial invoice from the sender before release"
+                  >Awaiting the commercial invoice from the sender before release</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="detail" role="row" aria-rowindex="5" id="popin-detail-SHP-20483">
+          <div
+            role="gridcell"
+            aria-colindex="1"
+            aria-colspan="5"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1 / -1"
+          >
+            <span
+              >Last scan: Lyon customs, 16/09/2026 07:12. Release expected once the invoice
+              arrives.</span
+            >
+          </div>
+        </div>
+        <div
+          data-part="row"
+          role="row"
+          aria-rowindex="6"
+          data-row="SHP-20484"
+          aria-selected="false"
+        >
+          <div
+            data-part="selection"
+            role="gridcell"
+            aria-colindex="1"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1"
+          >
+            <span data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end"
+              ><input
+                data-part="control"
+                type="checkbox"
+                id="popin-SHP-20484-select"
+                aria-label="Select SHP-20484" /><span data-part="indicator"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="check"></svg></span></span
+            ></span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            data-kind="expander"
+            aria-colindex="2"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 2"
+          >
+            <button
+              data-part="expander"
+              type="button"
+              tabindex="-1"
+              aria-expanded="false"
+              aria-label="Show details"
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
+          </div>
+          <div
+            data-part="row-header"
+            role="rowheader"
+            aria-colindex="3"
+            tabindex="-1"
+            data-text="truncate"
+            style="--slotted-data-grid-column: 3"
+          >
+            <span title="SHP-20484">SHP-20484</span>
+          </div>
+          <div
+            data-part="cell"
+            role="gridcell"
+            aria-colindex="4"
+            tabindex="-1"
+            data-pinned="end"
+            data-pin-edge
+            data-align="end"
+            style="--slotted-data-grid-column: 4; --slotted-data-grid-pin-offset: 0px"
+          >
+            <span></span>
+            <div data-part="actions">
+              <button type="button" aria-label="Edit SHP-20484" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg></button
+              ><button type="button" aria-label="More actions for SHP-20484" tabindex="-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div
+            data-part="popin"
+            role="gridcell"
+            aria-colindex="5"
+            data-column="$popin"
+            tabindex="-1"
+            style="--slotted-data-grid-column: 1 / -1"
+          >
+            <div data-part="popin-field" data-field="status">
+              <span data-part="popin-label">Status</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span
+                  data-ui="badge"
+                  data-part="root"
+                  data-tone="success"
+                  data-variant="soft"
+                  data-size="sm"
+                  ><span data-part="label">Delivered</span></span
+                >
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="customer">
+              <span data-part="popin-label">Customer</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Nordlys Kaffe">Nordlys Kaffe</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="dest">
+              <span data-part="popin-label">Destination</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="Tromsø, NO">Tromsø, NO</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="weight">
+              <span data-part="popin-label">Weight</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="64 kg">64 kg</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="shipped">
+              <span data-part="popin-label">Shipped</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="15/09/2026">15/09/2026</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="cost">
+              <span data-part="popin-label">Cost</span>
+              <div data-part="popin-value" data-text="truncate">
+                <span title="€ 310.00">€ 310.00</span>
+              </div>
+            </div>
+            <div data-part="popin-field" data-field="notes">
+              <span data-part="popin-label">Notes</span>
+              <div data-part="popin-value" data-text="truncate"><span title=""></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
+  The pop-in without gutters, under a pinned identity column, in the plain
+  and the framed variant, with the summary's popped aggregate; last, the ruled
+  variant at the 44-pixel control height a coarse pointer gives the theme.
+-->
+<section data-scene="popin-variants" data-widths="300 360 420 720 1280">
+  <div style="display: grid; gap: var(--slotted-space-6, 1rem)">
+    <div
+      data-ui="data-grid"
+      data-part="root"
+      role="grid"
+      data-variant="plain"
+      data-sticky-header
+      data-rows="auto"
+      data-popin="4"
+      aria-label="Shipments, plain"
+      aria-rowcount="5"
+      aria-colcount="4"
+      style="--slotted-data-grid-template: 112px minmax(96px, 1fr) 120px"
+    >
+      <div data-part="scroll">
+        <div data-part="head" role="rowgroup">
+          <div data-part="header-row" role="row" aria-rowindex="1">
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="1"
+              data-pinned="start"
+              data-pin-edge
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="2"
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="3"
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 3"
+              data-numeric
+            >
+              <span>Cost</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div data-part="popin-header" role="columnheader" aria-colindex="4">Details</div>
+          </div>
+        </div>
+        <div data-part="body" role="rowgroup">
+          <div data-part="row" role="row" aria-rowindex="2" data-row="SHP-20481">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20481">SHP-20481</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Aurora Textiles">Aurora Textiles</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 1,240.00">€ 1,240.00</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Porto, PT">Porto, PT</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="142.5 kg">142.5 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="12/09/2026">12/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Fragile, keep upright">Fragile, keep upright</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="3" data-row="SHP-20482">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20482">SHP-20482</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Hoffmann &amp; Söhne Industriebedarf GmbH"
+                >Hoffmann &amp; Söhne Industriebedarf GmbH</span
+              >
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 12,480.00">€ 12,480.00</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Mönchengladbach, DE">Mönchengladbach, DE</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="1,142.5 kg">1,142.5 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="13/09/2026">13/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate"><span title=""></span></div>
+              </div>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="4" data-row="SHP-20483">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20483">SHP-20483</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Bloom &amp; Co.">Bloom &amp; Co.</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 96.40">€ 96.40</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Lyon, FR">Lyon, FR</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="18.2 kg">18.2 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="14/09/2026">14/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Awaiting the commercial invoice from the sender before release"
+                    >Awaiting the commercial invoice from the sender before release</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="summary" role="rowgroup">
+          <div role="row" aria-rowindex="5">
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="1"
+              data-pinned="start"
+              data-pin-edge
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span data-label>Total</span>
+            </div>
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="2"
+              style="--slotted-data-grid-column: 2"
+            ></div>
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="3"
+              data-numeric
+              style="--slotted-data-grid-column: 3"
+            >
+              <span>€ 13,816.40</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value"><span>1,303.2 kg</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      data-ui="data-grid"
+      data-part="root"
+      role="grid"
+      data-variant="framed"
+      data-sticky-header
+      data-rows="auto"
+      data-popin="4"
+      aria-label="Shipments, framed"
+      aria-rowcount="5"
+      aria-colcount="4"
+      style="--slotted-data-grid-template: 112px minmax(96px, 1fr) 120px"
+    >
+      <div data-part="scroll">
+        <div data-part="head" role="rowgroup">
+          <div data-part="header-row" role="row" aria-rowindex="1">
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="1"
+              data-pinned="start"
+              data-pin-edge
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="2"
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="3"
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 3"
+              data-numeric
+            >
+              <span>Cost</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div data-part="popin-header" role="columnheader" aria-colindex="4">Details</div>
+          </div>
+        </div>
+        <div data-part="body" role="rowgroup">
+          <div data-part="row" role="row" aria-rowindex="2" data-row="SHP-20481">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20481">SHP-20481</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Aurora Textiles">Aurora Textiles</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 1,240.00">€ 1,240.00</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Porto, PT">Porto, PT</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="142.5 kg">142.5 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="12/09/2026">12/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Fragile, keep upright">Fragile, keep upright</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="3" data-row="SHP-20482">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20482">SHP-20482</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Hoffmann &amp; Söhne Industriebedarf GmbH"
+                >Hoffmann &amp; Söhne Industriebedarf GmbH</span
+              >
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 12,480.00">€ 12,480.00</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Mönchengladbach, DE">Mönchengladbach, DE</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="1,142.5 kg">1,142.5 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="13/09/2026">13/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate"><span title=""></span></div>
+              </div>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="4" data-row="SHP-20483">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20483">SHP-20483</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Bloom &amp; Co.">Bloom &amp; Co.</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 96.40">€ 96.40</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Lyon, FR">Lyon, FR</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="18.2 kg">18.2 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="14/09/2026">14/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Awaiting the commercial invoice from the sender before release"
+                    >Awaiting the commercial invoice from the sender before release</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="summary" role="rowgroup">
+          <div role="row" aria-rowindex="5">
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="1"
+              data-pinned="start"
+              data-pin-edge
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span data-label>Total</span>
+            </div>
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="2"
+              style="--slotted-data-grid-column: 2"
+            ></div>
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="3"
+              data-numeric
+              style="--slotted-data-grid-column: 3"
+            >
+              <span>€ 13,816.40</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value"><span>1,303.2 kg</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      data-ui="data-grid"
+      data-part="root"
+      role="grid"
+      data-variant="ruled"
+      data-sticky-header
+      data-rows="auto"
+      data-popin="4"
+      aria-label="Shipments, touch"
+      aria-rowcount="5"
+      aria-colcount="4"
+      style="
+        --slotted-data-grid-template: 112px minmax(96px, 1fr) 120px;
+        --slotted-control-height-md: 44px;
+      "
+    >
+      <div data-part="scroll">
+        <div data-part="head" role="rowgroup">
+          <div data-part="header-row" role="row" aria-rowindex="1">
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="1"
+              data-pinned="start"
+              data-pin-edge
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="2"
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div
+              data-part="column-header"
+              role="columnheader"
+              aria-colindex="3"
+              data-sortable
+              tabindex="-1"
+              style="--slotted-data-grid-column: 3"
+              data-numeric
+            >
+              <span>Cost</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
+              <div data-part="resizer" aria-hidden="true"></div>
+            </div>
+            <div data-part="popin-header" role="columnheader" aria-colindex="4">Details</div>
+          </div>
+        </div>
+        <div data-part="body" role="rowgroup">
+          <div data-part="row" role="row" aria-rowindex="2" data-row="SHP-20481">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20481">SHP-20481</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Aurora Textiles">Aurora Textiles</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 1,240.00">€ 1,240.00</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Porto, PT">Porto, PT</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="142.5 kg">142.5 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="12/09/2026">12/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Fragile, keep upright">Fragile, keep upright</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="3" data-row="SHP-20482">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20482">SHP-20482</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Hoffmann &amp; Söhne Industriebedarf GmbH"
+                >Hoffmann &amp; Söhne Industriebedarf GmbH</span
+              >
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 12,480.00">€ 12,480.00</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Mönchengladbach, DE">Mönchengladbach, DE</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="1,142.5 kg">1,142.5 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="13/09/2026">13/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate"><span title=""></span></div>
+              </div>
+            </div>
+          </div>
+          <div data-part="row" role="row" aria-rowindex="4" data-row="SHP-20483">
+            <div
+              data-part="row-header"
+              role="rowheader"
+              aria-colindex="1"
+              tabindex="-1"
+              data-pinned="start"
+              data-pin-edge
+              data-text="truncate"
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span title="SHP-20483">SHP-20483</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="2"
+              tabindex="-1"
+              data-text="truncate"
+              style="--slotted-data-grid-column: 2"
+            >
+              <span title="Bloom &amp; Co.">Bloom &amp; Co.</span>
+            </div>
+            <div
+              data-part="cell"
+              role="gridcell"
+              aria-colindex="3"
+              tabindex="-1"
+              data-numeric
+              data-text="truncate"
+              style="--slotted-data-grid-column: 3"
+            >
+              <span title="€ 96.40">€ 96.40</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              data-column="$popin"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="dest">
+                <span data-part="popin-label">Destination</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Lyon, FR">Lyon, FR</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="18.2 kg">18.2 kg</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="shipped">
+                <span data-part="popin-label">Shipped</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="14/09/2026">14/09/2026</span>
+                </div>
+              </div>
+              <div data-part="popin-field" data-field="notes">
+                <span data-part="popin-label">Notes</span>
+                <div data-part="popin-value" data-text="truncate">
+                  <span title="Awaiting the commercial invoice from the sender before release"
+                    >Awaiting the commercial invoice from the sender before release</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-part="summary" role="rowgroup">
+          <div role="row" aria-rowindex="5">
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="1"
+              data-pinned="start"
+              data-pin-edge
+              style="--slotted-data-grid-column: 1; --slotted-data-grid-pin-offset: 0px"
+            >
+              <span data-label>Total</span>
+            </div>
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="2"
+              style="--slotted-data-grid-column: 2"
+            ></div>
+            <div
+              data-part="summary-cell"
+              role="gridcell"
+              aria-colindex="3"
+              data-numeric
+              style="--slotted-data-grid-column: 3"
+            >
+              <span>€ 13,816.40</span>
+            </div>
+            <div
+              data-part="popin"
+              role="gridcell"
+              aria-colindex="4"
+              tabindex="-1"
+              style="--slotted-data-grid-column: 1 / -1"
+            >
+              <div data-part="popin-field" data-field="weight">
+                <span data-part="popin-label">Weight</span>
+                <div data-part="popin-value"><span>1,303.2 kg</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!--
   The three things a body can hold instead of rows — nothing at all, nothing
   after the filter, and an error — and the first load's skeleton.
 -->
@@ -6080,7 +8466,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Site</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Site</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -6090,7 +8480,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Kind</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Kind</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -6101,7 +8495,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Stock</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Stock</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -6131,7 +8529,11 @@
               tabindex="-1"
               aria-expanded="true"
               aria-label="Collapse"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
             <span>Portugal</span>
           </div>
           <div
@@ -6170,7 +8572,11 @@
               tabindex="-1"
               aria-expanded="true"
               aria-label="Collapse"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
             <span>Lisboa</span>
           </div>
           <div
@@ -6283,7 +8689,11 @@
               aria-expanded="true"
               aria-label="Collapse"
               data-loading
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="loader-circle"></svg
+              ></span>
+            </button>
             <span>Porto</span>
           </div>
           <div
@@ -6322,7 +8732,11 @@
               tabindex="-1"
               aria-expanded="false"
               aria-label="Expand"
-            ></button>
+            >
+              <span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-right"></svg
+              ></span>
+            </button>
             <span>España</span>
           </div>
           <div
@@ -6374,7 +8788,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6384,7 +8802,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6394,7 +8816,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Destination</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6405,7 +8831,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Weight</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6415,7 +8845,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Status</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
           </div>
@@ -6467,7 +8901,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6477,7 +8915,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6487,7 +8929,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Destination</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6498,7 +8944,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Weight</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6509,7 +8959,11 @@
               tabindex="-1"
               data-filtered
             >
-              <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Status</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
           </div>
@@ -6573,7 +9027,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6583,7 +9041,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6593,7 +9055,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Destination</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6604,7 +9070,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Weight</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6614,7 +9084,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Status</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
           </div>
@@ -6677,7 +9151,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6687,7 +9165,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6697,7 +9179,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Destination</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6708,7 +9194,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Weight</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6718,7 +9208,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Status</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
           </div>
@@ -6986,7 +9480,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -6996,7 +9494,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7006,7 +9508,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Destination</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7017,7 +9523,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Weight</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7027,7 +9537,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Status</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
           </div>
@@ -7203,7 +9717,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7213,7 +9731,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7223,7 +9745,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Destination</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7234,7 +9760,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Weight</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7244,7 +9774,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Status</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
           </div>
@@ -7421,7 +9955,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Tracking</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7431,7 +9969,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Customer</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7441,7 +9983,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Destination</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7452,7 +9998,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Weight</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
             <div
@@ -7462,7 +10012,11 @@
               data-sortable
               tabindex="-1"
             >
-              <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+              <span>Status</span
+              ><span data-part="sort" aria-hidden="true"
+                ><span data-ui="icon" data-part="root" aria-hidden="true"
+                  ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+              ></span>
               <div data-part="resizer" aria-hidden="true"></div>
             </div>
           </div>
@@ -7694,7 +10248,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -7704,7 +10262,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -7714,7 +10276,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -7725,7 +10291,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>
@@ -7850,7 +10420,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Tracking</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Tracking</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -7860,7 +10434,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Customer</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Customer</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -7870,7 +10448,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Destination</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Destination</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -7881,7 +10463,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Weight</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Weight</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
           <div
@@ -7891,7 +10477,11 @@
             data-sortable
             tabindex="-1"
           >
-            <span>Status</span><span data-part="sort" aria-hidden="true"></span>
+            <span>Status</span
+            ><span data-part="sort" aria-hidden="true"
+              ><span data-ui="icon" data-part="root" aria-hidden="true"
+                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            ></span>
             <div data-part="resizer" aria-hidden="true"></div>
           </div>
         </div>

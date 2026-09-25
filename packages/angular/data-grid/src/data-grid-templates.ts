@@ -25,6 +25,18 @@ export class SlDataGridHeaderTemplate {
   readonly template = inject(TemplateRef);
 }
 
+/**
+ * A column's help, opened from its column-help button in a popover under the
+ * column's `description`. Named by column: a help for every column is a
+ * description, and `GridColumn.description` already says that.
+ */
+@Directive({ selector: 'ng-template[slDataGridColumnHelp]', standalone: true })
+export class SlDataGridColumnHelp {
+  /** The column id. */
+  readonly slDataGridColumnHelp = input.required<string>();
+  readonly template = inject(TemplateRef);
+}
+
 @Directive({ selector: 'ng-template[slDataGridFilter]', standalone: true })
 export class SlDataGridFilterTemplate {
   readonly slDataGridFilter = input<string>('');

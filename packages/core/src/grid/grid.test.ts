@@ -168,6 +168,18 @@ describe('columns', () => {
     expect(columnTemplate(resolved, [48])).toBe('48px 100px minmax(60px, 1fr)');
   });
 
+  /** A resize writes a width; a flex track ignores one, so the drag moved nothing. */
+  it('fixes a flex column once the reader has given it a width', () => {
+    const model = [
+      { id: 'a', label: 'A', width: 100 },
+      { id: 'b', label: 'B', flex: 1, minWidth: 60 },
+    ];
+    const state = withColumnWidth(normalizeColumnState(null, model), model[1]!, 320);
+    const resolved = resolveColumns(model, state);
+    expect(resolved[1]!.flex).toBe(undefined);
+    expect(columnTemplate(resolved)).toBe('100px 320px');
+  });
+
   it('clamps a resize to the column’s bounds', () => {
     const state = withColumnWidth(emptyColumnState(), columns[3]!, 500);
     expect(state.widths['weight']).toBe(200);
@@ -275,9 +287,12 @@ describe('view', () => {
         ...emptyQuery({ index: 2, size: 25 }),
         sort: [{ column: 'weight', direction: 'descending' as const }],
       },
+      density: null,
     };
     const text = serializeGridView(view, columns);
-    expect(text).toBe('sort=weight%3Adesc&page=3&size=25&columns=w%3Dweight%3A120%3Bh%3Dpriority');
+    expect(text).toBe(
+      'sort=weight%3Adesc&page=3&size=25&columns=w%3Dweight%3A120%3Bh%3Dpriority&v=1',
+    );
     expect(parseGridView(text, columns)).toEqual(view);
     expect(serializeGridView(emptyGridView(), columns)).toBe('');
     expect(parseGridView('%%%garbage')).toEqual(emptyGridView());

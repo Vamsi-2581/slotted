@@ -16,6 +16,7 @@ export {
 } from './data-grid-controls';
 export {
   SlDataGridCellTemplate,
+  SlDataGridColumnHelp,
   SlDataGridDetailTemplate,
   SlDataGridEditorTemplate,
   SlDataGridEmptyTemplate,
@@ -36,6 +37,7 @@ export {
 export type {
   DataGridActivateEvent,
   DataGridCellContext,
+  DataGridColumnOverflow,
   DataGridColumnStateRequest,
   DataGridDataSource,
   DataGridDataSourceResult,

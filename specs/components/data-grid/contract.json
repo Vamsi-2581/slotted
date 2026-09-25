@@ -20,8 +20,11 @@
     "column-group": "div",
     "column-header": "div",
     "sort": "span",
+    "column-description": "span",
     "column-actions": "span",
+    "column-help": "button",
     "column-menu": "button",
+    "column-menu-description": "div",
     "resizer": "div",
     "drop-indicator": "div",
     "filter-row": "div",
@@ -42,6 +45,11 @@
     "selection": "div",
     "expander": "button",
     "detail": "div",
+    "popin-header": "div",
+    "popin": "div",
+    "popin-field": "div",
+    "popin-label": "span",
+    "popin-value": "div",
     "group-row": "div",
     "group-toggle": "button",
     "tree-toggle": "button",
@@ -67,11 +75,13 @@
     "group-row": "row",
     "column-group": "columnheader",
     "column-header": "columnheader",
+    "popin-header": "columnheader",
     "row-header": "rowheader",
     "cell": "gridcell",
     "filter-cell": "gridcell",
     "selection": "gridcell",
-    "summary-cell": "gridcell"
+    "summary-cell": "gridcell",
+    "popin": "gridcell"
   },
   "composes": [
     "state",
@@ -100,7 +110,7 @@
   "data": {
     "rows": "the consumer's array, read every render; the family never mutates it",
     "rowKey": "a field name or a function of the row; the key survives sorting, filtering, windowing and editing, and every state model names rows by it",
-    "columns": "GridColumn[]: id, label, kind, accessor, format, compare, align, numeric, text, width, minWidth, maxWidth, flex, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse",
+    "columns": "GridColumn[]: id, label, description, kind, accessor, format, compare, align, numeric, text, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse",
     "columnGroups": "GridColumnGroup[]: id, label and the ids it spans, drawn as a header row above the columns with aria-colspan",
     "kind": "a FilterKind of @slotted/core/filter — text, number, date, time, datetime, boolean, set — or actions or custom. It decides the operators, the comparator, the default alignment, the default editor and whether the column is searchable.",
     "accessor": "accessor(row) gives the domain value; format(value, row) gives the text. Sorting and filtering read the value; the cell draws the text. §2.9: a number, a currency and a date are values, not strings.",
@@ -134,11 +144,14 @@
     "capability": "columns, added to the shared vocabulary by this family",
     "change": "the request carries change: order | width | hidden | pinned beside the reason",
     "normalizes": "a state naming a column that no longer exists is normalised silently, because a saved view survives a removed column; a column the state does not name takes the model's own order and width",
-    "resize": "the resizer on every resizable column's trailing edge, by pointer; Ctrl+Shift+ArrowLeft/Right by a step of --slotted-data-grid-resize-step with the cursor on the header, announced as the column and its width; Escape during a pointer drag restores. Bounded by minWidth and maxWidth. A double press on the resizer and Ctrl+Shift+Enter autofit the column to the cells in the DOM.",
+    "rowWidth": "a row is as wide as the frame, or as the template's minimum — the fixed widths and the flexible columns' floors — when that is wider, and then the frame scrolls. A flexible column never widens the row past the frame for a long value: the value truncates in its cell, which is what text: truncate promises. A column with flex takes every pixel the frame has left; the filler track after the template stretches only where no column flexes.",
+    "resize": "the resizer on every resizable column's trailing edge, by pointer; Ctrl+Shift+ArrowLeft/Right by a step of --slotted-data-grid-resize-step with the cursor on the header, announced as the column and its width; Escape during a pointer drag restores. Bounded by minWidth and maxWidth. A double press on the resizer and Ctrl+Shift+Enter autofit the column to the cells in the DOM; Shift with the double press, and the menu's Fit all columns, fit every resizable column in one request with change: width. The reason is pointer for a double press and for a menu item chosen by pointer, keyboard for Ctrl+Shift+Enter and for a menu item chosen by keyboard, programmatic for autofit() on the handle.",
     "reorder": "@slotted/core/drag: one horizontal container per pin zone, between targets, the header as the draggable and the handle; Alt+ArrowLeft/Right on the header is moveBy. A column never leaves its zone by dragging, because the zone is a fact of the state and a drop that changed two things would carry two reasons.",
     "pin": "by the column menu, and by the state. A pinned column is position: sticky with the summed width of the pinned columns before it as its inset; a header cell that is also pinned takes both offsets and the highest stacking step.",
-    "hide": "by the column menu, and by the state. A hidden column leaves the DOM and the track; aria-colcount counts the visible columns of the model, so the numbers a reader hears are the columns they can reach.",
-    "manager": "column-manager in wave 10 edits this object; until then the menu hides a column and the consumer writes the control that shows it again",
+    "hide": "by the column menu, and by the state. A hidden column leaves the DOM and the track; aria-colcount counts the visible columns of the model, so the numbers a reader hears are the columns they can reach. The menu's hide announces labels.columnHidden; the undo is the application's: a toast whose action restores the previous of the change: hidden request.",
+    "manager": "the application wires manageColumns (Angular) or onManageColumns (React), which the menu's Manage columns item calls, to column-manager, which edits this object; the grid does not compose it",
+    "priority": "a column yields to a frame too narrow for the template by its priority, the lower the longer it stays: a ResizeObserver on the scroller reads its inner width, and columnsOutOfSpace of @slotted/core/grid takes out first the columns without a priority, the last declared first, then the numbered ones, the highest first and the later declared on a tie, until the rest fit with the gutters. The identity column — the first with rowHeader, else the first that is not actions — and an actions column never leave; when only those remain the frame scrolls. The result is outOfSpace, { popin, hidden }: a column with popin: false is hidden, every other one moves into the row's pop-in. Both leave the header, the filter row, the column menu and the track; aria-colcount counts the rest and the pop-in's column. It is never in columnState, never persisted and never a columnStateChangeRequest; Angular exposes the outOfSpace signal and the outOfSpaceChange output, React onOutOfSpaceChange and handle.getOutOfSpace(). columnOverflow settles first: resolveColumnOverflow of @slotted/core/grid turns auto into popin when the frame is narrower than COMPACT_BELOW (600px), or narrower than EXPANDED_FROM (1024px) while matchMedia answers (pointer: coarse), and into scroll elsewhere; the bindings listen to the query's change, and a render without matchMedia reads a fine pointer. popin takes columns out at any width; scroll takes no column out. The width read is the frame's, which does not depend on either set, so the measure never loops.",
+    "popin": "while outOfSpace.popin is not empty the root carries data-popin with its count, and every record's row — held rows included — ends with a popin gridcell whose aria-colindex is the last: grid-column 1 / -1 on the row's second line, sticky at inset-inline-start 0 and max-inline-size 100cqi as the detail is, its fields starting after the gutters at --slotted-data-grid-leading. The header row ends with popin-header, a visually hidden columnheader named labels.popinHeader, with no track. Each column in the pop-in is a popin-field of a popin-label, the column's label (none for an empty one), over a popin-value drawn by the same cell template or renderer with the same context; an editable column is read only there. The summary row's pop-in holds the totals of the columns in it that aggregate. Rows are measured one by one, as rowHeight auto, and --slotted-data-grid-row-max-block-size caps the values' line and not the pop-in's.",
     "serialization": "serializeColumnState and parseColumnState round-trip the object through a string; parsing is total"
   },
   "cursor": {
@@ -148,7 +161,8 @@
     "focusInside": "the two optimal combinations of the pattern, applied by rule: a cell whose content is exactly one focusable element that takes no arrow keys — a, button, input[type=checkbox], [role=switch], [role=button] — receives focus on that element; any other cell receives it on itself, Enter and F2 enter it, Escape leaves it, and Tab inside cycles the cell's widgets without leaving the cell",
     "survives": "when the current row disappears — a filter, a removal, a page — the cursor stays at the same row index or the last, in the same column; on an empty set focus goes to the empty part. The grid never drops focus to the document.",
     "mounts": "a key that moves the cursor to a row outside the virtual window scrolls the window so the row is mounted, then focuses it",
-    "paints": "data-current on the cell and on its row; the ring is drawn inward, because a cell has no margin for an outer ring and the next row would cover it. Without focus the cursor stays at 60% so a reader returning from a popover finds where they were; with :focus-visible it is whole."
+    "paints": "data-current on the cell and on its row; the ring is drawn inward, because a cell has no margin for an outer ring and the next row would cover it. Without focus the cursor stays at 60% so a reader returning from a popover finds where they were; with :focus-visible it is whole.",
+    "popin": "POPIN_COLUMN_ID is the last column the cursor walks while the pop-in is drawn; on a row without a pop-in — the header, the filter row, a group row — it is that row's last visible column. Enter on the pop-in enters its widgets or activates the row, as on any cell; a column that moves into the pop-in takes the cursor with it."
   },
   "selection": {
     "module": "packages/core/src/collection",
@@ -169,7 +183,7 @@
   },
   "activation": {
     "event": "onActivate(key, { reason, event })",
-    "when": "a double press on a cell that does not edit, or Enter on a text cell of a row while activatable is true; with activatable and an editable cell, Enter edits and the double press activates",
+    "when": "a double press on a cell that does not edit, or Enter on a text cell of a row while activatable is true; with activatable and an editable cell, Enter edits and the double press activates. A single press whose pointerdown was touch or pen activates with reason pointer, unless it landed on a widget in the cell or on a cell in edit; the dblclick within 500ms after that activation is ignored. The mouse keeps the double press",
     "notState": "nothing stays, so it is an event and not a model; it is the fourth capability table deferred here by name, because a tr cannot be a widget and a grid cell can"
   },
   "editing": {
@@ -252,6 +266,17 @@
     "columns": "position: sticky with inset-inline-start or inset-inline-end, so a right-to-left document mirrors it",
     "corner": "a header cell that is also pinned takes both offsets and the highest stacking step, stated once"
   },
+  "controls": {
+    "size": "the family's own controls — the column help, the column menu, the filter trigger, the expander, the group toggle, the row handle — are --slotted-target-min square where the row has room, and the row less the cursor's ring where it has not (dense). On a coarse pointer, where the control scale has grown the row to the comfortable target, they grow with it to the row less the ring: a 24-pixel button in a 44-pixel row is a target a thumb misses. Their box reaches the comfortable target by a padding their ground does not paint, given back as a negative margin, so the ground keeps the ring's room and no row moves.",
+    "revealed": "the column menu, the filter trigger and a cell's actions are revealed by hover and by the cursor, and always shown on a coarse pointer, where there is no hover. The column help is always shown: it marks that the column has something to say, and a mark that appears on hover is one a coarse pointer never sees.",
+    "help": "the column help opens a popover by click, Enter and Space, never by hover; the popover holds the description and the help template or node, and it is a portal outside the root, so it stays at the page's density",
+    "contextMenu": "a contextmenu on a data column's header opens its column menu, beside the column-menu button and Ctrl+Enter: from a pointer, a long press included, at the event's coordinates through the menu's point anchor, reason pointer; from Shift+F10 or the Menu key, anchored to the header cell, reason keyboard, and the contextmenu Windows fires within 300ms after is its echo. The event is prevented only when the menu opens. The browser's menu stays under Shift and on an editable target — the filter row, an editor, a contenteditable; the gutters and popin-header open nothing. The button resets the anchor to itself."
+  },
+  "composition": {
+    "columnManager": "the application opens column-manager from manageColumns (Angular) or onManageColumns (React) and binds it to the same columnState the grid reads; the grid draws the menu item and nothing of the manager",
+    "columnHelp": "popover holds a column's help, anchored on the column-help button",
+    "undoHide": "toast with an Undo action that writes the previous of the change: hidden request back to columnState"
+  },
   "aggregates": {
     "functions": ["sum", "avg", "min", "max", "count"],
     "custom": "a function of the column's values",
@@ -261,14 +286,14 @@
   "wiring": {
     "aria-label": "the consumer's, required by the types as label or labelledBy: a grid with no name is a widget a reader cannot find",
     "aria-labelledby": "the consumer's",
-    "aria-describedby": "the consumer's, passed through untouched; the family appends the drag instructions id on a reorderable header",
+    "aria-describedby": "the consumer's, passed through untouched on the root. A column header with a description is described by its column-description, a visually hidden span holding the text, written before the drag instructions id a reorderable header appends; the column menu is described by the same span, and draws the text as column-menu-description, aria-hidden",
     "aria-sort": "on the first sort key's header, and on no other",
     "aria-selected": "on a selected row, and on every cell of a range",
     "aria-multiselectable": "true on the root in multiple and range",
     "aria-readonly": "on the root when no column edits; on a cell that does not edit when others do",
     "aria-rowcount": "the query's total, or -1 when unknown, always",
     "aria-rowindex": "on every row, counting the header rows first, always",
-    "aria-colcount": "the visible columns of the model, always",
+    "aria-colcount": "the visible columns of the model, and the pop-in's column while the pop-in is drawn, always",
     "aria-colindex": "on every cell, always, because the DOM never holds every column",
     "aria-colspan": "on a column group, a detail cell and a group row's cell",
     "aria-level": "on a group row",
@@ -446,6 +471,20 @@
       "source": "departure"
     },
     {
+      "key": "Shift+F10",
+      "where": "on a column header",
+      "effect": "opens the column menu anchored to the header cell; the Menu key does the same",
+      "focus": "the first item of the menu, then back to the header",
+      "source": "platform"
+    },
+    {
+      "key": "F2",
+      "where": "on a column header",
+      "effect": "enters the header cell and focuses the first widget of column-actions — the column help, the filter trigger or the column menu; Tab and Shift+Tab cycle the cell's widgets, Escape or a second F2 returns to the cell. Enter on the header still sorts",
+      "focus": "the first widget of column-actions, then the cell",
+      "source": "pattern-inside"
+    },
+    {
       "key": "Ctrl+Shift+ArrowRight",
       "where": "on a column header",
       "effect": "widens the column by one step, announced",
@@ -558,10 +597,6 @@
       "deferTo": "filter-bar",
       "reason": "nesting and groups are section 12's Filter Builder; the grid evaluates them and does not edit them"
     },
-    "columnManagerPanel": {
-      "deferTo": "column-manager",
-      "reason": "wave 10; the grid exposes columnState, which is what that panel edits"
-    },
     "dragBetweenPinZones": {
       "composition": "the column menu pins and unpins",
       "reason": "the zone is a fact of the state; a drop that changed both position and zone would carry two reasons"
@@ -610,12 +645,16 @@
     "sortDescendingAction": "Sort descending",
     "sortClearAction": "Remove sort",
     "columnMenu": "Column menu",
+    "columnHelp": "About {column}",
     "pinStart": "Pin to start",
     "pinEnd": "Pin to end",
     "unpin": "Unpin",
     "hide": "Hide column",
+    "columnHidden": "{column} hidden",
     "autofit": "Fit to content",
+    "autofitAll": "Fit all columns",
     "manageColumns": "Manage columns",
+    "popinHeader": "Details",
     "resized": "{column}, {width} pixels",
     "resize": "Resize column",
     "reorderRow": "Reorder {row}",
@@ -707,10 +746,12 @@
     "mode": ["client", "server"],
     "filterRow": [true, false],
     "virtualize": ["auto", true, false],
+    "columnOverflow": ["auto", "popin", "scroll"],
     "activatable": [true, false],
     "align": ["start", "center", "end"],
     "numeric": [true, false],
-    "text": ["wrap", "truncate", "nowrap"]
+    "text": ["wrap", "truncate", "nowrap"],
+    "density": ["comfortable", "compact", "dense"]
   },
   "resolution": {
     "variant": ["prop", "defaults", "ruled"],
@@ -722,10 +763,12 @@
     "mode": ["prop", "inferred from totalCount or hasMore", "client"],
     "filterRow": ["prop", "defaults", false],
     "virtualize": ["prop", "defaults", "auto"],
+    "columnOverflow": ["prop", "defaults", "auto"],
     "activatable": ["prop", "defaults", false],
     "align": ["column", "kind", "start"],
     "numeric": ["column", "kind", false],
-    "text": ["column", "defaults", "truncate"]
+    "text": ["column", "defaults", "truncate"],
+    "density": ["prop", "page", null]
   },
   "provides": {
     "dataGridDefaults": [
@@ -828,6 +871,7 @@
         "editMode": "cell",
         "filterRow": false,
         "virtualize": "auto",
+        "columnOverflow": "auto",
         "activatable": false,
         "align": "start",
         "numeric": false,
@@ -879,8 +923,11 @@
         "column-group",
         "column-header",
         "sort",
+        "column-description",
         "column-actions",
+        "column-help",
         "column-menu",
+        "column-menu-description",
         "resizer",
         "drop-indicator",
         "filter-row",
@@ -901,6 +948,11 @@
         "selection",
         "expander",
         "detail",
+        "popin-header",
+        "popin",
+        "popin-field",
+        "popin-label",
+        "popin-value",
         "group-row",
         "group-toggle",
         "tree-toggle",
@@ -933,8 +985,10 @@
       "pinning",
       "resize",
       "reorder",
+      "column-help",
       "column-menu",
       "column-state",
+      "undo-hide",
       "grouping",
       "summary",
       "detail",
@@ -946,6 +1000,7 @@
       "variant",
       "text",
       "density",
+      "responsive-priority",
       "content",
       "media",
       "realtime",

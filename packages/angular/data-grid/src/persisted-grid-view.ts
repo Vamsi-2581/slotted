@@ -6,17 +6,14 @@ import {
   serializeGridView,
   type GridColumn,
   type GridColumnState,
+  type GridDensity,
   type GridQuery,
   type GridView,
   type GridViewOptions,
+  type GridViewStorage,
 } from '@slotted/core/grid';
 
-/** What `localStorage` and `sessionStorage` are, and what a consumer's own store answers. */
-export interface GridViewStorage {
-  getItem(key: string): string | null;
-  setItem(key: string, value: string): void;
-  removeItem(key: string): void;
-}
+export type { GridViewStorage } from '@slotted/core/grid';
 
 export interface PersistedGridViewOptions<Row> extends GridViewOptions {
   /** The entry the view is kept under. */
@@ -28,6 +25,8 @@ export interface PersistedGridViewOptions<Row> extends GridViewOptions {
   /** What the view is before anything was saved, and after `reset`. */
   readonly defaultQuery?: GridQuery | undefined;
   readonly defaultColumnState?: Partial<GridColumnState> | undefined;
+  /** The density before anything was saved, and after `reset`. Default `null`: the page's. */
+  readonly defaultDensity?: GridDensity | null | undefined;
   /** Required outside an injection context. */
   readonly injector?: Injector | undefined;
 }
@@ -37,6 +36,8 @@ export interface PersistedGridView {
   readonly query: WritableSignal<GridQuery>;
   /** Bind with `[(columnState)]`. */
   readonly columnState: WritableSignal<GridColumnState>;
+  /** Bind with `[density]`; `null` inherits the page's density. */
+  readonly density: WritableSignal<GridDensity | null>;
   /** Back to the defaults, and the entry removed. */
   reset(): void;
 }
@@ -50,9 +51,9 @@ function defaultStorage(): GridViewStorage | null {
 }
 
 /**
- * The reader's view of a grid, kept across visits: the column state and the
- * query, read once from the store and written after every change. Two
- * writable signals for the grid's two-way bindings. The store is reached
+ * The reader's view of a grid, kept across visits: the column state, the
+ * query and the density, read once from the store and written after every change. Three
+ * writable signals for the grid's bindings. The store is reached
  * inside `try` both ways — a private window that refuses, a quota that is
  * full and a server that has no window all leave the view in memory.
  */
@@ -62,6 +63,7 @@ export function persistedGridView<Row>({
   storage,
   defaultQuery,
   defaultColumnState,
+  defaultDensity,
   injector,
   ...options
 }: PersistedGridViewOptions<Row>): PersistedGridView {
@@ -69,6 +71,7 @@ export function persistedGridView<Row>({
   const defaults: GridView = {
     columns: normalizeColumnState(defaultColumnState ?? null, columns),
     query: defaultQuery ?? emptyGridView(options.defaultPageSize).query,
+    density: defaultDensity ?? null,
   };
   let text: string | null;
   try {
@@ -85,10 +88,12 @@ export function persistedGridView<Row>({
          the application's, and an older entry may predate paging. */
       query:
         saved.query.page === null ? { ...saved.query, page: defaults.query.page } : saved.query,
+      density: saved.density ?? defaults.density,
     };
   }
   const query = signal<GridQuery>(initial.query);
   const columnState = signal<GridColumnState>(initial.columns);
+  const density = signal<GridDensity | null>(initial.density);
 
   /* The first run is the read; every run after is a change to write, except
      the one a reset causes. */
@@ -96,7 +101,7 @@ export function persistedGridView<Row>({
   let skip = false;
   effect(
     () => {
-      const view: GridView = { query: query(), columns: columnState() };
+      const view: GridView = { query: query(), columns: columnState(), density: density() };
       if (!settled || skip) {
         settled = true;
         skip = false;
@@ -119,14 +124,19 @@ export function persistedGridView<Row>({
   return {
     query,
     columnState,
+    density,
     /* The defaults are what an empty store means, so the entry goes rather
        than being rewritten as the defaults. */
     reset: () => {
       /* A signal set to the object it holds notifies nothing, so the skip is
          armed only when the effect will run. */
-      skip = query() !== defaults.query || columnState() !== defaults.columns;
+      skip =
+        query() !== defaults.query ||
+        columnState() !== defaults.columns ||
+        density() !== defaults.density;
       query.set(defaults.query);
       columnState.set(defaults.columns);
+      density.set(defaults.density);
       try {
         store?.removeItem(key);
       } catch {

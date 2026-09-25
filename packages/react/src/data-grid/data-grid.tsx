@@ -9,6 +9,7 @@ import {
   applyQuery,
   cellText,
   cellValue,
+  columnsOutOfSpace,
   toCsv,
   columnRange,
   columnTemplate,
@@ -19,11 +20,13 @@ import {
   isGroupCursorRow,
   moveCursor,
   normalizeColumnState,
+  POPIN_COLUMN_ID,
   rangeBounds,
   rangeCells,
   rangeEdges,
   rangeToText,
   RESIZE_STEP,
+  resolveColumnOverflow,
   resolveColumns,
   rowRange,
   sameCell,
@@ -45,6 +48,7 @@ import {
   type GridColumn,
   type GridColumnState,
   type GridNode,
+  type GridOutOfSpace,
   type GridQuery,
   type GridRange,
   type ResolvedGridColumn,
@@ -52,6 +56,7 @@ import {
 } from '@slotted/core/grid';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createScrollAffordance } from '@slotted/core/overflow';
+import type { PositionerAnchor } from '@slotted/core/positioner';
 import {
   useCallback,
   useEffect,
@@ -80,6 +85,7 @@ import {
 } from './data-grid-body';
 import {
   DataGridInternalContext,
+  type ColumnMenuAnchor,
   type DataGridInternal,
   type EditSession,
 } from './data-grid-context';
@@ -118,6 +124,24 @@ const VIRTUALIZE_COLUMNS_FROM = 20;
 /** The viewport assumed until the scroller is measured. */
 const PROVISIONAL_VIEWPORT = 600;
 const COLUMN_OVERSCAN_PX = 400;
+/** The out-of-space set of a frame not measured yet, or of a grid that scrolls instead. */
+const NONE_OUT: GridOutOfSpace = { popin: [], hidden: [] };
+/** Where a secondary press is the field's own: the browser's menu cuts, copies and pastes. */
+const EDITABLE = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+/**
+ * The window after a keyboard opening of a column menu in which a
+ * `contextmenu` is the one Windows fires for the key, not a second press:
+ * `context-menu`'s technique.
+ */
+const KEYBOARD_ECHO = 300;
+/** Milliseconds after a touch activation in which the `dblclick` the browser adds is ignored. */
+const TOUCH_ECHO = 500;
+
+/** A rectangle with no size at the point the reader pressed. */
+function pointAnchor(x: number, y: number): PositionerAnchor {
+  const rect = new DOMRect(x, y, 0, 0);
+  return { getBoundingClientRect: () => rect };
+}
 
 function sameQuery(a: GridQuery, b: GridQuery) {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -159,6 +183,8 @@ function contentWidth(cell: HTMLElement): number {
   let count = 0;
   for (const child of cell.children) {
     if (!(child instanceof HTMLElement) || getComputedStyle(child).display === 'none') continue;
+    /* The description is read, not drawn: it asks for no room. */
+    if (child.dataset['part'] === 'column-description') continue;
     count += 1;
     if (count === 1 && child.dataset['ui'] === undefined) {
       const range = cell.ownerDocument.createRange();
@@ -175,10 +201,12 @@ export function DataGrid<Row>({
   activatable,
   cellRenderers,
   columnGroups,
+  columnOverflow,
   dataSource,
   columnState: columnStateProp,
   columns,
   current: currentProp,
+  density,
   defaultColumnState,
   defaultCurrent,
   defaultExpanded,
@@ -220,6 +248,7 @@ export function DataGrid<Row>({
   onKeyDown,
   onLoadMore,
   onManageColumns,
+  onOutOfSpaceChange,
   onQueryChange,
   onRangeChange,
   onRetry: givenOnRetry,
@@ -279,6 +308,7 @@ export function DataGrid<Row>({
   const resolvedFilterRow = filterRow ?? defaults.filterRow ?? false;
   const resolvedVirtualize = virtualize ?? defaults.virtualize ?? 'auto';
   const resolvedRowHeight = rowHeight ?? defaults.rowHeight;
+  const resolvedColumnOverflow = columnOverflow ?? defaults.columnOverflow ?? 'auto';
   const resolvedOverscan = overscan ?? defaults.overscan ?? 6;
   const resolvedDebounce = filterDebounce ?? defaults.filterDebounce ?? 300;
   const resolvedThreshold = loadMoreThreshold ?? defaults.loadMoreThreshold ?? 20;
@@ -402,10 +432,70 @@ export function DataGrid<Row>({
     return list;
   }, [hasSelectionColumn, hasDragColumn, hasExpanderColumn]);
   const leading = gutters.reduce((sum, width) => sum + width, 0);
-  const resolved = useMemo(
+  /* Every column the reader has not hidden, before the frame's width is asked. */
+  const layout = useMemo(
     () => resolveColumns(columns, effectiveState, { leading }),
     [columns, effectiveState, leading],
   );
+  /* The scroller's inner width; 0 until it is measured, and nothing is taken out before. */
+  const [frameWidth, setFrameWidth] = useState(0);
+  /* Whether the main pointer is coarse — a finger — read again when it
+     changes: a tablet docked to a mouse leaves the pop-in for the sideways
+     scroll. A render without `matchMedia` reads a fine one. */
+  const [coarsePointer, setCoarsePointer] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const query = window.matchMedia('(pointer: coarse)');
+    const read = () => setCoarsePointer(query.matches);
+    read();
+    query.addEventListener('change', read);
+    return () => query.removeEventListener('change', read);
+  }, []);
+  /* The columns a frame too narrow for the template has taken out, by their
+     `priority`: those drawn in each row's pop-in, and those that declined it
+     with `popin: false`. Read from the frame's width, which neither set
+     changes, so the measure never loops. Never in `columnState`. Empty while
+     `columnOverflow` settles to `scroll`. The object is kept while its
+     members are the same, so nothing downstream re-runs. */
+  const outNow =
+    frameWidth <= 0 ||
+    resolveColumnOverflow(resolvedColumnOverflow, frameWidth, coarsePointer) === 'scroll'
+      ? NONE_OUT
+      : columnsOutOfSpace(layout, frameWidth, { leading });
+  const outKey = `${outNow.popin.join('\u0000')}\u0001${outNow.hidden.join('\u0000')}`;
+  const outOfSpace = useMemo<GridOutOfSpace>(() => outNow, [outKey]);
+  const resolved = useMemo(
+    () =>
+      outOfSpace.popin.length === 0 && outOfSpace.hidden.length === 0
+        ? layout
+        : resolveColumns(
+            columns,
+            {
+              ...effectiveState,
+              hidden: [...effectiveState.hidden, ...outOfSpace.popin, ...outOfSpace.hidden],
+            },
+            { leading },
+          ),
+    [layout, outOfSpace, columns, effectiveState, leading],
+  );
+  /* The columns drawn in each row's pop-in, in the order of the resolved columns. */
+  const popinColumns = useMemo(
+    () =>
+      outOfSpace.popin.length === 0
+        ? []
+        : layout.filter((column) => outOfSpace.popin.includes(column.id)),
+    [layout, outOfSpace],
+  );
+  const hasPopin = popinColumns.length > 0;
+  /* The sets a narrow frame took out, reported when either changes. */
+  const reportedSpace = useRef<GridOutOfSpace>(NONE_OUT);
+  useEffect(() => {
+    const reported = reportedSpace.current;
+    if (sameKeys(outOfSpace.popin, reported.popin) && sameKeys(outOfSpace.hidden, reported.hidden))
+      return;
+    reportedSpace.current = outOfSpace;
+    onOutOfSpaceChange?.(outOfSpace);
+  }, [outOfSpace, onOutOfSpaceChange]);
   const resolvedById = useMemo(
     () => new Map(resolved.map((column) => [column.id, column])),
     [resolved],
@@ -418,6 +508,14 @@ export function DataGrid<Row>({
       ...resolved.map((column) => column.id),
     ],
     [hasSelectionColumn, hasDragColumn, hasExpanderColumn, resolved],
+  );
+  /* The pop-in is one more column for a reader, after every visible one, with no track. */
+  const ariaColCount = columnIds.length + (hasPopin ? 1 : 0);
+  const popinIndex = columnIds.length + 1;
+  /* The columns the cursor walks: the visible ones, then the pop-in's. */
+  const cursorColumns = useMemo(
+    () => (hasPopin ? [...columnIds, POPIN_COLUMN_ID] : columnIds),
+    [hasPopin, columnIds],
   );
   const template = useMemo(() => columnTemplate(resolved, gutters), [resolved, gutters]);
 
@@ -513,8 +611,33 @@ export function DataGrid<Row>({
   ]);
   const nodes = result.nodes;
   const total = result.total;
-  const summaryColumns = useMemo(() => columns.filter((column) => column.aggregate), [columns]);
-  const hasSummary = summaryColumns.length > 0 && resolvedMode === 'client';
+  /* The aggregating columns in the pop-in: the summary row draws their totals in its own. */
+  const popinAggregated = useMemo(
+    () => popinColumns.filter((column) => column.column.aggregate !== undefined),
+    [popinColumns],
+  );
+  const hasSummary =
+    (resolved.some((column) => column.column.aggregate !== undefined) ||
+      popinAggregated.length > 0) &&
+    resolvedMode === 'client';
+  /* Whether a row draws a pop-in: a record's row, held or not, and the
+     summary while a column in the pop-in has a total to show there. */
+  const hasPopinCell = useCallback(
+    (row: string) => {
+      if (!hasPopin) return false;
+      if (row === SUMMARY_ROW) return popinAggregated.length > 0;
+      return isBodyRow(row);
+    },
+    [hasPopin, popinAggregated],
+  );
+  /* The pop-in's column on a row that draws none is that row's last visible column. */
+  const landOn = useCallback(
+    (cell: GridCell): GridCell => {
+      if (cell.column !== POPIN_COLUMN_ID || hasPopinCell(cell.row)) return cell;
+      return { row: cell.row, column: columnIds[columnIds.length - 1]! };
+    },
+    [hasPopinCell, columnIds],
+  );
   const headerRowCount =
     1 + (columnGroups && columnGroups.length > 0 ? 1 : 0) + (resolvedFilterRow ? 1 : 0);
 
@@ -538,7 +661,9 @@ export function DataGrid<Row>({
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [measuredRow, setMeasuredRow] = useState<number | null>(null);
   const [rowSizes, setRowSizes] = useState<ReadonlyMap<number, number>>(new Map());
-  const autoRows = resolvedRowHeight === 'auto';
+  /* A row with a pop-in is as tall as its fields, whatever the stated
+     height: it is measured one by one, as an `auto` row is. */
+  const autoRows = resolvedRowHeight === 'auto' || hasPopin;
   const rowSize =
     typeof resolvedRowHeight === 'number' ? resolvedRowHeight : (measuredRow ?? DEFAULT_ROW_HEIGHT);
   const windowsRows =
@@ -679,8 +804,8 @@ export function DataGrid<Row>({
   /* ── Cursor grid and range ──────────────────────────────────────────── */
   const pageRows = Math.max(1, Math.floor((viewport.height || 400) / rowSize) - 1);
   const cursorGrid = useMemo<CursorGrid>(
-    () => ({ rows: cursorRows, columns: columnIds, pageSize: pageRows, bodyStart, bodyEnd }),
-    [cursorRows, columnIds, pageRows, bodyStart, bodyEnd],
+    () => ({ rows: cursorRows, columns: cursorColumns, pageSize: pageRows, bodyStart, bodyEnd }),
+    [cursorRows, cursorColumns, pageRows, bodyStart, bodyEnd],
   );
   const bounds = useMemo(
     () => (resolvedSelection === 'range' ? rangeBounds(cursorGrid, range) : null),
@@ -786,22 +911,38 @@ export function DataGrid<Row>({
     if (focusCellNow(cell)) pendingFocus.current = null;
   });
 
-  /* The cursor survives its row leaving: same index, same column. */
+  /* The cursor survives its row leaving: same index, same column. A column
+     that moved into the pop-in takes the cursor with it. */
   const lastRowIndex = useRef(0);
   useEffect(() => {
     if (current && cursorRows.includes(current.row)) {
       lastRowIndex.current = cursorRows.indexOf(current.row);
-      if (columnIds.includes(current.column)) return;
+      if (cursorColumns.includes(current.column)) return;
     }
     if (!current) return;
-    const settled = settleCursor(cursorGrid, current, lastRowIndex.current);
+    const popped =
+      cursorRows.includes(current.row) &&
+      outOfSpace.popin.includes(current.column) &&
+      hasPopinCell(current.row);
+    const settled = popped
+      ? { row: current.row, column: POPIN_COLUMN_ID }
+      : settleCursor(cursorGrid, current, lastRowIndex.current);
     if (settled && !sameCell(settled, current)) {
       requestCurrent(settled, 'programmatic');
       if (focused) pendingFocus.current = settled;
     } else if (!settled && focused) {
       root.current?.querySelector<HTMLElement>('[data-part="empty"] [tabindex]')?.focus();
     }
-  }, [cursorGrid, cursorRows, columnIds, current, requestCurrent, focused]);
+  }, [
+    cursorGrid,
+    cursorRows,
+    cursorColumns,
+    outOfSpace,
+    hasPopinCell,
+    current,
+    requestCurrent,
+    focused,
+  ]);
 
   /* ── Sorting and filtering ──────────────────────────────────────────── */
   const sortOf = useCallback(
@@ -874,6 +1015,40 @@ export function DataGrid<Row>({
   );
   const [filterOpen, setFilterOpen] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  /* What a column menu opened by a context menu hangs from and returns focus
+     to; `null` while it opens from its button. */
+  const [menuAnchor, setMenuAnchor] = useState<ColumnMenuAnchor | null>(null);
+  const keyboardMenuAt = useRef(Number.NEGATIVE_INFINITY);
+  /* Opens a column's menu against an anchor other than its button: the point
+     a context menu was opened at, or the header cell. Focus returns to the
+     header cell, which is where the reader was. */
+  const openColumnMenu = useCallback(
+    (columnId: string, anchor: PositionerAnchor, header: HTMLElement) => {
+      setMenuAnchor({ column: columnId, anchor, returnTo: header });
+      setMenuOpen(columnId);
+    },
+    [],
+  );
+  /* The button and Ctrl+Enter open the menu where they always did: under the
+     button, focus returning to it. */
+  const anchorToButton = useCallback(() => setMenuAnchor(null), []);
+  /* A secondary press on a data column's header opens its menu at the press.
+     The browser keeps its own menu under Shift, and over a field, where cut,
+     copy and paste are the reader's; a `contextmenu` just after Shift+F10 or
+     the Menu key opened the menu from the keyboard is that key's echo. A
+     press in a layer the header owns — React bubbles a portal's events
+     through the tree — is not the header's. */
+  const onHeaderContextMenu = useCallback(
+    (event: MouseEvent<HTMLElement>, columnId: string) => {
+      const target = event.target;
+      if (!(target instanceof Element) || !event.currentTarget.contains(target)) return;
+      if (event.shiftKey || target.closest(EDITABLE)) return;
+      event.preventDefault();
+      if (Date.now() - keyboardMenuAt.current < KEYBOARD_ECHO) return;
+      openColumnMenu(columnId, pointAnchor(event.clientX, event.clientY), event.currentTarget);
+    },
+    [openColumnMenu],
+  );
   const countsCache = useRef(new Map<string, ReadonlyMap<string, number>>());
   const countsFor = useCallback(
     (columnId: string) => {
@@ -920,11 +1095,15 @@ export function DataGrid<Row>({
     },
     [effectiveState, requestState],
   );
+  /* Hides a column and announces it; the undo is the application's, from the request's `previous`. */
   const hide = useCallback(
-    (columnId: string, source?: unknown) => {
-      requestState(withColumnHidden(effectiveState, columnId, true), 'hidden', 'pointer', source);
+    (columnId: string, source?: unknown, reason: DataGridReason = 'programmatic') => {
+      const column = columns.find((entry) => entry.id === columnId);
+      if (!column || effectiveState.hidden.includes(columnId)) return;
+      requestState(withColumnHidden(effectiveState, columnId, true), 'hidden', reason, source);
+      announce(fill(resolvedLabels.columnHidden, { column: column.label }));
     },
-    [effectiveState, requestState],
+    [columns, effectiveState, requestState, announce, resolvedLabels.columnHidden],
   );
   const resizeTo = useCallback(
     (columnId: string, width: number, reason: DataGridReason, source?: unknown) => {
@@ -969,11 +1148,11 @@ export function DataGrid<Row>({
     }
     return widest > 0 ? Math.ceil(widest) : null;
   }, []);
-  const autofit = useCallback(
-    (columnId: string, source?: unknown) => {
+  const autofitColumn = useCallback(
+    (columnId: string, reason: DataGridReason, source?: unknown) => {
       if (!resolvedById.has(columnId)) return;
       const width = measureFit(columnId);
-      if (width !== null) resizeTo(columnId, width, 'keyboard', source);
+      if (width !== null) resizeTo(columnId, width, reason, source);
     },
     [resolvedById, measureFit, resizeTo],
   );
@@ -981,16 +1160,22 @@ export function DataGrid<Row>({
      folded into one state. Read live, one request per column started from
      the same state and only the last column kept its width. */
   const autofitAll = useCallback(
-    (source?: unknown) => {
+    (reason: DataGridReason, source?: unknown) => {
       let next = effectiveState;
       for (const column of resolved) {
         if (!column.resizable) continue;
         const width = measureFit(column.id);
         if (width !== null) next = withColumnWidth(next, column.column, width);
       }
-      if (next !== effectiveState) requestState(next, 'width', 'programmatic', source);
+      if (next !== effectiveState) requestState(next, 'width', reason, source);
     },
     [effectiveState, resolved, measureFit, requestState],
+  );
+  /* The fit behind the resizer, the menu, the keyboard and the handle, each with its own reason. */
+  const autofit = useCallback(
+    (columnId: string | null, reason: DataGridReason, source?: unknown) =>
+      columnId === null ? autofitAll(reason, source) : autofitColumn(columnId, reason, source),
+    [autofitAll, autofitColumn],
   );
   const moveColumn = useCallback(
     (columnId: string, direction: -1 | 1, source?: unknown) => {
@@ -1707,6 +1892,7 @@ export function DataGrid<Row>({
         ? null
         : new ResizeObserver(() => {
             setViewport({ width: scroller.clientWidth, height: scroller.clientHeight });
+            setFrameWidth(scroller.clientWidth);
             edges();
           });
     observer?.observe(scroller);
@@ -1715,6 +1901,7 @@ export function DataGrid<Row>({
     ))
       observer?.observe(part);
     setViewport({ width: scroller.clientWidth, height: scroller.clientHeight });
+    if (observer) setFrameWidth(scroller.clientWidth);
     edges();
     const affordance = createScrollAffordance(scroller, {
       orientation: () => 'horizontal',
@@ -1732,7 +1919,12 @@ export function DataGrid<Row>({
     };
   }, []);
 
-  /* The row height, read once from the first mounted row. */
+  /* The row height, read once from the first mounted row; every row when
+     auto. A row with a pop-in changes height with the columns in it and with
+     the frame's width, which reflows its fields: both are in the callback's
+     identity, so every mounted row reports its height again when either
+     moves. */
+  const remeasure = hasPopin ? `${outKey}\u0002${frameWidth}` : outKey;
   const measureRow = useCallback(
     (index: number, node: HTMLElement | null) => {
       if (!node) return;
@@ -1746,7 +1938,7 @@ export function DataGrid<Row>({
         );
       }
     },
-    [resolvedRowHeight, measuredRow, autoRows],
+    [resolvedRowHeight, measuredRow, autoRows, remeasure],
   );
 
   /* Load more when the window nears the end. */
@@ -1851,6 +2043,31 @@ export function DataGrid<Row>({
         return;
       }
 
+      /* A widget of a header cell: Escape and F2 return to the cell, Tab
+         cycles the cell's widgets without leaving it. */
+      if (
+        insideWidget &&
+        cell.row === HEADER_ROW &&
+        cellElement.contains(target) &&
+        target.closest('[data-part="column-actions"]') !== null
+      ) {
+        if (key === 'Escape' || key === 'F2') {
+          event.preventDefault();
+          cellElement.focus();
+          return;
+        }
+        if (key === 'Tab') {
+          const widgets = [
+            ...cellElement.querySelectorAll<HTMLElement>(
+              '[data-part="column-actions"] button:not([disabled])',
+            ),
+          ];
+          const index = widgets.indexOf(target);
+          event.preventDefault();
+          widgets[(index + (event.shiftKey ? -1 : 1) + widgets.length) % widgets.length]?.focus();
+          return;
+        }
+      }
       /* Inside a widget the cursor entered: Escape returns to the cell, Tab cycles. */
       if (insideWidget && !target.matches(SIMPLE_WIDGET)) {
         if (key === 'Escape') {
@@ -1885,6 +2102,16 @@ export function DataGrid<Row>({
 
       /* Column operations, on a header. */
       if (header && column) {
+        /* Shift+F10 and the Menu key open the column menu on the header cell. */
+        if (
+          (key === 'ContextMenu' || (key === 'F10' && event.shiftKey)) &&
+          !target.closest(EDITABLE)
+        ) {
+          event.preventDefault();
+          keyboardMenuAt.current = Date.now();
+          openColumnMenu(cell.column, cellElement, cellElement);
+          return;
+        }
         if (
           (event.ctrlKey || event.metaKey) &&
           event.shiftKey &&
@@ -1897,7 +2124,19 @@ export function DataGrid<Row>({
         }
         if ((event.ctrlKey || event.metaKey) && event.shiftKey && key === 'Enter') {
           event.preventDefault();
-          autofit(cell.column, event);
+          autofit(cell.column, 'keyboard', event);
+          return;
+        }
+        /* F2 enters the header cell: its widgets are the column's help, its
+           filter and its menu, and a reader reaches them without a pointer. */
+        if (key === 'F2' && !insideWidget) {
+          const first = cellElement.querySelector<HTMLElement>(
+            '[data-part="column-actions"] button:not([disabled])',
+          );
+          if (first) {
+            event.preventDefault();
+            first.focus();
+          }
           return;
         }
         if (event.altKey && (key === 'ArrowLeft' || key === 'ArrowRight')) {
@@ -1909,6 +2148,7 @@ export function DataGrid<Row>({
         }
         if ((event.ctrlKey || event.metaKey) && key === 'Enter') {
           event.preventDefault();
+          anchorToButton();
           setMenuOpen(cell.column);
           return;
         }
@@ -2038,9 +2278,11 @@ export function DataGrid<Row>({
         return;
       }
 
-      /* Entering a cell: the editor, or the widgets inside. */
-      if (row && column && (key === 'Enter' || key === 'F2')) {
-        const editable = isEditable(column.column, row);
+      /* Entering a cell: the editor, or the widgets inside. The pop-in is a
+         cell of the row: it edits nothing, and Enter enters its widgets or
+         activates the row as any other cell does. */
+      if (row && (column || cell.column === POPIN_COLUMN_ID) && (key === 'Enter' || key === 'F2')) {
+        const editable = column !== undefined && isEditable(column.column, row);
         if (editable && !insideWidget) {
           event.preventDefault();
           startEdit(cell);
@@ -2085,7 +2327,7 @@ export function DataGrid<Row>({
         return;
       }
       event.preventDefault();
-      const next = moveCursor(cursorGrid, cell, intent);
+      const next = landOn(moveCursor(cursorGrid, cell, intent));
       if (event.shiftKey && key.startsWith('Arrow')) {
         if (resolvedSelection === 'range' && isBodyRow(next.row)) {
           const from = range?.anchor ?? cell;
@@ -2136,12 +2378,19 @@ export function DataGrid<Row>({
       resolvedActivatable,
       activate,
       setCurrent,
+      openColumnMenu,
+      anchorToButton,
+      landOn,
     ],
   );
 
   /* ── Pointer ────────────────────────────────────────────────────────── */
+  /* The pointer of the last press on a cell: `touch` and `pen` activate on one press. */
+  const pressedWith = useRef('');
+  const touchActivatedAt = useRef(Number.NEGATIVE_INFINITY);
   const onCellPointerDown = useCallback(
     (event: PointerEvent<HTMLElement>, cell: GridCell) => {
+      pressedWith.current = event.pointerType ?? '';
       if (event.button !== 0) return;
       swallowClick.current = false;
       const session = editRef.current;
@@ -2182,6 +2431,8 @@ export function DataGrid<Row>({
 
   const onCellClick = useCallback(
     (event: MouseEvent<HTMLElement>, cell: GridCell) => {
+      const pointer = pressedWith.current;
+      pressedWith.current = '';
       if (swallowClick.current) {
         swallowClick.current = false;
         return;
@@ -2195,15 +2446,37 @@ export function DataGrid<Row>({
         toggleGroup(cell.row.slice(GROUP_ROW_PREFIX.length), event);
         return;
       }
-      if (isBodyRow(cell.row) && resolvedSelection === 'single' && !disabledSet.has(cell.row)) {
+      if (!isBodyRow(cell.row)) return;
+      if (resolvedSelection === 'single' && !disabledSet.has(cell.row)) {
         toggleSelected(cell.row, { range: false, source: event });
       }
+      /* On a touch screen one press opens the record: a double tap is a zoom,
+         not the gesture of opening. A cell in edit keeps the press for its
+         editor. */
+      const session = editRef.current;
+      const editing =
+        session !== null && session.cell.row === cell.row && session.columns.includes(cell.column);
+      if (resolvedActivatable && (pointer === 'touch' || pointer === 'pen') && !editing) {
+        touchActivatedAt.current = Date.now();
+        activate(cell.row, 'pointer', event);
+      }
     },
-    [resolvedById, pressSort, toggleGroup, resolvedSelection, disabledSet, toggleSelected],
+    [
+      resolvedById,
+      pressSort,
+      toggleGroup,
+      resolvedSelection,
+      disabledSet,
+      toggleSelected,
+      resolvedActivatable,
+      activate,
+    ],
   );
   const onCellDoubleClick = useCallback(
     (event: MouseEvent<HTMLElement>, cell: GridCell) => {
       if (insideWidget(event)) return;
+      /* The second tap of a touch that already activated the row. */
+      if (Date.now() - touchActivatedAt.current < TOUCH_ECHO) return;
       const row = rowOf(cell.row);
       const column = columns.find((entry) => entry.id === cell.column);
       if (!row) return;
@@ -2353,7 +2626,8 @@ export function DataGrid<Row>({
       },
       stopEdit: (options) =>
         options?.commit === false ? cancelEdit() : commitEdit('programmatic'),
-      autofit: (columnId) => (columnId ? autofit(columnId) : autofitAll()),
+      autofit: (columnId) => autofit(columnId ?? null, 'programmatic'),
+      getOutOfSpace: () => outOfSpace,
       getVisibleRows: () => (resolvedMode === 'client' ? result.rows : rows),
       toCsv: buildCsv,
       /* A download by an anchor: the one way a browser saves a file without
@@ -2384,7 +2658,7 @@ export function DataGrid<Row>({
       cancelEdit,
       commitEdit,
       autofit,
-      autofitAll,
+      outOfSpace,
       resolvedMode,
       result.rows,
       rows,
@@ -2449,6 +2723,10 @@ export function DataGrid<Row>({
       columnIds,
       mountedColumns,
       columnsWindowed: windowsColumns,
+      popinColumns,
+      popinAggregated,
+      popinIndex,
+      hasPopinCell,
       query,
       nodes,
       total,
@@ -2498,6 +2776,9 @@ export function DataGrid<Row>({
       setFilterOpen,
       menuOpen,
       setMenuOpen,
+      menuAnchor,
+      anchorToButton,
+      onHeaderContextMenu,
       filterDebounce: resolvedDebounce,
       countsFor,
       pin,
@@ -2548,6 +2829,10 @@ export function DataGrid<Row>({
       columnIds,
       mountedColumns,
       windowsColumns,
+      popinColumns,
+      popinAggregated,
+      popinIndex,
+      hasPopinCell,
       query,
       nodes,
       total,
@@ -2594,6 +2879,9 @@ export function DataGrid<Row>({
       setFilter,
       filterOpen,
       menuOpen,
+      menuAnchor,
+      anchorToButton,
+      onHeaderContextMenu,
       resolvedDebounce,
       countsFor,
       pin,
@@ -2644,6 +2932,8 @@ export function DataGrid<Row>({
       ? { '--slotted-data-grid-row-block-size': `${resolvedRowHeight}px` }
       : {}),
     ...(changedFor > 0 ? { '--slotted-data-grid-changed-duration': `${changedFor}ms` } : {}),
+    /* Where a pop-in's fields start: after the gutters, with the first data column. */
+    ...(hasPopin ? { '--slotted-data-grid-leading': `${leading}px` } : {}),
   } as CSSProperties;
   const bodyStyle = windowsRows
     ? ({
@@ -2713,7 +3003,7 @@ export function DataGrid<Row>({
       <div
         {...nativeProps}
         aria-busy={loading && rows.length > 0 ? true : undefined}
-        aria-colcount={columnIds.length}
+        aria-colcount={ariaColCount}
         aria-label={label ?? (labelledBy ? undefined : resolvedLabels.grid)}
         aria-labelledby={labelledBy}
         aria-multiselectable={
@@ -2727,7 +3017,9 @@ export function DataGrid<Row>({
           (hasSummary ? 1 : 0)
         }
         data-part="root"
+        data-popin={hasPopin ? outOfSpace.popin.length : undefined}
         data-rows={autoRows ? 'auto' : 'fixed'}
+        data-slotted-density={density ?? undefined}
         data-ui="data-grid"
         data-variant={resolvedVariant}
         onBlur={onRootBlur}
@@ -2756,7 +3048,7 @@ export function DataGrid<Row>({
             />
           ) : null}
           {status === 'loading' ? (
-            <DataGridLoader<Row> rows={skeletonCount} />
+            <DataGridLoader<Row> rowSize={rowSize} rows={skeletonCount} />
           ) : (
             <DataGridBody<Row>
               bodyStyle={bodyStyle}

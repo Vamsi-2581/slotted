@@ -7,15 +7,18 @@ import {
   withFilter,
   withPageIndex,
   withPageSize,
+  withColumnHidden,
   withSearch,
   type GridCell,
   type GridColumn,
   type GridColumnState,
+  type GridDensity,
+  type GridOutOfSpace,
   type GridQuery,
   type GridRange,
 } from '@slotted/core/grid';
 import type { ChangeRequest } from '@slotted/core/state';
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal, viewChild, type TemplateRef } from '@angular/core';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlBadge } from '@slotted/angular/badge';
 import { SlButton } from '@slotted/angular/button';
@@ -32,6 +35,8 @@ import {
 } from '@slotted/angular/pagination';
 import { SlTextField, SlTextFieldInput } from '@slotted/angular/text-field';
 import { SlText } from '@slotted/angular/typography';
+import { SlToastRegion, SlToastService } from '@slotted/angular/toast';
+import type { ToastMessage, ToastContent } from '@slotted/angular/toast';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/angular-vite';
@@ -49,6 +54,7 @@ import type {
 } from './data-grid-defaults';
 import {
   SlDataGridCellTemplate,
+  SlDataGridColumnHelp,
   SlDataGridDetailTemplate,
   SlDataGridFooter,
 } from './data-grid-templates';
@@ -231,10 +237,13 @@ const AWKWARD: Shipment[] = [
  * says beside the grid — a status line, a control — stands on the same stage
  * above the room, so the stage owns the gap between the two.
  */
-const screen = (body: string, options: { before?: string; size?: 'screen' | 'tall' } = {}) => `
+const screen = (
+  body: string,
+  options: { before?: string; size?: 'screen' | 'tall'; room?: 'desktop' | 'phone' } = {},
+) => `
 <div class="slotted-demo-stage" data-layout="block">
   ${options.before ?? ''}
-  <div class="slotted-demo-room" data-room="desktop">
+  <div class="slotted-demo-room" data-room="${options.room ?? 'desktop'}">
     <div class="slotted-demo-viewport" data-size="${options.size ?? 'screen'}">${body}</div>
   </div>
 </div>`;
@@ -289,6 +298,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     accessibility: Accessibility,
     activation: Activation,
     'column-groups': ColumnGroups,
+    'column-help': ColumnHelp,
     'column-menu': ColumnMenu,
     'column-state': ColumnState,
     columns: Columns,
@@ -310,12 +320,14 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     range: Range,
     reorder: Reorder,
     resize: Resize,
+    'responsive-priority': ResponsivePriority,
     search: Search,
     selection: Selection,
     server: Server,
     sorting: Sorting,
     summary: Summary,
     text: TextTreatment,
+    'undo-hide': UndoHide,
     validation: Validation,
     variant: Variant,
     virtualization: Virtualization,
@@ -365,6 +377,7 @@ const VIEW_KEY = 'slotted-demo:data-grid-view';
           [rows]="rows"
           [(query)]="view.query"
           [(columnState)]="view.columnState"
+          [density]="view.density()"
         >
           <ng-template slDataGridCell="status" let-value="value">
             <span slBadge variant="soft" [tone]="statusTone(value)">{{ value }}</span>
@@ -404,15 +417,90 @@ export class SavedViewDemo {
   }
 }
 
+/* The undo is the application's: the toast's action shows the hidden
+   column again. A component of the story's own, for the toast service
+   it provides and the action template it holds. */
+@Component({
+  selector: 'sl-data-grid-undo-hide-demo',
+  standalone: true,
+  imports: [SlDataGrid, SlDataGridCellTemplate, SlBadge, SlButton, SlText, SlToastRegion],
+  providers: [SlToastService],
+  template: ` <div class="slotted-demo-stage" data-layout="block">
+    <p slText size="sm" tone="muted">
+      Hide a column from its menu; the toast’s Undo puts it back where it stood
+    </p>
+    <div class="slotted-demo-room" data-room="desktop">
+      <div class="slotted-demo-viewport" data-size="tall">
+        <sl-data-grid
+          label="Shipments"
+          rowKey="id"
+          height="100%"
+          variant="framed"
+          [columns]="columns"
+          [rows]="rows"
+          [(columnState)]="columnState"
+          (columnStateChangeRequest)="onRequest($event)"
+        >
+          <ng-template slDataGridCell="status" let-value="value">
+            <span slBadge variant="soft" [tone]="statusTone(value)">{{ value }}</span>
+          </ng-template>
+        </sl-data-grid>
+        <sl-toast-region attach="inline" />
+      </div>
+    </div>
+    <ng-template #undo let-message>
+      <button slButton size="sm" type="button" variant="outline" (click)="restore(message.id)">
+        Undo
+      </button>
+    </ng-template>
+  </div>`,
+})
+export class UndoHideDemo {
+  readonly columns = columns;
+  readonly statusTone = statusTone;
+  readonly rows = FIFTY.slice(0, 8);
+  readonly columnState = signal<GridColumnState>({
+    order: [],
+    widths: {},
+    hidden: ['eta', 'priority'],
+    pinned: { start: ['id'], end: [] },
+  });
+  private readonly undo =
+    viewChild.required<TemplateRef<{ $implicit: ToastMessage<ToastContent> }>>('undo');
+  /** The columns each toast's Undo shows again, by the toast. */
+  private readonly hidden = new Map<string, readonly string[]>();
+  private readonly toasts = inject(SlToastService);
+  onRequest(request: DataGridColumnStateRequest) {
+    if (request.change !== 'hidden') return;
+    const shown = request.value.hidden.filter((id) => !request.previous.hidden.includes(id));
+    const toast = this.toasts.show({
+      title: 'Column hidden',
+      description: 'The column comes back to its place and its width.',
+      tone: 'secondary',
+      actions: this.undo(),
+    });
+    this.hidden.set(toast, shown);
+  }
+  restore(id: string) {
+    const shown = this.hidden.get(id) ?? [];
+    this.hidden.delete(id);
+    this.columnState.update((state) =>
+      shown.reduce((next, column) => withColumnHidden(next, column, false), state),
+    );
+    this.toasts.dismiss(id, 'pointer');
+  }
+}
+
 const meta: Meta<DataGridStoryArgs> = {
   title: 'Components/Data grid',
   component: SlDataGrid,
-  excludeStories: ['SavedViewDemo'],
+  excludeStories: ['SavedViewDemo', 'UndoHideDemo'],
   decorators: [
     moduleMetadata({
       imports: [
         SlDataGrid,
         SlDataGridCellTemplate,
+        SlDataGridColumnHelp,
         SlDataGridDetailTemplate,
         SlDataGridFooter,
         SlAvatar,
@@ -430,6 +518,7 @@ const meta: Meta<DataGridStoryArgs> = {
         SlTextField,
         SlTextFieldInput,
         SavedViewDemo,
+        UndoHideDemo,
       ],
     }),
   ],
@@ -831,6 +920,85 @@ export const ColumnMenu: Story = {
   },
 };
 
+const helpColumns: GridColumn<Shipment>[] = columns.map((column) =>
+  column.id === 'weight'
+    ? { ...column, description: 'Gross weight at pickup, in kilograms, packaging included' }
+    : column.id === 'cost'
+      ? { ...column, description: 'Freight cost billed by the carrier, before VAT' }
+      : column,
+);
+
+export const ColumnHelp: Story = {
+  parameters: scenario('column-help'),
+  render: () => ({
+    props: {
+      ...base(),
+      columns: helpColumns,
+      rows: FIFTY.slice(0, 8),
+      current: { row: 'header', column: 'weight' },
+    },
+    template: screen(
+      grid(
+        '[rows]="rows" [current]="current"',
+        `<ng-template slDataGridColumnHelp="status">
+          <p slText size="sm">
+            Customs means the shipment is held at a border for inspection; Returned means the
+            consignee refused it. Delayed is set by the carrier, not by us.
+          </p>
+        </ng-template>`,
+      ),
+      { size: 'tall' },
+    ),
+  }),
+};
+
+export const UndoHide: Story = {
+  parameters: scenario('undo-hide'),
+  render: () => ({
+    props: {},
+    template: '<sl-data-grid-undo-hide-demo></sl-data-grid-undo-hide-demo>',
+  }),
+};
+
+const PRIORITIES: Readonly<Record<string, number>> = {
+  status: 1,
+  eta: 2,
+  weight: 3,
+  carrier: 4,
+  destination: 5,
+  cost: 6,
+};
+/* Cost declines the pop-in: without room it is hidden, not moved into the row. */
+const priorityColumns: GridColumn<Shipment>[] = columns.map((column) => {
+  const priority = PRIORITIES[column.id];
+  if (priority === undefined) return column;
+  return column.id === 'cost' ? { ...column, priority, popin: false } : { ...column, priority };
+});
+const labelOf = (id: string) => columns.find((column) => column.id === id)?.label ?? id;
+
+export const ResponsivePriority: Story = {
+  parameters: scenario('responsive-priority'),
+  render: () => {
+    const out = signal<GridOutOfSpace>({ popin: [], hidden: [] });
+    return {
+      props: {
+        ...base(),
+        columns: priorityColumns,
+        rows: FIFTY.slice(0, 8),
+        out,
+        labelOf,
+      },
+      template: screen(grid('[rows]="rows" (outOfSpaceChange)="out.set($event)"'), {
+        room: 'phone',
+        size: 'tall',
+        before: note(
+          `{{ out().popin.length + out().hidden.length === 0 ? 'Every column fits' : 'In each row: ' + out().popin.map(labelOf).join(', ') + (out().hidden.length > 0 ? '. Hidden: ' + out().hidden.map(labelOf).join(', ') : '') }}`,
+        ),
+      }),
+    };
+  },
+};
+
 export const ColumnState: Story = {
   parameters: scenario('column-state'),
   render: () => ({
@@ -1190,10 +1358,31 @@ export const TextTreatment: Story = {
 
 export const Density: Story = {
   parameters: scenario('density'),
-  render: () => ({
-    props: { ...base(), rows: FIFTY.slice(0, 10) },
-    template: screen(grid('[rows]="rows" selectionMode="multiple"'), { size: 'tall' }),
-  }),
+  render: () => {
+    const chosen = signal<GridDensity | null>(null);
+    const densities: readonly (GridDensity | null)[] = [null, 'comfortable', 'compact', 'dense'];
+    return {
+      props: { ...base(), rows: FIFTY.slice(0, 10), chosen, densities },
+      template: screen(grid('[rows]="rows" [density]="chosen()" selectionMode="multiple"'), {
+        size: 'tall',
+        before: `<div class="slotted-demo-row">
+          @for (value of densities; track value) {
+            <button
+              slButton
+              size="sm"
+              tone="secondary"
+              type="button"
+              [variant]="chosen() === value ? 'solid' : 'outline'"
+              [attr.aria-pressed]="chosen() === value"
+              (click)="chosen.set(value)"
+            >
+              {{ value ?? 'The page’s' }}
+            </button>
+          }
+        </div>`,
+      }),
+    };
+  },
 };
 
 export const Content: Story = {

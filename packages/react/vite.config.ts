@@ -91,6 +91,7 @@ export default defineConfig({
         typography: resolve(import.meta.dirname, 'src/typography/index.ts'),
         upload: resolve(import.meta.dirname, 'src/upload/index.ts'),
         'visually-hidden': resolve(import.meta.dirname, 'src/visually-hidden/index.ts'),
+        wizard: resolve(import.meta.dirname, 'src/wizard/index.ts'),
       },
       formats: ['es'],
     },

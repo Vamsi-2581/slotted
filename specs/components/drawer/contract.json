@@ -90,7 +90,7 @@
   "focus": {
     "contain": "under mode=overlay while modal, from @slotted/core/focus. An inline drawer contains nothing and a non-modal overlay contains nothing, because both are reachable from the page by definition",
     "initial": "the first tabbable element under mode=overlay; nothing at all under mode=inline, because a sidebar that stole focus every time a breakpoint crossed would be unusable. Angular Material takes the same split, defaulting autoFocus to false in side mode",
-    "restore": "the element that held focus when the drawer opened, or its nearest connected ancestor when that element has since left the document. It restores in both modes, and only when focus is still inside the panel or on the body, so closing a drawer the reader had already left moves nothing",
+    "restore": "the element that held focus when the drawer opened, or its nearest connected ancestor when that element has since left the document, or the trigger when it was the body — a click does not focus a button in Safari. It restores in both modes, and only when focus is still inside the panel or on the body, so closing a drawer the reader had already left moves nothing. The layer is lifted before focus is given back, because a modal layer keeps the trigger inert while it stands, and the element to give back to is read once, when the drawer opens, not on every render",
     "closedPanel": "inert and content-visibility: hidden, in both modes. A panel the eye reads as closed whose controls are still in the tab sequence is the defect MUI's persistent variant ships"
   },
   "back": {

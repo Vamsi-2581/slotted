@@ -476,20 +476,38 @@ export class SlDrawer implements OnInit {
 
       const wanted = this.initialFocus() ?? 'first';
       const returnTo = this.finalFocus();
+      /**
+       * Where focus goes back to with no `finalFocus`: what held it when the
+       * drawer opened, or the trigger when that was nothing. A click does not
+       * focus a button in Safari, so a drawer opened from its trigger there
+       * had `body` as its origin and gave focus back to nowhere.
+       */
+      const origin = panel.ownerDocument.activeElement as HTMLElement | null;
+      const originParent = origin?.parentElement ?? null;
+      const fallback = (): HTMLElement | null => {
+        if (origin === null || origin === origin.ownerDocument.body) return this.triggerNode();
+        if (origin.isConnected) return origin;
+        /* The row the drawer was opened from has gone: its nearest ancestor
+           that is still in the document, as the contract's restore rule says. */
+        let node: HTMLElement | null = originParent;
+        while (node !== null && !node.isConnected) node = node.parentElement;
+        return node;
+      };
       this.scope = createFocusScope(panel, {
         contain: overlay && modal,
         initial: !overlay ? false : wanted instanceof HTMLElement ? () => wanted : wanted,
-        ...(returnTo === undefined
-          ? {}
-          : { restore: returnTo === false ? (false as const) : () => returnTo }),
+        restore: returnTo === undefined ? fallback : returnTo === false ? false : () => returnTo,
       });
       this.scope.enter();
 
       onCleanup(() => {
-        this.scope?.destroy();
-        this.scope = null;
+        /* The layer first: while it stands, a modal layer keeps every sibling
+           up to the root `inert`, and focus given back to a trigger there is
+           refused — the reader lands on `body`. */
         this.layer?.destroy();
         this.layer = null;
+        this.scope?.destroy();
+        this.scope = null;
         this.closed.emit(this.result());
         this.result.set(undefined);
       });
@@ -755,6 +773,15 @@ export class SlDrawer implements OnInit {
   /** Closes it from code, carrying `programmatic` and the result given. */
   close(result?: string) {
     this.request(false, 'programmatic', result, undefined);
+  }
+
+  /**
+   * The panel, once it is in the document — what React's handle calls
+   * `panel`. A family that composes the drawer reads it to hand the panel a
+   * value only it knows, as `action-sheet` hands it its measure.
+   */
+  get panel(): HTMLElement | null {
+    return this.panelRef()?.nativeElement ?? null;
   }
 
   /** Moves focus into the panel, as opening an overlay drawer does. */

@@ -677,6 +677,57 @@ describe('Drawer', () => {
     quiet.mockRestore();
   });
 
+  /**
+   * A render while the drawer is open is not an opening. The layer effect used
+   * to depend on the whole context object, whose identity changes on every
+   * render, so each one tore the focus scope down and entered it again: focus
+   * jumped back to the first control, and the element to return to was read
+   * again from inside the panel.
+   */
+  it('keeps focus across a render while open, and gives it back to the trigger on close', () => {
+    function Rerendering() {
+      const [count, setCount] = useState(0);
+      /* `loading` changes the context and nothing about the layer, as the
+         measured rest does in a browser once the panel has laid out. */
+      return (
+        <Drawer loading={count > 0}>
+          <DrawerTrigger>Open details</DrawerTrigger>
+          <DrawerPanel>
+            <DrawerBody>
+              <button type="button">First</button>
+              <button type="button" onClick={() => setCount(count + 1)}>
+                Clicked {count}
+              </button>
+            </DrawerBody>
+          </DrawerPanel>
+        </Drawer>
+      );
+    }
+    render(<Rerendering />);
+    trigger().focus();
+    press(trigger());
+    const second = screen.getByRole('button', { name: /Clicked/ });
+    second.focus();
+    press(second);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Clicked 1' }));
+    fireEvent.keyDown(document.activeElement as Element, { key: 'Escape' });
+    expect(document.activeElement).toBe(trigger());
+  });
+
+  /**
+   * A click does not focus a button in Safari, and jsdom follows it, so a
+   * drawer opened from its trigger has `body` as the element that held focus.
+   * Giving focus back to that is giving it back to nowhere.
+   */
+  it('gives focus back to the trigger when nothing held it on opening', () => {
+    render(<Basic />);
+    (document.activeElement as HTMLElement | null)?.blur();
+    press(trigger());
+    expect(panel()).not.toBeNull();
+    press(screen.getByRole('button', { name: 'Close' }));
+    expect(document.activeElement).toBe(trigger());
+  });
+
   /** The body's padding is the consumer's to drop, for content that brings its own inset. */
   it('drops the body inset when told', () => {
     render(

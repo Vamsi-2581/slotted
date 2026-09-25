@@ -614,6 +614,19 @@ describe('SlDrawer', () => {
 
   /* --------------------------------------------------------------- state - */
 
+  /**
+   * A click does not focus a button in Safari, and jsdom follows it, so a
+   * drawer opened from its trigger has `body` as the element that held focus.
+   * Giving focus back to that is giving it back to nowhere.
+   */
+  it('gives focus back to the trigger when nothing held it on opening', () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    press(trigger());
+    expect(panel()).not.toBeNull();
+    press(document.querySelector('[data-part="close"]') as HTMLElement);
+    expect(document.activeElement).toBe(trigger());
+  });
+
   it('carries the loading state to the row that is waiting', () => {
     host.open.set(true);
     host.loading.set(true);

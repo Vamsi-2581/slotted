@@ -38,7 +38,8 @@ export type DrawerMount = 'active' | 'lazy' | 'eager';
 export type DrawerDismissPolicy = 'close' | 'none';
 
 /** Where focus goes when an overlay drawer opens. */
-export type DrawerInitialFocus = 'first' | 'container' | HTMLElement | false;
+export type DrawerInitialFocus =
+  'first' | 'container' | HTMLElement | (() => HTMLElement | null) | false;
 
 /** Where focus goes when the drawer closes. Defaults to the trigger. */
 export type DrawerFinalFocus = HTMLElement | false;

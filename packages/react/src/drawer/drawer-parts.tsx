@@ -263,11 +263,23 @@ export function DrawerPanel({
     [registerLayer],
   );
 
+  /* The latest context, for listeners that live across renders. */
+  const current = useRef(drawer);
+  current.current = drawer;
+
   /**
    * Everything the drawer does while it is open, taken down when it closes
    * rather than when the node unmounts — `presence` keeps the node mounted
    * through the exit, and a layer still holding the scroll lock and the
    * background's `inert` for those milliseconds is a page nobody can touch.
+   *
+   * It is keyed on the values that decide the layer, and on nothing else. The
+   * context object is a new one whenever anything in it changes — the measured
+   * rest once the panel has laid out, a drag, `loading` — and an effect keyed
+   * on it tore the scope down and entered it again on every such render,
+   * reading the element to give focus back to from inside the panel. Closing
+   * then gave focus to a control on its way out, and the reader landed on
+   * `body`. What it calls later is read from `current`.
    */
   useEffect(() => {
     if (panel === null || layer === null || !drawer.open) return;
@@ -286,10 +298,10 @@ export function DrawerPanel({
           escape: drawer.escape === 'close',
           modal: drawer.modal,
           onDismiss: (request) => {
-            if (request.reason === 'outsidePress' && drawer.outsidePress === 'none') {
+            if (request.reason === 'outsidePress' && current.current.outsidePress === 'none') {
               return request.cancel();
             }
-            drawer.close(request.reason as DrawerOpenReason, undefined, request.source);
+            current.current.close(request.reason as DrawerOpenReason, undefined, request.source);
           },
           outsidePress: drawer.outsidePress === 'close',
           outsidePressEvent: 'click',
@@ -306,6 +318,24 @@ export function DrawerPanel({
      */
     const wanted = drawer.initialFocus;
     const returnTo = drawer.finalFocus;
+    /**
+     * Where focus goes back to with no `finalFocus`: what held it when the
+     * drawer opened, or the trigger when that was nothing. A click does not
+     * focus a button in Safari, so a drawer opened from its trigger there had
+     * `body` as its origin and gave focus back to nowhere.
+     */
+    const origin = panel.ownerDocument.activeElement as HTMLElement | null;
+    const originParent = origin?.parentElement ?? null;
+    const fallback = (): HTMLElement | null => {
+      if (origin === null || origin === origin.ownerDocument.body)
+        return current.current.nodes.trigger;
+      if (origin.isConnected) return origin;
+      /* The row the drawer was opened from has gone: its nearest ancestor that
+         is still in the document, as the contract's restore rule says. */
+      let node: HTMLElement | null = originParent;
+      while (node !== null && !node.isConnected) node = node.parentElement;
+      return node;
+    };
     const scope = createFocusScope(panel, {
       contain: overlay && drawer.modal,
       initial: !overlay
@@ -313,21 +343,34 @@ export function DrawerPanel({
         : typeof wanted === 'object' && wanted !== null
           ? () => wanted.current
           : wanted,
-      ...(returnTo === undefined
-        ? {}
-        : { restore: returnTo === false ? (false as const) : () => returnTo.current }),
+      restore:
+        returnTo === undefined
+          ? fallback
+          : returnTo === false
+            ? (false as const)
+            : () => returnTo.current,
     });
     scope.enter();
 
     return () => {
-      scope.destroy();
+      /* The layer first: while it stands, a modal layer keeps every sibling up
+         to the root `inert`, and focus given back to a trigger there is
+         refused — the reader lands on `body`. */
       dismissable?.destroy();
+      scope.destroy();
     };
-  }, [drawer, layer, overlay, panel]);
-
-  /* The latest context, for listeners that live across renders. */
-  const current = useRef(drawer);
-  current.current = drawer;
+  }, [
+    drawer.back,
+    drawer.escape,
+    drawer.finalFocus,
+    drawer.initialFocus,
+    drawer.modal,
+    drawer.open,
+    drawer.outsidePress,
+    layer,
+    overlay,
+    panel,
+  ]);
 
   /**
    * What the panel measures at rest, as a fraction, while nothing has moved

@@ -76,6 +76,7 @@ Um tema por linha. Cada família construída por `/component` produz até três 
 | `tour` | [2026-09-24 §1](2026-09-24-tour-design.md) | [2026-09-24](2026-09-24-tour-design.md) | [2026-09-24](2026-09-24-tour-self-assessment.md) |
 | `action-sheet` | [2026-09-24 §1](2026-09-24-action-sheet-design.md) | [2026-09-24](2026-09-24-action-sheet-design.md) | [2026-09-24](2026-09-24-action-sheet-self-assessment.md) |
 | `markdown` | [2026-09-24 §1](2026-09-24-markdown-design.md) | [2026-09-24](2026-09-24-markdown-design.md) | [2026-09-24](2026-09-24-markdown-self-assessment.md) |
+| `wizard` | [2026-09-25 §1](2026-09-25-wizard-design.md) | [2026-09-25](2026-09-25-wizard-design.md) | [2026-09-25](2026-09-25-wizard-self-assessment.md) |
 | `import-export-center` | [2026-09-25 §1](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-design.md) | [2026-09-25](2026-09-25-import-export-center-self-assessment.md) |
 
 ## Fundação

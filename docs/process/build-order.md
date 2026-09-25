@@ -611,6 +611,15 @@ de outra da mesma onda.
   enviar, rascunho, retomada e erro global. O estado vive fora de `stepper`,
   que só o desenha. Navegação direta depende de etapas concluídas; URL, reload
   e recuperação são políticas declaradas.
+
+  Entregue em 2026-09-25. Inventário e decisões em
+  `docs/history/designs/2026-09-25-wizard-design.md`, autoavaliação em
+  `docs/history/designs/2026-09-25-wizard-self-assessment.md`. Cada etapa é um `form` de
+  `form`; o valor são as respostas aceites por `name` de etapa; as etapas são as que o
+  consumidor renderiza, e o destino depois de aceitar uma etapa decide-se depois do render
+  dele. Aritmética e rascunho em `@slotted/core/wizard` (`storagePersistence`). React
+  `Wizard`, `WizardStep`, `WizardEdit`, `WizardComplete`, ações em `Button`; Angular
+  `[slWizard]`, `ng-template[slWizardStep]`, `form[slWizardForm]` do consumidor.
 - `detail-panel` — resumo, metadados, status, `tabs` ou seções, ações e
   histórico (`timeline`). Abre em página, `drawer` ou `master-detail` conforme
   a profundidade; URL e foco tornam a abertura compartilhável e reversível. Não

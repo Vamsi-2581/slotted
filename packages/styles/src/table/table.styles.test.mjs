@@ -26,7 +26,7 @@ const cell = ":is([data-part='cell'],[data-part='row-header'])";
 const plainRoot = "[data-part='root'][data-variant='plain']";
 
 /**
- * The fourteen families that ship the `plain` variant, read from the shared
+ * The families that ship the `plain` variant, read from the shared
  * test that holds their values, so the cell rule below cannot name a family
  * the variant does not reach, nor miss one that joins it. Two lists in two
  * files are one list when a test says so.

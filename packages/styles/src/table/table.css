@@ -349,7 +349,7 @@
    * the `plain` variant exists to avoid. The control's width stays the
    * control's own, as in a form.
    *
-   * The selector names the fourteen `plain` field families
+   * The selector names the fifteen `plain` field families
    * `plain-variant.test.mjs` holds, and no other: a `kbd`, a `listbox`, a
    * `timeline` or a nested table has a `plain` variant of its own and is not a
    * control. `table.styles.test.mjs` holds the two lists against each other.
@@ -370,7 +370,8 @@
           [data-ui='tags-input'],
           [data-ui='date-range-picker'],
           [data-ui='time-range-picker'],
-          [data-ui='datetime-range-picker']
+          [data-ui='datetime-range-picker'],
+          [data-ui='entity-picker']
         )
     ) {
     --slotted-control-padding-inline-sm: var(--_pad-inline);

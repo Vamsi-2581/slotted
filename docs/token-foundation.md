@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 114    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 115    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 112    |
 | `component` | One family adjusting a semantic value for itself.              | 27     |
 
@@ -297,6 +297,7 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-funnel`           | `funnel`               | stroke 2   |
 | `--slotted-icon-grip-vertical`    | `grip-vertical`        | stroke 2   |
 | `--slotted-icon-grip-horizontal`  | `grip-horizontal`      | stroke 2   |
+| `--slotted-icon-star`             | `star`                 | stroke 2   |
 
 A component-owned icon is the `Glyph` element; a character is never an icon, and
 a glyph token painted from CSS survives only in the families `PENDING` still

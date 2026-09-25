@@ -231,6 +231,7 @@ test('centres the ink of every glyph in the box the mask is drawn in', () => {
       '--slotted-icon-text-wrap',
       '--slotted-icon-bell',
       '--slotted-icon-funnel',
+      '--slotted-icon-star',
     ],
     'the glyphs Lucide did not frame on their own centre',
   );

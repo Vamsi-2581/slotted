@@ -78,9 +78,9 @@ export interface StatusIndicatorProps extends ComponentPropsWithRef<'span'> {
    */
   mark?: StatusIndicatorMark;
   /**
-   * A ring leaving the mark, for a change happening now. It is withdrawn under
-   * reduced motion and under forced colours, so nothing is ever said by the
-   * ring alone.
+   * A wave leaving the dot, for a change happening now. An icon mark does not
+   * pulse, and the wave is withdrawn under reduced motion and under forced
+   * colours, so nothing is ever said by the wave alone.
    */
   pulse?: boolean;
   render?: (props: StatusIndicatorRootProps) => ReactNode;

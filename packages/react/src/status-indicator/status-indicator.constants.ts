@@ -12,8 +12,8 @@ export const STATUS_INDICATOR_GLYPHS: Record<StatusIndicatorStatus, GlyphName> =
   neutral: 'circle',
   info: 'circle-info',
   success: 'circle-check',
-  warning: 'triangle-alert',
-  danger: 'circle-alert',
+  warning: 'circle-alert',
+  danger: 'circle-x',
   unknown: 'circle-question',
 };
 

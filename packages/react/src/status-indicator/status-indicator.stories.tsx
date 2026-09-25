@@ -147,7 +147,7 @@ export const Statuses: Story = {
       </Scene>
       <Scene
         label="The two that share a tone"
-        note="neutral is filled and unknown is a dashed ring, so “nothing is happening” and “nobody knows” are never told apart by colour alone."
+        note="neutral is filled and unknown is a dashed ring as wide as a lit dot, so “nothing is happening” and “nobody knows” are never told apart by colour alone."
       >
         <StatusIndicator status="neutral">Draft — nothing has started</StatusIndicator>
         <StatusIndicator status="unknown">No data — the agent stopped reporting</StatusIndicator>
@@ -178,7 +178,7 @@ export const Marks: Story = {
       </Scene>
       <Scene
         label="icon"
-        note="Five circles and one triangle. The silhouette is what still separates the six when the colour is gone — in greyscale, in high contrast, and under forced colours."
+        note="Six circles, the glyphs alert and toast draw for the same tones. The silhouette is what still separates the six when the colour is gone — in greyscale, in high contrast, and under forced colours."
       >
         {STATUSES.map(({ status, words }) => (
           <StatusIndicator key={status} mark="icon" status={status}>
@@ -241,7 +241,7 @@ export const Pulse: Story = {
     <div className="slotted-demo-grid" data-columns="2">
       <Scene
         label="A value moving while the reader watches"
-        note="The ring leaves the mark and fades once per cycle. It is an enhancement: the tone, the glyph and the word have already said what the status is."
+        note="A wave leaves the dot and fades, then rests before the next beat. An icon mark does not pulse. It is an enhancement: the tone, the glyph and the word have already said what the status is."
       >
         <StatusIndicator pulse status="info">
           Deploying to production
@@ -249,7 +249,7 @@ export const Pulse: Story = {
         <StatusIndicator pulse status="danger">
           Error rate climbing
         </StatusIndicator>
-        <StatusIndicator mark="icon" pulse status="warning">
+        <StatusIndicator pulse status="warning">
           Certificate expiring today
         </StatusIndicator>
       </Scene>
@@ -470,8 +470,8 @@ export const Accessibility: Story = {
         <Heading level={3}>Two ways to say the same six things</Heading>
         <Text>
           A dot beside its own word, or a glyph that keeps its meaning with the colour switched off.
-          The dot is rimmed with the tone’s darkest step, which the theme holds to the reading
-          ratio, so the mark clears the 3:1 a meaningful graphic needs.
+          The dot is lit with a halo of its own colour, and the glyph set is six circles, so no two
+          statuses are told apart by colour alone.
         </Text>
         <div className="slotted-demo-row">
           <StatusIndicator mark="icon" status="success">

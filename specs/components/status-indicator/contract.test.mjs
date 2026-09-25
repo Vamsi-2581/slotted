@@ -92,6 +92,19 @@ test('gives every status its own glyph from the foundation scale', () => {
 });
 
 /**
+ * `docs/build-briefing.md` › No triangle glyph: every mark is drawn in a
+ * circle, and the warning and danger marks are the ones `alert` and `toast`
+ * draw for the same tones.
+ */
+test('draws every status in a circle, never a triangle', () => {
+  for (const [status, name] of Object.entries(contract.statusGlyphs)) {
+    assert.ok(name.startsWith('circle'), `${status} draws ${name}`);
+  }
+  assert.equal(contract.statusGlyphs.warning, 'circle-alert');
+  assert.equal(contract.statusGlyphs.danger, 'circle-x');
+});
+
+/**
  * The word a reader hears when the consumer supplied no visible label. It is
  * the family's answer to the one thing every surveyed implementation gets
  * wrong: Spectrum asks the consumer for an `aria-label` and ships a nameless

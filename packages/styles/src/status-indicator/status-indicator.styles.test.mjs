@@ -128,10 +128,11 @@ test('draws the glyph the contract names for every status', () => {
 test('tells the two grey statuses apart by shape rather than by colour', () => {
   assert.equal(contract.statusTones.neutral, contract.statusTones.unknown);
   assert.ok(rule(`${root}[data-status='unknown']`).includes('--_solid:transparent'));
+  const ring = rule(`${ui}[data-mark='dot'][data-status='unknown'] [data-part='mark']::before`);
+  assert.ok(ring.includes('border:var(--slotted-border-width-thick,2px) dashed var(--_rim)'));
   assert.ok(
-    rule(`${ui}[data-mark='dot'][data-status='unknown'] [data-part='mark']`).includes(
-      'border-style:dashed',
-    ),
+    ring.includes('inset:calc(-1 * var(--_halo-width))'),
+    'the hollow ring ends where a lit dot’s halo ends',
   );
 });
 
@@ -152,16 +153,26 @@ test('leaves the announcement policy to the accessibility tree', () => {
 });
 
 /**
- * The dot is one cap tall — the height of the letters beside it — and rimmed
- * with the tone's own darkest step, which the theme's contrast test holds to
- * the reading ratio and which therefore clears WCAG 2.2 1.4.11's 3:1 with room
- * over. A neutral rim was read at 250% first, and it took the saturation out
- * of the four tones whose fill already cleared the ratio on its own.
+ * The disc is a whole number of pixels from the space scale, and its rim is
+ * the fill itself — a rim in another colour drew a bullseye around every tone
+ * in dark. `warning` is the one fill below WCAG 2.2 1.4.11's 3:1 on the light
+ * surface, and it alone takes an edge: the tone's border role, the same hue a
+ * step darker. See `docs/history/designs/2026-09-25-status-indicator-reui-dossier.md`.
  */
-test('sizes the disc on the cap height and rims it in the tone’s own darkest step', () => {
-  assert.ok(rule(root).includes('--_dot-size:1cap'));
+test('sizes the disc on the space scale and rims it in its own fill', () => {
+  assert.ok(rule(root).includes('--_dot-size:var(--slotted-space-4'));
+  assert.ok(rule(`${root}[data-size='sm']`).includes('--_dot-size:var(--slotted-space-3'));
+  assert.ok(!/\dcap\b/.test(normalized), 'a cap-sized disc lands on a fractional pixel');
   assert.ok(
-    rule(root).includes('--_rim:var(--slotted-status-indicator-mark-border-color,var(--_text'),
+    rule(root).includes(
+      '--_rim:var(--slotted-status-indicator-mark-border-color,var(--_edge,var(--_solid)))',
+    ),
+  );
+  assert.ok(
+    rule(`${root}[data-status='warning']`).includes('--_edge:var(--slotted-tone-warning-border)'),
+  );
+  assert.ok(
+    rule(`${root}[data-status='unknown']`).includes('--_edge:var(--slotted-border-strong)'),
   );
   const dot = rule(`${ui}[data-mark='dot'] [data-part='mark']`);
   assert.ok(dot.includes('background-color:var(--_solid'));
@@ -176,7 +187,7 @@ test('sizes the disc on the cap height and rims it in the tone’s own darkest s
  */
 test('puts the mark on the first line, however far the label runs', () => {
   assert.ok(rule(root).includes('align-items:flex-start'));
-  assert.ok(rule(root).includes('--_pulse-inset:calc((1lh - var(--_mark-size)) / 2)'));
+  assert.ok(rule(root).includes('--_pulse-inset:round(nearest,(1lh - var(--_mark-size)) / 2,1px)'));
   assert.ok(rule(`${ui} [data-part='mark']`).includes('margin-block-start:var(--_pulse-inset)'));
 });
 
@@ -227,11 +238,31 @@ test('draws the pulse on the root, whatever draws the mark', () => {
   assert.ok(!rule(`${ui}[data-mark='icon'] [data-part='mark']`).includes('mask'));
 });
 
-/** The ring is the tone's text role: the one step every status has. */
-test('paints the ring in a colour every status owns', () => {
+/**
+ * The wave is a filled disc in the dot's rim colour, under the mark, and each
+ * beat ends in a rest. An icon mark does not pulse: a disc behind a glyph
+ * fills its counters and blurs the silhouette the icon mark exists to keep.
+ */
+test('pulses a filled wave behind a dot, and none behind a glyph', () => {
+  const wave = rule(`${ui}[data-pulse]::after`);
+  assert.ok(wave.includes('background-color:var(--_rim)'));
+  assert.ok(wave.includes('z-index:-1'));
+  assert.ok(!wave.includes('border:'), 'a hairline ring reads as a grey circle');
+  assert.ok(wave.includes('var(--slotted-easing-enter)'));
+  assert.ok(rule(`${ui}[data-pulse]`).includes('isolation:isolate'));
+  assert.ok(normalized.includes('70%,to{opacity:0;scale:3;}'));
+  assert.equal(rule(`${ui}[data-mark='icon'][data-pulse]::after`), 'content:none;');
+});
+
+/** A band of the disc's own colour outside it, and none around the hollow ring. */
+test('lights the dot with a halo of its own colour', () => {
+  assert.ok(rule(root).includes('--_halo:color-mix(in oklab,var(--_rim) 20%,transparent)'));
   assert.ok(
-    rule(`${ui}[data-pulse]::after`).includes('border:var(--_rim-width) solid var(--_text'),
+    rule(`${ui}[data-mark='dot'] [data-part='mark']`).includes(
+      'box-shadow:0 0 0 var(--_halo-width) var(--_halo)',
+    ),
   );
+  assert.ok(rule(`${root}[data-status='unknown']`).includes('--_halo:transparent'));
 });
 
 test('takes its duration from the motion scale rather than stating one', () => {
@@ -270,10 +301,37 @@ test('keeps the mark visible under forced colours and withdraws the ring', () =>
   assert.ok(query.includes(`${ui}[data-pulse]::after{content:none`));
 });
 
-/** A status is furniture. Nothing in the sheet may answer a pointer. */
-test('answers no pointer at all', () => {
-  assert.ok(!/:hover/.test(css), 'a status is not a control');
-  assert.ok(!/:active(?![-\w])/.test(css), 'a status is not a control');
+/**
+ * A status is furniture until a consumer makes the root a link. Only then does
+ * it answer the pointer, on the words alone: an underline fades in on hover
+ * and the words take the muted role on press, both on motion tokens.
+ */
+test('answers a pointer only on a root the consumer made a link', () => {
+  const pointer = rules.filter(({ selector }) => /:hover|:active(?![-\w])/.test(selector));
+  assert.ok(pointer.length > 0);
+  for (const { selector } of pointer) {
+    assert.ok(
+      selector.startsWith(`${root}:any-link:not([data-disabled]):`),
+      `${selector} answers a pointer on a status`,
+    );
+  }
+  const link = rule(`${root}:any-link`);
+  assert.ok(link.includes('text-decoration-color:transparent'));
+  assert.ok(link.includes('color var(--slotted-duration-short) var(--slotted-easing-standard)'));
+  assert.ok(
+    link.includes(
+      'text-decoration-color var(--slotted-duration-short) var(--slotted-easing-standard)',
+    ),
+  );
+  assert.ok(
+    rule(`${root}:any-link:not([data-disabled]):hover`).includes(
+      'text-decoration-color:currentColor',
+    ),
+  );
+  assert.ok(
+    rule(`${root}:any-link:not([data-disabled]):active`).includes('color:var(--slotted-text-muted'),
+  );
+  assert.ok(rule(root).includes('color:inherit'), 'a linked status keeps the page colour');
 });
 
 /**

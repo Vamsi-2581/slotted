@@ -152,7 +152,7 @@ export const Statuses: Story = {
       ) +
         scene(
           'The two that share a tone',
-          'neutral is filled and unknown is a dashed ring, so “nothing is happening” and “nobody knows” are never told apart by colour alone.',
+          'neutral is filled and unknown is a dashed ring as wide as a lit dot, so “nothing is happening” and “nobody knows” are never told apart by colour alone.',
           `<span slStatusIndicator status="neutral">Draft — nothing has started</span>` +
             `<span slStatusIndicator status="unknown">No data — the agent stopped reporting</span>` +
             `<span slStatusIndicator status="neutral" mark="icon">Draft — nothing has started</span>` +
@@ -176,7 +176,7 @@ export const Marks: Story = {
       ) +
         scene(
           'icon',
-          'Five circles and one triangle. The silhouette is what still separates the six when the colour is gone — in greyscale, in high contrast, and under forced colours.',
+          'Six circles, the glyphs alert and toast draw for the same tones. The silhouette is what still separates the six when the colour is gone — in greyscale, in high contrast, and under forced colours.',
           STATUSES.map(
             ({ status, words }) =>
               `<span slStatusIndicator status="${status}" mark="icon">${words}</span>`,
@@ -232,10 +232,10 @@ export const Pulse: Story = {
       2,
       scene(
         'A value moving while the reader watches',
-        'The ring leaves the mark and fades once per cycle. It is an enhancement: the tone, the glyph and the word have already said what the status is.',
+        'A wave leaves the dot and fades, then rests before the next beat. An icon mark does not pulse. It is an enhancement: the tone, the glyph and the word have already said what the status is.',
         `<span slStatusIndicator status="info" pulse>Deploying to production</span>` +
           `<span slStatusIndicator status="danger" pulse>Error rate climbing</span>` +
-          `<span slStatusIndicator status="warning" mark="icon" pulse>Certificate expiring today</span>`,
+          `<span slStatusIndicator status="warning" pulse>Certificate expiring today</span>`,
       ) +
         scene(
           'What it is not for',
@@ -406,7 +406,7 @@ export const Accessibility: Story = {
           'Colour is never the only carrier',
           'Every indicator has words. Where a product cannot show them, the icon mark gives each status a silhouette of its own — which is what survives the reader’s own high-contrast mode.',
           `<h3 slHeading>Two ways to say the same six things</h3>` +
-            `<p slText>A dot beside its own word, or a glyph that keeps its meaning with the colour switched off. The dot is rimmed with the tone’s darkest step, which the theme holds to the reading ratio, so the mark clears the 3:1 a meaningful graphic needs.</p>` +
+            `<p slText>A dot beside its own word, or a glyph that keeps its meaning with the colour switched off. The dot is lit with a halo of its own colour, and the glyph set is six circles, so no two statuses are told apart by colour alone.</p>` +
             `<div class="slotted-demo-row">` +
             `<span slStatusIndicator status="success" mark="icon">Healthy</span>` +
             `<span slStatusIndicator status="warning" mark="icon">Degraded</span>` +

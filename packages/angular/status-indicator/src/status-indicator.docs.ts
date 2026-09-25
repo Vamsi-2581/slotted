@@ -35,7 +35,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the consumer’s element',
     required: true,
     purpose:
-      'The host the directive attaches to — a span, a td, an anchor. Carries data-ui="status-indicator", the axes as data attributes, data-pulse when the ring is drawn, and the live role unless the consumer wrote one.',
+      'The host the directive attaches to — a span, a td, an anchor. Carries data-ui="status-indicator", the axes as data attributes, data-pulse when the wave is drawn, and the live role unless the consumer wrote one.',
   },
   {
     part: 'mark',
@@ -112,11 +112,11 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'pulse',
     title: 'A change happening now',
-    note: 'The ring leaves the mark and fades. It is for a value moving while the reader watches — a deploy, a reindex, an error rate climbing — and never decoration on a status that settled a week ago.',
+    note: 'A wave leaves the dot and fades, then rests before the next beat. An icon mark does not pulse. It is for a value moving while the reader watches — a deploy, a reindex, an error rate climbing — and never decoration on a status that settled a week ago.',
     snippet: defineSnippet({
       id: 'status-indicator-angular-pulse',
       language: 'angular',
-      label: 'The ring, on any status',
+      label: 'The wave, on a dot',
       source:
         '<span slStatusIndicator status="info" pulse>Deploying to production</span>\n\n<!-- Not this: nothing is changing. -->\n<span slStatusIndicator status="success" pulse>Healthy since Tuesday</span>',
     }),
@@ -222,7 +222,7 @@ export const ANGULAR_STATUS_INDICATOR_DOCS = {
         'boolean',
         'false',
         'SlStatusIndicator',
-        'A ring leaving the mark, for a change happening now. Withdrawn under reduced motion and under forced colours, so it is never the only carrier',
+        'A wave leaving the dot, for a change happening now. Not drawn on an icon mark, and withdrawn under reduced motion and under forced colours, so it is never the only carrier',
       ],
       [
         'label',
@@ -272,10 +272,10 @@ export const ANGULAR_STATUS_INDICATOR_DOCS = {
     accessibility: [
       'There is no status-indicator pattern in the WAI-ARIA Authoring Practices: the pattern index carries thirty entries and none of them is this family. The applicable guidance is the ARIA status role, WCAG 2.2 1.4.1 Use of Color and 1.4.11 Non-text Contrast, and each is answered below.',
       'The name is always real text in the document — the projected content, or the status’s own word clipped by visually-hidden. role="img" with an aria-label, which is Fluent’s answer, is deliberately not used: text is what lets a live region announce its own contents, lets an aria-labelledby elsewhere point at it, and lets a page search find the word.',
-      'Colour is never the only carrier. Every indicator has words, and mark="icon" adds a distinct silhouette per status — five circles and one triangle — so the six survive greyscale, the high-contrast scheme, and the operating system’s forced colours, where every author colour is replaced and the glyph is all that is left.',
-      'The dot is rimmed with the tone’s own text role, which the theme holds to the 4.5:1 reading ratio, so the mark clears the 3:1 that WCAG 2.2 1.4.11 asks of a graphic required to understand the content.',
+      'Colour is never the only carrier. Every indicator has words, and mark="icon" adds a distinct silhouette per status — six circles — so the six survive greyscale, the high-contrast scheme, and the operating system’s forced colours, where every author colour is replaced and the glyph is all that is left.',
+      'Every dot fill clears the 3:1 that WCAG 2.2 1.4.11 asks of a graphic against the surface in the light and dark schemes, except warning, whose yellow is 1.53:1 on white; that dot alone is rimmed in the warning border role, 2.94:1. The word beside the dot carries the status, so the dot is never the only carrier.',
       'live="polite" writes role="status", which the platform gives an implicit aria-live="polite" and aria-atomic="true", so the mark and its word are announced as one thing rather than as two events. live="assertive" writes role="alert" and interrupts, which the APG reserves for a message needing immediate attention. A role written on the host element is read once through HostAttributeToken and kept.',
-      'The pulse is withdrawn under prefers-reduced-motion rather than shortened, because an endless animation has to stop; a ring frozen halfway through an expansion is a rendering fault rather than a state. Nothing is lost, since the tone, the glyph and the word were already carrying the status.',
+      'The pulse is withdrawn under prefers-reduced-motion rather than shortened, because an endless animation has to stop; a wave frozen halfway through an expansion is a rendering fault rather than a state. Nothing is lost, since the tone, the glyph and the word were already carrying the status.',
       'Nothing in the family is focusable on its own and no key is bound. The focus ring is painted for the case a consumer creates — the directive on their own anchor or button — so the ring is never missing where focus can land.',
     ],
     snippets: [
@@ -284,7 +284,7 @@ export const ANGULAR_STATUS_INDICATOR_DOCS = {
         language: 'angular',
         label: 'Anatomy, as it reaches the DOM',
         source:
-          '<span\n  data-ui="status-indicator"\n  data-part="root"\n  data-status="danger"\n  data-mark="icon"\n  data-size="md"\n  data-pulse=""\n  role="status"\n>\n  <span aria-hidden="true" data-part="mark">\n    <span aria-hidden="true" data-part="root" data-ui="icon">\n      <svg data-glyph="circle-alert" data-part="glyph">…</svg>\n    </span>\n  </span>\n  <span data-part="label">\n    Build 4821 failed\n    <!-- Or, with nothing projected: -->\n    <span data-part="announcement" data-ui="visually-hidden">Error</span>\n  </span>\n</span>',
+          '<span\n  data-ui="status-indicator"\n  data-part="root"\n  data-status="danger"\n  data-mark="icon"\n  data-size="md"\n  data-pulse=""\n  role="status"\n>\n  <span aria-hidden="true" data-part="mark">\n    <span aria-hidden="true" data-part="root" data-ui="icon">\n      <svg data-glyph="circle-x" data-part="glyph">…</svg>\n    </span>\n  </span>\n  <span data-part="label">\n    Build 4821 failed\n    <!-- Or, with nothing projected: -->\n    <span data-part="announcement" data-ui="visually-hidden">Error</span>\n  </span>\n</span>',
       }),
       defineSnippet({
         id: 'status-indicator-theming',

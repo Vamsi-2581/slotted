@@ -3,10 +3,10 @@
    * ── The indicator ──────────────────────────────────────────────────────
    *
    * A mark and the word it stands for: the operational state of something the
-   * application observes and this family only reports. It is never a command,
-   * so it answers no hover and gives no press feedback, and it holds no state
-   * of its own — a component that moved its own status would be describing a
-   * system it cannot see.
+   * application observes and this family only reports. It is never a command
+   * of its own: it answers a pointer only when a consumer renders the root as a
+   * link, and it holds no state of its own — a component that moved its own
+   * status would be describing a system it cannot see.
    *
    * `align-items: flex-start` rather than `center`, and that is the decision
    * the whole box is built around. A status is often a sentence — “Waiting for
@@ -29,42 +29,45 @@
      */
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_glyph-size: var(--slotted-control-icon-size-md, 16px);
-    --_gap: var(--slotted-space-3, 0.375rem);
+    --_gap: var(--slotted-space-4, 0.5rem);
     --_line-height: var(--slotted-line-height-md, 1.5);
 
     /**
-     * The disc is one cap tall: the height of the letters it stands beside
-     * rather than of the em box that contains them. `badge` sizes its own dot
-     * on the whole font size, and it is right to — a badge's dot is a chip
-     * standing alone, with nothing beside it to be measured against. Read at
-     * 420 pixels, the same 13 pixels beside a word is a bullet rather than a
-     * status light: it outweighs the letters it belongs to. One cap is 9.4
-     * pixels at `md`, which leaves 7.4 of tone inside the rim — above the six
-     * at which `badge` recorded a dot reading as dark rather than as its own
-     * colour — and it answers density and type size without a number.
+     * The disc is a whole number of pixels from the space scale: 8 at `md` and
+     * `lg`, 6 at `sm`. It was one cap tall, 9.48 pixels at `md`, and a
+     * fractional disc lands its edge across two device pixels at 1×. ReUI draws
+     * the same light at 6 pixels beside 14-pixel type (0.43 em); 8 beside 13 is
+     * 0.62 em, which keeps the tone legible in a table cell without
+     * outweighing the word. Measured in
+     * `docs/history/designs/2026-09-25-status-indicator-reui-dossier.md` § 3.
      */
-    --_dot-size: 1cap;
+    --_dot-size: var(--slotted-space-4, 0.5rem);
     --_mark-size: var(--_dot-size);
     --_rim-width: var(
       --slotted-status-indicator-mark-border-width,
       var(--slotted-border-width-thin, 1px)
     );
     /**
-     * The rim is the tone's own text role, which is the darkest step the tone
-     * has and the one the theme's contrast test holds to the 4.5:1 reading
-     * ratio against the surface. A mark whose whole meaning is a graphic is
-     * bound by WCAG 2.2 1.4.11's 3:1 rather than decorated by it, so a rim
-     * measured for text clears the requirement with room over.
-     *
-     * `badge` rims its dot with `--slotted-border-strong` instead, and it is
-     * right to: a badge's dot sits on the corner of a photograph or a button,
-     * where the ground is not the page's own surface and only a neutral edge
-     * can be measured against it. This one sits in a line of text on the
-     * surface the theme calibrated the tone against — and read at 250%, the
-     * neutral rim was a grey ring that took the saturation out of the four
-     * tones whose fill already cleared 3:1 on its own.
+     * The rim is the fill itself unless the fill cannot hold the edge alone.
+     * Every tone's fill clears WCAG 2.2 1.4.11's 3:1 against the surface in
+     * light and dark except `warning`, whose yellow is 1.53:1 on white; that
+     * one status sets `--_edge` to the tone's border role. The rim was the
+     * tone's text role on every status, and a second colour around the fill
+     * drew a bullseye: brown around yellow, near-black around grey, and a pale
+     * ring around every tone in dark (dossier § 3).
      */
-    --_rim: var(--slotted-status-indicator-mark-border-color, var(--_text));
+    --_rim: var(--slotted-status-indicator-mark-border-color, var(--_edge, var(--_solid)));
+    /**
+     * The halo: a band of the dot's own colour at a fifth of its strength,
+     * drawn outside the disc with `box-shadow` so it takes no room in the
+     * line. It is what separates a status light from a bullet — the disc
+     * reads as lit rather than printed — and it costs no contrast, because
+     * the disc inside it is unchanged. 3 pixels at `md` and `lg`, 2 at `sm`
+     * (dossier § 3). The gap to the words is 8 at `md` so the halo never
+     * reaches closer than 5 pixels to the first letter.
+     */
+    --_halo: color-mix(in oklab, var(--_rim) 20%, transparent);
+    --_halo-width: calc(var(--slotted-space-1, 0.125rem) * 1.5);
 
     /**
      * What the ring is drawn against. The pulse hangs off the root rather
@@ -72,11 +75,17 @@
      * clipped the element's pseudo-elements with it, and a ring behind a
      * triangle was cut into the shape of that triangle and then disappeared.
      * Photographed at 300% before it was moved here, and kept here so the
-     * ring never depends on how a mark is drawn.
+     * ring never depends on how a mark is drawn. Rounded to a whole pixel, the
+     * rule `alert` applies to its own mark, so the disc never straddles one.
      */
-    --_pulse-inset: calc((1lh - var(--_mark-size)) / 2);
+    --_pulse-inset: round(nearest, (1lh - var(--_mark-size)) / 2, 1px);
 
     align-items: flex-start;
+    /**
+     * The words keep the page's colour when `render` makes the root an `<a>`;
+     * without this the user agent paints the label in its link blue.
+     */
+    color: inherit;
     display: inline-flex;
     font-family: var(
       --slotted-status-indicator-font-family,
@@ -97,8 +106,8 @@
     position: relative;
     /**
      * `render` can make the root an `<a>`, and the rule a browser writes on
-     * every anchor would put a line under a status. The mark is the
-     * affordance; the underline belongs to `link`, on a link.
+     * every anchor would put a line under a status at rest. The linked root
+     * below draws its own underline, hidden until the pointer arrives.
      */
     text-decoration: none;
     /* Written inside a sentence, the indicator sits on the text's centre. */
@@ -146,7 +155,14 @@
     --_text: var(--slotted-tone-success-text);
   }
 
+  /**
+   * The one fill that cannot hold its edge: `#facc15` is 1.53:1 on the light
+   * surface. The tone's border role is the same hue a step darker, 2.94:1 in
+   * light, the fill itself in dark and black in `high-contrast` — an edge that
+   * reads as the dot's own rim rather than as a second colour around it.
+   */
   [data-ui='status-indicator'][data-part='root'][data-status='warning'] {
+    --_edge: var(--slotted-tone-warning-border);
     --_solid: var(--slotted-tone-warning-solid);
     --_text: var(--slotted-tone-warning-text);
   }
@@ -156,7 +172,15 @@
     --_text: var(--slotted-tone-danger-text);
   }
 
+  /**
+   * A ring with nothing inside, drawn in the neutral dot's own fill so the two
+   * grey statuses carry the same weight and differ only by being hollow. It
+   * has no halo of its own; the ring is drawn where the halo of a lit dot
+   * ends, below.
+   */
   [data-ui='status-indicator'][data-part='root'][data-status='unknown'] {
+    --_edge: var(--slotted-border-strong);
+    --_halo: transparent;
     --_solid: transparent;
     --_text: var(--slotted-tone-secondary-text);
   }
@@ -175,15 +199,16 @@
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
   [data-ui='status-indicator'][data-part='root'][data-size='sm'] {
+    --_dot-size: var(--slotted-space-3, 0.375rem);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
-    --_gap: var(--slotted-space-2, 0.25rem);
+    --_gap: var(--slotted-space-3, 0.375rem);
+    --_halo-width: var(--slotted-space-1, 0.125rem);
   }
 
   [data-ui='status-indicator'][data-part='root'][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_glyph-size: var(--slotted-control-icon-size-lg, 18px);
-    --_gap: var(--slotted-space-4, 0.5rem);
   }
 
   /* ── The mark ─────────────────────────────────────────────────────────
@@ -206,6 +231,7 @@
     background-color: var(--_solid, ButtonFace);
     border: var(--_rim-width) solid var(--_rim, CanvasText);
     border-radius: var(--slotted-radius-full, 9999px);
+    box-shadow: 0 0 0 var(--_halo-width) var(--_halo);
   }
 
   /**
@@ -214,7 +240,26 @@
    * family that says something by what it is missing.
    */
   [data-ui='status-indicator'][data-mark='dot'][data-status='unknown'] [data-part='mark'] {
-    border-style: dashed;
+    border: 0;
+    position: relative;
+  }
+
+  /**
+   * The ring is drawn on a pseudo-element rather than on the mark's border, so
+   * it can be as large as a lit dot looks without moving the words: its outer
+   * edge sits where a lit dot's halo ends — 14 pixels at `md`, 10 at `sm` —
+   * while the box in the line stays the dot's 8 or 6. Drawn on the 8-pixel
+   * border it was a one-pixel dashed circle half the visible size of its
+   * neighbours, and read as a speck rather than as a status. `outline` is
+   * reserved for the focus ring (`focus-ring.test.mjs`).
+   */
+  [data-ui='status-indicator'][data-mark='dot'][data-status='unknown'] [data-part='mark']::before {
+    border: var(--slotted-border-width-thick, 2px) dashed var(--_rim);
+    border-radius: var(--slotted-radius-full, 9999px);
+    box-sizing: border-box;
+    content: '';
+    inset: calc(-1 * var(--_halo-width));
+    position: absolute;
   }
 
   /**
@@ -286,58 +331,110 @@
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
+  /* ── The linked root ──────────────────────────────────────────────────
+   *
+   * A root the consumer made a link answers the pointer as a link in running
+   * text does, on the words alone: the mark keeps its tone through hover and
+   * press. The underline is drawn at rest in `transparent`, so hover fades it
+   * in rather than switching it on, and press darkens the words to the muted
+   * text role, a step hover does not take. The offset is `link`'s own 0.15em
+   * (dossier § 4).
+   */
+  [data-ui='status-indicator'][data-part='root']:any-link {
+    text-decoration-color: transparent;
+    text-decoration-line: underline;
+    text-decoration-thickness: from-font;
+    text-underline-offset: 0.15em;
+    transition:
+      color var(--slotted-duration-short) var(--slotted-easing-standard),
+      text-decoration-color var(--slotted-duration-short) var(--slotted-easing-standard);
+  }
+
+  [data-ui='status-indicator'][data-part='root']:any-link:not([data-disabled]):hover {
+    text-decoration-color: currentColor;
+  }
+
+  [data-ui='status-indicator'][data-part='root']:any-link:not([data-disabled]):active {
+    color: var(--slotted-text-muted, GrayText);
+    text-decoration-color: currentColor;
+  }
+
   /* ── The pulse ────────────────────────────────────────────────────────
    *
-   * A ring leaving the mark and fading, for a change happening now. It is an
+   * A wave leaving the mark and fading, for a change happening now. It is an
    * enhancement rather than the state: the tone, the glyph and the word have
-   * already said what the status is, so the ring can be withdrawn wherever it
+   * already said what the status is, so the wave can be withdrawn wherever it
    * would be wrong without anything going unsaid.
    *
-   * The three implementations that ship this animation all get the same thing
-   * wrong. Mantine and Shoelace each write a literal duration and `infinite`
-   * beside it, and Ant Design keeps its own in a theme number; none of the
-   * three sits inside a query that answers a reader who asked the operating
-   * system for stillness. This one takes the loop scale's slowest step, which
-   * is the only step the theme does not shorten under reduced motion —
+   * The wave is a filled disc behind the mark, not a hairline around it. A
+   * one-pixel ring scaled to 2.2 was a grey circle at most frames, too thin to
+   * read as motion beside an 8-pixel dot. It leaves on
+   * `--slotted-easing-enter`, fast out of the mark and settling as it fades,
+   * and it is gone by 70% of the beat, so each beat ends in a rest rather than
+   * running into the next one; ReUI's `ping` holds the same last quarter
+   * (dossier § 5).
+   *
+   * Mantine, Shoelace and Ant Design write a literal duration beside
+   * `infinite`, and none of the three answers a reader who asked the
+   * operating system for stillness. This one takes the loop scale's slowest
+   * step, the only step the theme does not shorten under reduced motion —
    * shortening an endless animation is not an answer to it.
    */
   @keyframes slotted-status-indicator-pulse {
     from {
-      opacity: 0.5;
+      opacity: 0.45;
       scale: 1;
     }
 
+    70%,
     to {
       opacity: 0;
-      scale: 2.2;
+      scale: 3;
     }
   }
 
   /**
-   * The ring is the tone's text role rather than its fill, and that is one
-   * decision covering three cases. It is defined for all six statuses, where
-   * the fill is not — `unknown` has none, so a ring painted from it would be a
-   * pulse nobody can see. It is the role the theme's contrast test holds to
-   * the reading ratio, so the ring clears its ground in every scheme. And on
-   * an icon mark it is the colour the glyph is already drawn in, so the ring
-   * leaves the mark rather than appearing beside it in a second colour.
+   * The wave is the dot's rim colour, defined for all six statuses —
+   * `unknown` has no fill, and its wave is the neutral edge. It starts at
+   * 0.45 of that colour and ends at three times the dot, 24 pixels at `md`,
+   * inside the line above and below without reaching the next status in a
+   * list (dossier § 5). The root isolates a
+   * stacking context so the wave can sit under the mark (`z-index: -1`)
+   * without falling behind the surface the indicator is drawn on.
    */
+  [data-ui='status-indicator'][data-pulse] {
+    isolation: isolate;
+  }
+
   [data-ui='status-indicator'][data-pulse]::after {
     animation: slotted-status-indicator-pulse var(--slotted-duration-loop-slow)
-      var(--slotted-easing-standard) infinite;
+      var(--slotted-easing-enter) infinite;
+    background-color: var(--_rim);
     block-size: var(--_mark-size);
-    border: var(--_rim-width) solid var(--_text);
     border-radius: var(--slotted-radius-full, 9999px);
-    box-sizing: border-box;
     content: '';
     inline-size: var(--_mark-size);
     inset-block-start: var(--_pulse-inset);
     inset-inline-start: 0;
+    pointer-events: none;
     position: absolute;
+    z-index: -1;
   }
 
   /**
-   * Stopped, not slowed, and removed rather than frozen. A ring halted halfway
+   * An icon mark does not pulse. A wave behind a glyph fills the glyph's
+   * counters and blurs its silhouette — the one thing the icon mark exists to
+   * keep — and a disc growing out of a shape that is not a disc reads as a
+   * second, larger mark rather than as motion. `pulse` on an icon mark is
+   * carried by the tone, the glyph and the word, as it is under reduced
+   * motion.
+   */
+  [data-ui='status-indicator'][data-mark='icon'][data-pulse]::after {
+    content: none;
+  }
+
+  /**
+   * Stopped, not slowed, and removed rather than frozen. A wave halted halfway
    * through an expansion is a rendering fault rather than a state — the
    * finding `button` recorded about its own loading band — so the pseudo goes
    * and the status is left to the parts that were always carrying it.
@@ -362,9 +459,10 @@
    * the system already resolves to `CanvasText`, and a filled box behind it
    * would bury it. It keeps its silhouette, which is the whole reason the icon
    * mark exists: a triangle and a circled cross are still different from each
-   * other when neither of them is red. The pulse is withdrawn, because its ring
-   * is painted from a tone the system replaces with a face colour, and a ring
-   * in `ButtonFace` on `Canvas` is an animation of nothing.
+   * other when neither of them is red. The pulse is withdrawn, because its wave
+   * is painted from a tone the system replaces with a face colour, and a wave
+   * in `ButtonFace` on `Canvas` is an animation of nothing. The halo needs no
+   * rule: the system sets `box-shadow` to `none`.
    */
   @media (forced-colors: active) {
     [data-ui='status-indicator'][data-mark='dot'] [data-part='mark'] {
